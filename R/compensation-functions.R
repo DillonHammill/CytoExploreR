@@ -5,13 +5,22 @@
 #' @return spillover matrix and \code{"Spillover Matrix.csv"} file.
 #' 
 #' @export
-computeSpillOver <- function(fs){
+computeSpillover <- function(fs, file = NULL){
   
   # Extract fluorescent channels
   channels <- getChannels(fs)
   
   # Select a fluorescent channel for each compensation control
+  if(is.null(file)){
+ 
   pData(fs)$channel <- selectChannels(fs)
+  write.csv(pData(fs), "Compensation Control Channels.csv", row.names = 1)
+  
+  }else{
+    
+    pData(fs) <- read.csv(file, header = TRUE)
+    
+  }
   
   # Gate compensation controls to get single cells
   gs <- GatingSet(fs)
@@ -20,8 +29,8 @@ computeSpillOver <- function(fs){
   trans <- estimateLogicle(gs[[1]], channels)
   gs <- transform(gs, trans)
   
-  gs <- drawGate(gs, alias = "Cells", channels = c("FSC-A","SSC-A"), gate_type = "polygon", subSample = 250000,file = "Compensation GatingTemplate.csv")
-  gs <- drawGate(gs, alias = "Single Cells", channels = c("SSC-W","SSC-H"), gate_type = "polygon", subSample = 250000,file = "Compensation GatingTemplate.csv")
+  gs <- drawGate(gs, alias = "Cells", channels = c("FSC-A","SSC-A"), gate_type = "polygon", subSample = 250000,file = "Compensation gatingTemplate.csv")
+  gs <- drawGate(gs, alias = "Single Cells", channels = c("SSC-W","SSC-H"), gate_type = "polygon", subSample = 250000,file = "Compensation gatingTemplate.csv")
   fs <- getData(gs, "Single Cells")
   
   # Extract unstained control based on selected channels in pData(fs)
@@ -60,22 +69,24 @@ computeSpillOver <- function(fs){
   signal <- sweep(pos, 2, neg)
   print(signal)
   
+  # Construct spillover matrix - only include values for which there is a control
+  spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))  
+  colnames(spill) <- channels
+  rownames(spill) <- channels
+  
   # Normalise each row to stained channel
   sapply(1:nrow(signal), function(x){
     
-    signal[x, ] <- signal[x, ]/signal[x, match(pData(fs)$channel, colnames(spill))]
+    signal[x, ] <- signal[x, ]/signal[x, match(fs[[x]]@description$Channel, colnames(spill))]
     
   })
   print(signal)
   
-  # Construct spillover matrix - only include values for which there is a control
-  spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
-  
   # Insert values into appropriate rows
   rws <- match(pData(fs)$channel, rownames(spill))
-  spill[rws,] <- vals
+  spill[rws,] <- signal
   
-  write.csv(spill, "Spillover Matrix.csv")
+  write.csv(spill, "Spillover Matrix.csv", row.names = FALSE)
   return(spill)
   
 }
