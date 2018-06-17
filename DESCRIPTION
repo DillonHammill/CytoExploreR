@@ -1,0 +1,16 @@
+Package: cytoTools
+Type: Package
+Title: Compensation & Gating Routines for Analysis of Flow Cytometry Data
+Version: 0.0.99
+Author: Dillon Hammill <Dillon.Hammill@anu.edu.au>
+Maintainer: Dillon Hammill <Dillon.Hammill@anu.edu.au>
+Description: Compensation & Gating Routines for Analysis of Flow Cytometry Data
+Depends: flowDensity (>= 1.12.0), DescTools (>= 0.99.21), openCyto(>= 1.19.1)
+Imports: flowDensity (>= 1.12.0), DescTools (>= 0.99.21), openCyto(>= 1.19.1)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
