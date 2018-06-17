@@ -59,7 +59,7 @@ selectChannels <- function(fs){
   return(channels)
 }
 
-#' Restrict flowFrame
+#' Sample a flowFrame
 #' 
 #' @param fr object of class \code{flowFrame}.
 #' @param size numeric indicating the number of events to keep. If \code{size > nrow(fr)}, size is set to \code{nrow(fr)}.
@@ -67,7 +67,7 @@ selectChannels <- function(fs){
 #' @return restricted \code{flowFrame}.
 #' 
 #' @export
-restrictFrame <- function(fr, size = 5000){
+sampleFrame <- function(fr, size = 5000){
   
   # Number of events
   events <- nrow(fr)
