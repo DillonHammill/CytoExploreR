@@ -177,6 +177,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, channels, al
 #' drawGate GatingSet Method
 #' 
 #' @param x object of class \code{GatingSet}.
+#' @param pData vector of indicating \code{c(column,row)} of \code{pData(gs)} used extract particular samples for gating.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
 #' of the kernel density will be constructed.
 #' @param parent name of the \code{parent} population to extract for gating.
@@ -185,9 +186,8 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, channels, al
 #' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 #' ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well.
-#' @param template logical indicating whether gates should be entered in the existing \code{template} R object and written to csv \code{GatingTemplate}
-#' called \code{file}.
-#' @param file name of \code{GatingTemplate} csv file if \code{template = TRUE}.
+#' @param template the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").
+#' @param file name of \code{gatingTemplate} csv file if \code{template = TRUE}.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted which is the default plotting behaviour.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
@@ -198,14 +198,28 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, channels, al
 #' @param ... additional arguments for \code{plotDens}.
 #'
 #' 
-#' @return object of class \code{GatingSet} with gates applied. The \code{GatingTemplate} can also be optionally written to .csv file
-#' and entries add to the R object called \code{template} generated use the \code{openCyto::add_pop} API.
+#' @return object of class \code{GatingSet} with gates applied. The \code{gatingTemplate} can also be optionally written to .csv file
+#' and entries add to the R object called \code{Template} generated use the \code{openCyto::add_pop} API.
 #' 
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, channels, parent = "root", alias,  gate_type = NULL, subSample = NULL, template = TRUE, file = "GatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias, channels, gate_type = NULL, subSample = NULL, template = NULL, file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
   gs <- x
   fs <- getData(x, parent)
+  
+  # Restrict to samples matching pData requirements
+  if(is.null(pData)){
+    
+    fr <- as(fs, "flowFrame")
+    
+  }else{
+    
+    idx <- pData(fs)[[pData[1]]] == pData[2]
+    sn <- rownames(pData(fs))[idx]
+    fr <- as(fs[sn], "flowFrame")
+    
+  }
+  
   fr <- as(fs, "flowFrame")
   
   # Supported gate types
@@ -264,8 +278,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, channels, 
   
   gates <- filters(gates)
   
-  if(template == TRUE){
-    # Prepare arguments for GatingTemplate Entry
+    # Prepare arguments for gatingTemplate Entry
     if(length(channels) == 2){
       channels <- paste(channels, collapse = ",")
     }
@@ -280,28 +293,28 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, channels, 
       alias <- paste(alias, collapse = ",")
     }
     
-    # Check if GatingTemplate exists - if not create one
-    if ("template" %in% ls(envir = .GlobalEnv)) {
+    # Check if gatingTemplate exists - if not create one
+    if (!is.null(template)) {
       
-      template <- rbind(get("template", envir = .GlobalEnv), add_pop(
+      Template <- get(template, envir = .GlobalEnv)
+      
+      Template <- rbind(Template, add_pop(
         gs, alias = alias, parent = parent, pop = pop, dims = channels, gating_method = "manualGate",
         gating_args = list(gate = gates)
       ))
+      assign(template, Template, envir = .GlobalEnv)
       
     } else {
       
-      template <- add_pop(
+      Template <- add_pop(
         gs, alias = alias, parent = parent, pop = pop, dims = channels, gating_method = "manualGate",
         gating_args = list(gate = gates)
       )
+      Template <<- Template
       
     }
     
-    template <<- template
-    write.csv(template, file)
-  }else{
-    
-  }
+    write.csv(Template, file, row.names = FALSE)
   
   return(gs)
   

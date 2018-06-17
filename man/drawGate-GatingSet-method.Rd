@@ -5,21 +5,23 @@
 \alias{drawGate,GatingSet-method}
 \title{drawGate GatingSet Method}
 \usage{
-\S4method{drawGate}{GatingSet}(x, channels, parent = "root", alias,
-  gate_type = NULL, subSample = NULL, template = TRUE,
-  file = "GatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE,
+\S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root", alias,
+  channels, gate_type = NULL, subSample = NULL, template = NULL,
+  file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE,
   labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
 
-\item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-of the kernel density will be constructed.}
+\item{pData}{vector of indicating \code{c(column,row)} of \code{pData(gs)} used extract particular samples for gating.}
 
 \item{parent}{name of the \code{parent} population to extract for gating.}
 
 \item{alias}{the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
 gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
+
+\item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
+of the kernel density will be constructed.}
 
 \item{gate_type}{vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
@@ -28,10 +30,9 @@ ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 number of events, all events will be plotted which is the default plotting behaviour.}
 
-\item{template}{logical indicating whether gates should be entered in the existing \code{template} R object and written to csv \code{GatingTemplate}
-called \code{file}.}
+\item{template}{the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").}
 
-\item{file}{name of \code{GatingTemplate} csv file if \code{template = TRUE}.}
+\item{file}{name of \code{gatingTemplate} csv file if \code{template = TRUE}.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.}
 
@@ -45,8 +46,8 @@ existing plots which may already contain a different gate type. For demonstratio
 \item{...}{additional arguments for \code{plotDens}.}
 }
 \value{
-object of class \code{GatingSet} with gates applied. The \code{GatingTemplate} can also be optionally written to .csv file
-and entries add to the R object called \code{template} generated use the \code{openCyto::add_pop} API.
+object of class \code{GatingSet} with gates applied. The \code{gatingTemplate} can also be optionally written to .csv file
+and entries add to the R object called \code{Template} generated use the \code{openCyto::add_pop} API.
 }
 \description{
 drawGate GatingSet Method
