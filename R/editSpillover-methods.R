@@ -127,7 +127,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
     
     output$plot <- renderPlot({
       
-      p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = 10000, subset = "root", aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
+      p <- ggcyto(fs.comp()@data[[input$flowFrame]], max_nrow_to_plot = 10000, subset = "root", aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
       p <- p + geom_point(alpha = 0.4)
       
       if(input$NIL == TRUE){
