@@ -3,7 +3,11 @@
 #' @param x an object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
 #' @param channels vector of length 1 or 2 indicating the names of the channels to use for plotting and gating.
 #'
-#' @return Stops gating process if channels are incorrect or returns nothing.
+#' @return Stops gating process if channels are incorrect or returns NULL.
+#' 
+#' @importFrom BiocGenerics colnames
+#' 
+#' @export
 checkChannels <- function(x, channels){
   
   chans <- colnames(x)
@@ -12,17 +16,34 @@ checkChannels <- function(x, channels){
     
     stop("Incorrect number of channels supplied. Please supply 1-2 channel names for plotting and gating.")
   
-  }else if(!all(channels %in% chans)){
+  }
+  
+  if(length(channels) == 1){
     
-    if(length(channels[channels %in% chans == FALSE]) == 2){
-    
-    stop(paste(paste(channels[channels %in% chans == FALSE], collapse = " & "), "are not valid channels for this", class(x)),"!")
-    
+    if(channels %in% chans == FALSE){
+      
+      stop(paste(channels[channels %in% chans == FALSE]),"is not a valid channel for this", class(x),"!")
+      
     }else{
+      
+      
+    }
+  
+  }else if(length(channels) == 2){
+    
+    if(sum(channels %in% chans) == 0){
+      
+      stop(paste(paste(channels[channels %in% chans == FALSE], collapse = " & "), "are not valid channels for this", class(x)),"!")
+      
+    }else if(sum(channels %in% chans) == 1){
       
       stop(paste(channels[channels %in% chans == FALSE],"is not a valid channel for this", class(x)),"!")
       
+    }else{
+      
+      
     }
+    
     
   }
   
@@ -32,7 +53,9 @@ checkChannels <- function(x, channels){
 #' 
 #' @param gate_type vector indicating the types of gates to construct using \code{drawGate}.
 #' 
-#' @return Stops gating process if gate_type is incorrect or returns nothing.
+#' @return Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s).
+#' 
+#' @export
 checkGateType <- function(gate_type){
   
   gts <- c("polygon", "Polygon", "p", "P","rectangle", "Rectangle", "r", "R","interval", "Interval", "i", "I","threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B","ellipse", "Ellipse", "e", "E","quadrant", "Quadrant", "q", "Q")
@@ -51,4 +74,15 @@ checkGateType <- function(gate_type){
     
   }
   
+  gate_type[gate_type %in% c("polygon", "Polygon", "p", "P")] <- "polygon"
+  gate_type[gate_type %in% c("rectangle", "Rectangle", "r", "R")] <- "rectangle"
+  gate_type[gate_type %in% c("interval", "Interval", "i", "I")] <- "interval"
+  gate_type[gate_type %in% c("threshold", "Threshold", "t", "T")] <- "threshold"
+  gate_type[gate_type %in% c("boundary", "Boundary", "b", "B")] <- "boundary"
+  gate_type[gate_type %in% c("ellipse", "Ellipse", "e", "E")] <- "ellipse"
+  gate_type[gate_type %in% c("quadrant", "Quadrant", "q", "Q")] <- "quadrant"
+  
+  return(gate_type)
 }
+
+

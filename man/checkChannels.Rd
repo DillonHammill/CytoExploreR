@@ -12,7 +12,7 @@ checkChannels(x, channels)
 \item{channels}{vector of length 1 or 2 indicating the names of the channels to use for plotting and gating.}
 }
 \value{
-Stops gating process if channels are incorrect or returns nothing.
+Stops gating process if channels are incorrect or returns NULL.
 }
 \description{
 Check Supplied Channels.

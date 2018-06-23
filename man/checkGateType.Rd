@@ -10,7 +10,7 @@ checkGateType(gate_type)
 \item{gate_type}{vector indicating the types of gates to construct using \code{drawGate}.}
 }
 \value{
-Stops gating process if gate_type is incorrect or returns nothing.
+Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s).
 }
 \description{
 Check Supplied Gate Types(s).
