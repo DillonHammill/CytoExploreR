@@ -1,4 +1,4 @@
-Package: cytoTools
+Package: cytoSuite
 Type: Package
 Title: Compensation & Gating Routines for Analysis of Flow Cytometry Data
 Version: 0.0.99

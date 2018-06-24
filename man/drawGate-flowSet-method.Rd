@@ -5,12 +5,14 @@
 \alias{drawGate,flowSet-method}
 \title{drawGate flowSet Method}
 \usage{
-\S4method{drawGate}{flowSet}(x, channels, alias, subSample = NULL,
-  gate_type = NULL, axis = "x", adjust = 1.5, plot = TRUE,
-  labs = TRUE, ...)
+\S4method{drawGate}{flowSet}(x, pData = NULL, channels, alias = NULL,
+  subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5,
+  plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
+
+\item{pData}{vector of indicating \code{c(column,row)} of \code{pData(fs)} used extract particular samples for gating.}
 
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
 of the kernel density will be constructed.}
@@ -19,7 +21,7 @@ of the kernel density will be constructed.}
 gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
 
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted which is the default plotting behaviour.}
+number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.}
 
 \item{gate_type}{vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
