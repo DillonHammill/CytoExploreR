@@ -5,12 +5,14 @@
 \alias{drawGate,flowSet-method}
 \title{drawGate flowSet Method}
 \usage{
-\S4method{drawGate}{flowSet}(x, channels, alias, subSample = 250000,
-  gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE,
-  labs = TRUE, ...)
+\S4method{drawGate}{flowSet}(x, pData = NULL, channels, alias = NULL,
+  subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5,
+  plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
+
+\item{pData}{vector of indicating \code{c(column,row)} of \code{pData(fs)} used extract particular samples for gating.}
 
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
 of the kernel density will be constructed.}

@@ -85,4 +85,28 @@ checkGateType <- function(gate_type){
   return(gate_type)
 }
 
-
+#' Check Supplied Alias
+#' 
+#' @param alias vector indicating the names of the populations to be gated.
+#' @param gate_type vector indicating the type(s) of gate(s) to be constructed.
+#' 
+#' @return Stops the gating process if alias is missing or \code{length(alias) != length(gate_type)}.
+#'
+#' @export
+checkAlias <- function(alias, gate_type){
+  
+  if(is.null(alias)){
+    
+    stop("The name(s) of the population(s) to gate must be supplied as the alias argument.")
+  
+  }
+  
+  if(length(gate_type) > 1){
+    
+    if(length(alias) != length(gate_type)){
+      
+      stop("Length of alias must be the same length as gate_type for multi-gates.")
+      
+    }
+  }
+}

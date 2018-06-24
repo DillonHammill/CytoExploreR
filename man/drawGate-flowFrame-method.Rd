@@ -5,9 +5,9 @@
 \alias{drawGate,flowFrame-method}
 \title{drawGate flowFrame Method.}
 \usage{
-\S4method{drawGate}{flowFrame}(x, channels, alias, subSample = 250000,
-  gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE,
-  labs = TRUE, ...)
+\S4method{drawGate}{flowFrame}(x, channels, alias = NULL,
+  subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5,
+  plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}.}

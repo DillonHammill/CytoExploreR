@@ -30,9 +30,12 @@ setGeneric(name="drawGate",
 #' @importFrom BiocGenerics colnames
 #' 
 #' @export
-setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, alias, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
   
   fr <- x
+  
+  # Check alias is upplied correctly
+  checkAlias(alias, gate_type)
   
   # Check supplied channel(s) are valid
   checkChannels(fr, channels)
@@ -85,6 +88,7 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
 #' drawGate flowSet Method
 #' 
 #' @param x object of class \code{flowSet}.
+#' @param pData vector of indicating \code{c(column,row)} of \code{pData(fs)} used extract particular samples for gating.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
 #' of the kernel density will be constructed.
 #' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
@@ -106,9 +110,22 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
 #' @importFrom BiocGenerics colnames
 #' 
 #' @export
-setMethod(drawGate, signature = "flowSet", definition = function(x, channels, alias, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL,channels, alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
-  fr <- as(x, "flowFrame")
+  fs <- x
+  
+  # Restrict to samples matching pData requirements
+  if(!is.null(pData)){
+    
+    # Extract samples using selectFrames
+    fs <- selectFrames(fs, pData)
+    
+  }
+  
+  fr <- as(fs, "flowFrame")
+  
+  # Check alias is upplied correctly
+  checkAlias(alias, gate_type)
   
   # Check supplied channel(s) are valid
   checkChannels(fr, channels)
@@ -189,25 +206,23 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, channels, al
 #' @importFrom BiocGenerics colnames 
 #' 
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias, channels, gate_type = "polygon", subSample = 250000, template = NULL, file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, template = NULL, file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
   gs <- x
   fs <- getData(x, parent)
   
   # Restrict to samples matching pData requirements
-  if(is.null(pData)){
+  if(!is.null(pData)){
     
-    fr <- as(fs, "flowFrame")
-    
-  }else{
-    
-    idx <- pData(fs)[[pData[1]]] == pData[2]
-    sn <- rownames(pData(fs))[idx]
-    fr <- as(fs[sn], "flowFrame")
-    
+    # Extract samples using selectFrames
+    fs <- selectFrames(fs, pData)
+
   }
   
   fr <- as(fs, "flowFrame")
+  
+  # Check alias is upplied correctly
+  checkAlias(alias, gate_type)
   
   # Check supplied channel(s) are valid
   checkChannels(fr, channels)
