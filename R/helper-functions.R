@@ -66,20 +66,52 @@ selectChannels <- function(fs){
 #' 
 #' @return \code{flowFrame} restricted to \code{size} events.
 #' 
+#' @importFrom BiocGenerics nrow
+#' @importFrom flowCore sampleFilter
+#' @importFrom flowCore Subset
+#' 
 #' @export
-sampleFrame <- function(fr, size = 5000){
+sampleFrame <- function(fr, size = 250000){
   
   # Number of events
   events <- nrow(fr)
   
-  if(events > size){
+  if(events < size){
+    
     size <- events
+  
   }else{
     
   }
-  
-  smp <- sampleFiler(size = size)
+
+  smp <- sampleFilter(size = size)
   fr <- Subset(fr, smp)
   
   return(fr)
+}
+
+#' Select flowFrames based on pData
+#' 
+#' @param fs an object of class \code{flowSet}.
+#' @param pData vector of form \code{c("column","row")} indicating the rows of \code{pData(fs)} to extract. 
+#' 
+#' @return an object of calss \code{flowSet} containing the extracted \code{flowFrame} objects.
+#' 
+#' @export
+selectFrames <- function(fs, pData){
+  
+  # Extract pData from flowSet 
+  pd <- pData(fs)
+  
+  # Find which rows to extract
+  rows <- pd[[pData[1]]] == pData[2]
+  
+  # Get sampleNames of these rows
+  sn <- rownames(pd)[rows]
+  
+  # Extract these samples by name from flowSet
+  fs <- fs[sn]
+  
+  return(fs)
+  
 }

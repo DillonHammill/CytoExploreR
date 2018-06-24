@@ -4,7 +4,7 @@
 \alias{sampleFrame}
 \title{Sample a flowFrame}
 \usage{
-sampleFrame(fr, size = 5000)
+sampleFrame(fr, size = 250000)
 }
 \arguments{
 \item{fr}{object of class \code{flowFrame}.}

@@ -5,10 +5,10 @@
 \alias{drawGate,GatingSet-method}
 \title{drawGate GatingSet Method}
 \usage{
-\S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root", alias,
-  channels, gate_type = "polygon", subSample = 250000, template = NULL,
-  file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE,
-  labs = TRUE, ...)
+\S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root",
+  alias = NULL, channels, gate_type = "polygon", subSample = 250000,
+  template = NULL, file = "gatingTemplate.csv", axis = "x",
+  adjust = 1.5, plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
