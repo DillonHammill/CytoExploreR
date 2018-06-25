@@ -517,8 +517,8 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
   # Extract points of drawn gate
   pts <- locator(n=1, type = "o", lwd = 2, pch = 16)
   
-  lines(x = pts$x[c(1, length(pts$x))], y = pts$y[c(1, length(pts$x))], lwd = 2)
-  abline(v = pts$x, h = pts$y, lwd = 2)
+  lines(x = pts$x[c(1, length(pts$x))], y = pts$y[c(1, length(pts$x))], lwd = 2, col = "red")
+  abline(v = pts$x, h = pts$y, lwd = 2, col = "red")
   
   pts <- as.data.frame(pts)
   colnames(pts) <- channels
