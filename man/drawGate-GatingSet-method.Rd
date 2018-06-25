@@ -5,10 +5,10 @@
 \alias{drawGate,GatingSet-method}
 \title{drawGate GatingSet Method}
 \usage{
-\S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root", alias,
-  channels, gate_type = NULL, subSample = NULL, template = NULL,
-  file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE,
-  labs = TRUE, ...)
+\S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root",
+  alias = NULL, channels, gate_type = "polygon", subSample = 250000,
+  template = NULL, file = "gatingTemplate.csv", axis = "x",
+  adjust = 1.5, plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
@@ -28,7 +28,7 @@ an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code
 ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well.}
 
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted which is the default plotting behaviour.}
+number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.}
 
 \item{template}{the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").}
 

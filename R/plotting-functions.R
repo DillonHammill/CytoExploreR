@@ -21,10 +21,8 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 drawPlot <- function(fr, channels, subSample = NULL, cex = 3, adjust = 1.5, ...){
   
-  # Check that length(channels) %in% c(1,2)
-  if(!length(channels) %in% c(1,2) | missing(channels)){
-    stop("Please supply fluorescent channel(s) for plotting.")
-  }
+  # Check supplied channel(s) are valid
+  checkChannels(fr, channels)
   
   # Open new plotting window
   if(dev.cur() == 1){  # null device
@@ -55,18 +53,10 @@ drawPlot <- function(fr, channels, subSample = NULL, cex = 3, adjust = 1.5, ...)
     }else{
       
       # Restrict fr to # of subSample events
-      events <- nrow(fr)
-      
-      if(subSample <= events){
-        subSample <- subSample
-      }else if(subSample > events){
-        subSample <- events
-      }
-      
-      samp <- Subset(fr, flowCore::sampleFilter(size = subSample))
+      fr <- sampleFrame(fr, size = subSample)
       
       # 2D Plot using flowDensity::plotDens
-      flowDensity::plotDens(samp, channels = channels, cex = 3, ...)  
+      flowDensity::plotDens(fr, channels = channels, cex = 3, ...)  
       
     }
     
