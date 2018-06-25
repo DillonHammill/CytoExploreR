@@ -47,6 +47,12 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
   plot <- c(TRUE, rep(FALSE, (length(alias) - 1)))
   
   # Construct gates save as filters object
+  if(gate_type == "quadrant"){
+    
+  gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+    
+  }else{
+  
   gates <- mapply(function(gate_type, alias, plot){
     
     if(gate_type == "polygon"){
@@ -73,13 +79,11 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
       
       drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
       
-    }else if(gate_type == "quadrant"){
-      
-      drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
     }
     
   }, gate_type, alias, plot = plot)
+  
+  }
   
   gates <- filters(gates)
   return(gates)
@@ -137,39 +141,43 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
   plot <- c(TRUE, rep(FALSE, (length(alias) - 1)))
   
   # Construct gates save as filters object
-  gates <- mapply(function(gate_type, alias, plot){
+  if(gate_type == "quadrant"){
     
-    if(gate_type == "polygon"){
-      
-      drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "rectangle"){
-      
-      drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "interval"){
-      
-      drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, axis = axis, labs = labs,...)
-      
-    }else if(gate_type == "threshold"){
-      
-      drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "boundary"){ 
-      
-      drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "ellipse"){
-      
-      drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "quadrant"){
-      
-      drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }
+    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
-  }, gate_type, alias, plot = plot)
+  }else{
+    
+    gates <- mapply(function(gate_type, alias, plot){
+      
+      if(gate_type == "polygon"){
+        
+        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "rectangle"){
+        
+        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "interval"){
+        
+        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, axis = axis, labs = labs,...)
+        
+      }else if(gate_type == "threshold"){
+        
+        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "boundary"){ 
+        
+        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "ellipse"){
+        
+        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }
+      
+    }, gate_type, alias, plot = plot)
+    
+  }
   
   gates <- filters(gates)
   return(gates)
@@ -234,39 +242,43 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   plot <- c(TRUE, rep(FALSE, (length(alias) - 1)))
   
   # Construct gates save as filters object
-  gates <- mapply(function(gate_type, alias, plot){
+  if(gate_type == "quadrant"){
     
-    if(gate_type == "polygon"){
-      
-      drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "rectangle"){
-      
-      drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "interval"){
-      
-      drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, axis = axis, labs = labs,...)
-      
-    }else if(gate_type == "threshold"){
-      
-      drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "boundary"){ 
-      
-      drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "ellipse"){
-      
-      drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }else if(gate_type == "quadrant"){
-      
-      drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
-      
-    }
+    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
-  }, gate_type, alias, plot = plot)
+  }else{
+    
+    gates <- mapply(function(gate_type, alias, plot){
+      
+      if(gate_type == "polygon"){
+        
+        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "rectangle"){
+        
+        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "interval"){
+        
+        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, axis = axis, labs = labs,...)
+        
+      }else if(gate_type == "threshold"){
+        
+        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "boundary"){ 
+        
+        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }else if(gate_type == "ellipse"){
+        
+        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+        
+      }
+      
+    }, gate_type, alias, plot = plot)
+    
+  }
   
   gates <- filters(gates)
   
