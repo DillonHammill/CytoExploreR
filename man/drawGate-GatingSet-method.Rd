@@ -32,8 +32,6 @@ number of events, all events will be plotted. \code{subSample} is set to 250 000
 
 \item{template}{the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").}
 
-\item{file}{name of \code{gatingTemplate} csv file if \code{template = TRUE}.}
-
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.}
 
 \item{adjust}{smooothing factor passed to \code{density()} for 1D plots (defaults to 1.5).}
@@ -44,6 +42,8 @@ existing plots which may already contain a different gate type. For demonstratio
 \item{labs}{logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.}
 
 \item{...}{additional arguments for \code{plotDens}.}
+
+\item{gtfile}{name of \code{gatingTemplate} csv file if \code{template = TRUE}.}
 }
 \value{
 object of class \code{GatingSet} with gates applied. The \code{gatingTemplate} can also be optionally written to .csv file

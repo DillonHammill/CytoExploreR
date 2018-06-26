@@ -49,6 +49,7 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
   # Construct gates save as filters object
   if(gate_type == "quadrant"){
     
+  plot <- TRUE
   gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
   }else{
@@ -143,6 +144,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
   # Construct gates save as filters object
   if(gate_type == "quadrant"){
     
+    plot <- TRUE
     gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
   }else{
@@ -197,7 +199,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 #' ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well.
 #' @param template the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").
-#' @param file name of \code{gatingTemplate} csv file if \code{template = TRUE}.
+#' @param gtfile name of \code{gatingTemplate} csv file if \code{template = TRUE}.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
@@ -244,6 +246,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   # Construct gates save as filters object
   if(gate_type == "quadrant"){
     
+    plot <- TRUE
     gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
   }else{
@@ -318,7 +321,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
       
     }
     
-    write.csv(Template, file, row.names = FALSE)
+    write.csv(Template, gtfile, row.names = FALSE)
   
   return(gs)
   
