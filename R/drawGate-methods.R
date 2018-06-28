@@ -216,7 +216,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' @importFrom BiocGenerics colnames 
 #' 
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, template = NULL, file = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, template = NULL, gtfile = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
   gs <- x
   fs <- getData(x, parent)
