@@ -76,3 +76,34 @@ getPopMFI <- function(gs, pops, stat = "median", channels = NULL){
   
   return(results)
 }
+
+#' Get Population Frequency
+#' 
+#' @param gs an object of class \code{GatingSet}.
+#' @param alias name of the population.
+#' @param parent name of the parent population to use for calculation
+#' 
+#' @importFrom flowCore fsApply
+#' @importFrom flowCore nrow
+#' 
+#' @export
+getFreq <- function(gs, alias, parent, type = "percent"){
+  
+  # Extract Population Events
+  pop <- getData(gs, alias)
+  pop.events <- fsApply(pop, function(fr){
+    nrow(fr)
+  })
+  
+  # Extract Parent Population
+  prnt <- getData(gs, parent)
+  prnt.events <- fsApply(prnt, function(fr){
+    nrow(fr)
+  })
+  
+  # Calculate Percentage
+  prcnt <- (pop.events/prnt.events)*100
+  
+  return(prcnt)
+  
+}
