@@ -25,12 +25,7 @@ drawPlot <- function(fr, channels, subSample = NULL, cex = 3, adjust = 1.5, ...)
   checkChannels(fr, channels)
   
   # Open new plotting window
-  if(dev.cur() == 1){  # null device
-    dev.new() # RStudioGD
-    dev.new() # New window
-  }else{
-    dev.new()
-  }
+  checkOSGD()
   
   # 1D Density Plot if length(channels) == 1
   if(length(channels) == 1){

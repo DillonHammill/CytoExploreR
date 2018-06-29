@@ -112,6 +112,8 @@ checkAlias <- function(alias, gate_type){
 }
 
 #' Check Operating System & Open New Graphics Device
+#' 
+#' @export
 checkOSGD <- function(){
   
   if(.Platform$OS.type == "windows"){
