@@ -110,3 +110,26 @@ checkAlias <- function(alias, gate_type){
     }
   }
 }
+
+#' Check Operating System & Open New Graphics Device
+checkOSGD <- function(){
+  
+  if(.Platform$OS.type == "windows"){
+    
+    windows()
+    
+  }else if(.Platform$OS.type == "unix"){
+    
+    if(Sys.info()["sysname"] == "Linux"){
+      
+      X11()
+      
+    }else if(Sys.info()["sysname"] == "Darwin"){
+      
+      quartz()
+      
+    }
+  
+  }
+  
+}
