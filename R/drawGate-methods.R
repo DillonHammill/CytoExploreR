@@ -198,8 +198,8 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 #' ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well.
-#' @param template the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").
-#' @param gtfile name of \code{gatingTemplate} csv file if \code{template = TRUE}.
+#' @param template the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "Template").
+#' @param gtfile name of \code{gatingTemplate} csv file to be saved.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 

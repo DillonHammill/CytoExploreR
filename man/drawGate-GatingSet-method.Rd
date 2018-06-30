@@ -7,7 +7,7 @@
 \usage{
 \S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root",
   alias = NULL, channels, gate_type = "polygon", subSample = 250000,
-  template = NULL, file = "gatingTemplate.csv", axis = "x",
+  template = NULL, gtfile = "gatingTemplate.csv", axis = "x",
   adjust = 1.5, plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
@@ -30,7 +30,9 @@ ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.}
 
-\item{template}{the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "template").}
+\item{template}{the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "Template").}
+
+\item{gtfile}{name of \code{gatingTemplate} csv file to be saved.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.}
 
@@ -42,8 +44,6 @@ existing plots which may already contain a different gate type. For demonstratio
 \item{labs}{logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.}
 
 \item{...}{additional arguments for \code{plotDens}.}
-
-\item{gtfile}{name of \code{gatingTemplate} csv file if \code{template = TRUE}.}
 }
 \value{
 object of class \code{GatingSet} with gates applied. The \code{gatingTemplate} can also be optionally written to .csv file
