@@ -2,16 +2,28 @@
 % Please edit documentation in R/compensation-functions.R
 \name{computeSpillover}
 \alias{computeSpillover}
-\title{Caluclate Spillover Matrix}
+\title{Caluclate Spillover Matrix - flowSet Method}
 \usage{
-computeSpillover(fs, file = NULL)
+computeSpillover(fs, gtfile = NULL, alias = NULL, pdfile = NULL,
+  spfile = NULL)
 }
 \arguments{
 \item{fs}{object of class \code{flowSet} containing compensation single stain controls as well as an unstained control.}
+
+\item{gtfile}{openCyto \code{gatingTemplate} csv file to be used to pre-gate samples prior to spillover calculation. If no
+\code{gatingTemplate} is supplied samples will be gated FSC-A/SSC-A singlets gated in SSC-W/SSC-H using \code{drawGate}. The gating
+strategy will be saved in gatingTemplate csv file called \code{"Compensation gatingTemplate.csv"}.}
+
+\item{alias}{name of the gated population to use for downstream calculations, set to the last node of the GatingSet by default.}
+
+\item{pdfile}{\code{pData} csv file containing additional column \code{"channel"} indicating the fluorescent channel associated
+with each sample. This channel should be set to \code{"Unstained"} for unstained controls.}
+
+\item{spfile}{name of the output spillover csv file, set to \code{"Spillover Matrix.csv"} by default.}
 }
 \value{
 spillover matrix and \code{"Spillover Matrix.csv"} file.
 }
 \description{
-Caluclate Spillover Matrix
+Caluclate Spillover Matrix - flowSet Method
 }
