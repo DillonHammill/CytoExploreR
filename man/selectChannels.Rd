@@ -2,16 +2,16 @@
 % Please edit documentation in R/helper-functions.R
 \name{selectChannels}
 \alias{selectChannels}
-\title{Select flurescent channels for compensation controls}
+\title{Select flourescent channels for compensation controls}
 \usage{
 selectChannels(fs)
 }
 \arguments{
-\item{fs}{object of class \code{flowSet} containing compensation controls}
+\item{x}{object of class \code{flowSet} or \code{GatingSet} containing compensation controls}
 }
 \value{
-add selected channels to \code{pData(fs)$channel}
+vector of channels in order of \code{flowSet} or \code{GatingSet} samples.
 }
 \description{
-Select flurescent channels for compensation controls
+Select flourescent channels for compensation controls
 }
