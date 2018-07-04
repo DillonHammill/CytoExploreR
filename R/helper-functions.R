@@ -38,11 +38,11 @@ setMethod(getChannels, signature = "GatingSet", definition = function(x){
   colnames(x@data[[1]]@description$SPILL)
 })
 
-#' Select flurescent channels for compensation controls
+#' Select flourescent channels for compensation controls
 #' 
-#' @param fs object of class \code{flowSet} containing compensation controls
+#' @param x object of class \code{flowSet} or \code{GatingSet} containing compensation controls
 #' 
-#' @return add selected channels to \code{pData(fs)$channel}
+#' @return vector of channels in order of \code{flowSet} or \code{GatingSet} samples.
 #' 
 #' @export
 selectChannels <- function(fs){
