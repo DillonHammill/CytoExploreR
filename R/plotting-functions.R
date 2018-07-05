@@ -133,3 +133,76 @@ plotLabels <- function(fr, channels, alias, gate){
   # Add text annotation to plot with population name & frequency
   plotrix::boxed.labels(x = center[1], y = center[2], labels = paste(alias,freq, sep = "\n"), border = FALSE, font = 2)
 }
+
+#' Compensation Plots
+#' 
+#' @param fs object of class \code{flowSet} containing gated compensation controls and an unstained control.
+#' @param pdfile \code{pData} csv file containing additional column \code{"channel"} indicating the fluorescent channel associated
+#' with each sample. This channel should be set to \code{"Unstained"} for unstained controls.
+#' @param overlay logical indicating whether the unstained control should be overlaid on each plot, set to FALSE by default.
+#' 
+#' @return plot grid with associated channel against all other channels for each compensation control.
+#' 
+#' @export
+drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensated"){
+  
+  if(is.na(match("Original",colnames(fs[[1]]))) == FALSE){
+    
+    fs <- fsApply(fs,function(fr){
+      
+      fr <- fr[,-match("Original",colnames(fs[[1]]))]
+      
+    },simplify=TRUE)
+    
+  }else if(is.na(match("Original",colnames(fs[[1]]))) == TRUE){
+    
+  }
+  
+  if(!is.null(pdfile)){
+    
+    pd <- read.csv(pdfile)
+    
+    for(i in 1:length(fs)){
+      
+      fs[[i]]@description$channel <- paste(pd$channel[i])
+    }
+  
+  }else{
+    
+    chans <- selectChannels(fs)
+    pData(fs)$channel <- chans
+    
+    pd <- pData(fs)$channel
+    
+    for(i in 1:length(fs)){
+      
+      fs[[i]]@description$channel <- paste(pd$channel[i])
+    
+      }
+  }
+  
+  fluor.channels <- getChannels(fs)
+  
+  plots <- fsApply(fs,function(fr){
+    
+    objs <- lapply(fluor.channels[-(match(fr@description$channel,fluor.channels))], function(y){
+      
+      p <- autoplot(fr, fr@description$channel, y, bins = 100)
+      
+      p <- p + labs_cyto("channel")
+      
+      p <- p + theme(legend.position="none", strip.background = element_blank(),strip.text.x = element_blank(),plot.title = element_text(size = 8,hjust = 0.5))
+      
+      p <- p + scale_x_logicle(limits = c(-250000,250000)) + scale_y_logicle(limits = c(-250000,250000))
+      
+      p <- p + ggtitle(paste(fr@description$channel,title))
+      
+      as.ggplot(p)
+      
+    })
+    
+    gridExtra::grid.arrange(grobs = objs, nrow = 4)
+    
+  },simplify = FALSE)
+  
+}
