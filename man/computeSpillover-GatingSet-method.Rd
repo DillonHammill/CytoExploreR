@@ -5,15 +5,11 @@
 \alias{computeSpillover,GatingSet-method}
 \title{Caluclate Spillover Matrix - flowSet Method}
 \usage{
-\S4method{computeSpillover}{GatingSet}(x, gtfile = NULL, alias = NULL,
-  pdfile = NULL, spfile = NULL, ...)
+\S4method{computeSpillover}{GatingSet}(x, alias = NULL, pdfile = NULL,
+  spfile = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet} containing gated compensation single stain controls as well as an unstained control.}
-
-\item{gtfile}{openCyto \code{gatingTemplate} csv file to be used to gate samples prior to spillover calculation. If no
-\code{gatingTemplate} is supplied samples will be gated on FSC-A/SSC-A and SSC-W/SSC-H using \code{drawGate}. The gating
-strategy will be saved as a side effect in a gatingTemplate csv file called \code{"Compensation gatingTemplate.csv"}.}
 
 \item{alias}{name of the gated population to use for downstream calculations, set to the last node of the GatingSet by default.}
 
