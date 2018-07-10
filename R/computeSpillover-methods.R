@@ -102,9 +102,6 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, pdfi
 #' Caluclate Spillover Matrix - GatingSet Method
 #' 
 #' @param x object of class \code{GatingSet} containing gated compensation single stain controls as well as an unstained control.
-#' @param gtfile openCyto \code{gatingTemplate} csv file to be used to gate samples prior to spillover calculation. If no
-#' \code{gatingTemplate} is supplied samples will be gated on FSC-A/SSC-A and SSC-W/SSC-H using \code{drawGate}. The gating
-#' strategy will be saved as a side effect in a gatingTemplate csv file called \code{"Compensation gatingTemplate.csv"}.
 #' @param alias name of the gated population to use for downstream calculations, set to the last node of the GatingSet by default.
 #' @param pdfile \code{pData} csv file containing additional column \code{"channel"} indicating the fluorescent channel associated
 #' with each sample. This channel should be set to \code{"Unstained"} for unstained controls.
@@ -115,7 +112,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, pdfi
 #' @return spillover matrix and \code{"Spillover Matrix.csv"} file.
 #' 
 #' @export
-setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gtfile = NULL, alias = NULL, pdfile = NULL, spfile = NULL, ...){
+setMethod(computeSpillover, signature = "GatingSet", definition = function(x, alias = NULL, pdfile = NULL, spfile = NULL, ...){
   
   gs <- x
   
