@@ -99,7 +99,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, pdfi
   
 })
 
-#' Caluclate Spillover Matrix - flowSet Method
+#' Caluclate Spillover Matrix - GatingSet Method
 #' 
 #' @param x object of class \code{GatingSet} containing gated compensation single stain controls as well as an unstained control.
 #' @param gtfile openCyto \code{gatingTemplate} csv file to be used to gate samples prior to spillover calculation. If no
@@ -125,12 +125,13 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
   # Select a fluorescent channel for each compensation control
   if(is.null(pdfile)){
     
-    pData(gs)$channel <- selectChannels(gs)
-    write.csv(pData(gs), "Compensation Control Channels.csv", row.names = FALSE)
+    pData(gs)$channel <- paste(selectChannels(gs))
+    write.csv(pData(gs), "Compensation Controls Channels.csv", row.names = FALSE)
     
   }else{
     
-    pData(gs) <- read.csv(pdfile, header = TRUE, row.names = 1)
+    pd <- read.csv(pdfile, header = TRUE, row.names = 1)
+    pData(gs)$channel <- paste(pd$channel)
     
   }
   
@@ -138,19 +139,19 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
   if(length(gs@transformation) == 0){
     
     # No transformation has been applied - get transform relevant channel in each sample
-    indx <- seq(1:length(pData(gs)$Channel))
-    if(!is.na(match("Unstained", pData(gs)$Channel))){
+    indx <- seq(1:length(pData(gs)$channel))
+    if(!is.na(match("Unstained", pData(gs)$channel))){
       
-      indx <- indx[-match("Unstained", pData(gs)$Channel)]
+      indx <- indx[-match("Unstained", pData(gs)$channel)]
       
     }
     
     translist <- lapply(indx, FUN = function(x){
       
-      estimateLogicle(gs[[x]], pData(gs)$Channel[x])[[pData(gs)$Channel[x]]]
-    
+      estimateLogicle(gs[[x]], pData(gs)$channel[x])[[pData(gs)$channel[x]]]
+      
     })
-    trans <- transformerList(pData(gs)$Channel[indx], translist)
+    trans <- transformerList(pData(gs)$channel[indx], translist)
     gs <- transform(gs, trans)
     
   }else if(length(gs@transformation) != 0){
@@ -161,7 +162,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
     if(all(channels %in% chans)){
       
       # All fluorescent channels have been transformed
-    
+      
     }else{
       
       # Not all fluorescent channels are transformed - transform remaining channels
@@ -169,13 +170,13 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
       chans <- names(gs@transformation[[1]])
       chans <- channels[is.na(match(channels,chans))]
       
-      indx <- na.omit(match(pData(gs)$Channel, chans))
+      indx <- na.omit(match(pData(gs)$channel, chans))
       translist <- lapply(indx, FUN = function(x){
         
-        estimateLogicle(gs[[x]], pData(gs)$Channel[x])[[pData(gs)$Channel[x]]]
+        estimateLogicle(gs[[x]], pData(gs)$channel[x])[[pData(gs)$channel[x]]]
         
       })
-      trans <- transformerList(pData(gs)$Channel[indx], translist)
+      trans <- transformerList(pData(gs)$channel[indx], translist)
       gs <- transform(gs, trans)
       
     }
@@ -197,16 +198,16 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
   NIL <- fs[[match("Unstained", pData(fs)$channel)]]
   fs <- fs[-match("Unstained", pData(fs)$channel)]
   
-  # Assign channel to each flowFrame to description slot called "Channel"
+  # Assign channel to each flowFrame to description slot called "channel"
   sapply(1:length(pData(fs)$channel), function(x){
-    fs[[x]]@description$Channel <- paste(pData(fs)$channel[x])
+    fs[[x]]@description$channel <- paste(pData(fs)$channel[x])
   })
   
   # Gate positive populations
   pops <- fsApply(fs, function(fr){
     
     # Call drawGate on each flowFrame using interval gate on selected channel
-    gt <- drawGate(x = fr, alias = paste(fr@description$Channel,"+"), channels = fr@description$Channel, gate_type = "interval", adjust = 1.5)
+    gt <- drawGate(x = fr, alias = paste(fr@description$channel,"+"), channels = fr@description$channel, gate_type = "interval", adjust = 1.5)
     fr <- Subset(fr, gt[[1]])
     
   }, simplify = TRUE)
@@ -218,9 +219,11 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
   
   # Calculate MedFI for all channels for unstained control
   neg <- each_col(NIL, median)[channels]
+  write.csv(neg, "Negative MedFI.csv", row.names = FALSE)
   
   # Calculate MedFI for all channels for all stained controls
   pos <- fsApply(pops, each_col, median)[,channels]
+  write.csv(pos, "Positive MedFI.csv", row.names = FALSE)
   
   # Subtract background fluorescence
   signal <- sweep(pos, 2, neg)
@@ -233,7 +236,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, gt
   # Normalise each row to stained channel
   for(i in 1:nrow(signal)){
     
-    signal[i, ] <- signal[i, ]/signal[i, match(fs[[i]]@description$Channel, colnames(spill))]
+    signal[i, ] <- signal[i, ]/signal[i, match(fs[[i]]@description$channel, colnames(spill))]
   } 
   
   # Insert values into appropriate rows

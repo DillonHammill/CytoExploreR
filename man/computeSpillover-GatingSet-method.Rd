@@ -3,7 +3,7 @@
 \docType{methods}
 \name{computeSpillover,GatingSet-method}
 \alias{computeSpillover,GatingSet-method}
-\title{Caluclate Spillover Matrix - flowSet Method}
+\title{Caluclate Spillover Matrix - GatingSet Method}
 \usage{
 \S4method{computeSpillover}{GatingSet}(x, gtfile = NULL, alias = NULL,
   pdfile = NULL, spfile = NULL, ...)
@@ -26,5 +26,5 @@ with each sample. This channel should be set to \code{"Unstained"} for unstained
 spillover matrix and \code{"Spillover Matrix.csv"} file.
 }
 \description{
-Caluclate Spillover Matrix - flowSet Method
+Caluclate Spillover Matrix - GatingSet Method
 }
