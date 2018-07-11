@@ -219,7 +219,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, template = NULL, gtfile = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
   gs <- x
-  fs <- getData(gs, parent)
+  fs <- flowWorkspace::getData(gs, parent)
   
   # Restrict to samples matching pData requirements
   if(!is.null(pData)){
