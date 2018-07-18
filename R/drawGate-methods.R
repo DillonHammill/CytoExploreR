@@ -16,7 +16,7 @@ setGeneric(name="drawGate",
 #' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
 #' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied with
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-#' ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well. Default \code{gate_type}
+#' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well. Default \code{gate_type}
 #' is \code{"polygon"}.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
@@ -52,6 +52,11 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
   plot <- TRUE
   gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
+  }else if(gate_type == "web"){
+
+  plot <- TRUE
+  gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+  
   }else{
   
   gates <- mapply(function(gate_type, alias, plot){
@@ -100,7 +105,7 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
 #' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
 #' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-#' ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well.
+#' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
@@ -146,6 +151,11 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
     
     plot <- TRUE
     gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+    
+  }else if(gate_type == "web"){
+    
+    plot <- TRUE
+    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
   }else{
     
@@ -197,7 +207,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
 #' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-#' ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well.
+#' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.
 #' @param template the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "Template").
 #' @param gtfile name of \code{gatingTemplate} csv file to be saved.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
@@ -248,6 +258,11 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     
     plot <- TRUE
     gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
+    
+  }else if(gate_type == "web"){
+    
+    plot <- TRUE
+    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot, labs = labs,...)
     
   }else{
     

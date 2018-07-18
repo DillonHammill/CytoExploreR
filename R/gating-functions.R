@@ -88,6 +88,7 @@ drawPolygon <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto
 #' @importFrom flowDensity plotDens
 #' @importFrom flowCore rectangleGate
+#' @importFrom flowCore exprs
 #' @export
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -568,4 +569,467 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
   gates <- filters(list(q1,q2,q3,q4))
   return(gates)
 
+}
+
+#' Draw Web Gate for Analysis of Flow Cytometry Data.
+#'
+#' \code{drawWeb} is a variation of drawQuadrant which allows more flexibility with gate co-ordinates (angled lines) and supports a number 
+#' of gates as indicated by the \code{alias} argument. To construct the gate supply the center point and surrounding points on plot edge.
+#'
+#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
+#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
+#' of the kernel density will be constructed.
+#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
+#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
+#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
+#' number of events, all events will be plotted which is the default plotting behaviour.
+#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
+#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
+#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{plotDens}.
+#'
+#' @return a filters list containing the constructed \code{polygonGate} object(s).
+#'
+#' @keywords manual, gating, draw, FlowJo, polygonGate, openCyto, drawWeb
+#' @importFrom flowDensity plotDens
+#' @importFrom flowCore polygonGate
+#' @importFrom flowCore exprs
+#' @export
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+  
+  if(length(channels) != 2) stop("Two channels are required to construct a web gate.")
+  
+  if(plot == TRUE){
+    
+    drawPlot(fr = fr, channels = channels, subSample = subSample, ...)
+    
+  }else if(plot == FALSE){
+    
+  }
+  
+  # Select center of the web gate
+  message("Select the center of the web gate.")
+  center <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
+  
+  # User Prompt
+  message("Select surrounding co-ordinates on plot edges to draw a web gate.")
+  
+  # Extract data for use later & Calculate min and max values
+  vals <- exprs(fr)[,channels]
+  xmin <- round(min(vals[,channels[1]]), 4)
+  xmax <- round(max(vals[,channels[1]]), 4)
+  ymin <- round(min(vals[,channels[2]]), 4)
+  ymax <- round(max(vals[,channels[2]]), 4)
+  
+  # Get all gate co-ordinates - c(center, others)
+  coords <- lapply(seq(1:length(alias)), function(x){
+    
+    pt <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
+    lines(x = c(center$x, pt$x), y = c(center$y,pt$y), lwd = 2, col = "red")
+    
+    return(c(pt$x,pt$y))
+    
+  })
+  coords <- as.data.frame(do.call(rbind, coords))
+  colnames(coords) <- c("x","y")
+  coords <- rbind(center,coords)
+  
+  # Determine which quadrants the points are in bottom left anti-clockwise to top right (relative to center)
+  quads <- c(0,rep(NA, length(alias)))
+  for(i in 2:length(coords$x)){
+    
+    # Bottom left Q1
+    if(coords[i,]$x < coords[1,]$x & coords[i,]$y < coords[1,]$y){
+      
+      quads[i] <- 1
+      
+      # Bottom right Q2  
+    }else if(coords[i,]$x >= coords[1,]$x & coords[i,]$y < coords[1,]$y){
+      
+      quads[i] <- 2
+      
+      # Top right Q3
+    }else if(coords[i,]$x >= coords[1,]$x & coords[i,]$y >= coords[1,]$y){
+      
+      quads[i] <- 3
+      
+      # Top left Q4  
+    }else if(coords[i,]$x < coords[1,]$x & coords[i,]$y >= coords[1,]$y){
+      
+      quads[i] <- 4
+      
+    }
+  }
+  coords[,"Q"] <- quads
+  coords <- coords[with(coords, order(coords$Q)),]
+  
+  # Push points to plot limits (intersection with plot limits)
+  
+  # Quadrant 1: find limit intercept and modify point co-ordinates
+  q1 <- coords[coords$Q == 1, ]
+  for(x in 1:length(q1$Q)){
+    
+    # Check if line through center and point intersects with vertical axis
+    vint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(xmin, center$y), c(xmin, ymin), interior.only = TRUE)
+    
+    # If a vertical intercept exists modify co-ordinates of point
+    if(!length(vint) == 0 & !anyNA(vint)){
+      
+      q1[x,c("x","y")] <- vint
+      
+    }else if(anyNA(vint) | length(vint) == 0){
+      
+      # If intercept does not exist - check if line through center and point intersects with horizontal axis
+      hint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin,ymin), interior.only = TRUE)
+      
+      # If a horizontal intercept exists modify co-ordinates of point
+      if(!length(hint) == 0 & !anyNA(hint)){
+        
+        q1[x,c("x","y")] <- hint
+        
+      }
+    }
+  }
+  coords[coords$Q == 1, ] <- q1
+  
+  # Quadrant 2: find limit intercept and modify point co-ordinates
+  q2 <- coords[coords$Q == 2, ]
+  for(x in 1:length(q2$Q)){
+    
+    # Check if line through center and point intersects with vertical axis
+    vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin), interior.only = TRUE)
+    
+    # If a vertical intercept exists modify co-ordinates of point
+    if(!length(vint) == 0 & !anyNA(vint)){
+      
+      q2[x,c("x","y")] <- vint
+      
+    }else if(anyNA(vint) | length(vint) == 0){
+      
+      # If intercept does not exist - check if line through center and point intersects with horizontal axis
+      hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, xmin), c(xmax, ymin), interior.only = TRUE)
+      
+      # If a horizontal intercept exists modify co-ordinates of point
+      if(!length(hint) == 0 & !anyNA(hint)){
+        
+        q2[x,c("x","y")] <- hint
+        
+      }
+    }
+  }
+  coords[coords$Q == 2, ] <- q2
+  
+  # Quadrant 3: find limit intercept and modify point co-ordinates
+  q3 <- coords[coords$Q == 3, ]
+  for(x in 1:length(q3$Q)){
+    
+    # Check if line through center and point intersects with vertical axis
+    vint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(xmax,ymax), c(xmax,center$y), interior.only = TRUE)
+    
+    # If a vertical intercept exists modify co-ordinates of point
+    if(!length(vint) == 0 & !anyNA(vint)){
+      
+      q3[x,c("x","y")] <- vint
+      
+    }else if(anyNA(vint) | length(vint) == 0){
+      
+      # If intercept does not exist - check if line through center and point intersects with horizontal axis
+      hint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(center$x, ymax), c(xmax, ymax), interior.only = TRUE)
+      
+      # If a horizontal intercept exists modify co-ordinates of point
+      if(!length(hint) == 0 & !anyNA(hint)){
+        
+        q3[x,c("x","y")] <- hint
+        
+      }
+    }
+  }
+  coords[coords$Q == 3, ] <- q3
+  
+  # Quadrant 4: find limit intercept and modify point co-ordinates
+  q4 <- coords[coords$Q == 4, ]
+  for(x in 1:length(q4$Q)){
+    
+    # Check if line through center and point intersects with vertical axis
+    vint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(xmin, center$y), interior.only = TRUE)
+    
+    # If a vertical intercept exists modify co-ordinates of point
+    if(!length(vint) == 0 & !anyNA(vint)){
+      
+      q4[x,c("x","y")] <- vint
+      
+    }else if(anyNA(vint) | length(vint) == 0){
+      
+      # If intercept does not exist - check if line through center and point intersects with horizontal axis
+      hint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(center$x, ymax), interior.only = TRUE)
+      
+      # If a horizontal intercept exists modify co-ordinates of point
+      if(!length(hint) == 0 & !anyNA(hint)){
+        
+        q4[x,c("x","y")] <- hint
+        
+      }
+    }
+  }
+  coords[coords$Q == 4, ] <- q4
+  
+  # If multiple points in same quadrant order anticlockwise Q1-Q4
+  if(anyDuplicated(coords$Q)){
+    
+    if(coords$Q[duplicated(coords$Q)] == 1){
+      
+      # Multiple points in Q1 - sort by -y then +x
+      q1 <- coords[coords$Q == 1,]
+      q1 <- q1[with(q1, order(-q1$y,q1$x))]
+      coords[coords$Q == 1,c("x","y")] <- q1
+      
+    }else if(coords$Q[duplicated(coords$Q)] == 2){
+      
+      # Multiple points in Q2 - sort by +x then +y
+      q2 <- coords[coords$Q == 2,]
+      q2 <- q2[with(q2, order(q2$x,q2$y))]
+      coords[coords$Q == 2, c("x","y")] <- q2
+      
+    }else if(coords$Q[duplicated(coords$Q)] == 3){
+      
+      # Multiple points in Q3 - sort by +y then -x
+      q3 <- coords[coords$Q == 3,]
+      q3 <- q3[with(q3, order(q3$y,-q3$x))]
+      coords[coords$Q == 3, c("x","y")] <- q3
+      
+    }else if(coords$Q[duplicated(coords$Q)] == 4){
+      
+      # Multiple points in Q4 - sort by -x then -y
+      q4 <- coords[coords$Q == 4,]
+      q4 <- q4[with(q4, order(-q4$x,-q4$y))]
+      coords[coords$Q == 4, c("x","y")] <- q4
+      
+    }
+  }
+  
+  # Construct gates using input points
+  # Duplicate first point after last point
+  coords[(length(coords$Q)+1), ] <- coords[2, ]
+  coords[] <- lapply(coords,round,4)
+  
+  # Gate coordinates using input points
+  gates <- list()
+  for(i in 2:(length(coords$Q)-1)){
+    gates[[i-1]] <- rbind(coords[1,], coords[i,], coords[i+1,])
+  }
+  
+  # Check if a corner lies between the points - add as gate co-ordinate
+  # Calculate corner points using min & max values
+  Q1 <- c(xmin, ymin, 1)
+  Q2 <- c(xmax, ymin, 2)
+  Q3 <- c(xmax, ymax, 3)
+  Q4 <- c(xmin, ymax, 4)
+  Q <- matrix(c(Q1,Q2,Q3,Q4),byrow = TRUE, nrow = 4)
+  colnames(Q) <- c("x","y","Q")
+  
+  # Add corners to appropriate gates step wise
+  gates <- lapply(gates, function(x){
+    
+    # DUPLICATION - points in same quadrant
+    if(any(duplicated(x$Q))){
+      # Quadrant 1:
+      if(x$Q[duplicated(x$Q)] == 1){
+        
+        if(x[2,"x"] == xmin & x[3,"x"] != xmin){                                  # NOT WORKING
+          
+          # Include Q1 corner in gate
+          x <- rbind(x[c(1,2),], Q1, x[3,])
+          
+        }
+        # Quadrant 2:  
+      }else if(x$Q[duplicated(x$Q)] == 2){
+        
+        if(x[3,"y"] == ymin & x[3,"y"] != ymin){
+          
+          # Include Q2 corner in gate
+          x <- rbind(x[c(1,2),],Q2,x[3,])
+          
+        }
+        # Quadrant 3:  
+      }else if(x$Q[duplicated(x$Q)] == 3){
+        
+        if(x[2,"x"] == xmax &  x[3,"x"] != xmax){
+          
+          # Include Q3 corner in gate
+          x <- rbind(x[c(1,2),],Q3,x[3,])
+          
+        }
+        # Quadrant 4:
+      }else if(x$Q[duplicated(x$Q)] == 4){
+        
+        if(x[2,"y"] == ymax & x[3,"y"] != ymax){
+          
+          # Include Q4 corner in gate
+          x <- rbind(x[c(1,2),], Q4, x[3,])
+          
+        }
+      }
+      
+      # ADJACENT - points in adjacent quadrants 
+    }else if(any(x[3,"Q"] - x[2,"Q"] == c(0,1,3))){
+      
+      # Q1-Q2
+      if(x[2,"Q"] == 1 & x[3,"Q"] == 2){
+        
+        if(x[2,"x"] == xmin & x[3,"x"] == xmax){
+          
+          # Include Q1 & Q2 corner in gate
+          x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
+          
+        }else if(x[2,"x"] == xmin & x[3,"x"] != xmax){
+          
+          # Include Q1 corner in gate
+          x <- rbind(x[c(1,2),], Q1, x[3,])
+          
+        }else if(x[2,"x"] != xmin & x[3,"x"] == xmax){
+          
+          # Include Q2 corner in gate
+          x <- rbind(x[c(1,2),], Q2, x[3,])
+          
+        }
+        
+        # Q2-Q3   
+      }else if(x[2,"Q"] == 2 & x[3,"Q"] == 3){
+        
+        if(x[2,"y"] == ymin & x[3,"y"] == ymax){
+          
+          # Include Q2 & Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
+          
+        }else if(x[2,"y"] == ymin & x[3,"y"] != ymax){
+          
+          # Include Q2 corner in gate
+          x <- rbind(x[c(1,2),], Q2, x[3,])
+          
+        }else if(x[2,"y"] != ymin & x[3,"y"] == ymax){
+          
+          # Include Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q3, x[3,])
+          
+        }
+        
+        # Q3-Q4 
+      }else if(x[2,"Q"] == 2 & x[3,"Q"] == 3){
+        
+        if(x[2,"x"] == xmax & x[2,"x"] == xmin){
+          
+          # Include Q3 & Q4 corner in gate
+          x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
+          
+        }else if(x[2,"x"] == xmax & x[2,"x"] != xmin){
+          
+          # Include Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q3, x[3,])
+          
+        }else if(x[2,"x"] != xmax & x[2,"x"] == xmin){
+          
+          # Include Q4 corner in gate
+          x <- rbind(x[c(1,2),], Q4, x[3,])
+          
+        }
+        
+        # Q4-Q1 
+      }else if(x[2,"Q"] == 4 & x[3,"Q"] == 1){
+        
+        if(x[2,"y"] == ymax & x[3,"y"] == ymin){
+          
+          # Include Q4 & Q1 corner in gate
+          x <- rbind(x[c(1,2),], Q4, Q1, x[3,])
+          
+        }else if(x[2,"y"] == ymax & x[3,"y"] != ymin){
+          
+          # Include Q4  corner in gate
+          x <- rbind(x[c(1,2),], Q4, x[3,])
+          
+        }else if(x[2,"y"] != ymax & x[3,"y"] == ymin){
+          
+          # Include Q1 corner in gate
+          x <- rbind(x[c(1,2),], Q1, x[3,])
+          
+        }
+        
+      }
+      
+      # SEPARATED - points separated by a quadrant   
+    }else if(x[3,"Q"] - x[2,"Q"] == 2){
+      
+      # Q1-Q3
+      if(x[2,"Q"] == 1 & x[3,"Q"] == 3){
+        
+        if(x[2,"x"] == xmin & x[3,"y"] == ymax){
+          
+          # Include Q1, Q2 & Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q1, Q2, Q3, x[3,])
+          
+        }else if(x[2,"x"] == xmin & x[3,"y"] != ymax){
+          
+          # Include Q1 & Q2 corner in gate
+          x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
+          
+        }else if(x[2,"x"] != xmin & x[3,"y"] == ymax){
+          
+          # Include Q2 & Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
+          
+        }else if(x[2,"x"] != xmin & x[3,"y"] != ymax){
+          
+          # Include Q2 corner in gate
+          x <- rbind(x[c(1,2),], Q2, x[3,])
+          
+        }
+        
+        # Q2-Q4
+      }else if(x[2,"Q"] == 2 & x[3,"Q"] == 4){
+        
+        if(x[2,"y"] == ymin & x[3,"x"] == xmin){
+          
+          # Include Q2, Q3 & Q4 corner in gate
+          x <- rbind(x[c(1,2),], Q2, Q3, Q4, x[3,])
+          
+        }else if(x[2,"y"] == ymin & x[3,"x"] != xmin){
+          
+          # Include Q2 & Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
+          
+        }else if(x[2,"y"] != ymin & x[3,"x"] == xmin){
+          
+          # Include Q3 & Q4 corner in gate
+          x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
+          
+        }else if(x[2,"y"] != ymin & x[3,"x"] != xmin){
+          
+          # Include Q3 corner in gate
+          x <- rbind(x[c(1,2),], Q3, x[3,])
+          
+        }
+        
+      }
+      
+    }
+    return(x)
+  })
+  
+  # Construct the gates
+  gates <- lapply(seq(1,length(gates), 1), function(x){
+    
+    coords <- as.matrix(gates[[x]])[,-3]
+    colnames(coords) <- channels
+    gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
+    
+    if(labs == TRUE){
+      plotLabels(fr = fr, alias = alias[x], channels = channels, gate = gate)
+    }
+    
+    return(gate)
+  })
+  
+  gates <- filters(gates)
+  return(gates)
 }

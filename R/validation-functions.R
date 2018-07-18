@@ -58,7 +58,7 @@ checkChannels <- function(x, channels){
 #' @export
 checkGateType <- function(gate_type){
   
-  gts <- c("polygon", "Polygon", "p", "P","rectangle", "Rectangle", "r", "R","interval", "Interval", "i", "I","threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B","ellipse", "Ellipse", "e", "E","quadrant", "Quadrant", "q", "Q")
+  gts <- c("polygon", "Polygon", "p", "P","rectangle", "Rectangle", "r", "R","interval", "Interval", "i", "I","threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B","ellipse", "Ellipse", "e", "E","quadrant", "Quadrant", "q", "Q", "web", "Web", "w","W")
   
   if(!all(gate_type %in% gts)){
     
@@ -81,6 +81,7 @@ checkGateType <- function(gate_type){
   gate_type[gate_type %in% c("boundary", "Boundary", "b", "B")] <- "boundary"
   gate_type[gate_type %in% c("ellipse", "Ellipse", "e", "E")] <- "ellipse"
   gate_type[gate_type %in% c("quadrant", "Quadrant", "q", "Q")] <- "quadrant"
+  gate_type[gate_type %in% c("web", "Web", "w", "W")] <- "web"
   
   return(gate_type)
 }

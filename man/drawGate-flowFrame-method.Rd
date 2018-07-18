@@ -23,7 +23,7 @@ number of events, all events will be plotted. \code{subSample} is set to 250 000
 
 \item{gate_type}{vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied with
 an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-ellipse, threshold, boundary, interval and quadrant} which can be abbreviated as upper or lower case first letters as well. Default \code{gate_type}
+ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well. Default \code{gate_type}
 is \code{"polygon"}.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.}
