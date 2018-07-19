@@ -873,7 +873,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       }
       
       # ADJACENT - points in adjacent quadrants 
-    }else if(any(x[3,"Q"] - x[2,"Q"] == c(0,1,3))){
+    }else if(any(x[3,"Q"] - x[2,"Q"] == c(0,1,-3))){
       
       # Q1-Q2
       if(x[2,"Q"] == 1 & x[3,"Q"] == 2){
