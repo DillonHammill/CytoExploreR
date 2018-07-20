@@ -136,3 +136,24 @@ checkOSGD <- function(){
   }
   
 }
+
+#' Check .csv file exists in working directory
+#' 
+#' @param name name of the csv file to be checked.
+#' 
+#' @return TRUE/FALSE if file exists
+#'
+#' @export
+checkCSV <- function(name){
+  
+  if(length(which(list.files() == name)) != 0){
+    
+    # CSV file exists in working directory
+    return(TRUE)
+  
+  }else if(length(which(list.files() == name)) == 0){
+    
+    # CSV file does not exist in working directory
+    return(FALSE)
+  }
+}

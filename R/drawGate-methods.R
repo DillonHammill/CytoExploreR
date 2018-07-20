@@ -208,7 +208,6 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 #' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.
-#' @param template the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "Template").
 #' @param gtfile name of \code{gatingTemplate} csv file to be saved.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
@@ -226,7 +225,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' @importFrom BiocGenerics colnames 
 #' 
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, template = NULL, gtfile = "gatingTemplate.csv", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
   gs <- x
   fs <- flowWorkspace::getData(gs, parent)
@@ -300,43 +299,64 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   
   gates <- filters(gates)
   
-    # Prepare arguments for gatingTemplate Entry
-    if(length(channels) == 2){
-      channels <- paste(channels, collapse = ",")
-    }
+  # Prepare gatingTemplate entries
+  pop <- "+"
+  
+  # Use add_pop to apply gates to GatingSet and construct gatingTemplate
+  if(is.null(gtfile)){
     
-    if(length(alias) > 1){
-      pop <- "*"
-    }else{
-      pop = "+"
-    }  
-    
-    if(length(alias) > 1){
-      alias <- paste(alias, collapse = ",")
-    }
-    
-    # Check if gatingTemplate exists - if not create one
-    if (!is.null(template)) {
+    message("No gatingTemplate file name supplied - creating gatingTemplate.csv to store gates.")
+
+    pops <- list()
+    for(i in 1:length(alias)){
       
-      Template <- get(template, envir = .GlobalEnv)
-      
-      Template <- rbind(Template, add_pop(
-        gs, alias = alias, parent = parent, pop = pop, dims = channels, gating_method = "manualGate",
-        gating_args = list(gate = gates)
-      ))
-      assign(template, Template, envir = .GlobalEnv)
-      
-    } else {
-      
-      Template <- add_pop(
-        gs, alias = alias, parent = parent, pop = pop, dims = channels, gating_method = "manualGate",
-        gating_args = list(gate = gates)
+      pops[[i]] <- add_pop(
+        gs, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
+        gating_args = list(gate = gates[[i]])
       )
-      Template <<- Template
-      
-    }
     
-    write.csv(Template, gtfile, row.names = FALSE)
+    }
+    pops <- do.call("rbind", pops)
+    
+    write.csv(pops, "gatingTemplate.csv", row.names = FALSE)
+    
+  }else if(checkCSV(gtfile) == FALSE){
+    
+    message("Supplied gtfile does not exist in working directory - writing new file.")
+    
+    pops <- list()
+    for(i in 1:length(alias)){
+      
+      pops[[i]] <- add_pop(
+        gs, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
+        gating_args = list(gate = gates[[i]])
+      )
+    
+    }
+    pops <- do.call("rbind", pops)
+    
+    write.csv(pops, gtfile, row.names = FALSE)
+    
+    
+  }else if(checkCSV(gtfile) == TRUE){
+    
+    gt <- read.csv(gtfile, header = TRUE)
+    
+    pops <- list()
+    for(i in 1:length(alias)){
+      
+      pops[[i]] <- add_pop(
+        gs, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
+        gating_args = list(gate = gates[[i]])
+      )
+    
+    }
+    pops <- do.call("rbind", pops)
+    gt <- rbind(gt, pops)
+    
+    write.csv(gt, gtfile, row.names = FALSE)
+    
+  }
   
   return(gs)
   

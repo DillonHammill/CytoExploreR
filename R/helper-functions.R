@@ -115,3 +115,73 @@ selectFrames <- function(fs, pData){
   return(fs)
   
 }
+
+#' Remove gate and edit gatingTemplate .csv file
+#' 
+#' @param gs an object of class \code{GatingSet}.
+#' @param alias name(s) of the gate to remove (e.g. "Single Cells").
+#' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv").
+#' @param children logical indicating whether descendant populations should also be removed from the gtfile, set to \code{TRUE} by default.
+#' 
+#' @return an object of calss \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed. containing the extracted \code{flowFrame} objects.
+#' 
+#' @export
+removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
+  
+  # Supply alias
+  if(is.null(alias)){
+    
+    stop("Please supply the name of the population to be removed.")
+  
+  }
+  
+  # Supply gtfile
+  if(is.null(gtfile)){
+    
+    stop("Please supply the name of the gatingTemplate csv file to remove the gate.")
+  
+  }
+  
+  # Read in gatingTemplate
+  gt <- read.csv(gtfile, header = TRUE)
+  
+  # For each alias remove from GatingSet and gatingTemplate
+  lapply(alias, function(x){
+    
+    # Remove node & children from GatingSet
+    Rm(x, gs)
+    
+    # Remove row entry from gatingTemplate
+    if(children == TRUE){
+    
+    # Remove rows with alias or parent = alias
+    if(length(which(gt$alias == x)) == 0){
+      
+      stop("Supplied alias is not a valid name for a gated population.")
+      
+    }else if(length(which(gt$parent == x)) != 0){
+      
+    indx <- c(which(gt$alias == x), which(gt$parent == x))
+    gt <- gt[-indx,]  
+    write.csv(gt, gtfile, row.names = FALSE)
+      
+    }else if(length(which(gt$parent == x)) == 0){
+      
+      indx <- which(gt$alias == x)
+      gt <- gt[-indx,]  
+      write.csv(gt, gtfile, row.names = FALSE)
+      
+    }
+    
+    }else if(children == FALSE){
+      
+      indx <- which(gt$alias == x)
+      gt <- gt[-indx,]  
+      write.csv(gt, gtfile, row.names = FALSE)
+      
+    }
+  })
+  
+  return(gs)
+  
+}

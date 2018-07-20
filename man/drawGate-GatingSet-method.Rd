@@ -7,8 +7,8 @@
 \usage{
 \S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root",
   alias = NULL, channels, gate_type = "polygon", subSample = 250000,
-  template = NULL, gtfile = "gatingTemplate.csv", axis = "x",
-  adjust = 1.5, plot = TRUE, labs = TRUE, ...)
+  gtfile = NULL, axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE,
+  ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
@@ -29,8 +29,6 @@ ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviat
 
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.}
-
-\item{template}{the name of an existing R object in global environment constructed using \code{openCyto::add_pop()} (e.g. "Template").}
 
 \item{gtfile}{name of \code{gatingTemplate} csv file to be saved.}
 

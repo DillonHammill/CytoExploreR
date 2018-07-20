@@ -837,7 +837,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       # Quadrant 1:
       if(x$Q[duplicated(x$Q)] == 1){
         
-        if(x[2,"x"] == xmin & x[3,"x"] != xmin){                                  # NOT WORKING
+        if(x[2,"x"] == xmin & x[3,"x"] != xmin){                                
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
