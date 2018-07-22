@@ -2,57 +2,112 @@
 output: github_document
 ---
 
-#CytoGate
-Plugin Gating Functions for openCyto
+#**cytoSuite**
+Compensation & Gating Routines for Analysis of Flow Cytometry Data.
 
-# Installation
-**CytoGate** can be installed from Github
+# **Installation**
+**cytoSuite** can be installed from Github.
 
 ## GitHub
 ```{r, eval = FALSE}
 library(devtools)
-install_github("DillonHammill/CytoGate")
+install_github("DillonHammill/cytoSuite")
 ```
-# Plugin Example
-To demonstrate the use of **CytoGate** the following example uses the **gate_draw** plugin for openCyto to draw polygonGates manually using the mouse.
 
-## Register openCyto Plugin
+# **Demonstration**
+
+## Load in Required Packages
 ```{r, echo = TRUE, results = "hide", message = FALSE, warning = FALSE}
-library(openCyto)
-library(CytoGate)
-
-registerPlugins(fun = gate_draw, methodName = "DrawGate")
-listgtMethods()
+library(cytoSuite)
 ```
 
-## Construct GatingSet
+## Load in Samples into flowSet
+```{r, echo = TRUE}
+# Here we will use the Activation samples included in cytoSuite and assign them to object called fs
+data(Activation, package = "cytoSuite")
+fs <- Activation
+```
+
+## Annotate flowSet with pData and Markers
+```{r}
+# pData entries will be used later to construct gates using specific samples
+pData(fs)$Samples <- c("Activated","Control")
+
+# Marker names can be used for gating and will be included in plot outputs - see ?Activation for details
+# To get a list of fluorescent channels use getChannels()
+fluor <- getChannels(fs)
+chnls <- c("Alexa Fluor 405-A","Alexa Fluor 430-A","APC-Cy7-A", "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
+markers <- c("Hoechst-405", "Hoechst-430", "CD11c", "Va2", "CD8", "CD4", "CD44", "CD69")
+names(markers) <- chnls
+markernames(fs) <- markers
+```
+
+## Add Samples to GatingSet for Gating
 ```{r, echo = TRUE, message = FALSE}
-data(Activation, package = "CytoGate")
-gs <- GatingSet(Activation)
+gs <- GatingSet(fs)
 ```
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-trans <- estimateLogicle(gs[[1]], "SSC-A")
+## Apply Compensation
+```{r, echo = TRUE}
+# Use spillover matrix attached to samples
+spill <- fs[[1]]@description$SPILL
+gs <- compensate(gs, spill)
+
+# Refer to ?computeSpillover and ?editSpillover to modify spillover matrix
+```
+
+## Apply Logicle Transformation to Fluorescent Channels
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+trans <- estimateLogicle(gs[[1]], fluor)
 gs <- transform(gs, trans)
 ```
 
-## Construct GatingTemplate Entry
-```{r facsplot, echo = TRUE, fig.show = "hold", fig.cap = "Gate", fig.width = 6, fig.height = 6, dev = "png", warning = FALSE, message = FALSE}
-library(flowDensity)
+## Gate Samples Using drawGate
+\code{drawGate} is a convenient wrapper for the gating functions in cytoSuite which constructs drawn gates, applies the gate(s) directly to the \code{GatingSet} and saves the gate(s) to the \code{gatingTemplate} csv file for future use.
+```{r, eval = FALSE}
+# Cells
+drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
 
-template <- add_pop(
-gs, alias = "Lymphocytes", pop = "+", parent = "root", dims = "FSC-A,SSC-A", 
-gating_method = "DrawGate", gating_args = "subSample=20000", collapseDataForGating = TRUE,
-groupBy = 2
-)
-```
+# Single Cells
+drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("SSC-W","SSC-H"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
 
-## Plot Gating Result
-```{r, eval = FALSE, warning = FALSE, message = FALSE}
-library(ggcyto)
-ggcyto(gs, subset = "root", aes(x = "FSC-A", y = "SSC-A")) + geom_hex(bins = 100) + geom_gate("Lymphocytes") + geom_stats()
+# Live Cells
+drawGate(gs, parent = "Single Cells", alias = "Live Cells", channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
+
+# Dendritic Cells & T cells
+drawGate(gs, parent = "Live Cells", alias = c("Dendritic Cells", "T Cells"), channels = c("APC-Cy7-A","PE-A"), gate_type = c("rectangle","ellipse"), gtfile = "gatingTemplate.csv")
+
+# CD4 & CD8 T Cells
+drawGate(gs, parent = "T Cells", alias = c("CD4 T Cells", "CD8 T Cells"), channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"), gate_type = "rectangle", gtfile = "gatingTemplate.csv")
+
+# CD69+ CD4 T Cells
+drawGate(gs, parent = "CD4 T Cells", alias = c("CD69+ CD4 T Cells"), channels = c("Alexa Fluor 647-A","7-AAD-A"), gate_type = "interval", axis = "y", gtfile = "gatingTemplate.csv")
+
+# CD69+ CD8 T Cells
+drawGate(gs, parent = "CD8 T Cells", alias = c("CD69+ CD8 T Cells"), channels = c("Alexa Fluor 647-A","7-AAD-A"), gate_type = "interval", axis = "y", gtfile = "gatingTemplate.csv")
 ```
-![](DrawGate.png)
+![](README_files/Cells.png)
+![](README_files/Single Cells.png)
+![](README_files/Live Cells.png)
+![](README_files/DC & T Cells.png)
+![](README_files/CD4 & CD8 T Cells.png)
+![](README_files/CD69 CD4 T Cells.png)
+![](README_files/CD69 CD8 T Cells.png)
+
+## Apply Saved Gates to Samples (Future Analyses)
+```{r}
+# Add samples to GatingSet, apply compensation, transform channels and apply gates
+gs <- GatingSet(fs)
+gs <- compensate(gs, spill)
+gs <- transform(gs, trans)
+
+# Apply saved gates
+gt <- gatingTemplate("gatingTemplate.csv")
+gating(gt, gs)
+
+# Check gates have been applied
+getNodes(gs)
+```
 
 Dillon Hammill, BMedSci (Hons)
 <br /> Ph.D. Scholar
