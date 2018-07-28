@@ -131,24 +131,27 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
     pData(gs)$channel <- paste(pd$channel)
     
   }
+  # Extract Population for Downstream Analyses
+  if(!is.null(alias)){
+    
+    fs <- flowWorkspace::getData(gs, alias)
+    
+  }else if(is.null(alias)){
+    
+    fs <- flowWorkspace::getData(gs, getNodes(gs)[length(getNodes(gs))])
+    
+  }
+  
+  # Merge files for use with estimateLogicle
+  fr <- as(fs, "flowFrame")
+  fs.m <- flowSet(fr)
+  gs.m <- GatingSet(fs.m)
   
   # Check if fluorescent channels have been transformed
   if(length(gs@transformation) == 0){
     
-    # No transformation has been applied - get transform relevant channel in each sample
-    indx <- seq(1:length(pData(gs)$channel))
-    if(!is.na(match("Unstained", pData(gs)$channel))){
-      
-      indx <- indx[-match("Unstained", pData(gs)$channel)]
-      
-    }
-    
-    translist <- lapply(indx, FUN = function(x){
-      
-      estimateLogicle(gs[[x]], pData(gs)$channel[x])[[pData(gs)$channel[x]]]
-      
-    })
-    trans <- transformerList(pData(gs)$channel[indx], translist)
+    # Calculate transformation parameters using estimateLogicle
+    trans <- estimateLogicle(gs.m[[1]], channels)
     gs <- transform(gs, trans)
     
   }else if(length(gs@transformation) != 0){
@@ -167,27 +170,10 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
       chans <- names(gs@transformation[[1]])
       chans <- channels[is.na(match(channels,chans))]
       
-      indx <- na.omit(match(pData(gs)$channel, chans))
-      translist <- lapply(indx, FUN = function(x){
-        
-        estimateLogicle(gs[[x]], pData(gs)$channel[x])[[pData(gs)$channel[x]]]
-        
-      })
-      trans <- transformerList(pData(gs)$channel[indx], translist)
+      trans <- estimateLogicle(gs.m[[1]], chans)
       gs <- transform(gs, trans)
       
     }
-    
-  }
-  
-  # Extract Population for Downstream Analyses
-  if(!is.null(alias)){
-    
-    fs <- flowWorkspace::getData(gs, alias)
-    
-  }else if(is.null(alias)){
-    
-    fs <- flowWorkspace::getData(gs, getNodes(gs)[length(getNodes(gs))])
     
   }
   
@@ -216,11 +202,9 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   
   # Calculate MedFI for all channels for unstained control
   neg <- each_col(NIL, median)[channels]
-  write.csv(neg, "Negative MedFI.csv", row.names = FALSE)
   
   # Calculate MedFI for all channels for all stained controls
   pos <- fsApply(pops, each_col, median)[,channels]
-  write.csv(pos, "Positive MedFI.csv", row.names = FALSE)
   
   # Subtract background fluorescence
   signal <- sweep(pos, 2, neg)
