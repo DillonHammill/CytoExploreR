@@ -828,6 +828,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   Q4 <- c(xmin, ymax, 4)
   Q <- matrix(c(Q1,Q2,Q3,Q4),byrow = TRUE, nrow = 4)
   colnames(Q) <- c("x","y","Q")
+  Q <- data.frame(Q)
   
   indx <- 1:(length(alias)-1)
   
@@ -1043,9 +1044,10 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     
     return(x)
   })
-  Q <- as.data.frame(Q)
   
   # Last gate inherits remaining corners
+  if(nrow(Q) != 0){
+    
   if(length(which(Q[,"Q"] >= gates[[length(alias)]][2,"Q"])) != 0){
     
     q <- Q[which(Q[,"Q"] >= gates[[length(alias)]][2,"Q"]),]
@@ -1057,10 +1059,11 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     q <- rbind(q, Q[which(Q[,"Q"] < gates[[length(alias)]][2,"Q"]),])
     
   }
-  print(q)
   
   gates[[length(alias)]] <- rbind(gates[[length(alias)]][c(1,2),], q, gates[[length(alias)]][3,])
-  print(gates)
+  
+  }
+  
   
   # Construct the gates
   gates <- lapply(seq(1,length(gates), 1), function(x){
