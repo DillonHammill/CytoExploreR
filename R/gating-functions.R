@@ -641,22 +641,22 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   for(i in 2:length(coords$x)){
     
     # Bottom left Q1
-    if(coords[i,]$x < coords[1,]$x & coords[i,]$y < coords[1,]$y){
+    if(coords[i,]$x < center$x & coords[i,]$y <= center$y){
       
       quads[i] <- 1
       
       # Bottom right Q2  
-    }else if(coords[i,]$x >= coords[1,]$x & coords[i,]$y < coords[1,]$y){
+    }else if(coords[i,]$x >= center$x & coords[i,]$y < center$y){
       
       quads[i] <- 2
       
       # Top right Q3
-    }else if(coords[i,]$x >= coords[1,]$x & coords[i,]$y >= coords[1,]$y){
+    }else if(coords[i,]$x > center$x & coords[i,]$y >= center$y){
       
       quads[i] <- 3
       
       # Top left Q4  
-    }else if(coords[i,]$x < coords[1,]$x & coords[i,]$y >= coords[1,]$y){
+    }else if(coords[i,]$x <= center$x & coords[i,]$y > center$y){
       
       quads[i] <- 4
       
@@ -695,12 +695,12 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   coords[coords$Q == 1, ] <- q1
   
   # Quadrant 2: find limit intercept and modify point co-ordinates
-  q2 <- coords[coords$Q == 2, ]
+  q2 <- coords[coords$Q == 2, ] 
   for(x in 1:length(q2$Q)){
     
     # Check if line through center and point intersects with vertical axis
     vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin), interior.only = TRUE)
-    
+
     # If a vertical intercept exists modify co-ordinates of point
     if(!length(vint) == 0 & !anyNA(vint)){
       
@@ -709,7 +709,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     }else if(anyNA(vint) | length(vint) == 0){
       
       # If intercept does not exist - check if line through center and point intersects with horizontal axis
-      hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, xmin), c(xmax, ymin), interior.only = TRUE)
+      hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, ymin), c(xmax, ymin), interior.only = TRUE)
       
       # If a horizontal intercept exists modify co-ordinates of point
       if(!length(hint) == 0 & !anyNA(hint)){
