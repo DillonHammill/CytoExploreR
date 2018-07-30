@@ -1056,11 +1056,24 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   
   if(length(which(Q[,"Q"] < gates[[length(alias)]][2,"Q"])) != 0){
     
-    q <- rbind(q, Q[which(Q[,"Q"] < gates[[length(alias)]][2,"Q"]),])
+    r <- Q[which(Q[,"Q"] < gates[[length(alias)]][2,"Q"]),]
     
   }
   
-  gates[[length(alias)]] <- rbind(gates[[length(alias)]][c(1,2),], q, gates[[length(alias)]][3,])
+  if(exists("q") & exists("r")){
+    
+    Q <- rbind(q,r)
+    
+  }else if(exists("q") & !exists("r")){
+    
+    Q <- q
+    
+  }else if(!exists("q") & exists("r")){
+    
+    Q <- r
+  }
+    
+  gates[[length(alias)]] <- rbind(gates[[length(alias)]][c(1,2),], Q, gates[[length(alias)]][3,])
   
   }
   
