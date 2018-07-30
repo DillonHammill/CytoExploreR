@@ -700,7 +700,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     
     # Check if line through center and point intersects with vertical axis
     vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin), interior.only = TRUE)
-
+    
     # If a vertical intercept exists modify co-ordinates of point
     if(!length(vint) == 0 & !anyNA(vint)){
       
@@ -776,7 +776,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   coords[coords$Q == 4, ] <- q4
   
   # If multiple points in same quadrant order anticlockwise Q1-Q4
-  if(anyDuplicated(coords$Q)){
+  if(anyDuplicated(coords$Q) != 0){
     
     if(coords$Q[duplicated(coords$Q)] == 1){
       
@@ -829,11 +829,14 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   Q <- matrix(c(Q1,Q2,Q3,Q4),byrow = TRUE, nrow = 4)
   colnames(Q) <- c("x","y","Q")
   
+  indx <- 1:(length(alias)-1)
+  
   # Add corners to appropriate gates step wise
-  gates <- lapply(gates, function(x){
+  gates[indx] <- lapply(gates[indx], function(x){
     
     # DUPLICATION - points in same quadrant
     if(any(duplicated(x$Q))){
+      
       # Quadrant 1:
       if(x$Q[duplicated(x$Q)] == 1){
         
@@ -841,6 +844,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
+          Q <<- Q[-match(1,Q[,"Q"]),]
           
         }
         # Quadrant 2:  
@@ -850,6 +854,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),],Q2,x[3,])
+          Q <<- Q[-match(2,Q[,"Q"]),]
           
         }
         # Quadrant 3:  
@@ -859,6 +864,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),],Q3,x[3,])
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
         }
         # Quadrant 4:
@@ -868,6 +874,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q4 corner in gate
           x <- rbind(x[c(1,2),], Q4, x[3,])
+          Q <<- Q[-match(4,Q[,"Q"]),]
           
         }
       }
@@ -882,16 +889,19 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
+          Q <<- Q[-match(c(1,2),Q[,"Q"]),]
           
         }else if(x[2,"x"] == xmin & x[3,"x"] != xmax){
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
+          Q <<- Q[-match(1,Q[,"Q"]),]
           
         }else if(x[2,"x"] != xmin & x[3,"x"] == xmax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
+          Q <<- Q[-match(2,Q[,"Q"]),]
           
         }
         
@@ -902,36 +912,42 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
+          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
           
         }else if(x[2,"y"] == ymin & x[3,"y"] != ymax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
+          Q <<- Q[-match(2,Q[,"Q"]),]
           
         }else if(x[2,"y"] != ymin & x[3,"y"] == ymax){
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),], Q3, x[3,])
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
         }
         
         # Q3-Q4 
-      }else if(x[2,"Q"] == 2 & x[3,"Q"] == 3){
+      }else if(x[2,"Q"] == 3 & x[3,"Q"] == 4){
         
-        if(x[2,"x"] == xmax & x[2,"x"] == xmin){
+        if(x[2,"x"] == xmax & x[3,"x"] == xmin){
           
           # Include Q3 & Q4 corner in gate
           x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
+          Q <<- Q[-match(c(3,4),Q[,"Q"]),]
           
-        }else if(x[2,"x"] == xmax & x[2,"x"] != xmin){
+        }else if(x[2,"x"] == xmax & x[3,"x"] != xmin){
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),], Q3, x[3,])
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
-        }else if(x[2,"x"] != xmax & x[2,"x"] == xmin){
+        }else if(x[2,"x"] != xmax & x[3,"x"] == xmin){
           
           # Include Q4 corner in gate
           x <- rbind(x[c(1,2),], Q4, x[3,])
+          Q <<- Q[-match(4,Q[,"Q"]),]
           
         }
         
@@ -942,16 +958,19 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q4 & Q1 corner in gate
           x <- rbind(x[c(1,2),], Q4, Q1, x[3,])
+          Q <<- Q[-match(c(1,4),Q[,"Q"]),]
           
         }else if(x[2,"y"] == ymax & x[3,"y"] != ymin){
           
           # Include Q4  corner in gate
           x <- rbind(x[c(1,2),], Q4, x[3,])
+          Q <<- Q[-match(4,Q[,"Q"]), ]
           
         }else if(x[2,"y"] != ymax & x[3,"y"] == ymin){
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
+          Q <<- Q[-match(1,Q[,"Q"]),]
           
         }
         
@@ -967,21 +986,25 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1, Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, Q3, x[3,])
+          Q <<- Q[-match(c(1,2,3),Q[,"Q"]),]
           
         }else if(x[2,"x"] == xmin & x[3,"y"] != ymax){
           
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
+          Q <<- Q[-match(c(1,2),Q[,"Q"]),]
           
         }else if(x[2,"x"] != xmin & x[3,"y"] == ymax){
           
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
+          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
           
         }else if(x[2,"x"] != xmin & x[3,"y"] != ymax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
+          Q <<- Q[-match(2,Q[,"Q"]),]
           
         }
         
@@ -992,29 +1015,52 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q2, Q3 & Q4 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, Q4, x[3,])
+          Q <<- Q[-match(c(2,3,4),Q[,"Q"]),]
           
         }else if(x[2,"y"] == ymin & x[3,"x"] != xmin){
           
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
+          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
           
         }else if(x[2,"y"] != ymin & x[3,"x"] == xmin){
           
           # Include Q3 & Q4 corner in gate
           x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
+          Q <<- Q[-match(c(3,4),Q[,"Q"]),]
           
         }else if(x[2,"y"] != ymin & x[3,"x"] != xmin){
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),], Q3, x[3,])
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
         }
         
       }
       
     }
+    
     return(x)
   })
+  Q <- as.data.frame(Q)
+  
+  # Last gate inherits remaining corners
+  if(length(which(Q[,"Q"] >= gates[[length(alias)]][2,"Q"])) != 0){
+    
+    q <- Q[which(Q[,"Q"] >= gates[[length(alias)]][2,"Q"]),]
+    
+  }
+  
+  if(length(which(Q[,"Q"] < gates[[length(alias)]][2,"Q"])) != 0){
+    
+    q <- rbind(q, Q[which(Q[,"Q"] < gates[[length(alias)]][2,"Q"]),])
+    
+  }
+  print(q)
+  
+  gates[[length(alias)]] <- rbind(gates[[length(alias)]][c(1,2),], q, gates[[length(alias)]][3,])
+  print(gates)
   
   # Construct the gates
   gates <- lapply(seq(1,length(gates), 1), function(x){
