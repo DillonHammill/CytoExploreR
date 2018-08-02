@@ -83,9 +83,28 @@ editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
       output$spillover <- renderRHandsontable({
         
         
-        rhandsontable(values$spill, rowHeaderWidth = 105, readOnly = FALSE) %>% hot_cols(type = "numeric", colWidths = 105, format = "0.00",
-                                                                                         halign = "htCenter") %>% hot_rows(rowHeights = 20)
-        
+        rhandsontable(values$spill, rowHeaderWidth = 105, readOnly = FALSE) %>% hot_cols(type = "numeric", colWidths = 105, format = "0.000", halign = "htCenter", renderer = "
+           function (instance, td, row, col, prop, value, cellProperties) {
+                                                                           Handsontable.renderers.TextRenderer.apply(this, arguments);
+                                                                           if(value < 0 ){
+                                                                           td.style.background = 'lightblue';
+                                                                           } else if (value == 0 ){
+                                                                           td.style.background = 'white';
+                                                                           } else if (value > 0 & value <= 10) {
+                                                                           td.style.background = 'lightgreen';
+                                                                           } else if (value > 10 & value <= 25){
+                                                                           td.style.background = 'yellow';
+                                                                           } else if (value > 25 & value <= 50){
+                                                                           td.style.background = 'orange';
+                                                                           } else if (value > 50 & value < 100){
+                                                                           td.style.background = 'red';
+                                                                           } else if (value == 100){
+                                                                           td.style.background = 'darkgrey';
+                                                                           } else if (value > 100){
+                                                                           td.style.background = 'violet';
+                                                                          }
+      }") %>% hot_rows(rowHeights = 20)
+      
       })
       
       fs.comp <- eventReactive(values$spill, {
