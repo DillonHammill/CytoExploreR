@@ -157,8 +157,33 @@ editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
           
         }
         
-        p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]),250000))
-        p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]),250000))
+        # if transformation applied use axis_inverse_trans 0 < range <= 5
+        # Ranges
+        xrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel])
+        yrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel])
+        
+        # X Axis
+        if(xrange > 0 & xrange <= 5){
+          
+          p <- p + axis_x_inverse_trans()
+          
+        }else{
+          
+          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]),250000))
+          
+        }
+        
+        # Y Axis
+        if(yrange > 0 & yrange <= 5){
+          
+          p <- p + axis_y_inverse_trans()
+          
+        }else{
+          
+          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]),250000))
+          
+        }
+        
         p <- p + facet_null()
         p <- p + ggtitle(paste(getData(fs.comp(),"root")[[input$flowFrame]]@description$GUID,"\n"))
         p <- p + xlab(paste("\n",input$xchannel))
