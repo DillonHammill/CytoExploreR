@@ -3,13 +3,11 @@
 #' @param x object of class \code{GatingSet}.
 #' @param parent name of the population to use for plotting (defaults to "root").
 #' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing.
-#' @param gtfile name of gatingTemplate csv file including .csv file extension to use to gate samples prior to extraction of
-#' \code{parent} population.
 #' 
 #' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
 #' 
 #' @export
-editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
+editSpillover <- function(x, parent = "root", spfile = NULL){
   
   require(shiny)
   require(shinythemes)

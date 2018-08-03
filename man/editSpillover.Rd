@@ -4,7 +4,7 @@
 \alias{editSpillover}
 \title{Edit Spillover Matrix}
 \usage{
-editSpillover(x, parent = "root", spfile = NULL, gtfile = NULL)
+editSpillover(x, parent = "root", spfile = NULL)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
@@ -12,9 +12,6 @@ editSpillover(x, parent = "root", spfile = NULL, gtfile = NULL)
 \item{parent}{name of the population to use for plotting (defaults to "root").}
 
 \item{spfile}{name of spillover matrix csv file including .csv file extension to use as a starting point for editing.}
-
-\item{gtfile}{name of gatingTemplate csv file including .csv file extension to use to gate samples prior to extraction of
-\code{parent} population.}
 }
 \value{
 write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
