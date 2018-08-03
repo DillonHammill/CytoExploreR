@@ -23,7 +23,8 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
   # Read in spillover matrix to object spill
   if(!is.null(spfile)){
     
-    spill <- read.csv(spfile)
+    spill <- read.csv(spfile, header = TRUE, row.names = 1)
+    spill <- as.matrix(spill)
     
   }else{
     
@@ -32,6 +33,8 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
+  print(class(spill))
+  View(spill)
   
   shinyApp(
     ui <- fluidPage(
@@ -42,9 +45,9 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
       
       sidebarPanel(
         selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
-        selectInput(inputId = "flowFrame", label = "Select sample:", choices = sampleNames(fs)),
-        selectInput(inputId = "xchannel", label = "x axis:", choices = channels, selected = channels[1]),
-        selectInput(inputId = "ychannel", label = "y axis:", choices = channels, selected = channels[2]),
+        selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
+        selectInput(inputId = "xchannel", label = "X Axis:", choices = channels, selected = channels[1]),
+        selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels, selected = channels[2]),
         checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = FALSE),
         checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
         checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
