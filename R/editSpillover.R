@@ -33,8 +33,6 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
-  print(class(spill))
-  View(spill)
   
   shinyApp(
     ui <- fluidPage(
