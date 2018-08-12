@@ -206,3 +206,32 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
   },simplify = FALSE)
   
 }
+
+#' Plot gates stored in filters list on an existing plot.
+#' 
+#' @param gates an object of class \code{filters} containing the gate(s) for plotting.
+#' @param col indicates the colour of the gate to be constructed, set to \code{"red"} by default.
+#' 
+#' @export
+plotGates <- function(gates, col = "red"){
+  
+  lapply(1:length(gates), function(x){
+    
+    if(class(gates[[x]]) == "rectangleGate"){
+      
+      rect(xleft = gates[[x]]@min[1], ybottom = gates[[x]]@min[2], xright = gates[[x]]@max[1], ytop = gates[[x]]@max[2], border = col, lwd = 2)
+      
+    }else if(class(gates[[x]]) == "polygonGate"){
+      
+      polygon(gates[[x]]@boundaries[,1], gates[[x]]@boundaries[,2], border = col, lwd = 2)
+      
+    }else if(class(gates[[x]]) == "ellipsoidGate"){
+      
+      gates[[x]] <- as(gates[[x]], "polygonGate")
+      polygon(gates[[x]]@boundaries[,1], gates[[x]]@boundaries[,2], border = col, lwd = 2)
+      
+    }
+  
+  })
+  
+}
