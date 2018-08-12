@@ -456,9 +456,9 @@ drawEllipse <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
     
     dimnames(cvm) <- list(channels,channels)
     
-    DescTools::DrawEllipse(x = center[1], y = center[2], radius.x = a, radius.y = b, rot = angle, border = "red", lwd = 2)
-    
     gate <- ellipsoidGate(.gate = cvm, mean = center, filterId = alias)
+    
+    polygon(as(gate, "polygonGate")@boundaries[,1], as(gate, "polygonGate")@boundaries[,2], border = "red", lwd = 3)
     
     if(labs == TRUE){
     plotLabels(fr = fr, alias = alias, gate = gate)
@@ -881,7 +881,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       }
       
       # ADJACENT - points in adjacent quadrants 
-    }else if(any(x[3,"Q"] - x[2,"Q"] == c(0,1,-3))){
+    }else if(any(x[3,"Q"] - x[2,"Q"] == c(0,1))){
       
       # Q1-Q2
       if(x[2,"Q"] == 1 & x[3,"Q"] == 2){
@@ -949,29 +949,6 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           # Include Q4 corner in gate
           x <- rbind(x[c(1,2),], Q4, x[3,])
           Q <<- Q[-match(4,Q[,"Q"]),]
-          
-        }
-        
-        # Q4-Q1 
-      }else if(x[2,"Q"] == 4 & x[3,"Q"] == 1){
-        
-        if(x[2,"y"] == ymax & x[3,"y"] == ymin){
-          
-          # Include Q4 & Q1 corner in gate
-          x <- rbind(x[c(1,2),], Q4, Q1, x[3,])
-          Q <<- Q[-match(c(1,4),Q[,"Q"]),]
-          
-        }else if(x[2,"y"] == ymax & x[3,"y"] != ymin){
-          
-          # Include Q4  corner in gate
-          x <- rbind(x[c(1,2),], Q4, x[3,])
-          Q <<- Q[-match(4,Q[,"Q"]), ]
-          
-        }else if(x[2,"y"] != ymax & x[3,"y"] == ymin){
-          
-          # Include Q1 corner in gate
-          x <- rbind(x[c(1,2),], Q1, x[3,])
-          Q <<- Q[-match(1,Q[,"Q"]),]
           
         }
         
