@@ -16,7 +16,7 @@ removeGate(gs, alias = NULL, gtfile = NULL, children = TRUE)
 \item{children}{logical indicating whether descendant populations should also be removed from the gtfile, set to \code{TRUE} by default.}
 }
 \value{
-an object of calss \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed. containing the extracted \code{flowFrame} objects.
+an object of class \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed.
 }
 \description{
 Remove gate and edit gatingTemplate .csv file
