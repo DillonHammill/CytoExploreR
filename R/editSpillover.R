@@ -3,13 +3,11 @@
 #' @param x object of class \code{GatingSet}.
 #' @param parent name of the population to use for plotting (defaults to "root").
 #' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing.
-#' @param gtfile name of gatingTemplate csv file including .csv file extension to use to gate samples prior to extraction of
-#' \code{parent} population.
 #' 
 #' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
 #' 
 #' @export
-editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
+editSpillover <- function(x, parent = "root", spfile = NULL){
   
   require(shiny)
   require(shinythemes)
@@ -25,7 +23,8 @@ editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
   # Read in spillover matrix to object spill
   if(!is.null(spfile)){
     
-    spill <- read.csv(spfile)
+    spill <- read.csv(spfile, header = TRUE, row.names = 1)
+    spill <- as.matrix(spill)
     
   }else{
     
@@ -44,9 +43,9 @@ editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
       
       sidebarPanel(
         selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
-        selectInput(inputId = "flowFrame", label = "Select sample:", choices = sampleNames(fs)),
-        selectInput(inputId = "xchannel", label = "x axis:", choices = channels, selected = channels[1]),
-        selectInput(inputId = "ychannel", label = "y axis:", choices = channels, selected = channels[2]),
+        selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
+        selectInput(inputId = "xchannel", label = "X Axis:", choices = channels, selected = channels[1]),
+        selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels, selected = channels[2]),
         checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = FALSE),
         checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
         checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
@@ -83,9 +82,28 @@ editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
       output$spillover <- renderRHandsontable({
         
         
-        rhandsontable(values$spill, rowHeaderWidth = 105, readOnly = FALSE) %>% hot_cols(type = "numeric", colWidths = 105, format = "0.00",
-                                                                                         halign = "htCenter") %>% hot_rows(rowHeights = 20)
-        
+        rhandsontable(values$spill, rowHeaderWidth = 105, readOnly = FALSE) %>% hot_cols(type = "numeric", colWidths = 105, format = "0.000", halign = "htCenter", renderer = "
+           function (instance, td, row, col, prop, value, cellProperties) {
+                                                                           Handsontable.renderers.TextRenderer.apply(this, arguments);
+                                                                           if(value < 0 ){
+                                                                           td.style.background = 'lightblue';
+                                                                           } else if (value == 0 ){
+                                                                           td.style.background = 'white';
+                                                                           } else if (value > 0 & value <= 10) {
+                                                                           td.style.background = 'lightgreen';
+                                                                           } else if (value > 10 & value <= 25){
+                                                                           td.style.background = 'yellow';
+                                                                           } else if (value > 25 & value <= 50){
+                                                                           td.style.background = 'orange';
+                                                                           } else if (value > 50 & value < 100){
+                                                                           td.style.background = 'red';
+                                                                           } else if (value == 100){
+                                                                           td.style.background = 'darkgrey';
+                                                                           } else if (value > 100){
+                                                                           td.style.background = 'violet';
+                                                                          }
+      }") %>% hot_rows(rowHeights = 20)
+      
       })
       
       fs.comp <- eventReactive(values$spill, {
@@ -138,8 +156,33 @@ editSpillover <- function(x, parent = "root", spfile = NULL, gtfile = NULL){
           
         }
         
-        p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]),250000))
-        p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]),250000))
+        # if transformation applied use axis_inverse_trans 0 < range <= 5
+        # Ranges
+        xrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel])
+        yrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel])
+        
+        # X Axis
+        if(xrange > 0 & xrange <= 5){
+          
+          p <- p + axis_x_inverse_trans()
+          
+        }else{
+          
+          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]),250000))
+          
+        }
+        
+        # Y Axis
+        if(yrange > 0 & yrange <= 5){
+          
+          p <- p + axis_y_inverse_trans()
+          
+        }else{
+          
+          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]),250000))
+          
+        }
+        
         p <- p + facet_null()
         p <- p + ggtitle(paste(getData(fs.comp(),"root")[[input$flowFrame]]@description$GUID,"\n"))
         p <- p + xlab(paste("\n",input$xchannel))

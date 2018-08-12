@@ -1,7 +1,7 @@
 Package: cytoSuite
 Type: Package
 Title: Compensation & Gating Routines for Analysis of Flow Cytometry Data
-Version: 0.0.99
+Version: 0.1.0
 Author: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Maintainer: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Description: Compensation & Gating Routines for Analysis of Flow Cytometry Data
