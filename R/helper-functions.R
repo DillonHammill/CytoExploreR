@@ -123,7 +123,7 @@ selectFrames <- function(fs, pData){
 #' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv").
 #' @param children logical indicating whether descendant populations should also be removed from the gtfile, set to \code{TRUE} by default.
 #' 
-#' @return an object of calss \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed. containing the extracted \code{flowFrame} objects.
+#' @return an object of class \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed.
 #' 
 #' @export
 removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
@@ -184,4 +184,118 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
   
   return(gs)
   
+}
+
+#' Extract saved gate(s) from gatingTemplate.
+#' 
+#' @param parent name of the parental population.
+#' @param alias name of the population for which the gate must be extracted.
+#' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv") where the gate(s) are saved.
+#' 
+#' @export
+extractGate <- function(parent, alias, gtfile){
+  
+  # Load gtfile into gatingTemplate
+  gt <- gatingTemplate(gtfile)
+  
+  # Extract population nodes from gt
+  pops <- getNodes(gt, only.names = TRUE)
+  
+  # Extract gates given parent and child node(s)
+  gates <- lapply(alias, function(x){
+    
+    if(parent == "root"){
+    
+    parent <- "root"
+    alias <- paste("/",x,sep="")
+  
+  } else {
+    
+    parent <- paste("/",parent,"")
+    alias <- paste("/",parent,"/",x,sep="")
+  
+  }  
+  
+  gate <- getGate(gt, parent, alias)
+  gate <- eval(parameters(gate)$gate)
+    
+  })
+  
+  gates <- filters(gates)
+  return(gates)
+}
+
+#' Edit existing gate(s).
+#' 
+#' @param x an object of class \code{GatingSet}.
+#' @param pData vector of form \code{c("column","row")} indicating the rows of \code{pData(fs)} to extract. 
+#' @param parent name of the parental population.
+#' @param alias name(s) of the gate to edit (e.g. "Single Cells").
+#' @param gate_type vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied with
+#' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
+#' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well. Default \code{gate_type}
+#' is \code{"polygon"}.
+#' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv") where the gate is saved.
+#' 
+#' @return an object of calss \code{GatingSet} with edited gate applied, as well as gatingTemplate file with editied gate saved.
+#' 
+#' @export
+editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = NULL, gtfile = NULL){
+  
+  # Rename x to gs
+  gs <- x
+  
+  # Restrict to samples matching pData requirements
+  if(!is.null(pData)){
+    
+    # Extract samples using selectFrames
+    fs <- selectFrames(fs, pData)
+    
+  }
+  
+  fr <- as(fs, "flowFrame")
+  
+  # Check alias is supplied correctly
+  checkAlias(alias, gate_type)
+  
+  # Check gate_type argument is valid
+  gate_type <- checkGateType(gate_type = gate_type)
+  
+  # Extract gate(s) from gtfile gating_args
+  gates <- extractGate(gtfile = gtfile, parent = parent, alias = alias)
+  
+  # Extract channels from gates
+  channels <- parameters(gates[[1]])
+  
+  # Plot data for visualisation
+  drawPlot(fr = fr, channels = channels)
+  
+  # Plot existing gates
+  plotGates(gates, col = "magenta")
+  
+  # Make new call to drawGate to get new gates - set plot = FALSE
+  new <- drawGate(fr, alias = alias, channels = channels, plot = FALSE, gate_type = gate_type)
+
+  # Find and Edit gatingTemplate entries - each alias and gate separate
+  gt <-read.csv(gtfile, header = TRUE)
+  gt <- as.data.table(gt)
+  
+  for(i in 1:length(alias)){
+    
+    gt[gt$alias == alias[i] & gt$parent == parent, "gating_args"] <- .argDeparser(list(gate = new[[i]]))
+    
+  }
+  
+  gt <- data.frame(gt)
+  write.csv(gt, gtfile, row.names = FALSE)
+  
+  # Apply entire gatingTemplate to GatingSet
+  gt <- gatingTemplate(gtfile)
+  rt <- getData(gs, "root")   # Remove all nodes - extract root
+  gs <- GatingSet(rt)         # Add root to GatingSet
+  
+  gating(gt,gs)
+  
+  assign(deparse(substitute(x)), gs, envir=globalenv())
+    
 }
