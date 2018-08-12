@@ -78,7 +78,7 @@ registerPlugins(gate_draw, "drawGate")
 #' @param fr a \code{flowFrame} object containing the flow cytometry data for gating.
 #' @param pp_res output of preprocessing function.
 #' @param channels fluorescent channel(s) to use for gating.
-#' @param gate stored \code{DrawGate} gate in csv file for passing to openCyto.
+#' @param gate stored \code{drawGate} gate in csv file for passing to openCyto.
 #'
 #' @return pass saved gate to openCyto to apply to all samples.
 #'

@@ -13,7 +13,7 @@ gate_manual(fr, pp_res, channels, gate)
 
 \item{channels}{fluorescent channel(s) to use for gating.}
 
-\item{gate}{stored \code{DrawGate} gate in csv file for passing to openCyto.}
+\item{gate}{stored \code{drawGate} gate in csv file for passing to openCyto.}
 }
 \value{
 pass saved gate to openCyto to apply to all samples.
