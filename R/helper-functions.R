@@ -255,15 +255,22 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   
   fr <- as(fs, "flowFrame")
   
+  # Extract gate(s) from gtfile gating_args
+  gates <- extractGate(gtfile = gtfile, parent = parent, alias = alias)  
+  
+  # If no gate_type supplied determine using getGateType
+  if(is.null(gate_type)){
+    
+    gate_type <- getGateType(gates)
+    
+  }
+  
   # Check gate_type argument is valid
   gate_type <- checkGateType(gate_type = gate_type, alias = alias)
   
   # Check alias is supplied correctly
   checkAlias(alias = alias, gate_type = gate_type)  
-  
-  # Extract gate(s) from gtfile gating_args
-  gates <- extractGate(gtfile = gtfile, parent = parent, alias = alias)
-  
+
   # Extract channels from gates
   channels <- parameters(gates[[1]])
   
