@@ -280,8 +280,24 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   # Plot existing gates
   plotGates(gates, col = "magenta")
   
+  # 2D Interval gates require axis argument
+  if("interval" %in% gate_type){
+    
+  intvl <- rbind(gates[[match("interval", gate_type)[1]]]@min,gates[[match("interval", gate_type)[1]]]@max)
+  
+     if(all(is.finite(intvl[1,]))){
+  
+       axis <- "x"
+    
+     }else if(all(is.finite(intvl[2,]))){
+       
+       axis <- "y"
+       
+     }
+  }
+  
   # Make new call to drawGate to get new gates - set plot = FALSE
-  new <- drawGate(fr, alias = alias, channels = channels, plot = FALSE, gate_type = gate_type)
+  new <- drawGate(fr, alias = alias, channels = channels, plot = FALSE, gate_type = gate_type, axis = axis)
 
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <-read.csv(gtfile, header = TRUE)
