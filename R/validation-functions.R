@@ -52,11 +52,13 @@ checkChannels <- function(x, channels){
 #' Check Supplied Gate Types(s).
 #' 
 #' @param gate_type vector indicating the types of gates to construct using \code{drawGate}.
+#' @param alias names of the populations to be gated.
 #' 
-#' @return Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s).
+#' @return Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s). If a single gate_type is supplied for multiple populations,
+#' the same gate_type will be used for all populations.
 #' 
 #' @export
-checkGateType <- function(gate_type){
+checkGateType <- function(gate_type,alias){
   
   gts <- c("polygon", "Polygon", "p", "P","rectangle", "Rectangle", "r", "R","interval", "Interval", "i", "I","threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B","ellipse", "Ellipse", "e", "E","quadrant", "Quadrant", "q", "Q", "web", "Web", "w","W")
   
@@ -83,6 +85,13 @@ checkGateType <- function(gate_type){
   gate_type[gate_type %in% c("quadrant", "Quadrant", "q", "Q")] <- "quadrant"
   gate_type[gate_type %in% c("web", "Web", "w", "W")] <- "web"
   
+  # Repeat gate_type to equal length of alias
+  if(!gate_type %in% c("quadrant","web")){
+  
+      gate_type <- rep(gate_type, length(alias))
+      
+  }
+  
   return(gate_type)
 }
 
@@ -98,8 +107,14 @@ checkAlias <- function(alias, gate_type){
   
   if(is.null(alias)){
     
-    stop("The name(s) of the population(s) to gate must be supplied as the alias argument.")
+    stop("The name(s) of the population(s) to be gated must be supplied as the alias argument.")
   
+  }
+
+  if(gate_type == "quadrant" & length(alias) != 4){
+    
+    stop("Supply 4 population names to alias argument to construct quadrant gates.")
+    
   }
   
   if(length(gate_type) > 1){
