@@ -4,13 +4,16 @@
 \alias{checkGateType}
 \title{Check Supplied Gate Types(s).}
 \usage{
-checkGateType(gate_type)
+checkGateType(gate_type, alias)
 }
 \arguments{
 \item{gate_type}{vector indicating the types of gates to construct using \code{drawGate}.}
+
+\item{alias}{names of the populations to be gated.}
 }
 \value{
-Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s).
+Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s). If a single gate_type is supplied for multiple populations,
+the same gate_type will be used for all populations.
 }
 \description{
 Check Supplied Gate Types(s).
