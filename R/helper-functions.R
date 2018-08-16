@@ -255,11 +255,11 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   
   fr <- as(fs, "flowFrame")
   
-  # Check alias is supplied correctly
-  checkAlias(alias, gate_type)
-  
   # Check gate_type argument is valid
-  gate_type <- checkGateType(gate_type = gate_type)
+  gate_type <- checkGateType(gate_type = gate_type, alias = alias)
+  
+  # Check alias is supplied correctly
+  checkAlias(alias = alias, gate_type = gate_type)  
   
   # Extract gate(s) from gtfile gating_args
   gates <- extractGate(gtfile = gtfile, parent = parent, alias = alias)
@@ -298,4 +298,245 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   
   assign(deparse(substitute(x)), gs, envir=globalenv())
     
+}
+
+#' Get gate_type from from gate.
+#' 
+#' @param gates an object of class \code{filters} containing the gates from which the \code{gate_type(s)} must be obtained.
+#'
+#' @return vector of gate_type names for supplied gates.
+#'
+#' @export
+getGateType <- function(gates){
+  
+  # Combine gate co-ordinates
+  pts <- lapply(qt, function(x){rbind(x@min,x@max)})
+  pts <- do.call(rbind,pts)
+  
+  # One gate supplied
+  if(length(gates) == 1){
+    
+    if(class(gates[[1]]) == "ellipsoidGate"){
+      
+      # gate_type == "ellipse"
+      types <- "ellipse"
+    
+    }else if(class(gates[[1]]) == "rectangleGate"){
+      
+      # Includes rectangle, interval, threshold and boundary gate_types
+      if(length(parameters(gates[[1]])) == 1){
+        
+        # Gate in One Dimension
+        if(is.infinite(gates[[1]]@min)){
+          
+          types <- "boundary"
+          
+        }else if(is.infinite(gates[[1]]@max)){
+          
+          types <- "threshold"
+          
+        }else if(is.finite(gates[[1]]@min) & is.finte(gates[[1]]@max)){
+          
+          types = "interval"
+          
+        }
+        
+      }else if(length(parameters(gates[[1]])) == 2){
+        
+        # Gate in 2 Dimensions
+        if(is.infinite(gates[[1]]@min[1]) & is.infinite(gates[[1]]@min[2])){
+          
+          types = "boundary"
+          
+        }else if(is.infinite(gates[[1]]@max[1]) & is.infinite(gates[[1]]@max[2])){
+          
+          types <- "threshold"
+          
+        }else if(all(is.infinite(c(gates[[1]]@min[1], gates[[1]]@max[1]))) | all(is.infinite(c(gates[[1]]@min[2], gates[[1]]@max[2])))){
+          
+          types <- "interval"
+          
+        }else{
+          
+          types <- "rectangle"
+          
+        }
+        
+      }
+      
+    }else if(class(gates[[1]]) == "polygon"){
+      
+      # gate_type == "polygon"
+      types <- "polygon"
+      
+    }
+    
+  # Multiple gates supplied
+  }else if(length(gates) > 1){
+    
+    # Get classes of gates
+    classes <- sapply(gates, function(x){
+     
+      class(x)   
+     
+    })
+    
+    # All gates are of the same class
+    if(all(classes[1] == classes)){
+      
+      # Gates are all ellipses
+      if(classes[1] == "ellipsoidGate"){
+        
+        types <- rep("ellipse", length(gates))
+       
+      # Gates are all rectangles 
+      }else if(classes[1] == "rectangleGate"){
+        
+        # if 4 gates are supplied - gate_type may be "quadrant"
+        if(length(gates) == 4){
+          
+          # Quadrant gates should have finite and infinite values in all gates and all finite co-ordinates should be the same
+          if(sum(is.finite(pts[,1])) == 4 & sum(is.infinite(pts[,1])) == 4 & sum(duplicated(pts[,1][is.finite(pts[,1])])) == 3){
+            
+            types <- "quadrant"
+           
+          # Each gate could be either rectangle, interval, threshold or boundary
+          }else{
+            
+            types <- sapply(gates, function(x){
+              
+              # Includes rectangle, interval, threshold and boundary gate_types
+              if(length(parameters(x)) == 1){
+                
+                # Gate in One Dimension
+                if(is.infinite(x@min)){
+                  
+                  types <- "boundary"
+                  
+                }else if(is.infinite(x@max)){
+                  
+                  types <- "threshold"
+                  
+                }else if(is.finite(x@min) & is.finte(x@max)){
+                  
+                  types = "interval"
+                  
+                }
+                
+              }else if(length(parameters(x)) == 2){
+                
+                # Gate in 2 Dimensions
+                if(is.infinite(x@min[1]) & is.infinite(x@min[2])){
+                  
+                  types = "boundary"
+                  
+                }else if(is.infinite(x@max[1]) & is.infinite(x@max[2])){
+                  
+                  types <- "threshold"
+                  
+                }else if(all(is.infinite(c(x@min[1], x@max[1]))) | all(is.infinite(c(x@min[2], x@max[2])))){
+                  
+                  types <- "interval"
+                  
+                }else{
+                  
+                  types <- "rectangle"
+                  
+                }
+                
+              }
+              
+            })
+            
+          }
+          
+        }else{
+          
+            types <- rep("rectangle", length(gates))
+            
+        }
+      
+      # Gates are all polygons  
+      }else if(classes[1] == "polygonGate"){
+        
+        # May be gate_type == "web" need to see if any points are conserved
+        if(sum(duplicated(pts[,1][is.finite(pts[,1])])) == (length(gates)-1)){
+          
+          types <- "web"
+          
+        }else{
+          
+          types <- rep("polygon", length(gates))
+          
+        }
+        
+      }
+      
+    # Not all supplied gates are of the same class - treat separately
+    }else{
+      
+      types <- sapply(gates, function(x){
+        
+        if(class(x) == "ellipsoidGate"){
+          
+          # gate_type == "ellipse"
+          types <- "ellipse"
+          
+        }else if(class(x) == "rectangleGate"){
+          
+          # Includes rectangle, interval, threshold and boundary gate_types
+          if(length(parameters(x)) == 1){
+            
+            # Gate in One Dimension
+            if(is.infinite(x@min)){
+              
+              types <- "boundary"
+              
+            }else if(is.infinite(x@max)){
+              
+              types <- "threshold"
+              
+            }else if(is.finite(x@min) & is.finte(x@max)){
+              
+              types = "interval"
+              
+            }
+            
+          }else if(length(parameters(x)) == 2){
+            
+            # Gate in 2 Dimensions
+            if(is.infinite(x@min[1]) & is.infinite(x@min[2])){
+              
+              types = "boundary"
+              
+            }else if(is.infinite(x@max[1]) & is.infinite(x@max[2])){
+              
+              types <- "threshold"
+              
+            }else if(all(is.infinite(c(x@min[1], x@max[1]))) | all(is.infinite(c(x@min[2], x@max[2])))){
+              
+              types <- "interval"
+              
+            }else{
+              
+              types <- "rectangle"
+              
+            }
+            
+          }
+          
+        }else if(class(x) == "polygon"){
+          
+          # gate_type == "polygon"
+          types <- "polygon"
+        }
+        
+      })
+      
+    }
+  
+  }
+  
+  return(types)
+  
 }
