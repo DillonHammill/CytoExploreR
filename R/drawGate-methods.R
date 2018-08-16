@@ -34,14 +34,14 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
   
   fr <- x
   
+  # Check gate_type argument is valid
+  gate_type <- checkGateType(gate_type = gate_type, alias = alias)
+  
   # Check alias is supplied correctly
-  checkAlias(alias, gate_type)
+  checkAlias(alias = alias, gate_type = gate_type) 
   
   # Check supplied channel(s) are valid
-  checkChannels(fr, channels)
-  
-  # Check gate_type argument is valid
-  gate_type <- checkGateType(gate_type = gate_type)
+  checkChannels(fr, channels = channels)
 
   # Make one call to drawPlot
   if(plot == TRUE){
@@ -141,14 +141,14 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
   
   fr <- as(fs, "flowFrame")
   
-  # Check alias is upplied correctly
-  checkAlias(alias, gate_type)
+  # Check gate_type argument is valid
+  gate_type <- checkGateType(gate_type = gate_type, alias = alias)
+  
+  # Check alias is supplied correctly
+  checkAlias(alias = alias, gate_type = gate_type) 
   
   # Check supplied channel(s) are valid
-  checkChannels(fr, channels)
-  
-  # Check gate_type argument is valid
-  gate_type <- checkGateType(gate_type = gate_type)
+  checkChannels(fr, channels = channels)
   
   # Make one call to drawPlot
   if(plot == TRUE){
@@ -253,14 +253,14 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   
   fr <- as(fs, "flowFrame")
   
-  # Check alias is upplied correctly
-  checkAlias(alias, gate_type)
+  # Check gate_type argument is valid
+  gate_type <- checkGateType(gate_type = gate_type, alias = alias)
+  
+  # Check alias is supplied correctly
+  checkAlias(alias = alias, gate_type = gate_type) 
   
   # Check supplied channel(s) are valid
-  checkChannels(fr, channels)
-  
-  # Check gate_type argument is valid
-  gate_type <- checkGateType(gate_type = gate_type)
+  checkChannels(fr, channels = channels)
   
   # Make one call to drawPlot
   if(plot == TRUE){
