@@ -213,25 +213,25 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
 #' @param col indicates the colour of the gate to be constructed, set to \code{"red"} by default.
 #' 
 #' @export
-plotGates <- function(gates, col = "red"){
+plotGates <- function(gates, col = "magenta"){
   
-  lapply(1:length(gates), function(x){
+  for(i in 1:length(gates)){
     
-    if(class(gates[[x]]) == "rectangleGate"){
+    if(class(gates[[i]]) == "rectangleGate"){
       
-      rect(xleft = gates[[x]]@min[1], ybottom = gates[[x]]@min[2], xright = gates[[x]]@max[1], ytop = gates[[x]]@max[2], border = col, lwd = 2)
+      rect(xleft = gates[[i]]@min[1], ybottom = gates[[i]]@min[2], xright = gates[[i]]@max[1], ytop = gates[[i]]@max[2], border = col, lwd = 2.5)
       
-    }else if(class(gates[[x]]) == "polygonGate"){
+    }else if(class(gates[[i]]) == "polygonGate"){
       
-      polygon(gates[[x]]@boundaries[,1], gates[[x]]@boundaries[,2], border = col, lwd = 2)
+      polygon(gates[[i]]@boundaries[,1], gates[[i]]@boundaries[,2], border = col, lwd = 2.5)
       
-    }else if(class(gates[[x]]) == "ellipsoidGate"){
+    }else if(class(gates[[i]]) == "ellipsoidGate"){
       
-      gates[[x]] <- as(gates[[x]], "polygonGate")
-      polygon(gates[[x]]@boundaries[,1], gates[[x]]@boundaries[,2], border = col, lwd = 2)
+      gates[[i]] <- as(gates[[i]], "polygonGate")
+      polygon(gates[[i]]@boundaries[,1], gates[[i]]@boundaries[,2], border = col, lwd = 2.5)
       
     }
-  
-  })
+    
+  }
   
 }
