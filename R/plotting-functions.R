@@ -213,7 +213,7 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
 #' @param col indicates the colour of the gate to be constructed, set to \code{"red"} by default.
 #' 
 #' @export
-plotGates <- function(gates, col = "magenta"){
+plotGates <- function(gates, col = "red"){
   
   for(i in 1:length(gates)){
     

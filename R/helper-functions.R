@@ -278,7 +278,7 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   drawPlot(fr = fr, channels = channels)
   
   # Plot existing gates
-  plotGates(gates = gates)
+  plotGates(gates = gates, col = "magenta")
   
   # 2D Interval gates require axis argument
   if("interval" %in% gate_type){
