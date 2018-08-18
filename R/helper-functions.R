@@ -192,6 +192,8 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
 #' @param alias name of the population for which the gate must be extracted.
 #' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv") where the gate(s) are saved.
 #' 
+#' @importFrom flowWorkspace getGate
+#' 
 #' @export
 extractGate <- function(parent, alias, gtfile){
   
@@ -199,25 +201,19 @@ extractGate <- function(parent, alias, gtfile){
   gt <- gatingTemplate(gtfile)
   
   # Extract population nodes from gt
-  pops <- getNodes(gt, only.names = TRUE)
+  nds <- getNodes(gt, only.names = TRUE)
+  
+  #Parent Node
+  parent <- names(nds[match(parent,nds)])
   
   # Extract gates given parent and child node(s)
   gates <- lapply(alias, function(x){
     
-    if(parent == "root"){
-    
-    parent <- "root"
-    alias <- paste("/",x,sep="")
+  # Alias node
+  alias <- names(nds[match(x,nds)])
   
-  } else {
-    
-    parent <- paste("/",parent,"")
-    alias <- paste("/",parent,"/",x,sep="")
-  
-  }  
-  
-  gate <- getGate(gt, parent, alias)
-  gate <- eval(parameters(gate)$gate)
+  gm <- getGate(gt, parent, alias)
+  gate <- eval(parameters(gm)$gate)
     
   })
   
@@ -239,11 +235,15 @@ extractGate <- function(parent, alias, gtfile){
 #' 
 #' @return an object of calss \code{GatingSet} with edited gate applied, as well as gatingTemplate file with editied gate saved.
 #' 
+#' @importFrom flowWorkspace getData
+#' @importFrom data.table as.data.table
+#' 
 #' @export
 editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = NULL, gtfile = NULL){
   
   # Rename x to gs
   gs <- x
+  fs <- getData(gs, parent)
   
   # Restrict to samples matching pData requirements
   if(!is.null(pData)){
@@ -278,7 +278,7 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   drawPlot(fr = fr, channels = channels)
   
   # Plot existing gates
-  plotGates(gates, col = "magenta")
+  plotGates(gates = gates)
   
   # 2D Interval gates require axis argument
   if("interval" %in% gate_type){
@@ -299,18 +299,20 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   # Make new call to drawGate to get new gates - set plot = FALSE
   new <- drawGate(fr, alias = alias, channels = channels, plot = FALSE, gate_type = gate_type, axis = axis)
 
+  # Re-name parent and pop to be data.table friendly
+  prnt <- parent
+  als <- alias
+  
   # Find and Edit gatingTemplate entries - each alias and gate separate
-  gt <-read.csv(gtfile, header = TRUE)
-  gt <- as.data.table(gt)
+  gt <- fread(gtfile)
   
   for(i in 1:length(alias)){
     
-    gt[gt$alias == alias[i] & gt$parent == parent, "gating_args"] <- .argDeparser(list(gate = new[[i]]))
+    gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(gate = new[[i]]))]
     
   }
   
-  gt <- data.frame(gt)
-  write.csv(gt, gtfile, row.names = FALSE)
+  fwrite(gt, gtfile)
   
   # Apply entire gatingTemplate to GatingSet
   gt <- gatingTemplate(gtfile)
@@ -331,10 +333,6 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
 #'
 #' @export
 getGateType <- function(gates){
-  
-  # Combine gate co-ordinates
-  pts <- lapply(qt, function(x){rbind(x@min,x@max)})
-  pts <- do.call(rbind,pts)
   
   # One gate supplied
   if(length(gates) == 1){
@@ -360,7 +358,7 @@ getGateType <- function(gates){
           
         }else if(is.finite(gates[[1]]@min) & is.finte(gates[[1]]@max)){
           
-          types = "interval"
+          types <- "interval"
           
         }
         
@@ -369,7 +367,7 @@ getGateType <- function(gates){
         # Gate in 2 Dimensions
         if(is.infinite(gates[[1]]@min[1]) & is.infinite(gates[[1]]@min[2])){
           
-          types = "boundary"
+          types <- "boundary"
           
         }else if(is.infinite(gates[[1]]@max[1]) & is.infinite(gates[[1]]@max[2])){
           
@@ -387,7 +385,7 @@ getGateType <- function(gates){
         
       }
       
-    }else if(class(gates[[1]]) == "polygon"){
+    }else if(class(gates[[1]]) == "polygonGate"){
       
       # gate_type == "polygon"
       types <- "polygon"
@@ -414,6 +412,10 @@ getGateType <- function(gates){
        
       # Gates are all rectangles 
       }else if(classes[1] == "rectangleGate"){
+        
+        # Combine gate co-ordinates
+        pts <- lapply(gates, function(x){rbind(x@min,x@max)})
+        pts <- do.call(rbind,pts)
         
         # if 4 gates are supplied - gate_type may be "quadrant"
         if(length(gates) == 4){
@@ -442,7 +444,7 @@ getGateType <- function(gates){
                   
                 }else if(is.finite(x@min) & is.finte(x@max)){
                   
-                  types = "interval"
+                  types <- "interval"
                   
                 }
                 
@@ -451,7 +453,7 @@ getGateType <- function(gates){
                 # Gate in 2 Dimensions
                 if(is.infinite(x@min[1]) & is.infinite(x@min[2])){
                   
-                  types = "boundary"
+                  types <- "boundary"
                   
                 }else if(is.infinite(x@max[1]) & is.infinite(x@max[2])){
                   
@@ -482,8 +484,13 @@ getGateType <- function(gates){
       # Gates are all polygons  
       }else if(classes[1] == "polygonGate"){
         
+        # Combine gate co-ordinates
+        pts <- lapply(gates, function(x){rbind(x@boundaries)})
+        pts <- do.call(rbind,pts)
+        dupl <- pts[pts[,1] == pts[which(duplicated(pts))[1],][1],]
+        
         # May be gate_type == "web" need to see if any points are conserved
-        if(sum(duplicated(pts[,1][is.finite(pts[,1])])) == (length(gates)-1)){
+        if(length(dupl[,1]) == 4){
           
           types <- "web"
           
@@ -521,7 +528,7 @@ getGateType <- function(gates){
               
             }else if(is.finite(x@min) & is.finte(x@max)){
               
-              types = "interval"
+              types <- "interval"
               
             }
             
@@ -530,7 +537,7 @@ getGateType <- function(gates){
             # Gate in 2 Dimensions
             if(is.infinite(x@min[1]) & is.infinite(x@min[2])){
               
-              types = "boundary"
+              types <- "boundary"
               
             }else if(is.infinite(x@max[1]) & is.infinite(x@max[2])){
               
@@ -548,7 +555,7 @@ getGateType <- function(gates){
             
           }
           
-        }else if(class(x) == "polygon"){
+        }else if(class(x) == "polygonGate"){
           
           # gate_type == "polygon"
           types <- "polygon"
