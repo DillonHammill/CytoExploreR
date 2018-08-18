@@ -675,17 +675,17 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     vint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(xmin, center$y), c(xmin, ymin), interior.only = TRUE)
     
     # If a vertical intercept exists modify co-ordinates of point
-    if(!length(vint) == 0 & !anyNA(vint)){
+    if(!anyNA(vint) | all(is.finite(vint))){
       
       q1[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | length(vint) == 0){
+    }else if(anyNA(vint) | all(is.infinite(vint))){
       
       # If intercept does not exist - check if line through center and point intersects with horizontal axis
-      hint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin,ymin), interior.only = TRUE)
+      hint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin, ymin), interior.only = TRUE)
       
       # If a horizontal intercept exists modify co-ordinates of point
-      if(!length(hint) == 0 & !anyNA(hint)){
+      if(!anyNA(hint) | all(is.finite(hint))){
         
         q1[x,c("x","y")] <- hint
         
@@ -702,17 +702,17 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin), interior.only = TRUE)
     
     # If a vertical intercept exists modify co-ordinates of point
-    if(!length(vint) == 0 & !anyNA(vint)){
+    if(!anyNA(vint) | all(is.finite(vint))){
       
       q2[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | length(vint) == 0){
+    }else if(anyNA(vint) | all(is.infinite(vint))){
       
       # If intercept does not exist - check if line through center and point intersects with horizontal axis
       hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, ymin), c(xmax, ymin), interior.only = TRUE)
       
       # If a horizontal intercept exists modify co-ordinates of point
-      if(!length(hint) == 0 & !anyNA(hint)){
+      if(!anyNA(hint) | all(is.finite(hint))){
         
         q2[x,c("x","y")] <- hint
         
@@ -729,17 +729,17 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     vint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(xmax,ymax), c(xmax,center$y), interior.only = TRUE)
     
     # If a vertical intercept exists modify co-ordinates of point
-    if(!length(vint) == 0 & !anyNA(vint)){
+    if(!anyNA(vint) | all(is.finite(vint))){
       
       q3[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | length(vint) == 0){
+    }else if(anyNA(vint) | all(is.infinite(vint))){
       
       # If intercept does not exist - check if line through center and point intersects with horizontal axis
       hint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(center$x, ymax), c(xmax, ymax), interior.only = TRUE)
       
       # If a horizontal intercept exists modify co-ordinates of point
-      if(!length(hint) == 0 & !anyNA(hint)){
+      if(!anyNA(hint) | all(is.finite(hint))){
         
         q3[x,c("x","y")] <- hint
         
@@ -756,17 +756,17 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     vint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(xmin, center$y), interior.only = TRUE)
     
     # If a vertical intercept exists modify co-ordinates of point
-    if(!length(vint) == 0 & !anyNA(vint)){
+    if(!anyNA(vint) | all(is.finite(vint))){
       
       q4[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | length(vint) == 0){
+    }else if(anyNA(vint) | all(is.infinite(vint))){
       
       # If intercept does not exist - check if line through center and point intersects with horizontal axis
       hint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(center$x, ymax), interior.only = TRUE)
       
       # If a horizontal intercept exists modify co-ordinates of point
-      if(!length(hint) == 0 & !anyNA(hint)){
+      if(!anyNA(hint) | all(is.finite(hint))){
         
         q4[x,c("x","y")] <- hint
         
@@ -778,41 +778,51 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   # If multiple points in same quadrant order anticlockwise Q1-Q4
   if(anyDuplicated(coords$Q) != 0){
     
-    if(coords$Q[duplicated(coords$Q)] == 1){
+    # Quadrant 1
+    if(1 %in% coords$Q[duplicated(coords$Q)]){
       
       # Multiple points in Q1 - sort by -y then +x
       q1 <- coords[coords$Q == 1,]
       q1 <- q1[with(q1, order(-q1$y,q1$x))]
-      coords[coords$Q == 1,c("x","y")] <- q1
+      coords[coords$Q == 1, c("x","y")] <- q1[,c("x","y")]
       
-    }else if(coords$Q[duplicated(coords$Q)] == 2){
+    }
+    
+    # Quadrant 2
+    if(2 %in% coords$Q[duplicated(coords$Q)]){
       
       # Multiple points in Q2 - sort by +x then +y
       q2 <- coords[coords$Q == 2,]
       q2 <- q2[with(q2, order(q2$x,q2$y))]
-      coords[coords$Q == 2, c("x","y")] <- q2
+      coords[coords$Q == 2, c("x","y")] <- q2[,c("x","y")]
       
-    }else if(coords$Q[duplicated(coords$Q)] == 3){
+    }
+    
+    # Quadrant 3
+    if(3 %in% coords$Q[duplicated(coords$Q)]){
       
       # Multiple points in Q3 - sort by +y then -x
       q3 <- coords[coords$Q == 3,]
       q3 <- q3[with(q3, order(q3$y,-q3$x))]
-      coords[coords$Q == 3, c("x","y")] <- q3
+      coords[coords$Q == 3, c("x","y")] <- q3[,c("x","y")]
       
-    }else if(coords$Q[duplicated(coords$Q)] == 4){
+    }
+    
+    # Quadrant 4
+    if(4 %in% coords$Q[duplicated(coords$Q)]){
       
       # Multiple points in Q4 - sort by -x then -y
       q4 <- coords[coords$Q == 4,]
       q4 <- q4[with(q4, order(-q4$x,-q4$y))]
-      coords[coords$Q == 4, c("x","y")] <- q4
+      coords[coords$Q == 4, c("x","y")] <- q4[,c("x","y")]
       
     }
   }
   
   # Construct gates using input points
   # Duplicate first point after last point
-  coords[(length(coords$Q)+1), ] <- coords[2, ]
-  coords[] <- lapply(coords,round,4)
+  coords[(length(coords$Q) + 1), ] <- coords[2, ]
+  coords[] <- lapply(coords, round, 4)
   
   # Gate coordinates using input points
   gates <- list()
@@ -832,14 +842,14 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   
   indx <- 1:(length(alias)-1)
   
-  # Add corners to appropriate gates step wise
+  # Add corners to appropriate gates step-wise
   gates[indx] <- lapply(gates[indx], function(x){
     
     # DUPLICATION - points in same quadrant
     if(any(duplicated(x$Q))){
       
-      # Quadrant 1:
-      if(x$Q[duplicated(x$Q)] == 1){
+      # Quadrant 1
+      if(1 %in% x$Q[duplicated(x$Q)]){
         
         if(x[2,"x"] == xmin & x[3,"x"] != xmin){                                
           
@@ -848,18 +858,22 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           Q <<- Q[-match(1,Q[,"Q"]),]
           
         }
-        # Quadrant 2:  
-      }else if(x$Q[duplicated(x$Q)] == 2){
+      }
+      
+      # Quadrant 2
+      if(2 %in% x$Q[duplicated(x$Q)]){
         
-        if(x[3,"y"] == ymin & x[3,"y"] != ymin){
+        if(x[2,"y"] == ymin & x[3,"y"] != ymin){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),],Q2,x[3,])
           Q <<- Q[-match(2,Q[,"Q"]),]
           
         }
-        # Quadrant 3:  
-      }else if(x$Q[duplicated(x$Q)] == 3){
+      }
+    
+      # Quadrant 3
+      if(3 %in% x$Q[duplicated(x$Q)]){
         
         if(x[2,"x"] == xmax &  x[3,"x"] != xmax){
           
@@ -868,8 +882,10 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           Q <<- Q[-match(3,Q[,"Q"]),]
           
         }
-        # Quadrant 4:
-      }else if(x$Q[duplicated(x$Q)] == 4){
+      }
+    
+      # Quadrant 4
+      if(4 %in% x$Q[duplicated(x$Q)]){
         
         if(x[2,"y"] == ymax & x[3,"y"] != ymax){
           
@@ -890,19 +906,19 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
-          Q <<- Q[-match(c(1,2),Q[,"Q"]),]
+          Q <<- Q[-match(c(1,2), Q[,"Q"]),]
           
         }else if(x[2,"x"] == xmin & x[3,"x"] != xmax){
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
-          Q <<- Q[-match(1,Q[,"Q"]),]
+          Q <<- Q[-match(1, Q[,"Q"]),]
           
         }else if(x[2,"x"] != xmin & x[3,"x"] == xmax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
-          Q <<- Q[-match(2,Q[,"Q"]),]
+          Q <<- Q[-match(2, Q[,"Q"]),]
           
         }
         
@@ -1070,5 +1086,6 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   })
   
   gates <- filters(gates)
+  plotGates(gates = gates, col = "red")
   return(gates)
 }
