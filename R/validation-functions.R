@@ -58,7 +58,7 @@ checkChannels <- function(x, channels){
 #' the same gate_type will be used for all populations.
 #' 
 #' @export
-checkGateType <- function(gate_type,alias){
+checkGateType <- function(gate_type, alias){
   
   gts <- c("polygon", "Polygon", "p", "P","rectangle", "Rectangle", "r", "R","interval", "Interval", "i", "I","threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B","ellipse", "Ellipse", "e", "E","quadrant", "Quadrant", "q", "Q", "web", "Web", "w","W")
   
@@ -86,7 +86,7 @@ checkGateType <- function(gate_type,alias){
   gate_type[gate_type %in% c("web", "Web", "w", "W")] <- "web"
   
   # Repeat gate_type to equal length of alias
-  if(!gate_type %in% c("quadrant","web")){
+  if(length(gate_type) != length(alias) & gate_type != "quadrant" & gate_type != "web"){
   
       gate_type <- rep(gate_type, length(alias))
       
