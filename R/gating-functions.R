@@ -668,112 +668,96 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   # Push points to plot limits (intersection with plot limits)
   
   # Quadrant 1: find limit intercept and modify point co-ordinates
+  if(1 %in% coords$Q){
   q1 <- coords[coords$Q == 1, ]
   for(x in 1:length(q1$Q)){
     
-    # Check if line through center and point intersects with vertical axis
-    vint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(xmin, center$y), c(xmin, ymin), interior.only = TRUE)
-    
-    # If a vertical intercept exists modify co-ordinates of point
-    if(!anyNA(vint) | all(is.finite(vint))){
+    # Calculate intersection with horizontal and vertical axes
+    vint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(xmin, center$y), c(xmin, ymin))
+    hint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin, ymin))
+
+    # Check which axis the point should be pushed onto
+    if(vint[2] >= ymin){
       
       q1[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | all(is.infinite(vint))){
+    }else if(vint[2] < ymin){
       
-      # If intercept does not exist - check if line through center and point intersects with horizontal axis
-      hint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin, ymin), interior.only = TRUE)
+      q1[x,c("x","y")] <- hint
       
-      # If a horizontal intercept exists modify co-ordinates of point
-      if(!anyNA(hint) | all(is.finite(hint))){
-        
-        q1[x,c("x","y")] <- hint
-        
-      }
     }
   }
   coords[coords$Q == 1, ] <- q1
+  }
   
   # Quadrant 2: find limit intercept and modify point co-ordinates
+  if(2 %in% coords$Q){
   q2 <- coords[coords$Q == 2, ] 
   for(x in 1:length(q2$Q)){
     
-    # Check if line through center and point intersects with vertical axis
-    vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin), interior.only = TRUE)
+    # Calculate intersection with horizontal and vertical axes
+    vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin))
+    hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, ymin), c(xmax, ymin))
     
-    # If a vertical intercept exists modify co-ordinates of point
-    if(!anyNA(vint) | all(is.finite(vint))){
+    # Check which axis the point should be pushed onto
+    if(vint[2] >= ymin){
       
       q2[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | all(is.infinite(vint))){
+    }else if(vint[2] < ymin){
       
-      # If intercept does not exist - check if line through center and point intersects with horizontal axis
-      hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, ymin), c(xmax, ymin), interior.only = TRUE)
+      q2[x,c("x","y")] <- hint
       
-      # If a horizontal intercept exists modify co-ordinates of point
-      if(!anyNA(hint) | all(is.finite(hint))){
-        
-        q2[x,c("x","y")] <- hint
-        
-      }
     }
   }
   coords[coords$Q == 2, ] <- q2
+  }
   
   # Quadrant 3: find limit intercept and modify point co-ordinates
+  if(3 %in% coords$Q){
   q3 <- coords[coords$Q == 3, ]
   for(x in 1:length(q3$Q)){
     
-    # Check if line through center and point intersects with vertical axis
-    vint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(xmax,ymax), c(xmax,center$y), interior.only = TRUE)
+    # Calculate intersection with horizontal and vertical axes
+    vint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(xmax,ymax), c(xmax,center$y))
+    hint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(center$x, ymax), c(xmax, ymax))
     
-    # If a vertical intercept exists modify co-ordinates of point
-    if(!anyNA(vint) | all(is.finite(vint))){
+    # Check which axis the point should be pushed onto
+    if(vint[2] >= ymax){
+      
+      q3[x,c("x","y")] <- hint
+      
+    }else if(vint[2] < ymax){
       
       q3[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | all(is.infinite(vint))){
-      
-      # If intercept does not exist - check if line through center and point intersects with horizontal axis
-      hint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(center$x, ymax), c(xmax, ymax), interior.only = TRUE)
-      
-      # If a horizontal intercept exists modify co-ordinates of point
-      if(!anyNA(hint) | all(is.finite(hint))){
-        
-        q3[x,c("x","y")] <- hint
-        
-      }
     }
   }
   coords[coords$Q == 3, ] <- q3
+  }
   
   # Quadrant 4: find limit intercept and modify point co-ordinates
+  if(4 %in% coords$Q){
   q4 <- coords[coords$Q == 4, ]
   for(x in 1:length(q4$Q)){
     
-    # Check if line through center and point intersects with vertical axis
-    vint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(xmin, center$y), interior.only = TRUE)
+    # Calculate intersection with horizontal and vertical axes
+    vint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(xmin, center$y))
+    hint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(center$x, ymax))
     
-    # If a vertical intercept exists modify co-ordinates of point
-    if(!anyNA(vint) | all(is.finite(vint))){
+    # Check which axis the point should be pushed onto
+    if(vint[2] >= ymax){
+      
+      q4[x,c("x","y")] <- hint
+      
+    }else if(vint[2] < ymax){
       
       q4[x,c("x","y")] <- vint
       
-    }else if(anyNA(vint) | all(is.infinite(vint))){
-      
-      # If intercept does not exist - check if line through center and point intersects with horizontal axis
-      hint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(center$x, ymax), interior.only = TRUE)
-      
-      # If a horizontal intercept exists modify co-ordinates of point
-      if(!anyNA(hint) | all(is.finite(hint))){
-        
-        q4[x,c("x","y")] <- hint
-        
-      }
     }
   }
   coords[coords$Q == 4, ] <- q4
+  }
   
   # If multiple points in same quadrant order anticlockwise Q1-Q4
   if(anyDuplicated(coords$Q) != 0){
