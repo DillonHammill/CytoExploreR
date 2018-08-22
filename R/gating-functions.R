@@ -6,7 +6,7 @@
 #' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
 #' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
+#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3","CD4")}) multiple 
 #' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
 #' number of events, all events will be plotted which is the default plotting behaviour.
@@ -839,7 +839,13 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
+          
+          # Remove Q1 from Q
+          if(1 %in% Q[,"Q"]){
+            
           Q <<- Q[-match(1,Q[,"Q"]),]
+          
+          }
           
         }
       }
@@ -851,7 +857,13 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),],Q2,x[3,])
+          
+          # Remove Q2 from Q
+          if(2 %in% Q[,"Q"]){
+            
           Q <<- Q[-match(2,Q[,"Q"]),]
+          
+          }
           
         }
       }
@@ -863,7 +875,13 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),],Q3,x[3,])
+          
+          # Remove Q3 from Q
+          if(3 %in% Q[,"Q"]){
+            
           Q <<- Q[-match(3,Q[,"Q"]),]
+          
+          }
           
         }
       }
@@ -875,7 +893,13 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q4 corner in gate
           x <- rbind(x[c(1,2),], Q4, x[3,])
+          
+          # Remove Q4 from Q
+          if(4 %in% Q[,"Q"]){
+            
           Q <<- Q[-match(4,Q[,"Q"]),]
+          
+          }
           
         }
       }
@@ -890,19 +914,37 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
-          Q <<- Q[-match(c(1,2), Q[,"Q"]),]
+          
+          # Remove Q1 and Q2 from Q
+          if(any(match(c(1,2), Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(1,2), Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] == xmin & x[3,"x"] != xmax){
           
           # Include Q1 corner in gate
           x <- rbind(x[c(1,2),], Q1, x[3,])
-          Q <<- Q[-match(1, Q[,"Q"]),]
+          
+          # Remove Q1 from Q
+          if(any(match(1, Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(1, Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] != xmin & x[3,"x"] == xmax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
-          Q <<- Q[-match(2, Q[,"Q"]),]
+          
+          # Remove Q2 from Q
+          if(any(match(2, Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(2, Q[,"Q"])),]
+          
+          }
           
         }
         
@@ -913,19 +955,37 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
-          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
+          
+          # Remove Q2 and Q3 from Q
+          if(any(match(c(2,3),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(2,3),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"y"] == ymin & x[3,"y"] != ymax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
-          Q <<- Q[-match(2,Q[,"Q"]),]
+          
+          # Remove Q2 from Q
+          if(any(match(2,Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(2,Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"y"] != ymin & x[3,"y"] == ymax){
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),], Q3, x[3,])
-          Q <<- Q[-match(3,Q[,"Q"]),]
+          
+          # Remove Q3 from Q
+          if(any(match(3,Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(3,Q[,"Q"])),]
+          
+          }
           
         }
         
@@ -936,19 +996,37 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q3 & Q4 corner in gate
           x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
-          Q <<- Q[-match(c(3,4),Q[,"Q"]),]
+          
+          # Remove Q3 and Q4 from Q
+          if(any(match(c(3,4),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(3,4),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] == xmax & x[3,"x"] != xmin){
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),], Q3, x[3,])
-          Q <<- Q[-match(3,Q[,"Q"]),]
+          
+          # Remove Q3 from Q
+          if(any(match(3,Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(3,Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] != xmax & x[3,"x"] == xmin){
           
           # Include Q4 corner in gate
           x <- rbind(x[c(1,2),], Q4, x[3,])
-          Q <<- Q[-match(4,Q[,"Q"]),]
+          
+          # Remove Q4 from Q
+          if(any(match(4,Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(4,Q[,"Q"])),]
+          
+          }
           
         }
         
@@ -964,25 +1042,49 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q1, Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, Q3, x[3,])
-          Q <<- Q[-match(c(1,2,3),Q[,"Q"]),]
+          
+          # Remove Q1, Q2 and Q3 from Q
+          if(any(match(c(1,2,3),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(1,2,3),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] == xmin & x[3,"y"] != ymax){
           
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
-          Q <<- Q[-match(c(1,2),Q[,"Q"]),]
+          
+          # Remove Q1 and Q2 from Q
+          if(any(match(c(1,2),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(1,2),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] != xmin & x[3,"y"] == ymax){
           
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
-          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
+          
+          # Remove Q2 and Q3 from Q
+          if(any(match(c(2,3),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(2,3),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"x"] != xmin & x[3,"y"] != ymax){
           
           # Include Q2 corner in gate
           x <- rbind(x[c(1,2),], Q2, x[3,])
-          Q <<- Q[-match(2,Q[,"Q"]),]
+          
+          # Remove Q2 from Q
+          if(any(match(2,Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(2,Q[,"Q"])),]
+          
+          }
           
         }
         
@@ -993,26 +1095,50 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           
           # Include Q2, Q3 & Q4 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, Q4, x[3,])
-          Q <<- Q[-match(c(2,3,4),Q[,"Q"]),]
+          
+          # Remove Q2, Q3 and Q4 from Q
+          if(any(match(c(2,3,4),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(2,3,4),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"y"] == ymin & x[3,"x"] != xmin){
           
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
-          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
+          
+          # Remove Q2 and Q3 from Q
+          if(any(match(c(2,3),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(2,3),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"y"] != ymin & x[3,"x"] == xmin){
           
           # Include Q3 & Q4 corner in gate
           x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
-          Q <<- Q[-match(c(3,4),Q[,"Q"]),]
+          
+          # Remove Q3 and Q4
+          if(any(match(c(3,4),Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(c(3,4),Q[,"Q"])),]
+          
+          }
           
         }else if(x[2,"y"] != ymin & x[3,"x"] != xmin){
           
           # Include Q3 corner in gate
           x <- rbind(x[c(1,2),], Q3, x[3,])
-          Q <<- Q[-match(3,Q[,"Q"]),]
           
+          # Remove Q3 from Q
+          if(any(match(3,Q[,"Q"]))){
+            
+          Q <<- Q[-which(match(3,Q[,"Q"])),]
+          
+          
+          }
         }
         
       }
