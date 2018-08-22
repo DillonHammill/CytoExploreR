@@ -4,7 +4,7 @@
 \alias{plotGates}
 \title{Plot gates stored in filters list on an existing plot.}
 \usage{
-plotGates(gates, col = "magenta")
+plotGates(gates, col = "red")
 }
 \arguments{
 \item{gates}{an object of class \code{filters} containing the gate(s) for plotting.}
