@@ -767,7 +767,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       
       # Multiple points in Q1 - sort by -y then +x
       q1 <- coords[coords$Q == 1,]
-      q1 <- q1[with(q1, order(-q1$y,q1$x))]
+      q1 <- q1[with(q1, order(-q1$y,q1$x)),]
       coords[coords$Q == 1, c("x","y")] <- q1[,c("x","y")]
       
     }
@@ -777,7 +777,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       
       # Multiple points in Q2 - sort by +x then +y
       q2 <- coords[coords$Q == 2,]
-      q2 <- q2[with(q2, order(q2$x,q2$y))]
+      q2 <- q2[with(q2, order(q2$x,q2$y)),]
       coords[coords$Q == 2, c("x","y")] <- q2[,c("x","y")]
       
     }
@@ -787,7 +787,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       
       # Multiple points in Q3 - sort by +y then -x
       q3 <- coords[coords$Q == 3,]
-      q3 <- q3[with(q3, order(q3$y,-q3$x))]
+      q3 <- q3[with(q3, order(q3$y,-q3$x)),]
       coords[coords$Q == 3, c("x","y")] <- q3[,c("x","y")]
       
     }
@@ -797,7 +797,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
       
       # Multiple points in Q4 - sort by -x then -y
       q4 <- coords[coords$Q == 4,]
-      q4 <- q4[with(q4, order(-q4$x,-q4$y))]
+      q4 <- q4[with(q4, order(-q4$x,-q4$y)),]
       coords[coords$Q == 4, c("x","y")] <- q4[,c("x","y")]
       
     }
@@ -916,9 +916,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
           
           # Remove Q1 and Q2 from Q
-          if(any(match(c(1,2), Q[,"Q"]))){
+          if(any(c(1,2) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(1,2), Q[,"Q"])),]
+          Q <<- Q[-match(c(1,2), Q[,"Q"]),]
           
           }
           
@@ -928,9 +928,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q1, x[3,])
           
           # Remove Q1 from Q
-          if(any(match(1, Q[,"Q"]))){
+          if(any(1 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(1, Q[,"Q"])),]
+          Q <<- Q[-match(1, Q[,"Q"]),]
           
           }
           
@@ -940,9 +940,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, x[3,])
           
           # Remove Q2 from Q
-          if(any(match(2, Q[,"Q"]))){
+          if(any(2 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(2, Q[,"Q"])),]
+          Q <<- Q[-match(2, Q[,"Q"]),]
           
           }
           
@@ -957,9 +957,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
           
           # Remove Q2 and Q3 from Q
-          if(any(match(c(2,3),Q[,"Q"]))){
+          if(any(c(2,3) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(2,3),Q[,"Q"])),]
+          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
           
           }
           
@@ -969,9 +969,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, x[3,])
           
           # Remove Q2 from Q
-          if(any(match(2,Q[,"Q"]))){
+          if(any(2 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(2,Q[,"Q"])),]
+          Q <<- Q[-match(2,Q[,"Q"]),]
           
           }
           
@@ -981,9 +981,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q3, x[3,])
           
           # Remove Q3 from Q
-          if(any(match(3,Q[,"Q"]))){
+          if(any(3 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(3,Q[,"Q"])),]
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
           }
           
@@ -998,9 +998,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
           
           # Remove Q3 and Q4 from Q
-          if(any(match(c(3,4),Q[,"Q"]))){
+          if(any(c(3,4) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(3,4),Q[,"Q"])),]
+          Q <<- Q[-match(c(3,4),Q[,"Q"]),]
           
           }
           
@@ -1010,9 +1010,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q3, x[3,])
           
           # Remove Q3 from Q
-          if(any(match(3,Q[,"Q"]))){
+          if(any(3 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(3,Q[,"Q"])),]
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
           }
           
@@ -1022,9 +1022,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q4, x[3,])
           
           # Remove Q4 from Q
-          if(any(match(4,Q[,"Q"]))){
+          if(any(4 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(4,Q[,"Q"])),]
+          Q <<- Q[-match(4,Q[,"Q"]),]
           
           }
           
@@ -1044,9 +1044,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q1, Q2, Q3, x[3,])
           
           # Remove Q1, Q2 and Q3 from Q
-          if(any(match(c(1,2,3),Q[,"Q"]))){
+          if(any(c(1,2,3) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(1,2,3),Q[,"Q"])),]
+          Q <<- Q[-match(c(1,2,3),Q[,"Q"]),]
           
           }
           
@@ -1056,9 +1056,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q1, Q2, x[3,])
           
           # Remove Q1 and Q2 from Q
-          if(any(match(c(1,2),Q[,"Q"]))){
+          if(any(c(1,2) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(1,2),Q[,"Q"])),]
+          Q <<- Q[-match(c(1,2),Q[,"Q"]),]
           
           }
           
@@ -1068,9 +1068,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
           
           # Remove Q2 and Q3 from Q
-          if(any(match(c(2,3),Q[,"Q"]))){
+          if(any(c(2,3) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(2,3),Q[,"Q"])),]
+          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
           
           }
           
@@ -1080,9 +1080,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, x[3,])
           
           # Remove Q2 from Q
-          if(any(match(2,Q[,"Q"]))){
+          if(any(2 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(2,Q[,"Q"])),]
+          Q <<- Q[-match(2,Q[,"Q"]),]
           
           }
           
@@ -1097,9 +1097,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, Q3, Q4, x[3,])
           
           # Remove Q2, Q3 and Q4 from Q
-          if(any(match(c(2,3,4),Q[,"Q"]))){
+          if(any(c(2,3,4) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(2,3,4),Q[,"Q"])),]
+          Q <<- Q[-match(c(2,3,4),Q[,"Q"]),]
           
           }
           
@@ -1109,9 +1109,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q2, Q3, x[3,])
           
           # Remove Q2 and Q3 from Q
-          if(any(match(c(2,3),Q[,"Q"]))){
+          if(any(c(2,3) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(2,3),Q[,"Q"])),]
+          Q <<- Q[-match(c(2,3),Q[,"Q"]),]
           
           }
           
@@ -1121,9 +1121,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q3, Q4, x[3,])
           
           # Remove Q3 and Q4
-          if(any(match(c(3,4),Q[,"Q"]))){
+          if(any(c(3,4) %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(c(3,4),Q[,"Q"])),]
+          Q <<- Q[-match(c(3,4),Q[,"Q"]),]
           
           }
           
@@ -1133,9 +1133,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
           x <- rbind(x[c(1,2),], Q3, x[3,])
           
           # Remove Q3 from Q
-          if(any(match(3,Q[,"Q"]))){
+          if(any(3 %in% Q[,"Q"])){
             
-          Q <<- Q[-which(match(3,Q[,"Q"])),]
+          Q <<- Q[-match(3,Q[,"Q"]),]
           
           
           }
