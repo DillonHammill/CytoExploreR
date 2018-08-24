@@ -131,30 +131,20 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
     pData(gs)$channel <- paste(pd$channel)
     
   }
-  # Extract Population for Downstream Analyses
-  if(!is.null(alias)){
-    
-    fs <- flowWorkspace::getData(gs, alias)
-    
-  }else if(is.null(alias)){
-    
-    fs <- flowWorkspace::getData(gs, getNodes(gs)[length(getNodes(gs))])
-    
-  }
-  
+
   # Merge files for use with estimateLogicle
   fr <- as(fs, "flowFrame")
   fs.m <- flowSet(fr)
   gs.m <- GatingSet(fs.m)
   
   # Check if fluorescent channels have been transformed
-  if(length(gs@transformation) == 0){
+  if(length(gs[[1]]@transformation) == 0){
     
     # Calculate transformation parameters using estimateLogicle
     trans <- estimateLogicle(gs.m[[1]], channels)
     gs <- transform(gs, trans)
     
-  }else if(length(gs@transformation) != 0){
+  }else if(length(gs[[1]]@transformation) != 0){
     
     # Check which channels have been transformed
     chans <- names(gs@transformation[[1]])
@@ -174,6 +164,17 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
       gs <- transform(gs, trans)
       
     }
+    
+  }
+  
+  # Extract Population for Downstream Analyses
+  if(!is.null(alias)){
+    
+    fs <- flowWorkspace::getData(gs, alias)
+    
+  }else if(is.null(alias)){
+    
+    fs <- flowWorkspace::getData(gs, getNodes(gs)[length(getNodes(gs))])
     
   }
   
