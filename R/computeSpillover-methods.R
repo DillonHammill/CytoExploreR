@@ -183,9 +183,11 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   fs <- fs[-match("Unstained", pData(fs)$channel)]
   
   # Assign channel to each flowFrame to description slot called "channel"
-  sapply(1:length(pData(fs)$channel), function(x){
+  suppressWarnings(sapply(1:length(pData(fs)$channel), function(x){
+    
     fs[[x]]@description$channel <- paste(pData(fs)$channel[x])
-  })
+    
+  }))
   
   # Gate positive populations
   pops <- fsApply(fs, function(fr){
@@ -197,6 +199,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   }, simplify = TRUE)
   
   # Inverse logicle transformation
+  trans <- gs@transformation[[1]]
   inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
   pops <- transform(pops, inv)
   NIL <- transform(NIL, inv)
@@ -219,6 +222,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   for(i in 1:nrow(signal)){
     
     signal[i, ] <- signal[i, ]/signal[i, match(fs[[i]]@description$channel, colnames(spill))]
+  
   } 
   
   # Insert values into appropriate rows
