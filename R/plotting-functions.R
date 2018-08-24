@@ -176,7 +176,7 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
     
     for(i in 1:length(fs)){
       
-      fs[[i]]@description$channel <- paste(pd$channel[i])
+      fs[[i]]@description$channel <- paste(pd[i])
     
       }
   }
