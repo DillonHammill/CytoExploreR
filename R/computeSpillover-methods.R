@@ -229,7 +229,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   rws <- match(pData(fs)$channel, rownames(spill))
   spill[rws,] <- signal
   
-  write.csv(spill, "Spillover Matrix.csv", row.names = FALSE)
+  write.csv(spill, "Spillover Matrix.csv")
   return(spill)
   
 })
