@@ -199,7 +199,7 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
       
       if("Unstained" %in% pData(fs)$channel){
         
-        p <- p + geom_overlay(data = Subset(NIL, sampleFilter(size = 5000)), alpha = 0.4, color = "black")
+        p <- p + geom_point(data = Subset(NIL, sampleFilter(size = 5000)), alpha = 0.4, color = "black")
         
       }
       
@@ -210,6 +210,8 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
       p <- p + scale_x_logicle(limits = c(-250000,250000)) + scale_y_logicle(limits = c(-250000,250000))
       
       p <- p + ggtitle(paste(fr@description$channel,title))
+      
+      p <- p + facet_null()
       
       as.ggplot(p)
       
