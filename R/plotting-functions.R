@@ -183,11 +183,25 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
   
   fluor.channels <- getChannels(fs)
   
-  plots <- fsApply(fs,function(fr){
+  # Extract unstained control if present
+  if("Unstained" %in% pData(fs)$channel){
+    
+    NIL <- fs[[match("Unstained", pData(fs)$channel)]]
+    fs2 <- fs[-match("Unstained", pData(fs)$channel)]
+      
+  }
+  
+  plots <- fsApply(fs2, function(fr){
     
     objs <- lapply(fluor.channels[-(match(fr@description$channel,fluor.channels))], function(y){
       
-      p <- autoplot(fr, fr@description$channel, y, bins = 100)
+      p <- autoplot(Subset(fr, sampleFilter(size = 5000)), fr@description$channel, y, bins = 100)
+      
+      if("Unstained" %in% pData(fs)$channel){
+        
+        p <- p + geom_overlay(data = Subset(NIL, sampleFilter(size = 5000)), alpha = 0.4, color = "black")
+        
+      }
       
       p <- p + labs_cyto("channel")
       
