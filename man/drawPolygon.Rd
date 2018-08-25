@@ -13,7 +13,7 @@ drawPolygon(fr, channels, alias = NULL, subSample = NULL, plot = TRUE,
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
 of the kernel density will be constructed.}
 
-\item{alias}{the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
+\item{alias}{the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3","CD4")}) multiple 
 gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
 
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total

@@ -1196,6 +1196,9 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   })
   
   gates <- filters(gates)
+  
   plotGates(gates = gates, col = "red")
+  
   return(gates)
+  
 }
