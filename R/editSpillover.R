@@ -15,6 +15,7 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
   require(ggcyto)
   
   gs <- x
+  nms <- sampleNames(gs)
   channels <- getChannels(gs)
   
   # Extract population for downstream plotting
@@ -33,6 +34,13 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
+  
+  # Rhandsontable does handle decimal points if none are supplied in the dataset - if matrix is empty edit first value in second column to 0.01
+  if(all(spill %in% c(0,1))){
+    
+    spill[1,2] <- 0.0001
+    
+  }
   
   shinyApp(
     ui <- fluidPage(
@@ -132,7 +140,7 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
           
           cutoff <- MFI[match(input$ychannel, MFI$Channel),]
           
-          p <- p + geom_hline(aes(yintercept = Median), color = "green", size = 1.2, data = cutoff)
+          p <- p + geom_hline(aes(yintercept = Median), color = "red", size = 1.2, data = cutoff)
         }
         
         if(input$trace == TRUE){
@@ -141,8 +149,8 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
           cells <- as.data.frame(cells)
           
           n <- nrow(cells)
-          splt <- seq(1,20,1)
-          r <- ceiling(nrow(cells)/20)
+          splt <- seq(1,50,1)
+          r <- ceiling(nrow(cells)/50)
           cuts <- splt*r
           cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
           
@@ -152,7 +160,7 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
           medians <- data.frame(unlist(xmedians), unlist(ymedians))
           colnames(medians) <- c(input$xchannel,input$ychannel)
           
-          p <- p + geom_line(mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "turquoise2", size = 1.2)
+          p <- p + geom_smooth(method = "gam", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
           
         }
         
@@ -184,7 +192,7 @@ editSpillover <- function(x, parent = "root", spfile = NULL){
         }
         
         p <- p + facet_null()
-        p <- p + ggtitle(paste(getData(fs.comp(),"root")[[input$flowFrame]]@description$GUID,"\n"))
+        p <- p + ggtitle(sampleNames(fs.comp()[[input$flowFrame]]),"\n")
         p <- p + xlab(paste("\n",input$xchannel))
         p <- p + ylab(paste(input$ychannel,"\n"))
         p <- p + editSpillover_theme()
