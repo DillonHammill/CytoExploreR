@@ -6,7 +6,7 @@
 \title{Caluclate Spillover Matrix - GatingSet Method}
 \usage{
 \S4method{computeSpillover}{GatingSet}(x, alias = NULL, pdfile = NULL,
-  spfile = NULL, ...)
+  spfile = "Spillover Matrix.csv", ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet} containing gated compensation single stain controls as well as an unstained control.}
