@@ -164,6 +164,7 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
     
     for(i in 1:length(fs)){
       
+      pData(fs)$channel <- pd$channel
       fs[[i]]@description$channel <- paste(pd$channel[i])
     }
   
@@ -187,19 +188,18 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
   if("Unstained" %in% pData(fs)$channel){
     
     NIL <- fs[[match("Unstained", pData(fs)$channel)]]
-    fs2 <- fs[-match("Unstained", pData(fs)$channel)]
       
   }
   
-  plots <- fsApply(fs2, function(fr){
+  plots <- fsApply(fs[-match("Unstained", pData(fs)$channel)], function(fr){
     
     objs <- lapply(fluor.channels[-(match(fr@description$channel,fluor.channels))], function(y){
       
-      p <- autoplot(Subset(fr, sampleFilter(size = 5000)), fr@description$channel, y, bins = 100)
+      p <- autoplot(Subset(fr, sampleFilter(size = 5000)), fr@description$channel, y, bins = 150)
       
       if("Unstained" %in% pData(fs)$channel){
         
-        p <- p + geom_point(data = Subset(NIL, sampleFilter(size = 5000)), alpha = 0.4, color = "black")
+        p <- p + geom_point(data = Subset(NIL, sampleFilter(size = 5000)), alpha = 0.4, color = "black", size = 0.2)
         
       }
       
