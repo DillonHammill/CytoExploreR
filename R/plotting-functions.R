@@ -139,12 +139,11 @@ plotLabels <- function(fr, channels, alias, gate){
 #' @param fs object of class \code{flowSet} containing gated compensation controls and an unstained control.
 #' @param pdfile \code{pData} csv file containing additional column \code{"channel"} indicating the fluorescent channel associated
 #' with each sample. This channel should be set to \code{"Unstained"} for unstained controls.
-#' @param overlay logical indicating whether the unstained control should be overlaid on each plot, set to FALSE by default.
-#' 
+#' @param subSample numeric indicating the number of events to plot, set to 2500 events by default to increase plotting speed.
 #' @return plot grid with associated channel against all other channels for each compensation control.
 #' 
 #' @export
-drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensated"){
+drawCompPlots <- function(fs, pdfile = NULL, subSample = 2500, title = "Compensated"){
   
   if(is.na(match("Original",colnames(fs[[1]]))) == FALSE){
     
@@ -195,11 +194,11 @@ drawCompPlots <- function(fs, pdfile = NULL, overlay = FALSE, title = "Compensat
     
     objs <- lapply(fluor.channels[-(match(fr@description$channel,fluor.channels))], function(y){
       
-      p <- autoplot(Subset(fr, sampleFilter(size = 5000)), fr@description$channel, y, bins = 150)
+      p <- autoplot(Subset(fr, sampleFilter(size = subSample)), fr@description$channel, y, bins = 100)
       
       if("Unstained" %in% pData(fs)$channel){
         
-        p <- p + geom_point(data = Subset(NIL, sampleFilter(size = 5000)), alpha = 0.4, color = "black", size = 0.2)
+        p <- p + geom_point(data = Subset(NIL, sampleFilter(size = subSample)), alpha = 0.4, color = "black", size = 0.2)
         
       }
       
