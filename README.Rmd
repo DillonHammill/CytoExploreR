@@ -69,7 +69,7 @@ gs <- transform(gs, trans)
 drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
 
 # Single Cells
-drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("SSC-W","SSC-H"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
+drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
 
 # Live Cells
 drawGate(gs, parent = "Single Cells", alias = "Live Cells", channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
@@ -89,8 +89,8 @@ drawGate(gs, parent = "CD8 T Cells", alias = c("CD69+ CD8 T Cells"), channels = 
 ![](README_files/Cells.png)
 ![](README_files/Single Cells.png)
 ![](README_files/Live Cells.png)
-![](README_files/DC & T Cells.png)
-![](README_files/CD4 & CD8 T Cells.png)
+![](README_files/Dendritic Cells T Cells.png)
+![](README_files/CD4 CD8 T Cells.png)
 ![](README_files/CD69 CD4 T Cells.png)
 ![](README_files/CD69 CD8 T Cells.png)
 
@@ -110,6 +110,7 @@ getNodes(gs)
 
 plotGate(gs[[1]])
 ```
+![](README_files/Gating Strategy.png)
 
 Dillon Hammill, BMedSci (Hons)
 <br /> Ph.D. Scholar
