@@ -16,11 +16,12 @@ setGeneric(name="editSpillover",
 #' 
 #' @param x object of class \code{flowSet}.
 #' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing.
+#' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.
 #' 
 #' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
 #' 
 #' @export
-setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = "Spillover Matrix.csv", ...){
+setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = "Spillover Matrix.csv", subSample = 5000, ...){
   
   require(shiny)
   require(shinythemes)
@@ -57,14 +58,14 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
       theme = shinytheme("yeti"),
       
-      titlePanel("Edit Spillover Matrix"),
+      titlePanel("cytoSuite Spillover Matrix Editor"),
       
       sidebarPanel(
         selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
         selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
         selectInput(inputId = "xchannel", label = "X Axis:", choices = channels, selected = channels[1]),
         selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels, selected = channels[2]),
-        checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = FALSE),
+        checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = TRUE),
         checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
         checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
         actionButton("saveBtn", "Save")
@@ -72,7 +73,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
       mainPanel(
         rHandsontableOutput("spillover"),
-        plotOutput("plot", height = "500px", width = "70%")
+        plotOutput("plot", height = "500px", width = "50%")
       )
     ),
     
@@ -126,26 +127,25 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
       fs.comp <- eventReactive(values$spill, {
         
-        gs <- GatingSet(fs)
-        gs <- compensate(gs, values$spill/100)
+        fs <- compensate(fs, values$spill/100)
         
-        return(gs)
+        return(fs)
         
       })
       
       
       output$plot <- renderPlot({
         
-        p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = 10000, subset = "root", aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
+        p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = subSample, aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
         p <- p + geom_hex(bins = 150)
         
         if(input$NIL == TRUE){
-          p <- p + geom_point(data = Subset(getData(fs.comp(),"root")[[input$Unstained]], sampleFilter(size = 10000)), alpha = 0.4,color = "black")
+          p <- p + geom_point(data = Subset(fs.comp()[[input$Unstained]], sampleFilter(size = subSample)), color = "black", size = 1.5, alpha = 0.6)
         }
         
         if(input$median == TRUE){      
           
-          medians <- fsApply(fs.comp()@data, each_col, median)[input$Unstained,channels]
+          medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
           MFI <- data.frame("Channel" = channels, "Median" = medians)
           
           cutoff <- MFI[match(input$ychannel, MFI$Channel),]
@@ -154,7 +154,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         }
         
         if(input$trace == TRUE){
-          cells <- exprs(getData(fs.comp(),"root")[[input$flowFrame]])
+          cells <- exprs(fs.comp()[[input$flowFrame]])
           cells <- cells[order(cells[,input$xchannel]),]
           cells <- as.data.frame(cells)
           
@@ -176,33 +176,33 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         
         # if transformation applied use axis_inverse_trans 0 < range <= 5
         # Ranges
-        xrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel])
-        yrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel])
+        xrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel])
+        yrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel])
         
         # X Axis
-        if(xrange > 0 & xrange <= 5){
+        if(xrange > -5 & xrange <= 10){
           
-          p <- p + axis_x_inverse_trans()
+          p <- p + scale_x_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),5))
           
         }else{
           
-          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]),250000))
+          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),250000))
           
         }
         
         # Y Axis
-        if(yrange > 0 & yrange <= 5){
+        if(yrange > -5 & yrange <= 10){
           
-          p <- p + axis_y_inverse_trans()
+          p <- p + scale_y_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),5))
           
         }else{
           
-          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]),250000))
+          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),250000))
           
         }
         
         p <- p + facet_null()
-        p <- p + ggtitle(sampleNames(fs.comp()[[input$flowFrame]]),"\n")
+        p <- p + ggtitle(paste(input$flowFrame),"\n")
         p <- p + xlab(paste("\n",input$xchannel))
         p <- p + ylab(paste(input$ychannel,"\n"))
         p <- p + editSpillover_theme()
@@ -227,11 +227,12 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 #' @param x object of class \code{GatingSet}.
 #' @param parent name of the population to use for plotting (defaults to "root").
 #' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing.
+#' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.
 #' 
 #' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
 #' 
 #' @export
-setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = "root", spfile = "Spillover Matrix.csv", ...){
+setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = "root", spfile = "Spillover Matrix.csv", subSample = 5000, ...){
   
   require(shiny)
   require(shinythemes)
@@ -271,14 +272,14 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
       
       theme = shinytheme("yeti"),
       
-      titlePanel("Edit Spillover Matrix"),
+      titlePanel("cytoSuite Spillover Matrix Editor"),
       
       sidebarPanel(
         selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
         selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
         selectInput(inputId = "xchannel", label = "X Axis:", choices = channels, selected = channels[1]),
         selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels, selected = channels[2]),
-        checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = FALSE),
+        checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = TRUE),
         checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
         checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
         actionButton("saveBtn", "Save")
@@ -286,7 +287,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
       
       mainPanel(
         rHandsontableOutput("spillover"),
-        plotOutput("plot", height = "500px", width = "70%")
+        plotOutput("plot", height = "500px", width = "50%")
       )
     ),
     
@@ -340,26 +341,25 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
       
       fs.comp <- eventReactive(values$spill, {
         
-        gs <- GatingSet(fs)
-        gs <- compensate(gs, values$spill/100)
+        fs <- compensate(fs, values$spill/100)
         
-        return(gs)
+        return(fs)
         
       })
       
       
       output$plot <- renderPlot({
         
-        p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = 10000, subset = "root", aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
+        p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = subSample, aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
         p <- p + geom_hex(bins = 150)
         
         if(input$NIL == TRUE){
-          p <- p + geom_point(data = Subset(getData(fs.comp(),"root")[[input$Unstained]], sampleFilter(size = 10000)), alpha = 0.4,color = "black")
+          p <- p + geom_point(data = Subset(fs.comp()[[input$Unstained]], sampleFilter(size = subSample)), color = "black", size = 1.5, alpha = 0.6)
         }
         
         if(input$median == TRUE){      
           
-          medians <- fsApply(fs.comp()@data, each_col, median)[input$Unstained,channels]
+          medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
           MFI <- data.frame("Channel" = channels, "Median" = medians)
           
           cutoff <- MFI[match(input$ychannel, MFI$Channel),]
@@ -368,7 +368,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
         }
         
         if(input$trace == TRUE){
-          cells <- exprs(getData(fs.comp(),"root")[[input$flowFrame]])
+          cells <- exprs(fs.comp()[[input$flowFrame]])
           cells <- cells[order(cells[,input$xchannel]),]
           cells <- as.data.frame(cells)
           
@@ -390,33 +390,33 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
         
         # if transformation applied use axis_inverse_trans 0 < range <= 5
         # Ranges
-        xrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel])
-        yrange <- max(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel])
+        xrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel])
+        yrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel])
         
         # X Axis
-        if(xrange > 0 & xrange <= 5){
+        if(xrange > -5 & xrange <= 10){
           
-          p <- p + axis_x_inverse_trans()
+          p <- p + scale_x_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),5))
           
         }else{
           
-          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$xchannel]),250000))
+          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),250000))
           
         }
         
         # Y Axis
-        if(yrange > 0 & yrange <= 5){
+        if(yrange > -5 & yrange <= 10){
           
-          p <- p + axis_y_inverse_trans()
+          p <- p + scale_y_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),5))
           
         }else{
           
-          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()@data[[input$flowFrame]])[,input$ychannel]),250000))
+          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),250000))
           
         }
         
         p <- p + facet_null()
-        p <- p + ggtitle(sampleNames(fs.comp()[[input$flowFrame]]),"\n")
+        p <- p + ggtitle(paste(input$flowFrame),"\n")
         p <- p + xlab(paste("\n",input$xchannel))
         p <- p + ylab(paste(input$ychannel,"\n"))
         p <- p + editSpillover_theme()
