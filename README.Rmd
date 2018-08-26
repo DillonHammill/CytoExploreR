@@ -110,7 +110,6 @@ getNodes(gs)
 
 plotGate(gs[[1]])
 ```
-![](README_files/Gating Strategy.png)
 
 Dillon Hammill, BMedSci (Hons)
 <br /> Ph.D. Scholar
