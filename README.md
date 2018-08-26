@@ -81,7 +81,7 @@ gs <- transform(gs, trans)
 Gate Samples Using drawGate
 ---------------------------
 
- is a convenient wrapper for the gating functions in cytoSuite which constructs drawn gates, applies the gate(s) directly to the and saves the gate(s) to the csv file for future use.
+**drawGate** is a convenient wrapper for the gating functions in cytoSuite which constructs drawn gates, applies the gate(s) directly to the and saves the gate(s) to the csv file for future use.
 
 ``` r
 # Cells
@@ -176,5 +176,11 @@ getNodes(gs)
     ##  [8] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells"                  
     ##  [9] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells/CD69+ CD4 T Cells"
     ## [10] "/Cells/Single Cells/Live Cells/Dendritic Cells"
+
+``` r
+plotGate(gs[[1]])
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 Dillon Hammill, BMedSci (Hons) <br /> Ph.D. Scholar <br /> The Parish Group – Cancer & Vascular Biology <br /> ACRF Department of Cancer Biology and Therapeutics <br /> The John Curtin School of Medical Research <br /> ANU College of Medicine, Biology and the Environment <br /> The Australian National University <br /> Acton ACT 2601 <br /> <Dillon.Hammill@anu.edu.au>

@@ -63,7 +63,7 @@ gs <- transform(gs, trans)
 ```
 
 ## Gate Samples Using drawGate
-\code{drawGate} is a convenient wrapper for the gating functions in cytoSuite which constructs drawn gates, applies the gate(s) directly to the \code{GatingSet} and saves the gate(s) to the \code{gatingTemplate} csv file for future use.
+**drawGate** is a convenient wrapper for the gating functions in cytoSuite which constructs drawn gates, applies the gate(s) directly to the \code{GatingSet} and saves the gate(s) to the \code{gatingTemplate} csv file for future use.
 ```{r, eval = FALSE}
 # Cells
 drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), gate_type = "polygon", gtfile = "gatingTemplate.csv")
@@ -107,6 +107,8 @@ gating(gt, gs)
 
 # Check gates have been applied
 getNodes(gs)
+
+plotGate(gs[[1]])
 ```
 
 Dillon Hammill, BMedSci (Hons)
