@@ -90,7 +90,7 @@ drawGate(gs,
          alias = "Cells", 
          channels = c("FSC-A","SSC-A"), 
          gate_type = "polygon", 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/Cells.png)
@@ -102,7 +102,7 @@ drawGate(gs,
          alias = "Single Cells", 
          channels = c("FSC-A","FSC-H"), 
          gate_type = "polygon", 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/Single%20Cells.png)
@@ -114,7 +114,7 @@ drawGate(gs,
          alias = "Live Cells", 
          channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"), 
          gate_type = "polygon", 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/Live%20Cells.png)
@@ -126,7 +126,7 @@ drawGate(gs,
          alias = c("Dendritic Cells", "T Cells"), 
          channels = c("APC-Cy7-A","PE-A"), 
          gate_type = c("rectangle","ellipse"), 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/Dendritic%20Cells%20T%20Cells.png)
@@ -138,7 +138,7 @@ drawGate(gs,
          alias = c("CD4 T Cells", "CD8 T Cells"), 
          channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"), 
          gate_type = "rectangle", 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/CD4%20CD8%20T%20Cells.png)
@@ -151,7 +151,7 @@ drawGate(gs,
          channels = c("Alexa Fluor 647-A","7-AAD-A"), 
          gate_type = "interval", 
          axis = "y", 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/CD69%20CD4%20T%20Cells.png)
@@ -164,7 +164,7 @@ drawGate(gs,
          channels = c("Alexa Fluor 647-A","7-AAD-A"), 
          gate_type = "interval", 
          axis = "y", 
-         gtfile = "gatingTemplate.csv")
+         gtfile = "Example gatingTemplate.csv")
 ```
 
 ![](README_files/CD69%20CD8%20T%20Cells.png)
@@ -184,7 +184,7 @@ gs <- compensate(gs, spill)
 gs <- transform(gs, trans)
 
 # Apply saved gates
-gt <- gatingTemplate("gatingTemplate.csv")
+gt <- gatingTemplate("Example gatingTemplate.csv")
 ```
 
     ## Adding population:Cells
