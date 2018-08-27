@@ -1,5 +1,5 @@
 ---
-title: "cytoSuite Gating Functions"
+title: "cytoSuite: Gating Functions"
 author: "Dillon Hammill"
 date: "27 August 2018"
 output:
