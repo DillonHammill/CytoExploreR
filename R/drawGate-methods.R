@@ -55,11 +55,11 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
   }
   
   # Construct gates save as filters object
-  if(gate_type == "quadrant"){
+  if(length(gate_type) == 1 & gate_type[1] == "quadrant"){
     
   gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot[1], labs = labs,...)
     
-  }else if(gate_type == "web"){
+  }else if(length(gate_type) == 1 & gate_type[1] == "web"){
 
   gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot[1], labs = labs,...)
   
@@ -162,11 +162,11 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
   }
   
   # Construct gates save as filters object
-  if(gate_type == "quadrant"){
+  if(length(gate_type) == 1 & gate_type[1] == "quadrant"){
     
     gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot[1], labs = labs,...)
     
-  }else if(gate_type == "web"){
+  }else if(length(gate_type) == 1 & gate_type[1] == "web"){
     
     gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot[1], labs = labs,...)
     
@@ -274,11 +274,11 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   }
   
   # Construct gates save as filters object
-  if(gate_type == "quadrant"){
+  if(length(gate_type) == 1 & gate_type[1] == "quadrant"){
     
     gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot[1], labs = labs,...)
     
-  }else if(gate_type == "web"){
+  }else if(length(gate_type) == 1 & gate_type[1] == "web"){
     
     gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = plot[1], labs = labs,...)
     
