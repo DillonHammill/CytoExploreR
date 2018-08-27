@@ -97,30 +97,45 @@ plotLabels <- function(fr, channels, alias, gate){
   
   }else if(class(gate) == "rectangleGate"){
     
-    if("Inf" %in% gate@max){
-      
-    max <- max(exprs(fr)[,names(gate@max[which(gate@max %in% "Inf")])])
-    gate@max[which(gate@max %in% "Inf")] <- max
+    xmin <- gate@min[1]
+    ymin <- gate@min[2]
+    xmax <- gate@max[1]
+    ymax <- gate@max[2]
     
+    if(is.infinite(xmin)){
+      
+      xmin <- par("usr")[1]
+      
     }
     
-    if("-Inf" %in% gate@min){
+    if(is.infinite(ymin)){
       
-    min <- min(exprs(fr)[,names(gate@min[which(gate@min %in% "-Inf")])])
-    gate@min[which(gate@min %in% "-Inf")] <- min
+      ymin <- par("usr")[3]
+      
+    }
     
+    if(is.infinite(xmax)){
+      
+      xmax <- par("usr")[2]
+      
+    }
+    
+    if(is.infinite(ymax)){
+      
+      ymax <- par("usr")[4]
+      
     }
     
     if(length(gate@max) == 1){
       
-      y.min <- par("usr")[3]
-      y.max <- par("usr")[4]
+      ymin <- par("usr")[3]
+      ymax <- par("usr")[4]
       
-      center <- center <- c((sum(gate@min[1],gate@max[1])/2),(sum(y.min,y.max)/2))
+      center <- c((sum(xmin,xmax)/2),(sum(ymin,ymax)/2))
       
     }else{
   
-    center <- c((sum(gate@min[1],gate@max[1])/2),(sum(gate@min[2],gate@max[2])/2))
+    center <- c((sum(xmin,xmax)/2),(sum(ymin,ymax)/2))
     
     }
     
