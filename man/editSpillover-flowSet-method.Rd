@@ -5,12 +5,15 @@
 \alias{editSpillover,flowSet-method}
 \title{Edit Spillover Matrix flowSet Method}
 \usage{
-\S4method{editSpillover}{flowSet}(x, spfile = "Spillover Matrix.csv", ...)
+\S4method{editSpillover}{flowSet}(x, spfile = "Spillover Matrix.csv",
+  subSample = 5000, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
 
 \item{spfile}{name of spillover matrix csv file including .csv file extension to use as a starting point for editing.}
+
+\item{subSample}{numeric indicating the number of events to plot, set to 5000 events by default.}
 }
 \value{
 write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.

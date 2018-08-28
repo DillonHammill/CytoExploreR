@@ -6,7 +6,7 @@
 \title{Edit Spillover Matrix GatingSet Method}
 \usage{
 \S4method{editSpillover}{GatingSet}(x, parent = "root",
-  spfile = "Spillover Matrix.csv", ...)
+  spfile = "Spillover Matrix.csv", subSample = 5000, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
@@ -14,6 +14,8 @@
 \item{parent}{name of the population to use for plotting (defaults to "root").}
 
 \item{spfile}{name of spillover matrix csv file including .csv file extension to use as a starting point for editing.}
+
+\item{subSample}{numeric indicating the number of events to plot, set to 5000 events by default.}
 }
 \value{
 write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
