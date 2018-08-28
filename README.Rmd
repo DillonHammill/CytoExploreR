@@ -144,7 +144,7 @@ drawGate(gs,
 ![](README_files/CD69 CD8 T Cells.png)
 
 ## Apply Saved Gates to Samples (Future Analyses)
-```{r}
+```{r, fig.keep = 'all'}
 # Add samples to GatingSet, apply compensation, transform channels and apply gates
 gs <- GatingSet(fs)
 gs <- compensate(gs, spill)

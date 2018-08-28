@@ -244,4 +244,4 @@ plotGate(gs[[1]])
 
 ![](README_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
-Dillon Hammill, BMedSci (Hons) <br /> Ph.D. Scholar <br /> The Parish Group – Cancer & Vascular Biology <br /> ACRF Department of Cancer Biology and Therapeutics <br /> The John Curtin School of Medical Research <br /> ANU College of Medicine, Biology and the Environment <br /> The Australian National University <br /> Acton ACT 2601 <br /> <Dillon.Hammill@anu.edu.au>
+Dillon Hammill, BMedSci (Hons) <br /> Ph.D. Scholar <br /> The Parish Group â€“ Cancer & Vascular Biology <br /> ACRF Department of Cancer Biology and Therapeutics <br /> The John Curtin School of Medical Research <br /> ANU College of Medicine, Biology and the Environment <br /> The Australian National University <br /> Acton ACT 2601 <br /> <Dillon.Hammill@anu.edu.au>
