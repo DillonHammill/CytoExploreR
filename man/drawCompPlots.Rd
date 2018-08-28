@@ -4,7 +4,7 @@
 \alias{drawCompPlots}
 \title{Compensation Plots}
 \usage{
-drawCompPlots(fs, pdfile = NULL, overlay = FALSE, title = "Compensated")
+drawCompPlots(fs, pdfile = NULL, subSample = 2500, title = "Compensated")
 }
 \arguments{
 \item{fs}{object of class \code{flowSet} containing gated compensation controls and an unstained control.}
@@ -12,7 +12,7 @@ drawCompPlots(fs, pdfile = NULL, overlay = FALSE, title = "Compensated")
 \item{pdfile}{\code{pData} csv file containing additional column \code{"channel"} indicating the fluorescent channel associated
 with each sample. This channel should be set to \code{"Unstained"} for unstained controls.}
 
-\item{overlay}{logical indicating whether the unstained control should be overlaid on each plot, set to FALSE by default.}
+\item{subSample}{numeric indicating the number of events to plot, set to 2500 events by default to increase plotting speed.}
 }
 \value{
 plot grid with associated channel against all other channels for each compensation control.
