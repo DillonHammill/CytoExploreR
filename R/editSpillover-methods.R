@@ -21,7 +21,7 @@ setGeneric(name="editSpillover",
 #' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
 #' 
 #' @export
-setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = "Spillover Matrix.csv", subSample = 5000, ...){
+setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = NULL, subSample = 5000, ...){
   
   require(shiny)
   require(shinythemes)
@@ -232,7 +232,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 #' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
 #' 
 #' @export
-setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = "root", spfile = "Spillover Matrix.csv", subSample = 5000, ...){
+setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = "root", spfile = NULL, subSample = 5000, ...){
   
   require(shiny)
   require(shinythemes)
