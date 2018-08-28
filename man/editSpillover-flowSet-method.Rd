@@ -5,8 +5,7 @@
 \alias{editSpillover,flowSet-method}
 \title{Edit Spillover Matrix flowSet Method}
 \usage{
-\S4method{editSpillover}{flowSet}(x, spfile = "Spillover Matrix.csv",
-  subSample = 5000, ...)
+\S4method{editSpillover}{flowSet}(x, spfile = NULL, subSample = 5000, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}

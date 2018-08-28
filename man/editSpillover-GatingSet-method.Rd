@@ -5,8 +5,8 @@
 \alias{editSpillover,GatingSet-method}
 \title{Edit Spillover Matrix GatingSet Method}
 \usage{
-\S4method{editSpillover}{GatingSet}(x, parent = "root",
-  spfile = "Spillover Matrix.csv", subSample = 5000, ...)
+\S4method{editSpillover}{GatingSet}(x, parent = "root", spfile = NULL,
+  subSample = 5000, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}

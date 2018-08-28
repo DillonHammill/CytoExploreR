@@ -23,6 +23,7 @@ setGeneric(name="computeSpillover",
 #' 
 #' @return spillover matrix object and \code{"Spillover Matrix.csv"} file as side effect.
 #' 
+#' @importFrom flowCore transform
 #' @export
 setMethod(computeSpillover, signature = "flowSet", definition = function(x, trans = NULL, pdfile = NULL, spfile = "Spillover Matrix.csv", ...){
   
@@ -161,6 +162,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
 #' 
 #' @return spillover matrix and \code{"Spillover Matrix.csv"} file.
 #' 
+#' @importFrom flowCore transform
 #' @export
 setMethod(computeSpillover, signature = "GatingSet", definition = function(x, alias = NULL, pdfile = NULL, spfile = "Spillover Matrix.csv", ...){
   
@@ -211,6 +213,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
       chans <- channels[is.na(match(channels,chans))]
       
       trans <- estimateLogicle(gs.m[[1]], chans)
+      print(trans)
       gs <- transform(gs, trans)
       
     }
