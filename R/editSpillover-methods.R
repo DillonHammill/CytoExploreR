@@ -40,6 +40,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
     
   }else{
     
+    spfile <- "Spillover Matrix.csv"
     spill <- fs[[1]]@description$SPILL
     
   }
@@ -159,8 +160,8 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
           cells <- as.data.frame(cells)
           
           n <- nrow(cells)
-          splt <- seq(1,50,1)
-          r <- ceiling(nrow(cells)/50)
+          splt <- seq(1,20,1)
+          r <- ceiling(nrow(cells)/20)
           cuts <- splt*r
           cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
           
@@ -170,7 +171,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
           medians <- data.frame(unlist(xmedians), unlist(ymedians))
           colnames(medians) <- c(input$xchannel,input$ychannel)
           
-          p <- p + geom_smooth(method = "gam", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
+          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
           
         }
         
@@ -182,22 +183,22 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         # X Axis
         if(xrange > -5 & xrange <= 10){
           
-          p <- p + scale_x_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),5))
+          p <- p + scale_x_continuous(limits = c(-4,5))
           
         }else{
           
-          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),250000))
+          p <- p + scale_x_logicle(limits = c(-10000,250000))
           
         }
         
         # Y Axis
         if(yrange > -5 & yrange <= 10){
           
-          p <- p + scale_y_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),5))
+          p <- p + scale_y_continuous(limits = c(-4,5))
           
         }else{
           
-          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),250000))
+          p <- p + scale_y_logicle(limits = c(-10000,250000))
           
         }
         
@@ -214,7 +215,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         input$saveBtn
         class(values$spill) <- "numeric"
         spill.mat <- values$spill/100
-        write.csv(spill.mat, "Spillover Matrix.csv")
+        write.csv(spill.mat, spfile)
       })
       
     })
@@ -254,6 +255,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
     
   }else{
     
+    spfile <- "Spillover Matrix.csv"
     spill <- fs[[1]]@description$SPILL
     
   }
@@ -373,8 +375,8 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
           cells <- as.data.frame(cells)
           
           n <- nrow(cells)
-          splt <- seq(1,50,1)
-          r <- ceiling(nrow(cells)/50)
+          splt <- seq(1,20,1)
+          r <- ceiling(nrow(cells)/20)
           cuts <- splt*r
           cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
           
@@ -384,7 +386,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
           medians <- data.frame(unlist(xmedians), unlist(ymedians))
           colnames(medians) <- c(input$xchannel,input$ychannel)
           
-          p <- p + geom_smooth(method = "gam", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
+          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
           
         }
         
@@ -396,22 +398,22 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
         # X Axis
         if(xrange > -5 & xrange <= 10){
           
-          p <- p + scale_x_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),5))
+          p <- p + scale_x_continuous(limits = c(-4,5))
           
         }else{
           
-          p <- p + scale_x_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]),250000))
+          p <- p + scale_x_logicle(limits = c(-10000,250000))
           
         }
         
         # Y Axis
         if(yrange > -5 & yrange <= 10){
           
-          p <- p + scale_y_continuous(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),5))
+          p <- p + scale_y_continuous(limits = c(-4,5))
           
         }else{
           
-          p <- p + scale_y_logicle(limits = c(min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]),250000))
+          p <- p + scale_y_logicle(limits = c(-10000,250000))
           
         }
         
@@ -428,7 +430,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
         input$saveBtn
         class(values$spill) <- "numeric"
         spill.mat <- values$spill/100
-        write.csv(spill.mat, "Spillover Matrix.csv")
+        write.csv(spill.mat, spfile)
       })
       
     })
