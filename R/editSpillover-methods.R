@@ -187,7 +187,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
           
         }else{
           
-          p <- p + scale_x_logicle(limits = c(-10000,250000))
+          p <- p + scale_x_logicle(limits = c(-10000,262143))
           
         }
         
@@ -198,7 +198,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
           
         }else{
           
-          p <- p + scale_y_logicle(limits = c(-10000,250000))
+          p <- p + scale_y_logicle(limits = c(-10000,262143))
           
         }
         
@@ -402,7 +402,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
           
         }else{
           
-          p <- p + scale_x_logicle(limits = c(-10000,250000))
+          p <- p + scale_x_logicle(limits = c(-10000,262143))
           
         }
         
@@ -413,7 +413,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
           
         }else{
           
-          p <- p + scale_y_logicle(limits = c(-10000,250000))
+          p <- p + scale_y_logicle(limits = c(-10000,262143))
           
         }
         
