@@ -286,7 +286,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   }else{
     
     pd <- read.csv(cmfile, header = TRUE, row.names = 1)
-    pData(fs)$channel <- paste(fs$channel)
+    pData(fs)$channel <- paste(pd$channel)
     
   }
   
