@@ -6,7 +6,7 @@ Author: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Maintainer: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Description: Compensation & Gating Routines for Analysis of Flow Cytometry Data
 Depends: flowDensity (>= 1.12.0), openCyto(>= 1.19.1), ggcyto(>= 1.9.11), data.table(>= 1.11.4)
-Imports: flowDensity (>= 1.12.0), openCyto(>= 1.19.1), ggcyto(>= 1.9.11), data.table(>= 1.11.4)
+Imports: flowDensity (>= 1.12.0), openCyto(>= 1.19.1), ggcyto(>= 1.9.11), data.table(>= 1.11.4), shiny(>= 1.1.0), shinythemes(>= 1.1.1), rhandsontable(>= 0.3.6.1), plotrix(>= 3.7-2)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
