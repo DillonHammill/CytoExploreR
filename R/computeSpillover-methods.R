@@ -88,7 +88,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
       
       # Transformation has not been applied
       trans <- estimateLogicle(fr, channels, ...)
-      fs <- transform(fs, trans)
+      fs <- suppressMessages(transform(fs, trans))
       
     }else{
       
@@ -109,7 +109,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
       trans <- c(trans, estimateLogicle(fr, chnls, ...))
       
       # Transformation has not been applied
-      fs <- transform(fs, trans)
+      fs <- suppressMessages(transform(fs, trans))
       
     }
     
@@ -119,7 +119,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
     if(!all(each_col(fs[[1]], range)[,channels][1,] >= -5 & each_col(fs[[1]], range)[,channels][2,] <= 5)){
       
       # Transformation has not been applied
-      fs <- transform(fs, trans)
+      fs <- suppressMessages(transform(fs, trans))
       
     }
     
@@ -147,8 +147,8 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   
   # Inverse logicle transformation
   inv <-  inverseLogicleTransform(trans)
-  pops <- transform(pops, inv)
-  NIL <- transform(NIL, inv)
+  pops <- suppressMessages(transform(pops, inv))
+  NIL <- suppressMessages(transform(NIL, inv))
   
   # Calculate MedFI for all channels for unstained control
   neg <- each_col(NIL, median)[channels]
@@ -254,7 +254,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
     
     # Calculate transformation parameters using estimateLogicle
     trans <- estimateLogicle(gs.m[[1]], channels)
-    gs <- transform(gs, trans)
+    gs <- suppressMessages(transform(gs, trans))
     
   }else if(length(gs[[1]]@transformation) != 0){
     
@@ -264,6 +264,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
     if(all(channels %in% chans)){
       
       # All fluorescent channels have been transformed
+      trans <- gs@transformation[[1]]
       
     }else{
       
@@ -272,8 +273,10 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
       chans <- names(gs@transformation[[1]])
       chans <- channels[is.na(match(channels,chans))]
       
+      trns <- gs@transformation[[1]]
       trans <- estimateLogicle(gs.m[[1]], chans)
-      gs <- transform(gs, trans)
+      gs <- suppressMessages(transform(gs, trans))
+      trans <- c(trns,trans)
       
     }
     
@@ -300,10 +303,9 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   }, simplify = TRUE)
   
   # Inverse logicle transformation
-  trans <- gs@transformation[[1]]
   inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
-  pops <- transform(pops, inv)
-  NIL <- transform(NIL, inv)
+  pops <- suppressMessages(transform(pops, inv))
+  NIL <- suppressMessages(transform(NIL, inv))
   
   # Calculate MedFI for all channels for unstained control
   neg <- each_col(NIL, median)[channels]
