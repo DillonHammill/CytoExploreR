@@ -1,11 +1,15 @@
-#' Check Supplied Channels.
+#' Check Channels Supplied to drawGate.
+#' 
+#' \code{checkChannels} will check whether the supplied channels are valid for the \code{flowSet} or \code{GatingSet} and that only 1or 2 channels are supplied.
 #' 
 #' @param x an object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
-#' @param channels vector of length 1 or 2 indicating the names of the channels to use for plotting and gating.
+#' @param channels vector of channel names (e.g. c("PE-A","APC-A")).
 #'
-#' @return Stops gating process if channels are incorrect or returns NULL.
+#' @return Stop gating process if the supplied channels do ot meet the requirements for drawGate.
 #' 
 #' @importFrom BiocGenerics colnames
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 checkChannels <- function(x, channels){
@@ -49,13 +53,15 @@ checkChannels <- function(x, channels){
   
 }
 
-#' Check Supplied Gate Types(s).
+#' Check Gate Types(s) Supplied drawGate.
 #' 
 #' @param gate_type vector indicating the types of gates to construct using \code{drawGate}.
 #' @param alias names of the populations to be gated.
 #' 
-#' @return Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s). If a single gate_type is supplied for multiple populations,
+#' @return Stop gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s). If a single gate_type is supplied for multiple populations,
 #' the same gate_type will be used for all populations.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 checkGateType <- function(gate_type, alias){
@@ -102,6 +108,8 @@ checkGateType <- function(gate_type, alias){
 #' 
 #' @return Stops the gating process if alias is missing or \code{length(alias) != length(gate_type)}.
 #'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
 #' @export
 checkAlias <- function(alias, gate_type){
   
@@ -129,6 +137,8 @@ checkAlias <- function(alias, gate_type){
 
 #' Check Operating System & Open New Graphics Device
 #' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
 checkOSGD <- function(){
   
@@ -152,23 +162,67 @@ checkOSGD <- function(){
   
 }
 
-#' Check .csv file exists in working directory
+#' Check File Exists in Working Directory
 #' 
-#' @param name name of the csv file to be checked.
+#' @param name filename including file extension to be checked.
 #' 
-#' @return TRUE/FALSE if file exists
+#' @return TRUE/FALSE if file exists in the current working directory.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-checkCSV <- function(name){
+checkFile <- function(name){
   
   if(length(which(list.files() == name)) != 0){
     
-    # CSV file exists in working directory
+    # File exists in working directory
     return(TRUE)
   
   }else if(length(which(list.files() == name)) == 0){
     
-    # CSV file does not exist in working directory
+    # File does not exist in working directory
     return(FALSE)
   }
+}
+
+#' Check gatingTemplate for Existing Entry
+#' 
+#' @param parent name of the parent population.
+#' @param alias name of the population of interest.
+#' @param gtfile csv file name of the gatingTemplate.
+#' 
+#' @return Null if entry does not exist or N/Y based on user input.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @export
+checkTemplate <- function(parent, alias, gtfile){
+  
+  gt <- read.csv(gtfile, header = TRUE)
+  
+  # Parent and alias entries match file
+  if(any(gt$parent %in% parent & gt$alias %in% alias)){
+      
+      gt <- gt[gt$parent %in% parent & gt$alias %in% alias,]
+    
+      message(paste(paste(gt$alias, collapse = " & "),"already exists in",gtfile,"."))
+      rsp <- readline("Do you want to override the existing gate?(Y/N)")
+    
+      if(rsp %in% c("y","Y","YES","Yes","yes")){
+      
+         rsp <- "Y"
+    
+      }else if(rsp %in% c("n","N","NO","No","no")){
+      
+         rsp <- "N"
+      
+      }
+      
+    }else{
+    
+    rsp <- NULL
+    
+  }
+  
+  return(rsp)
 }

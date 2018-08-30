@@ -17,3 +17,6 @@ Stops the gating process if alias is missing or \code{length(alias) != length(ga
 \description{
 Check Supplied Alias
 }
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

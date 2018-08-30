@@ -2,18 +2,21 @@
 % Please edit documentation in R/validation-functions.R
 \name{checkChannels}
 \alias{checkChannels}
-\title{Check Supplied Channels.}
+\title{Check Channels Supplied to drawGate.}
 \usage{
 checkChannels(x, channels)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.}
 
-\item{channels}{vector of length 1 or 2 indicating the names of the channels to use for plotting and gating.}
+\item{channels}{vector of channel names (e.g. c("PE-A","APC-A")).}
 }
 \value{
-Stops gating process if channels are incorrect or returns NULL.
+Stop gating process if the supplied channels do ot meet the requirements for drawGate.
 }
 \description{
-Check Supplied Channels.
+\code{checkChannels} will check whether the supplied channels are valid for the \code{flowSet} or \code{GatingSet} and that only 1or 2 channels are supplied.
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

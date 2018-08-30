@@ -9,3 +9,6 @@ checkOSGD()
 \description{
 Check Operating System & Open New Graphics Device
 }
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

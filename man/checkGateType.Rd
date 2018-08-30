@@ -2,7 +2,7 @@
 % Please edit documentation in R/validation-functions.R
 \name{checkGateType}
 \alias{checkGateType}
-\title{Check Supplied Gate Types(s).}
+\title{Check Gate Types(s) Supplied drawGate.}
 \usage{
 checkGateType(gate_type, alias)
 }
@@ -12,9 +12,12 @@ checkGateType(gate_type, alias)
 \item{alias}{names of the populations to be gated.}
 }
 \value{
-Stops gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s). If a single gate_type is supplied for multiple populations,
+Stop gating process if gate_type is incorrect or returns \code{gate_type} as full lower case name(s). If a single gate_type is supplied for multiple populations,
 the same gate_type will be used for all populations.
 }
 \description{
-Check Supplied Gate Types(s).
+Check Gate Types(s) Supplied drawGate.
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
