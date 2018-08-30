@@ -28,7 +28,7 @@ from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto
 then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
 matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
 matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
-so you can track changes in real time. To add in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
+so you can track changes in real time. To aid in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
 a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
 to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
 name as the specified \code{spfile}.
