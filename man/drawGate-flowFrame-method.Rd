@@ -5,7 +5,7 @@
 \alias{drawGate,flowFrame-method}
 \title{drawGate flowFrame Method.}
 \usage{
-\S4method{drawGate}{flowFrame}(x, channels, alias = NULL,
+\S4method{drawGate}{flowFrame}(x, channels = NULL, alias = NULL,
   subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5,
   plot = TRUE, labs = TRUE, ...)
 }
@@ -39,4 +39,7 @@ existing plots which may already contain a different gate type. For demonstratio
 }
 \description{
 drawGate flowFrame Method.
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

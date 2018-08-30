@@ -1,10 +1,22 @@
-#' drawGate Root
+#' drawGate
+#' 
+#' \code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate gate drawing. Using \code{drawGate} you can specify the type of gate(s) to be constructed and \code{drawGate}
+#' will automatically make calls to the relevant gating function(s) and handle plotting appropriately.
+#' 
+#' Pools samples
+#' Extract subsample for plotting
+#' make call to gating functions
+#' return gates as a list of filters
+#' 
+#' GatingSet method has additional functionality - gates are applied to GatingSet & gates saved in gatingTemplate for future use
 #' 
 #' @param x object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
 #' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
-setGeneric(name="drawGate",
-           def=function(x, ...){standardGeneric("drawGate")}
+setGeneric(name = "drawGate",
+           def = function(x, ...){standardGeneric("drawGate")}
 )
 
 #' drawGate flowFrame Method.
@@ -29,8 +41,10 @@ setGeneric(name="drawGate",
 #' 
 #' @importFrom BiocGenerics colnames
 #' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
-setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "flowFrame", definition = function(x, channels = NULL, alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
   
   fr <- x
   
@@ -126,8 +140,10 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels, 
 #' 
 #' @importFrom BiocGenerics colnames
 #' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
-setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL,channels, alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL, channels = NULL, alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
   fs <- x
   
@@ -236,10 +252,28 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' and entries add to the R object called \code{Template} generated use the \code{openCyto::add_pop} API.
 #' 
 #' @importFrom BiocGenerics colnames 
+#' @importFrom flowWorkspace getData
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels, gate_type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
+setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NULL, parent = "root", alias = NULL, channels = NULL, gate_type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE, ...){
 
+  # Check whether a gatingTemplate ready exists for this population
+  if(!is.null(gtfile)){
+    
+  # Check whether gate already exists in gtfile
+  rsp <- checkTemplate(parent, alias, gtfile)
+  
+  # User does not want to override existing gate in gatingTemplate
+  if("N" %in% rsp){
+    
+    stop("Please edit the existing gate with editGate or provide a different gtfile name.")
+    
+  }
+  
+  }
+  
   gs <- x
   fs <- flowWorkspace::getData(gs, parent)
   
@@ -339,9 +373,9 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     
     write.csv(pops, "gatingTemplate.csv", row.names = FALSE)
     
-  }else if(checkCSV(gtfile) == FALSE){
+  }else if(checkFile(gtfile) == FALSE){
     
-    message("Supplied gtfile does not exist in working directory - writing new file.")
+    message(paste("Supplied gtfile does not exist in working directory - writing", paste(gtfile),"."))
     
     pops <- list()
     for(i in 1:length(alias)){
@@ -357,9 +391,16 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     write.csv(pops, gtfile, row.names = FALSE)
     
     
-  }else if(checkCSV(gtfile) == TRUE){
+  }else if(checkFile(gtfile) == TRUE){
     
     gt <- read.csv(gtfile, header = TRUE)
+    
+    # Gate already exists and must be overriden - delete duplicate row
+    if("Y" %in% rsp){
+      
+      gt <- gt[!gt$parent %in% parent & !gt$alias %in% alias, ]
+      
+    }
     
     pops <- list()
     for(i in 1:length(alias)){

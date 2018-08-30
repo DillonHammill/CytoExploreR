@@ -6,9 +6,9 @@
 \title{drawGate GatingSet Method}
 \usage{
 \S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root",
-  alias = NULL, channels, gate_type = "polygon", subSample = 250000,
-  gtfile = NULL, axis = "x", adjust = 1.5, plot = TRUE, labs = TRUE,
-  ...)
+  alias = NULL, channels = NULL, gate_type = "polygon",
+  subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5,
+  plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
@@ -49,4 +49,7 @@ and entries add to the R object called \code{Template} generated use the \code{o
 }
 \description{
 drawGate GatingSet Method
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

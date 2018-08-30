@@ -83,12 +83,19 @@ checkGateType <- function(gate_type, alias){
   }
   
   gate_type[gate_type %in% c("polygon", "Polygon", "p", "P")] <- "polygon"
+  
   gate_type[gate_type %in% c("rectangle", "Rectangle", "r", "R")] <- "rectangle"
+  
   gate_type[gate_type %in% c("interval", "Interval", "i", "I")] <- "interval"
+  
   gate_type[gate_type %in% c("threshold", "Threshold", "t", "T")] <- "threshold"
+  
   gate_type[gate_type %in% c("boundary", "Boundary", "b", "B")] <- "boundary"
+  
   gate_type[gate_type %in% c("ellipse", "Ellipse", "e", "E")] <- "ellipse"
+  
   gate_type[gate_type %in% c("quadrant", "Quadrant", "q", "Q")] <- "quadrant"
+  
   gate_type[gate_type %in% c("web", "Web", "w", "W")] <- "web"
   
   # Repeat gate_type to equal length of alias
@@ -106,7 +113,7 @@ checkGateType <- function(gate_type, alias){
 #' @param alias vector indicating the names of the populations to be gated.
 #' @param gate_type vector indicating the type(s) of gate(s) to be constructed.
 #' 
-#' @return Stops the gating process if alias is missing or \code{length(alias) != length(gate_type)}.
+#' @return Stops the gating process if alias is missing or of the incorrect length given the gate_type.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'

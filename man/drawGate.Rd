@@ -2,7 +2,7 @@
 % Please edit documentation in R/drawGate-methods.R
 \name{drawGate}
 \alias{drawGate}
-\title{drawGate Root}
+\title{drawGate}
 \usage{
 drawGate(x, ...)
 }
@@ -10,5 +10,17 @@ drawGate(x, ...)
 \item{x}{object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.}
 }
 \description{
-drawGate Root
+\code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate gate drawing. Using \code{drawGate} you can specify the type of gate(s) to be constructed and \code{drawGate}
+will automatically make calls to the relevant gating function(s) and handle plotting appropriately.
+}
+\details{
+Pools samples
+Extract subsample for plotting
+make call to gating functions
+return gates as a list of filters
+
+GatingSet method has additional functionality - gates are applied to GatingSet & gates saved in gatingTemplate for future use
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

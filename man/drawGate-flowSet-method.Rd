@@ -5,9 +5,9 @@
 \alias{drawGate,flowSet-method}
 \title{drawGate flowSet Method}
 \usage{
-\S4method{drawGate}{flowSet}(x, pData = NULL, channels, alias = NULL,
-  subSample = 250000, gate_type = "polygon", axis = "x", adjust = 1.5,
-  plot = TRUE, labs = TRUE, ...)
+\S4method{drawGate}{flowSet}(x, pData = NULL, channels = NULL,
+  alias = NULL, subSample = 250000, gate_type = "polygon", axis = "x",
+  adjust = 1.5, plot = TRUE, labs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
@@ -43,4 +43,7 @@ list of gates stored in object of class \code{filters}.
 }
 \description{
 drawGate flowSet Method
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
