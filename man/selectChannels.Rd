@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{selectChannels}
 \alias{selectChannels}
-\title{Select flourescent channels for compensation controls}
+\title{Select Fluorescent Channel for Single Stain Controls}
 \usage{
 selectChannels(fs)
 }
@@ -13,5 +13,8 @@ selectChannels(fs)
 vector of channels in order of \code{flowSet} or \code{GatingSet} samples.
 }
 \description{
-Select flourescent channels for compensation controls
+Select Fluorescent Channel for Single Stain Controls
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

@@ -12,7 +12,7 @@ checkAlias(alias, gate_type)
 \item{gate_type}{vector indicating the type(s) of gate(s) to be constructed.}
 }
 \value{
-Stops the gating process if alias is missing or \code{length(alias) != length(gate_type)}.
+Stops the gating process if alias is missing or of the incorrect length given the gate_type.
 }
 \description{
 Check Supplied Alias

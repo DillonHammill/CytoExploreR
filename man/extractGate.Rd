@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{extractGate}
 \alias{extractGate}
-\title{Extract saved gate(s) from gatingTemplate.}
+\title{Extract Saved Gate(s) from gatingTemplate.}
 \usage{
 extractGate(parent, alias, gtfile)
 }
@@ -14,5 +14,8 @@ extractGate(parent, alias, gtfile)
 \item{gtfile}{name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv") where the gate(s) are saved.}
 }
 \description{
-Extract saved gate(s) from gatingTemplate.
+Extract Saved Gate(s) from gatingTemplate.
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

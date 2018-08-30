@@ -10,16 +10,12 @@ drawGate(x, ...)
 \item{x}{object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.}
 }
 \description{
-\code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate gate drawing. Using \code{drawGate} you can specify the type of gate(s) to be constructed and \code{drawGate}
-will automatically make calls to the relevant gating function(s) and handle plotting appropriately.
-}
-\details{
-Pools samples
-Extract subsample for plotting
-make call to gating functions
-return gates as a list of filters
-
-GatingSet method has additional functionality - gates are applied to GatingSet & gates saved in gatingTemplate for future use
+\code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate analysis of flow cytometry by gate drawing. Using \code{drawGate} 
+users can specify the type of gate(s) to be constructed through the \code{gate_type} argument and \code{drawGate} will automatically handle plotting the data and make calls
+to the relevant gating function(s) to construct the gates around populations of interest. \code{drawGate} has methods for \code{flowFrame}, \code{flowSet} and \code{GatingSet}
+objects, refer to their respective help pages for more information - ?`drawGate,flowFrame-method`, ?`drawGate,flowSet-method` or ?`drawGate,GatingSet-method`. The flowFrame and
+flowSet methods simply return the constructed gates as a list of \code{filters}, whilst the GatingSet method automatically applies the constructed gates to the GatingSet and saves
+the constructed gates in an \code{openCyto} gatingTemplate for future use. See ?editGate and ?removeGate to manipulate constructed gates and modify their entries in the gatingTemplate.
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

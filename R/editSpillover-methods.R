@@ -48,6 +48,8 @@ setGeneric(name = "editSpillover",
 #' @importFrom flowWorkspace sampleNames
 #' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
 #' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
 setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = NULL, subSample = 5000, ...){
   
@@ -276,6 +278,8 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 #' 
 #' @importFrom flowWorkspace sampleNames getData
 #' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 setMethod(editSpillover, signature = "GatingSet", definition = function(x, alias = NULL, spfile = NULL, subSample = 5000, ...){

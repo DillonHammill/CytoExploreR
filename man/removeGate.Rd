@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{removeGate}
 \alias{removeGate}
-\title{Remove gate and edit gatingTemplate .csv file}
+\title{Remove Gate(s) and Edit gatingTemplate .csv File}
 \usage{
 removeGate(gs, alias = NULL, gtfile = NULL, children = TRUE)
 }
@@ -19,5 +19,8 @@ removeGate(gs, alias = NULL, gtfile = NULL, children = TRUE)
 an object of class \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed.
 }
 \description{
-Remove gate and edit gatingTemplate .csv file
+Remove Gate(s) and Edit gatingTemplate .csv File
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

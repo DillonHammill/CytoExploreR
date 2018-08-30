@@ -33,3 +33,6 @@ a red line and median fluorescent intensity of the stained control is tracked wi
 to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
 name as the specified \code{spfile}.
 }
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

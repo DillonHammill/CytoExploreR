@@ -61,6 +61,8 @@ setGeneric(name="computeSpillover",
 #' @importFrom flowCore estimateLogicle transform each_col fsApply inverseLogicleTransform
 #' @importFrom flowWorkspace pData
 #' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
 setMethod(computeSpillover, signature = "flowSet", definition = function(x, trans = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
   
@@ -225,6 +227,8 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
 #' 
 #' @importFrom flowCore estimateLogicle transform each_col fsApply inverseLogicleTransform
 #' @importFrom flowWorkspace getData pData
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 setMethod(computeSpillover, signature = "GatingSet", definition = function(x, alias = NULL, trans = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){

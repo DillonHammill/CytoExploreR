@@ -17,3 +17,6 @@ sampleFrame(fr, size = 250000)
 \description{
 Sample a flowFrame
 }
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

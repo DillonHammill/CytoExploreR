@@ -3,7 +3,7 @@
 \docType{methods}
 \name{getChannels,GatingSet-method}
 \alias{getChannels,GatingSet-method}
-\title{Extract fluorescent parameters from a GatingSet}
+\title{Extract Fluorescent Channels - GatingSet Method}
 \usage{
 \S4method{getChannels}{GatingSet}(x)
 }
@@ -14,5 +14,8 @@
 vector of fluorescent channels
 }
 \description{
-Extract fluorescent parameters from a GatingSet
+Extract Fluorescent Channels - GatingSet Method
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

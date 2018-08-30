@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{selectFrames}
 \alias{selectFrames}
-\title{Select flowFrames based on pData}
+\title{Select flowFrames Based on pData}
 \usage{
 selectFrames(fs, pData)
 }
@@ -15,5 +15,8 @@ selectFrames(fs, pData)
 an object of calss \code{flowSet} containing the extracted \code{flowFrame} objects.
 }
 \description{
-Select flowFrames based on pData
+Select flowFrames Based on pData
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

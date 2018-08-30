@@ -3,7 +3,7 @@
 \docType{methods}
 \name{getChannels,flowFrame-method}
 \alias{getChannels,flowFrame-method}
-\title{Extract fluorescent parameters from a flowFrame}
+\title{Extract Fluorescent Channels - flowFrame Method}
 \usage{
 \S4method{getChannels}{flowFrame}(x)
 }
@@ -14,5 +14,8 @@
 vector of fluorescent channels
 }
 \description{
-Extract fluorescent parameters from a flowFrame
+Extract Fluorescent Channels - flowFrame Method
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

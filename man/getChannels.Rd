@@ -2,10 +2,13 @@
 % Please edit documentation in R/helper-functions.R
 \name{getChannels}
 \alias{getChannels}
-\title{Extract fluorescent parameters}
+\title{Extract Fluorescent Channels}
 \usage{
 getChannels(x)
 }
 \description{
-Extract fluorescent parameters
+Extract Fluorescent Channels
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

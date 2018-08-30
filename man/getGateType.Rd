@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{getGateType}
 \alias{getGateType}
-\title{Get gate_type from from gate.}
+\title{Get gate_type from Saved Gate.}
 \usage{
 getGateType(gates)
 }
@@ -13,5 +13,8 @@ getGateType(gates)
 vector of gate_type names for supplied gates.
 }
 \description{
-Get gate_type from from gate.
+Get gate_type from Saved Gate.
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

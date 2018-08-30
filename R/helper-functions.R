@@ -1,48 +1,58 @@
-#' Extract fluorescent parameters
+#' Extract Fluorescent Channels
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 setGeneric(name="getChannels",
            def=function(x){standardGeneric("getChannels")}
 )
 
-#' Extract fluorescent parameters from a flowFrame
+#' Extract Fluorescent Channels - flowFrame Method
 #' 
 #' @param x object \code{flowFrame}
 #' 
 #' @return vector of fluorescent channels
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 setMethod(getChannels, signature = "flowFrame", definition = function(x){
   colnames(x@description$SPILL)
 })
 
-#' Extract fluorescent parameters from a flowSet
+#' Extract Fluorescent Channels - flowSet Method
 #' 
 #' @param x object \code{flowSet}
 #' 
 #' @return vector of fluorescent channels
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 setMethod(getChannels, signature = "flowSet", definition = function(x){
 colnames(x[[1]]@description$SPILL)
 })
 
-#' Extract fluorescent parameters from a GatingSet
+#' Extract Fluorescent Channels - GatingSet Method
 #' 
 #' @param x object \code{GatingSet}
 #' 
 #' @return vector of fluorescent channels
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 setMethod(getChannels, signature = "GatingSet", definition = function(x){
   colnames(x@data[[1]]@description$SPILL)
 })
 
-#' Select flourescent channels for compensation controls
+#' Select Fluorescent Channel for Single Stain Controls
 #' 
 #' @param x object of class \code{flowSet} or \code{GatingSet} containing compensation controls
 #' 
 #' @return vector of channels in order of \code{flowSet} or \code{GatingSet} samples.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 selectChannels <- function(fs){
@@ -51,9 +61,13 @@ selectChannels <- function(fs){
   
   # Print sample name and select channel
   channels <- opts[sapply(pData(fs)$name, function(x){
+    
     message("Select a fluorescent channel for the following compensation control:")
+    
     print(x)
+    
     menu(choices = opts, graphics = TRUE)
+    
   })]
   
   return(channels)
@@ -69,6 +83,8 @@ selectChannels <- function(fs){
 #' @importFrom BiocGenerics nrow
 #' @importFrom flowCore sampleFilter
 #' @importFrom flowCore Subset
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 sampleFrame <- function(fr, size = 250000){
@@ -90,12 +106,14 @@ sampleFrame <- function(fr, size = 250000){
   return(fr)
 }
 
-#' Select flowFrames based on pData
+#' Select flowFrames Based on pData
 #' 
 #' @param fs an object of class \code{flowSet}.
 #' @param pData vector of form \code{c("column","row")} indicating the rows of \code{pData(fs)} to extract. 
 #' 
 #' @return an object of calss \code{flowSet} containing the extracted \code{flowFrame} objects.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 selectFrames <- function(fs, pData){
@@ -116,7 +134,7 @@ selectFrames <- function(fs, pData){
   
 }
 
-#' Remove gate and edit gatingTemplate .csv file
+#' Remove Gate(s) and Edit gatingTemplate .csv File
 #' 
 #' @param gs an object of class \code{GatingSet}.
 #' @param alias name(s) of the gate to remove (e.g. "Single Cells").
@@ -124,6 +142,8 @@ selectFrames <- function(fs, pData){
 #' @param children logical indicating whether descendant populations should also be removed from the gtfile, set to \code{TRUE} by default.
 #' 
 #' @return an object of class \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
@@ -186,13 +206,15 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
   
 }
 
-#' Extract saved gate(s) from gatingTemplate.
+#' Extract Saved Gate(s) from gatingTemplate.
 #' 
 #' @param parent name of the parental population.
 #' @param alias name of the population for which the gate must be extracted.
 #' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv") where the gate(s) are saved.
 #' 
 #' @importFrom flowWorkspace getGate
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 extractGate <- function(parent, alias, gtfile){
@@ -221,7 +243,7 @@ extractGate <- function(parent, alias, gtfile){
   return(gates)
 }
 
-#' Edit existing gate(s).
+#' Edit Existing Gate(s).
 #' 
 #' @param x an object of class \code{GatingSet}.
 #' @param pData vector of form \code{c("column","row")} indicating the rows of \code{pData(fs)} to extract. 
@@ -237,6 +259,8 @@ extractGate <- function(parent, alias, gtfile){
 #' 
 #' @importFrom flowWorkspace getData
 #' @importFrom data.table as.data.table
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
 editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = NULL, gtfile = NULL){
@@ -325,11 +349,13 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
     
 }
 
-#' Get gate_type from from gate.
+#' Get gate_type from Saved Gate.
 #' 
 #' @param gates an object of class \code{filters} containing the gates from which the \code{gate_type(s)} must be obtained.
 #'
 #' @return vector of gate_type names for supplied gates.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 getGateType <- function(gates){

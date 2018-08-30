@@ -50,3 +50,6 @@ select the positive population to use for the spillover calculation. The percent
 intensities of the stained populations and the universal unstained sample. The computed spillover matrix is returned as an r object and written
 to a named .csv file for future use.
 }
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

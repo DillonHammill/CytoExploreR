@@ -3,7 +3,7 @@
 \docType{methods}
 \name{getChannels,flowSet-method}
 \alias{getChannels,flowSet-method}
-\title{Extract fluorescent parameters from a flowSet}
+\title{Extract Fluorescent Channels - flowSet Method}
 \usage{
 \S4method{getChannels}{flowSet}(x)
 }
@@ -14,5 +14,8 @@
 vector of fluorescent channels
 }
 \description{
-Extract fluorescent parameters from a flowSet
+Extract Fluorescent Channels - flowSet Method
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

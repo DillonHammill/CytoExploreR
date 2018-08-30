@@ -1,14 +1,11 @@
 #' drawGate
 #' 
-#' \code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate gate drawing. Using \code{drawGate} you can specify the type of gate(s) to be constructed and \code{drawGate}
-#' will automatically make calls to the relevant gating function(s) and handle plotting appropriately.
-#' 
-#' Pools samples
-#' Extract subsample for plotting
-#' make call to gating functions
-#' return gates as a list of filters
-#' 
-#' GatingSet method has additional functionality - gates are applied to GatingSet & gates saved in gatingTemplate for future use
+#' \code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate analysis of flow cytometry by gate drawing. Using \code{drawGate} 
+#' users can specify the type of gate(s) to be constructed through the \code{gate_type} argument and \code{drawGate} will automatically handle plotting the data and make calls
+#' to the relevant gating function(s) to construct the gates around populations of interest. \code{drawGate} has methods for \code{flowFrame}, \code{flowSet} and \code{GatingSet}
+#' objects, refer to their respective help pages for more information - ?`drawGate,flowFrame-method`, ?`drawGate,flowSet-method` or ?`drawGate,GatingSet-method`. The flowFrame and
+#' flowSet methods simply return the constructed gates as a list of \code{filters}, whilst the GatingSet method automatically applies the constructed gates to the GatingSet and saves
+#' the constructed gates in an \code{openCyto} gatingTemplate for future use. See ?editGate and ?removeGate to manipulate constructed gates and modify their entries in the gatingTemplate.
 #' 
 #' @param x object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
 #' 
@@ -31,7 +28,7 @@ setGeneric(name = "drawGate",
 #' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well. Default \code{gate_type}
 #' is \code{"polygon"}.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
+#' number of events, all events will be plotted. \code{subSample} is set to 250000 events by default.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
 #' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.
@@ -128,7 +125,7 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels =
 #' an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 #' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
+#' number of events, all events will be plotted. \code{subSample} is set to 250000 events by default.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
 #' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.
@@ -239,7 +236,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, pData = NULL
 #' ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.
 #' @param gtfile name of \code{gatingTemplate} csv file to be saved.
 #' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.
+#' number of events, all events will be plotted. \code{subSample} is set to 250000 events by default.
 #' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
 #' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.

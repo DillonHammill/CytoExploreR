@@ -51,3 +51,6 @@ spill <- computeSpillover(Singlets, spfile = "Example Spillover Matrix.csv")
 }
 
 }
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

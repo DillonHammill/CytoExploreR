@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{editGate}
 \alias{editGate}
-\title{Edit existing gate(s).}
+\title{Edit Existing Gate(s).}
 \usage{
 editGate(x, pData = NULL, parent = NULL, alias = NULL, gate_type = NULL,
   gtfile = NULL)
@@ -27,5 +27,8 @@ is \code{"polygon"}.}
 an object of calss \code{GatingSet} with edited gate applied, as well as gatingTemplate file with editied gate saved.
 }
 \description{
-Edit existing gate(s).
+Edit Existing Gate(s).
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
