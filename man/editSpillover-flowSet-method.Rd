@@ -21,7 +21,7 @@ the spillover matrix will be extracted directly from the \code{flowSet} or \code
 save edited spillover matrix to .csv file named "Spillover Matrix.csv" or spfile.
 }
 \description{
-#' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
+\code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
 or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
 and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
 from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
