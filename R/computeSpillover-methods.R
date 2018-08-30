@@ -340,7 +340,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
       trns <- gs@transformation[[1]]
       trans <- estimateLogicle(gs.m[[1]], chans)
       gs <- suppressMessages(transform(gs, trans))
-      trans <- c(trns,trans)
+      trans <-gs[[1]]@transformation
       
     }
     
