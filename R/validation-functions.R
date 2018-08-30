@@ -205,31 +205,20 @@ checkFile <- function(name){
 #' @export
 checkTemplate <- function(parent, alias, gtfile){
   
+  if(checkFile(gtfile)){
+    
   gt <- read.csv(gtfile, header = TRUE)
   
   # Parent and alias entries match file
   if(any(gt$parent %in% parent & gt$alias %in% alias)){
-      
-      gt <- gt[gt$parent %in% parent & gt$alias %in% alias,]
     
-      message(paste(paste(gt$alias, collapse = " & "),"already exists in",gtfile,"."))
-      rsp <- readline("Do you want to override the existing gate?(Y/N)")
-    
-      if(rsp %in% c("y","Y","YES","Yes","yes")){
-      
-         rsp <- "Y"
-    
-      }else if(rsp %in% c("n","N","NO","No","no")){
-      
-         rsp <- "N"
-      
-      }
-      
-    }else{
-    
-    rsp <- NULL
+     message(paste(paste(gt$alias, collapse = " & "),"already exists in",gtfile,"."))
+     stop("Please supply a different gtfile name or edit the existing gate(s) using editGate.")
     
   }
   
-  return(rsp)
+  }else{
+    
+  }
+  
 }

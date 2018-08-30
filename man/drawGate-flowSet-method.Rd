@@ -21,7 +21,7 @@ of the kernel density will be constructed.}
 gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
 
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.}
+number of events, all events will be plotted. \code{subSample} is set to 250000 events by default.}
 
 \item{gate_type}{vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
 an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,

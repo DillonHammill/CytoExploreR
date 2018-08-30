@@ -260,14 +260,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   if(!is.null(gtfile)){
     
   # Check whether gate already exists in gtfile
-  rsp <- checkTemplate(parent, alias, gtfile)
-  
-  # User does not want to override existing gate in gatingTemplate
-  if("N" %in% rsp){
-    
-    stop("Please edit the existing gate with editGate or provide a different gtfile name.")
-    
-  }
+  checkTemplate(parent, alias, gtfile)
   
   }
   
@@ -391,13 +384,6 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   }else if(checkFile(gtfile) == TRUE){
     
     gt <- read.csv(gtfile, header = TRUE)
-    
-    # Gate already exists and must be overriden - delete duplicate row
-    if("Y" %in% rsp){
-      
-      gt <- gt[!gt$parent %in% parent & !gt$alias %in% alias, ]
-      
-    }
     
     pops <- list()
     for(i in 1:length(alias)){

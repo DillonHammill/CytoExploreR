@@ -28,7 +28,7 @@ an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code
 ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.}
 
 \item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted. \code{subSample} is set to 250 000 events by default.}
+number of events, all events will be plotted. \code{subSample} is set to 250000 events by default.}
 
 \item{gtfile}{name of \code{gatingTemplate} csv file to be saved.}
 
