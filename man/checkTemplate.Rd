@@ -14,7 +14,7 @@ checkTemplate(parent, alias, gtfile)
 \item{gtfile}{csv file name of the gatingTemplate.}
 }
 \value{
-Null if entry does not exist or N/Y based on user input.
+stops the gating process if an entry already exists in the gtfile for this population.
 }
 \description{
 Check gatingTemplate for Existing Entry

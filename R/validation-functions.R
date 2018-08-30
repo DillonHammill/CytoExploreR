@@ -198,7 +198,7 @@ checkFile <- function(name){
 #' @param alias name of the population of interest.
 #' @param gtfile csv file name of the gatingTemplate.
 #' 
-#' @return Null if entry does not exist or N/Y based on user input.
+#' @return stops the gating process if an entry already exists in the gtfile for this population.
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
