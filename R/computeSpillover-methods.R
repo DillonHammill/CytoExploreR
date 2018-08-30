@@ -276,7 +276,9 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
           
           if(length(chans) != 0){
             
-          trans <- c(trans,estimateLogicle(gs.m[[1]], chans))
+          trns <- estimateLogicle(gs.m[[1]], chans)
+          gs <- transform(gs, trns)
+          trans <- gs[[1]]@transformation
           
           }else{
             
