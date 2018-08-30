@@ -1,24 +1,52 @@
 #' Edit Spillover Matrix
 #' 
-#' Edit spillover matrix using single stain compensation controls and an unstained control.
+#' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
+#' or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
+#' and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
+#' from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
+#' then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
+#' matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
+#' matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
+#' so you can track changes in real time. To add in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
+#' a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
+#' to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
+#' name as the specified \code{spfile}. \code{editSpillover} has methods for both \code{flowSet} and \code{GatingSet} objects 
+#' refer to their respective help pages for more information - ?`editSpillover,flowSet-method` or ?`editSpillover,GatingSet-method`.
 #' 
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setGeneric(name="editSpillover",
-           def=function(x, ...){standardGeneric("editSpillover")}
+setGeneric(name = "editSpillover",
+           def = function(x, ...){standardGeneric("editSpillover")}
 )
 
 
-#' Edit Spillover Matrix flowSet Method
+#' Edit Spillover Matrix - flowSet Method
 #' 
+#' #' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
+#' or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
+#' and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
+#' from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
+#' then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
+#' matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
+#' matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
+#' so you can track changes in real time. To add in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
+#' a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
+#' to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
+#' name as the specified \code{spfile}. 
+#'
 #' @param x object of class \code{flowSet}.
-#' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing.
+#' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing. If \code{spfile} is not supplied
+#' the spillover matrix will be extracted directly from the \code{flowSet} or \code{GatingSet}.
 #' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.
+#' @param ... additional arguments (not used).
 #' 
-#' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
+#' @return save edited spillover matrix to .csv file named "Spillover Matrix.csv" or spfile.
+#' 
+#' @importFrom flowWorkspace sampleNames
+#' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
 #' 
 #' @export
 setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = NULL, subSample = 5000, ...){
@@ -171,11 +199,11 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
           medians <- data.frame(unlist(xmedians), unlist(ymedians))
           colnames(medians) <- c(input$xchannel,input$ychannel)
           
-          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
+          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "cyan", size = 1.2)
           
         }
         
-        # if transformation applied use axis_inverse_trans 0 < range <= 5
+        # if transformation applied use axis_inverse_trans -5 < range <= 10
         # Ranges
         xrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel])
         yrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel])
@@ -183,7 +211,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         # X Axis
         if(xrange > -5 & xrange <= 10){
           
-          p <- p + scale_x_continuous(limits = c(-4,5))
+          p <- p + scale_x_continuous(limits = c(-4,5.5))
           
         }else{
           
@@ -194,7 +222,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         # Y Axis
         if(yrange > -5 & yrange <= 10){
           
-          p <- p + scale_y_continuous(limits = c(-4,5))
+          p <- p + scale_y_continuous(limits = c(-4,5.5))
           
         }else{
           
@@ -225,15 +253,32 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 
 #' Edit Spillover Matrix GatingSet Method
 #'
+#' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
+#' or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
+#' and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
+#' from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
+#' then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
+#' matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
+#' matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
+#' so you can track changes in real time. To add in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
+#' a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
+#' to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
+#' name as the specified \code{spfile}. 
+#'
 #' @param x object of class \code{GatingSet}.
-#' @param parent name of the population to use for plotting (defaults to "root").
-#' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing.
+#' @param name of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").
+#' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing. If \code{spfile} is not supplied
+#' the spillover matrix will be extracted directly from the \code{flowSet} or \code{GatingSet}.
 #' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.
+#' @param ... additional arguments (not used).
 #' 
-#' @return write edited spillover matrix to csv file called \code{"Spillover Matrix.csv"} for later use.
+#' @return save edited spillover matrix to .csv file named "Spillover Matrix.csv" or spfile.
+#' 
+#' @importFrom flowWorkspace sampleNames getData
+#' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
 #' 
 #' @export
-setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = "root", spfile = NULL, subSample = 5000, ...){
+setMethod(editSpillover, signature = "GatingSet", definition = function(x, alias = NULL, spfile = NULL, subSample = 5000, ...){
   
   require(shiny)
   require(shinythemes)
@@ -245,7 +290,15 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
   channels <- getChannels(gs)
   
   # Extract population for downstream plotting
-  fs <- getData(gs, parent)
+  if(!is.null(alias)){
+    
+    fs <- getData(gs, alias)
+    
+  }else if(is.null(alias)){
+    
+    fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
+    
+  }
   
   # Read in spillover matrix to object spill
   if(!is.null(spfile)){
@@ -386,11 +439,11 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
           medians <- data.frame(unlist(xmedians), unlist(ymedians))
           colnames(medians) <- c(input$xchannel,input$ychannel)
           
-          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "magenta", size = 1.2)
+          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "cyan", size = 1.2)
           
         }
         
-        # if transformation applied use axis_inverse_trans 0 < range <= 5
+        # if transformation applied use axis_inverse_trans -5 < range <= 10
         # Ranges
         xrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel])
         yrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel])
@@ -398,7 +451,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
         # X Axis
         if(xrange > -5 & xrange <= 10){
           
-          p <- p + scale_x_continuous(limits = c(-4,5))
+          p <- p + scale_x_continuous(limits = c(-4,5.5))
           
         }else{
           
@@ -409,7 +462,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
         # Y Axis
         if(yrange > -5 & yrange <= 10){
           
-          p <- p + scale_y_continuous(limits = c(-4,5))
+          p <- p + scale_y_continuous(limits = c(-4,5.5))
           
         }else{
           

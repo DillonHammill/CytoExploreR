@@ -32,6 +32,13 @@ spillover matrix object and \code{"Spillover Matrix.csv"} file.
 }
 \description{
 Calculate spillover matrix using \code{GatingSet} containing gated single stain compensation controls and an unstained control.
+\code{computeSpillover} uses the method described by Bagwell & Adams 1993 to calculate fluorescent spillover values using single 
+stain compensation controls and a universal unstained control. \code{computeSpillover} begins by the user selecting which fluorescent
+channel is associated with each control from a dropdown menu. Following channel selection, \code{computeSpillover} runs through each control
+and plots a histogram which is gated by the user using an interval gate (refer to cytoSuite drawInterval documentation) to 
+select the positive population to use for the spillover calculation. The percentage spillover is calculated based on the median fluorescent
+intensities of the stained populations and the universal unstained sample. The computed spillover matrix is returned as an r object and written
+to a named .csv file for future use.
 }
 \examples{
 \dontrun{
