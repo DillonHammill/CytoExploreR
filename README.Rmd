@@ -162,7 +162,7 @@ plotGate(gs[[1]])
 
 Dillon Hammill, BMedSci (Hons)
 <br /> Ph.D. Scholar
-<br /> The Parish Group – Cancer & Vascular Biology
+<br /> The Parish Group Cancer & Vascular Biology
 <br /> ACRF Department of Cancer Biology and Therapeutics
 <br /> The John Curtin School of Medical Research
 <br /> ANU College of Medicine, Biology and the Environment
