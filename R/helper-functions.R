@@ -382,7 +382,7 @@ getGateType <- function(gates){
           
           types <- "threshold"
           
-        }else if(is.finite(gates[[1]]@min) & is.finte(gates[[1]]@max)){
+        }else if(is.finite(gates[[1]]@min) & is.finite(gates[[1]]@max)){
           
           types <- "interval"
           
@@ -468,7 +468,7 @@ getGateType <- function(gates){
                   
                   types <- "threshold"
                   
-                }else if(is.finite(x@min) & is.finte(x@max)){
+                }else if(is.finite(x@min) & is.finite(x@max)){
                   
                   types <- "interval"
                   
@@ -552,7 +552,7 @@ getGateType <- function(gates){
               
               types <- "threshold"
               
-            }else if(is.finite(x@min) & is.finte(x@max)){
+            }else if(is.finite(x@min) & is.finite(x@max)){
               
               types <- "interval"
               
