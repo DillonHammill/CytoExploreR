@@ -4,16 +4,14 @@
 \alias{removeGate}
 \title{Remove Gate(s) and Edit gatingTemplate .csv File}
 \usage{
-removeGate(gs, alias = NULL, gtfile = NULL, children = TRUE)
+removeGate(gs, alias = NULL, gtfile = NULL)
 }
 \arguments{
 \item{gs}{an object of class \code{GatingSet}.}
 
-\item{alias}{name(s) of the gate to remove (e.g. "Single Cells").}
+\item{alias}{name(s) of the population(s) to remove (e.g. "Single Cells"). By default all descendant populations will be removed as well.}
 
 \item{gtfile}{name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv").}
-
-\item{children}{logical indicating whether descendant populations should also be removed from the gtfile, set to \code{TRUE} by default.}
 }
 \value{
 an object of class \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed.

@@ -137,16 +137,17 @@ selectFrames <- function(fs, pData){
 #' Remove Gate(s) and Edit gatingTemplate .csv File
 #' 
 #' @param gs an object of class \code{GatingSet}.
-#' @param alias name(s) of the gate to remove (e.g. "Single Cells").
+#' @param alias name(s) of the population(s) to remove (e.g. "Single Cells"). By default all descendant populations will be removed as well.
 #' @param gtfile name of the \code{gatingTemplate} csv file (e.g. "gatingTemplate.csv").
-#' @param children logical indicating whether descendant populations should also be removed from the gtfile, set to \code{TRUE} by default.
-#' 
+#'
 #' @return an object of class \code{gatingSet} with gate and children removed, as well as gatingTemplate file with population removed.
+#' 
+#' @importFrom flowWorkspace getDescendants Rm
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @export
-removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
+removeGate <- function(gs, alias = NULL, gtfile = NULL){
   
   # Supply alias
   if(is.null(alias)){
@@ -162,48 +163,23 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL, children = TRUE){
   
   }
   
+  # Get children from GatingSet
+  chldrn <- sapply(alias, function(x) basename(getDescendants(gs[[1]], x)))
+  chldrn <- unlist(chldrn, use.names = FALSE)
+  chldrn <- unique(chldrn)
+  
   # Read in gatingTemplate
   gt <- read.csv(gtfile, header = TRUE)
   
-  # For each alias remove from GatingSet and gatingTemplate
-  lapply(alias, function(x){
-    
-    # Remove node & children from GatingSet
-    Rm(x, gs)
-    
-    # Remove row entry from gatingTemplate
-    if(children == TRUE){
-    
-    # Remove rows with alias or parent = alias
-    if(length(which(gt$alias == x)) == 0){
-      
-      stop("Supplied alias is not a valid name for a gated population.")
-      
-    }else if(length(which(gt$parent == x)) != 0){
-      
-    indx <- c(which(gt$alias == x), which(gt$parent == x))
-    gt <- gt[-indx,]  
-    write.csv(gt, gtfile, row.names = FALSE)
-      
-    }else if(length(which(gt$parent == x)) == 0){
-      
-      indx <- which(gt$alias == x)
-      gt <- gt[-indx,]  
-      write.csv(gt, gtfile, row.names = FALSE)
-      
-    }
-    
-    }else if(children == FALSE){
-      
-      indx <- which(gt$alias == x)
-      gt <- gt[-indx,]  
-      write.csv(gt, gtfile, row.names = FALSE)
-      
-    }
-  })
+  # Remove all rows with alias = chldrn
+  gt <- gt[!gt$alias %in% chldrn,]
   
-  return(gs)
+  # Remove nodes from GatingSet
+  Rm(alias, gs)
+
+  write.csv(gt, gtfile, row.names = FALSE)
   
+  assign(deparse(substitute(x)), gs, envir=globalenv())
 }
 
 #' Extract Saved Gate(s) from gatingTemplate.
