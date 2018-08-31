@@ -245,19 +245,82 @@ drawCompPlots <- function(fs, pdfile = NULL, subSample = 2500, title = "Compensa
 #' @export
 plotGates <- function(gates, col = "red"){
   
-  for(i in 1:length(gates)){
+    for(i in 1:length(gates)){
     
-    if(class(gates[[i]]) == "rectangleGate"){
+    if(class(gates[[i]]) == "rectangleGate" ){
       
+      if(length(gates[[i]]@min) == 2){
+      
+      # Replace -Inf x values for plotting
+      if(is.infinite(gates[[i]]@min[1])){
+        
+        gates[[i]]@min[1] <- par("usr")[1]
+        
+      }
+      
+      # Replace Inf x values for plotting
+      if(is.infinite(gates[[i]]@max[1])){
+        
+        gates[[i]]@max[1] <- par("usr")[2]
+        
+      }
+      
+      # Replace -Inf y values for plotting
+      if(is.infinite(gates[[i]]@min[2])){
+        
+        gates[[i]]@min[2] <- par("usr")[3]
+        
+      }
+      
+      # Replace Inf y values for plotting
+      if(is.infinite(gates[[i]]@max[2])){
+        
+        gates[[i]]@max[2] <- par("usr")[4]
+        
+      }
+      
+      points(x = c(gates[[i]]@min[1],gates[[i]]@max[1]), y = c(gates[[i]]@min[2],gates[[i]]@max[2]), col = col, pch = 16)
       rect(xleft = gates[[i]]@min[1], ybottom = gates[[i]]@min[2], xright = gates[[i]]@max[1], ytop = gates[[i]]@max[2], border = col, lwd = 2.5)
+     
+      }else if(length(gates[[i]]@min) == 1){
+       
+      # Replace -Inf values for plotting
+      if(is.infinite(gates[[i]]@min[1])){
+        
+        gates[[i]]@min[1] <- par("usr")[1]
+        
+      }
+      
+      # Replace Inf values for plotting
+      if(is.infinite(gates[[i]]@max[1])){
+        
+        gates[[i]]@max[1] <- par("usr")[2]
+        
+      }
+      
+      # height of horizontal line
+      hln <- 0.5*par("usr")[4]
+      
+      # Add points (x1,hln) and (x2, hln)
+      points(x = c(gates[[i]]@min[1],gates[[i]]@max[1]), y = c(hln,hln), col = col, pch = 16)
+      
+      # Add vertical lines through x1 and x2
+      abline(v = c(gates[[i]]@min[1], gates[[i]]@max[1]), lwd = 2.5, col = col)
+      
+      # Add horizontal line
+      lines(x = c(gates[[i]]@min[1], gates[[i]]@max[1]), y = c(hln,hln), col = col, lwd = 2.5)
+      
+      }
       
     }else if(class(gates[[i]]) == "polygonGate"){
       
+      points(x = c(gates[[i]]@boundaries[,1]), y = c(gates[[i]]@boundaries[,2]), pch = 16, col = col)
       polygon(gates[[i]]@boundaries[,1], gates[[i]]@boundaries[,2], border = col, lwd = 2.5)
       
     }else if(class(gates[[i]]) == "ellipsoidGate"){
       
       gates[[i]] <- as(gates[[i]], "polygonGate")
+      points(x = c(gates[[i]]@boundaries[,1]), y = c(gates[[i]]@boundaries[,2]), pch = 16, col = col)
       polygon(gates[[i]]@boundaries[,1], gates[[i]]@boundaries[,2], border = col, lwd = 2.5)
       
     }
