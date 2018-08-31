@@ -166,16 +166,16 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL){
   # Get children from GatingSet
   chldrn <- sapply(alias, function(x) basename(getDescendants(gs[[1]], x)))
   chldrn <- unlist(chldrn, use.names = FALSE)
-  chldrn <- unique(chldrn)
+  chldrn <- c(alias, unique(chldrn))
   
   # Read in gatingTemplate
   gt <- read.csv(gtfile, header = TRUE)
   
   # Remove all rows with alias = chldrn
-  gt <- gt[!gt$alias %in% chldrn,]
+  gt <- gt[!gt$alias %in% chldrn, ]
   
   # Remove nodes from GatingSet
-  Rm(alias, gs)
+  suppressMessages(Rm(alias, gs))
 
   write.csv(gt, gtfile, row.names = FALSE)
   
@@ -234,7 +234,7 @@ extractGate <- function(parent, alias, gtfile){
 #' @return an object of calss \code{GatingSet} with edited gate applied, as well as gatingTemplate file with editied gate saved.
 #' 
 #' @importFrom flowWorkspace getData
-#' @importFrom data.table as.data.table
+#' @importFrom data.table as.data.table fread fwrite
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
@@ -243,7 +243,7 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   
   # Rename x to gs
   gs <- x
-  fs <- getData(gs, parent)
+  fs <- suppressMessages(getData(gs, parent))
   
   # Restrict to samples matching pData requirements
   if(!is.null(pData)){
@@ -316,10 +316,10 @@ editGate <- function(x, pData = NULL, parent = NULL, alias = NULL, gate_type = N
   
   # Apply entire gatingTemplate to GatingSet
   gt <- gatingTemplate(gtfile)
-  rt <- getData(gs, "root")   # Remove all nodes - extract root
-  gs <- GatingSet(rt)         # Add root to GatingSet
+  rt <- suppressMessages(getData(gs, "root"))   # Remove all nodes - extract root
+  gs <- suppressMessages(GatingSet(rt))         # Add root to GatingSet
   
-  gating(gt,gs)
+  suppressMessages(gating(gt,gs))
   
   assign(deparse(substitute(x)), gs, envir=globalenv())
     
