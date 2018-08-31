@@ -43,8 +43,13 @@ gs <- transform(gs, trans)
 
 ```
 
+```{r, eval = TRUE, echo = FALSE, message = FALSE}
+gt <- suppressMessages(gatingTemplate("Manipulation gatingTemplate Full.csv"))
+suppressMessages(gating(gt,gs))
+```
+
 ## 2.2. Gate Samples Using drawGate
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 drawGate(gs,
          parent = "root",
          alias = "Cells",
@@ -54,7 +59,7 @@ drawGate(gs,
 ```
 ![](Cells.png)
 
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 drawGate(gs,
          parent = "Cells",
          alias = "Single Cells",
@@ -64,7 +69,7 @@ drawGate(gs,
 ```
 ![](Single Cells.png)
 
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 drawGate(gs,
          parent = "Single Cells",
          alias = "Live Cells",
@@ -74,7 +79,7 @@ drawGate(gs,
 ```
 ![](Live Cells.png)
 
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 drawGate(gs,
          parent = "Live Cells",
          alias = "T Cells",
@@ -84,7 +89,7 @@ drawGate(gs,
 ```
 ![](T Cells.png)
 
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 drawGate(gs,
          parent = "T Cells",
          alias = c("CD4 T Cells","CD8 T Cells"),
@@ -107,7 +112,7 @@ drawGate(gs,
 The **gate_type** argument is not necessary if the gate_type of the new gate is to be the same as the old one. This argument allows users to change the **gate_type** of the existing gate(s) if necessary. We will demonstrate its use below:
 
 Since no gate_type is supplied the new gate will have the same gate_type as the existing gate:
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 editGate(gs,
          parent = "root",
          alias = "Cells",
@@ -116,7 +121,7 @@ editGate(gs,
 ![](editGate1.png)
 
 gate_type = "ellipse" will change the existing polygon gate to an ellipsoid gate - notice how the existing gate has been updated based on our last editGate call:
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 editGate(gs,
          parent = "root",
          alias = "Cells",
@@ -126,7 +131,7 @@ editGate(gs,
 ![](editGate2.png)
 
 Users can edit any gates with **editGate** including 1-D interval gates:
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 editGate(gs,
          parent = "Live Cells",
          alias = "T Cells",
@@ -142,10 +147,17 @@ editGate(gs,
 * Remove gate(s) entries from the gatingTemplate.
 
 For example to remove the T Cells gate:
-```{r, eval = TRUE, message = FALSE}
+```{r, eval = FALSE, message = FALSE}
 removeGate(gs,
            alias = "CD4 T Cells",
            gtfile = "Manipulation gatingTemplate.csv")
+```
+
+```{r, eval = TRUE, echo = FALSE}
+gt <- suppressMessages(gatingTemplate("Manipulation gatingTemplate.csv"))
+gs <- getData(gs, "root")
+gs <- GatingSet(gs)
+suppressMessages(gating(gt,gs))
 ```
 
 T Cells node no longer exists in the GatingSet:

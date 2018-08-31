@@ -47,7 +47,7 @@ draw___(fr, channels, alias = NULL, subSample = 250000, plot = TRUE, labs = TRUE
 To demonstrate the use of cytoSuite's gating functions we will use the "Activation" flowSet shipped with **cytoSuite**. This flowSet contains two samples from an *in vitro* activation assay where activated dendritic cells pulsed with ovalbumin were used to stimulate OT-I (CD8+) and OT-II (CD4+) transgenic T cells. For more information about this flowSet see **?Activation**.
 
 ## 2.1 Prepare Samples for Gating
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # Load in required packages
 library(cytoSuite)
 
@@ -69,113 +69,93 @@ fr <- as(fs, "flowFrame")
 ```
 
 ## 2.2 drawPolygon
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate cells based on FSC-A & SSC-A - close gate by right click & "stop" - save gate to gts
 gts <- drawPolygon(fr, alias = "Cells", channels = c("FSC-A","SSC-A"))
 ```
 ![](drawPolygon.gif)
-```{r echo = TRUE, eval = TRUE}
-# gts is a filters list containing the constructed gates
-class(gts)
-gts[[1]]
-
-# Apply gate to all samples
+```{r echo = TRUE, eval = FALSE}
+# gts is a filters list containing the constructed gates that can be easily applied to samples
 Cells <- Subset(fr, gts[[1]])
 ```
 
 ## drawRectangle
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate single cells by selecting 2 diagonal points of rectangle - add gate to gts
 gts <- drawRectangle(Cells, alias = "Single Cells", channels = c("SSC-W","SSC-H"))
 ```
 ![](drawRectangle.gif)
-```{r echo = TRUE, eval = TRUE}
-# gts is a filters list containing the constructed gates
-gts 
-gts[[1]]
-
-# Apply gate to all samples
+```{r echo = TRUE, eval = FALSE}
+# gts is a filters list containing the constructed gates that can be easily applied to samples
 Singlets <- Subset(Cells, gts[[1]])
 ```
 
 ## drawBoundary
 ### 1-Dimensional Boundary Gate
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate live cells as Hoechst- Alexa Fluor 405-A - gate not applied to demonstrate 2-D boundary gates
 drawBoundary(Singlets, alias = "Cells", channels = "Alexa Fluor 405-A")
 ```
 ![](drawBoundary1D.gif)
 
 ### 2-Dimensional Boundary Gate
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate live cells using 2-D boundary gate
 gts <- drawBoundary(Singlets, alias = "Live Cells", channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"))
 ```
 ![](drawBoundary2D.gif)
-```{r echo = TRUE, eval = TRUE}
-# gts is a filters list containing the constructed gates
-gts 
-gts[[1]]
-
-# Apply gate to all samples
+```{r echo = TRUE, eval = FALSE}
+# gts is a filters list containing the constructed gates that can be easily applied to samples
 Live <- Subset(Singlets, gts[[1]])
 ```
 
 ## drawThreshold
 ### 1-Dimensional Threshold Gate
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate T cells as Va2-PE+ - gate not applied to demonstrate 2-D threshold gates
 drawThreshold(Live, alias = "T Cells", channels = "PE-A")
 ```
 ![](drawThreshold1D.gif)
 
 ### 2-Dimensional Threshold Gate
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate T cells as Va2-PE+ using 2-D threshold gate
 gts <- drawThreshold(Live, alias = "T Cells", channels = c("APC-Cy7-A","PE-A"))
 ```
 ![](drawThreshold2D.gif)
-```{r echo = TRUE, eval = TRUE}
-# gts is a filters list containing the constructed gates
-gts 
-gts[[1]]
-
-# Apply gate to all samples
+```{r echo = TRUE, eval = FALSE}
+# gts is a filters list containing the constructed gates that can be easily applied to samples
 Va2 <- Subset(Live, gts[[1]])
 ```
 
 ## drawInterval
 ### 1-Dimensional Interval Gate
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate Dendritic cells CD11c+ APC cy7 using 1D interval gate - gate not applied to demonstrate 2D interval gates
 drawInterval(Live, alias = "Dendritic Cells", channels = "APC-Cy7-A")
 ```
 ![](drawInterval1D.gif)
 
 ### 2-Dimensional Interval Gate
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate dendritic cells CD11c+ APC Cy7 using 2D interval gate
 gts <- drawInterval(Live, alias = "Dendritic Cells", channels = c("Qdot 605-A", "APC-Cy7-A"), axis = "y")
 ```
 ![](drawInterval2D.gif)
-```{r echo = TRUE, eval = TRUE}
-# gts is a filters list containing the constructed gates
-gts 
-gts[[1]]
-
-# Apply gate to all samples
+```{r echo = TRUE, eval = FALSE}
+# gts is a filters list containing the constructed gates that can be easily applied to samples
 DC <- Subset(Live, gts[[1]])
 ```
 
 ## drawEllipse
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate CD8+ T cells using ellipsoid gate - gate not applied to demonstrate quadrant and web gates
 drawEllipse(Va2, alias = "CD8 T Cells", channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
 ```
 ![](drawEllipse.gif)
 
 ## drawQuadrants
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate CD4 & CD8 T cells using quadrant gates - gates not applied to demonstrate web gates
 # Quadrant gates are named from bottom left anticlockwise to top left
 drawQuadrants(Va2, alias = c("CD4- CD8-","CD4+ CD8-","CD4+ CD8+","CD4+ CD8+"), channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
@@ -183,24 +163,20 @@ drawQuadrants(Va2, alias = c("CD4- CD8-","CD4+ CD8-","CD4+ CD8+","CD4+ CD8+"), c
 ![](drawQuadrants.gif)
 
 ## drawWeb
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate CD4 & CD8 T cells using web gates - gates not applied to demonstrate web gates
 # Gates are named from bottom left anticlockwise to top left
 gts <- drawWeb(Va2, alias = c("DN","CD4 T Cells","CD8 T Cells"), channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
 ```
 ![](drawWeb.gif)
-```{r echo = TRUE, eval = TRUE}
-# gts is a filters list containing the constructed gates
-gts 
-gts[[1]]
-
-# Apply gate to all samples
+```{r echo = TRUE, eval = FALSE}
+# gts is a filters list containing the constructed gates that can be easily applied to samples
 CD4 <- Subset(Va2, gts[[2]])
 CD8 <- Subset(Va2, gts[[3]])
 ```
 
 ## Multiple Gates
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate CD4 & CD8 T cells using multiple rectangle gates - gates not applied
 # Number of gates is determined based on how many populations are specified in "alias"
 drawRectangle(Va2, alias = c("CD4 T Cells","CD8 T Cells"), channels = c("Alexa Fluor 700-A", "Alexa Fluor 488-A"))
@@ -208,7 +184,7 @@ drawRectangle(Va2, alias = c("CD4 T Cells","CD8 T Cells"), channels = c("Alexa F
 ![](MultiGates.gif)
 
 ## Mixed Gates
-```{r echo = TRUE, eval = TRUE, fig.keep = 'none'}
+```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate CD4 & CD8 T cells using mixed gates - gates not applied
 # Gating functions can be mixed by setting plot = FALSE for subsequent gates & keep plotting window open
 drawRectangle(Va2, alias = "CD4 T Cells", channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
