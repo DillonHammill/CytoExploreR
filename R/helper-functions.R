@@ -125,7 +125,7 @@ selectFrames <- function(fs, pData){
   rows <- pd[[pData[1]]] == pData[2]
   
   # Get sampleNames of these rows
-  sn <- rownames(pd)[!is.na(rows)]
+  sn <- rownames(pd)[which(is.na(rows))]
   
   # Extract these samples by name from flowSet
   fs <- fs[sn]
