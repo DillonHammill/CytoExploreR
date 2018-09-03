@@ -123,9 +123,10 @@ selectFrames <- function(fs, pData){
   
   # Find which rows to extract
   rows <- pd[[pData[1]]] == pData[2]
+  rows[which(is.na(rows))] <- FALSE
   
   # Get sampleNames of these rows - exclude NA
-  sn <- rownames(pd)[-which(is.na(rows))]
+  sn <- rownames(pd)[rows]
   
   # Extract these samples by name from flowSet
   fs <- fs[sn]
