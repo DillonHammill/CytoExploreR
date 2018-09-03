@@ -268,7 +268,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 #' name as the specified \code{spfile}. 
 #'
 #' @param x object of class \code{GatingSet}.
-#' @param name of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").
+#' @param alias name of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").
 #' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing. If \code{spfile} is not supplied
 #' the spillover matrix will be extracted directly from the \code{flowSet} or \code{GatingSet}.
 #' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.

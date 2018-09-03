@@ -11,14 +11,14 @@
 \arguments{
 \item{x}{object of class \code{GatingSet}.}
 
+\item{alias}{name of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").}
+
 \item{spfile}{name of spillover matrix csv file including .csv file extension to use as a starting point for editing. If \code{spfile} is not supplied
 the spillover matrix will be extracted directly from the \code{flowSet} or \code{GatingSet}.}
 
 \item{subSample}{numeric indicating the number of events to plot, set to 5000 events by default.}
 
 \item{...}{additional arguments (not used).}
-
-\item{name}{of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").}
 }
 \value{
 save edited spillover matrix to .csv file named "Spillover Matrix.csv" or spfile.
