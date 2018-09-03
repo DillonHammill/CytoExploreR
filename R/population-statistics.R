@@ -1,109 +1,191 @@
-#' Extract Population Level Statistics from GatingSet.
+#' Compute Population Level Statistics for a GatingSet.
 #'
-#' \code{PopStats} function allows easy extraction of population level statistics from a \code{GatingSet} object,
-#' including geometric mean and median fluorescent intensities. \code{PopStats} searches \code{GatingSet} object for logicle
-#' transformation parameters and if present performs the inverse logicle transformation prior to calculation of relevant
-#' statistic. By default if no channels are supplied \code{PopStats} returns statistics for channels containing \code{markernames},
-#' if no \code{markernames} are found statistics are performed on all fluorescent channels.
+#' \code{computePopStats} function allows easy extraction of population level statistics from a \code{GatingSet} object,
+#' including mean, geometirc mean and median fluorescent intensities as well as population counts and frequencies. 
+#' \code{PopStats} searches \code{GatingSet} object for logicle transformation parameters and if present performs the inverse
+#' logicle transformation prior to calculation of relevant statistic. Users can also supply their own transformerList to the
+#' "trans" argument which will be used for the inverse transformation. By default if no channels are supplied \code{computePopStats} 
+#' returns statistics for channels containing \code{markernames}, if no \code{markernames} are found statistics are performed on all 
+#' channels.
 #'
 #' @param gs a \code{GatingSet} object defining populations for which statistics should be calulated.
-#' @param pops a vector containing the \code{node} names of the populations of interest.
+#' @param parent name of the parent population to use for frequency calculations.
+#' @param alias a vector containing the \code{node} names of the populations of interest.
 #' @param stat specify the statistic of interest by name, can be either "mean", "median" or "count". By default we use the more robust
 #' median fluorescent intensity (MedFI).
 #' @param channels a vector of channel names for which population statistics should be calculated, all channels by default.
+#' @param trans object of class transformerList to be used for inverse logicle transformation.
 #'
 #' @return a \code{list} object containing the calculated statistics for specified populations in all samples.
 #'
-#' @keywords population, statistics, median, geometric mean, MFI
+#' @keywords population, statistics, mean, median, geometric mean, MFI, count, frequency
+#' 
+#' @importFrom BiocGenerics colnames
+#' 
 #' @export
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-getPopMFI <- function(gs, pops, stat = "median", channels = NULL){
+computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", channels = NULL, trans = NULL){
   
-  # If no markernames present use all fluorescent channels
-  if(is.null(channels)){
-    if(length(markernames(gs)) == 0){
-      channels <- FlowDJ::fluor_channels(gs@data[[1]])
-    } else {
-      channels <- c(gs@data[[1]]@parameters$name[!is.na(gs@data[[1]]@parameters$desc)])
-    }
-  } else {
+  # gs is not a GatingSet
+  if(class(gs) != "GatingSet"){
+    
+    stop("computePopStats can only be applied to an object of class GatingSet.")
     
   }
   
-  # Check whether logicle transformation has been applied to GatingSet
-  if(length(gs@transformation) == 0){
-    message("No transformation parameters found in GatingSet: inverse logicle transformation has not been applied.")
-    inv_trans <- FALSE
-  } else {
-    message("Inverse logicle transformation has been applied.")
-    inv_trans <- TRUE
+  # No alias supplied
+  if(is.null(alias)){
+    
+    stop("Please supply the names of the population(s) as the alias argument.")
+    
   }
   
-  # Extract relevant statistic for calculation
+  # No channels supplied use all channels
+  if(is.null(channels)){
+    
+    channels <- colnames(gs)
+    
+  }
+  
+  # Extract relevant function for calculation
   if(stat %in% c("mean","median")){
+    
     func <- match.fun(stat)
-  } else if (stat == "count"){
+    inv.trans <- TRUE
+    
+  }else if(stat == "count"){
+    
     func <- match.fun("length")
     channels <- c("FSC-A")
+    inv.trans <- FALSE
+    
+  }else if(stat == "mode"){
+    
+    func <- function(x) {density(x)$x[which.max(density(x, adjust = 1.5)$y)]}
+    inv.trans <- TRUE
+    
+  }else if(stat == "geomean"){
+    
+    func <- function(x) {exp(mean(log(x)))}
+    inv.trans <- TRUE
+    
+  }else if(stat == "freq"){
+    
+    func <- match.fun("length")
+    channels <- c("FSC-A")
+    inv.trans <- FALSE
+    
+  }else{
+    
+    func <- match.fun(stat)
+    inv.trans <- FALSE
+    
   }
+
   
   # Extract populations from GatingSet and store results for each population as separate elements of a list
   results <- list()
-  for (pop in pops) {
+  
+  # For stat == "freq" get counts for parent and all pops - later divide alias by parent * 100
+  if(stat == "freq"){
+    
+    alias <- c(parent,alias)
+    
+  }
+  
+  for (pop in alias) {
     popData <- getData(gs, pop)
     
     # Inverse logicle transformation if required
-    if(inv_trans == TRUE){
-      inv.trans <- transformList(names(gs@transformation), lapply(gs@transformation, `[[`, "inverse"))
-      popData <- transform(popData, inv.trans)
+    if(inv.trans == TRUE){
+      
+      # Check whether logicle transformation has been applied to channels - use range
+      # For supplied channels check range between -5 and 10
+      # If transformed - inverse transformation with trans or use @transformation slot of GatingSet
+      
+      if(length(gs[[1]]@transformation) == 0){
+        
+        # No transformation has been applied - use data as is
+
+      }else{
+        
+        # Some transformation has been applied - inverse transform using trans or @transformation
+        if(!is.null(trans)){
+          
+          inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
+          popData <- transform(popData, inv)
+          
+        }else{
+          
+          inv <- transformList(names(gs[[1]]@transformation), lapply(gs[[1]]@transformation, `[[`, "inverse"))
+          popData <- transform(popData, inv) 
+          
+        }
+        
+      }
+
+    }else{
+      
+      # No inverse transformation required
+      
     }
     
-    # Calculate statistic for each supplied channel by name or inidices
-    MedFI <- fsApply(popData, function(fr) apply(exprs(fr[, channels]), 2, func))
-    results[[pop]] <- MedFI
+  # Calculate statistic for each supplied channel by name or inidices
+  MedFI <- fsApply(popData, function(fr) apply(exprs(fr[, channels]), 2, func))
+  results[[pop]] <- MedFI
+  
+  }
+  
+  # if stat == "freq" divide each alias by parent *100
+  if(stat == "freq"){
+
+    # Repeat columns 1 for each parent
+    results <- lapply(results, function(x){
+      
+      x <- matrix(x[,1], nrow = length(fs), ncol = length(parent))
+      colnames(x) <- parent
+      rownames(x) <- sampleNames(fs)
+      return(x)
+      
+    })
+    
+    # Parents
+    prnts <- matrix(nrow = length(fs), ncol = length(parent))
+    colnames(test) <- parent
+    rownames(test) <- sampleNames(fs)
+    for(i in 1:length(parent)){
+      
+      prnts[,i] <- results[[i]][,1]
+      
+    }
+    
+    # Divide each column by parent col1 by parent1 etc.
+    for(i in 1:length(results)){
+      
+      results[[i]] <- (results[[i]] / prnts)*100
+      
+    }
+    
+    results <- results[-c(1:length(parent))]
   }
   
   # Change colnames for count data to be pop.Count
   if(stat == "count"){
+    
     results <- do.call("cbind",results)
     titles <- c()
+    
     for(pop in pops){
+      
       titles <- c(titles,paste(pop,"Count", sep = "."))
+      
     }
-    colnames(results) <- titles
+    
+    base::colnames(results) <- titles
+    
   }
   
   return(results)
-}
 
-#' Get Population Frequency
-#' 
-#' @param gs an object of class \code{GatingSet}.
-#' @param alias name of the population.
-#' @param parent name of the parent population to use for calculation
-#' 
-#' @importFrom flowCore fsApply
-#' @importFrom flowCore nrow
-#' 
-#' @export
-getFreq <- function(gs, alias, parent, type = "percent"){
-  
-  # Extract Population Events
-  pop <- getData(gs, alias)
-  pop.events <- fsApply(pop, function(fr){
-    nrow(fr)
-  })
-  
-  # Extract Parent Population
-  prnt <- getData(gs, parent)
-  prnt.events <- fsApply(prnt, function(fr){
-    nrow(fr)
-  })
-  
-  # Calculate Percentage
-  prcnt <- (pop.events/prnt.events)*100
-  
-  return(prcnt)
-  
 }
