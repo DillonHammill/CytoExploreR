@@ -264,8 +264,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
   
   }
   
-  gs <- x
-  fs <- flowWorkspace::getData(gs, parent)
+  fs <- flowWorkspace::getData(x, parent)
   
   # Restrict to samples matching pData requirements
   if(!is.null(pData)){
@@ -354,7 +353,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     for(i in 1:length(alias)){
       
       pops[[i]] <- add_pop(
-        gs, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
+        gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]])
       )
     
@@ -371,7 +370,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     for(i in 1:length(alias)){
       
       pops[[i]] <- add_pop(
-        gs, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
+        gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]])
       )
     
@@ -389,7 +388,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     for(i in 1:length(alias)){
       
       pops[[i]] <- add_pop(
-        gs, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
+        gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]])
       )
     
@@ -400,7 +399,5 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, pData = NU
     write.csv(gt, gtfile, row.names = FALSE)
     
   }
-  
-  return(gs)
   
 })
