@@ -5,7 +5,7 @@
 \title{Compute Population Level Statistics for a GatingSet.}
 \usage{
 computePopStats(gs, parent = NULL, alias = NULL, stat = "median",
-  channels = NULL, trans = NULL)
+  channels = NULL, inv.trans = TRUE, trans = NULL)
 }
 \arguments{
 \item{gs}{a \code{GatingSet} object defining populations for which statistics should be calulated.}
@@ -17,7 +17,7 @@ computePopStats(gs, parent = NULL, alias = NULL, stat = "median",
 \item{stat}{specify the statistic of interest by name, can be either "mean", "median" or "count". By default we use the more robust
 median fluorescent intensity (MedFI).}
 
-\item{channels}{a vector of channel names for which population statistics should be calculated, all channels by default.}
+\item{channels}{a vector of channel names for which population statistics should be calculated, all fluorescent channels by default.}
 
 \item{trans}{object of class transformerList to be used for inverse logicle transformation.}
 }

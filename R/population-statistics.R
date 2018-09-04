@@ -13,7 +13,7 @@
 #' @param alias a vector containing the \code{node} names of the populations of interest.
 #' @param stat specify the statistic of interest by name, can be either "mean", "median" or "count". By default we use the more robust
 #' median fluorescent intensity (MedFI).
-#' @param channels a vector of channel names for which population statistics should be calculated, all channels by default.
+#' @param channels a vector of channel names for which population statistics should be calculated, all fluorescent channels by default.
 #' @param trans object of class transformerList to be used for inverse logicle transformation.
 #'
 #' @return a \code{list} object containing the calculated statistics for specified populations in all samples.
@@ -25,7 +25,7 @@
 #' @export
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", channels = NULL, trans = NULL){
+computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", channels = NULL, inv.trans = TRUE, trans = NULL){
   
   # gs is not a GatingSet
   if(class(gs) != "GatingSet"){
@@ -41,10 +41,10 @@ computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", ch
     
   }
   
-  # No channels supplied use all channels
+  # No channels supplied use all fluorescent channels
   if(is.null(channels)){
     
-    channels <- colnames(gs)
+    channels <- getChannels(gs)
     
   }
   
@@ -52,7 +52,6 @@ computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", ch
   if(stat %in% c("mean","median")){
     
     func <- match.fun(stat)
-    inv.trans <- TRUE
     
   }else if(stat == "count"){
     
@@ -63,12 +62,10 @@ computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", ch
   }else if(stat == "mode"){
     
     func <- function(x) {density(x)$x[which.max(density(x, adjust = 1.5)$y)]}
-    inv.trans <- TRUE
     
   }else if(stat == "geomean"){
     
     func <- function(x) {exp(mean(log(x)))}
-    inv.trans <- TRUE
     
   }else if(stat == "freq"){
     
@@ -82,17 +79,16 @@ computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", ch
     inv.trans <- FALSE
     
   }
-
-  
-  # Extract populations from GatingSet and store results for each population as separate elements of a list
-  results <- list()
   
   # For stat == "freq" get counts for parent and all pops - later divide alias by parent * 100
   if(stat == "freq"){
     
-    alias <- c(parent,alias)
+    alias <- c(parent, alias)
     
   }
+  
+  # Extract populations from GatingSet and store results for each population as separate elements of a list
+  results <- list()  
   
   for (pop in alias) {
     popData <- getData(gs, pop)
@@ -100,46 +96,40 @@ computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", ch
     # Inverse logicle transformation if required
     if(inv.trans == TRUE){
       
-      # Check whether logicle transformation has been applied to channels - use range
-      # For supplied channels check range between -5 and 10
-      # If transformed - inverse transformation with trans or use @transformation slot of GatingSet
-      
-      if(length(gs[[1]]@transformation) == 0){
+      if(is.null(trans)){
         
-        # No transformation has been applied - use data as is
-
-      }else{
-        
-        # Some transformation has been applied - inverse transform using trans or @transformation
-        if(!is.null(trans)){
+        if(is.null(gs[[1]]@transformation)){
           
-          inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
-          popData <- transform(popData, inv)
-          
-        }else{
-          
-          inv <- transformList(names(gs[[1]]@transformation), lapply(gs[[1]]@transformation, `[[`, "inverse"))
-          popData <- transform(popData, inv) 
+          stop("Please supply a transformerList object to 'trans' argument to perform inverse transformations.")
           
         }
         
+        trans <- gs[[1]]@transformation
+        inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
+        popData <- transform(popData, inv)
+        
+      }else if(!is.null(trans)){
+        
+        inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
+        popData <- transform(popData, inv)
+        
       }
-
+      
     }else{
       
       # No inverse transformation required
       
     }
     
-  # Calculate statistic for each supplied channel by name or inidices
-  MedFI <- fsApply(popData, function(fr) apply(exprs(fr[, channels]), 2, func))
-  results[[pop]] <- MedFI
-  
+    # Calculate statistic for each supplied channel by name or inidices
+    MedFI <- fsApply(popData, function(fr) apply(exprs(fr[, channels]), 2, func))
+    results[[pop]] <- MedFI
+    
   }
   
   # if stat == "freq" divide each alias by parent *100
   if(stat == "freq"){
-
+    
     # Repeat columns 1 for each parent
     results <- lapply(results, function(x){
       
@@ -187,5 +177,5 @@ computePopStats <- function(gs, parent = NULL, alias = NULL, stat = "median", ch
   }
   
   return(results)
-
+  
 }
