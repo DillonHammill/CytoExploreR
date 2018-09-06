@@ -126,7 +126,7 @@ checkAlias <- function(alias, gate_type){
   
   }
 
-  if(gate_type == "quadrant" & length(alias) != 4){
+  if(gate_type[1] == "quadrant" & length(alias) != 4){
     
     stop("Supply 4 population names to alias argument to construct quadrant gates.")
     

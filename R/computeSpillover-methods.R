@@ -88,7 +88,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   fr <- as(fs, "flowFrame")
   
   # Apply logicle transformation for gating
-  if(is.null(trans) | class(trans) != "transformList"){
+  if(is.null(trans) | class(trans)[1] != "transformList"){
     
     message("No transformList supplied to transfom channels prior to gating. All fluorescent channels will be transformed using the logicle transformation.")
     
@@ -241,7 +241,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   # Apply logicle transformation for gating
   if(!is.null(trans)){
     
-    if(class(trans) != "transformerList"){
+    if(class(trans)[1] != "transformerList"){
       
       stop("Transformation object should be of class transformerList.")
       
