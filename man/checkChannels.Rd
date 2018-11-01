@@ -2,20 +2,29 @@
 % Please edit documentation in R/validation-functions.R
 \name{checkChannels}
 \alias{checkChannels}
-\title{Check Channels Supplied to drawGate.}
+\title{Check Supplied Channels}
 \usage{
-checkChannels(x, channels)
+checkChannels(x, channels, plot)
 }
 \arguments{
-\item{x}{an object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.}
+\item{x}{an object of class
+\code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 
-\item{channels}{vector of channel names (e.g. c("PE-A","APC-A")).}
+\item{channels}{vector of channel names (e.g. c("PE-A","APC-A")) or marker
+names.}
+
+\item{plot}{logical indicating whether the channels will be used to construct
+a plot, set to TRUE by default to accept 1 or 2 channels only.}
 }
 \value{
-Stop gating process if the supplied channels do ot meet the requirements for drawGate.
+vector of valid channel names.
 }
 \description{
-\code{checkChannels} will check whether the supplied channels are valid for the \code{flowSet} or \code{GatingSet} and that only 1or 2 channels are supplied.
+\code{checkChannels} will check whether the supplied channels are valid for
+the \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowset}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} . \code{checkChannels}
+will also return the channels if the marker names are supplied.
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

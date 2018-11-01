@@ -1,21 +1,48 @@
 #' Edit Spillover Matrix
-#' 
-#' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
-#' or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
-#' and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
-#' from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
-#' then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
-#' matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
-#' matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
-#' so you can track changes in real time. To aid in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
-#' a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
-#' to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
-#' name as the specified \code{spfile}. \code{editSpillover} has methods for both \code{flowSet} and \code{GatingSet} objects 
-#' refer to their respective help pages for more information - ?`editSpillover,flowSet-method` or ?`editSpillover,GatingSet-method`.
-#' 
-#' @param x object of class \code{flowSet} or \code{GatingSet}.
-#' 
+#'
+#' Edit spillover matrices in real-time using a shiny interface.
+#'
+#' \code{editSpillover} provides an interactive shiny interface for editing
+#' fluorescent spillover matrices. \code{editSpillover} takes on either a
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+#' untransformed single stain compensation controls and a universal unstained
+#' control. It is recommended that samples be pre-gated based on FSC and SSC
+#' parameters to obtain a homogeneous population for calculation of fluorescent
+#' spillover. Users begin by selecting the unstained control and a stained
+#' control from dropdown menus of sample names. \code{editSpillover} leverages
+#' \code{plotCyto} to plot the stained sample and overlay the unstained control
+#' in black. Users should then select the channel associated with the selected
+#' control on the \code{x axis} and go through all other channels on the \code{y
+#' axis}. The displayed spillover matrix is extracted directly from the
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} unless another
+#' spillover matrix is supplied through the spfile argument. To edit the
+#' spillover matrix simply modify the appropriate cell in the the table. The new
+#' spillover matrix will be re-applied to the samples with each edit and
+#' automatically re-plotted so you can track changes in real-time. To aid in
+#' selection of an appropriate spillover value, the median fluorescent intensity
+#' of the unstained control is indicated by a red line and median fluorescent
+#' intensity of the stained control is tracked with a purple line. These
+#' features can be turned off by de-selecting the check boxes. Changes to the
+#' spillover matrix are automatically saved to a csv file called
+#' \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not
+#' specified or to the same name as the specified \code{spfile}.
+#' \code{editSpillover} has methods for both
+#' \code{\link[flowCore:flowSet-class]{flowSet}} and
+#' \code{\link[flowCore:flowSet-class]{flowSet}} objects refer to their
+#' respective help pages for more information.
+#'
+#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' @param ... additional method-specific arguments.
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{editSpillover,flowSet-method}}
+#' @seealso \code{\link{editSpillover,GatingSet-method}}
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #'
 #' @export
 setGeneric(name = "editSpillover",
@@ -24,39 +51,78 @@ setGeneric(name = "editSpillover",
 
 
 #' Edit Spillover Matrix - flowSet Method
-#' 
-#' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
-#' or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
-#' and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
-#' from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
-#' then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
-#' matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
-#' matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
-#' so you can track changes in real time. To aid in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
-#' a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
-#' to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
-#' name as the specified \code{spfile}. 
 #'
-#' @param x object of class \code{flowSet}.
-#' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing. If \code{spfile} is not supplied
-#' the spillover matrix will be extracted directly from the \code{flowSet} or \code{GatingSet}.
-#' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.
-#' @param ... additional arguments (not used).
-#' 
-#' @return save edited spillover matrix to .csv file named "Spillover Matrix.csv" or spfile.
-#' 
-#' @importFrom flowWorkspace sampleNames
+#' Edit spillover matrices in real-time using a shiny interface.
+#'
+#' \code{editSpillover} provides an interactive shiny interface for editing
+#' fluorescent spillover matrices. \code{editSpillover} takes on either a
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+#' untransformed single stain compensation controls and a universal unstained
+#' control. It is recommended that samples be pre-gated based on FSC and SSC
+#' parameters to obtain a homogeneous population for calculation of fluorescent
+#' spillover. Users begin by selecting the unstained control and a stained
+#' control from dropdown menus of sample names. \code{editSpillover} leverages
+#' \code{plotCyto} to plot the stained sample and overlay the unstained control
+#' in black. Users should then select the channel associated with the selected
+#' control on the \code{x axis} and go through all other channels on the \code{y
+#' axis}. The displayed spillover matrix is extracted directly from the
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} unless another
+#' spillover matrix is supplied through the spfile argument. To edit the
+#' spillover matrix simply modify the appropriate cell in the the table. The new
+#' spillover matrix will be re-applied to the samples with each edit and
+#' automatically re-plotted so you can track changes in real-time. To aid in
+#' selection of an appropriate spillover value, the median fluorescent intensity
+#' of the unstained control is indicated by a red line and median fluorescent
+#' intensity of the stained control is tracked with a purple line. These
+#' features can be turned off by de-selecting the check boxes. Changes to the
+#' spillover matrix are automatically saved to a csv file called
+#' \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not
+#' specified or to the same name as the specified \code{spfile}.
+#'
+#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' @param spfile name of spillover matrix csv file including .csv file extension
+#'   to use as a starting point for editing. If \code{spfile} is not supplied
+#'   the spillover matrix will be extracted directly from the
+#'   \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' @param subSample numeric indicating the number of events to plot, set to 5000
+#'   events by default.
+#' @param transList \code{\link[flowCore:transformList-class]{transformList}}
+#'   object generated by
+#'   \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
+#'   transform the fluorescent channels of the flowSet.
+#' @param ... additional arguments passed to \code{\link{plotCyto,flowFrame-method}}.
+#'
+#' @return save edited spillover matrix to .csv file named "Spillover
+#'   Matrix.csv" or spfile.
+#'
+#' @importFrom flowWorkspace sampleNames pData
 #' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
-#' 
+#' @importFrom utils read.csv write.csv
+#' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
+#'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
+#'   eventReactive renderPlot
+#' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
+#'   renderRHandsontable hot_cols hot_rows
+#' @importFrom shinythemes shinytheme
+#' @importFrom magrittr %>%
+#' @importFrom methods as
+#' @importFrom stats median loess predict
+#' @importFrom graphics lines
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
+#' @seealso \code{\link{editSpillover,GatingSet-method}}
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#'
 #' @export
-setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = NULL, subSample = 5000, ...){
+setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = NULL, subSample = 5000, transList = NULL, ...){
   
   require(shiny)
   require(shinythemes)
   require(rhandsontable)
-  require(ggcyto)
   
   fs <- x
   nms <- sampleNames(fs)
@@ -77,7 +143,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
   colnames(spill) <- channels
   rownames(spill) <- channels
   
-  # Rhandsontable does handle decimal points if none are supplied in the dataset - if matrix is empty edit first value in second column to 0.01
+  # Rhandsontable does handle decimal points if none are supplied in the dataset - if matrix is empty edit first value in second column to 0.0001
   if(all(spill %in% c(0,1))){
     
     spill[1,2] <- 0.0001
@@ -89,7 +155,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
       theme = shinytheme("yeti"),
       
-      titlePanel("cytoSuite Spillover Matrix Editor"),
+      titlePanel("cytoRSuite Spillover Matrix Editor"),
       
       sidebarPanel(
         selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
@@ -156,88 +222,145 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
       })
       
+      # Apply compensation after each edit
       fs.comp <- eventReactive(values$spill, {
         
         fs <- compensate(fs, values$spill/100)
+        
+        # Apply logicle transformation to fluorescent channels
+        if(!is.null(transList)){
+          
+          if(class(transList)[1] != "transformList"){
+            
+            stop("Please supply a transList object of class transformList.")
+            
+          }else{
+            
+            fs <- transform(fs, transList)
+            
+          }
+          
+        }else{
+          
+          transList <<- estimateLogicle(as(fs,"flowFrame"), channels)
+          fs <- transform(fs, transList)
+          
+        }
         
         return(fs)
         
       })
       
-      
       output$plot <- renderPlot({
         
-        p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = subSample, aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
-        p <- p + geom_hex(bins = 150)
+        # Axes Limits
+        fr.exprs <- exprs(fs.comp()[[input$flowFrame]])
+        xrange <- range(fr.exprs[, input$xchannel])
+        yrange <- range(fr.exprs[, input$ychannel])
         
-        if(input$NIL == TRUE){
-          p <- p + geom_point(data = Subset(fs.comp()[[input$Unstained]], sampleFilter(size = subSample)), color = "black", size = 1.5, alpha = 0.6)
+        # X Axis Limits
+        if(xrange[1] > 0){
+          
+          xmin <- -0.5
+          
+        }else if(xrange[1] <= 0){
+          
+          xmin <- xrange[1]
         }
+        xlim <- c(xmin,4.5)
         
-        if(input$median == TRUE){      
+        
+        # Y Axis Limits
+        if(yrange[1] > 0){
           
-          medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
-          MFI <- data.frame("Channel" = channels, "Median" = medians)
+          ymin <- -0.5
           
-          cutoff <- MFI[match(input$ychannel, MFI$Channel),]
+        }else if(yrange[1] <= 0){
           
-          p <- p + geom_hline(aes(yintercept = Median), color = "red", size = 1.2, data = cutoff)
+          ymin <- yrange[1]
+        } 
+        ylim <- c(ymin,4.5)
+        
+        # Plot
+        if(input$NIL == FALSE){
+          
+          plotCyto(fs.comp()[[input$flowFrame]], channels = c(input$xchannel,input$ychannel), subSample = subSample, transList = transList, main = input$flowFrame, cex.pts = 3, xlim = xlim, ylim = ylim, ...)
+          
+          if(input$median == TRUE){
+            
+            medians <- fsApply(fs.comp(), each_col, "median")[input$Unstained,channels]
+            MFI <- data.frame("Channel" = channels, "Median" = medians)
+            
+            cutoff <- MFI[match(input$ychannel, MFI$Channel),]
+            
+            abline(h = cutoff[2], col = "red", lwd = 2)
+            
+          }
+          
+          if(input$trace == TRUE){
+            cells <- exprs(fs.comp()[[input$flowFrame]])
+            cells <- cells[order(cells[,input$xchannel]),]
+            cells <- as.data.frame(cells)
+            
+            n <- nrow(cells)
+            splt <- seq(1,20,1)
+            r <- ceiling(nrow(cells)/20)
+            cuts <- splt*r
+            cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
+            
+            xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
+            ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
+            
+            medians <- data.frame(unlist(xmedians), unlist(ymedians))
+            colnames(medians) <- c(input$xchannel,input$ychannel)
+            
+            loessMod <- loess(medians[,input$ychannel] ~ medians[,input$xchannel], data = medians, span = 0.9)
+            loessMod <- predict(loessMod)
+            
+            lines(medians[,input$xchannel], loessMod, col = "magenta3", lwd = 3)
+            
+          }
+          
+        }else if(input$NIL == TRUE){
+          
+          plotCyto(fs.comp()[[input$flowFrame]], channels = c(input$xchannel,input$ychannel), overlay = fs.comp()[[input$Unstained]], subSample = subSample, transList = transList, main = input$flowFrame, cex.pts = 3, xlim = xlim, ylim = ylim, ...)
+          
+          if(input$median == TRUE){
+            
+            medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
+            MFI <- data.frame("Channel" = channels, "Median" = medians)
+            
+            cutoff <- MFI[match(input$ychannel, MFI$Channel),]
+            
+            abline(h = cutoff[2], col = "red", lwd = 2)
+            
+          }
+          
+          if(input$trace == TRUE){
+            cells <- exprs(fs.comp()[[input$flowFrame]])
+            cells <- cells[order(cells[,input$xchannel]),]
+            cells <- as.data.frame(cells)
+            
+            n <- nrow(cells)
+            splt <- seq(1,20,1)
+            r <- ceiling(nrow(cells)/20)
+            cuts <- splt*r
+            cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
+            
+            xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
+            ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
+            
+            medians <- data.frame(unlist(xmedians), unlist(ymedians))
+            colnames(medians) <- c(input$xchannel,input$ychannel)
+            
+            loessMod <- loess(medians[,input$ychannel] ~ medians[,input$xchannel], data = medians, span = 0.9)
+            loessMod <- predict(loessMod)
+            
+            lines(medians[,input$xchannel], loessMod, col = "magenta3", lwd = 3)
+            
+          }
+          
         }
-        
-        if(input$trace == TRUE){
-          cells <- exprs(fs.comp()[[input$flowFrame]])
-          cells <- cells[order(cells[,input$xchannel]),]
-          cells <- as.data.frame(cells)
-          
-          n <- nrow(cells)
-          splt <- seq(1,20,1)
-          r <- ceiling(nrow(cells)/20)
-          cuts <- splt*r
-          cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
-          
-          xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
-          ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
-          
-          medians <- data.frame(unlist(xmedians), unlist(ymedians))
-          colnames(medians) <- c(input$xchannel,input$ychannel)
-          
-          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "cyan", size = 1.2)
-          
-        }
-        
-        # if transformation applied use axis_inverse_trans -5 < range <= 10
-        # Ranges
-        xrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel])
-        yrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel])
-        
-        # X Axis
-        if(xrange > -5 & xrange <= 10){
-          
-          p <- p + scale_x_continuous(limits = c(-4,5.5))
-          
-        }else{
-          
-          p <- p + scale_x_logicle(limits = c(-10000,262143))
-          
-        }
-        
-        # Y Axis
-        if(yrange > -5 & yrange <= 10){
-          
-          p <- p + scale_y_continuous(limits = c(-4,5.5))
-          
-        }else{
-          
-          p <- p + scale_y_logicle(limits = c(-10000,262143))
-          
-        }
-        
-        p <- p + facet_null()
-        p <- p + ggtitle(paste(input$flowFrame),"\n")
-        p <- p + xlab(paste("\n",input$xchannel))
-        p <- p + ylab(paste(input$ychannel,"\n"))
-        p <- p + editSpillover_theme()
-        print(p)
         
       })
       
@@ -250,55 +373,120 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
     })
   
-  
 })
 
 #' Edit Spillover Matrix GatingSet Method
 #'
-#' \code{editSpillover} provides an interactive shiny interface for editing fluorescent spillover matrices. \code{editSpillover} takes on either a \code{flowSet} 
-#' or \code{GatingSet} containing untransformed single stain compensation controls and a universal unstained control. It is recommended that samples be pre-gated based on FSC
-#' and SSC parameters to obtain a homogeneous population for calculation of fluorescent spillover. Users begin by selecting the unstained control and a stained control
-#' from dropdown menus of sample names. \code{editSpillover} leverages \code{ggcyto} to plot the stained sample and overlay the unstained control in black. Users should
-#' then select the channel associated with the selected control on the \code{x axis} and go through all other channels on the \code{y axis}. The displayed spillover
-#' matrix is extracted directly from the \code{flowSet} or \code{GatingSet} unless another spillover matrix is supplied through the spfile argument. To edit the spillover
-#' matrix simply modify the appropriate cell in the the table. The new spillover matrix will be re-applied to the samples with each edit and automatically re-plotted
-#' so you can track changes in real time. To aid in selection of an appropriate spillover value, the median fluorescent intensity of the unstained control is indicated by
-#' a red line and median fluorescent intensity of the stained control is tracked with a blue line. These features can be turned off by de-selecting the check boxes. Changes
-#' to the spillover matrix are automatically saved to a csv file called \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not specified or to the same 
-#' name as the specified \code{spfile}. 
+#' Edit spillover matrices in real-time using a shiny interface.
 #'
-#' @param x object of class \code{GatingSet}.
-#' @param alias name of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").
-#' @param spfile name of spillover matrix csv file including .csv file extension to use as a starting point for editing. If \code{spfile} is not supplied
-#' the spillover matrix will be extracted directly from the \code{flowSet} or \code{GatingSet}.
-#' @param subSample numeric indicating the number of events to plot, set to 5000 events by default.
-#' @param ... additional arguments (not used).
-#' 
-#' @return save edited spillover matrix to .csv file named "Spillover Matrix.csv" or spfile.
-#' 
-#' @importFrom flowWorkspace sampleNames getData
+#' \code{editSpillover} provides an interactive shiny interface for editing
+#' fluorescent spillover matrices. \code{editSpillover} takes on either a
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+#' untransformed single stain compensation controls and a universal unstained
+#' control. It is recommended that samples be pre-gated based on FSC and SSC
+#' parameters to obtain a homogeneous population for calculation of fluorescent
+#' spillover. Users begin by selecting the unstained control and a stained
+#' control from dropdown menus of sample names. \code{editSpillover} leverages
+#' \code{plotCyto} to plot the stained sample and overlay the unstained control
+#' in black. Users should then select the channel associated with the selected
+#' control on the \code{x axis} and go through all other channels on the \code{y
+#' axis}. The displayed spillover matrix is extracted directly from the
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} unless another
+#' spillover matrix is supplied through the spfile argument. To edit the
+#' spillover matrix simply modify the appropriate cell in the the table. The new
+#' spillover matrix will be re-applied to the samples with each edit and
+#' automatically re-plotted so you can track changes in real-time. To aid in
+#' selection of an appropriate spillover value, the median fluorescent intensity
+#' of the unstained control is indicated by a red line and median fluorescent
+#' intensity of the stained control is tracked with a purple line. These
+#' features can be turned off by de-selecting the check boxes. Changes to the
+#' spillover matrix are automatically saved to a csv file called
+#' \code{"Spillover Matrix.csv"} in the case where the \code{spfile} is not
+#' specified or to the same name as the specified \code{spfile}.
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param parent name of the pre-gated population to be plotted (e.g. "Single
+#'   Cells").
+#' @param spfile name of spillover matrix csv file including .csv file extension
+#'   to use as a starting point for editing. If \code{spfile} is not supplied
+#'   the spillover matrix will be extracted directly from the
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param subSample numeric indicating the number of events to plot, set to 5000
+#'   events by default.
+#' @param transList object of class
+#'   \code{\link[flowCore:transformList-class]{transformList}} or
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}}
+#'   generated by \code{\link[flowCore:logicleTransform]{estimateLogicle}} which
+#'   was used to transform the fluorescent channels of the flowSet.
+#' @param ... additional arguments passed to \code{\link{plotCyto,flowFrame-method}}.
+#'
+#' @return save edited spillover matrix to .csv file named "Spillover
+#'   Matrix.csv" or spfile.
+#'
+#' @importFrom flowWorkspace sampleNames pData
 #' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
-#' 
+#' @importFrom utils read.csv write.csv
+#' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
+#'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
+#'   eventReactive renderPlot
+#' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
+#'   renderRHandsontable hot_cols hot_rows
+#' @importFrom shinythemes shinytheme
+#' @importFrom magrittr %>%
+#' @importFrom methods as
+#' @importFrom stats median loess predict
+#' @importFrom graphics lines
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
+#' @seealso \code{\link{editSpillover,flowSet-method}}
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#'
 #' @export
-setMethod(editSpillover, signature = "GatingSet", definition = function(x, alias = NULL, spfile = NULL, subSample = 5000, ...){
+setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = NULL, spfile = NULL, subSample = 5000, transList = NULL, ...){
   
   require(shiny)
   require(shinythemes)
   require(rhandsontable)
-  require(ggcyto)
   
   gs <- x
   nms <- sampleNames(gs)
   channels <- getChannels(gs)
   
+  # Transformations
+  if(is.null(transList)){
+    
+    trnsfrms <- lapply(channels, function(channel){getTransformations(gs[[1]], channel, only.function = FALSE)})
+    names(trnsfrms) <- channels
+  
+    # Remove NULL transforms
+    trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+  
+    if(length(trnsfrms) == 0){
+    
+      transList <- NULL
+    
+    }
+    
+  }
+  
+  # Convert to transformerList
+  if(!is.null(transList)){
+    
+    transList <- transformerList(names(transList), transList)
+    
+  }
+  
   # Extract population for downstream plotting
-  if(!is.null(alias)){
+  if(!is.null(parent)){
     
-    fs <- getData(gs, alias)
+    fs <- getData(gs, parent)
     
-  }else if(is.null(alias)){
+  }else if(is.null(parent)){
     
     fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
     
@@ -331,7 +519,7 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, alias
       
       theme = shinytheme("yeti"),
       
-      titlePanel("cytoSuite Spillover Matrix Editor"),
+      titlePanel("cytoRSuite Spillover Matrix Editor"),
       
       sidebarPanel(
         selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
@@ -398,88 +586,150 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, alias
       
       })
       
+      # Apply compensation after each edit
       fs.comp <- eventReactive(values$spill, {
         
         fs <- compensate(fs, values$spill/100)
+        
+        # Apply logicle transformation to fluorescent channels
+        if(!is.null(transList)){
+          
+          if(class(transList)[1] == "transformerList"){
+            
+            transList <<- transformList(names(transList),lapply(transList, `[[`, "transform"))
+            
+          }else if(class(transList)[1] == "transformList"){
+            
+            transList <<- transList
+            fs <- transform(fs, transList)
+            
+          }else{
+            
+            stop("Supplied transList should be of class transformList or transFormerList.")
+            
+          }
+          
+        }else{
+          
+          transList <<- estimateLogicle(as(fs,"flowFrame"), channels)
+          fs <- transform(fs, transList)
+          
+        }
         
         return(fs)
         
       })
       
-      
       output$plot <- renderPlot({
         
-        p <- ggcyto(fs.comp()[[input$flowFrame]], max_nrow_to_plot = subSample, aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)))
-        p <- p + geom_hex(bins = 150)
+        # Axes Limits
+        fr.exprs <- exprs(fs.comp()[[input$flowFrame]])
+        xrange <- range(fr.exprs[, input$xchannel])
+        yrange <- range(fr.exprs[, input$ychannel])
         
-        if(input$NIL == TRUE){
-          p <- p + geom_point(data = Subset(fs.comp()[[input$Unstained]], sampleFilter(size = subSample)), color = "black", size = 1.5, alpha = 0.6)
+        # X Axis Limits
+        if(xrange[1] > 0){
+          
+          xmin <- -0.5
+          
+        }else if(xrange[1] <= 0){
+          
+          xmin <- xrange[1]
         }
+        xlim <- c(xmin,4.5)
         
-        if(input$median == TRUE){      
+        
+        # Y Axis Limits
+        if(yrange[1] > 0){
           
-          medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
-          MFI <- data.frame("Channel" = channels, "Median" = medians)
+          ymin <- -0.5
           
-          cutoff <- MFI[match(input$ychannel, MFI$Channel),]
+        }else if(yrange[1] <= 0){
           
-          p <- p + geom_hline(aes(yintercept = Median), color = "red", size = 1.2, data = cutoff)
+          ymin <- yrange[1]
+        } 
+        ylim <- c(ymin,4.5)
+        
+        # Plot
+        if(input$NIL == FALSE){
+          
+          plotCyto(fs.comp()[[input$flowFrame]], channels = c(input$xchannel,input$ychannel), subSample = subSample, transList = transList, main = input$flowFrame, cex.pts = 3, xlim = xlim, ylim = ylim, ...)
+          
+          if(input$median == TRUE){
+            
+            medians <- fsApply(fs.comp(), each_col, "median")[input$Unstained,channels]
+            MFI <- data.frame("Channel" = channels, "Median" = medians)
+            
+            cutoff <- MFI[match(input$ychannel, MFI$Channel),]
+            
+            abline(h = cutoff[2], col = "red", lwd = 2)
+            
+          }
+          
+          if(input$trace == TRUE){
+            cells <- exprs(fs.comp()[[input$flowFrame]])
+            cells <- cells[order(cells[,input$xchannel]),]
+            cells <- as.data.frame(cells)
+            
+            n <- nrow(cells)
+            splt <- seq(1,20,1)
+            r <- ceiling(nrow(cells)/20)
+            cuts <- splt*r
+            cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
+            
+            xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
+            ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
+            
+            medians <- data.frame(unlist(xmedians), unlist(ymedians))
+            colnames(medians) <- c(input$xchannel,input$ychannel)
+            
+            loessMod <- loess(medians[,input$ychannel] ~ medians[,input$xchannel], data = medians, span = 0.9)
+            loessMod <- predict(loessMod)
+            
+            lines(medians[,input$xchannel], loessMod, col = "magenta3", lwd = 3)
+            
+          }
+          
+        }else if(input$NIL == TRUE){
+          
+          plotCyto(fs.comp()[[input$flowFrame]], channels = c(input$xchannel,input$ychannel), overlay = fs.comp()[[input$Unstained]], subSample = subSample, transList = transList, main = input$flowFrame, cex.pts = 3, xlim = xlim, ylim = ylim, ...)
+          
+          if(input$median == TRUE){
+            
+            medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
+            MFI <- data.frame("Channel" = channels, "Median" = medians)
+            
+            cutoff <- MFI[match(input$ychannel, MFI$Channel),]
+            
+            abline(h = cutoff[2], col = "red", lwd = 2)
+            
+          }
+          
+          if(input$trace == TRUE){
+            cells <- exprs(fs.comp()[[input$flowFrame]])
+            cells <- cells[order(cells[,input$xchannel]),]
+            cells <- as.data.frame(cells)
+            
+            n <- nrow(cells)
+            splt <- seq(1,20,1)
+            r <- ceiling(nrow(cells)/20)
+            cuts <- splt*r
+            cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
+            
+            xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
+            ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
+            
+            medians <- data.frame(unlist(xmedians), unlist(ymedians))
+            colnames(medians) <- c(input$xchannel,input$ychannel)
+            
+            loessMod <- loess(medians[,input$ychannel] ~ medians[,input$xchannel], data = medians, span = 0.9)
+            loessMod <- predict(loessMod)
+            
+            lines(medians[,input$xchannel], loessMod, col = "magenta3", lwd = 3)
+            
+          }
+          
         }
-        
-        if(input$trace == TRUE){
-          cells <- exprs(fs.comp()[[input$flowFrame]])
-          cells <- cells[order(cells[,input$xchannel]),]
-          cells <- as.data.frame(cells)
-          
-          n <- nrow(cells)
-          splt <- seq(1,20,1)
-          r <- ceiling(nrow(cells)/20)
-          cuts <- splt*r
-          cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
-          
-          xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
-          ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
-          
-          medians <- data.frame(unlist(xmedians), unlist(ymedians))
-          colnames(medians) <- c(input$xchannel,input$ychannel)
-          
-          p <- p + geom_smooth(method = "loess", se = FALSE, mapping = aes_(x = as.name(input$xchannel), y = as.name(input$ychannel)), data = medians, color = "cyan", size = 1.2)
-          
-        }
-        
-        # if transformation applied use axis_inverse_trans -5 < range <= 10
-        # Ranges
-        xrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$xchannel])
-        yrange <- max(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel]) - min(exprs(fs.comp()[[input$flowFrame]])[,input$ychannel])
-        
-        # X Axis
-        if(xrange > -5 & xrange <= 10){
-          
-          p <- p + scale_x_continuous(limits = c(-4,5.5))
-          
-        }else{
-          
-          p <- p + scale_x_logicle(limits = c(-10000,262143))
-          
-        }
-        
-        # Y Axis
-        if(yrange > -5 & yrange <= 10){
-          
-          p <- p + scale_y_continuous(limits = c(-4,5.5))
-          
-        }else{
-          
-          p <- p + scale_y_logicle(limits = c(-10000,262143))
-          
-        }
-        
-        p <- p + facet_null()
-        p <- p + ggtitle(paste(input$flowFrame),"\n")
-        p <- p + xlab(paste("\n",input$xchannel))
-        p <- p + ylab(paste(input$ychannel,"\n"))
-        p <- p + editSpillover_theme()
-        print(p)
         
       })
       
@@ -491,6 +741,5 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, alias
       })
       
     })
-  
   
 })

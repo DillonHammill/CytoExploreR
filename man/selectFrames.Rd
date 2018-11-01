@@ -7,12 +7,15 @@
 selectFrames(fs, pData)
 }
 \arguments{
-\item{fs}{an object of class \code{flowSet}.}
+\item{fs}{an object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
 
-\item{pData}{vector of form \code{c("column","row")} indicating the rows of \code{pData(fs)} to extract.}
+\item{pData}{vector of form \code{c("column","row")} indicating the rows of
+\code{pData(fs)} to extract.}
 }
 \value{
-an object of calss \code{flowSet} containing the extracted \code{flowFrame} objects.
+an object of calss \code{\link[flowCore:flowSet-class]{flowSet}}
+  containing the extracted \code{\link[flowCore:flowFrame-class]{flowFrame}}
+  objects.
 }
 \description{
 Select flowFrames Based on pData

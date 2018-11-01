@@ -1,53 +1,90 @@
 #' Compute Spillover Matrix
-#' 
-#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to calculate fluorescent spillover values using single 
-#' stain compensation controls and a universal unstained control. \code{computeSpillover} begins by the user selecting which fluorescent
-#' channel is associated with each control from a dropdown menu. Following channel selection, \code{computeSpillover} runs through each control
-#' and plots a histogram which is gated by the user using an interval gate (refer to cytoSuite drawInterval documentation) to 
-#' select the positive population to use for the spillover calculation. The percentage spillover is calculated based on the median fluorescent
-#' intensities of the stained populations and the universal unstained sample. The computed spillover matrix is returned as an r object and written
-#' to a named .csv file for future use. \code{computeSpillover} has methods for both \code{flowSet} and \code{GatingSet} objects refer to their
-#' respective help pages for more information - ?`computeSpillover,flowSet-method` or ?`computeSpillover,GatingSet-method`.
-#' 
-#' @param x object of class \code{flowSet} or \code{GatingSet}.
-#' @param ... additional method-specific arguments, see ?`computeSpillover,flowSet-method` or ?`computeSpillover,GatingSet-method` for details.
-#' 
+#'
+#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to
+#' calculate the fluorescent spillover matrix using a reference universal
+#' unstained control and single stain compensation controls.
+#'
+#' \code{computeSpillover} begins by the user selecting which fluorescent
+#' channel is associated with each control from a dropdown menu. Following
+#' channel selection, \code{computeSpillover} runs through each control and
+#' plots the density distribution of the unstained control in red and the
+#' compensation control in blue. Users can then gate the positive signal for
+#' spillover calculation using an interval gate. The percentage spillover is
+#' calculated based on the median fluorescent intensities of the stained
+#' populations and the universal unstained sample. The computed spillover matrix
+#' is returned as an r object and written to a named .csv file for future use.
+#' \code{computeSpillover} has methods for both
+#' \code{\link[flowCore:flowSet-class]{flowSet}} and
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects so refer to
+#' their respective help pages for more information.
+#'
+#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param ... additional method-specific arguments for computeSpillover.
+#'
+#' @seealso \code{\link{computeSpillover,flowSet-method}}
+#' @seealso \code{\link{computeSpillover,GatingSet-method}}
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @references C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral overlap compensation for any number of flow cytometry parameters. in: Annals of the New York Academy of Sciences, 677:167-184.
-#' 
+#'
+#' @references C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral
+#'   overlap compensation for any number of flow cytometry parameters. in:
+#'   Annals of the New York Academy of Sciences, 677:167-184.
+#'
 #' @export
 setGeneric(name="computeSpillover",
            def=function(x, ...){standardGeneric("computeSpillover")}
 )
 
 #' Compute Spillover Matrix - flowSet Method
-#' 
-#' Calculate spillover matrix using \code{GatingSet} containing gated single stain compensation controls and an unstained control.
-#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to calculate fluorescent spillover values using single 
-#' stain compensation controls and a universal unstained control. \code{computeSpillover} begins by the user selecting which fluorescent
-#' channel is associated with each control from a dropdown menu. Following channel selection, \code{computeSpillover} runs through each control
-#' and plots a histogram which is gated by the user using an interval gate (refer to cytoSuite drawInterval documentation) to 
-#' select the positive population to use for the spillover calculation. The percentage spillover is calculated based on the median fluorescent
-#' intensities of the stained populations and the universal unstained sample. The computed spillover matrix is returned as an r object and written
-#' to a named .csv file for future use.
 #'
-#' @param x object of class \code{flowSet} containing pre-gated single stain compensation controls and a universal unstained control. Currently,
-#' computeSpillover does not pre-gate samples to obtain a homogeneous cell population for downstream calculations. We therefore recommmend pre-gating
-#' samples based on FSC and SSC parameters prior to passing them to computeSpillover (i.e. \code{x} should contain events for single cells only).
-#' Passing raw files to computeSpillover will result in inaccurate calculations of fluorescent spillover.
-#' @param trans object of class \code{"transformList"} generated by \code{estimateLogicle} to transform fluorescent channels for gating. \code{trans}
-#' is required if logicle transformation has already been applied to \code{x} using estimateLogicle. \code{computeSpillover} will automatically call
-#' estimateLogicle internally to transform channels prior to gating, if \code{trans} is supplied it will be used for the transformation instead.
-#' @param cmfile name of .csv file containing the names of the samples in a column called "name" and their matching channel in a column called "channel".
-#' \code{computeSpillover} will the guide you through the channel selection process and generate a channel match file called "Compensation Channels.csv" 
-#' automatically. If you already have a complete cmfile and would like to bypass the channel selection process, simply pass the name of the cmfile to 
-#' this argument (e.g. "Compensation Channels.csv").
-#' @param spfile name of the output spillover csv file, set to \code{"Spillover Matrix.csv"} by default.
-#' @param ... additional arguments passed to estimateLogicle to transform fluorescent channels prior to gating.
-#' 
+#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to
+#' calculate the fluorescent spillover matrix using a reference universal
+#' unstained control and single stain compensation controls.
+#'
+#' Calculate spillover matrix using
+#' \code{\link[flowCore:flowSet-class]{flowSet}} containing gated single stain
+#' compensation controls and an unstained control. \code{computeSpillover}
+#' begins by the user selecting which fluorescent channel is associated with
+#' each control from a dropdown menu. Following channel selection,
+#' \code{computeSpillover} runs through each control and plots the density
+#' distribution of the unstained control in red and the compensation control in
+#' blue. Users can then gate the positive signal for spillover calculation using
+#' an interval gate. The percentage spillover is calculated based on the median
+#' fluorescent intensities of the stained populations and the universal
+#' unstained sample. The computed spillover matrix is returned as an r object
+#' and written to a named .csv file for future use.
+#'
+#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}
+#'   containing pre-gated single stain compensation controls and a universal
+#'   unstained control. Currently, computeSpillover does not pre-gate samples to
+#'   obtain a homogeneous cell population for downstream calculations. We
+#'   therefore recommmend pre-gating samples based on FSC and SSC parameters
+#'   prior to passing them to computeSpillover (i.e. \code{x} should contain
+#'   events for single cells only). Passing raw files to computeSpillover will
+#'   result in inaccurate calculations of fluorescent spillover matrix.
+#' @param transList object of class
+#'   \code{\link[flowCore:transformList-class]{transformList}} generated by
+#'   \code{estimateLogicle} to transform fluorescent channels for gating.
+#'   \code{transList} is required if logicle transformation has already been
+#'   applied to \code{x} using estimateLogicle. \code{computeSpillover} will
+#'   automatically call \code{\link[flowCore:logicleTransform]{estimateLogicle}}
+#'   internally to transform channels prior to gating, if \code{transList} is
+#'   supplied it will be used for the transformation instead.
+#' @param cmfile name of .csv file containing the names of the samples in a
+#'   column called "name" and their matching channel in a column called
+#'   "channel". \code{computeSpillover} will the guide you through the channel
+#'   selection process and generate a channel match file called "Compensation
+#'   Channels.csv" automatically. If you already have a complete cmfile and
+#'   would like to bypass the channel selection process, simply pass the name of
+#'   the cmfile to this argument (e.g. "Compensation Channels.csv").
+#' @param spfile name of the output spillover csv file, set to \code{"Spillover
+#'   Matrix.csv"} by default.
+#' @param ... additional arguments passed to \code{\link{plotCyto1d,flowFrame-method}}
+#' and \code{\link{plotCyto1d,flowSet-method}}.
+#'
 #' @return spillover matrix object and \code{"Spillover Matrix.csv"} file.
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' fs <- Activation
@@ -57,14 +94,25 @@ setGeneric(name="computeSpillover",
 #' Singlets <- Subset(Cells, g2[[1]])
 #' spill <- computeSpillover(Singlets, spfile = "Example Spillover Matrix.csv")
 #' }
-#' 
-#' @importFrom flowCore estimateLogicle transform each_col fsApply inverseLogicleTransform
-#' @importFrom flowWorkspace pData
-#' 
+#'
+#' @importFrom flowCore estimateLogicle transform each_col fsApply
+#'   inverseLogicleTransform sampleNames flowSet
+#' @importFrom flowWorkspace pData GatingSet
+#' @importFrom methods as
+#' @importFrom utils read.csv write.csv
+#' @importFrom stats median
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto1d,flowSet-method}}
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
+#' @references C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral
+#'   overlap compensation for any number of flow cytometry parameters. in:
+#'   Annals of the New York Academy of Sciences, 677:167-184.
+#'
 #' @export
-setMethod(computeSpillover, signature = "flowSet", definition = function(x, trans = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
+setMethod(computeSpillover, signature = "flowSet", definition = function(x, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
   
   fs <- x
   
@@ -87,50 +135,76 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   # Merge files for use with estimateLogicle
   fr <- as(fs, "flowFrame")
   
-  # Apply logicle transformation for gating
-  if(is.null(trans) | class(trans)[1] != "transformList"){
+  # Check if channels have been transformed for gating - using max values in each channel
+  mx <- apply(exprs(fr)[, channels], 2, max)
+  
+  # All channels  not transformed
+  if(all(mx >= 10)){
     
-    message("No transformList supplied to transfom channels prior to gating. All fluorescent channels will be transformed using the logicle transformation.")
-    
-    # Check if transformation has been applied using range of values
-    if(!all(each_col(fs[[1]], range)[,channels][1,] >= -5 & each_col(fs[[1]], range)[,channels][2,] <= 5)){
+    # Use transList if supplied
+    if(!is.null(transList)){
       
-      # Transformation has not been applied
-      trans <- estimateLogicle(fr, channels, ...)
-      fs <- suppressMessages(transform(fs, trans))
+      # Check if transList contains all channels
+      if(all(channels %in% names(transList@transforms))){
+        
+        # TransList contains all transformations
+        fs <- suppressMessages(transform(fs, transList))
+        
+      }else if(!all(channels %in% names(transList@transforms))){
+        
+        # TransList does not contain all the transformations needed
+        chns <- channels[!channels %in% names(transList@transforms)]
+        trns <- estimateLogicle(fr, chns)
+        transList <- c(transList, trns)
+        fs <- suppressMessages(transform(fs, transList))
+        
+      }
       
-    }else{
+    }else if(is.null(transList)){
       
-      stop("Please provide transformList object used to transform the flowSet to the trans argument.")
+      # Use estimateLogicle to transform all channels
+      transList <- estimateLogicle(fr, channels)
+      fs <- suppressMessages(transform(fs, transList))
       
     }
     
-  }else if(!all(channels %in% names(trans))){
+    # All channels transformed  
+  }else if(all(mx < 10)){
     
-    # Not all fluorescent channels are listed in transformList
-    message("Not all channels are transformed using this transformList - applying logicle transformation to remaining fluorescent channels.")
-    
-    # Check if transformation has been applied using range of values
-    if(!all(each_col(fs[[1]], range)[,names(trans)][1,] >= -5 & each_col(fs[[1]], range)[,names(trans)][2,] <= 5)){
+    # Need to check that transList contains all transformations
+    if(is.null(transList)){
       
-      # Get transformList for remaining channels
-      chnls <- channels[-match(names(trans), channels)]
-      trans <- c(trans, estimateLogicle(fr, chnls, ...))
+      stop("Please supply the transformList used to transform this flowSet to the transList argument.")
       
-      # Transformation has not been applied
-      fs <- suppressMessages(transform(fs, trans))
+    }else if(!is.null(transList)){
+      
+      if(!all(channels %in% names(transList@transforms))){
+        
+        stop("Some transformations are missing in the transformList. The transformList should contain transformations for all fluorescent channels.")
+        
+      }
       
     }
     
-  }else if(all(channels %in% names(trans))){
     
-    # Check if transformation has been applied using range of values
-    if(!all(each_col(fs[[1]], range)[,channels][1,] >= -5 & each_col(fs[[1]], range)[,channels][2,] <= 5)){
+    # Some channels have been  transformed  
+  }else if(any(mx < 10)){
+    
+    # Which channels have been transformed?
+    chns <- channels[mx < 10]
+    
+    # Check transList
+    if(!all(chns %in% names(transList@transforms))){
       
-      # Transformation has not been applied
-      fs <- suppressMessages(transform(fs, trans))
+      stop("Some transformations are missing in the transformList. The transformList should contain all the transformations applied to this flowSet.")
       
     }
+    
+    # Get remaining transformations using estimateLogicle
+    chans <- channels[mx >= 10]
+    trns <- estimateLogicle(fr, chans)
+    fs <- suppressMessages(transform(fs, trns))
+    transList <- c(transList, trns)
     
   }
   
@@ -138,24 +212,34 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   NIL <- fs[[match("Unstained", pData(fs)$channel)]]
   fs <- fs[-match("Unstained", pData(fs)$channel)]
   
-  # Assign channel to each flowFrame to description slot called "channel"
-  suppressWarnings(sapply(1:length(pData(fs)$channel), function(x){
-    
-    fs[[x]]@description$channel <- paste(pData(fs)$channel[x])
-    
-  }))
+  # Names
+  nms <- sampleNames(fs)
+  
+  # Samples
+  smp <- length(fs)
   
   # Gate positive populations
-  pops <- fsApply(fs, function(fr){
+  pops <- lapply(seq(1,smp,1), function(x){
+    
+    # Extract flowFrame
+    fr <- fs[[x]]
+    
+    # Channel
+    chan <- pData(fs)$channel[x]
+    
+    # Plot
+    plotCyto(NIL, channels = chan, overlay = fr, offset = 0, transList = transList, popup = TRUE, fill = c("red","dodgerblue"), legend = FALSE, alpha = 0.6, main = nms[x], ...)
     
     # Call drawGate on each flowFrame using interval gate on selected channel
-    gt <- drawGate(x = fr, alias = paste(fr@description$channel,"+"), channels = fr@description$channel, gate_type = "interval", adjust = 1.5)
+    gt <- drawGate(x = fr, alias = paste(chan,"+"), channels = chan, type = "interval", adjust = 1.5, plot = FALSE)
     fr <- Subset(fr, gt[[1]])
     
-  }, simplify = TRUE)
+  })
+  names(pops) <- nms
+  pops <- flowSet(pops)
   
   # Inverse logicle transformation
-  inv <-  inverseLogicleTransform(trans)
+  inv <-  inverseLogicleTransform(transList)
   pops <- suppressMessages(transform(pops, inv))
   NIL <- suppressMessages(transform(NIL, inv))
   
@@ -174,11 +258,11 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   rownames(spill) <- channels
   
   # Normalise each row to stained channel
-  for(i in 1:nrow(signal)){
+  lapply(seq(1,nrow(signal),1), function(x){
     
-    signal[i, ] <- signal[i, ]/signal[i, match(fs[[i]]@description$channel, colnames(spill))]
+    signal[x, ] <<- signal[x, ]/signal[x, match(pData(fs)$channel[x], colnames(spill))]
     
-  } 
+  }) 
   
   # Insert values into appropriate rows
   rws <- match(pData(fs)$channel, rownames(spill))
@@ -190,119 +274,104 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
 })
 
 #' Compute Spillover Matrix - GatingSet Method
-#' 
-#' Calculate spillover matrix using \code{flowSet} containing gated single stain compensation controls and an unstained control.
-#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to calculate fluorescent spillover values using single 
-#' stain compensation controls and a universal unstained control. \code{computeSpillover} begins by the user selecting which fluorescent
-#' channel is associated with each control from a dropdown menu. Following channel selection, \code{computeSpillover} runs through each control
-#' and plots a histogram which is gated by the user using an interval gate (refer to cytoSuite drawInterval documentation) to 
-#' select the positive population to use for the spillover calculation. The percentage spillover is calculated based on the median fluorescent
-#' intensities of the stained populations and the universal unstained sample. The computed spillover matrix is returned as an r object and written
-#' to a named .csv file for future use. 
-#' 
-#' @param x object of class \code{GatingSet} containing pre-gated single stain compensation controls and a universal unstained control. Currently,
-#' computeSpillover does not pre-gate samples to obtain a homogeneous cell population for downstream calculations. We therefore recommmend pre-gating
-#' samples based on FSC and SSC parameters prior to passing them to computeSpillover and indicate the population of interest using the \code{alias} argument.
-#' @param alias name of the pre-gated population to use for downstream calculations, set to the last node of the GatingSet by default (e.g. "Single Cells").
-#' @param trans object of class \code{"transformList"} generated by \code{estimateLogicle} to transform fluorescent channels for gating. \code{trans}
-#' is required if logicle transformation has already been applied to \code{x} using estimateLogicle. \code{computeSpillover} will automatically call
-#' estimateLogicle internally to transform channels prior to gating, if \code{trans} is supplied it will be used for the transformation instead.
-#' @param cmfile name of .csv file containing the names of the samples in a column called "name" and their matching channel in a column called "channel".
-#' \code{computeSpillover} will the guide you through the channel selection process and generate a channel match file called "Compensation Channels.csv" 
-#' automatically. If you already have a complete cmfile and would like to bypass the channel selection process, simply pass the name of the cmfile to 
-#' this argument (e.g. "Compensation Channels.csv").
-#' @param spfile name of the output spillover csv file, set to \code{"Spillover Matrix.csv"} by default.
-#' @param ... additional arguments passed to estimateLogicle to transform fluorescent channels prior to gating.
-#' 
+#'
+#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to
+#' calculate the fluorescent spillover matrix using a reference universal
+#' unstained control and single stain compensation controls.
+#'
+#' Calculate spillover matrix using
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing gated
+#' single stain compensation controls and an unstained control.
+#' \code{computeSpillover} uses the method described by Bagwell & Adams 1993 to
+#' calculate fluorescent spillover values using single stain compensation
+#' controls and a universal unstained control. \code{computeSpillover} begins by
+#' the user selecting which fluorescent channel is associated with each control
+#' from a dropdown menu. Following channel selection, \code{computeSpillover}
+#' runs through each control and plots the density distribution of the unstained
+#' control in red and the compensation control in blue. Users can then gate the
+#' positive signal for spillover calculation using an interval gate. The
+#' percentage spillover is calculated based on the median fluorescent
+#' intensities of the stained populations and the universal unstained sample.
+#' The computed spillover matrix is returned as an r object and written to a
+#' named .csv file for future use.
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing pre-gated
+#'   single stain compensation controls and a universal unstained control.
+#'   Currently, computeSpillover does not pre-gate samples to obtain a
+#'   homogeneous cell population for downstream calculations. We therefore
+#'   recommmend pre-gating samples based on FSC and SSC parameters prior to
+#'   passing them to computeSpillover and indicate the population of interest
+#'   using the \code{parent} argument.
+#' @param parent name of the pre-gated population to use for downstream
+#'   calculations, set to the last node of the GatingSet by default (e.g.
+#'   "Single Cells").
+#' @param transList object of class
+#'   \code{\link[flowCore:transformList-class]{transformerList}} generated by
+#'   \code{estimateLogicle} to transform fluorescent channels for gating.
+#'   \code{transList} is required if logicle transformation has already been
+#'   applied to \code{x} using estimateLogicle. \code{computeSpillover} will
+#'   automatically call \code{\link[flowCore:logicleTransform]{estimateLogicle}}
+#'   internally to transform channels prior to gating, if \code{transList} is
+#'   supplied it will be used for the transformation instead.
+#' @param cmfile name of .csv file containing the names of the samples in a
+#'   column called "name" and their matching channel in a column called
+#'   "channel". \code{computeSpillover} will the guide you through the channel
+#'   selection process and generate a channel match file called "Compensation
+#'   Channels.csv" automatically. If you already have a complete cmfile and
+#'   would like to bypass the channel selection process, simply pass the name of
+#'   the cmfile to this argument (e.g. "Compensation Channels.csv").
+#' @param spfile name of the output spillover csv file, set to \code{"Spillover
+#'   Matrix.csv"} by default.
+#' @param ... additional arguments passed to \code{\link{plotCyto1d,flowFrame-method}}
+#' and \code{\link{plotCyto1d,flowSet-method}}.
+#'
 #' @return spillover matrix object and \code{"Spillover Matrix.csv"} file.
-#' 
-#' #' @examples
+#'
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), gtfile = "Example gatingTemplate.csv")
-#' drawGate(gs, parent = "Cells", alias = "Singlets", channels = c("FSC-A","FSC-H"), gtfile = "Example gatingTemplate.csv")
-#' spill <- computeSpillover(gs, alias = "Single Cells", spfile = "Example Spillover Matrix.csv")
+#' drawGate(gs, 
+#'          parent = "root", 
+#'          parent = "Cells", 
+#'          channels = c("FSC-A","SSC-A"), 
+#'          gtfile = "Example gatingTemplate.csv")
+#' drawGate(gs, 
+#'          parent = "Cells", 
+#'          parent = "Singlets", 
+#'          channels = c("FSC-A","FSC-H"), 
+#'          gtfile = "Example gatingTemplate.csv")
+#' spill <- computeSpillover(gs, 
+#'                           parent = "Single Cells", 
+#'                           spfile = "Example Spillover Matrix.csv")
 #' }
-#' 
-#' @importFrom flowCore estimateLogicle transform each_col fsApply inverseLogicleTransform
-#' @importFrom flowWorkspace getData pData
-#' 
+#'
+#' @importFrom flowCore estimateLogicle transform each_col fsApply
+#'   inverseLogicleTransform flowSet
+#' @importFrom flowWorkspace getData pData getTransformations GatingSet
+#' @importFrom methods as
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto1d,flowSet-method}}
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
+#' @references C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral
+#'   overlap compensation for any number of flow cytometry parameters. in:
+#'   Annals of the New York Academy of Sciences, 677:167-184.
+#'
 #' @export
-setMethod(computeSpillover, signature = "GatingSet", definition = function(x, alias = NULL, trans = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
+setMethod(computeSpillover, signature = "GatingSet", definition = function(x, parent = NULL, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
   
   gs <- x
   
-  # Extract fluorescent channels
-  channels <- getChannels(gs)
-  
-  # Apply logicle transformation for gating
-  if(!is.null(trans)){
-    
-    if(class(trans)[1] != "transformerList"){
-      
-      stop("Transformation object should be of class transformerList.")
-      
-    }
-
-    if(length(gs[[1]]@transformation) == 0){
-      
-      # No transformation has been applied to GatingSet
-      chans <- names(trans)
-      
-      if(all(chans %in% channels)){
-        
-        gs <- transform(gs, trans)
-        
-      }else if(length(gs[[1]]@transformation) != 0){
-        
-       # Some transformation applied - check that all channels are transformed
-        chans <- names(gs[[1]]@transformation)
-        
-        if(all(chans %in% channels)){
-          
-          # All channels have been transformed
-          trans <- gs[[1]]@transformation
-          
-        }else{
-          
-          # Only some of the channels are transformed
-          # Which channels are in trans object get remainder using estimateLogicle
-          chans <- names(gs@transformation[[1]])
-          chans <- channels[is.na(match(channels,chans))]
-          chans <- channels[is.na(match(channels, names(trans)))]
-          
-          if(length(chans) != 0){
-            
-          trns <- estimateLogicle(gs.m[[1]], chans)
-          gs <- transform(gs, trns)
-          trans <- gs[[1]]@transformation
-          
-          }else{
-            
-            trans
-            
-          }
-          
-          gs <- suppressMessages(transform(gs, trans))
-          
-        }
-        
-      }
-    }
-    
-   
-  # No transformation object supplied - use estimateLogicle   
-  }else{
-  
   # Extract Population for Downstream Analyses
-  if(!is.null(alias)){
+  if(!is.null(parent)){
     
-    fs <- getData(gs, alias)
+    fs <- getData(gs, parent)
     
-  }else if(is.null(alias)){
+  }else if(is.null(parent)){
     
     fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
     
@@ -313,115 +382,151 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, al
   fs.m <- flowSet(fr)
   gs.m <- suppressMessages(GatingSet(fs.m))
   
-  # Check if fluorescent channels have been transformed
-  if(length(gs[[1]]@transformation) == 0){
+  # Extract fluorescent channels
+  channels <- getChannels(gs)
+  
+  if(!is.null(transList)){
     
-    # Calculate transformation parameters using estimateLogicle
-    trans <- estimateLogicle(gs.m[[1]], channels)
-    gs <- suppressMessages(transform(gs, trans))
-    
-  }else if(length(gs[[1]]@transformation) != 0){
-    
-    # Check which channels have been transformed
-    chans <- names(gs@transformation[[1]])
-    
-    if(all(channels %in% chans)){
+    if(class(transList)[1] != "transformerList"){
       
-      # All fluorescent channels have been transformed
-      trans <- gs@transformation[[1]]
-      
-    }else{
-      
-      # Not all fluorescent channels are transformed - transform remaining channels
-      # Which channels need transform? Use appropriate sample to get transform (indx of samples)
-      chans <- names(gs@transformation[[1]])
-      chans <- channels[is.na(match(channels,chans))]
-      
-      trns <- gs@transformation[[1]]
-      trans <- estimateLogicle(gs.m[[1]], chans)
-      gs <- suppressMessages(transform(gs, trans))
-      trans <- c(trns,trans)
+      stop("Transformation object should be of class transformerList.")
       
     }
     
   }
   
+  # Extract transformations if NULL apply transList
+  trnsfrms <- lapply(channels, function(channel){getTransformations(gs[[1]], channel, only.function = FALSE)})
+  names(trnsfrms) <- channels
+  
+  # Remove NULL transforms
+  trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+  
+  if(length(trnsfrms) == 0){
+    
+    trnsfrms <- NULL
+    
   }
+  
+  # Convert to transformerList
+  if(!is.null(trnsfrms)){
+    
+    trnsLst <- transformerList(names(trnsfrms), trnsfrms)
+    
+  }
+  
+  # No transformations extracted from GatingSet
+  if(is.null(trnsfrms)){
+    
+    # Check if transList has been supplied and contains all channels
+    if(!is.null(transList)){
+      
+      if(all(channels %in% names(transList))){
+        
+        # TransList contains transformations for all channels
+        gs <- suppressMessages(transform(gs, transList))
+        
+      }else if(!all(channels %in% names(transList))){
+        
+        # Not all channels are listed in transList
+        chns <- channels[!channels %in% names(transList)]
+        
+        # Add missing transformations to transList
+        transList[chns] <- estimateLogicle(gs.m[[1]], chns)[chns]
+        
+        # Apply transformations to GatingSet
+        gs <- suppressMessages(transform(gs, transList))
+        
+      }
+      
+    }else if(is.null(transList)){
+      
+      # No transformations applied and no transList supplied
+      transList <- estimateLogicle(gs.m[[1]], channels)
+      gs <- suppressMessages(transform(gs, transList))
+      
+    }
+    
+    # Some transformations were extracted from GatingSet 
+  }else if(!is.null(trnsfrms)){
+    
+    if(all(channels %in% names(trnsLst))){
+      
+      # All transformations were extracted from GatingSet
+      
+    }else if(!all(channels %in% names(trnsLst))){
+      
+      # Not all channels have been transformed in the GatingSet
+      chans <- channels[!channels %in% names(trnsLst)]
+      
+      # Try get transformations from transList
+      if(!is.null(transList)){
+        
+        if(all(chans %in% names(transList))){
+          
+          # All missing transformations are in transList
+          trns <- transformerList(names(transList[chans]), transList[chans])
+          gs <- suppressMessages(transform(gs, trns))
+          
+          # Update transList
+          transList <- c(trnsLst, trns)
+          
+        }else if(!all(chans %in% names(transList))){
+          
+          # Not all of the remaining channels are in transList
+          if(any(chans %in% names(transList))){
+            
+            # Some channels are in transList
+            chnls <- chans[chans %in% names(transList)]
+            trns <- transformerList(names(transList[chnls]), transList[chnls])
+            gs <- suppressMessages(transform(gs, trns))
+            transList <- c(trnsLst, trns)
+            
+            # Get remaining transformations using estimateLogicle
+            chnls <- chans[!chans %in% names(transList)]
+            trns <- estimateLogicle(gs.m[[1]], chnls)
+            gs <- suppressMessages(transform(gs, trns))
+            transList <- c(transList, trns)
+            
+            
+          }else if(!any(chans %in% names(transList))){
+            
+            # No missing channels are in transList need to use estimateLogicle
+            trns <- estimateLogicle(gs.m[[1]], chans)
+            gs <- suppressMessages(transform(gs, trns))
+            transList <- c(trnsLst, trns)
+            
+          }
+          
+        }
+        
+        # No transList supplied - use estimateLogicle 
+      }else if(is.null(transList)){
+        
+        # Get remaining transformations using estimateLogicle
+        chns <- channels[!channels %in% names(trnsLst)]
+        trns <- estimateLogicle(gs.m[[1]], chns)
+        gs <- suppressMessages(transform(gs, trns))
+        transList <- c(trnsLst, trns)
+        
+      }
+      
+    }
+    
+  }
+  transList <- transformList(names(transList),lapply(transList, `[[`, "transform"))
+  
   # Extract Transformed flowSet for Downstream Analyses
-  if(!is.null(alias)){
+  if(!is.null(parent)){
     
-    fs <- getData(gs, alias)
+    fs <- getData(gs, parent)
     
-  }else if(is.null(alias)){
+  }else if(is.null(parent)){
     
     fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
     
   }
   
-  # Select a fluorescent channel for each compensation control
-  if(is.null(cmfile)){
-    
-    pData(fs)$channel <- paste(selectChannels(fs))
-    write.csv(pData(fs), "Compensation Channels.csv", row.names = FALSE)
-    
-  }else{
-    
-    pd <- read.csv(cmfile, header = TRUE, row.names = 1)
-    pData(fs)$channel <- paste(pd$channel)
-    
-  }
-  
-  # Extract unstained control based on selected channels in pData(fs)
-  NIL <- fs[[match("Unstained", pData(fs)$channel)]]
-  fs <- fs[-match("Unstained", pData(fs)$channel)]
-  
-  # Assign channel to each flowFrame to description slot called "channel"
-  suppressWarnings(sapply(1:length(pData(fs)$channel), function(x){
-    
-    fs[[x]]@description$channel <- paste(pData(fs)$channel[x])
-    
-  }))
-  
-  # Gate positive populations
-  pops <- fsApply(fs, function(fr){
-    
-    # Call drawGate on each flowFrame using interval gate on selected channel
-    gt <- drawGate(x = fr, alias = paste(fr@description$channel,"+"), channels = fr@description$channel, gate_type = "interval", adjust = 1.5)
-    fr <- Subset(fr, gt[[1]])
-    
-  }, simplify = TRUE)
-  
-  # Inverse logicle transformation
-  inv <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
-  pops <- suppressMessages(transform(pops, inv))
-  NIL <- suppressMessages(transform(NIL, inv))
-  
-  # Calculate MedFI for all channels for unstained control
-  neg <- each_col(NIL, median)[channels]
-  
-  # Calculate MedFI for all channels for all stained controls
-  pos <- fsApply(pops, each_col, median)[,channels]
-  
-  # Subtract background fluorescence
-  signal <- sweep(pos, 2, neg)
-  
-  # Construct spillover matrix - only include values for which there is a control
-  spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))  
-  colnames(spill) <- channels
-  rownames(spill) <- channels
-  
-  # Normalise each row to stained channel
-  for(i in 1:nrow(signal)){
-    
-    signal[i, ] <- signal[i, ]/signal[i, match(fs[[i]]@description$channel, colnames(spill))]
-  
-  } 
-  
-  # Insert values into appropriate rows
-  rws <- match(pData(fs)$channel, rownames(spill))
-  spill[rws,] <- signal
-  
-  write.csv(spill, spfile)
-  return(spill)
+  computeSpillover(x = fs, transList = transList, cmfile = cmfile, spfile = spfile, ...)
   
 })

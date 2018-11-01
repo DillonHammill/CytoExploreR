@@ -2,41 +2,54 @@
 % Please edit documentation in R/gating-functions.R
 \name{drawPolygon}
 \alias{drawPolygon}
-\title{Draw Polygon Gate(s) for Analysis of Flow Cytometry Data.}
+\title{Draw Polygon(s) to Gate Flow Cytometry Populations.}
 \usage{
-drawPolygon(fr, channels, alias = NULL, subSample = NULL, plot = TRUE,
-  labs = TRUE, ...)
+drawPolygon(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
+  ...)
 }
 \arguments{
-\item{fr}{a \code{flowFrame} object containing the flow cytometry data for plotting and gating.}
+\item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-of the kernel density will be constructed.}
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
-\item{alias}{the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3","CD4")}) multiple 
-gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
+\item{alias}{the name(s) of the populations to be gated. If multiple
+population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
+will be returned. \code{alias} is \code{NULL} by default which will halt
+the gating routine.}
 
-\item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted which is the default plotting behaviour.}
+\item{plot}{logical indicating whether the data should be plotted. This
+feature allows for constructing gates of different types over existing
+plots which may already contain a different gate type.}
 
-\item{plot}{logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.}
+\item{labels}{logical indicating whether to include \code{\link{plotLabels}}
+for the gated population(s), \code{TRUE} by default.}
 
-\item{labs}{logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.}
-
-\item{...}{additional arguments for \code{plotDens}.}
+\item{...}{additional arguments for \code{\link{plotCyto,flowFrame-method}}.}
 }
 \value{
-a list containing the constructed \code{polygonGate} object(s).
+a\code{\link[flowCore:filters-class]{filters}} list containing the
+  constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+  object(s).
 }
 \description{
-\code{drawPolygon} constructs an interactive plotting window for user to select the coordinates a polygon gate which then constructed
-into a \code{polygonGate} object and stored in a list.
+\code{drawPolygon} constructs an interactive plotting window to allow manual
+selection of the co-ordinates of a ploygon gate(s) (through mouse click)
+which are constructed into
+\code{\link[flowCore:polygonGate]{polygonGate}} objects and stored in a
+\code{\link[flowCore:filters-class]{filters}} list.
+}
+\seealso{
+\code{\link{plotCyto1d,flowFrame-method}}
+
+\code{\link{plotCyto2d,flowFrame-method}}
+
+\code{\link{drawGate}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)
 }
-\keyword{FlowJo,}
 \keyword{draw,}
 \keyword{gating,}
 \keyword{manual,}

@@ -11,6 +11,7 @@ Activation
 \description{
 An experiment performed to assess the in vitro activation of OT-I and OT-II transgenic T cells co-cultured with
 OVA-presenting dendritic cells (DCs). This data set is comprised of two samples saved as a \code{flowSet} object.
+The first sample is an unactivated control whilst the second is an activated sample.
 }
 \details{
 Pooled DCs & T cells were labelled as follows:

@@ -1,7 +1,8 @@
 #' Activation
 #'
 #' An experiment performed to assess the in vitro activation of OT-I and OT-II transgenic T cells co-cultured with
-#' OVA-presenting dendritic cells (DCs). This data set is comprised of two samples saved as a \code{flowSet} object.
+#' OVA-presenting dendritic cells (DCs). This data set is comprised of two samples saved as a \code{flowSet} object. 
+#' The first sample is an unactivated control whilst the second is an activated sample.
 #' 
 #' Pooled DCs & T cells were labelled as follows:
 #' * Hoechst 33258, a DNA intercalating dye which fluoresces in Alexa Fluor 405-A and Alexa Fluor 430-A channels

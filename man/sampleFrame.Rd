@@ -7,12 +7,14 @@
 sampleFrame(fr, size = 250000)
 }
 \arguments{
-\item{fr}{object of class \code{flowFrame}.}
+\item{fr}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 
-\item{size}{numeric indicating the number of events to keep. If \code{size > nrow(fr)}, size is set to \code{nrow(fr)}.}
+\item{size}{numeric indicating the number of events to keep. If \code{size >
+nrow(fr)}, size is set to \code{nrow(fr)}.}
 }
 \value{
-\code{flowFrame} restricted to \code{size} events.
+\code{\link[flowCore:flowFrame-class]{flowFrame}} restricted to
+  \code{size} events.
 }
 \description{
 Sample a flowFrame

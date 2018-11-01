@@ -7,22 +7,40 @@
 computeSpillover(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{...}{additional method-specific arguments, see ?`computeSpillover,flowSet-method` or ?`computeSpillover,GatingSet-method` for details.}
+\item{...}{additional method-specific arguments for computeSpillover.}
 }
 \description{
-\code{computeSpillover} uses the method described by Bagwell & Adams 1993 to calculate fluorescent spillover values using single 
-stain compensation controls and a universal unstained control. \code{computeSpillover} begins by the user selecting which fluorescent
-channel is associated with each control from a dropdown menu. Following channel selection, \code{computeSpillover} runs through each control
-and plots a histogram which is gated by the user using an interval gate (refer to cytoSuite drawInterval documentation) to 
-select the positive population to use for the spillover calculation. The percentage spillover is calculated based on the median fluorescent
-intensities of the stained populations and the universal unstained sample. The computed spillover matrix is returned as an r object and written
-to a named .csv file for future use. \code{computeSpillover} has methods for both \code{flowSet} and \code{GatingSet} objects refer to their
-respective help pages for more information - ?`computeSpillover,flowSet-method` or ?`computeSpillover,GatingSet-method`.
+\code{computeSpillover} uses the method described by Bagwell & Adams 1993 to
+calculate the fluorescent spillover matrix using a reference universal
+unstained control and single stain compensation controls.
+}
+\details{
+\code{computeSpillover} begins by the user selecting which fluorescent
+channel is associated with each control from a dropdown menu. Following
+channel selection, \code{computeSpillover} runs through each control and
+plots the density distribution of the unstained control in red and the
+compensation control in blue. Users can then gate the positive signal for
+spillover calculation using an interval gate. The percentage spillover is
+calculated based on the median fluorescent intensities of the stained
+populations and the universal unstained sample. The computed spillover matrix
+is returned as an r object and written to a named .csv file for future use.
+\code{computeSpillover} has methods for both
+\code{\link[flowCore:flowSet-class]{flowSet}} and
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects so refer to
+their respective help pages for more information.
 }
 \references{
-C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral overlap compensation for any number of flow cytometry parameters. in: Annals of the New York Academy of Sciences, 677:167-184.
+C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral
+  overlap compensation for any number of flow cytometry parameters. in:
+  Annals of the New York Academy of Sciences, 677:167-184.
+}
+\seealso{
+\code{\link{computeSpillover,flowSet-method}}
+
+\code{\link{computeSpillover,GatingSet-method}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

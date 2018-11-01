@@ -7,7 +7,8 @@
 gate_manual(fr, pp_res, channels, gate)
 }
 \arguments{
-\item{fr}{a \code{flowFrame} object containing the flow cytometry data for gating.}
+\item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+containing the flow cytometry data for gating.}
 
 \item{pp_res}{output of preprocessing function.}
 
@@ -19,8 +20,9 @@ gate_manual(fr, pp_res, channels, gate)
 pass saved gate to openCyto to apply to all samples.
 }
 \description{
-\code{drawGate} allows the user to draw gates directly onto plots of flow cytometry data.This plugin provides
-a way of passing saved gates to \code{openCyto}.
+\code{drawGate} allows the user to draw gates directly onto plots of flow
+cytometry data. This plugin provides a way of passing manually drawn gates to
+\code{openCyto}.
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

@@ -1,16 +1,31 @@
-Package: cytoSuite
+Package: cytoRSuite
 Type: Package
-Title: Compensation & Gating Routines for Analysis of Flow Cytometry Data
-Version: 0.2.0
+Title: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data
+Version: 0.9.5
 Author: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Maintainer: Dillon Hammill <Dillon.Hammill@anu.edu.au>
-Description: Compensation & Gating Routines for Analysis of Flow Cytometry Data
-Depends: flowDensity (>= 1.12.0), openCyto(>= 1.19.1), ggcyto(>= 1.9.11), data.table(>= 1.11.4)
-Imports: flowDensity (>= 1.12.0), openCyto(>= 1.19.1), ggcyto(>= 1.9.11), data.table(>= 1.11.4), shiny(>= 1.1.0), shinythemes(>= 1.1.1), rhandsontable(>= 0.3.6.1), plotrix(>= 3.7-2)
+Description: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
+Depends: 
+   openCyto(>= 1.19.1),
+   flowWorkspace (>= 3.28.2),
+   flowCore (>= 1.46.2)
+Imports: 
+  data.table(>= 1.11.4),
+  BiocGenerics,
+  shiny(>= 1.1.0), 
+  shinythemes(>= 1.1.1), 
+  rhandsontable(>= 0.3.6.1), 
+  MASS (>= 7.3-50),
+  methods,
+  stats,
+  utils,
+  graphics,
+  grDevices,
+  magrittr
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

@@ -5,50 +5,74 @@
 \alias{drawGate,GatingSet-method}
 \title{drawGate GatingSet Method}
 \usage{
-\S4method{drawGate}{GatingSet}(x, pData = NULL, parent = "root",
-  alias = NULL, channels = NULL, gate_type = "polygon",
+\S4method{drawGate}{GatingSet}(x, select = NULL, parent = "root",
+  alias = NULL, channels = NULL, type = "polygon",
   subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5,
-  plot = TRUE, labs = TRUE, ...)
+  labels = TRUE, plot = TRUE, ...)
 }
 \arguments{
-\item{x}{object of class \code{GatingSet}.}
+\item{x}{object of class
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{pData}{vector of indicating \code{c(column,row)} of \code{pData(gs)} used extract particular samples for gating.}
+\item{select}{vector containing the indicies of samples within gs to use for
+plotting.}
 
 \item{parent}{name of the \code{parent} population to extract for gating.}
 
-\item{alias}{the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
+\item{alias}{the name(s) of the populations to be gated. If multiple
+population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
+will be returned. \code{alias} is \code{NULL} by default which will halt
+the gating routine.}
 
-\item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-of the kernel density will be constructed.}
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
-\item{gate_type}{vector of gate type names used to construct the gates. Multiple \code{gate_types} are supported but should be accompanied wuth
-an \code{alias} argument of the same length (i.e. one \code{gate_type} per \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-ellipse, threshold, boundary, interval, quadrant and web} which can be abbreviated as upper or lower case first letters as well.}
+\item{type}{vector of gate type names used to construct the gates. Multiple
+gate types are supported but should be accompanied with an \code{alias}
+argument of the same length (i.e. one \code{type} per \code{alias}).
+Supported gate types are \code{polygon, rectangle, ellipse, threshold,
+boundary, interval, quadrant and web} which can be abbreviated as upper or
+lower case first letters as well. Default \code{type} is \code{"interval"}
+for 1D gates and \code{"polygon"} for 2D gates.}
 
-\item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted. \code{subSample} is set to 250000 events by default.}
+\item{subSample}{numeric indicating the number of events to plot, set to all
+events by default. Reducing the sample size can significantly increase
+plotting speed on less powerful machines.}
 
 \item{gtfile}{name of \code{gatingTemplate} csv file to be saved.}
 
-\item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.}
+\item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
+gated for 2-D interval gates.}
 
-\item{adjust}{smooothing factor passed to \code{density()} for 1D plots (defaults to 1.5).}
+\item{adjust}{smooothing factor passed to
+\code{\link[stats:density]{density}} for 1-D plots (defaults to 1.5).}
 
-\item{plot}{logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.}
+\item{labels}{logical indicating whether to include \code{\link{plotLabels}}
+for the gated population(s), \code{TRUE} by default.}
 
-\item{labs}{logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.}
+\item{plot}{logical indicating whether a plot should be drawn, set to
+\code{TRUE} by default.}
 
-\item{...}{additional arguments for \code{plotDens}.}
+\item{...}{additional arguments for \code{\link{plotCyto,GatingSet-method}}.}
 }
 \value{
-object of class \code{GatingSet} with gates applied. The \code{gatingTemplate} can also be optionally written to .csv file
-and entries add to the R object called \code{Template} generated use the \code{openCyto::add_pop} API.
+drawn gates are applied to the
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and saved to a
+  \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}.
 }
 \description{
-drawGate GatingSet Method
+Manually draw gates around populations for analysis of flow cytometry data.
+}
+\seealso{
+\code{\link{plotCyto,GatingSet-method}}
+
+\code{\link{plotCyto1d,flowFrame-method}}
+
+\code{\link{plotCyto2d,flowFrame-method}}
+
+\code{\link{drawGate,flowFrame-method}}
+
+\code{\link{drawGate,flowSet-method}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

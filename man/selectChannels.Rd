@@ -2,18 +2,21 @@
 % Please edit documentation in R/helper-functions.R
 \name{selectChannels}
 \alias{selectChannels}
-\title{Select Fluorescent Channel for Single Stain Controls}
+\title{Select Fluorescent Channel for Compensation Controls}
 \usage{
-selectChannels(fs)
+selectChannels(x)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet} containing compensation controls}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+compensation controls.}
 }
 \value{
-vector of channels in order of \code{flowSet} or \code{GatingSet} samples.
+vector of channels in order of compensation Control samples.
 }
 \description{
-Select Fluorescent Channel for Single Stain Controls
+Select Fluorescent Channel for Compensation Controls
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

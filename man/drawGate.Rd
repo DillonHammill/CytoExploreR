@@ -7,15 +7,39 @@
 drawGate(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}, \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{...}{additional method-specific arguments.}
 }
 \description{
-\code{drawGate} is a convenient wrapper for the gating functions shipped with \code{cytoSuite} to facilitate analysis of flow cytometry by gate drawing. Using \code{drawGate} 
-users can specify the type of gate(s) to be constructed through the \code{gate_type} argument and \code{drawGate} will automatically handle plotting the data and make calls
-to the relevant gating function(s) to construct the gates around populations of interest. \code{drawGate} has methods for \code{flowFrame}, \code{flowSet} and \code{GatingSet}
-objects, refer to their respective help pages for more information - ?`drawGate,flowFrame-method`, ?`drawGate,flowSet-method` or ?`drawGate,GatingSet-method`. The flowFrame and
-flowSet methods simply return the constructed gates as a list of \code{filters}, whilst the GatingSet method automatically applies the constructed gates to the GatingSet and saves
-the constructed gates in an \code{openCyto} gatingTemplate for future use. See ?editGate and ?removeGate to manipulate constructed gates and modify their entries in the gatingTemplate.
+Manually draw gates around populations for analysis of flow cytometry data.
+}
+\details{
+\code{drawGate} is a convenient wrapper for the gating functions shipped with
+\code{cytoRSuite} to facilitate analysis of flow cytometry by gate drawing.
+Using \code{drawGate} users can specify the type of gate(s) to be constructed
+through the \code{type} argument and \code{drawGate} will automatically
+handle plotting the data and make calls to the relevant gating function(s) to
+construct the gates around populations of interest. \code{drawGate} has
+methods for \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}} and
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects, refer to
+their respective help pages for more information. The flowFrame and flowSet
+methods simply return the constructed gates as a list of
+\code{\link[flowCore:filters-class]{filters}}, whilst the GatingSet method
+automatically applies the constructed gates to the GatingSet and saves the
+constructed gates in an \code{openCyto}
+\code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}for future use.
+See \code{\link{editGate}} and \code{\link{removeGate}} to manipulate
+constructed gates and modify their entries in the gatingTemplate.
+}
+\seealso{
+\code{\link{drawGate,flowFrame-method}}
+
+\code{\link{drawGate,flowSet-method}}
+
+\code{\link{drawGate,GatingSet-method}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

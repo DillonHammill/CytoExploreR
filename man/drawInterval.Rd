@@ -2,44 +2,59 @@
 % Please edit documentation in R/gating-functions.R
 \name{drawInterval}
 \alias{drawInterval}
-\title{Draw Interval Gate(s) for Analysis of Flow Cytometry Data.}
+\title{Draw Interval(s) to Gate Flow Cytometry Populations.}
 \usage{
-drawInterval(fr, channels, alias = NULL, subSample = NULL, plot = TRUE,
-  axis = "x", labs = TRUE, ...)
+drawInterval(fr, channels, alias = NULL, plot = TRUE, axis = "x",
+  labels = TRUE, ...)
 }
 \arguments{
-\item{fr}{a \code{flowFrame} object containing the flow cytometry data for plotting and gating.}
+\item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-of the kernel density will be constructed.}
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
-\item{alias}{the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.}
+\item{alias}{the name(s) of the populations to be gated. If multiple
+population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
+will be returned. \code{alias} is \code{NULL} by default which will halt
+the gating routine.}
 
-\item{subSample}{numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-number of events, all events will be plotted which is the default plotting behaviour.}
+\item{plot}{logical indicating whether the data should be plotted. This
+feature allows for constructing gates of different types over existing
+plots which may already contain a different gate type.}
 
-\item{plot}{logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.}
+\item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
+gated for 2-D interval gates.}
 
-\item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.}
+\item{labels}{logical indicating whether to include \code{\link{plotLabels}}
+for the gated population(s), \code{TRUE} by default.}
 
-\item{labs}{logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.}
-
-\item{...}{additional arguments for \code{plotDens}.}
+\item{...}{additional arguments for \code{\link{plotCyto,flowFrame-method}}.}
 }
 \value{
-a list containing the constructed \code{rectangleGate} object(s).
+a\code{\link[flowCore:filters-class]{filters}} list containing the
+  constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+  object(s).
 }
 \description{
-\code{drawInterval} constructs an interactive plotting window for user to select the lower and upper bounds of a population which is constructed
-into a \code{rectangleGate} object and stored in a list. Both 1-D and 2-D interval gates are supported, for 2-D interval gates an additional argument
+\code{drawInterval} constructs an interactive plotting window for user to
+select the lower and upper bounds of a population (through mouse click) which
+is constructed into a
+\code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
+interval gates are supported, for 2-D interval gates an additional argument
 \code{axis} must be supplied to indicate which axis should be gated.
+}
+\seealso{
+\code{\link{plotCyto1d,flowFrame-method}}
+
+\code{\link{plotCyto2d,flowFrame-method}}
+
+\code{\link{drawGate}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)
 }
-\keyword{FlowJo,}
 \keyword{draw,}
 \keyword{gating,}
 \keyword{interval}

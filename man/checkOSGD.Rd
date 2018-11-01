@@ -7,7 +7,9 @@
 checkOSGD()
 }
 \description{
-Check Operating System & Open New Graphics Device
+\code{checkOSGD} is used internally by plotCyto to open an OS-specific
+interactive garphics device to facilitate gate drawing. Mac users will need
+to install \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

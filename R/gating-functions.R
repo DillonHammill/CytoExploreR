@@ -1,40 +1,64 @@
-#' Draw Polygon Gate(s) for Analysis of Flow Cytometry Data.
+#' Draw Polygon(s) to Gate Flow Cytometry Populations.
 #'
-#' \code{drawPolygon} constructs an interactive plotting window for user to select the coordinates a polygon gate which then constructed
-#' into a \code{polygonGate} object and stored in a list.
+#' \code{drawPolygon} constructs an interactive plotting window to allow manual
+#' selection of the co-ordinates of a ploygon gate(s) (through mouse click)
+#' which are constructed into
+#' \code{\link[flowCore:polygonGate]{polygonGate}} objects and stored in a
+#' \code{\link[flowCore:filters-class]{filters}} list.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3","CD4")}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. If multiple
+#'   population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
+#'   will be returned. \code{alias} is \code{NULL} by default which will halt
+#'   the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the constructed \code{polygonGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+#'   object(s).
 #'
-#' @keywords manual, gating, draw, FlowJo, polygonGate, openCyto
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore polygonGate
-#' @export
+#' @keywords manual, gating, draw, polygonGate, openCyto
+#'
+#' @importFrom flowCore polygonGate filters
+#' @importFrom graphics locator lines
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawPolygon <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...){
   
-  if(length(channels) != 2) stop("Two channels are required to construct a polygon gate.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias   
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+
+  # Call new plot?
   if(plot == TRUE){
     
-  drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  # Construct gates
   gates <- lapply(alias, function(alias){
     
     message(paste("Select at least 3 points to construct a polygon gate around the",alias,"population. \n"))
@@ -43,7 +67,7 @@ drawPolygon <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
     coords <- locator(type = "o", lwd = 2, pch = 16, col = "red")
     
     if (length(coords$x) < 3) stop("A minimum of 3 points is required to construct a polygon gate.")
-    lines(x = coords$x[c(1, length(coords$x))], y = coords$y[c(1, length(coords$x))], lwd = 2, col = "red")
+    lines(x = coords$x[c(1, length(coords$x))], y = coords$y[c(1, length(coords$x))], lwd = 2.5, col = "red")
     
     coords <- as.data.frame(coords)
     coords <- as.matrix(coords)
@@ -51,59 +75,84 @@ drawPolygon <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
     
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias)
     
-    if(labs == TRUE){
+    if(labels == TRUE){
       
-    plotLabels(fr = fr, alias = alias, gate = gate)
+      plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
       
     }
     
     return(gate)
     
   })
-
+  
   gates <- filters(gates)
   return(gates)
   
 }
 
-#' Draw Rectangle Gate(s) for Analysis of Flow Cytometry Data.
+#' Draw Rectangles to Gate Flow Cytometry Populations.
 #'
-#' \code{drawRectangle} constructs an interactive plotting window for user to select the diagonal coordinates of a rectangle which is constructed
-#' into a \code{rectangleGate} object and stored in a list.
+#' \code{drawRectangle} constructs an interactive plotting window to allow
+#' manual selection of the co-ordinates of a rectangle gate(s) (through mouse
+#' click) which are constructed into
+#' \code{\link[flowCore:rectangleGate]{rectangleGate}} objects and stored
+#' in a \code{\link[flowCore:filters-class]{filters}} list. Simply select 2
+#' diagonal co-ordinates to construct the rectangleGate(s).
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. If multiple
+#'   population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
+#'   will be returned. \code{alias} is \code{NULL} by default which will halt
+#'   the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the constructed \code{rectangleGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   object(s).
 #'
-#' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore rectangleGate
-#' @importFrom flowCore exprs
-#' @export
+#' @keywords manual, gating, draw, rectangleGate, openCyto
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawRectangle <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @importFrom flowCore rectangleGate filters
+#' @importFrom flowCore exprs
+#' @importFrom graphics locator rect
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...){
   
-  if(length(channels) != 2) stop("Two fluorescent channels are required to construct a rectangle gate.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = TRUE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  # Construct gates
   gates <- lapply(alias, function(alias){
     
     message(paste("Select 2 diagonal points to construct a rectangle gate around the",alias,"population. \n"))
@@ -114,101 +163,143 @@ drawRectangle <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
     coords <- as.matrix(coords)
     colnames(coords) <- channels
     
-    rect(xleft = min(coords[,1]), ybottom = min(coords[,2]), xright = max(coords[,1]), ytop = max(coords[,2]), border = "red", lwd = 2)
+    rect(xleft = min(coords[,1]), ybottom = min(coords[,2]), xright = max(coords[,1]), ytop = max(coords[,2]), border = "red", lwd = 2.5)
   
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
     
-    if(labs == TRUE){
+    if(labels == TRUE){
       
-    plotLabels(fr = fr, alias = alias, gate = gate)
+      plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
       
     }
     
     return(gate)
+    
     })
 
   gates <- filters(gates)
   return(gates)
 }
 
-#' Draw Interval Gate(s) for Analysis of Flow Cytometry Data.
+#' Draw Interval(s) to Gate Flow Cytometry Populations.
 #'
-#' \code{drawInterval} constructs an interactive plotting window for user to select the lower and upper bounds of a population which is constructed
-#' into a \code{rectangleGate} object and stored in a list. Both 1-D and 2-D interval gates are supported, for 2-D interval gates an additional argument
+#' \code{drawInterval} constructs an interactive plotting window for user to
+#' select the lower and upper bounds of a population (through mouse click) which
+#' is constructed into a
+#' \code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+#' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
+#' interval gates are supported, for 2-D interval gates an additional argument
 #' \code{axis} must be supplied to indicate which axis should be gated.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be gated for 2-D interval gates.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. If multiple
+#'   population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
+#'   will be returned. \code{alias} is \code{NULL} by default which will halt
+#'   the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
+#'   gated for 2-D interval gates.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the constructed \code{rectangleGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   object(s).
 #'
-#' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, interval
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore rectangleGate
-#' @export
+#' @keywords manual, gating, draw, rectangleGate, openCyto, interval
+#'
+#' @importFrom flowCore rectangleGate filters
+#' @importFrom graphics locator abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawInterval <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, axis = "x", labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", labels = TRUE,...){
   
-  if(!length(channels) %in% c(1,2)) stop("Supply 1-2 channels to construct interval gates.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  # Construct gates
   gates <- lapply(alias, function(alias){
     
     message(paste("Select the lower and upper bounds of the",alias,"population to construct an interval gate. \n"))
     
     # Extract gate coordinates
-    coords <- locator(n=2, type = "o", lwd = 2, pch = 16, col = "red")
+    coords <- locator(n=2, type = "o", lwd = 2.5, pch = 16, col = "red")
     coords <- data.frame(coords)
     coords <- as.matrix(coords)
     
     if(length(channels) == 1){
+      
       colnames(coords) <- c(channels[1],"Density")
+      
     }else{
+      
       colnames(coords) <- channels
+      
     }
     
     if(axis == "x"){
-      abline(v = coords[,1], lwd = 2, col = "red")
+      
+      abline(v = coords[,1], lwd = 2.5, col = "red")
+      
     }else if(axis == "y"){
-      abline(h = coords[,2], lwd = 2, col = "red")
+      
+      abline(h = coords[,2], lwd = 2.5, col = "red")
+      
     }
     
     
     if(axis == "x"){
     if(length(channels) == 1){
+      
       coords <- data.frame(x = coords[,1])
       coords <- as.matrix(coords)
       colnames(coords) <- channels[1]
+      
     }else if(length(channels) == 2){
+      
       coords <- data.frame(x = coords[,1], y = c(-Inf,Inf))
       coords <- as.matrix(coords)
       colnames(coords) <- channels
+      
     }
       gate <- rectangleGate(.gate = coords, filterId = alias)
       
-      if(labs == TRUE){
-      plotLabels(fr = fr, alias = alias, gate = gate)
+      if(labels == TRUE){
+        
+        plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+      
       }
       
     }else if(axis == "y"){
+      
       if(length(channels) == 1) stop("Cannot gate y axis if a single channel is supplied.")
       coords <- data.frame(x = c(-Inf,Inf), y = coords[,2])
       coords <- as.matrix(coords)
@@ -216,8 +307,10 @@ drawInterval <- function(fr, channels, alias = NULL, subSample = NULL, plot = TR
         
       gate <- rectangleGate(.gate = coords, filterId = alias)
       
-      if(labs == TRUE){
-      plotLabels(fr = fr, alias = alias, gate = gate)
+      if(labels == TRUE){
+        
+        plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+      
       }
     }
     
@@ -230,181 +323,269 @@ drawInterval <- function(fr, channels, alias = NULL, subSample = NULL, plot = TR
     
 }
 
-#' Draw Threshold Gate(s) for Analysis of Flow Cytometry Data.
+#' Draw Threshold(s) to Gate Flow Cytometry Populations.
 #'
-#' \code{drawThreshold} constructs an interactive plotting window for user to select the lower bound of a population which is constructed
-#' into a \code{rectangleGate} object and stored in a list. Both 1-D and 2-D threshold gates are supported, for 2-D threshold gates all events
-#' above the select x and y coordinates are included in the gate.
+#' \code{drawThreshold} constructs an interactive plotting window for user to
+#' select the lower bound of a population which is constructed into a
+#' \code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+#' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
+#' threshold gates are supported, for 2-D threshold gates all events above the
+#' select x and y coordinates are included in the gate. Multiple threshold gates
+#' are not currently supported.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. Multiple
+#'   \code{threshold} gates are not currently supported. \code{alias} is
+#'   \code{NULL} by default which will halt the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the constructed \code{rectangleGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}} object.
 #'
-#' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, threshold
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore rectangleGate
-#' @export
+#' @keywords manual, gating, draw, rectangleGate, openCyto, threshold
+#'
+#' @importFrom flowCore rectangleGate filters
+#' @importFrom graphics locator rect abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawThreshold <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...){
   
-  if(!length(channels) %in% c(1,2)) stop("Supply 1-2 channels to construct interval gates.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  
+  # Construct gates
   message(paste("Select the lower bound of the",alias,"population to construct a threshold gate. \n"))
   
   if(length(alias) > 1){
-    message("Multiple threhold gates are not supported - a single threshold gate will be returned")
+    
+    stop("Multiple threhold gates are not supported.")
+  
   }
   
   # Extract gate coordinates
-  coords <- locator(n=1, type = "p", lwd = 2, pch = 16, col = "red")
+  coords <- locator(n=1, type = "p", lwd = 2.5, pch = 16, col = "red")
   
   if(length(channels) == 1){
+    
     pts <- data.frame(x = c(coords$x,Inf))
     pts <- as.matrix(pts)
     colnames(pts) <- channels[1]
-    abline(v = coords$x, lwd = 2, col = "red")
+    abline(v = coords$x, lwd = 2.5, col = "red")
+    
   }else if(length(channels) == 2){
+    
     pts <- data.frame(x = c(coords$x,Inf), y = c(coords$y,Inf))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
-    rect(xleft = min(coords$x), ybottom = min(coords$y), xright = max(exprs(fr)[,channels[1]]), ytop = max(exprs(fr)[, channels[2]]), border = "red", lwd = 2)
+    rect(xleft = min(coords$x), ybottom = min(coords$y), xright = max(exprs(fr)[,channels[1]]), ytop = max(exprs(fr)[, channels[2]]), border = "red", lwd = 2.5)
+  
   }
   
   gate <- rectangleGate(.gate = pts, filterId = alias)
   
-  if(labs == TRUE){
-  plotLabels(fr = fr, alias = alias, gate = gate)
+  if(labels == TRUE){
+    
+    plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+    
   }
   
   gates <- filters(list(gate))
   
 }
 
-#' Draw Boundary Gate(s) for Analysis of Flow Cytometry Data.
+#' Draw Boundary(s) to Gate Flow Cytometry Populations.
 #'
-#' \code{drawBoundary} constructs an interactive plotting window for user to select the upper bound of a population which is constructed
-#' into a \code{rectangleGate} object and stored in a list. Both 1-D and 2-D boundary gates are supported, for 2-D boundary gates all events
-#' below the select x and y coordinates are included in the gate.
+#' \code{drawBoundary} constructs an interactive plotting window for user to
+#' select the upper bound of a population which is constructed into a
+#' \code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+#' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
+#' boundary gates are supported, for 2-D boundary gates all events below the
+#' select x and y coordinates are included in the gate. Multiple boundary gates
+#' ares not currently supported.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. Multiple boundary
+#'   gates ares not currently supported. \code{alias} is \code{NULL} by default
+#'   which will halt the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the constructed \code{rectangleGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   object.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, boundary
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore rectangleGate
-#' @export
 #'
+#' @importFrom flowCore rectangleGate filters
+#' @importFrom graphics locator rect abline
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawBoundary <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...){
   
-  if(!length(channels) %in% c(1,2)) stop("Supply 1-2 channels to construct interval gates.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  # Construct gates
   message(paste("Select the upper bound of the",alias,"population to construct a boundary gate. \n"))
   
   if(length(alias) > 1){
-    message("Multiple boundary gates are not supported - a single boundary gate will be returned")
+    
+    stop("Multiple boundary gates are not supported.")
+ 
   }
   
   # Extract gate coordinates
-  coords <- locator(n=1, type = "p", lwd = 2, pch = 16, col = "red")
+  coords <- locator(n=1, type = "p", lwd = 2.5, pch = 16, col = "red")
   
   if(length(channels) == 1){
+    
     pts <- data.frame(x = c(-Inf,coords$x))
     pts <- as.matrix(pts)
     colnames(pts) <- channels[1]
-    abline(v = coords$x, lwd = 2, col = "red")
+    abline(v = coords$x, lwd = 2.5, col = "red")
+    
   }else if(length(channels) == 2){
+    
     pts <- data.frame(x = c(-Inf,coords$x), y = c(-Inf,coords$y))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
-    rect(xleft = min(exprs(fr)[,channels[1]]), ybottom = min(exprs(fr)[,channels[2]]), xright = max(coords$x), ytop = max(coords$y), border = "red", lwd = 2)
+    rect(xleft = min(exprs(fr)[,channels[1]]), ybottom = min(exprs(fr)[,channels[2]]), xright = max(coords$x), ytop = max(coords$y), border = "red", lwd = 2.5)
+  
   }
   
   gate <- rectangleGate(.gate = pts, filterId = alias)
   
-  if(labs == TRUE){
-  plotLabels(fr = fr, alias = alias, gate = gate)
+  if(labels == TRUE){
+    
+    plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+    
   }
   
   gates <- filters(list(gate))
   
 }
 
-#' Draw Ellipsoid Gate(s) for Analysis of Flow Cytometry Data.
+#' Draw Ellipse(s) to Gate Flow Cytometry Populations.
 #'
-#' \code{drawEllipse} constructs an interactive plotting window for user to select the limits of a population in 2-D (4 points) which is constructed
-#' into a \code{ellipsoidGate} object and stored in a list.
+#' \code{drawEllipse} constructs an interactive plotting window for user to
+#' select the limits of a population in 2 dimensions (4 points) which is
+#' constructed into \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}
+#' object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. If multiple
+#'   population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
+#'   will be returned. \code{alias} is \code{NULL} by default which will halt
+#'   the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the constructed \code{ellipsoidGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}
+#'   object(s).
 #'
-#' @keywords manual, gating, draw, FlowJo, ellipsoidGate, openCyto, ellipse
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore ellipsoidGate
-#' @export
+#' @keywords manual, gating, draw, ellipsoidGate, openCyto, ellipse
+#'
+#' @importFrom flowCore ellipsoidGate filters
+#' @importFrom graphics locator polygon
+#' @importFrom methods as
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawEllipse <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,...){
   
-  if(!length(channels) == 2) stop("Supply 2 channels to construct ellipsoid gates.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  # Construct gates
   gates <- lapply(alias, function(alias){
       
     message(paste("Select 4 points to define the limits of the",alias,"population to construct an ellipsoid gate. \n"))
@@ -421,7 +602,15 @@ drawEllipse <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
     mr.pts <- coords[!coords$x %in% mj.pts$x & !coords$y %in% mj.pts$y,]
     
     # Find center of the major axis
-    center <- c((sum(mj.pts$x)/nrow(mj.pts)), (sum(mj.pts$y)/nrow(mj.pts)))
+    mj.center <- c((sum(mj.pts$x)/nrow(mj.pts)), (sum(mj.pts$y)/nrow(mj.pts)))
+    
+    # Find center of all points
+    center <- c(sum(c(mj.pts$x,mr.pts$x))/4, sum(c(mj.pts$y,mr.pts$y))/4)
+    
+    # Adjust mj.pts to fall on center
+    adj <- c((mj.center[1] - center[1]),(mj.center[2] - center[2]))
+    mj.pts$x <- mj.pts$x - adj[1]
+    mj.pts$y <- mj.pts$y - adj[2]
     
     # Find major point which lies above center
     max.pt <- mj.pts[mj.pts$y > center[2] ,]
@@ -434,15 +623,19 @@ drawEllipse <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
     
     # Angle between horizontal line through center and max.pt
     if(max.pt[1] > center[1]){           # angle < pi/2
+      
       mj.pt.ct <- cbind(max.pt[1],center[2])
       colnames(mj.pt.ct) <- c("x","y")
       adj <- stats::dist(rbind(center,mj.pt.ct))
       angle <- acos(adj/a)
+      
     }else if(max.pt[1] < center[1]){     # angle > pi/2
+      
       mj.pt.ct <- cbind(center[1], max.pt[2])
       colnames(mj.pt.ct) <- c("x","y")
       opp <- stats::dist(as.matrix(rbind(max.pt,mj.pt.ct)))
       angle <- pi/2 + asin(opp/a)
+      
     }
     
     # Covariance matrix
@@ -458,10 +651,12 @@ drawEllipse <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
     
     gate <- ellipsoidGate(.gate = cvm, mean = center, filterId = alias)
     
-    polygon(as(gate, "polygonGate")@boundaries[,1], as(gate, "polygonGate")@boundaries[,2], border = "red", lwd = 3)
+    polygon(as(gate, "polygonGate")@boundaries[,1], as(gate, "polygonGate")@boundaries[,2], border = "red", lwd = 2.5)
     
-    if(labs == TRUE){
-    plotLabels(fr = fr, alias = alias, gate = gate)
+    if(labels == TRUE){
+      
+      plotLabels(x = fr, gates = gate, channels = channels, alias = alias, cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+      
     }
       
     return(gate)
@@ -472,38 +667,60 @@ drawEllipse <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRU
   
 }
 
-#' Draw Quadrant Gates for Analysis of Flow Cytometry Data.
+#' Draw Quadrants to Gate Multiple Flow Cytometry Populations.
 #'
-#' \code{drawQuadrants} constructs an interactive plotting window for user to select the crosshair center of 4 populations which is used to construct
-#' 4 \code{rectangleGate} objects and stored in a list. Populations are assigned in the following order: bottom left, bottom right, top right and top left.
+#' \code{drawQuadrants} constructs an interactive plotting window for user to
+#' select the crosshair center of 4 populations which is used to construct 4
+#' \code{\link[flowCore:rectangleGate]{rectangleGate}} objects which are
+#' stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
+#' are assigned in the following order: bottom left, bottom right, top right and
+#' top left.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the 4 populations to be gated. \code{alias} is
+#'   \code{NULL} by default which will halt the gating routine.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a list containing the 4 constructed \code{rectangleGate} objects.
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the 4
+#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, quadrants
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore rectangleGate
-#' @export
+#'
+#' @importFrom flowCore rectangleGate filters
+#' @importFrom graphics locator lines abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...){
   
-  if(!length(channels) == 2) stop("Supply 2 channels to construct quadrant gates.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr, channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
@@ -513,13 +730,14 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
     stop("Supply 4 population names as the alias argument to construct a set of quadrant gates")
   }
   
+  # Construct gates
   message(paste("Select 1 point designating the center point of the populations to construct quadrant gates. \n"))
   
   # Extract points of drawn gate
   pts <- locator(n=1, type = "o", lwd = 2, pch = 16)
   
-  lines(x = pts$x[c(1, length(pts$x))], y = pts$y[c(1, length(pts$x))], lwd = 2, col = "red")
-  abline(v = pts$x, h = pts$y, lwd = 2, col = "red")
+  lines(x = pts$x[c(1, length(pts$x))], y = pts$y[c(1, length(pts$x))], lwd = 2.5, col = "red")
+  abline(v = pts$x, h = pts$y, lwd = 2.5, col = "red")
   
   pts <- as.data.frame(pts)
   colnames(pts) <- channels
@@ -532,8 +750,10 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
   colnames(q1.gate) <- channels
   q1 <- rectangleGate(.gate = q1.gate, filterId = alias[1])
   
-  if(labs == TRUE){
-  plotLabels(fr = fr, alias = alias[1], channels = channels, gate = q1)
+  if(labels == TRUE){
+    
+    plotLabels(x = fr, gates = q1, channels = channels, alias = alias[1], cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+  
   }
   
   # Q2 <- Bottom Right
@@ -542,8 +762,10 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
   colnames(q2.gate) <- channels
   q2 <- rectangleGate(.gate = q2.gate, filterId = alias[2])
   
-  if(labs == TRUE){
-  plotLabels(fr = fr, alias = alias[2], channels = channels, gate = q2)
+  if(labels == TRUE){
+    
+    plotLabels(x = fr, gates = q2, channels = channels, alias = alias[2], cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+  
   }
   
   # Q3 <- Top Right
@@ -552,8 +774,10 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
   colnames(q3.gate) <- channels
   q3 <- rectangleGate(.gate = q3.gate, filterId = alias[3])
   
-  if(labs == TRUE){
-  plotLabels(fr = fr, alias = alias[3], channels = channels, gate = q3)
+  if(labels == TRUE){
+    
+    plotLabels(x = fr, gates = q3, channels = channels, alias = alias[3], cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+    
   }
   
   # Q4 <- Top Left
@@ -562,8 +786,10 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
   colnames(q4.gate) <- channels
   q4 <- rectangleGate(.gate = q4.gate, filterId = alias[4])
   
-  if(labs == TRUE){
-  plotLabels(fr = fr, alias = alias[4], channels = channels, gate = q4)
+  if(labels == TRUE){
+    
+    plotLabels(x = fr, gates = q4, channels = channels, alias = alias[4], cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+  
   }
   
   gates <- filters(list(q1,q2,q3,q4))
@@ -571,44 +797,70 @@ drawQuadrants <- function(fr, channels, alias = NULL, subSample = NULL, plot = T
 
 }
 
-#' Draw Web Gate for Analysis of Flow Cytometry Data.
+#' Draw Web to Gate Multiple Flow Cytometry Populations.
 #'
-#' \code{drawWeb} is a variation of drawQuadrant which allows more flexibility with gate co-ordinates (angled lines) and supports a number 
-#' of gates as indicated by the \code{alias} argument. To construct the gate supply the center point and surrounding points on plot edge.
+#' \code{drawWeb} is a variation of drawQuadrant which allows more flexibility
+#' with gate co-ordinates (angled lines) and supports any number of gates as
+#' indicated by the \code{alias} argument. To construct the gate simply select
+#' the center point and surrounding divider points on plot edge. \code{drawWeb}
+#' will contruct the \code{\link[flowCore:polygonGate]{polygonGate}}
+#' objects and store them in a \code{\link[flowCore:filters-class]{filters}}
+#' list.
 #'
-#' @param fr a \code{flowFrame} object containing the flow cytometry data for plotting and gating.
-#' @param channels a vector indicating the fluorescent channel(s) to be used for gating. If a single channel is supplied, a histogram of
-#' of the kernel density will be constructed.
-#' @param alias the name(s) of the populations to be gated. If multiple population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple 
-#' gates will be returned. \code{alias} is \code{NULL} by default which will halt the gating routine.
-#' @param subSample numeric indicating the number of events to plot to speed up plotting. If \code{subSample} is greater than the total
-#' number of events, all events will be plotted which is the default plotting behaviour.
-#' @param plot logical indicating whether the data should be plotted. This feature allows for constructing gates of different types over 
-#' existing plots which may already contain a different gate type. For demonstration of this feature refer to the package vignette.
-#' @param labs logical indicating whether to include \code{plotLabels} for the gated population(s), \code{TRUE} by default.
-#' @param ... additional arguments for \code{plotDens}.
+#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
+#'   containing the flow cytometry data for plotting and gating.
+#' @param channels vector of channel names to use for plotting, can be of length
+#'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
+#' @param alias the name(s) of the populations to be gated. If multiple
+#'   population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
+#'   will be returned. \code{alias} is \code{NULL} by default which will halt
+#'   the gating routine. Recommended for 3 or more populations.
+#' @param plot logical indicating whether the data should be plotted. This
+#'   feature allows for constructing gates of different types over existing
+#'   plots which may already contain a different gate type.
+#' @param labels logical indicating whether to include \code{\link{plotLabels}}
+#'   for the gated population(s), \code{TRUE} by default.
+#' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
-#' @return a filters list containing the constructed \code{polygonGate} object(s).
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+#'   object(s).
 #'
-#' @keywords manual, gating, draw, FlowJo, polygonGate, openCyto, drawWeb
-#' @importFrom flowDensity plotDens
-#' @importFrom flowCore polygonGate
+#' @keywords manual, gating, draw, polygonGate, openCyto, drawWeb
+#'
+#' @importFrom flowCore polygonGate filters
 #' @importFrom flowCore exprs
-#' @export
-#'
+#' @importFrom graphics locator lines
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, labs = TRUE,...){
+#'
+#' @seealso \code{\link{plotCyto1d,flowFrame-method}}
+#' @seealso \code{\link{plotCyto2d,flowFrame-method}}
+#' @seealso \code{\link{drawGate}}
+#'
+#' @export
+drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...){
   
-  if(length(channels) != 2) stop("Two channels are required to construct a web gate.")
+  # Check channels
+  channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
+  # Check alias
+  if(is.null(alias)){
+    
+    stop("Please supply a name for a the gated population as the alias argument.")
+    
+  }
+  
+  # Call new plot?
   if(plot == TRUE){
     
-    drawPlot(fr = fr, channels = channels, subSample = subSample, ...)
+    plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
     
   }else if(plot == FALSE){
     
   }
   
+  # Construct gates
   # Select center of the web gate
   message("Select the center of the web gate.")
   center <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
@@ -626,8 +878,8 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq(1:length(alias)), function(x){
     
-    pt <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
-    lines(x = c(center$x, pt$x), y = c(center$y,pt$y), lwd = 2, col = "red")
+    pt <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
+    lines(x = c(center$x, pt$x), y = c(center$y,pt$y), lwd = 2.5, col = "red")
     
     return(c(pt$x,pt$y))
     
@@ -673,8 +925,8 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   for(x in 1:length(q1$Q)){
     
     # Calculate intersection with horizontal and vertical axes
-    vint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(xmin, center$y), c(xmin, ymin))
-    hint <- lines.intercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin, ymin))
+    vint <- linesIntercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(xmin, center$y), c(xmin, ymin))
+    hint <- linesIntercept(c(center$x,center$y), c(q1[x,"x"], q1[x,"y"]), c(center$x, ymin), c(xmin, ymin))
 
     # Check which axis the point should be pushed onto
     if(vint[2] >= ymin){
@@ -696,8 +948,8 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   for(x in 1:length(q2$Q)){
     
     # Calculate intersection with horizontal and vertical axes
-    vint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin))
-    hint <- lines.intercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, ymin), c(xmax, ymin))
+    vint <- linesIntercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(xmax, center$y), c(xmax, ymin))
+    hint <- linesIntercept(c(center$x,center$y), c(q2[x,"x"], q2[x,"y"]), c(center$x, ymin), c(xmax, ymin))
     
     # Check which axis the point should be pushed onto
     if(vint[2] >= ymin){
@@ -719,8 +971,8 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   for(x in 1:length(q3$Q)){
     
     # Calculate intersection with horizontal and vertical axes
-    vint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(xmax,ymax), c(xmax,center$y))
-    hint <- lines.intercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(center$x, ymax), c(xmax, ymax))
+    vint <- linesIntercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(xmax,ymax), c(xmax,center$y))
+    hint <- linesIntercept(c(center$x,center$y), c(q3[x,"x"], q3[x,"y"]), c(center$x, ymax), c(xmax, ymax))
     
     # Check which axis the point should be pushed onto
     if(vint[2] >= ymax){
@@ -742,8 +994,8 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   for(x in 1:length(q4$Q)){
     
     # Calculate intersection with horizontal and vertical axes
-    vint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(xmin, center$y))
-    hint <- lines.intercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(center$x, ymax))
+    vint <- linesIntercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(xmin, center$y))
+    hint <- linesIntercept(c(center$x,center$y), c(q4[x,"x"], q4[x,"y"]), c(xmin, ymax), c(center$x, ymax))
     
     # Check which axis the point should be pushed onto
     if(vint[2] >= ymax){
@@ -1188,8 +1440,10 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
     colnames(coords) <- channels
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
     
-    if(labs == TRUE){
-      plotLabels(fr = fr, alias = alias[x], channels = channels, gate = gate)
+    if(labels == TRUE){
+      
+      plotLabels(x = fr, gates = gate, channels = channels, alias = alias[x], cex.text = 1, format.text = c("alias","percent"), alpha = 0.7)
+    
     }
     
     return(gate)
@@ -1197,7 +1451,7 @@ drawWeb <- function(fr, channels, alias = NULL, subSample = NULL, plot = TRUE, l
   
   gates <- filters(gates)
   
-  plotGates(gates = gates, col = "red")
+  plotGates(gates = gates, channels = channels, gate.col = "red", gate.lwd = 2.5)
   
   return(gates)
   

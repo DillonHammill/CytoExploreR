@@ -8,13 +8,18 @@
 \S4method{getChannels}{GatingSet}(x)
 }
 \arguments{
-\item{x}{object \code{GatingSet}}
+\item{x}{object \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 }
 \value{
-vector of fluorescent channels
+vector of fluorescent channels.
 }
 \description{
 Extract Fluorescent Channels - GatingSet Method
+}
+\seealso{
+\code{\link{getChannels,flowFrame-method}}
+
+\code{\link{getChannels,flowSet-method}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

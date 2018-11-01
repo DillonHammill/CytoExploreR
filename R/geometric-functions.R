@@ -1,3 +1,5 @@
+#' Lines Intersection from retistruct Package
+#' 
 #' Determine the intersection of two lines L1 and L2 in two dimensions,
 #' using the formula described by Weisstein.
 #' 
@@ -17,14 +19,15 @@
 #' From MathWorld--A Wolfram Web Resource.
 #' \url{http://mathworld.wolfram.com/Line-LineIntersection.html}
 #' @author David Sterratt
-#' @export
 #' @examples
 #' ## Intersection of two intersecting lines
-#' lines.intercept(c(0, 0), c(1, 1), c(0, 1), c(1, 0))
+#' linesIntercept(c(0, 0), c(1, 1), c(0, 1), c(1, 0))
 #'
 #' ## Two lines that don't intersect
-#' lines.intercept(c(0, 0), c(0, 1), c(1, 0), c(1, 1))
-lines.intercept <- function(P1, P2, P3, P4, interior.only=FALSE) {
+#' linesIntercept(c(0, 0), c(0, 1), c(1, 0), c(1, 1))
+#' 
+#' @noRd
+linesIntercept <- function(P1, P2, P3, P4, interior.only=FALSE) {
   P1 <- as.vector(P1)
   P2 <- as.vector(P2)
   P3 <- as.vector(P3)

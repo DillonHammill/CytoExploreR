@@ -2,10 +2,11 @@
 #' inverse function of argParser
 #' 
 #' @param args gatingTemplate arguments as named list to be deparsed (e.g. list(gate = gateobj)).
+#' @param split logical.
 #' 
 #' @return deparsed arguments for storage in gatingTemplate csv file
 #' 
-#' @export
+#' @noRd
 .argDeparser <- function(args, split = TRUE){
   if(split){
     args <- sapply(names(args), function(argn){
