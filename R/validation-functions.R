@@ -355,14 +355,14 @@ checkAlias <- function(alias, type){
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom grDevices windows X11
+#' @import grDevices 
 #'
 #' @export
 checkOSGD <- function(){
   
   if(.Platform$OS.type == "windows"){
     
-    windows()
+    grDevices::windows()
     
   }else if(.Platform$OS.type == "unix"){
     

@@ -5,7 +5,7 @@
 \title{Edit Existing Gate(s).}
 \usage{
 editGate(x, select = NULL, parent = NULL, alias = NULL,
-  type = NULL, gtfile = NULL, ...)
+  overlay = NULL, type = NULL, gtfile = NULL, ...)
 }
 \arguments{
 \item{x}{an object of class \code{GatingSet}.}
@@ -16,6 +16,8 @@ plotting.}
 \item{parent}{name of the parental population.}
 
 \item{alias}{name(s) of the gate to edit (e.g. "Single Cells").}
+
+\item{overlay}{name(s) of the population(s) to overlay onto the plot.}
 
 \item{type}{vector of gate type names used to construct the gates. Multiple
 \code{gate_types} are supported but should be accompanied with an

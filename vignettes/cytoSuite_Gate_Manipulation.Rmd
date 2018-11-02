@@ -23,10 +23,10 @@ To demonstrate **editGate** and **removeGate** we will use the "Activation" flow
 
 ## 2.1. Prepare Samples for Gating
 ```{r, eval = TRUE, message = FALSE}
-library(cytoSuite, quietly = TRUE)
+library(cytoRSuite, quietly = TRUE)
 
 # Load in Activation dataset
-data("Activation", package = "cytoSuite")
+data("Activation", package = "cytoRSuite")
 
 # Add Samples to GatingSet
 gs <- GatingSet(Activation)
