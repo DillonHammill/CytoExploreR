@@ -1,0 +1,53 @@
+reference:
+  - title: Compensation
+    desc: Functions to compute, edit and visualise compensation
+    contents:
+      - '`spillover_compute`'
+      - '`spillover_edit`'
+      - '`cyto_plot_compensation`'
+  - title: Annotation
+    desc: Functions to annotate flow cytometry data
+    contents:
+      - '`cyto_markers`'
+      - '`cyto_annotate`'
+  - title: Helpers
+    desc: Functions to simplify regular operations
+    contents:
+      - '`cyto_fluor_channels`'
+      - '`cyto_channel_check`'
+      - '`cyto_channel_select`'
+      - '`cyto_trans_check`'
+      - '`cyto_sample`'
+      - '`gate_type`'
+  - title: Gating
+    desc: Functions to draw, construct, edit or remove gates
+    contents:
+      - '`gate_rectangle_draw`'
+      - '`gate_polygon_draw`'
+      - '`gate_ellipse_draw`'
+      - '`gate_interval_draw`'
+      - '`gate_threshold_draw`'
+      - '`gate_boundary_draw`'
+      - '`gate_quadrant_draw`'
+      - '`gate_web_draw`'
+      - '`gate_draw`'
+      - '`gate_edit`'
+      - '`gate_remove`'
+  - title: Visualisation
+    desc: Functions to visualise flow cytometry data
+    contents:
+      - '`cyto_plot`'
+      - '`cyto_plot_profile`'
+      - '`cyto_plot_gating_scheme`'
+      - '`cyto_plot_gate`'
+      - '`cyto_plot_label`'
+      - '`cyto_plot_contour`'
+      - '`cyto_plot_overlay`'
+  - title: Statistics
+    desc: Functions to compute and export statistics
+    contents:
+      - '`cyto_stats_compute`'
+  - title: Conversion
+    desc: Function to convert old gatingTemplates to new format
+    contents:
+      - '`gatingTemplate_convert`'

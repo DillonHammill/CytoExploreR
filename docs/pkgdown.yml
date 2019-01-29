@@ -1,0 +1,10 @@
+pandoc: 2.1.3
+pkgdown: 1.3.0.9000
+pkgdown_sha: 2f40b4769ea9ad2312aa4cc93f27ab116461543b
+articles:
+  CytoRSuite-Compensation: CytoRSuite-Compensation.html
+  CytoRSuite-Gate-Manipulation: CytoRSuite-Gate-Manipulation.html
+  CytoRSuite-Gating-Functions: CytoRSuite-Gating-Functions.html
+  CytoRSuite-Visualisation: CytoRSuite-Visualisation.html
+  CytoRSuite: CytoRSuite.html
+

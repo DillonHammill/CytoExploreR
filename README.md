@@ -1,312 +1,312 @@
 
-**cytoRSuite**
---------------
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
+# CytoRSuite <img src="man/figures/logo.png" align="right" alt="" width="120"/>
 
-**Installation**
-----------------
+[![Travis build
+status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite)
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/CytoRSuite)
+[![Coverage
+status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 
-**cytoRSuite** can be installed from Github.
+CytoRSuite is designed to provide an interactive interface for the
+analysis of flow cytometry data in R. You can see CytoRSuite in action
+at **link to final website**. Learn more in vignette(“CytoRSuite”) or
+articles tab.
 
-### GitHub
+# Installation
 
-``` r
-library(devtools)
-install_github("DillonHammill/cytoRSuite")
-```
+CytoRSuite is built on the existing flow cytometry infrastructure for R
+developed by the [RGLab](https://github.com/RGLab). To install
+CytoRSuite, users should first install the latest versions of
+[flowCore](https://github.com/RGLab/flowCore),
+[flowWorkspace](https://github.com/RGLab/flowWorkspace) and
+[openCyto](https://github.com/RGLab/openCyto) from Bioconductor and
+GitHUb.
 
-**Overview**
-------------
-
-**cytoRSuite** provides an interactive interface for analysis of flow cytometry data. Some key features include:
-
--   user guided automatic compensation using **computeSpillover**
--   interactively modify spillover matrices using **editSpillover**
--   visualise compensation in all channels using **plotCytoComp**
--   manual gate drawing using **drawGate**
--   ability to edit drawn gates using **editGate**
--   remove gates using **removeGate**
--   gate saving to an openCyto **gatingTemplate**
--   visualisation of flowFrames, flowSets, GatingHierarchies and GatingSets using **plotCyto**
--   visualisation of complete gating strategies using **plotCytoGates**
--   visualisation of marker expression in all channels using **plotCytoExprs**
--   export population level statistics using **computeStats**
-
-For more details please refer to the vignettes which document all of these features in more detail.
-
-**Demonstration**
------------------
-
-To give you a taste of what **cytoRSuite** can do, here we will demonstrate the use of **drawGate** to analyse some in vitro T cell activation data supplied with the package. For more details on this dataset see **?Activation**. The Activation dataset is comprised of two separate files:
-
-1.  Unactivated sample
-2.  Activated sample
-
-Feel free to run the below code chunks in your R session so that you see how easy it is to draw gates using **drawGate** and visualise gating strategies using **plotCytoGates**!
-
-### Load in Required Packages
+## flowCore
 
 ``` r
-library(cytoRSuite)
+# Bioconductor
+install.packages("BiocManager")
+
+# flowCore Bioconductor release version
+BiocManager::install("flowCore")
+
+# GitHub
+install.packages("devtools")
+
+# flowCore development version on GitHub
+devtools::install_github("RGLab/flowCore", ref = "trunk")
 ```
 
-### Load in Samples into flowSet
+## flowWorkspace
+
+flowWorkspace requires additional C++ libraries to build from source
+using Rtools for windows users. Windows users should follow these
+[instructions](https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL)
+before proceeding.
 
 ``` r
-# Here we will use the Activation samples included in cytoRSuite and assign them to object called fs
-data(Activation, package = "cytoRSuite")
-fs <- Activation
+# flowWorkspace Bioconductor release version
+BiocManager::install("flowWorkspace")
+
+# flowWorkspace development version on GitHub
+devtools::install_github("RGLab/flowWorkspace", ref = "trunk")
 ```
 
-### Annotate flowSet with pData and Markers
-
-To help with downstream analyses let's add marker names to the channels that we are using in the experiment.
+## openCyto
 
 ``` r
-# pData entries will be used later to construct gates using specific samples
-pData(fs)$Samples <- c("Control","Activated")
+# openCyto Bioconductor release version
+BiocManager::install("openCyto")
 
-# Marker names can be used for gating and will be included in plot outputs - see ?Activation for details
-# To get a list of fluorescent channels use getChannels()
-fluor <- getChannels(fs)
-chnls <- c("Alexa Fluor 405-A","Alexa Fluor 430-A","APC-Cy7-A", "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
-markers <- c("Hoechst-405", "Hoechst-430", "CD11c", "Va2", "CD8", "CD4", "CD44", "CD69")
-names(markers) <- chnls
-markernames(fs) <- markers
+# openCyto development version on GitHub
+devtools::install_github("RGLab/openCyto", ref = "trunk")
 ```
 
-### Add Samples to GatingSet for Gating
+## CytoRSuite
+
+Once these packages are installed users can install **CytoRSuite** from
+GitHub. Users should also install CytoRSuiteData which contains example
+datasets that will be used in the vignettes to demonstrate the features
+of CytoRSuite.
 
 ``` r
-gs <- GatingSet(fs)
+# CytoRSuite development version on GitHub
+devtools::install_github("DillonHammill/CytoRSuite")
+
+# CytoRSuiteData development version on GitHub
+devtools::install_github("DillonHammill/CytoRSuiteData")
 ```
 
-### Apply Compensation
+# Overview
 
-**cytoRSuite** provides three distinct functions to aid in compensation of fluorescence spillover:
+**CytoRSuite** provides an interactive interface for analysis of flow
+cytometry data. Some key features include:
 
--   **computeSpillover** provides an automated approach to calculating the percentage of fluorescent spillover using the algorithm described by Bagwell & Adams 1993.
--   **editSpillover** utilises an interactive Shiny interface to allow realtime visualisation of changes in spillover percentages and is designed to aid in manual manipulation of spilllover matrices.
--   **plotCytoComp** displays each compensation control in all channels to easily identify any potential compensation issues.
+  - user guided automatic compensation using **spillover\_compute**
+  - interactively modify spillover matrices using **spillover\_edit**
+  - visualise compensation in all channels using
+    **cyto\_plot\_compensation**
+  - easliy associate experimental details with each file using
+    **cyto\_annotate**
+  - manual gate drawing using **gate\_draw**
+  - ability to edit drawn gates using **gate\_edit**
+  - remove gates using **gate\_remove**
+  - gate saving directly to an openCyto **gatingTemplate** for future
+    use
+  - support for using both manual and automated gating approaches
+    through linking to **openCyto**
+  - visualisation of flowFrames, flowSets, GatingHierarchies and
+    GatingSets using **cyto\_plot**
+  - visualisation of complete gating strategies with back-gating and/or
+    gate tracking using **cyto\_plot\_gating\_scheme**
+  - visualisation of marker expression in all channels using
+    **cyto\_plot\_profile**
+  - export population level statistics using **cyto\_stats\_compute**
 
-These features will be documentaed in a separate compensation vignette, if you are interested in these functions see **?computeSpillover**, **?editSpillover** and **?plotCytoComp** for more details.
+# Usage
 
-For brevity we will use the spillover matrix attached to each flowFrame in the Activation dataset for fluorescence compensation.
+The full details of how CytoRSuite works will be tackled individually in
+the package vignettes, but a succinct usage outline is described below:
+
+1.  Compensation of fluorecent spillover
+    
+    1.1 Load compensation controls into a `ncdfFlowSet`
+    
+    ``` r
+    library(CytoRSuite)
+    library(CytoRSuiteData)
+    
+    # Save .fcs files to folder "Compensation Controls" in working directory
+    files <- list.files(path = "Compensation Controls", full.names = TRUE)
+    fs <- read.ncdfFlowSet(files = files)
+    ```
+    
+    1.2 Load compensation controls into `GatingSet` for gating
+    
+    ``` r
+    # Gate Cells
+    gate_draw(gs, 
+              parent = "root",
+              alias = "Cells",
+              channels = c("FSC-A","SSC-A"),
+              type = "polygon",
+              gatingTemplate = "Compensation-gatingTemplate.csv")
+    
+    # Gate Single Cells
+        gate_draw(gs, 
+              parent = "Cells",
+              alias = "Single Cells",
+              channels = c("FSC-A","FSC-H"),
+              type = "polygon",
+              gatingTemplate = "Compensation-gatingTemplate.csv")
+    ```
+    
+    ![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
+    
+    1.3 Compute fluorescent spillover matrix using `spillover_compute`
+    
+    ``` r
+    spillover_compute(gs, 
+                      parent = "Single Cells")
+    ```
+    
+    1.4 Interactively edit computed spillover matrix using
+    `spillover_edit`
+    
+    ``` r
+    spillover_edit(gs, 
+                   parent = "Single Cells", 
+                   channel_match = "Compensation-Channels.csv", 
+                   spillover = "Spillover-Matrix.csv")
+    ```
+    
+    <img src="man/figures/README-spillover_edit.PNG" width="100%" height="100%" style="display: block; margin: auto;" />
+
+2.  Analyse samples
+    
+    2.1 Load samples into a `ncdfFlowSet`
+    
+    ``` r
+    # Save samples to folder "Samples" in working directory
+    files <- list.files(path = "Samples", full.names = TRUE)
+    fs <- read.ncdfFlowSet(files = files)
+    ```
+    
+    2.2 Annotate samples with markers using
+    `cyto_markers`
+    
+    ``` r
+    cyto_markers(fs)
+    ```
+    
+    <img src="man/figures/README-cyto_markers.PNG" width="40%" height="40%" style="display: block; margin: auto;" />
+    
+    2.3 Annotate samples with experimental details using
+    `cyto_annotate`
+    
+    ``` r
+    cyto_annotate(fs)
+    ```
+    
+    <img src="man/figures/README-cyto_annotate.PNG" width="30%" height="30%" style="display: block; margin: auto;" />
+    
+    2.4 Add samples to GatingSet
+    
+    ``` r
+    gs <- GatingSet(fs)
+    ```
+    
+    2.4 Apply fluorescent compensation
+    
+    ``` r
+    # Load in spillover matrix
+    spill <- read.csv("Spillover-Matrix.csv", 
+                      header = TRUE, 
+                      row.names = 1)
+    colnames(spill) <- rownames(spill)
+    
+    # Apply compensation to samples
+    gs <- compensate(gs, spill)
+    ```
+    
+    2.5 Transform fluorescent channels for gating
+    
+    ``` r
+    # Fluorescent channels
+    chans <- cyto_fluor_channels(gs)
+    
+    # Logicle transformation
+    trans <- estimateLogicle(gs[[4]], chans)
+    gs <- transform(gs, trans)
+    ```
+    
+    2.6 Build gating scheme using `gate_draw`
+    
+    ``` r
+    # Cells
+    gate_draw(gs,
+              parent = "Cells",
+              alias = "Cells",
+              channels = c("FSC-A","SSC-A"),
+              gatingTemplate = "Example-gatingTemplate.csv")
+    
+    # Copy above & edit to add new population(s)
+    # Repeat until gating scheme is complete
+    ```
+
+<img src="man/figures/README-gate_draw.gif" width="60%" height="60%" style="display: block; margin: auto;" />
+
+3.  Visualise gating schemes using
+`cyto_plot_gating_scheme`
+
+<!-- end list -->
 
 ``` r
-# Use spillover matrix attached to samples
-spill <- fs[[1]]@description$SPILL
-gs <- compensate(gs, spill)
-
-# Refer to ?computeSpillover and ?editSpillover to modify spillover matrix
+cyto_plot_gating_scheme(gs[[4]], back_gate = TRUE)
 ```
 
-### Apply Logicle Transformation to Fluorescent Channels
+<img src="man/figures/README-cyto_plot_gating_scheme.png" width="100%" height="100%" style="display: block; margin: auto;" />
 
-In order to appropriately visualise the data, we first need to transform all fluorescent channels post-compensation. Currently, **cytoRSuite** only supports the logicle transformation documented in the **flowCore** package. Below we use **estimateLogicle** to get parameter estimates for each fluorescent channel and apply these transformations to the GatingSet using the **transform** function from **flowCore**.
+4.  Export population-level statistics using `cyto_stats_compute`
+
+<!-- end list -->
 
 ``` r
-# Get a list of the fluorescent channels
-channels <- getChannels(gs)
-
-trans <- estimateLogicle(gs[[2]], channels)
-gs <- transform(gs, trans)
+cyto_stats_compute(gs,
+                   alias = c("CD4 T Cells","CD8 T Cells"),
+                   channels = c("CD44","CD69"),
+                   stat = "median")
 ```
 
-### Manual Gate Drawing Using drawGate
+    #> $`CD4 T Cells`
+    #>                 OVAConc Alexa Fluor 647-A   7-AAD-A
+    #> Activation1.fcs   0.000          675.1999  606.7077
+    #> Activation2.fcs   0.005          720.3611  656.8873
+    #> Activation3.fcs   0.050          971.4868  744.3725
+    #> Activation4.fcs   0.500         1503.4010 1233.6546
+    #> 
+    #> $`CD8 T Cells`
+    #>                 OVAConc Alexa Fluor 647-A  7-AAD-A
+    #> Activation1.fcs   0.000          414.2267 260.0531
+    #> Activation2.fcs   0.005          410.1949 248.5102
+    #> Activation3.fcs   0.050          454.0508 312.6521
+    #> Activation4.fcs   0.500          552.0260 382.5721
 
-**drawGate** is a convenient wrapper for the gating functions in cytoRSuite which constructs drawn gates, applies the gate(s) directly to the **GatingSet** and saves the gate(s) to an **openCyto gatingTemplate** csv file for future use. **drawGate** will pool the data and plot it in an interactive plotting window which will allow the user to draw gates around the population of interest. The type of gate is determined by the **gate\_type** argument. Below we will demonstrate some of the key features of drawGate, for details on specific gate types please refer to the gating functions vignette.
+# News
 
-Here we will gate a population "Cells" within the parent population "root" in FSC-A and SSC-A channels using a polygon gate. The gate will be automatically applied to the GatingSet and saved in a gatingTemplate csv called "Example gatingTemplate.csv" in the current working directory.
+There is a ChangeLog for the GitHub master branch which will reflect any
+updates made to improve the stability, usability or plenitude of the
+package.
 
-``` r
-# Cells
-drawGate(gs, 
-         parent = "root", 
-         alias = "Cells", 
-         channels = c("FSC-A","SSC-A"), 
-         type = "polygon", 
-         gtfile = "Example-gatingTemplate.csv")
-```
+# Credits
 
-![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+CytoRSuite would not be possible without the existing flow cytometry
+infrastructure developed by the RGLab. CytoRSuite started out as simple
+plugin for openCyto to facilitate gate drawing but has evolved into a
+fully-fledged flow cytometry analysis package thanks to the support and
+guidance of members of the RGLab. Please take the time to check out
+their work on [GitHub](https://github.com/RGLab).
 
-Here we will gate a population "Single Cells" within the parent population "Cells" in FSC-A and FSC-H channels using a polygon gate. Notice how this gate is added as a row to the gatingTemplate csv file.
+# Development
 
-``` r
-# Single Cells
-drawGate(gs, 
-         parent = "Cells", 
-         alias = "Single Cells", 
-         channels = c("FSC-A","FSC-H"), 
-         type = "polygon", 
-         gtfile = "Example-gatingTemplate.csv")
-```
+CytoRSuite is a maturing package which will continue to be sculpted by
+the feedback of users. The GitHub  branch will always contain the most
+stable build of the package. New features and updates will be made to a
+separate branch and merged to the `master` branch when stable and
+tested. The changelog will reflect any changes made to the `master`
+branch and it is recommended that users visit this prior to installing
+newer versions of the package. Feature requests are welcome.
 
-![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
+# Getting help
 
-Here we will gate a population "Live Cells" within the parent population "Single Cells" in Alexa Fluor 405-A and Alexa Fluor 430-A channels using a polygon gate. Notice how the axes have been transformed appropriately on the plot as these are fluorescent channels which were transformed with the logicle transformation earlier.
-
-``` r
-# Live Cells
-drawGate(gs, 
-         parent = "Single Cells", 
-         alias = "Live Cells", 
-         channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"), 
-         type = "polygon", 
-         gtfile = "Example-gatingTemplate.csv")
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
-
-Next we will demonstrate the ability to draw multiple gates (of the same or different type) onto the same plot. Here we will gate both the "Dendritic Cells" and "T Cells" populations within the parent population "Live Cells" in APC-Cy7-A and PE-A channels using a rectangle and an ellipsoid gate. To gate multiple populations on the same plot simply suppply multiple names to the alias argument wrapped inside c(). Notice how we can use the marker names rather than the channel names if they are supplied in the original flowSet.
-
-``` r
-# Dendritic Cells & T cells
-drawGate(gs, 
-         parent = "Live Cells", 
-         alias = c("Dendritic Cells", "T Cells"), 
-         channels = c("CD11c","Va2"), 
-         type = c("rectangle","ellipse"), 
-         gtfile = "Example-gatingTemplate.csv")
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-16-1.png)
-
-Here we will gate both the "CD4 T Cells" and "CD8 T Cells" populations within the parent population "T Cells" in Alexa Fluor 700-A and Alexa Fluor 488-A channels using a rectangle gates. Notice how gate\_type can also be abbreviated as the first letter of the gate type (e.g. "r" for "rectangle"). Be sure to draw the gates in the order that they are listed in the alias argument.
-
-``` r
-# CD4 & CD8 T Cells
-drawGate(gs, 
-         parent = "T Cells", 
-         alias = c("CD4 T Cells", "CD8 T Cells"), 
-         channels = c("CD4","CD8"), 
-         type = "r", 
-         gtfile = "Example-gatingTemplate.csv")
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-18-1.png)
-
-Here we will demonstrate the use of a different gate\_type called "interval" which gates populations based on a defined lower and upper bound. Interval gates are traditionally used in a single dimension, but interval gates are fully supported for 2-dimensional plots on either the x or y axis. Notice how we have indicated which axis we would like to gate using the axis argument. In this case we will be gating the population based on a lower and upper y axis bounds. We will also add some contour lines to aid in gating.
-
-``` r
-# CD69+ CD4 T Cells
-drawGate(gs, 
-         parent = "CD4 T Cells", 
-         alias = c("CD69+ CD4 T Cells"), 
-         channels = c("CD44","CD69"), 
-         type = "interval", 
-         axis = "y", 
-         gtfile = "Example-gatingTemplate.csv",
-         contours = 15)
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-20-1.png)
-
-To finish things off lets make a similar gate on the CD8 T Cells as well. This time we will overlay the unactivated control in black and use it to determine where gate should be drawn.
-
-``` r
-# Extract the CD8 T Cells from Sample 1 for overlay
-CD8 <- getData(gs, "CD8 T Cells")[[1]]
-
-# CD69+ CD8 T Cells
-drawGate(gs, 
-         parent = "CD8 T Cells", 
-         alias = c("CD69+ CD8 T Cells"), 
-         channels = c("CD44","CD69"), 
-         type = "interval", 
-         axis = "y", 
-         gtfile = "Example-gatingTemplate.csv",
-         overlay = CD8)
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-22-1.png)
-
-### Apply Saved Gates to Samples (Future Analyses)
-
-Since all the drawn gates have been saved to the gatingTemplate, next time you visit the data there is no need to re-draw gates! Simply apply the existing gatingTemplate to the data and you are right where you left off!
-
-``` r
-# Add samples to GatingSet
-gs <- GatingSet(fs)
-```
-
-    ## ..done!
-
-``` r
-# Apply compensation
-gs <- compensate(gs, spill)
-
-# Transform fluorescent channels
-gs <- transform(gs, trans)
-
-# Apply saved gates to GatingSet
-gt <- gatingTemplate("Example-gatingTemplate.csv")
-```
-
-    ## Adding population:Cells
-    ## Adding population:Single Cells
-    ## Adding population:Live Cells
-    ## Adding population:Dendritic Cells
-    ## Adding population:T Cells
-    ## Adding population:CD4 T Cells
-    ## Adding population:CD8 T Cells
-    ## Adding population:CD69+ CD4 T Cells
-    ## Adding population:CD69+ CD8 T Cells
-
-``` r
-gating(gt, gs)
-```
-
-    ## Gating for 'Cells'
-    ## done.
-    ## Gating for 'Single Cells'
-    ## done.
-    ## Gating for 'Live Cells'
-    ## done.
-    ## Gating for 'T Cells'
-    ## done.
-    ## Gating for 'CD8 T Cells'
-    ## done.
-    ## Gating for 'CD69+ CD8 T Cells'
-    ## done.
-    ## Gating for 'CD4 T Cells'
-    ## done.
-    ## Gating for 'CD69+ CD4 T Cells'
-    ## done.
-    ## Gating for 'Dendritic Cells'
-    ## done.
-    ## finished.
-
-``` r
-# Check gates have been applied
-getNodes(gs)
-```
-
-    ##  [1] "root"                                                                
-    ##  [2] "/Cells"                                                              
-    ##  [3] "/Cells/Single Cells"                                                 
-    ##  [4] "/Cells/Single Cells/Live Cells"                                      
-    ##  [5] "/Cells/Single Cells/Live Cells/T Cells"                              
-    ##  [6] "/Cells/Single Cells/Live Cells/T Cells/CD8 T Cells"                  
-    ##  [7] "/Cells/Single Cells/Live Cells/T Cells/CD8 T Cells/CD69+ CD8 T Cells"
-    ##  [8] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells"                  
-    ##  [9] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells/CD69+ CD4 T Cells"
-    ## [10] "/Cells/Single Cells/Live Cells/Dendritic Cells"
-
-``` r
-# Plot gating strategy using plotCytoGates
-plotCytoGates(gs[[2]])
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-24-1.png)
-
-``` r
-# plotCytoGates Back-Gating Support
-plotCytoGates(gs[[2]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
-```
-
-![](README_files/figure-markdown_github/unnamed-chunk-25-1.png)
-
-Dillon Hammill, BMedSci (Hons) <br /> Ph.D. Scholar <br /> The Parish Group Cancer & Vascular Biology <br /> ACRF Department of Cancer Biology and Therapeutics <br /> The John Curtin School of Medical Research <br /> ANU College of Medicine, Biology and the Environment <br /> The Australian National University <br /> Acton ACT 2601 <br /> <Dillon.Hammill@anu.edu.au>
+The Get started and Articles tabs on the CytoRSuite website are your
+first port of call if you require any help. For problems with the
+functioning of the package refer to the package issues to see if another
+user has experienced/rectified the issue you are experiencing. Otherwise
+feel free to post a new issue on the GitHub page so any potential issues
+can be rectified.

@@ -1,2 +1,6 @@
+^codecov\.yml$
+^README\.Rmd$
+^appveyor\.yml$
+^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
