@@ -74,7 +74,7 @@ unstained control and single stain compensation controls." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@ unstained control and single stain compensation controls." />
       <a href="../articles/CytoRSuite-Gating-Functions.html">CytoRSuite: Gating Functions</a>
     </li>
     <li>
-      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation of Flow Cytometry Data Using plotCyto</a>
+      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation Using cyto_plot</a>
     </li>
   </ul>
 </li>
@@ -165,7 +165,7 @@ unstained control and single stain compensation controls.</p>
 single stain compensation controls and a universal unstained control.
 Currently, spillover_compute does not pre-gate samples to obtain a
 homogeneous cell population for downstream calculations. We therefore
-recommmend pre-gating samples based on FSC and SSC parameters prior to
+recommend pre-gating samples based on FSC and SSC parameters prior to
 passing them to spillover_compute and indicate the population of interest
 using the <code>parent</code> argument.</p></td>
     </tr>
@@ -258,7 +258,10 @@ and written to a named .csv file for future use.</p>
 <span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Compensation_gatingTemplate</span>
 <span class='fu'>gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Channel match fille</span>
-<span class='no'>cmfile</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/system.file'>system.file</a></span>(<span class='st'>"extdata"</span>, <span class='st'>"Compensation-Channels.csv"</span>, <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"CytoRSuiteData"</span>)
+<span class='no'>cmfile</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/system.file'>system.file</a></span>(<span class='st'>"extdata"</span>,
+  <span class='st'>"Compensation-Channels.csv"</span>,
+  <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"CytoRSuiteData"</span>
+)
 
 <span class='co'># Compute fluorescent spillover matrix</span>
 <span class='no'>spill</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='spillover_compute.html'>spillover_compute</a></span>(<span class='no'>gs</span>,

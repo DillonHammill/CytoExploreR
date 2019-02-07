@@ -26,8 +26,9 @@ plots which may already contain a different gate type.}
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
@@ -37,9 +38,9 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the
   object(s).
 }
 \description{
-\code{gate_interval_draw} constructs an interactive plotting window for user to
-select the lower and upper bounds of a population (through mouse click) which
-is constructed into a
+\code{gate_interval_draw} constructs an interactive plotting window for user
+to select the lower and upper bounds of a population (through mouse click)
+which is constructed into a
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 interval gates are supported, for 2-D interval gates an additional argument

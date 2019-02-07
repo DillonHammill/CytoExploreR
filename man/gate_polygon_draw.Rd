@@ -23,8 +23,9 @@ the gating routine.}
 feature allows for constructing gates of different types over existing
 plots which may already contain a different gate type.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
@@ -34,9 +35,9 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the
   object(s).
 }
 \description{
-\code{gate_polygon_draw} constructs an interactive plotting window to allow manual
-selection of the co-ordinates of a ploygon gate(s) (through mouse click)
-which are constructed into
+\code{gate_polygon_draw} constructs an interactive plotting window to allow
+manual selection of the co-ordinates of a polygon gate(s) (through mouse
+click) which are constructed into
 \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
 \code{\link[flowCore:filters-class]{filters}} list.
 }

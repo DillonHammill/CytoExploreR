@@ -1,6 +1,9 @@
 library(CytoRSuite)
 library(CytoRSuiteData)
 
+# recordTest("tests/testthat/apps/spillover_edit", loadTimeout = 100000)
+# testApp("tests/testthat/apps/spillover_edit/")
+
 # Needed to bypass wd checks for files
 options("CytoRSuite_wd_check" = FALSE)
 
@@ -8,9 +11,10 @@ options("CytoRSuite_wd_check" = FALSE)
 datadir <- system.file("extdata", package = "CytoRSuiteData")
 
 # Sample for speed -
-Compensation <- read.flowSet(path = paste0(datadir,"/Compensation-Controls"), pattern = ".fcs")
+Compensation <- read.flowSet(path = paste0(datadir,"/Compensation-Controls"), 
+                             pattern = ".fcs")
 
-Comp <- flowSet(lapply(1:length(Compensation), function(x) {
+Comp <- flowSet(lapply(seq_len(length(Compensation)), function(x) {
   Compensation[[x]][1:1000, ]
 }))
 sampleNames(Comp) <- sampleNames(Compensation)
@@ -26,10 +30,12 @@ gtc <- gatingTemplate(paste0(datadir,"/Compensation-gatingTemplate.csv"))
 gating(gtc, gsc)
 
 # Spillover
-spfile <- system.file("extdata", "Ref-Spillover-matrix.csv", package = "CytoRSuite")
+spfile <- system.file("extdata", "Ref-Spillover-matrix.csv", 
+                      package = "CytoRSuite")
 
 # Channel match
-cmfile <- system.file("extdata", "Compensation-channels.csv", package = "CytoRSuite")
+cmfile <- system.file("extdata", "Compensation-channels.csv", 
+                      package = "CytoRSuite")
   
 spillover_edit(gsc,
                parent = "Single Cells",

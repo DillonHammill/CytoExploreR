@@ -23,8 +23,9 @@ the gating routine.}
 feature allows for constructing gates of different types over existing
 plots which may already contain a different gate type.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
@@ -34,8 +35,8 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the
   object(s).
 }
 \description{
-\code{gate_ellipse_draw} constructs an interactive plotting window for user to
-select the limits of a population in 2 dimensions (4 points) which is
+\code{gate_ellipse_draw} constructs an interactive plotting window for user
+to select the limits of a population in 2 dimensions (4 points) which is
 constructed into \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 }

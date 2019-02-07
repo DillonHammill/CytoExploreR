@@ -1,38 +1,51 @@
 context("gate_draw")
 
-test_that(".onLoad set CytoRSuite_interact to TRUE", {
-  
-  CytoRSuite:::.onLoad()
-  expect_true(getOption("CytoRSuite_interact") == interactive())
-  
-  # Set cytoRSuite_interact to FALSE to avoid user input when running tests
-  options("CytoRSuite_interact" = FALSE)
-  
-})
+# flowFrame method -------------------------------------------------------------
 
-## --------------------------------------------------------------------------------------
-# flowFrame method -
-
-test_that("gate_draw flowFrame method returns appropriate gates", {
+test_that("gate_draw flowFrame method", {
   
-  gts <- gate_draw(fs[[1]], alias = c("Cells","Cells","Cells","Cells","Cells","Cells"), channels = c("FSC-A","SSC-A"), type = c("r","p","e","i","t","b"), display = 0.1)
+  gts <- gate_draw(fs[[1]],
+                   alias = c("Cells","Cells","Cells","Cells","Cells","Cells"), 
+                   channels = c("FSC-A","SSC-A"), 
+                   type = c("r","p","e","i","t","b"), 
+                   display = 0.1)
   
   expect_s4_class(gts, "filters")
-  expect_equal(lapply(gts,function(x) {class(x)[1]}), list(rectangle = "rectangleGate", polygon = "polygonGate", ellipse = "ellipsoidGate", interval = "rectangleGate", threshold = "rectangleGate", boundary = "rectangleGate"))
+  expect_equal(lapply(gts,function(x) {class(x)[1]}), 
+               list(rectangle = "rectangleGate", 
+                    polygon = "polygonGate", 
+                    ellipse = "ellipsoidGate", 
+                    interval = "rectangleGate", 
+                    threshold = "rectangleGate", 
+                    boundary = "rectangleGate"))
   expect_length(gts, 6)
-  expect_equal(unname(gts), filters(list(rg,pg,eg,ig,tg,bg)), tolerance = 0.01)
+  expect_equal(unname(gts), filters(list(rg,pg,eg,ig,tg,bg)), 
+               tolerance = 0.01)
   
-  gts <- gate_draw(fs[[1]], alias = c("A","B","C","D"), channels = c("FSC-A","SSC-A"), type = "q", display = 0.1)
+  gts <- gate_draw(fs[[1]], 
+                   alias = c("A","B","C","D"), 
+                   channels = c("FSC-A","SSC-A"), 
+                   type = "q", 
+                   display = 0.1)
   
   expect_s4_class(gts, "filters")
-  expect_equal(lapply(gts,function(x) {class(x)[1]}), list("rectangleGate","rectangleGate","rectangleGate","rectangleGate"))
+  expect_equal(lapply(gts,function(x) {class(x)[1]}), 
+               list("rectangleGate",
+                    "rectangleGate",
+                    "rectangleGate",
+                    "rectangleGate"))
   expect_length(gts, 4)
   expect_equal(gts, qg)
   
-  gts <- gate_draw(fs[[1]], alias = c("A","B","C","D","E","F","G","H"), channels = c("FSC-A","SSC-A"), type = "w", display = 0.1)
+  gts <- gate_draw(fs[[1]], 
+                   alias = c("A","B","C","D","E","F","G","H"), 
+                   channels = c("FSC-A","SSC-A"), 
+                   type = "w", 
+                   display = 0.1)
   
   expect_s4_class(gts, "filters")
-  expect_equal(as.vector(sapply(gts,function(x) {class(x)[1]})), rep("polygonGate",8))
+  expect_equal(unlist(lapply(gts,function(x) {class(x)[1]})), 
+               rep("polygonGate",8))
   expect_length(gts, 8)
   expect_equal(gts, wg, tolerance = 0.01)
   
@@ -42,31 +55,64 @@ test_that("gate_draw flowFrame method returns appropriate gates", {
   
 })
 
-## --------------------------------------------------------------------------------------
-# flowSet method -
+# flowSet method ---------------------------------------------------------------
 
-test_that("gate_draw flowSet method returns appropriate gates", {
+test_that("gate_draw flowSet method", {
     
-    gts <- gate_draw(fs, select = 1, alias = c("Cells","Cells","Cells","Cells","Cells","Cells"), channels = c("FSC-A","SSC-A"), type = c("r","p","e","i","t","b"), display = 0.1)
+    gts <- gate_draw(fs, 
+                     select = 1, 
+                     alias = c("Cells",
+                               "Cells",
+                               "Cells",
+                               "Cells",
+                               "Cells",
+                               "Cells"), 
+                     channels = c("FSC-A","SSC-A"), 
+                     type = c("r","p","e","i","t","b"), 
+                     display = 0.1)
     
     expect_s4_class(gts, "filters")
-    expect_equal(lapply(gts,function(x) {class(x)[1]}), list(rectangle = "rectangleGate", polygon = "polygonGate", ellipse = "ellipsoidGate", interval = "rectangleGate", threshold = "rectangleGate", boundary = "rectangleGate"))
+    expect_equal(lapply(gts,function(x) {class(x)[1]}), 
+                 list(rectangle = "rectangleGate", 
+                      polygon = "polygonGate", 
+                      ellipse = "ellipsoidGate", 
+                      interval = "rectangleGate", 
+                      threshold = "rectangleGate", 
+                      boundary = "rectangleGate"))
     expect_length(gts, 6)
-    expect_equal(unname(gts), filters(list(rg,pg,eg,ig,tg,bg)), tolerance = 0.01)
+    expect_equal(unname(gts), filters(list(rg,pg,eg,ig,tg,bg)), 
+                 tolerance = 0.01)
     
-    expect_error(gate_draw(fs, select = "A", alias = "Cells", channels = c("FSC-A","SSC-A")), "Vector supplied to select argument should contain the numeric indicies of the samples to select.")
+    expect_error(gate_draw(fs, 
+                           select = "A", 
+                           alias = "Cells", 
+                           channels = c("FSC-A","SSC-A")), 
+        "'select' must contain the numeric indicies of the samples to plot.")
     
-    gts <- gate_draw(fs, alias = c("A","B","C","D"), channels = c("FSC-A","SSC-A"), type = "q", display = 0.1)
+    gts <- gate_draw(fs, 
+                     alias = c("A","B","C","D"), 
+                     channels = c("FSC-A","SSC-A"), 
+                     type = "q", 
+                     display = 0.1)
     
     expect_s4_class(gts, "filters")
-    expect_equal(lapply(gts,function(x) {class(x)[1]}), list("rectangleGate","rectangleGate","rectangleGate","rectangleGate"))
+    expect_equal(lapply(gts,function(x) {class(x)[1]}), 
+                 list("rectangleGate",
+                      "rectangleGate",
+                      "rectangleGate",
+                      "rectangleGate"))
     expect_length(gts, 4)
     expect_equal(gts, qg)
     
-    gts <- gate_draw(fs, alias = c("A","B","C","D","E","F","G","H"), channels = c("FSC-A","SSC-A"), type = "w", display = 0.1)
+    gts <- gate_draw(fs, 
+                     alias = c("A","B","C","D","E","F","G","H"), 
+                     channels = c("FSC-A","SSC-A"), 
+                     type = "w", 
+                     display = 0.1)
     
     expect_s4_class(gts, "filters")
-    expect_equal(as.vector(sapply(gts,function(x) {class(x)[1]})), rep("polygonGate",8))
+    expect_equal(unlist(lapply(gts,function(x) {class(x)[1]})), 
+                 rep("polygonGate",8))
     expect_length(gts, 8)
     expect_equal(gts, wg, tolerance = 0.01)
     
@@ -76,22 +122,38 @@ test_that("gate_draw flowSet method returns appropriate gates", {
     
   })
 
-## --------------------------------------------------------------------------------------
-# GatingSet method -
+# GatingSet method -------------------------------------------------------------
 
-test_that("gate_draw GatingSet methods returns appropriate gates and applies them to the GatingSet", {
+test_that("gate_draw GatingSet method", {
   
   gs1 <- GatingSet(fs)
     
-  gate_draw(gs1, parent = "root", alias = c("x","y","z"), channels = c("FSC-A","SSC-A"), type = c("e","p","i"), display = 0.1, gatingTemplate = "gatingTemplate.csv")
+  gate_draw(gs1, 
+            parent = "root", 
+            alias = c("x","y","z"), 
+            channels = c("FSC-A","SSC-A"), 
+            type = c("e","p","i"), 
+            display = 0.1, 
+            gatingTemplate = "gatingTemplate.csv")
   
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z"))
   
-  gate_draw(gs1, parent = "root", alias = c("K","L","M"), channels = c("FSC-A","SSC-A"), type = "w", display = 0.1)
+  gate_draw(gs1, 
+            parent = "root", 
+            alias = c("K","L","M"), 
+            channels = c("FSC-A","SSC-A"),
+            type = "w", 
+            display = 0.1)
   
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z","K","L","M"))
   
-  gby <- gate_draw(gs1, group_by = "OVAConc", parent = "root", alias = c("X"), channels = c("FSC-A","SSC-A"), type = "p", display = 0.1)
+  gby <- gate_draw(gs1, 
+                   group_by = "OVAConc", 
+                   parent = "root", 
+                   alias = c("X"), 
+                   channels = c("FSC-A","SSC-A"), 
+                   type = "p", 
+                   display = 0.1)
 
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z","K","L","M","X"))
   

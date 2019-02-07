@@ -4,7 +4,7 @@ author: "Dillon Hammill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{CytoRSuite: Gate Manipulation Using gate_edit & gate_remove}
+  %\VignetteIndexEntry{CytoRSuite: Gate Manipulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -135,7 +135,7 @@ gate_edit(gs,
 ```
 
 ```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
-knitr::include_graphics('Gate-Manipulation/gate_edit1.png')
+knitr::include_graphics('Gate-manipulation/gate_edit1.png')
 ```
 
 Let's update the Single Cells gate as well:
@@ -147,7 +147,7 @@ gate_edit(gs,
 ```
 
 ```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
-knitr::include_graphics('Gate-Manipulation/gate_edit2.png')
+knitr::include_graphics('Gate-manipulation/gate_edit2.png')
 ```
 
 Changing the type argument will alter the gate type of the existing gate. for example type = "ellipse" will change the existing rectangle gate to an ellipsoid gate:
@@ -160,7 +160,7 @@ gate_edit(gs,
 ```
 
 ```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
-knitr::include_graphics('Gate-Manipulation/gate_edit3.png')
+knitr::include_graphics('Gate-manipulation/gate_edit3.png')
 ```
 
 Users can edit any gates with `gate_edit` including 1-D interval gates:
@@ -172,7 +172,7 @@ gate_edit(gs,
 ```
 
 ```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
-knitr::include_graphics('Gate-Manipulation/gate_edit4.png')
+knitr::include_graphics('Gate-manipulation/gate_edit4.png')
 ```
 
 Users can also pass cyto_plot arguments to gate_edit. For example we can add some 2-D contour lines to help determine where the gate should be drawn:
@@ -185,7 +185,7 @@ gate_edit(gs,
 ```
 
 ```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
-knitr::include_graphics('Gate-Manipulation/gate_edit5.png')
+knitr::include_graphics('Gate-manipulation/gate_edit5.png')
 ```
 
 Back-gating is also fully supported in `gate_edit` through cyto_plot's `overlay` argument. For example if we would like to see where the T Cells population falls on FSC-A and SSC-A:
@@ -221,7 +221,7 @@ gate_remove(gs,
 ```
 
 ```{r, eval = TRUE, echo = FALSE, message = FALSE}
-gt <- suppressMessages(gatingTemplate("Gate-Manipulation/Manipulation-gatingTemplate.csv"))
+gt <- suppressMessages(gatingTemplate("Gate-manipulation/Manipulation-gatingTemplate.csv"))
 gs <- getData(gs, "root")
 gs <- GatingSet(gs)
 suppressMessages(gating(gt,gs))
@@ -238,9 +238,9 @@ gatingTemplate("Manipulation gatingTemplate.csv")
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
-gatingTemplate("Gate-Manipulation/Manipulation-gatingTemplate.csv")
+gatingTemplate("Gate-manipulation/Manipulation-gatingTemplate.csv")
 ```
 
 ## 5. More information
 
-For more information refer to the CytoRSuite vignettes and help documentation for each of the described functions.
+For more information on these gate manipulation functions refer to the documentation for these functions in the [Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html). To learn more about how to visualise the data refer to [Visualisation Using cyto_plot](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite-Visualisation.html) vignette.

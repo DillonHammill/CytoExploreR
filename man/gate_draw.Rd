@@ -7,7 +7,8 @@
 gate_draw(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}, \code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{...}{additional method-specific arguments.}
@@ -16,13 +17,14 @@ gate_draw(x, ...)
 Manually draw gates around populations for analysis of flow cytometry data.
 }
 \details{
-\code{gate_draw} is a convenient wrapper for the gating functions shipped with
-\code{cytoRSuite} to facilitate analysis of flow cytometry by gate drawing.
-Using \code{gate_draw} users can specify the type of gate(s) to be constructed
-through the \code{type} argument and \code{gate_draw} will automatically
-handle plotting the data and make calls to the relevant gating function(s) to
-construct the gates around populations of interest. \code{gate_draw} has
-methods for \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{gate_draw} is a convenient wrapper for the gating functions shipped
+with \code{cytoRSuite} to facilitate analysis of flow cytometry by gate
+drawing. Using \code{gate_draw} users can specify the type of gate(s) to be
+constructed through the \code{type} argument and \code{gate_draw} will
+automatically handle plotting the data and make calls to the relevant gating
+function(s) to construct the gates around populations of interest.
+\code{gate_draw} has methods for
+\code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}} and
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects, refer to
 their respective help pages for more information. The flowFrame and flowSet

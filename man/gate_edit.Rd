@@ -35,12 +35,12 @@ abbreviated as upper or lower case first letters as well. Default
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
 
-\item{...}{additional arguments passed to plotCyto, see ?plotCyto for
+\item{...}{additional arguments passed to cyto_plot, see ?cyto_plot for
 details.}
 }
 \value{
-an object of calss \code{GatingSet} with edited gate applied, as well
-  as gatingTemplate file with editied gate saved.
+an object of class \code{GatingSet} with edited gate applied, as well
+  as gatingTemplate file with edited gate saved.
 }
 \description{
 Edit Existing Gate(s).

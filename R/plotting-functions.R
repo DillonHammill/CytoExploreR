@@ -1,16 +1,22 @@
 #' Boxed Labels - Modified plotrix
 #'
-#' @param x,y  x and y position of the centers of the labels. \code{x} can be a xy.coords list.
-#' @param bg The fill color of the rectangles on which the labels are displayed (see Details).
+#' @param x,y  x and y position of the centers of the labels. \code{x} can be a
+#'   xy.coords list.
+#' @param bg The fill color of the rectangles on which the labels are displayed
+#'   (see Details).
 #' @param labels Text strings.
 #' @param border Whether to draw borders around the rectangles.
-#' @param xpad,ypad The proportion of the rectangles to the extent of the text within.
-#' @param srt Rotation of the labels. if 90 or 270 degrees, the box will be rotated 90 degrees.
+#' @param xpad,ypad The proportion of the rectangles to the extent of the text
+#'   within.
+#' @param srt Rotation of the labels. if 90 or 270 degrees, the box will be
+#'   rotated 90 degrees.
 #' @param cex Character expansion. See \code{text}.
-#' @param adj left/right adjustment. If this is set outside the function, the box will not be aligned properly.
+#' @param adj left/right adjustment. If this is set outside the function, the
+#'   box will not be aligned properly.
 #' @param xlog Whether the X axis is a log axis.
 #' @param ylog Whether the y axis is a log axis.
-#' @param alpha.bg Numeric [0,1] controlling the transparency of the background, set to 0.5 by default.
+#' @param alpha.bg Numeric [0,1] controlling the transparency of the background,
+#'   set to 0.5 by default.
 #' @param ... additional arguments passed to \code{text}.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -20,10 +26,21 @@
 #' @importFrom utils modifyList
 #'
 #' @noRd
-.boxed.labels <- function(x, y = NA, labels,
-                          bg = ifelse(match(par("bg"), "transparent", 0), "white", par("bg")),
-                          border = NA, xpad = 1.2, ypad = 1.2,
-                          srt = 0, cex = 1, adj = 0.5, xlog = FALSE, ylog = FALSE, alpha.bg = 0.5, ...) {
+.boxed.labels <- function(x,
+                          y = NA,
+                          labels,
+                          bg = ifelse(match(par("bg"), "transparent", 0),
+                            "white", par("bg")
+                          ),
+                          border = NA,
+                          xpad = 1.2,
+                          ypad = 1.2,
+                          srt = 0,
+                          cex = 1,
+                          adj = 0.5,
+                          xlog = FALSE,
+                          ylog = FALSE,
+                          alpha.bg = 0.5, ...) {
   border <- NA
   oldpars <- par(c("cex", "xpd"))
   par(cex = cex, xpd = TRUE)
@@ -68,7 +85,13 @@
     yb <- y - bheights * ypad
     yt <- y + theights * ypad
   }
-  rect(xr, yb, xl, yt, col = adjustcolor(col = bg, alpha.f = alpha.bg), border = border)
+  rect(xr,
+    yb,
+    xl,
+    yt,
+    col = adjustcolor(col = bg, alpha.f = alpha.bg),
+    border = border
+  )
   do.call(text, args)
   par(cex = oldpars)
 }
@@ -101,62 +124,69 @@ setGeneric(
 #' @importFrom flowCore transformList inverseLogicleTransform
 #'
 #' @noRd
-setMethod(.cyto_axes_text, signature = "flowFrame", definition = function(x, channels, trans = NULL) {
+setMethod(.cyto_axes_text,
+  signature = "flowFrame",
+  definition = function(x,
+                          channels,
+                          trans = NULL) {
 
-  # Return NULL if trans is missing
-  if (is.null(trans)) {
-    return(NULL)
-  } else {
-
-    # trans of incorrect class
-    if (!any(inherits(trans, "transformList") | inherits(trans, "transformerList"))) {
-      stop("Please supply a valid transformList containing the transformations applied to the flowFrame.")
-    }
-  }
-
-  # Convert transformerList to transformList
-  if (inherits(trans, "transformerList")) {
-    trns <- lapply(trans, `[[`, "transform")
-    trans <- transformList(names(trns), trns)
-  }
-
-  # Assign x to fr
-  fr <- x
-
-  # Get list of axis breaks and labels
-  axs <- lapply(channels, function(channel) {
-
-    # Channel not included in trans
-    if (!channel %in% names(trans@transforms)) {
+    # Return NULL if trans is missing
+    if (is.null(trans)) {
       return(NULL)
+    } else {
+
+      # trans of incorrect class
+      if (!any(inherits(trans, "transformList") |
+        inherits(trans, "transformerList"))) {
+        stop("Supply a valid transformList/transformerList object to 'trans'.")
+      }
     }
 
-    # Range of values
-    r <- as.vector(range(fr)[, channel])
+    # Convert transformerList to transformList
+    if (inherits(trans, "transformerList")) {
+      trns <- lapply(trans, `[[`, "transform")
+      trans <- transformList(names(trns), trns)
+    }
 
-    # Transformation Functions & Breaks
-    trans.func <- trans@transforms[[channel]]@f
-    inv.func <- inverseLogicleTransform(trans)@transforms[[channel]]@f
-    raw <- inv.func(r)
-    brks <- .cyto_axes_breaks(raw, n = 5, equal.space = FALSE)
+    # Assign x to fr
+    fr <- x
+
+    # Get list of axis breaks and labels
+    axs <- lapply(channels, function(channel) {
+
+      # Channel not included in trans
+      if (!channel %in% names(trans@transforms)) {
+        return(NULL)
+      }
+
+      # Range of values
+      r <- as.vector(range(fr)[, channel])
+
+      # Transformation Functions & Breaks
+      trans.func <- trans@transforms[[channel]]@f
+      inv.func <- inverseLogicleTransform(trans)@transforms[[channel]]@f
+      raw <- inv.func(r)
+      brks <- .cyto_axes_breaks(raw, n = 5, equal.space = FALSE)
 
 
-    pos <- signif(trans.func(brks))
-    label <- .cyto_axes_inverse(brks, drop.1 = TRUE)
+      pos <- signif(trans.func(brks))
+      label <- .cyto_axes_inverse(brks, drop.1 = TRUE)
 
-    res <- list(label = label, at = pos)
+      res <- list(label = label, at = pos)
 
-    return(res)
-  })
-  names(axs) <- channels
+      return(res)
+    })
+    names(axs) <- channels
 
-  return(axs)
-})
+    return(axs)
+  }
+)
 
 #' Get Appropriate Axes Labels for Transformed Channels - GatingHierarchy Method
 #'
 #' @param x \code{GatingHiearchy}.
-#' @param channels \code{character} name(s) of the channel(S) used to construct the plot.
+#' @param channels \code{character} name(s) of the channel(S) used to construct
+#'   the plot.
 #'
 #' @return when there is transformation function associated with the given
 #'   channel, it returns a list of that contains positions and labels to draw on
@@ -165,58 +195,69 @@ setMethod(.cyto_axes_text, signature = "flowFrame", definition = function(x, cha
 #' @importFrom flowWorkspace getTransformations getData
 #'
 #' @noRd
-setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(x, channels) {
+setMethod(.cyto_axes_text,
+  signature = "GatingHierarchy",
+  definition = function(x, channels) {
 
-  # Assign x to gh
-  gh <- x
+    # Assign x to gh
+    gh <- x
 
-  # Get list of axis breaks and labels
-  axs <- lapply(channels, function(channel) {
-    res <- gh@axis[[sampleNames(gh)]][[channel]]
-    if (is.null(res)) {
-      # try to grab trans and do inverse trans for axis label on the fly
-      trans <- getTransformations(gh, channel, only.function = FALSE)
-      if (is.null(trans)) {
-        res <- NULL
+    # Get list of axis breaks and labels
+    axs <- lapply(channels, function(channel) {
+      res <- gh@axis[[sampleNames(gh)]][[channel]]
+      if (is.null(res)) {
+        # try to grab trans and do inverse trans for axis label on the fly
+        trans <- getTransformations(gh, channel, only.function = FALSE)
+        if (is.null(trans)) {
+          res <- NULL
+        } else {
+          inv.func <- trans[["inverse"]]
+          trans.func <- trans[["transform"]]
+          brk.func <- trans[["breaks"]]
+
+          fr <- getData(gh, use.exprs = FALSE)
+          r <- as.vector(range(fr)[, channel]) # range
+          raw <- inv.func(r)
+          brks <- brk.func(raw)
+          pos <- signif(trans.func(brks))
+          # format it
+          label <- trans[["format"]](brks)
+
+          res <- list(label = label, at = pos)
+        }
       } else {
-        inv.func <- trans[["inverse"]]
-        trans.func <- trans[["transform"]]
-        brk.func <- trans[["breaks"]]
-
-        fr <- getData(gh, use.exprs = FALSE)
-        r <- as.vector(range(fr)[, channel]) # range
-        raw <- inv.func(r)
-        brks <- brk.func(raw)
-        pos <- signif(trans.func(brks))
-        # format it
-        label <- trans[["format"]](brks)
-
-        res <- list(label = label, at = pos)
+        # use the stored axis label if exists
+        res$label <- .cyto_axes_inverse(as.numeric(res$label), drop.1 = TRUE)
       }
-    } else {
-      # use the stored axis label if exists
-      res$label <- .cyto_axes_inverse(as.numeric(res$label), drop.1 = TRUE)
-    }
 
-    return(res)
-  })
-  names(axs) <- channels
+      return(res)
+    })
+    names(axs) <- channels
 
-  return(axs)
-})
+    return(axs)
+  }
+)
 
-#' Generate the breaks that makes sense for flow data visualization - flowWorkspace
+#' Generate the breaks that makes sense for flow data visualization -
+#' flowWorkspace
 #'
-#' @param n desired number of breaks (the actual number will be different depending on the data range)
+#' @param n desired number of breaks (the actual number will be different
+#'   depending on the data range)
 #' @param x the raw data values
 #' @param equal.space whether breaks at equal-spaced intervals
-#' @param trans.fun the transform function (only needed when equal.space is TRUE)
-#' @param inverse.fun the inverse function (only needed when equal.space is TRUE)
+#' @param trans.fun the transform function (only needed when equal.space is
+#'   TRUE)
+#' @param inverse.fun the inverse function (only needed when equal.space is
+#'   TRUE)
 #'
-#' @return either 10^n intervals or equal-spaced(after transformed) intervals in raw scale.
+#' @return either 10^n intervals or equal-spaced(after transformed) intervals in
+#'   raw scale.
 #'
 #' @noRd
-.cyto_axes_breaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
+.cyto_axes_breaks <- function(x,
+                              n = 6,
+                              equal.space = FALSE,
+                              trans.fun, inverse.fun) {
   rng.raw <- range(x, na.rm = TRUE)
   if (equal.space) {
     rng <- trans.fun(rng.raw)
@@ -284,13 +325,21 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_plot_limits <- function(x, parent = "root", channels, overlay = NULL, limits = "machine") {
+.cyto_plot_limits <- function(x,
+                              parent = "root",
+                              channels,
+                              overlay = NULL,
+                              limits = "machine") {
 
   # Missing channels
   if (missing(channels)) {
-    stop("Please supply the names of the channel(s) to calculate axes limits.")
+    stop("Supply the names of the channel(s) to calculate axes limits.")
   } else {
-    channels <- cyto_channel_check(x = x, channels = channels, plot = FALSE)
+    channels <- cyto_channel_check(
+      x = x,
+      channels = channels,
+      plot = FALSE
+    )
   }
 
   # Incorrect limits argument
@@ -307,7 +356,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
     fr <- as(x, "flowFrame")
 
     if ("Original" %in% BiocGenerics::colnames(fr)) {
-      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      fr <- suppressWarnings(
+        fr[, -match("Original", BiocGenerics::colnames(fr))]
+      )
     }
 
     # x is a GatingHierarchy
@@ -319,7 +370,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
     fr <- as(getData(x, parent), "flowFrame")
 
     if ("Original" %in% BiocGenerics::colnames(fr)) {
-      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      fr <- suppressWarnings(
+        fr[, -match("Original", BiocGenerics::colnames(fr))]
+      )
     }
   }
 
@@ -337,7 +390,7 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
       mlms <- c(0, mlms[2])
     }
 
-    # Add 10% buffer on lower limit -
+    # Add 10% buffer on lower limit if transformed
     if (sm[sm$name == channel, "maxRange"] > 6) {
       if (mlms[1] > 0) {
         rng <- 0.1 * (mlms[2] - mlms[1])
@@ -379,21 +432,21 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
         } else if (class(overlay) == "list") {
 
           # list of flowFrames
-          if (all(as.vector(sapply(overlay, function(x) {
+          if (all(unlist(lapply(overlay, function(x) {
             class(x)
           })) == "flowFrame")) {
             fr <- as(flowSet(c(list(fr), overlay)), "flowFrame")
           }
 
           # list of flowSets
-        } else if (all(as.vector(sapply(overlay, function(x) {
+        } else if (all(unlist(lapply(overlay, function(x) {
           class(x)
         })) == "flowFrame")) {
           ov <- lapply(overlay, function(x) {
             as(x, "flowFrame")
           })
 
-          if (is.na(match("Original", BiocGenerics::colnames(ov[[1]]))) == FALSE) {
+          if (!is.na(match("Original", BiocGenerics::colnames(ov[[1]])))) {
             ov <- lapply(ov, function(fr) {
               fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
 
@@ -403,19 +456,21 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
           fr <- as(flowSet(c(list(fr), ov)), "flowFrame")
 
           # list of lists
-        } else if (all(as.vector(sapply(overlay, function(x) {
+        } else if (all(unlist(lapply(overlay, function(x) {
           class(x)
         })) == "list")) {
 
           # flowFrame lists
-          if (all(as.vector(sapply(overlay, function(x) {
-            sapply(x, class)
+          if (all(unlist(lapply(overlay, function(x) {
+            lapply(x, class)
           })) == "flowFrame")) {
             fr.lst <- lapply(overlay, function(x) {
               as(flowSet(x), "flowFrame")
             })
 
-            if (is.na(match("Original", BiocGenerics::colnames(fr.lst[[1]]))) == FALSE) {
+            if (!is.na(
+              match("Original", BiocGenerics::colnames(fr.lst[[1]]))
+            )) {
               ov <- lapply(fr.lst, function(fr) {
                 fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
 
@@ -426,14 +481,16 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
           }
 
           # flowSet lists
-          if (all(as.vector(sapply(overlay, function(x) {
-            sapply(x, class)
+          if (all(unlist(lapply(overlay, function(x) {
+            lapply(x, class)
           })) == "flowSet")) {
             fr.lst <- lapply(overlay, function(x) {
               as(x, "flowFrame")
             })
 
-            if (is.na(match("Original", BiocGenerics::colnames(fr.lst[[1]]))) == FALSE) {
+            if (!is.na(
+              match("Original", BiocGenerics::colnames(fr.lst[[1]]))
+            )) {
               ov <- lapply(fr.lst, function(fr) {
                 fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
 
@@ -480,7 +537,8 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
                                 display = NULL) {
 
   # x is flowSet prior to merging
-  if (!class(x)[1] %in% c("flowSet", "GatingSet") | length(overlay) != length(x)) {
+  if (!class(x)[1] %in% c("flowSet", "GatingSet") |
+    length(overlay) != length(x)) {
     stop("Supply the original data prior to merging.")
   }
 
@@ -501,7 +559,7 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
 
   # List of group indicies - ind
   if (length(group_by) == 1 & group_by[1] == "all") {
-    grps <- list(1:length(x))
+    grps <- list(seq_len(length(x)))
   } else {
 
     # Groups
@@ -521,13 +579,14 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
   overlay <- lapply(grps, function(x) {
     ov <- overlay[x]
 
-    lapply(1:length(ov[[1]]), function(x) {
+    lapply(seq_len(length(ov[[1]])), function(x) {
       fr.lst <- lapply(ov, `[[`, x)
 
       # if same flowFrame return first only
-      if (length(unique(fr.lst)) == 1 | length(unique(sapply(fr.lst, function(x) {
-        x@description$GUID
-      }))) == 1) {
+      if (length(unique(fr.lst)) == 1 |
+        length(unique(unlist(lapply(fr.lst, function(x) {
+          x@description$GUID
+        })))) == 1) {
         fr <- fr.lst[[1]]
       } else {
         fs <- flowSet(fr.lst)
@@ -535,7 +594,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
         fr <- as(fs, "flowFrame")
 
         if ("Original" %in% BiocGenerics::colnames(fr)) {
-          fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+          fr <- suppressWarnings(
+            fr[, -match("Original", BiocGenerics::colnames(fr))]
+          )
         }
       }
 
@@ -605,7 +666,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
     fr <- as(fs, "flowFrame")
 
     if ("Original" %in% BiocGenerics::colnames(fr)) {
-      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      fr <- suppressWarnings(
+        fr[, -match("Original", BiocGenerics::colnames(fr))]
+      )
     }
 
     if (!is.null(display)) {
@@ -622,7 +685,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
       fr <- as(fs[pd$name[pd$group_by == x]], "flowFrame")
 
       if ("Original" %in% BiocGenerics::colnames(fr)) {
-        fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+        fr <- suppressWarnings(
+          fr[, -match("Original", BiocGenerics::colnames(fr))]
+        )
       }
 
       if (!is.null(display)) {
@@ -640,7 +705,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
       fr <- as(fs[pd$name[pd$group_by == x]], "flowFrame")
 
       if ("Original" %in% BiocGenerics::colnames(fr)) {
-        fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+        fr <- suppressWarnings(
+          fr[, -match("Original", BiocGenerics::colnames(fr))]
+        )
       }
 
       if (!is.null(display)) {
@@ -792,22 +859,26 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
   smp <- length(overlay) + 1
 
   # checkChannel
-  channel <- cyto_channel_check(x = x, channels = channel, plot = TRUE)
+  channel <- cyto_channel_check(
+    x = x,
+    channels = channel,
+    plot = TRUE
+  )
 
   # list of gates
   if (inherits(gates, "filters")) {
 
     # Convert to list of gates
-    gates <- lapply(1:length(gates), function(gate) gates[[gate]])
+    gates <- lapply(seq_len(length(gates)), function(gate) gates[[gate]])
 
     # Must be rectangleGates for 1D plots
-    if (!all(as.vector(sapply(gates, class)) == "rectangleGate")) {
+    if (!all(unlist(lapply(gates, class)) == "rectangleGate")) {
       stop("Only rectangleGate gates are supported in 1-D plots.")
     }
   } else if (inherits(gates, "list")) {
 
     # Must be rectangleGates for 1D plots
-    if (!all(as.vector(sapply(gates, class)) == "rectangleGate")) {
+    if (!all(unlist(lapply(gates, class)) == "rectangleGate")) {
       stop("Only rectangleGate gates are supported in 1-D plots.")
     }
   } else if (inherits(gates, "rectangleGate")) {
@@ -820,7 +891,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
   if (any(lapply(gates, function(x) length(flowCore::parameters(x))) == 2)) {
 
     # Some gates are in 2D - construct 1D gate
-    ind <- unname(which(lapply(gates, function(x) length(flowCore::parameters(x))) == 2))
+    ind <- unname(which(lapply(gates, function(x) {
+      length(flowCore::parameters(x))
+    }) == 2))
 
     # Convert these gates to 1D gates
     gts <- lapply(ind, function(x) {
@@ -833,29 +906,65 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
 
   # Find center x co-ord for label position in each gate
   if (all(is.na(label_box_x))) {
-    label_box_x <- sapply(gates, function(x) {
+    label_box_x <- unlist(lapply(gates, function(x) {
       (unname(x@min) + unname(x@max)) / 2
-    })
+    }))
   }
 
   # Find y co-ord for each sample
   if (all(is.na(label_box_y))) {
-    label_box_y <- sapply(1:smp, function(x) {
+    label_box_y <- unlist(lapply(seq(1, smp), function(x) {
       (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
-    })
+    }))
   }
 
   # Plot gates
-  cyto_plot_gate(gates, channels = channel, gate_line_col = gate_line_col, gate_line_width = gate_line_width, gate_line_type = gate_line_type)
+  cyto_plot_gate(gates,
+    channels = channel,
+    gate_line_col = gate_line_col,
+    gate_line_width = gate_line_width,
+    gate_line_type = gate_line_type
+  )
 
   # List of flowFrames for cyto_plot_label
   fr.lst <- c(list(x), overlay)
 
   # Plot labels
-  lapply(1:length(gates), function(x) {
-    mapply(function(y, label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_x, label_box_y, label_box_alpha) {
-      suppressMessages(cyto_plot_label(x = fr.lst[[y]], channels = channel, gates = gates[[x]], trans = trans, text_x = label_box_x[x], text_y = label_box_y[x], text = label_text, stat = label_stat, text_font = label_text_font, text_col = label_text_col, text_size = label_text_size, box_alpha = label_box_alpha))
-    }, 1:length(fr.lst), label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_x, label_box_y, label_box_alpha)
+  lapply(seq_len(length(gates)), function(x) {
+    mapply(
+      function(y,
+                     label_text,
+                     label_stat,
+                     label_text_font,
+                     label_text_col,
+                     label_text_size,
+                     label_box_x,
+                     label_box_y,
+                     label_box_alpha) {
+        suppressMessages(cyto_plot_label(
+          x = fr.lst[[y]],
+          channels = channel,
+          gates = gates[[x]],
+          trans = trans,
+          text_x = label_box_x[x],
+          text_y = label_box_y[x],
+          text = label_text,
+          stat = label_stat,
+          text_font = label_text_font,
+          text_col = label_text_col,
+          text_size = label_text_size,
+          box_alpha = label_box_alpha
+        ))
+      }, seq_len(length(fr.lst)),
+      label_text,
+      label_stat,
+      label_text_font,
+      label_text_col,
+      label_text_size,
+      label_box_x,
+      label_box_y,
+      label_box_alpha
+    )
   })
 }
 
@@ -879,7 +988,7 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
                           density_stack = 0) {
 
   # x object of incorrect class
-  if (!all(as.vector(sapply(x, class)) %in% "flowFrame")) {
+  if (!all(unlist(lapply(x, class)) %in% "flowFrame")) {
     stop("x should be a list of flowFrame objects.")
   }
 

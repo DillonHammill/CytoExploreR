@@ -39,7 +39,10 @@ gt <- Activation_gatingTemplate
 gating(gt, gs)
 
 # gatingTemplate
-gtfile <- system.file("extdata", "Activation-gatingTemplate.csv", package = "CytoRSuiteData")
+gtfile <- system.file("extdata",
+  "Activation-gatingTemplate.csv",
+  package = "CytoRSuiteData"
+)
 
 # Extract T Cells gate
 gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)

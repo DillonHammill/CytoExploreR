@@ -25,8 +25,8 @@ set this argument to "all".}
 \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 transform the fluorescent channels of the supplied flowFrame. This
 transform object will be used internally to ensure axes labels of the plot
-are appropriately transformed. The transform object will NOT be applied to the
-flowFrame internally and should be applied to the flowFrame prior to
+are appropriately transformed. The transform object will NOT be applied to
+the flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
 \item{title}{a title for the plots, set to the file name of x by default.}
@@ -34,7 +34,8 @@ plotting.}
 \item{density_stack}{numeric [0,1] indicating the degree of offset for
 overlaid populations, set to 0.5 by default.}
 
-\item{...}{additional arguments passed to \code{\link{cyto_plot,flowFrame-method}}.}
+\item{...}{additional arguments passed to
+\code{\link{cyto_plot,flowFrame-method}}.}
 }
 \description{
 Plot Expression Profile in All Fluorescent Channels - flowSet Method

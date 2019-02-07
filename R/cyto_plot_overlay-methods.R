@@ -61,19 +61,28 @@ setGeneric(
 #'   point_col = "magenta"
 #' )
 #' @export
-setMethod(cyto_plot_overlay, signature = "flowFrame", definition = function(x,
-                                                                            channels,
-                                                                            point_shape = ".",
-                                                                            point_size = 2,
-                                                                            point_col = "black",
-                                                                            point_alpha = 1) {
+setMethod(cyto_plot_overlay,
+  signature = "flowFrame",
+  definition = function(x,
+                          channels,
+                          point_shape = ".",
+                          point_size = 2,
+                          point_col = "black",
+                          point_alpha = 1) {
 
-  # Assign x to fr
-  fr <- x
+    # Assign x to fr
+    fr <- x
 
-  # Add points to existing plot
-  graphics::points(x = exprs(fr)[, channels[1]], y = exprs(fr)[, channels[2]], pch = point_shape, col = adjustcolor(point_col, point_alpha), cex = point_size)
-})
+    # Add points to existing plot
+    graphics::points(
+      x = exprs(fr)[, channels[1]],
+      y = exprs(fr)[, channels[2]],
+      pch = point_shape,
+      col = adjustcolor(point_col, point_alpha),
+      cex = point_size
+    )
+  }
+)
 
 #' Overlay Points on cyto_plot - flowSet Method
 #'
@@ -120,26 +129,48 @@ setMethod(cyto_plot_overlay, signature = "flowFrame", definition = function(x,
 #'   point_col = c("magenta", "orange", "green")
 #' )
 #' @export
-setMethod(cyto_plot_overlay, signature = "flowSet", definition = function(x,
-                                                                          channels,
-                                                                          point_shape = ".",
-                                                                          point_size = 2,
-                                                                          point_col = "black",
-                                                                          point_alpha = 1) {
+setMethod(cyto_plot_overlay,
+  signature = "flowSet",
+  definition = function(x,
+                          channels,
+                          point_shape = ".",
+                          point_size = 2,
+                          point_col = "black",
+                          point_alpha = 1) {
 
-  # Assign x to fs
-  fs <- x
+    # Assign x to fs
+    fs <- x
 
-  # Convert to list of flowFrames
-  fr.lst <- lapply(1:length(fs), function(x) {
-    fs[[x]]
-  })
+    # Convert to list of flowFrames
+    fr.lst <- lapply(seq_len(length(fs)), function(x) {
+      fs[[x]]
+    })
 
-  # Add points to existing plot
-  invisible(mapply(function(fr, point_shape, point_size, point_col, point_alpha) {
-    cyto_plot_overlay(x = fr, channels = channels, point_shape = point_shape, point_size = point_size, point_col = point_col, point_alpha = point_alpha)
-  }, fr.lst, point_shape, point_size, point_col, point_alpha))
-})
+    # Add points to existing plot
+    invisible(
+      mapply(
+        function(fr,
+                         point_shape,
+                         point_size,
+                         point_col,
+                         point_alpha) {
+          cyto_plot_overlay(
+            x = fr,
+            channels = channels,
+            point_shape = point_shape,
+            point_size = point_size,
+            point_col = point_col,
+            point_alpha = point_alpha
+          )
+        }, fr.lst,
+        point_shape,
+        point_size,
+        point_col,
+        point_alpha
+      )
+    )
+  }
+)
 
 #' Overlay Points on cyto_plot - list Method
 #'
@@ -181,28 +212,53 @@ setMethod(cyto_plot_overlay, signature = "flowSet", definition = function(x,
 #' )
 #' 
 #' # Overlay CD4 T Cells & Dendritic Cells
-#' cyto_plot_overlay(list(getData(gs, "CD4 T Cells")[[4]], getData(gs, "Dendritic Cells")[[4]]),
-#'   channels = c("APC-Cy7-A", "PE-A"),
-#'   point_col = c("magenta", "red")
+#' cyto_plot_overlay(list(
+#'   getData(gs, "CD4 T Cells")[[4]],
+#'   getData(gs, "Dendritic Cells")[[4]]
+#' ),
+#' channels = c("APC-Cy7-A", "PE-A"),
+#' point_col = c("magenta", "red")
 #' )
 #' @export
-setMethod(cyto_plot_overlay, signature = "list", definition = function(x,
-                                                                       channels,
-                                                                       point_shape = ".",
-                                                                       point_size = 2,
-                                                                       point_col = "black",
-                                                                       point_alpha = 1) {
+setMethod(cyto_plot_overlay,
+  signature = "list",
+  definition = function(x,
+                          channels,
+                          point_shape = ".",
+                          point_size = 2,
+                          point_col = "black",
+                          point_alpha = 1) {
 
-  # Check class of x
-  if (!all(as.vector(sapply(x, class)) == "flowFrame")) {
-    stop("x should be a list of flowFrame objects to overlay.")
+    # Check class of x
+    if (!all(unlist(lapply(x, "class")) == "flowFrame")) {
+      stop("x should be a list of flowFrame objects to overlay.")
+    }
+
+    # Assign x to fr.lst
+    fr.lst <- x
+
+    # Add points to existing plot
+    invisible(
+      mapply(
+        function(fr,
+                         point_shape,
+                         point_size,
+                         point_col,
+                         point_alpha) {
+          cyto_plot_overlay(
+            x = fr,
+            channels = channels,
+            point_shape = point_shape,
+            point_size = point_size,
+            point_col = point_col,
+            point_alpha = point_alpha
+          )
+        }, fr.lst,
+        point_shape,
+        point_size,
+        point_col,
+        point_alpha
+      )
+    )
   }
-
-  # Assign x to fr.lst
-  fr.lst <- x
-
-  # Add points to existing plot
-  invisible(mapply(function(fr, point_shape, point_size, point_col, point_alpha) {
-    cyto_plot_overlay(x = fr, channels = channels, point_shape = point_shape, point_size = point_size, point_col = point_col, point_alpha = point_alpha)
-  }, fr.lst, point_shape, point_size, point_col, point_alpha))
-})
+)

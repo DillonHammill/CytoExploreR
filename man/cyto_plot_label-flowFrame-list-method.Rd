@@ -38,10 +38,10 @@ by default. Statistics for fluorescent intensity are calculated for the
 entire distribution. Only count and percent statistics are supported for 2D
 plots.}
 
-\item{text_x}{vector containing the x co-ordiantes for the plot labels. Set
+\item{text_x}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
 
-\item{text_y}{vector containing the x co-ordiantes for the plot labels. Set
+\item{text_y}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
 
 \item{text_font}{integer [1,2,3,4] passed to \code{text} to alter the font,
@@ -54,8 +54,8 @@ details.}
 \item{text_col}{specify text colour in label for each gate, defaults to
 \code{"black"} for all gates.}
 
-\item{box_alpha}{numeric [0,1] controls the transparency of the background, set
-to \code{0.6} by default.}
+\item{box_alpha}{numeric [0,1] controls the transparency of the background,
+set to \code{0.6} by default.}
 }
 \value{
 add a boxed text label to cyto_plot.

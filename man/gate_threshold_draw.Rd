@@ -22,18 +22,20 @@ containing the flow cytometry data for plotting and gating.}
 feature allows for constructing gates of different types over existing
 plots which may already contain a different gate type.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object.
+  constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
+  object.
 }
 \description{
-\code{gate_threshold_draw} constructs an interactive plotting window for user to
-select the lower bound of a population which is constructed into a
+\code{gate_threshold_draw} constructs an interactive plotting window for user
+to select the lower bound of a population which is constructed into a
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 threshold gates are supported, for 2-D threshold gates all events above the

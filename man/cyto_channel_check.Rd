@@ -20,11 +20,12 @@ a plot, set to TRUE by default to accept 1 or 2 channels only.}
 vector of valid channel names.
 }
 \description{
-\code{cyto_channel_check} will check whether the supplied channels are valid for
-the \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{cyto_channel_check} will check whether the supplied channels are valid
+for the \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowset}} or
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} . \code{cyto_channel_check}
-will also return the channels if the marker names are supplied.
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} .
+\code{cyto_channel_check} will also return the channels if the marker names
+are supplied.
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

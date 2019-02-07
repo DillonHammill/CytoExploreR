@@ -36,7 +36,7 @@ setGeneric(
 #' @param back_gate names of the population(s) to back-gate, set to \code{FALSE}
 #'   by default to turn off back-gating. To back-gate all populations set this
 #'   argument to \code{"all"}.
-#' @param gate_track logicla indicating whether gate colour should be tracked
+#' @param gate_track logical indicating whether gate colour should be tracked
 #'   throughout gating scheme, set to TRUE by default.
 #' @param show_all logical indicating whether every population should be
 #'   included in every plot in the gating scheme, set to \code{FALSE} by
@@ -98,7 +98,7 @@ setGeneric(
 #' 
 #' # Gate using gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt,gs)
+#' gating(gt, gs)
 #' 
 #' # Gating scheme
 #' cyto_plot_gating_scheme(gs[[4]])
@@ -140,14 +140,17 @@ setMethod(cyto_plot_gating_scheme,
 
     # Gating template supplied - apply to GatingHierarchy
     if (!is.null(gatingTemplate)) {
-      if(getOption("CytoRSuite_wd_check") == TRUE){
+      if (getOption("CytoRSuite_wd_check") == TRUE) {
         if (.file_wd_check(gatingTemplate)) {
           gt <- gatingTemplate(gatingTemplate)
           gating(gt, gh)
         } else {
-          stop("Supplied gatingTemplate file does not exist in current working directory.")
+          stop(paste(
+            gatingTemplate,
+            "is not in this working directory."
+          ))
         }
-      }else{
+      } else {
         gt <- gatingTemplate(gatingTemplate)
         gating(gt, gh)
       }
@@ -190,7 +193,24 @@ setMethod(cyto_plot_gating_scheme,
     }
 
     # Colours
-    cols <- c("cyan", "deepskyblue", "navyblue", "turquoise4", "springgreen3", "green", "darkgreen", "goldenrod4", "orange", "firebrick2", "red", "darkred", "deeppink2", "darkmagenta", "purple4", "magenta")
+    cols <- c(
+      "cyan",
+      "deepskyblue",
+      "navyblue",
+      "turquoise4",
+      "springgreen3",
+      "green",
+      "darkgreen",
+      "goldenrod4",
+      "orange",
+      "firebrick2",
+      "red",
+      "darkred",
+      "deeppink2",
+      "darkmagenta",
+      "purple4",
+      "magenta"
+    )
     cols <- colorRampPalette(cols)
 
     # Get colour for each population
@@ -204,21 +224,21 @@ setMethod(cyto_plot_gating_scheme,
           point_col[!pops %in% back_gate] <- point_col[1]
         }
       } else {
-        point_col <- c(point_col, cols(ovn))[1:npop]
+        point_col <- c(point_col, cols(ovn))[seq_len(npop)]
       }
 
       # Density fill colour
       if (missing(density_fill)) {
         density_fill <- point_col
       } else {
-        density_fill <- c(density_fill, cols(ovn))[1:npop]
+        density_fill <- c(density_fill, cols(ovn))[seq_len(npop)]
       }
 
       # Gate line colour
       if (missing(gate_line_col)) {
         gate_line_col <- c("grey32", cols(npop - 1))
       } else {
-        gate_line_col <- c(gate_line_col, cols(ovn))[1:npop]
+        gate_line_col <- c(gate_line_col, cols(ovn))[seq_len(npop)]
       }
     } else if (gate_track) {
 
@@ -244,7 +264,7 @@ setMethod(cyto_plot_gating_scheme,
       if (missing(gate_line_col)) {
         gate_line_col <- c("grey32", cols(npop - 1)) # include root
       } else {
-        gate_line_col <- c(gate_line_col, cols(ovn))[1:npop]
+        gate_line_col <- c(gate_line_col, cols(ovn))[seq_len(npop)]
       }
     } else if (back_gate != FALSE) {
 
@@ -256,14 +276,14 @@ setMethod(cyto_plot_gating_scheme,
           point_col[!pops %in% back_gate] <- point_col[1]
         }
       } else {
-        point_col <- c(point_col, cols(ovn))[1:npop]
+        point_col <- c(point_col, cols(ovn))[seq_len(npop)]
       }
 
       # Density fill colour
       if (missing(density_fill)) {
         density_fill <- point_col
       } else {
-        density_fill <- c(density_fill, cols(ovn))[1:npop]
+        density_fill <- c(density_fill, cols(ovn))[seq_len(npop)]
       }
 
       # Gate line colour
@@ -295,7 +315,19 @@ setMethod(cyto_plot_gating_scheme,
         gate_line_col <- gate_line_col[1]
       }
     }
-    popcols <- data.frame("node" = pops, "ptcol" = rep(point_col, length.out = npop), "gtcol" = rep(gate_line_col, length.out = npop), "denscol" = rep(density_fill, length.out = npop), stringsAsFactors = FALSE)
+    popcols <- data.frame(
+      "node" = pops,
+      "ptcol" = rep(point_col,
+        length.out = npop
+      ),
+      "gtcol" = rep(gate_line_col,
+        length.out = npop
+      ),
+      "denscol" = rep(density_fill,
+        length.out = npop
+      ),
+      stringsAsFactors = FALSE
+    )
 
     # Header - add spaces to center
     if (missing(header)) {
@@ -304,22 +336,43 @@ setMethod(cyto_plot_gating_scheme,
 
     # Use GatingHierarchy directly to get gating scheme
     gt <- templateGen(gh)
-    gts <- data.frame(parent = basename(gt$parent), alias = gt$alias, xchannel = do.call(rbind, strsplit(gt$dims, ",", fixed = TRUE))[, 1], ychannel = do.call(rbind, strsplit(gt$dims, ",", fixed = TRUE))[, 2], stringsAsFactors = FALSE)
+    gts <- data.frame(
+      parent = basename(gt$parent),
+      alias = gt$alias,
+      xchannel = do.call(
+        "rbind",
+        strsplit(gt$dims,
+          ",",
+          fixed = TRUE
+        )
+      )[, 1],
+      ychannel = do.call(
+        "rbind",
+        strsplit(gt$dims,
+          ",",
+          fixed = TRUE
+        )
+      )[, 2],
+      stringsAsFactors = FALSE
+    )
 
     # Extract unique parents for plotting
-    parents <- c()
-    lapply(unique(as.vector(gts$parent)), function(parent) {
-      parents <<- c(parents, rep(parent, nrow(unique(gts[gts$parent == parent, c("xchannel", "ychannel")]))))
-    })
+    parents <- unique(gts$parent)
 
     # Pop-up window?
     if (popup == TRUE) {
       .cyto_plot_window()
     }
 
+    # Number of plots
+    np <- nrow(unique(gts[, c("parent", "xchannel", "ychannel")]))
+
     # Calculate layout parameters based on number of parents
     if (missing(layout)) {
-      layout <- c((n2mfrow(length(parents) + 1))[2], n2mfrow((length(parents) + 1))[1])
+      layout <- c(
+        n2mfrow(np + 1)[2],
+        n2mfrow(np + 1)[1]
+      )
       par(mfrow = layout)
     }
 
@@ -337,66 +390,123 @@ setMethod(cyto_plot_gating_scheme,
     }
 
     mapply(function(parents, title) {
-      parent <- as.character(parents)
-      alias <- as.vector(gts[gts$parent == parents, "alias"])
-      xchannel <- as.character(gts[gts$parent == parent & gts$alias == alias[1], "xchannel"])
-      ychannel <- as.character(gts[gts$parent == parent & gts$alias == alias[1], "ychannel"])
-      channels <- c(xchannel, ychannel)
+      gt <- gts[gts$parent == parents, ]
 
-      if (channels[1] == channels[2]) {
-        channels <- channels[1]
-      }
+      # Parent may have gates in different channels
+      # construct a plot for each channel set
+      lapply(
+        seq(1, nrow(unique(gt[, c("xchannel", "ychannel")]))),
+        function(x) {
+          parent <- as.character(parents)
+          xchannel <- as.character(unique(gt[, "xchannel"])[x])
+          ychannel <- as.character(unique(gt[, "ychannel"])[x])
+          channels <- c(xchannel, ychannel)
+          alias <- as.vector(gt[gt$parent == parents &
+            gt$xchannel == xchannel &
+            gt$ychannel == ychannel, "alias"])
 
-      # Back-gating
-      if (back_gate[1] != FALSE) {
-        if (back_gate[1] == "all") {
-          if (!show_all) {
-            overlay <- c(alias, unlist(sapply(1:length(alias), function(x) {
-              basename(getDescendants(gh, alias[x]))
-            })))
+          if (channels[1] == channels[2]) {
+            channels <- channels[1]
           }
-        } else {
-          if (!show_all) {
-            if (any(back_gate %in% c(alias, unlist(sapply(1:length(alias), function(x) {
-              basename(getDescendants(gh, alias[x]))
-            }))))) {
-              overlay <- back_gate[back_gate %in% c(alias, unlist(sapply(1:length(alias), function(x) {
-                basename(getDescendants(gh, alias[x]))
-              })))]
+
+          # Back-gating
+          if (back_gate[1] != FALSE) {
+            if (back_gate[1] == "all") {
+              if (!show_all) {
+                overlay <- c(alias, unlist(lapply(
+                  seq_along(alias),
+                  function(x) {
+                    basename(getDescendants(gh, alias[x]))
+                  }
+                )))
+              }
             } else {
-              overlay <- NULL
+              if (!show_all) {
+                if (any(back_gate %in%
+                  c(alias, unlist(lapply(seq_along(alias), function(x) {
+                    basename(getDescendants(gh, alias[x]))
+                  }))))) {
+                  ind <- c(
+                    alias,
+                    unlist(lapply(
+                      seq_along(alias),
+                      function(x) {
+                        basename(getDescendants(gh, alias[x]))
+                      }
+                    ))
+                  )
+                  overlay <- back_gate[back_gate %in% ind]
+                } else {
+                  overlay <- NULL
+                }
+              }
             }
           }
+
+          # Point colour
+          point_col <- popcols[, "ptcol"][match(c(parent, overlay), pops)]
+
+          # Gate line colour
+          gate_line_col <- popcols[, "gtcol"][match(alias, pops)]
+
+          # Density fill colour
+          density_fill <- popcols[, "denscol"][match(
+            c(parent, overlay),
+            pops
+          )]
+
+          # Border line col
+          if (gate_track) {
+            if (is.na(border_line_col)) {
+              border_line_col <- popcols[, "gtcol"][match(parent, pops)]
+            }
+          } else {
+            if (is.na(border_line_col)) {
+              border_line_col <- "black"
+            }
+          }
+
+          # Title text colour
+          if (is.na(title_text_col)) {
+            title_text_col <- border_line_col
+          }
+
+          # Skip boolean gates
+          if (any(
+            unlist(lapply(alias, function(x) {
+              flowWorkspace:::isNegated(gh, x)
+            }))
+          )) {
+            message("Skipping boolean gates.")
+            alias <- alias[!unlist(
+              lapply(
+                alias,
+                function(x) {
+                  flowWorkspace:::isNegated(gh, x)
+                }
+              )
+            )]
+          }
+
+          # Call to cyto_plot
+          cyto_plot(gh,
+            parent = parent,
+            alias = alias,
+            overlay = overlay,
+            channels = channels,
+            legend = FALSE,
+            legend_text = NA,
+            title = title,
+            point_col = point_col,
+            density_fill = density_fill,
+            gate_line_col = gate_line_col,
+            border_line_col = border_line_col,
+            border_line_width = border_line_width,
+            title_text_col = title_text_col,
+            label_text_size = label_text_size, ...
+          )
         }
-      }
-
-      # Point colour
-      point_col <- popcols[, "ptcol"][match(c(parent, overlay), pops)]
-
-      # Gate line colour
-      gate_line_col <- popcols[, "gtcol"][match(alias, pops)]
-
-      # Density fill colour
-      density_fill <- popcols[, "denscol"][match(c(parent, overlay), pops)]
-
-      # Border line col
-      if (gate_track) {
-        if (is.na(border_line_col)) {
-          border_line_col <- popcols[, "gtcol"][match(parent, pops)]
-        }
-      } else {
-        if (is.na(border_line_col)) {
-          border_line_col <- "black"
-        }
-      }
-
-      # Title text colour
-      if (is.na(title_text_col)) {
-        title_text_col <- border_line_col
-      }
-
-      # Call to cyto_plot
-      cyto_plot(gh, parent = parent, alias = alias, overlay = overlay, channels = channels, legend = FALSE, title = title, point_col = point_col, density_fill = density_fill, gate_line_col = gate_line_col, border_line_col = border_line_col, border_line_width = border_line_width, title_text_col = title_text_col, label_text_size = label_text_size, ...)
+      )
     }, parents, title)
 
     # header
@@ -421,7 +531,13 @@ setMethod(cyto_plot_gating_scheme,
         plot.new()
 
         # Add legend
-        legend(x = 0.1, y = 0.8, legend = legend_text, fill = popcols[, "ptcol"][match(overlay, pops)], bty = "n", cex = legend_text_size, x.intersp = 0.5)
+        legend("center",
+          legend = legend_text,
+          fill = popcols[, "ptcol"][match(overlay, pops)],
+          bty = "n",
+          cex = legend_text_size,
+          x.intersp = 0.5
+        )
       }
     }
 
@@ -443,10 +559,10 @@ setMethod(cyto_plot_gating_scheme,
 #' @param gatingTemplate name of the gatingTemplate csv file used to gate
 #'   \code{x}. If not supplied the gating scheme will be obtained directly from
 #'   the GatingSet.
-#' @param group_by a vector of pData variables to merge samples into groups prior
-#'   to plotting, set to NULL by default to prevent merging. To merge all
+#' @param group_by a vector of pData variables to merge samples into groups
+#'   prior to plotting, set to NULL by default to prevent merging. To merge all
 #'   samples set this argument to \code{TRUE} or \code{"all"}.
-#' @param gate_track logicla indicating whether gate colour should be tracked
+#' @param gate_track logical indicating whether gate colour should be tracked
 #'   throughout gating scheme, set to TRUE by default.
 #' @param back_gate names of the population(s) to back-gate, set to \code{FALSE}
 #'   by default to turn off back-gating. To back-gate all populations set this
@@ -514,7 +630,7 @@ setMethod(cyto_plot_gating_scheme,
 #' 
 #' # Gate using gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt,gs)
+#' gating(gt, gs)
 #' 
 #' # Gating scheme
 #' cyto_plot_gating_scheme(gs)
@@ -555,14 +671,14 @@ setMethod(cyto_plot_gating_scheme,
 
     # gatingTemplate supplied - apply to GatingSet
     if (!is.null(gatingTemplate)) {
-      if(getOption("CytoRSuite_wd_check") == TRUE){
+      if (getOption("CytoRSuite_wd_check") == TRUE) {
         if (.file_wd_check(gatingTemplate)) {
           gt <- gatingTemplate(gatingTemplate)
           gating(gt, x)
         } else {
-          stop("Supplied gatingTemplate file does not exist in current working directory.")
+          stop(paste(gatingTemplate, "is not in this working directory"))
         }
-      }else{
+      } else {
         gt <- gatingTemplate(gatingTemplate)
         gating(gt, x)
       }
@@ -599,7 +715,7 @@ setMethod(cyto_plot_gating_scheme,
 
       # Check group_by is pData variable
       if (!group_by %in% colnames(pd)) {
-        stop("group_by should be the name of a pData variable. See colnames(pData(x)) for options.")
+        stop("group_by should contain the name(s) of pData variable(s).")
       }
 
       # Add group_by column to pd
@@ -613,7 +729,7 @@ setMethod(cyto_plot_gating_scheme,
 
       # Check group_by is pData variable
       if (!all(group_by %in% colnames(pd))) {
-        stop("group_by should contain the names of pData variables. See colnames(pData(x)) for options.")
+        stop("group_by should contain the name(s) of pData variable(s).")
       }
 
       # Add group_by column to pd
@@ -660,7 +776,24 @@ setMethod(cyto_plot_gating_scheme,
       }
 
       # Colours
-      cols <- c("cyan", "deepskyblue", "navyblue", "turquoise4", "springgreen3", "green", "darkgreen", "goldenrod4", "orange", "firebrick2", "red", "darkred", "deeppink2", "darkmagenta", "purple4", "magenta")
+      cols <- c(
+        "cyan",
+        "deepskyblue",
+        "navyblue",
+        "turquoise4",
+        "springgreen3",
+        "green",
+        "darkgreen",
+        "goldenrod4",
+        "orange",
+        "firebrick2",
+        "red",
+        "darkred",
+        "deeppink2",
+        "darkmagenta",
+        "purple4",
+        "magenta"
+      )
       cols <- colorRampPalette(cols)
 
       # Get colour for each population
@@ -674,21 +807,21 @@ setMethod(cyto_plot_gating_scheme,
             point_col[!pops %in% back_gate] <- point_col[1]
           }
         } else {
-          point_col <- c(point_col, cols(ovn))[1:npop]
+          point_col <- c(point_col, cols(ovn))[seq_len(npop)]
         }
 
         # Density fill colour
         if (is.null(density_fill)) {
           density_fill <- point_col
         } else {
-          density_fill <- c(density_fill, cols(ovn))[1:npop]
+          density_fill <- c(density_fill, cols(ovn))[seq_len(npop)]
         }
 
         # Gate line colour
         if (is.null(gate_line_col)) {
           gate_line_col <- c("grey32", cols(npop - 1))
         } else {
-          gate_line_col <- c(gate_line_col, cols(ovn))[1:npop]
+          gate_line_col <- c(gate_line_col, cols(ovn))[seq_len(npop)]
         }
       } else if (gate_track) {
 
@@ -714,7 +847,7 @@ setMethod(cyto_plot_gating_scheme,
         if (is.null(gate_line_col)) {
           gate_line_col <- c("grey32", cols(npop - 1)) # include root
         } else {
-          gate_line_col <- c(gate_line_col, cols(ovn))[1:npop]
+          gate_line_col <- c(gate_line_col, cols(ovn))[seq_len(npop)]
         }
       } else if (back_gate != FALSE) {
 
@@ -726,14 +859,14 @@ setMethod(cyto_plot_gating_scheme,
             point_col[!pops %in% back_gate] <- point_col[1]
           }
         } else {
-          point_col <- c(point_col, cols(ovn))[1:npop]
+          point_col <- c(point_col, cols(ovn))[seq_len(npop)]
         }
 
         # Density fill colour
         if (is.null(density_fill)) {
           density_fill <- point_col
         } else {
-          density_fill <- c(density_fill, cols(ovn))[1:npop]
+          density_fill <- c(density_fill, cols(ovn))[seq_len(npop)]
         }
 
         # Gate line colour
@@ -765,14 +898,23 @@ setMethod(cyto_plot_gating_scheme,
           gate_line_col <- gate_line_col[1]
         }
       }
-      popcols <- data.frame("node" = pops, "ptcol" = rep(point_col, length.out = npop), "gtcol" = rep(gate_line_col, length.out = npop), "denscol" = rep(density_fill, length.out = npop), stringsAsFactors = FALSE)
+      popcols <- data.frame(
+        "node" = pops,
+        "ptcol" = rep(point_col, length.out = npop),
+        "gtcol" = rep(gate_line_col, length.out = npop),
+        "denscol" = rep(density_fill, length.out = npop),
+        stringsAsFactors = FALSE
+      )
 
       # Header - add spaces to center
       if (is.na(header)) {
         if (group_by == "all") {
           header <- paste("       ", "Combined Gating Scheme")
         } else {
-          header <- paste("       ", pd$group_by[pd$name %in% sampleNames(gs)][1])
+          header <- paste(
+            "       ",
+            pd$group_by[pd$name %in% sampleNames(gs)][1]
+          )
         }
       } else {
         header <- paste("       ", header)
@@ -780,22 +922,41 @@ setMethod(cyto_plot_gating_scheme,
 
       # Use GatingSet directly to get gating scheme - template from first member
       gt <- templateGen(gs[[1]])
-      gts <- data.frame(parent = basename(gt$parent), alias = gt$alias, xchannel = do.call(rbind, strsplit(gt$dims, ",", fixed = TRUE))[, 1], ychannel = do.call(rbind, strsplit(gt$dims, ",", fixed = TRUE))[, 2], stringsAsFactors = FALSE)
+      gts <- data.frame(
+        parent = basename(gt$parent),
+        alias = gt$alias,
+        xchannel = do.call(
+          rbind,
+          strsplit(gt$dims, ",",
+            fixed = TRUE
+          )
+        )[, 1],
+        ychannel = do.call(
+          rbind,
+          strsplit(gt$dims, ",",
+            fixed = TRUE
+          )
+        )[, 2],
+        stringsAsFactors = FALSE
+      )
 
       # Extract unique parents for plotting
-      parents <- c()
-      lapply(unique(as.vector(gts$parent)), function(parent) {
-        parents <<- c(parents, rep(parent, nrow(unique(gts[gts$parent == parent, c("xchannel", "ychannel")]))))
-      })
+      parents <- unique(gts$parent)
 
       # Pop-up window?
       if (popup == TRUE) {
         .cyto_plot_window()
       }
 
+      # Number of plots
+      np <- nrow(unique(gts[, c("parent", "xchannel", "ychannel")]))
+
       # Calculate layout parameters based on number of parents
       if (is.null(layout)) {
-        layout <- c((n2mfrow(length(parents) + 1))[2], n2mfrow((length(parents) + 1))[1])
+        layout <- c(
+          n2mfrow(np + 1)[2],
+          n2mfrow(np + 1)[1]
+        )
         par(mfrow = layout)
       } else if (layout[1] != FALSE) {
         par(mfrow = layout)
@@ -815,88 +976,128 @@ setMethod(cyto_plot_gating_scheme,
       }
 
       mapply(function(parents, title) {
-        parent <- as.character(parents)
-        alias <- as.vector(gts[gts$parent == parents, "alias"])
-        xchannel <- as.character(gts[gts$parent == parent & gts$alias == alias[1], "xchannel"])
-        ychannel <- as.character(gts[gts$parent == parent & gts$alias == alias[1], "ychannel"])
-        channels <- c(xchannel, ychannel)
+        gt <- gts[gts$parent == parents, ]
 
-        if (channels[1] == channels[2]) {
-          channels <- channels[1]
-        }
+        # Parent may have gates in different channels
+        # construct a plot for each channel set
+        lapply(seq(1, nrow(
+          unique(gt[, c("xchannel", "ychannel")])
+        )), function(x) {
+          parent <- as.character(parents)
+          xchannel <- as.character(unique(gt[, "xchannel"])[x])
+          ychannel <- as.character(unique(gt[, "ychannel"])[x])
+          channels <- c(xchannel, ychannel)
+          alias <- as.vector(gt[gt$parent == parents &
+            gt$xchannel == xchannel &
+            gt$ychannel == ychannel, "alias"])
 
-        # Back-gating
-        if (back_gate[1] != FALSE) {
-          if (back_gate[1] == "all") {
-            if (!show_all) {
-              overlay <- c(alias, unlist(sapply(1:length(alias), function(x) {
-                basename(getDescendants(gs[[1]], alias[x]))
-              })))
-            }
-          } else {
-            if (!show_all) {
-              if (any(back_gate %in% c(alias, unlist(sapply(1:length(alias), function(x) {
-                basename(getDescendants(gs[[1]], alias[x]))
-              }))))) {
-                overlay <- back_gate[back_gate %in% c(alias, unlist(sapply(1:length(alias), function(x) {
-                  basename(getDescendants(gs[[1]], alias[x]))
-                })))]
-              } else {
-                overlay <- NULL
+          if (channels[1] == channels[2]) {
+            channels <- channels[1]
+          }
+
+          # Back-gating
+          if (back_gate[1] != FALSE) {
+            if (back_gate[1] == "all") {
+              if (!show_all) {
+                overlay <- c(alias, unlist(lapply(
+                  seq_along(alias),
+                  function(x) {
+                    basename(getDescendants(gs[[1]], alias[x]))
+                  }
+                )))
+              }
+            } else {
+              if (!show_all) {
+                if (any(back_gate %in%
+                  c(alias, unlist(lapply(seq_along(alias), function(x) {
+                    basename(getDescendants(gs[[1]], alias[x]))
+                  }))))) {
+                  overlay <- back_gate[back_gate %in%
+                    c(
+                      alias,
+                      unlist(lapply(
+                        seq_along(alias),
+                        function(x) {
+                          basename(getDescendants(gs[[1]], alias[x]))
+                        }
+                      ))
+                    )]
+                } else {
+                  overlay <- NULL
+                }
               }
             }
           }
-        }
 
-        # Point colour
-        point_col <- popcols[, "ptcol"][match(c(parent, overlay), pops)]
+          # Point colour
+          point_col <- popcols[, "ptcol"][match(c(parent, overlay), pops)]
 
-        # Gate line colour
-        gate_line_col <- popcols[, "gtcol"][match(alias, pops)]
+          # Gate line colour
+          gate_line_col <- popcols[, "gtcol"][match(alias, pops)]
 
-        # Density fill colour
-        density_fill <- popcols[, "denscol"][match(c(parent, overlay), pops)]
+          # Density fill colour
+          density_fill <- popcols[, "denscol"][match(c(parent, overlay), pops)]
 
-        # Border line col
-        if (gate_track) {
-          if (is.null(border_line_col)) {
-            border_line_col <- popcols[, "gtcol"][match(parent, pops)]
+          # Border line col
+          if (gate_track) {
+            if (is.null(border_line_col)) {
+              border_line_col <- popcols[, "gtcol"][match(parent, pops)]
+            }
+          } else {
+            if (is.null(border_line_col)) {
+              border_line_col <- "black"
+            }
           }
-        } else {
-          if (is.null(border_line_col)) {
-            border_line_col <- "black"
+
+          # Title text colour
+          if (is.null(title_text_col)) {
+            title_text_col <- border_line_col
           }
-        }
 
-        # Title text colour
-        if (is.null(title_text_col)) {
-          title_text_col <- border_line_col
-        }
+          # Number of events to display
+          if (is.null(display)) {
+            display <- 1 / length(gs)
+          }
 
-        # Number of events to display
-        if (is.null(display)) {
-          display <- 1 / length(gs)
-        }
+          # Skip boolean gates
+          if (any(unlist(lapply(
+            alias,
+            function(x) {
+              flowWorkspace:::isNegated(
+                gs[[1]],
+                x
+              )
+            }
+          )))) {
+            message("skipping boolean gates.")
+            alias <- alias[!unlist(
+              lapply(alias, function(x) {
+                flowWorkspace:::isNegated(gs[[1]], x)
+              })
+            )]
+          }
 
-        # Call to cyto_plot
-        cyto_plot(gs,
-          parent = parent,
-          group_by = "all",
-          alias = alias,
-          overlay = overlay,
-          channels = channels,
-          legend = FALSE,
-          title = title,
-          point_col = point_col,
-          density_fill = density_fill,
-          gate_line_col = gate_line_col,
-          border_line_col = border_line_col,
-          border_line_width = border_line_width,
-          title_text_col = title_text_col,
-          label_text_size = label_text_size,
-          layout = FALSE,
-          display = display, ...
-        )
+          # Call to cyto_plot
+          cyto_plot(gs,
+            parent = parent,
+            group_by = "all",
+            alias = alias,
+            overlay = overlay,
+            channels = channels,
+            legend = FALSE,
+            legend_text = NA,
+            title = title,
+            point_col = point_col,
+            density_fill = density_fill,
+            gate_line_col = gate_line_col,
+            border_line_col = border_line_col,
+            border_line_width = border_line_width,
+            title_text_col = title_text_col,
+            label_text_size = label_text_size,
+            layout = FALSE,
+            display = display, ...
+          )
+        })
       }, parents, title)
 
       # header
@@ -921,7 +1122,13 @@ setMethod(cyto_plot_gating_scheme,
           plot.new()
 
           # Add legend
-          legend(x = 0.1, y = 0.8, legend = legend_text, fill = popcols[, "ptcol"][match(overlay, pops)], bty = "n", cex = legend_text_size, x.intersp = 0.5)
+          legend("center",
+            legend = legend_text,
+            fill = popcols[, "ptcol"][match(overlay, pops)],
+            bty = "n",
+            cex = legend_text_size,
+            x.intersp = 0.5
+          )
         }
       }
     })

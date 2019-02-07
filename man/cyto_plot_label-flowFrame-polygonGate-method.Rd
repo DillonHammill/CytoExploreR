@@ -33,10 +33,10 @@ include percent in labels.}
 either \code{"percent"} or \code{"count"}. \code{stat} is set to
 \code{"percent"} by default.}
 
-\item{text_x}{vector containing the x co-ordiantes for the plot labels. Set
+\item{text_x}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
 
-\item{text_y}{vector containing the x co-ordiantes for the plot labels. Set
+\item{text_y}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
 
 \item{text_font}{integer [1,2,3,4] passed to \code{text} to alter the font,

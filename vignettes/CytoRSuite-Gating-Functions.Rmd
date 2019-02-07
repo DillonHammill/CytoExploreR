@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = TRUE)
 * `gate_ellipse_draw` - constructs **ellipsoidGate(s)** based on selection of 4 points indicating the lower and upper bounds of the population in 2 dimensions. 
 * `gate_quadrant_draw` - constructs 4 open-ended **rectangleGates** based on selection of 1 point indicating the center of the crosshair between 4 populations. 
 * `gate_web_draw` - constructs any number of **polygonGates** based on selection of a center point and surrounding separating points. See below for demonstration.
-* `gate_draw` is a wapper for all of these gating functions which takes on an argument `type` to indicate that type of gate to draw and construct.
+* `gate_draw` is a wrapper for all of these gating functions which takes on an argument `type` to indicate that type of gate to draw and construct.
 
 ## 2. Gating Arguments
 
@@ -41,7 +41,7 @@ gate_draw(fr, channels, alias = NULL, display = 1, plot = TRUE, label = TRUE, ..
 * **display** numeric [0,1] indicating the percentage of events to display when plotting, set to all events by default. If the supplied value is greater than the total number of events in the `flowFrame`, all events will be plotted.
 * **plot** logical indicating whether a plot should be constructed, set to **TRUE** by default. This argument can be used to turn off plotting when mixing gating functions as detailed later.
 * **label** logical indicating whether population names and statistics should be added to the plot after gating, set to **TRUE** by default.
-* **...** additional arguments passed to plotDens for plotting.
+* **...** additional arguments passed to cyto_plot for plotting.
 
 ## 3. Demonstration of Gating Functions
 
@@ -244,4 +244,4 @@ knitr::include_graphics('Gating-functions/MixedGates.gif')
 
 ## 3. More information
 
-For more information refer to the CytoRSuite vignettes and help documentation for each of the described functions.
+For more information on these gating functions refer to the documentation for these functions in the [Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html). To learn more about how to edit and remove gates refer to [Gate Manipulation](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite-Gate-Manipulation.html) vignette.

@@ -10,7 +10,7 @@
   contour_line_col = "black")
 }
 \arguments{
-\item{x}{oa list of \code{flowFrame} objects to use for contour lines to
+\item{x}{a list of \code{flowFrame} objects to use for contour lines to
 overlay onto an existing cyto_plot.}
 
 \item{channels}{channels used to construct the existing cyto_plot.}

@@ -32,8 +32,8 @@
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
-contructed, either a 1-D density distribution for a single channel or a 2-D
-scatterplot with blue-red colour scale for two channels.}
+constructed, either a 1-D density distribution for a single channel or a
+2-D scatterplot with blue-red colour scale for two channels.}
 
 \item{axes_trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or
@@ -41,9 +41,9 @@ scatterplot with blue-red colour scale for two channels.}
 \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 transform the fluorescent channels of the supplied flowFrame. This
 transformation object will be used internally to ensure that the axes
-labels of the plot are appropriately transformed. The transList will NOT be
-applied to the flowFrame internally and should be applied to the flowFrame
-prior to plotting.}
+labels of the plot are appropriately transformed. The transformation object
+will NOT be applied to the flowFrame internally and should be applied to
+the flowFrame prior to plotting.}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet} or list of
 \code{flowFrames} to be overlaid onto the plot.}
@@ -51,7 +51,7 @@ prior to plotting.}
 \item{gate}{gate object(s) to be added to plot.  For \code{cyto_1d_plot} only
 gate objects of class
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} in either 1 or 2
-dimensions are supported. Mulitple gates can be supplied either as a
+dimensions are supported. Multiple gates can be supplied either as a
 \code{list} or \code{\link[flowCore:filters-class]{filters}} object.}
 
 \item{limits}{indicates whether the axes limits should be based on the
@@ -138,12 +138,12 @@ default.}
 \item{axes_text_col}{colour to use for axes text, set to \code{"black"} by
 default.}
 
-\item{axes_label_text_font}{numeric to control the font axes labels, set to 1 for
-plain font by default. See \code{\link[graphics:par]{font}} for
+\item{axes_label_text_font}{numeric to control the font axes labels, set to 1
+for plain font by default. See \code{\link[graphics:par]{font}} for
 alternatives.}
 
-\item{axes_label_text_size}{numeric to control the text size of axes labels, set
-to 1.1 by default.}
+\item{axes_label_text_size}{numeric to control the text size of axes labels,
+set to 1.1 by default.}
 
 \item{axes_label_text_col}{colour to use for axes labels text, set to
 \code{"black"} by default.}
@@ -224,7 +224,7 @@ plot label(s) on the plot.}
 \item{label_box_y}{vector of y co-ordinate(s) to manually adjust the position
 plot label(s) on the plot.}
 
-\item{label_box_alpha}{numeric to control backgropund fill transparency of
+\item{label_box_alpha}{numeric to control background fill transparency of
 label boxes, set to 0.6 by default to introduce some transparency.}
 
 \item{border_line_type}{integer [0,6] to control the line type of plot

@@ -15,7 +15,7 @@
 single stain compensation controls and a universal unstained control.
 Currently, spillover_compute does not pre-gate samples to obtain a
 homogeneous cell population for downstream calculations. We therefore
-recommmend pre-gating samples based on FSC and SSC parameters prior to
+recommend pre-gating samples based on FSC and SSC parameters prior to
 passing them to spillover_compute and indicate the population of interest
 using the \code{parent} argument.}
 
@@ -90,7 +90,10 @@ gt <- Compensation_gatingTemplate
 gating(gt, gs)
 
 # Channel match fille
-cmfile <- system.file("extdata", "Compensation-Channels.csv", package = "CytoRSuiteData")
+cmfile <- system.file("extdata",
+  "Compensation-Channels.csv",
+  package = "CytoRSuiteData"
+)
 
 # Compute fluorescent spillover matrix
 spill <- spillover_compute(gs,

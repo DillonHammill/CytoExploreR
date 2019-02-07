@@ -58,27 +58,40 @@ setGeneric(
 #'   contour_lines = 20
 #' )
 #' @export
-setMethod(cyto_plot_contour, signature = "flowFrame", definition = function(x,
-                                                                            channels,
-                                                                            contour_lines = 15,
-                                                                            contour_line_type = 1,
-                                                                            contour_line_width = 1,
-                                                                            contour_line_col = "black") {
+setMethod(cyto_plot_contour,
+  signature = "flowFrame",
+  definition = function(x,
+                          channels,
+                          contour_lines = 15,
+                          contour_line_type = 1,
+                          contour_line_width = 1,
+                          contour_line_col = "black") {
 
-  # Assign x to fr
-  fr <- x
-  fr.exprs <- exprs(fr)[, channels]
+    # Assign x to fr
+    fr <- x
+    fr.exprs <- exprs(fr)[, channels]
 
-  # Contours
-  if (contour_lines != 0) {
+    # Contours
+    if (contour_lines != 0) {
 
-    # Calculate 2D kernel density using kde2d from MASS
-    z <- MASS::kde2d(fr.exprs[, 1], fr.exprs[, 2], n = 75)
+      # Calculate 2D kernel density using kde2d from MASS
+      z <- MASS::kde2d(fr.exprs[, 1], fr.exprs[, 2], n = 75)
 
-    # Add contour lines to plot
-    graphics::contour(z = z$z, x = z$x, y = z$y, add = TRUE, drawlabels = FALSE, nlevels = contour_lines, col = contour_line_col, lwd = contour_line_width, lty = contour_line_type)
+      # Add contour lines to plot
+      graphics::contour(
+        z = z$z,
+        x = z$x,
+        y = z$y,
+        add = TRUE,
+        drawlabels = FALSE,
+        nlevels = contour_lines,
+        col = contour_line_col,
+        lwd = contour_line_width,
+        lty = contour_line_type
+      )
+    }
   }
-})
+)
 
 #' Contour Lines for cyto_plot - flowSet Method
 #'
@@ -120,30 +133,49 @@ setMethod(cyto_plot_contour, signature = "flowFrame", definition = function(x,
 #'   contour_lines = c(20, 0, 0, 0)
 #' )
 #' @export
-setMethod(cyto_plot_contour, signature = "flowSet", definition = function(x,
-                                                                          channels,
-                                                                          contour_lines = 15,
-                                                                          contour_line_type = 1,
-                                                                          contour_line_width = 1,
-                                                                          contour_line_col = "black") {
+setMethod(cyto_plot_contour,
+  signature = "flowSet",
+  definition = function(x,
+                          channels,
+                          contour_lines = 15,
+                          contour_line_type = 1,
+                          contour_line_width = 1,
+                          contour_line_col = "black") {
 
-  # Assign x to fs
-  fs <- x
+    # Assign x to fs
+    fs <- x
 
-  # Convert to list of flowFrames
-  fr.lst <- lapply(1:length(fs), function(x) {
-    fs[[x]]
-  })
+    # Convert to list of flowFrames
+    fr.lst <- lapply(seq_len(length(fs)), function(x) {
+      fs[[x]]
+    })
 
-  # Contours
-  invisible(mapply(function(fr, contour_lines, contour_line_type, contour_line_width, contour_line_col) {
-    cyto_plot_contour(fr, channels = channels, contour_lines = contour_lines, contour_line_type = contour_line_type, contour_line_width = contour_line_width, contour_line_col = "black")
-  }, fr.lst, contour_lines, contour_line_type, contour_line_width, contour_line_col))
-})
+    # Contours
+    invisible(mapply(
+      function(fr,
+                     contour_lines,
+                     contour_line_type,
+                     contour_line_width,
+                     contour_line_col) {
+        cyto_plot_contour(fr,
+          channels = channels,
+          contour_lines = contour_lines,
+          contour_line_type = contour_line_type,
+          contour_line_width = contour_line_width,
+          contour_line_col = "black"
+        )
+      }, fr.lst,
+      contour_lines,
+      contour_line_type,
+      contour_line_width,
+      contour_line_col
+    ))
+  }
+)
 
 #' Contour Lines for cyto_plot - list Method
 #'
-#' @param x oa list of \code{flowFrame} objects to use for contour lines to
+#' @param x a list of \code{flowFrame} objects to use for contour lines to
 #'   overlay onto an existing cyto_plot.
 #' @param channels channels used to construct the existing cyto_plot.
 #' @param contour_lines numeric indicating the number of levels to use for
@@ -181,22 +213,41 @@ setMethod(cyto_plot_contour, signature = "flowSet", definition = function(x,
 #'   contour_lines = c(20, 0, 0, 0)
 #' )
 #' @export
-setMethod(cyto_plot_contour, signature = "list", definition = function(x,
-                                                                       channels,
-                                                                       contour_lines = 15,
-                                                                       contour_line_type = 1,
-                                                                       contour_line_width = 1,
-                                                                       contour_line_col = "black") {
-  # Check class of x
-  if (!all(as.vector(sapply(x, class)) == "flowFrame")) {
-    stop("x should be a list of flowFrame objects.")
+setMethod(cyto_plot_contour,
+  signature = "list",
+  definition = function(x,
+                          channels,
+                          contour_lines = 15,
+                          contour_line_type = 1,
+                          contour_line_width = 1,
+                          contour_line_col = "black") {
+    # Check class of x
+    if (!all(lapply(x, "class") == "flowFrame")) {
+      stop("x should be a list of flowFrame objects.")
+    }
+
+    # Assign x to fr.lst
+    fr.lst <- x
+
+    # Contours
+    invisible(mapply(
+      function(fr,
+                     contour_lines,
+                     contour_line_type,
+                     contour_line_width,
+                     contour_line_col) {
+        cyto_plot_contour(fr,
+          channels = channels,
+          contour_lines = contour_lines,
+          contour_line_type = contour_line_type,
+          contour_line_width = contour_line_width,
+          contour_line_col = "black"
+        )
+      }, fr.lst,
+      contour_lines,
+      contour_line_type,
+      contour_line_width,
+      contour_line_col
+    ))
   }
-
-  # Assign x to fr.lst
-  fr.lst <- x
-
-  # Contours
-  invisible(mapply(function(fr, contour_lines, contour_line_type, contour_line_width, contour_line_col) {
-    cyto_plot_contour(fr, channels = channels, contour_lines = contour_lines, contour_line_type = contour_line_type, contour_line_width = contour_line_width, contour_line_col = "black")
-  }, fr.lst, contour_lines, contour_line_type, contour_line_width, contour_line_col))
-})
+)

@@ -37,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
       </span>
     </div>
 
@@ -72,7 +72,7 @@
       <a href="../articles/CytoRSuite-Gating-Functions.html">CytoRSuite: Gating Functions</a>
     </li>
     <li>
-      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation of Flow Cytometry Data Using plotCyto</a>
+      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation Using cyto_plot</a>
     </li>
   </ul>
 </li>
@@ -102,7 +102,7 @@
       <h1>Getting Started with CytoRSuite</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-01-29</h4>
+            <h4 class="date">2019-02-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite.Rmd"><code>vignettes/CytoRSuite.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite.Rmd</code></div>
@@ -114,7 +114,7 @@
 <div id="overview" class="section level1">
 <h1 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h1>
-<p>The main features of CytoRSuite will be documented in spearet vignettes for “Compensation”, “Gating functions”, “Visualisation” and “Automated and manual gating” respectively. Before we dive into the details, let’s demonstrate how simple it can be to analyse some in vitro T cell activation data using <strong>CytoRSuite</strong>. The Activation dataset used in this vignette is shipped with CytoRSuiteData. For more details on this dataset see <strong>?Activation</strong>.</p>
+<p>The main features of CytoRSuite will be documented in separate vignettes for “Compensation”, “Gating functions”, “Visualisation” and “Automated and manual gating” respectively. Before we dive into the details, let’s demonstrate how simple it can be to analyse some in vitro T cell activation data using <strong>CytoRSuite</strong>. The Activation dataset used in this vignette is shipped with CytoRSuiteData. For more details on this dataset see <strong>?Activation</strong>.</p>
 <div id="load-required-packages" class="section level2">
 <h2 class="hasAnchor">
 <a href="#load-required-packages" class="anchor"></a>1. Load Required Packages</h2>
@@ -149,10 +149,10 @@
 <div id="annotate-flowset-with-markers" class="section level2">
 <h2 class="hasAnchor">
 <a href="#annotate-flowset-with-markers" class="anchor"></a>3. Annotate flowSet with Markers</h2>
-<p>Assigning marker names to channels will be useful downstream as we can refer to channels by their marker rather than by name. <code>cyto_markers</code> provides an editbale table to make marker assignment easy. The details in the flowSet will automatically be updated when the window is closed. Channels without markers should have empty “Marker” entries. Edit the table to match the image below:</p>
+<p>Assigning marker names to channels will be useful downstream as we can refer to channels by their marker rather than by name. <code>cyto_markers</code> provides an editable table to make marker assignment easy. The details in the flowSet will automatically be updated when the window is closed. Channels without markers should have empty “Marker” entries. Edit the table to match the image below:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># Assign markers</span></a>
 <a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw"><a href="../reference/cyto_markers.html">cyto_markers</a></span>(fs)</a></code></pre></div>
-<p><img src="cyto_markers.png" width="30%" height="30%" style="display: block; margin: auto;"></p>
+<p><img src="cyto_markers.PNG" width="30%" height="30%" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># Markers added to desc column in details for each flowFrame</span></a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">fs[[<span class="dv">1</span>]]</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co">#&gt; flowFrame object 'Activation1.fcs'</span></a>
@@ -184,7 +184,7 @@
 <p>Experimental details can be associated with each sample using <code>cyto_annotate</code> which uses the same interface as <code>cyto_markers</code> to interactively edit pData information. This information will be used downstream for grouping samples prior to gating and will be included in the exported statistics tables to aid in statistical analysis. Modify the table to include a variable “OVAConc” with values 0, 0.005, 0.05 and 0.5 as shown in the image.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># Associate each samples with experimental information</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="../reference/cyto_annotate.html">cyto_annotate</a></span>(fs)</a></code></pre></div>
-<p><img src="cyto_annotate.png" width="30%" height="30%" style="display: block; margin: auto;"></p>
+<p><img src="cyto_annotate.PNG" width="30%" height="30%" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># pData information updated with OVAConc column</span></a>
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">pData</span>(fs)</a>
 <a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">#&gt;                            name OVAConc</span></a>
@@ -214,12 +214,12 @@
 <li>
 <code>spillover_compute</code> provides an automated approach to calculating the percentage of fluorescent spillover using the algorithm described by Bagwell &amp; Adams 1993.</li>
 <li>
-<code>spillover_edit</code> utilises an interactive Shiny interface to allow realtime visualisation of changes in spillover percentages and is designed to aid in manual manipulation of spilllover matrices.</li>
+<code>spillover_edit</code> utilises an interactive Shiny interface to allow realtime visualisation of changes in spillover percentages and is designed to aid in manual manipulation of spillover matrices.</li>
 <li>
 <code>cyto_plot_compensation</code> displays each compensation control in all channels to easily identify any potential compensation issues.</li>
 </ul>
-<p>These features will be documentaed in a separate compensation vignette, see <code><a href="../reference/spillover_compute.html">?spillover_compute</a></code>, <code><a href="../reference/spillover_edit.html">?spillover_edit</a></code> and <code><a href="../reference/cyto_plot_compensation.html">?cyto_plot_compensation</a></code> for more details on these functions.</p>
-<p>Here we will demonstarte how to apply the spillover matrix attached to each flowFrame. Recall the spillover matrix can be extracted from the <code>description</code> slot of the flowFrame under <code>SPILL</code>.</p>
+<p>These features will be documented in a separate compensation vignette, see <code><a href="../reference/spillover_compute.html">?spillover_compute</a></code>, <code><a href="../reference/spillover_edit.html">?spillover_edit</a></code> and <code><a href="../reference/cyto_plot_compensation.html">?cyto_plot_compensation</a></code> for more details on these functions.</p>
+<p>Here we will demonstrate how to apply the spillover matrix attached to each flowFrame. Recall the spillover matrix can be extracted from the <code>description</code> slot of the flowFrame under <code>SPILL</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># Get attached spillover matrix</span></a>
 <a class="sourceLine" id="cb8-2" data-line-number="2">spill &lt;-<span class="st"> </span>fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL</a>
 <a class="sourceLine" id="cb8-3" data-line-number="3">spill</a>
@@ -277,7 +277,7 @@
 <h2 class="hasAnchor">
 <a href="#visualise-gatingset-using-cyto_plot" class="anchor"></a>8. Visualise GatingSet using <code>cyto_plot</code>
 </h2>
-<p>Visualising 1-D density distributions and 2-D scatter plots of flow cytometry data is made easy with <code>cyto_plot</code>. <code>cyto_plot</code> is capable of handling flowFrame, flowSet, GatingHierarchy and GatingSet objects. Any function in CytoRSuite which makes a call to plot uses <code>cyto_plot</code> internally and can therefore accept any of its arguments to customise the plot output. In a similar fashion to ggplot2, <code>cyto_plot</code> has argumets of the form geom_aes (e.g. point_col) which make it autocomplete friendly. Additional plotting functions such as <code>cyto_plot_profile</code> and <code>cyto_plot_gating_scheme</code> allow the user to look at expression profiles and gating schemes respectively. All these visualisation tools will be detailed in the “Visualisation” vignette.</p>
+<p>Visualising 1-D density distributions and 2-D scatter plots of flow cytometry data is made easy with <code>cyto_plot</code>. <code>cyto_plot</code> is capable of handling flowFrame, flowSet, GatingHierarchy and GatingSet objects. Any function in CytoRSuite which makes a call to plot uses <code>cyto_plot</code> internally and can therefore accept any of its arguments to customise the plot output. In a similar fashion to ggplot2, <code>cyto_plot</code> has arguments of the form geom_aes (e.g. point_col) which make it autocomplete friendly. Additional plotting functions such as <code>cyto_plot_profile</code> and <code>cyto_plot_gating_scheme</code> allow the user to look at expression profiles and gating schemes respectively. All these visualisation tools will be detailed in the “Visualisation” vignette.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># 2-D scatter plot with contour lines</span></a>
 <a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs,</a>
 <a class="sourceLine" id="cb10-3" data-line-number="3">          <span class="dt">parent =</span> <span class="st">"root"</span>,</a>

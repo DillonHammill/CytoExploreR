@@ -1,10 +1,10 @@
 ---
-title: "CytoRSuite: Visualisation of Flow Cytometry Data Using plotCyto"
+title: "CytoRSuite: Visualisation Using cyto_plot"
 author: "Dillon Hammill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{CytoRSuite: Visualisation of Flow Cytometry Data Using plotCyto}
+  %\VignetteIndexEntry{CytoRSuite: Visualisation Using cyto_plot}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,27 +13,41 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## 1. Introduction
+# 1. Overview
 
 **CytoRSuite** contains an intuitive plotting function built on base graphics called `cyto_plot` which supports all existing flow cytometry objects including flowFrames, flowSets, GatingHierarchies and GatingSets. Some key plotting features include:
 
-- sensible defaults to minimise code
-- back gating support with **overlay**
-- plot **gate** objects
-- label gated populations with name and frequency
-- sample merging
-- **display** to sample events to speed up plotting
-- stack density histograms with **density_stack**
-- 2D scatter plots with default blue-red colour scale
-- 2D **contour lines** overlays
+- 1-D density distributions
+- 2-D scatter plots with blue-red colour scale
+- restrict percentage of events to plot using `display`
+- group samples prior to plotting using `group_by`
+- order samples prior to plotting using `group_by`
+- full back-gating support through `overlay`
+- plot all supported gates including `rectangleGate`, `polygonGate`, `ellipsoidGate` and `filters` objects.
+- full customisation for gates using `gate_line_type`, `gate_line_width` and `gate_line_col`.
+- label plots with text and statistics using `label_text` and `label_stat`.
+- position labels using `label_box_x` and `label_box_y`
+- support for legend through `legend`
+- stacked density distributions with `density_stack`
+- density distributions normalised to mode with `density_modal`
+- gated stacked density distributions with `gate` and `density_stack`
+- full customisation of density distributions using `density_fill`, `density_fill_alpha`, `density_line_type`, `density_line_width` and `density_line_col`.
+- add 2-D contour lines using `contour_lines`
+- customise contour lines with `contour_line_type`, `contour_line_width` and `contour_line_col`
+- full customisation of point using `point_col`, `point_alpha`, `point_shape` and`point_size`.
+- full support for faceting with customisable grid layout through `layout`
+- ability to plot in pop-up window through `popup`
+- plot entire gating schemes using `cyto_plot_gating_scheme`
+- plot marker expression profiles using `cyto_plot_profiles`
+- works with `png()` to export high resolution images
 
-`cyto_plot` is used internally throughout CytoRSuite so any plotCyto arguments can be passed to functions which generate plots, including `gate_draw` and `gate_edit`
+`cyto_plot` is used internally throughout **CytoRSuite** so any cyto_plot arguments can be passed to functions which generate plots, including `gate_draw` and `gate_edit`
 
-## 2. `cyto_plot` Demonstration
+# 2. Demonstration
 
-Here we aim to document some of the key features of `cyto_plot` for visualation of flow cytometry data. To accomplish this goal we will use the `Activation` dataset supplied with **CytoRSuiteData**.
+Here we aim to document some of the key features of `cyto_plot` for visualisation of flow cytometry data. To accomplish this goal we will use the `Activation` dataset supplied with **CytoRSuiteData**.
 
-### 2.1 Preparation of Flow Cytometry Data
+## 2.1 Preparation of Flow Cytometry Data
 ```{r, message = FALSE, warning = FALSE}
 # Load Required Packages
 library(CytoRSuite)
@@ -67,7 +81,7 @@ TCells <- getData(gs, "T Cells")
 
 ```
 
-### 2.2 `cyto_plot` Overview
+## 2.2 `cyto_plot` Overview
 
 At its most basic level, `cyto_plot` constructs either a 1-D or 2-D plot based on the number of channels supplied to the channels argument. To construct the plot in a pop-up window simply set the popup argument to TRUE. Note: for larger plots users will need to expand the plotting area to avoid figure margins errors.
 
@@ -77,23 +91,23 @@ If a single channel is supplied a 1-D density distribution is plotted. All densi
 cyto_plot(fs[[1]], channels = "FSC-A")
 ```
 
-If two channels are supplied a 2-D scatterplot with blue-red colour gradient is contructed.
+If two channels are supplied a 2-D scatterplot with blue-red colour gradient is constructed.
 
 ```{r, fig.width = 6, fig.height = 6, fig.align='center'}
 cyto_plot(fs[[1]], channels = c("FSC-A","SSC-A"))
 ```
 
-### 2.3 `cyto_plot`: 1-Dimensional Density Distibutions
+## 2.3 `cyto_plot`: 1-Dimensional Density Distributions
 
 To get 1-D density distributions of the data, simply supply a single channel or marker name to the channels argument. 
 
-#### flowFrame
+### 2.3.1 flowFrame
 
 ```{r, fig.width = 6, fig.height = 6, fig.align='center'}
 cyto_plot(TCells[[1]], channels = "CD4")
 ```
 
-#### flowSet
+### 2.3.2 flowSet
 
 The density distribution for each flowFrame within the flowSet will be plotted in a separate panel by default. Notice how the x axis in the above plot has limits [0,4] this is due to flowFrame and flowSet objects not retaining the logicle transformation information. To have appropriately labelled axes users should supply a transformList object to the `axes_trans` argument as shown below. The `density_fill` argument controls the fill colour for the density distribution.
 
@@ -102,41 +116,41 @@ trans <- estimateLogicle(fs[[2]], channels)
 cyto_plot(TCells, channels = "CD4", axes_trans = trans, density_fill = "dodgerblue")
 ```
 
-Stacking of samples is supported through the `density_stack` argument which controls the percentage overlap of the stacked distributions. The `density_alpha` argument controls the degree of transparency of the fill colour.
+Stacking of samples is supported through the `density_stack` argument which controls the percentage overlap of the stacked distributions. The `density_fill_alpha` argument controls the degree of transparency of the fill colour.
 
 ```{r, fig.width = 6, fig.height = 6, fig.align='center'}
-cyto_plot(TCells, channels = "CD4", density_fill = c("dodgerblue", "red"), density_stack = 0.5, density_alpha = 0.5)
+cyto_plot(TCells, channels = "CD4", density_fill = c("dodgerblue", "red"), density_stack = 0.5, density_fill_alpha = 0.5)
 ```
 
-#### GatingHierarchy
+### 2.3.3 GatingHierarchy
 
-To plot objects of class GatingHierachy supply the name of the `parent` population to extract for plotting. Population overlays are supported for flowFrame, flowSet, list of flowFrames or list of flowSets using the `overlay` argument. For GatingHierachies and GatingSets the name of the population to overlay is also supported. The degree of overlap for overlays can be controlled using the `density_stack` argument. For 1-D density distribution the `density_line_col` argument controls the border colour.
+To plot objects of class GatingHierarchy supply the name of the `parent` population to extract for plotting. Population overlays are supported for flowFrame, flowSet, list of flowFrames or list of flowSets using the `overlay` argument. For GatingHierarchies and GatingSets the name of the population to overlay is also supported. The degree of overlap for overlays can be controlled using the `density_stack` argument. For 1-D density distribution the `density_line_col` argument controls the border colour.
 
 ```{r, fig.width = 6, fig.height = 6, fig.align='center'}
 cyto_plot(gs[[1]], parent = "T Cells", channels = "CD4", overlay = "CD4 T Cells", density_fill = c("green","blue"), density_line_col = c("black","red"))
 ``` 
 
-#### GatingSet
+### 2.3.4 GatingSet
 
-To change the border line type user can supply an interger [0,4] to the `density_line_type` argument. The line width can be controlled in a similar fashion using the `density_line_width` argument. By default the title above each plot will be the name of the sample but this can be changed by supplying specific names to the `title` argument.
+To change the border line type user can supply an integer [0,4] to the `density_line_type` argument. The line width can be controlled in a similar fashion using the `density_line_width` argument. By default the title above each plot will be the name of the sample but this can be changed by supplying specific names to the `title` argument.
 
 ```{r, fig.width = 11, fig.height = 5, fig.align='center'}
 cyto_plot(gs, parent = "T Cells", channels = "CD4", density_line_type = 2, density_line_width = 4, title = c("Unactivated","Activated"))
 ```
 
-### 2.4 `cyto_plot`: 2-Dimensional Scatter Plots
+## 2.4 `cyto_plot`: 2-Dimensional Scatter Plots
 
-To get 2-D density scatter plots of the data, simply supply two channels or marker names to the **channels** argument of plotCyto. 
+To get 2-D density scatter plots of the data, simply supply two channels or marker names to the **channels** argument of cyto_plot. 
 
-#### flowFrame
+### 2.4.1 flowFrame
 
-By default 2-D scatter plots will use a blue-red colour scale for points, this can be modified using the  `point_col` argument. To modify axes labels simply supply the desired labels to the `xlab` and `ylab` arguments. The axes limits can be modified by suppling the lower and upper limits to the `xlim` and `ylim` arguments.
+By default 2-D scatter plots will use a blue-red colour scale for points, this can be modified using the  `point_col` argument. To modify axes labels simply supply the desired labels to the `xlab` and `ylab` arguments. The axes limits can be modified by supplying the lower and upper limits to the `xlim` and `ylim` arguments.
 
 ```{r, fig.width = 6, fig.height = 6, fig.align='center'}
 cyto_plot(TCells[[1]], channels = c("CD4","CD8"), axes_trans = trans, xlab = "CD4", ylab = "CD8", xlim = c(-0.5,3.5), ylim = c(-0.5,4))
 ```
 
-#### flowSet
+### 2.4.2 flowSet
 
 Contour lines are also supported for 2-D scatter plots, simply supply the number of contours levels to the `contour_lines` argument. Users can use the `contour_line_col` and `contour_line_width` arguments to modify the colour and line width of the contour lines respectively.
 
@@ -144,7 +158,7 @@ Contour lines are also supported for 2-D scatter plots, simply supply the number
 cyto_plot(TCells, channels = c("CD4","CD8"), axes_trans = trans, contour_lines = 15)
 ```
 
-#### GatingHierarchy
+### 2.4.3 GatingHierarchy
 
 `cyto_plot` also has full support for plotting gates, simply supply the gate object to the `gate` argument or for GatingHierarchies and GatingSet simply supply the name of the gated population to the `alias` argument. Users can use the the `gate_line_col`, `gate_line_type` and `gate_line_width` arguments to modify the gate colour, line type or line width.
 
@@ -152,7 +166,7 @@ cyto_plot(TCells, channels = c("CD4","CD8"), axes_trans = trans, contour_lines =
 cyto_plot(gs[[1]], parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), channels = c("CD4","CD8"))
 ```
 
-#### GatingSet
+### 2.4.4 GatingSet
 
 Overlays are also supported in 2-D scatterplots, simply supply the name of the gated population to the **overlay**. Overlay also accepts the following objects: flowFrames, flowSets, list of flowFrames or list of flowSets which allow overlay of any data. The colour of the overlay is also controlled by the `point_col` argument, simply supply a colour for the base plot and a colour for each overlay. Here we will set the colour of the base plot to "grey" and the overlay colours to "purple" and "blue". To include a legend in the plot users can set the `legend` argument to TRUE. To show the layering used within cyto_plot we have added some contours as well.
 
@@ -160,7 +174,7 @@ Overlays are also supported in 2-D scatterplots, simply supply the name of the g
 cyto_plot(gs, parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), channels = c("CD4","CD8"), contour_lines = 15, overlay = c("CD4 T Cells","CD8 T Cells"), point_col = c("grey","purple", "blue"), point_alpha = 0.5, legend = TRUE)
 ```
 
-### Export High Resolution Images
+# 3. Export High Resolution Images
 
 ```{r, eval = FALSE}
 png("Activation.png", res = 600, height = 5, width = 13, units = "in")
@@ -170,6 +184,6 @@ cyto_plot(gs, parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), channe
 dev.off()
 ```
 
-## 3. More information
+# 4. More information
 
-For more information refer to the CytoRSuite vignettes and help documentation for each of the described functions.
+For more information on these visualisation functions refer to the documentation for these functions in the [Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html).

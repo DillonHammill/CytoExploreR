@@ -13,7 +13,7 @@ cyto_trans_check(trans = NULL, inverse = FALSE)
 \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 transform the fluorescent channels of the samples.}
 
-\item{inverse}{logical indicating whther the returned transformList should
+\item{inverse}{logical indicating whether the returned transformList should
 contain the inverse transformations.}
 }
 \value{

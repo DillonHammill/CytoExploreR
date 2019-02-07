@@ -49,7 +49,10 @@
 #' }
 #' 
 #' @noRd
-.gate_manual <- function(fr, pp_res, channels, alias, ...) {
+.gate_manual <- function(fr,
+                         pp_res,
+                         channels,
+                         alias, ...) {
 
   # Determine vertices of polygon using gate_draw
   gates <- gate_draw(x = fr, channels = channels, alias = alias, ...)
@@ -75,7 +78,10 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.gate_draw <- function(fr, pp_res, channels, gate) {
+.gate_draw <- function(fr,
+                       pp_res,
+                       channels,
+                       gate) {
 
   # pp_res is NULL - no grouping
   if (is.null(pp_res)) {
@@ -119,7 +125,12 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.pp_gate_draw <- function(fs, gs, gm, channels = NA, groupBy = NA, isCollapse = NA, ...) {
+.pp_gate_draw <- function(fs,
+                          gs,
+                          gm,
+                          channels = NA,
+                          groupBy = NA,
+                          isCollapse = NA, ...) {
 
   # Samples
   smp <- length(gs)
@@ -132,24 +143,29 @@
     groupBy <- NA
   }
 
+  # split groupBy
+  if (is.character(groupBy)) {
+    groupBy <- unlist(strsplit(groupBy, ":"))
+  }
+
   # Add groupBy info to pData gs
-  if (!is.na(groupBy) & grepl("^[A-Za-z]+$", groupBy) == TRUE) {
+  if (!all(is.na(groupBy)) & all(grepl("^[A-Za-z]+$", groupBy))) {
 
     # groupBy is composed of characters
     pd$groupby <- do.call(paste, pd[, groupBy, drop = FALSE])
 
     grpby <- pd[, "groupby"][match(pData(fs[1])[, "name"], pd[, "name"])]
-  } else if (!is.na(groupBy) & grepl("^[A-Za-z]+$", groupBy) == FALSE) {
+  } else if (!all(is.na(groupBy)) & !all(grepl("^[A-Za-z]+$", groupBy))) {
     if (groupBy == smp) {
       grpby <- 1
     } else {
-      message("Numeric groupBy is not supported, use pData variables instead. All samples will be grouped together.")
+      message("Numeric groupBy is not supported. Grouping all samples.")
       grpby <- 1
     }
   }
 
   # No grouping select first gate - only 1 gate expected
-  if (is.na(groupBy)) {
+  if (all(is.na(groupBy))) {
     grpby <- 1
   }
 

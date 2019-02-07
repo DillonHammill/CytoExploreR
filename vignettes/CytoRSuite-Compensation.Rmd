@@ -4,7 +4,7 @@ author: "Dillon Hammill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{CytoRSuite: Compensation of Fluorescent Spillover}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -84,7 +84,7 @@ knitr::include_graphics('Compensation/Compensation2.png')
 
 ## 2.4 Automated Spillover Calculation Using `spillover_compute`
 
-`spillover_compute` will guide the user through channel selection for each of the compensation conrols and save these selections to "Compensation-Channels.csv" for downstream use. This file can be passed to the `channel_match` argument of `cyto_plot_compensation` to bypass the channel selection process. Next the user gates the positive signal for each single stain control using an `interval` gate. This populaton will be used internally to calculate the percentage spillover based on the unstained control. The calculated spillover matrix is returned and written to a csv file for downstream analyses. The name of this file is controlled by the `spillover` argument.
+`spillover_compute` will guide the user through channel selection for each of the compensation controls and save these selections to "Compensation-Channels.csv" for downstream use. This file can be passed to the `channel_match` argument of `cyto_plot_compensation` to bypass the channel selection process. Next the user gates the positive signal for each single stain control using an `interval` gate. This population will be used internally to calculate the percentage spillover based on the unstained control. The calculated spillover matrix is returned and written to a csv file for downstream analyses. The name of this file is controlled by the `spillover` argument.
 
 ```{r, eval = FALSE}
 spill <- spillover_compute(gs, parent = "Single Cells")
@@ -92,15 +92,15 @@ spill <- spillover_compute(gs, parent = "Single Cells")
 
 ### 2.4.1 Channel Selection Process
 
-Users are prompted to select a fluorescent channel for each of the compensation controls from a drop-down menu. The results are saved to a csv file called "Compensation-Channels.csv" for later use. This channel selection process can be bypassed by suppling the name of a channel match file to the `channel_match` argument.
+Users are prompted to select a fluorescent channel for each of the compensation controls from a drop-down menu. The results are saved to a csv file called "Compensation-Channels.csv" for later use. This channel selection process can be bypassed by supplying the name of a channel match file to the `channel_match` argument.
 
 ```{r, echo=FALSE, out.width='100%', out.height='100%',fig.align="center"}
-knitr::include_graphics('Compensation/channel_select.png')
+knitr::include_graphics('Compensation/channel_select.PNG')
 ```
 
 ### 2.4.2 Gating Positive Signal
 
-A density distribution of each control in the appropriate channel will be plotted for users to gate the positive signal to use for spillover calculation. The unstained control is overlayed in red as a reference for gating.
+A density distribution of each control in the appropriate channel will be plotted for users to gate the positive signal to use for spillover calculation. The unstained control is overlaid in red as a reference for gating.
 
 ```{r, echo=FALSE, out.width='75%', out.height='75%',fig.align="center"}
 knitr::include_graphics('Compensation/Compensation3.png')
@@ -136,24 +136,24 @@ spillover_edit(gs, parent = "Single Cells", spillover = "Spillover-Matrix.csv")
 - overlay **unstained** control as a reference
 - red horizontal line indicating median fluorescent intensity of the unstained control
 - purple **median tracker** line which monitors changes in the median fluorescent intensity of the stained population
-- density denstributions automically update with changes and display median fluorescent intensities for unstained and single stain controls.
+- density distributions automatically update with changes and display median fluorescent intensities for unstained and single stain controls.
 - **save** updates by clicking save button
 - **Plots** tab displays compensation changes in all fluorescent channels
 
 ```{r, echo=FALSE, out.width='100%'}
-knitr::include_graphics('Compensation/spillover_edit1.png')
+knitr::include_graphics('Compensation/spillover_edit1.PNG')
 ```
 
-Modifying the spillover values will automatically result in the plot being updated. The correct spillover value is such that the median of the stained population is equal to that of the unstained population (i.e. red line and purple line should meet in the center of the stained population). Looks like the PE-Cy7 control is over compensated in the APC-Cy7 channel, let's modify the value and click **save** to correct this:
+Modifying the spillover values will automatically result in the plot being updated. The correct spillover value is such that the median of the stained population is equal to that of the unstained population (i.e. red line and purple line should meet in the center of the stained population). Looks like the PE-Cy7 control is slightly over compensated in the APC-Cy7 channel, let's modify the value and click **save** to correct this:
 
 ```{r, echo=FALSE, out.width='100%'}
-knitr::include_graphics('Compensation/spillover_edit2.png')
+knitr::include_graphics('Compensation/spillover_edit2.PNG')
 ```
 
 Clicking on the **Plots** tab will display fluorescence spillover in all fluorescent channels with options to overlay the unstained control and the un-compensated sample.
 
 ```{r, echo=FALSE, out.width='100%'}
-knitr::include_graphics('Compensation/spillover_edit3.png')
+knitr::include_graphics('Compensation/spillover_edit3.PNG')
 ```
 
 ### 2.6 Visualise Compensation Using `cyto_plot_compensation`
@@ -186,4 +186,4 @@ knitr::include_graphics('Compensation/cyto_plot_comp2.png')
 
 ## 3. More Information
 
-For more information refer to the CytoRSuite vignettes and help documentation for each of the described functions.
+For more information on these compensation functions refer to the documentation for these functions in the [Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html). To learn more about the gating functions included in **CytoRSuite** refer to [Gating Functions](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite-Gating-Functions.html) vignette.

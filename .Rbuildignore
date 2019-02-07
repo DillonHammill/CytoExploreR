@@ -1,6 +1,10 @@
+^Meta$
+^docs$
+^pkgdown$
+^codemeta\.json$
 ^codecov\.yml$
 ^README\.Rmd$
-^appveyor\.yml$
 ^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\_pkgdown\.yml$

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
       </span>
     </div>
 
@@ -107,7 +107,7 @@
       <a href="../articles/CytoRSuite-Gating-Functions.html">CytoRSuite: Gating Functions</a>
     </li>
     <li>
-      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation of Flow Cytometry Data Using plotCyto</a>
+      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation Using cyto_plot</a>
     </li>
   </ul>
 </li>
@@ -170,8 +170,8 @@ channels by default.</p></td>
 <code><a href='https://www.rdocumentation.org/packages/flowCore/topics/logicleTransform'>estimateLogicle</a></code> which was used to
 transform the fluorescent channels of the supplied flowFrame. This
 transform object will be used internally to ensure axes labels of the plot
-are appropriately transformed. The transform object will NOT be applied to the
-flowFrame internally and should be applied to the flowFrame prior to
+are appropriately transformed. The transform object will NOT be applied to
+the flowFrame internally and should be applied to the flowFrame prior to
 plotting.</p></td>
     </tr>
     <tr>
@@ -184,7 +184,8 @@ plotting.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments passed to <code><a href='cyto_plot-flowFrame-method.html'>cyto_plot,flowFrame-method</a></code>.</p></td>
+      <td><p>additional arguments passed to
+<code><a href='cyto_plot-flowFrame-method.html'>cyto_plot,flowFrame-method</a></code>.</p></td>
     </tr>
     </table>
     

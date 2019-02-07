@@ -24,7 +24,7 @@ the GatingSet.}
 by default to turn off back-gating. To back-gate all populations set this
 argument to \code{"all"}.}
 
-\item{gate_track}{logicla indicating whether gate colour should be tracked
+\item{gate_track}{logical indicating whether gate colour should be tracked
 throughout gating scheme, set to TRUE by default.}
 
 \item{show_all}{logical indicating whether every population should be
@@ -97,7 +97,7 @@ gs <- transform(gs, trans)
 
 # Gate using gate_draw
 gt <- Activation_gatingTemplate
-gating(gt,gs)
+gating(gt, gs)
 
 # Gating scheme
 cyto_plot_gating_scheme(gs[[4]])

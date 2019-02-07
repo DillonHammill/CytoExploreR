@@ -1,8 +1,8 @@
 #' Draw Polygon Gate(s) Around Populations.
 #'
-#' \code{gate_polygon_draw} constructs an interactive plotting window to allow manual
-#' selection of the co-ordinates of a ploygon gate(s) (through mouse click)
-#' which are constructed into
+#' \code{gate_polygon_draw} constructs an interactive plotting window to allow
+#' manual selection of the co-ordinates of a polygon gate(s) (through mouse
+#' click) which are constructed into
 #' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
 #' \code{\link[flowCore:filters-class]{filters}} list.
 #'
@@ -17,8 +17,9 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
@@ -59,22 +60,39 @@
 #' }
 #' 
 #' @export
-gate_polygon_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_polygon_draw <- function(fr,
+                              alias = NULL,
+                              channels,
+                              plot = TRUE,
+                              label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
@@ -82,13 +100,26 @@ gate_polygon_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 
   # Construct gates
   gates <- lapply(alias, function(alias) {
-    message(paste("Select at least 3 points to construct a polygon gate around the", alias, "population. \n"))
+    message(
+      paste(
+        "Select at least 3 points to construct a polygon gate around the",
+        alias, "population. \n"
+      )
+    )
 
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
-      coords <- locator(type = "o", lwd = 2, pch = 16, col = "red")
+      coords <- locator(
+        type = "o",
+        lwd = 2,
+        pch = 16,
+        col = "red"
+      )
     } else {
-      coords <- list(c(50000, 100000, 100000, 75000, 50000), c(10000, 10000, 60000, 85000, 60000))
+      coords <- list(
+        c(50000, 100000, 100000, 75000, 50000),
+        c(10000, 10000, 60000, 85000, 60000)
+      )
       names(coords) <- c("x", "y")
     }
 
@@ -96,7 +127,12 @@ gate_polygon_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
       stop("A minimum of 3 points is required to construct a polygon gate.")
     }
 
-    lines(x = coords$x[c(1, length(coords$x))], y = coords$y[c(1, length(coords$x))], lwd = 2.5, col = "red")
+    lines(
+      x = coords$x[c(1, length(coords$x))],
+      y = coords$y[c(1, length(coords$x))],
+      lwd = 2.5,
+      col = "red"
+    )
 
     coords <- as.data.frame(coords)
     coords <- as.matrix(coords)
@@ -109,7 +145,15 @@ gate_polygon_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
     }
 
     if (label == TRUE) {
-      cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+      cyto_plot_label(
+        x = fr,
+        gates = gate,
+        channels = channels,
+        text = alias,
+        text_size = 1,
+        stat = "percent",
+        box_alpha = 0.7
+      )
     }
 
     return(gate)
@@ -139,8 +183,9 @@ gate_polygon_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
@@ -183,22 +228,39 @@ gate_polygon_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 #' }
 #' 
 #' @export
-gate_rectangle_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_rectangle_draw <- function(fr,
+                                alias = NULL,
+                                channels,
+                                plot = TRUE,
+                                label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = TRUE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = TRUE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = TRUE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = TRUE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
@@ -206,13 +268,27 @@ gate_rectangle_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 
   # Construct gates
   gates <- lapply(alias, function(alias) {
-    message(paste("Select 2 diagonal points to construct a rectangle gate around the", alias, "population. \n"))
+    message(
+      paste(
+        "Select 2 diagonal points to construct a rectangle gate around the",
+        alias, "population. \n"
+      )
+    )
 
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
-      coords <- locator(n = 2, type = "p", lwd = 2, pch = 16, col = "red")
+      coords <- locator(
+        n = 2,
+        type = "p",
+        lwd = 2,
+        pch = 16,
+        col = "red"
+      )
     } else {
-      coords <- list(c(25000, 150000), c(5000, 150000))
+      coords <- list(
+        c(25000, 150000),
+        c(5000, 150000)
+      )
       names(coords) <- c("x", "y")
     }
 
@@ -220,12 +296,27 @@ gate_rectangle_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
     coords <- as.matrix(coords)
     colnames(coords) <- channels
 
-    rect(xleft = min(coords[, 1]), ybottom = min(coords[, 2]), xright = max(coords[, 1]), ytop = max(coords[, 2]), border = "red", lwd = 2.5)
+    rect(
+      xleft = min(coords[, 1]),
+      ybottom = min(coords[, 2]),
+      xright = max(coords[, 1]),
+      ytop = max(coords[, 2]),
+      border = "red",
+      lwd = 2.5
+    )
 
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
 
     if (label == TRUE) {
-      cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+      cyto_plot_label(
+        x = fr,
+        gates = gate,
+        channels = channels,
+        text = alias,
+        text_size = 1,
+        stat = "percent",
+        box_alpha = 0.7
+      )
     }
 
     return(gate)
@@ -237,9 +328,9 @@ gate_rectangle_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 
 #' Draw Interval Gate(s) Around Populations.
 #'
-#' \code{gate_interval_draw} constructs an interactive plotting window for user to
-#' select the lower and upper bounds of a population (through mouse click) which
-#' is constructed into a
+#' \code{gate_interval_draw} constructs an interactive plotting window for user
+#' to select the lower and upper bounds of a population (through mouse click)
+#' which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' interval gates are supported, for 2-D interval gates an additional argument
@@ -258,8 +349,9 @@ gate_rectangle_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 #'   plots which may already contain a different gate type.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
@@ -312,22 +404,40 @@ gate_rectangle_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 #' }
 #' 
 #' @export
-gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "x", label = TRUE, ...) {
+gate_interval_draw <- function(fr,
+                               alias = NULL,
+                               channels,
+                               plot = TRUE,
+                               axis = "x",
+                               label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
@@ -335,13 +445,27 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
 
   # Construct gates
   gates <- lapply(alias, function(alias) {
-    message(paste("Select the lower and upper bounds of the", alias, "population to construct an interval gate. \n"))
+    message(
+      paste(
+        "Select the lower and upper bounds of the",
+        alias, "population to construct an interval gate. \n"
+      )
+    )
 
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
-      coords <- locator(n = 2, type = "o", lwd = 2.5, pch = 16, col = "red")
+      coords <- locator(
+        n = 2,
+        type = "o",
+        lwd = 2.5,
+        pch = 16,
+        col = "red"
+      )
     } else {
-      coords <- list(c(25000, 150000), c(-Inf, Inf))
+      coords <- list(
+        c(25000, 150000),
+        c(-Inf, Inf)
+      )
       names(coords) <- c("x", "y")
     }
     coords <- data.frame(coords)
@@ -354,11 +478,18 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
     }
 
     if (axis == "x") {
-      abline(v = coords[, 1], lwd = 2.5, col = "red")
+      abline(
+        v = coords[, 1],
+        lwd = 2.5,
+        col = "red"
+      )
     } else if (axis == "y") {
-      abline(h = coords[, 2], lwd = 2.5, col = "red")
+      abline(
+        h = coords[, 2],
+        lwd = 2.5,
+        col = "red"
+      )
     }
-
 
     if (axis == "x") {
       if (length(channels) == 1) {
@@ -375,10 +506,20 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
       gate <- rectangleGate(.gate = coords, filterId = alias)
 
       if (label == TRUE) {
-        cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+        cyto_plot_label(
+          x = fr,
+          gates = gate,
+          channels = channels,
+          text = alias,
+          text_size = 1,
+          stat = "percent",
+          box_alpha = 0.7
+        )
       }
     } else if (axis == "y") {
-      if (length(channels) == 1) stop("Cannot gate y axis if a single channel is supplied.")
+      if (length(channels) == 1) {
+        stop("Cannot gate y axis if a single channel is supplied.")
+      }
       coords <- data.frame(x = c(-Inf, Inf), y = coords[, 1])
       coords <- as.matrix(coords)
       colnames(coords) <- channels
@@ -387,7 +528,15 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
       gate <- rectangleGate(.gate = coords, filterId = alias)
 
       if (label == TRUE) {
-        cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+        cyto_plot_label(
+          x = fr,
+          gates = gate,
+          channels = channels,
+          text = alias,
+          text_size = 1,
+          stat = "percent",
+          box_alpha = 0.7
+        )
       }
     }
 
@@ -400,8 +549,8 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
 
 #' Draw Threshold Gate(s) Around Populations.
 #'
-#' \code{gate_threshold_draw} constructs an interactive plotting window for user to
-#' select the lower bound of a population which is constructed into a
+#' \code{gate_threshold_draw} constructs an interactive plotting window for user
+#' to select the lower bound of a population which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' threshold gates are supported, for 2-D threshold gates all events above the
@@ -418,12 +567,14 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object.
+#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
+#'   object.
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, threshold
 #'
@@ -469,29 +620,51 @@ gate_interval_draw <- function(fr, alias = NULL, channels, plot = TRUE, axis = "
 #' }
 #' 
 #' @export
-gate_threshold_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_threshold_draw <- function(fr,
+                                alias = NULL,
+                                channels,
+                                plot = TRUE,
+                                label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
   }
 
   # Construct gates
-  message(paste("Select the lower bound of the", alias, "population to construct a threshold gate. \n"))
+  message(
+    paste(
+      "Select the lower bound of the",
+      alias, "population to construct a threshold gate. \n"
+    )
+  )
 
   if (length(alias) > 1) {
     stop("Multiple threshold gates are not supported.")
@@ -499,9 +672,18 @@ gate_threshold_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 
   # Extract gate coordinates
   if (getOption("CytoRSuite_interact") == TRUE) {
-    coords <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
+    coords <- locator(
+      n = 1,
+      type = "p",
+      lwd = 2.5,
+      pch = 16,
+      col = "red"
+    )
   } else {
-    coords <- list(c(25000), c(5000))
+    coords <- list(
+      c(25000),
+      c(5000)
+    )
     names(coords) <- c("x", "y")
   }
 
@@ -516,13 +698,28 @@ gate_threshold_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
     pts <- as.matrix(pts)
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")
-    rect(xleft = min(coords$x), ybottom = min(coords$y), xright = max(exprs(fr)[, channels[1]]), ytop = max(exprs(fr)[, channels[2]]), border = "red", lwd = 2.5)
+    rect(
+      xleft = min(coords$x),
+      ybottom = min(coords$y),
+      xright = max(exprs(fr)[, channels[1]]),
+      ytop = max(exprs(fr)[, channels[2]]),
+      border = "red",
+      lwd = 2.5
+    )
   }
 
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
   if (label == TRUE) {
-    cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+    cyto_plot_label(
+      x = fr,
+      gates = gate,
+      channels = channels,
+      text = alias,
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
   }
 
   gates <- filters(list(gate))
@@ -530,8 +727,8 @@ gate_threshold_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 
 #' Draw Boundary Gate(s) Around Populations.
 #'
-#' \code{gate_boundary_draw} constructs an interactive plotting window for user to
-#' select the upper bound of a population which is constructed into a
+#' \code{gate_boundary_draw} constructs an interactive plotting window for user
+#' to select the upper bound of a population which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' boundary gates are supported, for 2-D boundary gates all events below the
@@ -548,8 +745,9 @@ gate_threshold_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
@@ -599,29 +797,51 @@ gate_threshold_draw <- function(fr, alias = NULL, channels, plot = TRUE, label =
 #' }
 #' 
 #' @export
-gate_boundary_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_boundary_draw <- function(fr,
+                               alias = NULL,
+                               channels,
+                               plot = TRUE,
+                               label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
   }
 
   # Construct gates
-  message(paste("Select the upper bound of the", alias, "population to construct a boundary gate. \n"))
+  message(
+    paste(
+      "Select the upper bound of the",
+      alias, "population to construct a boundary gate. \n"
+    )
+  )
 
   if (length(alias) > 1) {
     stop("Multiple boundary gates are not supported.")
@@ -629,9 +849,18 @@ gate_boundary_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 
   # Extract gate coordinates
   if (getOption("CytoRSuite_interact") == TRUE) {
-    coords <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
+    coords <- locator(
+      n = 1,
+      type = "p",
+      lwd = 2.5,
+      pch = 16,
+      col = "red"
+    )
   } else {
-    coords <- list(c(200000), c(200000))
+    coords <- list(
+      c(200000),
+      c(200000)
+    )
     names(coords) <- c("x", "y")
   }
 
@@ -646,13 +875,27 @@ gate_boundary_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
     pts <- as.matrix(pts)
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")
-    rect(xleft = min(exprs(fr)[, channels[1]]), ybottom = min(exprs(fr)[, channels[2]]), xright = max(coords$x), ytop = max(coords$y), border = "red", lwd = 2.5)
+    rect(
+      xleft = min(exprs(fr)[, channels[1]]),
+      ybottom = min(exprs(fr)[, channels[2]]),
+      xright = max(coords$x), ytop = max(coords$y),
+      border = "red",
+      lwd = 2.5
+    )
   }
 
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
   if (label == TRUE) {
-    cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+    cyto_plot_label(
+      x = fr,
+      gates = gate,
+      channels = channels,
+      text = alias,
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
   }
 
   gates <- filters(list(gate))
@@ -660,8 +903,8 @@ gate_boundary_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 
 #' Draw Ellipsoid Gate(s) Around Populations.
 #'
-#' \code{gate_ellipse_draw} constructs an interactive plotting window for user to
-#' select the limits of a population in 2 dimensions (4 points) which is
+#' \code{gate_ellipse_draw} constructs an interactive plotting window for user
+#' to select the limits of a population in 2 dimensions (4 points) which is
 #' constructed into \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 #' object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
@@ -676,8 +919,9 @@ gate_boundary_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
@@ -720,22 +964,39 @@ gate_boundary_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 #' }
 #' 
 #' @export
-gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_ellipse_draw <- function(fr,
+                              alias = NULL,
+                              channels,
+                              plot = TRUE,
+                              label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
@@ -743,13 +1004,27 @@ gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 
   # Construct gates
   gates <- lapply(alias, function(alias) {
-    message(paste("Select 4 points to define the limits of the", alias, "population to construct an ellipsoid gate. \n"))
+    message(
+      paste(
+        "Select 4 points to define the limits of the",
+        alias, "population to construct an ellipsoid gate. \n"
+      )
+    )
 
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
-      coords <- locator(n = 4, type = "p", lwd = 2, pch = 16, col = "red")
+      coords <- locator(
+        n = 4,
+        type = "p",
+        lwd = 2,
+        pch = 16,
+        col = "red"
+      )
     } else {
-      coords <- list(c(40000, 60000, 100000, 60000), c(50000, 5000, 50000, 100000))
+      coords <- list(
+        c(40000, 60000, 100000, 60000),
+        c(50000, 5000, 50000, 100000)
+      )
       names(coords) <- c("x", "y")
     }
 
@@ -763,7 +1038,10 @@ gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
     mr.pts <- coords[!coords$x %in% mj.pts$x & !coords$y %in% mj.pts$y, ]
 
     # Find center of the major axis
-    mj.center <- c((sum(mj.pts$x) / nrow(mj.pts)), (sum(mj.pts$y) / nrow(mj.pts)))
+    mj.center <- c(
+      (sum(mj.pts$x) / nrow(mj.pts)),
+      (sum(mj.pts$y) / nrow(mj.pts))
+    )
 
     # Find center of all points
     center <- c(sum(c(mj.pts$x, mr.pts$x)) / 4, sum(c(mj.pts$y, mr.pts$y)) / 4)
@@ -799,21 +1077,39 @@ gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 
     # Covariance matrix
     cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
-    cinv[1, 1] <- (((cos(angle) * cos(angle)) / (a * a)) + ((sin(angle) * sin(angle)) / (b * b)))
-    cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a * a)) - (1 / (b * b)))
+    cinv[1, 1] <- (((cos(angle) * cos(angle)) /
+      (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
+    cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a^2)) - (1 / (b^2)))
     cinv[1, 2] <- cinv[2, 1]
-    cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a * a)) + ((cos(angle) * cos(angle)) / (b * b)))
+    cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
+      ((cos(angle) * cos(angle)) / (b^2)))
 
     cvm <- solve(cinv)
 
     dimnames(cvm) <- list(channels, channels)
 
-    gate <- ellipsoidGate(.gate = cvm, mean = center, filterId = alias)
+    gate <- ellipsoidGate(
+      .gate = cvm,
+      mean = center,
+      filterId = alias
+    )
 
-    polygon(as(gate, "polygonGate")@boundaries[, 1], as(gate, "polygonGate")@boundaries[, 2], border = "red", lwd = 2.5)
+    polygon(as(gate, "polygonGate")@boundaries[, 1],
+      as(gate, "polygonGate")@boundaries[, 2],
+      border = "red",
+      lwd = 2.5
+    )
 
     if (label == TRUE) {
-      cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias, text_size = 1, stat = "percent", box_alpha = 0.7)
+      cyto_plot_label(
+        x = fr,
+        gates = gate,
+        channels = channels,
+        text = alias,
+        text_size = 1,
+        stat = "percent",
+        box_alpha = 0.7
+      )
     }
 
     return(gate)
@@ -824,8 +1120,8 @@ gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 
 #' Draw Quadrant Gates Around Populations.
 #'
-#' \code{gate_quadrant_draw} constructs an interactive plotting window for user to
-#' select the crosshair center of 4 populations which is used to construct 4
+#' \code{gate_quadrant_draw} constructs an interactive plotting window for user
+#' to select the crosshair center of 4 populations which is used to construct 4
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects which are
 #' stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
 #' are assigned in the following order: bottom left, bottom right, top right and
@@ -840,8 +1136,9 @@ gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the 4
@@ -882,44 +1179,76 @@ gate_ellipse_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = T
 #' }
 #' 
 #' @export
-gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_quadrant_draw <- function(fr,
+                               alias = NULL,
+                               channels,
+                               plot = TRUE,
+                               label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
   }
 
   if (!length(alias) == 4) {
-    stop("Supply 4 population names as the alias argument to construct a set of quadrant gates.")
+    stop("'alias' should contain 4 population names for quadrant gates.")
   }
 
   # Construct gates
-  message(paste("Select 1 point designating the center point of the populations to construct quadrant gates. \n"))
+  message(
+    paste("Select the center point to construct quadrant gates. \n")
+  )
 
   # Extract points of drawn gate
   if (getOption("CytoRSuite_interact") == TRUE) {
-    pts <- locator(n = 1, type = "o", lwd = 2, pch = 16)
+    pts <- locator(
+      n = 1,
+      type = "o",
+      lwd = 2,
+      pch = 16
+    )
   } else {
     pts <- list(c(150000), c(150000))
     names(pts) <- c("x", "y")
   }
 
-  lines(x = pts$x[c(1, length(pts$x))], y = pts$y[c(1, length(pts$x))], lwd = 2.5, col = "red")
-  abline(v = pts$x, h = pts$y, lwd = 2.5, col = "red")
+  lines(
+    x = pts$x[c(1, length(pts$x))],
+    y = pts$y[c(1, length(pts$x))],
+    lwd = 2.5, col = "red"
+  )
+  abline(
+    v = pts$x,
+    h = pts$y,
+    lwd = 2.5, col = "red"
+  )
 
   pts <- as.data.frame(pts)
   colnames(pts) <- channels
@@ -933,7 +1262,15 @@ gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
   q1 <- rectangleGate(.gate = q1.gate, filterId = alias[1])
 
   if (label == TRUE) {
-    cyto_plot_label(x = fr, gates = q1, channels = channels, text = alias[1], text_size = 1, stat = "percent", box_alpha = 0.7)
+    cyto_plot_label(
+      x = fr,
+      gates = q1,
+      channels = channels,
+      text = alias[1],
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
   }
 
   # Q2 <- Bottom Right
@@ -943,17 +1280,36 @@ gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
   q2 <- rectangleGate(.gate = q2.gate, filterId = alias[2])
 
   if (label == TRUE) {
-    cyto_plot_label(x = fr, gates = q2, channels = channels, text = alias[2], text_size = 1, stat = "percent", box_alpha = 0.7)
+    cyto_plot_label(
+      x = fr,
+      gates = q2,
+      channels = channels,
+      text = alias[2],
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
   }
 
   # Q3 <- Top Right
-  q3.gate <- data.frame(x = c(pts[1, 1], Inf), y = c(pts[1, 2], Inf))
+  q3.gate <- data.frame(
+    x = c(pts[1, 1], Inf),
+    y = c(pts[1, 2], Inf)
+  )
   q3.gate <- as.matrix(q3.gate)
   colnames(q3.gate) <- channels
   q3 <- rectangleGate(.gate = q3.gate, filterId = alias[3])
 
   if (label == TRUE) {
-    cyto_plot_label(x = fr, gates = q3, channels = channels, text = alias[3], text_size = 1, stat = "percent", box_alpha = 0.7)
+    cyto_plot_label(
+      x = fr,
+      gates = q3,
+      channels = channels,
+      text = alias[3],
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
   }
 
   # Q4 <- Top Left
@@ -963,7 +1319,15 @@ gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
   q4 <- rectangleGate(.gate = q4.gate, filterId = alias[4])
 
   if (label == TRUE) {
-    cyto_plot_label(x = fr, gates = q4, channels = channels, text = alias[4], text_size = 1, stat = "percent", box_alpha = 0.7)
+    cyto_plot_label(
+      x = fr,
+      gates = q4,
+      channels = channels,
+      text = alias[4],
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
   }
 
   gates <- filters(list(q1, q2, q3, q4))
@@ -972,13 +1336,13 @@ gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 
 #' Draw Web Gates Around Populations.
 #'
-#' \code{gate_web_draw} is a variation of drawQuadrant which allows more flexibility
-#' with gate co-ordinates (angled lines) and supports any number of gates as
-#' indicated by the \code{alias} argument. To construct the gate simply select
-#' the center point and surrounding divider points on plot edge. \code{gate_web_draw}
-#' will contruct the \code{\link[flowCore:polygonGate-class]{polygonGate}}
-#' objects and store them in a \code{\link[flowCore:filters-class]{filters}}
-#' list.
+#' \code{gate_web_draw} is a variation of drawQuadrant which allows more
+#' flexibility with gate co-ordinates (angled lines) and supports any number of
+#' gates as indicated by the \code{alias} argument. To construct the gate simply
+#' select the center point and surrounding divider points on plot edge.
+#' \code{gate_web_draw} will construct the
+#' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and store them
+#' in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for plotting and gating.
@@ -991,8 +1355,9 @@ gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
-#' @param label logical indicating whether to include \code{\link{cyto_plot_label}}
-#'   for the gated population(s), \code{TRUE} by default.
+#' @param label logical indicating whether to include
+#'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+#'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
@@ -1034,22 +1399,39 @@ gate_quadrant_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = 
 #' }
 #' 
 #' @export
-gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE, ...) {
+gate_web_draw <- function(fr,
+                          alias = NULL,
+                          channels,
+                          plot = TRUE,
+                          label = TRUE, ...) {
 
   # Check channels
-  channels <- cyto_channel_check(fr, channels = channels, plot = TRUE)
+  channels <- cyto_channel_check(fr,
+    channels = channels,
+    plot = TRUE
+  )
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for a the gated population as the alias argument.")
+    stop("Please supply a name for the gated population as the alias argument.")
   }
 
   # Call new plot?
   if (plot == TRUE) {
     if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr, channels = channels, popup = FALSE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = FALSE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     } else {
-      cyto_plot(fr, channels = channels, popup = TRUE, legend = FALSE, label = FALSE, ...)
+      cyto_plot(fr,
+        channels = channels,
+        popup = TRUE,
+        legend = FALSE,
+        label = FALSE, ...
+      )
     }
   } else if (plot == FALSE) {
 
@@ -1060,7 +1442,13 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
   message("Select the center of the web gate.")
 
   if (getOption("CytoRSuite_interact") == TRUE) {
-    center <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
+    center <- locator(
+      n = 1,
+      type = "p",
+      lwd = 2,
+      pch = 16,
+      col = "red"
+    )
   } else {
     center <- list(c(120627.9), c(147367.9))
     names(center) <- c("x", "y")
@@ -1081,17 +1469,31 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
 
 
   # Get all gate co-ordinates - c(center, others)
-  coords <- lapply(seq(1:length(alias)), function(x) {
+  coords <- lapply(seq_len(length(alias)), function(x) {
     if (getOption("CytoRSuite_interact") == TRUE) {
       pt <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
     } else {
       # Test co-ordinates
-      tst <- list(list(c(18175.99), c(109811.2)), list(c(59368), c(-8549.33)), list(c(167629), c(4538.609)), list(c(246316.3), c(3400.527)), list(c(264799.9), c(184924.5)), list(c(238922.9), c(267435.5)), list(c(107425.3), c(258899.9)), list(c(-4004.315), c(244104.8)))
+      tst <- list(
+        list(c(18175.99), c(109811.2)),
+        list(c(59368), c(-8549.33)),
+        list(c(167629), c(4538.609)),
+        list(c(246316.3), c(3400.527)),
+        list(c(264799.9), c(184924.5)),
+        list(c(238922.9), c(267435.5)),
+        list(c(107425.3), c(258899.9)),
+        list(c(-4004.315), c(244104.8))
+      )
       pt <- tst[[x]]
       names(pt) <- c("x", "y")
     }
 
-    lines(x = c(center$x, pt$x), y = c(center$y, pt$y), lwd = 2.5, col = "red")
+    lines(
+      x = c(center$x, pt$x),
+      y = c(center$y, pt$y),
+      lwd = 2.5,
+      col = "red"
+    )
 
     return(c(pt$x, pt$y))
   })
@@ -1099,9 +1501,10 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
   colnames(coords) <- c("x", "y")
   coords <- rbind(center, coords)
 
-  # Determine which quadrants the points are in bottom left anti-clockwise to top right (relative to center)
+  # Determine which quadrants the points are in
+  # bottom left anti-clockwise to top right (relative to center)
   quads <- c(0, rep(NA, length(alias)))
-  for (i in 2:length(coords$x)) {
+  for (i in seq_len(length(coords$x))[-1]) {
 
     # Bottom left Q1
     if (coords[i, ]$x < center$x & coords[i, ]$y <= center$y) {
@@ -1128,11 +1531,21 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
   # Quadrant 1: find limit intercept and modify point co-ordinates
   if (1 %in% coords$Q) {
     q1 <- coords[coords$Q == 1, ]
-    for (x in 1:length(q1$Q)) {
+    for (x in seq_len(length(q1$Q))) {
 
       # Calculate intersection with horizontal and vertical axes
-      vint <- linesIntercept(c(center$x, center$y), c(q1[x, "x"], q1[x, "y"]), c(xmin, center$y), c(xmin, ymin))
-      hint <- linesIntercept(c(center$x, center$y), c(q1[x, "x"], q1[x, "y"]), c(center$x, ymin), c(xmin, ymin))
+      vint <- linesIntercept(
+        c(center$x, center$y),
+        c(q1[x, "x"], q1[x, "y"]),
+        c(xmin, center$y),
+        c(xmin, ymin)
+      )
+      hint <- linesIntercept(
+        c(center$x, center$y),
+        c(q1[x, "x"], q1[x, "y"]),
+        c(center$x, ymin),
+        c(xmin, ymin)
+      )
 
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymin) {
@@ -1147,11 +1560,21 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
   # Quadrant 2: find limit intercept and modify point co-ordinates
   if (2 %in% coords$Q) {
     q2 <- coords[coords$Q == 2, ]
-    for (x in 1:length(q2$Q)) {
+    for (x in seq_len(length(q2$Q))) {
 
       # Calculate intersection with horizontal and vertical axes
-      vint <- linesIntercept(c(center$x, center$y), c(q2[x, "x"], q2[x, "y"]), c(xmax, center$y), c(xmax, ymin))
-      hint <- linesIntercept(c(center$x, center$y), c(q2[x, "x"], q2[x, "y"]), c(center$x, ymin), c(xmax, ymin))
+      vint <- linesIntercept(
+        c(center$x, center$y),
+        c(q2[x, "x"], q2[x, "y"]),
+        c(xmax, center$y),
+        c(xmax, ymin)
+      )
+      hint <- linesIntercept(
+        c(center$x, center$y),
+        c(q2[x, "x"], q2[x, "y"]),
+        c(center$x, ymin),
+        c(xmax, ymin)
+      )
 
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymin) {
@@ -1166,11 +1589,21 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
   # Quadrant 3: find limit intercept and modify point co-ordinates
   if (3 %in% coords$Q) {
     q3 <- coords[coords$Q == 3, ]
-    for (x in 1:length(q3$Q)) {
+    for (x in seq_len(length(q3$Q))) {
 
       # Calculate intersection with horizontal and vertical axes
-      vint <- linesIntercept(c(center$x, center$y), c(q3[x, "x"], q3[x, "y"]), c(xmax, ymax), c(xmax, center$y))
-      hint <- linesIntercept(c(center$x, center$y), c(q3[x, "x"], q3[x, "y"]), c(center$x, ymax), c(xmax, ymax))
+      vint <- linesIntercept(
+        c(center$x, center$y),
+        c(q3[x, "x"], q3[x, "y"]),
+        c(xmax, ymax),
+        c(xmax, center$y)
+      )
+      hint <- linesIntercept(
+        c(center$x, center$y),
+        c(q3[x, "x"], q3[x, "y"]),
+        c(center$x, ymax),
+        c(xmax, ymax)
+      )
 
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymax) {
@@ -1185,11 +1618,21 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
   # Quadrant 4: find limit intercept and modify point co-ordinates
   if (4 %in% coords$Q) {
     q4 <- coords[coords$Q == 4, ]
-    for (x in 1:length(q4$Q)) {
+    for (x in seq_len(length(q4$Q))) {
 
       # Calculate intersection with horizontal and vertical axes
-      vint <- linesIntercept(c(center$x, center$y), c(q4[x, "x"], q4[x, "y"]), c(xmin, ymax), c(xmin, center$y))
-      hint <- linesIntercept(c(center$x, center$y), c(q4[x, "x"], q4[x, "y"]), c(xmin, ymax), c(center$x, ymax))
+      vint <- linesIntercept(
+        c(center$x, center$y),
+        c(q4[x, "x"], q4[x, "y"]),
+        c(xmin, ymax),
+        c(xmin, center$y)
+      )
+      hint <- linesIntercept(
+        c(center$x, center$y),
+        c(q4[x, "x"], q4[x, "y"]),
+        c(xmin, ymax),
+        c(center$x, ymax)
+      )
 
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymax) {
@@ -1529,7 +1972,11 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
       Q <- r
     }
 
-    gates[[length(alias)]] <- rbind(gates[[length(alias)]][c(1, 2), ], Q, gates[[length(alias)]][3, ])
+    gates[[length(alias)]] <- rbind(
+      gates[[length(alias)]][c(1, 2), ],
+      Q,
+      gates[[length(alias)]][3, ]
+    )
   }
 
 
@@ -1541,7 +1988,15 @@ gate_web_draw <- function(fr, alias = NULL, channels, plot = TRUE, label = TRUE,
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
     if (label == TRUE) {
-      cyto_plot_label(x = fr, gates = gate, channels = channels, text = alias[x], text_size = 1, stat = "percent", box_alpha = 0.7)
+      cyto_plot_label(
+        x = fr,
+        gates = gate,
+        channels = channels,
+        text = alias[x],
+        text_size = 1,
+        stat = "percent",
+        box_alpha = 0.7
+      )
     }
 
     return(gate)

@@ -1,56 +1,86 @@
 context("cyto_stats_compute")
 
-# Prepare data for testing -----------------------------------------------------------------------
+# Prepare data for testing -----------------------------------------------------
 
 # Inverse transformed data -
 inv <- cyto_trans_check(trans, inverse = TRUE)
 V <- transform(Va2, inv)
 
-# cyto_stats_compute flowFrame method ------------------------------------------------------------
+# cyto_stats_compute flowFrame method ------------------------------------------
 
 test_that("cyto_stats_compute flowFrame method", {
   
   # Median -
-  sts <- matrix(colMedians(exprs(Va2[[1]])), nrow = 1, ncol = length(chans))
+  sts <- matrix(colMedians(exprs(Va2[[1]])), 
+                nrow = 1, 
+                ncol = length(chans))
   rownames(sts) <- nms[[1]]
   colnames(sts) <- chans
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "median"), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], stat = "median"), 
+               sts, 
+               tolerance = 0.01)
   
-  sts <- matrix(colMedians(exprs(Va2[[1]])), nrow = 1, ncol = length(chans))
+  sts <- matrix(colMedians(exprs(Va2[[1]])), 
+                nrow = 1, 
+                ncol = length(chans))
   colnames(sts) <- chans
   sts <- matrix(sts[, c("Alexa Fluor 700-A","Alexa Fluor 488-A")], nrow = 1)
   rownames(sts) <- nms[[1]]
   colnames(sts) <- c("Alexa Fluor 700-A","Alexa Fluor 488-A")
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "median", channels = c("CD4","CD8")), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "median", 
+                                  channels = c("CD4","CD8")), 
+               sts, 
+               tolerance = 0.01)
   
   sts <- matrix(colMedians(exprs(V[[1]])), nrow = 1, ncol = length(chans))
   rownames(sts) <- nms[[1]]
   colnames(sts) <- chans
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "median", trans = trans), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "median", 
+                                  trans = trans),
+               sts, 
+               tolerance = 0.01)
   
   # Mean -
-  sts <- matrix(colMeans(exprs(Va2[[1]])), nrow = 1, ncol = length(chans))
+  sts <- matrix(colMeans(exprs(Va2[[1]])), 
+                nrow = 1, 
+                ncol = length(chans))
   rownames(sts) <- nms[[1]]
   colnames(sts) <- chans
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "mean"), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "mean"), 
+               sts, 
+               tolerance = 0.01)
   
-  sts <- matrix(colMeans(exprs(Va2[[1]])), nrow = 1, ncol = length(chans))
+  sts <- matrix(colMeans(exprs(Va2[[1]])), 
+                nrow = 1, 
+                ncol = length(chans))
   colnames(sts) <- chans
   sts <- matrix(sts[, c("Alexa Fluor 700-A","Alexa Fluor 488-A")], nrow = 1)
   rownames(sts) <- nms[[1]]
   colnames(sts) <- c("Alexa Fluor 700-A","Alexa Fluor 488-A")
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "mean", channels = c("CD4","CD8")), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "mean", 
+                                  channels = c("CD4","CD8")), 
+               sts, tolerance = 0.01)
   
-  sts <- matrix(colMeans(exprs(V[[1]])), nrow = 1, ncol = length(chans))
+  sts <- matrix(colMeans(exprs(V[[1]])), 
+                nrow = 1, 
+                ncol = length(chans))
   rownames(sts) <- nms[[1]]
   colnames(sts) <- chans
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "mean", trans = trans), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "mean", 
+                                  trans = trans), 
+               sts, 
+               tolerance = 0.01)
   
   # Geometric mean -
   sts <- lapply(chans, function(x){
@@ -69,7 +99,11 @@ test_that("cyto_stats_compute flowFrame method", {
   rownames(sts) <- nms[[1]]
   colnames(sts) <- chans
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "geo mean", trans = trans), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "geo mean", 
+                                  trans = trans), 
+               sts, 
+               tolerance = 0.01)
   
   sts <- suppressWarnings(lapply(chans, function(x){
     
@@ -80,7 +114,9 @@ test_that("cyto_stats_compute flowFrame method", {
   rownames(sts) <- nms[[1]]
   colnames(sts) <- chans
   
-  expect_error(cyto_stats_compute(Va2[[1]], stat = "geo mean"),"Some channels have been transformed, supply the transformList to calculate the geometric mean.")
+  expect_error(cyto_stats_compute(Va2[[1]], 
+                                  stat = "geo mean"),
+               "Supply transformList/transformerList to calculate geo mean.")
   
   # Mode -
   sts <- lapply(chans, function(x){
@@ -91,13 +127,21 @@ test_that("cyto_stats_compute flowFrame method", {
   colnames(sts) <- chans
   rownames(sts) <- nms[[1]]
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "mode"), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "mode"), 
+               sts, 
+               tolerance = 0.01)
   
-  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], nrow = 1)
+  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], 
+                nrow = 1)
   rownames(sts) <- nms[[1]]
   colnames(sts) <- c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "mode", channels = c("CD4","CD8")), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "mode", 
+                                  channels = c("CD4","CD8")), 
+               sts, 
+               tolerance = 0.01)
   
   sts <- lapply(chans, function(x){
     d <- density(exprs(V[[1]])[,x], adjust = 1.5)
@@ -107,7 +151,11 @@ test_that("cyto_stats_compute flowFrame method", {
   colnames(sts) <- chans
   rownames(sts) <- nms[[1]]
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "mode", trans = trans), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "mode", 
+                                  trans = trans), 
+               sts, 
+               tolerance = 0.01)
   
   # CV -
   sts <- lapply(chans, function(x){
@@ -117,13 +165,21 @@ test_that("cyto_stats_compute flowFrame method", {
   colnames(sts) <- chans
   rownames(sts) <- nms[[1]]
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "CV"), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "CV"), 
+               sts, 
+               tolerance = 0.01)
   
-  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], nrow = 1)
+  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], 
+                nrow = 1)
   rownames(sts) <- nms[[1]]
   colnames(sts) <- c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "CV", channels = c("CD4","CD8")), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "CV", 
+                                  channels = c("CD4","CD8")), 
+               sts, 
+               tolerance = 0.01)
   
   sts <- lapply(chans, function(x){
     (sd(exprs(V[[1]])[, x])/mean(exprs(V[[1]])[, x]))*100
@@ -132,7 +188,11 @@ test_that("cyto_stats_compute flowFrame method", {
   colnames(sts) <- chans
   rownames(sts) <- nms[[1]]
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "CV", trans = trans), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "CV", 
+                                  trans = trans), 
+               sts, 
+               tolerance = 0.01)
   
   # CVI -
   sts <- lapply(chans, function(x){
@@ -142,13 +202,21 @@ test_that("cyto_stats_compute flowFrame method", {
   colnames(sts) <- chans
   rownames(sts) <- nms[[1]]
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "CVI"), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "CVI"), 
+               sts, 
+               tolerance = 0.01)
   
-  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], nrow = 1)
+  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], 
+                nrow = 1)
   rownames(sts) <- nms[[1]]
   colnames(sts) <- c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "CVI", channels = c("CD4","CD8")), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "CVI", 
+                                  channels = c("CD4","CD8")), 
+               sts, 
+               tolerance = 0.01)
   
   sts <- lapply(chans, function(x){
     1/(sd(exprs(V[[1]])[, x])/mean(exprs(V[[1]])[, x]))*100
@@ -157,19 +225,26 @@ test_that("cyto_stats_compute flowFrame method", {
   colnames(sts) <- chans
   rownames(sts) <- nms[[1]]
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "CVI", trans = trans), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "CVI", 
+                                  trans = trans), 
+               sts, 
+               tolerance = 0.01)
   
   # Count -
   sts <- data.frame(nrow(Va2[[1]]))
   rownames(sts) <- nms[1]
   colnames(sts) <- "count"
   
-  expect_equal(cyto_stats_compute(Va2[[1]], stat = "count"), sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2[[1]], 
+                                  stat = "count"), 
+               sts, 
+               tolerance = 0.01)
   
   
 })
 
-# cyto_stats_compute flowSet method --------------------------------------------------------------
+# cyto_stats_compute flowSet method --------------------------------------------
 
 test_that("cyto_stats_compute flowSet method returns the correct statistics",{
   
@@ -178,17 +253,25 @@ test_that("cyto_stats_compute flowSet method returns the correct statistics",{
   sts <- cbind(pData(Va2), sts)
   sts <- sts[,-1]
   
-  expect_equal(cyto_stats_compute(Va2, stat = "count", trans = trans)[[1]], sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2, 
+                                  stat = "count", 
+                                  trans = trans)[[1]], 
+               sts, 
+               tolerance = 0.01)
   
   sts <- fsApply(V, colMedians, use.exprs = TRUE)
   sts <- cbind(pData(Va2), sts)
   sts <- sts[,-1]
   
-  expect_equal(cyto_stats_compute(Va2, stat = "median", trans = trans)[[1]], sts, tolerance = 0.01)
+  expect_equal(cyto_stats_compute(Va2, 
+                                  stat = "median", 
+                                  trans = trans)[[1]], 
+               sts, 
+               tolerance = 0.01)
   
 })
 
-# cyto_stats_compute GatingSet method ------------------------------------------------------------
+# cyto_stats_compute GatingSet method ------------------------------------------
 
 test_that("cyto_stats_compute GatingSet method returns the correct statistics",{
   
@@ -196,9 +279,18 @@ test_that("cyto_stats_compute GatingSet method returns the correct statistics",{
   sts <- cbind(pData(Va2), sts)
   sts <- sts[,-1]
   
-  expect_equal(cyto_stats_compute(gs, alias = "T Cells", stat = "median", trans = trans, save = FALSE)[[1]], sts)
+  expect_equal(cyto_stats_compute(gs, 
+                                  alias = "T Cells", 
+                                  stat = "median", 
+                                  trans = trans, 
+                                  save = FALSE)[[1]], 
+               sts)
   
-  expect_equal(cyto_stats_compute(gs, alias = "T Cells", stat = "median", save = FALSE)[[1]], sts)
+  expect_equal(cyto_stats_compute(gs, 
+                                  alias = "T Cells", 
+                                  stat = "median", 
+                                  save = FALSE)[[1]], 
+               sts)
   
   pops <- c("CD4 T Cells", "CD8 T Cells", "root", "Live Cells")
   cnts <- lapply(pops, function(pop){
@@ -225,11 +317,24 @@ test_that("cyto_stats_compute GatingSet method returns the correct statistics",{
   sts <- list(CD4, CD8)
   names(sts) <- c("CD4 T Cells","CD8 T Cells")
 
-  expect_equal(cyto_stats_compute(gs, alias = c("CD4 T Cells", "CD8 T Cells"), parent = c("root", "Live Cells"), stat = "freq"), sts, tolerance = 0.01)
-  expect_true(.file_wd_check(paste(format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = "")))
-  expect_true(.file_wd_check(paste(format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = "")))
+  expect_equal(cyto_stats_compute(gs, 
+                                  alias = c("CD4 T Cells", "CD8 T Cells"), 
+                                  parent = c("root", "Live Cells"), 
+                                  stat = "freq"), 
+               sts, 
+               tolerance = 0.01)
+  expect_true(.file_wd_check(
+    paste(format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = ""))
+    )
+  expect_true(.file_wd_check(
+    paste(format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = ""))
+    )
   
 })
 
-base::unlink(paste(format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = ""))
-base::unlink(paste(format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = ""))
+base::unlink(paste(
+  format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = "")
+  )
+base::unlink(paste(
+  format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = "")
+  )

@@ -21,8 +21,9 @@ containing the flow cytometry data for plotting and gating.}
 feature allows for constructing gates of different types over existing
 plots which may already contain a different gate type.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
@@ -32,8 +33,8 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the 4
   objects.
 }
 \description{
-\code{gate_quadrant_draw} constructs an interactive plotting window for user to
-select the crosshair center of 4 populations which is used to construct 4
+\code{gate_quadrant_draw} constructs an interactive plotting window for user
+to select the crosshair center of 4 populations which is used to construct 4
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects which are
 stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
 are assigned in the following order: bottom left, bottom right, top right and

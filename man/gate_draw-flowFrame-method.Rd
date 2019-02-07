@@ -35,11 +35,12 @@ for 1D gates and \code{"polygon"} for 2D gates.}
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}
 
-\item{density_smooth}{smooothing factor passed to
+\item{density_smooth}{smoothing factor passed to
 \code{\link[stats:density]{density}} for 1-D plots (defaults to 1.5).}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{plot}{logical indicating whether a plot should be drawn, set to
 \code{TRUE} by default.}

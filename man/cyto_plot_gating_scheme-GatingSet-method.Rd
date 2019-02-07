@@ -22,15 +22,15 @@
 \code{x}. If not supplied the gating scheme will be obtained directly from
 the GatingSet.}
 
-\item{group_by}{a vector of pData variables to merge samples into groups prior
-to plotting, set to NULL by default to prevent merging. To merge all
+\item{group_by}{a vector of pData variables to merge samples into groups
+prior to plotting, set to NULL by default to prevent merging. To merge all
 samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{back_gate}{names of the population(s) to back-gate, set to \code{FALSE}
 by default to turn off back-gating. To back-gate all populations set this
 argument to \code{"all"}.}
 
-\item{gate_track}{logicla indicating whether gate colour should be tracked
+\item{gate_track}{logical indicating whether gate colour should be tracked
 throughout gating scheme, set to TRUE by default.}
 
 \item{show_all}{logical indicating whether every population should be
@@ -107,7 +107,7 @@ gs <- transform(gs, trans)
 
 # Gate using gate_draw
 gt <- Activation_gatingTemplate
-gating(gt,gs)
+gating(gt, gs)
 
 # Gating scheme
 cyto_plot_gating_scheme(gs)

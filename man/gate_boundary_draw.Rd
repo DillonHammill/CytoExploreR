@@ -22,8 +22,9 @@ which will halt the gating routine.}
 feature allows for constructing gates of different types over existing
 plots which may already contain a different gate type.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
@@ -33,8 +34,8 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the
   object.
 }
 \description{
-\code{gate_boundary_draw} constructs an interactive plotting window for user to
-select the upper bound of a population which is constructed into a
+\code{gate_boundary_draw} constructs an interactive plotting window for user
+to select the upper bound of a population which is constructed into a
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 boundary gates are supported, for 2-D boundary gates all events below the

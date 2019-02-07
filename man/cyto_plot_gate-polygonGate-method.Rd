@@ -10,28 +10,29 @@
   gate_point_shape = 16, gate_point_size = 1)
 }
 \arguments{
-\item{x}{an object of class \code{\link[flowCore:polygonGate-class]{polygonGate}}.}
+\item{x}{an object of class
+\code{\link[flowCore:polygonGate-class]{polygonGate}}.}
 
 \item{channels}{fluorescent channels to used to construct the plot.}
 
-\item{gate_line_type}{integer [0,6] which controls the line type, set to \code{1}
-to draw solid lines by default.}
+\item{gate_line_type}{integer [0,6] which controls the line type, set to
+\code{1} to draw solid lines by default.}
 
-\item{gate_line_width}{numeric to adjust line thickness of gates, set to \code{2.5}
-by default.}
+\item{gate_line_width}{numeric to adjust line thickness of gates, set to
+\code{2.5} by default.}
 
-\item{gate_line_col}{indicates the colour of the gate to be constructed, set to
-\code{"red"} by default.}
+\item{gate_line_col}{indicates the colour of the gate to be constructed, set
+to \code{"red"} by default.}
 
 \item{gate_point}{logical indicating whether points should be included when
 plotting the gates, set to \code{FALSE} by default.}
 
-\item{gate_point_shape}{integer [0,25] passed to pch to control the shape of the
-points, set to \code{16} to draw filled circles by default. For other
+\item{gate_point_shape}{integer [0,25] passed to pch to control the shape of
+the points, set to \code{16} to draw filled circles by default. For other
 shapes refer to \code{\link[graphics:points]{?pch}}.}
 
-\item{gate_point_size}{numeric character expansion to control the size of the points
-in the drawn gate, set to \code{1} by default.}
+\item{gate_point_size}{numeric character expansion to control the size of the
+points in the drawn gate, set to \code{1} by default.}
 }
 \value{
 gate object with modified co-ordinates for plotting.

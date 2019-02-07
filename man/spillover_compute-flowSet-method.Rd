@@ -82,7 +82,10 @@ gt <- Compensation_gatingTemplate
 gating(gt, gs)
 
 # Channel match fille
-cmfile <- system.file("extdata", "Compensation-Channels.csv", package = "CytoRSuiteData")
+cmfile <- system.file("extdata",
+  "Compensation-Channels.csv",
+  package = "CytoRSuiteData"
+)
 
 # Compute fluorescent spillover matrix
 spill <- spillover_compute(getData(gs, "Single Cells"),

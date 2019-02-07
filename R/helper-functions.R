@@ -38,12 +38,24 @@ setGeneric(
 #' # Get fluorescent channels
 #' cyto_fluor_channels(fs[[1]])
 #' @export
-setMethod(cyto_fluor_channels, signature = "flowFrame", definition = function(x) {
-  channels <- unname(BiocGenerics::colnames(x))
-  channels <- channels[!channels %in% c("FSC-A", "FSC-H", "FSC-W", "SSC-A", "SSC-H", "SSC-W", "Time", "Original")]
+setMethod(cyto_fluor_channels,
+  signature = "flowFrame",
+  definition = function(x) {
+    channels <- unname(BiocGenerics::colnames(x))
+    channels <- channels[!channels %in% c(
+      "FSC-A",
+      "FSC-H",
+      "FSC-W",
+      "SSC-A",
+      "SSC-H",
+      "SSC-W",
+      "Time",
+      "Original"
+    )]
 
-  return(channels)
-})
+    return(channels)
+  }
+)
 
 #' Extract Fluorescent Channels - flowSet Method
 #'
@@ -65,9 +77,12 @@ setMethod(cyto_fluor_channels, signature = "flowFrame", definition = function(x)
 #' # get fluorescent channels
 #' cyto_fluor_channels(fs)
 #' @export
-setMethod(cyto_fluor_channels, signature = "flowSet", definition = function(x) {
-  cyto_fluor_channels(x[[1]])
-})
+setMethod(cyto_fluor_channels,
+  signature = "flowSet",
+  definition = function(x) {
+    cyto_fluor_channels(x[[1]])
+  }
+)
 
 #' Extract Fluorescent Channels - GatingSet Method
 #'
@@ -90,10 +105,13 @@ setMethod(cyto_fluor_channels, signature = "flowSet", definition = function(x) {
 #' # Get fluorescent channels
 #' cyto_fluor_channels(gs)
 #' @export
-setMethod(cyto_fluor_channels, signature = "GatingSet", definition = function(x) {
-  fr <- getData(x[[1]], "root")
-  cyto_fluor_channels(fr)
-})
+setMethod(cyto_fluor_channels,
+  signature = "GatingSet",
+  definition = function(x) {
+    fr <- getData(x[[1]], "root")
+    cyto_fluor_channels(fr)
+  }
+)
 
 #' Select Fluorescent Channel for Compensation Controls
 #'
@@ -136,25 +154,33 @@ setGeneric(
 #' }
 #' 
 #' @export
-setMethod(cyto_channel_select, signature = "flowFrame", definition = function(x) {
+setMethod(cyto_channel_select,
+  signature = "flowFrame",
+  definition = function(x) {
 
-  # Assign x to fr
-  fr <- x
+    # Assign x to fr
+    fr <- x
 
-  opts <- cyto_fluor_channels(fr)
+    opts <- cyto_fluor_channels(fr)
 
-  # Print sample name and select channel
-  message(paste("Select a fluorescent channel for the following compensation control:", fr@description$GUID))
+    # Print sample name and select channel
+    message(
+      paste(
+        "Select a fluorescent channel for the following csample:",
+        fr@description$GUID
+      )
+    )
 
-  if (getOption("CytoRSuite_interact") == TRUE) {
-    channel <- opts[menu(choices = opts, graphics = TRUE)]
-  } else {
-    # Tests use PE Cy7 Control -
-    channel <- opts[5]
+    if (getOption("CytoRSuite_interact") == TRUE) {
+      channel <- opts[menu(choices = opts, graphics = TRUE)]
+    } else {
+      # Tests use PE Cy7 Control -
+      channel <- opts[5]
+    }
+
+    return(channel)
   }
-
-  return(channel)
-})
+)
 
 #' Select Fluorescent Channel for Compensation Controls - flowSet Method
 #'
@@ -180,30 +206,33 @@ setMethod(cyto_channel_select, signature = "flowFrame", definition = function(x)
 #' }
 #' 
 #' @export
-setMethod(cyto_channel_select, signature = "flowSet", definition = function(x) {
+setMethod(cyto_channel_select,
+  signature = "flowSet",
+  definition = function(x) {
 
-  # Assign x to fs
-  fs <- x
+    # Assign x to fs
+    fs <- x
 
-  opts <- c(cyto_fluor_channels(fs), "Unstained")
+    opts <- c(cyto_fluor_channels(fs), "Unstained")
 
-  # Print sample name and select channel
-  channels <- opts[sapply(pData(fs)$name, function(x) {
-    message("Select a fluorescent channel for the following compensation control:")
+    # Print sample name and select channel
+    channels <- opts[unlist(lapply(pData(fs)$name, function(x) {
+      message("Select a fluorescent channel for the following sample:")
 
-    print(x)
+      print(x)
 
-    if (getOption("CytoRSuite_interact") == TRUE) {
-      menu(choices = opts, graphics = TRUE)
-    } else {
+      if (getOption("CytoRSuite_interact") == TRUE) {
+        menu(choices = opts, graphics = TRUE)
+      } else {
 
-      # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
-      c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
-    }
-  })]
+        # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
+        c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
+      }
+    }))]
 
-  return(channels)
-})
+    return(channels)
+  }
+)
 
 #' Select Fluorescent Channel for Compensation Controls - GatingSet Method
 #'
@@ -230,30 +259,33 @@ setMethod(cyto_channel_select, signature = "flowSet", definition = function(x) {
 #' }
 #' 
 #' @export
-setMethod(cyto_channel_select, signature = "GatingSet", definition = function(x) {
+setMethod(cyto_channel_select,
+  signature = "GatingSet",
+  definition = function(x) {
 
-  # Assign x to gs
-  gs <- x
+    # Assign x to gs
+    gs <- x
 
-  opts <- c(cyto_fluor_channels(gs), "Unstained")
+    opts <- c(cyto_fluor_channels(gs), "Unstained")
 
-  # Print sample name and select channel
-  channels <- opts[sapply(pData(gs)$name, function(x) {
-    message("Select a fluorescent channel for the following compensation control:")
+    # Print sample name and select channel
+    channels <- opts[unlist(lapply(pData(gs)$name, function(x) {
+      message("Select a fluorescent channel for the following sample:")
 
-    print(x)
+      print(x)
 
-    if (getOption("CytoRSuite_interact") == TRUE) {
-      menu(choices = opts, graphics = TRUE)
-    } else {
+      if (getOption("CytoRSuite_interact") == TRUE) {
+        menu(choices = opts, graphics = TRUE)
+      } else {
 
-      # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
-      c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
-    }
-  })]
+        # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
+        c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
+      }
+    }))]
 
-  return(channels)
-})
+    return(channels)
+  }
+)
 
 #' Sample a flowFrame
 #'
@@ -302,7 +334,7 @@ cyto_sample <- function(fr, display) {
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
 #'
 #' @importFrom flowWorkspace pData
-#' @importFrom flowCore parameters markernames
+#' @importFrom flowCore parameters markernames markernames<-
 #' @importFrom utils edit
 #'
 #' @return NULL and update marker names of \code{x}.
@@ -312,14 +344,14 @@ cyto_sample <- function(fr, display) {
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Load in samples
 #' fs <- Activation
-#'
+#' 
 #' # Add marker names to channels - edit table
 #' cyto_markers(fs)
 #' }
-#'
+#' 
 #' @export
 cyto_markers <- function(x) {
   if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))) {
@@ -369,6 +401,7 @@ cyto_markers <- function(x) {
 #' @return NULL and update pData for the \code{flowSet} or \code{GatingSet}.
 #'
 #' @importFrom flowWorkspace pData
+#' @importFrom flowCore pData<-
 #' @importFrom utils edit
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -406,6 +439,13 @@ cyto_annotate <- function(x) {
   # Update pData
   pData(cyto) <- pd
 
+  # Write to csv "Experiment-Details.csv"
+  write.csv(pData(cyto), paste0(
+    format(Sys.Date(), "%d%m%y"),
+    "-Experiment-Details.csv"
+  ), row.names = FALSE)
+  
+  # Update globally
   assign(deparse(substitute(x)), cyto, envir = globalenv())
 
   invisible(NULL)

@@ -23,8 +23,9 @@ the gating routine. Recommended for 3 or more populations.}
 feature allows for constructing gates of different types over existing
 plots which may already contain a different gate type.}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot,flowFrame-method}}.}
 }
@@ -34,13 +35,13 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the
   object(s).
 }
 \description{
-\code{gate_web_draw} is a variation of drawQuadrant which allows more flexibility
-with gate co-ordinates (angled lines) and supports any number of gates as
-indicated by the \code{alias} argument. To construct the gate simply select
-the center point and surrounding divider points on plot edge. \code{gate_web_draw}
-will contruct the \code{\link[flowCore:polygonGate-class]{polygonGate}}
-objects and store them in a \code{\link[flowCore:filters-class]{filters}}
-list.
+\code{gate_web_draw} is a variation of drawQuadrant which allows more
+flexibility with gate co-ordinates (angled lines) and supports any number of
+gates as indicated by the \code{alias} argument. To construct the gate simply
+select the center point and surrounding divider points on plot edge.
+\code{gate_web_draw} will construct the
+\code{\link[flowCore:polygonGate-class]{polygonGate}} objects and store them
+in a \code{\link[flowCore:filters-class]{filters}} list.
 }
 \examples{
 \dontrun{

@@ -4,7 +4,7 @@ author: "Dillon Hammill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Getting Started with CytoRSuite}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-The main features of CytoRSuite will be documented in spearet vignettes for "Compensation", "Gating functions", "Visualisation" and "Automated and manual gating" respectively. Before we dive into the details, let's demonstrate how simple it can be to analyse some in vitro T cell activation data using **CytoRSuite**. The Activation dataset used in this vignette is shipped with CytoRSuiteData. For more details on this dataset see **?Activation**.
+The main features of CytoRSuite will be documented in separate vignettes for "Compensation", "Gating functions", "Visualisation" and "Automated and manual gating" respectively. Before we dive into the details, let's demonstrate how simple it can be to analyse some in vitro T cell activation data using **CytoRSuite**. The Activation dataset used in this vignette is shipped with CytoRSuiteData. For more details on this dataset see **?Activation**.
 
 ## 1. Load Required Packages
 
@@ -57,7 +57,7 @@ fs <- Activation
 
 ## 3. Annotate flowSet with Markers
 
-Assigning marker names to channels will be useful downstream as we can refer to channels by their marker rather than by name. `cyto_markers` provides an editbale table to make marker assignment easy. The details in the flowSet will automatically be updated when the window is closed. Channels without markers should have empty "Marker" entries. Edit the table to match the image below:
+Assigning marker names to channels will be useful downstream as we can refer to channels by their marker rather than by name. `cyto_markers` provides an editable table to make marker assignment easy. The details in the flowSet will automatically be updated when the window is closed. Channels without markers should have empty "Marker" entries. Edit the table to match the image below:
 
 ```{r, eval = FALSE}
 # Assign markers
@@ -66,7 +66,7 @@ cyto_markers(fs)
 ```
 
 ```{r echo=FALSE, out.width='30%', out.height='30%',fig.align="center"}
-knitr::include_graphics('cyto_markers.png')
+knitr::include_graphics('cyto_markers.PNG')
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
@@ -92,7 +92,7 @@ cyto_annotate(fs)
 ```
 
 ```{r echo=FALSE, out.width='30%', out.height='30%',fig.align="center"}
-knitr::include_graphics('cyto_annotate.png')
+knitr::include_graphics('cyto_annotate.PNG')
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
@@ -119,12 +119,12 @@ pData(gs)
 CytoRSuite provides three distinct functions to aid in compensation of fluorescence spillover:
 
 - `spillover_compute` provides an automated approach to calculating the percentage of fluorescent spillover using the algorithm described by Bagwell & Adams 1993. 
-- `spillover_edit` utilises an interactive Shiny interface to allow realtime visualisation of changes in spillover percentages and is designed to aid in manual manipulation of spilllover matrices.
+- `spillover_edit` utilises an interactive Shiny interface to allow realtime visualisation of changes in spillover percentages and is designed to aid in manual manipulation of spillover matrices.
 - `cyto_plot_compensation` displays each compensation control in all channels to easily identify any potential compensation issues. 
 
-These features will be documentaed in a separate compensation vignette, see `?spillover_compute`, `?spillover_edit` and `?cyto_plot_compensation` for more details on these functions.
+These features will be documented in a separate compensation vignette, see `?spillover_compute`, `?spillover_edit` and `?cyto_plot_compensation` for more details on these functions.
 
-Here we will demonstarte how to apply the spillover matrix attached to each flowFrame. Recall the spillover matrix can be extracted from the `description` slot of the flowFrame under `SPILL`.
+Here we will demonstrate how to apply the spillover matrix attached to each flowFrame. Recall the spillover matrix can be extracted from the `description` slot of the flowFrame under `SPILL`.
 
 ```{r, echo = TRUE}
 # Get attached spillover matrix
@@ -149,7 +149,7 @@ gs <- transform(gs, trans)
 
 ## 8. Visualise GatingSet using `cyto_plot`
 
-Visualising 1-D density distributions and 2-D scatter plots of flow cytometry data is made easy with `cyto_plot`. `cyto_plot` is capable of handling flowFrame, flowSet, GatingHierarchy and GatingSet objects. Any function in CytoRSuite which makes a call to plot uses `cyto_plot` internally and can therefore accept any of its arguments to customise the plot output. In a similar fashion to ggplot2, `cyto_plot` has argumets of the form geom_aes (e.g. point_col) which make it autocomplete friendly. Additional plotting functions such as `cyto_plot_profile` and `cyto_plot_gating_scheme` allow the user to look at expression profiles and gating schemes respectively. All these visualisation tools will be detailed in the "Visualisation" vignette.
+Visualising 1-D density distributions and 2-D scatter plots of flow cytometry data is made easy with `cyto_plot`. `cyto_plot` is capable of handling flowFrame, flowSet, GatingHierarchy and GatingSet objects. Any function in CytoRSuite which makes a call to plot uses `cyto_plot` internally and can therefore accept any of its arguments to customise the plot output. In a similar fashion to ggplot2, `cyto_plot` has arguments of the form geom_aes (e.g. point_col) which make it autocomplete friendly. Additional plotting functions such as `cyto_plot_profile` and `cyto_plot_gating_scheme` allow the user to look at expression profiles and gating schemes respectively. All these visualisation tools will be detailed in the "Visualisation" vignette.
 
 ```{r, eval = FALSE}
 # 2-D scatter plot with contour lines

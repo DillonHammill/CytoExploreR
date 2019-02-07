@@ -1,40 +1,31 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-r: devel
 dist: trusty
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+   - os: linux
+     r: release
+   - os: linux
+     r: devel
+     env: R_CODECOV=true
+   - os: osx
+     osx_image: xcode9.3
+   - os: osx
+     osx_image: xcode7.3
+     disable_homebrew: true
 
 sudo: required
 
 cache: 
   packages: TRUE
-  directories:
-   - travis_phantomjs
 
 before_install:
   - R -e 'install.packages("devtools")'
-  - tlmgr install index
-  - "export PHANTOMJS_VERSION=2.1.1"
-  - "phantomjs --version"
-  - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"
-  - "hash -r"
-  - "phantomjs --version"
-  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
-  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi"
-  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
-  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then hash -r; fi"
-  - "phantomjs --version"
   
 install:
   - R -e 'devtools::install_deps(dep = T)'
-  - R -e 'devtools::install_github("RGLab/flowCore", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspace", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
-  - R -e 'devtools::install_github("DillonHammill/CytoRSuiteData", ref = "master")'
 
 warnings_are_errors: false
 
@@ -42,7 +33,7 @@ r_github_packages:
   - r-lib/covr
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+  -  if [[ "${R_CODECOV}" ]]; then R -e 'covr::codecov()'; fi
   
 env:
  global:

@@ -2,12 +2,14 @@ context("cyto_plot")
 
 # vdiffr::manage_cases() to validate and generate reference images
 
-# cyto_plot flowFrame method ---------------------------------------------------------------------
+# cyto_plot flowFrame method ---------------------------------------------------
 
 test_that("cyto_plot flowFrame method", {
   
   # 1-D density distribution errors
-  expect_error(cyto_plot(Va2[[1]]), "Please supply the name(s) of the channel(s) or marker(s) to construct the plot.", fixed = TRUE)
+  expect_error(cyto_plot(Va2[[1]]), 
+               "Supply channel/marker(s) to construct the plot.", 
+               fixed = TRUE)
   
   # 1-D density distributions
   p <- function() cyto_plot(Va2[[1]], 
@@ -44,25 +46,31 @@ test_that("cyto_plot flowFrame method", {
   
 })
 
-# cyto_plot flowSet method -----------------------------------------------------------------------
+# cyto_plot flowSet method -----------------------------------------------------
 
 test_that("cyto_plot flowSet method", {
   
   # Channels error
-  expect_error(cyto_plot(Va2), "Please supply the name(s) of the channel(s) or marker(s) to construct the plot.", fixed = TRUE)
+  expect_error(cyto_plot(Va2), 
+               "Supply channel/marker(s) to construct the plot.",
+               fixed = TRUE)
   
   
 })
 
-# cyto_plot GatingHierarchy method ---------------------------------------------------------------
+# cyto_plot GatingHierarchy method ---------------------------------------------
 
 test_that("cyto_plot GatingHierarchy method", {
   
   # Channels error
-  expect_error(cyto_plot(gs[[1]], parent = "T Cells"), "Please supply the name(s) of the channel(s) or marker(s) to construct the plot.", fixed = TRUE)
+  expect_error(cyto_plot(gs[[1]], parent = "T Cells"), 
+               "Supply channel/marker(s) to construct the plot.", 
+               fixed = TRUE)
   
   # Parent error
-  expect_error(cyto_plot(gs[[1]], channels = c("CD4","CD8")), "Please supply the name of the parent population to plot.")
+  expect_error(cyto_plot(gs[[1]], 
+                         channels = c("CD4","CD8")), 
+               "Please supply the name of the parent population to plot.")
   
   # 2-D Scatter plots
   p <- function() cyto_plot(gs[[4]], 
@@ -90,15 +98,19 @@ test_that("cyto_plot GatingHierarchy method", {
   
 })
 
-# cyto_plot GatingSet method ---------------------------------------------------------------------
+# cyto_plot GatingSet method ---------------------------------------------------
 
 test_that("cyto_plot GatingSet method", {
   
   # Channels error
-  expect_error(cyto_plot(gs, parent = "T Cells"), "Please supply the name(s) of the channel(s) or marker(s) to construct the plot.", fixed = TRUE)
+  expect_error(cyto_plot(gs, parent = "T Cells"), 
+               "Supply channel/marker(s) to construct the plot.", 
+               fixed = TRUE)
   
   # Parent error
-  expect_error(cyto_plot(gs, channels = c("CD4","CD8")), "Please supply the name of the parent population to plot.")
+  expect_error(cyto_plot(gs, 
+                         channels = c("CD4","CD8")), 
+               "Please supply the name of the parent population to plot.")
   
   # 1-D density distributions
   p <- function() cyto_plot(gs, 
@@ -111,7 +123,12 @@ test_that("cyto_plot GatingSet method", {
                             ylab = "Density",
                             density_smooth = 1.6,
                             density_stack = 0.5,
-                            density_fill = c("red","blue","green","orange","purple","black"),
+                            density_fill = c("red",
+                                             "blue",
+                                             "green",
+                                             "orange",
+                                             "purple",
+                                             "black"),
                             density_fill_alpha = c(0.2,0.5,1),
                             density_line_type = c(1,2,3),
                             density_line_width = 1.5,
@@ -121,7 +138,10 @@ test_that("cyto_plot GatingSet method", {
                             axes_text_col = "green4",
                             axes_label_text_font = 2,
                             axes_label_text_size = 1.5,
-                            axes_label_text_col = c("red","yellow","darkorange","grey40"),
+                            axes_label_text_col = c("red",
+                                                    "yellow",
+                                                    "darkorange",
+                                                    "grey40"),
                             title_text_font = 4,
                             title_text_size = 3,
                             title_text_col = "red",
@@ -130,7 +150,9 @@ test_that("cyto_plot GatingSet method", {
                             border_line_col = "purple", 
                             legend = TRUE,
                             label_text = c("A","B","C"),
-                            label_text_col = c("blue","black","green"))
+                            label_text_col = c("blue",
+                                               "black",
+                                               "green"))
   expect_doppelganger("cyto_plot-gs1", p)
   
   # 1-D density distributions & group_by
@@ -179,7 +201,10 @@ test_that("cyto_plot GatingSet method", {
                             axes_text_col = "green4",
                             axes_label_text_font = 2,
                             axes_label_text_size = 1.5,
-                            axes_label_text_col = c("red","yellow","darkorange","grey40"),
+                            axes_label_text_col = c("red",
+                                                    "yellow",
+                                                    "darkorange",
+                                                    "grey40"),
                             title_text_font = 4,
                             title_text_size = 3,
                             title_text_col = "red",

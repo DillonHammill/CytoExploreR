@@ -1,22 +1,29 @@
 context("spillover_compute")
 
-# .getCompleteTransList ----------------------------------------------------------
+# .getCompleteTransList --------------------------------------------------------
 
 test_that(".getCompleteTransList", {
   
   # transList of incorrect class
-  expect_error(.getCompleteTransList(fs[[4]], "Test"), "Supplied trans object should be of class transformList or transformerList.")
+  expect_error(.getCompleteTransList(fs[[4]], "Test"), 
+               "'trans' should be a transformList or transformerList object.")
   
   # flowFrame/flowSet transformed but no transList
-  expect_error(.getCompleteTransList(getData(gs, "T Cells")[[1]]), "Looks like the data is already transformed. Please supply the transform object used.")
-  expect_error(.getCompleteTransList(getData(gs, "T Cells")), "Looks like the data is already transformed. Please supply the transform object used.")
+  expect_error(.getCompleteTransList(getData(gs, "T Cells")[[1]]), 
+               "Looks like the data is already transformed. 
+ Please supply the transformList/transformerList used.")
+  expect_error(.getCompleteTransList(getData(gs, "T Cells")), 
+               "Looks like the data is already transformed. 
+ Please supply the transformList/transformerList used.")
   
   fst <- transform(fs, cyto_trans_check(trans, inverse = FALSE))
   gst <- GatingSet(fst)
   
-  expect_error(.getCompleteTransList(gst), "Looks like the data is already transformed. No transformations found in GatingSet.")
+  expect_error(.getCompleteTransList(gst),
+               "Looks like the data is already transformed. 
+ Please supply the transformList/transformerList used.")
   
-  # NULL transList -----------------------------------------------------------------
+  # NULL transList -------------------------------------------------------------
   
   # flowFrame no transformations - no transList
   tr <- .getCompleteTransList(fs[[4]])
@@ -52,7 +59,7 @@ test_that(".getCompleteTransList", {
   expect_is(tr, "transformerList")
   expect_setequal(names(tr), cyto_fluor_channels(gst))
   
-  # Complete transList ------------------------------------------------------------
+  # Complete transList ---------------------------------------------------------
   
   # flowFrame complete transList
   tr <- .getCompleteTransList(fs[[4]], trans)
@@ -85,7 +92,7 @@ test_that(".getCompleteTransList", {
   expect_is(tr, "transformerList")
   expect_setequal(names(tr), cyto_fluor_channels(gs))
   
-  # Incomplete transList -----------------------------------------------------------
+  # Incomplete transList -------------------------------------------------------
   
   # flowFrame with some transformations
   trns <- estimateLogicle(fs[[4]], c("PE-A", "Alexa Fluor 488-A"))
@@ -129,7 +136,9 @@ test_that(".getCompleteTransList", {
   trns <- estimateLogicle(gst[[4]], c("PE-A", "Alexa Fluor 488-A"))
   gst <- transform(gst, trns)
   
-  trns <- estimateLogicle(gst[[4]], c("PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A"))
+  trns <- estimateLogicle(gst[[4]], c("PE-A", 
+                                      "Alexa Fluor 488-A", 
+                                      "Alexa Fluor 700-A"))
   
   tr <- .getCompleteTransList(gst, trns)
   
@@ -144,33 +153,38 @@ test_that(".getCompleteTransList", {
   
 })
 
-# .getTransformedData ------------------------------------------------------------
+# .getTransformedData ----------------------------------------------------------
 
 test_that(".getTransformedData", {
-  expect_error(.getTransformedData(gs[[1]]), "x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
+  expect_error(.getTransformedData(gs[[1]]), 
+               "'x' must be either a flowFrame, flowSet or GatingSet.")
   
   # flowFrame raw
   fr <- .getTransformedData(fs[[1]])
   fst <- transform(fs, cyto_trans_check(trans, inverse = FALSE))
   
-  expect_equal(pData(parameters(fr))[, "maxRange"], pData(parameters(fst[[1]]))[, "maxRange"])
+  expect_equal(pData(parameters(fr))[, "maxRange"], 
+               pData(parameters(fst[[1]]))[, "maxRange"])
   
   # flowSet raw
   fst <- .getTransformedData(fs)
   fst2 <- transform(fs, cyto_trans_check(trans, inverse = FALSE))
   
-  expect_equal(pData(parameters(fst[[1]]))[, "maxRange"], pData(parameters(fst2[[1]]))[, "maxRange"])
+  expect_equal(pData(parameters(fst[[1]]))[, "maxRange"], 
+               pData(parameters(fst2[[1]]))[, "maxRange"])
   
   # GatingSet raw
   gst <- .getTransformedData(GatingSet(fs, trans))
   
-  expect_equal(pData(parameters(getData(gst, "root")[[1]]))[, "maxRange"], pData(parameters(getData(gs, "root")[[1]]))[, "maxRange"])
+  expect_equal(pData(parameters(getData(gst, "root")[[1]]))[, "maxRange"], 
+               pData(parameters(getData(gs, "root")[[1]]))[, "maxRange"])
   
   # flowSet transformed
   fst <- transform(fs, cyto_trans_check(trans, inverse = FALSE))
   fst2 <- .getTransformedData(fst, trans)
   
-  expect_equal(pData(parameters(fst2[[1]]))[, "maxRange"], pData(parameters(fst[[1]]))[, "maxRange"])
+  expect_equal(pData(parameters(fst2[[1]]))[, "maxRange"], 
+               pData(parameters(fst[[1]]))[, "maxRange"])
   
   # flowSet some transformations
   trns <- estimateLogicle(fs[[4]], c("PE-A", "Alexa Fluor 700-A"))
@@ -178,7 +192,8 @@ test_that(".getTransformedData", {
   fst2 <- .getTransformedData(fst, trns)
   fst3 <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
   
-  expect_equal(pData(parameters(fst2[[1]]))[, "maxRange"], pData(parameters(fst3[[1]]))[, "maxRange"])
+  expect_equal(pData(parameters(fst2[[1]]))[, "maxRange"], 
+               pData(parameters(fst3[[1]]))[, "maxRange"])
   
   # GatingSet some transformations
   gst <- GatingSet(fs)
@@ -187,20 +202,23 @@ test_that(".getTransformedData", {
   gst2 <- .getTransformedData(gst, trns)
   gst3 <- transform(gst, estimateLogicle(gst[[4]], cyto_fluor_channels(fs)))
   
-  expect_equal(pData(parameters(getData(gst2, "root")[[1]]))[, "maxRange"], pData(parameters(getData(gst3, "root")[[1]]))[, "maxRange"])
+  expect_equal(pData(parameters(getData(gst2, "root")[[1]]))[, "maxRange"], 
+               pData(parameters(getData(gst3, "root")[[1]]))[, "maxRange"])
 })
 
-# .getRawData --------------------------------------------------------------------
+# .getRawData ------------------------------------------------------------------
 
 test_that(".getRawData", {
   
   # Transformed data without transList
-  expect_error(.getRawData(getData(gs, "T Cells")), "Supply a transform object to inverse transformations.")
+  expect_error(.getRawData(getData(gs, "T Cells")), 
+               "Supply a transform object to inverse transformations.")
   
   # Object of incorrect class
-  expect_error(.getRawData(gs[[1]]), "x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
+  expect_error(.getRawData(gs[[1]]), 
+               "'x' must be either a flowFrame, flowSet or GatingSet.")
   
-  # Untransformed ------------------------------------------------------------------
+  # Untransformed --------------------------------------------------------------
   
   # flowFrame
   expect_equal(.getRawData(fs[[1]]), fs[[1]])
@@ -210,48 +228,59 @@ test_that(".getRawData", {
   
   # GatingSet
   gst <- GatingSet(fs)
-  expect_equal(pData(parameters(.getRawData(gst)[[1]])), pData(parameters(fs[[1]])))
+  expect_equal(pData(parameters(.getRawData(gst)[[1]])), 
+               pData(parameters(fs[[1]])))
   
-  # Transformed --------------------------------------------------------------------
+  # Transformed ----------------------------------------------------------------
   
   # flowFrame
   fr <- getData(gs, "T Cells")[[1]]
   inv <- cyto_trans_check(trans, inverse = TRUE)
   fr <- transform(fr, inv)
   
-  expect_equal(.getRawData(getData(gs, "T Cells")[[1]], trans), fr)
-  expect_equal(.getRawData(getData(gs, "T Cells")[[1]], cyto_trans_check(trans)), fr)
+  expect_equal(.getRawData(getData(gs, "T Cells")[[1]], 
+                           trans), 
+               fr)
+  expect_equal(.getRawData(getData(gs, "T Cells")[[1]], 
+                           cyto_trans_check(trans)),
+               fr)
   
   # flowSet
   fst <- getData(gs, "T Cells")
   inv <- cyto_trans_check(trans, inverse = TRUE)
   fst <- transform(fst, inv)
   
-  expect_equal(.getRawData(getData(gs, "T Cells"), trans), fst)
-  expect_equal(.getRawData(getData(gs, "T Cells"), cyto_trans_check(trans)), fst)
+  expect_equal(.getRawData(getData(gs, "T Cells"), 
+                           trans), 
+               fst)
+  expect_equal(.getRawData(getData(gs, "T Cells"), 
+                           cyto_trans_check(trans)), 
+               fst)
   
   # GatingSet
   fst <- getData(gs, "T Cells")
   inv <- cyto_trans_check(trans, inverse = TRUE)
   fst <- transform(fst, inv)
   
-  expect_equal(pData(parameters(.getRawData(gs)[[1]])), pData(parameters(fst[[1]])))
+  expect_equal(pData(parameters(.getRawData(gs)[[1]])), 
+               pData(parameters(fst[[1]])))
   
-  # Some transformations - complete transList --------------------------------------
+  # Some transformations - complete transList ----------------------------------
   fr <- fs[[1]]
   trns <- estimateLogicle(fs[[1]], c("PE-A", "Alexa Fluor 700-A"))
   fr <- transform(fr, trns)
   
   trns <- estimateLogicle(fs[[1]], cyto_fluor_channels(fs))
   
-  expect_equal(pData(parameters(.getRawData(fr, trns))), pData(parameters(fs[[1]])))
+  expect_equal(pData(parameters(.getRawData(fr, trns))), 
+               pData(parameters(fs[[1]])))
 })
 
-# spillover_compute ---------------------------------------------------------------
+# spillover_compute ------------------------------------------------------------
 
 test_that("spillover_compute", {
   
-  # GatingSet method --------------------------------------------------------------
+  # GatingSet method -----------------------------------------------------------
   spillover_compute(gsc, parent = "Single Cells")
   
   expect_true(.file_wd_check("Spillover-Matrix.csv"))

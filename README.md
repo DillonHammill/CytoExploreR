@@ -1,32 +1,33 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# CytoRSuite <img src="man/figures/logo.png" align="right" alt="" width="120"/>
+# CytoRSuite <img src="man/figures/logo.png" align="right" alt="" width="130"/>
 
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Travis build
 status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite)
-[![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/CytoRSuite)
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--08-yellowgreen.svg)](/commits/master)
 
-CytoRSuite is designed to provide an interactive interface for the
-analysis of flow cytometry data in R. You can see CytoRSuite in action
-at **link to final website**. Learn more in vignette(“CytoRSuite”) or
-articles tab.
+**CytoRSuite** is designed to provide an interactive interface for the
+analysis of flow cytometry data in R. If you are new to **CytoRSuite**
+visit <https://dillonhammill.github.io/CytoRSuite/> to get started.
 
 # Installation
 
-CytoRSuite is built on the existing flow cytometry infrastructure for R
-developed by the [RGLab](https://github.com/RGLab). To install
-CytoRSuite, users should first install the latest versions of
+**CytoRSuite** is built on the existing flow cytometry infrastructure
+for R developed by the [RGLab](https://github.com/RGLab). To install
+**CytoRSuite**, users should first install the latest versions of
 [flowCore](https://github.com/RGLab/flowCore),
 [flowWorkspace](https://github.com/RGLab/flowWorkspace) and
 [openCyto](https://github.com/RGLab/openCyto) from Bioconductor and
-GitHUb.
+GitHub.
 
-## flowCore
+## flowCore - Core Infrastructure
 
 ``` r
 # Bioconductor
@@ -42,10 +43,11 @@ install.packages("devtools")
 devtools::install_github("RGLab/flowCore", ref = "trunk")
 ```
 
-## flowWorkspace
+## flowWorkspace - Gating Infrastructure
 
 flowWorkspace requires additional C++ libraries to build from source
-using Rtools for windows users. Windows users should follow these
+using Rtools for windows users. Windows and Linux users should follow
+these
 [instructions](https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL)
 before proceeding.
 
@@ -57,7 +59,7 @@ BiocManager::install("flowWorkspace")
 devtools::install_github("RGLab/flowWorkspace", ref = "trunk")
 ```
 
-## openCyto
+## openCyto - Gating Pipeline
 
 ``` r
 # openCyto Bioconductor release version
@@ -70,13 +72,13 @@ devtools::install_github("RGLab/openCyto", ref = "trunk")
 ## CytoRSuite
 
 Once these packages are installed users can install **CytoRSuite** from
-GitHub. Users should also install CytoRSuiteData which contains example
-datasets that will be used in the vignettes to demonstrate the features
-of CytoRSuite.
+GitHub. Users should also install **CytoRSuiteData** which contains
+example datasets that will be used in the vignettes to demonstrate the
+features of CytoRSuite.
 
 ``` r
 # CytoRSuite development version on GitHub
-devtools::install_github("DillonHammill/CytoRSuite")
+devtools::install_github("DillonHammill/CytoRSuite", build_vignettes = TRUE)
 
 # CytoRSuiteData development version on GitHub
 devtools::install_github("DillonHammill/CytoRSuiteData")
@@ -87,33 +89,33 @@ devtools::install_github("DillonHammill/CytoRSuiteData")
 **CytoRSuite** provides an interactive interface for analysis of flow
 cytometry data. Some key features include:
 
-  - user guided automatic compensation using **spillover\_compute**
-  - interactively modify spillover matrices using **spillover\_edit**
+  - user guided automatic compensation using `spillover_compute`
+  - interactively modify spillover matrices using `spillover_edit`
   - visualise compensation in all channels using
-    **cyto\_plot\_compensation**
-  - easliy associate experimental details with each file using
-    **cyto\_annotate**
-  - manual gate drawing using **gate\_draw**
-  - ability to edit drawn gates using **gate\_edit**
-  - remove gates using **gate\_remove**
-  - gate saving directly to an openCyto **gatingTemplate** for future
-    use
+    `cyto_plot_compensation`
+  - easily associate experimental details with each file using
+    `cyto_annotate`
+  - manual gate drawing using `gate_draw`
+  - ability to edit drawn gates using `gate_edit`
+  - remove gates using `gate_remove`
+  - gate saving directly to an openCyto `gatingTemplate` for future use
   - support for using both manual and automated gating approaches
-    through linking to **openCyto**
+    through linking to `openCyto`
   - visualisation of flowFrames, flowSets, GatingHierarchies and
-    GatingSets using **cyto\_plot**
+    GatingSets using `cyto_plot`
   - visualisation of complete gating strategies with back-gating and/or
-    gate tracking using **cyto\_plot\_gating\_scheme**
-  - visualisation of marker expression in all channels using
-    **cyto\_plot\_profile**
-  - export population level statistics using **cyto\_stats\_compute**
+    gate tracking using `cyto_plot_gating_scheme`
+  - visualisation of marker expression profiles in all channels using
+    `cyto_plot_profile`
+  - export population level statistics using `cyto_stats_compute`
 
 # Usage
 
-The full details of how CytoRSuite works will be tackled individually in
-the package vignettes, but a succinct usage outline is described below:
+The full details of how **CytoRSuite** works will be tackled
+individually in the package vignettes, but a succinct usage outline is
+described below:
 
-1.  Compensation of fluorecent spillover
+1.  Compensation of fluorescent spillover
     
     1.1 Load compensation controls into a `ncdfFlowSet`
     
@@ -127,6 +129,13 @@ the package vignettes, but a succinct usage outline is described below:
     ```
     
     1.2 Load compensation controls into `GatingSet` for gating
+    
+    ``` r
+    # Add flowSet to GatingSet
+    gs <- GatingSet(fs)
+    ```
+    
+    1.3 Gate Single Cells using `gate_draw`
     
     ``` r
     # Gate Cells
@@ -146,16 +155,16 @@ the package vignettes, but a succinct usage outline is described below:
               gatingTemplate = "Compensation-gatingTemplate.csv")
     ```
     
-    ![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
+    ![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
     
-    1.3 Compute fluorescent spillover matrix using `spillover_compute`
+    1.4 Compute fluorescent spillover matrix using `spillover_compute`
     
     ``` r
     spillover_compute(gs, 
                       parent = "Single Cells")
     ```
     
-    1.4 Interactively edit computed spillover matrix using
+    1.5 Interactively edit computed spillover matrix using
     `spillover_edit`
     
     ``` r
@@ -279,34 +288,41 @@ cyto_stats_compute(gs,
 
 # News
 
-There is a ChangeLog for the GitHub master branch which will reflect any
-updates made to improve the stability, usability or plenitude of the
-package.
+There is a Changelog for the GitHub `master` branch which will reflect
+any updates made to improve the stability, usability or plenitude of the
+package. Users should refer to the
+[Changelog](https://dillonhammill.github.io/CytoRSuite/news/index.html)
+before installing new versions of the package.
 
 # Credits
 
-CytoRSuite would not be possible without the existing flow cytometry
-infrastructure developed by the RGLab. CytoRSuite started out as simple
-plugin for openCyto to facilitate gate drawing but has evolved into a
-fully-fledged flow cytometry analysis package thanks to the support and
-guidance of members of the RGLab. Please take the time to check out
-their work on [GitHub](https://github.com/RGLab).
+**CytoRSuite** would not be possible without the existing flow cytometry
+infrastructure developed by the RGLab. **CytoRSuite** started out as
+simple plugin for openCyto to facilitate gate drawing but has evolved
+into a fully-fledged flow cytometry analysis package thanks to the
+support and guidance of members of the RGLab. Please take the time to
+check out their work on [GitHub](https://github.com/RGLab).
 
 # Development
 
-CytoRSuite is a maturing package which will continue to be sculpted by
-the feedback of users. The GitHub  branch will always contain the most
-stable build of the package. New features and updates will be made to a
-separate branch and merged to the `master` branch when stable and
-tested. The changelog will reflect any changes made to the `master`
-branch and it is recommended that users visit this prior to installing
-newer versions of the package. Feature requests are welcome.
+**CytoRSuite** is a maturing package which will continue to be sculpted
+by the feedback and feature requests of users. The GitHub `master`
+branch will always contain the most stable build of the package. New
+features and updates will be made to a separate branch and merged to the
+`master` branch when stable and tested. The
+[Changelog](https://dillonhammill.github.io/CytoRSuite/news/index.html)
+will reflect any changes made to the `master` branch.
 
 # Getting help
 
-The Get started and Articles tabs on the CytoRSuite website are your
-first port of call if you require any help. For problems with the
-functioning of the package refer to the package issues to see if another
-user has experienced/rectified the issue you are experiencing. Otherwise
-feel free to post a new issue on the GitHub page so any potential issues
-can be rectified.
+The [Get
+Started](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite.html)
+and
+[Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html)
+sections on the **CytoRSuite** website are your first port of call if
+you require any help. For more detailed workflows refer the **Articles**
+tab. If you encounter any issues with the functioning of the package
+refer to these
+[issues](https://github.com/DillonHammill/CytoRSuite/issues) to see if
+the problem has been identified and resolved. Feel free to post new
+issues on the GitHub page if they have not already been addressed.

@@ -26,8 +26,9 @@ not supplied the spillover matrix will be extracted directly from the
 \code{\link[flowCore:flowSet-class]{flowSet}} and the edited matrix saved
 to \code{"Spillover-Matrix.csv"}.}
 
-\item{display}{numeric indicating the number of events to plot, set to 5000
-events by default.}
+\item{display}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{display} can substantial improve
+plotting speed for less powerful machines. Set to all events by default.}
 
 \item{axes_trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or
@@ -86,13 +87,15 @@ gt <- Compensation_gatingTemplate
 gating(gt, gs)
 
 # Channel match file
-cmfile <- system.file("extdata", "Compensation-Channels.csv", package = "CytoRSuiteData")
+cmfile <- system.file("extdata",
+  "Compensation-Channels.csv",
+  package = "CytoRSuiteData"
+)
 
 # Edit spillover matrix
 spillover_edit(getData(gs, "Single Cells"),
   channel_match = cmfile
 )
-
 }
 }
 \seealso{

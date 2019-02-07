@@ -3,7 +3,9 @@ context("spillover-edit")
 
 library(shinytest)
 
+# spillover_edit ---------------------------------------------------------------
+
 test_that("spillover_edit", {
-  skip_on_travis()
+  skip("Skip spillover_edit test")
   shinytest::expect_pass(testApp("apps/spillover_edit/", compareImages = FALSE))
 })

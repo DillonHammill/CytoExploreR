@@ -7,7 +7,7 @@
 \usage{
 \S4method{gate_draw}{GatingSet}(x, group_by = NULL, select = NULL,
   parent = "root", alias = NULL, channels = NULL, type = "polygon",
-  display = 1/length(x), gatingTemplate = NULL, axis = "x",
+  display = NULL, gatingTemplate = NULL, axis = "x",
   density_smooth = 1.5, label = TRUE, plot = TRUE, ...)
 }
 \arguments{
@@ -17,7 +17,7 @@
 \item{group_by}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
 prior to gating, set to the length of x by default to construct a single
-gate for all samples. If group_by is suppied a different gate will be
+gate for all samples. If group_by is supplied a different gate will be
 constructed for each group.}
 
 \item{select}{vector containing the indicies of samples within each group to
@@ -50,11 +50,12 @@ plotting speed for less powerful machines.}
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}
 
-\item{density_smooth}{smooothing factor passed to
+\item{density_smooth}{smoothing factor passed to
 \code{\link[stats:density]{density}} for 1-D plots (defaults to 1.5).}
 
-\item{label}{logical indicating whether to include \code{\link{cyto_plot_label}}
-for the gated population(s), \code{TRUE} by default.}
+\item{label}{logical indicating whether to include
+\code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
+default.}
 
 \item{plot}{logical indicating whether a plot should be drawn, set to
 \code{TRUE} by default.}

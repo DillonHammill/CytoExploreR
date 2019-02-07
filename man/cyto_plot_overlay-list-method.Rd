@@ -53,9 +53,12 @@ cyto_plot(gs[[4]],
 )
 
 # Overlay CD4 T Cells & Dendritic Cells
-cyto_plot_overlay(list(getData(gs, "CD4 T Cells")[[4]], getData(gs, "Dendritic Cells")[[4]]),
-  channels = c("APC-Cy7-A", "PE-A"),
-  point_col = c("magenta", "red")
+cyto_plot_overlay(list(
+  getData(gs, "CD4 T Cells")[[4]],
+  getData(gs, "Dendritic Cells")[[4]]
+),
+channels = c("APC-Cy7-A", "PE-A"),
+point_col = c("magenta", "red")
 )
 }
 \author{

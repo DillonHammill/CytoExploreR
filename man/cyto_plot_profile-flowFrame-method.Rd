@@ -20,15 +20,16 @@ channels by default.}
 \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 transform the fluorescent channels of the supplied flowFrame. This
 transform object will be used internally to ensure axes labels of the plot
-are appropriately transformed. The transform object will NOT be applied to the
-flowFrame internally and should be applied to the flowFrame prior to
+are appropriately transformed. The transform object will NOT be applied to
+the flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
 \item{layout}{vector of grid dimensions \code{c(#rows,#columns)}.}
 
 \item{title}{a title for the plots, set to the file name of x by default.}
 
-\item{...}{additional arguments passed to \code{\link{cyto_plot,flowFrame-method}}.}
+\item{...}{additional arguments passed to
+\code{\link{cyto_plot,flowFrame-method}}.}
 }
 \description{
 Plot Expression Profile in All Fluorescent Channels - flowFrame Method

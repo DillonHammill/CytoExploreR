@@ -18,13 +18,13 @@ compensation controls and an unstained control.}
 
 \item{parent}{name of the population to plot.}
 
-\item{channel_match}{name of a csv file with two columns, the first
-called "name" lists the names of each compensation control and the second
+\item{channel_match}{name of a csv file with two columns, the first called
+"name" lists the names of each compensation control and the second
 "channel" lists the fluorescent channel associated with each of the
 compensation controls. Use "Unstained" in the channel column for the
 universal unstained control. No need to construct this file manually as
-users will be guided through this process if the \code{channel_match}
-is missing.}
+users will be guided through this process if the \code{channel_match} is
+missing.}
 
 \item{compensate}{logical indicating whether the samples should be
 compensated prior to plotting, set to FALSE by default. If no spillover
@@ -43,8 +43,8 @@ directly from the \code{GatingSet} and applied to the samples when
 \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 transform the fluorescent channels of the supplied flowFrame. This
 transform object will be used internally to ensure axes labels of the plot
-are appropriately transformed. The transform object will NOT be applied to the
-flowFrame internally and should be applied to the flowFrame prior to
+are appropriately transformed. The transform object will NOT be applied to
+the flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
 \item{overlay}{logical indicating whether the unstained control should be
@@ -69,7 +69,8 @@ sample by default.}
 
 \item{header_text_col}{colour for header text, set to "black" by default.}
 
-\item{...}{additional arguments passed to \code{\link{cyto_plot,flowFrame-method}}.}
+\item{...}{additional arguments passed to
+\code{\link{cyto_plot,flowFrame-method}}.}
 }
 \description{
 Plot each compensation control in all fluorescent channels to identify any

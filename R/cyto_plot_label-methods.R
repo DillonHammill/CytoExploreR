@@ -54,9 +54,9 @@ setGeneric(
 #'   Statistics for fluorescent intensity are calculated for the entire
 #'   distribution. Only count and percent statistics are supported for 2D
 #'   plots.
-#' @param text_x vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
-#' @param text_y vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_y vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
@@ -137,24 +137,40 @@ setMethod(cyto_plot_label,
 
     # Channels needed to position label
     if (missing(channels)) {
-      stop("Supply the name(s) of the fluorescent channels used to construct the plot.")
+      stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Missing transList
-    if (stat %in% c("median", "mode", "mean", "geo mean")) {
+    if (stat %in% c(
+      "median",
+      "mode",
+      "mean",
+      "geo mean"
+    )) {
       if (is.null(cyto_trans_check(trans))) {
-        stop("Supply the transform object used to transform the fluorescent channels of the flowFrame.")
+        stop(
+          paste("Supply transformList/transformerList to calculate", stat, ".")
+        )
       }
     }
 
     # Stats not supported in 2D
-    if (length(channels) == 2 & stat %in% c("mean", "median", "mode", "geo mean", "percent")) {
+    if (length(channels) == 2 &
+      stat %in% c(
+        "mean",
+        "median",
+        "mode",
+        "geo mean",
+        "percent"
+      )) {
       stop("Only count is supported for 2D plots without gates.")
     }
 
     # Missing text
     if (all(is.na(text)) & !all(is.na(stat))) {
-      message(paste("No text supplied for labels - labels will show", stat, "only."))
+      message(
+        paste("No text supplied for labels - labels will show", stat, "only.")
+      )
     }
 
     # Calculate statistics
@@ -200,11 +216,38 @@ setMethod(cyto_plot_label,
 
     # Add labels
     if (!all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = paste(text, st, sep = "\n"), border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (!all(is.na(text)) & all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = text, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = st, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     }
   }
 )
@@ -234,9 +277,9 @@ setMethod(cyto_plot_label,
 #'   by default. Statistics for fluorescent intensity are calculated for the
 #'   entire distribution. Only count and percent statistics are supported for 2D
 #'   plots.
-#' @param text_x vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
-#' @param text_y vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_y vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
@@ -323,7 +366,7 @@ setMethod(cyto_plot_label,
 
     # Channels needed to position label
     if (missing(channels)) {
-      stop("Supply the name(s) of the fluorescent channels used to construct the plot.")
+      stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Only count and percent supported in 2D
@@ -334,7 +377,9 @@ setMethod(cyto_plot_label,
     # Missing transList
     if (stat %in% c("median", "mode", "mean", "geo mean")) {
       if (is.null(cyto_trans_check(trans))) {
-        stop("Supply the transform object used to transform the fluorescent channels of the flowFrame.")
+        stop(
+          paste("Supply transformList/transformerList to calculate", stat, ".")
+        )
       }
     }
 
@@ -345,7 +390,9 @@ setMethod(cyto_plot_label,
 
     # Missing text
     if (all(is.na(text)) & !all(is.na(stat))) {
-      message(paste("No text supplied for labels - labels will show", stat, "only."))
+      message(
+        paste("No text supplied for labels - labels will show", stat, "only.")
+      )
     }
 
     # Calculate statistics
@@ -384,8 +431,13 @@ setMethod(cyto_plot_label,
 
     # 1D gate plotted in 2D
     if (length(channels) == 2 & length(parameters(gates)) == 1) {
-      rg <- matrix(c(as.numeric(gates@min), as.numeric(gates@max), -Inf, Inf), ncol = 2, nrow = 2)
-      colnames(rg) <- c(as.vector(parameters(gates)), channels[!channels == as.vector(parameters(gates))])
+      rg <- matrix(c(as.numeric(gates@min), as.numeric(gates@max), -Inf, Inf),
+        ncol = 2, nrow = 2
+      )
+      colnames(rg) <- c(
+        as.vector(parameters(gates)),
+        channels[!channels == as.vector(parameters(gates))]
+      )
       rownames(rg) <- c("min", "max")
       gates <- rectangleGate(.gate = rg)
     }
@@ -494,11 +546,38 @@ setMethod(cyto_plot_label,
 
     # Add labels
     if (!all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = paste(text, st, sep = "\n"), border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (!all(is.na(text)) & all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = text, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = st, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     }
   }
 )
@@ -525,9 +604,9 @@ setMethod(cyto_plot_label,
 #' @param stat indicates the type of statistic to include in the label, can be
 #'   either \code{"percent"} or \code{"count"}. \code{stat} is set to
 #'   \code{"percent"} by default.
-#' @param text_x vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
-#' @param text_y vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_y vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
@@ -610,17 +689,19 @@ setMethod(cyto_plot_label,
 
     # Channels needed to position label
     if (missing(channels)) {
-      stop("Supply the name(s) of the fluorescent channels used to construct the plot.")
+      stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Only count and percent supported
     if (!stat %in% c("count", "percent")) {
-      stop("Only count and percent statistics are supported for 2D plots containing a polygonGate.")
+      stop("Only 'count' and 'percent' are supported for gated 2D plots.")
     }
 
     # Missing text
     if (all(is.na(text)) & !all(is.na(stat))) {
-      message(paste("No text supplied for labels - labels will show", stat, "only."))
+      message(
+        paste("No text supplied for labels - labels will show", stat, "only.")
+      )
     }
 
     # Calculate statistic
@@ -658,11 +739,38 @@ setMethod(cyto_plot_label,
 
     # Add labels
     if (!all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = paste(text, st, sep = "\n"), border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (!all(is.na(text)) & all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = text, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = st, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     }
   }
 )
@@ -689,9 +797,9 @@ setMethod(cyto_plot_label,
 #' @param stat indicates the type of statistic to include in the label, can be
 #'   either \code{"percent"} or \code{"count"}. \code{stat} is set to
 #'   \code{"percent"} by default.
-#' @param text_x vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
-#' @param text_y vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_y vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
@@ -700,8 +808,8 @@ setMethod(cyto_plot_label,
 #'   details.
 #' @param text_col specify text colour in label for each gate, defaults to
 #'   \code{"black"} for all gates.
-#' @param box_alpha numeric [0,1] controls the transparency of the background, set
-#'   to \code{0.6} by default.
+#' @param box_alpha numeric [0,1] controls the transparency of the background,
+#'   set to \code{0.6} by default.
 #'
 #' @return add a boxed text label to cyto_plot.
 #'
@@ -775,17 +883,19 @@ setMethod(cyto_plot_label,
 
     # Channels needed to position label
     if (missing(channels)) {
-      stop("Supply the name(s) of the fluorescent channels used to construct the plot.")
+      stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Only count and percent supported
     if (!stat %in% c("count", "percent")) {
-      stop("Only count and percent statistics are supported for 2D plots containing a polygonGate.")
+      stop("Only 'count' and 'percent' are supported for gated 2D plots.")
     }
 
     # Missing text
     if (all(is.na(text)) & !all(is.na(stat))) {
-      message(paste("No text supplied for labels - labels will show", stat, "only."))
+      message(
+        paste("No text supplied for labels - labels will show", stat, "only.")
+      )
     }
 
     # Calculate statistic
@@ -823,11 +933,38 @@ setMethod(cyto_plot_label,
 
     # Add labels
     if (!all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = paste(text, st, sep = "\n"), border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (!all(is.na(text)) & all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = text, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     } else if (all(is.na(text)) & !all(is.na(stat))) {
-      .boxed.labels(x = text_x, y = text_y, labels = st, border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)
+      .boxed.labels(
+        x = text_x,
+        y = text_y,
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
     }
   }
 )
@@ -859,9 +996,9 @@ setMethod(cyto_plot_label,
 #'   by default. Statistics for fluorescent intensity are calculated for the
 #'   entire distribution. Only count and percent statistics are supported for 2D
 #'   plots.
-#' @param text_x vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
-#' @param text_y vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_y vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
@@ -870,8 +1007,8 @@ setMethod(cyto_plot_label,
 #'   details.
 #' @param text_col specify text colour in label for each gate, defaults to
 #'   \code{"black"} for all gates.
-#' @param box_alpha numeric [0,1] controls the transparency of the background, set
-#'   to \code{0.6} by default.
+#' @param box_alpha numeric [0,1] controls the transparency of the background,
+#'   set to \code{0.6} by default.
 #'
 #' @return add a boxed text label to cyto_plot.
 #'
@@ -942,9 +1079,35 @@ setMethod(cyto_plot_label,
 
 
     # Make calls to cyto_plot_label
-    invisible(mapply(function(gate, text, stat, text_font, text_col, text_size, box_alpha) {
-      cyto_plot_label(x = x, trans = trans, gates = gate, channels = channels, text = text, stat = stat, text_font = text_font, text_col = text_col, text_size = text_size, box_alpha = box_alpha)
-    }, gates, text, stat, text_font, text_col, text_size, box_alpha))
+    invisible(
+      mapply(
+        function(gate,
+                         text,
+                         stat,
+                         text_font,
+                         text_col,
+                         text_size,
+                         box_alpha) {
+          cyto_plot_label(
+            x = x,
+            trans = trans,
+            gates = gate,
+            channels = channels,
+            text = text,
+            stat = stat,
+            text_font = text_font,
+            text_col = text_col,
+            text_size = text_size,
+            box_alpha = box_alpha
+          )
+        }, gates,
+        text, stat,
+        text_font,
+        text_col,
+        text_size,
+        box_alpha
+      )
+    )
   }
 )
 
@@ -976,9 +1139,9 @@ setMethod(cyto_plot_label,
 #'   by default. Statistics for fluorescent intensity are calculated for the
 #'   entire distribution. Only count and percent statistics are supported for 2D
 #'   plots.
-#' @param text_x vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
-#' @param text_y vector containing the x co-ordiantes for the plot labels. Set
+#' @param text_y vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
@@ -1059,8 +1222,34 @@ setMethod(cyto_plot_label,
                           box_alpha = 0.6) {
 
     # Make calls to cyto_plot_label
-    invisible(mapply(function(gate, text, stat, text_font, text_col, text_size, box_alpha) {
-      cyto_plot_label(x = x, trans = trans, gates = gate, channels = channels, text = text, stat = stat, text_font = text_font, text_col = text_col, text_size = text_size, box_alpha = box_alpha)
-    }, gates, text, stat, text_font, text_col, text_size, box_alpha))
+    invisible(
+      mapply(
+        function(gate,
+                         text,
+                         stat,
+                         text_font,
+                         text_col,
+                         text_size,
+                         box_alpha) {
+          cyto_plot_label(
+            x = x,
+            trans = trans,
+            gates = gate,
+            channels = channels,
+            text = text,
+            stat = stat,
+            text_font = text_font,
+            text_col = text_col,
+            text_size = text_size,
+            box_alpha = box_alpha
+          )
+        }, gates,
+        text, stat,
+        text_font,
+        text_col,
+        text_size,
+        box_alpha
+      )
+    )
   }
 )

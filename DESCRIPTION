@@ -1,9 +1,18 @@
 Package: CytoRSuite
 Type: Package
 Title: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data
-Version: 0.9.8
-Authors@R: person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au")
-Description: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
+Version: 0.9.9
+Authors@R: c(
+  person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
+  person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),
+  person("Mike", "Jiang", role = "ctb", email = "wjiang2@fhcrc.org"))
+Description: An intuitive and interactive approach to flow cytometry analysis in R. 
+  CytoRSuite contains tools for every stage of the analysis pipeline including 
+  user-guided automatic compensation, realtime editing of spillover matrices, 
+  manual gate drawing, gate editing, visualisation of all existing flow cytometry 
+  objects and export of population level statistics for further analysis. Furthermore,
+  through linking to openCyto, CytoRSuite provides the tools necessary to easily combine 
+  manual and automated gating approaches in R.
 URL: https://github.com/DillonHammill/CytoRSuite
 BugReports: https://github.com/DillonHammill/CytoRSuite/issues
 Depends: 
@@ -28,17 +37,22 @@ Imports:
   magrittr
 Suggests: 
   CytoRSuiteData,
+  RProtoBufLib,
+  cytolib,
   knitr,
   rmarkdown,
   testthat,
   vdiffr,
   shinytest,
   covr,
-  robustbase
+  robustbase,
+  pkgdown
 Remotes: 
   Bioconductor/BiocGenerics@a2de4dd,
   RGLab/RProtoBufLib@trunk,
   RGLab/flowCore@trunk,
+  RGLab/ncdfFlow@trunk,
+  RGLab/cytolib@trunk,
   RGLab/flowWorkspace@trunk,
   RGLab/openCyto@trunk,
   DillonHammill/CytoRSuiteData@master

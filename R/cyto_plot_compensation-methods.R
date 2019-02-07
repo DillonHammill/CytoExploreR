@@ -79,23 +79,23 @@ setGeneric(
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Don't run - bypass directory check for external files
 #' options("CytoRSuite_wd_check" = FALSE)
-#'
+#' 
 #' # Load in compensation controls
 #' gs <- GatingSet(Compensation)
-#'
+#' 
 #' # Gate single cells using gate_draw
 #' gt <- Compensation_gatingTemplate
 #' gating(gt, gs)
-#'
+#' 
 #' # Compensation plots
 #' cyto_plot_compensation(getData(gs, "Single Cells")[[1]],
 #'   channel_match = "7-AAD-A",
 #'   overlay = getData(gs, "Single Cells")[[4]]
 #' )
-#'
+#' 
 #' # Don't run - return "CytoRSuite_wd_check" to default
 #' options("CytoRSuite_wd_check" = TRUE)
 #' @export
@@ -129,7 +129,9 @@ setMethod(cyto_plot_compensation,
         spill <- fr@description$SPILL
         fr <- suppressMessages(compensate(fr, spill))
       } else if (!is.null(spillover)) {
-        if (inherits(spillover, "matrix") | inherits(spillover, "data.frame") | inherits(spillover, "tibble")) {
+        if (inherits(spillover, "matrix") |
+          inherits(spillover, "data.frame") |
+          inherits(spillover, "tibble")) {
           spill <- spillover
         } else {
           if (getOption("CytoRSuite_wd_check") == TRUE) {
@@ -137,7 +139,7 @@ setMethod(cyto_plot_compensation,
               spill <- read.csv(spillover, header = TRUE, row.names = 1)
               colnames(spill) <- rownames(spill)
             } else {
-              message("Supplied spillover file does not exist in the current working directory. Extracting the spillover matrix from the samples.")
+              message(paste(spillover, "is not in this working directory."))
               spill <- fr@description$SPILL
             }
           } else {
@@ -170,7 +172,10 @@ setMethod(cyto_plot_compensation,
 
     # layout
     if (missing(layout)) {
-      layout <- c(n2mfrow(length(channels))[2], n2mfrow(length(channels))[1])
+      layout <- c(
+        n2mfrow(length(channels))[2],
+        n2mfrow(length(channels))[1]
+      )
       par(mfrow = layout)
     } else if (!missing(layout)) {
       if (layout[1] == FALSE) {
@@ -192,12 +197,22 @@ setMethod(cyto_plot_compensation,
     }
 
     # Plots
-    lapply(1:length(channels), function(y) {
-      cyto_plot(fr, channels = c(chan, channels[y]), axes_trans = axes_trans, legend = FALSE, title = title, ...)
+    lapply(seq_len(length(channels)), function(y) {
+      cyto_plot(fr,
+        channels = c(chan, channels[y]),
+        axes_trans = axes_trans,
+        legend = FALSE,
+        title = title, ...
+      )
 
       if (channels[y] == channels[length(channels)]) {
         if (!is.null(header)) {
-          mtext(header, outer = TRUE, cex = header_text_size, font = header_text_font, col = header_text_col)
+          mtext(header,
+            outer = TRUE,
+            cex = header_text_size,
+            font = header_text_font,
+            col = header_text_col
+          )
         }
       }
     })
@@ -327,7 +342,9 @@ setMethod(cyto_plot_compensation,
       if (is.null(spillover)) {
         spill <- fs[[1]]@description$SPILL
       } else if (!is.null(spillover)) {
-        if (inherits(spillover, "matrix") | inherits(spillover, "data.frame") | inherits(spillover, "tibble")) {
+        if (inherits(spillover, "matrix") |
+          inherits(spillover, "data.frame") |
+          inherits(spillover, "tibble")) {
           spill <- spillover
         } else {
           if (getOption("CytoRSuite_wd_check") == TRUE) {
@@ -335,7 +352,7 @@ setMethod(cyto_plot_compensation,
               spill <- read.csv(spillover, header = TRUE, row.names = 1)
               colnames(spill) <- rownames(spill)
             } else {
-              message("Supplied spillover file does not exist in the current working directory. Extracting the spillover matrix from the samples.")
+              message(paste(spillover, "is not in this working directory."))
               spill <- fs[[1]]@description$SPILL
             }
           } else {
@@ -370,16 +387,16 @@ setMethod(cyto_plot_compensation,
     if (is.null(channel_match)) {
 
       # No channel_match file supplied
-      message("No channel_match file name supplied channels will be selected manually from menu.")
+      message("Select a channel for each sample from the dropdown menu.")
       pd$channel <- paste(cyto_channel_select(fs))
 
       # Save new channel_match csv file
-      message("Writing new channel_match file 'Compensation-channels.csv' to save channel matching.")
-      write.csv(pd, "Compensation-channels.csv", row.names = FALSE)
+      message("Saving channel selections to 'Compensation-Channels.csv'.")
+      write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
     } else if (!is.null(channel_match)) {
       if (getOption("CytoRSuite_wd_check") == TRUE) {
         if (.file_wd_check(channel_match) == FALSE) {
-          message("Supplied channel_match file does not exist in the current working directory.")
+          message(paste(channel_match, "is not in this working directory."))
           pd$channel <- paste(cyto_channel_select(fs))
         } else {
           cm <- read.csv(channel_match, header = TRUE, row.names = 1)
@@ -419,7 +436,10 @@ setMethod(cyto_plot_compensation,
 
     # layout
     if (missing(layout)) {
-      layout <- c(n2mfrow(length(channels))[2], n2mfrow(length(channels))[1])
+      layout <- c(
+        n2mfrow(length(channels))[2],
+        n2mfrow(length(channels))[1]
+      )
       par(mfrow = layout)
     } else if (!missing(layout)) {
       if (layout[1] == FALSE) {
@@ -442,17 +462,33 @@ setMethod(cyto_plot_compensation,
 
     # Loop through fs.lst
     lapply(1:smp, function(x) {
-      lapply(1:length(channels), function(y) {
+      lapply(seq_len(length(channels)), function(y) {
         if (unst == TRUE & overlay == TRUE) {
-          cyto_plot(fs.lst[[x]], channels = c(pd$channel[x], channels[y]), overlay = NIL, axes_trans = axes_trans, legend = FALSE, title = title, ...)
+          cyto_plot(fs.lst[[x]],
+            channels = c(pd$channel[x], channels[y]),
+            overlay = NIL,
+            axes_trans = axes_trans,
+            legend = FALSE,
+            title = title, ...
+          )
         } else {
-          cyto_plot(fs.lst[[x]], channels = c(pd$channel[x], channels[y]), axes_trans = axes_trans, legend = FALSE, title = title, ...)
+          cyto_plot(fs.lst[[x]],
+            channels = c(pd$channel[x], channels[y]),
+            axes_trans = axes_trans,
+            legend = FALSE,
+            title = title, ...
+          )
         }
 
         # Call new plot
         if (x != smp & channels[y] == channels[length(channels)]) {
           if (!is.null(header)) {
-            mtext(header[x], outer = TRUE, cex = header_text_size, font = header_text_font, col = header_text_col)
+            mtext(header[x],
+              outer = TRUE,
+              cex = header_text_size,
+              font = header_text_font,
+              col = header_text_col
+            )
           }
 
           if (popup == TRUE) {
@@ -466,7 +502,12 @@ setMethod(cyto_plot_compensation,
           }
         } else if (x == smp & channels[y] == channels[length(channels)]) {
           if (!is.null(header)) {
-            mtext(header[x], outer = TRUE, cex = header_text_size, font = header_text_font, col = header_text_col)
+            mtext(header[x],
+              outer = TRUE,
+              cex = header_text_size,
+              font = header_text_font,
+              col = header_text_col
+            )
           }
         }
       })
@@ -488,13 +529,13 @@ setMethod(cyto_plot_compensation,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing gated
 #'   compensation controls and an unstained control.
 #' @param parent name of the population to plot.
-#' @param channel_match name of a csv file with two columns, the first
-#'   called "name" lists the names of each compensation control and the second
+#' @param channel_match name of a csv file with two columns, the first called
+#'   "name" lists the names of each compensation control and the second
 #'   "channel" lists the fluorescent channel associated with each of the
 #'   compensation controls. Use "Unstained" in the channel column for the
 #'   universal unstained control. No need to construct this file manually as
-#'   users will be guided through this process if the \code{channel_match}
-#'   is missing.
+#'   users will be guided through this process if the \code{channel_match} is
+#'   missing.
 #' @param compensate logical indicating whether the samples should be
 #'   compensated prior to plotting, set to FALSE by default. If no spillover
 #'   matrix is supplied to the spillover_file argument the spillover matrix will
@@ -510,8 +551,8 @@ setMethod(cyto_plot_compensation,
 #'   \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 #'   transform the fluorescent channels of the supplied flowFrame. This
 #'   transform object will be used internally to ensure axes labels of the plot
-#'   are appropriately transformed. The transform object will NOT be applied to the
-#'   flowFrame internally and should be applied to the flowFrame prior to
+#'   are appropriately transformed. The transform object will NOT be applied to
+#'   the flowFrame internally and should be applied to the flowFrame prior to
 #'   plotting.
 #' @param layout vector of grid dimensions \code{c(#rows,#columns)} for each
 #'   plot.
@@ -527,7 +568,8 @@ setMethod(cyto_plot_compensation,
 #' @param header_text_font font to use for header text, set to 2 by default.
 #' @param header_text_size text size for header, set to 1 by default.
 #' @param header_text_col colour for header text, set to "black" by default.
-#' @param ... additional arguments passed to \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments passed to
+#'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @importFrom flowWorkspace sampleNames pData getNodes GatingSet
 #' @importFrom flowCore parameters compensate flowSet fsApply
@@ -591,7 +633,11 @@ setMethod(cyto_plot_compensation,
     # Parent
     if (is.null(parent)) {
       parent <- basename(getNodes(gs))[length(getNodes(gs))]
-      message(paste("No parent supplied -", parent, "population will be used for plots."))
+      message(paste(
+        "No parent supplied -",
+        parent,
+        "population will be used for plots."
+      ))
     }
 
     # Extract channels
@@ -605,7 +651,9 @@ setMethod(cyto_plot_compensation,
       if (is.null(spillover)) {
         spill <- fs[[1]]@description$SPILL
       } else if (!is.null(spillover)) {
-        if (inherits(spillover, "matrix") | inherits(spillover, "data.frame") | inherits(spillover, "tibble")) {
+        if (inherits(spillover, "matrix") |
+          inherits(spillover, "data.frame") |
+          inherits(spillover, "tibble")) {
           spill <- spillover
         } else {
           if (getOption("CytoRSuite_wd_check") == TRUE) {
@@ -613,7 +661,7 @@ setMethod(cyto_plot_compensation,
               spill <- read.csv(spillover, header = TRUE, row.names = 1)
               colnames(spill) <- rownames(spill)
             } else {
-              message("Supplied spillover file does not exist in the current working directory. Extracting the spillover matrix from the samples.")
+              message(paste(spillover, "is not in this working directory."))
               spill <- fs[[1]]@description$SPILL
             }
           } else {

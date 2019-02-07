@@ -35,10 +35,10 @@ Statistics for fluorescent intensity are calculated for the entire
 distribution. Only count and percent statistics are supported for 2D
 plots.}
 
-\item{text_x}{vector containing the x co-ordiantes for the plot labels. Set
+\item{text_x}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
 
-\item{text_y}{vector containing the x co-ordiantes for the plot labels. Set
+\item{text_y}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
 
 \item{text_font}{integer [1,2,3,4] passed to \code{text} to alter the font,

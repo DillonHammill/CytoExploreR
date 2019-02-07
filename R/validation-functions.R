@@ -1,10 +1,11 @@
 #' Check Supplied Channels
 #'
-#' \code{cyto_channel_check} will check whether the supplied channels are valid for
-#' the \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{cyto_channel_check} will check whether the supplied channels are valid
+#' for the \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #' \code{\link[flowCore:flowSet-class]{flowset}} or
-#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} . \code{cyto_channel_check}
-#' will also return the channels if the marker names are supplied.
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} .
+#' \code{cyto_channel_check} will also return the channels if the marker names
+#' are supplied.
 #'
 #' @param x an object of class
 #'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
@@ -27,8 +28,8 @@ setGeneric(
 
 #' Check Supplied Channels - flowFrame Method
 #'
-#' \code{cyto_channel_check} will check whether the supplied channels are valid for
-#' the supplied \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+#' \code{cyto_channel_check} will check whether the supplied channels are valid
+#' for the supplied \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #'
 #' @param x an object of class
 #'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
@@ -51,57 +52,75 @@ setGeneric(
 #' fs <- Activation
 #' 
 #' # Assign marker names
-#' chnls <- c("PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A")
+#' chnls <- c(
+#'   "PE-A",
+#'   "Alexa Fluor 488-A",
+#'   "Alexa Fluor 700-A",
+#'   "Alexa Fluor 647-A",
+#'   "7-AAD-A"
+#' )
 #' markers <- c("Va2", "CD8", "CD4", "CD44", "CD69")
 #' names(markers) <- chnls
 #' markernames(fs) <- markers
 #' 
-#' cyto_channel_check(fs[[1]], channels = c("CD4", "CD8"), plot = TRUE)
-#' cyto_channel_check(fs[[1]], channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+#' cyto_channel_check(fs[[1]],
+#'   channels = c("CD4", "CD8"),
+#'   plot = TRUE
+#' )
+#' 
+#' cyto_channel_check(fs[[1]],
+#'   channels = c("CD4", "CD8", "CD44", "CD69"),
+#'   plot = FALSE
+#' )
 #' @export
-setMethod(cyto_channel_check, signature = "flowFrame", definition = function(x,
-                                                                             channels,
-                                                                             plot = TRUE) {
+setMethod(cyto_channel_check,
+  signature = "flowFrame",
+  definition = function(x,
+                          channels,
+                          plot = TRUE) {
 
-  # Incorrect channels length
-  if (plot == TRUE) {
-    if (!length(channels) %in% c(1, 2)) {
-      stop("Invalid number of supplied channels.")
-    }
-  }
-
-  chans <- BiocGenerics::colnames(x)
-  fr.data <- pData(parameters(x))
-
-  # Channel Indices supplied
-  if (is.numeric(channels)) {
-    channels <- chans[channels]
-  }
-
-  # Check if channels match colnames of flowFrame
-  if (all(channels %in% chans)) {
-
-    # Supplied channels are valid
-  } else if (!all(channels %in% chans)) {
-    lapply(channels, function(channel) {
-      if (channel %in% chans) {
-
-
-      } else if (channel %in% fr.data$desc) {
-        channels[channels %in% channel] <<- as.character(fr.data$name[match(channel, fr.data$desc)])
-      } else if (!channel %in% chans & !channel %in% fr.data$desc) {
-        stop(paste(channel, "is not a valid channel for this flowFrame."))
+    # Incorrect channels length
+    if (plot == TRUE) {
+      if (!length(channels) %in% c(1, 2)) {
+        stop("Invalid number of supplied channels.")
       }
-    })
-  }
+    }
 
-  return(channels)
-})
+    chans <- BiocGenerics::colnames(x)
+    fr.data <- pData(parameters(x))
+
+    # Channel Indices supplied
+    if (is.numeric(channels)) {
+      channels <- chans[channels]
+    }
+
+    # Check if channels match colnames of flowFrame
+    if (all(channels %in% chans)) {
+
+      # Supplied channels are valid
+    } else if (!all(channels %in% chans)) {
+      lapply(channels, function(channel) {
+        if (channel %in% chans) {
+
+
+        } else if (channel %in% fr.data$desc) {
+          channels[channels %in% channel] <<- as.character(
+            fr.data$name[match(channel, fr.data$desc)]
+          )
+        } else if (!channel %in% chans & !channel %in% fr.data$desc) {
+          stop(paste(channel, "is not a valid channel for this flowFrame."))
+        }
+      })
+    }
+
+    return(channels)
+  }
+)
 
 #' Check Supplied Channels - flowSet Method
 #'
-#' \code{cyto_channel_check} will check whether the supplied channels are valid for
-#' the supplied \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' \code{cyto_channel_check} will check whether the supplied channels are valid
+#' for the supplied \code{\link[flowCore:flowSet-class]{flowSet}}.
 #'
 #' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
 #' @param channels vector of channel names (e.g. c("PE-A","APC-A")) or marker
@@ -123,60 +142,77 @@ setMethod(cyto_channel_check, signature = "flowFrame", definition = function(x,
 #' fs <- Activation
 #' 
 #' # Assign marker names
-#' chnls <- c("PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A")
+#' chnls <- c(
+#'   "PE-A",
+#'   "Alexa Fluor 488-A",
+#'   "Alexa Fluor 700-A",
+#'   "Alexa Fluor 647-A",
+#'   "7-AAD-A"
+#' )
 #' markers <- c("Va2", "CD8", "CD4", "CD44", "CD69")
 #' names(markers) <- chnls
 #' markernames(fs) <- markers
 #' 
-#' cyto_channel_check(fs, channels = c("CD4", "CD8"), plot = TRUE)
-#' cyto_channel_check(fs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+#' cyto_channel_check(fs,
+#'   channels = c("CD4", "CD8"),
+#'   plot = TRUE
+#' )
+#' cyto_channel_check(fs,
+#'   channels = c("CD4", "CD8", "CD44", "CD69"),
+#'   plot = FALSE
+#' )
 #' @export
-setMethod(cyto_channel_check, signature = "flowSet", definition = function(x,
-                                                                           channels,
-                                                                           plot = TRUE) {
+setMethod(cyto_channel_check,
+  signature = "flowSet",
+  definition = function(x,
+                          channels,
+                          plot = TRUE) {
 
-  # Incorrect channels length
-  if (plot == TRUE) {
-    if (!length(channels) %in% c(1, 2)) {
-      stop("Invalid number of supplied channels.")
-    }
-  }
-
-  # Assign x to fs
-  fs <- x
-
-  chans <- BiocGenerics::colnames(fs[[1]])
-  fr.data <- pData(parameters(fs[[1]]))
-
-  # Channel Indices supplied
-  if (is.numeric(channels)) {
-    channels <- chans[channels]
-  }
-
-  # Check if channels match colnames of flowFrame
-  if (all(channels %in% chans)) {
-
-    # Supplied channels are valid
-  } else if (!all(channels %in% chans)) {
-    lapply(channels, function(channel) {
-      if (channel %in% chans) {
-
-
-      } else if (channel %in% fr.data$desc) {
-        channels[channels %in% channel] <<- as.character(fr.data$name[match(channel, fr.data$desc)])
-      } else if (!channel %in% chans & !channel %in% fr.data$desc) {
-        stop(paste(channel, "is not a valid channel for this flowFrame."))
+    # Incorrect channels length
+    if (plot == TRUE) {
+      if (!length(channels) %in% c(1, 2)) {
+        stop("Invalid number of supplied channels.")
       }
-    })
-  }
+    }
 
-  return(channels)
-})
+    # Assign x to fs
+    fs <- x
+
+    chans <- BiocGenerics::colnames(fs[[1]])
+    fr.data <- pData(parameters(fs[[1]]))
+
+    # Channel Indices supplied
+    if (is.numeric(channels)) {
+      channels <- chans[channels]
+    }
+
+    # Check if channels match colnames of flowFrame
+    if (all(channels %in% chans)) {
+
+      # Supplied channels are valid
+    } else if (!all(channels %in% chans)) {
+      lapply(channels, function(channel) {
+        if (channel %in% chans) {
+
+
+        } else if (channel %in% fr.data$desc) {
+          channels[channels %in% channel] <<- as.character(
+            fr.data$name[match(channel, fr.data$desc)]
+          )
+        } else if (!channel %in% chans & !channel %in% fr.data$desc) {
+          stop(paste(channel, "is not a valid channel for this flowFrame."))
+        }
+      })
+    }
+
+    return(channels)
+  }
+)
 
 #' Check Supplied Channels - GatingSet Method
 #'
-#' \code{cyto_channel_check} will check whether the supplied channels are valid for
-#' the supplied \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' \code{cyto_channel_check} will check whether the supplied channels are valid
+#' for the supplied \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @param x an object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -199,7 +235,13 @@ setMethod(cyto_channel_check, signature = "flowSet", definition = function(x,
 #' fs <- Activation
 #' 
 #' # Assign marker names
-#' chnls <- c("PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A")
+#' chnls <- c(
+#'   "PE-A",
+#'   "Alexa Fluor 488-A",
+#'   "Alexa Fluor 700-A",
+#'   "Alexa Fluor 647-A",
+#'   "7-AAD-A"
+#' )
 #' markers <- c("Va2", "CD8", "CD4", "CD44", "CD69")
 #' names(markers) <- chnls
 #' markernames(fs) <- markers
@@ -207,51 +249,63 @@ setMethod(cyto_channel_check, signature = "flowSet", definition = function(x,
 #' # fs to GatingSet
 #' gs <- GatingSet(fs)
 #' 
-#' cyto_channel_check(gs, channels = c("CD4", "CD8"), plot = TRUE)
-#' cyto_channel_check(gs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+#' cyto_channel_check(gs,
+#'   channels = c("CD4", "CD8"),
+#'   plot = TRUE
+#' )
+#' 
+#' cyto_channel_check(gs,
+#'   channels = c("CD4", "CD8", "CD44", "CD69"),
+#'   plot = FALSE
+#' )
 #' @export
-setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
-                                                                             channels,
-                                                                             plot = TRUE) {
+setMethod(cyto_channel_check,
+  signature = "GatingSet",
+  definition = function(x,
+                          channels,
+                          plot = TRUE) {
 
-  # Incorrect channels length
-  if (plot == TRUE) {
-    if (!length(channels) %in% c(1, 2)) {
-      stop("Invalid number of supplied channels.")
-    }
-  }
-
-  # Assign x to gs
-  gs <- x
-  fs <- getData(gs, "root")
-
-  chans <- BiocGenerics::colnames(fs[[1]])
-  fr.data <- pData(parameters(fs[[1]]))
-
-  # Channel Indices supplied
-  if (is.numeric(channels)) {
-    channels <- chans[channels]
-  }
-
-  # Check if channels match colnames of flowFrame
-  if (all(channels %in% chans)) {
-
-    # Supplied channels are valid
-  } else if (!all(channels %in% chans)) {
-    lapply(channels, function(channel) {
-      if (channel %in% chans) {
-
-
-      } else if (channel %in% fr.data$desc) {
-        channels[channels %in% channel] <<- as.character(fr.data$name[match(channel, fr.data$desc)])
-      } else if (!channel %in% chans & !channel %in% fr.data$desc) {
-        stop(paste(channel, "is not a valid channel for this flowFrame."))
+    # Incorrect channels length
+    if (plot == TRUE) {
+      if (!length(channels) %in% c(1, 2)) {
+        stop("Invalid number of supplied channels.")
       }
-    })
-  }
+    }
 
-  return(channels)
-})
+    # Assign x to gs
+    gs <- x
+    fs <- getData(gs, "root")
+
+    chans <- BiocGenerics::colnames(fs[[1]])
+    fr.data <- pData(parameters(fs[[1]]))
+
+    # Channel Indices supplied
+    if (is.numeric(channels)) {
+      channels <- chans[channels]
+    }
+
+    # Check if channels match colnames of flowFrame
+    if (all(channels %in% chans)) {
+
+      # Supplied channels are valid
+    } else if (!all(channels %in% chans)) {
+      lapply(channels, function(channel) {
+        if (channel %in% chans) {
+
+
+        } else if (channel %in% fr.data$desc) {
+          channels[channels %in% channel] <<- as.character(
+            fr.data$name[match(channel, fr.data$desc)]
+          )
+        } else if (!channel %in% chans & !channel %in% fr.data$desc) {
+          stop(paste(channel, "is not a valid channel for this flowFrame."))
+        }
+      })
+    }
+
+    return(channels)
+  }
+)
 
 #' Check Gate Type(s) Supplied to gate_draw.
 #'
@@ -273,13 +327,54 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
     stop("Supply the names of 4 poulations to alias for quadrant gates.")
   }
 
-  gts <- c("polygon", "Polygon", "p", "P", "rectangle", "Rectangle", "r", "R", "interval", "Interval", "i", "I", "threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B", "ellipse", "Ellipse", "e", "E", "quadrant", "Quadrant", "q", "Q", "web", "Web", "w", "W")
+  gts <- c(
+    "polygon",
+    "Polygon",
+    "p",
+    "P",
+    "rectangle",
+    "Rectangle",
+    "r",
+    "R",
+    "interval",
+    "Interval",
+    "i",
+    "I",
+    "threshold",
+    "Threshold",
+    "t",
+    "T",
+    "boundary",
+    "Boundary",
+    "b",
+    "B",
+    "ellipse",
+    "Ellipse",
+    "e",
+    "E",
+    "quadrant",
+    "Quadrant",
+    "q",
+    "Q",
+    "web",
+    "Web",
+    "w",
+    "W"
+  )
 
   if (!all(type %in% gts)) {
     if (length(type[type %in% gts == FALSE]) >= 2) {
-      stop(paste(paste(type[type %in% gts == FALSE], collapse = " & "), "are not valid gate types for gate_draw!"))
+      stop(
+        paste(
+          paste(type[type %in% gts == FALSE], collapse = " & "),
+          "are not valid gate types for gate_draw!"
+        )
+      )
     } else {
-      stop(paste(type[type %in% gts == FALSE], "is not a valid gate type for gate_draw!"))
+      stop(paste(
+        type[type %in% gts == FALSE],
+        "is not a valid gate type for gate_draw!"
+      ))
     }
   }
 
@@ -300,7 +395,9 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
   type[type %in% c("web", "Web", "w", "W")] <- "web"
 
   # Repeat type to equal length of alias
-  if (length(type) != length(alias) & type[1] != "quadrant" & type[1] != "web") {
+  if (length(type) != length(alias) &
+    type[1] != "quadrant" &
+    type[1] != "web") {
     type <- rep(type, length(alias))
   }
 
@@ -322,11 +419,11 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
 #' @noRd
 .cyto_alias_check <- function(alias = NULL, type) {
   if (is.null(alias)) {
-    stop("The name(s) of the population(s) to be gated must be supplied as the alias argument.")
+    stop("Supply names of populations to 'alias' for checking.")
   }
 
   if (type[1] == "quadrant" & length(alias) != 4) {
-    stop("Supply 4 population names to alias argument to construct quadrant gates.")
+    stop("Supply 4 population names to 'alias' to construct quadrant gates.")
   }
 
   if (length(type) > 1) {
@@ -394,8 +491,8 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
 #' @param alias name of the population of interest.
 #' @param gatingTemplate csv file name of the gatingTemplate.
 #'
-#' @return stops the gating process if an entry already exists in the gatingTemplate for
-#'   the supplied alias.
+#' @return stops the gating process if an entry already exists in the
+#'   gatingTemplate for the supplied alias.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -404,7 +501,7 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
 #' @noRd
 .cyto_gatingTemplate_check <- function(parent, alias, gatingTemplate) {
   if (inherits(gatingTemplate, "gatingTemplate")) {
-    stop("Supply the name of the gatingTemplate csv file and not the gatingTemplate object.")
+    stop("'gatingTemplate' should the name of the gatingTemplate csv file.")
   } else {
     if (getOption("CytoRSuite_wd_check") == TRUE) {
       if (.file_wd_check(gatingTemplate)) {
@@ -412,8 +509,13 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
 
         # Parent and alias entries match file
         if (any(gt$parent %in% parent & gt$alias %in% alias)) {
-          message(paste(paste(gt$alias, collapse = " & "), "already exists in", gatingTemplate, "."))
-          stop("Please supply a different gatingTemplate name or edit the existing gate(s) using gate_edit.")
+          message(
+            paste(
+              paste(gt$alias, collapse = " & "),
+              "already exists in", gatingTemplate, "."
+            )
+          )
+          stop("Supply another gatingTemplate or edit gate(s) using gate_edit.")
         }
       }
     }
@@ -427,7 +529,7 @@ setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x,
 #'   \code{\link[flowWorkspace]{transformerList}} generated by
 #'   \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 #'   transform the fluorescent channels of the samples.
-#' @param inverse logical indicating whther the returned transformList should
+#' @param inverse logical indicating whether the returned transformList should
 #'   contain the inverse transformations.
 #'
 #' @return NULL or object of class
@@ -464,7 +566,7 @@ cyto_trans_check <- function(trans = NULL, inverse = FALSE) {
     return(NULL)
   } else {
     if (!class(trans)[1] %in% c("transformList", "transformerList")) {
-      stop("Supplied trans object should be of class transformList or transformerList.")
+      stop("'trans' should be of class transformList or transformerList.")
     } else {
       if (is(trans, "transformList")) {
         if (inverse) {
@@ -488,8 +590,9 @@ cyto_trans_check <- function(trans = NULL, inverse = FALSE) {
 
 #' Check Overlays Supplied to cyto_plot
 #'
-#' \code{.cyto_overlay_check} will check whether the supplied overlay is supported and
-#' convert it into an appropriate format for use in \code{\link{cyto_plot}}.
+#' \code{.cyto_overlay_check} will check whether the supplied overlay is
+#' supported and convert it into an appropriate format for use in
+#' \code{\link{cyto_plot}}.
 #'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
 #' @param overlay object to overlay.
@@ -509,9 +612,10 @@ setGeneric(
 
 #' Check Overlays Supplied to cyto_plot
 #'
-#' \code{.cyto_overlay_check} will check whether the supplied overlay is supported and
-#' convert it into an appropriate format for use in \code{\link{cyto_plot}}. This
-#' flowFrame method will return a list of flowFrames to overlay.
+#' \code{.cyto_overlay_check} will check whether the supplied overlay is
+#' supported and convert it into an appropriate format for use in
+#' \code{\link{cyto_plot}}. This flowFrame method will return a list of
+#' flowFrames to overlay.
 #'
 #' @param x object of class \code{flowFrame}.
 #' @param overlay object to overlay.
@@ -524,60 +628,71 @@ setGeneric(
 #' @importFrom flowCore sampleFilter fsApply Subset
 #'
 #' @noRd
-setMethod(.cyto_overlay_check, signature = "flowFrame", definition = function(x,
-                                                                              overlay,
-                                                                              display = NULL) {
+setMethod(.cyto_overlay_check,
+  signature = "flowFrame",
+  definition = function(x,
+                          overlay,
+                          display = NULL) {
 
-  # Assign x to fr
-  fr <- x
+    # Assign x to fr
+    fr <- x
 
-  # Check overlay class
-  if (class(overlay) == "flowFrame") {
-    if (!is.null(display)) {
-      overlay <- Subset(overlay, sampleFilter(size = display * BiocGenerics::nrow(overlay)))
-    }
-    overlay <- list(overlay)
-  } else if (class(overlay) == "flowSet") {
-    if (!is.null(display)) {
-      overlay <- fsApply(overlay, function(x) {
-        Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
-      })
-    }
-
-    overlay <- lapply(seq(1, length(overlay), 1), function(x) overlay[[x]])
-  } else if (all(as.vector(sapply(overlay, class)) == "flowFrame")) {
-    if (!is.null(display)) {
-      overlay <- lapply(overlay, function(x) {
-        Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
-      })
-    }
-
-    overlay <- overlay
-  } else if (all(as.vector(sapply(overlay, class)) == "flowSet") & length(overlay) == 1) {
-    if (!is.null(display)) {
-      overlay <- lapply(overlay, function(x) {
-        fsApply(x, function(y) {
-          Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
+    # Check overlay class
+    if (class(overlay) == "flowFrame") {
+      if (!is.null(display)) {
+        n <- BiocGenerics::nrow(overlay)
+        overlay <- Subset(
+          overlay,
+          sampleFilter(size = display * n)
+        )
+      }
+      overlay <- list(overlay)
+    } else if (class(overlay) == "flowSet") {
+      if (!is.null(display)) {
+        overlay <- fsApply(overlay, function(x) {
+          Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
-      })
+      }
+
+      overlay <- lapply(seq(1, length(overlay), 1), function(x) overlay[[x]])
+    } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
+      if (!is.null(display)) {
+        overlay <- lapply(overlay, function(x) {
+          Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
+        })
+      }
+
+      overlay <- overlay
+    } else if (all(unlist(lapply(overlay, class)) == "flowSet") &
+      length(overlay) == 1) {
+      if (!is.null(display)) {
+        overlay <- lapply(overlay, function(x) {
+          fsApply(x, function(y) {
+            Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
+          })
+        })
+      }
+
+      overlay <- lapply(overlay, function(x) {
+        lapply(seq(1, length(x), 1), function(y) x[[y]])
+      })[[1]]
+    } else {
+      stop(paste("'overlay' must be a flowFrame, flowSet,",
+         "list of flowFrames or a list containing a flowSet.",
+         sep = " "))
     }
 
-    overlay <- lapply(overlay, function(x) {
-      lapply(seq(1, length(x), 1), function(y) x[[y]])
-    })[[1]]
-  } else {
-    stop("Overlay should be either a flowFrame, flowSet, list of flowFrames or a list containing a flowSet.")
+    # return is a list of flowFrames to overlay
+    return(overlay)
   }
-
-  # return is a list of flowFrames to overlay
-  return(overlay)
-})
+)
 
 #' Check Overlays Supplied to cyto_plot
 #'
-#' \code{.cyto_overlay_check} will check whether the supplied overlay is supported and
-#' convert it into an appropriate format for use in \code{\link{cyto_plot}}. This
-#' flowSet method will return a list of flowFrame lists to overlay.
+#' \code{.cyto_overlay_check} will check whether the supplied overlay is
+#' supported and convert it into an appropriate format for use in
+#' \code{\link{cyto_plot}}. This flowSet method will return a list of flowFrame
+#' lists to overlay.
 #'
 #' @param x object of class \code{flowSet}.
 #' @param overlay object to overlay.
@@ -590,88 +705,103 @@ setMethod(.cyto_overlay_check, signature = "flowFrame", definition = function(x,
 #' @importFrom flowCore sampleFilter Subset fsApply
 #'
 #' @noRd
-setMethod(.cyto_overlay_check, signature = "flowSet", definition = function(x, overlay, display = NULL) {
+setMethod(.cyto_overlay_check,
+  signature = "flowSet",
+  definition = function(x,
+                          overlay,
+                          display = NULL) {
 
-  # Assign x to fs
-  fs <- x
+    # Assign x to fs
+    fs <- x
 
-  # Check overlay class
-  if (class(overlay) == "flowFrame") {
-    if (!is.null(display)) {
-      overlay <- Subset(overlay, sampleFilter(size = display * BiocGenerics::nrow(overlay)))
-    }
-
-    overlay <- lapply(rep(list(overlay), length(fs)), "list")
-  } else if (class(overlay) == "flowSet") {
-    if (!is.null(display)) {
-      overlay <- fsApply(overlay, function(x) {
-        Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
-      })
-    }
-
-    overlay <- lapply(lapply(seq(1, length(overlay), 1), function(x) overlay[[x]]), "list")
-  } else if (all(as.vector(sapply(overlay, class)) == "flowFrame")) {
-    if (length(overlay) == 1) {
-      overlay <- lapply(rep(list(overlay[[1]]), length(fs)), "list")
-    } else {
-      if (length(overlay) != length(fs)) {
-        stop("Supplied list of flowFrames should be of the same length as the flowSet.")
+    # Check overlay class
+    if (class(overlay) == "flowFrame") {
+      if (!is.null(display)) {
+        n <- BiocGenerics::nrow(overlay)
+        overlay <- Subset(overlay, sampleFilter(size = display * n))
       }
-      overlay <- lapply(overlay, "list")
-    }
 
-    if (!is.null(display)) {
-      overlay <- lapply(overlay, function(x) {
-        Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
-      })
-    }
-  } else if (all(as.vector(sapply(overlay, class)) == "flowSet")) {
-    if (!all(as.vector(sapply(overlay, length)) == length(fs))) {
-      stop("Each flowSet in supplied list should be of the same length as the supplied flowSet.")
-    }
-
-    if (!is.null(display)) {
-      overlay <- lapply(overlay, function(x) {
-        fsApply(x, function(y) {
-          Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
+      overlay <- lapply(rep(list(overlay), length(fs)), "list")
+    } else if (class(overlay) == "flowSet") {
+      if (!is.null(display)) {
+        overlay <- fsApply(overlay, function(x) {
+          Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
-      })
-    }
+      }
 
-    # list of flowFrame lists
-    overlay <- lapply(overlay, function(x) {
-      lapply(seq(1, length(x), 1), function(y) x[[y]])
-    })
-    overlay <- lapply(seq_along(fs), function(x) {
-      lapply(overlay, `[[`, x)
-    })
-  } else if (all(do.call("rbind", lapply(overlay, function(x) {
-    sapply(x, class)
-  })) == "flowFrame")) {
-    if (length(overlay) != length(fs)) {
-      stop("Overlay should be a list of flowFrames lists to overlay on each flowFrame in the flowSet.")
-    }
+      overlay <- lapply(lapply(
+        seq(1, length(overlay), 1),
+        function(x) overlay[[x]]
+      ), "list")
+    } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
+      if (length(overlay) == 1) {
+        overlay <- lapply(rep(list(overlay[[1]]), length(fs)), "list")
+      } else {
+        if (length(overlay) != length(fs)) {
+          stop(paste("Supplied list of flowFrames must be of the", 
+             "same length as the flowSet.", sep = " "))
+        }
+        overlay <- lapply(overlay, "list")
+      }
 
-    if (!is.null(display)) {
-      overlay <- lapply(overlay, function(x) {
-        lapply(x, function(y) {
-          Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
+      if (!is.null(display)) {
+        overlay <- lapply(overlay, function(x) {
+          Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
+      }
+    } else if (all(unlist(lapply(overlay, class)) == "flowSet")) {
+      if (!all(unlist(lapply(overlay, length)) == length(fs))) {
+        stop(paste("Each flowSet in supplied list should be of the", 
+           "same length as the supplied flowSet.", sep = " "))
+      }
+
+      if (!is.null(display)) {
+        overlay <- lapply(overlay, function(x) {
+          fsApply(x, function(y) {
+            Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
+          })
+        })
+      }
+
+      # list of flowFrame lists
+      overlay <- lapply(overlay, function(x) {
+        lapply(seq(1, length(x), 1), function(y) x[[y]])
       })
+      overlay <- lapply(seq_along(fs), function(x) {
+        lapply(overlay, `[[`, x)
+      })
+    } else if (all(do.call("rbind", lapply(overlay, function(x) {
+      lapply(x, class)
+    })) == "flowFrame")) {
+      if (length(overlay) != length(fs)) {
+        stop(paste("'overlay' should be a list of flowFrames lists to overlay", 
+           "on each flowFrame in the flowSet.", sep = " "))
+      }
+
+      if (!is.null(display)) {
+        overlay <- lapply(overlay, function(x) {
+          lapply(x, function(y) {
+            Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
+          })
+        })
+      }
+    } else {
+      stop(paste("'overlay' must be a flowFrame, flowSet,",
+        "list of flowFrames or a list of flowSets.", sep = " "))
     }
-  } else {
-    stop("Overlay should be either a flowFrame, flowSet, list of flowFrames or a list of flowSets.")
+
+    # return is a list of flowFrame lists to overlay
+    # 1 flowFrame list per flowFrame in fs
+    return(overlay)
   }
-
-  # return is a list of flowFrame lists to overlay -  1 flowFrame list per flowFrame in fs
-  return(overlay)
-})
+)
 
 #' Check Overlays Supplied to cyto_plot
 #'
-#' \code{.cyto_overlay_check} will check whether the supplied overlay is supported and
-#' convert it into an appropriate format for use in \code{\link{cyto_plot}}. This
-#' flowSet method will return a list of flowFrame lists to overlay.
+#' \code{.cyto_overlay_check} will check whether the supplied overlay is
+#' supported and convert it into an appropriate format for use in
+#' \code{\link{cyto_plot}}. This flowSet method will return a list of flowFrame
+#' lists to overlay.
 #'
 #' @param x object of class \code{GatingHierarchy}.
 #' @param overlay object to overlay.
@@ -684,38 +814,49 @@ setMethod(.cyto_overlay_check, signature = "flowSet", definition = function(x, o
 #' @importFrom flowWorkspace getData
 #'
 #' @noRd
-setMethod(.cyto_overlay_check, signature = "GatingHierarchy", definition = function(x, overlay, display = NULL) {
+setMethod(.cyto_overlay_check,
+  signature = "GatingHierarchy",
+  definition = function(x,
+                          overlay,
+                          display = NULL) {
 
-  # Assign x to gh
-  gh <- x
+    # Assign x to gh
+    gh <- x
 
-  # Extract flowFrame
-  fr <- getData(gh, "root")
+    # Extract flowFrame
+    fr <- getData(gh, "root")
 
-  # Overlay should be character vector of population names
-  if (inherits(overlay, "flowFrame") | inherits(overlay, "flowSet") | inherits(overlay, "list")) {
+    # Overlay should be character vector of population names
+    if (inherits(overlay, "flowFrame") |
+      inherits(overlay, "flowSet") |
+      inherits(overlay, "list")) {
 
-  } else if (inherits(overlay, "character")) {
-    if (!all(overlay %in% basename(getNodes(gh)))) {
-      stop("Supplied population(s) for overlay does not exist in the GatingHierarchy.")
-    } else {
-      nms <- overlay
-      overlay <- lapply(overlay, function(x) {
-        getData(gh, x)
-      })
-      names(overlay) <- nms
+    } else if (inherits(overlay, "character")) {
+      if (!all(overlay %in% basename(getNodes(gh)))) {
+        stop("'overlay' does not exist in the GatingHierarchy.")
+      } else {
+        nms <- overlay
+        overlay <- lapply(overlay, function(x) {
+          getData(gh, x)
+        })
+        names(overlay) <- nms
+      }
     }
-  }
 
-  # .cyto_overlay_check to convert overlay to correct format
-  .cyto_overlay_check(fr, overlay = overlay, display = display)
-})
+    # .cyto_overlay_check to convert overlay to correct format
+    .cyto_overlay_check(fr,
+      overlay = overlay,
+      display = display
+    )
+  }
+)
 
 #' Check Overlays Supplied to cyto_plot
 #'
-#' \code{.cyto_overlay_check} will check whether the supplied overlay is supported and
-#' convert it into an appropriate format for use in \code{\link{cyto_plot}}. This
-#' flowSet method will return a list of flowFrame lists to overlay.
+#' \code{.cyto_overlay_check} will check whether the supplied overlay is
+#' supported and convert it into an appropriate format for use in
+#' \code{\link{cyto_plot}}. This flowSet method will return a list of flowFrame
+#' lists to overlay.
 #'
 #' @param x object of class \code{GatingSet}.
 #' @param overlay object to overlay.
@@ -728,32 +869,42 @@ setMethod(.cyto_overlay_check, signature = "GatingHierarchy", definition = funct
 #' @importFrom flowWorkspace getData
 #'
 #' @noRd
-setMethod(.cyto_overlay_check, signature = "GatingSet", definition = function(x, overlay, display = NULL) {
+setMethod(.cyto_overlay_check,
+  signature = "GatingSet",
+  definition = function(x,
+                          overlay,
+                          display = NULL) {
 
-  # Assign x to gh
-  gs <- x
+    # Assign x to gh
+    gs <- x
 
-  # Extract flowFrame
-  fs <- getData(gs, "root")
+    # Extract flowFrame
+    fs <- getData(gs, "root")
 
-  # Overlay should be character vector of population names
-  if (inherits(overlay, "flowFrame") | inherits(overlay, "flowSet") | inherits(overlay, "list")) {
+    # Overlay should be character vector of population names
+    if (inherits(overlay, "flowFrame") |
+      inherits(overlay, "flowSet") |
+      inherits(overlay, "list")) {
 
-  } else if (inherits(overlay, "character")) {
-    if (!all(overlay %in% basename(getNodes(gs)))) {
-      stop("Supplied population(s) for overlay does not exist in the GatingHierarchy.")
-    } else {
-      nms <- overlay
-      overlay <- lapply(overlay, function(x) {
-        getData(gs, x)
-      })
-      names(overlay) <- nms
+    } else if (inherits(overlay, "character")) {
+      if (!all(overlay %in% basename(getNodes(gs)))) {
+        stop("overlay' does not exist in the GatingHierarchy.")
+      } else {
+        nms <- overlay
+        overlay <- lapply(overlay, function(x) {
+          getData(gs, x)
+        })
+        names(overlay) <- nms
+      }
     }
-  }
 
-  # .cyto_overlay_check to convert overlay to correct format
-  .cyto_overlay_check(fs, overlay = overlay, display = display)
-})
+    # .cyto_overlay_check to convert overlay to correct format
+    .cyto_overlay_check(fs,
+      overlay = overlay,
+      display = display
+    )
+  }
+)
 
 #' Check Statistic for ComputeStats
 #'
@@ -763,7 +914,25 @@ setMethod(.cyto_overlay_check, signature = "GatingSet", definition = function(x,
 #'
 #' @noRd
 .cyto_stat_check <- function(stat) {
-  if (!stat %in% c("mean", "Mean", "median", "Median", "mode", "Mode", "count", "Count", "freq", "Freq", "geo mean", "Geo mean", "Geo Mean", "CV", "cv", "CVI", "cvi")) {
+  if (!stat %in% c(
+    "mean",
+    "Mean",
+    "median",
+    "Median",
+    "mode",
+    "Mode",
+    "count",
+    "Count",
+    "freq",
+    "Freq",
+    "geo mean",
+    "Geo mean",
+    "Geo Mean",
+    "CV",
+    "cv",
+    "CVI",
+    "cvi"
+  )) {
     stop("Supplied statistic not supported.")
   }
 
@@ -799,7 +968,9 @@ setMethod(.cyto_overlay_check, signature = "GatingSet", definition = function(x,
 .cyto_gate_check <- function(gate, smp) {
 
   # A single gate supplied
-  if (inherits(gate, "rectangleGate") | inherits(gate, "polygonGate") | inherits(gate, "ellipsoidGate")) {
+  if (inherits(gate, "rectangleGate") |
+    inherits(gate, "polygonGate") |
+    inherits(gate, "ellipsoidGate")) {
     gate <- rep(list(list(gate)), smp)
 
     # A filters object supplied
@@ -810,7 +981,8 @@ setMethod(.cyto_overlay_check, signature = "GatingSet", definition = function(x,
   } else if (inherits(gate, "list")) {
 
     # List of individual gates
-    if (all(as.vector(sapply(gate, class)) %in% c("rectangleGate", "polygonGate", "ellipsoidGate"))) {
+    if (all(unlist(lapply(gate, class)) %in%
+      c("rectangleGate", "polygonGate", "ellipsoidGate"))) {
 
       # Assume 1 gate per sample
       if (length(gate) == smp) {
@@ -822,7 +994,7 @@ setMethod(.cyto_overlay_check, signature = "GatingSet", definition = function(x,
       }
 
       # List of filters objects
-    } else if (all(as.vector(sapply(gate, class)) == "filters")) {
+    } else if (all(unlist(lapply(gate, class)) == "filters")) {
 
       # Assume 1 filters object per sample
       gate <- rep(gate, length.out = smp)
