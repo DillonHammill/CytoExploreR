@@ -315,3 +315,9 @@ There is a Changelog for the GitHub `master` branch which will reflect any updat
 # Getting help
 
 The [Get Started](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite.html) and [Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html) sections on the **CytoRSuite** website are your first port of call if you require any help. For more detailed workflows refer the **Articles** tab. If you encounter any issues with the functioning of the package refer to these [issues](https://github.com/DillonHammill/CytoRSuite/issues) to see if the problem has been identified and resolved. Feel free to post new issues on the GitHub page if they have not already been addressed.
+
+# Code of conduct
+
+Please note that the **CytoRSuite** project is released with a
+[Contributor Code of Conduct](CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.

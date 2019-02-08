@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--08-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--09-yellowgreen.svg)](/commits/master)
 
 **CytoRSuite** is designed to provide an interactive interface for the
 analysis of flow cytometry data in R. If you are new to **CytoRSuite**
@@ -326,3 +326,9 @@ refer to these
 [issues](https://github.com/DillonHammill/CytoRSuite/issues) to see if
 the problem has been identified and resolved. Feel free to post new
 issues on the GitHub page if they have not already been addressed.
+
+# Code of conduct
+
+Please note that the **CytoRSuite** project is released with a
+[Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to
+this project, you agree to abide by its terms.
