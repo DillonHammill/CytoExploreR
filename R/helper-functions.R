@@ -335,7 +335,7 @@ cyto_sample <- function(fr, display) {
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters markernames markernames<-
-#' @importFrom utils edit
+#' @importFrom utils edit write.csv
 #'
 #' @return NULL and update marker names of \code{x}.
 #'
@@ -373,6 +373,12 @@ cyto_markers <- function(x) {
   colnames(dt) <- c("Channel", "Marker")
   rownames(dt) <- NULL
 
+  # Write result to csv file
+  write.csv(dt, paste0(
+    format(Sys.Date(), "%d%m%y"),
+    "-Experiment-Markers.csv"
+  ), row.names = FALSE)
+  
   # Channels with markers
   chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
 
@@ -397,12 +403,13 @@ cyto_markers <- function(x) {
 #' Interactively edit pData Information for a flowSet or GatingSet
 #'
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param file name of csv file containing experimental information.
 #'
 #' @return NULL and update pData for the \code{flowSet} or \code{GatingSet}.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore pData<-
-#' @importFrom utils edit
+#' @importFrom utils edit write.csv read.csv
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -418,7 +425,7 @@ cyto_markers <- function(x) {
 #' }
 #' 
 #' @export
-cyto_annotate <- function(x) {
+cyto_annotate <- function(x, file = NULL) {
 
   # x should be a flowSet or GatingSet
   if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
@@ -428,22 +435,35 @@ cyto_annotate <- function(x) {
   # Assign x to cyto
   cyto <- x
 
-  # Extract pData
-  pd <- pData(cyto)
-  rownames(pd) <- NULL
+  # File missing
+  if(is.null(file)){
+    
+    # Extract pData
+    pd <- pData(cyto)
+    rownames(pd) <- NULL
 
-  # Edit pData
-  pd <- edit(pd)
-  rownames(pd) <- pd$name
+    # Edit pData
+    pd <- edit(pd)
+    rownames(pd) <- pd$name
 
-  # Update pData
-  pData(cyto) <- pd
+    # Update pData
+    pData(cyto) <- pd
 
-  # Write to csv "Experiment-Details.csv"
-  write.csv(pData(cyto), paste0(
-    format(Sys.Date(), "%d%m%y"),
-    "-Experiment-Details.csv"
-  ), row.names = FALSE)
+    # Write to csv "Experiment-Details.csv"
+    write.csv(pData(cyto), paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-Experiment-Details.csv"
+    ), row.names = FALSE)
+    
+  }else{
+    
+    # Read in file
+    pd <- read.csv(file, header = TRUE)
+    
+    # Update pData
+    pData(cyto) <- pd
+    
+  }
   
   # Update globally
   assign(deparse(substitute(x)), cyto, envir = globalenv())

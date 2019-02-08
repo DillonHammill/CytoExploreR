@@ -1608,12 +1608,12 @@ setMethod(cyto_plot,
     }
 
     # group_by
-    if (group_by == TRUE) {
+    if (group_by[1] == TRUE) {
       group_by <- "all"
     }
 
     # group_by?
-    if (group_by != FALSE) {
+    if (group_by[1] != FALSE) {
 
       # check group_by
       if (all(!group_by %in% c("all", colnames(pData(gs))))) {
@@ -1697,7 +1697,7 @@ setMethod(cyto_plot,
       if (all(is.na(label_text)) & !is.null(alias)) {
         label_text <- alias
       }
-    } else if (group_by == FALSE) {
+    } else if (group_by[1] == FALSE) {
 
       # Extract population
       fs <- getData(gs, parent)

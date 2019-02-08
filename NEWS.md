@@ -1,7 +1,9 @@
 # CytoRSuite 0.9.9
 
 * Improved support for editing constructed with multiple grouping variables using `gate_edit`.
-- Updated `cyto_annotate` to save pData information to a csv file for future use.
+* `cyto_annotate` to save pData information to a csv file ("Experiment-Details.csv") for future use.
+* `cyto_annotate` can now accept a csv file containing experiment details instaed of manually re-entering this information.
+* `cyto_markers` updated to save markers to csv file ("Experiment-Markers.csv") for future use.
 
 # CytoRSuite 0.9.8
 

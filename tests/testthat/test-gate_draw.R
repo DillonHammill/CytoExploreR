@@ -148,12 +148,12 @@ test_that("gate_draw GatingSet method", {
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z","K","L","M"))
   
   gby <- gate_draw(gs1, 
-                   group_by = "OVAConc", 
-                   parent = "root", 
-                   alias = c("X"), 
-                   channels = c("FSC-A","SSC-A"), 
-                   type = "p", 
-                   display = 0.1)
+            group_by = "OVAConc", 
+            parent = "root", 
+            alias = c("X"), 
+            channels = c("FSC-A","SSC-A"), 
+            type = "p", 
+            display = 0.1)
 
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z","K","L","M","X"))
   

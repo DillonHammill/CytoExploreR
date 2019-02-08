@@ -4,10 +4,12 @@
 \alias{cyto_annotate}
 \title{Interactively edit pData Information for a flowSet or GatingSet}
 \usage{
-cyto_annotate(x)
+cyto_annotate(x, file = NULL)
 }
 \arguments{
 \item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+
+\item{file}{name of csv file containing experimental information.}
 }
 \value{
 NULL and update pData for the \code{flowSet} or \code{GatingSet}.
