@@ -1,10 +1,10 @@
 ---
-title: "CytoRSuite: Manual & Automated Gating"
+title: "CytoRSuite: Manual and Automated Gating"
 author: "Dillon Hammill"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{CytoRSuite: Manual & Automated Gating}
+  %\VignetteIndexEntry{CytoRSuite: Manual and Automated Gating}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
