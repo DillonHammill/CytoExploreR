@@ -23,7 +23,7 @@ Here we aim to demonstrate the use of both manual and automated gating approache
 
 ## 2.1 Preparation of Activation Dataset for Gating
 
-```{r, eval = FALSE}
+```{r, message = FALSE, warning = FALSE}
 library(CytoRSuite) # openCyto is imported with CytoRSuite
 library(CytoRSuiteData)
 
@@ -44,6 +44,7 @@ gs <- transform(gs, trans)
 ## 2.2 Manually Gate `Cells` 
 
 ```{r, eval = FALSE}
+# gate_draw returns gatingTemplate entry
 template <- gate_draw(gs,
                       parent = "root",
                       alias = "Cells",
