@@ -5,6 +5,7 @@
 * `cyto_annotate` can now accept a csv file containing experiment details instead of manually re-entering this information.
 * `cyto_markers` updated to save markers to csv file ("Experiment-Markers.csv") for future use.
 * Added Contributors Code of Conduct.
+* New 'Manual & Automated Gating' vignette.
 
 # CytoRSuite 0.9.8
 

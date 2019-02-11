@@ -1,0 +1,164 @@
+---
+title: "CytoRSuite: Manual & Automated Gating"
+author: "Dillon Hammill"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CytoRSuite: Manual & Automated Gating}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Overview
+
+**CytoRSuite** is built on and shares the same gatingTemplate as the **openCyto** package. This means that users can take advantage of both the manual gating in **CytoRSuite** and the automated gating in **openCyto** for their analyses. Furthermore, **CytoRSuite** users can take advantage of some of the other features of the **openCyto** gatingTemplate, such as boolean and reference gates. More information on the **openCyto** gatingTemplate can be found [here](http://bioconductor.org/packages/release/bioc/vignettes/openCyto/inst/doc/HowToWriteCSVTemplate.html).
+
+# 2. Demonstration
+
+Here we aim to demonstrate the use of both manual and automated gating approaches using **CytoRSuite** and **openCyto**. For demonstration purposes we will use the `Activation` dataset shipped with **CytoRSuiteData**.
+
+## 2.1 Preparation of Activation Dataset for Gating
+
+```{r, eval = FALSE}
+library(CytoRSuite) # openCyto is imported with CytoRSuite
+library(CytoRSuiteData)
+
+# Assign Activation flowSet to fs
+fs <- Activation
+
+# Add fs to a GatingSet
+gs <- GatingSet(fs)
+
+# Apply compensation
+gs <- compensate(gs, fs[[1]]@description$SPILL)
+
+# Transform fluorescent channels
+trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
+gs <- transform(gs, trans)
+```
+
+## 2.2 Manually Gate `Cells` 
+
+```{r, eval = FALSE}
+template <- gate_draw(gs,
+                      parent = "root",
+                      alias = "Cells",
+                      channels = c("FSC-A","SSC-A"))
+```
+
+## 2.3 Manually Gate `Single Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, gate_draw(gs,
+                                      parent = "Cells",
+                                      alias = "Single Cells",
+                                      channels = c("FSC-A","FSC-H")))
+```
+
+## 2.4 Manually Gate `Live Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, gate_draw(gs,
+                                      parent = "Single Cells",
+                                      alias = "Live Cells",
+                                      channels = c("Alexa Fluor 405-A",
+                                                   "Alexa Fluor 430-A")))
+```
+
+## 2.5 Automatically Gate `T Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, app_pop(gs,
+                                    alias = "T Cells",
+                                    pop = "+",
+                                    parent = "Live Cells",
+                                    dims = "APC-Cy7-A,PE-A",
+                                    gating_method = "flowClust",
+                                    gating_args = "K=3,target=c(0,3)"))
+```
+
+## 2.6 Automatically Gate `CD4 T Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, app_pop(gs,
+                                    alias = "CD4 T Cells",
+                                    pop = "+",
+                                    parent = "T Cells",
+                                    dims = "Alexa Fluor 700-A,Alexa Fluor 488-A",
+                                    gating_method = "flowClust",
+                                    gating_args = "K=3,target=c(3,0)"))
+```
+
+## 2.7 Automatically Gate `CD8 T Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, app_pop(gs,
+                                    alias = "CD8 T Cells",
+                                    pop = "+",
+                                    parent = "T Cells",
+                                    dims = "Alexa Fluor 700-A,Alexa Fluor 488-A",
+                                    gating_method = "flowClust",
+                                    gating_args = "K=3,target=c(0,3)"))
+```
+
+## 2.8 Manually Gate `CD69+ CD4 T Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, gate_draw(gs,
+                                      parent = "CD4 T Cells",
+                                      alias = "CD69+ CD4 T Cells",
+                                      channels = c("Alexa Fluor 647-A",
+                                                   "7-AAD-A"),
+                                      type = "interval",
+                                      axis = "y"))
+```
+
+## 2.9 Manually Gate `CD69+ CD8 T Cells`
+
+```{r, eval = FALSE}
+template <- rbind(template, gate_draw(gs,
+                                      parent = "CD8 T Cells",
+                                      alias = "CD69+ CD8 T Cells",
+                                      channels = c("Alexa Fluor 647-A",
+                                                   "7-AAD-A"),
+                                      type = "interval",
+                                      axis = "y"))
+```
+
+## 2.10 Save gatingTemplate for Future Use
+
+```{r, eval = FALSE}
+write.csv(template, "gatingTemplate.csv", row.names = FALSE)
+```
+
+## 2.11 Applying a Saved gatingTemplate
+
+```{r, eval = FALSE}
+# Assign Activation flowSet to fs
+fs <- Activation
+
+# Add fs to a GatingSet
+gs <- GatingSet(fs)
+
+# Apply compensation
+gs <- compensate(gs, fs[[1]]@description$SPILL)
+
+# Transform fluorescent channels
+trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
+gs <- transform(gs, trans)
+
+# Apply gatingTemplate
+gt <- gatingTemplate("gatingTemplate.csv")
+gating(gt,gs)
+
+# Visualise Gating Scheme
+cyto_plot_gating_scheme(gs[[4]])
+```
+
+# 3. More Information
+
+For more information on manual gating using **CytoRSuite** refer to [Gating Functions](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite-Gating-Functions.html) and [Gate Manipulation](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite-Gate-Manipulation.html) vignettes. For more information on automated gating using **openCyto** refer to this [Gating Methods](https://www.bioconductor.org/packages/devel/bioc/vignettes/openCyto/inst/doc/HowToAutoGating.html) vignette.
