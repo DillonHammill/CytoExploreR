@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 # Overview
 
-The main features of CytoRSuite will be documented in separate vignettes for "Compensation", "Gating functions", "Visualisation" and "Automated and manual gating" respectively. Before we dive into the details, let's demonstrate how simple it can be to analyse some in vitro T cell activation data using **CytoRSuite**. The Activation dataset used in this vignette is shipped with CytoRSuiteData. For more details on this dataset see **?Activation**.
+The main features of CytoRSuite will be documented in separate vignettes for "Compensation", "Gating functions", "Visualisation" and "Manual and Automated gating" respectively. Before we dive into the details, let's demonstrate how simple it can be to analyse some in vitro T cell activation data using **CytoRSuite**. The Activation dataset used in this vignette is shipped with CytoRSuiteData. For more details on this dataset see **?Activation**.
 
 ## 1. Load Required Packages
 
