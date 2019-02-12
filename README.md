@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--11-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--12-yellowgreen.svg)](/commits/master)
 
 **CytoRSuite** is designed to provide an interactive interface for the
 analysis of flow cytometry data in R. If you are new to **CytoRSuite**
@@ -174,7 +174,7 @@ described below:
                    spillover = "Spillover-Matrix.csv")
     ```
     
-    <img src="man/figures/README-spillover_edit.PNG" width="100%" height="100%" style="display: block; margin: auto;" />
+    <img src="man/figures/README-spillover_edit.png" width="100%" height="100%" style="display: block; margin: auto;" />
 
 2.  Analyse samples
     
@@ -193,7 +193,7 @@ described below:
     cyto_markers(fs)
     ```
     
-    <img src="man/figures/README-cyto_markers.PNG" width="40%" height="40%" style="display: block; margin: auto;" />
+    <img src="man/figures/README-cyto_markers.png" width="40%" height="40%" style="display: block; margin: auto;" />
     
     2.3 Annotate samples with experimental details using
     `cyto_annotate`
@@ -202,7 +202,7 @@ described below:
     cyto_annotate(fs)
     ```
     
-    <img src="man/figures/README-cyto_annotate.PNG" width="30%" height="30%" style="display: block; margin: auto;" />
+    <img src="man/figures/README-cyto_annotate.png" width="30%" height="30%" style="display: block; margin: auto;" />
     
     2.4 Add samples to GatingSet
     

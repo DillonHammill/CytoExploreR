@@ -66,7 +66,7 @@ cyto_markers(fs)
 ```
 
 ```{r echo=FALSE, out.width='30%', out.height='30%',fig.align="center"}
-knitr::include_graphics('cyto_markers.PNG')
+knitr::include_graphics('cyto_markers.png')
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
@@ -92,7 +92,7 @@ cyto_annotate(fs)
 ```
 
 ```{r echo=FALSE, out.width='30%', out.height='30%',fig.align="center"}
-knitr::include_graphics('cyto_annotate.PNG')
+knitr::include_graphics('cyto_annotate.png')
 ```
 
 ```{r, eval = TRUE, echo = FALSE}

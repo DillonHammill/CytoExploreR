@@ -168,7 +168,7 @@ The full details of how **CytoRSuite** works will be tackled individually in the
     ```
     
     ```{r echo=FALSE, out.width='100%', out.height='100%',fig.align="center"}
-    knitr::include_graphics('man/figures/README-spillover_edit.PNG')
+    knitr::include_graphics('man/figures/README-spillover_edit.png')
     ```
     
 2. Analyse samples
@@ -188,7 +188,7 @@ The full details of how **CytoRSuite** works will be tackled individually in the
     ```
     
     ```{r echo=FALSE, out.width='40%', out.height='40%',fig.align="center"}
-    knitr::include_graphics('man/figures/README-cyto_markers.PNG')
+    knitr::include_graphics('man/figures/README-cyto_markers.png')
     ```
     
     2.3 Annotate samples with experimental details using `cyto_annotate`
@@ -198,7 +198,7 @@ The full details of how **CytoRSuite** works will be tackled individually in the
     ```
 
     ```{r echo=FALSE, out.width='30%', out.height='30%',fig.align="center"}
-    knitr::include_graphics('man/figures/README-cyto_annotate.PNG')
+    knitr::include_graphics('man/figures/README-cyto_annotate.png')
     ```
 
     2.4 Add samples to GatingSet

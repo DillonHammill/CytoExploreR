@@ -105,7 +105,7 @@
       <h1>Getting Started with CytoRSuite</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-02-11</h4>
+            <h4 class="date">2019-02-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite.Rmd"><code>vignettes/CytoRSuite.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite.Rmd</code></div>
@@ -155,7 +155,7 @@
 <p>Assigning marker names to channels will be useful downstream as we can refer to channels by their marker rather than by name. <code>cyto_markers</code> provides an editable table to make marker assignment easy. The details in the flowSet will automatically be updated when the window is closed. Channels without markers should have empty “Marker” entries. Edit the table to match the image below:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># Assign markers</span></a>
 <a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw"><a href="../reference/cyto_markers.html">cyto_markers</a></span>(fs)</a></code></pre></div>
-<p><img src="cyto_markers.PNG" width="30%" height="30%" style="display: block; margin: auto;"></p>
+<p><img src="cyto_markers.png" width="30%" height="30%" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># Markers added to desc column in details for each flowFrame</span></a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">fs[[<span class="dv">1</span>]]</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co">#&gt; flowFrame object 'Activation1.fcs'</span></a>
@@ -187,7 +187,7 @@
 <p>Experimental details can be associated with each sample using <code>cyto_annotate</code> which uses the same interface as <code>cyto_markers</code> to interactively edit pData information. This information will be used downstream for grouping samples prior to gating and will be included in the exported statistics tables to aid in statistical analysis. Modify the table to include a variable “OVAConc” with values 0, 0.005, 0.05 and 0.5 as shown in the image.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># Associate each samples with experimental information</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="../reference/cyto_annotate.html">cyto_annotate</a></span>(fs)</a></code></pre></div>
-<p><img src="cyto_annotate.PNG" width="30%" height="30%" style="display: block; margin: auto;"></p>
+<p><img src="cyto_annotate.png" width="30%" height="30%" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># pData information updated with OVAConc column</span></a>
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">pData</span>(fs)</a>
 <a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">#&gt;                            name OVAConc</span></a>

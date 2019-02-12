@@ -34,9 +34,9 @@ The **CytoRSuite** compensation workflow is as follows:
 
 Traditionally, all compensation controls including an universal unstained control are stored in a folder called "Compensation Controls" in the current working directory. For demonstration purposes we will use the `Compensation` dataset supplied in **CytoRSuiteData** which is a flowSet containing 5 single stain compensation controls and a universal unstained control.
 
-```{r, eval = TRUE}
-library(CytoRSuite, quietly = TRUE)
-library(CytoRSuiteData, quietly = TRUE)
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+library(CytoRSuite)
+library(CytoRSuiteData)
 
 # Assign Compensation flowSet to fs
 fs <- Compensation
@@ -44,7 +44,7 @@ fs <- Compensation
 
 ## 2.2 Add Compensation Controls to `GatingSet`
 
-```{r, eval = TRUE}
+```{r, eval = TRUE, message = FALSE}
 gs <- GatingSet(fs)
 ```
 
@@ -95,7 +95,7 @@ spill <- spillover_compute(gs, parent = "Single Cells")
 Users are prompted to select a fluorescent channel for each of the compensation controls from a drop-down menu. The results are saved to a csv file called "Compensation-Channels.csv" for later use. This channel selection process can be bypassed by supplying the name of a channel match file to the `channel_match` argument.
 
 ```{r, echo=FALSE, out.width='100%', out.height='100%',fig.align="center"}
-knitr::include_graphics('Compensation/channel_select.PNG')
+knitr::include_graphics('Compensation/channel_select.png')
 ```
 
 ### 2.4.2 Gating Positive Signal
@@ -141,19 +141,19 @@ spillover_edit(gs, parent = "Single Cells", spillover = "Spillover-Matrix.csv")
 - **Plots** tab displays compensation changes in all fluorescent channels
 
 ```{r, echo=FALSE, out.width='100%'}
-knitr::include_graphics('Compensation/spillover_edit1.PNG')
+knitr::include_graphics('Compensation/spillover_edit1.png')
 ```
 
 Modifying the spillover values will automatically result in the plot being updated. The correct spillover value is such that the median of the stained population is equal to that of the unstained population (i.e. red line and purple line should meet in the center of the stained population). Looks like the PE-Cy7 control is slightly over compensated in the APC-Cy7 channel, let's modify the value and click **save** to correct this:
 
 ```{r, echo=FALSE, out.width='100%'}
-knitr::include_graphics('Compensation/spillover_edit2.PNG')
+knitr::include_graphics('Compensation/spillover_edit2.png')
 ```
 
 Clicking on the **Plots** tab will display fluorescence spillover in all fluorescent channels with options to overlay the unstained control and the un-compensated sample.
 
 ```{r, echo=FALSE, out.width='100%'}
-knitr::include_graphics('Compensation/spillover_edit3.PNG')
+knitr::include_graphics('Compensation/spillover_edit3.png')
 ```
 
 ### 2.6 Visualise Compensation Using `cyto_plot_compensation`
