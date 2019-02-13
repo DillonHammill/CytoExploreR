@@ -58,8 +58,8 @@ gate_draw(gs,
          gatingTemplate = "Manipulation gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, fig.align='center'}
-cyto_plot(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), group_by = TRUE)
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gate-manipulation/gate_manipulation1.png')
 ```
 
 ```{r, eval = FALSE, message = FALSE}
@@ -71,8 +71,8 @@ gate_draw(gs,
          gatingTemplate = "Manipulation gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, fig.align='center'}
-cyto_plot(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"), group_by = TRUE)
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gate-manipulation/gate_manipulation2.png')
 ```
 
 ```{r, eval = FALSE, message = FALSE}
@@ -84,8 +84,8 @@ gate_draw(gs,
          gatingTemplate = "Manipulation gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, fig.align='center'}
-cyto_plot(gs, parent = "Single Cells", alias = "Live Cells", channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"), group_by = TRUE)
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gate-manipulation/gate_manipulation3.png')
 ```
 
 ```{r, eval = FALSE, message = FALSE}
@@ -97,8 +97,8 @@ gate_draw(gs,
          gatingTemplate = "Manipulation gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, fig.align='center'}
-cyto_plot(gs, parent = "Live Cells", alias = "T Cells", channels = "PE-A", group_by = TRUE)
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gate-manipulation/gate_manipulation4.png')
 ```
 
 ```{r, eval = FALSE, message = FALSE}
@@ -110,8 +110,8 @@ gate_draw(gs,
          gatingTemplate = "Manipulation gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.width = 5.5, fig.width = 6, fig.height = 6, fig.align='center'}
-cyto_plot(gs, parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"), group_by = TRUE)
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gate-manipulation/gate_manipulation5.png')
 ```
 
 ## 3. `gate_edit`

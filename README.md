@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--12-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--14-yellowgreen.svg)](/commits/master)
 
 **CytoRSuite** is designed to provide an interactive interface for the
 analysis of flow cytometry data in R. If you are new to **CytoRSuite**
