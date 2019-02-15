@@ -4,10 +4,12 @@
 \alias{cyto_markers}
 \title{Assign marker names to flowFrame or flowSet}
 \usage{
-cyto_markers(x)
+cyto_markers(x, file = NULL)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or \code{flowSet}.}
+
+\item{file}{name of csv file containing columns 'Channel' and 'Marker'.}
 }
 \value{
 NULL and update marker names of \code{x}.

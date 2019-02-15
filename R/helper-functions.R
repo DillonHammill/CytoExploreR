@@ -332,6 +332,7 @@ cyto_sample <- function(fr, display) {
 #' \code{flowFrame} or \code{flowSet} upon closing the window.
 #'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
+#' @param file name of csv file containing columns 'Channel' and 'Marker'.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters markernames markernames<-
@@ -353,7 +354,7 @@ cyto_sample <- function(fr, display) {
 #' }
 #' 
 #' @export
-cyto_markers <- function(x) {
+cyto_markers <- function(x, file = NULL) {
   if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))) {
     stop("Please supply either a flowFrame or flowSet object")
   }
@@ -368,22 +369,47 @@ cyto_markers <- function(x) {
     pd <- pData(parameters(x[[1]]))
   }
 
-  # Make data.frame with channel and marker column
-  dt <- pd[, c("name", "desc")]
-  colnames(dt) <- c("Channel", "Marker")
-  rownames(dt) <- NULL
+  # file missing
+  if(is.null(file)){
+    # Make data.frame with channel and marker columns
+    dt <- pd[, c("name", "desc")]
+    colnames(dt) <- c("Channel", "Marker")
+    rownames(dt) <- NULL
+  }else{
+    if(getOption("CytoRSuite_wd_check")){
+      if(!.file_wd_check(file)){
+        stop(paste(file, "does not exist in this working directory."))
+      }
+    }
+    dt <- read.csv(file, header = TRUE)
+  }
 
-  # Write result to csv file
-  write.csv(dt, paste0(
-    format(Sys.Date(), "%d%m%y"),
-    "-Experiment-Markers.csv"
-  ), row.names = FALSE)
-  
   # Channels with markers
   chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
 
   # Edit dt
   dt <- suppressWarnings(edit(dt))
+  
+  # Write result to csv file
+  if(length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0){
+    
+    # file already exists
+    message("'Experiment-Details.csv' already exists.")
+    ans <- menu(c("Yes","No"), title = "Would you like to update this file?")
+    
+    if(ans == 1){
+      write.csv(dt, paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Experiment-Markers.csv"
+      ), row.names = FALSE)
+    }
+    
+  }else{
+    write.csv(dt, paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-Experiment-Markers.csv"
+    ), row.names = FALSE)
+  }
 
   # Channels with markers added
   tb <- dt[!dt$Channel %in% chans, ]
