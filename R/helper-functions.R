@@ -370,14 +370,14 @@ cyto_markers <- function(x, file = NULL) {
   }
 
   # file missing
-  if(is.null(file)){
+  if (is.null(file)) {
     # Make data.frame with channel and marker columns
     dt <- pd[, c("name", "desc")]
     colnames(dt) <- c("Channel", "Marker")
     rownames(dt) <- NULL
-  }else{
-    if(getOption("CytoRSuite_wd_check")){
-      if(!.file_wd_check(file)){
+  } else {
+    if (getOption("CytoRSuite_wd_check")) {
+      if (!.file_wd_check(file)) {
         stop(paste(file, "does not exist in this working directory."))
       }
     }
@@ -389,22 +389,21 @@ cyto_markers <- function(x, file = NULL) {
 
   # Edit dt
   dt <- suppressWarnings(edit(dt))
-  
+
   # Write result to csv file
-  if(length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0){
-    
+  if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
+
     # file already exists
     message("'Experiment-Details.csv' already exists.")
-    ans <- menu(c("Yes","No"), title = "Would you like to update this file?")
-    
-    if(ans == 1){
+    ans <- menu(c("Yes", "No"), title = "Would you like to update this file?")
+
+    if (ans == 1) {
       write.csv(dt, paste0(
         format(Sys.Date(), "%d%m%y"),
         "-Experiment-Markers.csv"
       ), row.names = FALSE)
     }
-    
-  }else{
+  } else {
     write.csv(dt, paste0(
       format(Sys.Date(), "%d%m%y"),
       "-Experiment-Markers.csv"
@@ -462,35 +461,52 @@ cyto_annotate <- function(x, file = NULL) {
   cyto <- x
 
   # File missing
-  if(is.null(file)){
-    
+  if (is.null(file)) {
+
     # Extract pData
     pd <- pData(cyto)
     rownames(pd) <- NULL
+  } else {
+    if (getOption("CytoRSuite_wd_check")) {
+      if (!.file_wd_check(file)) {
+        stop(paste(file, "does not exist in this working directory"))
+      }
+    }
 
-    # Edit pData
-    pd <- edit(pd)
-    rownames(pd) <- pd$name
+    # Read in file
+    pd <- read.csv(file, header = TRUE)
 
     # Update pData
     pData(cyto) <- pd
+  }
 
-    # Write to csv "Experiment-Details.csv"
+  # Edit pData
+  pd <- edit(pd)
+  rownames(pd) <- pd$name
+
+  # Update pData
+  pData(cyto) <- pd
+
+  # Write result to csv file
+  if (length(grep("Experiment-Details.csv", c(file, list.files()))) != 0) {
+
+    # Experiment-Details.csv already exists
+    message("'Experiment-Details.csv' already exists.")
+    ans <- menu(c("Yes", "No"), title = "Would you like to update this file?")
+
+    if (ans == 1) {
+      write.csv(pData(cyto), paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Experiment-Details.csv"
+      ), row.names = FALSE)
+    }
+  } else {
     write.csv(pData(cyto), paste0(
       format(Sys.Date(), "%d%m%y"),
       "-Experiment-Details.csv"
     ), row.names = FALSE)
-    
-  }else{
-    
-    # Read in file
-    pd <- read.csv(file, header = TRUE)
-    
-    # Update pData
-    pData(cyto) <- pd
-    
   }
-  
+
   # Update globally
   assign(deparse(substitute(x)), cyto, envir = globalenv())
 
