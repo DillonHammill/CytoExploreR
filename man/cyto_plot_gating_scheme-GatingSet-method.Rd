@@ -8,8 +8,8 @@
 \S4method{cyto_plot_gating_scheme}{GatingSet}(x, gatingTemplate = NULL,
   group_by, back_gate = FALSE, gate_track = FALSE, show_all = FALSE,
   display = NULL, header = NA, title = NULL, popup = FALSE,
-  layout = NULL, point_col = NULL, density_fill = NULL,
-  gate_line_col = NULL, border_line_col = NULL,
+  layout = NULL, point_col = NULL, density_stack = 0.5,
+  density_fill = NULL, gate_line_col = NULL, border_line_col = NULL,
   border_line_width = NULL, legend = TRUE, legend_text = NULL,
   legend_text_size = 1.2, title_text_col = NULL,
   label_text_size = 0.8, ...)
@@ -55,6 +55,9 @@ for plotting \code{c(#rows, #columns)}.}
 \item{point_col}{colour of points in 2D plots set to NA to use default
 red-blue colour scale. Control the colour of overlays by supplying multiple
 colours to this argument (e.g. c("blue","red")).}
+
+\item{density_stack}{numeric [0,1] indicating the degree of offset for 1-D
+density distributions with overlay, set to 0.5 by default.}
 
 \item{density_fill}{fill colour for 1D density distributions. Control the
 colour of overlays by supplying multiple colours to this argument (e.g.

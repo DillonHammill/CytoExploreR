@@ -51,6 +51,8 @@ setGeneric(
 #' @param point_col colour of points in 2D plots set to NA to use default
 #'   red-blue colour scale. Control the colour of overlays by supplying multiple
 #'   colours to this argument (e.g. c("blue","red")).
+#' @param density_stack numeric [0,1] indicating the degree of offset for 1-D
+#'   density distributions with overlay, set to 0.5 by default.
 #' @param density_fill fill colour for 1D density distributions. Control the
 #'   colour of overlays by supplying multiple colours to this argument (e.g.
 #'   c(NA,"red")).
@@ -125,6 +127,7 @@ setMethod(cyto_plot_gating_scheme,
                           popup = FALSE,
                           layout,
                           point_col,
+                          density_stack = 0.5,
                           density_fill,
                           gate_line_col,
                           border_line_col = NA,
@@ -498,6 +501,7 @@ setMethod(cyto_plot_gating_scheme,
             legend_text = NA,
             title = title,
             point_col = point_col,
+            density_stack = density_stack,
             density_fill = density_fill,
             gate_line_col = gate_line_col,
             border_line_col = border_line_col,
@@ -583,6 +587,8 @@ setMethod(cyto_plot_gating_scheme,
 #' @param point_col colour of points in 2D plots set to NA to use default
 #'   red-blue colour scale. Control the colour of overlays by supplying multiple
 #'   colours to this argument (e.g. c("blue","red")).
+#' @param density_stack numeric [0,1] indicating the degree of offset for 1-D
+#'   density distributions with overlay, set to 0.5 by default.
 #' @param density_fill fill colour for 1D density distributions. Control the
 #'   colour of overlays by supplying multiple colours to this argument (e.g.
 #'   c(NA,"red")).
@@ -659,6 +665,7 @@ setMethod(cyto_plot_gating_scheme,
                           popup = FALSE,
                           layout = NULL,
                           point_col = NULL,
+                          density_stack = 0.5,
                           density_fill = NULL,
                           gate_line_col = NULL,
                           border_line_col = NULL,
@@ -1088,6 +1095,7 @@ setMethod(cyto_plot_gating_scheme,
             legend_text = NA,
             title = title,
             point_col = point_col,
+            density_stack = density_stack,
             density_fill = density_fill,
             gate_line_col = gate_line_col,
             border_line_col = border_line_col,
