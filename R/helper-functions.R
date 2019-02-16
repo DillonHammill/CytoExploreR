@@ -336,7 +336,7 @@ cyto_sample <- function(fr, display) {
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters markernames markernames<-
-#' @importFrom utils edit write.csv
+#' @importFrom utils edit write.csv read.csv
 #'
 #' @return NULL and update marker names of \code{x}.
 #'
