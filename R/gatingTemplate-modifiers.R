@@ -943,3 +943,75 @@ gatingTemplate_convert <- function(gs, gatingTemplate) {
 
   write.csv(gt, gatingTemplate, row.names = FALSE)
 }
+
+#' Interactively Edit a gatingTemplate
+#' 
+#' \code{gatingTemplate_edit} provides an interactive interface to editing the
+#' openCyto gatingTemplate. This function is intended to aid in adding boolean
+#' and reference gates to the gatingTemplate. Users should NOT modify existing
+#' entries in the gatingTemplate.
+#' 
+#' @param x object of class \code{GatingSet} which has been gated with the 
+#' supplied gatingTemplate.
+#' @param gatingTemplate name of the gatingTemplate csv file to be edited.
+#' 
+#' @return update gatingTemplate csv file and update the GatingSet accordingly.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom openCyto gatingTemplate gating
+#' @importFrom utils edit read.csv write.csv
+#' 
+#' @examples
+#' \dontrun{
+#' library(CytoRSuite)
+#' 
+#' # gs is a GatingSet object
+#' gatingTemplate_edit(gs, "gatingTemplate.csv")
+#' }
+#' 
+#' @export
+gatingTemplate_edit <- function(x, gatingTemplate = NULL){
+  
+  # x of wrong class
+  if(!inherits(x, "GatingSet")){
+    stop("'x' should be either a GatingSet object.")
+  }
+  
+  # Assign x to gs
+  gs <- x
+  
+  # Read in gatingTemplate
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the 'gatingTemplate' csv file to edit.")
+  }else{
+    if(getOption("CytoRSuite_wd_check")){
+      if(!.file_wd_check(gatingTemplate)){
+        stop(
+          paste(gatingTemplate, "does not exist in this working directory.")
+          )
+      }
+    }
+    gt <- read.csv(gatingTemplate, header = TRUE)
+  }
+  
+  # Edit gatingTemplate
+  message("Do not modify existing gatingTemplate entries!")
+  message("Add new rows to add boolean or reference gates to the GatingSet.")
+  gt <- suppressMessages(edit(gt))
+  
+  # Write updated template to csv file
+  write.csv(gt, gatingTemplate, row.names = FALSE)
+  
+  # Read in updated template to gatingTemplate object
+  gt <- gatingTemplate(gatingTemplate)
+  
+  # Re-apply template to GatingSet
+  gating(gt, gs)
+  
+  # Update GatingSet globally
+  assign(deparse(substitute(x)), gs, envir = globalenv())
+  
+  # Return gatingTemplate object
+  invisible(return(gt))
+}
