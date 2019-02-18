@@ -33,6 +33,10 @@ reference:
       - '`gate_draw`'
       - '`gate_edit`'
       - '`gate_remove`'
+  - title: Modification of gatingTemplate
+    desc: Functions to modify the gatingTemplate
+    contents:
+      - '`gatingTemplate_edit`'
   - title: Visualisation
     desc: Functions to visualise flow cytometry data
     contents:
@@ -47,7 +51,7 @@ reference:
     desc: Functions to compute and export statistics
     contents:
       - '`cyto_stats_compute`'
-  - title: Conversion
+  - title: Conversion of gatingTemplate
     desc: Function to convert old gatingTemplates to new format
     contents:
       - '`gatingTemplate_convert`'

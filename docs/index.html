@@ -126,46 +126,46 @@
 <div id="flowcore---core-infrastructure" class="section level2">
 <h2 class="hasAnchor">
 <a href="#flowcore---core-infrastructure" class="anchor"></a>flowCore - Core Infrastructure</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Bioconductor</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"BiocManager"</span>)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># flowCore Bioconductor release version</span></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5">BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">"flowCore"</span>)</a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co"># GitHub</span></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"devtools"</span>)</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co"># flowCore development version on GitHub</span></a>
-<a class="sourceLine" id="cb1-11" data-line-number="11">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"RGLab/flowCore"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Bioconductor</span>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"BiocManager"</span>)
+
+<span class="co"># flowCore Bioconductor release version</span>
+BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"flowCore"</span>)
+
+<span class="co"># GitHub</span>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"devtools"</span>)
+
+<span class="co"># flowCore development version on GitHub</span>
+devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"RGLab/flowCore"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</code></pre></div>
 </div>
 <div id="flowworkspace---gating-infrastructure" class="section level2">
 <h2 class="hasAnchor">
 <a href="#flowworkspace---gating-infrastructure" class="anchor"></a>flowWorkspace - Gating Infrastructure</h2>
 <p>flowWorkspace requires additional C++ libraries to build from source using Rtools for windows users. Windows and Linux users should follow these <a href="https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL">instructions</a> before proceeding.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># flowWorkspace Bioconductor release version</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">"flowWorkspace"</span>)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># flowWorkspace development version on GitHub</span></a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"RGLab/flowWorkspace"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># flowWorkspace Bioconductor release version</span>
+BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"flowWorkspace"</span>)
+
+<span class="co"># flowWorkspace development version on GitHub</span>
+devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"RGLab/flowWorkspace"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</code></pre></div>
 </div>
 <div id="opencyto---gating-pipeline" class="section level2">
 <h2 class="hasAnchor">
 <a href="#opencyto---gating-pipeline" class="anchor"></a>openCyto - Gating Pipeline</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># openCyto Bioconductor release version</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">"openCyto"</span>)</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co"># openCyto development version on GitHub</span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"RGLab/openCyto"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># openCyto Bioconductor release version</span>
+BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"openCyto"</span>)
+
+<span class="co"># openCyto development version on GitHub</span>
+devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"RGLab/openCyto"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</code></pre></div>
 </div>
 <div id="cytorsuite-1" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cytorsuite-1" class="anchor"></a>CytoRSuite</h2>
 <p>Once these packages are installed users can install <strong>CytoRSuite</strong> from GitHub. Users should also install <strong>CytoRSuiteData</strong> which contains example datasets that will be used in the vignettes to demonstrate the features of CytoRSuite.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># CytoRSuite development version on GitHub</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"DillonHammill/CytoRSuite"</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="co"># CytoRSuiteData development version on GitHub</span></a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"DillonHammill/CytoRSuiteData"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># CytoRSuite development version on GitHub</span>
+devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"DillonHammill/CytoRSuite"</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)
+
+<span class="co"># CytoRSuiteData development version on GitHub</span>
+devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"DillonHammill/CytoRSuiteData"</span>)</code></pre></div>
 </div>
 </div>
 <div id="overview" class="section level1">
@@ -208,82 +208,82 @@
 <li>
 <p>Compensation of fluorescent spillover</p>
 <p>1.1 Load compensation controls into a <code>ncdfFlowSet</code></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co"># Save .fcs files to folder "Compensation Controls" in working directory</span></a>
-<a class="sourceLine" id="cb5-5" data-line-number="5">files &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list.files">list.files</a></span>(<span class="dt">path =</span> <span class="st">"Compensation Controls"</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb5-6" data-line-number="6">fs &lt;-<span class="st"> </span><span class="kw">read.ncdfFlowSet</span>(<span class="dt">files =</span> files)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)
+
+<span class="co"># Save .fcs files to folder "Compensation Controls" in working directory</span>
+files &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list.files">list.files</a></span>(<span class="dt">path =</span> <span class="st">"Compensation Controls"</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)
+fs &lt;-<span class="st"> </span><span class="kw">read.ncdfFlowSet</span>(<span class="dt">files =</span> files)</code></pre></div>
 <p>1.2 Load compensation controls into <code>GatingSet</code> for gating</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># Add flowSet to GatingSet</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add flowSet to GatingSet</span>
+gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</code></pre></div>
 <p>1.3 Gate Single Cells using <code>gate_draw</code></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># Gate Cells</span></a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs, </a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">          <span class="dt">parent =</span> <span class="st">"root"</span>,</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">          <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">          <span class="dt">type =</span> <span class="st">"polygon"</span>,</a>
-<a class="sourceLine" id="cb7-7" data-line-number="7">          <span class="dt">gatingTemplate =</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</a>
-<a class="sourceLine" id="cb7-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co"># Gate Single Cells</span></a>
-<a class="sourceLine" id="cb7-10" data-line-number="10">    <span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs, </a>
-<a class="sourceLine" id="cb7-11" data-line-number="11">          <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb7-12" data-line-number="12">          <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,</a>
-<a class="sourceLine" id="cb7-13" data-line-number="13">          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>),</a>
-<a class="sourceLine" id="cb7-14" data-line-number="14">          <span class="dt">type =</span> <span class="st">"polygon"</span>,</a>
-<a class="sourceLine" id="cb7-15" data-line-number="15">          <span class="dt">gatingTemplate =</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate Cells</span>
+<span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs, 
+          <span class="dt">parent =</span> <span class="st">"root"</span>,
+          <span class="dt">alias =</span> <span class="st">"Cells"</span>,
+          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),
+          <span class="dt">type =</span> <span class="st">"polygon"</span>,
+          <span class="dt">gatingTemplate =</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)
+
+<span class="co"># Gate Single Cells</span>
+    <span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs, 
+          <span class="dt">parent =</span> <span class="st">"Cells"</span>,
+          <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,
+          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>),
+          <span class="dt">type =</span> <span class="st">"polygon"</span>,
+          <span class="dt">gatingTemplate =</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-8-1.png" width="700"></p>
 <p>1.4 Compute fluorescent spillover matrix using <code>spillover_compute</code></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw"><a href="reference/spillover_compute.html">spillover_compute</a></span>(gs, </a>
-<a class="sourceLine" id="cb8-2" data-line-number="2">                  <span class="dt">parent =</span> <span class="st">"Single Cells"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/spillover_compute.html">spillover_compute</a></span>(gs, 
+                  <span class="dt">parent =</span> <span class="st">"Single Cells"</span>)</code></pre></div>
 <p>1.5 Interactively edit computed spillover matrix using <code>spillover_edit</code></p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="reference/spillover_edit.html">spillover_edit</a></span>(gs, </a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">               <span class="dt">parent =</span> <span class="st">"Single Cells"</span>, </a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">               <span class="dt">channel_match =</span> <span class="st">"Compensation-Channels.csv"</span>, </a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">               <span class="dt">spillover =</span> <span class="st">"Spillover-Matrix.csv"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/spillover_edit.html">spillover_edit</a></span>(gs, 
+               <span class="dt">parent =</span> <span class="st">"Single Cells"</span>, 
+               <span class="dt">channel_match =</span> <span class="st">"Compensation-Channels.csv"</span>, 
+               <span class="dt">spillover =</span> <span class="st">"Spillover-Matrix.csv"</span>)</code></pre></div>
 <p><img src="reference/figures/README-spillover_edit.png" width="100%" height="100%" style="display: block; margin: auto;"></p>
 </li>
 <li>
 <p>Analyse samples</p>
 <p>2.1 Load samples into a <code>ncdfFlowSet</code></p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># Save samples to folder "Samples" in working directory</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2">files &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list.files">list.files</a></span>(<span class="dt">path =</span> <span class="st">"Samples"</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb10-3" data-line-number="3">fs &lt;-<span class="st"> </span><span class="kw">read.ncdfFlowSet</span>(<span class="dt">files =</span> files)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Save samples to folder "Samples" in working directory</span>
+files &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list.files">list.files</a></span>(<span class="dt">path =</span> <span class="st">"Samples"</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)
+fs &lt;-<span class="st"> </span><span class="kw">read.ncdfFlowSet</span>(<span class="dt">files =</span> files)</code></pre></div>
 <p>2.2 Annotate samples with markers using <code>cyto_markers</code></p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw"><a href="reference/cyto_markers.html">cyto_markers</a></span>(fs)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/cyto_markers.html">cyto_markers</a></span>(fs)</code></pre></div>
 <p><img src="reference/figures/README-cyto_markers.png" width="40%" height="40%" style="display: block; margin: auto;"></p>
 <p>2.3 Annotate samples with experimental details using <code>cyto_annotate</code></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="kw"><a href="reference/cyto_annotate.html">cyto_annotate</a></span>(fs)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/cyto_annotate.html">cyto_annotate</a></span>(fs)</code></pre></div>
 <p><img src="reference/figures/README-cyto_annotate.png" width="30%" height="30%" style="display: block; margin: auto;"></p>
 <p>2.4 Add samples to GatingSet</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</code></pre></div>
 <p>2.4 Apply fluorescent compensation</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># Load in spillover matrix</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2">spill &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/read.table">read.csv</a></span>(<span class="st">"Spillover-Matrix.csv"</span>, </a>
-<a class="sourceLine" id="cb14-3" data-line-number="3">                  <span class="dt">header =</span> <span class="ot">TRUE</span>, </a>
-<a class="sourceLine" id="cb14-4" data-line-number="4">                  <span class="dt">row.names =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb14-5" data-line-number="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill) &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">rownames</a></span>(spill)</a>
-<a class="sourceLine" id="cb14-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb14-7" data-line-number="7"><span class="co"># Apply compensation to samples</span></a>
-<a class="sourceLine" id="cb14-8" data-line-number="8">gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, spill)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load in spillover matrix</span>
+spill &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/read.table">read.csv</a></span>(<span class="st">"Spillover-Matrix.csv"</span>, 
+                  <span class="dt">header =</span> <span class="ot">TRUE</span>, 
+                  <span class="dt">row.names =</span> <span class="dv">1</span>)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill) &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">rownames</a></span>(spill)
+
+<span class="co"># Apply compensation to samples</span>
+gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, spill)</code></pre></div>
 <p>2.5 Transform fluorescent channels for gating</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="co"># Fluorescent channels</span></a>
-<a class="sourceLine" id="cb15-2" data-line-number="2">chans &lt;-<span class="st"> </span><span class="kw"><a href="reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs)</a>
-<a class="sourceLine" id="cb15-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb15-4" data-line-number="4"><span class="co"># Logicle transformation</span></a>
-<a class="sourceLine" id="cb15-5" data-line-number="5">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], chans)</a>
-<a class="sourceLine" id="cb15-6" data-line-number="6">gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Fluorescent channels</span>
+chans &lt;-<span class="st"> </span><span class="kw"><a href="reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs)
+
+<span class="co"># Logicle transformation</span>
+trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], chans)
+gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</code></pre></div>
 <p>2.6 Build gating scheme using <code>gate_draw</code></p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="co"># Cells</span></a>
-<a class="sourceLine" id="cb16-2" data-line-number="2"><span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs,</a>
-<a class="sourceLine" id="cb16-3" data-line-number="3">          <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb16-4" data-line-number="4">          <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb16-5" data-line-number="5">          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),</a>
-<a class="sourceLine" id="cb16-6" data-line-number="6">          <span class="dt">gatingTemplate =</span> <span class="st">"Example-gatingTemplate.csv"</span>)</a>
-<a class="sourceLine" id="cb16-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb16-8" data-line-number="8"><span class="co"># Copy above &amp; edit to add new population(s)</span></a>
-<a class="sourceLine" id="cb16-9" data-line-number="9"><span class="co"># Repeat until gating scheme is complete</span></a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Cells</span>
+<span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs,
+          <span class="dt">parent =</span> <span class="st">"Cells"</span>,
+          <span class="dt">alias =</span> <span class="st">"Cells"</span>,
+          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),
+          <span class="dt">gatingTemplate =</span> <span class="st">"Example-gatingTemplate.csv"</span>)
+
+<span class="co"># Copy above &amp; edit to add new population(s)</span>
+<span class="co"># Repeat until gating scheme is complete</span></code></pre></div>
 </li>
 </ol>
 <p><img src="reference/figures/README-gate_draw.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
@@ -291,16 +291,16 @@
 <li>Visualise gating schemes using <code>cyto_plot_gating_scheme</code>
 </li>
 </ol>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw"><a href="reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]], <span class="dt">back_gate =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]], <span class="dt">back_gate =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <p><img src="reference/figures/README-cyto_plot_gating_scheme.png" width="100%" height="100%" style="display: block; margin: auto;"></p>
 <ol start="4" style="list-style-type: decimal">
 <li>Export population-level statistics using <code>cyto_stats_compute</code>
 </li>
 </ol>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw"><a href="reference/cyto_stats_compute.html">cyto_stats_compute</a></span>(gs,</a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">                   <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>),</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">                   <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD44"</span>,<span class="st">"CD69"</span>),</a>
-<a class="sourceLine" id="cb18-4" data-line-number="4">                   <span class="dt">stat =</span> <span class="st">"median"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="reference/cyto_stats_compute.html">cyto_stats_compute</a></span>(gs,
+                   <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>),
+                   <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD44"</span>,<span class="st">"CD69"</span>),
+                   <span class="dt">stat =</span> <span class="st">"median"</span>)</code></pre></div>
 <pre><code>#&gt; $`CD4 T Cells`
 #&gt;                 OVAConc Alexa Fluor 647-A   7-AAD-A
 #&gt; Activation1.fcs   0.000          675.1999  606.7077
@@ -373,7 +373,7 @@
 <li><a href="https://travis-ci.org/DillonHammill/CytoRSuite"><img src="https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master" alt="Travis build status"></a></li>
 <li><a href="https://codecov.io/github/DillonHammill/CytoRSuite?branch=master"><img src="https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
 <li><a href="https://www.tidyverse.org/lifecycle/#maturing"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="lifecycle"></a></li>
-<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2019--02--14-yellowgreen.svg" alt="Last-changedate"></a></li>
+<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2019--02--18-yellowgreen.svg" alt="Last-changedate"></a></li>
 </ul>
 </div>
 </div>

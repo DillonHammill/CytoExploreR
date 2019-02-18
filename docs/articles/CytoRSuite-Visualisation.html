@@ -105,7 +105,7 @@
       <h1>CytoRSuite: Visualisation Using cyto_plot</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-02-14</h4>
+            <h4 class="date">2019-02-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite-Visualisation.Rmd"><code>vignettes/CytoRSuite-Visualisation.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite-Visualisation.Rmd</code></div>
@@ -167,45 +167,45 @@
 <div id="preparation-of-flow-cytometry-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#preparation-of-flow-cytometry-data" class="anchor"></a>2.1 Preparation of Flow Cytometry Data</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Load Required Packages</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># Prepare Data</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6">fs &lt;-<span class="st"> </span>Activation</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># Add Marker Names</span></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">chnls &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,<span class="st">"Alexa Fluor 430-A"</span>,<span class="st">"APC-Cy7-A"</span>, <span class="st">"PE-A"</span>, <span class="st">"Alexa Fluor 488-A"</span>, <span class="st">"Alexa Fluor 700-A"</span>, <span class="st">"Alexa Fluor 647-A"</span>, <span class="st">"7-AAD-A"</span>) </a>
-<a class="sourceLine" id="cb1-10" data-line-number="10">markers &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Hoechst-405"</span>, <span class="st">"Hoechst-430"</span>, <span class="st">"CD11c"</span>, <span class="st">"Va2"</span>, <span class="st">"CD8"</span>, <span class="st">"CD4"</span>, <span class="st">"CD44"</span>, <span class="st">"CD69"</span>)</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(markers) &lt;-<span class="st"> </span>chnls</a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw">markernames</span>(fs) &lt;-<span class="st"> </span>markers</a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co"># Add fs to GatingSet</span></a>
-<a class="sourceLine" id="cb1-15" data-line-number="15">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a>
-<a class="sourceLine" id="cb1-16" data-line-number="16"></a>
-<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="co"># Apply Compensation</span></a>
-<a class="sourceLine" id="cb1-18" data-line-number="18">gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL)</a>
-<a class="sourceLine" id="cb1-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb1-20" data-line-number="20"><span class="co"># Transform Fluorescent Channels</span></a>
-<a class="sourceLine" id="cb1-21" data-line-number="21">channels &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs)</a>
-<a class="sourceLine" id="cb1-22" data-line-number="22">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">1</span>]], channels)</a>
-<a class="sourceLine" id="cb1-23" data-line-number="23">gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</a>
-<a class="sourceLine" id="cb1-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb1-25" data-line-number="25"><span class="co"># Apply Saved Gates</span></a>
-<a class="sourceLine" id="cb1-26" data-line-number="26"><span class="kw">gating</span>(Activation_gatingTemplate,gs)</a>
-<a class="sourceLine" id="cb1-27" data-line-number="27"></a>
-<a class="sourceLine" id="cb1-28" data-line-number="28"><span class="co"># Pull out T Cells Population </span></a>
-<a class="sourceLine" id="cb1-29" data-line-number="29">TCells &lt;-<span class="st"> </span><span class="kw">getData</span>(gs, <span class="st">"T Cells"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load Required Packages</span>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)
+
+<span class="co"># Prepare Data</span>
+fs &lt;-<span class="st"> </span>Activation
+
+<span class="co"># Add Marker Names</span>
+chnls &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,<span class="st">"Alexa Fluor 430-A"</span>,<span class="st">"APC-Cy7-A"</span>, <span class="st">"PE-A"</span>, <span class="st">"Alexa Fluor 488-A"</span>, <span class="st">"Alexa Fluor 700-A"</span>, <span class="st">"Alexa Fluor 647-A"</span>, <span class="st">"7-AAD-A"</span>) 
+markers &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Hoechst-405"</span>, <span class="st">"Hoechst-430"</span>, <span class="st">"CD11c"</span>, <span class="st">"Va2"</span>, <span class="st">"CD8"</span>, <span class="st">"CD4"</span>, <span class="st">"CD44"</span>, <span class="st">"CD69"</span>)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(markers) &lt;-<span class="st"> </span>chnls
+<span class="kw">markernames</span>(fs) &lt;-<span class="st"> </span>markers
+
+<span class="co"># Add fs to GatingSet</span>
+gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)
+
+<span class="co"># Apply Compensation</span>
+gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL)
+
+<span class="co"># Transform Fluorescent Channels</span>
+channels &lt;-<span class="st"> </span><span class="kw"><a href="../reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs)
+trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">1</span>]], channels)
+gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)
+
+<span class="co"># Apply Saved Gates</span>
+<span class="kw">gating</span>(Activation_gatingTemplate,gs)
+
+<span class="co"># Pull out T Cells Population </span>
+TCells &lt;-<span class="st"> </span><span class="kw">getData</span>(gs, <span class="st">"T Cells"</span>)</code></pre></div>
 </div>
 <div id="cyto_plot-overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cyto_plot-overview" class="anchor"></a>2.2 <code>cyto_plot</code> Overview</h2>
 <p>At its most basic level, <code>cyto_plot</code> constructs either a 1-D or 2-D plot based on the number of channels supplied to the channels argument. To construct the plot in a pop-up window simply set the popup argument to TRUE. Note: for larger plots users will need to expand the plotting area to avoid figure margins errors.</p>
 <p>If a single channel is supplied a 1-D density distribution is plotted. All density distributions are normalised to the mode by default by this can be changed by setting <code>density_modal</code> to FALSE.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(fs[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="st">"FSC-A"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(fs[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="st">"FSC-A"</span>)</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-2-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>If two channels are supplied a 2-D scatterplot with blue-red colour gradient is constructed.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(fs[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(fs[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>))</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-3-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div id="cyto_plot-1-dimensional-density-distributions" class="section level2">
@@ -215,15 +215,15 @@
 <div id="flowframe" class="section level3">
 <h3 class="hasAnchor">
 <a href="#flowframe" class="anchor"></a>2.3.1 flowFrame</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="st">"CD4"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="st">"CD4"</span>)</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-4-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div id="flowset" class="section level3">
 <h3 class="hasAnchor">
 <a href="#flowset" class="anchor"></a>2.3.2 flowSet</h3>
 <p>The density distribution for each flowFrame within the flowSet will be plotted in a separate panel by default. Notice how the x axis in the above plot has limits [0,4] this is due to flowFrame and flowSet objects not retaining the logicle transformation information. To have appropriately labelled axes users should supply a transformList object to the <code>axes_trans</code> argument as shown below. The <code>density_fill</code> argument controls the fill colour for the density distribution.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(fs[[<span class="dv">2</span>]], channels)</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">axes_trans =</span> trans, <span class="dt">density_fill =</span> <span class="st">"dodgerblue"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(fs[[<span class="dv">2</span>]], channels)
+<span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">axes_trans =</span> trans, <span class="dt">density_fill =</span> <span class="st">"dodgerblue"</span>)</code></pre></div>
 <pre><code>## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
 ## data length is not a multiple of split variable
 
@@ -249,21 +249,21 @@
 ## data length is not a multiple of split variable</code></pre>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-5-1.png" width="1056" style="display: block; margin: auto;"></p>
 <p>Stacking of samples is supported through the <code>density_stack</code> argument which controls the percentage overlap of the stacked distributions. The <code>density_fill_alpha</code> argument controls the degree of transparency of the fill colour.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">density_fill =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"dodgerblue"</span>, <span class="st">"red"</span>), <span class="dt">density_stack =</span> <span class="fl">0.5</span>, <span class="dt">density_fill_alpha =</span> <span class="fl">0.5</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">density_fill =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"dodgerblue"</span>, <span class="st">"red"</span>), <span class="dt">density_stack =</span> <span class="fl">0.5</span>, <span class="dt">density_fill_alpha =</span> <span class="fl">0.5</span>)</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div id="gatinghierarchy" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gatinghierarchy" class="anchor"></a>2.3.3 GatingHierarchy</h3>
 <p>To plot objects of class GatingHierarchy supply the name of the <code>parent</code> population to extract for plotting. Population overlays are supported for flowFrame, flowSet, list of flowFrames or list of flowSets using the <code>overlay</code> argument. For GatingHierarchies and GatingSets the name of the population to overlay is also supported. The degree of overlap for overlays can be controlled using the <code>density_stack</code> argument. For 1-D density distribution the <code>density_line_col</code> argument controls the border colour.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs[[<span class="dv">1</span>]], <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">overlay =</span> <span class="st">"CD4 T Cells"</span>, <span class="dt">density_fill =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"green"</span>,<span class="st">"blue"</span>), <span class="dt">density_line_col =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"black"</span>,<span class="st">"red"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs[[<span class="dv">1</span>]], <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">overlay =</span> <span class="st">"CD4 T Cells"</span>, <span class="dt">density_fill =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"green"</span>,<span class="st">"blue"</span>), <span class="dt">density_line_col =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"black"</span>,<span class="st">"red"</span>))</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div id="gatingset" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gatingset" class="anchor"></a>2.3.4 GatingSet</h3>
 <p>To change the border line type user can supply an integer [0,4] to the <code>density_line_type</code> argument. The line width can be controlled in a similar fashion using the <code>density_line_width</code> argument. By default the title above each plot will be the name of the sample but this can be changed by supplying specific names to the <code>title</code> argument.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">density_line_type =</span> <span class="dv">2</span>, <span class="dt">density_line_width =</span> <span class="dv">4</span>, <span class="dt">title =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Unactivated"</span>,<span class="st">"Activated"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">density_line_type =</span> <span class="dv">2</span>, <span class="dt">density_line_width =</span> <span class="dv">4</span>, <span class="dt">title =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Unactivated"</span>,<span class="st">"Activated"</span>))</code></pre></div>
 <pre><code>## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
 ## data length is not a multiple of split variable
 
@@ -298,28 +298,28 @@
 <h3 class="hasAnchor">
 <a href="#flowframe-1" class="anchor"></a>2.4.1 flowFrame</h3>
 <p>By default 2-D scatter plots will use a blue-red colour scale for points, this can be modified using the <code>point_col</code> argument. To modify axes labels simply supply the desired labels to the <code>xlab</code> and <code>ylab</code> arguments. The axes limits can be modified by supplying the lower and upper limits to the <code>xlim</code> and <code>ylim</code> arguments.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">axes_trans =</span> trans, <span class="dt">xlab =</span> <span class="st">"CD4"</span>, <span class="dt">ylab =</span> <span class="st">"CD8"</span>, <span class="dt">xlim =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">3.5</span>), <span class="dt">ylim =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="fl">0.5</span>,<span class="dv">4</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells[[<span class="dv">1</span>]], <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">axes_trans =</span> trans, <span class="dt">xlab =</span> <span class="st">"CD4"</span>, <span class="dt">ylab =</span> <span class="st">"CD8"</span>, <span class="dt">xlim =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">3.5</span>), <span class="dt">ylim =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="fl">0.5</span>,<span class="dv">4</span>))</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-9-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div id="flowset-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#flowset-1" class="anchor"></a>2.4.2 flowSet</h3>
 <p>Contour lines are also supported for 2-D scatter plots, simply supply the number of contours levels to the <code>contour_lines</code> argument. Users can use the <code>contour_line_col</code> and <code>contour_line_width</code> arguments to modify the colour and line width of the contour lines respectively.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">axes_trans =</span> trans, <span class="dt">contour_lines =</span> <span class="dv">15</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">axes_trans =</span> trans, <span class="dt">contour_lines =</span> <span class="dv">15</span>)</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-10-1.png" width="1056" style="display: block; margin: auto;"></p>
 </div>
 <div id="gatinghierarchy-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gatinghierarchy-1" class="anchor"></a>2.4.3 GatingHierarchy</h3>
 <p><code>cyto_plot</code> also has full support for plotting gates, simply supply the gate object to the <code>gate</code> argument or for GatingHierarchies and GatingSet simply supply the name of the gated population to the <code>alias</code> argument. Users can use the the <code>gate_line_col</code>, <code>gate_line_type</code> and <code>gate_line_width</code> arguments to modify the gate colour, line type or line width.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs[[<span class="dv">1</span>]], <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs[[<span class="dv">1</span>]], <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>))</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div id="gatingset-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#gatingset-1" class="anchor"></a>2.4.4 GatingSet</h3>
 <p>Overlays are also supported in 2-D scatterplots, simply supply the name of the gated population to the <strong>overlay</strong>. Overlay also accepts the following objects: flowFrames, flowSets, list of flowFrames or list of flowSets which allow overlay of any data. The colour of the overlay is also controlled by the <code>point_col</code> argument, simply supply a colour for the base plot and a colour for each overlay. Here we will set the colour of the base plot to “grey” and the overlay colours to “purple” and “blue”. To include a legend in the plot users can set the <code>legend</code> argument to TRUE. To show the layering used within cyto_plot we have added some contours as well.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">contour_lines =</span> <span class="dv">15</span>, <span class="dt">overlay =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">point_col =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"grey"</span>,<span class="st">"purple"</span>, <span class="st">"blue"</span>), <span class="dt">point_alpha =</span> <span class="fl">0.5</span>, <span class="dt">legend =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">contour_lines =</span> <span class="dv">15</span>, <span class="dt">overlay =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">point_col =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"grey"</span>,<span class="st">"purple"</span>, <span class="st">"blue"</span>), <span class="dt">point_alpha =</span> <span class="fl">0.5</span>, <span class="dt">legend =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-12-1.png" width="1152" style="display: block; margin: auto;"></p>
 </div>
 </div>
@@ -327,11 +327,11 @@
 <div id="export-high-resolution-images" class="section level1">
 <h1 class="hasAnchor">
 <a href="#export-high-resolution-images" class="anchor"></a>3. Export High Resolution Images</h1>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/grDevices/topics/png">png</a></span>(<span class="st">"Activation.png"</span>, <span class="dt">res =</span> <span class="dv">600</span>, <span class="dt">height =</span> <span class="dv">5</span>, <span class="dt">width =</span> <span class="dv">13</span>, <span class="dt">units =</span> <span class="st">"in"</span>)</a>
-<a class="sourceLine" id="cb15-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb15-3" data-line-number="3"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">contour_lines =</span> <span class="dv">15</span>, <span class="dt">overlay =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">point_col =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"grey"</span>,<span class="st">"purple"</span>, <span class="st">"blue"</span>), <span class="dt">point_alpha =</span> <span class="fl">0.5</span>, <span class="dt">legend =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb15-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb15-5" data-line-number="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/grDevices/topics/dev">dev.off</a></span>()</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/grDevices/topics/png">png</a></span>(<span class="st">"Activation.png"</span>, <span class="dt">res =</span> <span class="dv">600</span>, <span class="dt">height =</span> <span class="dv">5</span>, <span class="dt">width =</span> <span class="dv">13</span>, <span class="dt">units =</span> <span class="st">"in"</span>)
+
+<span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>), <span class="dt">contour_lines =</span> <span class="dv">15</span>, <span class="dt">overlay =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">point_col =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"grey"</span>,<span class="st">"purple"</span>, <span class="st">"blue"</span>), <span class="dt">point_alpha =</span> <span class="fl">0.5</span>, <span class="dt">legend =</span> <span class="ot">TRUE</span>)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/grDevices/topics/dev">dev.off</a></span>()</code></pre></div>
 </div>
 <div id="more-information" class="section level1">
 <h1 class="hasAnchor">

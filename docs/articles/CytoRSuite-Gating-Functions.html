@@ -105,7 +105,7 @@
       <h1>CytoRSuite: Gating Functions</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-02-14</h4>
+            <h4 class="date">2019-02-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite-Gating-Functions.Rmd"><code>vignettes/CytoRSuite-Gating-Functions.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite-Gating-Functions.Rmd</code></div>
@@ -172,45 +172,45 @@
 <div id="prepare-samples-for-gating" class="section level2">
 <h2 class="hasAnchor">
 <a href="#prepare-samples-for-gating" class="anchor"></a>3.1 Prepare Samples for Gating</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Load in required packages</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)</a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># Load in Activation dataset</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6">fs &lt;-<span class="st"> </span>Activation</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover</span></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">spill &lt;-<span class="st"> </span>fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL</a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># Apply compensation to samples &amp; save to object fs</span></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12">fs &lt;-<span class="st"> </span><span class="kw">compensate</span>(fs, spill)</a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co"># Apply logicle transformation to all fluorescent channels</span></a>
-<a class="sourceLine" id="cb1-15" data-line-number="15">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(fs[[<span class="dv">1</span>]], <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill))</a>
-<a class="sourceLine" id="cb1-16" data-line-number="16">fs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(fs, trans)</a>
-<a class="sourceLine" id="cb1-17" data-line-number="17"></a>
-<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="co"># We will use the pooled samples for gating - for large datasets use display to limit events for plotting</span></a>
-<a class="sourceLine" id="cb1-19" data-line-number="19">fr &lt;-<span class="st"> </span><span class="kw">as</span>(fs, <span class="st">"flowFrame"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load in required packages</span>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)
+
+<span class="co"># Load in Activation dataset</span>
+fs &lt;-<span class="st"> </span>Activation
+
+<span class="co"># Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover</span>
+spill &lt;-<span class="st"> </span>fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL
+
+<span class="co"># Apply compensation to samples &amp; save to object fs</span>
+fs &lt;-<span class="st"> </span><span class="kw">compensate</span>(fs, spill)
+
+<span class="co"># Apply logicle transformation to all fluorescent channels</span>
+trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(fs[[<span class="dv">1</span>]], <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill))
+fs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(fs, trans)
+
+<span class="co"># We will use the pooled samples for gating - for large datasets use display to limit events for plotting</span>
+fr &lt;-<span class="st"> </span><span class="kw">as</span>(fs, <span class="st">"flowFrame"</span>)</code></pre></div>
 </div>
 <div id="gate_polygon_draw" class="section level2">
 <h2 class="hasAnchor">
 <a href="#gate_polygon_draw" class="anchor"></a>3.2 <code>gate_polygon_draw</code>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Gate cells based on FSC-A &amp; SSC-A - close gate by right click &amp; "stop" - save gate to gts</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_polygon_draw.html">gate_polygon_draw</a></span>(fr, <span class="dt">alias =</span> <span class="st">"Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate cells based on FSC-A &amp; SSC-A - close gate by right click &amp; "stop" - save gate to gts</span>
+gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_polygon_draw.html">gate_polygon_draw</a></span>(fr, <span class="dt">alias =</span> <span class="st">"Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawPolygon.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">Cells &lt;-<span class="st"> </span><span class="kw">Subset</span>(fr, gts[[<span class="dv">1</span>]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span>
+Cells &lt;-<span class="st"> </span><span class="kw">Subset</span>(fr, gts[[<span class="dv">1</span>]])</code></pre></div>
 </div>
 <div id="gate_rectangle_draw" class="section level2">
 <h2 class="hasAnchor">
 <a href="#gate_rectangle_draw" class="anchor"></a>3.3 <code>gate_rectangle_draw</code>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># Gate single cells by selecting 2 diagonal points of rectangle - add gate to gts</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_rectangle_draw.html">gate_rectangle_draw</a></span>(Cells, <span class="dt">alias =</span> <span class="st">"Single Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"SSC-W"</span>,<span class="st">"SSC-H"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate single cells by selecting 2 diagonal points of rectangle - add gate to gts</span>
+gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_rectangle_draw.html">gate_rectangle_draw</a></span>(Cells, <span class="dt">alias =</span> <span class="st">"Single Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"SSC-W"</span>,<span class="st">"SSC-H"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawRectangle.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span></a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">Singlets &lt;-<span class="st"> </span><span class="kw">Subset</span>(Cells, gts[[<span class="dv">1</span>]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span>
+Singlets &lt;-<span class="st"> </span><span class="kw">Subset</span>(Cells, gts[[<span class="dv">1</span>]])</code></pre></div>
 </div>
 <div id="gate_boundary_draw" class="section level2">
 <h2 class="hasAnchor">
@@ -219,101 +219,106 @@
 <div id="dimensional-boundary-gate" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dimensional-boundary-gate" class="anchor"></a>3.4.1 1-Dimensional Boundary Gate</h3>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># Gate live cells as Hoechst- Alexa Fluor 405-A - gate not applied to demonstrate 2-D boundary gates</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="../reference/gate_boundary_draw.html">gate_boundary_draw</a></span>(Singlets, <span class="dt">alias =</span> <span class="st">"Cells"</span>, <span class="dt">channels =</span> <span class="st">"Alexa Fluor 405-A"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate live cells as Hoechst- Alexa Fluor 405-A - gate not applied to demonstrate 2-D boundary gates</span>
+<span class="kw"><a href="../reference/gate_boundary_draw.html">gate_boundary_draw</a></span>(Singlets, <span class="dt">alias =</span> <span class="st">"Cells"</span>, <span class="dt">channels =</span> <span class="st">"Alexa Fluor 405-A"</span>)</code></pre></div>
 <p><img src="Gating-functions/drawBoundary1D.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="dimensional-boundary-gate-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dimensional-boundary-gate-1" class="anchor"></a>3.4.2 2-Dimensional Boundary Gate</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># Gate live cells using 2-D boundary gate</span></a>
-<a class="sourceLine" id="cb7-2" data-line-number="2">gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_boundary_draw.html">gate_boundary_draw</a></span>(Singlets, <span class="dt">alias =</span> <span class="st">"Live Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,<span class="st">"Alexa Fluor 430-A"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate live cells using 2-D boundary gate</span>
+gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_boundary_draw.html">gate_boundary_draw</a></span>(Singlets, <span class="dt">alias =</span> <span class="st">"Live Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,<span class="st">"Alexa Fluor 430-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawBoundary2D.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span></a>
-<a class="sourceLine" id="cb8-2" data-line-number="2">Live &lt;-<span class="st"> </span><span class="kw">Subset</span>(Singlets, gts[[<span class="dv">1</span>]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span>
+Live &lt;-<span class="st"> </span><span class="kw">Subset</span>(Singlets, gts[[<span class="dv">1</span>]])</code></pre></div>
 </div>
 </div>
 <div id="gate_threshold_draw" class="section level2">
 <h2 class="hasAnchor">
-<a href="#gate_threshold_draw" class="anchor"></a>3.5 gate_threshold_draw</h2>
+<a href="#gate_threshold_draw" class="anchor"></a>3.5 <code>gate_threshold_draw</code>
+</h2>
 <div id="dimensional-threshold-gate" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dimensional-threshold-gate" class="anchor"></a>3.5.1 1-Dimensional Threshold Gate</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co"># Gate T cells as Va2-PE+ - gate not applied to demonstrate 2-D threshold gates</span></a>
-<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw"><a href="../reference/gate_threshold_draw.html">gate_threshold_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"PE-A"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate T cells as Va2-PE+ - gate not applied to demonstrate 2-D threshold gates</span>
+<span class="kw"><a href="../reference/gate_threshold_draw.html">gate_threshold_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"PE-A"</span>)</code></pre></div>
 <p><img src="Gating-functions/drawThreshold1D.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="dimensional-threshold-gate-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dimensional-threshold-gate-1" class="anchor"></a>3.5.2 2-Dimensional Threshold Gate</h3>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># Gate T cells as Va2-PE+ using 2-D threshold gate</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2">gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_threshold_draw.html">gate_threshold_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"APC-Cy7-A"</span>,<span class="st">"PE-A"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate T cells as Va2-PE+ using 2-D threshold gate</span>
+gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_threshold_draw.html">gate_threshold_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"APC-Cy7-A"</span>,<span class="st">"PE-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawThreshold2D.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span></a>
-<a class="sourceLine" id="cb11-2" data-line-number="2">Va2 &lt;-<span class="st"> </span><span class="kw">Subset</span>(Live, gts[[<span class="dv">1</span>]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span>
+Va2 &lt;-<span class="st"> </span><span class="kw">Subset</span>(Live, gts[[<span class="dv">1</span>]])</code></pre></div>
 </div>
 </div>
 <div id="gate_interval_draw" class="section level2">
 <h2 class="hasAnchor">
-<a href="#gate_interval_draw" class="anchor"></a>3.6 gate_interval_draw</h2>
+<a href="#gate_interval_draw" class="anchor"></a>3.6 <code>gate_interval_draw</code>
+</h2>
 <div id="dimensional-interval-gate" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dimensional-interval-gate" class="anchor"></a>3.6.1 1-Dimensional Interval Gate</h3>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="co"># Gate Dendritic cells CD11c+ APC cy7 using 1D interval gate - gate not applied to demonstrate 2D interval gates</span></a>
-<a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw"><a href="../reference/gate_interval_draw.html">gate_interval_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"Dendritic Cells"</span>, <span class="dt">channels =</span> <span class="st">"APC-Cy7-A"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate Dendritic cells CD11c+ APC cy7 using 1D interval gate - gate not applied to demonstrate 2D interval gates</span>
+<span class="kw"><a href="../reference/gate_interval_draw.html">gate_interval_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"Dendritic Cells"</span>, <span class="dt">channels =</span> <span class="st">"APC-Cy7-A"</span>)</code></pre></div>
 <p><img src="Gating-functions/drawInterval1D.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="dimensional-interval-gate-1" class="section level3">
 <h3 class="hasAnchor">
 <a href="#dimensional-interval-gate-1" class="anchor"></a>3.6.2 2-Dimensional Interval Gate</h3>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="co"># Gate dendritic cells CD11c+ APC Cy7 using 2D interval gate</span></a>
-<a class="sourceLine" id="cb13-2" data-line-number="2">gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_interval_draw.html">gate_interval_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"Dendritic Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Qdot 605-A"</span>, <span class="st">"APC-Cy7-A"</span>), <span class="dt">axis =</span> <span class="st">"y"</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate dendritic cells CD11c+ APC Cy7 using 2D interval gate</span>
+gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_interval_draw.html">gate_interval_draw</a></span>(Live, <span class="dt">alias =</span> <span class="st">"Dendritic Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Qdot 605-A"</span>, <span class="st">"APC-Cy7-A"</span>), <span class="dt">axis =</span> <span class="st">"y"</span>)</code></pre></div>
 <p><img src="Gating-functions/drawInterval2D.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2">DC &lt;-<span class="st"> </span><span class="kw">Subset</span>(Live, gts[[<span class="dv">1</span>]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span>
+DC &lt;-<span class="st"> </span><span class="kw">Subset</span>(Live, gts[[<span class="dv">1</span>]])</code></pre></div>
 </div>
 </div>
 <div id="gate_ellipse_draw" class="section level2">
 <h2 class="hasAnchor">
-<a href="#gate_ellipse_draw" class="anchor"></a>3.7 gate_ellipse_draw</h2>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="co"># Gate CD8+ T cells using ellipsoid gate - gate not applied to demonstrate quadrant and web gates</span></a>
-<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="kw"><a href="../reference/gate_ellipse_draw.html">gate_ellipse_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</a></code></pre></div>
+<a href="#gate_ellipse_draw" class="anchor"></a>3.7 <code>gate_ellipse_draw</code>
+</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate CD8+ T cells using ellipsoid gate - gate not applied to demonstrate quadrant and web gates</span>
+<span class="kw"><a href="../reference/gate_ellipse_draw.html">gate_ellipse_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawEllipse.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="gate_quadrant_draw" class="section level2">
 <h2 class="hasAnchor">
-<a href="#gate_quadrant_draw" class="anchor"></a>3.8 gate_quadrant_draw</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="co"># Gate CD4 &amp; CD8 T cells using quadrant gates - gates not applied to demonstrate web gates</span></a>
-<a class="sourceLine" id="cb16-2" data-line-number="2"><span class="co"># Quadrant gates are named from bottom left anticlockwise to top left</span></a>
-<a class="sourceLine" id="cb16-3" data-line-number="3"><span class="kw"><a href="../reference/gate_quadrant_draw.html">gate_quadrant_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4- CD8-"</span>,<span class="st">"CD4+ CD8-"</span>,<span class="st">"CD4+ CD8+"</span>,<span class="st">"CD4+ CD8+"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</a></code></pre></div>
+<a href="#gate_quadrant_draw" class="anchor"></a>3.8 <code>gate_quadrant_draw</code>
+</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate CD4 &amp; CD8 T cells using quadrant gates - gates not applied to demonstrate web gates</span>
+<span class="co"># Quadrant gates are named from bottom left anticlockwise to top left</span>
+<span class="kw"><a href="../reference/gate_quadrant_draw.html">gate_quadrant_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4- CD8-"</span>,<span class="st">"CD4+ CD8-"</span>,<span class="st">"CD4+ CD8+"</span>,<span class="st">"CD4+ CD8+"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawQuadrants.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="gate_web_draw" class="section level2">
 <h2 class="hasAnchor">
-<a href="#gate_web_draw" class="anchor"></a>3.9 gate_web_draw</h2>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="co"># Gate CD4 &amp; CD8 T cells using web gates - gates not applied to demonstrate web gates</span></a>
-<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="co"># Gates are named from bottom left anticlockwise to top left</span></a>
-<a class="sourceLine" id="cb17-3" data-line-number="3">gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_web_draw.html">gate_web_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"DN"</span>,<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</a></code></pre></div>
+<a href="#gate_web_draw" class="anchor"></a>3.9 <code>gate_web_draw</code>
+</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate CD4 &amp; CD8 T cells using web gates - gates not applied to demonstrate web gates</span>
+<span class="co"># Gates are named from bottom left anticlockwise to top left</span>
+gts &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_web_draw.html">gate_web_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"DN"</span>,<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/drawWeb.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span></a>
-<a class="sourceLine" id="cb18-2" data-line-number="2">CD4 &lt;-<span class="st"> </span><span class="kw">Subset</span>(Va2, gts[[<span class="dv">2</span>]])</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">CD8 &lt;-<span class="st"> </span><span class="kw">Subset</span>(Va2, gts[[<span class="dv">3</span>]])</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gts is a filters list containing the constructed gates that can be easily applied to samples</span>
+CD4 &lt;-<span class="st"> </span><span class="kw">Subset</span>(Va2, gts[[<span class="dv">2</span>]])
+CD8 &lt;-<span class="st"> </span><span class="kw">Subset</span>(Va2, gts[[<span class="dv">3</span>]])</code></pre></div>
 </div>
 <div id="multiple-gates" class="section level2">
 <h2 class="hasAnchor">
 <a href="#multiple-gates" class="anchor"></a>4. Multiple Gates</h2>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="co"># Gate CD4 &amp; CD8 T cells using multiple rectangle gates - gates not applied</span></a>
-<a class="sourceLine" id="cb19-2" data-line-number="2"><span class="co"># Number of gates is determined based on how many populations are specified in "alias"</span></a>
-<a class="sourceLine" id="cb19-3" data-line-number="3"><span class="kw"><a href="../reference/gate_rectangle_draw.html">gate_rectangle_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>, <span class="st">"Alexa Fluor 488-A"</span>))</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate CD4 &amp; CD8 T cells using multiple rectangle gates - gates not applied</span>
+<span class="co"># Number of gates is determined based on how many populations are specified in "alias"</span>
+<span class="kw"><a href="../reference/gate_rectangle_draw.html">gate_rectangle_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>), <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>, <span class="st">"Alexa Fluor 488-A"</span>))</code></pre></div>
 <p><img src="Gating-functions/MultiGates.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="mixed-gates" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mixed-gates" class="anchor"></a>5. Mixed Gates</h2>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="co"># Gate CD4 &amp; CD8 T cells using mixed gates - gates not applied</span></a>
-<a class="sourceLine" id="cb20-2" data-line-number="2"><span class="co"># Gating functions can be mixed by setting plot = FALSE for subsequent gates &amp; keep plotting window open</span></a>
-<a class="sourceLine" id="cb20-3" data-line-number="3"><span class="kw"><a href="../reference/gate_rectangle_draw.html">gate_rectangle_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="st">"CD4 T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))</a>
-<a class="sourceLine" id="cb20-4" data-line-number="4"><span class="kw"><a href="../reference/gate_ellipse_draw.html">gate_ellipse_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>), <span class="dt">plot =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Gate CD4 &amp; CD8 T cells using mixed gates - gates not applied</span>
+<span class="co"># Gating functions can be mixed by setting plot = FALSE for subsequent gates &amp; keep plotting window open</span>
+<span class="kw"><a href="../reference/gate_rectangle_draw.html">gate_rectangle_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="st">"CD4 T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>))
+<span class="kw"><a href="../reference/gate_ellipse_draw.html">gate_ellipse_draw</a></span>(Va2, <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>, <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>), <span class="dt">plot =</span> <span class="ot">FALSE</span>)</code></pre></div>
 <p><img src="Gating-functions/MixedGates.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="more-information" class="section level2">
@@ -337,11 +342,11 @@
       <li><a href="#gate_polygon_draw">3.2 <code>gate_polygon_draw</code></a></li>
       <li><a href="#gate_rectangle_draw">3.3 <code>gate_rectangle_draw</code></a></li>
       <li><a href="#gate_boundary_draw">3.4 <code>gate_boundary_draw</code></a></li>
-      <li><a href="#gate_threshold_draw">3.5 gate_threshold_draw</a></li>
-      <li><a href="#gate_interval_draw">3.6 gate_interval_draw</a></li>
-      <li><a href="#gate_ellipse_draw">3.7 gate_ellipse_draw</a></li>
-      <li><a href="#gate_quadrant_draw">3.8 gate_quadrant_draw</a></li>
-      <li><a href="#gate_web_draw">3.9 gate_web_draw</a></li>
+      <li><a href="#gate_threshold_draw">3.5 <code>gate_threshold_draw</code></a></li>
+      <li><a href="#gate_interval_draw">3.6 <code>gate_interval_draw</code></a></li>
+      <li><a href="#gate_ellipse_draw">3.7 <code>gate_ellipse_draw</code></a></li>
+      <li><a href="#gate_quadrant_draw">3.8 <code>gate_quadrant_draw</code></a></li>
+      <li><a href="#gate_web_draw">3.9 <code>gate_web_draw</code></a></li>
       <li><a href="#multiple-gates">4. Multiple Gates</a></li>
       <li><a href="#mixed-gates">5. Mixed Gates</a></li>
       <li><a href="#more-information">3. More information</a></li>
