@@ -960,6 +960,7 @@ gatingTemplate_convert <- function(gs, gatingTemplate) {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @importFrom openCyto gatingTemplate gating
+#' @importFrom flowWorkspace recompute
 #' @importFrom utils edit read.csv write.csv
 #' 
 #' @examples
@@ -1007,7 +1008,10 @@ gatingTemplate_edit <- function(x, gatingTemplate = NULL){
   gt <- gatingTemplate(gatingTemplate)
   
   # Re-apply template to GatingSet
-  gating(gt, gs)
+  suppressMessages(gating(gt, gs))
+  
+  # Recompute statistics
+  suppressMessages(recompute(gs))
   
   # Update GatingSet globally
   assign(deparse(substitute(x)), gs, envir = globalenv())

@@ -75,6 +75,16 @@ test_that("gate_interval_draw", {
                            display = 0.05, 
                            axis = "y")
 
+  coords <- matrix(c(di[[1]]@min[1], 
+                     di[[1]]@max[1],
+                     25000, 
+                     150000),
+                   ncol = 2, nrow = 2)
+  colnames(coords) <- c("FSC-A", "SSC-A")
+  rownames(coords) <- c("min", "max")
+  di <- rectangleGate(filterId = "Cells", .gate = coords)
+  di <- filters(list(di))
+  
   expect_s4_class(di, "filters")
   expect_s4_class(di[[1]], "rectangleGate")
   expect_equal(di[[1]], igy)
