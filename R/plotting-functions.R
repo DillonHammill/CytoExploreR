@@ -381,6 +381,11 @@ setMethod(.cyto_axes_text,
 
   lms <- lapply(channels, function(channel) {
 
+    # Time parameter always uses data limits
+    if(channel == "Time"){
+      limits <- "data"
+    }
+    
     # Extract machine limits
     mlms <- vector()
     mlms[1] <- sm[sm$name == channel, "minRange"]
@@ -506,6 +511,11 @@ setMethod(.cyto_axes_text,
       # Limits from flowFrame
       lms <- range(exprs(fr)[, channel])
       lms <- c(mlms[1], lms[2] + (0.1 * (lms[2] - mlms[1])))
+      
+      # Limits for Time parameter
+      if(channel == "Time"){
+        lms <- c(0, range(exprs(fr)[, channel])[2])
+      }
     }
 
     return(lms)
