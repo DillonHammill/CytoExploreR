@@ -6,7 +6,7 @@
 \title{gate_draw flowFrame Method.}
 \usage{
 \S4method{gate_draw}{flowFrame}(x, channels = NULL, alias = NULL,
-  display = 1/length(x), type = "polygon", axis = "x",
+  type = "polygon", display = 1/length(x), axis = "x",
   density_smooth = 1.5, label = TRUE, plot = TRUE, ...)
 }
 \arguments{
@@ -20,10 +20,6 @@ population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
 
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
-
 \item{type}{vector of gate type names used to construct the gates. Multiple
 gate types are supported but should be accompanied with an \code{alias}
 argument of the same length (i.e. one \code{type} per \code{alias}).
@@ -31,6 +27,10 @@ Supported gate types include \code{polygon, rectangle, ellipse, threshold,
 boundary, interval, quadrant and web} which can be abbreviated as upper or
 lower case first letters as well. Default \code{type} is \code{"interval"}
 for 1D gates and \code{"polygon"} for 2D gates.}
+
+\item{display}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{display} can substantial improve
+plotting speed for less powerful machines.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

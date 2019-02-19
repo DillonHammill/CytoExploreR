@@ -7,7 +7,7 @@
 \usage{
 \S4method{gate_draw}{GatingSet}(x, group_by = NULL, select = NULL,
   parent = "root", alias = NULL, channels = NULL, type = "polygon",
-  display = NULL, gatingTemplate = NULL, axis = "x",
+  gatingTemplate = NULL, display = NULL, axis = "x",
   density_smooth = 1.5, label = TRUE, plot = TRUE, ...)
 }
 \arguments{
@@ -41,11 +41,11 @@ boundary, interval, quadrant and web} which can be abbreviated as upper or
 lower case first letters as well. Default \code{type} is \code{"interval"}
 for 1D gates and \code{"polygon"} for 2D gates.}
 
+\item{gatingTemplate}{name of \code{gatingTemplate} csv file to be saved.}
+
 \item{display}{numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
-
-\item{gatingTemplate}{name of \code{gatingTemplate} csv file to be saved.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

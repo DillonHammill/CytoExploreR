@@ -110,13 +110,16 @@ setMethod(gate_draw,
   definition = function(x,
                           channels = NULL,
                           alias = NULL,
-                          display = 1 / length(x),
                           type = "polygon",
+                          display = 1 / length(x),
                           axis = "x",
                           density_smooth = 1.5,
                           label = TRUE,
                           plot = TRUE, ...) {
 
+    # Turn off sampling of overlay
+    options("CytoRSuite_overlay_display" = FALSE)
+    
     # Assign x to fr
     fr <- x
 
@@ -171,7 +174,10 @@ setMethod(gate_draw,
         }
       }
     }
-
+    
+    # Reset sampling of overlay
+    options("CytoRSuite_overlay_display" = TRUE)
+    
     # Construct gates save as filters object
     if (length(type) == 1 & type[1] == "quadrant") {
       gates <- gate_quadrant_draw(
@@ -247,7 +253,6 @@ setMethod(gate_draw,
     }
 
     gates <- filters(gates)
-
     return(gates)
   }
 )
@@ -326,13 +331,16 @@ setMethod(gate_draw,
                           select = NULL,
                           channels = NULL,
                           alias = NULL,
-                          display = 1 / length(x),
                           type = "polygon",
+                          display = 1 / length(x),
                           axis = "x",
                           density_smooth = 1.5,
                           label = TRUE,
                           plot = TRUE, ...) {
 
+    # Turn off sampling of overlay
+    options("CytoRSuite_overlay_display" = FALSE)
+    
     # Assign x to fs
     fs <- x
 
@@ -404,7 +412,10 @@ setMethod(gate_draw,
         }
       }
     }
-
+    
+    # Reset sampling of overlay
+    options("CytoRSuite_overlay_display" = TRUE)
+    
     # Construct gates save as filters object
     if (length(type) == 1 & type[1] == "quadrant") {
       gates <- gate_quadrant_draw(
@@ -585,13 +596,16 @@ setMethod(gate_draw,
                           alias = NULL,
                           channels = NULL,
                           type = "polygon",
-                          display = NULL,
                           gatingTemplate = NULL,
+                          display = NULL,
                           axis = "x",
                           density_smooth = 1.5,
                           label = TRUE,
                           plot = TRUE, ...) {
 
+    # Turn off sampling of overlay
+    options("CytoRSuite_overlay_display" = FALSE)
+    
     # Assign x to gs
     gs <- x
     smp <- length(gs)
@@ -741,7 +755,10 @@ setMethod(gate_draw,
           }
         }
       }
-
+      
+    # Reset sampling of overlay
+    options("CytoRSuite_overlay_display" = TRUE)
+    
       # Construct gates save as filters object
       if (length(type) == 1 & type[1] == "quadrant") {
         gates <- gate_quadrant_draw(

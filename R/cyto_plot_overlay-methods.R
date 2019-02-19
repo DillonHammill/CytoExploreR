@@ -72,7 +72,7 @@ setMethod(cyto_plot_overlay,
 
     # Assign x to fr
     fr <- x
-
+    
     # Add points to existing plot
     graphics::points(
       x = exprs(fr)[, channels[1]],
@@ -146,6 +146,23 @@ setMethod(cyto_plot_overlay,
       fs[[x]]
     })
 
+    # Colours
+    cols <- colorRampPalette(c(
+      "darkorchid",
+      "blueviolet",
+      "magenta",
+      "deeppink",
+      "red4",
+      "orange",
+      "springgreen4"
+    ))
+    point_col <- c(point_col,cols(length(fr.lst)))[seq_len(length(fr.lst))]
+    
+    # Repeat other arguments
+    point_shape <- rep(point_shape, length.out = length(fr.lst))
+    point_size <- rep(point_size, length.out = length(fr.lst))
+    point_alpha <- rep(point_alpha, length.out = length(fr.lst))
+    
     # Add points to existing plot
     invisible(
       mapply(
@@ -237,6 +254,23 @@ setMethod(cyto_plot_overlay,
     # Assign x to fr.lst
     fr.lst <- x
 
+    # Colours
+    cols <- colorRampPalette(c(
+      "darkorchid",
+      "blueviolet",
+      "magenta",
+      "deeppink",
+      "red4",
+      "orange",
+      "springgreen4"
+    ))
+    point_col <- c(point_col,cols(length(fr.lst)))[seq_len(length(fr.lst))]
+    
+    # Repeat other arguments
+    point_shape <- rep(point_shape, length.out = length(fr.lst))
+    point_size <- rep(point_size, length.out = length(fr.lst))
+    point_alpha <- rep(point_alpha, length.out = length(fr.lst))
+    
     # Add points to existing plot
     invisible(
       mapply(

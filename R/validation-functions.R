@@ -639,7 +639,7 @@ setMethod(.cyto_overlay_check,
 
     # Check overlay class
     if (class(overlay) == "flowFrame") {
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         n <- BiocGenerics::nrow(overlay)
         overlay <- Subset(
           overlay,
@@ -648,7 +648,7 @@ setMethod(.cyto_overlay_check,
       }
       overlay <- list(overlay)
     } else if (class(overlay) == "flowSet") {
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- fsApply(overlay, function(x) {
           Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
@@ -656,7 +656,7 @@ setMethod(.cyto_overlay_check,
 
       overlay <- lapply(seq(1, length(overlay), 1), function(x) overlay[[x]])
     } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- lapply(overlay, function(x) {
           Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
@@ -665,7 +665,7 @@ setMethod(.cyto_overlay_check,
       overlay <- overlay
     } else if (all(unlist(lapply(overlay, class)) == "flowSet") &
       length(overlay) == 1) {
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- lapply(overlay, function(x) {
           fsApply(x, function(y) {
             Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
@@ -716,14 +716,14 @@ setMethod(.cyto_overlay_check,
 
     # Check overlay class
     if (class(overlay) == "flowFrame") {
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         n <- BiocGenerics::nrow(overlay)
         overlay <- Subset(overlay, sampleFilter(size = display * n))
       }
 
       overlay <- lapply(rep(list(overlay), length(fs)), "list")
     } else if (class(overlay) == "flowSet") {
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- fsApply(overlay, function(x) {
           Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
@@ -744,7 +744,7 @@ setMethod(.cyto_overlay_check,
         overlay <- lapply(overlay, "list")
       }
 
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- lapply(overlay, function(x) {
           Subset(x, sampleFilter(size = display * BiocGenerics::nrow(x)))
         })
@@ -755,7 +755,7 @@ setMethod(.cyto_overlay_check,
            "same length as the supplied flowSet.", sep = " "))
       }
 
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- lapply(overlay, function(x) {
           fsApply(x, function(y) {
             Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
@@ -778,7 +778,7 @@ setMethod(.cyto_overlay_check,
            "on each flowFrame in the flowSet.", sep = " "))
       }
 
-      if (!is.null(display)) {
+      if (!is.null(display) & getOption("CytoRSuite_overlay_display")) {
         overlay <- lapply(overlay, function(x) {
           lapply(x, function(y) {
             Subset(y, sampleFilter(size = display * BiocGenerics::nrow(y)))
