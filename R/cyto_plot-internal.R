@@ -1433,7 +1433,7 @@ setMethod(.cyto_plot_1d,
     if (missing(legend_text)) {
       legend_text <- names(fr.lst)
     }
-
+    
     # Number of gates
     typ <- c("rectangleGate", "filters")
     if (class(gate) %in% typ) {
@@ -1629,7 +1629,7 @@ setMethod(.cyto_plot_1d,
 
         # Stacking - One panel
       } else {
-
+        
         # Get named list of arguments
         args <- as.list(environment())
 
@@ -1660,8 +1660,7 @@ setMethod(.cyto_plot_1d,
           layers = density_layers,
           gates = gates
         )
-
-
+        
         # Call to cyto_plot
         mapply(
           function(sp,
@@ -1755,7 +1754,7 @@ setMethod(.cyto_plot_1d,
               border_line_col = border_line_col, ...
             )
           }, unique(sp),
-          gate,
+          list(gate[[1]]),
           args[["xlab"]],
           args[["ylab"]],
           args[["title"]],
