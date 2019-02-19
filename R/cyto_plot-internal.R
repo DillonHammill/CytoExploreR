@@ -1663,7 +1663,7 @@ setMethod(.cyto_plot_1d,
         
         # Call to cyto_plot
         mapply(
-          function(sp,
+          function(y,
                              gate,
                              xlab,
                              ylab,
@@ -1706,10 +1706,10 @@ setMethod(.cyto_plot_1d,
                              border_line_width,
                              border_line_col, ...) {
             .cyto_plot_1d(
-              x = fr.lst[sp == sp][[1]],
+              x = fr.lst[sp == y][[1]],
               channel = channel,
               axes_trans = axes_trans,
-              overlay = fr.lst[sp == sp][2:length(fr.lst[sp == sp])],
+              overlay = fr.lst[sp == y][2:length(fr.lst[sp == y])],
               gate = gate,
               density_stack = density_stack,
               xlim = xlim,
@@ -3074,6 +3074,11 @@ setMethod(.cyto_plot_2d,
     # Assign x to fr
     fs <- x
 
+    # Label text supplied turn on labels
+    if(!all(is.na(label_text))){
+      label <- TRUE
+    }
+    
     # Refresh mfrow after plotting?
     if (is.null(layout[1])) {
       refresh <- TRUE
@@ -3725,14 +3730,12 @@ setMethod(.cyto_plot_2d,
       "label_box_y",
       "label_box_alpha"
     )
-
-    n <- length(x[["label_text"]])
-
+    
     lapply(args, function(arg) {
       if (arg %in% names(x)) {
         if (gates != 0) {
           res <- rep(x[[arg]], length.out = gates * plots * layers)
-
+          
           if (plots == 1) {
             res <- list(res)
           } else {
