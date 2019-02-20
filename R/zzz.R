@@ -3,6 +3,7 @@
 #'
 #' @noRd
 .onLoad <- function(libname, pkgname) {
+  options("locatorBell" = FALSE)
   options("CytoRSuite_interact" = interactive())
   options("CytoRSuite_wd_check" = TRUE)
   options("CytoRSuite_overlay_display" = TRUE)
