@@ -111,7 +111,7 @@ cyto_plot(TCells[[1]], channels = "CD4")
 
 The density distribution for each flowFrame within the flowSet will be plotted in a separate panel by default. Notice how the x axis in the above plot has limits [0,4] this is due to flowFrame and flowSet objects not retaining the logicle transformation information. To have appropriately labelled axes users should supply a transformList object to the `axes_trans` argument as shown below. The `density_fill` argument controls the fill colour for the density distribution.
 
-```{r, fig.width = 11, fig.height = 5, fig.align='center'}
+```{r, fig.width = 11, fig.height = 9, fig.align='center'}
 trans <- estimateLogicle(fs[[2]], channels)
 cyto_plot(TCells, channels = "CD4", axes_trans = trans, density_fill = "dodgerblue")
 ```
@@ -134,7 +134,7 @@ cyto_plot(gs[[1]], parent = "T Cells", channels = "CD4", overlay = "CD4 T Cells"
 
 To change the border line type user can supply an integer [0,4] to the `density_line_type` argument. The line width can be controlled in a similar fashion using the `density_line_width` argument. By default the title above each plot will be the name of the sample but this can be changed by supplying specific names to the `title` argument.
 
-```{r, fig.width = 11, fig.height = 5, fig.align='center'}
+```{r, fig.width = 11, fig.height = 9, fig.align='center'}
 cyto_plot(gs, parent = "T Cells", channels = "CD4", density_line_type = 2, density_line_width = 4, title = c("Unactivated","Activated"))
 ```
 
@@ -154,7 +154,7 @@ cyto_plot(TCells[[1]], channels = c("CD4","CD8"), axes_trans = trans, xlab = "CD
 
 Contour lines are also supported for 2-D scatter plots, simply supply the number of contours levels to the `contour_lines` argument. Users can use the `contour_line_col` and `contour_line_width` arguments to modify the colour and line width of the contour lines respectively.
 
-```{r, fig.width = 11, fig.height = 5, fig.align='center'}
+```{r, fig.width = 11, fig.height = 9, fig.align='center'}
 cyto_plot(TCells, channels = c("CD4","CD8"), axes_trans = trans, contour_lines = 15)
 ```
 
@@ -170,7 +170,7 @@ cyto_plot(gs[[1]], parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), c
 
 Overlays are also supported in 2-D scatterplots, simply supply the name of the gated population to the **overlay**. Overlay also accepts the following objects: flowFrames, flowSets, list of flowFrames or list of flowSets which allow overlay of any data. The colour of the overlay is also controlled by the `point_col` argument, simply supply a colour for the base plot and a colour for each overlay. Here we will set the colour of the base plot to "grey" and the overlay colours to "purple" and "blue". To include a legend in the plot users can set the `legend` argument to TRUE. To show the layering used within cyto_plot we have added some contours as well.
 
-```{r, fig.width = 12, fig.height = 5, fig.align='center'}
+```{r, fig.width = 12, fig.height = 9, fig.align='center'}
 cyto_plot(gs, parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), channels = c("CD4","CD8"), contour_lines = 15, overlay = c("CD4 T Cells","CD8 T Cells"), point_col = c("grey","purple", "blue"), point_alpha = 0.5, legend = TRUE)
 ```
 

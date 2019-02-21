@@ -105,7 +105,7 @@
       <h1>CytoRSuite: Visualisation Using cyto_plot</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-02-18</h4>
+            <h4 class="date">2019-02-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite-Visualisation.Rmd"><code>vignettes/CytoRSuite-Visualisation.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite-Visualisation.Rmd</code></div>
@@ -224,29 +224,6 @@ TCells &lt;-<span class="st"> </span><span class="kw">getData</span>(gs, <span c
 <p>The density distribution for each flowFrame within the flowSet will be plotted in a separate panel by default. Notice how the x axis in the above plot has limits [0,4] this is due to flowFrame and flowSet objects not retaining the logicle transformation information. To have appropriately labelled axes users should supply a transformList object to the <code>axes_trans</code> argument as shown below. The <code>density_fill</code> argument controls the fill colour for the density distribution.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(fs[[<span class="dv">2</span>]], channels)
 <span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">axes_trans =</span> trans, <span class="dt">density_fill =</span> <span class="st">"dodgerblue"</span>)</code></pre></div>
-<pre><code>## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable</code></pre>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-5-1.png" width="1056" style="display: block; margin: auto;"></p>
 <p>Stacking of samples is supported through the <code>density_stack</code> argument which controls the percentage overlap of the stacked distributions. The <code>density_fill_alpha</code> argument controls the degree of transparency of the fill colour.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(TCells, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">density_fill =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"dodgerblue"</span>, <span class="st">"red"</span>), <span class="dt">density_stack =</span> <span class="fl">0.5</span>, <span class="dt">density_fill_alpha =</span> <span class="fl">0.5</span>)</code></pre></div>
@@ -264,29 +241,6 @@ TCells &lt;-<span class="st"> </span><span class="kw">getData</span>(gs, <span c
 <a href="#gatingset" class="anchor"></a>2.3.4 GatingSet</h3>
 <p>To change the border line type user can supply an integer [0,4] to the <code>density_line_type</code> argument. The line width can be controlled in a similar fashion using the <code>density_line_width</code> argument. By default the title above each plot will be the name of the sample but this can be changed by supplying specific names to the <code>title</code> argument.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot.html">cyto_plot</a></span>(gs, <span class="dt">parent =</span> <span class="st">"T Cells"</span>, <span class="dt">channels =</span> <span class="st">"CD4"</span>, <span class="dt">density_line_type =</span> <span class="dv">2</span>, <span class="dt">density_line_width =</span> <span class="dv">4</span>, <span class="dt">title =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Unactivated"</span>,<span class="st">"Activated"</span>))</code></pre></div>
-<pre><code>## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable
-
-## Warning in split.default(res, rep(1:plots, length_out = n, each = layers)):
-## data length is not a multiple of split variable</code></pre>
 <p><img src="CytoRSuite-Visualisation_files/figure-html/unnamed-chunk-8-1.png" width="1056" style="display: block; margin: auto;"></p>
 </div>
 </div>
