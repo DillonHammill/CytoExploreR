@@ -1,5 +1,8 @@
 # CytoRSuite 0.9.9
 
+* `density_layers` argument for `cyto_plot` is now operational. This argument designates the number of layers to include per plot for stacked density distributions. 
+* `cyto_markers` has been updated to allow editing of channel names as well.
+* `cyto_stats_compute` now calculates the robust CV for stat = "CV".
 * New function `gatingTemplate_edit` to facilitate interactive editing of the gatingTemplate. The feature is designed for adding boolean, reference or automated gates to existing gatingTemplates.
 * Improved support for editing gates constructed with multiple grouping variables using `gate_edit`.
 * `cyto_annotate` to save pData information to a csv file ("Experiment-Details.csv") for future use.

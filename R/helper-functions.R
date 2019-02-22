@@ -326,10 +326,12 @@ cyto_sample <- function(fr, display) {
 
 #' Assign marker names to flowFrame or flowSet
 #'
-#' \code{markers_assign} opens an editable table containing a list of channels
-#' and markers for a \code{flowFrame} or \code{flowSet}. Users can edit the
-#' \code{markers} column as required and these entries will be updated in the
-#' \code{flowFrame} or \code{flowSet} upon closing the window.
+#' \code{cyto_markers} opens an editable table containing a list of channels and
+#' markers for a \code{flowFrame} or \code{flowSet}. Users can edit the
+#' \code{name} or \code{desc} columns with updated channel names or marker names
+#' respectively. These entries will be updated in the \code{flowFrame} or
+#' \code{flowSet} upon closing the window and saved to a
+#' "Experiment-markers.csv" file for future use.
 #'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
 #' @param file name of csv file containing columns 'Channel' and 'Marker'.
@@ -345,14 +347,14 @@ cyto_sample <- function(fr, display) {
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Add marker names to channels - edit table
 #' cyto_markers(fs)
 #' }
-#' 
+#'
 #' @export
 cyto_markers <- function(x, file = NULL) {
   if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))) {
@@ -402,6 +404,9 @@ cyto_markers <- function(x, file = NULL) {
   # Edit dt
   dt <- suppressWarnings(edit(dt))
 
+  # Update channels
+  BiocGenerics::colnames(x) <- dt$Channel
+  
   # Write result to csv file
   if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
     
@@ -418,7 +423,6 @@ cyto_markers <- function(x, file = NULL) {
 
   # Channels with markers added
   tb <- dt[!dt$Channel %in% chans, ]
-
   chns <- tb$Channel[!is.na(tb$Marker)]
   
   # Pull out assigned markers

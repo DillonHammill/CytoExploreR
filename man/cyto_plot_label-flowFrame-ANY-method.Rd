@@ -29,11 +29,10 @@ gating.}
 (e.g. population name(s)).}
 
 \item{stat}{indicates the type of statistic to include in the label, can be
-either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"} or
-\code{"geo mean"}. \code{stat} is set to \code{"median"} by default.
-Statistics for fluorescent intensity are calculated for the entire
-distribution. Only count and percent statistics are supported for 2D
-plots.}
+either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"},
+\code{"geo mean"} or \code{"CV"}. \code{stat} is set to \code{"median"} by
+default. Statistics for fluorescent intensity are calculated for the entire
+distribution. Only count and percent statistics are supported for 2D plots.}
 
 \item{text_x}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}

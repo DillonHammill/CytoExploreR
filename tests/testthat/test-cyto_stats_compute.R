@@ -159,7 +159,11 @@ test_that("cyto_stats_compute flowFrame method", {
   
   # CV -
   sts <- lapply(chans, function(x){
-    (sd(exprs(Va2[[1]])[, x])/mean(exprs(Va2[[1]])[, x]))*100
+    fr.exprs <- exprs(Va2[[1]])
+    md <- median(fr.exprs[,x])
+    rSD <- median(abs(fr.exprs[,x] - md))*1.4826
+    st <- rSD/md * 100
+    return(st)
   })
   sts <- do.call("cbind", sts)
   colnames(sts) <- chans
@@ -182,7 +186,11 @@ test_that("cyto_stats_compute flowFrame method", {
                tolerance = 0.01)
   
   sts <- lapply(chans, function(x){
-    (sd(exprs(V[[1]])[, x])/mean(exprs(V[[1]])[, x]))*100
+    fr.exprs <- exprs(V[[1]])
+    md <- median(fr.exprs[,x])
+    rSD <- median(abs(fr.exprs[,x] - md))*1.4826
+    st <- rSD/md * 100
+    return(st)
   })
   sts <- do.call("cbind", sts)
   colnames(sts) <- chans
@@ -190,43 +198,6 @@ test_that("cyto_stats_compute flowFrame method", {
   
   expect_equal(cyto_stats_compute(Va2[[1]], 
                                   stat = "CV", 
-                                  trans = trans), 
-               sts, 
-               tolerance = 0.01)
-  
-  # CVI -
-  sts <- lapply(chans, function(x){
-    1/(sd(exprs(Va2[[1]])[, x])/mean(exprs(Va2[[1]])[, x]))*100
-  })
-  sts <- do.call("cbind", sts)
-  colnames(sts) <- chans
-  rownames(sts) <- nms[[1]]
-  
-  expect_equal(cyto_stats_compute(Va2[[1]], 
-                                  stat = "CVI"), 
-               sts, 
-               tolerance = 0.01)
-  
-  sts <- matrix(sts[, c("Alexa Fluor 700-A", "Alexa Fluor 488-A")], 
-                nrow = 1)
-  rownames(sts) <- nms[[1]]
-  colnames(sts) <- c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
-  
-  expect_equal(cyto_stats_compute(Va2[[1]], 
-                                  stat = "CVI", 
-                                  channels = c("CD4","CD8")), 
-               sts, 
-               tolerance = 0.01)
-  
-  sts <- lapply(chans, function(x){
-    1/(sd(exprs(V[[1]])[, x])/mean(exprs(V[[1]])[, x]))*100
-  })
-  sts <- do.call("cbind", sts)
-  colnames(sts) <- chans
-  rownames(sts) <- nms[[1]]
-  
-  expect_equal(cyto_stats_compute(Va2[[1]], 
-                                  stat = "CVI", 
                                   trans = trans), 
                sts, 
                tolerance = 0.01)

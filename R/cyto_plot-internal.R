@@ -208,13 +208,12 @@ setMethod(.cyto_plot_1d,
                           border_line_width = 1,
                           border_line_col = "black", ...) {
 
-
     # Prevent scientific notation on axes
     options(scipen = 999)
 
     # Assign x to fr
     fr <- x
-
+    
     # Return channel name if marker supplied
     channel <- cyto_channel_check(fr,
       channels = channel,

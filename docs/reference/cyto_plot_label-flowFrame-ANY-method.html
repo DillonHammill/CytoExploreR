@@ -196,11 +196,10 @@ gating.</p></td>
     <tr>
       <th>stat</th>
       <td><p>indicates the type of statistic to include in the label, can be
-either code"count", <code>"median"</code>, <code>"mean"</code>, <code>"mode"</code> or
-<code>"geo mean"</code>. <code>stat</code> is set to <code>"median"</code> by default.
-Statistics for fluorescent intensity are calculated for the entire
-distribution. Only count and percent statistics are supported for 2D
-plots.</p></td>
+either code"count", <code>"median"</code>, <code>"mean"</code>, <code>"mode"</code>,
+<code>"geo mean"</code> or <code>"CV"</code>. <code>stat</code> is set to <code>"median"</code> by
+default. Statistics for fluorescent intensity are calculated for the entire
+distribution. Only count and percent statistics are supported for 2D plots.</p></td>
     </tr>
     <tr>
       <th>text_x</th>
@@ -272,7 +271,7 @@ calculation.</p></td>
 <span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>4</span>]],
   <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"T Cells"</span>,
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"Alexa Fluor 700-A"</span>)
-)</div><div class='input'>
+)</div><div class='img'><img src='cyto_plot_label-flowFrame-ANY-method-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Labels without gates - position using text_x and text_y</span>
 <span class='fu'><a href='cyto_plot_label.html'>cyto_plot_label</a></span>(<span class='fu'>getData</span>(<span class='no'>gs</span>, <span class='st'>"T Cells"</span>)<span class='kw'>[[</span><span class='fl'>4</span>]],
   <span class='kw'>gates</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -281,7 +280,7 @@ calculation.</p></td>
   <span class='kw'>text</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"CD4 T Cells"</span>, <span class='st'>"CD8 T Cells"</span>),
   <span class='kw'>text_x</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>3.1</span>, <span class='fl'>1</span>),
   <span class='kw'>text_y</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>0.2</span>, <span class='fl'>3.2</span>)
-)</div><div class='img'><img src='cyto_plot_label-flowFrame-ANY-method-1.png' alt='' width='700' height='433' /></div></pre>
+)</div><div class='output co'>#&gt; <span class='error'>Error in .cyto_stat_check(stat): Supplied statistic not supported.</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

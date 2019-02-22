@@ -33,7 +33,7 @@ on the original linear scale.}
 
 \item{stat}{name of the statistic to calculate, options include
 \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
-\code{"mean"}, \code{"geo mean"}, \code{"CV"}, \code{CVI}, \code{"freq"}.}
+\code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.}
 
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by

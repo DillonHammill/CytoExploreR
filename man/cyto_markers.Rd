@@ -15,10 +15,12 @@ cyto_markers(x, file = NULL)
 NULL and update marker names of \code{x}.
 }
 \description{
-\code{markers_assign} opens an editable table containing a list of channels
-and markers for a \code{flowFrame} or \code{flowSet}. Users can edit the
-\code{markers} column as required and these entries will be updated in the
-\code{flowFrame} or \code{flowSet} upon closing the window.
+\code{cyto_markers} opens an editable table containing a list of channels and
+markers for a \code{flowFrame} or \code{flowSet}. Users can edit the
+\code{name} or \code{desc} columns with updated channel names or marker names
+respectively. These entries will be updated in the \code{flowFrame} or
+\code{flowSet} upon closing the window and saved to a
+"Experiment-markers.csv" file for future use.
 }
 \examples{
 \dontrun{

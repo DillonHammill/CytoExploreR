@@ -908,7 +908,7 @@ setMethod(.cyto_overlay_check,
 
 #' Check Statistic for ComputeStats
 #'
-#' @param stat computeStats statistic.
+#' @param stat cyto_stats_compute statistic.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -929,9 +929,7 @@ setMethod(.cyto_overlay_check,
     "Geo mean",
     "Geo Mean",
     "CV",
-    "cv",
-    "CVI",
-    "cvi"
+    "cv"
   )) {
     stop("Supplied statistic not supported.")
   }
@@ -950,8 +948,6 @@ setMethod(.cyto_overlay_check,
     stat <- "geo mean"
   } else if (stat %in% c("cv", "CV")) {
     stat <- "CV"
-  } else if (stat %in% c("cvi", "CVI")) {
-    stat <- "CVI"
   }
 
   return(stat)

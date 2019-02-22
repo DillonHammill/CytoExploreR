@@ -49,11 +49,10 @@ setGeneric(
 #' @param text character string to include in the label above the statistic
 #'   (e.g. population name(s)).
 #' @param stat indicates the type of statistic to include in the label, can be
-#'   either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"} or
-#'   \code{"geo mean"}. \code{stat} is set to \code{"median"} by default.
-#'   Statistics for fluorescent intensity are calculated for the entire
-#'   distribution. Only count and percent statistics are supported for 2D
-#'   plots.
+#'   either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"},
+#'   \code{"geo mean"} or \code{"CV"}. \code{stat} is set to \code{"median"} by
+#'   default. Statistics for fluorescent intensity are calculated for the entire
+#'   distribution. Only count and percent statistics are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
@@ -85,27 +84,27 @@ setGeneric(
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gating(Activation_gatingTemplate, gs)
-#' 
+#'
 #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "T Cells",
 #'   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A")
 #' )
-#' 
+#'
 #' # Labels without gates - position using text_x and text_y
 #' cyto_plot_label(getData(gs, "T Cells")[[4]],
 #'   gates = NULL,
@@ -135,6 +134,9 @@ setMethod(cyto_plot_label,
     # Assign x to fr
     fr <- x
 
+    # Check statistic
+    stat <- .cyto_stat_check(stat)
+    
     # Channels needed to position label
     if (missing(channels)) {
       stop("Supply channel/marker(s) to contruct the plot.")
@@ -145,7 +147,8 @@ setMethod(cyto_plot_label,
       "median",
       "mode",
       "mean",
-      "geo mean"
+      "geo mean",
+      "CV"
     )) {
       if (is.null(cyto_trans_check(trans))) {
         stop(
@@ -161,7 +164,8 @@ setMethod(cyto_plot_label,
         "median",
         "mode",
         "geo mean",
-        "percent"
+        "percent",
+        "CV"
       )) {
       stop("Only count is supported for 2D plots without gates.")
     }
@@ -195,6 +199,13 @@ setMethod(cyto_plot_label,
         inv <- cyto_trans_check(trans, inverse = TRUE)
         st <- inv@transforms[[channels]]@f(st)
         st <- round(st, 2)
+      } else if (stat == "CV"){
+        fr <- .getRawData(x = fr, trans)
+        fr.exprs <- exprs(fr)
+        md <- median(fr.exprs[,channels])
+        rSD <- median(abs(fr.exprs[,channels] - md))*1.4826
+        st <- rSD/md
+        st <- sprintf("%.2f %%", st*100)
       }
     }
 
@@ -273,10 +284,10 @@ setMethod(cyto_plot_label,
 #'   (e.g. population name(s)).
 #' @param stat indicates the type of statistic to include in the label, can be
 #'   either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
-#'   \code{"mode"} or \code{"geo mean"}. \code{stat} is set to \code{"percent"}
-#'   by default. Statistics for fluorescent intensity are calculated for the
-#'   entire distribution. Only count and percent statistics are supported for 2D
-#'   plots.
+#'   \code{"mode"}, \code{"geo mean"} or \code{"CV"}. \code{stat} is set to
+#'   \code{"percent"} by default. Statistics for fluorescent intensity are
+#'   calculated for the entire distribution. Only count and percent statistics
+#'   are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
@@ -308,33 +319,33 @@ setMethod(cyto_plot_label,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gating(Activation_gatingTemplate, gs)
-#' 
+#'
 #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "CD4 T Cells",
 #'   channels = "7-AAD-A"
 #' )
-#' 
+#'
 #' # CD69+ CD4 T Cells gate
 #' gt <- getGate(gs, "CD69+ CD4 T Cells")[[1]]
 #' cyto_plot_gate(gt,
 #'   channels = "7-AAD-A"
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "CD4 T Cells")[[4]],
 #'   gates = gt,
@@ -426,6 +437,13 @@ setMethod(cyto_plot_label,
         inv <- cyto_trans_check(trans, inverse = TRUE)
         st <- inv@transforms[[channels]]@f(st)
         st <- round(st, 2)
+      } else if (stat == "CV"){
+        fr <- .getRawData(x = fr, trans)
+        fr.exprs <- exprs(fr)
+        md <- median(fr.exprs[,channels])
+        rSD <- median(abs(fr.exprs[,channels] - md))*1.4826
+        st <- rSD/md
+        st <- sprintf("%.2f %%", st*100)
       }
     }
 
@@ -992,10 +1010,10 @@ setMethod(cyto_plot_label,
 #'   include percent in labels.
 #' @param stat indicates the type of statistic to include in the label, can be
 #'   either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
-#'   \code{"mode"} or \code{"geo mean"}. \code{stat} is set to \code{"percent"}
-#'   by default. Statistics for fluorescent intensity are calculated for the
-#'   entire distribution. Only count and percent statistics are supported for 2D
-#'   plots.
+#'   \code{"mode"}, \code{"geo mean"} or \code{"CV"}. \code{stat} is set to
+#'   \code{"percent"} by default. Statistics for fluorescent intensity are
+#'   calculated for the entire distribution. Only count and percent statistics
+#'   are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
@@ -1023,33 +1041,33 @@ setMethod(cyto_plot_label,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gating(Activation_gatingTemplate, gs)
-#' 
+#'
 #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "Live Cells",
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # T Cells & Dendritic Cells gates
 #' gts <- list(getGate(gs, "T Cells")[[1]], getGate(gs, "Dendritic Cells")[[1]])
 #' cyto_plot_gate(gts,
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "Live Cells")[[4]],
 #'   gates = gts,
@@ -1135,10 +1153,10 @@ setMethod(cyto_plot_label,
 #'   include percent in labels.
 #' @param stat indicates the type of statistic to include in the label, can be
 #'   either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
-#'   \code{"mode"} or \code{"geo mean"}. \code{stat} is set to \code{"percent"}
-#'   by default. Statistics for fluorescent intensity are calculated for the
-#'   entire distribution. Only count and percent statistics are supported for 2D
-#'   plots.
+#'   \code{"mode"}, \code{"geo mean"} or\code{"CV"}. \code{stat} is set to
+#'   \code{"percent"} by default. Statistics for fluorescent intensity are
+#'   calculated for the entire distribution. Only count and percent statistics
+#'   are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
@@ -1150,8 +1168,8 @@ setMethod(cyto_plot_label,
 #'   details.
 #' @param text_col specify text colour in label for each gate, defaults to
 #'   \code{"black"} for all gates.
-#' @param box_alpha numeric [0,1] controls the transparency of the background, set
-#'   to \code{0.6} by default.
+#' @param box_alpha numeric [0,1] controls the transparency of the background,
+#'   set to \code{0.6} by default.
 #'
 #' @return add a boxed text label to cyto_plot.
 #'
@@ -1166,34 +1184,35 @@ setMethod(cyto_plot_label,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gating(Activation_gatingTemplate, gs)
-#' 
+#'
 #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "Live Cells",
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # T Cells & Dendritic Cells gates
-#' gts <- filters(list(getGate(gs, "T Cells")[[1]], getGate(gs, "Dendritic Cells")[[1]]))
+#' gts <- filters(list(getGate(gs, "T Cells")[[1]], 
+#' getGate(gs, "Dendritic Cells")[[1]]))
 #' cyto_plot_gate(gts,
 #'   channels = c("APC-Cy7-A", "PE-A"),
 #'   gate_line_col = c("red", "black")
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "Live Cells")[[4]],
 #'   gates = gts,

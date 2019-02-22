@@ -34,10 +34,10 @@ include percent in labels.}
 
 \item{stat}{indicates the type of statistic to include in the label, can be
 either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
-\code{"mode"} or \code{"geo mean"}. \code{stat} is set to \code{"percent"}
-by default. Statistics for fluorescent intensity are calculated for the
-entire distribution. Only count and percent statistics are supported for 2D
-plots.}
+\code{"mode"}, \code{"geo mean"} or\code{"CV"}. \code{stat} is set to
+\code{"percent"} by default. Statistics for fluorescent intensity are
+calculated for the entire distribution. Only count and percent statistics
+are supported for 2D plots.}
 
 \item{text_x}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}
@@ -55,8 +55,8 @@ details.}
 \item{text_col}{specify text colour in label for each gate, defaults to
 \code{"black"} for all gates.}
 
-\item{box_alpha}{numeric [0,1] controls the transparency of the background, set
-to \code{0.6} by default.}
+\item{box_alpha}{numeric [0,1] controls the transparency of the background,
+set to \code{0.6} by default.}
 }
 \value{
 add a boxed text label to cyto_plot.
@@ -90,7 +90,8 @@ cyto_plot(gs[[4]],
 )
 
 # T Cells & Dendritic Cells gates
-gts <- filters(list(getGate(gs, "T Cells")[[1]], getGate(gs, "Dendritic Cells")[[1]]))
+gts <- filters(list(getGate(gs, "T Cells")[[1]], 
+getGate(gs, "Dendritic Cells")[[1]]))
 cyto_plot_gate(gts,
   channels = c("APC-Cy7-A", "PE-A"),
   gate_line_col = c("red", "black")

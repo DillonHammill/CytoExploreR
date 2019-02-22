@@ -197,10 +197,10 @@ include percent in labels.</p></td>
       <th>stat</th>
       <td><p>indicates the type of statistic to include in the label, can be
 either <code>"percent"</code>, <code>"count"</code>, <code>"median"</code>, <code>"mean"</code>,
-<code>"mode"</code> or <code>"geo mean"</code>. <code>stat</code> is set to <code>"percent"</code>
-by default. Statistics for fluorescent intensity are calculated for the
-entire distribution. Only count and percent statistics are supported for 2D
-plots.</p></td>
+<code>"mode"</code>, <code>"geo mean"</code> or<code>"CV"</code>. <code>stat</code> is set to
+<code>"percent"</code> by default. Statistics for fluorescent intensity are
+calculated for the entire distribution. Only count and percent statistics
+are supported for 2D plots.</p></td>
     </tr>
     <tr>
       <th>text_x</th>
@@ -230,8 +230,8 @@ details.</p></td>
     </tr>
     <tr>
       <th>box_alpha</th>
-      <td><p>numeric [0,1] controls the transparency of the background, set
-to <code>0.6</code> by default.</p></td>
+      <td><p>numeric [0,1] controls the transparency of the background,
+set to <code>0.6</code> by default.</p></td>
     </tr>
     </table>
     
@@ -268,7 +268,8 @@ to <code>0.6</code> by default.</p></td>
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"APC-Cy7-A"</span>, <span class='st'>"PE-A"</span>)
 )</div><div class='input'>
 <span class='co'># T Cells &amp; Dendritic Cells gates</span>
-<span class='no'>gts</span> <span class='kw'>&lt;-</span> <span class='fu'>filters</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'>getGate</span>(<span class='no'>gs</span>, <span class='st'>"T Cells"</span>)<span class='kw'>[[</span><span class='fl'>1</span>]], <span class='fu'>getGate</span>(<span class='no'>gs</span>, <span class='st'>"Dendritic Cells"</span>)<span class='kw'>[[</span><span class='fl'>1</span>]]))
+<span class='no'>gts</span> <span class='kw'>&lt;-</span> <span class='fu'>filters</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'>getGate</span>(<span class='no'>gs</span>, <span class='st'>"T Cells"</span>)<span class='kw'>[[</span><span class='fl'>1</span>]],
+<span class='fu'>getGate</span>(<span class='no'>gs</span>, <span class='st'>"Dendritic Cells"</span>)<span class='kw'>[[</span><span class='fl'>1</span>]]))
 <span class='fu'><a href='cyto_plot_gate.html'>cyto_plot_gate</a></span>(<span class='no'>gts</span>,
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"APC-Cy7-A"</span>, <span class='st'>"PE-A"</span>),
   <span class='kw'>gate_line_col</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"red"</span>, <span class='st'>"black"</span>)

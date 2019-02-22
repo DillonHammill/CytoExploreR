@@ -286,7 +286,6 @@ test_that(".cyto_stat_check", {
   expect_equal(.cyto_stat_check("Freq"), "freq")
   expect_equal(.cyto_stat_check("Geo mean"), "geo mean")
   expect_equal(.cyto_stat_check("cv"), "CV")
-  expect_equal(.cyto_stat_check("cvi"), "CVI")
 })
 
 graphics.off()

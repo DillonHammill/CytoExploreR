@@ -37,7 +37,7 @@ setGeneric(
 #'   on the original linear scale.
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
-#'   \code{"mean"}, \code{"geo mean"}, \code{"CV"} or \code{CVI}.
+#'   \code{"mean"}, \code{"geo mean"} or \code{"CV"}.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
@@ -127,9 +127,9 @@ setMethod(cyto_stats_compute,
           d <- density(fr.exprs[, channel], adjust = density_smooth)
           d$x[d$y == max(d$y)]
         } else if (stat == "CV") {
-          (sd(fr.exprs[, channel]) / mean(fr.exprs[, channel])) * 100
-        } else if (stat == "CVI") {
-          (1 / (sd(fr.exprs[, channel]) / mean(fr.exprs[, channel])) * 100)
+          md <- median(fr.exprs[,channel])
+          rSD <- median(abs(fr.exprs[,channel] - md))*1.4826
+          rSD/md * 100
         }
       })
       names(sts) <- channels
@@ -197,7 +197,7 @@ setMethod(cyto_stats_compute,
 #'   on the original linear scale.
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
-#'   \code{"mean"}, \code{"geo mean"}, \code{"CV"} or \code{CVI}.
+#'   \code{"mean"}, \code{"geo mean"} or \code{"CV"}.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
@@ -307,7 +307,7 @@ setMethod(cyto_stats_compute,
 #'   on the original linear scale.
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
-#'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, \code{CVI}, \code{"freq"}.
+#'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
