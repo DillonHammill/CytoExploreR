@@ -135,7 +135,7 @@ setMethod(cyto_plot_label,
     fr <- x
     
     # Check statistic
-    if(!all(is.na(stat))){
+    if(all(!is.na(stat))){
       stat <- .cyto_stat_check(stat)
     }
     
@@ -378,7 +378,7 @@ setMethod(cyto_plot_label,
     fr <- x
 
     # Check statistic
-    if(!all(is.na(stat))){
+    if(all(!is.na(stat))){
       stat <- .cyto_stat_check(stat)
     }
     
@@ -713,7 +713,7 @@ setMethod(cyto_plot_label,
     fr <- x
 
     # Check statistic
-    if(!all(is.na(stat))){
+    if(all(!is.na(stat))){
       stat <- .cyto_stat_check(stat)
     }
     
@@ -912,7 +912,7 @@ setMethod(cyto_plot_label,
     fr <- x
 
     # Check statistic
-    if(!all(is.na(stat))){
+    if(all(!is.na(stat))){
       stat <- .cyto_stat_check(stat)
     }
     
