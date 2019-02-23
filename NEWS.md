@@ -1,5 +1,6 @@
 # CytoRSuite 0.9.9
 
+* `cyto_plot_label` now accepts stat `freq` instead of `percent` for consistency with `cyto_stats_compute`.
 * `density_layers` argument for `cyto_plot` is now operational. This argument designates the number of layers to include per plot for stacked density distributions. 
 * `cyto_markers` has been updated to allow editing of channel names as well.
 * `cyto_stats_compute` now calculates the robust CV for stat = "CV".

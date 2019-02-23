@@ -133,9 +133,11 @@ setMethod(cyto_plot_label,
 
     # Assign x to fr
     fr <- x
-
+    
     # Check statistic
-    stat <- .cyto_stat_check(stat)
+    if(!all(is.na(stat))){
+      stat <- .cyto_stat_check(stat)
+    }
     
     # Channels needed to position label
     if (missing(channels)) {
@@ -164,7 +166,7 @@ setMethod(cyto_plot_label,
         "median",
         "mode",
         "geo mean",
-        "percent",
+        "freq",
         "CV"
       )) {
       stop("Only count is supported for 2D plots without gates.")
@@ -283,9 +285,9 @@ setMethod(cyto_plot_label,
 #' @param text character string to include in the label above the statistic
 #'   (e.g. population name(s)).
 #' @param stat indicates the type of statistic to include in the label, can be
-#'   either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
+#'   either \code{"freq"}, \code{"count"}, \code{"median"}, \code{"mean"},
 #'   \code{"mode"}, \code{"geo mean"} or \code{"CV"}. \code{stat} is set to
-#'   \code{"percent"} by default. Statistics for fluorescent intensity are
+#'   \code{"freq"} by default. Statistics for fluorescent intensity are
 #'   calculated for the entire distribution. Only count and percent statistics
 #'   are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
@@ -352,7 +354,7 @@ setMethod(cyto_plot_label,
 #'   trans = trans,
 #'   channels = "7-AAD-A",
 #'   text = c("CD69+"),
-#'   stat = "percent",
+#'   stat = "freq",
 #'   text_col = "blue"
 #' )
 #' @export
@@ -375,13 +377,18 @@ setMethod(cyto_plot_label,
     # Assign x to fr
     fr <- x
 
+    # Check statistic
+    if(!all(is.na(stat))){
+      stat <- .cyto_stat_check(stat)
+    }
+    
     # Channels needed to position label
     if (missing(channels)) {
       stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Only count and percent supported in 2D
-    if (length(channels) == 2 & !stat %in% c("count", "percent")) {
+    if (length(channels) == 2 & !stat %in% c("count", "freq")) {
       stop("Only count and percent statistics are supported in 2D plots.")
     }
 
@@ -410,7 +417,7 @@ setMethod(cyto_plot_label,
     if (!all(is.na(stat))) {
       if (stat == "count") {
         st <- BiocGenerics::nrow(flowCore::Subset(fr, gates))
-      } else if (stat == "percent") {
+      } else if (stat == "freq") {
 
         # Total events
         events <- BiocGenerics::nrow(fr)
@@ -620,8 +627,8 @@ setMethod(cyto_plot_label,
 #' @param text the name of the gated population, set to NA by default to only
 #'   include percent in labels.
 #' @param stat indicates the type of statistic to include in the label, can be
-#'   either \code{"percent"} or \code{"count"}. \code{stat} is set to
-#'   \code{"percent"} by default.
+#'   either \code{"freq"} or \code{"count"}. \code{stat} is set to
+#'   \code{"freq"} by default.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
@@ -682,7 +689,7 @@ setMethod(cyto_plot_label,
 #'   trans = trans,
 #'   channels = c("FSC-A", "SSC-A"),
 #'   text = "Cells",
-#'   stat = "percent",
+#'   stat = "freq",
 #'   text_col = "magenta",
 #'   text_size = 1.2
 #' )
@@ -705,13 +712,18 @@ setMethod(cyto_plot_label,
     # Assign x to fr
     fr <- x
 
+    # Check statistic
+    if(!all(is.na(stat))){
+      stat <- .cyto_stat_check(stat)
+    }
+    
     # Channels needed to position label
     if (missing(channels)) {
       stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Only count and percent supported
-    if (!stat %in% c("count", "percent")) {
+    if (!stat %in% c("count", "freq")) {
       stop("Only 'count' and 'percent' are supported for gated 2D plots.")
     }
 
@@ -726,7 +738,7 @@ setMethod(cyto_plot_label,
     if (!all(is.na(stat))) {
       if (stat == "count") {
         st <- BiocGenerics::nrow(flowCore::Subset(fr, gates))
-      } else if (stat == "percent") {
+      } else if (stat == "freq") {
         # Total events
         events <- nrow(fr)
 
@@ -813,8 +825,8 @@ setMethod(cyto_plot_label,
 #' @param text the name of the gated population, set to NA by default to only
 #'   include percent in labels.
 #' @param stat indicates the type of statistic to include in the label, can be
-#'   either \code{"percent"} or \code{"count"}. \code{stat} is set to
-#'   \code{"percent"} by default.
+#'   either \code{"freq"} or \code{"count"}. \code{stat} is set to
+#'   \code{"freq"} by default.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
 #'   to \code{NULL} by default to place labels in the center of the gates.
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
@@ -899,13 +911,18 @@ setMethod(cyto_plot_label,
     # Assign x to fr
     fr <- x
 
+    # Check statistic
+    if(!all(is.na(stat))){
+      stat <- .cyto_stat_check(stat)
+    }
+    
     # Channels needed to position label
     if (missing(channels)) {
       stop("Supply channel/marker(s) to contruct the plot.")
     }
 
     # Only count and percent supported
-    if (!stat %in% c("count", "percent")) {
+    if (!stat %in% c("count", "freq")) {
       stop("Only 'count' and 'percent' are supported for gated 2D plots.")
     }
 
@@ -920,7 +937,7 @@ setMethod(cyto_plot_label,
     if (!all(is.na(stat))) {
       if (stat == "count") {
         st <- BiocGenerics::nrow(flowCore::Subset(fr, gates))
-      } else if (stat == "percent") {
+      } else if (stat == "freq") {
         # Total events
         events <- nrow(fr)
 
@@ -1009,9 +1026,9 @@ setMethod(cyto_plot_label,
 #' @param text the name of the gated population, set to NA by default to only
 #'   include percent in labels.
 #' @param stat indicates the type of statistic to include in the label, can be
-#'   either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
+#'   either \code{"freq"}, \code{"count"}, \code{"median"}, \code{"mean"},
 #'   \code{"mode"}, \code{"geo mean"} or \code{"CV"}. \code{stat} is set to
-#'   \code{"percent"} by default. Statistics for fluorescent intensity are
+#'   \code{"freq"} by default. Statistics for fluorescent intensity are
 #'   calculated for the entire distribution. Only count and percent statistics
 #'   are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
@@ -1152,9 +1169,9 @@ setMethod(cyto_plot_label,
 #' @param text the name of the gated population, set to NA by default to only
 #'   include percent in labels.
 #' @param stat indicates the type of statistic to include in the label, can be
-#'   either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
+#'   either \code{"freq"}, \code{"count"}, \code{"median"}, \code{"mean"},
 #'   \code{"mode"}, \code{"geo mean"} or\code{"CV"}. \code{stat} is set to
-#'   \code{"percent"} by default. Statistics for fluorescent intensity are
+#'   \code{"freq"} by default. Statistics for fluorescent intensity are
 #'   calculated for the entire distribution. Only count and percent statistics
 #'   are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
@@ -1219,7 +1236,7 @@ setMethod(cyto_plot_label,
 #'   trans = trans,
 #'   channels = c("APC-Cy7-A", "PE-A"),
 #'   text = c("T Cells", "Dendritic Cells"),
-#'   stat = "percent",
+#'   stat = "freq",
 #'   text_col = c("green4", "purple"),
 #'   text_size = 1.2,
 #'   box_alpha = 1

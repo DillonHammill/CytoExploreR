@@ -33,9 +33,9 @@ gating.}
 include percent in labels.}
 
 \item{stat}{indicates the type of statistic to include in the label, can be
-either \code{"percent"}, \code{"count"}, \code{"median"}, \code{"mean"},
+either \code{"freq"}, \code{"count"}, \code{"median"}, \code{"mean"},
 \code{"mode"}, \code{"geo mean"} or\code{"CV"}. \code{stat} is set to
-\code{"percent"} by default. Statistics for fluorescent intensity are
+\code{"freq"} by default. Statistics for fluorescent intensity are
 calculated for the entire distribution. Only count and percent statistics
 are supported for 2D plots.}
 
@@ -103,7 +103,7 @@ cyto_plot_label(getData(gs, "Live Cells")[[4]],
   trans = trans,
   channels = c("APC-Cy7-A", "PE-A"),
   text = c("T Cells", "Dendritic Cells"),
-  stat = "percent",
+  stat = "freq",
   text_col = c("green4", "purple"),
   text_size = 1.2,
   box_alpha = 1

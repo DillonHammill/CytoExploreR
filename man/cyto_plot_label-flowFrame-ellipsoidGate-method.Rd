@@ -30,8 +30,8 @@ transform the fluorescent channels of the supplied flowFrame.}
 include percent in labels.}
 
 \item{stat}{indicates the type of statistic to include in the label, can be
-either \code{"percent"} or \code{"count"}. \code{stat} is set to
-\code{"percent"} by default.}
+either \code{"freq"} or \code{"count"}. \code{stat} is set to
+\code{"freq"} by default.}
 
 \item{text_x}{vector containing the x co-ordinates for the plot labels. Set
 to \code{NULL} by default to place labels in the center of the gates.}

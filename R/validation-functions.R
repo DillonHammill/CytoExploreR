@@ -923,6 +923,8 @@ setMethod(.cyto_overlay_check,
     "Mode",
     "count",
     "Count",
+    "percent",
+    "Percent",
     "freq",
     "Freq",
     "geo mean",
@@ -942,7 +944,7 @@ setMethod(.cyto_overlay_check,
     stat <- "mode"
   } else if (stat %in% c("count", "Count")) {
     stat <- "count"
-  } else if (stat %in% c("freq", "Freq")) {
+  } else if (stat %in% c("percent", "Percent", "freq", "Freq")) {
     stat <- "freq"
   } else if (stat %in% c("geo mean", "Geo mean", "Geo Mean")) {
     stat <- "geo mean"
