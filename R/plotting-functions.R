@@ -44,9 +44,8 @@
   border <- NA
   oldpars <- par(c("cex", "xpd"))
   par(cex = cex, xpd = TRUE)
-  if (is.na(y) && is.list(x)) {
-    y <- unlist(x[[2]])
-    x <- unlist(x[[1]])
+  if(all(is.na(y))){
+    y <- x
   }
   box.adj <- adj + (xpad - 1) * cex * (0.5 - adj)
   if (srt == 90 || srt == 270) {
