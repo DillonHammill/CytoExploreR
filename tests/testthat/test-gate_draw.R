@@ -87,7 +87,7 @@ test_that("gate_draw flowSet method", {
                            select = "A", 
                            alias = "Cells", 
                            channels = c("FSC-A","SSC-A")), 
-        "'select' must contain the numeric indicies of the samples to plot.")
+        "'select' must contain the numeric indices of the samples to plot.")
     
     gts <- gate_draw(fs, 
                      alias = c("A","B","C","D"), 
