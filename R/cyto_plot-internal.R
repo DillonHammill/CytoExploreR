@@ -2563,7 +2563,7 @@ setMethod(.cyto_plot_2d,
     if (nrow(fr) < 2) {
       graphics::plot(1,
         type = "n",
-        axes = F,
+        axes = FALSE,
         pch = args[["point_shape"]][1],
         cex.pts = args[["point_size"]][1],
         xlim = xlim,
