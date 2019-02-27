@@ -105,7 +105,7 @@
       <h1>CytoRSuite: Manual and Automated Gating</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-02-23</h4>
+            <h4 class="date">2019-02-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite-Manual-Automated-Gating.Rmd"><code>vignettes/CytoRSuite-Manual-Automated-Gating.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite-Manual-Automated-Gating.Rmd</code></div>
@@ -126,138 +126,138 @@
 <div id="preparation-of-activation-dataset-for-gating" class="section level2">
 <h2 class="hasAnchor">
 <a href="#preparation-of-activation-dataset-for-gating" class="anchor"></a>2.1 Preparation of Activation Dataset for Gating</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite) <span class="co"># openCyto is imported with CytoRSuite</span>
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)
-
-<span class="co"># Assign Activation flowSet to fs</span>
-fs &lt;-<span class="st"> </span>Activation
-
-<span class="co"># Add fs to a GatingSet</span>
-gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)
-
-<span class="co"># Apply compensation</span>
-gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL)
-
-<span class="co"># Transform fluorescent channels</span>
-trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], <span class="kw"><a href="../reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs))
-gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite) <span class="co"># openCyto is imported with CytoRSuite</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)</a>
+<a class="sourceLine" id="cb1-3" title="3"></a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="co"># Assign Activation flowSet to fs</span></a>
+<a class="sourceLine" id="cb1-5" title="5">fs &lt;-<span class="st"> </span>Activation</a>
+<a class="sourceLine" id="cb1-6" title="6"></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co"># Add fs to a GatingSet</span></a>
+<a class="sourceLine" id="cb1-8" title="8">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a>
+<a class="sourceLine" id="cb1-9" title="9"></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co"># Apply compensation</span></a>
+<a class="sourceLine" id="cb1-11" title="11">gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL)</a>
+<a class="sourceLine" id="cb1-12" title="12"></a>
+<a class="sourceLine" id="cb1-13" title="13"><span class="co"># Transform fluorescent channels</span></a>
+<a class="sourceLine" id="cb1-14" title="14">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], <span class="kw"><a href="../reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs))</a>
+<a class="sourceLine" id="cb1-15" title="15">gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</a></code></pre></div>
 </div>
 <div id="manually-gate-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#manually-gate-cells" class="anchor"></a>2.2 Manually Gate <code>Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># gate_draw returns gatingTemplate entry</span>
-template &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-                      <span class="dt">parent =</span> <span class="st">"root"</span>,
-                      <span class="dt">alias =</span> <span class="st">"Cells"</span>,
-                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>))</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co"># gate_draw returns gatingTemplate entry</span></a>
+<a class="sourceLine" id="cb2-2" title="2">template &lt;-<span class="st"> </span><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb2-3" title="3">                      <span class="dt">parent =</span> <span class="st">"root"</span>,</a>
+<a class="sourceLine" id="cb2-4" title="4">                      <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb2-5" title="5">                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>))</a></code></pre></div>
 </div>
 <div id="manually-gate-single-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#manually-gate-single-cells" class="anchor"></a>2.3 Manually Gate <code>Single Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-                                      <span class="dt">parent =</span> <span class="st">"Cells"</span>,
-                                      <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,
-                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>)))</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb3-2" title="2">                                      <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb3-3" title="3">                                      <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,</a>
+<a class="sourceLine" id="cb3-4" title="4">                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>)))</a></code></pre></div>
 </div>
 <div id="manually-gate-live-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#manually-gate-live-cells" class="anchor"></a>2.4 Manually Gate <code>Live Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-                                      <span class="dt">parent =</span> <span class="st">"Single Cells"</span>,
-                                      <span class="dt">alias =</span> <span class="st">"Live Cells"</span>,
-                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,
-                                                   <span class="st">"Alexa Fluor 430-A"</span>)))</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb4-2" title="2">                                      <span class="dt">parent =</span> <span class="st">"Single Cells"</span>,</a>
+<a class="sourceLine" id="cb4-3" title="3">                                      <span class="dt">alias =</span> <span class="st">"Live Cells"</span>,</a>
+<a class="sourceLine" id="cb4-4" title="4">                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,</a>
+<a class="sourceLine" id="cb4-5" title="5">                                                   <span class="st">"Alexa Fluor 430-A"</span>)))</a></code></pre></div>
 </div>
 <div id="automatically-gate-t-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#automatically-gate-t-cells" class="anchor"></a>2.5 Automatically Gate <code>T Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw">app_pop</span>(gs,
-                                    <span class="dt">alias =</span> <span class="st">"T Cells"</span>,
-                                    <span class="dt">pop =</span> <span class="st">"+"</span>,
-                                    <span class="dt">parent =</span> <span class="st">"Live Cells"</span>,
-                                    <span class="dt">dims =</span> <span class="st">"APC-Cy7-A,PE-A"</span>,
-                                    <span class="dt">gating_method =</span> <span class="st">"flowClust"</span>,
-                                    <span class="dt">gating_args =</span> <span class="st">"K=3,target=c(0,3)"</span>))</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw">app_pop</span>(gs,</a>
+<a class="sourceLine" id="cb5-2" title="2">                                    <span class="dt">alias =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb5-3" title="3">                                    <span class="dt">pop =</span> <span class="st">"+"</span>,</a>
+<a class="sourceLine" id="cb5-4" title="4">                                    <span class="dt">parent =</span> <span class="st">"Live Cells"</span>,</a>
+<a class="sourceLine" id="cb5-5" title="5">                                    <span class="dt">dims =</span> <span class="st">"APC-Cy7-A,PE-A"</span>,</a>
+<a class="sourceLine" id="cb5-6" title="6">                                    <span class="dt">gating_method =</span> <span class="st">"flowClust"</span>,</a>
+<a class="sourceLine" id="cb5-7" title="7">                                    <span class="dt">gating_args =</span> <span class="st">"K=3,target=c(0,3)"</span>))</a></code></pre></div>
 </div>
 <div id="automatically-gate-cd4-t-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#automatically-gate-cd4-t-cells" class="anchor"></a>2.6 Automatically Gate <code>CD4 T Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw">app_pop</span>(gs,
-                                    <span class="dt">alias =</span> <span class="st">"CD4 T Cells"</span>,
-                                    <span class="dt">pop =</span> <span class="st">"+"</span>,
-                                    <span class="dt">parent =</span> <span class="st">"T Cells"</span>,
-                                    <span class="dt">dims =</span> <span class="st">"Alexa Fluor 700-A,Alexa Fluor 488-A"</span>,
-                                    <span class="dt">gating_method =</span> <span class="st">"flowClust"</span>,
-                                    <span class="dt">gating_args =</span> <span class="st">"K=3,target=c(3,0)"</span>))</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw">app_pop</span>(gs,</a>
+<a class="sourceLine" id="cb6-2" title="2">                                    <span class="dt">alias =</span> <span class="st">"CD4 T Cells"</span>,</a>
+<a class="sourceLine" id="cb6-3" title="3">                                    <span class="dt">pop =</span> <span class="st">"+"</span>,</a>
+<a class="sourceLine" id="cb6-4" title="4">                                    <span class="dt">parent =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb6-5" title="5">                                    <span class="dt">dims =</span> <span class="st">"Alexa Fluor 700-A,Alexa Fluor 488-A"</span>,</a>
+<a class="sourceLine" id="cb6-6" title="6">                                    <span class="dt">gating_method =</span> <span class="st">"flowClust"</span>,</a>
+<a class="sourceLine" id="cb6-7" title="7">                                    <span class="dt">gating_args =</span> <span class="st">"K=3,target=c(3,0)"</span>))</a></code></pre></div>
 </div>
 <div id="automatically-gate-cd8-t-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#automatically-gate-cd8-t-cells" class="anchor"></a>2.7 Automatically Gate <code>CD8 T Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw">app_pop</span>(gs,
-                                    <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>,
-                                    <span class="dt">pop =</span> <span class="st">"+"</span>,
-                                    <span class="dt">parent =</span> <span class="st">"T Cells"</span>,
-                                    <span class="dt">dims =</span> <span class="st">"Alexa Fluor 700-A,Alexa Fluor 488-A"</span>,
-                                    <span class="dt">gating_method =</span> <span class="st">"flowClust"</span>,
-                                    <span class="dt">gating_args =</span> <span class="st">"K=3,target=c(0,3)"</span>))</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw">app_pop</span>(gs,</a>
+<a class="sourceLine" id="cb7-2" title="2">                                    <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>,</a>
+<a class="sourceLine" id="cb7-3" title="3">                                    <span class="dt">pop =</span> <span class="st">"+"</span>,</a>
+<a class="sourceLine" id="cb7-4" title="4">                                    <span class="dt">parent =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb7-5" title="5">                                    <span class="dt">dims =</span> <span class="st">"Alexa Fluor 700-A,Alexa Fluor 488-A"</span>,</a>
+<a class="sourceLine" id="cb7-6" title="6">                                    <span class="dt">gating_method =</span> <span class="st">"flowClust"</span>,</a>
+<a class="sourceLine" id="cb7-7" title="7">                                    <span class="dt">gating_args =</span> <span class="st">"K=3,target=c(0,3)"</span>))</a></code></pre></div>
 </div>
 <div id="manually-gate-cd69-cd4-t-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#manually-gate-cd69-cd4-t-cells" class="anchor"></a>2.8 Manually Gate <code>CD69+ CD4 T Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-                                      <span class="dt">parent =</span> <span class="st">"CD4 T Cells"</span>,
-                                      <span class="dt">alias =</span> <span class="st">"CD69+ CD4 T Cells"</span>,
-                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 647-A"</span>,
-                                                   <span class="st">"7-AAD-A"</span>),
-                                      <span class="dt">type =</span> <span class="st">"interval"</span>,
-                                      <span class="dt">axis =</span> <span class="st">"y"</span>))</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb8-2" title="2">                                      <span class="dt">parent =</span> <span class="st">"CD4 T Cells"</span>,</a>
+<a class="sourceLine" id="cb8-3" title="3">                                      <span class="dt">alias =</span> <span class="st">"CD69+ CD4 T Cells"</span>,</a>
+<a class="sourceLine" id="cb8-4" title="4">                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 647-A"</span>,</a>
+<a class="sourceLine" id="cb8-5" title="5">                                                   <span class="st">"7-AAD-A"</span>),</a>
+<a class="sourceLine" id="cb8-6" title="6">                                      <span class="dt">type =</span> <span class="st">"interval"</span>,</a>
+<a class="sourceLine" id="cb8-7" title="7">                                      <span class="dt">axis =</span> <span class="st">"y"</span>))</a></code></pre></div>
 </div>
 <div id="manually-gate-cd69-cd8-t-cells" class="section level2">
 <h2 class="hasAnchor">
 <a href="#manually-gate-cd69-cd8-t-cells" class="anchor"></a>2.9 Manually Gate <code>CD69+ CD8 T Cells</code>
 </h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-                                      <span class="dt">parent =</span> <span class="st">"CD8 T Cells"</span>,
-                                      <span class="dt">alias =</span> <span class="st">"CD69+ CD8 T Cells"</span>,
-                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 647-A"</span>,
-                                                   <span class="st">"7-AAD-A"</span>),
-                                      <span class="dt">type =</span> <span class="st">"interval"</span>,
-                                      <span class="dt">axis =</span> <span class="st">"y"</span>))</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">template &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">rbind</a></span>(template, <span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb9-2" title="2">                                      <span class="dt">parent =</span> <span class="st">"CD8 T Cells"</span>,</a>
+<a class="sourceLine" id="cb9-3" title="3">                                      <span class="dt">alias =</span> <span class="st">"CD69+ CD8 T Cells"</span>,</a>
+<a class="sourceLine" id="cb9-4" title="4">                                      <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 647-A"</span>,</a>
+<a class="sourceLine" id="cb9-5" title="5">                                                   <span class="st">"7-AAD-A"</span>),</a>
+<a class="sourceLine" id="cb9-6" title="6">                                      <span class="dt">type =</span> <span class="st">"interval"</span>,</a>
+<a class="sourceLine" id="cb9-7" title="7">                                      <span class="dt">axis =</span> <span class="st">"y"</span>))</a></code></pre></div>
 </div>
 <div id="save-gatingtemplate-for-future-use" class="section level2">
 <h2 class="hasAnchor">
 <a href="#save-gatingtemplate-for-future-use" class="anchor"></a>2.10 Save gatingTemplate for Future Use</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/write.table">write.csv</a></span>(template, <span class="st">"gatingTemplate.csv"</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/write.table">write.csv</a></span>(template, <span class="st">"gatingTemplate.csv"</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 </div>
 <div id="applying-a-saved-gatingtemplate" class="section level2">
 <h2 class="hasAnchor">
 <a href="#applying-a-saved-gatingtemplate" class="anchor"></a>2.11 Applying a Saved gatingTemplate</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Assign Activation flowSet to fs</span>
-fs &lt;-<span class="st"> </span>Activation
-
-<span class="co"># Add fs to a GatingSet</span>
-gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)
-
-<span class="co"># Apply compensation</span>
-gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL)
-
-<span class="co"># Transform fluorescent channels</span>
-trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], <span class="kw"><a href="../reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs))
-gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)
-
-<span class="co"># Apply gatingTemplate</span>
-gt &lt;-<span class="st"> </span><span class="kw">gatingTemplate</span>(<span class="st">"gatingTemplate.csv"</span>)
-<span class="kw">gating</span>(gt,gs)
-
-<span class="co"># Visualise Gating Scheme</span>
-<span class="kw"><a href="../reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]])</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co"># Assign Activation flowSet to fs</span></a>
+<a class="sourceLine" id="cb11-2" title="2">fs &lt;-<span class="st"> </span>Activation</a>
+<a class="sourceLine" id="cb11-3" title="3"></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="co"># Add fs to a GatingSet</span></a>
+<a class="sourceLine" id="cb11-5" title="5">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a>
+<a class="sourceLine" id="cb11-6" title="6"></a>
+<a class="sourceLine" id="cb11-7" title="7"><span class="co"># Apply compensation</span></a>
+<a class="sourceLine" id="cb11-8" title="8">gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL)</a>
+<a class="sourceLine" id="cb11-9" title="9"></a>
+<a class="sourceLine" id="cb11-10" title="10"><span class="co"># Transform fluorescent channels</span></a>
+<a class="sourceLine" id="cb11-11" title="11">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], <span class="kw"><a href="../reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs))</a>
+<a class="sourceLine" id="cb11-12" title="12">gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</a>
+<a class="sourceLine" id="cb11-13" title="13"></a>
+<a class="sourceLine" id="cb11-14" title="14"><span class="co"># Apply gatingTemplate</span></a>
+<a class="sourceLine" id="cb11-15" title="15">gt &lt;-<span class="st"> </span><span class="kw">gatingTemplate</span>(<span class="st">"gatingTemplate.csv"</span>)</a>
+<a class="sourceLine" id="cb11-16" title="16"><span class="kw">gating</span>(gt,gs)</a>
+<a class="sourceLine" id="cb11-17" title="17"></a>
+<a class="sourceLine" id="cb11-18" title="18"><span class="co"># Visualise Gating Scheme</span></a>
+<a class="sourceLine" id="cb11-19" title="19"><span class="kw"><a href="../reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]])</a></code></pre></div>
 </div>
 </div>
 <div id="more-information" class="section level1">

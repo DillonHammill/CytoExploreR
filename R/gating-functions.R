@@ -733,14 +733,14 @@ gate_threshold_draw <- function(fr,
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' boundary gates are supported, for 2-D boundary gates all events below the
 #' select x and y coordinates are included in the gate. Multiple boundary gates
-#' ares not currently supported.
+#' are not currently supported.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for plotting and gating.
 #' @param channels vector of channel names to use for plotting, can be of length
 #'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
 #' @param alias the name(s) of the populations to be gated. Multiple boundary
-#'   gates ares not currently supported. \code{alias} is \code{NULL} by default
+#'   gates are not currently supported. \code{alias} is \code{NULL} by default
 #'   which will halt the gating routine.
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing

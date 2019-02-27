@@ -62,7 +62,7 @@ setGeneric(
 #'   containing pre-gated single stain compensation controls and a universal
 #'   unstained control. Currently, spillover_compute does not pre-gate samples
 #'   to obtain a homogeneous cell population for downstream calculations. We
-#'   therefore recommmend pre-gating samples based on FSC and SSC parameters
+#'   therefore recommend pre-gating samples based on FSC and SSC parameters
 #'   prior to passing them to spillover_compute (i.e. \code{x} should contain
 #'   events for single cells only). Passing raw files to spillover_compute will
 #'   result in inaccurate calculations of fluorescent spillover matrix.

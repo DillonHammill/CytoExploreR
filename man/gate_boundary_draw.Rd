@@ -12,7 +12,7 @@ gate_boundary_draw(fr, alias = NULL, channels, plot = TRUE,
 containing the flow cytometry data for plotting and gating.}
 
 \item{alias}{the name(s) of the populations to be gated. Multiple boundary
-gates ares not currently supported. \code{alias} is \code{NULL} by default
+gates are not currently supported. \code{alias} is \code{NULL} by default
 which will halt the gating routine.}
 
 \item{channels}{vector of channel names to use for plotting, can be of length
@@ -40,7 +40,7 @@ to select the upper bound of a population which is constructed into a
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 boundary gates are supported, for 2-D boundary gates all events below the
 select x and y coordinates are included in the gate. Multiple boundary gates
-ares not currently supported.
+are not currently supported.
 }
 \examples{
 \dontrun{

@@ -262,7 +262,7 @@ setMethod(gate_draw,
 #' Manually draw gates around populations for analysis of flow cytometry data.
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
-#' @param select vector containing the indicies of samples within gs to use for
+#' @param select vector containing the indices of samples within gs to use for
 #'   plotting.
 #' @param channels vector of channel names to use for plotting, can be of length
 #'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
@@ -348,7 +348,7 @@ setMethod(gate_draw,
     if (!is.null(select)) {
       if (class(select) != "numeric") {
         stop(
-          "'select' must contain the numeric indicies of the samples to plot."
+          "'select' must contain the numeric indices of the samples to plot."
           )
       }
 
@@ -506,7 +506,7 @@ setMethod(gate_draw,
 #'   prior to gating, set to the length of x by default to construct a single
 #'   gate for all samples. If group_by is supplied a different gate will be
 #'   constructed for each group.
-#' @param select vector containing the indicies of samples within each group to
+#' @param select vector containing the indices of samples within each group to
 #'   use for plotting.
 #' @param channels vector of channel names to use for plotting, can be of length
 #'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
@@ -648,7 +648,7 @@ setMethod(gate_draw,
       # Restrict to samples matching pData requirements
       if (!is.null(select)) {
         if (class(select) != "numeric") {
-          stop("'select' contain the numeric indicies of the samples to plot.")
+          stop("'select' contain the numeric indices of the samples to plot.")
         }
 
         # Extract samples using selectFrames

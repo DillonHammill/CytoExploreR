@@ -105,7 +105,7 @@
       <h1>CytoRSuite: Gate Manipulation</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-02-23</h4>
+            <h4 class="date">2019-02-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite-Gate-Manipulation.Rmd"><code>vignettes/CytoRSuite-Gate-Manipulation.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite-Gate-Manipulation.Rmd</code></div>
@@ -126,62 +126,62 @@
 <div id="prepare-samples-for-gating" class="section level2">
 <h2 class="hasAnchor">
 <a href="#prepare-samples-for-gating" class="anchor"></a>2.1 Prepare Samples for Gating</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)
-
-<span class="co"># Load in Activation dataset</span>
-fs &lt;-<span class="st"> </span>Activation
-
-<span class="co"># Add Samples to GatingSet</span>
-gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)
-
-<span class="co"># Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover</span>
-spill &lt;-<span class="st"> </span>fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL
-
-<span class="co"># Apply compensation to samples &amp; save to object fs</span>
-gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, spill)
-
-<span class="co"># Apply logicle transformation to all fluorescent channels</span>
-trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill))
-gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3"></a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="co"># Load in Activation dataset</span></a>
+<a class="sourceLine" id="cb1-5" title="5">fs &lt;-<span class="st"> </span>Activation</a>
+<a class="sourceLine" id="cb1-6" title="6"></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="co"># Add Samples to GatingSet</span></a>
+<a class="sourceLine" id="cb1-8" title="8">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a>
+<a class="sourceLine" id="cb1-9" title="9"></a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="co"># Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover</span></a>
+<a class="sourceLine" id="cb1-11" title="11">spill &lt;-<span class="st"> </span>fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL</a>
+<a class="sourceLine" id="cb1-12" title="12"></a>
+<a class="sourceLine" id="cb1-13" title="13"><span class="co"># Apply compensation to samples &amp; save to object fs</span></a>
+<a class="sourceLine" id="cb1-14" title="14">gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, spill)</a>
+<a class="sourceLine" id="cb1-15" title="15"></a>
+<a class="sourceLine" id="cb1-16" title="16"><span class="co"># Apply logicle transformation to all fluorescent channels</span></a>
+<a class="sourceLine" id="cb1-17" title="17">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill))</a>
+<a class="sourceLine" id="cb1-18" title="18">gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</a></code></pre></div>
 </div>
 <div id="gate-samples-using-gate_draw" class="section level2">
 <h2 class="hasAnchor">
 <a href="#gate-samples-using-gate_draw" class="anchor"></a>2.2 Gate Samples Using gate_draw</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"root"</span>,
-         <span class="dt">alias =</span> <span class="st">"Cells"</span>,
-         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),
-         <span class="dt">type =</span> <span class="st">"p"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb2-2" title="2">         <span class="dt">parent =</span> <span class="st">"root"</span>,</a>
+<a class="sourceLine" id="cb2-3" title="3">         <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb2-4" title="4">         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),</a>
+<a class="sourceLine" id="cb2-5" title="5">         <span class="dt">type =</span> <span class="st">"p"</span>,</a>
+<a class="sourceLine" id="cb2-6" title="6">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_manipulation1.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,
-         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>),
-         <span class="dt">type =</span> <span class="st">"p"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb3-2" title="2">         <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb3-3" title="3">         <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,</a>
+<a class="sourceLine" id="cb3-4" title="4">         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>),</a>
+<a class="sourceLine" id="cb3-5" title="5">         <span class="dt">type =</span> <span class="st">"p"</span>,</a>
+<a class="sourceLine" id="cb3-6" title="6">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_manipulation2.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"Single Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"Live Cells"</span>,
-         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,<span class="st">"Alexa Fluor 430-A"</span>),
-         <span class="dt">type =</span> <span class="st">"boundary"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb4-2" title="2">         <span class="dt">parent =</span> <span class="st">"Single Cells"</span>,</a>
+<a class="sourceLine" id="cb4-3" title="3">         <span class="dt">alias =</span> <span class="st">"Live Cells"</span>,</a>
+<a class="sourceLine" id="cb4-4" title="4">         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 405-A"</span>,<span class="st">"Alexa Fluor 430-A"</span>),</a>
+<a class="sourceLine" id="cb4-5" title="5">         <span class="dt">type =</span> <span class="st">"boundary"</span>,</a>
+<a class="sourceLine" id="cb4-6" title="6">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_manipulation3.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"Live Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"T Cells"</span>,
-         <span class="dt">channels =</span> <span class="st">"PE-A"</span>,
-         <span class="dt">type =</span> <span class="st">"interval"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb5-2" title="2">         <span class="dt">parent =</span> <span class="st">"Live Cells"</span>,</a>
+<a class="sourceLine" id="cb5-3" title="3">         <span class="dt">alias =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb5-4" title="4">         <span class="dt">channels =</span> <span class="st">"PE-A"</span>,</a>
+<a class="sourceLine" id="cb5-5" title="5">         <span class="dt">type =</span> <span class="st">"interval"</span>,</a>
+<a class="sourceLine" id="cb5-6" title="6">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_manipulation4.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"T Cells"</span>,
-         <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>),
-         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>),
-         <span class="dt">type =</span> <span class="st">"rectangle"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw"><a href="../reference/gate_draw.html">gate_draw</a></span>(gs,</a>
+<a class="sourceLine" id="cb6-2" title="2">         <span class="dt">parent =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb6-3" title="3">         <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>),</a>
+<a class="sourceLine" id="cb6-4" title="4">         <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Alexa Fluor 700-A"</span>,<span class="st">"Alexa Fluor 488-A"</span>),</a>
+<a class="sourceLine" id="cb6-5" title="5">         <span class="dt">type =</span> <span class="st">"rectangle"</span>,</a>
+<a class="sourceLine" id="cb6-6" title="6">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_manipulation5.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 </div>
 <div id="gate_edit" class="section level2">
@@ -198,46 +198,46 @@ gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocument
 </ul>
 <p>The <code>type</code> argument is not necessary if the type of the new gate is to be the same as the old one. This argument allows users to change the <code>type</code> of the existing gate(s) if necessary. We will demonstrate its use below:</p>
 <p>Since no type is supplied the new gate will have the same type as the existing gate:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"root"</span>,
-         <span class="dt">alias =</span> <span class="st">"Cells"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,</a>
+<a class="sourceLine" id="cb7-2" title="2">         <span class="dt">parent =</span> <span class="st">"root"</span>,</a>
+<a class="sourceLine" id="cb7-3" title="3">         <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb7-4" title="4">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_edit1.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 <p>Let’s update the Single Cells gate as well:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,</a>
+<a class="sourceLine" id="cb8-2" title="2">         <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb8-3" title="3">         <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,</a>
+<a class="sourceLine" id="cb8-4" title="4">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_edit2.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 <p>Changing the type argument will alter the gate type of the existing gate. for example type = “ellipse” will change the existing rectangle gate to an ellipsoid gate:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"T Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"CD4 T Cells"</span>,
-         <span class="dt">type =</span> <span class="st">"ellipse"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,</a>
+<a class="sourceLine" id="cb9-2" title="2">         <span class="dt">parent =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb9-3" title="3">         <span class="dt">alias =</span> <span class="st">"CD4 T Cells"</span>,</a>
+<a class="sourceLine" id="cb9-4" title="4">         <span class="dt">type =</span> <span class="st">"ellipse"</span>,</a>
+<a class="sourceLine" id="cb9-5" title="5">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_edit3.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 <p>Users can edit any gates with <code>gate_edit</code> including 1-D interval gates:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"Live Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"T Cells"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,</a>
+<a class="sourceLine" id="cb10-2" title="2">         <span class="dt">parent =</span> <span class="st">"Live Cells"</span>,</a>
+<a class="sourceLine" id="cb10-3" title="3">         <span class="dt">alias =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb10-4" title="4">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_edit4.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 <p>Users can also pass cyto_plot arguments to gate_edit. For example we can add some 2-D contour lines to help determine where the gate should be drawn:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"T Cells"</span>,
-         <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>, 
-         <span class="dt">contour_lines =</span> <span class="dv">15</span>)</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,</a>
+<a class="sourceLine" id="cb11-2" title="2">         <span class="dt">parent =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb11-3" title="3">         <span class="dt">alias =</span> <span class="st">"CD8 T Cells"</span>,</a>
+<a class="sourceLine" id="cb11-4" title="4">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>, </a>
+<a class="sourceLine" id="cb11-5" title="5">         <span class="dt">contour_lines =</span> <span class="dv">15</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_edit5.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 <p>Back-gating is also fully supported in <code>gate_edit</code> through cyto_plot’s <code>overlay</code> argument. For example if we would like to see where the T Cells population falls on FSC-A and SSC-A:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,
-         <span class="dt">parent =</span> <span class="st">"root"</span>,
-         <span class="dt">alias =</span> <span class="st">"Cells"</span>,
-         <span class="dt">overlay =</span> <span class="st">"T Cells"</span>,
-         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw"><a href="../reference/gate_edit.html">gate_edit</a></span>(gs,</a>
+<a class="sourceLine" id="cb12-2" title="2">         <span class="dt">parent =</span> <span class="st">"root"</span>,</a>
+<a class="sourceLine" id="cb12-3" title="3">         <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
+<a class="sourceLine" id="cb12-4" title="4">         <span class="dt">overlay =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb12-5" title="5">         <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p><img src="Gate-manipulation/gate_edit6.png" width="85%" height="85%" style="display: block; margin: auto;"></p>
 <p>Visualise the new gating strategy using cyto_plot_gating_scheme (result not shown).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]])</code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw"><a href="../reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]])</a></code></pre></div>
 </div>
 <div id="gate_remove" class="section level2">
 <h2 class="hasAnchor">
@@ -249,15 +249,15 @@ gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocument
 <li>Remove gate(s) entries from the gatingTemplate.</li>
 </ul>
 <p>For example to remove the T Cells gate:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/gate_remove.html">gate_remove</a></span>(gs,
-           <span class="dt">alias =</span> <span class="st">"T Cells"</span>,
-           <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw"><a href="../reference/gate_remove.html">gate_remove</a></span>(gs,</a>
+<a class="sourceLine" id="cb14-2" title="2">           <span class="dt">alias =</span> <span class="st">"T Cells"</span>,</a>
+<a class="sourceLine" id="cb14-3" title="3">           <span class="dt">gatingTemplate =</span> <span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <p>T Cells node no longer exists in the GatingSet:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getNodes</span>(gs)</code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">getNodes</span>(gs)</a></code></pre></div>
 <pre><code>## [1] "root"                           "/Cells"                        
 ## [3] "/Cells/Single Cells"            "/Cells/Single Cells/Live Cells"</code></pre>
 <p>T Cells node no longer exists in the gatingTemplate:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">gatingTemplate</span>(<span class="st">"Manipulation gatingTemplate.csv"</span>)</code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">gatingTemplate</span>(<span class="st">"Manipulation gatingTemplate.csv"</span>)</a></code></pre></div>
 <pre><code>## Adding population:Cells</code></pre>
 <pre><code>## Adding population:Single Cells</code></pre>
 <pre><code>## Adding population:Live Cells</code></pre>

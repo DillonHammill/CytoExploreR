@@ -12,7 +12,7 @@
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
 
-\item{select}{vector containing the indicies of samples within gs to use for
+\item{select}{vector containing the indices of samples within gs to use for
 plotting.}
 
 \item{channels}{vector of channel names to use for plotting, can be of length

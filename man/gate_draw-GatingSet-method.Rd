@@ -20,7 +20,7 @@ prior to gating, set to the length of x by default to construct a single
 gate for all samples. If group_by is supplied a different gate will be
 constructed for each group.}
 
-\item{select}{vector containing the indicies of samples within each group to
+\item{select}{vector containing the indices of samples within each group to
 use for plotting.}
 
 \item{parent}{name of the \code{parent} population to extract for gating.}

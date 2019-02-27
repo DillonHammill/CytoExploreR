@@ -251,7 +251,7 @@ cyto_plot(gs, parent = "Single Cells", alias = "Live Cells", channels = c("Alexa
 
 ### 9.4 Gate `Dendritic Cells` and `T Cells` Using Rectangle and Ellipsoid Gates
 
-Next we will demonstrate the ability to draw multiple gates (of the same or different type) onto the same plot. Here we will gate both the "Dendritic Cells" and "T Cells" populations within the parent population "Live Cells" in APC-Cy7-A and PE-A channels using a rectangle and an ellipsoid gate. To gate multiple populations on the same plot simply suppply multiple names to the alias argument wrapped inside c(). Notice how we can use the marker names rather than the channel names since we assigned these using `cyto_markers`. Ellipsoid gates require selection of 4 points whilst rectangle gates require selection of 2 diagonal points to define the limits of the gate in 2 dimensions.
+Next we will demonstrate the ability to draw multiple gates (of the same or different type) onto the same plot. Here we will gate both the "Dendritic Cells" and "T Cells" populations within the parent population "Live Cells" in APC-Cy7-A and PE-A channels using a rectangle and an ellipsoid gate. To gate multiple populations on the same plot simply supply multiple names to the alias argument wrapped inside c(). Notice how we can use the marker names rather than the channel names since we assigned these using `cyto_markers`. Ellipsoid gates require selection of 4 points whilst rectangle gates require selection of 2 diagonal points to define the limits of the gate in 2 dimensions.
 
 ```{r, eval = FALSE}
 # Dendritic Cells & T cells

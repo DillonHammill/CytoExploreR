@@ -11,7 +11,8 @@ status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--14-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--02--27-yellowgreen.svg)](/commits/master)
+[![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoRSuite** is designed to provide an interactive interface for the
 analysis of flow cytometry data in R. If you are new to **CytoRSuite**
@@ -20,30 +21,11 @@ visit <https://dillonhammill.github.io/CytoRSuite/> to get started.
 # Installation
 
 **CytoRSuite** is built on the existing flow cytometry infrastructure
-for R developed by the [RGLab](https://github.com/RGLab). To install
-**CytoRSuite**, users should first install the latest versions of
-[flowCore](https://github.com/RGLab/flowCore),
-[flowWorkspace](https://github.com/RGLab/flowWorkspace) and
-[openCyto](https://github.com/RGLab/openCyto) from Bioconductor and
-GitHub.
+for R developed by the [RGLab](https://github.com/RGLab). In order to
+properly install **CytoRSuite** and its dependencies the following
+platform-specific tools are required:
 
-## flowCore - Core Infrastructure
-
-``` r
-# Bioconductor
-install.packages("BiocManager")
-
-# flowCore Bioconductor release version
-BiocManager::install("flowCore")
-
-# GitHub
-install.packages("devtools")
-
-# flowCore development version on GitHub
-devtools::install_github("RGLab/flowCore", ref = "trunk")
-```
-
-## flowWorkspace - Gating Infrastructure
+## Windows and Linux
 
 flowWorkspace requires additional C++ libraries to build from source
 using Rtools for windows users. Windows and Linux users should follow
@@ -51,37 +33,43 @@ these
 [instructions](https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL)
 before proceeding.
 
+## Mac
+
+Mac users will need to ensure that **XQuartz** is in their list of
+installed Applications. **XQuartz** is commonly found in the utilities
+folder. If **XQuartz** is missing from your list of applications it can
+be installed from this [link](https://www.xquartz.org/). Restart your
+computer following installation.
+
+## flowCore, flowWorkspace & openCyto
+
+Once these tools are installed, users can proceed to installing the
+latest versions of [flowCore](https://github.com/RGLab/flowCore),
+[flowWorkspace](https://github.com/RGLab/flowWorkspace) and
+[openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
+
 ``` r
-# flowWorkspace Bioconductor release version
-BiocManager::install("flowWorkspace")
+# Bioconductor
+install.packages("BiocManager")
 
-# flowWorkspace development version on GitHub
-devtools::install_github("RGLab/flowWorkspace", ref = "trunk")
-```
-
-## openCyto - Gating Pipeline
-
-``` r
-# openCyto Bioconductor release version
-BiocManager::install("openCyto")
-
-# openCyto development version on GitHub
-devtools::install_github("RGLab/openCyto", ref = "trunk")
+# Install flowCore, flowWorkspace and openCyto
+library(BiocManager)
+install(c("flowCore", "flowWorkspace", "openCyto"), version = "devel")
 ```
 
 ## CytoRSuite
 
-Once these packages are installed users can install **CytoRSuite** from
-GitHub. Users should also install **CytoRSuiteData** which contains
-example datasets that will be used in the vignettes to demonstrate the
-features of CytoRSuite.
+Once these packages are successfully installed, users will need to
+install **CytoRSuiteData** which contains example datasets which will be
+used to demonstrate the features of **CytoRSuite**. **CytoRSuite** can
+then be installed from GitHub.
 
 ``` r
-# CytoRSuite development version on GitHub
-devtools::install_github("DillonHammill/CytoRSuite", build_vignettes = TRUE)
-
 # CytoRSuiteData development version on GitHub
 devtools::install_github("DillonHammill/CytoRSuiteData")
+
+# CytoRSuite development version on GitHub
+devtools::install_github("DillonHammill/CytoRSuite", build_vignettes = TRUE)
 ```
 
 # Overview
@@ -155,7 +143,7 @@ described below:
               gatingTemplate = "Compensation-gatingTemplate.csv")
     ```
     
-    ![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
+    ![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
     
     1.4 Compute fluorescent spillover matrix using `spillover_compute`
     
