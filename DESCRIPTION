@@ -17,13 +17,13 @@ URL: https://github.com/DillonHammill/CytoRSuite
 BugReports: https://github.com/DillonHammill/CytoRSuite/issues
 Depends: 
   R (>= 2.10),
-  openCyto(>= 1.21.1),
-  flowWorkspace (>= 3.28.2),
-  flowCore (>= 1.49.4)
+  openCyto(>= 1.19.1),
+  flowWorkspace (>= 3.17.43),
+  flowCore (>= 1.31.17)
 Imports: 
   ncdfFlow,
   data.table,
-  BiocGenerics (>= 0.29),
+  BiocGenerics,
   shiny, 
   shinythemes, 
   rhandsontable, 
@@ -47,15 +47,6 @@ Suggests:
   covr,
   robustbase,
   pkgdown
-Remotes: 
-  Bioconductor/BiocGenerics@a2de4dd,
-  RGLab/RProtoBufLib@trunk,
-  RGLab/flowCore@trunk,
-  RGLab/ncdfFlow@trunk,
-  RGLab/cytolib@trunk,
-  RGLab/flowWorkspace@trunk,
-  RGLab/openCyto@trunk,
-  DillonHammill/CytoRSuiteData@master
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

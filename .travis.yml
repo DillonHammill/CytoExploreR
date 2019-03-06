@@ -2,6 +2,7 @@
 
 language: r
 dist: trusty
+sudo: required
 
 matrix:
   include:
@@ -16,8 +17,6 @@ matrix:
      osx_image: xcode7.3
      disable_homebrew: true
 
-sudo: required
-
 cache: 
   packages: TRUE
 
@@ -27,10 +26,20 @@ before_install:
 install:
   - R -e 'devtools::install_deps(dep = T)'
 
-warnings_are_errors: false
+bioc_packages:
+  - BiocGenerics
+  - RProtoBufLib
+  - flowCore
+  - ncdfFlow
+  - cytolib
+  - flowWorkspace
+  - openCyto
 
 r_github_packages:
   - r-lib/covr
+  - DillonHammill/CytoRSuiteData
+  
+warnings_are_errors: false
 
 after_success:
   -  if [[ "${R_CODECOV}" ]]; then R -e 'covr::codecov()'; fi
@@ -38,6 +47,11 @@ after_success:
 env:
  global:
    - CRAN: http://cran.rstudio.com
--apt_packages:
--  - libhdf5-7 
--  - libhdf5-dev
+   - BIOC_USE_DEVEL="FALSE"
+
+addons:
+  apt:
+    packages:
+      - libhdf5-7
+      - libhdf5-dev
+  
