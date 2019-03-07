@@ -34,7 +34,7 @@ flowWorkspace requires additional C++ libraries to build from source using Rtool
 Mac users will need to ensure that **XQuartz** is in their list of installed Applications. **XQuartz** is commonly found in the utilities folder. If **XQuartz** is missing from your list of applications it can be installed from this [link](https://www.xquartz.org/). Restart your computer following installation. 
 
 ## flowCore, flowWorkspace & openCyto
-Once these tools are installed, users can proceed to installing the latest versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
+Once these tools are installed, users can proceed to installing the release versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
 
 ```{r, eval = FALSE}
 # Bioconductor
@@ -42,7 +42,7 @@ install.packages("BiocManager")
 
 # Install flowCore, flowWorkspace and openCyto
 library(BiocManager)
-install(c("flowCore", "flowWorkspace", "openCyto"), version = "devel")
+install(c("flowCore", "flowWorkspace", "openCyto"))
 ```
 
 ## CytoRSuite
