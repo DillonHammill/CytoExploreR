@@ -22,9 +22,34 @@ cache:
 
 before_install:
   - R -e 'install.packages("devtools")'
+
+r_packages:
+  - data.table
+  - shiny
+  - shinythemes
+  - MASS
+  - methods
+  - stats
+  - utils
+  - graphics
+  - grDevices
+  - tools
+  - magrittr
+  - rmarkdown
+  - robustbase
+
+r_github_packages:
+  - jrowen/rhandsontable
+  - rlbarter/superheat
+  - yihui/knitr
+  - r-lib/covr
+  - r-lib/testthat
+  - r-lib/vdiffr
+  - r-lib/pkgdown
+  - rstudio/shinytest
+  - DillonHammill/CytoRSuiteData
   
-install:
-  - R -e 'devtools::install_deps(dep = c("Imports","Suggests"))'
+use_bioc: true
 
 bioc_packages:
   - BiocGenerics
@@ -34,10 +59,6 @@ bioc_packages:
   - cytolib
   - flowWorkspace
   - openCyto
-
-r_github_packages:
-  - r-lib/covr
-  - DillonHammill/CytoRSuiteData
   
 warnings_are_errors: false
 
