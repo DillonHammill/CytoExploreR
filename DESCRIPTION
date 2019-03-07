@@ -17,9 +17,9 @@ URL: https://github.com/DillonHammill/CytoRSuite
 BugReports: https://github.com/DillonHammill/CytoRSuite/issues
 Depends: 
   R (>= 2.10),
-  openCyto,
+  flowCore,
   flowWorkspace,
-  flowCore
+  openCyto
 Imports: 
   ncdfFlow,
   data.table,
@@ -49,6 +49,7 @@ Suggests:
   pkgdown
 Remotes: 
   DillonHammill/CytoRSuiteData
+biocViews:
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
