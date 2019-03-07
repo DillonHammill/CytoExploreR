@@ -24,7 +24,7 @@ before_install:
   - R -e 'install.packages("devtools")'
   
 install:
-  - R -e 'devtools::install_deps(dep = T)'
+  - R -e 'devtools::install_deps(dep = c("Imports","Suggests"))'
 
 bioc_packages:
   - BiocGenerics
