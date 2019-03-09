@@ -5,20 +5,20 @@
 \alias{gate_draw,flowFrame-method}
 \title{gate_draw flowFrame Method.}
 \usage{
-\S4method{gate_draw}{flowFrame}(x, channels = NULL, alias = NULL,
+\S4method{gate_draw}{flowFrame}(x, alias = NULL, channels = NULL,
   type = "polygon", display = 1/length(x), axis = "x",
   density_smooth = 1.5, label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{type}{vector of gate type names used to construct the gates. Multiple
 gate types are supported but should be accompanied with an \code{alias}

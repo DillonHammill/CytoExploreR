@@ -4,20 +4,38 @@
 \alias{gate_remove}
 \title{Remove Gate(s) and Edit gatingTemplate csv File}
 \usage{
-gate_remove(gs, alias = NULL, gatingTemplate = NULL)
+gate_remove(gs, parent = NULL, alias = NULL, channels = NULL,
+  type = NULL, gatingTemplate = NULL, ...)
 }
 \arguments{
 \item{gs}{an object of class \code{GatingSet}.}
 
+\item{parent}{name of the parent population from which to remove the gate.
+This argument is not necessary but is included to allow conversion of
+\code{gate_draw} code to \code{gate_remove} code by simply changing
+\code{"draw"} to \code{"remove"}.}
+
 \item{alias}{name(s) of the population(s) to remove (e.g. "Single Cells"). By
 default all descendant populations will be removed as well.}
 
+\item{channels}{names of the channel(s) used to gate the population. This
+argument is not necessary but is included to allow conversion of
+\code{gate_draw} code to \code{gate_remove} code by simply changing
+\code{"draw"} to \code{"remove"}.}
+
+\item{type}{gate type(s) used to for the gates to be removed. This argument
+is not necessary but is included to allow conversion of \code{gate_draw}
+code to \code{gate_remove} code by simply changing \code{"draw"} to
+\code{"remove"}.}
+
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv").}
+
+\item{...}{additional \code{gate_draw} arguments that will be ignored.}
 }
 \value{
-an object of class \code{gatingSet} with gate and children removed,
-  as well as gatingTemplate file with population removed.
+an object of class \code{GatingSet} with gate and children removed
+  and updated gatingTemplate to reflect these changes.
 }
 \description{
 Remove Gate(s) and Edit gatingTemplate csv File

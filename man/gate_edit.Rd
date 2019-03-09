@@ -4,29 +4,29 @@
 \alias{gate_edit}
 \title{Edit Existing Gate(s).}
 \usage{
-gate_edit(x, select = NULL, parent = NULL, alias = NULL,
-  overlay = NULL, type = NULL, gatingTemplate = NULL,
-  display = NULL, ...)
+gate_edit(x, parent = NULL, alias = NULL, channels = NULL,
+  type = NULL, gatingTemplate = NULL, display = NULL,
+  select = NULL, overlay = NULL, ...)
 }
 \arguments{
 \item{x}{an object of class \code{GatingSet}.}
-
-\item{select}{vector containing the indicies of samples within gs to use for
-plotting.}
 
 \item{parent}{name of the parental population.}
 
 \item{alias}{name(s) of the gate to edit (e.g. "Single Cells").}
 
-\item{overlay}{name(s) of the population(s) to overlay onto the plot.}
+\item{channels}{name(s) of the channel(s) used to construct the gate(s). This
+argument is not necessary but is included to allow conversion of
+\code{gate_draw} code to \code{gate_remove} code by simply changing
+\code{"draw"} to \code{"remove"}.}
 
 \item{type}{vector of gate type names used to construct the gates. Multiple
-\code{types} are supported but should be accompanied with an
-\code{alias} argument of the same length (i.e. one \code{type} per
-\code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-ellipse, threshold, boundary, interval, quadrant and web} which can be
-abbreviated as upper or lower case first letters as well. Default
-\code{type} is \code{"polygon"}.}
+\code{types} are supported but should be accompanied with an \code{alias}
+argument of the same length (i.e. one \code{type} per \code{alias}).
+Supported \code{gate_types} are \code{polygon, rectangle, ellipse,
+threshold, boundary, interval, quadrant and web} which can be abbreviated
+as upper or lower case first letters as well. Default \code{type} is
+\code{"polygon"}.}
 
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the gate is saved.}
@@ -34,6 +34,11 @@ abbreviated as upper or lower case first letters as well. Default
 \item{display}{numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
+
+\item{select}{vector containing the indicies of samples within gs to use for
+plotting.}
+
+\item{overlay}{name(s) of the population(s) to overlay onto the plot.}
 
 \item{...}{additional arguments passed to cyto_plot, see ?cyto_plot for
 details.}

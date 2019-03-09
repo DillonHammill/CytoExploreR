@@ -1,13 +1,26 @@
 #' Remove Gate(s) and Edit gatingTemplate csv File
 #'
 #' @param gs an object of class \code{GatingSet}.
+#' @param parent name of the parent population from which to remove the gate.
+#'   This argument is not necessary but is included to allow conversion of
+#'   \code{gate_draw} code to \code{gate_remove} code by simply changing
+#'   \code{"draw"} to \code{"remove"}.
 #' @param alias name(s) of the population(s) to remove (e.g. "Single Cells"). By
 #'   default all descendant populations will be removed as well.
+#' @param channels names of the channel(s) used to gate the population. This
+#'   argument is not necessary but is included to allow conversion of
+#'   \code{gate_draw} code to \code{gate_remove} code by simply changing
+#'   \code{"draw"} to \code{"remove"}.
+#' @param type gate type(s) used to for the gates to be removed. This argument
+#'   is not necessary but is included to allow conversion of \code{gate_draw}
+#'   code to \code{gate_remove} code by simply changing \code{"draw"} to
+#'   \code{"remove"}.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv").
+#' @param ... additional \code{gate_draw} arguments that will be ignored.
 #'
-#' @return an object of class \code{gatingSet} with gate and children removed,
-#'   as well as gatingTemplate file with population removed.
+#' @return an object of class \code{GatingSet} with gate and children removed
+#'   and updated gatingTemplate to reflect these changes.
 #'
 #' @importFrom flowWorkspace getDescendants Rm getNodes
 #' @importFrom utils read.csv write.csv
@@ -17,52 +30,55 @@
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
-#' 
+#'
 #' # Remove T Cells population - replace gatingTemplate name
 #' gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")
 #' }
 #' @export
 gate_remove <- function(gs,
+                        parent = NULL,
                         alias = NULL,
-                        gatingTemplate = NULL) {
-
+                        channels = NULL,
+                        type = NULL,
+                        gatingTemplate = NULL, ...) {
+  
   # Supply alias
   if (is.null(alias)) {
     stop("Please supply the name of the population to be removed.")
   }
-
+  
   # Check Alias
   if (!all(alias %in% basename(getNodes(gs)))) {
     stop("Supplied alias does not exist in the GatingSet.")
   }
-
+  
   # Supply gatingTemplate
   if (is.null(gatingTemplate)) {
     stop("Supply the name of the gatingTemplate csv file to remove the gate.")
   }
-
+  
   # Check gatingTemplate
   if (getOption("CytoRSuite_wd_check") == TRUE) {
     if (.file_wd_check(gatingTemplate) == FALSE) {
       stop(paste(gatingTemplate, "is not in this working directory."))
     }
   }
-
+  
   # Get children from GatingSet
   chldrn <- unlist(lapply(
     alias,
@@ -70,20 +86,20 @@ gate_remove <- function(gs,
   ))
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- c(alias, unique(chldrn))
-
+  
   # Read in gatingTemplate
   gt <- read.csv(gatingTemplate, header = TRUE)
-
+  
   # Remove all rows with alias = chldrn
   gt <- gt[!gt$alias %in% chldrn, ]
-
+  
   # Remove nodes from GatingSet
   for (i in seq_len(length(alias))) {
     if (alias[i] %in% basename(getNodes(gs))) {
       suppressMessages(Rm(alias[i], gs))
     }
   }
-
+  
   write.csv(gt, gatingTemplate, row.names = FALSE)
 }
 
@@ -136,17 +152,17 @@ gate_remove <- function(gs,
 gate_extract <- function(parent,
                          alias,
                          gatingTemplate) {
-
+  
   # Parent
   if (missing(parent)) {
     stop("Please supply the name of the parent population.")
   }
-
+  
   # Alias
   if (missing(alias)) {
     stop("Please supply the name(s) of the alias to extract.")
   }
-
+  
   # gatingTemplate
   if (missing(gatingTemplate)) {
     stop("Please supply the name of the gatingTemplate to extract gates from.")
@@ -157,51 +173,56 @@ gate_extract <- function(parent,
       }
     }
   }
-
+  
   # Load gatingTemplate into gatingTemplate
   gt <- suppressMessages(gatingTemplate(gatingTemplate))
-
+  
   # Extract population nodes from gt
   nds <- getNodes(gt, only.names = TRUE)
-
+  
   # Parent Node
   parent <- names(nds[match(parent, nds)])
-
+  
   # Extract gates given parent and child node(s)
   gates <- lapply(alias, function(x) {
-
+    
     # Alias node
     alias <- names(nds[match(x, nds)])
-
+    
     gm <- getGate(gt, parent, alias)
     gate <- eval(parameters(gm)$gate)
     names(parameters(gate[[1]][[1]])) <- parameters(gate[[1]][[1]])
     return(gate)
   })
-
+  
   return(gates)
 }
 
 #' Edit Existing Gate(s).
 #'
 #' @param x an object of class \code{GatingSet}.
-#' @param select vector containing the indicies of samples within gs to use for
-#'   plotting.
+
 #' @param parent name of the parental population.
 #' @param alias name(s) of the gate to edit (e.g. "Single Cells").
-#' @param overlay name(s) of the population(s) to overlay onto the plot.
+#' @param channels name(s) of the channel(s) used to construct the gate(s). This
+#'   argument is not necessary but is included to allow conversion of
+#'   \code{gate_draw} code to \code{gate_remove} code by simply changing
+#'   \code{"draw"} to \code{"remove"}.
 #' @param type vector of gate type names used to construct the gates. Multiple
-#'   \code{types} are supported but should be accompanied with an
-#'   \code{alias} argument of the same length (i.e. one \code{type} per
-#'   \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
-#'   ellipse, threshold, boundary, interval, quadrant and web} which can be
-#'   abbreviated as upper or lower case first letters as well. Default
-#'   \code{type} is \code{"polygon"}.
+#'   \code{types} are supported but should be accompanied with an \code{alias}
+#'   argument of the same length (i.e. one \code{type} per \code{alias}).
+#'   Supported \code{gate_types} are \code{polygon, rectangle, ellipse,
+#'   threshold, boundary, interval, quadrant and web} which can be abbreviated
+#'   as upper or lower case first letters as well. Default \code{type} is
+#'   \code{"polygon"}.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the gate is saved.
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
+#' @param select vector containing the indicies of samples within gs to use for
+#'   plotting.
+#' @param overlay name(s) of the population(s) to overlay onto the plot.
 #' @param ... additional arguments passed to cyto_plot, see ?cyto_plot for
 #'   details.
 #'
@@ -221,22 +242,22 @@ gate_extract <- function(parent,
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
-#' 
+#'
 #' # Edit CD4 T Cells Gate - replace gatingTemplate name
 #' gate_edit(gs,
 #'   parent = "T Cells",
@@ -244,49 +265,50 @@ gate_extract <- function(parent,
 #'   gatingTemplate = "gatingTemplate.csv"
 #' )
 #' }
-#' 
+#'
 #' @export
 gate_edit <- function(x,
-                      select = NULL,
                       parent = NULL,
                       alias = NULL,
-                      overlay = NULL,
+                      channels = NULL,
                       type = NULL,
                       gatingTemplate = NULL,
-                      display = NULL, ...) {
-
+                      display = NULL,
+                      select = NULL,
+                      overlay = NULL, ...) {
+  
   # Parent
   if (is.null(parent)) {
     stop("Please supply the name of the parent population.")
   } else if (!parent %in% basename(getNodes(x))) {
     stop("Supplied parent does not exist in the GatingSet.")
   }
-
+  
   # Alias
   if (is.null(alias)) {
     stop("Please supply the name(s) of the gates to edit to 'alias'.")
   } else if (!all(alias %in% basename(getNodes(x)))) {
     stop("Supplied alias does not exist in the GatingSet.")
   }
-
+  
   # gatingTemplate
   if (is.null(gatingTemplate)) {
     stop("Please supply the name of gatingTemplate to the 'gatingTemplate'.")
   }
-
+  
   # Check gatingTemplate
   if (getOption("CytoRSuite_wd_check") == TRUE) {
     if (.file_wd_check(gatingTemplate) == FALSE) {
       stop(paste(gatingTemplate, "is not in this working directory."))
     }
   }
-
+  
   # Assign x to gs
   gs <- x
-
+  
   # Extract pData information
   pd <- pData(gs)
-
+  
   # Extract transList from gs
   if (length(getTransformations(gs[[1]])) != 0) {
     transList <- transformList(
@@ -296,30 +318,30 @@ gate_edit <- function(x,
   } else {
     transList <- NULL
   }
-
+  
   # Extract gates from gt
   gT <- suppressMessages(gatingTemplate(gatingTemplate))
-
+  
   # Extract population nodes from gt
   nds <- getNodes(gT, only.names = TRUE)
-
+  
   # Parent Node
   prnt <- names(nds)[match(parent, nds)]
-
+  
   # Read in gatingTemplate
   gt <- read.csv(gatingTemplate, header = TRUE)
-
+  
   # Get groupBy from gatingTemplate
   grpby <- as.character(gt[gt$parent == parent &
-    gt$alias == alias[1], "groupBy"])
-
+                             gt$alias == alias[1], "groupBy"])
+  
   # groupBy is NA
   if (all(is.na(grpby))) {
     grpby <- length(gs)
   } else {
     grpby <- unlist(strsplit(grpby, ":"))
   }
-
+  
   # groupBy is numeric
   if (!all(grepl("^[A-Za-z]+$", grpby))) {
     grpby <- as.numeric(grpby)
@@ -329,24 +351,24 @@ gate_edit <- function(x,
       stop("Numeric groupBy must be equal to the length of the GatingSet.")
     }
   }
-
+  
   # Get channels from gatingTemplate
   channels <- unique(
     unlist(
       strsplit(
         as.character(gt[gt$parent == parent &
-          gt$alias %in% alias, "dims"]), ",",
+                          gt$alias %in% alias, "dims"]), ",",
         fixed = TRUE
       )
     )
   )
-
+  
   # Menu to select which groups require editing
   if (is.numeric(grpby)) {
-
+    
     # All samples in same group
     if (grpby >= length(gs)) {
-
+      
       # no selection required - grps indicates which filters object to edit
       grps <- 1
       pd$groupby <- rep(1, length(gs))
@@ -356,30 +378,30 @@ gate_edit <- function(x,
   } else if (is.character(grpby)) {
     vrs <- unlist(strsplit(grpby, ",", fixed = TRUE))
     opts <- unique(do.call(paste, pd[, grpby, drop = FALSE]))
-
+    
     pd$groupby <- do.call(paste, pd[, grpby, drop = FALSE])
-
+    
     grps <- select.list(opts,
-      multiple = TRUE,
-      graphics = TRUE,
-      title = "Select the group(s) to edit:"
+                        multiple = TRUE,
+                        graphics = TRUE,
+                        title = "Select the group(s) to edit:"
     )
   }
-
+  
   # Extract gates given parent and child node(s)
   gt_gates <- lapply(seq_along(alias), function(x) {
-
+    
     # Alias node
     als <- names(nds[match(alias[x], nds)])
     gm <- getGate(gT, prnt, als)
     gate <- eval(parameters(gm)$gate)
     names(gate) <- unique(pd$groupby)
-
+    
     return(gate)
   })
   names(gt_gates) <- alias
   # gt_gates is list (length(alias)) of list of filters (1x filters per group)
-
+  
   # Split GatingSet into list of GatingSet groups
   if (is.numeric(grpby)) {
     gs.lst <- list(gs)
@@ -388,54 +410,57 @@ gate_edit <- function(x,
     gs.lst <- lapply(grps, function(x) gs[which(pd$groupby == x)])
     names(gs.lst) <- grps
   }
-
+  
   # plot, edit and save gate for each group
   new_gates <- lapply(gs.lst, function(grp) {
-
+    
     # Extract parent population for plotting
     fs <- suppressMessages(getData(grp, parent))
     fr <- as(fs, "flowFrame")
-
+    
     # Remove "Original" column introduced by coercion
     if (is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE) {
       fr <- suppressWarnings(
         fr[, -match("Original", BiocGenerics::colnames(fr))]
       )
     }
-
+    
     # Display
     if (is.null(display)) {
       display <- 1 / length(fs)
     }
-
+    
     # Overlay
     if (!is.null(overlay)) {
-
+      
       # Extract populations to overlay - list of flowSets
       if (class(overlay) == "character") {
         overlay <- lapply(overlay, function(overlay) {
           getData(grp, overlay)
         })
-
+        
         overlay <- lapply(overlay, function(x) {
           fr <- as(x, "flowFrame")
-
+          
           if (is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE) {
             fr <- suppressWarnings(
               fr[, -match("Original", BiocGenerics::colnames(fr))]
             )
           }
-
+          
           return(fr)
         })
       }
     }
-
+    
+    # Turn off overlay sampling
+    options("CytoRSuite_overlay_display" = FALSE)
+    
     # Extract gate(s) for plotting
     gates <- filters(lapply(alias, function(x) {
       getGate(grp[[1]], x)
     }))
-
+    
     # Plot data and existing gates
     if (is.numeric(grpby)) {
       if (parent == "root") {
@@ -443,7 +468,7 @@ gate_edit <- function(x,
       } else {
         pnt <- parent
       }
-
+      
       if (grpby >= length(gs)) {
         main <- paste("Combined Events", "\n", pnt)
       }
@@ -453,103 +478,106 @@ gate_edit <- function(x,
       } else {
         pnt <- parent
       }
-
+      
       main <- paste(
         unique(pd[pd$name %in% sampleNames(grp), "groupby"]),
         "\n",
         pnt
       )
     }
-
+    
     if (getOption("CytoRSuite_interact") == TRUE) {
       cyto_plot(fr,
-        channels = channels,
-        overlay = overlay,
-        display = display,
-        popup = TRUE,
-        legend = FALSE,
-        gate = gates,
-        gate_line_col = "magenta",
-        axes_trans = transList,
-        label = FALSE,
-        title = main,
-        gate_line_width = 2.5,
-        legend_text = NA, ...
+                channels = channels,
+                overlay = overlay,
+                display = display,
+                popup = TRUE,
+                legend = FALSE,
+                gate = gates,
+                gate_line_col = "magenta",
+                axes_trans = transList,
+                label = FALSE,
+                title = main,
+                gate_line_width = 2.5,
+                legend_text = NA, ...
       )
     } else {
       cyto_plot(fr,
-        channels = channels,
-        overlay = overlay,
-        display = display,
-        legend = FALSE,
-        gate = gates,
-        gate_line_col = "magenta",
-        axes_trans = transList,
-        label = FALSE,
-        title = main,
-        gate_line_width = 2.5,
-        legend_text = NA, ...
+                channels = channels,
+                overlay = overlay,
+                display = display,
+                legend = FALSE,
+                gate = gates,
+                gate_line_col = "magenta",
+                axes_trans = transList,
+                label = FALSE,
+                title = main,
+                gate_line_width = 2.5,
+                legend_text = NA, ...
       )
     }
-
+    
+    # Reset overlay sampling
+    options("CytoRSuite_overlay_display" = TRUE)
+    
     # If no type supplied determine using gate_type
     if (is.null(type)) {
       type <- gate_type(gates)
     }
-
+    
     # Check type argument is valid
     type <- .cyto_gate_type_check(type = type, alias = alias)
-
+    
     # Check alias is supplied correctly
     .cyto_alias_check(alias = alias, type = type)
-
+    
     # Extract channels from gates
     channels <- unique(unlist(lapply(gates, parameters)))
-
+    
     # 2D Interval gates require axis argument
     if ("interval" %in% type) {
       intvl <- rbind(
         gates[[match("interval", type)[1]]]@min,
         gates[[match("interval", type)[1]]]@max
       )
-
+      
       if (all(is.finite(intvl[, 1]))) {
         axis <- "x"
       } else if (all(is.finite(intvl[, 2]))) {
         axis <- "y"
       }
     }
-
+    
     # Draw new gates - set plot to FALSE (filters object of length alias)
     new_gates <- gate_draw(fr,
-      alias = alias,
-      channels = channels,
-      type = type,
-      axis = axis,
-      plot = FALSE
+                           alias = alias,
+                           channels = channels,
+                           type = type,
+                           axis = axis,
+                           plot = FALSE
     )
     names(new_gates) <- alias
-
+    
     # Modify existing gate(s)
     lapply(seq_along(alias), function(pop) {
       gt_gates[[alias[pop]]][[match(
         pd[pd$name %in% sampleNames(grp), "groupby"][1], names(gt_gates[[pop]])
       )]] <<- filters(list(new_gates[[alias[pop]]]))
     })
-
+    
     return(new_gates)
   })
-
-
+  
+  
   # Re-name parent and pop to be data.table friendly
   prnt <- parent
   als <- alias
   gtmd <- "gate_draw"
   ppmd <- "pp_gate_draw"
-
+  
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <- data.table::fread(gatingTemplate)
-
+  
   # data.table R CMD Check NOTE
   gating_method <- NULL
   gating_args <- NULL
@@ -557,7 +585,7 @@ gate_edit <- function(x,
   groupBy <- NULL
   preprocessing_method <- NULL
   preprocessing_args <- NULL
-
+  
   # Prepare grpby
   if (length(grpby) == 1) {
     if (!all(grepl("^[A-Za-z]+$", grpby)) & grpby[1] == length(gs)) {
@@ -566,7 +594,7 @@ gate_edit <- function(x,
   } else {
     grpby <- paste(grpby, collapse = ":")
   }
-
+  
   # Modify template
   for (i in seq_len(length(alias))) {
     gt[parent == prnt & alias == als[i], gating_method := gtmd]
@@ -578,10 +606,10 @@ gate_edit <- function(x,
     gt[parent == prnt & alias == als[i], preprocessing_method := ppmd]
     gt[parent == prnt & alias == als[i], preprocessing_args := as.logical(NA)]
   }
-
+  
   # Save updated gatingTemplate
   write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
-
+  
   # Apply new gates to GatingSet by group
   lapply(grps, function(grp) {
     lapply(seq_along(alias), function(pop) {
@@ -590,12 +618,12 @@ gate_edit <- function(x,
         length(gs[which(pd$groupby == grp)])
       )
       names(fltrs) <- as.character(sampleNames(gs[which(pd$groupby == grp)]))
-
+      
       suppressMessages(setGate(gs[which(pd$groupby == grp)], alias[pop], fltrs))
       suppressMessages(recompute(gs[which(pd$groupby == grp)], alias[pop]))
     })
   })
-
+  
   assign(deparse(substitute(x)), gs, envir = globalenv())
 }
 
@@ -632,22 +660,22 @@ gate_edit <- function(x,
 #' gate_type(getGate(gs, "CD69+ CD4 T Cells")[[1]])
 #' @export
 gate_type <- function(gates) {
-
+  
   # One gate supplied
   if (length(gates) == 1) {
     if (class(gates) %in% c("filters", "list")) {
       gates <- gates[[1]]
     }
-
+    
     if (class(gates) == "ellipsoidGate") {
-
+      
       # type == "ellipse"
       types <- "ellipse"
     } else if (class(gates) == "rectangleGate") {
-
+      
       # Includes rectangle, interval, threshold and boundary gate_types
       if (length(parameters(gates)) == 1) {
-
+        
         # Gate in One Dimension
         if (is.infinite(gates@min)) {
           types <- "boundary"
@@ -657,66 +685,66 @@ gate_type <- function(gates) {
           types <- "interval"
         }
       } else if (length(parameters(gates)) == 2) {
-
+        
         # Gate in 2 Dimensions
         if (is.infinite(gates@min[1]) & is.infinite(gates@min[2])) {
           types <- "boundary"
         } else if (is.infinite(gates@max[1]) & is.infinite(gates@max[2])) {
           types <- "threshold"
         } else if (all(is.infinite(c(gates@min[1], gates@max[1]))) |
-          all(is.infinite(c(gates@min[2], gates@max[2])))) {
+                   all(is.infinite(c(gates@min[2], gates@max[2])))) {
           types <- "interval"
         } else {
           types <- "rectangle"
         }
       }
     } else if (class(gates) == "polygonGate") {
-
+      
       # type == "polygon"
       types <- "polygon"
     }
-
+    
     # Multiple gates supplied
   } else if (length(gates) > 1) {
-
+    
     # Get classes of gates
     classes <- unlist(lapply(gates, function(x) {
       class(x)
     }))
-
+    
     # All gates are of the same class
     if (all(classes[1] == classes)) {
-
+      
       # Gates are all ellipses
       if (classes[1] == "ellipsoidGate") {
         types <- rep("ellipse", length(gates))
-
+        
         # Gates are all rectangles
       } else if (classes[1] == "rectangleGate") {
-
+        
         # Combine gate co-ordinates
         pts <- lapply(gates, function(x) {
           rbind(x@min, x@max)
         })
         pts <- do.call(rbind, pts)
-
+        
         # if 4 gates are supplied - type may be "quadrant"
         if (length(gates) == 4) {
-
+          
           # Quadrant gates should have finite and infinite values in all gates
           # and all finite co-ordinates should be the same
           if (sum(is.finite(pts[, 1])) == 4 &
-            sum(is.infinite(pts[, 1])) == 4 &
-            sum(duplicated(pts[, 1][is.finite(pts[, 1])])) == 3) {
+              sum(is.infinite(pts[, 1])) == 4 &
+              sum(duplicated(pts[, 1][is.finite(pts[, 1])])) == 3) {
             types <- "quadrant"
-
+            
             # Each gate could be either rectangle, interval, threshold, boundary
           } else {
             types <- unlist(lapply(gates, function(x) {
-
+              
               # Includes rectangle, interval, threshold and boundary gate_types
               if (length(parameters(x)) == 1) {
-
+                
                 # Gate in One Dimension
                 if (is.infinite(x@min)) {
                   types <- "boundary"
@@ -726,14 +754,14 @@ gate_type <- function(gates) {
                   types <- "interval"
                 }
               } else if (length(parameters(x)) == 2) {
-
+                
                 # Gate in 2 Dimensions
                 if (is.infinite(x@min[1]) & is.infinite(x@min[2])) {
                   types <- "boundary"
                 } else if (is.infinite(x@max[1]) & is.infinite(x@max[2])) {
                   types <- "threshold"
                 } else if (all(is.infinite(c(x@min[1], x@max[1]))) |
-                  all(is.infinite(c(x@min[2], x@max[2])))) {
+                           all(is.infinite(c(x@min[2], x@max[2])))) {
                   types <- "interval"
                 } else {
                   types <- "rectangle"
@@ -743,10 +771,10 @@ gate_type <- function(gates) {
           }
         } else {
           types <- unlist(lapply(gates, function(x) {
-
+            
             # Includes rectangle, interval, threshold and boundary gate_types
             if (length(parameters(x)) == 1) {
-
+              
               # Gate in One Dimension
               if (is.infinite(x@min)) {
                 types <- "boundary"
@@ -756,14 +784,14 @@ gate_type <- function(gates) {
                 types <- "interval"
               }
             } else if (length(parameters(x)) == 2) {
-
+              
               # Gate in 2 Dimensions
               if (is.infinite(x@min[1]) & is.infinite(x@min[2])) {
                 types <- "boundary"
               } else if (is.infinite(x@max[1]) & is.infinite(x@max[2])) {
                 types <- "threshold"
               } else if (all(is.infinite(c(x@min[1], x@max[1]))) |
-                all(is.infinite(c(x@min[2], x@max[2])))) {
+                         all(is.infinite(c(x@min[2], x@max[2])))) {
                 types <- "interval"
               } else {
                 types <- "rectangle"
@@ -771,17 +799,17 @@ gate_type <- function(gates) {
             }
           }))
         }
-
+        
         # Gates are all polygons
       } else if (classes[1] == "polygonGate") {
-
+        
         # Combine gate co-ordinates
         pts <- lapply(gates, function(x) {
           rbind(x@boundaries)
         })
         pts <- do.call(rbind, pts)
         dupl <- pts[pts[, 1] == pts[which(duplicated(pts))[1], ][1], ]
-
+        
         # May be type == "web" need to see if any points are conserved
         if (length(dupl[, 1]) == length(gates)) {
           types <- "web"
@@ -789,19 +817,19 @@ gate_type <- function(gates) {
           types <- rep("polygon", length(gates))
         }
       }
-
+      
       # Not all supplied gates are of the same class - treat separately
     } else {
       types <- unlist(lapply(gates, function(x) {
         if (class(x) == "ellipsoidGate") {
-
+          
           # type == "ellipse"
           types <- "ellipse"
         } else if (class(x) == "rectangleGate") {
-
+          
           # Includes rectangle, interval, threshold and boundary gate_types
           if (length(parameters(x)) == 1) {
-
+            
             # Gate in One Dimension
             if (is.infinite(x@min)) {
               types <- "boundary"
@@ -811,28 +839,28 @@ gate_type <- function(gates) {
               types <- "interval"
             }
           } else if (length(parameters(x)) == 2) {
-
+            
             # Gate in 2 Dimensions
             if (is.infinite(x@min[1]) & is.infinite(x@min[2])) {
               types <- "boundary"
             } else if (is.infinite(x@max[1]) & is.infinite(x@max[2])) {
               types <- "threshold"
             } else if (all(is.infinite(c(x@min[1], x@max[1]))) |
-              all(is.infinite(c(x@min[2], x@max[2])))) {
+                       all(is.infinite(c(x@min[2], x@max[2])))) {
               types <- "interval"
             } else {
               types <- "rectangle"
             }
           }
         } else if (class(x) == "polygonGate") {
-
+          
           # type == "polygon"
           types <- "polygon"
         }
       }))
     }
   }
-
+  
   return(types)
 }
 
@@ -876,7 +904,7 @@ gate_type <- function(gates) {
 #' 
 #' @export
 gatingTemplate_convert <- function(gs, gatingTemplate) {
-
+  
   # data.table R CMD Check NOTE
   alias <- NULL
   gating_method <- NULL
@@ -885,10 +913,10 @@ gatingTemplate_convert <- function(gs, gatingTemplate) {
   groupBy <- NULL
   preprocessing_method <- NULL
   preprocessing_args <- NULL
-
+  
   # Number of samples
   smp <- length(gs)
-
+  
   if (missing(gatingTemplate)) {
     stop("Please supply the name of the gatingTemplate to be converted.")
   } else {
@@ -898,49 +926,49 @@ gatingTemplate_convert <- function(gs, gatingTemplate) {
       }
     }
   }
-
+  
   # Read in gatingTemplate
   gt <- data.table::fread(gatingTemplate)
-
+  
   # Modify template
   for (i in seq_len(nrow(gt))) {
-
+    
     # Load gatingTemplate into gatingTemplate
     gT <- suppressMessages(gatingTemplate(gatingTemplate))
     pops <- basename(gT@nodes)[-1]
-
+    
     # Extract population nodes from gT
     nds <- getNodes(gT, only.names = TRUE)
-
+    
     als <- names(nds[match(pops[i], nds)])
-
+    
     # Parent Node
     parent <- gt[alias == pops[i], "parent"]
     parent <- as.character(parent)
-
+    
     prnt <- names(nds[match(parent, nds)])
     gm <- getGate(gT, prnt, als)
     gate <- eval(parameters(gm)$gate)
     gts <- list(filters(list(gate)))
-
+    
     gtmd <- "gate_draw"
     ppmd <- "pp_gate_draw"
     als <- pops[i]
-
+    
     gt[alias == als, gating_method := gtmd]
     gt[alias == als, gating_args := .argDeparser(list(gate = gts))]
     gt[alias == als, collapseDataForGating := TRUE]
   }
-
+  
   # Save updated gatingTemplate
   data.table::fwrite(gt, gatingTemplate)
-
+  
   gt <- read.csv(gatingTemplate, header = TRUE)
   gt$collapseDataForGating <- rep(TRUE, nrow(gt))
   gt$groupBy <- rep(smp, nrow(gt))
   gt$preprocessing_method <- rep("pp_gate_draw", nrow(gt))
   gt$preprocessing_args <- rep(NA, nrow(gt))
-
+  
   write.csv(gt, gatingTemplate, row.names = FALSE)
 }
 
@@ -990,7 +1018,7 @@ gatingTemplate_edit <- function(x, gatingTemplate = NULL){
       if(!.file_wd_check(gatingTemplate)){
         stop(
           paste(gatingTemplate, "does not exist in this working directory.")
-          )
+        )
       }
     }
     gt <- read.csv(gatingTemplate, header = TRUE)

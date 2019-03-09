@@ -5,23 +5,14 @@
 \alias{gate_draw,GatingSet-method}
 \title{gate_draw GatingSet Method}
 \usage{
-\S4method{gate_draw}{GatingSet}(x, group_by = NULL, select = NULL,
-  parent = "root", alias = NULL, channels = NULL, type = "polygon",
-  gatingTemplate = NULL, display = NULL, axis = "x",
+\S4method{gate_draw}{GatingSet}(x, parent = "root", alias = NULL,
+  channels = NULL, type = "polygon", gatingTemplate = NULL,
+  group_by = NULL, display = NULL, select = NULL, axis = "x",
   density_smooth = 1.5, label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
-
-\item{group_by}{vector of pData column names (e.g.
-c("Treatment","Concentration") indicating how the samples should be grouped
-prior to gating, set to the length of x by default to construct a single
-gate for all samples. If group_by is supplied a different gate will be
-constructed for each group.}
-
-\item{select}{vector containing the indices of samples within each group to
-use for plotting.}
 
 \item{parent}{name of the \code{parent} population to extract for gating.}
 
@@ -43,9 +34,18 @@ for 1D gates and \code{"polygon"} for 2D gates.}
 
 \item{gatingTemplate}{name of \code{gatingTemplate} csv file to be saved.}
 
+\item{group_by}{vector of pData column names (e.g.
+c("Treatment","Concentration") indicating how the samples should be grouped
+prior to gating, set to the length of x by default to construct a single
+gate for all samples. If group_by is supplied a different gate will be
+constructed for each group.}
+
 \item{display}{numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
+
+\item{select}{vector containing the indices of samples within each group to
+use for plotting.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

@@ -5,23 +5,20 @@
 \alias{gate_draw,flowSet-method}
 \title{gate_draw flowSet Method}
 \usage{
-\S4method{gate_draw}{flowSet}(x, select = NULL, channels = NULL,
-  alias = NULL, type = "polygon", display = 1/length(x),
+\S4method{gate_draw}{flowSet}(x, alias = NULL, channels = NULL,
+  type = "polygon", display = 1/length(x), select = NULL,
   axis = "x", density_smooth = 1.5, label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
 
-\item{select}{vector containing the indices of samples within gs to use for
-plotting.}
-
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{type}{vector of gate type names used to construct the gates. Multiple
 gate types are supported but should be accompanied with an \code{alias}
@@ -34,6 +31,9 @@ for 1D gates and \code{"polygon"} for 2D gates.}
 \item{display}{numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
+
+\item{select}{vector containing the indices of samples within gs to use for
+plotting.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}
