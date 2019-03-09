@@ -27,6 +27,7 @@ Imports:
   shiny, 
   shinythemes, 
   rhandsontable, 
+  superheat,
   MASS,
   methods,
   stats,
