@@ -71,114 +71,114 @@ setGeneric(
 #' cyto_stats_compute(fs[[1]], stat = "count")
 #' @export
 setMethod(cyto_stats_compute,
-  signature = "flowFrame",
-  definition = function(x,
-                          channels = NULL,
-                          trans = NULL,
-                          stat = "median",
-                          density_smooth = 1.5) {
-
-    # Check statistic
-    stat <- .cyto_stat_check(stat = stat)
-
-    # Assign x to fr
-    fr <- x
-
-    # Channels
-    if (is.null(channels)) {
-      channels <- BiocGenerics::colnames(fr)
-    } else {
-      channels <- cyto_channel_check(
-        x = fr,
-        channels = channels,
-        plot = FALSE
-      )
-    }
-
-    # Transformations
-    if (is.null(trans) & stat %in%
-      c("mean", "median", "mode", "geo mean", "CV", "CVI")) {
-      message("'trans' missing - statistics will be returned on current scale.")
-      trans <- NULL
-    } else if (!is.null(trans)) {
-      trans <- cyto_trans_check(trans, inverse = FALSE)
-      inv <- cyto_trans_check(trans, inverse = TRUE)
-      fr <- transform(fr, inv)
-    }
-
-    # Extract data from fr
-    fr.exprs <- exprs(fr)
-
-    # Statistics
-    if (stat == "count") {
-      cnt <- data.frame(count = BiocGenerics::nrow(fr))
-      rownames(cnt) <- fr@description$GUID
-
-      return(cnt)
-    } else if (stat %in% c("median", "mode", "mean", "CV", "CVI")) {
-
-      # Calculate statistic
-      sts <- lapply(channels, function(channel) {
-        if (stat == "mean") {
-          mean(fr.exprs[, channel])
-        } else if (stat == "median") {
-          median(fr.exprs[, channel])
-        } else if (stat == "mode") {
-          d <- density(fr.exprs[, channel], adjust = density_smooth)
-          d$x[d$y == max(d$y)]
-        } else if (stat == "CV") {
-          md <- median(fr.exprs[,channel])
-          rSD <- median(abs(fr.exprs[,channel] - md))*1.4826
-          rSD/md * 100
-        }
-      })
-      names(sts) <- channels
-      sts <- do.call(cbind, sts)
-      rownames(sts) <- fr@description$GUID
-
-      return(sts)
-    } else if (stat == "geo mean") {
-
-      # Don't transform calculate mean then inverse transform to get geo mean
-      sts <- lapply(channels, function(channel) {
-        fr.exprs <- exprs(x)[, channel]
-
-        # trans supplied
-        if (!is.null(trans)) {
-
-          # Channel is already transformed
-          if (channel %in% BiocGenerics::colnames(trans)) {
-            inv <- cyto_trans_check(trans, inverse = TRUE)
-            sts <- inv@transforms[[channel]]@f(mean(fr.exprs))
-
-            # Channel has not been transformed
-          } else if (!channel %in% BiocGenerics::colnames(trans)) {
-            sts <- exp(mean(log(fr.exprs)))
-          }
-
-          # No trans supplied
-        } else {
-          sts <- suppressWarnings(exp(mean(log(fr.exprs))))
-
-          if (is.nan(sts)) {
-            stop(
-              paste0(
-                "Supply transformList/transformerList to calculate ",
-                stat, "."
+          signature = "flowFrame",
+          definition = function(x,
+                                channels = NULL,
+                                trans = NULL,
+                                stat = "median",
+                                density_smooth = 1.5) {
+            
+            # Check statistic
+            stat <- .cyto_stat_check(stat = stat)
+            
+            # Assign x to fr
+            fr <- x
+            
+            # Channels
+            if (is.null(channels)) {
+              channels <- BiocGenerics::colnames(fr)
+            } else {
+              channels <- cyto_channel_check(
+                x = fr,
+                channels = channels,
+                plot = FALSE
               )
-            )
+            }
+            
+            # Transformations
+            if (is.null(trans) & stat %in%
+                c("mean", "median", "mode", "geo mean", "CV", "CVI")) {
+              message("'trans' missing - statistics will be returned on current scale.")
+              trans <- NULL
+            } else if (!is.null(trans)) {
+              trans <- cyto_trans_check(trans, inverse = FALSE)
+              inv <- cyto_trans_check(trans, inverse = TRUE)
+              fr <- transform(fr, inv)
+            }
+            
+            # Extract data from fr
+            fr.exprs <- exprs(fr)
+            
+            # Statistics
+            if (stat == "count") {
+              cnt <- data.frame(count = BiocGenerics::nrow(fr))
+              rownames(cnt) <- fr@description$GUID
+              
+              return(cnt)
+            } else if (stat %in% c("median", "mode", "mean", "CV", "CVI")) {
+              
+              # Calculate statistic
+              sts <- lapply(channels, function(channel) {
+                if (stat == "mean") {
+                  mean(fr.exprs[, channel])
+                } else if (stat == "median") {
+                  median(fr.exprs[, channel])
+                } else if (stat == "mode") {
+                  d <- density(fr.exprs[, channel], adjust = density_smooth)
+                  d$x[d$y == max(d$y)]
+                } else if (stat == "CV") {
+                  md <- median(fr.exprs[,channel])
+                  rSD <- median(abs(fr.exprs[,channel] - md))*1.4826
+                  rSD/md * 100
+                }
+              })
+              names(sts) <- channels
+              sts <- do.call(cbind, sts)
+              rownames(sts) <- fr@description$GUID
+              
+              return(sts)
+            } else if (stat == "geo mean") {
+              
+              # Don't transform calculate mean then inverse transform to get geo mean
+              sts <- lapply(channels, function(channel) {
+                fr.exprs <- exprs(x)[, channel]
+                
+                # trans supplied
+                if (!is.null(trans)) {
+                  
+                  # Channel is already transformed
+                  if (channel %in% BiocGenerics::colnames(trans)) {
+                    inv <- cyto_trans_check(trans, inverse = TRUE)
+                    sts <- inv@transforms[[channel]]@f(mean(fr.exprs))
+                    
+                    # Channel has not been transformed
+                  } else if (!channel %in% BiocGenerics::colnames(trans)) {
+                    sts <- exp(mean(log(fr.exprs)))
+                  }
+                  
+                  # No trans supplied
+                } else {
+                  sts <- suppressWarnings(exp(mean(log(fr.exprs))))
+                  
+                  if (is.nan(sts)) {
+                    stop(
+                      paste0(
+                        "Supply transformList/transformerList to calculate ",
+                        stat, "."
+                      )
+                    )
+                  }
+                }
+                
+                return(sts)
+              })
+              sts <- do.call(cbind, sts)
+              rownames(sts) <- fr@description$GUID
+              colnames(sts) <- channels
+            }
+            
+            return(sts)
           }
-        }
-
-        return(sts)
-      })
-      sts <- do.call(cbind, sts)
-      rownames(sts) <- fr@description$GUID
-      colnames(sts) <- channels
-    }
-
-    return(sts)
-  }
 )
 
 #' Compute Statistics - flowSet Method
@@ -238,51 +238,51 @@ setMethod(cyto_stats_compute,
 #' )
 #' @export
 setMethod(cyto_stats_compute,
-  signature = "flowSet",
-  definition = function(x,
-                          channels = NULL,
-                          trans = NULL,
-                          stat = "median",
-                          density_smooth = 1.5) {
-
-    # Check statistic
-    stat <- .cyto_stat_check(stat = stat)
-
-    # Assign x to fs
-    fs <- x
-
-    # pData
-    pdata <- as.data.frame(pData(fs))
-
-    # cyto_stats_compute
-    sts <- fsApply(fs, function(fr) {
-      cyto_stats_compute(fr,
-        channels = channels,
-        trans = trans,
-        stat = stat,
-        density_smooth = density_smooth
-      )
-    })
-
-    # Structure of count statistics
-    if (stat == "count") {
-      sts <- do.call(rbind, sts)
-    }
-
-    # Merge with pdata
-    pdata[, "name"] <- list(NULL)
-    if (class(sts) == "data.frame") {
-      sts <- lapply(list(sts), function(x) {
-        cbind(pdata, x)
-      })
-    } else if (class(sts) == "matrix") {
-      sts <- lapply(list(sts), function(x) {
-        cbind(pdata, x)
-      })
-    }
-
-    return(sts)
-  }
+          signature = "flowSet",
+          definition = function(x,
+                                channels = NULL,
+                                trans = NULL,
+                                stat = "median",
+                                density_smooth = 1.5) {
+            
+            # Check statistic
+            stat <- .cyto_stat_check(stat = stat)
+            
+            # Assign x to fs
+            fs <- x
+            
+            # pData
+            pdata <- as.data.frame(pData(fs))
+            
+            # cyto_stats_compute
+            sts <- fsApply(fs, function(fr) {
+              cyto_stats_compute(fr,
+                                 channels = channels,
+                                 trans = trans,
+                                 stat = stat,
+                                 density_smooth = density_smooth
+              )
+            })
+            
+            # Structure of count statistics
+            if (stat == "count") {
+              sts <- do.call(rbind, sts)
+            }
+            
+            # Merge with pdata
+            pdata[, "name"] <- list(NULL)
+            if (class(sts) == "data.frame") {
+              sts <- lapply(list(sts), function(x) {
+                cbind(pdata, x)
+              })
+            } else if (class(sts) == "matrix") {
+              sts <- lapply(list(sts), function(x) {
+                cbind(pdata, x)
+              })
+            }
+            
+            return(sts)
+          }
 )
 
 #' Compute Statistics - GatingSet Method
@@ -369,111 +369,111 @@ setMethod(cyto_stats_compute,
 #' )
 #' @export
 setMethod(cyto_stats_compute,
-  signature = "GatingSet",
-  definition = function(x,
-                          alias = NULL,
-                          parent = NULL,
-                          channels = NULL,
-                          trans = NULL,
-                          stat = "median",
-                          density_smooth = 1.5,
-                          save = TRUE) {
-
-    # Check statistic
-    stat <- .cyto_stat_check(stat = stat)
-
-    # Assign x to gs
-    gs <- x
-
-    # transformerList?
-    if (!is.null(trans)) {
-      trans <- cyto_trans_check(trans, inverse = FALSE)
-    }
-
-    # Get trans if not supplied
-    if (is.null(trans)) {
-      trans <- transformList(
-        names(getTransformations(gs[[1]])),
-        getTransformations(gs[[1]])
-      )
-    }
-
-    # Extract population(s)
-    fs.lst <- lapply(alias, function(x) getData(gs, x))
-
-    # Population frequencies
-    if (stat == "freq") {
-      sts <- lapply(fs.lst, function(fs) {
-        as.data.frame(cyto_stats_compute(fs,
-          channels = channels,
-          trans = trans,
-          stat = "count",
-          density_smooth = density_smooth
-        ))
-      })
-      names(sts) <- alias
-
-      # Get parent counts
-      prnts <- lapply(parent, function(x) {
-        fs <- getData(gs, x)
-        as.data.frame(cyto_stats_compute(fs,
-          channels = channels,
-          trans = trans,
-          stat = "count",
-          density_smooth = density_smooth
-        ))
-      })
-      names(prnts) <- parent
-
-      sts <- lapply(sts, function(x) {
-        m <- matrix(rep(x[, "count"], length(parent)),
-          ncol = length(parent),
-          byrow = FALSE
-        )
-        colnames(m) <- rep("count", length(parent))
-        sts <- cbind(x, m)
-        return(sts)
-      })
-
-      sts <- lapply(sts, function(x) {
-        lapply(seq_len(length(parent)), function(y) {
-          N <- ncol(x) - length(parent)
-          x[, (N + y)] <<- (x[, (N + y)] / prnts[[y]][, "count"]) * 100
-          colnames(x)[(N + y)] <<- parent[y]
-        })
-
-        return(x)
-      })
-    } else {
-      sts <- lapply(fs.lst, function(fs) {
-        sts <- cyto_stats_compute(fs,
-          channels = channels,
-          trans = trans,
-          stat = stat,
-          density_smooth = density_smooth
-        )
-        clnms <- colnames(sts[[1]])
-        sts <- as.data.frame(sts)
-        colnames(sts) <- clnms
-        return(sts)
-      })
-      names(sts) <- alias
-    }
-
-    # Save to csv file
-    if (save == TRUE) {
-      lapply(seq_along(alias), function(x) {
-        write.csv(
-          sts[[x]],
-          paste(
-            format(Sys.Date(), "%d%m%y"),
-            "-", alias[x], "-", stat, ".csv",
-            sep = ""
-          )
-        )
-      })
-    }
-
-    return(sts)
-  }
+          signature = "GatingSet",
+          definition = function(x,
+                                alias = NULL,
+                                parent = NULL,
+                                channels = NULL,
+                                trans = NULL,
+                                stat = "median",
+                                density_smooth = 1.5,
+                                save = TRUE) {
+            
+            # Check statistic
+            stat <- .cyto_stat_check(stat = stat)
+            
+            # Assign x to gs
+            gs <- x
+            
+            # transformerList?
+            if (!is.null(trans)) {
+              trans <- cyto_trans_check(trans, inverse = FALSE)
+            }
+            
+            # Get trans if not supplied
+            if (is.null(trans)) {
+              trans <- transformList(
+                names(getTransformations(gs[[1]])),
+                getTransformations(gs[[1]])
+              )
+            }
+            
+            # Extract population(s)
+            fs.lst <- lapply(alias, function(x) getData(gs, x))
+            
+            # Population frequencies
+            if (stat == "freq") {
+              sts <- lapply(fs.lst, function(fs) {
+                as.data.frame(cyto_stats_compute(fs,
+                                                 channels = channels,
+                                                 trans = trans,
+                                                 stat = "count",
+                                                 density_smooth = density_smooth
+                ))
+              })
+              names(sts) <- alias
+              
+              # Get parent counts
+              prnts <- lapply(parent, function(x) {
+                fs <- getData(gs, x)
+                as.data.frame(cyto_stats_compute(fs,
+                                                 channels = channels,
+                                                 trans = trans,
+                                                 stat = "count",
+                                                 density_smooth = density_smooth
+                ))
+              })
+              names(prnts) <- parent
+              
+              sts <- lapply(sts, function(x) {
+                m <- matrix(rep(x[, "count"], length(parent)),
+                            ncol = length(parent),
+                            byrow = FALSE
+                )
+                colnames(m) <- rep("count", length(parent))
+                sts <- cbind(x, m)
+                return(sts)
+              })
+              
+              sts <- lapply(sts, function(x) {
+                lapply(seq_len(length(parent)), function(y) {
+                  N <- ncol(x) - length(parent)
+                  x[, (N + y)] <<- (x[, (N + y)] / prnts[[y]][, "count"]) * 100
+                  colnames(x)[(N + y)] <<- parent[y]
+                })
+                
+                return(x)
+              })
+            } else {
+              sts <- lapply(fs.lst, function(fs) {
+                sts <- cyto_stats_compute(fs,
+                                          channels = channels,
+                                          trans = trans,
+                                          stat = stat,
+                                          density_smooth = density_smooth
+                )
+                clnms <- colnames(sts[[1]])
+                sts <- as.data.frame(sts)
+                colnames(sts) <- clnms
+                return(sts)
+              })
+              names(sts) <- alias
+            }
+            
+            # Save to csv file
+            if (save == TRUE) {
+              lapply(seq_along(alias), function(x) {
+                write.csv(
+                  sts[[x]],
+                  paste(
+                    format(Sys.Date(), "%d%m%y"),
+                    "-", alias[x], "-", stat, ".csv",
+                    sep = ""
+                  )
+                )
+              })
+            }
+            
+            return(sts)
+          }
 )
