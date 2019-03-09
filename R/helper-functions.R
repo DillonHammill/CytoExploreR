@@ -39,22 +39,22 @@ setGeneric(
 #' cyto_fluor_channels(fs[[1]])
 #' @export
 setMethod(cyto_fluor_channels,
-  signature = "flowFrame",
-  definition = function(x) {
-    channels <- unname(BiocGenerics::colnames(x))
-    channels <- channels[!channels %in% c(
-      "FSC-A",
-      "FSC-H",
-      "FSC-W",
-      "SSC-A",
-      "SSC-H",
-      "SSC-W",
-      "Time",
-      "Original"
-    )]
-
-    return(channels)
-  }
+          signature = "flowFrame",
+          definition = function(x) {
+            channels <- unname(BiocGenerics::colnames(x))
+            channels <- channels[!channels %in% c(
+              "FSC-A",
+              "FSC-H",
+              "FSC-W",
+              "SSC-A",
+              "SSC-H",
+              "SSC-W",
+              "Time",
+              "Original"
+            )]
+            
+            return(channels)
+          }
 )
 
 #' Extract Fluorescent Channels - flowSet Method
@@ -78,10 +78,10 @@ setMethod(cyto_fluor_channels,
 #' cyto_fluor_channels(fs)
 #' @export
 setMethod(cyto_fluor_channels,
-  signature = "flowSet",
-  definition = function(x) {
-    cyto_fluor_channels(x[[1]])
-  }
+          signature = "flowSet",
+          definition = function(x) {
+            cyto_fluor_channels(x[[1]])
+          }
 )
 
 #' Extract Fluorescent Channels - GatingSet Method
@@ -106,11 +106,11 @@ setMethod(cyto_fluor_channels,
 #' cyto_fluor_channels(gs)
 #' @export
 setMethod(cyto_fluor_channels,
-  signature = "GatingSet",
-  definition = function(x) {
-    fr <- getData(x[[1]], "root")
-    cyto_fluor_channels(fr)
-  }
+          signature = "GatingSet",
+          definition = function(x) {
+            fr <- getData(x[[1]], "root")
+            cyto_fluor_channels(fr)
+          }
 )
 
 #' Select Fluorescent Channel for Compensation Controls
@@ -155,31 +155,31 @@ setGeneric(
 #' 
 #' @export
 setMethod(cyto_channel_select,
-  signature = "flowFrame",
-  definition = function(x) {
-
-    # Assign x to fr
-    fr <- x
-
-    opts <- cyto_fluor_channels(fr)
-
-    # Print sample name and select channel
-    message(
-      paste(
-        "Select a fluorescent channel for the following csample:",
-        fr@description$GUID
-      )
-    )
-
-    if (getOption("CytoRSuite_interact") == TRUE) {
-      channel <- opts[menu(choices = opts, graphics = TRUE)]
-    } else {
-      # Tests use PE Cy7 Control -
-      channel <- opts[5]
-    }
-
-    return(channel)
-  }
+          signature = "flowFrame",
+          definition = function(x) {
+            
+            # Assign x to fr
+            fr <- x
+            
+            opts <- cyto_fluor_channels(fr)
+            
+            # Print sample name and select channel
+            message(
+              paste(
+                "Select a fluorescent channel for the following csample:",
+                fr@description$GUID
+              )
+            )
+            
+            if (getOption("CytoRSuite_interact") == TRUE) {
+              channel <- opts[menu(choices = opts, graphics = TRUE)]
+            } else {
+              # Tests use PE Cy7 Control -
+              channel <- opts[5]
+            }
+            
+            return(channel)
+          }
 )
 
 #' Select Fluorescent Channel for Compensation Controls - flowSet Method
@@ -207,31 +207,31 @@ setMethod(cyto_channel_select,
 #' 
 #' @export
 setMethod(cyto_channel_select,
-  signature = "flowSet",
-  definition = function(x) {
-
-    # Assign x to fs
-    fs <- x
-
-    opts <- c(cyto_fluor_channels(fs), "Unstained")
-
-    # Print sample name and select channel
-    channels <- opts[unlist(lapply(pData(fs)$name, function(x) {
-      message("Select a fluorescent channel for the following sample:")
-
-      print(x)
-
-      if (getOption("CytoRSuite_interact") == TRUE) {
-        menu(choices = opts, graphics = TRUE)
-      } else {
-
-        # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
-        c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
-      }
-    }))]
-
-    return(channels)
-  }
+          signature = "flowSet",
+          definition = function(x) {
+            
+            # Assign x to fs
+            fs <- x
+            
+            opts <- c(cyto_fluor_channels(fs), "Unstained")
+            
+            # Print sample name and select channel
+            channels <- opts[unlist(lapply(pData(fs)$name, function(x) {
+              message("Select a fluorescent channel for the following sample:")
+              
+              print(x)
+              
+              if (getOption("CytoRSuite_interact") == TRUE) {
+                menu(choices = opts, graphics = TRUE)
+              } else {
+                
+                # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
+                c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
+              }
+            }))]
+            
+            return(channels)
+          }
 )
 
 #' Select Fluorescent Channel for Compensation Controls - GatingSet Method
@@ -260,31 +260,31 @@ setMethod(cyto_channel_select,
 #' 
 #' @export
 setMethod(cyto_channel_select,
-  signature = "GatingSet",
-  definition = function(x) {
-
-    # Assign x to gs
-    gs <- x
-
-    opts <- c(cyto_fluor_channels(gs), "Unstained")
-
-    # Print sample name and select channel
-    channels <- opts[unlist(lapply(pData(gs)$name, function(x) {
-      message("Select a fluorescent channel for the following sample:")
-
-      print(x)
-
-      if (getOption("CytoRSuite_interact") == TRUE) {
-        menu(choices = opts, graphics = TRUE)
-      } else {
-
-        # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
-        c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
-      }
-    }))]
-
-    return(channels)
-  }
+          signature = "GatingSet",
+          definition = function(x) {
+            
+            # Assign x to gs
+            gs <- x
+            
+            opts <- c(cyto_fluor_channels(gs), "Unstained")
+            
+            # Print sample name and select channel
+            channels <- opts[unlist(lapply(pData(gs)$name, function(x) {
+              message("Select a fluorescent channel for the following sample:")
+              
+              print(x)
+              
+              if (getOption("CytoRSuite_interact") == TRUE) {
+                menu(choices = opts, graphics = TRUE)
+              } else {
+                
+                # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
+                c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
+              }
+            }))]
+            
+            return(channels)
+          }
 )
 
 #' Sample a flowFrame
@@ -311,16 +311,16 @@ setMethod(cyto_channel_select,
 #' cyto_sample(fs[[1]], 0.5)
 #' @export
 cyto_sample <- function(fr, display) {
-
+  
   # Number of events
   events <- nrow(fr)
-
+  
   # Size
   size <- display * events
-
+  
   smp <- sampleFilter(size = size)
   fr <- Subset(fr, smp)
-
+  
   return(fr)
 }
 
@@ -360,17 +360,17 @@ cyto_markers <- function(x, file = NULL) {
   if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))) {
     stop("Please supply either a flowFrame or flowSet object")
   }
-
+  
   if (inherits(x, "flowFrame")) {
-
+    
     # Extract pData of parameters
     pd <- pData(parameters(x))
   } else if (inherits(x, "flowSet")) {
-
+    
     # Extract pData of parameters
     pd <- pData(parameters(x[[1]]))
   }
-
+  
   # file missing
   if (is.null(file)) {
     
@@ -388,7 +388,7 @@ cyto_markers <- function(x, file = NULL) {
       rownames(dt) <- NULL
       
     }
-
+    
   } else {
     if (getOption("CytoRSuite_wd_check")) {
       if (!.file_wd_check(file)) {
@@ -397,30 +397,30 @@ cyto_markers <- function(x, file = NULL) {
     }
     dt <- read.csv(file, header = TRUE)
   }
-
+  
   # Channels with markers
   chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
-
+  
   # Edit dt
   dt <- suppressWarnings(edit(dt))
-
+  
   # Update channels
   BiocGenerics::colnames(x) <- dt$Channel
   
   # Write result to csv file
   if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
     
-      write.csv(dt, c(file, list.files())[grep("Experiment-Markers.csv",
-                                              c(file, list.files()))[1]]
-      , row.names = FALSE)
-
+    write.csv(dt, c(file, list.files())[grep("Experiment-Markers.csv",
+                                             c(file, list.files()))[1]]
+              , row.names = FALSE)
+    
   } else {
     write.csv(dt, paste0(
       format(Sys.Date(), "%d%m%y"),
       "-Experiment-Markers.csv"
     ), row.names = FALSE)
   }
-
+  
   # Channels with markers added
   tb <- dt[!dt$Channel %in% chans, ]
   chns <- tb$Channel[!is.na(tb$Marker)]
@@ -431,7 +431,7 @@ cyto_markers <- function(x, file = NULL) {
   
   # Assign markers to x
   markernames(x) <- mrk
-
+  
   invisible(NULL)
 }
 
@@ -461,18 +461,18 @@ cyto_markers <- function(x, file = NULL) {
 #' 
 #' @export
 cyto_annotate <- function(x, file = NULL) {
-
+  
   # x should be a flowSet or GatingSet
   if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
     stop("Please supply either a flowSet or a GatingSet")
   }
-
+  
   # Assign x to cyto
   cyto <- x
-
+  
   # File missing
   if (is.null(file)) {
-
+    
     if(length(grep("Experiment-Details.csv", list.files())) != 0){
       
       message("Experiment-Details.csv found in working directory.")
@@ -493,24 +493,24 @@ cyto_annotate <- function(x, file = NULL) {
         stop(paste(file, "does not exist in this working directory"))
       }
     }
-
+    
     # Read in file
     pd <- read.csv(file, header = TRUE)
-
+    
     # Update pData
     pData(cyto) <- pd
   }
-
+  
   # Edit pData
   pd <- suppressWarnings(edit(pd))
   rownames(pd) <- pd$name
-
+  
   # Update pData
   pData(cyto) <- pd
-
+  
   # Write result to csv file
   if (length(grep("Experiment-Details.csv", c(file, list.files()))) != 0) {
-
+    
     write.csv(pd, c(file, list.files())[grep("Experiment-Details.csv",
                                              c(file, list.files()))[1]]
               , row.names = FALSE)
@@ -523,9 +523,9 @@ cyto_annotate <- function(x, file = NULL) {
     ), row.names = FALSE)
     
   }
-
+  
   # Update globally
   assign(deparse(substitute(x)), cyto, envir = globalenv())
-
+  
   invisible(NULL)
 }
