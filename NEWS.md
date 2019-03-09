@@ -1,3 +1,13 @@
+# CytoRSuite 1.0.0
+
+* Improved handling of lower axes limits to display negative values.
+* Updated `gate_draw`, `gate_edit` and `gate_remove` to allow easier switching between these functions. Users can now replace `draw` in their `gate_draw` code with `edit` or `remove` to modify drawn gates without any additional code.
+* Supplying an empty character string to the `alias` argument of `cyto_plot` (e.g. alias = "") will automatically plot all gates constructed in the supplied channels. This way users don't have to specify each gate by name.
+* Added Support for spillover matrices has been added through `spillover_spread_compute` which utilises a similar API to `spillover_compute`.
+* Modified colour scheme in `spillover_edit` to improve visibility.
+* Improved layout for `cyto_plot_gating_scheme` when there isn't a `legend`.
+* Updated `cyto_plot` to allow plotting of all 2-D gate objects in a single dimension. The minimum and maximum gate co-ordinates in the supplied channel will be used to construct a 1-D rectabgleGate for plotting.
+
 # CytoRSuite 0.9.9
 
 * `cyto_plot_label` now accepts stat `freq` instead of `percent` for consistency with `cyto_stats_compute`.

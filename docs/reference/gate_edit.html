@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -149,9 +149,9 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>gate_edit</span>(<span class='no'>x</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>gate_edit</span>(<span class='no'>x</span>, <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>type</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -159,11 +159,6 @@
     <tr>
       <th>x</th>
       <td><p>an object of class <code>GatingSet</code>.</p></td>
-    </tr>
-    <tr>
-      <th>select</th>
-      <td><p>vector containing the indicies of samples within gs to use for
-plotting.</p></td>
     </tr>
     <tr>
       <th>parent</th>
@@ -174,18 +169,21 @@ plotting.</p></td>
       <td><p>name(s) of the gate to edit (e.g. "Single Cells").</p></td>
     </tr>
     <tr>
-      <th>overlay</th>
-      <td><p>name(s) of the population(s) to overlay onto the plot.</p></td>
+      <th>channels</th>
+      <td><p>name(s) of the channel(s) used to construct the gate(s). This
+argument is not necessary but is included to allow conversion of
+<code>gate_draw</code> code to <code>gate_remove</code> code by simply changing
+<code>"draw"</code> to <code>"remove"</code>.</p></td>
     </tr>
     <tr>
       <th>type</th>
       <td><p>vector of gate type names used to construct the gates. Multiple
-<code>types</code> are supported but should be accompanied with an
-<code>alias</code> argument of the same length (i.e. one <code>type</code> per
-<code>alias</code>). Supported <code>gate_types</code> are <code>polygon, rectangle,
-ellipse, threshold, boundary, interval, quadrant and web</code> which can be
-abbreviated as upper or lower case first letters as well. Default
-<code>type</code> is <code>"polygon"</code>.</p></td>
+<code>types</code> are supported but should be accompanied with an <code>alias</code>
+argument of the same length (i.e. one <code>type</code> per <code>alias</code>).
+Supported <code>gate_types</code> are <code>polygon, rectangle, ellipse,
+threshold, boundary, interval, quadrant and web</code> which can be abbreviated
+as upper or lower case first letters as well. Default <code>type</code> is
+<code>"polygon"</code>.</p></td>
     </tr>
     <tr>
       <th>gatingTemplate</th>
@@ -197,6 +195,15 @@ abbreviated as upper or lower case first letters as well. Default
       <td><p>numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for <code>display</code> can substantial improve
 plotting speed for less powerful machines.</p></td>
+    </tr>
+    <tr>
+      <th>select</th>
+      <td><p>vector containing the indicies of samples within gs to use for
+plotting.</p></td>
+    </tr>
+    <tr>
+      <th>overlay</th>
+      <td><p>name(s) of the population(s) to overlay onto the plot.</p></td>
     </tr>
     <tr>
       <th>...</th>

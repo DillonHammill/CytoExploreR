@@ -1,7 +1,7 @@
 Package: CytoRSuite
 Type: Package
 Title: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data
-Version: 0.9.9
+Version: 1.0.0
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
   person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),

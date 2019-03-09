@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -150,9 +150,9 @@
     </div>
 
     <pre class="usage"><span class='co'># S4 method for GatingSet</span>
-<span class='fu'><a href='gate_draw.html'>gate_draw</a></span>(<span class='no'>x</span>, <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>, <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"polygon"</span>,
-  <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>axis</span> <span class='kw'>=</span> <span class='st'>"x"</span>,
+<span class='fu'><a href='gate_draw.html'>gate_draw</a></span>(<span class='no'>x</span>, <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>, <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"polygon"</span>, <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>axis</span> <span class='kw'>=</span> <span class='st'>"x"</span>,
   <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>1.5</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -162,19 +162,6 @@
       <th>x</th>
       <td><p>object of class
 <code><a href='https://www.rdocumentation.org/packages/flowWorkspace/topics/GatingSet-class'>GatingSet</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>group_by</th>
-      <td><p>vector of pData column names (e.g.
-c("Treatment","Concentration") indicating how the samples should be grouped
-prior to gating, set to the length of x by default to construct a single
-gate for all samples. If group_by is supplied a different gate will be
-constructed for each group.</p></td>
-    </tr>
-    <tr>
-      <th>select</th>
-      <td><p>vector containing the indices of samples within each group to
-use for plotting.</p></td>
     </tr>
     <tr>
       <th>parent</th>
@@ -207,10 +194,23 @@ for 1D gates and <code>"polygon"</code> for 2D gates.</p></td>
       <td><p>name of <code>gatingTemplate</code> csv file to be saved.</p></td>
     </tr>
     <tr>
+      <th>group_by</th>
+      <td><p>vector of pData column names (e.g.
+c("Treatment","Concentration") indicating how the samples should be grouped
+prior to gating, set to the length of x by default to construct a single
+gate for all samples. If group_by is supplied a different gate will be
+constructed for each group.</p></td>
+    </tr>
+    <tr>
       <th>display</th>
       <td><p>numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for <code>display</code> can substantial improve
 plotting speed for less powerful machines.</p></td>
+    </tr>
+    <tr>
+      <th>select</th>
+      <td><p>vector containing the indices of samples within each group to
+use for plotting.</p></td>
     </tr>
     <tr>
       <th>axis</th>

@@ -5,6 +5,10 @@ reference:
       - '`spillover_compute`'
       - '`spillover_edit`'
       - '`cyto_plot_compensation`'
+  - title: Spillover Spreading
+    desc: Functions to compute and visualise spillover spreading matrices
+    contents:
+      - '`spillover_spread_compute`'
   - title: Annotation
     desc: Functions to annotate flow cytometry data
     contents:
