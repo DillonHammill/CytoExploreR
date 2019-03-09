@@ -13,7 +13,7 @@
 containing pre-gated single stain compensation controls and a universal
 unstained control. Currently, spillover_compute does not pre-gate samples
 to obtain a homogeneous cell population for downstream calculations. We
-therefore recommend pre-gating samples based on FSC and SSC parameters
+therefore recommmend pre-gating samples based on FSC and SSC parameters
 prior to passing them to spillover_compute (i.e. \code{x} should contain
 events for single cells only). Passing raw files to spillover_compute will
 result in inaccurate calculations of fluorescent spillover matrix.}
@@ -43,7 +43,7 @@ simply pass the name of the channel_match to this argument (e.g.
 \code{\link{cyto_plot,flowFrame-method}}.}
 }
 \value{
-spillover matrix object and \code{"Spillover Matrix.csv"} file.
+spillover matrix object and \code{"Spillover-Matrix.csv"} file.
 }
 \description{
 \code{spillover_compute} uses the method described by Bagwell & Adams 1993 to

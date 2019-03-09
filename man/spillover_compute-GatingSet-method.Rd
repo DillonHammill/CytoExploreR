@@ -48,7 +48,7 @@ simply pass the name of the channel_match to this argument (e.g.
 \code{\link{cyto_plot,flowFrame-method}}.}
 }
 \value{
-spillover matrix object and \code{"Spillover Matrix.csv"} file.
+spillover matrix object and \code{"Spillover-Matrix.csv"} file.
 }
 \description{
 \code{spillover_compute} uses the method described by Bagwell & Adams 1993 to

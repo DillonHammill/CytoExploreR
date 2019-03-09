@@ -62,7 +62,7 @@ setGeneric(
 #'   containing pre-gated single stain compensation controls and a universal
 #'   unstained control. Currently, spillover_compute does not pre-gate samples
 #'   to obtain a homogeneous cell population for downstream calculations. We
-#'   therefore recommend pre-gating samples based on FSC and SSC parameters
+#'   therefore recommmend pre-gating samples based on FSC and SSC parameters
 #'   prior to passing them to spillover_compute (i.e. \code{x} should contain
 #'   events for single cells only). Passing raw files to spillover_compute will
 #'   result in inaccurate calculations of fluorescent spillover matrix.
@@ -87,7 +87,7 @@ setGeneric(
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @return spillover matrix object and \code{"Spillover Matrix.csv"} file.
+#' @return spillover matrix object and \code{"Spillover-Matrix.csv"} file.
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -144,171 +144,171 @@ setGeneric(
 #'
 #' @export
 setMethod(spillover_compute,
-  signature = "flowSet",
-  definition = function(x,
-                          axes_trans = NULL,
-                          channel_match = NULL,
-                          spillover = "Spillover-Matrix.csv", ...) {
-
-    # Assign x to fs
-    fs <- x
-
-    # Extract pData information
-    pd <- pData(fs)
-
-    # Extract fluorescent channels
-    channels <- cyto_fluor_channels(fs)
-
-    # Select a fluorescent channel for each compensation control
-    if (is.null(channel_match)) {
-      pd$channel <- paste(cyto_channel_select(fs))
-      write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
-    } else {
-      if (inherits(channel_match, "data.frame") |
-        inherits(channel_match, "matrix") |
-        inherits(channel_match, "tibble")) {
-        if (!all(c("name", "channel") %in% colnames(channel_match))) {
-          stop("channel_match should contains columns 'name' and 'channel'.")
-        }
-        cm <- channel_match
-        chans <- cm$channel[match(sampleNames(fs), rownames(cm))]
-        pd$channel <- paste(chans)
-      } else {
-        if (getOption("CytoRSuite_wd_check") == TRUE) {
-          if (.file_wd_check(channel_match)) {
-            cm <- read.csv(channel_match, header = TRUE, row.names = 1)
-            chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
-            pd$channel <- paste(chans)
-          } else {
-            stop(paste(channel_match, "is not in this working directory."))
+          signature = "flowSet",
+          definition = function(x,
+                                axes_trans = NULL,
+                                channel_match = NULL,
+                                spillover = "Spillover-Matrix.csv", ...) {
+            
+            # Assign x to fs
+            fs <- x
+            
+            # Extract pData information
+            pd <- pData(fs)
+            
+            # Extract fluorescent channels
+            channels <- cyto_fluor_channels(fs)
+            
+            # Select a fluorescent channel for each compensation control
+            if (is.null(channel_match)) {
+              pd$channel <- paste(cyto_channel_select(fs))
+              write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
+            } else {
+              if (inherits(channel_match, "data.frame") |
+                  inherits(channel_match, "matrix") |
+                  inherits(channel_match, "tibble")) {
+                if (!all(c("name", "channel") %in% colnames(channel_match))) {
+                  stop("channel_match should contains columns 'name' and 'channel'.")
+                }
+                cm <- channel_match
+                chans <- cm$channel[match(sampleNames(fs), rownames(cm))]
+                pd$channel <- paste(chans)
+              } else {
+                if (getOption("CytoRSuite_wd_check") == TRUE) {
+                  if (.file_wd_check(channel_match)) {
+                    cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+                    chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
+                    pd$channel <- paste(chans)
+                  } else {
+                    stop(paste(channel_match, "is not in this working directory."))
+                  }
+                } else {
+                  cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+                  chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
+                  pd$channel <- paste(chans)
+                }
+              }
+            }
+            
+            # Merge files for use with estimateLogicle
+            fr <- as(fs, "flowFrame")
+            
+            # Extract summary statistics
+            sm <- pData(parameters(fs[[1]]))
+            
+            # Get complete transformList object
+            axes_trans <- .getCompleteTransList(fr, axes_trans)
+            
+            # Get transformed data - all fluorescent channels transformed
+            fs <- .getTransformedData(fs, axes_trans)
+            
+            # Extract unstained control based on selected channels in pData(fs)
+            NIL <- fs[[match("Unstained", pd$channel)]]
+            fs <- fs[-match("Unstained", pd$channel)]
+            
+            # Names
+            nms <- sampleNames(fs)
+            
+            # Samples
+            smp <- length(fs)
+            
+            # Remove NIL from pd
+            pd <- pd[!pd$channel == "Unstained", ]
+            
+            # Gate positive populations
+            pops <- lapply(seq(1, smp, 1), function(x) {
+              
+              # Extract flowFrame
+              fr <- fs[[x]]
+              
+              # Channel
+              chan <- pd$channel[x]
+              
+              # Plot
+              if (getOption("CytoRSuite_interact") == TRUE) {
+                cyto_plot(NIL,
+                          channels = chan,
+                          overlay = fr,
+                          density_stack = 0,
+                          axes_trans = axes_trans,
+                          popup = TRUE,
+                          density_fill = c("red", "dodgerblue"),
+                          legend = FALSE,
+                          density_fill_alpha = 0.6,
+                          title = nms[x], ...
+                )
+              } else {
+                cyto_plot(NIL,
+                          channels = chan,
+                          overlay = fr,
+                          density_stack = 0,
+                          axes_trans = axes_trans,
+                          density_fill = c("red", "dodgerblue"),
+                          legend = FALSE,
+                          density_fill_alpha = 0.6,
+                          title = nms[x], ...
+                )
+              }
+              
+              # Call gate_draw on each flowFrame using interval gate on selected channel
+              if (getOption("CytoRSuite_interact") == TRUE) {
+                gt <- gate_draw(
+                  x = fr,
+                  alias = paste(chan, "+"),
+                  channels = chan,
+                  type = "interval",
+                  density_smooth = 1.5,
+                  plot = FALSE
+                )
+                fr <- Subset(fr, gt[[1]])
+              }
+              
+              return(fr)
+            })
+            names(pops) <- nms
+            pops <- flowSet(pops)
+            
+            # Inverse logicle transformation
+            inv <- cyto_trans_check(axes_trans, inverse = TRUE)
+            pops <- suppressMessages(transform(pops, inv))
+            NIL <- suppressMessages(transform(NIL, inv))
+            
+            # Calculate MedFI for all channels for unstained control
+            neg <- each_col(NIL, median)[channels]
+            
+            # Calculate MedFI for all channels for all stained controls
+            pos <- fsApply(pops, each_col, median)[, channels]
+            
+            # Subtract background fluorescence
+            signal <- sweep(pos, 2, neg)
+            
+            # Construct spillover matrix - include values for which there is a control
+            spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
+            colnames(spill) <- channels
+            rownames(spill) <- channels
+            
+            # Normalise each row to stained channel
+            lapply(seq(1, nrow(signal), 1), function(x) {
+              signal[x, ] <<- signal[x, ] /
+                signal[x, match(pd$channel[x], colnames(spill))]
+            })
+            
+            # Insert values into appropriate rows
+            rws <- match(pd$channel, rownames(spill))
+            spill[rws, ] <- signal
+            
+            # write spillover matrix to csv file
+            if (!inherits(spillover, "character")) {
+              stop("'spillover' should be the name of a csv file.")
+            } else {
+              if (!file_ext(spillover) == "csv") {
+                paste0(spillover, ".csv")
+              }
+              write.csv(spill, spillover)
+            }
+            
+            return(spill)
           }
-        } else {
-          cm <- read.csv(channel_match, header = TRUE, row.names = 1)
-          chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
-          pd$channel <- paste(chans)
-        }
-      }
-    }
-
-    # Merge files for use with estimateLogicle
-    fr <- as(fs, "flowFrame")
-
-    # Extract summary statistics
-    sm <- pData(parameters(fs[[1]]))
-
-    # Get complete transformList object
-    axes_trans <- .getCompleteTransList(fr, axes_trans)
-
-    # Get transformed data - all fluorescent channels transformed
-    fs <- .getTransformedData(fs, axes_trans)
-
-    # Extract unstained control based on selected channels in pData(fs)
-    NIL <- fs[[match("Unstained", pd$channel)]]
-    fs <- fs[-match("Unstained", pd$channel)]
-
-    # Names
-    nms <- sampleNames(fs)
-
-    # Samples
-    smp <- length(fs)
-
-    # Remove NIL from pd
-    pd <- pd[!pd$channel == "Unstained", ]
-
-    # Gate positive populations
-    pops <- lapply(seq(1, smp, 1), function(x) {
-
-      # Extract flowFrame
-      fr <- fs[[x]]
-
-      # Channel
-      chan <- pd$channel[x]
-
-      # Plot
-      if (getOption("CytoRSuite_interact") == TRUE) {
-        cyto_plot(NIL,
-          channels = chan,
-          overlay = fr,
-          density_stack = 0,
-          axes_trans = axes_trans,
-          popup = TRUE,
-          density_fill = c("red", "dodgerblue"),
-          legend = FALSE,
-          density_fill_alpha = 0.6,
-          title = nms[x], ...
-        )
-      } else {
-        cyto_plot(NIL,
-          channels = chan,
-          overlay = fr,
-          density_stack = 0,
-          axes_trans = axes_trans,
-          density_fill = c("red", "dodgerblue"),
-          legend = FALSE,
-          density_fill_alpha = 0.6,
-          title = nms[x], ...
-        )
-      }
-
-      # Call gate_draw on each flowFrame using interval gate on selected channel
-      if (getOption("CytoRSuite_interact") == TRUE) {
-        gt <- gate_draw(
-          x = fr,
-          alias = paste(chan, "+"),
-          channels = chan,
-          type = "interval",
-          density_smooth = 1.5,
-          plot = FALSE
-        )
-        fr <- Subset(fr, gt[[1]])
-      }
-
-      return(fr)
-    })
-    names(pops) <- nms
-    pops <- flowSet(pops)
-
-    # Inverse logicle transformation
-    inv <- cyto_trans_check(axes_trans, inverse = TRUE)
-    pops <- suppressMessages(transform(pops, inv))
-    NIL <- suppressMessages(transform(NIL, inv))
-
-    # Calculate MedFI for all channels for unstained control
-    neg <- each_col(NIL, median)[channels]
-
-    # Calculate MedFI for all channels for all stained controls
-    pos <- fsApply(pops, each_col, median)[, channels]
-
-    # Subtract background fluorescence
-    signal <- sweep(pos, 2, neg)
-
-    # Construct spillover matrix - include values for which there is a control
-    spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
-    colnames(spill) <- channels
-    rownames(spill) <- channels
-
-    # Normalise each row to stained channel
-    lapply(seq(1, nrow(signal), 1), function(x) {
-      signal[x, ] <<- signal[x, ] /
-        signal[x, match(pd$channel[x], colnames(spill))]
-    })
-
-    # Insert values into appropriate rows
-    rws <- match(pd$channel, rownames(spill))
-    spill[rws, ] <- signal
-
-    # write spillover matrix to csv file
-    if (!inherits(spillover, "character")) {
-      stop("'spillover' should be the name of a csv file.")
-    } else {
-      if (!file_ext(spillover) == "csv") {
-        paste0(spillover, ".csv")
-      }
-      write.csv(spill, spillover)
-    }
-
-    return(spill)
-  }
 )
 
 #' Compute Spillover Matrix - GatingSet Method
@@ -365,7 +365,7 @@ setMethod(spillover_compute,
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @return spillover matrix object and \code{"Spillover Matrix.csv"} file.
+#' @return spillover matrix object and \code{"Spillover-Matrix.csv"} file.
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -420,42 +420,42 @@ setMethod(spillover_compute,
 #'
 #' @export
 setMethod(spillover_compute,
-  signature = "GatingSet",
-  definition = function(x,
-                          parent = NULL,
-                          axes_trans = NULL,
-                          channel_match = NULL,
-                          spillover = "Spillover-Matrix.csv", ...) {
-    gs <- x
-
-    # Extract Population for Downstream Analyses
-    if (!is.null(parent)) {
-      fs <- getData(gs, parent)
-    } else if (is.null(parent)) {
-      fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
-    }
-
-    # Merge files for use with estimateLogicle
-    fr <- as(fs, "flowFrame")
-    fs.m <- flowSet(fr)
-    gs.m <- suppressMessages(GatingSet(fs.m))
-
-    # Extract fluorescent channels
-    channels <- cyto_fluor_channels(gs)
-
-    # Get complete transformerList
-    axes_trans <- .getCompleteTransList(gs.m, axes_trans)
-
-    # Get complete transformList
-    axes_trans <- cyto_trans_check(axes_trans, inverse = FALSE)
-
-    spillover_compute(
-      x = fs,
-      axes_trans = axes_trans,
-      channel_match = channel_match,
-      spillover = spillover, ...
-    )
-  }
+          signature = "GatingSet",
+          definition = function(x,
+                                parent = NULL,
+                                axes_trans = NULL,
+                                channel_match = NULL,
+                                spillover = "Spillover-Matrix.csv", ...) {
+            gs <- x
+            
+            # Extract Population for Downstream Analyses
+            if (!is.null(parent)) {
+              fs <- getData(gs, parent)
+            } else if (is.null(parent)) {
+              fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
+            }
+            
+            # Merge files for use with estimateLogicle
+            fr <- as(fs, "flowFrame")
+            fs.m <- flowSet(fr)
+            gs.m <- suppressMessages(GatingSet(fs.m))
+            
+            # Extract fluorescent channels
+            channels <- cyto_fluor_channels(gs)
+            
+            # Get complete transformerList
+            axes_trans <- .getCompleteTransList(gs.m, axes_trans)
+            
+            # Get complete transformList
+            axes_trans <- cyto_trans_check(axes_trans, inverse = FALSE)
+            
+            spillover_compute(
+              x = fs,
+              axes_trans = axes_trans,
+              channel_match = channel_match,
+              spillover = spillover, ...
+            )
+          }
 )
 
 #' .getCompleteTransList
@@ -473,18 +473,18 @@ setMethod(spillover_compute,
 #'
 #' @noRd
 .getCompleteTransList <- function(x, trans = NULL) {
-
+  
   # Check class of trans
   if (!is.null(trans)) {
     if (!any(inherits(trans, "transformList") |
-      inherits(trans, "transformerList"))) {
+             inherits(trans, "transformerList"))) {
       stop("'trans' should be a transformList or transformerList object.")
     }
   }
-
+  
   # Extract fluorescent channels
   channels <- cyto_fluor_channels(x)
-
+  
   # If NULL trans get all transformations
   if (is.null(trans)) {
     if (inherits(x, "flowFrame")) {
@@ -495,7 +495,7 @@ setMethod(spillover_compute,
           "Please supply the transformList/transformerList used."
         ))
       }
-
+      
       trans <- flowCore::estimateLogicle(x, channels)
       return(trans)
     } else if (inherits(x, "flowSet")) {
@@ -506,7 +506,7 @@ setMethod(spillover_compute,
           "Please supply the transformList/transformerList used."
         ))
       }
-
+      
       trans <- flowCore::estimateLogicle(as(x, "flowFrame"), channels)
       return(trans)
     } else if (inherits(x, "GatingSet")) {
@@ -517,137 +517,137 @@ setMethod(spillover_compute,
           "Please supply the transformList/transformerList used."
         ))
       }
-
+      
       # GatingSet is not transformed
       if (length(x@transformation) == 0) {
-
+        
         # GatingSet is not transformed
         fs <- flowWorkspace::getData(x, "root")
         fr <- as(fs, "flowFrame")
         fs <- flowCore::flowSet(fr)
         gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-
+        
         trans <- flowCore::estimateLogicle(gs[[1]], channels)
         return(trans)
-
+        
         # GatingSet contains transformations
       } else if (length(x@transformation) != 0) {
         chans <- names(x@transformation[[1]])
-
+        
         if (any(chans %in% channels)) {
-
+          
           # Extract transformations from GatingSet
           trnsfrms <- lapply(channels[chans %in% channels], function(channel) {
             getTransformations(x[[1]], channel, only.function = FALSE)
           })
           names(trnsfrms) <- channels[chans %in% channels]
-
+          
           # Remove NULL transforms
           trnsfrms[unlist(lapply(trnsfrms, is.null))] <- NULL
           trans <- transformerList(names(trnsfrms), trnsfrms)
-
+          
           if (all(channels %in% names(trans))) {
-
+            
             # GatingSet contains all transformations
             return(trans)
           } else {
-
+            
             # Get remaining transformations with estimateLogicle
             fs <- flowWorkspace::getData(x, "root")
             fr <- as(fs, "flowFrame")
             fs <- flowCore::flowSet(fr)
             gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-
+            
             trnsLst <- estimateLogicle(
               gs[[1]],
               channels[!channels %in% names(trans)]
             )
             trans <- c(trnsLst, trans)
             trans <- flowWorkspace::transformerList(names(trans), trans)
-
+            
             return(trans)
           }
         } else {
-
+          
           # GatingSet does not contain transformations for fluorescent channels
           fs <- flowWorkspace::getData(x, "root")
           fr <- as(fs, "flowFrame")
           fs <- flowCore::flowSet(fr)
           gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-
+          
           trnsLst <- flowCore::estimateLogicle(gs[[1]], channels)
           trans <- c(trnsLst, trans)
           trans <- flowWorkspace::transformerList(names(trans), trans)
-
+          
           return(trans)
         }
       }
     }
   } else if (!is.null(trans)) {
-
+    
     # flowFrame or flowSet return transformList
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
-
+      
       # Run cyto_trans_check to get transformList
       trans <- cyto_trans_check(trans, inverse = FALSE)
-
+      
       # Check which channels have been transformed
       chans <- names(trans@transforms)
-
+      
       # trans contains transformations for all fluorescent channels
       if (all(channels %in% chans)) {
-
+        
         # trans is complete
         return(trans)
-
+        
         # Some fluorescent channels don't have transformations
       } else {
-
+        
         # Convert x to flowSet
         if (inherits(x, "flowFrame")) {
           fs <- flowCore::flowSet(x)
         } else if (inherits(x, "flowSet")) {
           fs <- x
         }
-
+        
         # Generate merged flowFrame for use with estimateLogicle
         fr <- as(fs, "flowFrame")
-
+        
         # Find channels excluded from trans
         excl <- channels[!channels %in% chans]
-
+        
         # Get transformations for these channels using estimateLogicle
         trns <- flowCore::estimateLogicle(fr, excl)
-
+        
         # Combine supplied trans with add transformations
         nms <- c(names(trans@transforms), excl)
         trans <- c(trans, trns)
         names(trans@transforms) <- nms
-
+        
         return(trans)
       }
-
+      
       # GatingSet return transformerList
     } else if (inherits(x, "GatingSet")) {
-
+      
       # Supplied trans is a transformList - convert to transformerList
       if (inherits(trans, "transformList")) {
         chans <- names(trans@transforms)
-
+        
         # Get transform functions
         trans <- lapply(seq_len(length(trans@transforms)), function(x) {
           trans@transforms[[x]]@f
         })
         names(trans) <- chans
-
+        
         # Convert to transform objects
         trans <- lapply(seq_len(length(trans)), function(x) {
           t <- new("transform", .Data = trans[[1]])
           t@transformationId <- names(trans)[x]
-
+          
           return(t)
         })
-
+        
         trans <- lapply(trans, function(t) {
           inv <- flowCore::inverseLogicleTransform(trans = t)
           flowWorkspace::flow_trans("logicle", t@.Data, inv@.Data)
@@ -655,94 +655,94 @@ setMethod(spillover_compute,
         names(trans) <- chans
         trans <- flowWorkspace::transformerList(names(trans), trans)
       }
-
+      
       # check which channels are covered by trans
       chans <- names(trans)
-
+      
       # transformerList is complete
       if (all(channels %in% chans)) {
         return(trans)
       } else if (!all(channels %in% chans)) {
-
+        
         # GatingSet contains some transformations
         if (length(x@transformation) != 0) {
           trnsfrms <- lapply(channels, function(channel) {
             getTransformations(x[[1]], channel, only.function = FALSE)
           })
           names(trnsfrms) <- channels
-
+          
           # Remove NULL transforms
           trnsfrms[unlist(lapply(trnsfrms, is.null))] <- NULL
           trnsLst <- transformerList(names(trnsfrms), trnsfrms)
-
+          
           # GatingSet contains some transformations
           if (any(channels %in% names(trnsLst))) {
-
+            
             # GatingSet contains all transformations
             if (all(channels %in% names(trnsLst))) {
               return(trnsLst)
             } else {
-
+              
               # GatingSet contains some transformations
               trnsLst <- trnsLst[names(trnsLst) %in% channels]
-
+              
               # See if trans has any additional transformations
               if (any(names(trans) %in%
-                channels[!channels %in% names(trnsLst)])) {
+                      channels[!channels %in% names(trnsLst)])) {
                 trans <- transformerList(
                   names(trans[names(trans) %in%
-                    channels[!channels %in% names(trnsLst)]]),
+                                channels[!channels %in% names(trnsLst)]]),
                   trans[names(trans) %in%
-                    channels[!channels %in% names(trnsLst)]]
+                          channels[!channels %in% names(trnsLst)]]
                 )
                 trnsLst <- c(trnsLst, trans)
                 trnsLst <- transformerList(names(trnsLst), trnsLst)
               }
-
+              
               # See if all transformations are now present
               if (all(channels %in% names(trnsLst))) {
                 return(trnsLst)
               } else {
-
+                
                 # Some channels are still missing transformations
                 fs <- flowWorkspace::getData(x, "root")
                 fr <- as(fs, "flowFrame")
                 fs <- flowCore::flowSet(fr)
                 gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-
+                
                 trans <- estimateLogicle(
                   gs[[1]],
                   channels[!channels %in%
-                    names(trnsLst)]
+                             names(trnsLst)]
                 )
                 trans <- c(trnsLst, trans)
                 trans <- flowWorkspace::transformerList(names(trans), trans)
-
+                
                 return(trans)
               }
             }
           }
-
+          
           # GatingSet has no transformations
         } else if (length(x@transformation) == 0) {
-
+          
           # trans contains all transformations
           if (all(channels %in% chans)) {
             return(trans)
-
+            
             # Get remaining transformations from GatingSet using estimateLogicle
           } else {
-
+            
             # Get remaining transformations with estimateLogicle
             fs <- flowWorkspace::getData(x, "root")
             fr <- as(fs, "flowFrame")
             fs <- flowCore::flowSet(fr)
             gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-
+            
             trnsLst <- estimateLogicle(gs[[1]], channels[!channels %in% chans])
             trans <- c(trnsLst, trans)
             trans <- flowWorkspace::transformerList(names(trans), trans)
-
+            
             return(trans)
           }
         }
@@ -763,24 +763,24 @@ setMethod(spillover_compute,
 #'
 #' @noRd
 .getTransformedData <- function(x, trans = NULL) {
-
+  
   # Only flowFrame/flowSet/GatingSet
   if (!any(inherits(x, "flowFrame") |
-    inherits(x, "flowSet") |
-    class(x) == "GatingSet")) {
+           inherits(x, "flowSet") |
+           class(x) == "GatingSet")) {
     stop("'x' must be either a flowFrame, flowSet or GatingSet.")
   }
-
+  
   # Get comlete trans
   trans <- .getCompleteTransList(x, trans)
-
+  
   # Extract channels which have transformations
   if (inherits(trans, "transformList")) {
     chans <- names(trans@transforms)
   } else if (inherits(trans, "transformerList")) {
     chans <- names(trans)
   }
-
+  
   # Extract summary stats
   if (inherits(x, "flowFrame")) {
     sm <- flowWorkspace::pData(flowCore::parameters(x))
@@ -789,20 +789,20 @@ setMethod(spillover_compute,
   } else if (inherits(x, "GatingSet")) {
     sm <- flowWorkspace::pData(flowCore::parameters(getData(x, "root")[[1]]))
   }
-
+  
   # Extract channels that have been transformed
   chns <- as.vector(sm[, "name"][sm[, "maxRange"] < 6])
-
+  
   # Check all chans have been transformed
   if (length(chns) == 0) {
-
+    
     # No channels transformed
     x <- suppressMessages(flowCore::transform(x, trans))
   } else if (all(chans %in% chns)) {
-
+    
     # All channels have been transformed
   } else {
-
+    
     # Get transformations for untransformed channels
     if (inherits(trans, "transformList")) {
       trans <- transformList(
@@ -815,11 +815,11 @@ setMethod(spillover_compute,
         trans[chans[!chans %in% chns]]
       )
     }
-
+    
     # Some channels have been transformed
     x <- suppressMessages(flowCore::transform(x, trans))
   }
-
+  
   return(x)
 }
 
@@ -828,14 +828,14 @@ setMethod(spillover_compute,
 #' GatingSet returns a flowSet of untransformed data at parent node
 #' @noRd
 .getRawData <- function(x, trans = NULL, parent = "root") {
-
+  
   # Only flowFrame/flowSet/GatingSet
   if (!any(inherits(x, "flowFrame") |
-    inherits(x, "flowSet") |
-    class(x) == "GatingSet")) {
+           inherits(x, "flowSet") |
+           class(x) == "GatingSet")) {
     stop("'x' must be either a flowFrame, flowSet or GatingSet.")
   }
-
+  
   # Data is untransformed
   if (.checkDataTransform(x) == FALSE) {
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
@@ -843,7 +843,7 @@ setMethod(spillover_compute,
     } else if (inherits(x, "GatingSet")) {
       return(flowWorkspace::getData(x, parent))
     }
-
+    
     # Data is transformed
   } else {
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
@@ -852,31 +852,31 @@ setMethod(spillover_compute,
       }
     }
   }
-
+  
   # Extract transformations from GatingSet
   if (is.null(trans) & inherits(x, "GatingSet")) {
     channels <- colnames(x)
-
+    
     trnsfrms <- lapply(channels, function(channel) {
       getTransformations(x[[1]], channel, only.function = FALSE)
     })
     names(trnsfrms) <- channels
-
+    
     # Remove NULL transforms
     trnsfrms[unlist(lapply(trnsfrms, is.null))] <- NULL
     trans <- transformerList(names(trnsfrms), trnsfrms)
   }
-
+  
   # Get inverse trans
   inv <- cyto_trans_check(trans, inverse = TRUE)
-
+  
   # Extract channels which have transformations
   if (inherits(trans, "transformList")) {
     chans <- names(trans@transforms)
   } else if (inherits(trans, "transformerList")) {
     chans <- names(trans)
   }
-
+  
   # Extract summary stats
   if (inherits(x, "flowFrame")) {
     sm <- flowWorkspace::pData(flowCore::parameters(x))
@@ -885,25 +885,25 @@ setMethod(spillover_compute,
   } else if (inherits(x, "GatingSet")) {
     sm <- pData(flowCore::parameters(flowWorkspace::getData(x, "root")[[1]]))
   }
-
+  
   # Extract channels that have been transformed - apply inverse transform
   chns <- as.vector(sm[, "name"][sm[, "maxRange"] < 6])
-
+  
   # Extract flowSet from GatingSet
   if (inherits(x, "GatingSet")) {
     x <- flowWorkspace::getData(x, parent)
   }
-
+  
   # Check all chans have been transformed
   if (length(chns) == 0) {
-
+    
     # No channels transformed
   } else if (all(chans %in% chns)) {
-
+    
     # All channels have been transformed
     x <- flowCore::transform(x, inv)
   } else {
-
+    
     # Some channels have been transformed
     trns <- lapply(chans[chans %in% chns], function(x) {
       inv@transforms[[x]]@f
@@ -912,7 +912,7 @@ setMethod(spillover_compute,
     inv <- transformList(names(trns), trns)
     x <- flowCore::transform(x, inv)
   }
-
+  
   return(x)
 }
 
@@ -929,10 +929,10 @@ setMethod(spillover_compute,
 #' @noRd
 .checkDataTransform <- function(x) {
   if (inherits(x, "flowFrame")) {
-
+    
     # Extract summary stats
     sm <- pData(parameters(x))
-
+    
     # Check if any maxRange < 6
     if (any(sm[, "maxRange"] < 6)) {
       return(TRUE)
@@ -940,10 +940,10 @@ setMethod(spillover_compute,
       return(FALSE)
     }
   } else if (inherits(x, "flowSet")) {
-
+    
     # Extract summary stats
     sm <- pData(parameters(x[[1]]))
-
+    
     # Check if any maxRange < 6
     if (any(sm[, "maxRange"] < 6)) {
       return(TRUE)
@@ -951,13 +951,13 @@ setMethod(spillover_compute,
       return(FALSE)
     }
   } else if (inherits(x, "GatingSet")) {
-
+    
     # Extract root flowSet
     fs <- getData(x, "root")
-
+    
     # Extract summary stats
     sm <- pData(parameters(fs[[1]]))
-
+    
     # Check if any maxRange < 6
     if (any(sm[, "maxRange"] < 6)) {
       return(TRUE)
