@@ -3,7 +3,7 @@
 
 # CytoRSuite <img src="man/figures/logo.png" align="right" alt="" width="130"/>
 
-[![Project Status: Active – The project has reached a stable, usable
+[![Project Status: Active â€“ The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Travis build
@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--03--07-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--03--09-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoRSuite** is designed to provide an interactive interface for the
@@ -44,17 +44,16 @@ computer following installation.
 ## flowCore, flowWorkspace & openCyto
 
 Once these tools are installed, users can proceed to installing the
-release versions of [flowCore](https://github.com/RGLab/flowCore),
+latest versions of [flowCore](https://github.com/RGLab/flowCore),
 [flowWorkspace](https://github.com/RGLab/flowWorkspace) and
 [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
 
 ``` r
 # Bioconductor
 install.packages("BiocManager")
-
 # Install flowCore, flowWorkspace and openCyto
 library(BiocManager)
-install(c("flowCore", "flowWorkspace", "openCyto"))
+install(c("flowCore", "flowWorkspace", "openCyto"), version = "devel")
 ```
 
 ## CytoRSuite
@@ -67,7 +66,6 @@ then be installed from GitHub.
 ``` r
 # CytoRSuiteData development version on GitHub
 devtools::install_github("DillonHammill/CytoRSuiteData")
-
 # CytoRSuite development version on GitHub
 devtools::install_github("DillonHammill/CytoRSuite", build_vignettes = TRUE)
 ```
@@ -143,7 +141,7 @@ described below:
               gatingTemplate = "Compensation-gatingTemplate.csv")
     ```
     
-    ![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
+    <img src="man/figures/README-Compensation-gates.png" width="100%" height="100%" style="display: block; margin: auto;" />
     
     1.4 Compute fluorescent spillover matrix using `spillover_compute`
     
