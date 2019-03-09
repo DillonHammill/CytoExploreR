@@ -23,6 +23,11 @@ Nguyen R, Perfetto S, Mahnke YD, Chattopadhyay P & Roederer M,
   performance and aiding in multicolor panel design. Cytometry A,
   83(3):306-15.
 }
+\seealso{
+\code{\link{spillover_spread_compute,flowSet-method}}
+
+\code{\link{spillover_spread_compute,GatingSet-method}}
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

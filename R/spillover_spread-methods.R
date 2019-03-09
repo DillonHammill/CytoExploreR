@@ -12,6 +12,9 @@
 #'   (2013). Quantifying spillover spreading for comparing instrument
 #'   performance and aiding in multicolor panel design. Cytometry A,
 #'   83(3):306-15.
+#'   
+#' @seealso \code{\link{spillover_spread_compute,flowSet-method}}
+#' @seealso \code{\link{spillover_spread_compute,GatingSet-method}}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
