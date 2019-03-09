@@ -287,7 +287,7 @@ test_that("cyto_stats_compute GatingSet method returns the correct statistics",{
   
   sts <- list(CD4, CD8)
   names(sts) <- c("CD4 T Cells","CD8 T Cells")
-
+  
   expect_equal(cyto_stats_compute(gs, 
                                   alias = c("CD4 T Cells", "CD8 T Cells"), 
                                   parent = c("root", "Live Cells"), 
@@ -296,16 +296,16 @@ test_that("cyto_stats_compute GatingSet method returns the correct statistics",{
                tolerance = 0.01)
   expect_true(.file_wd_check(
     paste(format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = ""))
-    )
+  )
   expect_true(.file_wd_check(
     paste(format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = ""))
-    )
+  )
   
 })
 
 base::unlink(paste(
   format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = "")
-  )
+)
 base::unlink(paste(
   format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = "")
-  )
+)

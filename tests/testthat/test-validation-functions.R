@@ -148,11 +148,11 @@ test_that(".cyto_alias_check stops gating process if alias is incorrect", {
                fixed = TRUE)
   expect_error(.cyto_alias_check(type = "quadrant", 
                                  alias = "Cells"), 
-          "Supply 4 population names to 'alias' to construct quadrant gates.", 
+               "Supply 4 population names to 'alias' to construct quadrant gates.", 
                fixed = TRUE)
   expect_error(.cyto_alias_check(type = c("rectangle", "polygon"),
                                  alias = "Cells"), 
-           "Length of alias must be the same length as type for multi-gates.",
+               "Length of alias must be the same length as type for multi-gates.",
                fixed = TRUE)
 })
 
@@ -161,9 +161,9 @@ test_that(".cyto_alias_check stops gating process if alias is incorrect", {
 test_that(".cyto_gatingTemplate_check", {
   expect_error(
     .cyto_gatingTemplate_check(parent = "Cells", 
-                              alias = "Single Cells", 
-                          gatingTemplate = "Compensation-gatingTemplate.csv"), 
-               "Supply another gatingTemplate or edit gate(s) using gate_edit.",
+                               alias = "Single Cells", 
+                               gatingTemplate = "Compensation-gatingTemplate.csv"), 
+    "Supply another gatingTemplate or edit gate(s) using gate_edit.",
     fixed = TRUE)
 })
 
@@ -189,28 +189,28 @@ test_that(".cyto_overlay_check flowFrame method returns list of flowFrames", {
   expect_equal(.cyto_overlay_check(fs[[1]], 
                                    overlay = list(fs)), 
                list(fs[[1]], fs[[2]], fs[[3]], fs[[4]]))
-
+  
   expect_error(.cyto_overlay_check(fs[[1]], 
                                    overlay = list(fs, fs)), 
                paste("'overlay' must be a flowFrame, flowSet,",
                      "list of flowFrames or a list containing a flowSet.",
                      sep = " "))
-
+  
 })
 
 test_that(".cyto_overlay_check flowSet method", {
   expect_equal(.cyto_overlay_check(fs, 
                                    overlay = fs[[2]]), 
-              list(list(fs[[2]]), list(fs[[2]]), list(fs[[2]]), list(fs[[2]])))
+               list(list(fs[[2]]), list(fs[[2]]), list(fs[[2]]), list(fs[[2]])))
   expect_equal(.cyto_overlay_check(fs, 
                                    overlay = list(fs[[2]])), 
-              list(list(fs[[2]]), list(fs[[2]]), list(fs[[2]]), list(fs[[2]])))
+               list(list(fs[[2]]), list(fs[[2]]), list(fs[[2]]), list(fs[[2]])))
   expect_equal(.cyto_overlay_check(fs, 
                                    overlay = fs), 
-              list(list(fs[[1]]), list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
+               list(list(fs[[1]]), list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
   expect_equal(.cyto_overlay_check(fs, 
                                    overlay = list(fs)), 
-              list(list(fs[[1]]), list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
+               list(list(fs[[1]]), list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
   expect_equal(.cyto_overlay_check(fs, 
                                    overlay = list(fs, fs)), 
                list(list(fs[[1]], fs[[1]]), 
@@ -222,8 +222,8 @@ test_that(".cyto_overlay_check flowSet method", {
                                                   fs[[2]], 
                                                   fs[[3]], 
                                                   fs[[4]])), 
-              list(list(fs[[1]]), list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
-
+               list(list(fs[[1]]), list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
+  
   expect_error(.cyto_overlay_check(fs, 
                                    overlay = exprs(fs[[1]])), 
                paste("'overlay' must be a flowFrame, flowSet,",
@@ -237,12 +237,12 @@ test_that(".cyto_overlay_check flowSet method", {
   expect_error(.cyto_overlay_check(fs, 
                                    overlay = list(fs[[1]], fs[[2]])),
                paste("Supplied list of flowFrames must be of the", 
-                      "same length as the flowSet.", sep = " "))
+                     "same length as the flowSet.", sep = " "))
   expect_error(.cyto_overlay_check(fs, 
                                    overlay = list(list(fs[[1]]), 
                                                   list(fs[[2]]))), 
-            paste("'overlay' should be a list of flowFrames lists to overlay", 
-                    "on each flowFrame in the flowSet.", sep = " "))
+               paste("'overlay' should be a list of flowFrames lists to overlay", 
+                     "on each flowFrame in the flowSet.", sep = " "))
 })
 
 test_that(".cyto_overlay_check GatingHierarchy method", {
@@ -250,10 +250,10 @@ test_that(".cyto_overlay_check GatingHierarchy method", {
                                    overlay = "TEST"), 
                "'overlay' does not exist in the GatingHierarchy.", 
                fixed = TRUE)
-
+  
   ov <- list(getData(gs, "T Cells")[[1]])
   names(ov) <- "T Cells"
-
+  
   expect_equal(.cyto_overlay_check(gs[[1]], 
                                    overlay = "T Cells"), 
                ov)
@@ -267,10 +267,10 @@ test_that(".cyto_overlay_check GatingSet method", {
                                    overlay = "TEST"), 
                "overlay' does not exist in the GatingHierarchy.", 
                fixed = TRUE)
-
+  
   TC <- getData(gs, "T Cells")
   ov <- list(list(TC[[1]]), list(TC[[2]]), list(TC[[3]]), list(TC[[4]]))
-
+  
   expect_equivalent(.cyto_overlay_check(gs, overlay = "T Cells"), ov)
 })
 

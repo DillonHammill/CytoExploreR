@@ -62,26 +62,26 @@ setGeneric(
 #' )
 #' @export
 setMethod(cyto_plot_overlay,
-  signature = "flowFrame",
-  definition = function(x,
-                          channels,
-                          point_shape = ".",
-                          point_size = 2,
-                          point_col = "black",
-                          point_alpha = 1) {
-
-    # Assign x to fr
-    fr <- x
-    
-    # Add points to existing plot
-    graphics::points(
-      x = exprs(fr)[, channels[1]],
-      y = exprs(fr)[, channels[2]],
-      pch = point_shape,
-      col = adjustcolor(point_col, point_alpha),
-      cex = point_size
-    )
-  }
+          signature = "flowFrame",
+          definition = function(x,
+                                channels,
+                                point_shape = ".",
+                                point_size = 2,
+                                point_col = "black",
+                                point_alpha = 1) {
+            
+            # Assign x to fr
+            fr <- x
+            
+            # Add points to existing plot
+            graphics::points(
+              x = exprs(fr)[, channels[1]],
+              y = exprs(fr)[, channels[2]],
+              pch = point_shape,
+              col = adjustcolor(point_col, point_alpha),
+              cex = point_size
+            )
+          }
 )
 
 #' Overlay Points on cyto_plot - flowSet Method
@@ -130,63 +130,63 @@ setMethod(cyto_plot_overlay,
 #' )
 #' @export
 setMethod(cyto_plot_overlay,
-  signature = "flowSet",
-  definition = function(x,
-                          channels,
-                          point_shape = ".",
-                          point_size = 2,
-                          point_col = "black",
-                          point_alpha = 1) {
-
-    # Assign x to fs
-    fs <- x
-
-    # Convert to list of flowFrames
-    fr.lst <- lapply(seq_len(length(fs)), function(x) {
-      fs[[x]]
-    })
-
-    # Colours
-    cols <- colorRampPalette(c(
-      "darkorchid",
-      "blueviolet",
-      "magenta",
-      "deeppink",
-      "red4",
-      "orange",
-      "springgreen4"
-    ))
-    point_col <- c(point_col,cols(length(fr.lst)))[seq_len(length(fr.lst))]
-    
-    # Repeat other arguments
-    point_shape <- rep(point_shape, length.out = length(fr.lst))
-    point_size <- rep(point_size, length.out = length(fr.lst))
-    point_alpha <- rep(point_alpha, length.out = length(fr.lst))
-    
-    # Add points to existing plot
-    invisible(
-      mapply(
-        function(fr,
+          signature = "flowSet",
+          definition = function(x,
+                                channels,
+                                point_shape = ".",
+                                point_size = 2,
+                                point_col = "black",
+                                point_alpha = 1) {
+            
+            # Assign x to fs
+            fs <- x
+            
+            # Convert to list of flowFrames
+            fr.lst <- lapply(seq_len(length(fs)), function(x) {
+              fs[[x]]
+            })
+            
+            # Colours
+            cols <- colorRampPalette(c(
+              "darkorchid",
+              "blueviolet",
+              "magenta",
+              "deeppink",
+              "red4",
+              "orange",
+              "springgreen4"
+            ))
+            point_col <- c(point_col,cols(length(fr.lst)))[seq_len(length(fr.lst))]
+            
+            # Repeat other arguments
+            point_shape <- rep(point_shape, length.out = length(fr.lst))
+            point_size <- rep(point_size, length.out = length(fr.lst))
+            point_alpha <- rep(point_alpha, length.out = length(fr.lst))
+            
+            # Add points to existing plot
+            invisible(
+              mapply(
+                function(fr,
                          point_shape,
                          point_size,
                          point_col,
                          point_alpha) {
-          cyto_plot_overlay(
-            x = fr,
-            channels = channels,
-            point_shape = point_shape,
-            point_size = point_size,
-            point_col = point_col,
-            point_alpha = point_alpha
-          )
-        }, fr.lst,
-        point_shape,
-        point_size,
-        point_col,
-        point_alpha
-      )
-    )
-  }
+                  cyto_plot_overlay(
+                    x = fr,
+                    channels = channels,
+                    point_shape = point_shape,
+                    point_size = point_size,
+                    point_col = point_col,
+                    point_alpha = point_alpha
+                  )
+                }, fr.lst,
+                point_shape,
+                point_size,
+                point_col,
+                point_alpha
+              )
+            )
+          }
 )
 
 #' Overlay Points on cyto_plot - list Method
@@ -238,61 +238,61 @@ setMethod(cyto_plot_overlay,
 #' )
 #' @export
 setMethod(cyto_plot_overlay,
-  signature = "list",
-  definition = function(x,
-                          channels,
-                          point_shape = ".",
-                          point_size = 2,
-                          point_col = "black",
-                          point_alpha = 1) {
-
-    # Check class of x
-    if (!all(unlist(lapply(x, "class")) == "flowFrame")) {
-      stop("x should be a list of flowFrame objects to overlay.")
-    }
-
-    # Assign x to fr.lst
-    fr.lst <- x
-
-    # Colours
-    cols <- colorRampPalette(c(
-      "darkorchid",
-      "blueviolet",
-      "magenta",
-      "deeppink",
-      "red4",
-      "orange",
-      "springgreen4"
-    ))
-    point_col <- c(point_col,cols(length(fr.lst)))[seq_len(length(fr.lst))]
-    
-    # Repeat other arguments
-    point_shape <- rep(point_shape, length.out = length(fr.lst))
-    point_size <- rep(point_size, length.out = length(fr.lst))
-    point_alpha <- rep(point_alpha, length.out = length(fr.lst))
-    
-    # Add points to existing plot
-    invisible(
-      mapply(
-        function(fr,
+          signature = "list",
+          definition = function(x,
+                                channels,
+                                point_shape = ".",
+                                point_size = 2,
+                                point_col = "black",
+                                point_alpha = 1) {
+            
+            # Check class of x
+            if (!all(unlist(lapply(x, "class")) == "flowFrame")) {
+              stop("x should be a list of flowFrame objects to overlay.")
+            }
+            
+            # Assign x to fr.lst
+            fr.lst <- x
+            
+            # Colours
+            cols <- colorRampPalette(c(
+              "darkorchid",
+              "blueviolet",
+              "magenta",
+              "deeppink",
+              "red4",
+              "orange",
+              "springgreen4"
+            ))
+            point_col <- c(point_col,cols(length(fr.lst)))[seq_len(length(fr.lst))]
+            
+            # Repeat other arguments
+            point_shape <- rep(point_shape, length.out = length(fr.lst))
+            point_size <- rep(point_size, length.out = length(fr.lst))
+            point_alpha <- rep(point_alpha, length.out = length(fr.lst))
+            
+            # Add points to existing plot
+            invisible(
+              mapply(
+                function(fr,
                          point_shape,
                          point_size,
                          point_col,
                          point_alpha) {
-          cyto_plot_overlay(
-            x = fr,
-            channels = channels,
-            point_shape = point_shape,
-            point_size = point_size,
-            point_col = point_col,
-            point_alpha = point_alpha
-          )
-        }, fr.lst,
-        point_shape,
-        point_size,
-        point_col,
-        point_alpha
-      )
-    )
-  }
+                  cyto_plot_overlay(
+                    x = fr,
+                    channels = channels,
+                    point_shape = point_shape,
+                    point_size = point_size,
+                    point_col = point_col,
+                    point_alpha = point_alpha
+                  )
+                }, fr.lst,
+                point_shape,
+                point_size,
+                point_col,
+                point_alpha
+              )
+            )
+          }
 )

@@ -16,8 +16,8 @@ cyto_plot(x, ...)
 Explore & visualise flow cytometry data.
 }
 \details{
-\code{cyto_plot} is flow cytometry visualisation tool built on base graphics
-which supports all existing flow cytometry objects including
+\code{cyto_plot} is a flow cytometry visualisation tool built on base
+graphics which supports all existing flow cytometry objects including
 \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} and
