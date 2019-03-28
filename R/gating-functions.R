@@ -109,6 +109,8 @@ gate_polygon_draw <- function(fr,
     
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
+      options("show.error.messages" = FALSE)
+      on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
         type = "o",
         lwd = 2,
@@ -277,6 +279,8 @@ gate_rectangle_draw <- function(fr,
     
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
+      options("show.error.messages" = FALSE)
+      on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
         n = 2,
         type = "p",
@@ -454,6 +458,8 @@ gate_interval_draw <- function(fr,
     
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
+      options("show.error.messages" = FALSE)
+      on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
         n = 2,
         type = "o",
@@ -672,6 +678,8 @@ gate_threshold_draw <- function(fr,
   
   # Extract gate coordinates
   if (getOption("CytoRSuite_interact") == TRUE) {
+    options("show.error.messages" = FALSE)
+    on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
       n = 1,
       type = "p",
@@ -849,6 +857,8 @@ gate_boundary_draw <- function(fr,
   
   # Extract gate coordinates
   if (getOption("CytoRSuite_interact") == TRUE) {
+    options("show.error.messages" = FALSE)
+    on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
       n = 1,
       type = "p",
@@ -1013,6 +1023,8 @@ gate_ellipse_draw <- function(fr,
     
     # Extract gate coordinates
     if (getOption("CytoRSuite_interact") == TRUE) {
+      options("show.error.messages" = FALSE)
+      on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
         n = 4,
         type = "p",
@@ -1228,6 +1240,8 @@ gate_quadrant_draw <- function(fr,
   
   # Extract points of drawn gate
   if (getOption("CytoRSuite_interact") == TRUE) {
+    options("show.error.messages" = FALSE)
+    on.exit(options("show.error.messages" = TRUE))
     pts <- locator(
       n = 1,
       type = "o",
@@ -1442,6 +1456,8 @@ gate_web_draw <- function(fr,
   message("Select the center of the web gate.")
   
   if (getOption("CytoRSuite_interact") == TRUE) {
+    options("show.error.messages" = FALSE)
+    on.exit(options("show.error.messages" = TRUE))
     center <- locator(
       n = 1,
       type = "p",
@@ -1471,7 +1487,13 @@ gate_web_draw <- function(fr,
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
     if (getOption("CytoRSuite_interact") == TRUE) {
-      pt <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
+      options("show.error.messages" = FALSE)
+      on.exit(options("show.error.messages" = TRUE))
+      pt <- locator(n = 1, 
+                    type = "p", 
+                    lwd = 2.5, 
+                    pch = 16, 
+                    col = "red")
     } else {
       # Test co-ordinates
       tst <- list(
