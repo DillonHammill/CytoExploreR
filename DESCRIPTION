@@ -35,7 +35,8 @@ Imports:
   graphics,
   grDevices,
   tools,
-  magrittr
+  magrittr,
+  maptools
 Suggests: 
   CytoRSuiteData,
   RProtoBufLib,
