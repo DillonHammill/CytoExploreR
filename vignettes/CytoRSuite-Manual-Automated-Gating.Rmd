@@ -73,7 +73,7 @@ template <- rbind(template, gate_draw(gs,
 ## 2.5 Automatically Gate `T Cells`
 
 ```{r, eval = FALSE}
-template <- rbind(template, app_pop(gs,
+template <- rbind(template, add_pop(gs,
                                     alias = "T Cells",
                                     pop = "+",
                                     parent = "Live Cells",
@@ -85,7 +85,7 @@ template <- rbind(template, app_pop(gs,
 ## 2.6 Automatically Gate `CD4 T Cells`
 
 ```{r, eval = FALSE}
-template <- rbind(template, app_pop(gs,
+template <- rbind(template, add_pop(gs,
                                     alias = "CD4 T Cells",
                                     pop = "+",
                                     parent = "T Cells",
@@ -97,7 +97,7 @@ template <- rbind(template, app_pop(gs,
 ## 2.7 Automatically Gate `CD8 T Cells`
 
 ```{r, eval = FALSE}
-template <- rbind(template, app_pop(gs,
+template <- rbind(template, add_pop(gs,
                                     alias = "CD8 T Cells",
                                     pop = "+",
                                     parent = "T Cells",

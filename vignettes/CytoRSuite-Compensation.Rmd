@@ -62,7 +62,7 @@ gate_draw(gs,
          parent = "root",
          alias = "Cells",
          channels = c("FSC-A","SSC-A"),
-         gtfile = "Compensation gatingTemplate.csv")
+         gatingTemplate = "Compensation gatingTemplate.csv")
 ```
 
 ```{r echo=FALSE, out.width='75%', out.height='75%',fig.align="center"}
@@ -75,7 +75,7 @@ gate_draw(gs,
          parent = "Cells",
          alias = "Single Cells",
          channels = c("FSC-A","FSC-H"),
-         gtfile = "Compensation gatingTemplate.csv")
+         gatingTemplate = "Compensation gatingTemplate.csv")
 ```
 
 ```{r echo=FALSE, out.width='75%', out.height='75%',fig.align="center"}
