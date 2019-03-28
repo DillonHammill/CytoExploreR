@@ -452,12 +452,26 @@ setMethod(cyto_channel_check,
 #' @noRd
 .cyto_plot_window <- function() {
   if (.Platform$OS.type == "windows") {
+    
+    # open windows graphics device
     grDevices::windows()
+    
   } else if (.Platform$OS.type == "unix") {
     if (Sys.info()["sysname"] == "Linux") {
+      
+      # open X11 graphics device
       X11()
+      
+      # X11 device requires type "cairo" for transparency
+      if(dev.capabilities()$semiTransparency == FALSE){
+        X11.options(type = "cairo")
+      }
+      
     } else if (Sys.info()["sysname"] == "Darwin") {
+      
+      # open XQuartz graphics device
       quartz()
+      
     }
   }
 }
