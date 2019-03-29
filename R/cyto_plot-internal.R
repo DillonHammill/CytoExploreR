@@ -145,7 +145,7 @@ setGeneric(
 #' )
 #' }
 #' 
-#' @importFrom flowCore exprs parameters
+#' @importFrom flowCore exprs parameters identifier
 #' @importFrom flowWorkspace pData
 #' @importFrom graphics plot axis title abline polygon legend par box
 #' @importFrom grDevices adjustcolor
@@ -263,12 +263,12 @@ setMethod(.cyto_plot_1d,
               frs <- c(list(fr), overlay)
               names(frs) <- unlist(
                 lapply(frs, function(fr) {
-                  fr@description$GUID
+                  identifier(fr)
                 })
               )
             } else {
               frs <- list(fr)
-              names(frs) <- fr@description$GUID
+              names(frs) <- identifier(fr)
             }
             
             # Extract information
@@ -308,7 +308,13 @@ setMethod(.cyto_plot_1d,
             
             # Title missing - set to sample name
             if (missing(title)) {
-              title <- fr@description$GUID
+              
+              title <- identifier(fr)
+              
+              if(title == "anonymous"){
+                title <- "All Events"
+              }
+              
             }
             
             # Y Axis Title
@@ -1088,7 +1094,7 @@ setMethod(.cyto_plot_1d,
 #' @seealso \code{\link{cyto_plot_1d,flowFrame-method}}
 #' @seealso \code{\link{cyto_plot,flowSet-method}}
 #'
-#' @importFrom flowCore exprs parameters fsApply
+#' @importFrom flowCore exprs parameters fsApply identifier
 #' @importFrom flowWorkspace pData sampleNames
 #' @importFrom graphics plot axis title abline polygon legend
 #' @importFrom grDevices n2mfrow
@@ -2099,21 +2105,22 @@ setGeneric(
 #' \dontrun{
 #' library(CytoRSuiteData)
 #' fs <- Activation
-#' 
+#'
 #' cyto_plot_2d(fs[[1]],
 #'   channel = c("FSC-A", "SSC-A"),
 #'   overlay = fs[[2]],
 #'   point_col = c(NA, "purple")
 #' )
-#' 
+#'
 #' cyto_plot_2d(fs[[1]],
 #'   channel = c("FSC-A", "SSC-A"),
 #'   overlay = fs[[2]],
 #'   point_col = c("black", "red")
 #' )
 #' }
-#' 
+#'
 #' @importFrom flowCore exprs parameters fsApply filter rectangleGate Subset
+#'   identifier
 #' @importFrom flowWorkspace pData
 #' @importFrom MASS kde2d
 #' @importFrom graphics plot axis title abline polygon contour legend points par
@@ -2178,7 +2185,6 @@ setMethod(.cyto_plot_2d,
                                 border_line_width = 1,
                                 border_line_col = "black", ...) {
             
-            
             # Prevent scientific notation
             options(scipen = 999)
             
@@ -2190,13 +2196,15 @@ setMethod(.cyto_plot_2d,
             
             # FSC/SSC bug with -ve values
             if(any(channels %in% c("FSC-A","SSC-A"))){
-              if("FSC-A" %in% channels){
+              if("FSC-A" %in% channels & min(exprs(fr)[,"FSC-A"]) < 0){
                 nonDebris <- filter(fr, rectangleGate("FSC-A" = c(0, Inf)))
                 fr <- Subset(fr, nonDebris)
+                rm(nonDebris)
               }
-              if("SSC-A" %in% channels){
+              if("SSC-A" %in% channels & min(exprs(fr)[,"SSC-A"]) < 0){
                 nonDebris <- filter(fr, rectangleGate("SSC-A" = c(0, Inf)))
                 fr <- Subset(fr, nonDebris)
+                rm(nonDebris)
               }
             }
             
@@ -2445,20 +2453,24 @@ setMethod(.cyto_plot_2d,
             
             # Title
             if (missing(title)) {
-              title <- fr@description$GUID
+              title <- identifier(fr)
+              
+              if(title == "anonymous"){
+                title <- "All Events"
+              }
             }
             
             # Legend labels
             if (missing(legend_text)) {
               if (!is.null(overlay)) {
                 legend_text <- c(
-                  fr@description$GUID,
+                  identifier(fr),
                   unlist(lapply(overlay, function(fr) {
-                    fr@description$GUID
+                    identifier(fr)
                   }))
                 )
               } else {
-                legend_text <- fr@description$GUID
+                legend_text <- identifier(fr)
               }
             }
             
@@ -2963,21 +2975,22 @@ setMethod(.cyto_plot_2d,
 #' \dontrun{
 #' library(CytoRSuiteData)
 #' fs <- Activation
-#' 
+#'
 #' cyto_plot_2d(fs,
 #'   channel = c("FSC-A", "SSC-A"),
 #'   overlay = fs[[2]],
 #'   point_col = c(NA, "purple")
 #' )
-#' 
+#'
 #' cyto_plot_2d(fs,
 #'   channel = c("FSC-A", "SSC-A"),
 #'   overlay = fs[[2]],
 #'   point_col = c("black", "red")
 #' )
 #' }
-#' 
+#'
 #' @importFrom flowCore exprs parameters fsApply filter rectangleGate Subset
+#'   identifier
 #' @importFrom flowWorkspace pData sampleNames
 #' @importFrom graphics plot axis title abline polygon contour legend points par
 #' @importFrom grDevices densCols colorRampPalette n2mfrow
@@ -3050,13 +3063,17 @@ setMethod(.cyto_plot_2d,
             
             # FSC/SSC bug with -ve values
             if(any(channels %in% c("FSC-A","SSC-A"))){
-              if("FSC-A" %in% channels){
+              if("FSC-A" %in% channels & 
+                 min(exprs(as(fs,"flowFrame"))[,"FSC-A"]) < 0){
                 nonDebris <- filter(fs, rectangleGate("FSC-A" = c(0, Inf)))
                 fs <- Subset(fs, nonDebris)
+                rm(nonDebris)
               }
-              if("SSC-A" %in% channels){
+              if("SSC-A" %in% channels &
+                 min(exprs(as(fs,"flowFrame"))[,"SSC-A"]) < 0){
                 nonDebris <- filter(fs, rectangleGate("SSC-A" = c(0, Inf)))
                 fs <- Subset(fs, nonDebris)
+                rm(nonDebris)
               }
             }
             
