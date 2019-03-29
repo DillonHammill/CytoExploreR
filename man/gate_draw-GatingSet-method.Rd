@@ -44,8 +44,9 @@ constructed for each group.}
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
 
-\item{select}{vector containing the indices of samples within each group to
-use for plotting.}
+\item{select}{vector containing the indices of samples within gs to use for
+plotting. For large \code{flowSet} objects \code{select} is set to 20
+random \code{flowFrame} objects to improve processing speed.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

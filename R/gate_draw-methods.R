@@ -279,7 +279,8 @@ setMethod(gate_draw,
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
 #' @param select vector containing the indices of samples within gs to use for
-#'   plotting.
+#'   plotting. For large \code{flowSet} objects \code{select} is set to 20
+#'   random \code{flowFrame} objects to improve processing speed.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
 #' @param label logical indicating whether to include
@@ -344,7 +345,7 @@ setMethod(gate_draw,
             # Assign x to fs
             fs <- x
             
-            # Restrict to samples matching pData requirements
+            # Restrict to samples based on indices
             if (!is.null(select)) {
               if (class(select) != "numeric") {
                 stop(
@@ -354,6 +355,12 @@ setMethod(gate_draw,
               
               # Extract samples using selectFrames
               fs <- fs[select]
+              
+            # Large flowSets restricted to 20 random flowFrames for speed
+            }else if(is.null(select) & length(fs) > 20){
+              
+              fs <- fs[sample(seq(1,length(fs)), 20)]
+              
             }
             fr <- as(fs, "flowFrame")
             
@@ -524,8 +531,9 @@ setMethod(gate_draw,
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
-#' @param select vector containing the indices of samples within each group to
-#'   use for plotting.
+#' @param select vector containing the indices of samples within gs to use for
+#'   plotting. For large \code{flowSet} objects \code{select} is set to 20
+#'   random \code{flowFrame} objects to improve processing speed.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
 #' @param label logical indicating whether to include
@@ -653,6 +661,12 @@ setMethod(gate_draw,
                 
                 # Extract samples using selectFrames
                 fs <- fs[select]
+                
+              # Large flowSets restricted to 20 random flowFrames for speed
+              }else if(is.null(select) & length(fs) > 20){
+                
+                fs <- fs[sample(seq(1,length(fs)), 20)]
+                
               }
               fr <- as(fs, "flowFrame")
               
