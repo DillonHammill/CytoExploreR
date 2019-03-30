@@ -8,6 +8,7 @@
 * Improved layout for `cyto_plot_gating_scheme` when there isn't a `legend`.
 * Updated `cyto_plot` to allow plotting of all 2-D gate objects in a single dimension. The minimum and maximum gate co-ordinates in the supplied channel will be used to construct a 1-D rectangleGate for plotting.
 * Labels are now adjusted to prevent overlap in `cyto_plot_label` and `cyto_plot` when multiple gates are supplied.
+* `gate_draw` now restricts large flowSet or GatingSet objects to 20 random samples to improve processing speed.
 
 # CytoRSuite 0.9.9
 

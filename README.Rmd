@@ -39,7 +39,7 @@ Once these tools are installed, users can proceed to installing the latest versi
 install.packages("BiocManager")
 # Install flowCore, flowWorkspace and openCyto
 library(BiocManager)
-install(c("flowCore", "flowWorkspace", "openCyto"), version = "devel")
+install(c("flowCore", "flowWorkspace", "openCyto"))
 ```
 
 ## CytoRSuite
