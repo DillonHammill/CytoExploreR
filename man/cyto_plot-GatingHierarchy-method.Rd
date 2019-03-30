@@ -35,7 +35,8 @@
 \item{parent}{name of the population to plot.}
 
 \item{alias}{name of the gated population for which the gate should be drawn
-on the plot.}
+on the plot. Setting \code{alias} to "" will automatically plot any gates
+contructed in the supplied channels.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be

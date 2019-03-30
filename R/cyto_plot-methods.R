@@ -826,7 +826,8 @@ setMethod(cyto_plot,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}.
 #' @param parent name of the population to plot.
 #' @param alias name of the gated population for which the gate should be drawn
-#'   on the plot.
+#'   on the plot. Setting \code{alias} to "" will automatically plot any gates
+#'   contructed in the supplied channels.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
 #'   the plot. The length of channels determines the type of plot to be
 #'   constructed, either a 1-D density distribution for a single channel or a
@@ -1121,6 +1122,7 @@ setMethod(cyto_plot,
               # Plot all appropriate gates if alias is an empty character string
               if(all(alias == "")){
                 gt <- templateGen(gh)
+                gt <- gt[basename(gt$parent) == parent,]
                 alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
               }
               
@@ -1273,7 +1275,8 @@ setMethod(cyto_plot,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the population containing the events to plot.
 #' @param alias name of the gated population for which the gate should be drawn
-#'   on the plot.
+#'   on the plot. Setting \code{alias} to "" will automatically plot any gates
+#'   contructed in the supplied channels.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
 #'   the plot. The length of channels determines the type of plot to be
 #'   constructed, either a 1-D density distribution for a single channel or a
@@ -1568,6 +1571,7 @@ setMethod(cyto_plot,
               # Plot all appropriate gates if alias is an empty character string
               if(all(alias == "")){
                 gt <- templateGen(x[[1]])
+                gt <- gt[basename(gt$parent) == parent,]
                 alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
               }
               
