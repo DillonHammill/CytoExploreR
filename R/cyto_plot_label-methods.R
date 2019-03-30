@@ -1381,6 +1381,8 @@ setMethod(cyto_plot_label,
 #'
 #' @return list containing adjusted x and y coordinates for labels if any
 #'   overlap is detected.
+#'   
+#' @importFrom stats na.omit
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1484,17 +1486,20 @@ setMethod(cyto_plot_label,
   coords <- do.call("rbind", coords)
   colnames(coords) <- c("x", "y")
   
+  # Repeat label_text_size
+  label_text_size <- rep(label_text_size, length.out = length(gts))
+  
   # Calculate label co-ordinates
   label_coords <- lapply(seq_len(length(gts)), function(x){
     
     .cyto_plot_label_coords(label_box_x = coords[,"x"][x],
-                       label_box_y = coords[,"y"][x],
-                       label_text = label_text[x], 
-                       label_stat = label_stat[x],
-                       label_text_size = label_text_size[x])
+                            label_box_y = coords[,"y"][x],
+                            label_text = label_text[x], 
+                            label_stat = label_stat[x],
+                            label_text_size = label_text_size[x])
     
   })
-  
+
   # Some labels will be overlapping
   if(any(na.omit(unlist(.cyto_plot_label_overlap(label_coords))))){
     

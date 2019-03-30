@@ -80,6 +80,8 @@ setGeneric(
 #'   83(3):306-15.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom stats quantile
 #'
 #' @export
 setMethod(
