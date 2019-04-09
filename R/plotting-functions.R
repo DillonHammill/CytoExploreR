@@ -95,6 +95,59 @@
   par(cex = oldpars)
 }
 
+#' spread.labs from TeachingDemos
+#' 
+#' Used internally in cyto_plot to offset overlapping labels in y direction.
+#' 
+#' @param x x or y co-ordinates to spread out
+#' @param mindiff minimum difference between values
+#' @param maxiter maximum number of iterations
+#' @param stepsize how far to move values with each iteration
+#' @param min minimum bound for returned values
+#' @param max maximum bound for returned values
+#' 
+#' @return spread co-ordinates
+#' 
+#' @author Greg Snow \email{538280@gmail.com}
+#' 
+#' @noRd
+spread.labs <- function(x, 
+                        mindiff, 
+                        maxiter=1000, 
+                        stepsize=1/10,
+                        min=-Inf, 
+                        max=Inf) {
+  unsort <- order(order(x))
+  x <- sort(x)
+  df <- x[-1] - x[ -length(x) ]
+  
+  stp <- mindiff * stepsize
+  
+  i <- 1
+  while( any( df < mindiff ) ) {
+    tmp <- c( df < mindiff, FALSE )
+    if( tmp[1] && (x[1] - stp) < min ) {  # don't move bottom set
+      tmp2 <- as.logical( cumprod(tmp) )
+      tmp <- tmp & !tmp2
+    }
+    x[ tmp ] <- x[ tmp ] - stp
+    tmp <- c( FALSE, df < mindiff )
+    if( tmp[length(tmp)] && (x[length(x)] + stp) > max ) { # don't move top
+      tmp2 <- rev( as.logical( cumprod( rev(tmp) ) ) )
+      tmp <- tmp & !tmp2
+    }
+    x[ tmp ] <- x[ tmp] + stp
+    
+    df <- x[-1] - x[-length(x)]
+    i <- i + 1
+    if( i > maxiter ) {
+      warning("Maximum iterations reached")
+      break
+    }
+  }
+  x[unsort]
+}
+
 #' Get Appropriate Axes Labels for Transformed Channels - flowWorkspace
 #'
 #' @param x object of class \code{flowFrame} or \code{GatingHierarchy}.
@@ -742,24 +795,32 @@ setMethod(.cyto_axes_text,
                                legend_text = NULL,
                                title = NA) {
   
-  # plot margins
-  if (!is.null(overlay) & legend != FALSE) {
-    mrgn <- 7 + max(nchar(legend_text)) * 0.32
+  if(getOption("CytoRSuite_cyto_plot_grid")){
+
+    # Do nothing
     
-    # Remove excess sapce above if no main
-    if (is.na(title)) {
-      par(mar = c(5, 5, 2, mrgn) + 0.1)
-    } else {
-      par(mar = c(5, 5, 4, mrgn) + 0.1)
-    }
-  } else {
+  }else{
     
-    # Remove excess space above if no main
-    if (is.na(title)) {
-      par(mar = c(5, 5, 2, 2) + 0.1)
+      # plot margins
+    if (!is.null(overlay) & legend != FALSE) {
+      mrgn <- 7 + max(nchar(legend_text)) * 0.32
+    
+      # Remove excess sapce above if no main
+      if (is.na(title)) {
+        par(mar = c(5, 5, 2, mrgn) + 0.1)
+      } else {
+        par(mar = c(5, 5, 4, mrgn) + 0.1)
+      }
     } else {
-      par(mar = c(5, 5, 4, 2) + 0.1)
+    
+      # Remove excess space above if no main
+      if (is.na(title)) {
+        par(mar = c(5, 5, 2, 2) + 0.1)
+      } else {
+        par(mar = c(5, 5, 4, 2) + 0.1)
+      }
     }
+    
   }
 }
 

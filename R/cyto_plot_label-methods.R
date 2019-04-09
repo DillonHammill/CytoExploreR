@@ -1306,71 +1306,7 @@ setMethod(cyto_plot_label,
     }
 )
 
-#' Dimensions of Labels
-#' 
-#' @param label_text character string to include in label.
-#' 
-#' @importFrom graphics strwidth strheight
-#' 
-#' @return upper left and bottom right x and y co-ordinates of labels
-#' 
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @noRd
-.cyto_plot_label_coords <- function(label_box_x,
-                               label_box_y = NA,
-                               label_text,
-                               label_stat = NA,
-                               bg = ifelse(match(par("bg"), "transparent", 0),
-                                           "white", par("bg")
-                               ),
-                               border = NA,
-                               xpad = 1.2,
-                               ypad = 1.2,
-                               label_text_size = 1,
-                               adj = 0.5,
-                               alpha.bg = 0.5, ...){
-  
-  border <- NA
-  if(all(is.na(label_box_y))){
-    label_box_y <- label_box_x
-  }
-  box.adj <- adj + (xpad - 1) * label_text_size * (0.5 - adj)
-  
-  # Rectangle widths
-  lwidths <- strwidth(label_text)
-  rwidths <- lwidths * (1 - box.adj)
-  lwidths <- lwidths * box.adj
-  bheights <- theights <- strheight(label_text) * 0.5
 
-  # Rectangle co-ordinates
-  xr <- label_box_x - lwidths * xpad
-  xl <- label_box_x + lwidths * xpad
-  
-  # y co-ordinates must make space for label_stat
-  if(is.na(label_stat)){
-    
-    yb <- label_box_y - bheights * ypad
-    yt <- label_box_y + theights * ypad
-    
-  }else {
-    
-    yb <- label_box_y - bheights * ypad * 2
-    yt <- label_box_y + theights * ypad * 2
-  }
-  
-  # Return top left then bottom right co-ordinates
-  coords <- matrix(c(min(c(xl,xr)),
-                     max(c(yb,yt)),
-                     max(c(xl,xr)),
-                     min(c(yb,yt))),
-                   ncol = 2,
-                   byrow = TRUE)
-  colnames(coords) <- c("x","y")
-  
-  return(coords)
-  
-}
 
 #' Position Labels to Prevent Overlap
 #'
@@ -1383,6 +1319,7 @@ setMethod(cyto_plot_label,
 #'   overlap is detected.
 #'   
 #' @importFrom stats na.omit
+#' @importFrom graphics strheight
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1417,6 +1354,9 @@ setMethod(cyto_plot_label,
   xmax <- par("usr")[2]
   ymin <- par("usr")[3]
   ymax <- par("usr")[4]
+  
+  xrange <- xmax - xmin
+  yrange <- ymax - ymin
   
   # Co-ordinates for gate centers
   coords <- lapply(gts, function(gt){
@@ -1489,6 +1429,9 @@ setMethod(cyto_plot_label,
   # Repeat label_text_size
   label_text_size <- rep(label_text_size, length.out = length(gts))
   
+  # Repeat label_stat
+  label_stat <- rep(label_stat, length.out = length(gts))
+  
   # Calculate label co-ordinates
   label_coords <- lapply(seq_len(length(gts)), function(x){
     
@@ -1499,102 +1442,23 @@ setMethod(cyto_plot_label,
                             label_text_size = label_text_size[x])
     
   })
-
-  # Some labels will be overlapping
-  if(any(na.omit(unlist(.cyto_plot_label_overlap(label_coords))))){
-    
-    # Split y axis into n labels based on label height
-    label_height <- abs(label_coords[[1]][,"y"][2] - label_coords[[1]][,"y"][1])
-    
-    # Number of label options
-    label_y_levels <- floor((ymax - ymin)/ label_height)
-    
-    # Options for y positioning
-    label_y_options <- seq(ymin, ymax, length.out = label_y_levels) + 
-      0.5 * label_height
-    label_y_options <- label_y_options[label_y_options < ymax]
-    
-    # Run through each label to see which label_y_option is closest
-    label_y_closest <- unlist(lapply(seq_len(length(gts)), function(x){
-      label_y_options[which.min(abs(label_y_options - coords[,"y"][x]))]
-    }))
   
-    # Run through each label and adjust labels which will be overlapping
-    label_y_taken <- c()
-    lapply(seq_len(length(gts)), function(x){
-      
-      # First gate gets its label_y_closest position
-      if(x == 1){
-       
-        # Update coords with label_y_closest position
-        coords[,"y"][x] <<- label_y_closest[x]
-        label_y_taken[x] <<- coords[,"y"][x]
-        
-      # Subsequent gates check to see any close labels have already taken the 
-      # desired label_y_closest
-      }else if(x > 1){
-        
-        # Other labels don't share same label_y_closest
-        if(length(which(label_y_closest == label_y_closest[x])) == 1){
-        
-          # Update coords with label_y_closest position
-          coords[,"y"][x] <<- label_y_closest[x]
-          label_y_taken[x] <<- coords[,"y"][x]
-          
-        # Other labels share same label_y_closest  
-        }else if(length(which(label_y_closest == label_y_closest[x])) > 1){
-          
-          # Other labels want the same label_y_closest
-          label_y_same_closest <- which(label_y_closest == label_y_closest[x])
-          
-          # Any preivous labels which share label_y_closest?
-          if(any(label_y_same_closest < x)){
-            
-            # Previous label used label_y_closest
-            previous_y_closest <- label_y_same_closest[label_y_same_closest < x]
-
-            # Coords of current label and previous with shared label_y_closest
-            # Test for proximity
-            test_coords <- label_coords[c(x,previous_y_closest)]
-            
-            # Previous label close to x, remove option and choose again 
-            if(any(na.omit(.cyto_plot_label_overlap(test_coords)[[1]]))) {
-              
-              close_previous <- previous_y_closest[which(
-                .cyto_plot_label_overlap(test_coords)[[1]])-1]
-              
-              label_y_remove <- match(label_y_taken[close_previous], 
-                                      label_y_options)
-
-              label_y_options <- label_y_options[-label_y_remove]
-              
-            }
-              
-            # Update coords with label_y_closest position
-            label_y_chosen <- which.min(abs(label_y_options - coords[,"y"][x]))
-            coords[,"y"][x] <<- label_y_options[label_y_chosen]
-            label_y_taken[x] <<- coords[,"y"][x]
-            
-          # No previous labels with same label_y_closest
-          }else {
-            
-            # Update coords with label_y_closest position
-            label_y_chosen <- which.min(abs(label_y_options - coords[,"y"][x]))
-            coords[,"y"][x] <<- label_y_options[label_y_chosen]
-            label_y_taken[x] <<- coords[,"y"][x]
-            
-          }
-          
-        }
-        
-      }
-      
-    })
+  # Check if any labels will be overlapping and offset coords
+  if(any(na.omit(unlist(.cyto_plot_label_overlap(label_coords))))){
+  
     
-  # No labels are overlapping
-  }else {
+    if(all(!is.na(label_stat))){
+      label_text <- paste(label_text, "\n")
+    }
     
-    # Use gate centers for label positioning - no adjustment needed
+    # Use spread.labs TeachingDemos to offset y values
+    label_height <- max(label_coords[[1]][,"y"]) - 
+                    min(label_coords[[1]][,"y"])
+    label_height <- label_height + 0.18*label_height
+    coords[,"y"] <- spread.labs(coords[,"y"],
+                           mindiff = label_height,
+                           min = ymin + 0.05*yrange,
+                           max = ymax - 0.05*yrange)
     
   }
   
@@ -1604,6 +1468,82 @@ setMethod(cyto_plot_label,
   
   return(coords)
 
+}
+
+#' Dimensions of Labels
+#' 
+#' @param label_text character string to include in label.
+#' 
+#' @importFrom graphics strwidth strheight
+#' 
+#' @return upper left and bottom right x and y co-ordinates of labels
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.cyto_plot_label_coords <- function(label_box_x,
+                               label_box_y = NA,
+                               label_text,
+                               label_stat = NA,
+                               bg = ifelse(match(par("bg"), "transparent", 0),
+                                           "white", par("bg")
+                               ),
+                               xpad = 1.2,
+                               ypad = 1.2,
+                               label_text_size = 1,
+                               adj = 0.5,
+                               alpha.bg = 0.5, ...){
+  
+  # Get parameters for reset after calculation
+  cex_reset <- par("cex")
+  xpd_reset <- par("xpd")
+  
+  par(cex = label_text_size)
+  par(xpd = TRUE)
+  
+  if(all(is.na(label_box_y))){
+    label_box_y <- label_box_x
+  }
+  box.adj <- adj + (xpad - 1) * label_text_size * (0.5 - adj)
+  
+  # Rectangle dimensions
+  lwidths <- strwidth(label_text)
+  rwidths <- lwidths * (1 - box.adj)
+  lwidths <- lwidths * box.adj
+  bheights <- theights <- strheight(label_text) * 0.5
+
+  # Rectangle co-ordinates
+  xr <- label_box_x - lwidths * xpad
+  xl <- label_box_x + lwidths * xpad
+  
+  # y co-ordinates must make space for label_stat
+  if(is.na(label_stat)){
+    
+    yb <- label_box_y - bheights * ypad
+    yt <- label_box_y + theights * ypad
+    
+  }else {
+    
+    yb <- label_box_y - bheights * ypad * 2
+    yt <- label_box_y + theights * ypad * 2
+    
+  }
+  
+  # Return top left then bottom right co-ordinates
+  coords <- matrix(c(min(c(xl,xr)),
+                     max(c(yb,yt)),
+                     max(c(xl,xr)),
+                     min(c(yb,yt))),
+                   ncol = 2,
+                   byrow = TRUE)
+  colnames(coords) <- c("x","y")
+
+  # Reset par(cex)
+  par(cex = cex_reset)
+  par(xpd = xpd_reset)
+  
+  return(coords)
+  
 }
 
 #' Check if any cyto_plot labels overlap
@@ -1656,25 +1596,6 @@ setMethod(cyto_plot_label,
           return(FALSE)
           
         }
-        
-      }
-      
-      # Y co-ordinates are overlapping
-      if(min(y2) >= min(y1) & min(y2) <= max(y1) |
-         max(y2) >= min(y1) & max(y2) <= max(y1)){
-        
-        # X co-ordinates are also overlapping
-        if(min(x2) >= min(x1) & min(x2) <= max(x1) |
-           max(x2) >= min(x1) & max(x2) <= max(x1)){
-          
-          return(TRUE)
-          
-        }else{
-          
-          return(FALSE)
-          
-        }
-        
         
       }
       
