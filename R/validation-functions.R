@@ -459,20 +459,9 @@ setMethod(cyto_channel_check,
   } else if (.Platform$OS.type == "unix") {
     
     if (Sys.info()["sysname"] == "Linux") {
-            
-      # X11 type
-      X11_type <- X11.options()$type
       
-      # X11 device requires type "cairo" for transparency
-      if(dev.capabilities()$semiTransparency == FALSE){
-        
-        X11.options(type = "cairo")
-        
-      }
-            
-      # open X11 graphics device
-      on.exit(X11.options(type = X11_type))
-      X11()
+      # Cairo needed for semi-transparency      
+      X11(type = "cairo")
 
     } else if (Sys.info()["sysname"] == "Darwin") {
       
