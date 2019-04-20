@@ -13,7 +13,8 @@
 #'
 #' @return data.frame containing the number events.
 #'
-#' @importFrom flowCore exprs identifier
+#' @importFrom flowCore exprs
+#' @importFrom tibble tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
@@ -29,8 +30,7 @@
   fr <- x
   
   # Extract raw data and calculate mean directly
-  res <- data.frame("Count" = BiocGenerics::nrow(fr))
-  rownames(res) <- identifier(fr)
+  res <- tibble("count" = BiocGenerics::nrow(fr))
   
   return(res)
   
@@ -47,7 +47,8 @@
 #' @return data.frame containing the mean fluorescent intensity for each of
 #'   the supplied channels.
 #'
-#' @importFrom flowCore exprs identifier
+#' @importFrom flowCore exprs
+#' @importFrom tibble as_tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -87,12 +88,11 @@
   res <- unlist(lapply(channels, function(x){
     mean(exprs(fr)[,x])
   }))
-  res <- data.frame(res)
-  
-  # return transposed data.frame for cbinding to pData
-  res <- data.frame(t(res))
-  rownames(res) <- identifier(fr)
+
+  # return transposed tibble for cbinding to pData
+  res <- t(res)
   colnames(res) <- cyto_marker_extract(fr, channels)
+  res <- as_tibble(res)
   
   return(res)
   
@@ -109,7 +109,8 @@
 #' @return data.frame containing the geometric mean fluorescent intensity for
 #'   each of the supplied channels.
 #'
-#' @importFrom flowCore exprs identifier
+#' @importFrom flowCore exprs
+#' @importFrom tibble as_tibble
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -177,12 +178,11 @@
     }))
     
   }
-  res <- data.frame(res)
   
-  # return transposed data.frame for cbinding to pData
-  res <- data.frame(t(res))
-  rownames(res) <- identifier(fr)
+  # return transposed tibble for cbinding to pData
+  res <- t(res)
   colnames(res) <- cyto_marker_extract(fr, channels)
+  res <- as_tibble(res)
 
   return(res)
   
@@ -199,7 +199,8 @@
 #' @return data.frame containing the median fluorescent intensity for each of
 #'   the supplied channels.
 #'
-#' @importFrom flowCore exprs identifier
+#' @importFrom flowCore exprs
+#' @importFrom tibble as_tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -239,12 +240,11 @@
   res <- unlist(lapply(channels, function(x){
     median(exprs(fr)[,x])
   }))
-  res <- data.frame(res)
   
-  # return transposed data.frame for cbinding to pData
-  res <- data.frame(t(res))
-  rownames(res) <- identifier(fr)
+  # return transposed tibble for cbinding to pData
+  res <- t(res)
   colnames(res) <- cyto_marker_extract(fr, channels)
+  res <- as_tibble(res)
   
   return(res)
   
@@ -264,7 +264,8 @@
 #' @return data.frame containing the mode fluorescent intensity for each of
 #'   the supplied channels.
 #'
-#' @importFrom flowCore exprs identifier
+#' @importFrom flowCore exprs
+#' @importFrom tibble as_tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -309,12 +310,11 @@
                        modal = FALSE)
     d$x[d$y == max(d$y)]
   }))
-  res <- data.frame(res)
   
-  # return transposed data.frame for cbinding to pData
-  res <- data.frame(t(res))
-  rownames(res) <- identifier(fr)
+  # return transposed tibble for cbinding to pData
+  res <- t(res)
   colnames(res) <- cyto_marker_extract(fr, channels)
+  res <- as_tibble(res)
   
   return(res)
   
@@ -331,7 +331,8 @@
 #' @return data.frame containing the robust coefficient of variation for each
 #'   of the supplied channels.
 #'
-#' @importFrom flowCore exprs identifier
+#' @importFrom flowCore exprs
+#' @importFrom tibble as_tibble
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -373,12 +374,11 @@
     rSD <- median(abs(exprs(fr)[,x] - md)) * 1.4826
     rSD/md * 100
   }))
-  res <- data.frame(res)
   
-  # return transposed data.frame for cbinding to pData
-  res <- data.frame(t(res))
-  rownames(res) <- identifier(fr)
+  # return transposed tibble for cbinding to pData
+  res <- t(res)
   colnames(res) <- cyto_marker_extract(fr, channels)
+  res <- as_tibble(res)
   
   return(res)
   
