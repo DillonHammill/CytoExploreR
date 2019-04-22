@@ -7,8 +7,8 @@ context("cyto-stats")
 
 test_that(".cyto_count", {
   
-  ref <- tibble("count" = BiocGenerics::nrow(fr))
-  exp <- .cyto_count(fr)[,"count"]
+  ref <- tibble("count" = BiocGenerics::nrow(fr_test))
+  exp <- .cyto_count(fr_test)[,"count"]
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref))
   
@@ -19,7 +19,7 @@ test_that(".cyto_count", {
 test_that(".cyto_mean", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_mean(fr, c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_mean(fr_test, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -32,7 +32,7 @@ test_that(".cyto_mean", {
   ref <- tibble("FSC-A" = 63807.668,
                 "Va2" = 21467.458,
                 "CD4" = 1179.643)
-  exp <- .cyto_mean(fr, 
+  exp <- .cyto_mean(fr_test, 
                     c("FSC-A","Va2","CD4"), 
                     trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
@@ -52,7 +52,7 @@ test_that(".cyto_geometric_mean", {
                 "Va2" = 19684.97676,
                 "CD4" = 406.33749,
                 "Hoechst-430" = 64.71426)
-  exp <- .cyto_geometric_mean(fr, 
+  exp <- .cyto_geometric_mean(fr_test, 
                              c("FSC-A","Va2","CD4", "Hoechst-430"), 
                              trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
@@ -65,7 +65,7 @@ test_that(".cyto_geometric_mean", {
 test_that(".cyto_median", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_median(fr, c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_median(fr_test, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -78,7 +78,7 @@ test_that(".cyto_median", {
   ref <- tibble("FSC-A" = 61485.9004,
                 "Va2" = 20932.5897,
                 "CD4" = 144.1649)
-  exp <- .cyto_median(fr, c("FSC-A","Va2","CD4"), trans)
+  exp <- .cyto_median(fr_test, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -89,7 +89,7 @@ test_that(".cyto_median", {
 test_that(".cyto_mode", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_mode(fr, c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_mode(fr_test, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -102,7 +102,7 @@ test_that(".cyto_mode", {
   ref <- tibble("FSC-A" = 60567.6369,
                 "Va2" = 20560.1825,
                 "CD4" = 38.8483)
-  exp <- .cyto_mode(fr, c("FSC-A","Va2","CD4"), trans)
+  exp <- .cyto_mode(fr_test, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -113,7 +113,7 @@ test_that(".cyto_mode", {
 test_that(".cyto_CV", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_CV(fr, c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_CV(fr_test, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -126,7 +126,7 @@ test_that(".cyto_CV", {
   ref <- tibble("FSC-A" = 12.57232,
                 "Va2" = 35.77359,
                 "CD4" = 262.80242)
-  exp <- .cyto_CV(fr, c("FSC-A","Va2","CD4"), trans)
+  exp <- .cyto_CV(fr_test, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -140,7 +140,7 @@ test_that(".cyto_density", {
   expect_error(.cyto_density(Va2, channel = "CD4"),
                "'x' should be a flowFrame object.")
   
-  exp <- .cyto_density(fr, channel = "CD4")
+  exp <- .cyto_density(fr_test, channel = "CD4")
   expect_s3_class(exp, "density")
   
 })
