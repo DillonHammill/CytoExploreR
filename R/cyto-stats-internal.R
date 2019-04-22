@@ -84,11 +84,9 @@
     fr <- transform(fr, inv)
   }
   
-  # Extract raw data and calculate mean directly
-  res <- unlist(lapply(channels, function(x){
-    mean(exprs(fr)[,x])
-  }))
-
+  # Extract raw data and calculate mean directly - colMeans for speed
+  res <- colMeans(exprs(fr)[, channels])
+  
   # return transposed tibble for cbinding to pData
   res <- t(res)
   colnames(res) <- cyto_marker_extract(fr, channels)
@@ -133,27 +131,24 @@
   # Geometric mean calculate as inverse of arithmetic mean of transformed data
   if(is.null(trans)){
     
-    res <- unlist(lapply(channels, function(x){
+    log_exprs <- log(exprs(fr)[,channels])
+    geo_mean <- suppressWarnings(exp(colMeans(log_exprs)))
       
-      geo_mean <- suppressWarnings(exp(mean(log(exprs(fr)[,x]))))
-      
-      # Zero/negative values present
-      if(is.nan(geo_mean)){
-        stop(
-          paste0(
-            "Supply transformList/transformerList to calculate geometric mean."
-          )
+    # Zero/negative values present
+    if(is.nan(geo_mean)){
+      stop(
+        paste0(
+          "Supply transformList/transformerList to calculate geometric mean."
         )
-      }
-      
-      return(geo_mean)
-      
-    }))
+      )
+    }
     
   }else if(!is.null(trans)){
     
     # Convert tranform object to transformList
     trans <- cyto_trans_check(trans, inverse = FALSE)
+    
+    fr_mean <- colMeans(exprs(fr)[,channels])
     
     res <- unlist(lapply(channels, function(x){
       
@@ -164,7 +159,7 @@
         inv <- cyto_trans_check(trans, inverse = TRUE)
         
         # Inverse transformation on calculated arithmetic mean
-        geo_mean <- inv@transforms[[x]]@f(mean(exprs(fr)[,x]))
+        geo_mean <- inv@transforms[[x]]@f(fr_mean[x])
         
       # Channel has not been transformed  
       }else{
@@ -201,6 +196,7 @@
 #'
 #' @importFrom flowCore exprs
 #' @importFrom tibble as_tibble
+#' @importFrom robustbase colMedians
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -236,10 +232,8 @@
     fr <- transform(fr, inv)
   }
   
-  # Extract raw data and calculate median directly
-  res <- unlist(lapply(channels, function(x){
-    median(exprs(fr)[,x])
-  }))
+  # Extract raw data and calculate median directly - colMedians for speed
+  res <- colMedians(exprs(fr)[,channels])
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
@@ -333,6 +327,7 @@
 #'
 #' @importFrom flowCore exprs
 #' @importFrom tibble as_tibble
+#' @importFrom robustbase colMedians
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -369,8 +364,9 @@
   }
   
   # Extract raw data and calculate CV directly
+  fr_median <- colMedians(exprs(fr)[,channels])
   res <- unlist(lapply(channels, function(x){
-    md <- median(exprs(fr)[,x])
+    md <- fr_median[x]
     rSD <- median(abs(exprs(fr)[,x] - md)) * 1.4826
     rSD/md * 100
   }))

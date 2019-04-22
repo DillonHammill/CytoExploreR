@@ -7,9 +7,10 @@ context("cyto-stats")
 
 test_that(".cyto_count", {
   
-  ref <- tibble("count" = BiocGenerics::nrow(Va2[[4]]))
-  expect_equal(.cyto_count(Va2[[4]])[,"count"],
-               ref)
+  ref <- tibble("count" = BiocGenerics::nrow(fr))
+  exp <- .cyto_count(fr)[,"count"]
+  expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
+  expect_equal(as.data.frame(exp), as.data.frame(ref))
   
 })
 
@@ -18,7 +19,7 @@ test_that(".cyto_count", {
 test_that(".cyto_mean", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_mean(Va2[[4]], c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_mean(fr, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -28,10 +29,12 @@ test_that(".cyto_mean", {
   expect_error(.cyto_mean(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 70187.580779,
-                "Va2" = 3.351131,
-                "CD4" = 1.388182)
-  exp <- .cyto_mean(Va2[[4]], c("FSC-A","Va2","CD4"))
+  ref <- tibble("FSC-A" = 63807.668,
+                "Va2" = 21467.458,
+                "CD4" = 1179.643)
+  exp <- .cyto_mean(fr, 
+                    c("FSC-A","Va2","CD4"), 
+                    trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -41,21 +44,15 @@ test_that(".cyto_mean", {
 
 test_that(".cyto_geometric_mean", {
   
-  # Throw error if you try to get geometric mean of transformed channels
-  # without supplying transformation object
-  expect_error(.cyto_geometric_mean(Va2[[4]],
-                                    c("FSC-A","Va2","CD4","Hoechst-430")),
-           "Supply transformList/transformerList to calculate geometric mean.")
-  
   # Error - flowFrame objects only
   expect_error(.cyto_geometric_mean(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 67578.12698,
-                "Va2" = 18969.77070,
-                "CD4" = 334.66689,
-                "Hoechst-430" = 76.23341)
-  exp <- .cyto_geometric_mean(Va2[[4]], 
+  ref <- tibble("FSC-A" = 62652.05858,
+                "Va2" = 19684.97676,
+                "CD4" = 406.33749,
+                "Hoechst-430" = 64.71426)
+  exp <- .cyto_geometric_mean(fr, 
                              c("FSC-A","Va2","CD4", "Hoechst-430"), 
                              trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
@@ -68,7 +65,7 @@ test_that(".cyto_geometric_mean", {
 test_that(".cyto_median", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_median(Va2[[4]], c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_median(fr, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -78,10 +75,10 @@ test_that(".cyto_median", {
   expect_error(.cyto_median(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 64473.5,
-                "Va2" = 20394.90959,
-                "CD4" = 89.22609)
-  exp <- .cyto_median(Va2[[4]], c("FSC-A","Va2","CD4"), trans)
+  ref <- tibble("FSC-A" = 61485.9004,
+                "Va2" = 20932.5897,
+                "CD4" = 144.1649)
+  exp <- .cyto_median(fr, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -92,7 +89,7 @@ test_that(".cyto_median", {
 test_that(".cyto_mode", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_mode(Va2[[4]], c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_mode(fr, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -102,10 +99,10 @@ test_that(".cyto_mode", {
   expect_error(.cyto_mode(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 62791.87068,
-                "Va2" = 19952.17720,
-                "CD4" = 14.76467)
-  exp <- .cyto_mode(Va2[[4]], c("FSC-A","Va2","CD4"), trans)
+  ref <- tibble("FSC-A" = 60567.6369,
+                "Va2" = 20560.1825,
+                "CD4" = 38.8483)
+  exp <- .cyto_mode(fr, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -116,7 +113,7 @@ test_that(".cyto_mode", {
 test_that(".cyto_CV", {
   
   # Message - trans object required for transformed channels
-  expect_message(.cyto_CV(Va2[[4]], c("FSC-A","Va2","CD4")),
+  expect_message(.cyto_CV(fr, c("FSC-A","Va2","CD4")),
             paste(
               "'trans' requires a transformList/transformerList to calculate",
               "statistics on a linear scale for transformed channels."
@@ -126,10 +123,10 @@ test_that(".cyto_CV", {
   expect_error(.cyto_CV(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 14.382532,
-                "Va2" = 34.00737,
-                "CD4" = 418.05588)
-  exp <- .cyto_CV(Va2[[4]], c("FSC-A","Va2","CD4"), trans)
+  ref <- tibble("FSC-A" = 12.57232,
+                "Va2" = 35.77359,
+                "CD4" = 262.80242)
+  exp <- .cyto_CV(fr, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
   
@@ -143,7 +140,7 @@ test_that(".cyto_density", {
   expect_error(.cyto_density(Va2, channel = "CD4"),
                "'x' should be a flowFrame object.")
   
-  exp <- .cyto_density(Va2[[4]], channel = "CD4")
+  exp <- .cyto_density(fr, channel = "CD4")
   expect_s3_class(exp, "density")
   
 })

@@ -36,7 +36,11 @@ Imports:
   grDevices,
   tools,
   magrittr,
-  tools
+  parallel,
+  tibble,
+  tidyr,
+  dplyr,
+  robustbase
 Suggests: 
   CytoRSuiteData,
   RProtoBufLib,
@@ -47,8 +51,9 @@ Suggests:
   vdiffr,
   shinytest,
   covr,
-  robustbase,
-  pkgdown
+  pkgdown,
+  mockr,
+  mockery
 Remotes: 
   DillonHammill/CytoRSuiteData
 biocViews:
