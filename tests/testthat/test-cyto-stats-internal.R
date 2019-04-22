@@ -29,9 +29,9 @@ test_that(".cyto_mean", {
   expect_error(.cyto_mean(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 63807.668,
-                "Va2" = 21467.458,
-                "CD4" = 1179.643)
+  ref <- tibble("FSC-A" = 70372.9868,
+                "Va2" = 18939.2329,
+                "CD4" = 982.8482)
   exp <- .cyto_mean(fr_test, 
                     c("FSC-A","Va2","CD4"), 
                     trans)
@@ -48,10 +48,10 @@ test_that(".cyto_geometric_mean", {
   expect_error(.cyto_geometric_mean(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 62652.05858,
-                "Va2" = 19684.97676,
-                "CD4" = 406.33749,
-                "Hoechst-430" = 64.71426)
+  ref <- tibble("FSC-A" = 67637.01451,
+                "Va2" = 17170.08487,
+                "CD4" = 280.31106,
+                "Hoechst-430" = 82.27335)
   exp <- .cyto_geometric_mean(fr_test, 
                              c("FSC-A","Va2","CD4", "Hoechst-430"), 
                              trans)
@@ -75,9 +75,9 @@ test_that(".cyto_median", {
   expect_error(.cyto_median(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 61485.9004,
-                "Va2" = 20932.5897,
-                "CD4" = 144.1649)
+  ref <- tibble("FSC-A" = 64774.15039,
+                "Va2" = 18448.62970,
+                "CD4" = 63.38221)
   exp <- .cyto_median(fr_test, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
@@ -99,9 +99,9 @@ test_that(".cyto_mode", {
   expect_error(.cyto_mode(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 60567.6369,
-                "Va2" = 20560.1825,
-                "CD4" = 38.8483)
+  ref <- tibble("FSC-A" = 62786.47125,
+                "Va2" = 17915.35399,
+                "CD4" = 18.10466)
   exp <- .cyto_mode(fr_test, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
@@ -123,9 +123,9 @@ test_that(".cyto_CV", {
   expect_error(.cyto_CV(Va2, c("FSC-A","Va2","CD4")),
                "'x' should be a flowFrame object.")
   
-  ref <- tibble("FSC-A" = 12.57232,
-                "Va2" = 35.77359,
-                "CD4" = 262.80242)
+  ref <- tibble("FSC-A" = 16.64379,
+                "Va2" = 39.77155,
+                "CD4" = 432.67621)
   exp <- .cyto_CV(fr_test, c("FSC-A","Va2","CD4"), trans)
   expect_s3_class(exp, c("tbl_df","tbl","data.frame"))
   expect_equal(as.data.frame(exp), as.data.frame(ref), tolerance = 0.001)
