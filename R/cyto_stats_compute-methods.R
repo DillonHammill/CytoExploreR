@@ -38,36 +38,56 @@ setGeneric(
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"} or \code{"CV"}.
+#' @param format indicates whether the data should be returned in the
+#'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
+#'   default.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
 #'
+#' @return a tibble containing the computed statistics in the wide or long
+#'   format.
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom flowCore exprs inverseLogicleTransform transform transformList
-#' @importFrom stats median density sd
+#'   identifier
+#' @importFrom tibble tibble
+#' @importFrom dplyr bind_cols %>%
+#' @importFrom tidyr gather
 #'
 #' @seealso \code{\link{cyto_stats_compute,flowSet-method}}
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Apply compensation
 #' fs <- compensate(fs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(fs[[4]], cyto_fluor_channels(fs))
+#' trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
 #' fs <- transform(fs, trans)
-#' 
-#' # Compute statistics
-#' cyto_stats_compute(fs[[4]],
+#'
+#' # Compute statistics in long format - median
+#' stats <- cyto_stats_compute(fs[[32]],
+#'  channels = c("Alexa Fluor 647-A", "7-AAD-A"),
+#'  trans = trans,
+#'  stat = "median",
+#'  format = "long"
+#' )
+#'
+#' # Compute statistics in wide format - geometric mean
+#' cyto_stats_compute(fs[[32]],
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   trans = trans,
-#'   stat = "median"
+#'   stat = "geo mean",
+#'   format = "long"
 #' )
+#'
+#' # Compute count statistics
 #' cyto_stats_compute(fs[[1]], stat = "count")
 #' @export
 setMethod(cyto_stats_compute,
@@ -76,6 +96,7 @@ setMethod(cyto_stats_compute,
                                 channels = NULL,
                                 trans = NULL,
                                 stat = "median",
+                                format = "long",
                                 density_smooth = 1.5) {
             
             # Check statistic
@@ -97,87 +118,70 @@ setMethod(cyto_stats_compute,
             
             # Transformations
             if (is.null(trans) & stat %in%
-                c("mean", "median", "mode", "geo mean", "CV", "CVI")) {
-              message("'trans' missing - statistics will be returned on current scale.")
+                c("mean", "median", "mode", "geo mean", "CV")) {
+              message(
+                paste("'trans' missing - statistics will be returned on the",
+                      "current scale.")
+              )
               trans <- NULL
-            } else if (!is.null(trans)) {
-              trans <- cyto_trans_check(trans, inverse = FALSE)
-              inv <- cyto_trans_check(trans, inverse = TRUE)
-              fr <- transform(fr, inv)
             }
-            
-            # Extract data from fr
-            fr.exprs <- exprs(fr)
             
             # Statistics
             if (stat == "count") {
-              cnt <- data.frame(count = BiocGenerics::nrow(fr))
-              rownames(cnt) <- fr@description$GUID
               
-              return(cnt)
-            } else if (stat %in% c("median", "mode", "mean", "CV", "CVI")) {
+              res <- .cyto_count(fr)
+
+            }else if(stat == "mean"){
               
-              # Calculate statistic
-              sts <- lapply(channels, function(channel) {
-                if (stat == "mean") {
-                  mean(fr.exprs[, channel])
-                } else if (stat == "median") {
-                  median(fr.exprs[, channel])
-                } else if (stat == "mode") {
-                  d <- density(fr.exprs[, channel], adjust = density_smooth)
-                  d$x[d$y == max(d$y)]
-                } else if (stat == "CV") {
-                  md <- median(fr.exprs[,channel])
-                  rSD <- median(abs(fr.exprs[,channel] - md))*1.4826
-                  rSD/md * 100
-                }
-              })
-              names(sts) <- channels
-              sts <- do.call(cbind, sts)
-              rownames(sts) <- fr@description$GUID
+              res <- suppressMessages(.cyto_mean(fr,
+                                                 channels,
+                                                 trans))
               
-              return(sts)
-            } else if (stat == "geo mean") {
+            }else if(stat == "geo mean"){
               
-              # Don't transform calculate mean then inverse transform to get geo mean
-              sts <- lapply(channels, function(channel) {
-                fr.exprs <- exprs(x)[, channel]
-                
-                # trans supplied
-                if (!is.null(trans)) {
-                  
-                  # Channel is already transformed
-                  if (channel %in% BiocGenerics::colnames(trans)) {
-                    inv <- cyto_trans_check(trans, inverse = TRUE)
-                    sts <- inv@transforms[[channel]]@f(mean(fr.exprs))
-                    
-                    # Channel has not been transformed
-                  } else if (!channel %in% BiocGenerics::colnames(trans)) {
-                    sts <- exp(mean(log(fr.exprs)))
-                  }
-                  
-                  # No trans supplied
-                } else {
-                  sts <- suppressWarnings(exp(mean(log(fr.exprs))))
-                  
-                  if (is.nan(sts)) {
-                    stop(
-                      paste0(
-                        "Supply transformList/transformerList to calculate ",
-                        stat, "."
-                      )
-                    )
-                  }
-                }
-                
-                return(sts)
-              })
-              sts <- do.call(cbind, sts)
-              rownames(sts) <- fr@description$GUID
-              colnames(sts) <- channels
+              res <- suppressMessages(.cyto_geometric_mean(fr,
+                                                           channels,
+                                                           trans))
+              
+            }else if(stat == "median"){
+              
+              res <- suppressMessages(.cyto_median(fr,
+                                                   channels,
+                                                   trans))
+              
+            }else if(stat == "mode"){
+              
+              res <- suppressMessages(.cyto_mode(fr,
+                                                 channels,
+                                                 trans,
+                                                 density_smooth))
+              
+            }else if(stat == "CV"){
+              
+              res <- suppressMessages(.cyto_CV(fr,
+                                               channels,
+                                               trans))
+              
+            }  
+          
+            # Convert to long format
+            if(format == "long" &
+               stat != "count" &
+               length(channels) > 1){
+              
+              res <- res %>%
+                gather(key = "Marker", 
+                       value = "Value")
+              colnames(res)[ncol(res)] <- .cyto_stat_name(stat)
+              
             }
             
-            return(sts)
+            # Combine with pData
+            pd <- tibble("name" = rep(identifier(fr),nrow(res)))
+            res <- bind_cols(pd, res)
+            
+            return(res)
+            
           }
 )
 
@@ -198,14 +202,22 @@ setMethod(cyto_stats_compute,
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"} or \code{"CV"}.
+#' @param format indicates whether the data should be returned in the
+#'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
+#'   default.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
-#'
+#'  
+#' @return a tibble containing the computed statistics in the wide or long
+#'   format.
+#'  
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom flowCore exprs inverseLogicleTransform transform
 #' @importFrom flowWorkspace pData
+#' @importFrom tibble as_tibble remove_rownames
+#' @importFrom dplyr bind_rows bind_cols %>%
 #'
 #' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
 #' @seealso \code{\link{cyto_stats_compute,GatingSet-method}}
@@ -220,21 +232,20 @@ setMethod(cyto_stats_compute,
 #' fs <- compensate(fs, fs[[1]]@description$SPILL)
 #' 
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(fs[[4]], cyto_fluor_channels(fs))
+#' trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
 #' fs <- transform(fs, trans)
 #' 
-#' # Compute statistics
+#' # Compute statistics in long format - median
 #' cyto_stats_compute(fs,
 #'   channels = c("Alexa Fluor 488-A", "PE-A"),
 #'   trans = trans,
-#'   stat = "median"
+#'   stat = "median",
+#'   format = "long"
 #' )
+#' 
+#' # Compute count statistics
 #' cyto_stats_compute(fs,
-#'   trans = trans,
-#'   stat = "geo mean"
-#' )
-#' cyto_stats_compute(fs,
-#'   stat = "count"
+#'   stat = "count",
 #' )
 #' @export
 setMethod(cyto_stats_compute,
@@ -243,6 +254,7 @@ setMethod(cyto_stats_compute,
                                 channels = NULL,
                                 trans = NULL,
                                 stat = "median",
+                                format = "long",
                                 density_smooth = 1.5) {
             
             # Check statistic
@@ -251,37 +263,282 @@ setMethod(cyto_stats_compute,
             # Assign x to fs
             fs <- x
             
-            # pData
-            pdata <- as.data.frame(pData(fs))
-            
             # cyto_stats_compute
-            sts <- fsApply(fs, function(fr) {
+            res <- fsApply(fs, function(fr) {
               cyto_stats_compute(fr,
                                  channels = channels,
                                  trans = trans,
                                  stat = stat,
-                                 density_smooth = density_smooth
+                                 density_smooth = density_smooth,
+                                 format = "wide"
               )
             })
+            res <- do.call("bind_rows", res)
             
-            # Structure of count statistics
-            if (stat == "count") {
-              sts <- do.call(rbind, sts)
+            # Extract pData -> tibble
+            pd <- pData(fs)
+            name_class <- class(pd$name)
+            pd <- as_tibble(remove_rownames(pd))
+            class(pd$name) <- name_class
+            
+            # cbind pd with res
+            res <- bind_cols(pd, res[,-1])
+            
+            # Convert to long format
+            if(format == "long" &
+               stat != "count" &
+               length(channels) > 1){
+              
+              mn <- ncol(pd) + 1
+              mx <- ncol(res)
+
+              res <- res %>%
+                gather(key = "Marker", 
+                       value = "Value",
+                       !! mn:mx)
+              colnames(res)[ncol(res)] <- .cyto_stat_name(stat)
+              
             }
             
-            # Merge with pdata
-            pdata[, "name"] <- list(NULL)
-            if (class(sts) == "data.frame") {
-              sts <- lapply(list(sts), function(x) {
-                cbind(pdata, x)
-              })
-            } else if (class(sts) == "matrix") {
-              sts <- lapply(list(sts), function(x) {
-                cbind(pdata, x)
-              })
+            return(res)
+          }
+)
+
+#' Compute Statistics - GatingHierarchy Method
+#'
+#' Calculate and export flow cytometry statistics for a GatingHierarchy.
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}.
+#' @param alias name(s) of the population(s) for which the statistic should be
+#'   calculated.
+#' @param parent name(s) of the parent population(s) used calculate population
+#'   frequencies. The frequency of alias in each parent will be returned as a
+#'   percentage.
+#' @param channels names of of channels for which statistic should be
+#'   calculated, set to all channels by default.
+#' @param trans object of class
+#'   \code{\link[flowCore:transformList-class]{transformList}} or
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}} generated by
+#'   \code{\link[flowCore:logicleTransform]{estimateLogicle}} used to transform
+#'   the fluorescent channels of x. The transformation list is required to apply
+#'   the inverse transformation such that the required statistics are returned
+#'   on the original linear scale.
+#' @param stat name of the statistic to calculate, options include
+#'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
+#'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.
+#' @param format indicates whether the data should be returned in the
+#'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
+#'   default.
+#' @param save_as name of a csv file to which the statistical results should be
+#'   saved.
+#' @param density_smooth smoothing parameter passed to
+#'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
+#'   default.
+#'
+#' @return a tibble containing the computed statistics in the wide or long
+#'   format.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom flowWorkspace getData getTransformations
+#' @importFrom utils write.csv
+#' @importFrom dplyr bind_rows bind_cols select %>%
+#' @importFrom tidyr spread
+#' @importFrom tibble as_tibble add_column
+#' @importFrom tools file_ext
+#'
+#' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
+#' @seealso \code{\link{cyto_stats_compute,flowSet-method}}
+#'
+#' @examples
+#' library(CytoRSuiteData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#'
+#' # Apply compensation
+#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#'
+#' # Transform fluorescent channels
+#' trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
+#' gs <- transform(gs, trans)
+#'
+#' # Gate using gate_draw
+#' gt <- Activation_gatingTemplate
+#' gating(gt, gs)
+#'
+#' # Compute statistics
+#' cyto_stats_compute(gs[[32]],
+#'   alias = "T Cells",
+#'   channels = c("Alexa Fluor 488-A", "PE-A"),
+#'   stat = "median"
+#' )
+#'
+#' # Compute population frequency statistics
+#' cyto_stats_compute(gs[[32]],
+#'   alias = c("CD4 T Cells", "CD8 T Cells"),
+#'   parent = c("Live Cells", "T Cells"),
+#'   stat = "freq"
+#' )
+#' 
+#' # Save calculated statistics to csv file - save_as
+#' #' cyto_stats_compute(gs[[32]],
+#'   alias = c("CD4 T Cells", "CD8 T Cells"),
+#'   parent = c("Live Cells", "T Cells"),
+#'   stat = "freq",
+#'   save_as = "Population-Frequencies"
+#' )
+#' @export
+setMethod(cyto_stats_compute,
+          signature = "GatingHierarchy",
+          definition = function(x,
+                                alias = NULL,
+                                parent = NULL,
+                                channels = NULL,
+                                trans = NULL,
+                                stat = "median",
+                                format = "long",
+                                save_as = NULL,
+                                density_smooth = 1.5) {
+            
+            # Check statistic
+            stat <- .cyto_stat_check(stat = stat)
+            
+            # Assign x to gh
+            gh <- x
+            
+            # Get trans if not supplied
+            if (is.null(trans)) {
+              trans <- transformList(
+                names(getTransformations(gh)),
+                getTransformations(gh)
+              )
             }
             
-            return(sts)
+            # Extract population(s) - list of flowFrames
+            alias_frames <- lapply(alias, function(x) getData(gh, x))
+            
+            # Extract parent population(s) - list of flowFrames
+            if(stat == "freq"){
+              if(is.null(parent)){
+                message(
+                  paste("Calculating frequency of 'root' as no 'parent'",
+                        "population(s) were specified."))
+                parent <- "root"
+              }
+              parent_frames <- lapply(parent, function(x) getData(gh, x))
+            }
+            
+            # Extract pData
+            pd <- pData(gh)
+            name_class <- class(pd$name)
+            pd <- as_tibble(remove_rownames(pData(gh)))
+            class(pd$name) <- name_class # remove weird <I(chr)> class
+            
+            # Repeat row alias times - add stats as columns
+            pd <- do.call("bind_rows", 
+                          replicate(length(alias), 
+                                    pd, 
+                                    simplify = FALSE))
+            
+            # Add Population column
+            pd <- add_column(pd, Population = alias)
+            
+            # Statistics
+            if (stat == "freq") {
+              
+              # Calculate count statistic for each parent population
+              parent_counts <- lapply(seq(1,length(parent)), function(x){
+                
+                cnt <- cyto_stats_compute(parent_frames[[x]],
+                                          channels = channels,
+                                          trans = trans,
+                                          stat = "count")
+                
+                # Repeat row alias times
+                cnt <- do.call("bind_rows", 
+                               replicate(length(alias), 
+                                         cnt, 
+                                         simplify = FALSE))[,2]
+                
+                return(cnt)
+                
+              })
+              parent_counts <- do.call("bind_cols", parent_counts)
+              colnames(parent_counts) <- parent
+
+              # Add parent counts to pd
+              pd <- bind_cols(pd, parent_counts)
+              
+              # Caclulate counts for each alias
+              alias_counts <- lapply(seq(1,length(alias)), function(x){
+                
+                cnt <- cyto_stats_compute(alias_frames[[x]],
+                                          channels = channels,
+                                          trans = trans,
+                                          stat = "count")[,2]
+                
+                return(cnt)
+                
+              })
+              alias_counts <- do.call("bind_rows", alias_counts)
+              
+              # Repeat alias_counts column parent times
+              alias_counts <- alias_counts[,rep(1,length(parent))]
+              colnames(alias_counts) <- parent
+              
+              # alias / parent * 100
+              lapply(parent, function(x){
+                pd[,x] <<- alias_counts[,x] / pd[,x] * 100
+              })
+              res <- pd
+              
+              # Covert to long format
+              if(format == "long"){
+                res <- res %>%
+                  gather("Parent", 
+                         "Frequency", 
+                         seq(ncol(res) - length(parent) + 1, ncol(res)))
+              }
+              
+            }else{
+              
+              # Rbind results for each population in long format
+              res <- lapply(seq(1,length(alias)), function(x){
+                dat <- cyto_stats_compute(alias_frames[[x]],
+                                          channels = channels,
+                                          trans = trans,
+                                          stat = stat,
+                                          format = "wide",
+                                          density_smooth = density_smooth)
+              })
+              res <- do.call("bind_rows", res)
+              
+              # Cbind with pd
+              res <- bind_cols(pd, res[,-1])
+
+              # Convert to long format
+              if(format == "long"){
+                res <- res %>%
+                  gather(Marker, 
+                         !! .cyto_stat_name(stat), 
+                         seq(ncol(pd) + 1, ncol(res)))
+              }
+              
+            }
+
+            # Save results
+            if(!is.null(save_as)){
+              if(file_ext(save_as) == ""){
+                save_as <- paste0(save_as,".csv")
+              }
+              write.csv(res, save_as, row.names = FALSE)
+            }
+            
+            return(res)
+            
           }
 )
 
@@ -308,16 +565,21 @@ setMethod(cyto_stats_compute,
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.
+#' @param format indicates whether the data should be returned in the
+#'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
+#'   default.
+#' @param save_as name of a csv file to which the statistical results should be
+#'   saved.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
-#' @param save logical indicating whether statistical results should be saved to
-#'   a csv file.
+#'
+#' @return a tibble containing the computed statistics in the wide or long
+#'   format.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom flowCore exprs inverseLogicleTransform transform
-#' @importFrom flowWorkspace getData sampleNames getTransformations
+#' @importFrom dplyr bind_rows
 #' @importFrom utils write.csv
 #'
 #' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
@@ -334,14 +596,14 @@ setMethod(cyto_stats_compute,
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
 #' 
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
+#' trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
 #' 
 #' # Gate using gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
 #' 
-#' # Compute statistics
+#' # Compute statistics - median
 #' cyto_stats_compute(gs,
 #'   alias = "T Cells",
 #'   channels = c("Alexa Fluor 488-A", "PE-A"),
@@ -349,23 +611,12 @@ setMethod(cyto_stats_compute,
 #'   save = FALSE
 #' )
 #' 
-#' cyto_stats_compute(gs,
-#'   alias = "T Cells",
-#'   stat = "geo mean",
-#'   save = FALSE
-#' )
-#' 
-#' cyto_stats_compute(gs,
-#'   alias = c("CD4 T Cells", "CD8 T Cells"),
-#'   stat = "count",
-#'   save = FALSE
-#' )
-#' 
+#' # Compute population frequencies and save to csv file
 #' cyto_stats_compute(gs,
 #'   alias = c("CD4 T Cells", "CD8 T Cells"),
 #'   parent = c("Live Cells", "T Cells"),
 #'   stat = "freq",
-#'   save = FALSE
+#'   save_as = "Population-Frequencies"
 #' )
 #' @export
 setMethod(cyto_stats_compute,
@@ -376,20 +627,16 @@ setMethod(cyto_stats_compute,
                                 channels = NULL,
                                 trans = NULL,
                                 stat = "median",
-                                density_smooth = 1.5,
-                                save = TRUE) {
+                                format = "long",
+                                save_as = NULL,
+                                density_smooth = 1.5) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
             
             # Assign x to gs
             gs <- x
-            
-            # transformerList?
-            if (!is.null(trans)) {
-              trans <- cyto_trans_check(trans, inverse = FALSE)
-            }
-            
+
             # Get trans if not supplied
             if (is.null(trans)) {
               trans <- transformList(
@@ -398,82 +645,59 @@ setMethod(cyto_stats_compute,
               )
             }
             
-            # Extract population(s)
-            fs.lst <- lapply(alias, function(x) getData(gs, x))
+            # Make calls to GatingHierarchy method
+            res <- lapply(seq(1,length(gs)), function(x){
+              
+              cyto_stats_compute(gs[[x]],
+                                 parent = parent,
+                                 alias = alias,
+                                 channels = channels,
+                                 trans = trans,
+                                 stat = stat,
+                                 format = format,
+                                 save_as = NULL,
+                                 density_smooth = density_smooth)
+              
+            })
+            res <- do.call("bind_rows", res)
             
-            # Population frequencies
-            if (stat == "freq") {
-              sts <- lapply(fs.lst, function(fs) {
-                as.data.frame(cyto_stats_compute(fs,
-                                                 channels = channels,
-                                                 trans = trans,
-                                                 stat = "count",
-                                                 density_smooth = density_smooth
-                ))
-              })
-              names(sts) <- alias
-              
-              # Get parent counts
-              prnts <- lapply(parent, function(x) {
-                fs <- getData(gs, x)
-                as.data.frame(cyto_stats_compute(fs,
-                                                 channels = channels,
-                                                 trans = trans,
-                                                 stat = "count",
-                                                 density_smooth = density_smooth
-                ))
-              })
-              names(prnts) <- parent
-              
-              sts <- lapply(sts, function(x) {
-                m <- matrix(rep(x[, "count"], length(parent)),
-                            ncol = length(parent),
-                            byrow = FALSE
-                )
-                colnames(m) <- rep("count", length(parent))
-                sts <- cbind(x, m)
-                return(sts)
-              })
-              
-              sts <- lapply(sts, function(x) {
-                lapply(seq_len(length(parent)), function(y) {
-                  N <- ncol(x) - length(parent)
-                  x[, (N + y)] <<- (x[, (N + y)] / prnts[[y]][, "count"]) * 100
-                  colnames(x)[(N + y)] <<- parent[y]
-                })
-                
-                return(x)
-              })
-            } else {
-              sts <- lapply(fs.lst, function(fs) {
-                sts <- cyto_stats_compute(fs,
-                                          channels = channels,
-                                          trans = trans,
-                                          stat = stat,
-                                          density_smooth = density_smooth
-                )
-                clnms <- colnames(sts[[1]])
-                sts <- as.data.frame(sts)
-                colnames(sts) <- clnms
-                return(sts)
-              })
-              names(sts) <- alias
+            # Save results to csv file
+            if(!is.null(save_as)){
+              if(file_ext(save_as) == ""){
+                save_as <- paste0(save_as,".csv")
+              }
+              write.csv(res, save_as, row.names = FALSE)
             }
-            
-            # Save to csv file
-            if (save == TRUE) {
-              lapply(seq_along(alias), function(x) {
-                write.csv(
-                  sts[[x]],
-                  paste(
-                    format(Sys.Date(), "%d%m%y"),
-                    "-", alias[x], "-", stat, ".csv",
-                    sep = ""
-                  )
-                )
-              })
-            }
-            
-            return(sts)
+
+            return(res)
           }
 )
+
+#' Get column name for statistic
+#' 
+#' @param x statistic.
+#' 
+#' @return name of statistics to include as column name for long data format.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+.cyto_stat_name <- function(x){
+  
+  if(x == "count"){
+    nm <- "Count"
+  }else if(x == "mean"){
+    nm <- "MFI"
+  }else if(x == "geo mean"){
+    nm <- "GMFI"
+  }else if(x == "median"){
+    nm <- "MedFI"
+  }else if(x == "mode"){
+    nm <- "ModFI"
+  }else if(x == "CV"){
+    nm <- "CV"
+  }else if(x == "percent"){
+    nm <- "Percent"
+  }
+  return(nm)
+}

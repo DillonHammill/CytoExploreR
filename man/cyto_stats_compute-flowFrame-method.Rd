@@ -6,7 +6,8 @@
 \title{Compute Statistics - flowFrame Method}
 \usage{
 \S4method{cyto_stats_compute}{flowFrame}(x, channels = NULL,
-  trans = NULL, stat = "median", density_smooth = 1.5)
+  trans = NULL, stat = "median", format = "long",
+  density_smooth = 1.5)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
@@ -26,9 +27,17 @@ on the original linear scale.}
 \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 \code{"mean"}, \code{"geo mean"} or \code{"CV"}.}
 
+\item{format}{indicates whether the data should be returned in the
+\code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
+default.}
+
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 default.}
+}
+\value{
+a tibble containing the computed statistics in the wide or long
+  format.
 }
 \description{
 Calculate and export flow cytometry statistics for a flowFrame.
@@ -43,15 +52,26 @@ fs <- Activation
 fs <- compensate(fs, fs[[1]]@description$SPILL)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(fs[[4]], cyto_fluor_channels(fs))
+trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
 fs <- transform(fs, trans)
 
-# Compute statistics
-cyto_stats_compute(fs[[4]],
+# Compute statistics in long format - median
+stats <- cyto_stats_compute(fs[[32]],
+ channels = c("Alexa Fluor 647-A", "7-AAD-A"),
+ trans = trans,
+ stat = "median",
+ format = "long"
+)
+
+# Compute statistics in wide format - geometric mean
+cyto_stats_compute(fs[[32]],
   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
   trans = trans,
-  stat = "median"
+  stat = "geo mean",
+  format = "long"
 )
+
+# Compute count statistics
 cyto_stats_compute(fs[[1]], stat = "count")
 }
 \seealso{

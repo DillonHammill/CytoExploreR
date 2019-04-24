@@ -131,11 +131,11 @@
   # Geometric mean calculate as inverse of arithmetic mean of transformed data
   if(is.null(trans)){
     
-    log_exprs <- log(exprs(fr)[,channels])
+    log_exprs <- suppressWarnings(log(exprs(fr)[,channels]))
     geo_mean <- suppressWarnings(exp(colMeans(log_exprs)))
       
     # Zero/negative values present
-    if(is.nan(geo_mean)){
+    if(any(is.nan(geo_mean))){
       stop(
         paste0(
           "Supply transformList/transformerList to calculate geometric mean."
