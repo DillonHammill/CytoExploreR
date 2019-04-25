@@ -519,6 +519,13 @@ setMethod(cyto_stats_compute,
               # Cbind with pd
               res <- bind_cols(pd, res[,-1])
 
+              # Convert count statistics to wide format
+              if(stat == "count" & format == "wide"){
+                res <- res %>%
+                  spread(Population, count)
+              }
+              
+              
               # Convert to long format
               if(format == "long"){
                 res <- res %>%
