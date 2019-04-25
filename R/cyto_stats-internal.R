@@ -431,6 +431,7 @@
 #' The upper limit is determined by the limits argument.
 #'
 #' @param x cytometry object(s) which require range calculation.
+#' @param parent name of parent population to extract for range calculation.
 #' @param channels name(s) of channels.
 #' @param limits either "data" or "machine".
 #' @param plot logical indicating whether a check should be performed for
@@ -447,7 +448,7 @@
 #'
 #' @noRd
 .cyto_range <- function(x,
-                        parent = NULL,
+                        parent = "root",
                         channels = NULL,
                         limits = "data",
                         plot = FALSE,
