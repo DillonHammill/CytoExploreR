@@ -1,3 +1,85 @@
+#' Extract the marker names given channels
+#'
+#' @param x object of class flowFrame.
+#' @param channels names of the channels for which markers should be extracted.
+#'
+#' @return vector of marker names or channel names if markers have not been
+#'   assigned.
+#'   
+#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace pData
+#'   
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd  
+cyto_marker_extract <- function(x, channels = NULL){
+  
+  # Throw error for invalid object
+  if(!inherits(x, "flowFrame")){
+    stop("'x' should be a flowFrame object.")
+  }
+  
+  # Assign x to fr
+  fr <- x
+  
+  # Check channels
+  channels <- cyto_channel_check(fr, channels, FALSE)
+  
+  # Extract channel info
+  chn <- pData(parameters(fr))
+  
+  # Extract markers for channels
+  mrk <- as.vector(chn[match(channels, chn$name), "desc"])
+  
+  # Replace NA with channel names
+  if(any(is.na(mrk))){
+    ind <- is.na(mrk)
+    mrk[ind] <- channels[ind]
+  }
+  
+  return(mrk)
+  
+}
+
+#' Extract the channels given marker names
+#'
+#' @param x object of class flowFrame.
+#' @param markers names of the markers for which the channels should be
+#'   extracted.
+#'
+#' @return vector of channel names.
+#'
+#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace pData
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+cyto_channel_extract <- function(x, markers = NULL){
+  
+  # Throw error for invalid object
+  if(!inherits(x, "flowFrame")){
+    stop("'x' should be a flowFrame object.")
+  }
+  
+  # Assign x to fr
+  fr <- x
+
+  # Extract channel info
+  chn <- pData(parameters(fr))
+  
+  # Check markers
+  if(!all(markers %in% chn$desc)){
+    stop("Supplied markers are not valid.")
+  }
+  
+  # Extract channels for markers
+  chans <- as.vector(chn[match(markers, chn$desc), "name"])
+  
+  return(chans)
+  
+}
+
 #' Extract Fluorescent Channels
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -84,6 +166,36 @@ setMethod(cyto_fluor_channels,
           }
 )
 
+#' Extract Fluorescent Channels - GatingHierarchy Method
+#'
+#' @param x object
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}.
+#'
+#' @return vector of fluorescent channels.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_fluor_channels,flowFrame-method}}
+#' @seealso \code{\link{cyto_fluor_channels,flowSet-method}}
+#'
+#' @examples
+#' library(CytoRSuiteData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#'
+#' # Get fluorescent channels
+#' cyto_fluor_channels(gs[[1]])
+#' @export
+setMethod(cyto_fluor_channels,
+          signature = "GatingHierarchy",
+          definition = function(x) {
+            fr <- getData(x, "root")
+            cyto_fluor_channels(fr)
+          }
+)
+
 #' Extract Fluorescent Channels - GatingSet Method
 #'
 #' @param x object \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -139,6 +251,7 @@ setGeneric(
 #' @return selected channel associated with the supplied flowFrame.
 #'
 #' @importFrom utils menu
+#' @importFrom flowCore identifier
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -166,19 +279,14 @@ setMethod(cyto_channel_select,
             # Print sample name and select channel
             message(
               paste(
-                "Select a fluorescent channel for the following csample:",
-                fr@description$GUID
+                "Select a fluorescent channel for the following sample:",
+                identifier(fr)
               )
             )
-            
-            if (getOption("CytoRSuite_interact") == TRUE) {
-              channel <- opts[menu(choices = opts, graphics = TRUE)]
-            } else {
-              # Tests use PE Cy7 Control -
-              channel <- opts[5]
-            }
-            
-            return(channel)
+
+            chan <- opts[menu(choices = opts, graphics = TRUE)]
+
+            return(chan)
           }
 )
 
@@ -216,21 +324,70 @@ setMethod(cyto_channel_select,
             opts <- c(cyto_fluor_channels(fs), "Unstained")
             
             # Print sample name and select channel
-            channels <- opts[unlist(lapply(pData(fs)$name, function(x) {
-              message("Select a fluorescent channel for the following sample:")
+            chans <- opts[unlist(lapply(pData(fs)$name, function(x) {
+              message(
+                paste("Select a fluorescent channel for the following sample:",
+                      x))
               
-              print(x)
+              menu(choices = opts, graphics = TRUE)
               
-              if (getOption("CytoRSuite_interact") == TRUE) {
-                menu(choices = opts, graphics = TRUE)
-              } else {
-                
-                # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
-                c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
-              }
             }))]
             
-            return(channels)
+            return(chans)
+          }
+)
+
+#' Select Fluorescent Channel for Compensation Controls - GatingHierarchy Method
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}
+#'   containing compensation controls.
+#'
+#' @return vector of channels in order of GatingSet.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom utils menu
+#' @importFrom flowWorkspace getData
+#'
+#' @examples
+#' \dontrun{
+#' library(CytoRSuiteData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#'
+#' # Select channel for each sample from dropdown menu
+#' cyto_channel_select(gs[[1]])
+#' }
+#'
+#' @export
+setMethod(cyto_channel_select,
+          signature = "GatingHierarchy",
+          definition = function(x) {
+            
+            # Assign x to gs
+            gh <- x
+            
+            # Extract flowFrame
+            fr <- getData(gh, "root")
+            
+            opts <- cyto_fluor_channels(fr)
+            
+            # Print sample name and select channel
+            message(
+              paste(
+                "Select a fluorescent channel for the following sample:",
+                identifier(fr)
+              )
+            )
+            
+            chan <- opts[menu(choices = opts, graphics = TRUE)]
+            
+            return(chan)
+            
+            
           }
 )
 
@@ -244,7 +401,8 @@ setMethod(cyto_channel_select,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom utils menu
+#' @importFrom utils menu 
+#' @importFrom flowWorkspace getData
 #'
 #' @examples
 #' \dontrun{
@@ -266,24 +424,25 @@ setMethod(cyto_channel_select,
             # Assign x to gs
             gs <- x
             
-            opts <- c(cyto_fluor_channels(gs), "Unstained")
+            # Extract flowSet
+            fs <- getData(gs, "root")
+            
+            # Channel options
+            opts <- c(cyto_fluor_channels(fs), "Unstained")
             
             # Print sample name and select channel
-            channels <- opts[unlist(lapply(pData(gs)$name, function(x) {
-              message("Select a fluorescent channel for the following sample:")
+            chans <- opts[unlist(lapply(pData(fs)$name, function(x) {
+              message(
+                paste("Select a fluorescent channel for the following sample:",
+                      x))
               
-              print(x)
+              menu(choices = opts, graphics = TRUE)
               
-              if (getOption("CytoRSuite_interact") == TRUE) {
-                menu(choices = opts, graphics = TRUE)
-              } else {
-                
-                # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
-                c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
-              }
             }))]
             
-            return(channels)
+            return(chans)
+            
+            
           }
 )
 
@@ -291,9 +450,11 @@ setMethod(cyto_channel_select,
 #'
 #' @param fr object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #' @param display numeric [0,1] indicating the percentage of events to plot.
+#' @param seed value used to \code{set.seed()} internally. Setting a value for
+#'   seed will return the same result with each run.
 #'
 #' @return \code{\link[flowCore:flowFrame-class]{flowFrame}} restricted to
-#'   \code{size} events.
+#'   \code{display} percentage events.
 #'
 #' @importFrom BiocGenerics nrow
 #' @importFrom flowCore sampleFilter
@@ -303,24 +464,36 @@ setMethod(cyto_channel_select,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Constrict first sample by 50%
 #' cyto_sample(fs[[1]], 0.5)
+#' 
 #' @export
-cyto_sample <- function(fr, display) {
+cyto_sample <- function(fr, display = 1, seed = NULL) {
   
-  # Number of events
-  events <- nrow(fr)
+  # No sampling
+  if(display == 1){
+    
+  }else{
+    # Number of events
+    events <- nrow(fr)
   
-  # Size
-  size <- display * events
-  
-  smp <- sampleFilter(size = size)
-  fr <- Subset(fr, smp)
-  
+    # Size
+    size <- display * events
+    
+    # Set seed
+    if(!is.null(seed)){
+      set.seed(seed)
+    }
+
+    # Sample
+    smp <- sampleFilter(size = size)
+    fr <- Subset(fr, smp)
+  }
+
   return(fr)
 }
 
