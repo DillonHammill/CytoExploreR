@@ -424,3 +424,123 @@
     
   return(dens)
 }
+
+#' Calculate combined range of cytometry objects
+#'
+#' The lower limit is always set to zero unless there is data below this limit.
+#' The upper limit is determined by the limits argument.
+#'
+#' @param x cytometry object(s) which require range calculation.
+#' @param channels name(s) of channels.
+#' @param limits either "data" or "machine".
+#' @param plot logical indicating whether a check should be performed for
+#'   channel length.
+#' @param buffer FALSE or fraction indcating the amount of buffering to be added
+#'   to the lower limit for transformed channels, set to 0.1 by default.
+#'
+#' @return vector containing minimum and maximum values.
+#'
+#' @importFrom flowCore flowSet
+#' @importFrom flowWorkspace getData
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_range <- function(x,
+                        parent = NULL,
+                        channels = NULL,
+                        limits = "data",
+                        plot = FALSE,
+                        buffer = 0.1) {
+  
+  # Time parameter always uses data limits
+  if("Time" %in% channels){
+    limits <- "data"
+  }
+  
+  # Convert GatingHierarchy/GatingSet to flowFrame/flowSet
+  if(inherits(x, "GatingHierarchy") | inherits(x, "GatingSet")){
+    x <- getData(x, parent)
+  }
+  
+  # Convert lists to conventional objects
+  if(class(x) == "list"){
+    
+    # Convert list of flowFrames to flowSet
+    if(all(unlist(lapply(x,"class")) == "flowFrame")){
+      x <- .cyto_convert(x, "flowSet")
+    }
+    
+    # Convert list of flowSets to flowSet
+    if(all(unlist(lapply(x, function(y){inherits(y,"flowSet")})))){
+      x <- .cyto_convert(x, "flowSet")
+    }
+    
+  }
+  
+  # Convert markers to channels
+  if(!is.null(channels)){
+    channels <- cyto_channel_check(x, channels = channels, plot = plot)
+  }else{
+    channels <- BiocGenerics::colnmaes(x)
+  }
+  
+  # Extract ranges
+  if(inherits(x, "flowFrame")){
+    
+    # Lower bound - use data limits
+    rng <- suppressWarnings(range(x, type = "data")[,channels])
+    
+    # Upper bound
+    if(limits == "data"){
+      mx <- suppressWarnings(range(x, type = "data")[,channels][2,])
+    }else if(limits == "machine"){
+      mx <- suppressWarnings(range(x, type = "instrument")[,channels][2,])
+    }
+    rng[2,] <- mx
+    
+  }else if(inherits(x, "flowSet")){
+    
+    # Lower bound - use data limits
+    rng <- suppressWarnings(range(x[[1]], type = "data")[,channels])
+    
+    # Upper bound
+    if(limits == "data"){
+      mx <- do.call("rbind",fsApply(x, function(fr){
+        suppressWarnings(range(fr, type = "data")[,channels][2,])
+      }))
+      mx <- unlist(lapply(channels, function(chan){
+        mx <- mx[,chan]
+        mx <- mx[is.finite(mx)]
+        max(mx)
+      }))
+    }else if(limits == "machine"){
+      mx <- do.call("rbind", fsApply(x, function(fr){
+        suppressWarnings(range(fr, type = "instrument")[,channels][2,])
+      }))
+      mx <- unlist(lapply(channels, function(chan){
+        mx <- mx[,chan]
+        mx <- mx[is.finite(mx)]
+        max(mx)
+      }))
+    }
+    rng[2,] <- mx
+    
+  }
+  
+  # Replace lower data limit if > 0
+  if(any(rng[1,] > 0)){
+    rng[1, rng[1,] > 0] <- 0
+  }
+  
+  # Add buffer to lower limit if channel is transformed
+  if(buffer != FALSE){
+    lapply(channels, function(chan){
+      if(rng[,chan][2] < 6){
+        rng[,chan][1] <<- rng[,chan][1] - buffer*(rng[,chan][2] - rng[,chan][1])
+      }
+    })
+  }
+  
+  return(rng)
+}

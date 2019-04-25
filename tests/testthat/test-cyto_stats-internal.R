@@ -144,3 +144,71 @@ test_that(".cyto_density", {
   expect_s3_class(exp, "density")
   
 })
+
+# .cyto_range ------------------------------------------------------------------
+
+test_that(".cyto_range", {
+  
+  # flowFrame ------------------------------------------------------------------
+  
+  # Data limits
+  exp_range <- data.frame("FSC-A" = c(0,137691.4),
+                          "Alexa Fluor 700-A" = c(-0.30388087,3.0388087))
+  colnames(exp_range) <- c("FSC-A","Alexa Fluor 700-A")
+  rownames(exp_range) <- c("min","max")
+  expect_equal(.cyto_range(getData(gs, "CD4 T Cells")[[32]], 
+                           channels = c("FSC-A","CD4")), 
+               exp_range, tolerance = 0.001)
+  
+  # Machine limits
+  exp_range <- data.frame("FSC-A" = c(0,262144),
+                          "Alexa Fluor 700-A" = c(-0.45,4.5))
+  colnames(exp_range) <- c("FSC-A","Alexa Fluor 700-A")
+  rownames(exp_range) <- c("min","max")
+  expect_equal(.cyto_range(getData(gs, "CD4 T Cells")[[1]], 
+                           channels = c("FSC-A","CD4"),
+                           limits = "machine"), 
+               exp_range, tolerance = 0.001)
+  
+  # flowSet --------------------------------------------------------------------
+  
+  # Data limits
+  exp_range <- data.frame("FSC-A" = c(0,200476.5),
+                          "Alexa Fluor 700-A" = c(-0.31415410,3.1415410))
+  colnames(exp_range) <- c("FSC-A","Alexa Fluor 700-A")
+  rownames(exp_range) <- c("min","max")
+  expect_equal(.cyto_range(getData(gs, "CD4 T Cells"), 
+                           channels = c("FSC-A","CD4")), 
+               exp_range, tolerance = 0.001)
+  
+  # Machine limits
+  exp_range <- data.frame("FSC-A" = c(0,262144),
+                          "Alexa Fluor 700-A" = c(-0.45,4.5))
+  colnames(exp_range) <- c("FSC-A","Alexa Fluor 700-A")
+  rownames(exp_range) <- c("min","max")
+  expect_equal(.cyto_range(getData(gs, "CD4 T Cells"), 
+                           channels = c("FSC-A","CD4"),
+                           limits = "machine"), 
+               exp_range, tolerance = 0.001)
+  
+  # GatingHierarchy ------------------------------------------------------------
+  exp_range <- data.frame("FSC-A" = c(0,92915.9),
+                          "Alexa Fluor 700-A" = c(-0.3044766,3.0447665))
+  colnames(exp_range) <- c("FSC-A","Alexa Fluor 700-A")
+  rownames(exp_range) <- c("min","max")
+  expect_equal(.cyto_range(gs[[1]],
+                           parent = "CD4 T Cells", 
+                           channels = c("FSC-A","CD4")), 
+               exp_range, tolerance = 0.001)
+  
+  # GatingSet ------------------------------------------------------------------
+  exp_range <- data.frame("FSC-A" = c(0,200476.5),
+                          "Alexa Fluor 700-A" = c(-0.3141541,3.141541))
+  colnames(exp_range) <- c("FSC-A","Alexa Fluor 700-A")
+  rownames(exp_range) <- c("min","max")
+  expect_equal(.cyto_range(gs,
+                           parent = "CD4 T Cells",
+                           channels = c("FSC-A","CD4")), 
+               exp_range, tolerance = 0.001)
+  
+})
