@@ -76,11 +76,11 @@
   fr <- x
   
   # Check channels
-  channels <- cyto_channel_check(fr, channels, FALSE)
+  channels <- cyto_channels_extract(fr, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_check(trans = trans, inverse = TRUE)
+    inv <- cyto_trans_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -89,7 +89,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_marker_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(fr, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -126,7 +126,7 @@
   fr <- x
   
   # Check channels
-  channels <- cyto_channel_check(fr, channels, FALSE)
+  channels <- cyto_channels_extract(fr, channels, FALSE)
   
   # Geometric mean calculate as inverse of arithmetic mean of transformed data
   if(is.null(trans)){
@@ -146,7 +146,7 @@
   }else if(!is.null(trans)){
     
     # Convert tranform object to transformList
-    trans <- cyto_trans_check(trans, inverse = FALSE)
+    trans <- cyto_trans_convert(trans, inverse = FALSE)
     
     fr_mean <- colMeans(exprs(fr)[,channels])
     
@@ -156,7 +156,7 @@
       if(x %in% BiocGenerics::colnames(trans)){
         
         # Inverse transformations
-        inv <- cyto_trans_check(trans, inverse = TRUE)
+        inv <- cyto_trans_convert(trans, inverse = TRUE)
         
         # Inverse transformation on calculated arithmetic mean
         geo_mean <- inv@transforms[[x]]@f(fr_mean[x])
@@ -176,7 +176,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_marker_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(fr, channels)
   res <- as_tibble(res)
 
   return(res)
@@ -224,11 +224,11 @@
   fr <- x
   
   # Check channels
-  channels <- cyto_channel_check(fr, channels, FALSE)
+  channels <- cyto_channels_extract(fr, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_check(trans = trans, inverse = TRUE)
+    inv <- cyto_trans_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -237,7 +237,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_marker_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(fr, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -288,11 +288,11 @@
   fr <- x
   
   # Check channels
-  channels <- cyto_channel_check(fr, channels, FALSE)
+  channels <- cyto_channels_extract(fr, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_check(trans = trans, inverse = TRUE)
+    inv <- cyto_trans_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -307,7 +307,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_marker_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(fr, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -355,11 +355,11 @@
   fr <- x
   
   # Check channels
-  channels <- cyto_channel_check(fr, channels, FALSE)
+  channels <- cyto_channels_extract(fr, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_check(trans = trans, inverse = TRUE)
+    inv <- cyto_trans_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -373,7 +373,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_marker_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(fr, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -411,7 +411,7 @@
   fr <- x
   
   # Check channels
-  channel <- cyto_channel_check(fr, channel, FALSE)
+  channel <- cyto_channels_extract(fr, channel, FALSE)
   
   # Calculate kernel density
   dens <- density(exprs(fr)[,channel],
@@ -432,7 +432,7 @@
 #'
 #' @param x cytometry object(s) which require range calculation.
 #' @param parent name of parent population to extract for range calculation.
-#' @param channels name(s) of channels.
+#' @param channels name(s) of channel(s).
 #' @param limits either "data" or "machine".
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
@@ -481,7 +481,7 @@
   
   # Convert markers to channels
   if(!is.null(channels)){
-    channels <- cyto_channel_check(x, channels = channels, plot = plot)
+    channels <- cyto_channels_extract(x, channels, plot)
   }else{
     channels <- BiocGenerics::colnmaes(x)
   }
@@ -490,25 +490,35 @@
   if(inherits(x, "flowFrame")){
     
     # Lower bound - use data limits
-    rng <- suppressWarnings(range(x, type = "data")[,channels])
+    rng <- suppressWarnings(
+      range(x, type = "data")[, channels, drop = FALSE]
+      )
     
     # Upper bound
     if(limits == "data"){
-      mx <- suppressWarnings(range(x, type = "data")[,channels][2,])
+      mx <- suppressWarnings(
+        range(x, type = "data")[, channels, drop = FALSE][2,]
+        )
     }else if(limits == "machine"){
-      mx <- suppressWarnings(range(x, type = "instrument")[,channels][2,])
+      mx <- suppressWarnings(
+        range(x, type = "instrument")[, channels, drop = FALSE][2,]
+        )
     }
     rng[2,] <- mx
     
   }else if(inherits(x, "flowSet")){
     
     # Lower bound - use data limits
-    rng <- suppressWarnings(range(x[[1]], type = "data")[,channels])
+    rng <- suppressWarnings(
+      range(x[[1]], type = "data")[, channels, drop = FALSE]
+      )
     
     # Upper bound
     if(limits == "data"){
       mx <- do.call("rbind",fsApply(x, function(fr){
-        suppressWarnings(range(fr, type = "data")[,channels][2,])
+        suppressWarnings(
+          range(fr, type = "data")[, channels, drop = FALSE][2,]
+        )
       }))
       mx <- unlist(lapply(channels, function(chan){
         mx <- mx[,chan]
@@ -517,7 +527,9 @@
       }))
     }else if(limits == "machine"){
       mx <- do.call("rbind", fsApply(x, function(fr){
-        suppressWarnings(range(fr, type = "instrument")[,channels][2,])
+        mx <- suppressWarnings(
+          range(fr, type = "instrument")[, channels, drop = FALSE][2,]
+          )
       }))
       mx <- unlist(lapply(channels, function(chan){
         mx <- mx[,chan]
