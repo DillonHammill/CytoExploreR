@@ -41,7 +41,7 @@ setGeneric(
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs identifier
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par mtext
 #'
@@ -82,6 +82,11 @@ setMethod(cyto_plot_profile,
                           layout = NULL,
                           title = NA, ...) {
 
+    # Set plot method 
+    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+      options("CytoRSuite_cyto_plot_method" = "profile/flowFrame")
+    }
+    
     # Assign x to fr
     fr <- x
 
@@ -95,9 +100,9 @@ setMethod(cyto_plot_profile,
     }
 
     # Check channels
-    channels <- cyto_channel_check(
-      x = fr,
-      channels = channels,
+    channels <- cyto_channels_extract(
+      fr,
+      channels,
       plot = FALSE
     )
 
@@ -134,17 +139,36 @@ setMethod(cyto_plot_profile,
 
     # Plot title
     if (!is.null(title) & is.na(title)) {
-      title <- fr@description$GUID
+      title <- identifier(fr)
     }
 
     # Add title
     if (!is.null(title)) {
       mtext(title, outer = TRUE, cex = 1, font = 2)
     }
-
+    
     # Return defaults
     par(mfrow = c(1, 1))
     par(oma = c(0, 0, 0, 0))
+    
+    # Turn off graphics device for saving
+    if(getOption("CytoRSuite_cyto_plot_save")){
+      
+      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+        
+        # Close graphics device
+        dev.off()
+        
+        # Reset CytoRSuite_cyto_plot_save
+        options("CytoRSuite_cyto_plot_save" = FALSE)
+        
+        # Reset CytoRSuite_cyto_plot_method
+        options("cytoRSuite_cyto_plot_method" = NULL)
+        
+      }
+      
+    }
+    
   }
 )
 
@@ -212,6 +236,11 @@ setMethod(cyto_plot_profile,
                           title = NA,
                           density_stack = 0.5, ...) {
 
+    # Set plot method 
+    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+      options("CytoRSuite_cyto_plot_method" = "profile/flowSet")
+    }
+    
     # Assign x to fs
     fs <- x
 
@@ -251,7 +280,27 @@ setMethod(cyto_plot_profile,
         density_stack = density_stack, ...
       )
     }
+    
+    # Turn off graphics device for saving
+    if(getOption("CytoRSuite_cyto_plot_save")){
+      
+      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+        
+        # Close graphics device
+        dev.off()
+        
+        # Reset CytoRSuite_cyto_plot_save
+        options("CytoRSuite_cyto_plot_save" = FALSE)
+        
+        # Reset CytoRSuite_cyto_plot_method
+        options("cytoRSuite_cyto_plot_method" = NULL)
+        
+      }
+      
+    }
+    
   }
+  
 )
 
 #' Plot Expression Profile in All Fluorescent Channels - GatingSet Method
@@ -315,6 +364,11 @@ setMethod(cyto_plot_profile,
                           channels = NULL,
                           axes_trans = NULL, ...) {
 
+    # Set plot method 
+    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+      options("CytoRSuite_cyto_plot_method" = "profile/GatingSet")
+    }
+    
     # Parent missing
     if (is.null(parent)) {
       stop("Please supply the name of the parent population to plot.")
@@ -333,9 +387,9 @@ setMethod(cyto_plot_profile,
     }
 
     # Check channels
-    channels <- cyto_channel_check(
-      x = fs,
-      channels = channels,
+    channels <- cyto_channels_extract(
+      fs,
+      channels,
       plot = FALSE
     )
 
@@ -352,5 +406,25 @@ setMethod(cyto_plot_profile,
       channels = channels,
       axes_trans = axes_trans, ...
     )
+    
+    # Turn off graphics device for saving
+    if(getOption("CytoRSuite_cyto_plot_save")){
+      
+      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+        
+        # Close graphics device
+        dev.off()
+        
+        # Reset CytoRSuite_cyto_plot_save
+        options("CytoRSuite_cyto_plot_save" = FALSE)
+        
+        # Reset CytoRSuite_cyto_plot_method
+        options("cytoRSuite_cyto_plot_method" = NULL)
+        
+      }
+      
+    }
+    
   }
+  
 )

@@ -68,7 +68,7 @@ setGeneric(
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
 #' @importFrom flowWorkspace sampleNames pData
-#' @importFrom flowCore parameters compensate
+#' @importFrom flowCore parameters compensate identifier
 #' @importFrom utils read.csv
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par mtext
@@ -114,11 +114,16 @@ setMethod(cyto_plot_compensation,
                           header_text_size = 1,
                           header_text_col = "black", ...) {
 
+    # Set plot method 
+    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+      options("CytoRSuite_cyto_plot_method" = "Comp/flowFrame")
+    }
+    
     # Assign x to fr
     fr <- x
 
     # Sample names
-    nm <- fr@description$GUID
+    nm <- identifier(fr)
 
     # Extract channels
     channels <- cyto_fluor_channels(fr)
@@ -193,7 +198,7 @@ setMethod(cyto_plot_compensation,
 
     # Title
     if (!is.null(header) & is.na(header)) {
-      header <- fr@description$GUID
+      header <- identifier(fr)
     }
 
     # Plots
@@ -220,6 +225,25 @@ setMethod(cyto_plot_compensation,
     # Return defaults
     par(mfrow = c(1, 1))
     par(oma = c(0, 0, 0, 0))
+    
+    # Turn off graphics device for saving
+    if(getOption("CytoRSuite_cyto_plot_save")){
+      
+      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+        
+        # Close graphics device
+        dev.off()
+        
+        # Reset CytoRSuite_cyto_plot_save
+        options("CytoRSuite_cyto_plot_save" = FALSE)
+        
+        # Reset CytoRSuite_cyto_plot_method
+        options("cytoRSuite_cyto_plot_method" = NULL)
+        
+      }
+      
+    }
+    
   }
 )
 
@@ -328,6 +352,11 @@ setMethod(cyto_plot_compensation,
                           header_text_size = 1,
                           header_text_col = "black", ...) {
 
+    # Set plot method 
+    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+      options("CytoRSuite_cyto_plot_method" = "Comp/flowSet")
+    }
+    
     # Assign x to fs
     fs <- x
 
@@ -516,6 +545,25 @@ setMethod(cyto_plot_compensation,
     # Return defaults
     par(mfrow = c(1, 1))
     par(oma = c(0, 0, 0, 0))
+    
+    # Turn off graphics device for saving
+    if(getOption("CytoRSuite_cyto_plot_save")){
+      
+      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+        
+        # Close graphics device
+        dev.off()
+        
+        # Reset CytoRSuite_cyto_plot_save
+        options("CytoRSuite_cyto_plot_save" = FALSE)
+        
+        # Reset CytoRSuite_cyto_plot_method
+        options("cytoRSuite_cyto_plot_method" = NULL)
+        
+      }
+      
+    }
+    
   }
 )
 
@@ -627,6 +675,11 @@ setMethod(cyto_plot_compensation,
                           header_text_size = 1,
                           header_text_col = "black", ...) {
 
+    # Set plot method 
+    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+      options("CytoRSuite_cyto_plot_method" = "Comp/GatingSet")
+    }
+    
     # Assign x to gs
     gs <- x
 
@@ -703,5 +756,24 @@ setMethod(cyto_plot_compensation,
     # Return defaults
     par(mfrow = c(1, 1))
     par(oma = c(0, 0, 0, 0))
+    
+    # Turn off graphics device for saving
+    if(getOption("CytoRSuite_cyto_plot_save")){
+      
+      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+        
+        # Close graphics device
+        dev.off()
+        
+        # Reset CytoRSuite_cyto_plot_save
+        options("CytoRSuite_cyto_plot_save" = FALSE)
+        
+        # Reset CytoRSuite_cyto_plot_method
+        options("cytoRSuite_cyto_plot_method" = NULL)
+        
+      }
+      
+    }
+    
   }
 )

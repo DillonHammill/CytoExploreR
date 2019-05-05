@@ -1,3 +1,22 @@
+# Function & argument definitions for cyto_plot --------------------------------
+
+# cyto_plot with pass all of its arguments to the cyto_plot internal functions
+# as a named list. The function which receives these arguments is determined
+# based on the length of the supplied channels.
+
+# ADDING NEW FEATURES TO CYTO_PLOT: 
+# 1. Add the argument to cyto_plot with an appropriate default. This will 
+# automatically be passed with all the other arguments to the internal plotting
+# functions in a named list. 
+# 2. Modify the code in the called cyto_plot internal function to add the new 
+# feature. New arguments can be accessed form the argument list by name (e.g.
+# args[["argument_name"]]).
+
+# ARGUMENT CONVENTIONS:
+# Arguments that can be replaced internally are set to missing by default and
+# replaced if not assigned NA. Arguments that can be either supplied or not are
+# set to NA by default.
+
 #' cyto_plot
 #'
 #' Explore & visualise flow cytometry data.
@@ -34,12 +53,9 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setGeneric(
-  name = "cyto_plot",
-  def = function(x, ...) {
-    standardGeneric("cyto_plot")
-  }
-)
+cyto_plot <- function(x, ...){
+  UseMethod("cyto_plot")
+}
 
 #' cyto_plot - flowFrame Method
 #'
@@ -88,6 +104,8 @@ setGeneric(
 #'   plots.
 #' @param density_stack numeric [0,1] indicating the degree of offset for 1-D
 #'   density distributions with overlay, set to 0.5 by default.
+#' @param density_cols vector colours to draw from when selecting density fill
+#'   colours if none are supplied to density_fill.
 #' @param density_fill fill colour(s) for 1-D density distributions.
 #' @param density_fill_alpha numeric [0,1] used to control 1-D density fill
 #'   colour transparency, set to 1 by default for solid colours.
@@ -103,6 +121,8 @@ setGeneric(
 #'   \code{\link[graphics:par]{pch}} for alternatives.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default.
+#' @param point_cols vector colours to draw from when selecting colours for points
+#'   if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
 #'   by default to use a blue-red density colour scale.
 #' @param point_alpha numeric [0,1] to control point colour transparency in 2-D
@@ -117,6 +137,9 @@ setGeneric(
 #'   in 2-D scatter plots, set to 2 by default.
 #' @param contour_line_col colour(s) to use for contour lines in 2-D scatter
 #'   plots, set to \code{"black"} by default.
+#' @param axes_text logical vector of length 2 indicating whether axis text
+#'   should be included for the x and y axes respectively, set to
+#'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
 #' @param axes_text_font numeric to control the font of axes text, set to 1 for
 #'   plain font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -194,6 +217,8 @@ setGeneric(
 #'   set to 1 by default.
 #' @param border_line_col colour to use for the plot border, set to "black" by
 #'   default.
+#' @param border_fill border_fill fill colour to use inside the plot border
+#'   (i.e. background colour), set to "white" by default.
 #' @param ... additional arguments passed to \code{\link[graphics:plot]{plot}}.
 #'
 #' @examples
@@ -227,12 +252,12 @@ setGeneric(
 #' @seealso \code{\link{cyto_plot,GatingHierarchy-method}}
 #' @seealso \code{\link{cyto_plot,GatingSet-method}}
 #'
+#' @importFrom grDevices recordPlot
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(cyto_plot,
-          signature = "flowFrame",
-          definition = function(x,
+cyto_plot.flowFrame <- function(x,
                                 channels,
                                 axes_trans = NULL,
                                 overlay = NULL,
@@ -247,6 +272,7 @@ setMethod(cyto_plot,
                                 density_modal = TRUE,
                                 density_smooth = 1.5,
                                 density_stack = 0,
+                                density_cols = NA,
                                 density_fill = NA,
                                 density_fill_alpha = 1,
                                 density_line_type = 1,
@@ -254,12 +280,14 @@ setMethod(cyto_plot,
                                 density_line_col = "black",
                                 point_shape = ".",
                                 point_size = 2,
+                                point_cols = NA,
                                 point_col = NA,
                                 point_alpha = 1,
                                 contour_lines = 0,
                                 contour_line_type = 1,
                                 contour_line_width = 1,
                                 contour_line_col = "black",
+                                axes_text = c(TRUE,TRUE),
                                 axes_text_font = 1,
                                 axes_text_size = 1,
                                 axes_text_col = "black",
@@ -291,133 +319,65 @@ setMethod(cyto_plot,
                                 label_box_alpha = 0.6,
                                 border_line_type = 1,
                                 border_line_width = 1,
-                                border_line_col = "black", ...) {
+                                border_line_col = "black",
+                                border_fill = "white", ...) {
+            
+            # Set plot method 
+            if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+              options("CytoRSuite_cyto_plot_method" = "flowFrame")
+            }
             
             # Check if channels supplied
             if (missing(channels)) {
               stop("Supply channel/marker(s) to construct the plot.")
             }
             
-            # Assign x to fr
-            fr <- x
-            
             # Check channels
-            channels <- cyto_channel_check(fr,
+            channels <- cyto_channels_extract(x,
                                            channels = channels,
                                            plot = TRUE
             )
             
+            # Pull down arguments to named list
+            args <- args_list()
+            
+            # Inherit arguments from cyto_plot_theme
+            args <- .cyto_plot_theme_inherit(args)
+            
             # Make call to appropriate cyto_plot internal function
             if (length(channels) == 1) {
-              .cyto_plot_1d(
-                x = fr,
-                channel = channels,
-                axes_trans = axes_trans,
-                overlay = overlay,
-                gate = gate,
-                limits = limits,
-                popup = popup,
-                xlim = xlim,
-                ylim = ylim,
-                title = title,
-                xlab = xlab,
-                ylab = ylab,
-                density_modal = density_modal,
-                density_smooth = density_smooth,
-                density_stack = density_stack,
-                density_fill = density_fill,
-                density_fill_alpha = density_fill_alpha,
-                density_line_type = density_line_type,
-                density_line_width = density_line_width,
-                density_line_col = density_line_col,
-                axes_text_font = axes_text_font,
-                axes_text_size = axes_text_size,
-                axes_text_col = axes_text_col,
-                axes_label_text_font = axes_label_text_font,
-                axes_label_text_size = axes_label_text_size,
-                axes_label_text_col = axes_label_text_col,
-                title_text_font = title_text_font,
-                title_text_size = title_text_size,
-                title_text_col = title_text_col,
-                legend = legend,
-                legend_text = legend_text,
-                legend_text_font = legend_text_font,
-                legend_text_size = legend_text_size,
-                legend_text_col = legend_text_col,
-                legend_line_col = legend_line_col,
-                legend_box_fill = legend_box_fill,
-                gate_line_type = gate_line_type,
-                gate_line_width = gate_line_width,
-                gate_line_col = gate_line_col,
-                label = label,
-                label_text = label_text,
-                label_stat = label_stat,
-                label_text_font = label_text_font,
-                label_text_size = label_text_size,
-                label_text_col = label_text_col,
-                label_box_x = label_box_x,
-                label_box_y = label_box_y,
-                label_box_alpha = label_box_alpha,
-                border_line_type = border_line_type,
-                border_line_width = border_line_width,
-                border_line_col = border_line_col, ...
-              )
+              .cyto_plot_1d(args[["x"]], args)
             } else if (length(channels) == 2) {
-              .cyto_plot_2d(
-                x = fr,
-                channels = channels,
-                axes_trans = axes_trans,
-                overlay = overlay,
-                gate = gate,
-                limits = limits,
-                popup = popup,
-                xlim = xlim,
-                ylim = ylim,
-                title = title,
-                xlab = xlab,
-                ylab = ylab,
-                point_shape = point_shape,
-                point_size = point_size,
-                point_col = point_col,
-                point_alpha = point_alpha,
-                contour_lines = contour_lines,
-                contour_line_type = contour_line_type,
-                contour_line_width = contour_line_width,
-                contour_line_col = contour_line_col,
-                axes_text_font = axes_text_font,
-                axes_text_size = axes_text_size,
-                axes_text_col = axes_text_col,
-                axes_label_text_font = axes_label_text_font,
-                axes_label_text_size = axes_label_text_size,
-                axes_label_text_col = axes_label_text_col,
-                title_text_font = title_text_font,
-                title_text_size = title_text_size,
-                title_text_col = title_text_col,
-                legend = legend,
-                legend_text = legend_text,
-                legend_text_font = legend_text_font,
-                legend_text_size = legend_text_size,
-                legend_text_col = legend_text_col,
-                legend_point_col = legend_point_col,
-                gate_line_type = gate_line_type,
-                gate_line_width = gate_line_width,
-                gate_line_col = gate_line_col,
-                label = label,
-                label_text = label_text,
-                label_stat = label_stat,
-                label_text_font = label_text_font,
-                label_text_size = label_text_size,
-                label_text_col = label_text_col,
-                label_box_x = label_box_x,
-                label_box_y = label_box_y,
-                label_box_alpha = label_box_alpha,
-                border_line_type = border_line_type,
-                border_line_width = border_line_width,
-                border_line_col = border_line_col, ...
-              )
+              .cyto_plot_2d(args[["x"]], args)
             }
+            
+            # Turn off graphics device for saving
+            if(getOption("CytoRSuite_cyto_plot_save")){
+              
+              if(inherits(x, getOption("CytoRSuite_cyto_plot_method"))){
+                
+                
+                if(!getOption("CytoRSuite_cyto_plot_custom")){
+                  
+                  # Close graphics device
+                  dev.off()
+                  
+                }
+              
+                # Reset CytoRSuite_cyto_plot_save
+                options("CytoRSuite_cyto_plot_save" = FALSE)
+                
+                # Reset CytoRSuite_cyto_plot_method
+                options("cytoRSuite_cyto_plot_method" = NULL)
+                
+              }
+              
+            }
+            
+            # Record plot for assignment
+            invisible(recordPlot())
+            
           }
-)
 
 #' cyto_plot - flowSet Method
 #'
@@ -506,6 +466,9 @@ setMethod(cyto_plot,
 #'   in 2-D scatter plots, set to 2 by default.
 #' @param contour_line_col colour(s) to use for contour lines in 2-D scatter
 #'   plots, set to \code{"black"} by default.
+#' @param axes_text logical vector of length 2 indicating whether axis text
+#'   should be included for the x and y axes respectively, set to
+#'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
 #' @param axes_text_font numeric to control the font of axes text, set to 1 for
 #'   plain font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -616,12 +579,12 @@ setMethod(cyto_plot,
 #' @seealso \code{\link{cyto_plot,GatingHierarchy-method}}
 #' @seealso \code{\link{cyto_plot,GatingSet-method}}
 #'
+#' @importFrom grDevices recordPlot
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(cyto_plot,
-          signature = "flowSet",
-          definition = function(x,
+cyto_plot.flowSet <- function(x,
                                 channels,
                                 axes_trans = NULL,
                                 group_by = FALSE,
@@ -653,6 +616,7 @@ setMethod(cyto_plot,
                                 contour_line_type = 1,
                                 contour_line_width = 1,
                                 contour_line_col = "black",
+                                axes_text = c(TRUE,TRUE),
                                 axes_text_font = 1,
                                 axes_text_size = 1,
                                 axes_text_col = "black",
@@ -686,137 +650,74 @@ setMethod(cyto_plot,
                                 border_line_width = 1,
                                 border_line_col = "black", ...) {
             
+            # Set plot method 
+            if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+              options("CytoRSuite_cyto_plot_method" = "flowSet")
+            }
+            
+            # Signal custom plot if layout is FALSE
+            if(!is.null(layout)){
+              
+              if(all(layout == FALSE)){
+                
+                options("CytoRSuite_cyto_plot_custom" = TRUE)
+                
+              }
+            }
+            
             # Check if channels supplied
             if (missing(channels)) {
               stop("Supply channel/marker(s) to construct the plot.")
             }
             
-            # Assign x to fs
-            fs <- x
-            
             # Check channels
-            channels <- cyto_channel_check(fs,
+            channels <- cyto_channels_extract(x,
                                            channels = channels,
                                            plot = TRUE
             )
             
+            # Pull down arguments to named list
+            args <- args_list()
+            
+            # Inherit arguments from cyto_plot_theme
+            args <- .cyto_plot_theme_inherit(args)
+            
             # Make call to appropriate cyto_plot function
             if (length(channels) == 1) {
-              .cyto_plot_1d(
-                x = fs,
-                channel = channels,
-                axes_trans = axes_trans,
-                group_by = group_by,
-                overlay = overlay,
-                gate = gate,
-                limits = limits,
-                layout = layout,
-                popup = popup,
-                xlim = xlim,
-                ylim = ylim,
-                title = title,
-                xlab = xlab,
-                ylab = ylab,
-                density_modal = density_modal,
-                density_smooth = density_smooth,
-                density_stack = density_stack,
-                density_layers = density_layers,
-                density_fill = density_fill,
-                density_fill_alpha = density_fill_alpha,
-                density_line_type = density_line_type,
-                density_line_width = density_line_width,
-                density_line_col = density_line_col,
-                axes_text_font = axes_text_font,
-                axes_text_size = axes_text_size,
-                axes_text_col = axes_text_col,
-                axes_label_text_font = axes_label_text_font,
-                axes_label_text_size = axes_label_text_size,
-                axes_label_text_col = axes_label_text_col,
-                title_text_font = title_text_font,
-                title_text_size = title_text_size,
-                title_text_col = title_text_col,
-                legend = legend,
-                legend_text = legend_text,
-                legend_text_font = legend_text_font,
-                legend_text_size = legend_text_size,
-                legend_text_col = legend_text_col,
-                legend_line_col = legend_line_col,
-                legend_box_fill = legend_box_fill,
-                gate_line_type = gate_line_type,
-                gate_line_width = gate_line_width,
-                gate_line_col = gate_line_col,
-                label = label,
-                label_text = label_text,
-                label_stat = label_stat,
-                label_text_font = label_text_font,
-                label_text_size = label_text_size,
-                label_text_col = label_text_col,
-                label_box_x = label_box_x,
-                label_box_y = label_box_y,
-                label_box_alpha = label_box_alpha,
-                border_line_type = border_line_type,
-                border_line_width = border_line_width,
-                border_line_col = border_line_col, ...
-              )
+              .cyto_plot_1d(args[["x"]], args)
             } else if (length(channels) == 2) {
-              .cyto_plot_2d(
-                x = fs,
-                channels = channels,
-                axes_trans = axes_trans,
-                group_by = group_by,
-                overlay = overlay,
-                gate = gate,
-                limits = limits,
-                display = display,
-                layout = layout,
-                popup = popup,
-                xlim = xlim,
-                ylim = ylim,
-                title = title,
-                xlab = xlab,
-                ylab = ylab,
-                point_shape = point_shape,
-                point_size = point_size,
-                point_col = point_col,
-                point_alpha = point_alpha,
-                contour_lines = contour_lines,
-                contour_line_type = contour_line_type,
-                contour_line_width = contour_line_width,
-                contour_line_col = contour_line_col,
-                axes_text_font = axes_text_font,
-                axes_text_size = axes_text_size,
-                axes_text_col = axes_text_col,
-                axes_label_text_font = axes_label_text_font,
-                axes_label_text_size = axes_label_text_size,
-                axes_label_text_col = axes_label_text_col,
-                title_text_font = title_text_font,
-                title_text_size = title_text_size,
-                title_text_col = title_text_col,
-                legend = legend,
-                legend_text = legend_text,
-                legend_text_font = legend_text_font,
-                legend_text_size = legend_text_size,
-                legend_text_col = legend_text_col,
-                legend_point_col = legend_point_col,
-                gate_line_type = gate_line_type,
-                gate_line_width = gate_line_width,
-                gate_line_col = gate_line_col,
-                label = label,
-                label_text = label_text,
-                label_stat = label_stat,
-                label_text_font = label_text_font,
-                label_text_size = label_text_size,
-                label_text_col = label_text_col,
-                label_box_x = label_box_x,
-                label_box_y = label_box_y,
-                label_box_alpha = label_box_alpha,
-                border_line_type = border_line_type,
-                border_line_width = border_line_width,
-                border_line_col = border_line_col, ...
-              )
+              .cyto_plot_2d(args[["x"]], args)
             }
+            
+            # Turn off graphics device for saving
+            if(getOption("CytoRSuite_cyto_plot_save")){
+              
+              if(inherits(x, getOption("CytoRSuite_cyto_plot_method"))){
+                
+                if(!getOption("CytoRSuite_cyto_plot_custom")){
+                
+                  # Close graphics device
+                  dev.off()
+                  
+                }
+                
+                # Reset CytoRSuite_cyto_plot_save
+                options("CytoRSuite_cyto_plot_save" = FALSE)
+                
+                # Reset CytoRSuite_cyto_plot_method
+                options("cytoRSuite_cyto_plot_method" = NULL)
+                
+                # Reset custom plotting flag
+                options("CytoRSuite_cyto_plot_custom" = FALSE)
+                
+              }
+              
+            }
+            
+            # Record plot for assignment
+            invisible(recordPlot())
+            
           }
-)
 
 #' cyto_plot - GatingHierarchy Method
 #'
@@ -901,6 +802,9 @@ setMethod(cyto_plot,
 #'   in 2-D scatter plots, set to 2 by default.
 #' @param contour_line_col colour(s) to use for contour lines in 2-D scatter
 #'   plots, set to \code{"black"} by default.
+#' @param axes_text logical vector of length 2 indicating whether axis text
+#'   should be included for the x and y axes respectively, set to
+#'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
 #' @param axes_text_font numeric to control the font of axes text, set to 1 for
 #'   plain font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -1024,6 +928,8 @@ setMethod(cyto_plot,
 #' @importFrom flowWorkspace getGate getData sampleNames getTransformations
 #'   getNodes
 #' @importFrom openCyto templateGen
+#' @importFrom grDevices recordPlot
+#' @importFrom methods formalArgs
 #'
 #' @seealso \code{\link{cyto_plot,flowFrame-method}}
 #' @seealso \code{\link{cyto_plot,flowSet-method}}
@@ -1032,9 +938,7 @@ setMethod(cyto_plot,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(cyto_plot,
-          signature = "GatingHierarchy",
-          definition = function(x,
+cyto_plot.GatingHierarchy <- function(x,
                                 parent,
                                 alias = NULL,
                                 channels,
@@ -1064,6 +968,7 @@ setMethod(cyto_plot,
                                 contour_line_type = 1,
                                 contour_line_width = 1,
                                 contour_line_col = "black",
+                                axes_text = axes_text,
                                 axes_text_font = 1,
                                 axes_text_size = 1,
                                 axes_text_col = "black",
@@ -1097,6 +1002,11 @@ setMethod(cyto_plot,
                                 border_line_width = 1,
                                 border_line_col = "black", ...) {
             
+            # Set plot method 
+            if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+              options("CytoRSuite_cyto_plot_method" = "GatingHierarchy")
+            }
+            
             # No Parent Supplied
             if (missing(parent)) {
               stop("Please supply the name of the parent population to plot.")
@@ -1111,7 +1021,7 @@ setMethod(cyto_plot,
             gh <- x
             
             # Check channels
-            channels <- cyto_channel_check(
+            channels <- cyto_channels_extract(
               x = getData(gh, "root"),
               channels,
               plot = TRUE
@@ -1124,11 +1034,14 @@ setMethod(cyto_plot,
                 gt <- templateGen(gh)
                 gt <- gt[basename(gt$parent) == parent,]
                 alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+                
+                # No gates constructed in the supplied channels
+                if(length(alias) == 0){
+                  alias <- NULL
+                }
+                
               }
-              
-              if (!all(alias %in% basename(getNodes(gh)))) {
-                stop("Supplied alias does not exist in the GatingHierarchy")
-              }
+
             }
             
             # Gates - either alias or gate not both
@@ -1166,7 +1079,7 @@ setMethod(cyto_plot,
             }
             
             # Extract population from GatingHierarchy
-            fr <- getData(gh, parent)
+            x <- getData(gh, parent)
             
             # Titles
             if (missing(title)) {
@@ -1201,71 +1114,40 @@ setMethod(cyto_plot,
               }
             }
             
-            # Make call to cyto_plot
-            cyto_plot(
-              x = fr,
-              channels = channels,
-              axes_trans = axes_trans,
-              overlay = overlay,
-              gate = gate,
-              limits = limits,
-              popup = popup,
-              xlim = xlim,
-              ylim = ylim,
-              title = title,
-              xlab = xlab,
-              ylab = ylab,
-              density_modal = density_modal,
-              density_smooth = density_smooth,
-              density_stack = density_stack,
-              density_fill = density_fill,
-              density_fill_alpha = density_fill_alpha,
-              density_line_type = density_line_type,
-              density_line_width = density_line_width,
-              density_line_col = density_line_col,
-              point_shape = point_shape,
-              point_size = point_size,
-              point_col = point_col,
-              point_alpha = point_alpha,
-              contour_lines = contour_lines,
-              contour_line_type = contour_line_type,
-              contour_line_width = contour_line_width,
-              contour_line_col = contour_line_col,
-              axes_text_font = axes_text_font,
-              axes_text_size = axes_text_size,
-              axes_text_col = axes_text_col,
-              axes_label_text_font = axes_label_text_font,
-              axes_label_text_size = axes_label_text_size,
-              axes_label_text_col = axes_label_text_col,
-              title_text_font = title_text_font,
-              title_text_size = title_text_size,
-              title_text_col = title_text_col,
-              legend = legend,
-              legend_text = legend_text,
-              legend_text_font = legend_text_font,
-              legend_text_size = legend_text_size,
-              legend_text_col = legend_text_col,
-              legend_line_col = legend_line_col,
-              legend_box_fill = legend_box_fill,
-              legend_point_col = legend_point_col,
-              gate_line_type = gate_line_type,
-              gate_line_width = gate_line_width,
-              gate_line_col = gate_line_col,
-              label = label,
-              label_text = label_text,
-              label_stat = label_stat,
-              label_text_font = label_text_font,
-              label_text_size = label_text_size,
-              label_text_col = label_text_col,
-              label_box_x = label_box_x,
-              label_box_y = label_box_y,
-              label_box_alpha = label_box_alpha,
-              border_line_type = border_line_type,
-              border_line_width = border_line_width,
-              border_line_col = border_line_col, ...
-            )
+            # Pull down arguments to named list
+            args <- args_list()
+            
+            # Pass arguments to cyto_plot flowFrame method for theme & dispatch
+            .args <- formalArgs("cyto_plot.flowFrame")
+            do.call("cyto_plot.flowFrame", 
+                    args[names(args) %in% .args])
+                        
+            # Turn off graphics device for saving
+            if(getOption("CytoRSuite_cyto_plot_save")){
+              
+              if(inherits(x, getOption("CytoRSuite_cyto_plot_method"))){
+                
+                if(!getOption("CytoRSuite_cyto_plot_custom")){
+                  
+                  # Close graphics device
+                  dev.off()
+                  
+                }
+                
+                # Reset CytoRSuite_cyto_plot_save
+                options("CytoRSuite_cyto_plot_save" = FALSE)
+                
+                # Reset CytoRSuite_cyto_plot_method
+                options("cytoRSuite_cyto_plot_method" = NULL)
+                
+              }
+              
+            }
+            
+            # Record plot for assignment
+            invisible(recordPlot())
+            
           }
-)
 
 #' cyto_plot - GatingSet Method
 #'
@@ -1360,6 +1242,9 @@ setMethod(cyto_plot,
 #'   in 2-D scatter plots, set to 2 by default.
 #' @param contour_line_col colour(s) to use for contour lines in 2-D scatter
 #'   plots, set to \code{"black"} by default.
+#' @param axes_text logical vector of length 2 indicating whether axis text
+#'   should be included for the x and y axes respectively, set to
+#'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
 #' @param axes_text_font numeric to control the font of axes text, set to 1 for
 #'   plain font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -1476,6 +1361,8 @@ setMethod(cyto_plot,
 #'   sampleNames pData getNodes
 #' @importFrom flowCore flowSet
 #' @importFrom openCyto templateGen
+#' @importFrom grDevices recordPlot
+#' @importFrom methods formalArgs
 #'
 #' @seealso \code{\link{cyto_plot,flowFrame-method}}
 #' @seealso \code{\link{cyto_plot,flowSet-method}}
@@ -1484,9 +1371,7 @@ setMethod(cyto_plot,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(cyto_plot,
-          signature = "GatingSet",
-          definition = function(x,
+cyto_plot.GatingSet <- function(x,
                                 parent,
                                 alias = NULL,
                                 channels,
@@ -1520,6 +1405,7 @@ setMethod(cyto_plot,
                                 contour_line_type = 1,
                                 contour_line_width = 1,
                                 contour_line_col = "black",
+                                axes_text = c(TRUE,TRUE),
                                 axes_text_font = 1,
                                 axes_text_size = 1,
                                 axes_text_col = "black",
@@ -1553,6 +1439,21 @@ setMethod(cyto_plot,
                                 border_line_width = 1,
                                 border_line_col = "black", ...) {
             
+            # Set plot method 
+            if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+              options("CytoRSuite_cyto_plot_method" = "GatingSet")
+            }
+            
+            # Signal custom plot if layout is FALSE
+            if(!is.null(layout)){
+              
+              if(all(layout == FALSE)){
+                
+                options("CytoRSuite_cyto_plot_custom" = TRUE)
+                
+              }
+            }
+            
             # No Parent Supplied
             if (missing(parent)) {
               stop("Please supply the name of the parent population to plot.")
@@ -1564,7 +1465,7 @@ setMethod(cyto_plot,
             }
             
             # Check channels
-            channels <- cyto_channel_check(x, channels, plot = TRUE)
+            channels <- cyto_channels_extract(x, channels, plot = TRUE)
             
             # Check supplied alias exists in GatingSet
             if (!missing(alias)) {
@@ -1573,11 +1474,14 @@ setMethod(cyto_plot,
                 gt <- templateGen(x[[1]])
                 gt <- gt[basename(gt$parent) == parent,]
                 alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+                
+                # No gates constructed in the supplied channels
+                if(length(alias) == 0){
+                  alias <- NULL
+                }
+                
               }
               
-              if (!all(alias %in% basename(getNodes(x)))) {
-                stop("Supplied alias does not exist in the GatingSet.")
-              }
             }
             
             # Assign x to gs
@@ -1649,7 +1553,7 @@ setMethod(cyto_plot,
               }
               
               # Extract data
-              fs <- getData(gs, parent)
+              x <- getData(gs, parent)
               
               # Sampling happens in cyto_plot flowSet method
               fr.lst <- .cyto_merge(gs,
@@ -1679,7 +1583,7 @@ setMethod(cyto_plot,
               }
               
               # Convert merged flowFrame list to flowSet
-              fs <- flowSet(fr.lst)
+              x <- flowSet(fr.lst)
               
               # Gates - either alias or gate not both
               if (!.valid_gates(gate, channels)) {
@@ -1719,7 +1623,7 @@ setMethod(cyto_plot,
             } else if (group_by[1] == FALSE) {
               
               # Extract population
-              fs <- getData(gs, parent)
+              x <- getData(gs, parent)
               
               # Plot titles
               if (missing(title)) {
@@ -1770,72 +1674,41 @@ setMethod(cyto_plot,
               }
             }
             
-            # Make call to cyto_plot
-            cyto_plot(
-              x = fs,
-              channels = channels,
-              axes_trans = axes_trans,
-              group_by = FALSE,
-              overlay = overlay,
-              gate = gate,
-              limits = limits,
-              display = display,
-              layout = layout,
-              popup = popup,
-              xlim = xlim,
-              ylim = ylim,
-              title = title,
-              xlab = xlab,
-              ylab = ylab,
-              density_modal = density_modal,
-              density_smooth = density_smooth,
-              density_stack = density_stack,
-              density_layers = density_layers,
-              density_fill = density_fill,
-              density_fill_alpha = density_fill_alpha,
-              density_line_type = density_line_type,
-              density_line_width = density_line_width,
-              density_line_col = density_line_col,
-              point_shape = point_shape,
-              point_size = point_size,
-              point_col = point_col,
-              point_alpha = point_alpha,
-              contour_lines = contour_lines,
-              contour_line_type = contour_line_type,
-              contour_line_width = contour_line_width,
-              contour_line_col = contour_line_col,
-              axes_text_font = axes_text_font,
-              axes_text_size = axes_text_size,
-              axes_text_col = axes_text_col,
-              axes_label_text_font = axes_label_text_font,
-              axes_label_text_size = axes_label_text_size,
-              axes_label_text_col = axes_label_text_col,
-              title_text_font = title_text_font,
-              title_text_size = title_text_size,
-              title_text_col = title_text_col,
-              legend = legend,
-              legend_text = legend_text,
-              legend_text_font = legend_text_font,
-              legend_text_size = legend_text_size,
-              legend_text_col = legend_text_col,
-              legend_line_col = legend_line_col,
-              legend_box_fill = legend_box_fill,
-              legend_point_col = legend_point_col,
-              gate_line_type = gate_line_type,
-              gate_line_width = gate_line_width,
-              gate_line_col = gate_line_col,
-              label = label,
-              label_text = label_text,
-              label_stat = label_stat,
-              label_text_font = label_text_font,
-              label_text_size = label_text_size,
-              label_text_col = label_text_col,
-              label_box_x = label_box_x,
-              label_box_y = label_box_y,
-              label_box_alpha = label_box_alpha,
-              border_line_type = border_line_type,
-              border_line_width = border_line_width,
-              border_line_col = border_line_col, ...
-            )
+            # Pull down arguments to named list
+            args <- args_list()
+            
+            # Pass arguments to flowSet method for theme & dispatch
+            .args <- formalArgs("cyto_plot.flowSet")
+            do.call("cyto_plot.flowSet",
+                    args[names(args) %in% .args])
+            
+            # Turn off graphics device for saving
+            if(getOption("CytoRSuite_cyto_plot_save")){
+              
+              if(inherits(x, getOption("CytoRSuite_cyto_plot_method"))){
+                
+                
+                if(!getOption("CytoRSuite_cyto_plot_custom")){
+                
+                  # Close graphics device
+                  dev.off()
+                  
+                }
+                
+                # Reset CytoRSuite_cyto_plot_save
+                options("CytoRSuite_cyto_plot_save" = FALSE)
+                
+                # Reset CytoRSuite_cyto_plot_method
+                options("cytoRSuite_cyto_plot_method" = NULL)
+                
+                # Reset custom plotting flag
+                options("CytoRSuite_cyto_plot_custom")
+                
+              }
+              
+            }
+            
+            # Record plot for assignment
+            invisible(recordPlot())
+
           }
-)

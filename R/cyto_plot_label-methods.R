@@ -1319,7 +1319,6 @@ setMethod(cyto_plot_label,
 #'   overlap is detected.
 #'   
 #' @importFrom stats na.omit
-#' @importFrom graphics strheight
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'

@@ -67,7 +67,7 @@ gate_polygon_draw <- function(fr,
                               label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -79,23 +79,12 @@ gate_polygon_draw <- function(fr,
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
-      cyto_plot(fr,
-                channels = channels,
-                popup = TRUE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    }
-  } else if (plot == FALSE) {
-    
+    cyto_plot(fr,
+              channels = channels,
+              popup = TRUE,
+              legend = FALSE,
+              label = FALSE, ...
+    )
   }
   
   # Construct gates
@@ -107,28 +96,22 @@ gate_polygon_draw <- function(fr,
       )
     )
     
-    # Extract gate coordinates
-    if (getOption("CytoRSuite_interact") == TRUE) {
-      options("show.error.messages" = FALSE)
-      on.exit(options("show.error.messages" = TRUE))
-      coords <- locator(
-        type = "o",
-        lwd = 2,
-        pch = 16,
-        col = "red"
-      )
-    } else {
-      coords <- list(
-        c(50000, 100000, 100000, 75000, 50000),
-        c(10000, 10000, 60000, 85000, 60000)
-      )
-      names(coords) <- c("x", "y")
-    }
+    # Extract gate coordinates - close without error if not gate drawn
+    options("show.error.messages" = FALSE)
+    on.exit(options("show.error.messages" = TRUE))
+    coords <- locator(
+      type = "o",
+      lwd = 2,
+      pch = 16,
+      col = "red"
+    )
     
+    # Too few points selected to construct polygon
     if (length(coords$x) < 3) {
       stop("A minimum of 3 points is required to construct a polygon gate.")
     }
     
+    # Draw gate on the plot
     lines(
       x = coords$x[c(1, length(coords$x))],
       y = coords$y[c(1, length(coords$x))],
@@ -136,15 +119,13 @@ gate_polygon_draw <- function(fr,
       col = "red"
     )
     
+    # Tidy up input coords
     coords <- as.data.frame(coords)
     coords <- as.matrix(coords)
     colnames(coords) <- channels
     
+    # Construct gate object
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias)
-    
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot_gate(gate, channels = channels)
-    }
     
     if (label == TRUE) {
       cyto_plot_label(
@@ -237,7 +218,7 @@ gate_rectangle_draw <- function(fr,
                                 label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -416,7 +397,7 @@ gate_interval_draw <- function(fr,
                                label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -633,7 +614,7 @@ gate_threshold_draw <- function(fr,
                                 label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -812,7 +793,7 @@ gate_boundary_draw <- function(fr,
                                label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -981,7 +962,7 @@ gate_ellipse_draw <- function(fr,
                               label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -1198,7 +1179,7 @@ gate_quadrant_draw <- function(fr,
                                label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )
@@ -1420,7 +1401,7 @@ gate_web_draw <- function(fr,
                           label = TRUE, ...) {
   
   # Check channels
-  channels <- cyto_channel_check(fr,
+  channels <- cyto_channels_extract(fr,
                                  channels = channels,
                                  plot = TRUE
   )

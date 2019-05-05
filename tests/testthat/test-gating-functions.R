@@ -3,19 +3,27 @@ context("Gating Functions")
 ## gate_polygon_draw -----------------------------------------------------------
 
 test_that("gate_polygon_draw", {
-  expect_error(gate_polygon_draw(fs[[1]], 
+  expect_error(gate_polygon_draw(fr_test, 
                                  channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
+      "Please supply a name for the gated population as the alias argument.")
   
-  dp <- gate_polygon_draw(fs[[1]], 
-                          alias = "Cells", 
-                          channels = c("FSC-A", "SSC-A"), 
-                          display = 0.05)
-  
-  expect_s4_class(dp, "filters")
-  expect_s4_class(dp[[1]], "polygonGate")
-  expect_equal(dp[[1]], pg)
-  expect_equal(parameters(dp[[1]]), parameters(pg))
+  # Reference polygonGate -
+  coords <- list("x" = c(50000, 100000, 100000, 75000, 50000),
+                 "y" = c(10000, 10000, 60000, 85000, 60000))
+  coords <- matrix(c(50000, 100000, 100000, 75000, 50000, 
+                     10000, 10000, 60000, 85000, 60000), 
+                   ncol = 2, nrow = 5)
+  colnames(coords) <- c("FSC-A", "SSC-A")
+  ref <- polygonGate(filterId = "Cells", .gate = coords)
+  mock_locator <- mock(coords)
+  testthat::with_mock(locator = mock_locator,
+                      expect_equal(
+                        gate_polygon_draw(fr_test,
+                                          alias = "Cells",
+                                          channels = c("FSC-A","SSC-A"),
+                                          plot = FALSE),
+                        ref))
+
 })
 
 ## gate_rectangle_draw ---------------------------------------------------------

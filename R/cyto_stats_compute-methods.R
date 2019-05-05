@@ -109,7 +109,7 @@ setMethod(cyto_stats_compute,
             if (is.null(channels)) {
               channels <- BiocGenerics::colnames(fr)
             } else {
-              channels <- cyto_channel_check(
+              channels <- cyto_channels_extract(
                 x = fr,
                 channels = channels,
                 plot = FALSE

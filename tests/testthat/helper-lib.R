@@ -14,6 +14,10 @@ library(grDevices)
 # Load in robustbase (colMedians) -
 library(robustbase)
 
+# Libraries for data manipulation
+library(tibble)
+library(dplyr)
+
 # Data directory CytoRSuiteData ------------------------------------------------
 datadir <- system.file("extdata", package = "CytoRSuiteData")
 
@@ -22,15 +26,12 @@ datadir <- system.file("extdata", package = "CytoRSuiteData")
 # Assign Activation dataset to fs -
 fs <- read.flowSet(path = paste0(datadir,"/Activation"), pattern = ".fcs")
 
-# Sample names
-nms <- sampleNames(fs)
+# Fix file order -
+fs <- fs[c(1,12,23,28,29,30,31,32,33,2,3,4,5,6,7,8,9,10,
+           11,13,14,15,16,17,18,19,20,21,22,24,25,26,27)]
 
 # Sample for speed -
-fs <- flowSet(lapply(seq_len(length(fs)), function(x) {
-  fs[[x]][1:2000, ]
-}))
-sampleNames(fs) <- nms
-pData(fs)$name <- nms
+fs <- fsApply(fs, function(fr){cyto_sample(fr, display = 0.04, seed = 20)})
 
 # Samplenames
 nms <- sampleNames(fs)
@@ -39,9 +40,16 @@ nms <- sampleNames(fs)
 chans <- colnames(fs)
 
 # pData information -
-pData(fs)$OVAConc <- c(0, 0.005, 0.05, 0.5)
-pData(fs)$Treatment <- c("A", "A", "B", "B")
-pData(fs)$Treatment <- factor(pData(fs)$Treatment, levels = c("B", "A"))
+pData(fs)$OVAConc <- c(rep(c(0,0,0.005,0.005,0.05,0.05,0.5,0.5), 4), NA)
+pData(fs)$Treatment <- c(rep("Stim-A", 8),
+                         rep("Stim-B", 8),
+                         rep("Stim-C", 8),
+                         rep("Stim-D", 8),
+                         NA)
+pData(fs)$Treatment <- factor(pData(fs)$Treatment, levels = c("Stim-A",
+                                                              "Stim-B",
+                                                              "Stim-C",
+                                                              "Stim-D", "NA"))
 chnls <- c("Alexa Fluor 405-A", 
            "Alexa Fluor 430-A", 
            "APC-Cy7-A", "PE-A", 
@@ -67,7 +75,7 @@ gs <- GatingSet(fs)
 gs <- compensate(gs, fs[[1]]@description$SPILL)
 
 # Transformation -
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
+trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 gs <- transform(gs, trans)
 
 # gatingTemplate -
@@ -84,17 +92,19 @@ gating(gt, gs)
 # Extract T Cells Population -
 Va2 <- getData(gs, "T Cells")
 
+# Extract a flowFrame/flowSet for testing -
+fr_test <- Va2[[32]]
+fs_test <- Va2[c(26,28,30,32)]
+gs_test <- gs[c(26,28,30,32)]
+
 # Compensation GatingSet -------------------------------------------------------
 Compensation <- read.flowSet(path = paste0(datadir,
-                                           "/Compensation-Controls"),
+                                           "/Compensation"),
                              pattern = ".fcs")
 
 # Sample for speed -
-Comp <- flowSet(lapply(seq_len(length(Compensation)), function(x) {
-  Compensation[[x]][1:1000, ]
-}))
-sampleNames(Comp) <- sampleNames(Compensation)
-pData(Comp)$name <- sampleNames(Compensation)
+Comp <- fsApply(Compensation, function(fr){
+  cyto_sample(fr, display = 0.04, seed = 20)})
 
 # GatingSet -
 gsc <- GatingSet(Comp)

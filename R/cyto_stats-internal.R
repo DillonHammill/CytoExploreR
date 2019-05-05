@@ -7,6 +7,8 @@
 # To add new statistical functions to cyto_stats_compute follow the same format
 # as below and add the name of the function to cyto_stats_compute options.
 
+# COUNT ------------------------------------------------------------------------
+
 #' Calculate Number of Events
 #' 
 #' @param x object of class flowFrame.
@@ -35,6 +37,8 @@
   return(res)
   
 }
+
+# MEAN -------------------------------------------------------------------------
 
 #' Calculate Arithmetic Mean Fluorescent Intensity
 #'
@@ -95,6 +99,8 @@
   return(res)
   
 }
+
+# GEOMETRIC MEAN ---------------------------------------------------------------
 
 #' Calculate Geometric Mean Fluorescent Intensity
 #'
@@ -183,6 +189,8 @@
   
 }
 
+# MEDIAN -----------------------------------------------------------------------
+
 #' Calculate Median Fluorescent Intensity
 #'
 #' @param x object of class flowFrame.
@@ -243,6 +251,8 @@
   return(res)
   
 }
+
+# MODE -------------------------------------------------------------------------
 
 #' Calculate Mode Fluorescent Intensity
 #'
@@ -314,6 +324,8 @@
   
 }
 
+# COEFFICIENT OF VARIATION -----------------------------------------------------
+
 #' Calculate Robust Coefficient of Variation
 #'
 #' @param x object of class flowFrame.
@@ -380,6 +392,8 @@
   
 }
 
+# DENSITY ----------------------------------------------------------------------
+
 #' Calculate Kernel Density
 #'
 #' @param x object of class flowFrame.
@@ -399,7 +413,7 @@
 #' @noRd
 .cyto_density <- function(x,
                           channel = NULL,
-                          density_smooth = 1.5,
+                          smooth = 1.5,
                           modal = TRUE) {
   
   # Throw error for invalid object
@@ -414,9 +428,14 @@
   channel <- cyto_channels_extract(fr, channel, FALSE)
   
   # Calculate kernel density
-  dens <- density(exprs(fr)[,channel],
-                  adjust = density_smooth)
-  
+  if(length(exprs(fr)[,channel]) > 2){
+    dens <- suppressWarnings(density(exprs(fr)[,channel],
+                    adjust = smooth))
+  }else{
+    warning("Insufficient events to compute kernel density.")
+    return(NA)
+  }
+
   # Normalise to mode if required
   if(modal){
     dens$y <- (dens$y / max(dens$y)) * 100
@@ -424,6 +443,39 @@
     
   return(dens)
 }
+
+# DENSITY RANGES ---------------------------------------------------------------
+
+#' Calculate range of density objects
+#' 
+#' @param x list of density objects.
+#' @param axis either "x" or "y".
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+.cyto_density_range <- function(x,
+                                axis = "x"){
+  
+  if(!all(unlist(lapply(x,"class")) == "density")){
+    stop("'x should be a list of density objects")
+  }
+  
+  # Range
+  rng <- lapply(rng, function(d){
+    if(axis == "x"){
+      range(d$x)
+    }else if(axis == "y"){
+      range(d$y)
+    }
+  })
+  rng <- do.call(rng, "rbind")
+  rng <- c(min(rng[,1]), max(rng[,2]))
+  
+  return(rng)
+}
+
+# RANGE ------------------------------------------------------------------------
 
 #' Calculate combined range of cytometry objects
 #'
@@ -449,7 +501,7 @@
 #' @noRd
 .cyto_range <- function(x,
                         parent = "root",
-                        channels = NULL,
+                        channels = NA,
                         limits = "data",
                         plot = FALSE,
                         buffer = 0.1) {
@@ -470,17 +522,15 @@
     # Convert list of flowFrames to flowSet
     if(all(unlist(lapply(x,"class")) == "flowFrame")){
       x <- .cyto_convert(x, "flowSet")
-    }
-    
     # Convert list of flowSets to flowSet
-    if(all(unlist(lapply(x, function(y){inherits(y,"flowSet")})))){
+    }else if(all(unlist(lapply(x, function(y){inherits(y,"flowSet")})))){
       x <- .cyto_convert(x, "flowSet")
     }
     
   }
   
   # Convert markers to channels
-  if(!is.null(channels)){
+  if(!.all_na(channels)){
     channels <- cyto_channels_extract(x, channels, plot)
   }else{
     channels <- BiocGenerics::colnmaes(x)
@@ -515,22 +565,30 @@
     
     # Upper bound
     if(limits == "data"){
-      mx <- do.call("rbind",fsApply(x, function(fr){
+      mx <- fsApply(x, function(fr){
         suppressWarnings(
           range(fr, type = "data")[, channels, drop = FALSE][2,]
         )
-      }))
+      }, simplify = TRUE)
+      if(length(channels) > 1){
+        mx <- do.call("rbind", mx)
+      }
+      colnames(mx) <- channels
       mx <- unlist(lapply(channels, function(chan){
         mx <- mx[,chan]
         mx <- mx[is.finite(mx)]
         max(mx)
       }))
     }else if(limits == "machine"){
-      mx <- do.call("rbind", fsApply(x, function(fr){
+      mx <- fsApply(x, function(fr){
         mx <- suppressWarnings(
           range(fr, type = "instrument")[, channels, drop = FALSE][2,]
           )
-      }))
+      }, simplify = TRUE)
+      if(length(channels) > 1){
+        mx <- do.call("rbind", mx)
+      }
+      colnames(mx) <- channels
       mx <- unlist(lapply(channels, function(chan){
         mx <- mx[,chan]
         mx <- mx[is.finite(mx)]
@@ -541,8 +599,8 @@
     
   }
   
-  # Replace lower data limit if > 0
-  if(any(rng[1,] > 0)){
+  # Replace lower data limit if > 0 & machine limits
+  if(any(rng[1,] > 0) & limits == "machine"){
     rng[1, rng[1,] > 0] <- 0
   }
   

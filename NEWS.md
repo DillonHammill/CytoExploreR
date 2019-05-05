@@ -1,14 +1,18 @@
 # CytoRSuite 1.0.0
 
 * Improved handling of lower axes limits to display negative values.
+* Improved support for handling samples with few events.
 * Updated `gate_draw`, `gate_edit` and `gate_remove` to allow easier switching between these functions. Users can now replace `draw` in their `gate_draw` code with `edit` or `remove` to modify drawn gates without any additional code.
 * Supplying an empty character string to the `alias` argument of `cyto_plot` (e.g. alias = "") will automatically plot all gates constructed in the supplied channels. This way users don't have to specify each gate by name.
-* Added Support for spillover matrices has been added through `spillover_spread_compute` which utilises a similar API to `spillover_compute`.
+* Added support for spillover matrices has been added through `spillover_spread_compute` which utilises a similar API to `spillover_compute`.
 * Modified colour scheme in `spillover_edit` to improve visibility.
 * Improved layout for `cyto_plot_gating_scheme` when there isn't a `legend`.
 * Updated `cyto_plot` to allow plotting of all 2-D gate objects in a single dimension. The minimum and maximum gate co-ordinates in the supplied channel will be used to construct a 1-D rectangleGate for plotting.
 * Labels are now adjusted to prevent overlap in `cyto_plot_label` and `cyto_plot` when multiple gates are supplied.
 * `gate_draw` now restricts large flowSet or GatingSet objects to 20 random samples to improve processing speed.
+* New function `cyto_plot_save` provides a simpler method for saving high resolution images. `cyto_plot_save` should be called prior to plotting.
+* `gate_rename` provides an easy way to update gate names in the GatingHierarchy/GatingSet and associated gatingTemplate.
+* `cyto_stats_compute` has been completely revamped to improve speed and to return tidyverse-friendly tibbles in either wide or long formats.
 
 # CytoRSuite 0.9.9
 

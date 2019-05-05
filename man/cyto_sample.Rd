@@ -4,16 +4,19 @@
 \alias{cyto_sample}
 \title{Sample a flowFrame}
 \usage{
-cyto_sample(fr, display)
+cyto_sample(fr, display = 1, seed = NULL)
 }
 \arguments{
 \item{fr}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 
 \item{display}{numeric [0,1] indicating the percentage of events to plot.}
+
+\item{seed}{value used to \code{set.seed()} internally. Setting a value for
+seed will return the same result with each run.}
 }
 \value{
 \code{\link[flowCore:flowFrame-class]{flowFrame}} restricted to
-  \code{size} events.
+  \code{display} percentage events.
 }
 \description{
 Sample a flowFrame
@@ -26,6 +29,7 @@ fs <- Activation
 
 # Constrict first sample by 50\%
 cyto_sample(fs[[1]], 0.5)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

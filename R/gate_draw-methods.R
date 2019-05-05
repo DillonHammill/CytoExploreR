@@ -135,7 +135,7 @@ setMethod(gate_draw,
             .cyto_alias_check(alias = alias, type = type)
             
             # Check supplied channel(s) are valid
-            channels <- cyto_channel_check(fr,
+            channels <- cyto_channels_extract(fr,
                                            channels = channels,
                                            plot = TRUE
             )
@@ -376,7 +376,7 @@ setMethod(gate_draw,
             .cyto_alias_check(alias = alias, type = type)
             
             # Check supplied channel(s) are valid
-            channels <- cyto_channel_check(fr,
+            channels <- cyto_channels_extract(fr,
                                            channels = channels,
                                            plot = TRUE
             )
@@ -694,7 +694,7 @@ setMethod(gate_draw,
               .cyto_alias_check(alias = alias, type = type)
               
               # Check supplied channel(s) are valid
-              channels <- cyto_channel_check(fr,
+              channels <- cyto_channels_extract(fr,
                                              channels = channels,
                                              plot = TRUE
               )

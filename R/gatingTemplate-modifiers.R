@@ -627,6 +627,70 @@ gate_edit <- function(x,
   assign(deparse(substitute(x)), gs, envir = globalenv())
 }
 
+#' Rename Gates
+#'
+#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param gates current names of the gates to be changed.
+#' @param names new names to use for \code{gates}.
+#' @param gatingTemplate name of the gatingTemplate csv file to be edited.
+#'
+#' @return update gate names in \code{GatingSet} or \code{GatingHierarchy} and
+#'   update the gatingTemplate accordingly.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom flowWorkspace getNodes setNode
+#' @importFrom utils read.csv write.csv
+#'
+#' @export
+gate_rename <- function(x,
+                        gates = NULL,
+                        names = NULL,
+                        gatingTemplate = NULL){
+  
+  # gatingTemplate missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate csv file to be edited.")
+  }else{
+    if(.file_wd_check(gatingTemplate) == FALSE){
+      stop("Supplied gatingTemplate does not exist in this working directory.")
+    }
+  }
+  
+  # Gates do not exist
+  if(!all(gates %in% basename(getNodes(x)))){
+    stop(paste0("Supplied gate(s) do not exist in this ", class(x), "."))
+  }
+  
+  # Rename gates in GatingHierarchy/GatingSet
+  mapply(function(gate, name){
+    
+    setNode(x, gate, name)
+    
+  }, gates, names)
+  
+  # Modify names in gatingTemplate
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE, 
+                 stringsAsFactors = FALSE)
+  
+  # Update parental names
+  if(any(gates %in% gt$parent)){
+    
+    print(gt$parent[match(gates, gt$parent)])
+    gt[gt$parent %in% gates,"parent"] <- names
+  
+  }
+  
+  # Update alias names
+  print(gt$alias[match(gates, gt$alias)])
+  gt[gt$alias %in% gates,"alias"] <- names
+  
+  # Re-write updated gatingTemplate
+  write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
+  
+}
+
 #' Get Gate Type from Saved Gate.
 #'
 #' @param gates an object of class \code{filters} containing the gates from

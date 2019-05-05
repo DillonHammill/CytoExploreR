@@ -14,11 +14,12 @@
   point_shape = ".", point_size = 2, point_col = NA,
   point_alpha = 1, contour_lines = 0, contour_line_type = 1,
   contour_line_width = 1, contour_line_col = "black",
-  axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
-  axes_label_text_font = 1, axes_label_text_size = 1.1,
-  axes_label_text_col = "black", title_text_font = 2,
-  title_text_size = 1.1, title_text_col = "black", legend = FALSE,
-  legend_text, legend_text_font = 1, legend_text_size = 1,
+  axes_text = c(TRUE, TRUE), axes_text_font = 1, axes_text_size = 1,
+  axes_text_col = "black", axes_label_text_font = 1,
+  axes_label_text_size = 1.1, axes_label_text_col = "black",
+  title_text_font = 2, title_text_size = 1.1,
+  title_text_col = "black", legend = FALSE, legend_text,
+  legend_text_font = 1, legend_text_size = 1,
   legend_text_col = "black", legend_line_col = NA,
   legend_box_fill = NA, legend_point_col = NA, gate_line_type = 1,
   gate_line_width = 2.5, gate_line_col = "red", label = TRUE,
@@ -127,6 +128,10 @@ in 2-D scatter plots, set to 2 by default.}
 
 \item{contour_line_col}{colour(s) to use for contour lines in 2-D scatter
 plots, set to \code{"black"} by default.}
+
+\item{axes_text}{logical vector of length 2 indicating whether axis text
+should be included for the x and y axes respectively, set to
+\code{c(TRUE,TRUE)} by default to display axes text on both axes.}
 
 \item{axes_text_font}{numeric to control the font of axes text, set to 1 for
 plain font by default. See \code{\link[graphics:par]{font}} for

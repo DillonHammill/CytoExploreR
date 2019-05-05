@@ -138,6 +138,11 @@ setMethod(cyto_plot_gating_scheme,
                                 title_text_col = NA,
                                 label_text_size = 0.8, ...) {
             
+            # Set plot method 
+            if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+              options("CytoRSuite_cyto_plot_method" = "Gating/GatingHierarchy")
+            }
+            
             # Assign x to gh
             gh <- x
             
@@ -562,10 +567,30 @@ setMethod(cyto_plot_gating_scheme,
                 )
               }
             }
-            
+
             # Return default plot layout
             par(mfrow = c(1, 1))
             par(oma = c(0, 0, 0, 0))
+            
+            # Turn off graphics device for saving
+            if(getOption("CytoRSuite_cyto_plot_save")){
+              
+              if(inherits(x, 
+                          basename(getOption("CytoRSuite_cyto_plot_method")))){
+                
+                # Close graphics device
+                dev.off()
+                
+                # Reset CytoRSuite_cyto_plot_save
+                options("CytoRSuite_cyto_plot_save" = FALSE)
+                
+                # Reset CytoRSuite_cyto_plot_method
+                options("cytoRSuite_cyto_plot_method" = NULL)
+                
+              }
+              
+            }
+            
           }
 )
 
@@ -693,6 +718,11 @@ setMethod(cyto_plot_gating_scheme,
                                 legend_text_size = 1.2,
                                 title_text_col = NULL,
                                 label_text_size = 0.8, ...) {
+            
+            # Set plot method 
+            if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+              options("CytoRSuite_cyto_plot_method" = "Gating/GatingSet")
+            }
             
             # gatingTemplate supplied - apply to GatingSet
             if (!is.null(gatingTemplate)) {
@@ -1059,7 +1089,9 @@ setMethod(cyto_plot_gating_scheme,
                                                    unlist(lapply(
                                                      seq_along(alias),
                                                      function(x) {
-                                                       basename(getDescendants(gs[[1]], alias[x]))
+                                                       basename(
+                                                         getDescendants(gs[[1]], 
+                                                                        alias[x]))
                                                      }
                                                    ))
                                                  )]
@@ -1071,13 +1103,15 @@ setMethod(cyto_plot_gating_scheme,
                   }
                   
                   # Point colour
-                  point_col <- popcols[, "ptcol"][match(c(parent, overlay), pops)]
+                  point_col <- popcols[, "ptcol"][match(c(parent, overlay), 
+                                                        pops)]
                   
                   # Gate line colour
                   gate_line_col <- popcols[, "gtcol"][match(alias, pops)]
                   
                   # Density fill colour
-                  density_fill <- popcols[, "denscol"][match(c(parent, overlay), pops)]
+                  density_fill <- popcols[, "denscol"][match(c(parent, overlay), 
+                                                             pops)]
                   
                   # Border line col
                   if (gate_track) {
@@ -1174,9 +1208,29 @@ setMethod(cyto_plot_gating_scheme,
                 }
               }
             })
-            
+
             # Return default plot layout
             par(mfrow = c(1, 1))
             par(oma = c(0, 0, 0, 0))
+            
+            # Turn off graphics device for saving
+            if(getOption("CytoRSuite_cyto_plot_save")){
+              
+              if(inherits(x, 
+                          basename(getOption("CytoRSuite_cyto_plot_method")))){
+                
+                # Close graphics device
+                dev.off()
+                
+                # Reset CytoRSuite_cyto_plot_save
+                options("CytoRSuite_cyto_plot_save" = FALSE)
+                
+                # Reset CytoRSuite_cyto_plot_method
+                options("cytoRSuite_cyto_plot_method" = NULL)
+                
+              }
+              
+            }
+            
           }
 )
