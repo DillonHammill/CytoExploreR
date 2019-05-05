@@ -1,4 +1,4 @@
-context("gatingTemplate Modifiers")
+context("gatingTemplate modifiers")
 
 gs3 <- clone(gs)
 
@@ -201,21 +201,3 @@ test_that("gate_type", {
                  "boundary"))
   
 })
-
-# gatingTemplate_convert -------------------------------------------------------
-
-test_that("gatingTemplate_convert", {
-  
-  old.gt <- read.csv("Ref-old-gatingTemplate.csv", header = TRUE)
-  
-  gatingTemplate_convert(gs, "Ref-old-gatingTemplate.csv")
-  
-  gt_convert_ref <- read.csv("Converted-gatingTemplate.csv", header = TRUE)
-  gt_convert <- read.csv("Ref-old-gatingTemplate.csv", header = TRUE)
-  
-  expect_equal(gt_convert, gt_convert_ref)
-  
-  write.csv(old.gt, "Ref-old-gatingTemplate.csv", row.names = FALSE)
-})
-
-write.csv(gtf, "Activation-gatingTemplate.csv", row.names = FALSE)
