@@ -31,6 +31,8 @@ cyto_check <- function(x){
     
   }
   
+  return(TRUE)
+  
 }
 
 # CYTO_EXTRACT -----------------------------------------------------------------
@@ -65,7 +67,7 @@ cyto_check <- function(x){
 cyto_extract <- function(x, parent = "root"){
   
   # Throw error for invalid object
-  if(!.cyto_check(x)){
+  if(!cyto_check(x)){
     stop(
       paste("'x' should be either a flowFrame, flowSet, GatingHierarchy",
             "or GatingSet.")
@@ -249,7 +251,7 @@ cyto_convert <- function(x,
 #' Select samples based on experiment variables
 #'
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
-#' @param ...
+#' @param ... 
 #'
 #' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
 #'   the selection criteria.
@@ -272,19 +274,29 @@ cyto_convert <- function(x,
 #' @export
 cyto_filter <- function(x, ...){
   
+  # Check class of x
+  if(!any(inherits(x, "flowSet") |
+     inherits(x, "GatingSet"))){
+    stop("'x' should be an object of class flowSet or GatingSet.")
+  }
+  
   # Extract experiment details
   pd <- pData(x)
   
-  # Convert pd to tibble for filtering'
-  pd <- as_tibble(pd)
-  
   # Perform filtering on pd to pull out samples
-  pd <- filter(pd, ...)
+  pd_filter <- filter(pd, ...)
   
-  return(x[pd[,"name"]])
+  # Get indices for selected samples
+  if(nrow(pd_filter) == 0){
+    message("No samples match the filtering criteria. Returning all samples.")
+    ind <- seq_len(length(x))
+  }else{
+    ind <- match(pd_filter[,"name"], pd[,"name"])
+  }
+  
+  return(x[ind])
   
 }
-
 
 # CYTO_SAMPLE ------------------------------------------------------------------
 

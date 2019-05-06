@@ -37,7 +37,7 @@ test_that("cyto_extract", {
   expect_equal(cyto_extract(gs[[1]]), exp[[1]])
   
   # GatingSet ------------------------------------------------------------------
-  expect_equal(cyto_extract(gs, getData(gs, "root")), exp)
+  expect_equal(cyto_extract(gs), exp)
   
 })
 
@@ -95,11 +95,31 @@ test_that("cyto_convert", {
   
 })
 
+# cyto_filter ------------------------------------------------------------------
+
+test_that("cyto_filter", {
+  
+  expect_error(cyto_filter(list(fs), Treatment = "Stim-C"),
+               "'x' should be an object of class flowSet or GatingSet.")
+  
+  expect_equal(cyto_filter(fs, Treatment == "Stim-C"), 
+               fs[c(17,18,19,20,21,22,23,24)])
+  
+  expect_equal(cyto_filter(fs, Treatment == "Stim-A", OVAConc %in% c(0,0.5)),
+               fs[c(1,2,7,8)])
+  
+  # Filtered GatingSet will have different guid slot
+  expect_equivalent(cyto_filter(gs, Treatment == "Stim-C"), 
+                                gs[c(17, 18, 19, 20, 21, 22, 23, 24)])
+  
+  expect_equivalent(cyto_filter(gs, Treatment == "Stim-A", OVAConc %in% c(0,0.5)),
+                                gs[c(1, 2, 7, 8)])
+  
+})
+
 # cyto_sample ------------------------------------------------------------------
 
 test_that("cyto_sample", {
   expect_equal(nrow(exprs(cyto_sample(fs[[1]], 1))), 2000)
   expect_equal(nrow(exprs(cyto_sample(fs[[1]], 0.5))), 1000)
 })
-
-
