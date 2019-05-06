@@ -244,8 +244,46 @@ cyto_convert <- function(x,
   return(x)
 }
 
-# CYTO_SELECT ------------------------------------------------------------------
+# CYTO_FILTER ------------------------------------------------------------------
 
+#' Select samples based on experiment variables
+#'
+#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param ...
+#'
+#' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
+#'   the selection criteria.
+#'   
+#' @importFrom flowWorkspace pData
+#' @importFrom dplyr filter
+#' @importFrom tibble as_tibble
+#'   
+#' @examples
+#' library(CytoRSuite)
+#' 
+#' # Look at experiment details
+#' pData(Activation)
+#' 
+#' # Select Stim-C samples with 0 and 0.5 OVA concentrations
+#' fs <- cyto_filter(Activation, Treatment == "Stim-C", OVAConc %in% c(0,0.5))
+#'   
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @export
+cyto_filter <- function(x, ...){
+  
+  # Extract experiment details
+  pd <- pData(x)
+  
+  # Convert pd to tibble for filtering'
+  pd <- as_tibble(pd)
+  
+  # Perform filtering on pd to pull out samples
+  pd <- filter(pd, ...)
+  
+  return(x[pd[,"name"]])
+  
+}
 
 
 # CYTO_SAMPLE ------------------------------------------------------------------
