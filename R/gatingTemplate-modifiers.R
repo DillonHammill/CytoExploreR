@@ -697,13 +697,11 @@ gate_rename <- function(x,
   # Update parental names
   if(any(gates %in% gt$parent)){
     
-    print(gt$parent[match(gates, gt$parent)])
     gt[gt$parent %in% gates,"parent"] <- names
   
   }
   
   # Update alias names
-  print(gt$alias[match(gates, gt$alias)])
   gt[gt$alias %in% gates,"alias"] <- names
   
   # Re-write updated gatingTemplate
