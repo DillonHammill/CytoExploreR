@@ -119,10 +119,3 @@ test_that("cyto_channel_select", {
                                      "PE-A")))
   
 })
-
-# cyto_sample ------------------------------------------------------------------
-
-test_that("cyto_sample returns subsetted flowFrame", {
-  expect_equal(nrow(exprs(cyto_sample(fs[[1]], 1))), 2000)
-  expect_equal(nrow(exprs(cyto_sample(fs[[1]], 0.5))), 1000)
-})
