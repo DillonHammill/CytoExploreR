@@ -67,6 +67,11 @@ gate_remove <- function(gs,
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
+  # Use activae gatingTemplate if set
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+  }
+  
   # Supply gatingTemplate
   if (is.null(gatingTemplate)) {
     stop("Supply the name of the gatingTemplate csv file to remove the gate.")
@@ -151,7 +156,7 @@ gate_remove <- function(gs,
 #' @export
 gate_extract <- function(parent,
                          alias,
-                         gatingTemplate) {
+                         gatingTemplate = NULL) {
   
   # Parent
   if (missing(parent)) {
@@ -163,8 +168,13 @@ gate_extract <- function(parent,
     stop("Please supply the name(s) of the alias to extract.")
   }
   
+  # Use active gatingTemplate if set
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+  }
+  
   # gatingTemplate
-  if (missing(gatingTemplate)) {
+  if (is.null(gatingTemplate)) {
     stop("Please supply the name of the gatingTemplate to extract gates from.")
   } else {
     if (getOption("CytoRSuite_wd_check") == TRUE) {
@@ -289,6 +299,11 @@ gate_edit <- function(x,
     stop("Please supply the name(s) of the gates to edit to 'alias'.")
   } else if (!all(alias %in% basename(getNodes(x)))) {
     stop("Supplied alias does not exist in the GatingSet.")
+  }
+  
+  # Use active gatingTemplate if set
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
   }
   
   # gatingTemplate
@@ -647,6 +662,11 @@ gate_rename <- function(x,
                         gates = NULL,
                         names = NULL,
                         gatingTemplate = NULL){
+  
+  # Use active gatingTemplate if set
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+  }
   
   # gatingTemplate missing
   if(is.null(gatingTemplate)){

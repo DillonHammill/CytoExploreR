@@ -1,33 +1,5 @@
 ## Function Definitions for Exported Validation Functions ----------------------
 
-# Check if a file exists in current working directory --------------------------
-
-# Validation Functions for Working Directory Checks ----------------------------
-
-#' Check if a file exists in the current working directory
-#'
-#' @param name filename including file extension to be checked.
-#'
-#' @return TRUE/FALSE if file exists in the current working directory.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @examples
-#' file_wd_check("gatingTemplate.csv")
-#' 
-#' @export
-file_wd_check <- function(name) {
-  if (length(which(list.files() == name)) != 0) {
-    
-    # File exists in working directory
-    return(TRUE)
-  } else if (length(which(list.files() == name)) == 0) {
-    
-    # File does not exist in working directory
-    return(FALSE)
-  }
-}
-
 # Check channels and return channels given marker names ------------------------
 
 #' Extract channels associated with certain markers

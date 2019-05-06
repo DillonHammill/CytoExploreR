@@ -4,7 +4,7 @@
 \alias{gate_extract}
 \title{Extract Saved Gate(s) from gatingTemplate.}
 \usage{
-gate_extract(parent, alias, gatingTemplate)
+gate_extract(parent, alias, gatingTemplate = NULL)
 }
 \arguments{
 \item{parent}{name of the parental population.}

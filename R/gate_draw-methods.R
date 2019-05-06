@@ -882,6 +882,11 @@ setMethod(gate_draw,
               group_by <- NA
             }
             
+            # Use active gatingTemplate if supplied
+            if(is.null(gatingTemplate)){
+              gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+            }
+            
             # Use add_pop to apply gates to GatingSet and construct gatingTemplate
             if (is.null(gatingTemplate)) {
               message("Writing gatingTemplate.csv to store gates.")

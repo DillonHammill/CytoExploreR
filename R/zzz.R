@@ -9,6 +9,9 @@
   # Turn off bell noises whilst gating
   options("locatorBell" = FALSE)
   
+  # Select active gatingTemplate
+  options("CytoRSuite_gatingTemplate" = NULL)
+  
   # Bypass working directory checks for external files
   options("CytoRSuite_wd_check" = TRUE)
   
