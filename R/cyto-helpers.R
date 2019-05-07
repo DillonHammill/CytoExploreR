@@ -353,7 +353,7 @@ cyto_select <- function(x, ...) {
   if(class(args[[1]]) == "list"){
     args <- args[[1]]
   }
-
+  
   # Extract experiment details
   pd <- pData(x)
   
@@ -361,18 +361,20 @@ cyto_select <- function(x, ...) {
   if(!all(names(args) %in% colnames(pd))){
     lapply(names(args), function(y){
       if(!y %in% names(pd)){
-        stop(paste(y, "is not valid variable in pData(x)."))
+        stop(paste(y, "is not a valid variable in pData(x)."))
       }
     })
   }
   
   # Check that all variable levels at least exist in pd
   lapply(names(args), function(z){
+    var <- factor(pd[,z], exclude = NULL) # keep <NA> as factor level
+    lvls <- levels(var)
     # some variable levels do not exist in pd
-    if(!all(args[[z]] %in% unique(pd[,z]))){
+    if(!all(args[[z]] %in% lvls)){
       lapply(args[[z]], function(v){
-        if(!v %in% unique(pd[,z])){
-          stop(paste(v, "is not a valid level for", z,"!"))
+        if(!v %in% lvls){
+          stop(paste0(v, " is not a valid level for ", z,"!"))
         }
       })
     }
@@ -381,7 +383,7 @@ cyto_select <- function(x, ...) {
   # Get filtered pd
   pd_filter <- pd
   lapply(names(args), function(y){
-    ind <- which(pd[,y] %in% args[[y]])
+    ind <- which(pd_filter[,y] %in% args[[y]])
     # No filtering if variable level is missing
     if(length(ind) != 0){
       pd_filter <<- pd_filter[ind, ]
@@ -389,7 +391,7 @@ cyto_select <- function(x, ...) {
   })
   
   # Get indices for selected samples
-  ind <- match(names(pd_filter), names(pd))
+  ind <- match(pd_filter[,"name"], pd[,"name"])
   
   return(x[ind])
   

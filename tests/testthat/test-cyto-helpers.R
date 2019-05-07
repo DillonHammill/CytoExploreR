@@ -123,8 +123,17 @@ test_that("cyto_filter", {
 
 test_that("cyto_select", {
   
+  # Must be flowSet or GatingSet object
   expect_error(cyto_select(list(fs), Treatment = "Stim-C"),
                "'x' should be an object of class flowSet or GatingSet.")
+  
+  # Invalid variable names
+  expect_error(cyto_select(fs, Treatment = "Stim-A", OvaConc = 0),
+              "OvaConc is not a valid variable in pData(x).", fixed = TRUE)
+  
+  # Invalid levels for variables
+  expect_error(cyto_select(fs, Treatment = "Stim-A", "OVAConc" = 10),
+              "10 is not a valid level for OVAConc!", fixed = TRUE)
   
   expect_equal(cyto_select(fs, Treatment = "Stim-C"), 
                fs[c(17,18,19,20,21,22,23,24)])
@@ -132,13 +141,17 @@ test_that("cyto_select", {
   expect_equal(cyto_select(fs, Treatment = "Stim-A", OVAConc = c(0,0.5)),
                fs[c(1,2,7,8)])
   
+  expect_equal(cyto_select(fs, 
+                           list("Treatment" = "Stim-A", "OVAConc" = c(0,0.5))),
+               fs[c(1,2,7,8)])
+  
   # Filtered GatingSet will have different guid slot
   expect_equivalent(cyto_select(gs, Treatment = "Stim-C"), 
                     gs[c(17, 18, 19, 20, 21, 22, 23, 24)])
   
   expect_equivalent(cyto_select(gs, 
-                                Treatment = "Stim-A", 
-                                OVAConc = c(0,0.5)),
+                                list("Treatment" = "Stim-A", 
+                                     "OVAConc" = c(0,0.5))),
                     gs[c(1, 2, 7, 8)])
   
 })

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_filter}
 \alias{cyto_filter}
-\title{Select samples based on experiment variables}
+\title{Filter samples based on experiment variables}
 \usage{
 cyto_filter(x, ...)
 }
@@ -15,10 +15,10 @@ examples below for demonstration.}
 }
 \value{
 \code{flowSet} or \code{GatingSet} restricted to samples which meet
-  the selection criteria.
+  the filtering criteria.
 }
 \description{
-Select samples based on experiment variables
+Filter samples based on experiment variables
 }
 \examples{
 library(CytoRSuite)
