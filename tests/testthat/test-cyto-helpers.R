@@ -112,8 +112,42 @@ test_that("cyto_filter", {
   expect_equivalent(cyto_filter(gs, Treatment == "Stim-C"), 
                                 gs[c(17, 18, 19, 20, 21, 22, 23, 24)])
   
-  expect_equivalent(cyto_filter(gs, Treatment == "Stim-A", OVAConc %in% c(0,0.5)),
+  expect_equivalent(cyto_filter(gs, 
+                                Treatment == "Stim-A", 
+                                OVAConc %in% c(0,0.5)),
                                 gs[c(1, 2, 7, 8)])
+  
+})
+
+# cyto_select ------------------------------------------------------------------
+
+test_that("cyto_select", {
+  
+  expect_error(cyto_select(list(fs), Treatment = "Stim-C"),
+               "'x' should be an object of class flowSet or GatingSet.")
+  
+  expect_equal(cyto_select(fs, Treatment = "Stim-C"), 
+               fs[c(17,18,19,20,21,22,23,24)])
+  
+  expect_equal(cyto_select(fs, Treatment = "Stim-A", OVAConc = c(0,0.5)),
+               fs[c(1,2,7,8)])
+  
+  # Filtered GatingSet will have different guid slot
+  expect_equivalent(cyto_select(gs, Treatment = "Stim-C"), 
+                    gs[c(17, 18, 19, 20, 21, 22, 23, 24)])
+  
+  expect_equivalent(cyto_select(gs, 
+                                Treatment = "Stim-A", 
+                                OVAConc = c(0,0.5)),
+                    gs[c(1, 2, 7, 8)])
+  
+})
+
+# cyto_group_by -----------------------------------------------------------------
+
+test_that("cyto_group_by", {
+  
+  
   
 })
 
@@ -123,3 +157,44 @@ test_that("cyto_sample", {
   expect_equal(nrow(exprs(cyto_sample(fs[[1]], 1))), 2000)
   expect_equal(nrow(exprs(cyto_sample(fs[[1]], 0.5))), 1000)
 })
+
+# cyto_markers -----------------------------------------------------------------
+
+# cyto_annotate ----------------------------------------------------------------
+
+# cyto_compensate --------------------------------------------------------------
+
+test_that("cyto_compensate", {
+  
+  # Write fs[[1]]@description$SPILL to csv file for testing
+  spill <- fs[[1]]@description$SPILL
+  rownames(spill) <- colnames(spill)
+  write.csv(spill, "Test-Spillover-Matrix.csv")
+  
+  # flowFrame
+  expect_equivalent(cyto_compensate(fs[[1]]),
+                    getData(gs, "root")[[1]])
+  expect_equivalent(cyto_compensate(fs[[1]], "Test-Spillover-Matrix.csv"),
+                    getData(gs, "root")[[1]])
+  
+  # flowSet
+  expect_equivalent(cyto_compensate(fs),
+                    getData(gs, "root"))
+  expect_equivalent(cyto_compensate(fs, "Test-Spillover-Matrix.csv"),
+                    getData(gs, "root"))
+  
+  # GatingSet
+  expect_equivalent(cyto_compensate(GatingSet(fs)),
+                    gs)
+  expect_equivalent(cyto_compensate(GatingSet(fs), "Test-Spillover-Matrix.csv"),
+                    gs)
+  
+})
+
+# cyto_transform ---------------------------------------------------------------
+
+# cyto_inverse_transform -------------------------------------------------------
+
+
+# Remove generated spillover matrix
+base::unlink("Test-Spillover-Matrix.csv")

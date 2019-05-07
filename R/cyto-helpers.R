@@ -248,7 +248,7 @@ cyto_convert <- function(x,
 
 # CYTO_FILTER ------------------------------------------------------------------
 
-#' Select samples based on experiment variables
+#' Filter samples based on experiment variables
 #'
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
 #' @param ... tidyverse-style subsetting using comma separated logical
@@ -256,7 +256,7 @@ cyto_convert <- function(x,
 #'   examples below for demonstration.
 #'
 #' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
-#'   the selection criteria.
+#'   the filtering criteria.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom dplyr filter
@@ -305,6 +305,99 @@ cyto_filter <- function(x, ...){
   return(x[ind])
   
 }
+
+# CYTO_SELECT ------------------------------------------------------------------
+
+# Similar to cyto_filter but acts in a non-tidyverse way.
+
+#' Select samples based on experiment variables
+#'
+#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param ... named list containing experimental variables to be used to select
+#'   samples or named arguments containing the levels of the variables to
+#'   select. See below examples for use cases.
+#'
+#' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
+#'   the selection criteria.
+#'
+#' @examples
+#' library(CytoRSuite)
+#'
+#' # Look at experiment details
+#' pData(Activation)
+#'
+#' # Select Stim-C samples with 0 and 0.5 OVA concentrations
+#' fs <- cyto_select(Activation,
+#'                   Treatment = "Stim-C",
+#'                   OVAConc = c(0,0.5))
+#'
+#' # Select Stim-A and Stim-C treatment groups
+#' fs <- cyto_select(Activation,
+#'                   list("Treatment" = c("Stim-A","Stim-C")))
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_select <- function(x, ...) {
+  
+  # Check class of x
+  if(!any(inherits(x, "flowSet") |
+          inherits(x, "GatingSet"))){
+    stop("'x' should be an object of class flowSet or GatingSet.")
+  }
+  
+  # Pull down ... arguments to list
+  args <- list(...)
+  
+  # ... is already a named list of arguments
+  if(class(args[[1]]) == "list"){
+    args <- args[[1]]
+  }
+
+  # Extract experiment details
+  pd <- pData(x)
+  
+  # Check that all varaibles are valid
+  if(!all(names(args) %in% colnames(pd))){
+    lapply(names(args), function(y){
+      if(!y %in% names(pd)){
+        stop(paste(y, "is not valid variable in pData(x)."))
+      }
+    })
+  }
+  
+  # Check that all variable levels at least exist in pd
+  lapply(names(args), function(z){
+    # some variable levels do not exist in pd
+    if(!all(args[[z]] %in% unique(pd[,z]))){
+      lapply(args[[z]], function(v){
+        if(!v %in% unique(pd[,z])){
+          stop(paste(v, "is not a valid level for", z,"!"))
+        }
+      })
+    }
+  })
+  
+  # Get filtered pd
+  pd_filter <- pd
+  lapply(names(args), function(y){
+    ind <- which(pd[,y] %in% args[[y]])
+    # No filtering if variable level is missing
+    if(length(ind) != 0){
+      pd_filter <<- pd_filter[ind, ]
+    }
+  })
+  
+  # Get indices for selected samples
+  ind <- match(names(pd_filter), names(pd))
+  
+  return(x[ind])
+  
+}
+
+# CYTO_GROUP_BY ----------------------------------------------------------------
+
+
 
 # CYTO_SAMPLE ------------------------------------------------------------------
 
@@ -571,3 +664,189 @@ cyto_annotate <- function(x, file = NULL) {
   
   invisible(NULL)
 }
+
+# CYTO_COMPENSATE --------------------------------------------------------------
+
+#' Apply fluorescence compensation to samples
+#'
+#' \code{cyto_compensate} will apply a saved spillover matrix csv file to all
+#' samples. The csv file must contain the fluorescent channels as both the
+#' colnames (i.e. first row) and rownames (i.e. first column). If no
+#' \code{spillover} csv file is supplied, the spillover matrix will be extracted
+#' directly from the first element of \code{x}. To select a different sample for
+#' spillover matrix extraction supply the index or name of the sample to the
+#' \code{select} argument.
+#'
+#' @param x object of class \code{flowFrame}, \code{flowSet} or
+#'   \code{GatingSet}.
+#' @param spillover name of the spillover matrix csv file (e.g.
+#'   "Spillover-Matrix.csv") saved in the current working directory.
+#' @param select index or name of the sample from which the spillover matrix
+#'   should be extracted when no spillover matrix file is supplied to
+#'   \code{spillover}. To compensate each sample individually using their stored
+#'   spillover matrix file, set \code{select} to NULL.
+#'
+#' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
+#'   object.
+#'
+#' @importFrom utils read.csv
+#' @importFrom flowWorkspace sampleNames getData
+#'
+#' @examples
+#' library(CytoRSuiteData)
+#'
+#' # Apply stored spillover matrix to flowSet
+#' cyto_compensate(Activation)
+#'
+#' # Save spillover matrix in correct format
+#' spill <- Activation[[1]]@description$SPILL
+#' rownames(spill) <- colnames(spill)
+#' write.csv(spill,
+#'           "Spillover-Matrix.csv")
+#'           
+#' # Apply saved spillover matrix csv file to flowSet
+#' cyto_compensate(Activation, "Spillover-Matrix.csv")
+#'
+#' # Apply stored spillover matrix to GatingSet
+#' gs <- GatingSet(Activation)
+#' cyto_compensate(gs)
+#'
+#' # Apply saved spillover matrix csv file to GatingSet
+#' cyto_compensate(gs, "Spillover-Matrix.csv")
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @rdname cyto_compensate
+#'
+#' @export
+cyto_compensate <- function(x, 
+                            spillover = NULL,
+                            use){
+  UseMethod("cyto_compensate")
+}
+
+#' @rdname cyto_compensate
+#' @export
+cyto_compensate.flowFrame <- function(x,
+                                      spillover = NULL,
+                                      select = 1){
+  
+  # Read in spillover matrix file
+  if(!is.null(spillover)){
+    if(getOption("CytoRSuite_wd_check")){
+      if(!file_wd_check(spillover)){
+        stop(paste(spillover, "does not exist in this working directory."))
+      }
+    }
+    spill <- read.csv(spillover, header = TRUE, row.names = 1)
+    colnames(spill) <- rownames(spill)
+  }
+  
+  # Extract spillover directly from x
+  if(is.null(spillover)){
+    spill <- x@description$SPILL
+  }
+  
+  # Apply compensation
+  flowCore::compensate(x, spill)
+}
+
+#' @rdname cyto_compensate
+#' @export
+cyto_compensate.flowSet <- function(x, 
+                                    spillover = NULL,
+                                    select = 1){
+  
+  # Read in spillover matrix file
+  if(!is.null(spillover)){
+    if(getOption("CytoRSuite_wd_check")){
+      if(!file_wd_check(spillover)){
+        stop(paste(spillover, "does not exist in this working directory."))
+      }
+    }
+    spill <- read.csv(spillover, header = TRUE, row.names = 1)
+    colnames(spill) <- rownames(spill)
+    
+    # Convert spill into a named list
+    spill <- rep(list(spill), length(x))
+    names(spill) <- sampleNames(x)
+  }
+  
+  # Extract spillover directly from x
+  if(is.null(spillover)){
+    if(!is.null(select)){
+      spill <- rep(list(x[[select]]@description$SPILL), length(x))
+      names(spill) <- sampleNames(x)
+    }else{
+      spill <- lapply(sampleNames(x), function(y){
+        x[[y]]@description$SPILL
+      })
+    }
+
+  }
+
+  # Apply compensation
+  flowCore::compensate(x, spill)
+  
+}
+
+#' @rdname cyto_compensate
+#' @export
+cyto_compensate.GatingSet <- function(x, 
+                                      spillover = NULL,
+                                      select = 1){
+  
+  # Extract flowSet
+  fs <- getData(gs, "root")
+  
+  # Read in spillover matrix file
+  if(!is.null(spillover)){
+    if(getOption("CytoRSuite_wd_check")){
+      if(!file_wd_check(spillover)){
+        stop(paste(spillover, "does not exist in this working directory."))
+      }
+    }
+    spill <- read.csv(spillover, header = TRUE, row.names = 1)
+    colnames(spill) <- rownames(spill)
+    
+    # Convert spill into a named list
+    spill <- rep(list(spill), length(x))
+    names(spill) <- sampleNames(x)
+  }
+  
+  # Extract spillover directly from x
+  if(is.null(spillover)){
+    if(!is.null(select)){
+      spill <- rep(list(fs[[select]]@description$SPILL), length(x))
+      names(spill) <- sampleNames(x)
+    }else{
+      spill <- lapply(sampleNames(x), function(y){
+        fs[[y]]@description$SPILL
+      })
+    }
+    
+  }
+  
+  # Apply compensation
+  flowWorkspace::compensate(x, spill)
+  
+}
+
+# CYTO_TRANSFORM ---------------------------------------------------------------
+
+# Possibly assign transform object to global option that can be accessed
+# internally by cyto_plot. 
+
+# Challenges:
+# - which samples do you use with estimateLogicle? Maybe sample a percentage of 
+#   samples and pool? 
+# - needs to support adjustment of transformation parameters on a per channel 
+#   basis.
+
+# CYTO_INVERSE_TRANSFORM -------------------------------------------------------
+
+# Extract transform object from global option or supplied. Get inverse
+# transformations for designated channels and apply to samples.
+
+# These transform functions can then be used by cyto_plot to make in-line
+# transformations. Need to come up with a new argument/s to implement this.
