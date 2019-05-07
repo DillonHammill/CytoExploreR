@@ -160,7 +160,19 @@ test_that("cyto_select", {
 
 test_that("cyto_group_by", {
   
+  expect_error(cyto_group_by(list(fs)),
+               "'x' should be an object of class flowSet or GatingSet.")
   
+  expect_error(cyto_group_by(fs, c("Treatment","OVA")),
+               "OVA is not a valid variable for this flowSet.")
+  
+  # flowSet
+  expect_equal(cyto_group_by(fs,"Treatment"),
+               list(fs[1:8],fs[9:16],fs[17:24],fs[25:32],fs[33]))
+  
+  # GatingSet - different guid slot for subset
+  expect_equivalent(cyto_group_by(gs,"Treatment"),
+                    list(gs[1:8],gs[9:16],gs[17:24],gs[25:32],gs[33]))
   
 })
 

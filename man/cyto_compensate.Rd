@@ -7,7 +7,7 @@
 \alias{cyto_compensate.GatingSet}
 \title{Apply fluorescence compensation to samples}
 \usage{
-cyto_compensate(x, spillover = NULL, use)
+cyto_compensate(x, ...)
 
 \method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1)
 

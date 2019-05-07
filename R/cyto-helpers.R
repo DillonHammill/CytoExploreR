@@ -399,7 +399,179 @@ cyto_select <- function(x, ...) {
 
 # CYTO_GROUP_BY ----------------------------------------------------------------
 
+#' Group a flowSet or GatingSet by experiment variables
+#'
+#' @param x an object of class \code{flowSet} or \code{GatingSet}.
+#' @param parent name of the parent population to extract from GatingSet object.
+#' @param group_by names of pData variables to use for merging. Set to "all" to
+#'   merge all samples in \code{x}.
+#'
+#' @return a named list of \code{flowSet} or \code{GatingSet} objects
+#'   respectively.
+#'
+#' @importFrom flowWorkspace pData sampleNames
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @rdname cyto_group_by
+#'
+#' @export
+cyto_group_by <- function(x,
+                          group_by = "all"){
+  
+  # Check class of x
+  if(!any(inherits(x,"flowSet")|inherits(x,"GatingSet"))){
+    stop("'x' should be an object of class flowSet or GatingSet.")
+  }
+  
+  # Extract experiment details
+  pd <- pData(x)
+  
+  # Repace any NA with "NA" to avoid missing rows
+  if(any(is.na(pd))){
+    pd[is.na(pd)] <- "NA"
+  }
+  
+  # Extract sample names
+  nms <- sampleNames(x)
+  
+  # Check group_by
+  if(!all(group_by %in% colnames(pd))){
+    lapply(group_by, function(y){
+      if(!y %in% colnames(pd)){
+        stop(paste0(y, " is not a valid variable for this ", class(x),"."))
+      }
+    })
+  }
+  
+  # Split pd based on group_by into a named list
+  if(group_by == "all"){
+    pd_split <- list("all" = pd)
+  }else{
+    pd_split <- split(pd, pd[,group_by], sep = " ")
+  }
+  
+  # Replace each element of pd_split with matching samples
+  x_list <- lapply(seq_len(length(pd_split)), function(z){
+    
+    x[pd_split[[z]][,"name"]]
+    
+  })
+  
+  return(x_list)
+  
+}
 
+#' Merge samples by pData
+#'
+#' @param x flowSet or GatingSet object
+#' @param parent name of the parent population to extract from GatingSet object.
+#' @param group_by names of pData variables to use for merging. Set to "all" to
+#'   merge all samples in the flowSet.
+#' @param display numeric [0,1] to control the percentage of events to be
+#'   plotted. Specifying a value for \code{display} can substantial improve
+#'   plotting speed for less powerful machines.
+#'
+#' @return list containing merged flowFrames, named with group.
+#'
+#' @importFrom flowWorkspace pData getData
+#' @importFrom flowCore sampleFilter Subset
+#'
+#' @noRd
+.cyto_merge <- function(x,
+                        parent = "root",
+                        group_by = "all",
+                        display = NULL) {
+  
+  # check x
+  if (inherits(x, "flowFrame") | inherits(x, "GatingHierarchy")) {
+    stop("x must be either a flowSet or a GtaingSet object.")
+  }
+  
+  # check group_by
+  if (all(!group_by %in% c("all", colnames(pData(x))))) {
+    stop("group_by should be the name of pData variables or 'all'.")
+  }
+  
+  # Extract pData information
+  pd <- pData(x)
+  
+  # Sort pd by group_by colnames
+  if (!is.null(group_by)) {
+    if (group_by[1] != "all") {
+      pd <- pd[do.call("order", pd[group_by]), ]
+    }
+  }
+  
+  # flowSet for merging
+  if (inherits(x, "GatingSet")) {
+    fs <- getData(x, parent)
+  } else {
+    fs <- x
+  }
+  
+  # group_by all samples
+  if (length(group_by) == 1 & group_by[1] == "all") {
+    pd$group_by <- rep("all", length(x))
+    
+    fr <- as(fs, "flowFrame")
+    
+    if ("Original" %in% BiocGenerics::colnames(fr)) {
+      fr <- suppressWarnings(
+        fr[, -match("Original", BiocGenerics::colnames(fr))]
+      )
+    }
+    
+    if (!is.null(display)) {
+      fr <- Subset(fr, sampleFilter(size = display * BiocGenerics::nrow(fr)))
+    }
+    
+    fr.lst <- list(fr)
+    
+    # group_by by one variable
+  } else if (length(group_by) == 1) {
+    pd$group_by <- pd[, group_by]
+    
+    fr.lst <- lapply(unique(pd$group_by), function(x) {
+      fr <- as(fs[pd$name[pd$group_by == x]], "flowFrame")
+      
+      if ("Original" %in% BiocGenerics::colnames(fr)) {
+        fr <- suppressWarnings(
+          fr[, -match("Original", BiocGenerics::colnames(fr))]
+        )
+      }
+      
+      if (!is.null(display)) {
+        fr <- Subset(fr, sampleFilter(size = display * BiocGenerics::nrow(fr)))
+      }
+      
+      return(fr)
+    })
+    
+    # group_by by multiple variables
+  } else {
+    pd$group_by <- do.call("paste", pd[, group_by])
+    
+    fr.lst <- lapply(unique(pd$group_by), function(x) {
+      fr <- as(fs[pd$name[pd$group_by == x]], "flowFrame")
+      
+      if ("Original" %in% BiocGenerics::colnames(fr)) {
+        fr <- suppressWarnings(
+          fr[, -match("Original", BiocGenerics::colnames(fr))]
+        )
+      }
+      
+      if (!is.null(display)) {
+        fr <- Subset(fr, sampleFilter(size = display * BiocGenerics::nrow(fr)))
+      }
+      
+      return(fr)
+    })
+  }
+  names(fr.lst) <- unique(pd$group_by)
+  
+  return(fr.lst)
+}
 
 # CYTO_SAMPLE ------------------------------------------------------------------
 
@@ -721,9 +893,7 @@ cyto_annotate <- function(x, file = NULL) {
 #' @rdname cyto_compensate
 #'
 #' @export
-cyto_compensate <- function(x, 
-                            spillover = NULL,
-                            use){
+cyto_compensate <- function(x, ...){
   UseMethod("cyto_compensate")
 }
 
