@@ -437,6 +437,8 @@ cyto_plot.flowFrame <- function(x,
 #'   density distributions with overlay, set to 0.5 by default.
 #' @param density_layers numeric indicating the number of samples to stack in
 #'   each plot, set to all samples by default.
+#' @param density_cols vector colours to draw from when selecting density fill
+#'   colours if none are supplied to density_fill.
 #' @param density_fill fill colour(s) for 1-D density distributions.
 #' @param density_fill_alpha numeric [0,1] used to control 1-D density fill
 #'   colour transparency, set to 1 by default for solid colours.
@@ -452,6 +454,8 @@ cyto_plot.flowFrame <- function(x,
 #'   \code{\link[graphics:par]{pch}} for alternatives.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default.
+#' @param point_cols vector colours to draw from when selecting colours for points
+#'   if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
 #'   by default to use a blue-red density colour scale.
 #' @param point_alpha numeric [0,1] to control point colour transparency in 2-D
@@ -603,6 +607,7 @@ cyto_plot.flowSet <- function(x,
                                 density_smooth = 1.5,
                                 density_stack = 0,
                                 density_layers = length(x),
+                                density_col = NA,
                                 density_fill = NA,
                                 density_fill_alpha = 1,
                                 density_line_type = 1,
@@ -610,6 +615,7 @@ cyto_plot.flowSet <- function(x,
                                 density_line_col = "black",
                                 point_shape = ".",
                                 point_size = 2,
+                                point_cols = NA,
                                 point_col = NA,
                                 point_alpha = 1,
                                 contour_lines = 0,
@@ -773,6 +779,8 @@ cyto_plot.flowSet <- function(x,
 #'   plots.
 #' @param density_stack numeric [0,1] indicating the degree of offset for 1-D
 #'   density distributions with overlay, set to 0.5 by default.
+#' @param density_cols vector colours to draw from when selecting density fill
+#'   colours if none are supplied to density_fill.
 #' @param density_fill fill colour(s) for 1-D density distributions.
 #' @param density_fill_alpha numeric [0,1] used to control 1-D density fill
 #'   colour transparency, set to 1 by default for solid colours.
@@ -788,6 +796,8 @@ cyto_plot.flowSet <- function(x,
 #'   \code{\link[graphics:par]{pch}} for alternatives.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default.
+#' @param point_cols vector colours to draw from when selecting colours for points
+#'   if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
 #'   by default to use a blue-red density colour scale.
 #' @param point_alpha numeric [0,1] to control point colour transparency in 2-D
@@ -955,6 +965,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                 density_modal = TRUE,
                                 density_smooth = 1.5,
                                 density_stack = 0,
+                                density_cols = NA,
                                 density_fill = NA,
                                 density_fill_alpha = 1,
                                 density_line_type = 1,
@@ -962,6 +973,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                 density_line_col = "black",
                                 point_shape = ".",
                                 point_size = 2,
+                                point_cols = NA,
                                 point_col = NA,
                                 point_alpha = 1,
                                 contour_lines = 0,
@@ -1213,6 +1225,8 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   density distributions with overlay, set to 0.5 by default.
 #' @param density_layers numeric indicating the number of samples to stack in
 #'   each plot, set to all samples by default.
+#' @param density_cols vector colours to draw from when selecting density fill
+#'   colours if none are supplied to density_fill.
 #' @param density_fill fill colour(s) for 1-D density distributions.
 #' @param density_fill_alpha numeric [0,1] used to control 1-D density fill
 #'   colour transparency, set to 1 by default for solid colours.
@@ -1228,6 +1242,8 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   \code{\link[graphics:par]{pch}} for alternatives.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default.
+#' @param point_cols vector colours to draw from when selecting colours for points
+#'   if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
 #'   by default to use a blue-red density colour scale.
 #' @param point_alpha numeric [0,1] to control point colour transparency in 2-D
@@ -1392,6 +1408,7 @@ cyto_plot.GatingSet <- function(x,
                                 density_smooth = 1.5,
                                 density_stack = 0,
                                 density_layers = length(x),
+                                density_cols = NA,
                                 density_fill = NA,
                                 density_fill_alpha = 1,
                                 density_line_type = 1,
@@ -1399,6 +1416,7 @@ cyto_plot.GatingSet <- function(x,
                                 density_line_col = "black",
                                 point_shape = ".",
                                 point_size = 2,
+                                point_cols = NA,
                                 point_col = NA,
                                 point_alpha = 1,
                                 contour_lines = 0,
@@ -1437,7 +1455,8 @@ cyto_plot.GatingSet <- function(x,
                                 label_box_alpha = 0.6,
                                 border_line_type = 1,
                                 border_line_width = 1,
-                                border_line_col = "black", ...) {
+                                border_line_col = "black",
+                                border_fill = "white", ...) {
             
             # Set plot method 
             if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
