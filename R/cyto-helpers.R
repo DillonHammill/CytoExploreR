@@ -411,6 +411,16 @@ cyto_select <- function(x, ...) {
 #'
 #' @importFrom flowWorkspace pData sampleNames
 #'
+#' @examples 
+#' library(CytoRSuiteData)
+#' 
+#' # Group flowSet by Treatment
+#' cyto_group_by(Activation, "Treatment")
+#' 
+#' # Group GatingSet by Treatment and OVAConc
+#' gs <- GatingSet(Activation)
+#' cyto_group_by(gs, c("Treatment","OVAConc"))
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -460,117 +470,6 @@ cyto_group_by <- function(x,
   
   return(x_list)
   
-}
-
-#' Merge samples by pData
-#'
-#' @param x flowSet or GatingSet object
-#' @param parent name of the parent population to extract from GatingSet object.
-#' @param group_by names of pData variables to use for merging. Set to "all" to
-#'   merge all samples in the flowSet.
-#' @param display numeric [0,1] to control the percentage of events to be
-#'   plotted. Specifying a value for \code{display} can substantial improve
-#'   plotting speed for less powerful machines.
-#'
-#' @return list containing merged flowFrames, named with group.
-#'
-#' @importFrom flowWorkspace pData getData
-#' @importFrom flowCore sampleFilter Subset
-#'
-#' @noRd
-.cyto_merge <- function(x,
-                        parent = "root",
-                        group_by = "all",
-                        display = NULL) {
-  
-  # check x
-  if (inherits(x, "flowFrame") | inherits(x, "GatingHierarchy")) {
-    stop("x must be either a flowSet or a GtaingSet object.")
-  }
-  
-  # check group_by
-  if (all(!group_by %in% c("all", colnames(pData(x))))) {
-    stop("group_by should be the name of pData variables or 'all'.")
-  }
-  
-  # Extract pData information
-  pd <- pData(x)
-  
-  # Sort pd by group_by colnames
-  if (!is.null(group_by)) {
-    if (group_by[1] != "all") {
-      pd <- pd[do.call("order", pd[group_by]), ]
-    }
-  }
-  
-  # flowSet for merging
-  if (inherits(x, "GatingSet")) {
-    fs <- getData(x, parent)
-  } else {
-    fs <- x
-  }
-  
-  # group_by all samples
-  if (length(group_by) == 1 & group_by[1] == "all") {
-    pd$group_by <- rep("all", length(x))
-    
-    fr <- as(fs, "flowFrame")
-    
-    if ("Original" %in% BiocGenerics::colnames(fr)) {
-      fr <- suppressWarnings(
-        fr[, -match("Original", BiocGenerics::colnames(fr))]
-      )
-    }
-    
-    if (!is.null(display)) {
-      fr <- Subset(fr, sampleFilter(size = display * BiocGenerics::nrow(fr)))
-    }
-    
-    fr.lst <- list(fr)
-    
-    # group_by by one variable
-  } else if (length(group_by) == 1) {
-    pd$group_by <- pd[, group_by]
-    
-    fr.lst <- lapply(unique(pd$group_by), function(x) {
-      fr <- as(fs[pd$name[pd$group_by == x]], "flowFrame")
-      
-      if ("Original" %in% BiocGenerics::colnames(fr)) {
-        fr <- suppressWarnings(
-          fr[, -match("Original", BiocGenerics::colnames(fr))]
-        )
-      }
-      
-      if (!is.null(display)) {
-        fr <- Subset(fr, sampleFilter(size = display * BiocGenerics::nrow(fr)))
-      }
-      
-      return(fr)
-    })
-    
-    # group_by by multiple variables
-  } else {
-    pd$group_by <- do.call("paste", pd[, group_by])
-    
-    fr.lst <- lapply(unique(pd$group_by), function(x) {
-      fr <- as(fs[pd$name[pd$group_by == x]], "flowFrame")
-      
-      if ("Original" %in% BiocGenerics::colnames(fr)) {
-        fr <- suppressWarnings(
-          fr[, -match("Original", BiocGenerics::colnames(fr))]
-        )
-      }
-      
-      if (!is.null(display)) {
-        fr <- Subset(fr, sampleFilter(size = display * BiocGenerics::nrow(fr)))
-      }
-      
-      return(fr)
-    })
-  }
-  names(fr.lst) <- unique(pd$group_by)
-  
-  return(fr.lst)
 }
 
 # CYTO_SAMPLE ------------------------------------------------------------------
