@@ -302,7 +302,6 @@ cyto_plot(gs[[4]],
   alias = "CD69+ CD4 T Cells",
   channels = "7-AAD-A"
 )
-
 }
 \seealso{
 \code{\link{cyto_plot,flowFrame-method}}

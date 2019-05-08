@@ -48,7 +48,7 @@ cyto_plot_density.flowFrame <- function(x,
                                         density_line_col = "black") {
 
   # Combine x and overlay into a list - fr_list
-  if (!is.na(overlay)) {
+  if (!.all_na(overlay)) {
     fr_list <- c(list(x), .cyto_convert(overlay, "flowFrame list"))
   } else {
     fr_list <- list(x)
@@ -79,7 +79,7 @@ cyto_plot_density.flowFrame <- function(x,
   }else{
     y_max <- mean(unlist(lapply(fr_dens, function(z){
     
-      if(!is.na(z)){
+      if(!.all_na(z)){
         max(z$y)
       }else{
         NA
@@ -100,7 +100,7 @@ cyto_plot_density.flowFrame <- function(x,
   fr_dens <- mapply(function(fr_dens, ofst) {
 
     # Adjust values for stacking
-    if (ofst != 0 & !is.na(fr_dens)) {
+    if (ofst != 0 & !.all_na(fr_dens)) {
       fr_dens$y <- fr_dens$y + ofst
     }
 
@@ -131,7 +131,7 @@ cyto_plot_density.flowFrame <- function(x,
                      density_line_col,
                      density_line_width,
                      density_line_type) {
-        if(!is.na(fr_dens)){
+        if(!.all_na(fr_dens)){
           polygon(fr_dens,
             col = density_fill,
             border = density_line_col,
@@ -152,7 +152,7 @@ cyto_plot_density.flowFrame <- function(x,
                      density_line_col,
                      density_line_width,
                      density_line_type) {
-        if(!is.na(fr_dens)){
+        if(!.all_na(fr_dens)){
           polygon(fr_dens,
                   col = density_fill,
                   border = density_line_col,
@@ -207,7 +207,7 @@ cyto_plot_density.list <- function(x,
     y_range <- 100
   }else{
     y_range<- mean(unlist(lapply(x, function(d){
-      if(!is.na(d)){
+      if(!.all_na(d)){
         max(d$y) - min(d$y)
       }else{
         NA
@@ -227,7 +227,7 @@ cyto_plot_density.list <- function(x,
   
   # Minimum for each distribution
   mn <- unlist(lapply(x, function(z){
-    if(!is.na(z)){
+    if(!.all_na(z)){
       min(z$y)
     }else{
       0
@@ -244,7 +244,7 @@ cyto_plot_density.list <- function(x,
                density_line_col,
                density_line_width,
                density_line_type) {
-        if(!is.na(x)){
+        if(!.all_na(x)){
           polygon(x,
                   col = density_fill,
                   border = density_line_col,
@@ -265,7 +265,7 @@ cyto_plot_density.list <- function(x,
                density_line_col,
                density_line_width,
                density_line_type) {
-        if(!is.na(x)){
+        if(!.all_na(x)){
           polygon(x,
                   col = density_fill,
                   border = density_line_col,

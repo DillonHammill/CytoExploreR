@@ -10,19 +10,16 @@
 #'
 #' @noRd
 .empty <- function(x){
-  
-  empty <- all(unlist(lapply(x, function(y){
-    
-    if(is.character(y) &
-       nchar(trimws(y)) == 0){
+
+  if(is.character(x)){
+    if(all(nchar(trimws(x)) == 0)){
       return(TRUE)
     }else{
       return(FALSE)
     }
-    
-  })))
-  
-  return(empty)
+  }else{
+    return(FALSE)
+  }
   
 }
 
@@ -38,7 +35,7 @@
 #' 
 #' @noRd
 .all_na <- function(x){
-  all(is.na(x))
+  all(suppressWarnings(is.na(x)))
 }
 
 # ARGUMENT LIST ----------------------------------------------------------------
