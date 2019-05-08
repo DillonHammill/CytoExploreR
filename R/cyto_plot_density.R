@@ -179,7 +179,7 @@ cyto_plot_density.list <- function(x,
                                    density_fill_alpha = 1,
                                    density_line_type = 1,
                                    density_line_width = 1,
-                                   density_line_col = "black"){
+                                   density_line_col = "black", ...){
   
   # Check x contains density objects (may contain NA as well)
   if(!any(unlist(lapply(x, "class")) == "density")){

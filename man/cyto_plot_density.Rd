@@ -17,7 +17,7 @@ cyto_plot_density(x, ...)
 \method{cyto_plot_density}{list}(x, density_modal = TRUE,
   density_stack = 0.5, density_cols = NA, density_fill = NA,
   density_fill_alpha = 1, density_line_type = 1,
-  density_line_width = 1, density_line_col = "black")
+  density_line_width = 1, density_line_col = "black", ...)
 }
 \arguments{
 \item{x}{object of class flowFrame or a list of density objects.}
