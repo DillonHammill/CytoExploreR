@@ -136,17 +136,6 @@ channels = c("APC-Cy7-A", "PE-A"),
 gate_line_col = c("purple", "magenta")
 )
 }
-\seealso{
-\code{\link{cyto_plot_gate,rectangleGate-method}}
-
-\code{\link{cyto_plot_gate,polygonGate-method}}
-
-\code{\link{cyto_plot_gate,ellipsoidGate-method}}
-
-\code{\link{cyto_plot_gate,list-method}}
-
-\code{\link{cyto_plot_gate,filters-method}}
-}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
