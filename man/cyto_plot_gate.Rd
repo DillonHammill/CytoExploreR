@@ -2,9 +2,34 @@
 % Please edit documentation in R/cyto_plot_gate-methods.R
 \name{cyto_plot_gate}
 \alias{cyto_plot_gate}
-\title{Plot Gate Objects onto an Existing Plot}
+\alias{cyto_plot_gate.rectangleGate}
+\alias{cyto_plot_gate.polygonGate}
+\alias{cyto_plot_gate.ellipsoidGate}
+\alias{cyto_plot_gate.list}
+\alias{cyto_plot_gate.filters}
+\title{Plot gate objects onto an existing plot}
 \usage{
 cyto_plot_gate(x, ...)
+
+\method{cyto_plot_gate}{rectangleGate}(x, channels, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_point = FALSE,
+  gate_point_shape = 16, gate_point_size = 1)
+
+\method{cyto_plot_gate}{polygonGate}(x, channels, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_point = FALSE,
+  gate_point_shape = 16, gate_point_size = 1)
+
+\method{cyto_plot_gate}{ellipsoidGate}(x, channels, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_point = FALSE,
+  gate_point_shape = 16, gate_point_size = 1)
+
+\method{cyto_plot_gate}{list}(x, channels, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_point = FALSE,
+  gate_point_shape = 16, gate_point_size = 1)
+
+\method{cyto_plot_gate}{filters}(x, channels, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_point = FALSE,
+  gate_point_shape = 16, gate_point_size = 1)
 }
 \arguments{
 \item{x}{gate object of class
@@ -13,10 +38,103 @@ cyto_plot_gate(x, ...)
 \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{list} or
 \code{\link[flowCore:filters-class]{filters}}.}
 
-\item{...}{additional method-specific arguments.}
+\item{channels}{fluorescent channels to used to construct the plot.}
+
+\item{gate_line_type}{integer [0,6] which controls the line type, set to
+\code{1} to draw solid lines by default.}
+
+\item{gate_line_width}{numeric to adjust line thickness of gates, set to
+\code{2.5} by default.}
+
+\item{gate_line_col}{indicates the colour of the gate to be constructed, set
+to \code{"red"} by default.}
+
+\item{gate_point}{logical indicating whether points should be included when
+plotting the gates, set to \code{FALSE} by default.}
+
+\item{gate_point_shape}{integer [0,25] passed to pch to control the shape of
+the points, set to \code{16} to draw filled circles by default. For other
+shapes refer to \code{\link[graphics:points]{?pch}}.}
+
+\item{gate_point_size}{numeric character expansion to control the size of the
+points in the drawn gate, set to \code{1} by default.}
+}
+\value{
+gate object(s) with modified co-ordinates for plotting.
 }
 \description{
-Plot Gate Objects onto an Existing Plot
+Plot gate objects onto an existing plot
+}
+\examples{
+library(CytoRSuiteData)
+
+# Load in samples
+fs <- Activation
+gs <- GatingSet(fs)
+
+# Apply compensation
+gs <- compensate(gs, fs[[1]]@description$SPILL)
+
+# Transform fluorescent channels
+trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
+gs <- transform(gs, trans)
+
+# Gate using gate_draw
+gating(Activation_gatingTemplate, gs)
+
+# Plot
+cyto_plot(gs[[32]],
+  parent = "T Cells",
+  channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
+  axes_trans = trans
+)
+
+# CD4 T Cells rectangleGate
+cyto_plot_gate(getGate(gs, "CD4 T Cells")[[1]],
+  channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
+  gate_line_col = "purple"
+)
+
+#' # Plot
+cyto_plot(gs[[32]],
+  parent = "root",
+  channels = c("FSC-A", "SSC-A")
+)
+
+# Cells polygonGate
+cyto_plot_gate(getGate(gs, "Cells")[[1]],
+  channels = c("FSC-A", "SSC-A"),
+  gate_line_col = "purple"
+)
+
+#' # Plot
+cyto_plot(gs[[32]],
+  parent = "Live Cells",
+  channels = c("APC-Cy7-A", "PE-A"),
+  axes_trans = trans
+)
+
+# T Cells ellipsoidGate
+cyto_plot_gate(getGate(gs, "T Cells")[[1]],
+  channels = c("APC-Cy7-A", "PE-A"),
+  gate_line_col = "purple"
+)
+
+# Plot
+cyto_plot(gs[[32]],
+  parent = "Live Cells",
+  channels = c("APC-Cy7-A", "PE-A"),
+  axes_trans = trans
+)
+
+# T Cells & Dendritic Cells mixed gates
+cyto_plot_gate(list(
+  getGate(gs, "T Cells")[[1]],
+  getGate(gs, "Dendritic Cells")[[1]]
+),
+channels = c("APC-Cy7-A", "PE-A"),
+gate_line_col = c("purple", "magenta")
+)
 }
 \seealso{
 \code{\link{cyto_plot_gate,rectangleGate-method}}
