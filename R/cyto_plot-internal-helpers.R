@@ -1376,13 +1376,6 @@ setMethod(.cyto_plot_overlay_format,
       legend <- "fill"
     }
     
-    # Legend x position
-    legend.x <- 1.025 * par("usr")[2]
-
-    # Legend y position
-    legend.y <- mean(par("usr")[3:4])
-    legend.y <- legend.y + (((par("usr")[4]) / 21) * 0.5 * length(legend_text))
-
     # Reverse legend text order for legend
     legend_text <- rev(legend_text)
 
@@ -1396,8 +1389,8 @@ setMethod(.cyto_plot_overlay_format,
 
       # Construct legend
       legend(
-        x = legend.x,
-        y = legend.y,
+        x = "right",
+        inset = c(-0.4,0),
         legend = legend_text,
         text_font = rev(legend_text_font),
         cex = legend_text_size,
@@ -1428,8 +1421,8 @@ setMethod(.cyto_plot_overlay_format,
 
       # Construct legend
       legend(
-        x = legend.x,
-        y = legend.y,
+        x = "right", # right inside plot
+        inset = c(-0.4,0), # move outside 0.4 graphics device widths
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,
@@ -1444,13 +1437,6 @@ setMethod(.cyto_plot_overlay_format,
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
 
-    # Legend position x
-    legend.x <- par("usr")[2] + 0.025 * par("usr")[2]
-
-    # Legend position y
-    legend.y <- mean(par("usr")[c(3, 4)])
-    legend.y <- legend.y + (((par("usr")[4]) / 21) * 0.5 * length(legend_text))
-
     # Legend with points
     if (!all(point_alpha == 1)) {
       legend_point_col <- mapply(function(col, alpha) {
@@ -1459,8 +1445,8 @@ setMethod(.cyto_plot_overlay_format,
     }
 
     legend(
-      x = legend.x,
-      y = legend.y,
+      x = "right",
+      inset = c(-0.4,0),
       legend = rev(legend_text),
       col = rev(legend_point_col),
       pch = rev(point_shape),
