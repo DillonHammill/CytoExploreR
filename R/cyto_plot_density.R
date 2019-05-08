@@ -62,40 +62,30 @@ cyto_plot_density.flowFrame <- function(x,
 
   # Number of overlays
   ovn <- length(fr_list) - 1
-
+  
   # Get a list of kernel densities
   fr_dens <- lapply(fr_list, function(fr){
     
     # Calculate kernel density
-    dns <- suppressWarnings(.cyto_density(fr,
-                                          channel,
-                                          args[["density_smooth"]],
-                                          args[["density_modal"]]))
-    
-    # Return NA if too few events
-    if(is.null(dns)){
-      dns <- NA
-    }
-    
-    return(dns)
+    suppressWarnings(.cyto_density(fr,
+                                   channel,
+                                   args[["density_smooth"]],
+                                   args[["density_modal"]]))
   })
   
   # Get height of y axis for each density distribution
   if(args[["density_modal"]]){
     y_max <- 100
   }else{
-    y_max <- unlist(lapply(fr_dens, function(z){
+    y_max <- mean(unlist(lapply(fr_dens, function(z){
     
-      if(is.na(z)){
-        NA
-      }else{
+      if(!is.na(z)){
         max(z$y)
+      }else{
+        NA
       }
     
-    }))
-  
-    # Get mean height of each y axis
-    y_max <- mean(y_max[!is.na(y_max)])
+    })), na.rm = TRUE)
     
   }
   
@@ -110,7 +100,7 @@ cyto_plot_density.flowFrame <- function(x,
   fr_dens <- mapply(function(fr_dens, ofst) {
 
     # Adjust values for stacking
-    if (ofst != 0) {
+    if (ofst != 0 & !is.na(fr_dens)) {
       fr_dens$y <- fr_dens$y + ofst
     }
 
@@ -141,12 +131,13 @@ cyto_plot_density.flowFrame <- function(x,
                      density_line_col,
                      density_line_width,
                      density_line_type) {
-        polygon(fr_dens,
-          col = density_fill,
-          border = density_line_col,
-          lwd = density_line_width,
-          lty = density_line_type
-        )
+        if(!is.na(fr_dens)){
+          polygon(fr_dens,
+            col = density_fill,
+            border = density_line_col,
+            lwd = density_line_width,
+            lty = density_line_type)
+        }
       }, frs_dens,
       args[["density_fill"]],
       args[["density_line_col"]],
@@ -161,12 +152,14 @@ cyto_plot_density.flowFrame <- function(x,
                      density_line_col,
                      density_line_width,
                      density_line_type) {
-        polygon(fr_dens,
-          col = density_fill,
-          border = density_line_col,
-          lwd = density_line_width,
-          lty = density_line_type
-        )
+        if(!is.na(fr_dens)){
+          polygon(fr_dens,
+                  col = density_fill,
+                  border = density_line_col,
+                  lwd = density_line_width,
+                  lty = density_line_type)
+        }
+
       }, rev(frs_dens),
       rev(args[["density_fill"]]),
       rev(args[["density_line_col"]]),
@@ -179,6 +172,8 @@ cyto_plot_density.flowFrame <- function(x,
 #' @rdname cyto_plot_density
 #' @export
 cyto_plot_density.list <- function(x,
+                                   density_modal = TRUE,
+                                   density_stack = 0.5,
                                    density_cols = NA,
                                    density_fill = NA,
                                    density_fill_alpha = 1,
@@ -186,13 +181,16 @@ cyto_plot_density.list <- function(x,
                                    density_line_width = 1,
                                    density_line_col = "black"){
   
-  # Check x contains density objects
-  if(!all(unlist(lapply(x, "class")) == "density")){
+  # Check x contains density objects (may contain NA as well)
+  if(!any(unlist(lapply(x, "class")) == "density")){
     stop("'x' should be a list of density objects.")
   }
   
   # Pull down arguments to named list
   args <- args_list()
+  
+  # Inherit theme arguments
+  args <- .cyto_plot_theme_inherit(args)
   
   # Get density_fill colours (inherits from theme internally)
   if(.all_na(density_fill) | .empty(density_fill)){
@@ -201,8 +199,24 @@ cyto_plot_density.list <- function(x,
                                       args[.args])
   }
 
-  # Add horizontal lines minimum y value for each distribution
-  ofst <- unlist(lapply(x, function(z){min(z$y)}))
+  # Number of overlays
+  ovn <- length(x) - 1
+  
+  # Calculate the mean maximum y value for kernel densities
+  if(args[["density_modal"]]){
+    y_range <- 100
+  }else{
+    y_range<- mean(unlist(lapply(x, function(d){
+      if(!is.na(d)){
+        max(d$y) - min(d$y)
+      }else{
+        NA
+      }
+    })), na.rm = TRUE)
+  }
+  ofst <- seq(0,
+              ovn * args[["density_stack"]] * y_range,
+              args[["density_stack"]] * y_range)
   abline(
     h = ofst,
     col = args[["density_line_col"]],
@@ -212,11 +226,17 @@ cyto_plot_density.list <- function(x,
   )
   
   # Minimum for each distribution
-  mn <- unlist(lapply(x, function(z){min(z$y)}))
+  mn <- unlist(lapply(x, function(z){
+    if(!is.na(z)){
+      min(z$y)
+    }else{
+      0
+    }
+  }))
   
   # Add density distributions - reverse plot order and colours
   if (length(x) > 1 & 
-      all(mn == 0)) {
+      all(floor(mn) == 0)) {
     
     mapply(
       function(x,
@@ -224,12 +244,13 @@ cyto_plot_density.list <- function(x,
                density_line_col,
                density_line_width,
                density_line_type) {
-        polygon(x,
-                col = density_fill,
-                border = density_line_col,
-                lwd = density_line_width,
-                lty = density_line_type
-        )
+        if(!is.na(x)){
+          polygon(x,
+                  col = density_fill,
+                  border = density_line_col,
+                  lwd = density_line_width,
+                  lty = density_line_type)
+        }
       }, x,
       args[["density_fill"]],
       args[["density_line_col"]],
@@ -244,12 +265,13 @@ cyto_plot_density.list <- function(x,
                density_line_col,
                density_line_width,
                density_line_type) {
-        polygon(x,
-                col = density_fill,
-                border = density_line_col,
-                lwd = density_line_width,
-                lty = density_line_type
-        )
+        if(!is.na(x)){
+          polygon(x,
+                  col = density_fill,
+                  border = density_line_col,
+                  lwd = density_line_width,
+                  lty = density_line_type)
+        }
       }, rev(x),
       rev(args[["density_fill"]]),
       rev(args[["density_line_col"]]),
