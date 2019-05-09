@@ -56,6 +56,10 @@
   # Pull down arguments to named list - ... includes x as well
   assign("args", ...)
   
+  .args_update(args)
+  
+  print(.args_list())
+  
   # Restrict x to display percentage events
   args[["x"]] <- cyto_sample(args[["x"]], args[["display"]])
 

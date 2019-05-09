@@ -121,7 +121,7 @@ cyto_plot_empty <- function(x,
   on.exit(par(pars))
   
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)

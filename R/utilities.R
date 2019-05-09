@@ -48,8 +48,8 @@
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
-#' @export
-args_list <- function(){
+#' @noRd
+.args_list <- function(){
   
   # Get arguments from parental environment
   args <- as.list(parent.frame())
@@ -65,6 +65,25 @@ args_list <- function(){
   class(args) <- "alist"
   
   return(args)
+  
+}
+
+# ARGUMENT UPDATE --------------------------------------------------------------
+
+#' Update arguments of function using a named list of arguments
+#' 
+#' @param x named list of arguments to assign to function environment.
+#' 
+#' @return update arguments in function environment.
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.args_update <- function(x){
+  
+  lapply(seq(1,length(x)), function(z){
+    assign(names(x)[z], x[[z]], envir = parent.frame())
+  })
   
 }
 

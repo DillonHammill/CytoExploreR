@@ -53,7 +53,7 @@ cyto_plot_point.flowFrame <- function(x,
   }
    
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
@@ -106,7 +106,7 @@ cyto_plot_point.list <- function(x,
   # Must
   
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)

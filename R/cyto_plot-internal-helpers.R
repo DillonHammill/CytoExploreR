@@ -767,7 +767,7 @@
 .cyto_plot_point_cols <- function(point_cols = NA) {
 
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
@@ -1267,7 +1267,7 @@ setMethod(.cyto_plot_overlay_format,
   if (!getOption("CytoRSuite_cyto_plot_grid")) {
       
     # Pull down arguments to named lis
-    args <- args_list()
+    args <- .args_list()
     
     # Default margins
     mar <- c(5.1,5.1,4.1,2.1)
@@ -1497,7 +1497,7 @@ setMethod(.cyto_plot_overlay_format,
                              title) {
   
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # 1D density distributions
   if (length(args[["channels"]]) == 1) {
@@ -1750,7 +1750,7 @@ setMethod(.cyto_plot_overlay_format,
   n <- length(x)
   
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)

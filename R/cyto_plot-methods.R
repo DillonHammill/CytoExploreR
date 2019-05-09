@@ -350,7 +350,7 @@ cyto_plot.flowFrame <- function(x,
   )
 
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
 
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
@@ -693,7 +693,7 @@ cyto_plot.flowSet <- function(x,
   )
 
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
 
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
@@ -1134,7 +1134,7 @@ cyto_plot.GatingHierarchy <- function(x,
   }
 
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
 
   # Pass arguments to cyto_plot flowFrame method for theme & dispatch
   .args <- formalArgs("cyto_plot.flowFrame")
@@ -1696,7 +1696,7 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
 
   # Pass arguments to flowSet method for theme & dispatch
   .args <- formalArgs("cyto_plot.flowSet")

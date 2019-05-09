@@ -55,7 +55,7 @@ cyto_plot_density.flowFrame <- function(x,
   }
 
   # Pull down arguments to named list
-  args <- as.list(environment())
+  args <- .args_list()
 
   # Inherit cyto_plot_theme arguments
   args <- .cyto_plot_theme_inherit(args)
@@ -187,7 +187,7 @@ cyto_plot_density.list <- function(x,
   }
   
   # Pull down arguments to named list
-  args <- args_list()
+  args <- .args_list()
   
   # Inherit theme arguments
   args <- .cyto_plot_theme_inherit(args)
