@@ -4,11 +4,11 @@
 \alias{cyto_plot.GatingSet}
 \title{cyto_plot - GatingSet Method}
 \usage{
-\method{cyto_plot}{GatingSet}(x, parent, alias = NULL, channels,
-  axes_trans = NULL, group_by = FALSE, overlay = NULL, gate = NA,
-  limits = "machine", display = NULL, layout = NULL, popup = FALSE,
-  xlim = NULL, ylim = NULL, title, xlab = NA, ylab = NA,
-  density_modal = TRUE, density_smooth = 1.5, density_stack = 0,
+\method{cyto_plot}{GatingSet}(x, parent, alias, channels,
+  axes_trans = NA, group_by = FALSE, overlay = NA, gate = NA,
+  limits = "machine", display = 1, layout = NA, popup = FALSE,
+  xlim = NA, ylim = NA, title, xlab, ylab, density_modal = TRUE,
+  density_smooth = 0.6, density_stack = 0.5,
   density_layers = length(x), density_cols = NA, density_fill = NA,
   density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black",
@@ -272,6 +272,9 @@ set to 1 by default.}
 
 \item{border_line_col}{colour to use for the plot border, set to "black" by
 default.}
+
+\item{border_fill}{border_fill fill colour to use inside the plot border
+(i.e. background colour), set to "white" by default.}
 
 \item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
 }

@@ -4,12 +4,12 @@
 \alias{cyto_plot.flowSet}
 \title{cyto_plot - flowSet Method}
 \usage{
-\method{cyto_plot}{flowSet}(x, channels, axes_trans = NULL,
-  group_by = FALSE, overlay = NULL, gate = NA, limits = "machine",
-  display = NULL, layout = NULL, popup = FALSE, xlim = NULL,
-  ylim = NULL, title, xlab = NA, ylab = NA, density_modal = TRUE,
-  density_smooth = 1.5, density_stack = 0,
-  density_layers = length(x), density_col = NA, density_fill = NA,
+\method{cyto_plot}{flowSet}(x, channels, axes_trans = NA,
+  group_by = FALSE, overlay = NA, gate = NA, display = 1,
+  limits = "machine", layout = NA, popup = FALSE, xlim = NA,
+  ylim = NA, title, xlab, ylab, density_modal = TRUE,
+  density_smooth = 0.6, density_stack = 0.5,
+  density_layers = length(x), density_cols = NA, density_fill = NA,
   density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black",
   point_shape = ".", point_size = 2, point_cols = NA,
@@ -20,14 +20,15 @@
   axes_label_text_font = 1, axes_label_text_size = 1.1,
   axes_label_text_col = "black", title_text_font = 2,
   title_text_size = 1.1, title_text_col = "black", legend = FALSE,
-  legend_text, legend_text_font = 1, legend_text_size = 1,
+  legend_text = NA, legend_text_font = 1, legend_text_size = 1,
   legend_text_col = "black", legend_line_col = NA,
   legend_box_fill = NA, legend_point_col = NA, gate_line_type = 1,
   gate_line_width = 2.5, gate_line_col = "red", label = TRUE,
   label_text = NA, label_stat = "percent", label_text_font = 2,
   label_text_size = 1, label_text_col = "black", label_box_x = NA,
   label_box_y = NA, label_box_alpha = 0.6, border_line_type = 1,
-  border_line_width = 1, border_line_col = "black", ...)
+  border_line_width = 1, border_line_col = "black",
+  border_fill = "white", ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -61,14 +62,14 @@ gate objects of class
 dimensions are supported. Multiple gates can be supplied either as a
 \code{list} or \code{\link[flowCore:filters-class]{filters}} object.}
 
+\item{display}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{display} can substantial improve
+plotting speed for less powerful machines.}
+
 \item{limits}{indicates whether the axes limits should be based on the
 \code{"data"} or \code{"machine"}, set to "machine" by default to show
 complete axes ranges. This argument will only alter the upper axis limits,
 to modify the lower limits use \code{xlim} and \code{ylim}.}
-
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
 
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}
@@ -102,6 +103,9 @@ density distributions with overlay, set to 0.5 by default.}
 
 \item{density_layers}{numeric indicating the number of samples to stack in
 each plot, set to all samples by default.}
+
+\item{density_cols}{vector colours to draw from when selecting density fill
+colours if none are supplied to density_fill.}
 
 \item{density_fill}{fill colour(s) for 1-D density distributions.}
 
@@ -261,10 +265,10 @@ set to 1 by default.}
 \item{border_line_col}{colour to use for the plot border, set to "black" by
 default.}
 
-\item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
+\item{border_fill}{border_fill fill colour to use inside the plot border
+(i.e. background colour), set to "white" by default.}
 
-\item{density_cols}{vector colours to draw from when selecting density fill
-colours if none are supplied to density_fill.}
+\item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
 }
 \description{
 Explore & visualise a flowSet.

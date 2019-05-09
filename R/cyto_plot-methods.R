@@ -553,6 +553,8 @@ cyto_plot.flowFrame <- function(x,
 #'   set to 1 by default.
 #' @param border_line_col colour to use for the plot border, set to "black" by
 #'   default.
+#' @param border_fill border_fill fill colour to use inside the plot border
+#'   (i.e. background colour), set to "white" by default.
 #' @param ... additional arguments passed to \code{\link[graphics:plot]{plot}}.
 #'
 #' @examples
@@ -593,24 +595,24 @@ cyto_plot.flowFrame <- function(x,
 #' @export
 cyto_plot.flowSet <- function(x,
                               channels,
-                              axes_trans = NULL,
+                              axes_trans = NA,
                               group_by = FALSE,
-                              overlay = NULL,
+                              overlay = NA,
                               gate = NA,
+                              display = 1,
                               limits = "machine",
-                              display = NULL,
-                              layout = NULL,
+                              layout = NA,
                               popup = FALSE,
-                              xlim = NULL,
-                              ylim = NULL,
+                              xlim = NA,
+                              ylim = NA,
                               title,
-                              xlab = NA,
-                              ylab = NA,
+                              xlab,
+                              ylab,
                               density_modal = TRUE,
-                              density_smooth = 1.5,
-                              density_stack = 0,
+                              density_smooth = 0.6,
+                              density_stack = 0.5,
                               density_layers = length(x),
-                              density_col = NA,
+                              density_cols = NA,
                               density_fill = NA,
                               density_fill_alpha = 1,
                               density_line_type = 1,
@@ -636,7 +638,7 @@ cyto_plot.flowSet <- function(x,
                               title_text_size = 1.1,
                               title_text_col = "black",
                               legend = FALSE,
-                              legend_text,
+                              legend_text = NA,
                               legend_text_font = 1,
                               legend_text_size = 1,
                               legend_text_col = "black",
@@ -657,8 +659,12 @@ cyto_plot.flowSet <- function(x,
                               label_box_alpha = 0.6,
                               border_line_type = 1,
                               border_line_width = 1,
-                              border_line_col = "black", ...) {
+                              border_line_col = "black",
+                              border_fill = "white", ...) {
 
+  
+  
+  
   # Set plot method
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
     options("CytoRSuite_cyto_plot_method" = "flowSet")
@@ -886,6 +892,8 @@ cyto_plot.flowSet <- function(x,
 #'   set to 1 by default.
 #' @param border_line_col colour to use for the plot border, set to "black" by
 #'   default.
+#' @param border_fill border_fill fill colour to use inside the plot border
+#'   (i.e. background colour), set to "white" by default.
 #' @param ... additional arguments passed to \code{\link[graphics:plot]{plot}}.
 #'
 #' @examples
@@ -943,21 +951,21 @@ cyto_plot.flowSet <- function(x,
 #' @export
 cyto_plot.GatingHierarchy <- function(x,
                                       parent,
-                                      alias = NULL,
+                                      alias,
                                       channels,
-                                      axes_trans = NULL,
-                                      overlay = NULL,
+                                      axes_trans = NA,
+                                      overlay = NA,
                                       gate = NA,
                                       limits = "machine",
                                       popup = FALSE,
-                                      xlim = NULL,
-                                      ylim = NULL,
+                                      xlim = NA,
+                                      ylim = NA,
                                       title,
-                                      xlab = NA,
-                                      ylab = NA,
+                                      xlab,
+                                      ylab,
                                       density_modal = TRUE,
-                                      density_smooth = 1.5,
-                                      density_stack = 0,
+                                      density_smooth = 0.6,
+                                      density_stack = 0.5,
                                       density_cols = NA,
                                       density_fill = NA,
                                       density_fill_alpha = 1,
@@ -1005,7 +1013,8 @@ cyto_plot.GatingHierarchy <- function(x,
                                       label_box_alpha = 0.6,
                                       border_line_type = 1,
                                       border_line_width = 1,
-                                      border_line_col = "black", ...) {
+                                      border_line_col = "black",
+                                      border_fill = "white", ...) {
 
   # Set plot method
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
@@ -1325,6 +1334,8 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   set to 1 by default.
 #' @param border_line_col colour to use for the plot border, set to "black" by
 #'   default.
+#' @param border_fill border_fill fill colour to use inside the plot border
+#'   (i.e. background colour), set to "white" by default.
 #' @param ... additional arguments passed to \code{\link[graphics:plot]{plot}}.
 #'
 #' @examples
@@ -1376,24 +1387,24 @@ cyto_plot.GatingHierarchy <- function(x,
 #' @export
 cyto_plot.GatingSet <- function(x,
                                 parent,
-                                alias = NULL,
+                                alias,
                                 channels,
-                                axes_trans = NULL,
+                                axes_trans = NA,
                                 group_by = FALSE,
-                                overlay = NULL,
+                                overlay = NA,
                                 gate = NA,
                                 limits = "machine",
-                                display = NULL,
-                                layout = NULL,
+                                display = 1,
+                                layout = NA,
                                 popup = FALSE,
-                                xlim = NULL,
-                                ylim = NULL,
+                                xlim = NA,
+                                ylim = NA,
                                 title,
-                                xlab = NA,
-                                ylab = NA,
+                                xlab,
+                                ylab,
                                 density_modal = TRUE,
-                                density_smooth = 1.5,
-                                density_stack = 0,
+                                density_smooth = 0.6,
+                                density_stack = 0.5,
                                 density_layers = length(x),
                                 density_cols = NA,
                                 density_fill = NA,

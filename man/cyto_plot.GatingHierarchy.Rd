@@ -4,16 +4,15 @@
 \alias{cyto_plot.GatingHierarchy}
 \title{cyto_plot - GatingHierarchy Method}
 \usage{
-\method{cyto_plot}{GatingHierarchy}(x, parent, alias = NULL, channels,
-  axes_trans = NULL, overlay = NULL, gate = NA, limits = "machine",
-  popup = FALSE, xlim = NULL, ylim = NULL, title, xlab = NA,
-  ylab = NA, density_modal = TRUE, density_smooth = 1.5,
-  density_stack = 0, density_cols = NA, density_fill = NA,
-  density_fill_alpha = 1, density_line_type = 1,
-  density_line_width = 1, density_line_col = "black",
-  point_shape = ".", point_size = 2, point_cols = NA,
-  point_col = NA, point_alpha = 1, contour_lines = 0,
-  contour_line_type = 1, contour_line_width = 1,
+\method{cyto_plot}{GatingHierarchy}(x, parent, alias, channels,
+  axes_trans = NA, overlay = NA, gate = NA, limits = "machine",
+  popup = FALSE, xlim = NA, ylim = NA, title, xlab, ylab,
+  density_modal = TRUE, density_smooth = 0.6, density_stack = 0.5,
+  density_cols = NA, density_fill = NA, density_fill_alpha = 1,
+  density_line_type = 1, density_line_width = 1,
+  density_line_col = "black", point_shape = ".", point_size = 2,
+  point_cols = NA, point_col = NA, point_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
   contour_line_col = "black", axes_text = axes_text,
   axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
   axes_label_text_font = 1, axes_label_text_size = 1.1,
@@ -26,7 +25,8 @@
   label_text = NA, label_stat = "percent", label_text_font = 2,
   label_text_size = 1, label_text_col = "black", label_box_x = NA,
   label_box_y = NA, label_box_alpha = 0.6, border_line_type = 1,
-  border_line_width = 1, border_line_col = "black", ...)
+  border_line_width = 1, border_line_col = "black",
+  border_fill = "white", ...)
 }
 \arguments{
 \item{x}{object of class
@@ -256,6 +256,9 @@ set to 1 by default.}
 
 \item{border_line_col}{colour to use for the plot border, set to "black" by
 default.}
+
+\item{border_fill}{border_fill fill colour to use inside the plot border
+(i.e. background colour), set to "white" by default.}
 
 \item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
 }
