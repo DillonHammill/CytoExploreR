@@ -98,12 +98,6 @@
 #' )
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_plot_gate,rectangleGate-method}}
-#' @seealso \code{\link{cyto_plot_gate,polygonGate-method}}
-#' @seealso \code{\link{cyto_plot_gate,ellipsoidGate-method}}
-#' @seealso \code{\link{cyto_plot_gate,list-method}}
-#' @seealso \code{\link{cyto_plot_gate,filters-method}}
-#'
 #' @rdname cyto_plot_gate
 #'
 #' @export
@@ -249,7 +243,6 @@ cyto_plot_gate.rectangleGate <- function(x,
       lty = gate_line_type
     )
   }
-
   invisible(gt)
 }
 
@@ -343,7 +336,7 @@ cyto_plot_gate.polygonGate <- function(x,
       })
     }
 
-    # Plot Gate
+    # Plot gate
     if (gate_point == TRUE) {
       points(
         x = c(gt@boundaries[, channels[1]]),

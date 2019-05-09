@@ -14,6 +14,11 @@
 # for arguments accepting channel name(s) this make it easier to pass arguments
 # through do.call. 
 
+# MISSING ARGUMENTS:
+# - title
+# - xlab
+# - ylab
+
 # CHANNELS: "channels" of length 1 in cyto_plot_1d or length 2 for cyto_plot_2d.
 # "channels" have already been converted to valid names in the upper cyto_plot
 # layer.
@@ -50,10 +55,10 @@
   
   # Pull down arguments to named list - ... includes x as well
   assign("args", ...)
-
+  
   # Restrict x to display percentage events
   args[["x"]] <- cyto_sample(args[["x"]], args[["display"]])
-  
+
   # Convert overlay to list
   if(!.all_na(args[["overlay"]])){
     args[["overlay"]] <- cyto_convert(args[["overlay"]], "flowFrame list")
@@ -74,8 +79,8 @@
   }
   
   # Name each element of fr_list with identifier - used in legend
-  names(args[["fr_list"]]) <- unlist(lapply(args[["fr_list"]], function(x){
-    identifier(x)
+  names(args[["fr_list"]]) <- unlist(lapply(args[["fr_list"]], function(y){
+    identifier(y)
   }))
   
   # Get kernel density for each list element
@@ -119,11 +124,11 @@
     })
   }
   
-  # YLIM - bypass.cyto_plot_axes_limits
+  # YLIM 
   if(.all_na(args[["ylim"]])){
     args[["ylim"]] <- c(0, y_max + ovn * args[["density_stack"]] * y_max)
   }
-  
+
   # TITLE
   args[["title"]] <- .cyto_plot_title(args[["x"]],
                             args[["channels"]],
@@ -206,13 +211,76 @@
                       args[["point_col"]],
                       args[["point_alpha"]])
   }
-  
-  
-  # GATES
-  
-  
-  # LABELS
 
+  # GATES - no overlay
+  if (.all_na(args[["overlay"]])) {
+    if(!.all_na(args[["gate"]])){
+      args[["gate"]] <- cyto_plot_gate(args[["gate"]],
+                             channels = args[["channels"]],
+                             gate_line_col = args[["gate_line_col"]],
+                             gate_line_width = args[["gate_line_width"]],
+                             gate_line_type = args[["gate_line_type"]])
+    }
+    
+    # LABELS
+    if (!.all_na(args[["gate"]]) & args[["label"]]) {
+      
+      # Population names missing - show percentage only
+      suppressMessages(cyto_plot_label(
+        x = args[["fr_list"]][[1]],
+        channels = args[["channels"]],
+        gate = args[["gate"]],
+        trans = args[["axes_trans"]],
+        text = args[["label_text"]],
+        stat = args[["label_stat"]],
+        text_size = args[["label_text_size"]],
+        text_font = args[["label_text_font"]],
+        text_col = args[["label_text_col"]],
+        box_alpha = args[["label_box_alpha"]]
+      ))
+    }
+
+  } else if (!.all_na(args[["overlay"]]) & 
+             args[["density_stack"]] != 0 & 
+             !.all_na(args[["gate"]])) {
+    
+    # Need to compute y label positions
+    if(.all_na(args[["label_box_y"]])){
+      args[["label_box_y"]] <- unlist(
+        lapply(rep(seq(1,length(args[["fr_list"]])),
+                   length.out = length(args[["gate"]]) * length(args[["fr_list"]]),
+                   each = length(args[["gate"]])),
+              function(x){
+              (0.5 * args[["density_stack"]] * y_max) +
+              ((x-1) * args[["density_stack"]] * y_max)
+        }))
+    }
+    
+    .cyto_overlay_gate(
+      x = args[["fr_list"]][[1]],
+      channel = args[["channels"]],
+      trans = args[["axes_trans"]],
+      overlay = args[["fr_list"]][2:length(args[["fr_list"]])],
+      gate = args[["gate"]],
+      density_stack = args[["density_stack"]],
+      density_modal = args[["density_modal"]],
+      label_text = args[["label_text"]],
+      label_stat = args[["label_stat"]],
+      label_text_size = args[["label_text_size"]],
+      label_text_font = args[["label_text_font"]],
+      label_text_col = args[["label_text_col"]],
+      label_box_x = args[["label_box_x"]],
+      label_box_y = args[["label_box_y"]],
+      label_box_alpha = args[["label_box_alpha"]],
+      gate_line_col = args[["gate_line_col"]],
+      gate_line_width = args[["gate_line_width"]],
+      gate_line_type = args[["gate_line_type"]]
+    )
+  } else if (!.all_na(args[["overlay"]]) & 
+             args[["density_stack"]] == 0 & 
+             !.all_na(args[["gate"]])) {
+    message("Gating overlays without stacking is not supported.")
+  }
   
 }
   

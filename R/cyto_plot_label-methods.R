@@ -184,7 +184,7 @@ cyto_plot_label <- function(x, gate, ...){
 #' @export
 cyto_plot_label.NULL <- function(x,
                                 gate,
-                                trans = NULL,
+                                trans = NA,
                                 channels,
                                 text = NA,
                                 stat = NA,
@@ -200,7 +200,7 @@ cyto_plot_label.NULL <- function(x,
             fr <- x
             
             # Check statistic
-            if(all(!is.na(stat))){
+            if(!.all_na(stat)){
               stat <- .cyto_stat_check(stat)
             }
             
@@ -238,14 +238,14 @@ cyto_plot_label.NULL <- function(x,
             }
             
             # Missing text
-            if (all(is.na(text)) & !all(is.na(stat))) {
+            if (.all_na(text) & !.all_na(stat)) {
               message(
                 paste("No text supplied for labels - labels will show", stat, "only.")
               )
             }
             
             # Calculate statistics
-            if (!all(is.na(stat))) {
+            if (!.all_na(stat)) {
               if (stat == "count") {
                 st <- BiocGenerics::nrow(fr)
               } else if (stat == "median") {
@@ -283,17 +283,17 @@ cyto_plot_label.NULL <- function(x,
             ymax <- par("usr")[4]
             
             # Label position - x - defaults to 3/4
-            if (all(is.na(text_x))) {
+            if (.all_na(text_x)) {
               text_x <- xmin + (xmax - xmin) * 0.75
             }
             
             # Label position - y - defaults to 1/2
-            if (all(is.na(text_y))) {
+            if (.all_na(text_y)) {
               text_y <- c(ymin + ymax) / 2
             }
             
             # Add labels
-            if (!all(is.na(text)) & !all(is.na(stat))) {
+            if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -304,7 +304,7 @@ cyto_plot_label.NULL <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (!all(is.na(text)) & all(is.na(stat))) {
+            } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -315,7 +315,7 @@ cyto_plot_label.NULL <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (all(is.na(text)) & !all(is.na(stat))) {
+            } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -344,12 +344,12 @@ cyto_plot_label.rectangleGate <- function(x,
                                 text_col = "black",
                                 box_alpha = 0.6,
                                 density_smooth = 1.5) {
-            
+  
             # Assign x to fr
             fr <- x
             
             # Check statistic
-            if(all(!is.na(stat))){
+            if(!.all_na(stat)) {
               stat <- .cyto_stat_check(stat)
             }
             
@@ -378,14 +378,14 @@ cyto_plot_label.rectangleGate <- function(x,
             }
             
             # Missing text
-            if (all(is.na(text)) & !all(is.na(stat))) {
+            if (.all_na(text) & !.all_na(stat)) {
               message(
                 paste("No text supplied for labels - labels will show", stat, "only.")
               )
             }
             
             # Calculate statistics
-            if (!all(is.na(stat))) {
+            if (!.all_na(stat)) {
               if (stat == "count") {
                 st <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
               } else if (stat == "freq") {
@@ -453,7 +453,7 @@ cyto_plot_label.rectangleGate <- function(x,
                 if (!channels == chans) {
                   stop("Supplied channel does not match that of the supplied gate.")
                 } else if (channels == chans) {
-                  if (all(is.na(text_x))) {
+                  if (.all_na(text_x)) {
                     xmin <- gate@min
                     xmax <- gate@max
                     
@@ -469,7 +469,7 @@ cyto_plot_label.rectangleGate <- function(x,
                 if (!chans %in% channels) {
                   stop("Supplied channels do not match that of the supplied gate.")
                 } else if (chans %in% channels) {
-                  if (all(is.na(text_x))) {
+                  if (.all_na(text_x)) {
                     xmin <- gate@min[channels[1]]
                     xmax <- gate@max[channels[1]]
                     
@@ -482,7 +482,7 @@ cyto_plot_label.rectangleGate <- function(x,
                     }
                   }
                   
-                  if (all(is.na(text_y))) {
+                  if (.all_na(text_y)) {
                     ymin <- gate@min[channels[2]]
                     ymax <- gate@max[channels[2]]
                     
@@ -502,7 +502,7 @@ cyto_plot_label.rectangleGate <- function(x,
               if (!all(chans %in% channels)) {
                 stop("Supplied channels do not match that of the supplied gate.")
               } else if (all(chans %in% channels)) {
-                if (all(is.na(text_x))) {
+                if (.all_na(text_x)) {
                   xmin <- gate@min[channels[1]]
                   xmax <- gate@max[channels[1]]
                   
@@ -515,7 +515,7 @@ cyto_plot_label.rectangleGate <- function(x,
                   }
                 }
                 
-                if (all(is.na(text_y))) {
+                if (.all_na(text_y)) {
                   ymin <- gate@min[channels[2]]
                   ymax <- gate@max[channels[2]]
                   
@@ -531,17 +531,17 @@ cyto_plot_label.rectangleGate <- function(x,
             }
             
             # Label position - x - defaults to 3/4
-            if (all(is.na(text_x))) {
+            if (.all_na(text_x)) {
               text_x <- c(xmin + xmax) / 2
             }
             
             # Label position - y - defaults to 1/2
-            if (all(is.na(text_y))) {
+            if (.all_na(text_y)) {
               text_y <- c(ymin + ymax) / 2
             }
             
             # Add labels
-            if (!all(is.na(text)) & !all(is.na(stat))) {
+            if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -552,7 +552,7 @@ cyto_plot_label.rectangleGate <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (!all(is.na(text)) & all(is.na(stat))) {
+            } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -563,7 +563,7 @@ cyto_plot_label.rectangleGate <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (all(is.na(text)) & !all(is.na(stat))) {
+            } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -596,7 +596,7 @@ cyto_plot_label.polygonGate <- function(x,
             fr <- x
             
             # Check statistic
-            if(all(!is.na(stat))){
+            if(!.all_na(stat)){
               stat <- .cyto_stat_check(stat)
             }
             
@@ -611,14 +611,14 @@ cyto_plot_label.polygonGate <- function(x,
             }
             
             # Missing text
-            if (all(is.na(text)) & !all(is.na(stat))) {
+            if (.all_na(text) & !.all_na(stat)) {
               message(
                 paste("No text supplied for labels - labels will show", stat, "only.")
               )
             }
             
             # Calculate statistic
-            if (!all(is.na(stat))) {
+            if (!.all_na(stat)) {
               if (stat == "count") {
                 st <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
               } else if (stat == "freq") {
@@ -641,17 +641,17 @@ cyto_plot_label.polygonGate <- function(x,
             }
             
             # Label position - x
-            if (all(is.na(text_x))) {
+            if (.all_na(text_x)) {
               text_x <- sum(gate@boundaries[, channels[1]]) / nrow(gate@boundaries)
             }
             
             # Label position - y
-            if (all(is.na(text_y))) {
+            if (.all_na(text_y)) {
               text_y <- sum(gate@boundaries[, channels[2]]) / nrow(gate@boundaries)
             }
             
             # Add labels
-            if (!all(is.na(text)) & !all(is.na(stat))) {
+            if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -662,7 +662,7 @@ cyto_plot_label.polygonGate <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (!all(is.na(text)) & all(is.na(stat))) {
+            } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -673,7 +673,7 @@ cyto_plot_label.polygonGate <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (all(is.na(text)) & !all(is.na(stat))) {
+            } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -706,7 +706,7 @@ cyto_plot_label.ellipsoidGate <- function(x,
             fr <- x
             
             # Check statistic
-            if(all(!is.na(stat))){
+            if(!.all_na(stat)){
               stat <- .cyto_stat_check(stat)
             }
             
@@ -721,14 +721,14 @@ cyto_plot_label.ellipsoidGate <- function(x,
             }
             
             # Missing text
-            if (all(is.na(text)) & !all(is.na(stat))) {
+            if (.all_na(text) & !.all_na(stat)) {
               message(
                 paste("No text supplied for labels - labels will show", stat, "only.")
               )
             }
             
             # Calculate statistic
-            if (!all(is.na(stat))) {
+            if (!.all_na(stat)) {
               if (stat == "count") {
                 st <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
               } else if (stat == "freq") {
@@ -751,17 +751,17 @@ cyto_plot_label.ellipsoidGate <- function(x,
             }
             
             # Label position - x
-            if (all(is.na(text_x))) {
+            if (.all_na(text_x)) {
               text_x <- gate@mean[channels[1]]
             }
             
             # Label position - y
-            if (all(is.na(text_y))) {
+            if (.all_na(text_y)) {
               text_y <- gate@mean[channels[2]]
             }
             
             # Add labels
-            if (!all(is.na(text)) & !all(is.na(stat))) {
+            if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -772,7 +772,7 @@ cyto_plot_label.ellipsoidGate <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (!all(is.na(text)) & all(is.na(stat))) {
+            } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -783,7 +783,7 @@ cyto_plot_label.ellipsoidGate <- function(x,
                 alpha.bg = box_alpha,
                 cex = text_size
               )
-            } else if (all(is.na(text)) & !all(is.na(stat))) {
+            } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
                 x = text_x,
                 y = text_y,
@@ -824,12 +824,12 @@ cyto_plot_label.list <- function(x,
                                               text_size)
 
             # Replace x coords if text_x is NA
-            if(all(is.na(text_x))){
+            if(.all_na(text_x)){
               text_x <- coords[["x"]]
             }
             
             # Replace y coords if text_y is NA
-            if(all(is.na(text_y))){
+            if(.all_na(text_y)){
               text_y <- coords[["y"]]
             }
             

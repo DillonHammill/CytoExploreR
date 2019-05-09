@@ -39,7 +39,7 @@
 #' @noRd
 .cyto_plot_axes_limits.flowFrame <- function(x,
                                              channels,
-                                             overlay,
+                                             overlay = NA,
                                              limits = "machine"){
   
   # overlay should be a flowFrame, flowSet or flowFrame list
@@ -58,7 +58,7 @@
   channels <- cyto_channels_extract(x, channels, plot = TRUE)
   
   # Combine x and overlay into flowFrame list
-  if(!missing(overlay) | !.empty(overlay)){
+  if(!.all_na(overlay)){
     
     # Convert overlay to flowFrame list
     overlay <- cyto_convert(overlay, "flowFrame list")
@@ -95,7 +95,7 @@
 #' @noRd
 .cyto_plot_axes_limits.flowSet <- function(x,
                                            channels,
-                                           overlay,
+                                           overlay = NA,
                                            limits = "machine"){
   
   # Get ranges for x (flowSet)
@@ -105,7 +105,7 @@
                              plot = TRUE)
   
   # Convert overlay to flowFrame list
-  if(!missing(overlay) | !.empty(overlay)){
+  if(!.all_na(overlay)){
     overlay <- cyto_convert(overlay, "flowSet")
     
     data_limits_overlay <- .cyto_range(x,
@@ -145,14 +145,14 @@
 .cyto_plot_axes_limits.GatingHierarchy <- function(x,
                                                    parent = "root",
                                                    channels,
-                                                   overlay,
+                                                   overlay = NA,
                                                    limits = "machine"){
   
   # Convert x to flowFrame
   x <- cyto_convert(x, "flowFrame", parent)
   
   # Convert overlay to flowFrame list
-  if(!missing(overlay) | !.empty(overlay)){
+  if(!.all_na(overlay)){
     overlay <- cyto_convert(overlay, "flowSet", parent)
   }
   
@@ -170,14 +170,14 @@
 .cyto_plot_axes_limits.GatingSet <- function(x,
                                              parent = "root",
                                              channels,
-                                             overlay,
+                                             overlay = NA,
                                              limits = "machine"){
   
   # Convert x to flowSet
   x <- cyto_convert(x, "flowSet", parent)
   
   # Convert overlay to flowSet
-  if(!missing(overlay) | !.empty(overlay)){
+  if(!.all_na(overlay)){
     overlay <- cyto_convert(overlay, "flowSet", parent)
   }
   
@@ -220,10 +220,10 @@
 #' @noRd
 .cyto_plot_axes_text.flowFrame <- function(x,
                                            channels,
-                                           axes_trans) {
+                                           axes_trans = NA) {
   
   # Return NA if axes_trans is missing
-  if (missing(axes_trans) | .empty(axes_trans)) {
+  if (.all_na(axes_trans)) {
     return(NA)
   } else {
 
@@ -895,7 +895,7 @@ setGeneric(
 setMethod(.cyto_plot_overlay_format,
   signature = "flowFrame",
   definition = function(x,
-                        overlay,
+                        overlay = NA,
                         display = 1) {
 
     # Assign x to fr
@@ -1264,7 +1264,7 @@ setMethod(.cyto_plot_overlay_format,
 #'
 #' @noRd
 .cyto_plot_margins <- function(x,
-                               overlay,
+                               overlay = NA,
                                legend = FALSE,
                                legend_text = NA,
                                title,
@@ -1280,7 +1280,7 @@ setMethod(.cyto_plot_overlay_format,
     mar <- c(5.1,5.1,4.1,2.1)
       
     # Make space for legend text on right
-    if(!.empty(args[["overlay"]]) & 
+    if(!.all_na(args[["overlay"]]) & 
        legend != FALSE & 
        !.all_na(legend_text)){
       mar[4] <- 7 + max(nchar(legend_text)) * 0.32
@@ -1390,7 +1390,7 @@ setMethod(.cyto_plot_overlay_format,
       # Construct legend
       legend(
         x = "right",
-        inset = c(-0.4,0),
+        inset = c(-0.48,0),
         legend = legend_text,
         text_font = rev(legend_text_font),
         cex = legend_text_size,
@@ -1422,7 +1422,7 @@ setMethod(.cyto_plot_overlay_format,
       # Construct legend
       legend(
         x = "right", # right inside plot
-        inset = c(-0.4,0), # move outside 0.4 graphics device widths
+        inset = c(-0.48,0), # move outside 0.4 graphics device widths
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,
@@ -1446,7 +1446,7 @@ setMethod(.cyto_plot_overlay_format,
 
     legend(
       x = "right",
-      inset = c(-0.4,0),
+      inset = c(-0.48,0),
       legend = rev(legend_text),
       col = rev(legend_point_col),
       pch = rev(point_shape),
@@ -1494,7 +1494,7 @@ setMethod(.cyto_plot_overlay_format,
 #' @noRd
 .cyto_plot_title <- function(x,
                              channels,
-                             overlay,
+                             overlay = NA,
                              title) {
   
   # Pull down arguments to named list
@@ -1507,7 +1507,7 @@ setMethod(.cyto_plot_overlay_format,
     if(.empty(args[["title"]])){
     
       # stacked/overlays lack a title
-      if(.empty(args[["overlay"]])){
+      if(.all_na(args[["overlay"]])){
         args[["title"]] <- identifier(args[["x"]])
         if(args[["title"]] == "anonymous"){
           args[["title"]] <- "All Events"
