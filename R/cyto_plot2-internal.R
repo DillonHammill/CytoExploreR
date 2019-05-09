@@ -114,7 +114,7 @@
               ovn * args[["density_stack"]] * y_max,
               args[["density_stack"]] * y_max)
   
-  # Adlust y values if stacking is been applied
+  # Adjust y values if stacking is been applied
   if(args[["density_stack"]] > 0){  
     # Shift distributions for stacking
     lapply(seq_len(length(args[["fr_dens"]])), function(z){
@@ -284,3 +284,166 @@
   
 }
   
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' @noRd
+cyto_plot_1d.flowSet <- function(x, ...){
+  
+}
+
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' @noRd
+.cyto_plot_2d <- function(x, ...){
+  UseMethod(".cyto_plot_2d")
+}
+
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' @noRd
+.cyto_plot_2d.flowFrame <- function(x, ...){
+  
+  # Get current graphics parameters and reset on exit
+  pars <- par("mar")
+  on.exit(par(pars))
+  
+  # Pull down arguments to named list - ... includes x as well
+  assign("args", ...)
+  
+  # Restrict x to display percentage events
+  args[["x"]] <- cyto_sample(args[["x"]], args[["display"]])
+  
+  # Convert overlay to list
+  if(!.all_na(args[["overlay"]])){
+    args[["overlay"]] <- cyto_convert(args[["overlay"]], "flowFrame list")
+  }
+  
+  # Restrict overlay to display percentage events - bypass in gate_draw
+  if(!getOption("CytoRSuite_gate_draw") & args[["display"]] != 1){ 
+    args[["overlay"]] <- lapply(args[["overlay"]], function(x){
+      cyto_sample(x, args[["display"]])
+    })
+  }
+  
+  # Combine x and overlay into the same list
+  if(!.all_na(args[["overlay"]])){
+    args[["fr_list"]] <- c(list(args[["x"]]), args[["overlay"]])
+  }else{
+    args[["fr_list"]] <- list(args[["x"]])
+  }
+  
+  # Name each element of fr_list with identifier - used in legend
+  names(args[["fr_list"]]) <- unlist(lapply(args[["fr_list"]], function(y){
+    identifier(y)
+  }))
+  
+  # Number of overlays
+  ovn <- length(args[["fr_list"]]) - 1
+  
+  # TITLE - always name of flowFrame or "Combined Events"
+  args[["title"]] <- .cyto_plot_title(args[["x"]],
+                                      args[["channels"]],
+                                      args[["overlay"]],
+                                      args[["title"]])
+  
+  # AXES LABELS
+  labs <- .cyto_plot_axes_label(args[["x"]],
+                                args[["channels"]],
+                                args[["xlab"]],
+                                args[["ylab"]],
+                                args[["density_modal"]])
+  
+  # XLAB
+  args[["xlab"]] <- labs[[1]]
+  
+  # YLAB
+  args[["ylab"]] <- labs[[2]]
+  
+  # POPUP
+  if(args[["popup"]]){
+    cyto_plot_window()
+  }
+  
+  # LEGEND TEXT - required for setting plot margins
+  if(.all_na(args[["legend_text"]])){
+    args[["legend_text"]] <- names(args[["fr_list"]])
+  }
+  
+  # MARGINS
+  .cyto_plot_margins(args[["x"]],
+                     args[["overlay"]],
+                     args[["legend"]],
+                     args[["legend_text"]],
+                     args[["title"]],
+                     args[["axes_text"]])
+  
+  # EMPTY PLOT - handles margins and axes limits internally
+  .args <- formalArgs("cyto_plot_empty")
+  do.call("cyto_plot_empty", 
+          args[names(args) %in% .args])
+  
+  # POINT COL - list
+  if(.all_na(args[["point_col"]])){
+    args[["point_col"]] <- .cyto_plot_point_col(args[["fr_list"]],
+                                                args[["channels"]],
+                                                args[["point_col_scale"]],
+                                                args[["point_cols"]],
+                                                args[["point_col"]],
+                                                args[["point_col_alpha"]])
+  }
+  
+  # POINTS - list of point colours
+  cyto_plot_point(args[["fr_list"]],
+                  args[["channels"]],
+                  args[["point_shape"]],
+                  args[["point_size"]],
+                  args[["point_col_scale"]],
+                  args[["point_cols"]],
+                  args[["point_col"]],
+                  args[["point_col_alpha"]])
+  
+  # POINT DENSITY COLOUR SCALE
+  args[["point_cols"]] <- .cyto_plot_point_cols(args[["point_cols"]])
+  
+  # POINT_COL LEGEND - vector (replace density colours with first point_cols)
+  args[["point_col"]] <- unlist(lapply(args[["point_col"]], function(z){
+    
+    # colours defined for each point
+    if(length(z) > 1){
+      return(args[["point_cols"]][1])
+    }else{
+      return(z)
+    }
+    
+  }))
+  
+  # LEGEND
+  if(args[["legend"]] != FALSE){
+    .cyto_plot_legend(args[["channels"]],
+                      args[["legend"]],
+                      args[["legend_text"]],
+                      args[["legend_text_font"]],
+                      args[["legend_text_size"]],
+                      args[["legend_text_col"]],
+                      args[["legend_line_col"]],
+                      args[["legend_box_fill"]],
+                      args[["legend_point_col"]],
+                      args[["density_fill"]],
+                      args[["density_fill_alpha"]],
+                      args[["density_line_type"]],
+                      args[["density_line_width"]],
+                      args[["density_line_col"]],
+                      args[["point_shape"]],
+                      args[["point_size"]],
+                      args[["point_col"]],
+                      args[["point_col_alpha"]])
+  }
+  
+  # GATES
+  
+  # LABELS
+  
+}
+
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' @noRd
+.cyto_plot_2d.flowSet <- function(x, ...){
+  
+}

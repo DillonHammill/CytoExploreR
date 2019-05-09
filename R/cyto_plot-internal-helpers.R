@@ -750,16 +750,12 @@
   return(x)
 }
 
-# POINT COLOURS ----------------------------------------------------------------
+# POINT DENSITY COLOURS --------------------------------------------------------
 
-#' Custom density colour scales for cyto_plot
+#' Get density gradient colours for cyto_plot_2d
 #'
-#' Inherits from cyto_plot point_col_scale argument which accepts a vector of
-#' colours to use for scatter plot density colour scale. This function converts
-#' a list of colours into a colorRampPalette which can be passed to densCols.
-#'
-#' @param colours list of ordered colours to used to colour points in cyto_plot
-#'   scatter plots. Default is set to blue to darkred colour scale
+#' @param point_cols vector of ordered colours to use for point density colour
+#'   scale.
 #'
 #' @return a list of colorRampPalette functions to be used in densCols.
 #'
@@ -768,11 +764,17 @@
 #' @importFrom grDevices colorRampPalette
 #'
 #' @noRd
-.cyto_plot_point_col_scale <- function(colours = NULL) {
+.cyto_plot_point_cols <- function(point_cols = NA) {
 
+  # Pull down arguments to named list
+  args <- args_list()
+  
+  # Inherit arguments from cyto_plot_theme
+  args <- .cyto_plot_theme_inherit(args)
+  
   # Use default colour scale
-  if (is.null(colours)) {
-    colours <- c(
+  if (.all_na(args[["point_cols"]])) {
+    args[["point_cols"]] <- c(
       "blue",
       "turquoise",
       "green",
@@ -783,16 +785,7 @@
     )
   }
 
-  # List of colours supplied - one colour scale per plot
-  if (class(colours) == "list") {
-    col_scale <- lapply(colours, function(x) {
-      colorRampPalette(colours)
-    })
-  } else {
-    col_scale <- list(colorRampPalette(colours))
-  }
-
-  return(col_scale)
+  return(args[["point_cols"]])
 }
 
 # GATES ------------------------------------------------------------------------
@@ -1366,7 +1359,7 @@ setMethod(.cyto_plot_overlay_format,
                               point_shape = ".",
                               point_size = 2,
                               point_col = NA,
-                              point_alpha = 1) {
+                              point_col_alpha = 1) {
   
   # Legend for 1D density distributions
   if (length(channels) == 1) {
@@ -1390,7 +1383,7 @@ setMethod(.cyto_plot_overlay_format,
       # Construct legend
       legend(
         x = "right",
-        inset = c(-0.48,0),
+        inset = c(-0.47,0),
         legend = legend_text,
         text_font = rev(legend_text_font),
         cex = legend_text_size,
@@ -1404,13 +1397,13 @@ setMethod(.cyto_plot_overlay_format,
       )
     } else if (legend == "fill") {
 
-      # Revert to density_fill if no fill colours supplied
+      # Revert to density_fill if no legend fill colours supplied
       if (.all_na(legend_box_fill)) {
         legend_box_fill <- density_fill
-      }
-
-      # Alpha adjust legend fill colours
-      if (!all(density_fill_alpha == 1)) {
+        
+      # Alpha adjust colours if suppplied directly to legend_box_fill
+      }else if (!.all_na(legend_box_fill) &
+                !all(density_fill_alpha == 1)) {
         legend_box_fill <- mapply(
           function(legend_box_fill,
                              density_fill_alpha) {
@@ -1422,7 +1415,7 @@ setMethod(.cyto_plot_overlay_format,
       # Construct legend
       legend(
         x = "right", # right inside plot
-        inset = c(-0.48,0), # move outside 0.4 graphics device widths
+        inset = c(-0.47,0), # move outside 0.47 graphics device widths
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,
@@ -1437,16 +1430,22 @@ setMethod(.cyto_plot_overlay_format,
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
 
-    # Legend with points
-    if (!all(point_alpha == 1)) {
+    # 
+    
+    # Revert to point_col if no legen point cols supplied
+    if(.all_na(legend_point_col)){
+      legend_point_col <- point_col
+    # Alpha adjust colours supplied directly to legend_point_col
+    }else if (!.all_na(legend_point_col) &
+              !all(point_col_alpha == 1)) {
       legend_point_col <- mapply(function(col, alpha) {
         adjustcolor(col, alpha)
-      }, legend_point_col, point_alpha)
+      }, legend_point_col, point_col_alpha)
     }
 
     legend(
       x = "right",
-      inset = c(-0.48,0),
+      inset = c(-0.62,0),
       legend = rev(legend_text),
       col = rev(legend_point_col),
       pch = rev(point_shape),
@@ -1510,7 +1509,7 @@ setMethod(.cyto_plot_overlay_format,
       if(.all_na(args[["overlay"]])){
         args[["title"]] <- identifier(args[["x"]])
         if(args[["title"]] == "anonymous"){
-          args[["title"]] <- "All Events"
+          args[["title"]] <- "Combined Events"
         }
       }else{
         args[["title"]] <- NA
@@ -1524,6 +1523,18 @@ setMethod(.cyto_plot_overlay_format,
     # 2D scatterplots
   } else if (length(args[["channels"]]) == 2) {
 
+    # missing title replaced with sample name
+    if(.empty(args[["title"]])){
+      args[["title"]] <- identifier(args[["x"]])
+      if(args[["title"]] == "anonymous"){
+        args[["title"]] <- "Combined Events"
+      }
+      
+    # NA will remove title in cyto_plot_empty  
+    }else if(.all_na(args[["title"]])){
+      args[["title"]] <- NA
+    }
+    
   }
 
   return(args[["title"]])
@@ -1581,6 +1592,38 @@ setMethod(.cyto_plot_overlay_format,
     # 2D scatterplots
   } else if (length(channels) == 2) {
 
+    # x axis label
+    if(missing(xlab) | .empty(xlab)){
+      # Marker assigned to channel
+      if (!is.na(fr_data$desc[which(fr_channels == channels[1])])) {
+        xlab <- paste(fr_data$desc[which(fr_channels == channels[1])],
+                      channels[1],
+                      sep = " "
+        )
+        # No assigned marker to channel
+      } else if (is.na(fr_data$desc[which(fr_channels == channels[1])])) {
+        xlab <- paste(channels[1])
+      }
+    }else if(.all_na(xlab)){
+      xlab <- NA
+    }
+    
+    # y axis label
+    if(missing(ylab) | .empty(ylab)){
+      # Marker assigned to channel
+      if (!is.na(fr_data$desc[which(fr_channels == channels[2])])) {
+        ylab <- paste(fr_data$desc[which(fr_channels == channels[2])],
+                      channels[2],
+                      sep = " "
+        )
+        # No assigned marker to channel
+      } else if (is.na(fr_data$desc[which(fr_channels == channels[2])])) {
+        ylab <- paste(channels[2])
+      }
+    }else if(.all_na(ylab)){
+      ylab <- NA
+    }
+    
   }
 
   return(list(xlab, ylab))
@@ -1674,4 +1717,145 @@ setMethod(.cyto_plot_overlay_format,
   
   return(args[["density_fill"]])
   
+}
+
+# POINT COLOUR -----------------------------------------------------------------
+
+#' Get point colours for cyto_plot
+#'
+#' @param x list of flowFrames.
+#' @param channels used to construct the plot.
+#' @param point_col_scale vector of colours to use for density gradient.
+#' @param point_cols vector colours to select from when choosing a colour for
+#'   each layer in x.
+#' @param point_col vector of length x indicating colours to use for each layer.
+#'   If NA set to default density gradient.
+#' @param point_col_alpha transparency to use for point colours.
+#'
+#' @importFrom grDevices densCols colorRampPalette adjustcolor
+#' @importFrom flowCore exprs
+#' 
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_plot_point_col <- function(x,
+                                 channels,
+                                 point_col_scale,
+                                 point_cols,
+                                 point_col,
+                                 point_col_alpha){
+  
+  # Expected number of colours
+  n <- length(x)
+  
+  # Pull down arguments to named list
+  args <- args_list()
+  
+  # Inherit arguments from cyto_plot_theme
+  args <- .cyto_plot_theme_inherit(args)
+  
+  # No colours supplied for density gradient
+  if(.all_na(args[["point_col_scale"]])){
+    args[["point_col_scale"]] <- c("blue",
+                                   "turquoise",
+                                   "green",
+                                   "yellow",
+                                   "orange",
+                                   "red",
+                                   "darkred")
+  }
+  
+  # Make colorRampPalette
+  if(class(args[["point_col_scale"]]) != "function"){
+    col_scale <- colorRampPalette(args[["point_col_scale"]])
+  }else{
+    cols_scale <- args[["point_col_scale"]]
+  }
+  
+  # No colours supplied for selection
+  if(.all_na(args[["point_cols"]])){
+    args[["point_cols"]] <- c("black",
+                              "darkorchid",
+                              "blueviolet",
+                              "magenta",
+                              "deeppink",
+                              "red4",
+                              "orange",
+                              "springgreen4")
+  }
+  
+  # Make colorRampPalette
+  if(class(args[["point_cols"]]) != "function"){
+    cols <- colorRampPalette(args[["point_cols"]])
+  }else{
+    cols <- args[["point_cols"]]
+  }
+  
+  # Repeat point_col length of x and convert to list
+  args[["point_col"]] <- rep(args[["point_col"]], 
+                             length.out = length(x))
+  args[["point_col"]] <- lapply(seq(1,length(x)), function(z){
+                                args[["point_col"]][z]})
+  
+  # First layer contains density gradient in no other colour is designated
+  if(.all_na(args[["point_col"]])){
+    
+    # Extract data
+    fr_exprs <- exprs(x[[1]])[, channels]
+    
+    # Too few events for density computation
+    if(nrow(fr_exprs) <= 2){
+      # Get density colour for each point
+      args[["point_col"]][[1]] <- densCols(fr_exprs, 
+                                       colramp = col_scale)
+    }else{
+      args[["point_col"]][[1]] <- args[["point_col_scale"]][1]
+    }
+
+  }else if(any(is.na(args[["point_col"]]))){
+    
+    # Get position of NAs in point_col - replace with density scale
+    ind <- which(is.na(args[["point_col"]]))
+    
+    # Run through each ind and get density gradient colours
+    lapply(ind, function(z){
+      
+      # Extract data
+      fr_exprs <- exprs(x[[z]])[,channels]
+      
+      # Too few events for density computation
+      if(nrow(fr_exprs) <= 2){
+        # Get density colour for each point
+        args[["point_col"]][[z]] <<- densCols(fr_exprs,
+                                              colramp = col_scale)
+      }else{
+        args[["point_col"]][[z]] <- args[["point_col_scale"]][1]
+      }
+
+    })
+    
+  }
+  
+  # Remaining colours are selected one per layer from point_cols
+  if(any(is.na(args[["point_col"]]))){
+    
+    # Number of layers missing colours
+    n <- length(args[["point_col"]][is.na(args[["point_col"]])])
+    
+    # Pull colours out of point_cols
+    clrs <- cols(n) 
+    
+    # Replace NA values in point_col with selected colours
+    args[["point_col"]][is.na(args[["point_col"]])] <- clrs
+    
+  }
+  
+  # Adjust colors by point_fill_alpha
+  args[["point_col"]] <- mapply(function(point_col, point_col_alpha){
+    adjustcolor(point_col, point_col_alpha)
+  }, args[["point_col"]], args[["point_col_alpha"]], USE.NAMES = FALSE)
+  
+  return(args[["point_col"]])
+
 }

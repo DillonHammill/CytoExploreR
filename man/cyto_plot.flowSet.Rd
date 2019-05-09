@@ -12,9 +12,9 @@
   density_layers = length(x), density_cols = NA, density_fill = NA,
   density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black",
-  point_shape = ".", point_size = 2, point_cols = NA,
-  point_col = NA, point_alpha = 1, contour_lines = 0,
-  contour_line_type = 1, contour_line_width = 1,
+  point_shape = ".", point_size = 2, point_col_scale = NA,
+  point_cols = NA, point_col = NA, point_col_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
   contour_line_col = "black", axes_text = c(TRUE, TRUE),
   axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
   axes_label_text_font = 1, axes_label_text_size = 1.1,
@@ -129,13 +129,16 @@ lines, set to 1 by default.}
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default.}
 
+\item{point_col_scale}{vector of ordered colours to use for the density colour
+gradient of points.}
+
 \item{point_cols}{vector colours to draw from when selecting colours for points
 if none are supplied to point_col.}
 
 \item{point_col}{colour(s) to use for points in 2-D scatter plots, set to NA
 by default to use a blue-red density colour scale.}
 
-\item{point_alpha}{numeric [0,1] to control point colour transparency in 2-D
+\item{point_col_alpha}{numeric [0,1] to control point colour transparency in 2-D
 scatter plots, set to 1 by default to use solid colours.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
