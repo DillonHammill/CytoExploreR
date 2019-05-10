@@ -213,8 +213,10 @@
                       point_col_alpha = point_col_alpha)
   }
 
-  # GATES - no overlay
+  # GATES & LABEL - without overlay
   if (.all_na(overlay)) {
+    
+    # GATES
     if(!.all_na(gate)){
       gate <- cyto_plot_gate(gate,
                              channels = channels,
@@ -223,15 +225,25 @@
                              gate_line_type = gate_line_type)
     }
     
-    # LABELS
-    if (!.all_na(gate) & label) {
+    # LABEL?
+    if(!.all_na(gate) & 
+       .empty(label)){
+      label<- TRUE # turn on labels if gate
+    }else if(.all_na(gate) &
+             .empty(label)){
+      label <- FALSE # turn off labels if no gate
+    }
+    
+    # LABELS 
+    if (label == TRUE) {
       
-      # Population names missing - show percentage only
       suppressMessages(cyto_plot_label(
         x = fr_list[[1]],
         channels = channels,
         gate = gate,
         trans = axes_trans,
+        text_x = label_box_x,
+        text_y = label_box_y,
         text = label_text,
         stat = label_stat,
         text_size = label_text_size,
@@ -239,51 +251,64 @@
         text_col = label_text_col,
         box_alpha = label_box_alpha
       ))
+      
     }
 
-  } else if (!.all_na(overlay) & 
-             density_stack != 0 & 
-             !.all_na(gate)) {
+  # GATE & LABEL - with overlay
+  } else if (!.all_na(overlay)) {
     
-    # Need to compute y label positions
-    if(.all_na(label_box_y)){
-      label_box_y <- unlist(
-        lapply(rep(seq(1,length(fr_list)),
-                   length.out = length(gate) * length(fr_list),
-                   each = length(gate)),
-              function(x){
-              (0.5 * density_stack * y_max) +
-              ((x-1) * density_stack * y_max)
-        }))
+    # Calculate label y positions for stacked overlays
+    if(density_stack != 0){
+     
+      # Need to compute y label positions
+      if(.all_na(label_box_y)){
+        label_box_y <- unlist(
+          lapply(rep(seq(1,length(fr_list)),
+                     length.out = length(gate) * length(fr_list),
+                     each = length(gate)),
+                function(x){
+                (0.5 * density_stack * y_max) +
+                ((x-1) * density_stack * y_max)
+          }))
+        
+      }
+    
+      # LABEL?
+      if(!.all_na(gate) & 
+         .empty(label)){
+        label<- TRUE # turn on labels if gate
+      }else if(.all_na(gate) &
+               .empty(label)){
+        label <- FALSE # turn off labels if no gate
+      }
+      
+      # Gate density overlays
+      .cyto_plot_overlay_gate(
+        x = fr_list[[1]],
+        channel = channels,
+        trans = axes_trans,
+        overlay = fr_list[2:length(fr_list)],
+        gate = gate,
+        density_stack = density_stack,
+        density_modal = density_modal,
+        label = label,
+        label_text = label_text,
+        label_stat = label_stat,
+        label_text_size = label_text_size,
+        label_text_font = label_text_font,
+        label_text_col = label_text_col,
+        label_box_x = label_box_x,
+        label_box_y = label_box_y,
+        label_box_alpha = label_box_alpha,
+        gate_line_col = gate_line_col,
+        gate_line_width = gate_line_width,
+        gate_line_type = gate_line_type
+      )
+      
+    }else if(!.all_na(gate) & density_stack == 0){
+      message("Gating overlays without stacking is not supported.")
     }
-    
-    # Gate density overlays
-    .cyto_overlay_gate(
-      x = fr_list[[1]],
-      channel = channels,
-      trans = axes_trans,
-      overlay = fr_list[2:length(fr_list)],
-      gate = gate,
-      density_stack = density_stack,
-      density_modal = density_modal,
-      label_text = label_text,
-      label_stat = label_stat,
-      label_text_size = label_text_size,
-      label_text_font = label_text_font,
-      label_text_col = label_text_col,
-      label_box_x = label_box_x,
-      label_box_y = label_box_y,
-      label_box_alpha = label_box_alpha,
-      gate_line_col = gate_line_col,
-      gate_line_width = gate_line_width,
-      gate_line_type = gate_line_type
-    )
-  } else if (!.all_na(overlay) & 
-             density_stack == 0 & 
-             !.all_na(gate)) {
-    message("Gating overlays without stacking is not supported.")
   }
-  
 }
   
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -440,8 +465,73 @@ cyto_plot_1d.flowSet <- function(x, ...){
   }
   
   # GATES
+  if(!.all_na(gate)){
+    gate <- cyto_plot_gate(gate,
+                           channels = channels,
+                           gate_line_type = gate_line_type,
+                           gate_line_width = gate_line_width,
+                           gate_line_col = gate_line_col)
+  }
   
   # LABELS
+  if(!.all_na(gate) & label == TRUE){
+    
+    cyto_plot_label(fr_list[[1]],
+                    channels = channels,
+                    trans = axes_trans,
+                    text = label_text,
+                    gate = gate,
+                    stat = label_stat,
+                    text_x = label_box_x,
+                    text_y = label_box_y,
+                    text_font = label_text_font,
+                    text_size = label_text_size,
+                    text_col = label_text_col,
+                    box_alpha = label_box_alpha)
+    
+  # LABELS WITHOUT GATES  
+  }else if(.all_na(gate) &
+           .all_na(label_text) &
+           label == TRUE){
+    
+    # label - limited to # layers - arg_split
+    mapply(
+      function(label_text,
+               label_stat,
+               label_text_font,
+               label_text_size,
+               label_text_col,
+               label_box_x,
+               label_box_y,
+               label_box_alpha) {
+        if (label_stat == "percent") {
+          label_stat <- NA
+        }
+        suppressMessages(cyto_plot_label(
+          x = fr,
+          channels = channels,
+          gates = gate,
+          trans = axes_trans,
+          text = label_text,
+          stat = label_stat,
+          text_x = label_box_x,
+          text_y = label_box_y,
+          text_size = label_text_size,
+          text_font = label_text_font,
+          text_col = label_text_col,
+          box_alpha = label_box_alpha
+        ))
+      }, label_text,
+      label_stat,
+      label_text_font,
+      label_text_size,
+      label_text_col,
+      label_box_x,
+      label_box_y,
+      label_box_alpha
+    )
+    
+  }
   
 }
 

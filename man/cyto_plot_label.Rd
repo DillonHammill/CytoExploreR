@@ -17,24 +17,24 @@ cyto_plot_label(x, gate, ...)
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
   density_smooth = 1.5)
 
-\method{cyto_plot_label}{rectangleGate}(x, gate = NULL, trans = NULL,
-  channels, text = NA, stat = NA, text_x = NA, text_y = NA,
-  text_font = 2, text_size = 0.8, text_col = "black",
-  box_alpha = 0.6, density_smooth = 1.5)
+\method{cyto_plot_label}{rectangleGate}(x, gate, trans = NA, channels,
+  text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
+  text_size = 0.8, text_col = "black", box_alpha = 0.6,
+  density_smooth = 1.5)
 
-\method{cyto_plot_label}{polygonGate}(x, gate, channels, trans = NULL,
+\method{cyto_plot_label}{polygonGate}(x, gate, channels, trans = NA,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6)
 
-\method{cyto_plot_label}{ellipsoidGate}(x, gate, channels, trans = NULL,
+\method{cyto_plot_label}{ellipsoidGate}(x, gate, channels, trans = NA,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6)
 
-\method{cyto_plot_label}{list}(x, gate, trans = NULL, channels,
+\method{cyto_plot_label}{list}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6)
 
-\method{cyto_plot_label}{filters}(x, gate, trans = NULL, channels,
+\method{cyto_plot_label}{filters}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6)
 }
