@@ -269,7 +269,7 @@ setMethod(spillover_compute,
             pops <- flowSet(pops)
             
             # Inverse logicle transformation
-            inv <- cyto_trans_check(axes_trans, inverse = TRUE)
+            inv <- cyto_trans_convert(axes_trans, inverse = TRUE)
             pops <- suppressMessages(transform(pops, inv))
             NIL <- suppressMessages(transform(NIL, inv))
             
@@ -447,7 +447,7 @@ setMethod(spillover_compute,
             axes_trans <- .getCompleteTransList(gs.m, axes_trans)
             
             # Get complete transformList
-            axes_trans <- cyto_trans_check(axes_trans, inverse = FALSE)
+            axes_trans <- cyto_trans_convert(axes_trans, inverse = FALSE)
             
             spillover_compute(
               x = fs,
@@ -588,8 +588,8 @@ setMethod(spillover_compute,
     # flowFrame or flowSet return transformList
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
       
-      # Run cyto_trans_check to get transformList
-      trans <- cyto_trans_check(trans, inverse = FALSE)
+      # Run cyto_trans_convert to get transformList
+      trans <- cyto_trans_convert(trans, inverse = FALSE)
       
       # Check which channels have been transformed
       chans <- names(trans@transforms)
@@ -868,7 +868,7 @@ setMethod(spillover_compute,
   }
   
   # Get inverse trans
-  inv <- cyto_trans_check(trans, inverse = TRUE)
+  inv <- cyto_trans_convert(trans, inverse = TRUE)
   
   # Extract channels which have transformations
   if (inherits(trans, "transformList")) {

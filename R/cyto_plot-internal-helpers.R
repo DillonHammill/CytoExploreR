@@ -1383,7 +1383,7 @@ setMethod(.cyto_plot_overlay_format,
       # Construct legend
       legend(
         x = "right",
-        inset = c(-0.47,0),
+        inset = c(-0.68,0),
         legend = legend_text,
         text_font = rev(legend_text_font),
         cex = legend_text_size,
@@ -1415,7 +1415,7 @@ setMethod(.cyto_plot_overlay_format,
       # Construct legend
       legend(
         x = "right", # right inside plot
-        inset = c(-0.47,0), # move outside 0.47 graphics device widths
+        inset = c(-0.68,0), # move outside 0.47 graphics device widths
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,
@@ -1445,7 +1445,7 @@ setMethod(.cyto_plot_overlay_format,
 
     legend(
       x = "right",
-      inset = c(-0.62,0),
+      inset = c(-0.68,0),
       legend = rev(legend_text),
       col = rev(legend_point_col),
       pch = rev(point_shape),
@@ -1887,6 +1887,7 @@ setMethod(.cyto_plot_overlay_format,
 #' @param label_box_alpha transparency for label(s).
 #'
 #' @importFrom flowCore parameters
+#' @importFrom graphics par
 #'
 #' @noRd
 .cyto_plot_overlay_gate <- function(x,
@@ -1909,6 +1910,8 @@ setMethod(.cyto_plot_overlay_format,
                                     label_box_y = NA,
                                     label_box_alpha = 0.6, ...) {
   
+  # Add support for adding labels without gates
+  
   # Check class of x
   if (!inherits(x, "flowFrame")) {
     stop("x should be a flowFrame object.")
@@ -1924,86 +1927,156 @@ setMethod(.cyto_plot_overlay_format,
     plot = TRUE
   )
   
-  # list of gate
-  if (inherits(gate, "filters")) {
-    
-    # Convert to list of gate
-    gate <- lapply(seq_len(length(gate)), function(x) gate[[x]])
-    
-  } else if (inherits(gate, "list")) {
-    
-  } else if (inherits(gate, "rectangleGate") |
-             inherits(gate, "polygonGate") |
-             inherits(gate, "ellipsoidGate")) {
-    gate <- list(gate)
-  }
-  
-  # Plot gate
-  gate <- cyto_plot_gate(gate,
-                         channels = channels,
-                         gate_line_col = gate_line_col,
-                         gate_line_width = gate_line_width,
-                         gate_line_type = gate_line_type
-  )
-  
-  # Repeat gate number of layers -
-  gate <- do.call("rep", list(gate, smp))
-  
-  # Find center x co-ord for label position in each gate
-  if (all(is.na(label_box_x))) {
-    label_box_x <- unlist(lapply(unique(gate), function(x) {
-      (unname(x@min) + unname(x@max)) / 2
-    }))
-  }
-  label_box_x <- do.call("rep", list(label_box_x, smp))
-  
-  # Find y co-ord for each sample
-  if (.all_na(label_box_y) & density_modal) {
-    label_box_y <- unlist(lapply(rep(seq(1, smp), 
-                                     length.out = length(gate), 
-                                     each = length(unique(gate))), 
-                                 function(x) {
-                                   (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
-                                 }))
-    
-    # Too much computation required here - do this in cyto_plot_1d flowFrame
-  }else if(.all_na(label_box_y) & !density_modal){
-    stop("Need to supply y positions for labels")
-  } 
-  
   # List of flowFrames for cyto_plot_label
   fr.lst <- c(list(x), overlay)
   
-  # Plot labels
-  ind <- rep(seq_len(smp), 
-             each = length(unique(gate)), 
-             length.out = smp*length(unique(gate)))
-  ind <- split(seq_len(smp*length(unique(gate))), ind)
+  # Gates supplied
+  if(!.all_na(gate)){
   
-  # Repeat arguments
-  label_text <- rep(label_text, length.out = length(gate))
-  label_stat <- rep(label_stat, length.out = length(gate))
-  label_text_font <- rep(label_text_font, length.out = length(gate))
-  label_text_size <- rep(label_text_size, length.out = length(gate))
-  label_text_col <- rep(label_text_col, length.out = length(gate))
-  label_box_alpha <- rep(label_box_alpha, length.out = length(gate))
-  
-  mapply(function(fr,x) {
-    suppressMessages(cyto_plot_label(
-      x = fr,
-      channels = channels,
-      gate = gate[x],
-      trans = trans,
-      text_x = label_box_x[x],
-      text_y = label_box_y[x],
-      text = label_text[x],
-      stat = label_stat[x],
-      text_font = label_text_font[x],
-      text_col = label_text_col[x],
-      text_size = label_text_size[x],
-      box_alpha = label_box_alpha[x]
-    ))
+    # list of gate
+    if (inherits(gate, "filters")) {
+      
+      # Convert to list of gate
+      gate <- lapply(seq_len(length(gate)), function(x) gate[[x]])
+      
+    } else if (inherits(gate, "list")) {
+      
+    } else if (inherits(gate, "rectangleGate") |
+               inherits(gate, "polygonGate") |
+               inherits(gate, "ellipsoidGate")) {
+      gate <- list(gate)
+    }
     
-  }, fr.lst,
-  ind)
+    # Plot gate
+    gate <- cyto_plot_gate(gate,
+                           channels = channels,
+                           gate_line_col = gate_line_col,
+                           gate_line_width = gate_line_width,
+                           gate_line_type = gate_line_type
+    )
+    
+    # Add labels to gated plot
+    if(label == TRUE){
+      
+      # Repeat gate number of layers -
+      gate <- do.call("rep", list(gate, smp))
+    
+      # Find center x co-ord for label position in each gate
+      if (all(is.na(label_box_x))) {
+        label_box_x <- unlist(lapply(unique(gate), function(x) {
+          (unname(x@min) + unname(x@max)) / 2
+        }))
+      }
+      label_box_x <- do.call("rep", list(label_box_x, smp))
+    
+      # Find y co-ord for each sample
+      if (.all_na(label_box_y) & density_modal) {
+        label_box_y <- unlist(lapply(rep(seq(1, smp), 
+                                         length.out = length(gate), 
+                                         each = length(unique(gate))), 
+                                     function(x) {
+                                     (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
+                                     }))
+      
+      # Too much computation required here - do this in cyto_plot_1d flowFrame
+      }else if(.all_na(label_box_y) & !density_modal){
+        stop("Need to supply y positions for labels")
+      } 
+    
+      # Plot labels
+      ind <- rep(seq_len(smp), 
+                 each = length(unique(gate)), 
+                 length.out = smp*length(unique(gate)))
+      ind <- split(seq_len(smp*length(unique(gate))), ind)
+    
+      # Repeat arguments
+      label_text <- rep(label_text, length.out = length(gate))
+      label_stat <- rep(label_stat, length.out = length(gate))
+      label_text_font <- rep(label_text_font, length.out = length(gate))
+      label_text_size <- rep(label_text_size, length.out = length(gate))
+      label_text_col <- rep(label_text_col, length.out = length(gate))
+      label_box_alpha <- rep(label_box_alpha, length.out = length(gate))
+    
+      mapply(function(fr,x) {
+        suppressMessages(cyto_plot_label(
+          x = fr,
+          channels = channels,
+          gate = gate[x],
+          trans = trans,
+          text_x = label_box_x[x],
+          text_y = label_box_y[x],
+          text = label_text[x],
+          stat = label_stat[x],
+          text_font = label_text_font[x],
+          text_col = label_text_col[x],
+          text_size = label_text_size[x],
+          box_alpha = label_box_alpha[x]
+        ))
+      
+      }, fr.lst,
+      ind)
+    }
+    
+  # No gates - allow labels if label = TRUE
+  }else{
+    
+    # Allow a single label per layer if label = TRUE
+    if(label == TRUE){
+      
+      # Default x co-ord is 0.75 * x axis range
+      
+      # Find y co-ord for each sample
+      if (.all_na(label_box_y) & density_modal) {
+        label_box_y <- unlist(lapply(rep(seq(1, smp), 
+                                         length.out = length(gate), 
+                                         each = length(unique(gate))), 
+                                     function(x) {
+                                       (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
+                                     }))
+        
+        # Too much computation required here - do this in cyto_plot_1d flowFrame
+      }else if(.all_na(label_box_y) & !density_modal){
+        stop("Need to supply y positions for labels")
+      } 
+      
+      # Add labels to plot
+      mapply(function(fr,
+                      label_box_x,
+                      label_box_y,
+                      label_text,
+                      label_stat,
+                      label_text_font,
+                      label_text_size,
+                      label_text_col,
+                      label_box_alpha) {
+        
+        suppressMessages(cyto_plot_label(
+          x = fr,
+          channels = channels,
+          gate = NULL,
+          trans = trans,
+          text_x = label_box_x,
+          text_y = label_box_y,
+          text = label_text,
+          stat = label_stat,
+          text_font = label_text_font,
+          text_col = label_text_col,
+          text_size = label_text_size,
+          box_alpha = label_box_alpha
+        ))
+        
+      }, fr.lst,
+      label_box_x,
+      label_box_y,
+      label_text,
+      label_stat,
+      label_text_font,
+      label_text_size,
+      label_text_col,
+      label_box_alpha)
+      
+    }
+    
+  }
+  
 }
