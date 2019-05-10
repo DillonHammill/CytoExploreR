@@ -82,7 +82,8 @@
 .args_update <- function(x){
   
   lapply(seq(1,length(x)), function(z){
-    assign(names(x)[z], x[[z]], envir = parent.frame())
+    assign(names(x)[z], 
+           x[[z]], envir = parent.frame(n = 3))
   })
   
 }

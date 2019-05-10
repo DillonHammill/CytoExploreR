@@ -53,58 +53,54 @@
   pars <- par("mar")
   on.exit(par(pars))
   
-  # Pull down arguments to named list - ... includes x as well
-  assign("args", ...)
-  
-  .args_update(args)
-  
-  print(.args_list())
+  # Assign arguments to function environment (eliminates args subsetting)
+  .args_update(...)
   
   # Restrict x to display percentage events
-  args[["x"]] <- cyto_sample(args[["x"]], args[["display"]])
+  x <- cyto_sample(x, display)
 
   # Convert overlay to list
-  if(!.all_na(args[["overlay"]])){
-    args[["overlay"]] <- cyto_convert(args[["overlay"]], "flowFrame list")
+  if(!.all_na(overlay)){
+    overlay <- cyto_convert(overlay, "flowFrame list")
   }
   
   # Restrict overlay to display percentage events - bypass in gate_draw
-  if(!getOption("CytoRSuite_gate_draw") & args[["display"]] != 1){ 
-    args[["overlay"]] <- lapply(args[["overlay"]], function(x){
-      cyto_sample(x, args[["display"]])
+  if(!getOption("CytoRSuite_gate_draw") & display != 1){ 
+    overlay <- lapply(overlay, function(x){
+      cyto_sample(x, display)
     })
   }
   
   # Combine x and overlay into the same list
-  if(!.all_na(args[["overlay"]])){
-    args[["fr_list"]] <- c(list(args[["x"]]), args[["overlay"]])
+  if(!.all_na(overlay)){
+    fr_list <- c(list(x), overlay)
   }else{
-    args[["fr_list"]] <- list(args[["x"]])
+    fr_list <- list(x)
   }
   
   # Name each element of fr_list with identifier - used in legend
-  names(args[["fr_list"]]) <- unlist(lapply(args[["fr_list"]], function(y){
+  names(fr_list) <- unlist(lapply(fr_list, function(y){
     identifier(y)
   }))
   
   # Get kernel density for each list element
-  args[["fr_dens"]] <- lapply(args[["fr_list"]], function(x){
+  fr_dens <- lapply(fr_list, function(x){
     
     suppressWarnings(.cyto_density(x,
-                                   args[["channels"]],
-                                   args[["density_smooth"]],
-                                   args[["density_modal"]]))
+                                   channel = channels,
+                                   smooth = density_smooth,
+                                   modal = density_modal))
     
   })
   
   # Number of overlays
-  ovn <- length(args[["fr_dens"]]) - 1
+  ovn <- length(fr_dens) - 1
   
   # Calculate the mean maximum y value for kernel densities
-  if(args[["density_modal"]]){
+  if(density_modal){
     y_max <- 100
   }else{
-    y_max <- mean(unlist(lapply(args[["fr_dens"]], function(d){
+    y_max <- mean(unlist(lapply(fr_dens, function(d){
       if(!.all_na(d)){
         max(d$y)
       }else{
@@ -115,174 +111,176 @@
   
   # Stacked distributions require shifting of y values
   shft <- seq(0,
-              ovn * args[["density_stack"]] * y_max,
-              args[["density_stack"]] * y_max)
+              ovn * density_stack * y_max,
+              density_stack * y_max)
   
   # Adjust y values if stacking is been applied
-  if(args[["density_stack"]] > 0){  
+  if(density_stack > 0){  
     # Shift distributions for stacking
-    lapply(seq_len(length(args[["fr_dens"]])), function(z){
-      if(!.all_na(args[["fr_dens"]][[z]])){
-        args[["fr_dens"]][[z]]$y <<- args[["fr_dens"]][[z]]$y + shft[z]
+    lapply(seq_len(length(fr_dens)), function(z){
+      if(!.all_na(fr_dens[[z]])){
+        fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
       }
     })
   }
   
   # YLIM 
-  if(.all_na(args[["ylim"]])){
-    args[["ylim"]] <- c(0, y_max + ovn * args[["density_stack"]] * y_max)
+  if(.all_na(ylim)){
+    ylim <- c(0, y_max + ovn * density_stack * y_max)
   }
 
   # TITLE
-  args[["title"]] <- .cyto_plot_title(args[["x"]],
-                            args[["channels"]],
-                            args[["overlay"]],
-                            args[["title"]])
+  title <- .cyto_plot_title(x,
+                            channels = channels,
+                            overlay = overlay,
+                            title = title)
   
   # AXES LABELS
-  labs <- .cyto_plot_axes_label(args[["x"]],
-                                args[["channels"]],
-                                args[["xlab"]],
-                                args[["ylab"]],
-                                args[["density_modal"]])
+  labs <- .cyto_plot_axes_label(x,
+                                channels = channels,
+                                xlab = xlab,
+                                ylab = ylab,
+                                density_modal = density_modal)
   
   # XLAB
-  args[["xlab"]] <- labs[[1]]
+  xlab <- labs[[1]]
   
   # YLAB
-  args[["ylab"]] <- labs[[2]]
+  ylab <- labs[[2]]
   
   # POPUP
-  if(args[["popup"]]){
+  if(popup){
     cyto_plot_window()
   }
    
   # LEGEND TEXT - required for setting plot margins
-  if(.all_na(args[["legend_text"]])){
-    args[["legend_text"]] <- names(args[["fr_list"]])
+  if(.all_na(legend_text)){
+    legend_text <- names(fr_list)
   }
   
   # MARGINS
-  .cyto_plot_margins(args[["x"]],
-                     args[["overlay"]],
-                     args[["legend"]],
-                     args[["legend_text"]],
-                     args[["title"]],
-                     args[["axes_text"]])
+  .cyto_plot_margins(x,
+                     overlay = overlay,
+                     legend = legend,
+                     legend_text = legend_text,
+                     title = title,
+                     axes_text = axes_text)
   
   # EMPTY PLOT - handles margins and axes limits internally
+  args <- .args_list()
   .args <- formalArgs("cyto_plot_empty")
   do.call("cyto_plot_empty", 
           args[names(args) %in% .args])
 
   # DENSITY FILL - inherits theme internally
-  if(.all_na(args[["density_fill"]])){
-    args[["density_fill"]] <- .cyto_plot_density_fill(args[["fr_dens"]],
-                                                      args[["density_fill"]],
-                                                      args[["density_cols"]],
-                                                      args[["density_fill_alpha"]])
+  if(.all_na(density_fill)){
+    density_fill <- .cyto_plot_density_fill(fr_dens,
+                                            density_fill = density_fill,
+                                            density_cols = density_cols,
+                                            density_fill_alpha = density_fill_alpha)
   }
   
   # DENSITY 
-  cyto_plot_density(args[["fr_dens"]],
-                    args[["density_modal"]],
-                    args[["density_stack"]],
-                    args[["density_cols"]],
-                    args[["density_fill"]],
-                    args[["density_fill_alpha"]],
-                    args[["density_line_type"]],
-                    args[["density_line_width"]],
-                    args[["density_line_col"]])
+  cyto_plot_density(fr_dens,
+                    density_modal = density_modal,
+                    density_stack = density_stack,
+                    density_cols = density_cols,
+                    density_fill = density_fill,
+                    density_fill_alpha = density_fill_alpha,
+                    density_line_type = density_line_type,
+                    density_line_width = density_line_width,
+                    density_line_col = density_line_col)
 
   # LEGEND
-  if(args[["legend"]] != FALSE){
-    .cyto_plot_legend(args[["channels"]],
-                      args[["legend"]],
-                      args[["legend_text"]],
-                      args[["legend_text_font"]],
-                      args[["legend_text_size"]],
-                      args[["legend_text_col"]],
-                      args[["legend_line_col"]],
-                      args[["legend_box_fill"]],
-                      args[["legend_point_col"]],
-                      args[["density_fill"]],
-                      args[["density_fill_alpha"]],
-                      args[["density_line_type"]],
-                      args[["density_line_width"]],
-                      args[["density_line_col"]],
-                      args[["point_shape"]],
-                      args[["point_size"]],
-                      args[["point_col"]],
-                      args[["point_alpha"]])
+  if(legend != FALSE){
+    .cyto_plot_legend(channels = channels,
+                      legend = legend,
+                      legend_text = legend_text,
+                      legend_text_font = legend_text_font,
+                      legend_text_size = legend_text_size,
+                      legend_text_col = legend_text_col,
+                      legend_line_col = legend_line_col,
+                      legend_box_fill = legend_box_fill,
+                      legend_point_col = legend_point_col,
+                      density_fill = density_fill,
+                      density_fill_alpha = density_fill_alpha,
+                      density_line_type = density_line_type,
+                      density_line_width = density_line_width,
+                      density_line_col = density_line_col,
+                      point_shape = point_shape,
+                      point_size = point_size,
+                      point_col = point_col,
+                      point_col_alpha = point_col_alpha)
   }
 
   # GATES - no overlay
-  if (.all_na(args[["overlay"]])) {
-    if(!.all_na(args[["gate"]])){
-      args[["gate"]] <- cyto_plot_gate(args[["gate"]],
-                             channels = args[["channels"]],
-                             gate_line_col = args[["gate_line_col"]],
-                             gate_line_width = args[["gate_line_width"]],
-                             gate_line_type = args[["gate_line_type"]])
+  if (.all_na(overlay)) {
+    if(!.all_na(gate)){
+      gate <- cyto_plot_gate(gate,
+                             channels = channels,
+                             gate_line_col = gate_line_col,
+                             gate_line_width = gate_line_width,
+                             gate_line_type = gate_line_type)
     }
     
     # LABELS
-    if (!.all_na(args[["gate"]]) & args[["label"]]) {
+    if (!.all_na(gate) & label) {
       
       # Population names missing - show percentage only
       suppressMessages(cyto_plot_label(
-        x = args[["fr_list"]][[1]],
-        channels = args[["channels"]],
-        gate = args[["gate"]],
-        trans = args[["axes_trans"]],
-        text = args[["label_text"]],
-        stat = args[["label_stat"]],
-        text_size = args[["label_text_size"]],
-        text_font = args[["label_text_font"]],
-        text_col = args[["label_text_col"]],
-        box_alpha = args[["label_box_alpha"]]
+        x = fr_list[[1]],
+        channels = channels,
+        gate = gate,
+        trans = axes_trans,
+        text = label_text,
+        stat = label_stat,
+        text_size = label_text_size,
+        text_font = label_text_font,
+        text_col = label_text_col,
+        box_alpha = label_box_alpha
       ))
     }
 
-  } else if (!.all_na(args[["overlay"]]) & 
-             args[["density_stack"]] != 0 & 
-             !.all_na(args[["gate"]])) {
+  } else if (!.all_na(overlay) & 
+             density_stack != 0 & 
+             !.all_na(gate)) {
     
     # Need to compute y label positions
-    if(.all_na(args[["label_box_y"]])){
-      args[["label_box_y"]] <- unlist(
-        lapply(rep(seq(1,length(args[["fr_list"]])),
-                   length.out = length(args[["gate"]]) * length(args[["fr_list"]]),
-                   each = length(args[["gate"]])),
+    if(.all_na(label_box_y)){
+      label_box_y <- unlist(
+        lapply(rep(seq(1,length(fr_list)),
+                   length.out = length(gate) * length(fr_list),
+                   each = length(gate)),
               function(x){
-              (0.5 * args[["density_stack"]] * y_max) +
-              ((x-1) * args[["density_stack"]] * y_max)
+              (0.5 * density_stack * y_max) +
+              ((x-1) * density_stack * y_max)
         }))
     }
     
+    # Gate density overlays
     .cyto_overlay_gate(
-      x = args[["fr_list"]][[1]],
-      channel = args[["channels"]],
-      trans = args[["axes_trans"]],
-      overlay = args[["fr_list"]][2:length(args[["fr_list"]])],
-      gate = args[["gate"]],
-      density_stack = args[["density_stack"]],
-      density_modal = args[["density_modal"]],
-      label_text = args[["label_text"]],
-      label_stat = args[["label_stat"]],
-      label_text_size = args[["label_text_size"]],
-      label_text_font = args[["label_text_font"]],
-      label_text_col = args[["label_text_col"]],
-      label_box_x = args[["label_box_x"]],
-      label_box_y = args[["label_box_y"]],
-      label_box_alpha = args[["label_box_alpha"]],
-      gate_line_col = args[["gate_line_col"]],
-      gate_line_width = args[["gate_line_width"]],
-      gate_line_type = args[["gate_line_type"]]
+      x = fr_list[[1]],
+      channel = channels,
+      trans = axes_trans,
+      overlay = fr_list[2:length(fr_list)],
+      gate = gate,
+      density_stack = density_stack,
+      density_modal = density_modal,
+      label_text = label_text,
+      label_stat = label_stat,
+      label_text_size = label_text_size,
+      label_text_font = label_text_font,
+      label_text_col = label_text_col,
+      label_box_x = label_box_x,
+      label_box_y = label_box_y,
+      label_box_alpha = label_box_alpha,
+      gate_line_col = gate_line_col,
+      gate_line_width = gate_line_width,
+      gate_line_type = gate_line_type
     )
-  } else if (!.all_na(args[["overlay"]]) & 
-             args[["density_stack"]] == 0 & 
-             !.all_na(args[["gate"]])) {
+  } else if (!.all_na(overlay) & 
+             density_stack == 0 & 
+             !.all_na(gate)) {
     message("Gating overlays without stacking is not supported.")
   }
   
@@ -308,110 +306,111 @@ cyto_plot_1d.flowSet <- function(x, ...){
   pars <- par("mar")
   on.exit(par(pars))
   
-  # Pull down arguments to named list - ... includes x as well
-  assign("args", ...)
+  # Assign arguments to function environment (eliminates args subsetting)
+  .args_update(...)
   
   # Restrict x to display percentage events
-  args[["x"]] <- cyto_sample(args[["x"]], args[["display"]])
+  x <- cyto_sample(x, display)
   
   # Convert overlay to list
-  if(!.all_na(args[["overlay"]])){
-    args[["overlay"]] <- cyto_convert(args[["overlay"]], "flowFrame list")
+  if(!.all_na(overlay)){
+    overlay <- cyto_convert(overlay, "flowFrame list")
   }
   
   # Restrict overlay to display percentage events - bypass in gate_draw
-  if(!getOption("CytoRSuite_gate_draw") & args[["display"]] != 1){ 
-    args[["overlay"]] <- lapply(args[["overlay"]], function(x){
-      cyto_sample(x, args[["display"]])
+  if(!getOption("CytoRSuite_gate_draw") & display != 1){ 
+    overlay <- lapply(overlay, function(x){
+      cyto_sample(x, display)
     })
   }
   
   # Combine x and overlay into the same list
-  if(!.all_na(args[["overlay"]])){
-    args[["fr_list"]] <- c(list(args[["x"]]), args[["overlay"]])
+  if(!.all_na(overlay)){
+    fr_list <- c(list(x), overlay)
   }else{
-    args[["fr_list"]] <- list(args[["x"]])
+    fr_list <- list(x)
   }
   
   # Name each element of fr_list with identifier - used in legend
-  names(args[["fr_list"]]) <- unlist(lapply(args[["fr_list"]], function(y){
+  names(fr_list) <- unlist(lapply(fr_list, function(y){
     identifier(y)
   }))
   
   # Number of overlays
-  ovn <- length(args[["fr_list"]]) - 1
+  ovn <- length(fr_list) - 1
   
   # TITLE - always name of flowFrame or "Combined Events"
-  args[["title"]] <- .cyto_plot_title(args[["x"]],
-                                      args[["channels"]],
-                                      args[["overlay"]],
-                                      args[["title"]])
+  title <- .cyto_plot_title(x,
+                            channels = channels,
+                            overlay = overlay,
+                            title = title)
   
   # AXES LABELS
-  labs <- .cyto_plot_axes_label(args[["x"]],
-                                args[["channels"]],
-                                args[["xlab"]],
-                                args[["ylab"]],
-                                args[["density_modal"]])
+  labs <- .cyto_plot_axes_label(x,
+                                channels = channels,
+                                xlab = xlab,
+                                ylab = ylab,
+                                density_modal = density_modal)
   
   # XLAB
-  args[["xlab"]] <- labs[[1]]
+  xlab <- labs[[1]]
   
   # YLAB
-  args[["ylab"]] <- labs[[2]]
+  ylab <- labs[[2]]
   
   # POPUP
-  if(args[["popup"]]){
+  if(popup){
     cyto_plot_window()
   }
   
   # LEGEND TEXT - required for setting plot margins
-  if(.all_na(args[["legend_text"]])){
-    args[["legend_text"]] <- names(args[["fr_list"]])
+  if(.all_na(legend_text)){
+    legend_text <- names(fr_list)
   }
   
   # MARGINS
-  .cyto_plot_margins(args[["x"]],
-                     args[["overlay"]],
-                     args[["legend"]],
-                     args[["legend_text"]],
-                     args[["title"]],
-                     args[["axes_text"]])
+  .cyto_plot_margins(x,
+                     overlay = overlay,
+                     legend = legend,
+                     legend_text = legend_text,
+                     title = title,
+                     axes_text = axes_text)
   
   # EMPTY PLOT - handles margins and axes limits internally
+  args <- .args_list()
   .args <- formalArgs("cyto_plot_empty")
   do.call("cyto_plot_empty", 
           args[names(args) %in% .args])
   
   # POINT COL - list
-  if(.all_na(args[["point_col"]])){
-    args[["point_col"]] <- .cyto_plot_point_col(args[["fr_list"]],
-                                                args[["channels"]],
-                                                args[["point_col_scale"]],
-                                                args[["point_cols"]],
-                                                args[["point_col"]],
-                                                args[["point_col_alpha"]])
+  if(.all_na(point_col)){
+    point_col <- .cyto_plot_point_col(fr_list,
+                                      channels = channels,
+                                      point_col_scale = point_col_scale,
+                                      point_cols = point_cols,
+                                      point_col = point_col,
+                                      point_col_alpha = point_col_alpha)
   }
   
   # POINTS - list of point colours
-  cyto_plot_point(args[["fr_list"]],
-                  args[["channels"]],
-                  args[["point_shape"]],
-                  args[["point_size"]],
-                  args[["point_col_scale"]],
-                  args[["point_cols"]],
-                  args[["point_col"]],
-                  args[["point_col_alpha"]])
+  cyto_plot_point(fr_list,
+                  channels = channels,
+                  point_shape = point_shape,
+                  point_size = point_size,
+                  point_col_scale = point_col_scale,
+                  point_cols = point_cols,
+                  point_col = point_col,
+                  point_col_alpha = point_col_alpha)
   
   # POINT DENSITY COLOUR SCALE
-  args[["point_cols"]] <- .cyto_plot_point_cols(args[["point_cols"]])
+  point_cols <- .cyto_plot_point_cols(point_cols)
   
   # POINT_COL LEGEND - vector (replace density colours with first point_cols)
-  args[["point_col"]] <- unlist(lapply(args[["point_col"]], function(z){
+  point_col <- unlist(lapply(point_col, function(z){
     
     # colours defined for each point
     if(length(z) > 1){
-      return(args[["point_cols"]][1])
+      return(point_cols[1])
     }else{
       return(z)
     }
@@ -419,25 +418,25 @@ cyto_plot_1d.flowSet <- function(x, ...){
   }))
   
   # LEGEND
-  if(args[["legend"]] != FALSE){
-    .cyto_plot_legend(args[["channels"]],
-                      args[["legend"]],
-                      args[["legend_text"]],
-                      args[["legend_text_font"]],
-                      args[["legend_text_size"]],
-                      args[["legend_text_col"]],
-                      args[["legend_line_col"]],
-                      args[["legend_box_fill"]],
-                      args[["legend_point_col"]],
-                      args[["density_fill"]],
-                      args[["density_fill_alpha"]],
-                      args[["density_line_type"]],
-                      args[["density_line_width"]],
-                      args[["density_line_col"]],
-                      args[["point_shape"]],
-                      args[["point_size"]],
-                      args[["point_col"]],
-                      args[["point_col_alpha"]])
+  if(legend != FALSE){
+    .cyto_plot_legend(channels = channels,
+                      legend = legend,
+                      legend_text = legend_text,
+                      legend_text_font = legend_text_font,
+                      legend_text_size = legend_text_size,
+                      legend_text_col = legend_text_col,
+                      legend_line_col = legend_line_col,
+                      legend_box_fill = legend_box_fill,
+                      legend_point_col = legend_point_col,
+                      density_fill = density_fill,
+                      density_fill_alpha = density_fill_alpha,
+                      density_line_type = density_line_type,
+                      density_line_width = density_line_width,
+                      density_line_col = density_line_col,
+                      point_shape = point_shape,
+                      point_size = point_size,
+                      point_col = point_col,
+                      point_col_alpha = point_col_alpha)
   }
   
   # GATES
