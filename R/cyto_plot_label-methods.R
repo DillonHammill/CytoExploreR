@@ -292,8 +292,6 @@ cyto_plot_label.NULL <- function(x,
               text_y <- c(ymin + ymax) / 2
             }
             
-            print(stat)
-            
             # Add labels
             if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(

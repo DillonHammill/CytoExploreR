@@ -229,9 +229,19 @@
     if(!.all_na(gate) & 
        .empty(label)){
       label<- TRUE # turn on labels if gate
+      
     }else if(.all_na(gate) &
              .empty(label)){
       label <- FALSE # turn off labels if no gate
+    }
+    
+    # STAT
+    if(!.all_na(gate) &
+       .empty(label_stat)){
+      label_stat <- "freq"
+    }else if(.all_na(gate) &
+             .empty(label_stat)){
+      label_stat <- NA
     }
     
     # LABELS 
@@ -280,6 +290,15 @@
       }else if(.all_na(gate) &
                .empty(label)){
         label <- FALSE # turn off labels if no gate
+      }
+      
+      # STAT
+      if(!.all_na(gate) &
+         .empty(label_stat)){
+        label_stat <- "freq"
+      }else if(.all_na(gate) &
+               .empty(label_stat)){
+        label_stat <- NA
       }
       
       # Gate density overlays
@@ -471,6 +490,15 @@ cyto_plot_1d.flowSet <- function(x, ...){
                            gate_line_type = gate_line_type,
                            gate_line_width = gate_line_width,
                            gate_line_col = gate_line_col)
+  }
+  
+  # LABEL STAT
+  if(!.all_na(gate) &
+     .empty(label_stat)){
+    label_stat <- "freq"
+  }else if(.all_na(gate) &
+           .empty(label_stat)){
+    label_stat <- NA
   }
   
   # LABELS
