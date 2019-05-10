@@ -1,3 +1,122 @@
+# CYTO_LOAD --------------------------------------------------------------------
+
+#' Load .fcs files into ncdfFlowSet
+#'
+#' \code{cyto_load} is a convenient wrapper around
+#' \code{\link[base:list.files]{list.files}} and
+#' \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
+#' to load .fcs files into a ncdfFlowSet.
+#'
+#' @param path points to the location of the .fcs files to read in.
+#' @param ... additional arguments passed to read.ncdfFlowSet.
+#'
+#' @return \code{ncdfFlowSet}
+#'
+#' @importFrom ncdfFlow read.ncdfFlowSet
+#'
+#' @examples
+#' library(CytoRSuiteData)
+#'
+#' # Get path to Activation .fcs files in CytoRSuiteData
+#' datadir <- system.file("extdata", package = "CytoRSuiteData")
+#' path <- paste0(datadir,"/Activation")
+#'
+#' # Load in .fcs files into ncdfFlowSet
+#' fs <- cyto_load(path)
+#'
+#' # fs is a ncdfFlowSet
+#' class(fs)
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_load <- function(path = ".", ...){
+  
+  # Get paths to files
+  files <- list.files(path, full.names = TRUE, pattern = ".fcs")
+  
+  # Read into a ncdfFlowSet
+  read.ncdfFlowSet(files = files, ...)
+  
+}
+
+# CYTO_SETUP -------------------------------------------------------------------
+
+#' Load.fcs files into GatingSet and annotate with experiment details
+#'
+#' \code{cyto_setup} takes care of all the data loading and annotation steps to
+#' prepare your cytometry data for downstream analyses. The .fcs files are first
+#' read into a \code{ncdfFlowSet} using \code{cyto_load} which is then added to
+#' a \code{GatingSet}. Calls are then made to \code{cyto_markers} and
+#' \code{cyto_annotate} to update the GtaingSet with the details of the
+#' experiment. These details can be modified later with additional calls to
+#' \code{cyto_markers} and/or \code{cyto_annotate}.
+#'
+#' @param path points to the location of the .fcs files to read in.
+#' @param ... additional arguments passed to read.ncdfFlowSet.
+#'
+#' @return \code{GatingSet}
+#' 
+#' @importFrom flowWorkspace GatingSet
+#'
+#' @examples
+#' library(CytoRSuiteData)
+#' 
+#' # Get path to Activation .fcs files in CytoRSuiteData
+#' datadir <- system.file("extdata", package = "CytoRSuiteData")
+#' path <- paste0(datadir,"/Activation")
+#' 
+#' # Load in .fcs files into an annotated GatingSet
+#' fs <- cyto_setup(path)
+#' 
+#' # Markers have been assigned
+#' cyto_extract(gs, "root")[[1]]
+#' 
+#' # Experiment details have been updated
+#' cyto_details(gs)
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_setup <- function(path = ".", ...){
+  
+  # Load in .fsc files to ncdfFlowSet
+  fs <- cyto_load(path, ...)
+
+  # Add fs to GatingSet
+  message("Adding samples to GatingSet.")
+  gs <- GatingSet(fs)
+    
+  # Markers
+  message("Associate markers with their respective channels.")
+  cyto_markers(gs)
+  
+  # Annotate
+  message("Annotate samples with experiment details.")
+  cyto_annotate(gs)
+  
+  return(gs)
+  
+}
+
+# CYTO_DETAILS -----------------------------------------------------------------
+
+#' Extract experiment details from flowSet or GatingSet
+#'
+#' Simply a autocomplete-friendly wrapper around
+#' \code{\link[flowWorkspace:pData]{pData}}.
+#' 
+#' @param object of class \code{flowSet} or \code{GatingSet}.
+#' 
+#' @return experiment details as data.frame.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}  
+#' 
+#' @export
+cyto_details <- function(x){
+  pData(x)
+}
+
 # CYTO_CHECK -------------------------------------------------------------------
 
 #' Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
@@ -74,16 +193,12 @@ cyto_extract <- function(x, parent = "root"){
     )
   }
   
-  # Extract flowFrame from GatingHierarchy
-  if(inherits(x, "GatingHierarchy")){
+  # Extract data from GatingHierarchy or GatingSet
+  if(any(inherits(x, "GatingHierarchy") |
+         inherits(x, "GatingSet"))){
     x <- getData(x, parent)
   }
-  
-  # Extract flowSet from GatingSet
-  if(inherits(x, "GatingSet")){
-    x <- getData(x, parent)
-  }
-  
+
   return(x)
 }
 
@@ -532,13 +647,14 @@ cyto_sample <- function(x,
 #' Assign marker names to flowFrame or flowSet
 #'
 #' \code{cyto_markers} opens an editable table containing a list of channels and
-#' markers for a \code{flowFrame} or \code{flowSet}. Users can edit the
-#' \code{name} or \code{desc} columns with updated channel names or marker names
-#' respectively. These entries will be updated in the \code{flowFrame} or
-#' \code{flowSet} upon closing the window and saved to a
+#' markers for a \code{flowFrame}, \code{flowSet}, \code{GatingHierarchy} or
+#' \code{GatingSet}. Users can edit the \code{name} or \code{desc} columns with
+#' updated channel names or marker names respectively. These entries will be
+#' updated in the \code{x} upon closing the window and saved to a
 #' "Experiment-markers.csv" file for future use.
 #'
-#' @param x object of class \code{flowFrame} or \code{flowSet}.
+#' @param x object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param file name of csv file containing columns 'Channel' and 'Marker'.
 #'
 #' @importFrom flowWorkspace pData
@@ -558,23 +674,36 @@ cyto_sample <- function(x,
 #' # Add marker names to channels - edit table
 #' cyto_markers(fs)
 #' }
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_markers <- function(x, file = NULL) {
-  if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))) {
-    stop("Please supply either a flowFrame or flowSet object")
-  }
   
+  # check class of x
+  cyto_check(x)
+  
+  # flowFrame
   if (inherits(x, "flowFrame")) {
     
     # Extract pData of parameters
     pd <- pData(parameters(x))
+    
+  # flowSet
   } else if (inherits(x, "flowSet")) {
     
     # Extract pData of parameters
     pd <- pData(parameters(x[[1]]))
+    
+  # GatingHierachy
+  }else if(inherits(x, "GatingHierarchy")){
+    fr <- cyto_extract(x, "root")
+    pd <- pData(parameters(fr))
+    
+  # GatingSet
+  }else if(inherits(x, "GatingSet")){
+    fr <- cyto_extract(gs,"root")[[1]]
+    pd <- pData(parameters(fr))
   }
   
   # file missing
