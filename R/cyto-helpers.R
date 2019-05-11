@@ -154,6 +154,12 @@ cyto_check <- function(x){
   
 }
 
+# CYTO_TRANSFORM ---------------------------------------------------------------
+
+# CYTO_TRANSFORM_INVERSE -------------------------------------------------------
+
+# CYTO_TRANSFORM_CONVERT -------------------------------------------------------
+
 # CYTO_EXTRACT -----------------------------------------------------------------
 
 #' Extract a valid flowFrame or flowSet
@@ -590,19 +596,20 @@ cyto_group_by <- function(x,
 
 # CYTO_SAMPLE ------------------------------------------------------------------
 
-#' Sample a flowFrame
+#' Sample a flowFrame or flowSet
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+#'   \code{\link[flowCore:flowSet-class]{flowSet}}.
 #' @param display numeric [0,1] indicating the percentage of events to keep.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
 #'
-#' @return \code{\link[flowCore:flowFrame-class]{flowFrame}} restricted to
-#'   \code{display} percentage events.
+#' @return \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+#'   \code{\link[flowCore:flowSet-class]{flowSet}} restricted to \code{display}
+#'   percentage events.
 #'
 #' @importFrom BiocGenerics nrow
-#' @importFrom flowCore sampleFilter
-#' @importFrom flowCore Subset
+#' @importFrom flowCore sampleFilter Subset fsApply
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -612,18 +619,24 @@ cyto_group_by <- function(x,
 #'
 #' # Constrict first sample by 50%
 #' cyto_sample(fs[[1]], 0.5)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
+#' @rdname cyto_sample
+#'
 #' @export
-cyto_sample <- function(x, 
-                        display = 1, 
-                        seed = NULL) {
+cyto_sample <- function(x, ...){
+  UseMethod("cyto_sample")
+}
+
+#' @rdname cyto_sample
+#' @export
+cyto_sample.flowFrame <- function(x, 
+                                  display = 1, 
+                                  seed = NULL) {
   
-  # No sampling
-  if(display == 1){
-    
-  }else{
+  # Do nothing if no sampling required
+  if(display != 1){
     # Number of events
     events <- nrow(x)
     
@@ -641,6 +654,16 @@ cyto_sample <- function(x,
   }
   
   return(x)
+}
+
+#' @rdname cyto_sample
+#' @export
+cyto_sample.flowSet <- function(x,
+                                display = 1,
+                                seed = NULL){
+  
+  fsApply(x, cyto_sample, display = display, seed = seed)
+  
 }
 
 # CYTO_MARKERS -----------------------------------------------------------------

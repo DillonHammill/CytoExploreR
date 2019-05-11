@@ -841,357 +841,197 @@
   return(gate)
 }
 
-# OVERLAYS ---------------------------------------------------------------------
+# OVERLAY CONVERT --------------------------------------------------------------
 
 #' Format overlay for use in cyto_plot
 #'
-#' \code{cyto_plot_overlay_format} will check whether the supplied overlay is
+#' \code{.cyto_plot_overlay_convert} will check whether the supplied overlay is
 #' supported and convert it into an appropriate format for use in
 #' \code{\link{cyto_plot}}.
 #'
 #' @param x object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param overlay object to overlay.
-#' @param display numeric [0,1] to control the percentage of events to be
-#'   plotted. Specifying a value for \code{display} can substantial improve
-#'   plotting speed for less powerful machines.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @rdname cyto_plot_overlay_format
-#'
-#' @export
-setGeneric(
-  name = ".cyto_plot_overlay_format",
-  def = function(x, ...) {
-    standardGeneric(".cyto_plot_overlay_format")
-  }
-)
-
-#' Check Overlays Supplied to cyto_plot
-#'
-#' \code{.cyto_plot_overlay_format} will check whether the supplied overlay is
-#' supported and convert it into an appropriate format for use in
-#' \code{\link{cyto_plot}}. This flowFrame method will return a list of
-#' flowFrames to overlay.
-#'
-#' @param x object of class \code{flowFrame}.
-#' @param overlay object to overlay.
-#' @param display numeric [0,1] to control the percentage of events to be
-#'   plotted. Specifying a value for \code{display} can substantial improve
-#'   plotting speed for less powerful machines. Set to 1 by default to display
-#'   all events.
+#' 
+#' @return converted overlay
+#' 
+#' @importFrom flowCore fsApply
+#' @importFrom flowWorkspace getData getNodes
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-setMethod(.cyto_plot_overlay_format,
-  signature = "flowFrame",
-  definition = function(x,
-                        overlay = NA,
-                        display = 1) {
+cyto_plot_overlay_convert <- function(x, ...){
+  UseMethod(".cyto_plot_overlay_convert")
+}
 
-    # Assign x to fr
-    fr <- x
-
-    # Check overlay class - convert to flowFrame list
-    if (class(overlay) == "flowFrame") {
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- cyto_convert(overlay,
-          "flowFrame list",
-          display = display
-        )
-      } else {
-        overlay <- cyto_convert(overlay,
-          "flowFrame list",
-          display = 1
-        )
-      }
-    } else if (inherits(overlay, "flowSet")) {
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- cyto_convert(overlay,
-          "flowFrame list",
-          display = display
-        )
-      } else {
-        overlay <- cyto_convert(overlay,
-          "flowFrame list",
-          display = 1
-        )
-      }
-
-      # list of flowFrames
-    } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- cyto_convert(overlay,
-          "flowFrame list",
-          display = display
-        )
-      } else {
-        overlay <- cyto_convert(overlay,
-          "flowFrame list",
-          display = 1
-        )
-      }
-
-      # list containing flowSet
-    } else if (all(unlist(lapply(overlay, function(x) {
-      inherits(x, "flowSet")
-    }))) &
-      length(overlay) == 1) {
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- cyto_convert(overlay[[1]],
-          "flowFrame list",
-          display = display
-        )
-      } else {
-        overlay <- cyto_convert(overlay[[1]],
-          "flowFrame list",
-          display = 1
-        )
-      }
-    } else {
-      stop(paste("'overlay' must be a flowFrame, flowSet,",
-        "list of flowFrames or a list containing a flowSet.",
-        sep = " "
-      ))
-    }
-
-    # return is a list of flowFrames to overlay
+#' @noRd
+.cyto_plot_overlay_convert.flowFrame <- function(x, 
+                                                 overlay = NA){
+  
+  # No overlay supplied
+  if(.all_na(overlay)){
     return(overlay)
   }
-)
+  
+  # Convert overlay to list of flowFrames
+  
+  # flowFrame -> flowFrame list
+  if (inherits(x, "flowFrame")) {
+      overlay <- cyto_convert(overlay,
+                              "flowFrame list")
+  # flowSet -> list of flowFrames
+  } else if (inherits(overlay, "flowSet")) {
+      overlay <- cyto_convert(overlay,
+                              "list of flowFrames")
+  # list of flowFrames
+  } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
+    
+  # flowSet list -> list of flowFrames
+  } else if (all(unlist(lapply(overlay, function(x) {
+    inherits(x, "flowSet")
+  }))) &
+  length(overlay) == 1) {
+    
+    overlay <- cyto_convert(overlay[[1]],
+                            "list of flowFrames")
+  } else {
+    stop(paste("'overlay' must be a flowFrame, flowSet,",
+               "list of flowFrames or a list containing a flowSet.",
+               sep = " "
+    ))
+  }
+  
+  # return is a list of flowFrames to overlay
+  return(overlay)
+}
 
-#' Check Overlays Supplied to cyto_plot
-#'
-#' \code{.cyto_plot_overlay_format} will check whether the supplied overlay is
-#' supported and convert it into an appropriate format for use in
-#' \code{\link{cyto_plot}}. This flowSet method will return a list of flowFrame
-#' lists to overlay.
-#'
-#' @param x object of class \code{flowSet}.
-#' @param overlay object to overlay.
-#' @param display  numeric indicating the number of events to plot, set to all
-#'   events by default. Reducing the sample size can significantly increase
-#'   plotting speed on less powerful machines. Set to 1 by default to display
-#'   all events.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @importFrom flowCore fsApply
-#'
 #' @noRd
-setMethod(.cyto_plot_overlay_format,
-  signature = "flowSet",
-  definition = function(x,
-                          overlay,
-                          display = 1) {
-
-    # Assign x to fs
-    fs <- x
-
-    # Check overlay class - convert to list of flowFrame lists
-    if (class(overlay) == "flowFrame") {
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- cyto_sample(overlay, display = display)
-      }
-      overlay <- lapply(rep(list(overlay), length(fs)), "list")
-    } else if (inherits(overlay, "flowSet")) {
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- fsApply(overlay, function(fr) {
-          cyto_sample(fr, display = display)
-        })
-      }
-      overlay <- lapply(lapply(
-        seq(1, length(overlay), 1),
-        function(x) overlay[[x]]
-      ), "list")
-    } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
-      if (length(overlay) == 1) {
-        overlay <- lapply(rep(list(overlay[[1]]), length(fs)), "list")
-      } else {
-        if (length(overlay) != length(fs)) {
-          stop(paste("Supplied list of flowFrames must be of the",
-            "same length as the flowSet.",
-            sep = " "
-          ))
-        }
-        overlay <- lapply(overlay, "list")
-      }
-
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- lapply(overlay, function(x) {
-          list(cyto_sample(x[[1]], display = display))
-        })
-      }
-    } else if (all(unlist(lapply(overlay, function(x) {
-      inherits(x, "flowSet")
-    })))) {
-      if (!all(unlist(lapply(overlay, length)) == length(fs))) {
-        stop(paste("Each flowSet in supplied list should be of the",
-          "same length as the supplied flowSet.",
-          sep = " "
+.cyto_plot_overlay_convert.flowSet <- function(x,
+                                               overlay = NA){
+  
+  # No overlay supplied
+  if(.all_na(overlay)){
+    return(overlay)
+  }
+  
+  # Convert overlay to list of lists of flowFrames (1 list per element in x)
+  
+  # flowFrame
+  if (class(overlay) == "flowFrame") {
+    overlay <- lapply(rep(list(overlay), length(x)), "list")
+  # flowSet
+  } else if (inherits(overlay, "flowSet")) {
+    overlay <- lapply(lapply(
+      seq(1, length(overlay), 1),
+      function(z) overlay[[z]]
+    ), "list")
+  # list of flowFrames
+  } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
+    if (length(overlay) == 1) {
+      overlay <- lapply(rep(list(overlay[[1]]), length(x)), "list")
+    } else {
+      if (length(overlay) != length(x)) {
+        stop(paste("Supplied list of flowFrames must be of the",
+                   "same length as the flowSet.",
+                   sep = " "
         ))
       }
-
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- lapply(overlay, function(x) {
-          fsApply(x, function(y) {
-            cyto_sample(y, display = display)
-          })
-        })
-      }
-
-      # list of flowFrame lists
-      overlay <- lapply(overlay, function(x) {
-        lapply(seq(1, length(x), 1), function(y) x[[y]])
-      })
-      overlay <- lapply(seq_along(fs), function(x) {
-        lapply(overlay, `[[`, x)
-      })
-    } else if (all(do.call("rbind", lapply(overlay, function(x) {
-      lapply(x, "class")
-    })) == "flowFrame")) {
-      if (length(overlay) != length(fs)) {
-        stop(
-          paste("'overlay' should be a list of flowFrames lists",
-            "to overlay on each flowFrame in the flowSet.",
-            sep = " "
-          )
-        )
-      }
-
-      if (getOption("CytoRSuite_overlay_display")) {
-        overlay <- lapply(overlay, function(x) {
-          lapply(x, function(y) {
-            cyto_sample(y, display = display)
-          })
-        })
-      }
-    } else {
-      stop(paste("'overlay' must be a flowFrame, flowSet,",
-        "list of flowFrames or a list of flowSets.",
-        sep = " "
+      overlay <- lapply(overlay, "list")
+    }
+  # list of flowSets
+  } else if (all(unlist(lapply(overlay, function(x) {
+    inherits(x, "flowSet")
+  })))) {
+    if (!all(unlist(lapply(overlay, length)) == length(x))) {
+      stop(paste("Each flowSet in supplied list should be of the",
+                 "same length as the supplied flowSet.",
+                 sep = " "
       ))
     }
-
-    # return is a list of flowFrame lists to overlay
-    # 1 flowFrame list per flowFrame in fs
-    return(overlay)
-  }
-)
-
-#' Check Overlays Supplied to cyto_plot
-#'
-#' \code{.cyto_plot_overlay_format} will check whether the supplied overlay is
-#' supported and convert it into an appropriate format for use in
-#' \code{\link{cyto_plot}}. This flowSet method will return a list of flowFrame
-#' lists to overlay.
-#'
-#' @param x object of class \code{GatingHierarchy}.
-#' @param overlay object to overlay.
-#' @param display  numeric indicating the number of events to plot, set to all
-#'   events by default. Reducing the sample size can significantly increase
-#'   plotting speed on less powerful machines. Set to 1 by default to display
-#'   all events.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @importFrom flowWorkspace getData
-#'
-#' @noRd
-setMethod(.cyto_plot_overlay_format,
-  signature = "GatingHierarchy",
-  definition = function(x,
-                          overlay,
-                          display = 1) {
-
-    # Assign x to gh
-    gh <- x
-
-    # Extract flowFrame
-    fr <- getData(gh, "root")
-
-    # Overlay should be character vector of population names
-    if (inherits(overlay, "flowFrame") |
-      inherits(overlay, "flowSet") |
-      inherits(overlay, "list")) {
-
-    } else if (inherits(overlay, "character")) {
-      if (!all(overlay %in% basename(getNodes(gh)))) {
-        stop("'overlay' does not exist in the GatingHierarchy.")
-      } else {
-        nms <- overlay
-        overlay <- lapply(overlay, function(x) {
-          getData(gh, x)
-        })
-        names(overlay) <- nms
-      }
+    
+    # list of flowFrame lists
+    overlay <- lapply(overlay, function(z) {
+      lapply(seq(1, length(z), 1), function(y) z[[y]])
+    })
+    overlay <- lapply(seq_along(x), function(z) {
+      lapply(overlay, `[[`, z)
+    })
+  } else if (all(do.call("rbind", lapply(overlay, function(z) {
+    lapply(z, "class")
+  })) == "flowFrame")) {
+    if (length(overlay) != length(x)) {
+      stop(
+        paste("'overlay' should be a list of flowFrames lists",
+              "to overlay on each flowFrame in the flowSet.",
+              sep = " "
+        )
+      )
     }
-
-    # .cyto_plot_overlay_format to convert overlay to correct format
-    .cyto_plot_overlay_format(fr,
-      overlay = overlay,
-      display = display
-    )
+  } else {
+    stop(paste("'overlay' must be a flowFrame, flowSet,",
+               "list of flowFrames or a list of flowSets.",
+               sep = " "
+    ))
   }
-)
+  
+  # return is a list of flowFrame lists to overlay
+  # 1 flowFrame list per flowFrame in x
+  return(overlay)
+}
 
-#' Check Overlays Supplied to cyto_plot
-#'
-#' \code{.cyto_plot_overlay_format} will check whether the supplied overlay is
-#' supported and convert it into an appropriate format for use in
-#' \code{\link{cyto_plot}}. This flowSet method will return a list of flowFrame
-#' lists to overlay.
-#'
-#' @param x object of class \code{GatingSet}.
-#' @param overlay object to overlay.
-#' @param display  numeric indicating the number of events to plot, set to all
-#'   events by default. Reducing the sample size can significantly increase
-#'   plotting speed on less powerful machines. Set to 1 by default to display
-#'   all events.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @importFrom flowWorkspace getData
-#'
 #' @noRd
-setMethod(.cyto_plot_overlay_format,
-  signature = "GatingSet",
-  definition = function(x,
-                          overlay,
-                          display = 1) {
+.cyto_plot_overlay_convert_GatingHierarchy <- function(x, 
+                                                       overlay = NA){
+  
+  # Overlay could be character vector of population names
+  if (inherits(overlay, "flowFrame") |
+      inherits(overlay, "flowSet") |
+      inherits(overlay, "list")) {
+    
+  } else if (inherits(overlay, "character")) {
+    if (!all(overlay %in% basename(getNodes(x)))) {
+      stop("'overlay' does not exist in the GatingHierarchy.")
+    } else {
+      nms <- overlay
+      overlay <- lapply(overlay, function(z) {
+        getData(x, z)
+      })
+      names(overlay) <- nms
+    }
+  }
+  
+  # .cyto_plot_overlay_convert to convert overlay to correct format
+  .cyto_plot_overlay_convert(getData(x, "root"),
+                             overlay = overlay)
+  
+}
 
-    # Assign x to gh
-    gs <- x
-
-    # Extract flowFrame
-    fs <- getData(gs, "root")
-
-    # Overlay should be character vector of population names
+#' @noRd
+.cyto_plot_overlay_convert.GatingSet <- function(x, 
+                                                 overlay = NA){
+    # Overlay could be character vector of population names
     if (inherits(overlay, "flowFrame") |
       inherits(overlay, "flowSet") |
       inherits(overlay, "list")) {
 
     } else if (inherits(overlay, "character")) {
-      if (!all(overlay %in% basename(getNodes(gs)))) {
+      if (!all(overlay %in% basename(getNodes(x)))) {
         stop("overlay' does not exist in the GatingHierarchy.")
       } else {
         nms <- overlay
-        overlay <- lapply(overlay, function(x) {
-          getData(gs, x)
+        overlay <- lapply(overlay, function(z) {
+          getData(x, z)
         })
         names(overlay) <- nms
       }
     }
 
-    # .cyto_plot_overlay_format to convert overlay to correct format
-    .cyto_plot_overlay_format(fs,
-      overlay = overlay,
-      display = display
-    )
-  }
-)
+    # .cyto_plot_overlay_convert to convert overlay to correct format
+    .cyto_plot_overlay_convert(getData(x, "root"),
+      overlay = overlay)
+    
+}
 
 # LAYOUT -----------------------------------------------------------------------
 

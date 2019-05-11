@@ -2,12 +2,19 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_sample}
 \alias{cyto_sample}
-\title{Sample a flowFrame}
+\alias{cyto_sample.flowFrame}
+\alias{cyto_sample.flowSet}
+\title{Sample a flowFrame or flowSet}
 \usage{
-cyto_sample(x, display = 1, seed = NULL)
+cyto_sample(x, ...)
+
+\method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL)
+
+\method{cyto_sample}{flowSet}(x, display = 1, seed = NULL)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+\code{\link[flowCore:flowSet-class]{flowSet}}.}
 
 \item{display}{numeric [0,1] indicating the percentage of events to keep.}
 
@@ -15,11 +22,12 @@ cyto_sample(x, display = 1, seed = NULL)
 seed will return the same result with each run.}
 }
 \value{
-\code{\link[flowCore:flowFrame-class]{flowFrame}} restricted to
-  \code{display} percentage events.
+\code{\link[flowCore:flowFrame-class]{flowFrame}} or
+  \code{\link[flowCore:flowSet-class]{flowSet}} restricted to \code{display}
+  percentage events.
 }
 \description{
-Sample a flowFrame
+Sample a flowFrame or flowSet
 }
 \examples{
 library(CytoRSuiteData)
