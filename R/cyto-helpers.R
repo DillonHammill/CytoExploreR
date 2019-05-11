@@ -156,6 +156,111 @@ cyto_check <- function(x){
 
 # CYTO_TRANSFORM ---------------------------------------------------------------
 
+#' Apply logicle transformation to channels of flowSet or GatingSet
+#'
+#' A convenient wrapper for
+#' \code{\link[flowCore:estimateLogicle]{estimateLogicle}} and
+#' \code{\link[flowCore:transform]{transform}} which coerces samples prior to
+#' logicle parameter estimation. For large \code{flowSet} or \code{GatingSet}
+#' objects it is recommended that users select a subset of samples for parameter
+#' estimation using the \code{select} argument.
+#'
+#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param channels name(s) of the channels to transform. A call will be made to
+#'   \code{\link{cyto_fluor_channels}} to get the names of the fluorescent
+#'   channels if no channels are supplied.
+#' @param select a named list of experiment variables passed to
+#'   \code{\link{cyto_select}} to select particular samples to use for logicle
+#'   parameter estimation.
+#' @param ... additional arguments passed to
+#'   \code{\link[flowCore:estimateLogicle]{estimateLogicle}}.
+#'
+#' @return transformed \code{flowSet} or \code{GatingSet}.
+#'
+#' @importFrom flowCore estimateLogicle transform flowSet
+#' @importFrom flowWorkspace GatingSet
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @rdname cyto_transform
+#'
+#' @export
+cyto_transform <- function(x, ...){
+  UseMethod("cyto_transform")
+}
+
+#' @rdname cyto_transform
+#' @export
+cyto_transform.flowSet <- function(x,
+                                   channels, 
+                                   select = NULL,
+                                   ...){
+  
+  # Select a subset of samples for parameter estimation
+  if(!is.null(select)){
+    x <- cyto_select(x, select)
+  }
+  
+  # Missing channels - use fluorescent channels
+  if(missing(channels)){
+    channels <- cyto_fluor_channels(x)
+  }
+  
+  # Convert channels argument to valid channel names
+  channels <- cyto_channels_extract(x, channels)
+  
+  # Coerce flowSet to flowFrame for parameter estimation
+  fr <- as(x, "flowFrame")
+  
+  # Logicle parameter estimates using estimateLogicle
+  trans <- estimateLogicle(fr, channels, ...)
+  
+  # Apply transformation using flowCore:;transform
+  x <- transform(x, trans)
+  
+  return(x)
+  
+}
+
+#' @rdname cyto_transform
+#' @export
+cyto_transform.GatingSet <- function(x,
+                                     channels,
+                                     select = NULL,
+                                     ...){
+  
+  # Select a subset of samples for parameter estimation
+  if(!is.null(select)){
+    x <- cyto_select(x, select)
+  }
+  
+  # Missing channels - use fluorescent channels
+  if(missing(channels)){
+    channels <- cyto_fluor_channels(x)
+  }
+  
+  # Convert channels argument to valid channel names
+  channels <- cyto_channels_extract(x, channels)
+  
+  # Extract data from GatingSet
+  fs <- cyto_extract(x, "root")
+  
+  # Coerce flowSet to flowFrame
+  fr <- cyto_convert(fs, "flowFrame")
+  
+  # Add collapsed flowFrame to GatingSet
+  gs <- GatingSet(flowSet(fr))
+  
+  # Logicle parameter estimates using estimateLogicle
+  trans <- estimateLogicle(gs[[1]], channels, ...)
+  
+  # Apply transformation using flowCore::transform
+  x <- transform(x, trans)
+  
+  return(x)
+  
+}
+
 # CYTO_TRANSFORM_INVERSE -------------------------------------------------------
 
 # CYTO_TRANSFORM_CONVERT -------------------------------------------------------
