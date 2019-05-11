@@ -62,17 +62,18 @@ test_that("cyto_convert", {
   fr_list_exp <- lapply(seq_len(length(fs)), function(x){fs[[x]]})
   expect_equal(cyto_convert(fs, "flowFrame"), fr_exp)
   expect_equal(cyto_convert(fs, "flowSet"), fs)
-  expect_equal(cyto_convert(fs, "flowFrame list"), fr_list_exp)
+  expect_equal(cyto_convert(fs, "flowFrame list"), list(fr_exp))
+  expect_equal(cyto_convert(fs, "list of flowFrames"), fr_list_exp)
   expect_equal(cyto_convert(fs, "flowSet list"), list(fs))
   
   # GatingHierarchy ------------------------------------------------------------
-  expect_equal(cyto_convert(gs[[1]], "flowFrame", "root"),
+  expect_equal(cyto_convert(gs[[1]],  "root", "flowFrame"),
                getData(gs,"root")[[1]])
-  expect_equal(cyto_convert(gs[[1]], "flowFrame list", "root"),
+  expect_equal(cyto_convert(gs[[1]],"root" ,"flowFrame list"),
                list(getData(gs,"root")[[1]]))
-  expect_equal(cyto_convert(gs[[1]], "flowSet", "root"),
+  expect_equal(cyto_convert(gs[[1]], "root", "flowSet"),
                flowSet(getData(gs,"root")[[1]]))
-  expect_equal(cyto_convert(gs[[1]], "flowSet list", "root"),
+  expect_equal(cyto_convert(gs[[1]],"root", "flowSet list"),
                list(flowSet(getData(gs,"root")[[1]])))
   
   # GatingSet ------------------------------------------------------------------
@@ -84,13 +85,15 @@ test_that("cyto_convert", {
   }
   fr_list_exp <- lapply(seq_len(length(gs)), 
                         function(y){getData(gs,"root")[[y]]})
-  expect_equal(cyto_convert(gs, "flowFrame", "root"),
+  expect_equal(cyto_convert(gs, "root", "flowFrame"),
                fr_exp)
-  expect_equal(cyto_convert(gs, "flowFrame list", "root"),
+  expect_equal(cyto_convert(gs, "root", "list of flowFrames"),
                fr_list_exp)
-  expect_equal(cyto_convert(gs, "flowSet", "root"),
+  expect_equal(cyto_convert(gs, "root", "flowFrame list"),
+               list(fr_exp))
+  expect_equal(cyto_convert(gs, "root", "flowSet"),
                getData(gs,"root"))
-  expect_equal(cyto_convert(gs, "flowSet list", "root"),
+  expect_equal(cyto_convert(gs, "root", "flowSet list"),
                list(getData(gs,"root")))
   
 })

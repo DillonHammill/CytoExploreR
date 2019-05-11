@@ -2,21 +2,34 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_convert}
 \alias{cyto_convert}
+\alias{cyto_convert.flowFrame}
+\alias{cyto_convert.flowSet}
+\alias{cyto_convert.GatingHierarchy}
+\alias{cyto_convert.GatingSet}
 \title{Convert between cytometry objects}
 \usage{
-cyto_convert(x, return = "flowFrame", parent = "root", display = 1)
+cyto_convert(x, ...)
+
+\method{cyto_convert}{flowFrame}(x, return = "flowFrame")
+
+\method{cyto_convert}{flowSet}(x, return = "flowSet")
+
+\method{cyto_convert}{GatingHierarchy}(x, parent = "root",
+  return = "GatingHierarchy")
+
+\method{cyto_convert}{GatingSet}(x, parent = "root",
+  return = "GatingSet")
 }
 \arguments{
-\item{x}{flowFrame, flowSet, GatingHierarchy, GatingSet or flowFrame list or
-flowSet list.}
+\item{x}{\code{flowFrame}, \code{flowSet}, \code{GatingHierarchy},
+\code{GatingSet}.}
 
-\item{return}{either 'flowFrame', 'flowSet', 'flowFrame list' or 'flowSet
-list'.}
+\item{return}{either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
+coerced 'flowFrame list' or coreced 'flowSet list'. GatingSet and flowSet
+objects can also be converted to a 'list of flowFrames'.}
 
 \item{parent}{name of parent population to extract from GatingHierarchy and
 GatingSet objects.}
-
-\item{display}{percentage of events to include.}
 }
 \value{
 object specified by 'return' argument.
@@ -27,10 +40,10 @@ Automatically removes 'Original' column for coerced objects.
 \examples{
 library(CytoRSuiteData)
 
-# Convert flowSet to list of flowFrames
-cyto_convert(Activation, "flowFrame list")
+# Convert flowSet to 'list of flowFrames'
+cyto_convert(Activation, "list of flowFrames")
 
-# Convert flowSet to flowFrame
+# Convert flowSet to 'flowFrame'
 cyto_convert(Activation, "flowFrame")
 
 # Convert GatingSet to flowFrame

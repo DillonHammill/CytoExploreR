@@ -208,157 +208,158 @@ cyto_extract <- function(x, parent = "root"){
 #'
 #' Automatically removes 'Original' column for coerced objects.
 #'
-#' @param x flowFrame, flowSet, GatingHierarchy, GatingSet or flowFrame list or
-#'   flowSet list.
-#' @param return either 'flowFrame', 'flowSet', 'flowFrame list' or 'flowSet
-#'   list'.
+#' @param x \code{flowFrame}, \code{flowSet}, \code{GatingHierarchy},
+#'   \code{GatingSet}.
+#' @param return either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
+#'   coerced 'flowFrame list' or coreced 'flowSet list'. GatingSet and flowSet
+#'   objects can also be converted to a 'list of flowFrames'.
 #' @param parent name of parent population to extract from GatingHierarchy and
 #'   GatingSet objects.
-#' @param display percentage of events to include.
 #'
 #' @return object specified by 'return' argument.
 #'
-#' @importFrom flowCore flowSet
+#' @importFrom flowCore flowSet sampleNames
 #' @importFrom flowWorkspace getData GatingSet
 #' @importFrom methods as
 #'
-#' @examples 
+#' @examples
 #' library(CytoRSuiteData)
-#' 
-#' # Convert flowSet to list of flowFrames
-#' cyto_convert(Activation, "flowFrame list")
-#' 
-#' # Convert flowSet to flowFrame
+#'
+#' # Convert flowSet to 'list of flowFrames'
+#' cyto_convert(Activation, "list of flowFrames")
+#'
+#' # Convert flowSet to 'flowFrame'
 #' cyto_convert(Activation, "flowFrame")
-#' 
+#'
 #' # Convert GatingSet to flowFrame
 #' cyto_convert(GatingSet(Activation), "flowFrame", parent = "T Cells")
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @rdname cyto_convert
+#'
 #' @export
-cyto_convert <- function(x,
-                         return = "flowFrame",
-                         parent = "root",
-                         display = 1) {
+cyto_convert <- function(x, ...){
+  UseMethod("cyto_convert")
+}
+
+#' @rdname cyto_convert
+#' @export
+cyto_convert.flowFrame <- function(x,
+                                   return = "flowFrame"){
   
-  # Convert GatingHierarchy/GatingSet to flowFrame/flowSet objects
-  if(inherits(x, "GatingHierarchy") | inherits(x, "GatingSet")){
-    x <- getData(x, parent)
+  if(return == "flowFrame"){
+    
+  }else if(return == "flowFrame list"){
+    x <- list(x)
+  }else if(return == "flowSet"){
+    x <- flowSet(x)
+  }else if(return == "flowSet list"){
+    x <- list(flowSet(x))
+  }else if(return == "GatingSet"){
+    x <- flowSet(x)
+    x <- GatingSet(x)
+  }else if(return == "GatingHierarchy"){
+    x <- flowSet(x)
+    x <- GatingSet(x)[[1]]
   }
   
-  if(inherits(x, "flowFrame")){
-    
-    # Sampling
-    if(display != 1){
-      x <- cyto_sample(x, display = display)
-    }
-    
-    if(return == "flowFrame list"){
-      x <- list(x)
-    }else if(return == "flowSet"){
-      x <- flowSet(x)
-    }else if(return == "flowSet list"){
-      x <- list(flowSet(x))
-    }
-    
-  }else if(inherits(x, "flowSet")){
-    
-    # Sampling
-    if(display != 1){
-      x <- fsApply(x, function(fr){cyto_sample(fr, display = display)})
-    }
-    
-    if(return == "flowFrame"){
-      x <- as(x, "flowFrame")
-      if ("Original" %in% BiocGenerics::colnames(x)) {
-        x <- suppressWarnings(
-          x[, -match("Original", BiocGenerics::colnames(x))]
-        )
-      }
-    }else if(return == "flowFrame list"){
-      x <- lapply(seq_len(length(x)), function(y){x[[y]]})
-    }else if(return == "flowSet list"){
-      x <- list(x)
-    }
-    
-  }else if(all(unlist(lapply(x,"class")) == "flowFrame")){
-    
-    # Sampling
-    if(display != 1){
-      x <- lapply(x, function(fr){cyto_sample(fr, display = display)})
-    }
-    
-    if(return == "flowFrame"){
-      x <- flowSet(x)
-      x <- as(x, "flowFrame")
-      if ("Original" %in% BiocGenerics::colnames(x)) {
-        x <- suppressWarnings(
-          x[, -match("Original", BiocGenerics::colnames(x))]
-        )
-      }
-    }else if(return == "flowSet"){
-      x <- flowSet(x)
-    }else if(return == "flowSet list"){
-      x <- list(flowSet(x))
-    }
-    
-  }else if(all(unlist(lapply(x, function(x){inherits(x,"flowSet")})))){
-    
-    # Sampling
-    if(display != 1){
-      x <- lapply(x, function(fs){
-        fsApply(fs, function(fr){cyto_sample(fr, display = display)})
-      })
-    }
-    
-    if(return == "flowFrame"){
-      x <- lapply(x, function(fs){
-        fr <- as(fs, "flowFrame")
-        if ("Original" %in% BiocGenerics::colnames(fr)) {
-          fr <- suppressWarnings(
-            fr[, -match("Original", BiocGenerics::colnames(fr))]
-          )
-        }
-        return(fr)
-      })
-      x <- flowSet(x)
-      x <- as(x,"flowFrame")
-      if ("Original" %in% BiocGenerics::colnames(x)) {
-        x <- suppressWarnings(
-          x[, -match("Original", BiocGenerics::colnames(x))]
-        )
-      }
-      
-    }else if(return == "flowFrame list"){
-      
-      x <- lapply(x, function(fs){
-        fr <- as(fs, "flowFrame")
-        if ("Original" %in% BiocGenerics::colnames(fr)) {
-          fr <- suppressWarnings(
-            fr[, -match("Original", BiocGenerics::colnames(fr))]
-          )
-        }
-        return(fr)
-      })
-      
-    }else if(return == "flowSet"){
-      
-      x <- lapply(x, function(fs){
-        fr <- as(fs, "flowFrame")
-        if ("Original" %in% BiocGenerics::colnames(fr)) {
-          fr <- suppressWarnings(
-            fr[, -match("Original", BiocGenerics::colnames(fr))]
-          )
-        }
-        return(fr)
-      })
-      
-      x <- flowSet(x)
-      
-    }
-  }
   return(x)
+  
+}
+
+#' @rdname cyto_convert
+#' @export
+cyto_convert.flowSet <- function(x,
+                                 return = "flowSet"){
+  
+  if(return == "flowSet"){
+    
+  }else if(return == "flowFrame"){
+    x <- as(x, "flowFrame")
+    if ("Original" %in% BiocGenerics::colnames(x)) {
+      x <- suppressWarnings(
+        x[, -match("Original", BiocGenerics::colnames(x))]
+      )
+    }
+  }else if(return == "flowFrame list"){
+    x <- as(x, "flowFrame")
+    if ("Original" %in% BiocGenerics::colnames(x)) {
+      x <- suppressWarnings(
+        x[, -match("Original", BiocGenerics::colnames(x))]
+      )
+    }
+    x <- list(x)
+  }else if(return == "list of flowFrames"){
+    x <- lapply(seq_len(length(x)), function(y){x[[y]]})
+    names(x) <- sampleNames(x)
+  }else if(return == "flowSet list"){
+    x <- list(x)
+  }else if(return == "GatingSet"){
+    x <- GatingSet(x)
+  }else if(return == "GatingHierarchy"){
+    x <- as(x, "flowFrame")
+    if ("Original" %in% BiocGenerics::colnames(x)) {
+      x <- suppressWarnings(
+        x[, -match("Original", BiocGenerics::colnames(x))]
+      )
+    }
+    x <- flowSet(x)
+    x <- GatingSet(x)[[1]]
+  }
+  
+  return(x)
+  
+}
+
+#' @rdname cyto_convert
+#' @export
+cyto_convert.GatingHierarchy <- function(x, 
+                                         parent = "root",
+                                         return = "GatingHierarchy"){
+  
+  if(return == "GatingHierarchy"){
+    
+  }else if(return == "flowFrame"){
+    x <- cyto_extract(x, parent)
+  }else if(return == "flowFrame list"){
+    x <- list(cyto_extract(x, parent))
+  }else if(return == "flowSet"){
+    x <- flowSet(cyto_extract(x, parent))
+  }else if(return == "flowSet list"){
+    x <- list(flowSet(cyto_extract(x, parent)))
+  }
+  
+  return(x)
+  
+}
+
+#' @rdname cyto_convert
+#' @export
+cyto_convert.GatingSet <- function(x,
+                                   parent = "root",
+                                   return = "GatingSet"){
+  
+  if(return == "GatingSet"){
+    
+  }else if(return == "flowFrame"){
+    x <- cyto_convert(cyto_extract(x, parent),"flowFrame")
+  }else if(return == "flowFrame list"){
+    x <- list(cyto_convert(cyto_extract(x, parent),"flowFrame"))
+  }else if(return == "list of flowFrames"){
+    x <- lapply(seq(1,length(x)), function(z){cyto_extract(x[[z]], parent)})
+    names(x) <- sampleNames(x)
+  }else if(return == "flowSet"){
+    x <- cyto_extract(x, parent)
+  }else if(return == "flowSet list"){
+    x <- list(cyto_extract(x, parent))
+  }else if(return == "GatingHierachy"){
+    x <- flowSet(cyto_convert(cyto_extract(x, parent),"flowFrame"))
+    x <- GatingSet(x)[[1]]
+  }
+  
+  return(x)
+  
 }
 
 # CYTO_FILTER ------------------------------------------------------------------
