@@ -158,7 +158,7 @@ setMethod(cyto_plot_compensation,
 
     # Transformations
     axes_trans <- .getCompleteTransList(fr, axes_trans)
-    axes_trans <- cyto_trans_check(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
 
     # Transfomed Data
     fr <- .getTransformedData(fr, axes_trans)
@@ -404,7 +404,7 @@ setMethod(cyto_plot_compensation,
 
     # Transformations
     axes_trans <- .getCompleteTransList(fs, axes_trans)
-    axes_trans <- cyto_trans_check(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
 
     # Transformed Data
     fs <- .getTransformedData(fs, axes_trans)
@@ -737,7 +737,7 @@ setMethod(cyto_plot_compensation,
 
     # Transformations
     axes_trans <- .getCompleteTransList(gs, axes_trans)
-    axes_trans <- cyto_trans_check(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
 
     # Make to cyto_plot_compensation
     cyto_plot_compensation(

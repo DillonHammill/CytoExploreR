@@ -21,6 +21,29 @@ test_that("cyto_check",{
   
 })
 
+# cyto_transform_convert -----------------------------------------------------------
+
+test_that("cyto_transform_convert", {
+  
+  # NULL
+  expect_equal(cyto_transform_convert(NULL), NULL)
+  
+  # transformList
+  trns <- transformList(names(trans), lapply(trans, `[[`, "transform"))
+  expect_equal(cyto_transform_convert(trns), trns)
+  expect_equal(cyto_transform_convert(trns, inverse = TRUE),
+               inverseLogicleTransform(trns))
+  
+  # transformerList
+  expect_equal(cyto_transform_convert(trans),
+               transformList(names(trans), lapply(trans, `[[`, "transform")))
+  
+  # transformerList - inverse
+  expect_equal(cyto_transform_convert(trans, inverse = TRUE),
+               transformList(names(trans), lapply(trans, `[[`, "inverse")))
+  
+})
+
 # cyto_extract ----------------------------------------------------------------
 
 test_that("cyto_extract", {
@@ -218,11 +241,6 @@ test_that("cyto_compensate", {
                     gs)
   
 })
-
-# cyto_transform ---------------------------------------------------------------
-
-# cyto_inverse_transform -------------------------------------------------------
-
 
 # Remove generated spillover matrix
 base::unlink("Test-Spillover-Matrix.csv")

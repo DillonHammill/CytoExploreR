@@ -217,7 +217,7 @@ cyto_plot_label.NULL <- function(x,
               "geo mean",
               "CV"
             )) {
-              if (is.null(cyto_trans_convert(trans))) {
+              if (is.null(cyto_transform_convert(trans))) {
                 stop(
                   paste("Supply transformList/transformerList to calculate", stat, ".")
                 )
@@ -263,7 +263,7 @@ cyto_plot_label.NULL <- function(x,
                 st <- round(st, 2)
               } else if (stat == "geo mean") {
                 st <- mean(flowCore::exprs(fr)[, channels])
-                inv <- cyto_trans_convert(trans, inverse = TRUE)
+                inv <- cyto_transform_convert(trans, inverse = TRUE)
                 st <- inv@transforms[[channels]]@f(st)
                 st <- round(st, 2)
               } else if (stat == "CV"){
@@ -365,7 +365,7 @@ cyto_plot_label.rectangleGate <- function(x,
             
             # Missing transList
             if (stat %in% c("median", "mode", "mean", "geo mean")) {
-              if (is.null(cyto_trans_convert(trans))) {
+              if (is.null(cyto_transform_convert(trans))) {
                 stop(
                   paste("Supply transformList/transformerList to calculate", stat, ".")
                 )
@@ -412,7 +412,7 @@ cyto_plot_label.rectangleGate <- function(x,
                 st <- round(st, 2)
               } else if (stat == "geo mean") {
                 st <- mean(flowCore::exprs(fr)[, channels])
-                inv <- cyto_trans_convert(trans, inverse = TRUE)
+                inv <- cyto_transform_convert(trans, inverse = TRUE)
                 st <- inv@transforms[[channels]]@f(st)
                 st <- round(st, 2)
               } else if (stat == "CV"){

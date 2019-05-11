@@ -112,26 +112,3 @@ test_that("cyto_markers_extract", {
                "Invalid number of supplied channels.")
   
 })
-
-# cyto_trans_convert -----------------------------------------------------------
-
-test_that("cyto_trans_convert", {
-  
-  # NULL
-  expect_equal(cyto_trans_convert(NULL), NULL)
-  
-  # transformList
-  trns <- transformList(names(trans), lapply(trans, `[[`, "transform"))
-  expect_equal(cyto_trans_convert(trns), trns)
-  expect_equal(cyto_trans_convert(trns, inverse = TRUE),
-               inverseLogicleTransform(trns))
-  
-  # transformerList
-  expect_equal(cyto_trans_convert(trans),
-               transformList(names(trans), lapply(trans, `[[`, "transform")))
-  
-  # transformerList - inverse
-  expect_equal(cyto_trans_convert(trans, inverse = TRUE),
-               transformList(names(trans), lapply(trans, `[[`, "inverse")))
-  
-})

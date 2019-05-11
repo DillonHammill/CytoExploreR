@@ -84,7 +84,7 @@
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_convert(trans, inverse = TRUE)
+    inv <- cyto_transform_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -152,7 +152,7 @@
   }else if(!is.null(trans)){
     
     # Convert tranform object to transformList
-    trans <- cyto_trans_convert(trans, inverse = FALSE)
+    trans <- cyto_transform_convert(trans, inverse = FALSE)
     
     fr_mean <- colMeans(exprs(fr)[,channels])
     
@@ -162,7 +162,7 @@
       if(x %in% BiocGenerics::colnames(trans)){
         
         # Inverse transformations
-        inv <- cyto_trans_convert(trans, inverse = TRUE)
+        inv <- cyto_transform_convert(trans, inverse = TRUE)
         
         # Inverse transformation on calculated arithmetic mean
         geo_mean <- inv@transforms[[x]]@f(fr_mean[x])
@@ -236,7 +236,7 @@
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_convert(trans, inverse = TRUE)
+    inv <- cyto_transform_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -302,7 +302,7 @@
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_convert(trans, inverse = TRUE)
+    inv <- cyto_transform_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   
@@ -371,7 +371,7 @@
   
   # Inverse transformations
   if(!is.null(trans)){
-    inv <- cyto_trans_convert(trans, inverse = TRUE)
+    inv <- cyto_transform_convert(trans, inverse = TRUE)
     fr <- transform(fr, inv)
   }
   

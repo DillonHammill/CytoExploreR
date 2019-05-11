@@ -1087,9 +1087,9 @@ cyto_plot.GatingHierarchy <- function(x,
       axes_trans <- transformerList(names(trnsfrms), trnsfrms)
     }
 
-    axes_trans <- cyto_trans_check(trans = axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(trans = axes_trans, inverse = FALSE)
   } else {
-    axes_trans <- cyto_trans_check(trans = axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(trans = axes_trans, inverse = FALSE)
   }
 
   # Text for labels
@@ -1531,9 +1531,9 @@ cyto_plot.GatingSet <- function(x,
       axes_trans <- transformerList(names(trnsfrms), trnsfrms)
     }
 
-    axes_trans <- cyto_trans_check(trans = axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(trans = axes_trans, inverse = FALSE)
   } else {
-    axes_trans <- cyto_trans_check(trans = axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_convert(trans = axes_trans, inverse = FALSE)
   }
 
   # Labels
