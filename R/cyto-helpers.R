@@ -448,6 +448,10 @@ cyto_convert <- function(x, ...){
 cyto_convert.flowFrame <- function(x,
                                    return = "flowFrame"){
   
+  if(return == "list of flowFrames"){
+    return <- "flowFrame list"
+  }
+  
   if(return == "flowFrame"){
     
   }else if(return == "flowFrame list"){
