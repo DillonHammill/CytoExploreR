@@ -97,7 +97,7 @@ setMethod(cyto_stats_compute,
                                 trans = NULL,
                                 stat = "median",
                                 format = "long",
-                                density_smooth = 1.5) {
+                                density_smooth = 0.6) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
@@ -255,7 +255,7 @@ setMethod(cyto_stats_compute,
                                 trans = NULL,
                                 stat = "median",
                                 format = "long",
-                                density_smooth = 1.5) {
+                                density_smooth = 0.6) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
@@ -401,7 +401,7 @@ setMethod(cyto_stats_compute,
                                 stat = "median",
                                 format = "long",
                                 save_as = NULL,
-                                density_smooth = 1.5) {
+                                density_smooth = 0.6) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
@@ -636,7 +636,7 @@ setMethod(cyto_stats_compute,
                                 stat = "median",
                                 format = "long",
                                 save_as = NULL,
-                                density_smooth = 1.5) {
+                                density_smooth = 0.6) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)

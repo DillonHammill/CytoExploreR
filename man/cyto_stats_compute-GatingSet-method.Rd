@@ -7,7 +7,7 @@
 \usage{
 \S4method{cyto_stats_compute}{GatingSet}(x, alias = NULL,
   parent = NULL, channels = NULL, trans = NULL, stat = "median",
-  format = "long", save_as = NULL, density_smooth = 1.5)
+  format = "long", save_as = NULL, density_smooth = 0.6)
 }
 \arguments{
 \item{x}{object of class

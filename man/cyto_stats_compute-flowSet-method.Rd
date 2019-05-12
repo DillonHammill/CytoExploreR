@@ -7,7 +7,7 @@
 \usage{
 \S4method{cyto_stats_compute}{flowSet}(x, channels = NULL,
   trans = NULL, stat = "median", format = "long",
-  density_smooth = 1.5)
+  density_smooth = 0.6)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
