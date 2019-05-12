@@ -2,6 +2,7 @@
 % Please edit documentation in R/cyto_plot_label-methods.R
 \name{cyto_plot_label}
 \alias{cyto_plot_label}
+\alias{cyto_plot_label.default}
 \alias{cyto_plot_label.NULL}
 \alias{cyto_plot_label.rectangleGate}
 \alias{cyto_plot_label.polygonGate}
@@ -11,6 +12,8 @@
 \title{Add boxed text labels to cyto_plot}
 \usage{
 cyto_plot_label(x, gate, ...)
+
+\method{cyto_plot_label}{default}(x, gate, ...)
 
 \method{cyto_plot_label}{NULL}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,

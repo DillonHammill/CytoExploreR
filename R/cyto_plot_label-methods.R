@@ -182,6 +182,20 @@ cyto_plot_label <- function(x, gate, ...){
 
 #' @rdname cyto_plot_label
 #' @export
+cyto_plot_label.default <- function(x, gate, ...){
+  
+  # Dispatch to NULL method if gate is NA
+  if(.all_na(gate)){
+    cyto_plot_label.NULL(x, gate = NULL, ...)
+  }else{
+    stop(paste0("cyto_plot_label does not support gate objects of class ",
+               class(gate),"!"))
+  }
+  
+}
+
+#' @rdname cyto_plot_label
+#' @export
 cyto_plot_label.NULL <- function(x,
                                 gate,
                                 trans = NA,
