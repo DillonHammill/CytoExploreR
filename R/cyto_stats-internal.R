@@ -78,10 +78,9 @@
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
   
-  # Inverse transformations
+  # Get raw data using .cyto_raw
   if(!is.null(trans)){
-    inv <- cyto_transform_convert(trans, inverse = TRUE)
-    x <- transform(x, inv)
+    x <- .cyto_raw(x, trans)
   }
   
   # Extract raw data and calculate mean directly - colMeans for speed
@@ -224,10 +223,9 @@
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
   
-  # Inverse transformations
+  # Get raw data using .cyto_raw
   if(!is.null(trans)){
-    inv <- cyto_transform_convert(trans, inverse = TRUE)
-    x <- transform(x, inv)
+    x <- .cyto_raw(x, trans)
   }
   
   # Extract raw data and calculate median directly - colMedians for speed
@@ -287,10 +285,9 @@
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
   
-  # Inverse transformations
+  # Get raw data using .cyto_raw
   if(!is.null(trans)){
-    inv <- cyto_transform_convert(trans, inverse = TRUE)
-    x <- transform(x, inv)
+    x <- .cyto_raw(x, trans)
   }
   
   # Extract raw data and calculate mode directly
@@ -353,10 +350,9 @@
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
   
-  # Inverse transformations
+  # Get raw data using .cyto_raw
   if(!is.null(trans)){
-    inv <- cyto_transform_convert(trans, inverse = TRUE)
-    x <- transform(x, inv)
+    x <- .cyto_raw(x, trans)
   }
   
   # Extract raw data and calculate CV directly
