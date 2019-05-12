@@ -4,6 +4,7 @@
 \alias{cyto_sample}
 \alias{cyto_sample.flowFrame}
 \alias{cyto_sample.flowSet}
+\alias{cyto_sample.list}
 \title{Sample a flowFrame or flowSet}
 \usage{
 cyto_sample(x, ...)
@@ -11,6 +12,8 @@ cyto_sample(x, ...)
 \method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL)
 
 \method{cyto_sample}{flowSet}(x, display = 1, seed = NULL)
+
+\method{cyto_sample}{list}(x, display = 1, seed = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or

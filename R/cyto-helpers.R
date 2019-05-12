@@ -860,6 +860,18 @@ cyto_sample.flowSet <- function(x,
   
 }
 
+#' @rdname cyto_sample
+#' @export
+cyto_sample.list <- function(x,
+                             display = 1,
+                             seed = NULL){
+  
+  lapply(x, function(z){
+    cyto_sample(z, display, seed)
+  })
+  
+}
+
 # CYTO_MARKERS -----------------------------------------------------------------
 
 #' Assign marker names to flowFrame or flowSet
