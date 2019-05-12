@@ -7,6 +7,8 @@
 # To add new statistical functions to cyto_stats_compute follow the same format
 # as below and add the name of the function to cyto_stats_compute options.
 
+# NEED TO ADD .getRawData or .getTransformedData where necessary
+
 # COUNT ------------------------------------------------------------------------
 
 #' Calculate Number of Events

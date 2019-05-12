@@ -1920,3 +1920,508 @@ cyto_plot_overlay_convert <- function(x, ...){
   }
   
 }
+
+# LABEL COORDINATES ------------------------------------------------------------
+
+#' Get label coordinates for cyto_plot_label
+#' 
+#' @param x gate object.
+#' @param channels channels used to construct the plot.
+#' @param text_x x co-ordinate for label.
+#' @param text_y y co-ordinate for label.
+#' 
+#' @importFrom graphics par
+#' @importFrom flowCore parameters Subset rectangleGate
+#' 
+#' @noRd
+.cyto_plot_label_coords <- function(x, ...){
+  UseMethod("cyto_plot_label_coords")
+}
+
+#' @noRd
+.cyto_plot_label_coords.default <- function(x,
+                                            channels,
+                                            text_x = NA,
+                                            text_y = NA){
+  
+  # Dispatch to NULL method if gate is NA
+  if(.all_na(x)){
+    .cyto_plot_label_coords.NULL(NULL,
+                                 channels,
+                                 text_x = text_x,
+                                 text_y = text_y)
+  }else{
+    stop(paste0("cyto_plot_label does not support gate objects of ",
+                class(x),"!"))
+  }
+  
+}
+
+#' @noRd
+.cyto_plot_label_coords.NULL <- function(x,
+                                         channels,
+                                         text_x = NA,
+                                         text_y = NA){
+  
+  # No gates - use plot limits to set co-ordinates for label
+  xmin <- par("usr")[1]
+  xmax <- par("usr")[2]
+  ymin <- par("usr")[3]
+  ymax <- par("usr")[4]
+  
+  # x label position - defaults to 3/4 * range of x axis
+  if(.all_na(text_x)){
+    text_x <- xmin + (xmax - xmin) * 0.75
+  }
+  
+  # y label position - defaults to 1/2 * range of y axis
+  if(.all_na(text_y)){
+    text_y <- (ymax - ymin) * 0.5
+  }
+  
+  # Return co-ordinates
+  text_xy <- c(text_x, text_y)
+  
+  return(text_xy)
+  
+}
+
+#' @noRd
+.cyto_plot_label_coords.rectangleGate <- function(x,
+                                                  channels,
+                                                  text_x = NA,
+                                                  text_y = NA){
+  
+  # 1D gate plotted in 2D
+  if (length(channels) == 2 & length(parameters(x)) == 1) {
+    rg <- matrix(c(as.numeric(x@min), as.numeric(x@max), -Inf, Inf),
+                 ncol = 2, nrow = 2
+    )
+    colnames(rg) <- c(
+      as.vector(parameters(x)),
+      channels[!channels == as.vector(parameters(x))]
+    )
+    rownames(rg) <- c("min", "max")
+    x <- rectangleGate(.gate = rg)
+  }
+  
+  # Gate channels
+  chans <- as.vector(parameters(x))
+  
+  # Plot limits
+  xmin <- par("usr")[1]
+  xmax <- par("usr")[2]
+  ymin <- par("usr")[3]
+  ymax <- par("usr")[4]
+  
+  # 1D gate supplied
+  if (length(chans) == 1) {
+    if (length(channels) == 1) {
+      if (!channels == chans) {
+        stop("Supplied channel does not match that of the supplied gate.")
+      } else if (channels == chans) {
+        if (.all_na(text_x)) {
+          xmin <- x@min
+          xmax <- x@max
+          
+          if (is.infinite(xmin)) {
+            xmin <- par("usr")[1]
+          }
+          if (is.infinite(xmax)) {
+            xmax <- par("usr")[2]
+          }
+        }
+      }
+    } else if (length(channels) == 2) {
+      if (!chans %in% channels) {
+        stop("Supplied channels do not match that of the supplied gate.")
+      } else if (chans %in% channels) {
+        if (.all_na(text_x)) {
+          xmin <- x@min[channels[1]]
+          xmax <- x@max[channels[1]]
+          
+          if (is.infinite(xmin)) {
+            xmin <- par("usr")[1]
+          }
+          
+          if (is.infinite(xmax)) {
+            xmax <- par("usr")[2]
+          }
+        }
+        
+        if (.all_na(text_y)) {
+          ymin <- x@min[channels[2]]
+          ymax <- x@max[channels[2]]
+          
+          if (is.infinite(ymin)) {
+            ymin <- par("usr")[3]
+          }
+          
+          if (is.infinite(ymax)) {
+            ymax <- par("usr")[4]
+          }
+        }
+      }
+    }
+    
+    # 2D gate supplied
+  } else if (length(chans) == 2) {
+    if (!all(chans %in% channels)) {
+      stop("Supplied channels do not match that of the supplied gate.")
+    } else if (all(chans %in% channels)) {
+      if (.all_na(text_x)) {
+        xmin <- x@min[channels[1]]
+        xmax <- x@max[channels[1]]
+        
+        if (is.infinite(xmin)) {
+          xmin <- par("usr")[1]
+        }
+        
+        if (is.infinite(xmax)) {
+          xmax <- par("usr")[2]
+        }
+      }
+      
+      if (.all_na(text_y)) {
+        ymin <- x@min[channels[2]]
+        ymax <- x@max[channels[2]]
+        
+        if (is.infinite(ymin)) {
+          ymin <- par("usr")[3]
+        }
+        
+        if (is.infinite(ymax)) {
+          ymax <- par("usr")[4]
+        }
+      }
+    }
+  }
+  
+  # Label position - x - gate center
+  if (.all_na(text_x)) {
+    text_x <- c(xmin + xmax) / 2
+  }
+  
+  # Label position - y - gate center
+  if (.all_na(text_y)) {
+    text_y <- c(ymin + ymax) / 2
+  }
+  
+  # Return co-ordinates
+  text_xy <- c(text_x, text_y)
+  
+  return(text_xy)
+  
+}
+
+#' @noRd
+.cyto_plot_label_coords.polygonGate <- function(x,
+                                                channels,
+                                                text_x = NA,
+                                                text_y = NA){
+  
+  # Check supplied channels & gate channels
+  chans <- parameters(x)
+  
+  # Check gate parameters against channels
+  if (!all(chans %in% channels)) {
+    stop("Supplied channels do not match that of the supplied gate.")
+  }
+  
+  # Label position - x
+  if (.all_na(text_x)) {
+    text_x <- sum(x@boundaries[, channels[1]]) / nrow(x@boundaries)
+  }
+  
+  # Label position - y
+  if (.all_na(text_y)) {
+    text_y <- sum(x@boundaries[, channels[2]]) / nrow(x@boundaries)
+  }
+  
+  # Return co-ordinates
+  text_xy <- c(text_x, text_y)
+  
+  return(text_xy)
+  
+}
+
+#' @noRd
+.cyto_plot_label_coords.ellipsoidGate <- function(x,
+                                                  channels,
+                                                  text_x = NA,
+                                                  text_y = NA){
+  
+  # Check supplied channels & gate channels
+  chans <- parameters(x)
+  
+  # Check gate parameters against channels
+  if (!all(chans %in% channels)) {
+    stop("Supplied channels do not match that of the supplied gate.")
+  }
+  
+  # Label position - x
+  if (.all_na(text_x)) {
+    text_x <- x@mean[channels[1]]
+  }
+  
+  # Label position - y
+  if (.all_na(text_y)) {
+    text_y <- x@mean[channels[2]]
+  }
+  
+  # Return co-ordinate
+  text_xy <- c(text_x, text_y)
+
+  return(text_xy)  
+  
+}
+
+# LABEL DIMENSIONS -------------------------------------------------------------
+
+#' Get dimensions of labels for cyto_plot_label
+#' 
+#' @importFrom graphics strwidth strheight
+#' 
+#' @return upper left and bottom right x and y co-ordinates of labels
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.cyto_plot_label_dims <- function(label_text,
+                                  label_stat = NA,
+                                  label_box_x,
+                                  label_box_y = NA,
+                                  label_text_size = 1,  
+                                  bg = ifelse(match(par("bg"), "transparent", 0),
+                                                "white", par("bg")
+                                  ),
+                                  xpad = 1.2,
+                                  ypad = 1.2,
+                                  adj = 0.5,
+                                  alpha.bg = 0.5, ...){
+  
+  # Get parameters for reset after calculation
+  cex_reset <- par("cex")
+  xpd_reset <- par("xpd")
+  
+  par(cex = label_text_size)
+  par(xpd = TRUE)
+  
+  if(all(is.na(label_box_y))){
+    label_box_y <- label_box_x
+  }
+  box.adj <- adj + (xpad - 1) * label_text_size * (0.5 - adj)
+  
+  # Rectangle dimensions
+  lwidths <- strwidth(label_text)
+  rwidths <- lwidths * (1 - box.adj)
+  lwidths <- lwidths * box.adj
+  bheights <- theights <- strheight(label_text) * 0.5
+  
+  # Rectangle co-ordinates
+  xr <- label_box_x - lwidths * xpad
+  xl <- label_box_x + lwidths * xpad
+  
+  # y co-ordinates must make space for label_stat
+  if(is.na(label_stat)){
+    
+    yb <- label_box_y - bheights * ypad
+    yt <- label_box_y + theights * ypad
+    
+  }else {
+    
+    yb <- label_box_y - bheights * ypad * 2
+    yt <- label_box_y + theights * ypad * 2
+    
+  }
+  
+  # Return top left then bottom right co-ordinates
+  coords <- matrix(c(min(c(xl,xr)),
+                     max(c(yb,yt)),
+                     max(c(xl,xr)),
+                     min(c(yb,yt))),
+                   ncol = 2,
+                   byrow = TRUE)
+  colnames(coords) <- c("x","y")
+  
+  # Reset par(cex)
+  par(cex = cex_reset)
+  par(xpd = xpd_reset)
+  
+  return(coords)
+  
+}
+
+# LABEL OVERLAP ----------------------------------------------------------------
+
+#' Check if any cyto_plot labels overlap
+#' 
+#' @param x list containing the x and y coordinates defining rectangles of plot
+#' labels
+#' 
+#' @return list of length x. Each element compares the label to all others and 
+#' returns TRUE is any overlap is detected. NA is returned when comparing the
+#' same label co-ordinates.
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.cyto_plot_label_overlap <- function(x) {
+  
+  # For each rectangle in x
+  overlaps <- lapply(seq_len(length(x)), function(y){
+    
+    # Check if other rectangles overlap
+    unlist(lapply(seq_len(length(x)), function(z){
+      
+      # Co-ordinates of reference label
+      x1 <- x[[y]][,"x"]
+      y1 <- x[[y]][,"y"]
+      
+      # Co-ordinates of comparison label
+      x2 <- x[[z]][,"x"]
+      y2 <- x[[z]][,"y"]
+      
+      # Return NULL for same label
+      if(z == y){
+        
+        return(NA)
+        
+      }
+      
+      # X co-ordinates are overlapping
+      if(min(x2) >= min(x1) & min(x2) <= max(x1) |
+         max(x2) >= min(x1) & max(x2) <= max(x1)){
+        
+        # Y co-ordinates are also overlapping
+        if(min(y2) >= min(y1) & min(y2) <= max(y1) |
+           max(y2) >= min(y1) & max(y2) <= max(y1)){
+          
+          return(TRUE)
+          
+        }else{
+          
+          return(FALSE)
+          
+        }
+        
+      }
+      
+      # Non-overlapping x and y co-ordinates
+      return(FALSE)
+      
+    }))
+    
+  })
+  
+  return(overlaps)
+  
+}
+
+# LABEL OFFSET -----------------------------------------------------------------
+
+#' Offset Labels to Prevent Overlap
+#'
+#' @param x list of gate objects to be labelled.
+#' @param channels names of channel(s) used to construct the plot.
+#' @param label_text vector of character strings to use in labels.
+#' @param label_text_size vector of integers for character expansion.
+#'
+#' @return list containing adjusted x and y coordinates for labels if any
+#'   overlap is detected.
+#'   
+#' @importFrom stats na.omit
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @noRd
+.cyto_plot_label_offset <- function(x,
+                                    gate, 
+                                    channels,
+                                    label_text,
+                                    label_stat,
+                                    label_text_size) {
+  
+  # Invalid gate objects
+  if(!inherits(gate, "list")){
+    stop("'gate' should be a list of gate objects.")
+  }
+  
+  # Assign gate to gts
+  gts <- gate
+  
+  # Valid gate objects
+  typs <- c("filters","rectangleGate","polygonGate","ellipsoidGate")
+  
+  # Convert gate object to list of gates
+  if(inherits(gts,"list")){
+    if(!all(unlist(lapply(gts, "class")) %in% typs)){
+      stop("'gate' does not contain a list of valid gate objects.")
+    }
+  }
+  
+  # Plot limits
+  xmin <- par("usr")[1]
+  xmax <- par("usr")[2]
+  ymin <- par("usr")[3]
+  ymax <- par("usr")[4]
+  
+  xrange <- xmax - xmin
+  yrange <- ymax - ymin
+  
+  # Co-ordinates for gate centers
+  coords <- lapply(gts, function(gt){
+    
+    # Label co-ordinate
+    .cyto_plot_label_coords(gt,
+                            channels = channels,
+                            text_x = text_x,
+                            text_y = text_y)
+    
+  })
+  coords <- do.call("rbind", coords)
+  colnames(coords) <- c("x", "y")
+  
+  # Repeat label_text_size
+  label_text_size <- rep(label_text_size, length.out = length(gts))
+  
+  # Repeat label_stat
+  label_stat <- rep(label_stat, length.out = length(gts))
+  
+  # Calculate label dimensions
+  label_dims <- lapply(seq_len(length(gts)), function(z){
+    
+    .cyto_plot_label_dims(label_text = label_text[z],
+                          label_stat = label_stat[z],
+                          label_box_x = coords[,"x"][z],
+                          label_box_y = coords[,"y"][z],
+                          label_text_size = label_text_size[z])
+    
+  })
+  
+  # Check if any labels will be overlapping and offset coords
+  if(any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))){
+    
+    
+    if(all(!is.na(label_stat))){
+      label_text <- paste(label_text, "\n")
+    }
+    
+    # Use spread.labs TeachingDemos to offset y values
+    label_height <- max(label_dims[[1]][,"y"]) - 
+      min(label_dims[[1]][,"y"])
+    label_height <- label_height + 0.18*label_height
+    coords[,"y"] <- spread.labs(coords[,"y"],
+                                mindiff = label_height,
+                                min = ymin + 0.05*yrange,
+                                max = ymax - 0.05*yrange)
+    
+  }
+  
+  # Return a list of adjusted label positions
+  coords <- list(coords[,"x"], coords[,"y"])
+  names(coords) <- c("x","y")
+  
+  return(coords)
+  
+}

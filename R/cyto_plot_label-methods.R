@@ -208,10 +208,7 @@ cyto_plot_label.NULL <- function(x,
                                 text_size = 0.8,
                                 text_col = "black",
                                 box_alpha = 0.6,
-                                density_smooth = 1.5) {
-            
-            # Assign x to fr
-            fr <- x
+                                density_smooth = 0.6) {
             
             # Check statistic
             if(!.all_na(stat)){
@@ -258,59 +255,28 @@ cyto_plot_label.NULL <- function(x,
               )
             }
             
-            # Calculate statistics
+            # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
-              if (stat == "count") {
-                st <- BiocGenerics::nrow(fr)
-              } else if (stat == "median") {
-                fr <- .getRawData(x = fr, trans)
-                st <- median(flowCore::exprs(fr)[, channels])
-                st <- round(st, 2)
-              } else if (stat == "mean") {
-                fr <- .getRawData(x = fr, trans)
-                st <- mean(flowCore::exprs(fr)[, channels])
-                st <- round(st, 2)
-              } else if (stat == "mode") {
-                fr <- .getRawData(x = fr, trans)
-                d <- density(flowCore::exprs(fr)[, channels], adjust = density_smooth)
-                st <- d$x[d$y == max(d$y)]
-                st <- round(st, 2)
-              } else if (stat == "geo mean") {
-                st <- mean(flowCore::exprs(fr)[, channels])
-                inv <- cyto_transform_convert(trans, inverse = TRUE)
-                st <- inv@transforms[[channels]]@f(st)
-                st <- round(st, 2)
-              } else if (stat == "CV"){
-                fr <- .getRawData(x = fr, trans)
-                fr.exprs <- exprs(fr)
-                md <- median(fr.exprs[,channels])
-                rSD <- median(abs(fr.exprs[,channels] - md))*1.4826
-                st <- rSD/md
-                st <- sprintf("%.2f %%", st*100)
-              }
+              st <- cyto_stats_compute(x,
+                                       channels = channels,
+                                       trans = trans,
+                                       stat = stat,
+                                       format = "long",
+                                       density_smooth = density_smooth)
+              st <- round(st[,ncol(st)], 2)
             }
             
-            # Plot Limits
-            xmin <- par("usr")[1]
-            xmax <- par("usr")[2]
-            ymin <- par("usr")[3]
-            ymax <- par("usr")[4]
-            
-            # Label position - x - defaults to 3/4
-            if (.all_na(text_x)) {
-              text_x <- xmin + (xmax - xmin) * 0.75
-            }
-            
-            # Label position - y - defaults to 1/2
-            if (.all_na(text_y)) {
-              text_y <- c(ymin + ymax) / 2
-            }
+            # Label co-ordinate
+            text_xy <- .cyto_plot_label_coords(gate,
+                                               channels = channels,
+                                               text_x = text_x,
+                                               text_y = text_y)
             
             # Add labels
             if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = paste(text, st, sep = "\n"),
                 border = FALSE,
                 font = text_font,
@@ -320,8 +286,8 @@ cyto_plot_label.NULL <- function(x,
               )
             } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = text,
                 border = FALSE,
                 font = text_font,
@@ -331,8 +297,8 @@ cyto_plot_label.NULL <- function(x,
               )
             } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = st,
                 border = FALSE,
                 font = text_font,
@@ -357,11 +323,8 @@ cyto_plot_label.rectangleGate <- function(x,
                                 text_size = 0.8,
                                 text_col = "black",
                                 box_alpha = 0.6,
-                                density_smooth = 1.5) {
+                                density_smooth = 0.6) {
   
-            # Assign x to fr
-            fr <- x
-            
             # Check statistic
             if(!.all_na(stat)) {
               stat <- .cyto_stat_check(stat)
@@ -398,167 +361,38 @@ cyto_plot_label.rectangleGate <- function(x,
               )
             }
             
-            # Calculate statistics
+            # Apply gate to flowFrame
+            x <- Subset(x, gate)
+  
+            # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
-              if (stat == "count") {
-                st <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
-              } else if (stat == "freq") {
-                
-                # Total events
-                events <- BiocGenerics::nrow(fr)
-                
-                # Population events - percentages
-                cnt <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
-                prcnt <- round(cnt / events, 4)
-                st <- sprintf("%.2f %%", 100 * prcnt)
-              } else if (stat == "mean") {
-                fr <- .getRawData(x = fr, trans)
-                st <- mean(flowCore::exprs(fr)[, channels])
-                st <- round(st, 2)
-              } else if (stat == "median") {
-                fr <- .getRawData(x = fr, trans)
-                st <- median(flowCore::exprs(fr)[, channels])
-                st <- round(st, 2)
-              } else if (stat == "mode") {
-                fr <- .getRawData(x = fr, trans)
-                d <- density(flowCore::exprs(fr)[, channels], adjust = density_smooth)
-                st <- d$x[d$y == max(d$y)]
-                st <- round(st, 2)
-              } else if (stat == "geo mean") {
-                st <- mean(flowCore::exprs(fr)[, channels])
-                inv <- cyto_transform_convert(trans, inverse = TRUE)
-                st <- inv@transforms[[channels]]@f(st)
-                st <- round(st, 2)
-              } else if (stat == "CV"){
-                fr <- .getRawData(x = fr, trans)
-                fr.exprs <- exprs(fr)
-                md <- median(fr.exprs[,channels])
-                rSD <- median(abs(fr.exprs[,channels] - md))*1.4826
-                st <- rSD/md
-                st <- sprintf("%.2f %%", st*100)
-              }
-            }
-            
-            # 1D gate plotted in 2D
-            if (length(channels) == 2 & length(parameters(gate)) == 1) {
-              rg <- matrix(c(as.numeric(gate@min), as.numeric(gate@max), -Inf, Inf),
-                           ncol = 2, nrow = 2
-              )
-              colnames(rg) <- c(
-                as.vector(parameters(gate)),
-                channels[!channels == as.vector(parameters(gate))]
-              )
-              rownames(rg) <- c("min", "max")
-              gate <- rectangleGate(.gate = rg)
-            }
-            
-            # Gate channels
-            chans <- as.vector(parameters(gate))
-            
-            # Plot limits
-            xmin <- par("usr")[1]
-            xmax <- par("usr")[2]
-            ymin <- par("usr")[3]
-            ymax <- par("usr")[4]
-            
-            # 1D gate supplied
-            if (length(chans) == 1) {
-              if (length(channels) == 1) {
-                if (!channels == chans) {
-                  stop("Supplied channel does not match that of the supplied gate.")
-                } else if (channels == chans) {
-                  if (.all_na(text_x)) {
-                    xmin <- gate@min
-                    xmax <- gate@max
-                    
-                    if (is.infinite(xmin)) {
-                      xmin <- par("usr")[1]
-                    }
-                    if (is.infinite(xmax)) {
-                      xmax <- par("usr")[2]
-                    }
-                  }
-                }
-              } else if (length(channels) == 2) {
-                if (!chans %in% channels) {
-                  stop("Supplied channels do not match that of the supplied gate.")
-                } else if (chans %in% channels) {
-                  if (.all_na(text_x)) {
-                    xmin <- gate@min[channels[1]]
-                    xmax <- gate@max[channels[1]]
-                    
-                    if (is.infinite(xmin)) {
-                      xmin <- par("usr")[1]
-                    }
-                    
-                    if (is.infinite(xmax)) {
-                      xmax <- par("usr")[2]
-                    }
-                  }
-                  
-                  if (.all_na(text_y)) {
-                    ymin <- gate@min[channels[2]]
-                    ymax <- gate@max[channels[2]]
-                    
-                    if (is.infinite(ymin)) {
-                      ymin <- par("usr")[3]
-                    }
-                    
-                    if (is.infinite(ymax)) {
-                      ymax <- par("usr")[4]
-                    }
-                  }
-                }
+              
+              st <- cyto_stats_compute(x,
+                                       channels = channels,
+                                       trans = trans,
+                                       stat = stat,
+                                       format = "long",
+                                       density_smooth = density_smooth)
+              st <- round(st[,ncol(st)], 2)
+              
+              # Add percentage sign to frequency statistics
+              if(stat == "freq"){
+                st <- sprintf("%.2f %%", st)
               }
               
-              # 2D gate supplied
-            } else if (length(chans) == 2) {
-              if (!all(chans %in% channels)) {
-                stop("Supplied channels do not match that of the supplied gate.")
-              } else if (all(chans %in% channels)) {
-                if (.all_na(text_x)) {
-                  xmin <- gate@min[channels[1]]
-                  xmax <- gate@max[channels[1]]
-                  
-                  if (is.infinite(xmin)) {
-                    xmin <- par("usr")[1]
-                  }
-                  
-                  if (is.infinite(xmax)) {
-                    xmax <- par("usr")[2]
-                  }
-                }
-                
-                if (.all_na(text_y)) {
-                  ymin <- gate@min[channels[2]]
-                  ymax <- gate@max[channels[2]]
-                  
-                  if (is.infinite(ymin)) {
-                    ymin <- par("usr")[3]
-                  }
-                  
-                  if (is.infinite(ymax)) {
-                    ymax <- par("usr")[4]
-                  }
-                }
-              }
             }
             
-            # Label position - x - defaults to 3/4
-            if (.all_na(text_x)) {
-              text_x <- c(xmin + xmax) / 2
-            }
-            
-            # Label position - y - defaults to 1/2
-            if (.all_na(text_y)) {
-              text_y <- c(ymin + ymax) / 2
-            }
+            # Label co-ordinate
+            text_xy <- .cyto_plot_label_coords(gate,
+                                               channels = channels,
+                                               text_x = text_x,
+                                               text_y = text_y)
             
             # Add labels
             if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = paste(text, st, sep = "\n"),
                 border = FALSE,
                 font = text_font,
@@ -568,8 +402,8 @@ cyto_plot_label.rectangleGate <- function(x,
               )
             } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = text,
                 border = FALSE,
                 font = text_font,
@@ -579,8 +413,8 @@ cyto_plot_label.rectangleGate <- function(x,
               )
             } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = st,
                 border = FALSE,
                 font = text_font,
@@ -606,9 +440,6 @@ cyto_plot_label.polygonGate <- function(x,
                                 text_col = "black",
                                 box_alpha = 0.6) {
             
-            # Assign x to fr
-            fr <- x
-            
             # Check statistic
             if(!.all_na(stat)){
               stat <- .cyto_stat_check(stat)
@@ -631,44 +462,38 @@ cyto_plot_label.polygonGate <- function(x,
               )
             }
             
-            # Calculate statistic
+            # Apply gate to flowFrame
+            x <- Subset(x, gate)
+  
+            # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
-              if (stat == "count") {
-                st <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
-              } else if (stat == "freq") {
-                # Total events
-                events <- nrow(fr)
-                
-                # Population events - percentages
-                cnt <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
-                prcnt <- round(cnt / events, 4)
-                st <- sprintf("%.2f %%", 100 * prcnt)
+    
+              st <- cyto_stats_compute(x,
+                                       channels = channels,
+                                       trans = trans,
+                                       stat = stat,
+                                       format = "long",
+                                       density_smooth = density_smooth)
+              st <- round(st[,ncol(st)], 2)
+    
+              # Add percentage sign to frequency statistics
+              if(stat == "freq"){
+                st <- sprintf("%.2f %%", st)
               }
+    
             }
-            
-            # Check supplied channels & gate channels
-            chans <- parameters(gate)
-            
-            # Check gate parameters against channels
-            if (!all(chans %in% channels)) {
-              stop("Supplied channels do not match that of the supplied gate.")
-            }
-            
-            # Label position - x
-            if (.all_na(text_x)) {
-              text_x <- sum(gate@boundaries[, channels[1]]) / nrow(gate@boundaries)
-            }
-            
-            # Label position - y
-            if (.all_na(text_y)) {
-              text_y <- sum(gate@boundaries[, channels[2]]) / nrow(gate@boundaries)
-            }
+  
+            # Label co-ordinate
+            text_xy <- .cyto_plot_label_coords(gate,
+                                               channels = channels,
+                                               text_x = text_x,
+                                               text_y = text_y)
             
             # Add labels
             if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = paste(text, st, sep = "\n"),
                 border = FALSE,
                 font = text_font,
@@ -678,8 +503,8 @@ cyto_plot_label.polygonGate <- function(x,
               )
             } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = text,
                 border = FALSE,
                 font = text_font,
@@ -689,8 +514,8 @@ cyto_plot_label.polygonGate <- function(x,
               )
             } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = st,
                 border = FALSE,
                 font = text_font,
@@ -715,10 +540,7 @@ cyto_plot_label.ellipsoidGate <- function(x,
                                 text_size = 0.8,
                                 text_col = "black",
                                 box_alpha = 0.6) {
-            
-            # Assign x to fr
-            fr <- x
-            
+
             # Check statistic
             if(!.all_na(stat)){
               stat <- .cyto_stat_check(stat)
@@ -741,44 +563,39 @@ cyto_plot_label.ellipsoidGate <- function(x,
               )
             }
             
-            # Calculate statistic
+  
+            # Apply gate to flowFrame
+            x <- Subset(x, gate)
+  
+            # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
-              if (stat == "count") {
-                st <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
-              } else if (stat == "freq") {
-                # Total events
-                events <- nrow(fr)
-                
-                # Population events - percentages
-                cnt <- BiocGenerics::nrow(flowCore::Subset(fr, gate))
-                prcnt <- round(cnt / events, 4)
-                st <- sprintf("%.2f %%", 100 * prcnt)
+    
+              st <- cyto_stats_compute(x,
+                                       channels = channels,
+                                       trans = trans,
+                                       stat = stat,
+                                       format = "long",
+                                       density_smooth = density_smooth)
+              st <- round(st[,ncol(st)], 2)
+    
+              # Add percentage sign to frequency statistics
+              if(stat == "freq"){
+                st <- sprintf("%.2f %%", st)
               }
+    
             }
-            
-            # Check supplied channels & gate channels
-            chans <- parameters(gate)
-            
-            # Check gate parameters against channels
-            if (!all(chans %in% channels)) {
-              stop("Supplied channels do not match that of the supplied gate.")
-            }
-            
-            # Label position - x
-            if (.all_na(text_x)) {
-              text_x <- gate@mean[channels[1]]
-            }
-            
-            # Label position - y
-            if (.all_na(text_y)) {
-              text_y <- gate@mean[channels[2]]
-            }
+  
+            # Label co-ordinate
+            text_xy <- .cyto_plot_label_coords(gate,
+                                               channels = channels,
+                                               text_x = text_x,
+                                               text_y = text_y)
             
             # Add labels
             if (!.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = paste(text, st, sep = "\n"),
                 border = FALSE,
                 font = text_font,
@@ -788,8 +605,8 @@ cyto_plot_label.ellipsoidGate <- function(x,
               )
             } else if (!.all_na(text) & .all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = text,
                 border = FALSE,
                 font = text_font,
@@ -799,8 +616,8 @@ cyto_plot_label.ellipsoidGate <- function(x,
               )
             } else if (.all_na(text) & !.all_na(stat)) {
               .boxed.labels(
-                x = text_x,
-                y = text_y,
+                x = text_xy[1],
+                y = text_xy[2],
                 labels = st,
                 border = FALSE,
                 font = text_font,
@@ -831,11 +648,11 @@ cyto_plot_label.list <- function(x,
             
             # Get adjusted label coords to prevent overlap
             coords <- .cyto_plot_label_offset(x,
-                                              gate,
-                                              channels,
-                                              text,
-                                              stat,
-                                              text_size)
+                                              gate = gate,
+                                              channels = channels,
+                                              text = text,
+                                              stat = stat,
+                                              text_size = text_size)
 
             # Replace x coords if text_x is NA
             if(.all_na(text_x)){
@@ -901,7 +718,7 @@ cyto_plot_label.filters <- function(x,
                                 text_col = "black",
                                 box_alpha = 0.6) {
             
-            # Convert gate to a list of gate
+            # Convert gate to a list of gates
             gate <- unlist(gate)
             
             # Make calls to cyto_plot_label list method
@@ -921,304 +738,3 @@ cyto_plot_label.filters <- function(x,
             )
             
     }
-
-#' Position Labels to Prevent Overlap
-#'
-#' @param x list of gate objects to be labelled.
-#' @param channels names of channel(s) used to construct the plot.
-#' @param label_text vector of character strings to use in labels.
-#' @param label_text_size vector of integers for character expansion.
-#'
-#' @return list containing adjusted x and y coordinates for labels if any
-#'   overlap is detected.
-#'   
-#' @importFrom stats na.omit
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @noRd
-.cyto_plot_label_offset <- function(fr,
-                                    x, 
-                                    channels,
-                                    label_text,
-                                    label_stat,
-                                    label_text_size) {
-  
-  # Invalid gate objects
-  if(!inherits(x, "list")){
-    stop("'x' should be a list of gate objects.")
-  }
-  
-  # Assign x to gts
-  gts <- x
-  
-  # Valid gate objects
-  typs <- c("filters","rectangleGate","polygonGate","ellipsoidGate")
-  
-  # Convert gate object to list of gate
-  if(inherits(gts,"list")){
-    if(!all(unlist(lapply(gts, "class")) %in% typs)){
-      stop("'x' does not contain a list of valid gate objects.")
-    }
-  }
-  
-  # Plot limits
-  xmin <- par("usr")[1]
-  xmax <- par("usr")[2]
-  ymin <- par("usr")[3]
-  ymax <- par("usr")[4]
-  
-  xrange <- xmax - xmin
-  yrange <- ymax - ymin
-  
-  # Co-ordinates for gate centers
-  coords <- lapply(gts, function(gt){
-    
-    if(inherits(gt, "rectangleGate")){
-      
-      # Gate channel(s)
-      chans <- parameters(gt)
-      
-      if(length(channels) == 1 & length(chans) == 1){
-        
-        xmin <- gt@min
-        xmax <- gt@max
-        ymin <- ymin
-        ymax <- ymax
-        
-      }else if(length(channels) == 1 & length(chans) == 2){
-        
-        xmin <- gt@min[channels[1]]
-        xmax <- gt@max[channels[1]]
-        ymin <- ymin
-        ymax <- ymax
-        
-      }else if(length(channels) == 2 & length(chans) == 1){
-        
-        # Gate has xcoords
-        if(chans == channels[1]){
-          
-          xmin <- gt@min
-          xmax <- gt@max
-          ymin <- ymin
-          ymax <- ymax
-          
-        # Gate has ycoords
-        }else if(chans == channels[2]){
-          
-          xmin <- xmin
-          xmax <- xmax
-          ymin <- gt@min
-          ymax <- gt@max
-          
-        }
-        
-      }else if(length(channels) == 2 & length(chans) == 2){
-        
-        xmin <- gt@min[channels[1]]
-        xmax <- gt@max[channels[1]]
-        ymin <- gt@min[channels[2]]
-        ymax <- gt@max[channels[2]]
-        
-      }
-      coords <- c((xmin+xmax)/2, (ymin+ymax)/2)
-      
-    }else if(inherits(gt, "polygonGate")){
-      
-      coords <- c(sum(gt@boundaries[, channels[1]]) / nrow(gt@boundaries),
-                  sum(gt@boundaries[, channels[2]]) / nrow(gt@boundaries))
-      
-    }else if(inherits(gt, "ellipsoidGate")){
-      
-      coords <- c(gt@mean[channels[1]], gt@mean[channels[2]])
-      
-    }
-    return(coords)
-    
-  })
-  coords <- do.call("rbind", coords)
-  colnames(coords) <- c("x", "y")
-  
-  # Repeat label_text_size
-  label_text_size <- rep(label_text_size, length.out = length(gts))
-  
-  # Repeat label_stat
-  label_stat <- rep(label_stat, length.out = length(gts))
-  
-  # Calculate label co-ordinates
-  label_coords <- lapply(seq_len(length(gts)), function(x){
-    
-    .cyto_plot_label_coords(label_box_x = coords[,"x"][x],
-                            label_box_y = coords[,"y"][x],
-                            label_text = label_text[x], 
-                            label_stat = label_stat[x],
-                            label_text_size = label_text_size[x])
-    
-  })
-  
-  # Check if any labels will be overlapping and offset coords
-  if(any(na.omit(unlist(.cyto_plot_label_overlap(label_coords))))){
-  
-    
-    if(all(!is.na(label_stat))){
-      label_text <- paste(label_text, "\n")
-    }
-    
-    # Use spread.labs TeachingDemos to offset y values
-    label_height <- max(label_coords[[1]][,"y"]) - 
-                    min(label_coords[[1]][,"y"])
-    label_height <- label_height + 0.18*label_height
-    coords[,"y"] <- spread.labs(coords[,"y"],
-                           mindiff = label_height,
-                           min = ymin + 0.05*yrange,
-                           max = ymax - 0.05*yrange)
-    
-  }
-  
-  # Return a list of adjusted label positions
-  coords <- list(coords[,"x"], coords[,"y"])
-  names(coords) <- c("x","y")
-  
-  return(coords)
-
-}
-
-#' Dimensions of Labels
-#' 
-#' @param label_text character string to include in label.
-#' 
-#' @importFrom graphics strwidth strheight
-#' 
-#' @return upper left and bottom right x and y co-ordinates of labels
-#' 
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @noRd
-.cyto_plot_label_coords <- function(label_box_x,
-                               label_box_y = NA,
-                               label_text,
-                               label_stat = NA,
-                               bg = ifelse(match(par("bg"), "transparent", 0),
-                                           "white", par("bg")
-                               ),
-                               xpad = 1.2,
-                               ypad = 1.2,
-                               label_text_size = 1,
-                               adj = 0.5,
-                               alpha.bg = 0.5, ...){
-  
-  # Get parameters for reset after calculation
-  cex_reset <- par("cex")
-  xpd_reset <- par("xpd")
-  
-  par(cex = label_text_size)
-  par(xpd = TRUE)
-  
-  if(all(is.na(label_box_y))){
-    label_box_y <- label_box_x
-  }
-  box.adj <- adj + (xpad - 1) * label_text_size * (0.5 - adj)
-  
-  # Rectangle dimensions
-  lwidths <- strwidth(label_text)
-  rwidths <- lwidths * (1 - box.adj)
-  lwidths <- lwidths * box.adj
-  bheights <- theights <- strheight(label_text) * 0.5
-
-  # Rectangle co-ordinates
-  xr <- label_box_x - lwidths * xpad
-  xl <- label_box_x + lwidths * xpad
-  
-  # y co-ordinates must make space for label_stat
-  if(is.na(label_stat)){
-    
-    yb <- label_box_y - bheights * ypad
-    yt <- label_box_y + theights * ypad
-    
-  }else {
-    
-    yb <- label_box_y - bheights * ypad * 2
-    yt <- label_box_y + theights * ypad * 2
-    
-  }
-  
-  # Return top left then bottom right co-ordinates
-  coords <- matrix(c(min(c(xl,xr)),
-                     max(c(yb,yt)),
-                     max(c(xl,xr)),
-                     min(c(yb,yt))),
-                   ncol = 2,
-                   byrow = TRUE)
-  colnames(coords) <- c("x","y")
-
-  # Reset par(cex)
-  par(cex = cex_reset)
-  par(xpd = xpd_reset)
-  
-  return(coords)
-  
-}
-
-#' Check if any cyto_plot labels overlap
-#' 
-#' @param x list containing the x and y coordinates defining rectangles of plot
-#' labels
-#' 
-#' @return list of length x. Each element compares the label to all others and 
-#' returns TRUE is any overlap is detected. NA is returned when comparing the
-#' same label co-ordinates.
-#' 
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @noRd
-.cyto_plot_label_overlap <- function(x) {
-  
-  # For each rectangle in x
-  overlaps <- lapply(seq_len(length(x)), function(y){
-    
-    # Check if other rectangles overlap
-    unlist(lapply(seq_len(length(x)), function(z){
-      
-      # Co-ordinates of reference label
-      x1 <- x[[y]][,"x"]
-      y1 <- x[[y]][,"y"]
-        
-      # Co-ordinates of comparison label
-      x2 <- x[[z]][,"x"]
-      y2 <- x[[z]][,"y"]
-      
-      # Return NULL for same label
-      if(z == y){
-        
-        return(NA)
-        
-      }
-      
-      # X co-ordinates are overlapping
-      if(min(x2) >= min(x1) & min(x2) <= max(x1) |
-         max(x2) >= min(x1) & max(x2) <= max(x1)){
-        
-        # Y co-ordinates are also overlapping
-        if(min(y2) >= min(y1) & min(y2) <= max(y1) |
-           max(y2) >= min(y1) & max(y2) <= max(y1)){
-          
-          return(TRUE)
-          
-        }else{
-          
-          return(FALSE)
-          
-        }
-        
-      }
-      
-      # Non-overlapping x and y co-ordinates
-      return(FALSE)
-      
-    }))
-    
-  })
-  
-  return(overlaps)
-  
-}

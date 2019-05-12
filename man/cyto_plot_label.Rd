@@ -18,12 +18,12 @@ cyto_plot_label(x, gate, ...)
 \method{cyto_plot_label}{NULL}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
-  density_smooth = 1.5)
+  density_smooth = 0.6)
 
 \method{cyto_plot_label}{rectangleGate}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
-  density_smooth = 1.5)
+  density_smooth = 0.6)
 
 \method{cyto_plot_label}{polygonGate}(x, gate, channels, trans = NA,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
