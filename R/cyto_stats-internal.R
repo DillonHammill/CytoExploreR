@@ -28,11 +28,8 @@
     stop("'x' should be a flowFrame object.")
   }
   
-  # Assign x to fr
-  fr <- x
-  
   # Extract raw data and calculate mean directly
-  res <- tibble("count" = BiocGenerics::nrow(fr))
+  res <- tibble("count" = BiocGenerics::nrow(x))
   
   return(res)
   
@@ -76,24 +73,21 @@
     )
   }
   
-  # Assign x to fr
-  fr <- x
-  
   # Check channels
-  channels <- cyto_channels_extract(fr, channels, FALSE)
+  channels <- cyto_channels_extract(x, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
     inv <- cyto_transform_convert(trans, inverse = TRUE)
-    fr <- transform(fr, inv)
+    x <- transform(x, inv)
   }
   
   # Extract raw data and calculate mean directly - colMeans for speed
-  res <- colMeans(exprs(fr)[, channels])
+  res <- colMeans(exprs(x)[, channels, drop = FALSE])
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_markers_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(x, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -127,17 +121,14 @@
   if(!inherits(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
-  
-  # Assign x to fr
-  fr <- x
-  
+
   # Check channels
-  channels <- cyto_channels_extract(fr, channels, FALSE)
+  channels <- cyto_channels_extract(x, channels, FALSE)
   
   # Geometric mean calculate as inverse of arithmetic mean of transformed data
   if(is.null(trans)){
     
-    log_exprs <- suppressWarnings(log(exprs(fr)[,channels]))
+    log_exprs <- suppressWarnings(log(exprs(x)[,channels,drop = FALSE]))
     geo_mean <- suppressWarnings(exp(colMeans(log_exprs)))
       
     # Zero/negative values present
@@ -154,23 +145,23 @@
     # Convert tranform object to transformList
     trans <- cyto_transform_convert(trans, inverse = FALSE)
     
-    fr_mean <- colMeans(exprs(fr)[,channels])
+    fr_mean <- colMeans(exprs(x)[,channels, drop = FALSE])
     
-    res <- unlist(lapply(channels, function(x){
+    res <- unlist(lapply(channels, function(z){
       
       # Channel has been transformed
-      if(x %in% BiocGenerics::colnames(trans)){
+      if(z %in% BiocGenerics::colnames(trans)){
         
         # Inverse transformations
         inv <- cyto_transform_convert(trans, inverse = TRUE)
         
         # Inverse transformation on calculated arithmetic mean
-        geo_mean <- inv@transforms[[x]]@f(fr_mean[x])
+        geo_mean <- inv@transforms[[z]]@f(fr_mean[z])
         
       # Channel has not been transformed  
       }else{
         
-        geo_mean <- exp(mean(log(exprs(fr)[,x])))
+        geo_mean <- exp(mean(log(exprs(x)[,z, drop = FALSE])))
         
       }
       
@@ -182,7 +173,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_markers_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(x, channels)
   res <- as_tibble(res)
 
   return(res)
@@ -228,24 +219,21 @@
     )
   }
   
-  # Assign x to fr
-  fr <- x
-  
   # Check channels
-  channels <- cyto_channels_extract(fr, channels, FALSE)
+  channels <- cyto_channels_extract(x, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
     inv <- cyto_transform_convert(trans, inverse = TRUE)
-    fr <- transform(fr, inv)
+    x <- transform(x, inv)
   }
   
   # Extract raw data and calculate median directly - colMedians for speed
-  res <- colMedians(exprs(fr)[,channels])
+  res <- colMedians(exprs(x)[,channels,drop = FALSE])
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_markers_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(x, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -294,22 +282,19 @@
     )
   }
   
-  # Assign x to fr
-  fr <- x
-  
   # Check channels
-  channels <- cyto_channels_extract(fr, channels, FALSE)
+  channels <- cyto_channels_extract(x, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
     inv <- cyto_transform_convert(trans, inverse = TRUE)
-    fr <- transform(fr, inv)
+    x <- transform(x, inv)
   }
   
   # Extract raw data and calculate mode directly
-  res <- unlist(lapply(channels, function(x){
-    d <- .cyto_density(fr, 
-                       channel = x, 
+  res <- unlist(lapply(channels, function(z){
+    d <- .cyto_density(x, 
+                       channel = z, 
                        density_smooth = density_smooth, 
                        modal = FALSE)
     d$x[d$y == max(d$y)]
@@ -317,7 +302,7 @@
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_markers_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(x, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -362,30 +347,27 @@
       )
     )
   }
-  
-  # Assign x to fr
-  fr <- x
-  
+
   # Check channels
-  channels <- cyto_channels_extract(fr, channels, FALSE)
+  channels <- cyto_channels_extract(x, channels, FALSE)
   
   # Inverse transformations
   if(!is.null(trans)){
     inv <- cyto_transform_convert(trans, inverse = TRUE)
-    fr <- transform(fr, inv)
+    x <- transform(x, inv)
   }
   
   # Extract raw data and calculate CV directly
-  fr_median <- colMedians(exprs(fr)[,channels])
-  res <- unlist(lapply(channels, function(x){
-    md <- fr_median[x]
-    rSD <- median(abs(exprs(fr)[,x] - md)) * 1.4826
+  fr_median <- colMedians(exprs(x)[,channels,drop = FALSE])
+  res <- unlist(lapply(channels, function(z){
+    md <- fr_median[z]
+    rSD <- median(abs(exprs(x)[,z] - md)) * 1.4826
     rSD/md * 100
   }))
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
-  colnames(res) <- cyto_markers_extract(fr, channels)
+  colnames(res) <- cyto_markers_extract(x, channels)
   res <- as_tibble(res)
   
   return(res)
@@ -420,16 +402,13 @@
   if(!inherits(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
-  
-  # Assign x to fr
-  fr <- x
-  
+
   # Check channels
-  channel <- cyto_channels_extract(fr, channel, FALSE)
+  channel <- cyto_channels_extract(x, channel, FALSE)
   
   # Calculate kernel density
-  if(length(exprs(fr)[,channel]) > 2){
-    dens <- suppressWarnings(density(exprs(fr)[,channel],
+  if(length(exprs(x)[,channel]) > 2){
+    dens <- suppressWarnings(density(exprs(x)[,channel],
                     adjust = smooth))
   }else{
     warning("Insufficient events to compute kernel density.")
