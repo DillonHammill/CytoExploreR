@@ -1015,7 +1015,7 @@ cyto_plot_overlay_convert <- function(x, ...){
                            font = legend_text_font)
   
   # Calculate y center of plot
-  cnt <- (par("usr")[4] - par("usr")[3])/2
+  cnt <- par("usr")[3] + (par("usr")[4] - par("usr")[3])/2
   
   # Legend for 1D density distributions
   if (length(channels) == 1) {
@@ -1038,8 +1038,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 
       # Construct legend
       legend(
-        x = 1.15 * par("usr")[2],
-        y = cnt + 0.5 * lgnd_height,
+        x = 1.12 * par("usr")[2],
+        y = cnt + 0.6 * lgnd_height,
         legend = legend_text,
         text_font = rev(legend_text_font),
         cex = legend_text_size,
@@ -1070,8 +1070,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 
       # Construct legend
       legend(
-        x = 1.15 * par("usr")[2],
-        y = cnt + 0.5 * lgnd_height,
+        x = 1.12 * par("usr")[2],
+        y = cnt + 0.6 * lgnd_height,
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,
@@ -1100,8 +1100,8 @@ cyto_plot_overlay_convert <- function(x, ...){
     }
 
     legend(
-      x = 1.15 * par("usr")[2],
-      y = cnt + 0.5 * lgnd_height,
+      x = 1.12 * par("usr")[2],
+      y = cnt + 0.6 * lgnd_height,
       legend = rev(legend_text),
       col = rev(legend_point_col),
       pch = rev(point_shape),
