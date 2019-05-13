@@ -986,7 +986,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom graphics legend
+#' @importFrom graphics legend strheight
 #'
 #' @noRd
 .cyto_plot_legend <- function(channels,
@@ -1007,6 +1007,15 @@ cyto_plot_overlay_convert <- function(x, ...){
                               point_size = 2,
                               point_col = NA,
                               point_col_alpha = 1) {
+  
+  # Estimate legend height using strheight
+  lgnd <- paste(legend_text, collapse = " \n ")
+  lgnd_height <- strheight(lgnd,
+                           cex = legend_text_size,
+                           font = legend_text_font)
+  
+  # Calculate y center of plot
+  cnt <- (par("usr")[4] - par("usr")[3])/2
   
   # Legend for 1D density distributions
   if (length(channels) == 1) {
@@ -1029,8 +1038,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 
       # Construct legend
       legend(
-        x = "right",
-        inset = c(-0.68,0),
+        x = 1.15 * par("usr")[2],
+        y = cnt + 0.5 * lgnd_height,
         legend = legend_text,
         text_font = rev(legend_text_font),
         cex = legend_text_size,
@@ -1061,8 +1070,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 
       # Construct legend
       legend(
-        x = "right", # right inside plot
-        inset = c(-0.68,0), # move outside 0.47 graphics device widths
+        x = 1.15 * par("usr")[2],
+        y = cnt + 0.5 * lgnd_height,
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,
@@ -1091,8 +1100,8 @@ cyto_plot_overlay_convert <- function(x, ...){
     }
 
     legend(
-      x = "right",
-      inset = c(-0.68,0),
+      x = 1.15 * par("usr")[2],
+      y = cnt + 0.5 * lgnd_height,
       legend = rev(legend_text),
       col = rev(legend_point_col),
       pch = rev(point_shape),
@@ -1728,7 +1737,7 @@ cyto_plot_overlay_convert <- function(x, ...){
   
 }
 
-# LABEL COORDINATES ------------------------------------------------------------
+# LABEL CO-ORDINATES -----------------------------------------------------------
 
 #' Get label coordinates for cyto_plot_label
 #' 
@@ -2180,8 +2189,6 @@ cyto_plot_overlay_convert <- function(x, ...){
   coords <- do.call("rbind", coords)
   colnames(coords) <- c("x", "y")
   
-  print(coords)
-  
   # Repeat text_size
   text_size <- rep(text_size, length.out = length(gts))
   
@@ -2199,11 +2206,8 @@ cyto_plot_overlay_convert <- function(x, ...){
     
   })
   
-  print(label_dims)
-  
   # Check if any labels will be overlapping and offset coords
   if(any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))){
-    
     
     if(all(!is.na(stat))){
       text <- paste(text, "\n")

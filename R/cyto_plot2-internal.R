@@ -177,6 +177,8 @@
                      title = title,
                      axes_text = axes_text)
 
+  print(par("mar"))
+  
   # EMPTY PLOT - handles margins and axes limits internally
   args <- .args_list()
   .args <- formalArgs("cyto_plot_empty")
@@ -430,6 +432,8 @@ cyto_plot_1d.flowSet <- function(x, ...){
                      legend_text = legend_text,
                      title = title,
                      axes_text = axes_text)
+  
+  print(par("mar"))
   
   # EMPTY PLOT - handles margins and axes limits internally
   args <- .args_list()
