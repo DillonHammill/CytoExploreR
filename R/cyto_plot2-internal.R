@@ -18,6 +18,8 @@
 # - title
 # - xlab
 # - ylab
+# - label
+# - label_stat
 
 # CHANNELS: "channels" of length 1 in cyto_plot_1d or length 2 for cyto_plot_2d.
 # "channels" have already been converted to valid names in the upper cyto_plot
@@ -59,16 +61,17 @@
   # Restrict x to display percentage events
   x <- cyto_sample(x, display)
 
-  # Convert overlay to list
+  # Convert overlay to list of flowFrames
   if(!.all_na(overlay)){
-    overlay <- cyto_convert(overlay, "flowFrame list")
+    if(any(inherits(overlay,"flowFrame") |
+           inherits(overlay, "flowSet"))){
+      overlay <- cyto_convert(overlay, "list of flowFrames")
+    }
   }
   
   # Restrict overlay to display percentage events - bypass in gate_draw
   if(!getOption("CytoRSuite_gate_draw") & display != 1){ 
-    overlay <- lapply(overlay, function(x){
-      cyto_sample(x, display)
-    })
+    overlay <- cyto_sample(overlay, display)
   }
   
   # Combine x and overlay into the same list
@@ -124,11 +127,19 @@
     })
   }
   
+  # XLIM
+  if(.all_na(xlim)){
+    xlim <- .cyto_range(fr_list,
+                        channels = channels[1],
+                        limits = limits,
+                        plot = TRUE)[,1]
+  }
+  
   # YLIM 
   if(.all_na(ylim)){
     ylim <- c(0, y_max + ovn * density_stack * y_max)
   }
-
+  
   # TITLE
   title <- .cyto_plot_title(x,
                             channels = channels,
@@ -152,7 +163,7 @@
   if(popup){
     cyto_plot_window()
   }
-   
+
   # LEGEND TEXT - required for setting plot margins
   if(.all_na(legend_text)){
     legend_text <- names(fr_list)
@@ -165,7 +176,7 @@
                      legend_text = legend_text,
                      title = title,
                      axes_text = axes_text)
-  
+
   # EMPTY PLOT - handles margins and axes limits internally
   args <- .args_list()
   .args <- formalArgs("cyto_plot_empty")
@@ -179,7 +190,7 @@
                                             density_cols = density_cols,
                                             density_fill_alpha = density_fill_alpha)
   }
-  
+
   # DENSITY 
   cyto_plot_density(fr_dens,
                     density_modal = density_modal,
@@ -190,7 +201,7 @@
                     density_line_type = density_line_type,
                     density_line_width = density_line_width,
                     density_line_col = density_line_col)
-
+  
   # LEGEND
   if(legend != FALSE){
     .cyto_plot_legend(channels = channels,
@@ -212,7 +223,7 @@
                       point_col = point_col,
                       point_col_alpha = point_col_alpha)
   }
-
+  
   # GATES & LABEL - without overlay
   if (.all_na(overlay)) {
     
@@ -357,15 +368,15 @@ cyto_plot_1d.flowSet <- function(x, ...){
   x <- cyto_sample(x, display)
   
   # Convert overlay to list
-  if(!.all_na(overlay)){
-    overlay <- cyto_convert(overlay, "flowFrame list")
+  if(!.all_na(overlay) &
+     any(inherits(overlay, "flowFrame") |
+         inherits(overlay, "flowSet"))){
+    overlay <- cyto_convert(overlay, "list of flowFrames")
   }
   
   # Restrict overlay to display percentage events - bypass in gate_draw
   if(!getOption("CytoRSuite_gate_draw") & display != 1){ 
-    overlay <- lapply(overlay, function(x){
-      cyto_sample(x, display)
-    })
+    overlay <- cyto_sample(overlay, display)
   }
   
   # Combine x and overlay into the same list
@@ -490,6 +501,11 @@ cyto_plot_1d.flowSet <- function(x, ...){
                            gate_line_type = gate_line_type,
                            gate_line_width = gate_line_width,
                            gate_line_col = gate_line_col)
+  }
+  
+  # LABEL
+  if(.empty(label)){
+    label <- TRUE
   }
   
   # LABEL STAT

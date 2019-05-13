@@ -485,11 +485,16 @@
                                   channels,
                                   limits = "machine",
                                   plot = FALSE,
-                                  buffer = 0.1){
+                                  buffer = 0.1, ...){
   
   # Time parameter always uses data limits
   if("Time" %in% channels){
     limits <- "data"
+  }
+  
+  # flowCore compatibility
+  if(limits == "instrument"){
+    limits <- "machine"
   }
   
   # Convert markers to channels
@@ -520,7 +525,7 @@
   if(any(rng[1,] > 0) & limits == "machine"){
     rng[1, rng[1,] > 0] <- 0
   }
-  
+
   # Add buffer to lower limit if channel is transformed
   if(buffer != FALSE){
     lapply(channels, function(chan){
@@ -538,7 +543,7 @@
                                 channels,
                                 limits = "machine",
                                 plot = FALSE,
-                                buffer = 0.1){
+                                buffer = 0.1, ...){
   
   # Get ranges for each flowFrame as list
   rng <- fsApply(x, function(z){
@@ -571,7 +576,7 @@
                                         channels,
                                         limits = "machine",
                                         plot = FALSE,
-                                        buffer = 0.1){
+                                        buffer = 0.1, ...){
   
   # Extract data from GatingHierarchy
   x <- cyto_extract(x, parent)
@@ -593,7 +598,7 @@
                                   channels,
                                   limits = "machine",
                                   plot = FALSE,
-                                  buffer = 0.1){
+                                  buffer = 0.1, ...){
   
   # Extract data from GatingSet
   x <- cyto_extract(x, parent)
@@ -619,7 +624,7 @@
   
   # Calculate range for each list element
   rng <- lapply(x, function(z){
-    .cyto_range(x,
+    .cyto_range(z,
                 parent = parent,
                 channels = channels,
                 limits = limits,

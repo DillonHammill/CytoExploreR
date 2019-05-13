@@ -108,7 +108,7 @@ cyto_plot_empty <- function(x,
                             border_fill = "white",
                             legend = FALSE,
                             legend_text){
-  
+
   # Prevent scientific notation on axes - reset on exit
   scipen <- getOption("scipen")
   options(scipen = 100000000)
@@ -126,48 +126,57 @@ cyto_plot_empty <- function(x,
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
   
+  # Update arguments
+  .args_update(args)
+  
   # Check channels
-  channels <- cyto_channels_extract(args[["x"]],
-                                    args[["channels"]],
+  channels <- cyto_channels_extract(x,
+                                    channels,
                                     TRUE)
   
-  # X axis limits
-  if (.all_na(args[["xlim"]])) {
-    .args <- formalArgs(".cyto_plot_axes_limits.flowFrame")
-    args[["xlim"]] <- suppressWarnings(
-      do.call(".cyto_plot_axes_limits.flowFrame",
-              args[names(args) %in% .args])
-    )[[1]]
+  # Convert overlay to list of flowFrames
+  if(!.all_na(overlay) & 
+     any(inherits(overlay, "flowFrame")|
+         inherits(overlay, "flowSet"))){
+    overlay <- cyto_convert(overlay, "list of flowFrames")
+  }
+  
+  # Combine x and overlay into list
+  if(!.all_na(overlay)){
+    fr_list <- c(list(x), overlay)
+  }else{
+    fr_list <- list(x)
+  }
+  
+  # X axis limits - .cyto_range
+  if (.all_na(xlim)) {
+    xlim <- .cyto_range(fr_list,
+                        channels = channels[1],
+                        limits = limits,
+                        plot = TRUE)[,1]
   }
   
   # Y axis limits
-  if (.all_na(args[["ylim"]])) {
+  if (.all_na(ylim)) {
     
     # Density distributions have different y axis limits
     if(length(channels) == 1){
       
       # Number of overlays
-      ovn <- length(args[["overlay"]])
-      
-      # Combine x and overlay into the same list
-      if(!.all_na(args[["overlay"]])){
-        fr_list <- c(list(args[["x"]]), args[["overlay"]])
-      }else{
-        fr_list <- list(args[["x"]])
-      }
+      ovn <- length(overlay)
       
       # Get kernel density for each list element
       fr_dens <- lapply(fr_list, function(x){
         
-        .cyto_density(args[["x"]],
-                      args[["channels"]],
-                      args[["density_smooth"]],
-                      args[["density_modal"]])
+        .cyto_density(x,
+                      channel = channels,
+                      smooth = density_smooth,
+                      modal = density_modal)
         
       })
       
       # Calculate the mean maximum y value for kernel densities
-      if(args[["density_modal"]]){
+      if(density_modal){
         y_max <- 100
       }else{
         y_max <- mean(unlist(lapply(fr_dens, function(d){
@@ -177,8 +186,8 @@ cyto_plot_empty <- function(x,
       
       # Stacked distributions require shifting of y values
       shft <- seq(0,
-                  ovn * args[["density_stack"]] * y_max,
-                  args[["density_stack"]] * y_max)
+                  ovn * density_stack * y_max,
+                  density_stack * y_max)
       
       # Shift distributions for stacking
       lapply(seq_len(length(fr_dens)), function(z){
@@ -186,16 +195,15 @@ cyto_plot_empty <- function(x,
       })
       
       # YLIM 
-      if(.all_na(args[["ylim"]])){
-        args[["ylim"]] <- c(0, y_max + ovn * args[["density_stack"]] * y_max)
+      if(.all_na(ylim)){
+        ylim <- c(0, y_max + ovn * density_stack * y_max)
       }
       
     }else if(length(channels) == 2){
-      .args <- formalArgs(".cyto_plot_axes_limits.flowFrame")
-      args[["ylim"]] <- suppressWarnings(
-        do.call(".cyto_plot_axes_limits.flowFrame",
-              args[names(args) %in% .args])
-      )[[2]]
+      ylim <- .cyto_range(fr_list,
+                          channels = channels[2],
+                          limits = limits,
+                          plot = TRUE)[,1]
     }
 
   }
@@ -203,15 +211,15 @@ cyto_plot_empty <- function(x,
   # Get Axis Breaks and Labels from trans if supplied
   if(is.null(getOption("CytoRSuite_cyto_plot_axes_text"))){
     axs <- .cyto_plot_axes_text(
-      x = args[["x"]],
-      channels = args[["channels"]],
-      axes_trans = args[["axes_trans"]]
+      x,
+      channels = channels,
+      axes_trans = axes_trans
     )
   }else if(names(getOption("CytoRSuite_cyto_plot_axes_text")) != channels){
     axs <- .cyto_plot_axes_text(
-      x = args[["x"]],
-      channels = args[["channels"]],
-      axes_trans = args[["axes_trans"]]
+      x,
+      channels = channels,
+      axes_trans = axes_trans
     )
   }else{
     axs <- getOption("CytoRSuite_cyto_plot_axes_text")
@@ -228,129 +236,129 @@ cyto_plot_empty <- function(x,
   }
   
   # Turn off y axis labels for stacked overlays
-  if(!.all_na(args[["overlay"]]) & 
-     args[["density_stack"]] != 0 &
+  if(!.all_na(overlay) & 
+     density_stack != 0 &
      length(channels) == 1){
     
-    args[["axes_text"]] <- c(args[["axes_text"]][1], FALSE)
+    axes_text <- c(axes_text[1], FALSE)
     
   }
   
   # Set plot margins - set par("mar")
-  .cyto_plot_margins(args[["x"]],
-                     args[["overlay"]],
-                     args[["legend"]],
-                     args[["legend_text"]],
-                     args[["title"]],
-                     args[["axes_text"]])
+  .cyto_plot_margins(x,
+                     overlay = overlay,
+                     legend = legend,
+                     legend_text = legend_text,
+                     title = title,
+                     axes_text = axes_text)
   
   # Plot
   graphics::plot(1,
                  type = "n",
                  axes = FALSE,
-                 xlim = args[["xlim"]],
-                 ylim = args[["ylim"]],
+                 xlim = xlim,
+                 ylim = ylim,
                  xlab = "",
                  ylab = "",
                  bty = "n")
   
   # X axis
-  if(args[["axes_text"]][1]){
+  if(axes_text[1]){
     
     if(.all_na(xtext)){
       axis(1,
-           font.axis = args[["axes_text_font"]],
-           col.axis = args[["axes_text_col"]],
-           cex.axis = args[["axes_text_size"]])
+           font.axis = axes_text_font,
+           col.axis = axes_text_col,
+           cex.axis = axes_text_size)
     }else{
       axis(1,
            at = xtext$at,
            labels = xtext$label,
-           font.axis = args[["axes_text_font"]],
-           col.axis = args[["axes_text_col"]],
-           cex.axis = args[["axes_text_size"]])
+           font.axis = axes_text_font,
+           col.axis = axes_text_col,
+           cex.axis = axes_text_size)
     }
     
   }
   
   # Y axis
-  if(args[["axes_text"]][2]){
+  if(axes_text[2]){
     
     if(.all_na(ytext)){
       axis(2,
-           font.axis = args[["axes_text_font"]],
-           col.axis = args[["axes_text_col"]],
-           cex.axis = args[["axes_text_size"]])
+           font.axis = axes_text_font,
+           col.axis = axes_text_col,
+           cex.axis = axes_text_size)
     }else{
       axis(2,
            at = ytext$at,
            labels = ytext$label,
-           font.axis = args[["axes_text_font"]],
-           col.axis = args[["axes_text_col"]],
-           cex.axis = args[["axes_text_size"]])
+           font.axis = axes_text_font,
+           col.axis = axes_text_col,
+           cex.axis = axes_text_size)
     }
     
   }
   
   # Border
   box(which = "plot",
-      lty = args[["border_line_type"]],
-      lwd = args[["border_line_width"]],
-      col = args[["border_line_col"]])
+      lty = border_line_type,
+      lwd = border_line_width,
+      col = border_line_col)
   
   
   # Border fill
-  if(args[["border_fill"]] != "white"){
+  if(border_fill != "white"){
     rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],
-         col = args[["border_fill"]],
+         col = border_fill,
          border = NA)
   }
   
   # Title
-  if (!.all_na(args[["title"]])) {
-    title(main = args[["title"]],
-          cex.main = args[["title_text_size"]],
-          col.main = args[["title_text_col"]],
-          font.main = args[["title_text_font"]])
+  if (!.all_na(title)) {
+    title(main = title,
+          cex.main = title_text_size,
+          col.main = title_text_col,
+          font.main = title_text_font)
   }
   
   # X axis label - position labels closer if axes text is missing
-  if(!args[["axes_text"]][1] & 
-     !.all_na(args[["xlab"]])){
+  if(!axes_text[1] & 
+     !.all_na(xlab)){
     
-    title(xlab = args[["xlab"]],
-          font.lab = args[["axes_label_text_font"]],
-          col.lab = args[["axes_label_text_col"]],
-          cex.lab = args[["axes_label_text_size"]],
+    title(xlab = xlab,
+          font.lab = axes_label_text_font,
+          col.lab = axes_label_text_col,
+          cex.lab = axes_label_text_size,
           mgp = c(2,0,0))
     
-  }else if(args[["axes_text"]][1] & 
-           !.all_na(args[["xlab"]])){
+  }else if(axes_text[1] & 
+           !.all_na(xlab)){
     
-    title(xlab = args[["xlab"]],
-          font.lab = args[["axes_label_text_font"]],
-          col.lab = args[["axes_label_text_col"]],
-          cex.lab = args[["axes_label_text_size"]])
+    title(xlab = xlab,
+          font.lab = axes_label_text_font,
+          col.lab = axes_label_text_col,
+          cex.lab = axes_label_text_size)
     
   }
   
   # Y axis label - position labels closer if axes text is missing
-  if(!args[["axes_text"]][2] & 
-     !.all_na(args[["ylab"]])){
+  if(!axes_text[2] & 
+     !.all_na(ylab)){
     
-    title(ylab = args[["ylab"]],
-          font.lab = args[["axes_label_text_font"]],
-          col.lab = args[["axes_label_text_col"]],
-          cex.lab = args[["axes_label_text_size"]],
+    title(ylab = ylab,
+          font.lab = axes_label_text_font,
+          col.lab = axes_label_text_col,
+          cex.lab = axes_label_text_size,
           mgp = c(2,0,0))
     
-  }else if(args[["axes_text"]][2] & 
-           !.all_na(args[["ylab"]])){
+  }else if(axes_text[2] & 
+           !.all_na(ylab)){
     
-    title(ylab = args[["ylab"]],
-          font.lab = args[["axes_label_text_font"]],
-          col.lab = args[["axes_label_text_col"]],
-          cex.lab = args[["axes_label_text_size"]])
+    title(ylab = ylab,
+          font.lab = axes_label_text_font,
+          col.lab = axes_label_text_col,
+          cex.lab = axes_label_text_size)
     
   }
 

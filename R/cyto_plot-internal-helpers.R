@@ -1,196 +1,3 @@
-# AXES LIMITS ------------------------------------------------------------------
-
-# This function can only be called on cyto_convert supported objects (i.e.
-# flowFrames, flowSets, flowFrame lists and flowSet lists).
-
-#' Get axes limits for cyto_plot
-#'
-#' Calculates the limits of a valid channel only. Need to calculate y axis
-#' limits for density distributions separately in cyto_plot_empty.
-#'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:Gatinghierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param channels name of the channels or markers to be used to construct the
-#'   plot.
-#' @param parent name of the parental node to extract from GatingHierarchy or
-#'   GatingSet.
-#' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
-#'   \code{list of flowSets} or \code{list of flowFrame lists} containing
-#'   populations to be overlayed onto the plot(s). Data for overlays will be
-#'   merged with \code{x} prior to axis limit calculation to ensure that the
-#'   axes limits are set based on all the data to be included in the plot.
-#' @param limits indicates whether the limits of the "data" or limits of the
-#'   "machine" should be returned. This argument will only influence the upper
-#'   limit. The lower limit will always be set to 0, unless the data contains
-#'   values below this limit. In such cases the lower limit of the data will be
-#'   used instead. This argument is set to "machine" by default.
-#' @importFrom flowCore exprs flowSet parameters
-#' @importFrom flowWorkspace pData getData
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @noRd
-.cyto_plot_axes_limits <- function(x, ...){
-  UseMethod(".cyto_plot_axes_text")
-}
-
-#' @noRd
-.cyto_plot_axes_limits.flowFrame <- function(x,
-                                             channels,
-                                             overlay = NA,
-                                             limits = "machine"){
-  
-  # overlay should be a flowFrame, flowSet or flowFrame list
-  
-  # Incorrect limits argument
-  if (!limits %in% c("data", "machine", "instrument")) {
-    stop("Limits argument should be either 'data' or 'machine'.")
-  }
-  
-  # Set limits to machine if set to instrument - flowCore compatibility
-  if (limits == "instrument") {
-    limits <- "machine"
-  }
-  
-  # Check channels
-  channels <- cyto_channels_extract(x, channels, plot = TRUE)
-  
-  # Combine x and overlay into flowFrame list
-  if(!.all_na(overlay)){
-    
-    # Convert overlay to flowFrame list
-    overlay <- cyto_convert(overlay, "flowFrame list")
-    
-    # Combine x and overlay into the same flowFrame list
-    x <- c(list(x), overlay)
-    
-  }else{
-    
-    # Add x to list
-    x <- list(x)
-    
-  }
-  
-  # Calculate ranges
-  data_limits <- .cyto_range(x,
-                             channels = channels,
-                             limits = limits,
-                             plot = TRUE
-  )
-  
-  # Convert to list of x and y limits
-  data_limits <- lapply(channels, function(x) {
-    data_limits[, x]
-  })
-  names(data_limits) <- channels
-  
-  return(data_limits)
-  
-}
-
-#' overlay either flowFrame, flowSet or flowFrame list - not list of flowFrame
-#' lists
-#' @noRd
-.cyto_plot_axes_limits.flowSet <- function(x,
-                                           channels,
-                                           overlay = NA,
-                                           limits = "machine"){
-  
-  # Get ranges for x (flowSet)
-  data_limits <- .cyto_range(x,
-                             channels = channels,
-                             limits = limits,
-                             plot = TRUE)
-  
-  # Convert overlay to flowFrame list
-  if(!.all_na(overlay)){
-    overlay <- cyto_convert(overlay, "flowSet")
-    
-    data_limits_overlay <- .cyto_range(x,
-                                       channels = channels,
-                                       limits = limits,
-                                       plot = TRUE)
-    
-    # Replace values in data limits if min is lower or max is higher
-    lapply(channels, function(y){
-      
-      # minimum for overly is less than x
-      if(data_limits_overlay[,y][1] < data_limits[,y][1]){
-        data_limits[,y][1] <<- data_limits_overlay[,y][1]
-      }
-      
-      # maximum for overlay is greater than x
-      if(data_limits_overlay[,y][2] > data_limits[,y][2]){
-        data_limits[,y][2] <<- data_limits_overlay[,y][2]
-      }
-      
-    })
-    
-  }
-  
-  # Convert to list of x and y limits
-  data_limits <- lapply(channels, function(x) {
-    data_limits[, x]
-  })
-  names(data_limits) <- channels
-  
-  return(data_limits)
-  
-}
-
-#' overlay should be flowFrame list or flowSet
-#' @noRd
-.cyto_plot_axes_limits.GatingHierarchy <- function(x,
-                                                   parent = "root",
-                                                   channels,
-                                                   overlay = NA,
-                                                   limits = "machine"){
-  
-  # Convert x to flowFrame
-  x <- cyto_convert(x, "flowFrame", parent)
-  
-  # Convert overlay to flowFrame list
-  if(!.all_na(overlay)){
-    overlay <- cyto_convert(overlay, "flowSet", parent)
-  }
-  
-  # Make call to flowFrame method
-  data_limits <- .cyto_plot_axes_limits(x,
-                                        channels,
-                                        overlay,
-                                        limits)
-  
-  return(data_limits)
-  
-}
-
-#' @noRd
-.cyto_plot_axes_limits.GatingSet <- function(x,
-                                             parent = "root",
-                                             channels,
-                                             overlay = NA,
-                                             limits = "machine"){
-  
-  # Convert x to flowSet
-  x <- cyto_convert(x, "flowSet", parent)
-  
-  # Convert overlay to flowSet
-  if(!.all_na(overlay)){
-    overlay <- cyto_convert(overlay, "flowSet", parent)
-  }
-  
-  # Make call to flowSet method
-  data_limits <- .cyto_plot_axes_limits(x,
-                                        channels,
-                                        overlay,
-                                        limits)
-  
-  return(data_limits)
-  
-}
-
 # AXES TEXT --------------------------------------------------------------------
 
 #' Get Appropriate Axes Labels for Transformed Channels - flowWorkspace
@@ -1935,7 +1742,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' 
 #' @noRd
 .cyto_plot_label_coords <- function(x, ...){
-  UseMethod("cyto_plot_label_coords")
+  UseMethod(".cyto_plot_label_coords")
 }
 
 #' @noRd
@@ -1944,45 +1751,34 @@ cyto_plot_overlay_convert <- function(x, ...){
                                             text_x = NA,
                                             text_y = NA){
   
-  # Dispatch to NULL method if gate is NA
-  if(.all_na(x)){
-    .cyto_plot_label_coords.NULL(NULL,
-                                 channels,
-                                 text_x = text_x,
-                                 text_y = text_y)
+  # NULL or NA gate
+  if(.all_na(x) | is.null(x)){
+    
+    # No gates - use plot limits to set co-ordinates for label
+    xmin <- par("usr")[1]
+    xmax <- par("usr")[2]
+    ymin <- par("usr")[3]
+    ymax <- par("usr")[4]
+    
+    # x label position - defaults to 3/4 * range of x axis
+    if(.all_na(text_x)){
+      text_x <- xmin + (xmax - xmin) * 0.75
+    }
+    
+    # y label position - defaults to 1/2 * range of y axis
+    if(.all_na(text_y)){
+      text_y <- (ymax - ymin) * 0.5
+    }
+    
+    # Return co-ordinates
+    text_xy <- c(text_x, text_y)
+    
+    return(text_xy)
+    
   }else{
     stop(paste0("cyto_plot_label does not support gate objects of ",
                 class(x),"!"))
   }
-  
-}
-
-#' @noRd
-.cyto_plot_label_coords.NULL <- function(x,
-                                         channels,
-                                         text_x = NA,
-                                         text_y = NA){
-  
-  # No gates - use plot limits to set co-ordinates for label
-  xmin <- par("usr")[1]
-  xmax <- par("usr")[2]
-  ymin <- par("usr")[3]
-  ymax <- par("usr")[4]
-  
-  # x label position - defaults to 3/4 * range of x axis
-  if(.all_na(text_x)){
-    text_x <- xmin + (xmax - xmin) * 0.75
-  }
-  
-  # y label position - defaults to 1/2 * range of y axis
-  if(.all_na(text_y)){
-    text_y <- (ymax - ymin) * 0.5
-  }
-  
-  # Return co-ordinates
-  text_xy <- c(text_x, text_y)
-  
-  return(text_xy)
   
 }
 
@@ -2187,11 +1983,11 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
 #' @noRd
-.cyto_plot_label_dims <- function(label_text,
-                                  label_stat = NA,
-                                  label_box_x,
-                                  label_box_y = NA,
-                                  label_text_size = 1,  
+.cyto_plot_label_dims <- function(text,
+                                  stat = NA,
+                                  box_x,
+                                  box_y = NA,
+                                  text_size = 1,  
                                   bg = ifelse(match(par("bg"), "transparent", 0),
                                                 "white", par("bg")
                                   ),
@@ -2204,34 +2000,34 @@ cyto_plot_overlay_convert <- function(x, ...){
   cex_reset <- par("cex")
   xpd_reset <- par("xpd")
   
-  par(cex = label_text_size)
+  par(cex = text_size)
   par(xpd = TRUE)
   
-  if(all(is.na(label_box_y))){
-    label_box_y <- label_box_x
+  if(all(is.na(box_y))){
+    box_y <- box_x
   }
-  box.adj <- adj + (xpad - 1) * label_text_size * (0.5 - adj)
+  box.adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
   
   # Rectangle dimensions
-  lwidths <- strwidth(label_text)
+  lwidths <- strwidth(text)
   rwidths <- lwidths * (1 - box.adj)
   lwidths <- lwidths * box.adj
-  bheights <- theights <- strheight(label_text) * 0.5
+  bheights <- theights <- strheight(text) * 0.5
   
   # Rectangle co-ordinates
-  xr <- label_box_x - lwidths * xpad
-  xl <- label_box_x + lwidths * xpad
+  xr <- box_x - lwidths * xpad
+  xl <- box_x + lwidths * xpad
   
-  # y co-ordinates must make space for label_stat
-  if(is.na(label_stat)){
+  # y co-ordinates must make space for stat
+  if(is.na(stat)){
     
-    yb <- label_box_y - bheights * ypad
-    yt <- label_box_y + theights * ypad
+    yb <- box_y - bheights * ypad
+    yt <- box_y + theights * ypad
     
   }else {
     
-    yb <- label_box_y - bheights * ypad * 2
-    yt <- label_box_y + theights * ypad * 2
+    yb <- box_y - bheights * ypad * 2
+    yt <- box_y + theights * ypad * 2
     
   }
   
@@ -2282,7 +2078,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       x2 <- x[[z]][,"x"]
       y2 <- x[[z]][,"y"]
       
-      # Return NULL for same label
+      # Return NA for same label
       if(z == y){
         
         return(NA)
@@ -2324,8 +2120,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @param x list of gate objects to be labelled.
 #' @param channels names of channel(s) used to construct the plot.
-#' @param label_text vector of character strings to use in labels.
-#' @param label_text_size vector of integers for character expansion.
+#' @param text vector of character strings to use in labels.
+#' @param text_size vector of integers for character expansion.
 #'
 #' @return list containing adjusted x and y coordinates for labels if any
 #'   overlap is detected.
@@ -2338,9 +2134,11 @@ cyto_plot_overlay_convert <- function(x, ...){
 .cyto_plot_label_offset <- function(x,
                                     gate, 
                                     channels,
-                                    label_text,
-                                    label_stat,
-                                    label_text_size) {
+                                    text,
+                                    text_x = NA,
+                                    text_y = NA,
+                                    stat,
+                                    text_size) {
   
   # Invalid gate objects
   if(!inherits(gate, "list")){
@@ -2382,29 +2180,33 @@ cyto_plot_overlay_convert <- function(x, ...){
   coords <- do.call("rbind", coords)
   colnames(coords) <- c("x", "y")
   
-  # Repeat label_text_size
-  label_text_size <- rep(label_text_size, length.out = length(gts))
+  print(coords)
   
-  # Repeat label_stat
-  label_stat <- rep(label_stat, length.out = length(gts))
+  # Repeat text_size
+  text_size <- rep(text_size, length.out = length(gts))
+  
+  # Repeat stat
+  stat <- rep(stat, length.out = length(gts))
   
   # Calculate label dimensions
   label_dims <- lapply(seq_len(length(gts)), function(z){
     
-    .cyto_plot_label_dims(label_text = label_text[z],
-                          label_stat = label_stat[z],
-                          label_box_x = coords[,"x"][z],
-                          label_box_y = coords[,"y"][z],
-                          label_text_size = label_text_size[z])
+    .cyto_plot_label_dims(text = text[z],
+                          stat = stat[z],
+                          box_x = coords[,"x"][z],
+                          box_y = coords[,"y"][z],
+                          text_size = text_size[z])
     
   })
+  
+  print(label_dims)
   
   # Check if any labels will be overlapping and offset coords
   if(any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))){
     
     
-    if(all(!is.na(label_stat))){
-      label_text <- paste(label_text, "\n")
+    if(all(!is.na(stat))){
+      text <- paste(text, "\n")
     }
     
     # Use spread.labs TeachingDemos to offset y values

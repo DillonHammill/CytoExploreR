@@ -362,22 +362,26 @@ cyto_plot_label.rectangleGate <- function(x,
             }
             
             # Apply gate to flowFrame
-            x <- Subset(x, gate)
+            y <- Subset(x, gate)
   
             # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
               
-              st <- cyto_stats_compute(x,
-                                       channels = channels,
-                                       trans = trans,
-                                       stat = stat,
-                                       format = "long",
-                                       density_smooth = density_smooth)
-              st <- round(st[,ncol(st)], 2)
-              
-              # Add percentage sign to frequency statistics
               if(stat == "freq"){
+                
+                st <- .cyto_count(y)/.cyto_count(x) * 100
                 st <- sprintf("%.2f %%", st)
+                
+              }else{
+                
+                st <- cyto_stats_compute(y,
+                                         channels = channels,
+                                         trans = trans,
+                                         stat = stat,
+                                         format = "long",
+                                         density_smooth = density_smooth)
+                st <- round(st[,ncol(st)], 2)
+                
               }
               
             }
@@ -463,24 +467,28 @@ cyto_plot_label.polygonGate <- function(x,
             }
             
             # Apply gate to flowFrame
-            x <- Subset(x, gate)
+            y <- Subset(x, gate)
   
             # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
-    
-              st <- cyto_stats_compute(x,
-                                       channels = channels,
-                                       trans = trans,
-                                       stat = stat,
-                                       format = "long",
-                                       density_smooth = density_smooth)
-              st <- round(st[,ncol(st)], 2)
-    
-              # Add percentage sign to frequency statistics
+              
               if(stat == "freq"){
+                
+                st <- .cyto_count(y)/.cyto_count(x) * 100
                 st <- sprintf("%.2f %%", st)
+                
+              }else{
+                
+                st <- cyto_stats_compute(y,
+                                         channels = channels,
+                                         trans = trans,
+                                         stat = stat,
+                                         format = "long",
+                                         density_smooth = density_smooth)
+                st <- round(st[,ncol(st)], 2)
+                
               }
-    
+              
             }
   
             # Label co-ordinate
@@ -565,24 +573,28 @@ cyto_plot_label.ellipsoidGate <- function(x,
             
   
             # Apply gate to flowFrame
-            x <- Subset(x, gate)
+            y <- Subset(x, gate)
   
             # Calculate statistics using cyto_stats_compute
             if (!.all_na(stat)) {
-    
-              st <- cyto_stats_compute(x,
-                                       channels = channels,
-                                       trans = trans,
-                                       stat = stat,
-                                       format = "long",
-                                       density_smooth = density_smooth)
-              st <- round(st[,ncol(st)], 2)
-    
-              # Add percentage sign to frequency statistics
+              
               if(stat == "freq"){
+                
+                st <- .cyto_count(y)/.cyto_count(x) * 100
                 st <- sprintf("%.2f %%", st)
+                
+              }else{
+                
+                st <- cyto_stats_compute(y,
+                                         channels = channels,
+                                         trans = trans,
+                                         stat = stat,
+                                         format = "long",
+                                         density_smooth = density_smooth)
+                st <- round(st[,ncol(st)], 2)
+                
               }
-    
+              
             }
   
             # Label co-ordinate
@@ -651,6 +663,8 @@ cyto_plot_label.list <- function(x,
                                               gate = gate,
                                               channels = channels,
                                               text = text,
+                                              text_x = text_x,
+                                              text_y = text_y,
                                               stat = stat,
                                               text_size = text_size)
 
