@@ -470,111 +470,51 @@
 #'
 #' @return vector containing minimum and maximum values.
 #'
-#' @importFrom flowCore flowSet
+#' @importFrom flowCore flowSet fsApply
 #' @importFrom flowWorkspace getData
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_range <- function(x,
-                        parent = "root",
-                        channels = NA,
-                        limits = "data",
-                        plot = FALSE,
-                        buffer = 0.1) {
+.cyto_range <- function(x, ...){
+  UseMethod(".cyto_range")
+}
+
+#' @noRd
+.cyto_range.flowFrame <- function(x, 
+                                  channels,
+                                  limits = "machine",
+                                  plot = FALSE,
+                                  buffer = 0.1){
   
   # Time parameter always uses data limits
   if("Time" %in% channels){
     limits <- "data"
   }
   
-  # Convert GatingHierarchy/GatingSet to flowFrame/flowSet
-  if(inherits(x, "GatingHierarchy") | inherits(x, "GatingSet")){
-    x <- getData(x, parent)
-  }
-  
-  # Convert lists to conventional objects
-  if(class(x) == "list"){
-    
-    # Convert list of flowFrames to flowSet
-    if(all(unlist(lapply(x,"class")) == "flowFrame")){
-      x <- .cyto_convert(x, "flowSet")
-    # Convert list of flowSets to flowSet
-    }else if(all(unlist(lapply(x, function(y){inherits(y,"flowSet")})))){
-      x <- .cyto_convert(x, "flowSet")
-    }
-    
-  }
-  
   # Convert markers to channels
   if(!.all_na(channels)){
     channels <- cyto_channels_extract(x, channels, plot)
   }else{
-    channels <- BiocGenerics::colnmaes(x)
+    channels <- BiocGenerics::colnames(x)
   }
   
-  # Extract ranges
-  if(inherits(x, "flowFrame")){
-    
-    # Lower bound - use data limits
-    rng <- suppressWarnings(
-      range(x, type = "data")[, channels, drop = FALSE]
-      )
-    
-    # Upper bound
-    if(limits == "data"){
-      mx <- suppressWarnings(
-        range(x, type = "data")[, channels, drop = FALSE][2,]
-        )
-    }else if(limits == "machine"){
-      mx <- suppressWarnings(
-        range(x, type = "instrument")[, channels, drop = FALSE][2,]
-        )
-    }
-    rng[2,] <- mx
-    
-  }else if(inherits(x, "flowSet")){
-    
-    # Lower bound - use data limits
-    rng <- suppressWarnings(
-      range(x[[1]], type = "data")[, channels, drop = FALSE]
-      )
-    
-    # Upper bound
-    if(limits == "data"){
-      mx <- fsApply(x, function(fr){
-        suppressWarnings(
-          range(fr, type = "data")[, channels, drop = FALSE][2,]
-        )
-      }, simplify = TRUE)
-      if(length(channels) > 1){
-        mx <- do.call("rbind", mx)
-      }
-      colnames(mx) <- channels
-      mx <- unlist(lapply(channels, function(chan){
-        mx <- mx[,chan]
-        mx <- mx[is.finite(mx)]
-        max(mx)
-      }))
-    }else if(limits == "machine"){
-      mx <- fsApply(x, function(fr){
-        mx <- suppressWarnings(
-          range(fr, type = "instrument")[, channels, drop = FALSE][2,]
-          )
-      }, simplify = TRUE)
-      if(length(channels) > 1){
-        mx <- do.call("rbind", mx)
-      }
-      colnames(mx) <- channels
-      mx <- unlist(lapply(channels, function(chan){
-        mx <- mx[,chan]
-        mx <- mx[is.finite(mx)]
-        max(mx)
-      }))
-    }
-    rng[2,] <- mx
-    
+  # Lower bound - use data limits
+  rng <- suppressWarnings(
+    range(x, type = "data")[, channels, drop = FALSE]
+  )
+  
+  # Upper bound
+  if(limits == "data"){
+    mx <- suppressWarnings(
+      range(x, type = "data")[, channels, drop = FALSE][2,]
+    )
+  }else if(limits == "machine"){
+    mx <- suppressWarnings(
+      range(x, type = "instrument")[, channels, drop = FALSE][2,]
+    )
   }
+  rng[2,] <- mx
   
   # Replace lower data limit if > 0 & machine limits
   if(any(rng[1,] > 0) & limits == "machine"){
@@ -591,4 +531,114 @@
   }
   
   return(rng)
+}
+ 
+#' @noRd
+.cyto_range.flowSet <- function(x,
+                                channels,
+                                limits = "machine",
+                                plot = FALSE,
+                                buffer = 0.1){
+  
+  # Get ranges for each flowFrame as list
+  rng <- fsApply(x, function(z){
+    .cyto_range(z,
+                channels = channels,
+                limits = limits,
+                plot = plot,
+                buffer = buffer)
+  }, simplify = TRUE)
+  
+  # Combine results
+  rng <- do.call("rbind", rng)
+  
+  # Compute range for all samples for each channel
+  rng <- lapply(channels, function(z){
+    c(min(rng[,z][is.finite(rng[,z])]),
+      max(rng[,z][is.finite(rng[,z])]))
+  })
+  rng <- do.call("cbind",rng)
+  rownames(rng) <- c("min","max")
+  colnames(rng) <- channels
+  
+  return(rng)
+  
+}
+
+#' @noRd
+.cyto_range.GatingHierarchy <- function(x, 
+                                        parent,
+                                        channels,
+                                        limits = "machine",
+                                        plot = FALSE,
+                                        buffer = 0.1){
+  
+  # Extract data from GatingHierarchy
+  x <- cyto_extract(x, parent)
+  
+  # Make call to flowFrame method
+  rng <- .cyto_range(x,
+                     channels = channels,
+                     limits = limits,
+                     plot = plot,
+                     buffer = buffer)
+  
+  return(rng)
+  
+}
+
+#' @noRd
+.cyto_range.GatingSet <- function(x,
+                                  paraent,
+                                  channels,
+                                  limits = "machine",
+                                  plot = FALSE,
+                                  buffer = 0.1){
+  
+  # Extract data from GatingSet
+  x <- cyto_extract(x, parent)
+  
+  # Make call to flowSet method
+  rng <- .cyto_range(x,
+                     channels = channels,
+                     limits = limits,
+                     plot = plot,
+                     buffer = buffer)
+  
+  return(rng)
+  
+}
+
+#' @noRd
+.cyto_range.list <- function(x,
+                             parent,
+                             channels,
+                             limits = "machine",
+                             plot = FALSE,
+                             buffer = 0.1){
+  
+  # Calculate range for each list element
+  rng <- lapply(x, function(z){
+    .cyto_range(x,
+                parent = parent,
+                channels = channels,
+                limits = limits,
+                plot = plot,
+                buffer = 0.1)
+  })
+  
+  # Combine results
+  rng <- do.call("rbind", rng)
+  
+  # Compute range for all samples for each channel
+  rng <- lapply(channels, function(z){
+    c(min(rng[,z][is.finite(rng[,z])]),
+      max(rng[,z][is.finite(rng[,z])]))
+  })
+  rng <- do.call("cbind",rng)
+  rownames(rng) <- c("min","max")
+  colnames(rng) <- channels
+  
+  return(rng)
+  
 }
