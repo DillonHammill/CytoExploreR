@@ -1507,6 +1507,13 @@ cyto_plot.GatingSet <- function(x,
   # Update arguments
   .args_update()
   
+  # cyto_plot_save -------------------------------------------------------------
+  
+  # Turn off popup if cyto_plot_save is activated
+  if(getOption("CytoRSuite_cyto_plot_save") == TRUE){
+    popup <- FALSE
+  }
+  
   # Extract channels & transformations -----------------------------------------
 
   # Get valid channel names if markers are supplied
@@ -1867,6 +1874,7 @@ cyto_plot.GatingSet <- function(x,
       cnt <<- cnt + 1
       
       .cyto_plot(fr_list,
+                 channels = channels,
         gate = gate,
         axes_trans = axes_trans,
         limits = limits,

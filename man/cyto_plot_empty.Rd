@@ -2,11 +2,27 @@
 % Please edit documentation in R/cyto_plot-helpers.R
 \name{cyto_plot_empty}
 \alias{cyto_plot_empty}
+\alias{cyto_plot_empty.flowFrame}
+\alias{cyto_plot_empty.list}
 \title{Create an empty cyto_plot}
 \usage{
-cyto_plot_empty(x, channels, axes_trans = NA, overlay = NA,
-  xlim = NA, ylim = NA, limits = "machine", title = NA,
-  xlab = NA, ylab = NA, density_modal = TRUE, density_smooth = 1.5,
+cyto_plot_empty(x, ...)
+
+\method{cyto_plot_empty}{flowFrame}(x, channels, axes_trans = NA,
+  overlay = NA, xlim = NA, ylim = NA, limits = "machine",
+  title = NA, xlab = NA, ylab = NA, density_modal = TRUE,
+  density_smooth = 1.5, density_stack = 0.5, axes_text = c(TRUE,
+  TRUE), axes_text_font = 1, axes_text_size = 1,
+  axes_text_col = "black", axes_label_text_font = 1,
+  axes_label_text_size = 1.1, axes_label_text_col = "black",
+  title_text_font = 2, title_text_size = 1.1,
+  title_text_col = "black", border_line_type = 1,
+  border_line_width = 1, border_line_col = "black",
+  border_fill = "white", legend = FALSE, legend_text)
+
+\method{cyto_plot_empty}{list}(x, channels, axes_trans = NA, xlim = NA,
+  ylim = NA, limits = "machine", title = NA, xlab = NA,
+  ylab = NA, density_modal = TRUE, density_smooth = 1.5,
   density_stack = 0.5, axes_text = c(TRUE, TRUE), axes_text_font = 1,
   axes_text_size = 1, axes_text_col = "black",
   axes_label_text_font = 1, axes_label_text_size = 1.1,

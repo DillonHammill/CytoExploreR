@@ -41,6 +41,7 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
 .cyto_plot <- function(x,
+                       channels,
                        gate,
                        axes_trans = NA,
                        limits = "machine",
@@ -207,8 +208,8 @@
     
     # EMPTY PLOT - handles margins and axes limits internally
     args <- .args_list()
-    .args <- formalArgs("cyto_plot_empty")
-    do.call("cyto_plot_empty", 
+    .args <- formalArgs("cyto_plot_empty.list")
+    do.call("cyto_plot_empty.list", 
             args[names(args) %in% .args])
 
     # DENSITY FILL - inherits theme internally

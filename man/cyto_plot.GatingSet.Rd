@@ -4,7 +4,31 @@
 \alias{cyto_plot.GatingSet}
 \title{cyto_plot - GatingSet Method}
 \usage{
-\method{cyto_plot}{GatingSet}()
+\method{cyto_plot}{GatingSet}(x, parent, alias, channels,
+  axes_trans = NA, group_by, overlay = NA, gate = NA,
+  limits = "machine", display = 1, layout, popup = FALSE,
+  xlim = NA, ylim = NA, title, xlab, ylab, density_modal = TRUE,
+  density_smooth = 0.6, density_stack = 0.5,
+  density_layers = length(x), density_cols = NA, density_fill = NA,
+  density_fill_alpha = 1, density_line_type = 1,
+  density_line_width = 1, density_line_col = "black",
+  point_shape = ".", point_size = 2, point_col_scale = NA,
+  point_cols = NA, point_col = NA, point_col_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", axes_text = c(TRUE, TRUE),
+  axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
+  axes_label_text_font = 1, axes_label_text_size = 1.1,
+  axes_label_text_col = "black", title_text_font = 2,
+  title_text_size = 1.1, title_text_col = "black", legend = FALSE,
+  legend_text, legend_text_font = 1, legend_text_size = 1,
+  legend_text_col = "black", legend_line_col = NA,
+  legend_box_fill = NA, legend_point_col = NA, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", label,
+  label_text = NA, label_stat, label_text_font = 2,
+  label_text_size = 1, label_text_col = "black", label_box_x = NA,
+  label_box_y = NA, label_box_alpha = 0.6, border_line_type = 1,
+  border_line_width = 1, border_line_col = "black",
+  border_fill = "white", ...)
 }
 \arguments{
 \item{x}{object of class

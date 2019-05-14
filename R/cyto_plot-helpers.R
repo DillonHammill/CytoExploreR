@@ -78,8 +78,15 @@
 #'                 channels = c("FSC-A),
 #'                 overlay = Activation[2:4])
 #'
+#' @rdname cyto_plot_empty
 #' @export
-cyto_plot_empty <- function(x,
+cyto_plot_empty <- function(x, ...){
+  UseMethod("cyto_plot_empty")
+}
+
+#' @rdname cyto_plot_empty
+#' @export
+cyto_plot_empty.flowFrame <- function(x,
                             channels,
                             axes_trans = NA,
                             overlay = NA,
@@ -350,6 +357,57 @@ cyto_plot_empty <- function(x,
     
   }
 
+}
+
+#' @rdname cyto_plot_empty
+#' @export
+cyto_plot_empty.list <- function(x,
+                                 channels,
+                                 axes_trans = NA,
+                                 xlim = NA,
+                                 ylim = NA,
+                                 limits = "machine",
+                                 title = NA,
+                                 xlab = NA,
+                                 ylab = NA,
+                                 density_modal = TRUE,
+                                 density_smooth = 1.5,
+                                 density_stack = 0.5,
+                                 axes_text = c(TRUE,TRUE),
+                                 axes_text_font = 1,
+                                 axes_text_size = 1,
+                                 axes_text_col = "black",
+                                 axes_label_text_font = 1,
+                                 axes_label_text_size = 1.1,
+                                 axes_label_text_col = "black",
+                                 title_text_font = 2,
+                                 title_text_size = 1.1,
+                                 title_text_col = "black",
+                                 border_line_type = 1,
+                                 border_line_width = 1,
+                                 border_line_col = "black",
+                                 border_fill = "white",
+                                 legend = FALSE,
+                                 legend_text){
+  
+  # Pull out base layer
+  x <- x[[1]]
+  
+  # Overlay
+  if(length(x) == 1){
+    overlay <- NA
+  }else{
+    overlay <- x[2:length(x)]
+  }
+  
+  # Pull down arguments to named list
+  args <- .args_list()
+  
+  # Call to flowFrame method
+  .args <- formalArgs("cyto_plot_empty.flowFrame")
+  do.call("cyto_plot_empty.flowFrame",
+          args[names(args) %in% .args])
+  
 }
 
 # CYTO_PLOT_WINDOW -------------------------------------------------------------
