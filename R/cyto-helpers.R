@@ -778,7 +778,7 @@ cyto_group_by <- function(x,
   if(group_by == "all"){
     pd_split <- list("all" = pd)
   }else{
-    pd_split <- split(pd, pd[,group_by], sep = " ")
+    pd_split <- split(pd, as.vector(pd[,group_by]), sep = " ")
   }
   
   # Replace each element of pd_split with matching samples
