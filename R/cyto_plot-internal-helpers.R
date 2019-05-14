@@ -344,6 +344,7 @@
     "title_text_size",
     "title_text_col",
     "density_stack",
+    "axes_text",
     "axes_text_font",
     "axes_text_size",
     "axes_text_col",
@@ -892,8 +893,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 
 #' Set plot margins
 #'
-#' @param x flowFrame or flowSet object to be plotted (post merging).
-#' @param overlay object to overlay.
+#' @param x list of flowFrames.
 #' @param legend logical indicating whether a legend should be included in the
 #'   plot.
 #' @param legend_text text to be used in the legend, used to calculate required
@@ -904,11 +904,10 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @noRd
 .cyto_plot_margins <- function(x,
-                               overlay = NA,
                                legend = FALSE,
                                legend_text = NA,
                                title,
-                               axes_text = c(TRUE,TRUE)) {
+                               axes_text = list(TRUE,TRUE)) {
 
   # Bypass setting margins on cyto_plot_grid
   if (!getOption("CytoRSuite_cyto_plot_grid")) {
@@ -920,7 +919,7 @@ cyto_plot_overlay_convert <- function(x, ...){
     mar <- c(5.1,5.1,4.1,2.1)
       
     # Make space for legend text on right
-    if(!.all_na(args[["overlay"]]) & 
+    if(length(x) > 1 & 
        legend != FALSE & 
        !.all_na(legend_text)){
       mar[4] <- 7 + max(nchar(legend_text)) * 0.32
@@ -932,12 +931,12 @@ cyto_plot_overlay_convert <- function(x, ...){
     }
       
     # Remove space below plot if x axis is missing
-    if(!axes_text[1]){
+    if(all(axes_text[[1]] == FALSE)){
       mar[1] <- 4.1
     }
       
     # Remove space below plot if y axis is missing
-    if(!axes_text[2]){
+    if(all(axes_text[[2]] == FALSE)){
       mar[2] <- 4.1
     }
     
@@ -1155,45 +1154,48 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Pull down arguments to named list
   args <- .args_list()
   
+  # Update arguments
+  .args_update(args)
+  
   # 1D density distributions
-  if (length(args[["channels"]]) == 1) {
+  if (length(channels) == 1) {
 
     # missing/empty replace with valid title
-    if(.empty(args[["title"]])){
+    if(.empty(title)){
     
       # stacked/overlays lack a title
-      if(.all_na(args[["overlay"]])){
-        args[["title"]] <- identifier(args[["x"]])
-        if(args[["title"]] == "anonymous"){
-          args[["title"]] <- "Combined Events"
+      if(.all_na(overlay)){
+        title <- identifier(x)
+        if(title == "anonymous"){
+          title <- "Combined Events"
         }
       }else{
-        args[["title"]] <- NA
+        title <- NA
       }
       
     # NA will remove title in cyto_plot_empty  
-    }else if(.all_na(args[["title"]])){
-      args[["title"]] <- NA
+    }else if(.all_na(title)){
+      title <- NA
     }
 
     # 2D scatterplots
-  } else if (length(args[["channels"]]) == 2) {
+  } else if (length(channels) == 2) {
 
     # missing title replaced with sample name
-    if(.empty(args[["title"]])){
-      args[["title"]] <- identifier(args[["x"]])
-      if(args[["title"]] == "anonymous"){
-        args[["title"]] <- "Combined Events"
+    if(.empty(title)){
+      title <- identifier(x)
+      if(title == "anonymous"){
+        title <- "Combined Events"
       }
       
     # NA will remove title in cyto_plot_empty  
-    }else if(.all_na(args[["title"]])){
-      args[["title"]] <- NA
+    }else if(.all_na(title)){
+      title <- NA
     }
     
   }
 
-  return(args[["title"]])
+  return(title)
 }
 
 # AXES LABELS ------------------------------------------------------------------

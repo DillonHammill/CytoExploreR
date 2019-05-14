@@ -208,31 +208,27 @@ cyto_plot_empty <- function(x,
 
   }
   
-  # Get Axis Breaks and Labels from trans if supplied
-  if(is.null(getOption("CytoRSuite_cyto_plot_axes_text"))){
-    axs <- .cyto_plot_axes_text(
-      x,
-      channels = channels,
-      axes_trans = axes_trans
-    )
-  }else if(names(getOption("CytoRSuite_cyto_plot_axes_text")) != channels){
-    axs <- .cyto_plot_axes_text(
-      x,
-      channels = channels,
-      axes_trans = axes_trans
-    )
-  }else{
-    axs <- getOption("CytoRSuite_cyto_plot_axes_text")
+  # Convert axes_text to list - allows inheritance from cyto_plot
+  if(!inherits(axes_text, "list")){
+    axes_text <- list(axes_text[1], axes_text[2])
   }
-
-  # x axis text
-  xtext <- axs[[1]]
-
-  # Y axis text for 1D density distributions
-  if(length(channels) == 1) {
-    ytext <- NA
-  }else{
-    ytext <- axs[[2]]
+  
+  # X axis breaks and labels -  can be inherited from cyto_plot
+  if(!inherits(axes_text[[1]], "list") & axes_text[[1]] == TRUE){
+    axes_text[[1]] <- .cyto_plot_axes_text(x,
+                                           channels = channels[1],
+                                           axes_trans = axes_trans)[[1]]
+  }
+  
+  # Y axis breaks and labels - can be inherited from cyto_plot
+  if(!inherits(axes_text[[2]],"list") & axes_text[[2]] == TRUE){
+    if(length(channels) == 2){
+      axes_text[[2]] <- .cyto_plot_axes_text(x,
+                                           channels = channels[2],
+                                           axes_trans = axes_trans)[[1]]
+    }else{
+      axes_text[[2]] <- NA
+    }
   }
   
   # Turn off y axis labels for stacked overlays
@@ -240,7 +236,7 @@ cyto_plot_empty <- function(x,
      density_stack != 0 &
      length(channels) == 1){
     
-    axes_text <- c(axes_text[1], FALSE)
+    axes_text <- list(axes_text[[1]], FALSE)
     
   }
   
@@ -263,41 +259,33 @@ cyto_plot_empty <- function(x,
                  bty = "n")
   
   # X axis
-  if(axes_text[1]){
-    
-    if(.all_na(xtext)){
-      axis(1,
-           font.axis = axes_text_font,
-           col.axis = axes_text_col,
-           cex.axis = axes_text_size)
-    }else{
-      axis(1,
-           at = xtext$at,
-           labels = xtext$label,
-           font.axis = axes_text_font,
-           col.axis = axes_text_col,
-           cex.axis = axes_text_size)
-    }
-    
+  if(.all_na(axes_text[[1]])){
+    axis(1,
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size)
+  }else if(inherits(axes_text[[1]], "list")){
+    axis(1,
+         at = axes_text[[1]]$at,
+         labels = axes_text[[1]]$label,
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size)
   }
   
   # Y axis
-  if(axes_text[2]){
-    
-    if(.all_na(ytext)){
-      axis(2,
-           font.axis = axes_text_font,
-           col.axis = axes_text_col,
-           cex.axis = axes_text_size)
-    }else{
-      axis(2,
-           at = ytext$at,
-           labels = ytext$label,
-           font.axis = axes_text_font,
-           col.axis = axes_text_col,
-           cex.axis = axes_text_size)
-    }
-    
+  if(.all_na(axes_text[[2]])){
+    axis(2,
+        font.axis = axes_text_font,
+        col.axis = axes_text_col,
+        cex.axis = axes_text_size)
+  }else if(inherits(axes_text[[2]], "list")){
+    axis(2,
+        at = ytext$at,
+        labels = ytext$label,
+        font.axis = axes_text_font,
+        col.axis = axes_text_col,
+        cex.axis = axes_text_size)
   }
   
   # Border
