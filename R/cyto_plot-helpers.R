@@ -16,8 +16,7 @@
 #'   labels of the plot are appropriately transformed. The transformation object
 #'   will NOT be applied to the flowFrame internally and should be applied to
 #'   the flowFrame prior to plotting.
-#' @param overlay a \code{flowFrame}, \code{flowSet} or list of
-#'   \code{flowFrames} to be overlaid onto the plot.
+#' @param overlay a list of flowFrames to overlay onto the plot.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
 #' @param limits indicates whether the axes limits should be based on the
@@ -197,13 +196,19 @@ cyto_plot_empty.flowFrame <- function(x,
                   density_stack * y_max)
       
       # Shift distributions for stacking
-      lapply(seq_len(length(fr_dens)), function(z){
-        fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
-      })
+      if(density_stack > 0 & !.all_na(overlay)){
+        lapply(seq_len(length(fr_dens)), function(z){
+          fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
+        })
+      }
       
       # YLIM 
       if(.all_na(ylim)){
-        ylim <- c(0, y_max + ovn * density_stack * y_max)
+        if(!.all_na(overlay)){
+          ylim <- c(0, y_max + ovn * density_stack * y_max)
+        }else{
+          ylim <- c(0, y_max)
+        }
       }
       
     }else if(length(channels) == 2){
@@ -221,20 +226,25 @@ cyto_plot_empty.flowFrame <- function(x,
   }
   
   # X axis breaks and labels -  can be inherited from cyto_plot
-  if(!inherits(axes_text[[1]], "list") & axes_text[[1]] == TRUE){
-    axes_text[[1]] <- .cyto_plot_axes_text(x,
-                                           channels = channels[1],
-                                           axes_trans = axes_trans)[[1]]
+  if(!inherits(axes_text[[1]], "list")){
+    if(axes_text[[1]] == TRUE){
+      axes_text[[1]] <- .cyto_plot_axes_text(x,
+                                             channels = channels[1],
+                                             axes_trans = axes_trans)[[1]]
+    }
   }
   
   # Y axis breaks and labels - can be inherited from cyto_plot
-  if(!inherits(axes_text[[2]],"list") & axes_text[[2]] == TRUE){
-    if(length(channels) == 2){
-      axes_text[[2]] <- .cyto_plot_axes_text(x,
-                                           channels = channels[2],
-                                           axes_trans = axes_trans)[[1]]
-    }else{
-      axes_text[[2]] <- NA
+  if(!inherits(axes_text[[2]],"list")){
+    
+    if(axes_text[[2]] == TRUE){
+      if(length(channels) == 2){
+        axes_text[[2]] <- .cyto_plot_axes_text(x,
+                                               channels = channels[2],
+                                               axes_trans = axes_trans)[[1]]
+      }else{
+        axes_text[[2]] <- NA
+      }
     }
   }
   
@@ -248,8 +258,7 @@ cyto_plot_empty.flowFrame <- function(x,
   }
   
   # Set plot margins - set par("mar")
-  .cyto_plot_margins(x,
-                     overlay = overlay,
+  .cyto_plot_margins(c(list(x), overlay),
                      legend = legend,
                      legend_text = legend_text,
                      title = title,
@@ -266,33 +275,33 @@ cyto_plot_empty.flowFrame <- function(x,
                  bty = "n")
   
   # X axis
-  if(.all_na(axes_text[[1]])){
-    axis(1,
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size)
-  }else if(inherits(axes_text[[1]], "list")){
+  if(inherits(axes_text[[1]], "list")){
     axis(1,
          at = axes_text[[1]]$at,
          labels = axes_text[[1]]$label,
          font.axis = axes_text_font,
          col.axis = axes_text_col,
          cex.axis = axes_text_size)
+  }else if(.all_na(axes_text[[1]])){
+    axis(1,
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size)
   }
   
   # Y axis
-  if(.all_na(axes_text[[2]])){
+  if(inherits(axes_text[[2]], "list")){
     axis(2,
+        at = axes_text[[2]]$at,
+        labels = axes_text[[2]]$label,
         font.axis = axes_text_font,
         col.axis = axes_text_col,
         cex.axis = axes_text_size)
-  }else if(inherits(axes_text[[2]], "list")){
+  }else if(.all_na(axes_text[[2]])){
     axis(2,
-        at = ytext$at,
-        labels = ytext$label,
-        font.axis = axes_text_font,
-        col.axis = axes_text_col,
-        cex.axis = axes_text_size)
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size)
   }
   
   # Border
@@ -318,47 +327,53 @@ cyto_plot_empty.flowFrame <- function(x,
   }
   
   # X axis label - position labels closer if axes text is missing
-  if(!axes_text[1] & 
-     !.all_na(xlab)){
+  if(!.all_na(xlab)){
     
-    title(xlab = xlab,
-          font.lab = axes_label_text_font,
-          col.lab = axes_label_text_col,
-          cex.lab = axes_label_text_size,
-          mgp = c(2,0,0))
-    
-  }else if(axes_text[1] & 
-           !.all_na(xlab)){
-    
-    title(xlab = xlab,
-          font.lab = axes_label_text_font,
-          col.lab = axes_label_text_col,
-          cex.lab = axes_label_text_size)
+    if(inherits(axes_text[[1]], "list")){
+      title(xlab = xlab,
+            font.lab = axes_label_text_font,
+            col.lab = axes_label_text_col,
+            cex.lab = axes_label_text_size)
+    }else if(.all_na(axes_text[[1]])){
+      title(xlab = xlab,
+            font.lab = axes_label_text_font,
+            col.lab = axes_label_text_col,
+            cex.lab = axes_label_text_size)
+    }else if(axes_text[[1]] == FALSE){
+      title(xlab = xlab,
+            font.lab = axes_label_text_font,
+            col.lab = axes_label_text_col,
+            cex.lab = axes_label_text_size,
+            mgp = c(2,0,0))
+    }
     
   }
   
   # Y axis label - position labels closer if axes text is missing
-  if(!axes_text[2] & 
-     !.all_na(ylab)){
+  if(!.all_na(ylab)){
     
-    title(ylab = ylab,
-          font.lab = axes_label_text_font,
-          col.lab = axes_label_text_col,
-          cex.lab = axes_label_text_size,
-          mgp = c(2,0,0))
-    
-  }else if(axes_text[2] & 
-           !.all_na(ylab)){
-    
-    title(ylab = ylab,
-          font.lab = axes_label_text_font,
-          col.lab = axes_label_text_col,
-          cex.lab = axes_label_text_size)
-    
-  }
+    if(inherits(axes_text[[2]], "list")){
+      title(ylab = ylab,
+            font.lab = axes_label_text_font,
+            col.lab = axes_label_text_col,
+            cex.lab = axes_label_text_size)
+    }else if(.all_na(axes_text[[2]])){
+      title(ylab = ylab,
+            font.lab = axes_label_text_font,
+            col.lab = axes_label_text_col,
+            cex.lab = axes_label_text_size)
+    }else if(axes_text[[2]] == FALSE){
+      title(ylab = ylab,
+            font.lab = axes_label_text_font,
+            col.lab = axes_label_text_col,
+            cex.lab = axes_label_text_size,
+            mgp = c(2,0,0))
+    }
+
+ }
 
 }
-
+  
 #' @rdname cyto_plot_empty
 #' @export
 cyto_plot_empty.list <- function(x,
@@ -390,9 +405,6 @@ cyto_plot_empty.list <- function(x,
                                  legend = FALSE,
                                  legend_text){
   
-  # Pull out base layer
-  x <- x[[1]]
-  
   # Overlay
   if(length(x) == 1){
     overlay <- NA
@@ -400,13 +412,38 @@ cyto_plot_empty.list <- function(x,
     overlay <- x[2:length(x)]
   }
   
-  # Pull down arguments to named list
-  args <- .args_list()
+  # Pull out base layer
+  x <- x[[1]]
   
-  # Call to flowFrame method
-  .args <- formalArgs("cyto_plot_empty.flowFrame")
-  do.call("cyto_plot_empty.flowFrame",
-          args[names(args) %in% .args])
+  cyto_plot_empty.flowFrame(x,
+                   channels = channels,
+                   axes_trans = axes_trans,
+                   overlay = overlay,
+                   xlim = xlim,
+                   ylim = ylim,
+                   limits = limits,
+                   title = title,
+                   xlab = xlab,
+                   ylab = ylab,
+                   density_modal = density_modal,
+                   density_smooth = density_smooth,
+                   density_stack = density_stack,
+                   axes_text = axes_text,
+                   axes_text_font = axes_text_font,
+                   axes_text_size = axes_text_size,
+                   axes_text_col = axes_text_col,
+                   axes_label_text_font = axes_label_text_font,
+                   axes_label_text_size = axes_label_text_size,
+                   axes_label_text_col = axes_label_text_col,
+                   title_text_font = title_text_font,
+                   title_text_size = title_text_size,
+                   title_text_col = title_text_col,
+                   border_line_type = border_line_type,
+                   border_line_width = border_line_width,
+                   border_line_col = border_line_col,
+                   border_fill = border_fill,
+                   legend = legend,
+                   legend_text = legend_text)
   
 }
 

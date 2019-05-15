@@ -1412,7 +1412,7 @@ cyto_plot.GatingSet <- function(x,
                                 density_modal = TRUE,
                                 density_smooth = 0.6,
                                 density_stack = 0.5,
-                                density_layers = length(x),
+                                density_layers = NA,
                                 density_cols = NA,
                                 density_fill = NA,
                                 density_fill_alpha = 1,
@@ -1472,7 +1472,7 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Signal a custom plot if layout is FALSE
-  if (!is.null(layout)) {
+  if (!missing(layout)) {
     if (all(layout == FALSE)) {
       options("CytoRSuite_cyto_plot_custom" = TRUE)
     }
@@ -1497,23 +1497,25 @@ cyto_plot.GatingSet <- function(x,
   on.exit(par(old_pars))
 
   # cyto_plot_theme ------------------------------------------------------------
-  
+
+  # Remember all missing arguments now converted to "" (use .empty())
+
   # Pull down arguments to named list
   args <- .args_list()
-  
+
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # Update arguments
-  .args_update()
-  
+  .args_update(args)
+
   # cyto_plot_save -------------------------------------------------------------
-  
+
   # Turn off popup if cyto_plot_save is activated
-  if(getOption("CytoRSuite_cyto_plot_save") == TRUE){
+  if (getOption("CytoRSuite_cyto_plot_save") == TRUE) {
     popup <- FALSE
   }
-  
+
   # Extract channels & transformations -----------------------------------------
 
   # Get valid channel names if markers are supplied
@@ -1548,7 +1550,7 @@ cyto_plot.GatingSet <- function(x,
   fs <- cyto_extract(x, parent)
 
   # Add data to list and group if necessary - convert groups to flowFrames
-  if (!missing(group_by)) {
+  if (!.empty(group_by)) {
     fs_list <- cyto_group_by(fs, group_by)
     fr_list <- lapply(fr_list, function(z) {
       cyto_convert(z, "flowFrame")
@@ -1581,7 +1583,7 @@ cyto_plot.GatingSet <- function(x,
     } else if (inherits(overlay, "flowSet")) {
 
       # Apply same grouping to overlay
-      if (!missing(group_by)) {
+      if (!.empty(group_by)) {
         overlay_list <- cyto_group_by(overlay, group_by)
         overlay_list <- lapply(overlay_list, function(z) {
           cyto_convert(z, "flowFrame")
@@ -1604,7 +1606,7 @@ cyto_plot.GatingSet <- function(x,
       }
 
       # Apply same grouping to overlay
-      if (!missing(group_by)) {
+      if (!.empty(group_by)) {
         overlay_list <- lapply(overlay, function(z) {
           cyto_group_by(z, group_by)
         })
@@ -1621,19 +1623,30 @@ cyto_plot.GatingSet <- function(x,
 
       overlay_list <- overlay_list %>% transpose()
     }
+    
+  # No overlay
+  }else if(.all_na(overlay)){
+    nms <- names(fr_list)
+    fr_list <- lapply(seq(1,length(fr_list)), function(z){
+      lst <- list(fr_list[[z]])
+      names(lst) <- nms[z]
+      return(lst)
+    })
   }
 
   # Combine base layers with overlay into list of flowFrame lists
-  nms <- names(fr_list)
-  fr_list <- lapply(seq_len(length(fr_list)), function(z) {
-    c(fr_list[z], overlay_list[[z]])
-  })
-  names(fr_list) <- nms
+  if (!.all_na(overlay)) {
+    nms <- names(fr_list)
+    fr_list <- lapply(seq_len(length(fr_list)), function(z) {
+      c(fr_list[z], overlay_list[[z]])
+    })
+    names(fr_list) <- nms
+  }
 
   # Extract gate objects -------------------------------------------------------
 
   # Allow alias = "" to plot all appropriate gates
-  if (!missing(alias)) {
+  if (.empty(alias)) {
     # Plot all appropriate gates if alias is an empty character string
     if (all(alias == "")) {
       gt <- templateGen(x[[1]])
@@ -1649,7 +1662,7 @@ cyto_plot.GatingSet <- function(x,
 
   # Extract gate objects directly from x
   if (!.all_na(alias)) {
-    if (missing(group_by)) {
+    if (!.empty(group_by)) {
       gate <- lapply(nms, function(nm) {
         gt <- lapply(alias, function(z) {
           getGate(x[[match(nm, pd$group_by)]], z)
@@ -1678,7 +1691,7 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Legend text
-  if (missing(legend_text)) {
+  if (.empty(legend_text)) {
     if (!.all_na(overlay)) {
       if (class(overlay) == "character") {
         legend_text <- c(parent, overlay)
@@ -1689,10 +1702,10 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Title
-  if (missing(title)) {
+  if (.empty(title)) {
 
     # Extract plot title from names of fr_list
-    title <- names(fr_list)
+    title <- nms
 
     # Add parent name to each plot
     title <- unlist(lapply(title, function(z) {
@@ -1716,9 +1729,8 @@ cyto_plot.GatingSet <- function(x,
 
   # X axis breaks and labels - pass through axes_text argument
   if (axes_text[1] == TRUE) {
-    axes_text_x <- .cyto_plot_axes_text(x,
-      channels = channels,
-      axes_trans = axes_trans
+    axes_text_x <- .cyto_plot_axes_text(x[[1]],
+      channels = channels
     )[[1]]
   } else {
     axes_text_x <- FALSE
@@ -1727,9 +1739,8 @@ cyto_plot.GatingSet <- function(x,
   # Y axis breaks and labels - pass through axes_text argument
   if (axes_text[2] == TRUE) {
     if (length(channels) == 2) {
-      axes_text_y <- .cyto_plot_axes_text(x,
-        channels = channels[2],
-        axes_trans = axes_trans
+      axes_text_y <- .cyto_plot_axes_text(x[[1]],
+        channels = channels[2]
       )[[1]]
     } else {
       axes_text_y <- NA
@@ -1742,7 +1753,7 @@ cyto_plot.GatingSet <- function(x,
   # X axis limits
   if (.all_na(xlim)) {
     xlim <- lapply(fr_list, function(z) {
-      .cyto_plot_axes_limits(z,
+      .cyto_range(z,
         channels = channels[1],
         limits = limits,
         plot = TRUE
@@ -1754,8 +1765,8 @@ cyto_plot.GatingSet <- function(x,
   # Y axis limits - 1D y limit calculated downstream
   if (.all_na(ylim) & length(channels) != 1) {
     ylim <- lapply(fr_list, function(z) {
-      .cyto_plot_axes_limits(z,
-        channels = channels[2],
+      .cyto_range(z,
+        channels = channels[1],
         limits = limits,
         plot = TRUE
       )[, 1]
@@ -1769,10 +1780,11 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Layout - missing/off/supplied
-  if (missing(layout)) {
+  if (.empty(layout)) {
 
     # Layout dimensions
     layout <- .cyto_plot_layout(fr_list,
+      channels = channels,
       layout = layout,
       density_stack = density_stack,
       density_layers = density_layers
@@ -1783,33 +1795,32 @@ cyto_plot.GatingSet <- function(x,
     layout <- par("mfrow")
   }
   par("mfrow" = layout)
+  np <- layout[1] * layout[2]
 
   # Repeat arguments as required -----------------------------------------------
 
   # Pull down arguments to named list - missing converted to ""
   args <- .args_list()
-  
-  # Pass relevant arguments to .cyto_plot_args_split
-  .args <- formalArgs(".cyto_plot_args_split")
-  args <- .cyto_plot_args_split(args[names(args) %in% .args],
+
+  # Repeat arguments as required using .cyto_plot_args_split
+  args <- .cyto_plot_args_split(args,
     channels = channels,
     n = length(fr_list[[1]]) * length(fr_list),
     plots = length(fr_list),
     layers = length(fr_list[[1]]),
-    gates = length(gate)
+    gates = length(gate[[1]])
   )
 
   # Update arguments
   .args_update(args)
-
+  
   # Calls to cyto_plot flowFrame method ----------------------------------------
-
+  
   # Pass arguments to .cyto_plot to construct plot
   cnt <- 0
   mapply(
     function(fr_list,
                  gate,
-                 axes_trans,
                  limits,
                  display,
                  xlim,
@@ -1874,7 +1885,7 @@ cyto_plot.GatingSet <- function(x,
       cnt <<- cnt + 1
       
       .cyto_plot(fr_list,
-                 channels = channels,
+        channels = channels,
         gate = gate,
         axes_trans = axes_trans,
         limits = limits,
@@ -1939,18 +1950,16 @@ cyto_plot.GatingSet <- function(x,
         border_line_col = border_line_col,
         border_fill = border_fill
       )
-      
-      if(popup == TRUE &
-         cnt %% np == 0 &
-         length(fr_list) > cnt) {
+
+      if (popup == TRUE &
+        cnt %% np == 0 &
+        length(fr_list) > cnt) {
         cyto_plot_window()
         par("mfrow" = layout)
       }
-      
     },
     fr_list,
     gate,
-    axes_trans,
     limits,
     display,
     xlim,

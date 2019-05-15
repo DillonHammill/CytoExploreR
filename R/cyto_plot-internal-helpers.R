@@ -845,8 +845,9 @@ cyto_plot_overlay_convert <- function(x, ...){
 
 #' Set plot layout
 #'
-#' @param x object to be plotted.
-#' @param layout grid dimensions c(nr, nc), NULL or FALSE.
+#' @param x list of flowFrame lists to be plotted.
+#' @param channels
+#' @param layout grid dimensions c(nr, nc), NA or FALSE.
 #' @param density_stack degree of offset.
 #' @param denisity_layers number of layers per plot.
 #'
@@ -854,31 +855,36 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @noRd
 .cyto_plot_layout <- function(x,
+                              channels,
                               layout = NA,
                               density_stack = 0,
-                              density_layers = 1) {
+                              density_layers = NA) {
 
   # Number of samples
   smp <- length(x)
 
   # Stacking
-  if (density_stack != 0) {
-    if (density_layers == smp) {
-      smp <- ceiling(smp / smp)
-    } else {
-      smp <- ceiling(smp / density_layers)
+  if(length(channels) == 1){
+    if (density_stack != 0) {
+      if(!.all_na(density_layers)){
+        if (density_layers == smp) {
+          smp <- ceiling(smp / smp)
+        }else {
+          smp <- ceiling(smp / density_layers)
+        }
+      }
     }
   }
 
   # Plot layout
-  if (.all_na(layout)) {
+  if (.empty(layout)) {
     if (smp > 1) {
       mfrw <- c(grDevices::n2mfrow(smp)[2], grDevices::n2mfrow(smp)[1])
     } else {
       mfrw <- c(1, 1)
     }
-  } else if (!.all_na(layout)) {
-    if (layout[1] == FALSE) {
+  } else if (!.empty(layout)) {
+    if (layout[1] %in% c(FALSE, NA)) {
 
       # Do nothing
     } else {
@@ -908,7 +914,7 @@ cyto_plot_overlay_convert <- function(x, ...){
                                legend_text = NA,
                                title,
                                axes_text = list(TRUE,TRUE)) {
-
+  
   # Bypass setting margins on cyto_plot_grid
   if (!getOption("CytoRSuite_cyto_plot_grid")) {
       
@@ -929,15 +935,23 @@ cyto_plot_overlay_convert <- function(x, ...){
     if(.all_na(title)){
       mar[3] <- 2.1
     }
-      
+    
     # Remove space below plot if x axis is missing
-    if(all(axes_text[[1]] == FALSE)){
-      mar[1] <- 4.1
+    if(!all(inherits(axes_text[[1]], "list"))){
+      if(.all_na(axes_text[[1]])){
+        # NA == FALSE returns NA not T/F
+      }else if(all(axes_text[[1]] == FALSE)){
+        mar[1] <- 4.1
+      }
     }
       
     # Remove space below plot if y axis is missing
-    if(all(axes_text[[2]] == FALSE)){
-      mar[2] <- 4.1
+    if(!all(inherits(axes_text[[2]], "list"))){
+      if(.all_na(axes_text[[2]])){
+        # NA == FALSE return NA not T/F
+      }else if(all(axes_text[[2]] == FALSE)){
+        mar[2] <- 4.1
+      }
     }
     
     # Set update graphics parameter
@@ -1149,7 +1163,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 .cyto_plot_title <- function(x,
                              channels,
                              overlay = NA,
-                             title) {
+                             title = "") {
   
   # Pull down arguments to named list
   args <- .args_list()
@@ -1636,7 +1650,7 @@ cyto_plot_overlay_convert <- function(x, ...){
                                      (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
                                      }))
       
-      # Too much computation required here - do this in cyto_plot_1d flowFrame
+      # Too much computation required here - do this in .cyto_plot
       }else if(.all_na(label_box_y) & !density_modal){
         stop("Need to supply y positions for labels")
       } 
@@ -1656,6 +1670,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       label_box_alpha <- rep(label_box_alpha, length.out = length(gate))
     
       mapply(function(fr,x) {
+        
         suppressMessages(cyto_plot_label(
           x = fr,
           channels = channels,
@@ -2159,16 +2174,6 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Assign gate to gts
   gts <- gate
   
-  # Valid gate objects
-  typs <- c("filters","rectangleGate","polygonGate","ellipsoidGate")
-  
-  # Convert gate object to list of gates
-  if(inherits(gts,"list")){
-    if(!all(unlist(lapply(gts, "class")) %in% typs)){
-      stop("'gate' does not contain a list of valid gate objects.")
-    }
-  }
-  
   # Plot limits
   xmin <- par("usr")[1]
   xmax <- par("usr")[2]
@@ -2179,7 +2184,9 @@ cyto_plot_overlay_convert <- function(x, ...){
   yrange <- ymax - ymin
   
   # Co-ordinates for gate centers
-  coords <- lapply(gts, function(gt){
+  coords <- mapply(function(gt,
+                            text_x,
+                            text_y){
     
     # Label co-ordinate
     .cyto_plot_label_coords(gt,
@@ -2187,9 +2194,12 @@ cyto_plot_overlay_convert <- function(x, ...){
                             text_x = text_x,
                             text_y = text_y)
     
-  })
-  coords <- do.call("rbind", coords)
-  colnames(coords) <- c("x", "y")
+  },gts,
+  text_x,
+  text_y)
+  
+  # Each column different gate
+  rownames(coords) <- c("x", "y")
   
   # Repeat text_size
   text_size <- rep(text_size, length.out = length(gts))
@@ -2202,8 +2212,8 @@ cyto_plot_overlay_convert <- function(x, ...){
     
     .cyto_plot_label_dims(text = text[z],
                           stat = stat[z],
-                          box_x = coords[,"x"][z],
-                          box_y = coords[,"y"][z],
+                          box_x = coords["x",][z],
+                          box_y = coords["y",][z],
                           text_size = text_size[z])
     
   })
@@ -2219,7 +2229,7 @@ cyto_plot_overlay_convert <- function(x, ...){
     label_height <- max(label_dims[[1]][,"y"]) - 
       min(label_dims[[1]][,"y"])
     label_height <- label_height + 0.18*label_height
-    coords[,"y"] <- spread.labs(coords[,"y"],
+    coords["y",] <- spread.labs(coords["y",],
                                 mindiff = label_height,
                                 min = ymin + 0.05*yrange,
                                 max = ymax - 0.05*yrange)
@@ -2227,7 +2237,7 @@ cyto_plot_overlay_convert <- function(x, ...){
   }
   
   # Return a list of adjusted label positions
-  coords <- list(coords[,"x"], coords[,"y"])
+  coords <- list(coords["x",], coords["y",])
   names(coords) <- c("x","y")
   
   return(coords)

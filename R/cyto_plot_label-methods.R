@@ -655,9 +655,6 @@ cyto_plot_label.list <- function(x,
                                 text_col = "black",
                                 box_alpha = 0.6) {
             
-            # Convert filters object in list to list of gate
-            gate <- unlist(gate)
-            
             # Get adjusted label coords to prevent overlap
             coords <- .cyto_plot_label_offset(x,
                                               gate = gate,

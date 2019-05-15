@@ -42,7 +42,7 @@
 #' @noRd
 .cyto_plot <- function(x,
                        channels,
-                       gate,
+                       gate = NA,
                        axes_trans = NA,
                        limits = "machine",
                        display = 1,
@@ -82,7 +82,7 @@
                        axes_label_text_size = 1.1,
                        axes_label_text_col = "black",
                        legend = FALSE,
-                       legend_text,
+                       legend_text = NA,
                        legend_text_font = 1,
                        legend_text_size = 1,
                        legend_text_col = "black",
@@ -109,6 +109,14 @@
   # Get current graphics parameters and reset on exit
   pars <- par("mar")
   on.exit(par(pars))
+  
+  # ARGUMENTS ------------------------------------------------------------------
+  
+  # Pull down arguments to named list - convert missing to ""
+  args <- .args_list()
+  
+  # Update arguments
+  .args_update(args)
   
   # SAMPLING -------------------------------------------------------------------
    
@@ -185,7 +193,7 @@
                 density_stack * y_max)
   
     # Adjust y values if stacking is been applied
-    if(density_stack > 0){  
+    if(density_stack > 0 & length(x) > 1){  
       # Shift distributions for stacking
       lapply(seq_len(length(fr_dens)), function(z){
         if(!.all_na(fr_dens[[z]])){
@@ -198,19 +206,36 @@
     if(popup){
       cyto_plot_window()
     }
-  
-    # MARGINS
-    .cyto_plot_margins(x,
-                       legend = legend,
-                       legend_text = legend_text,
-                       title = title,
-                       axes_text = axes_text)
     
     # EMPTY PLOT - handles margins and axes limits internally
-    args <- .args_list()
-    .args <- formalArgs("cyto_plot_empty.list")
-    do.call("cyto_plot_empty.list", 
-            args[names(args) %in% .args])
+    cyto_plot_empty(x,
+                              channels = channels,
+                              axes_trans = axes_trans,
+                              xlim = xlim,
+                              ylim = ylim,
+                              limits = limits,
+                              title = title,
+                              xlab = xlab,
+                              ylab = ylab,
+                              density_modal = density_modal,
+                              density_smooth = density_smooth,
+                              density_stack = density_stack,
+                              axes_text = axes_text,
+                              axes_text_font = axes_text_font,
+                              axes_text_size = axes_text_size,
+                              axes_text_col = axes_text_col,
+                              axes_label_text_font = axes_label_text_font,
+                              axes_label_text_size = axes_label_text_size,
+                              axes_label_text_col = axes_label_text_col,
+                              title_text_font = title_text_font,
+                              title_text_size = title_text_size,
+                              title_text_col = title_text_col,
+                              border_line_type = border_line_type,
+                              border_line_width = border_line_width,
+                              border_line_col = border_line_col,
+                              border_fill = border_fill,
+                              legend = legend,
+                              legend_text = legend_text)
 
     # DENSITY FILL - inherits theme internally
     if(.all_na(density_fill)){
@@ -268,7 +293,7 @@
       # LABEL?
       if(!.all_na(gate) & 
          .empty(label)){
-        label<- TRUE # turn on labels if gate
+        label <- TRUE # turn on labels if gate
       
       }else if(.all_na(gate) &
                .empty(label)){
@@ -377,19 +402,36 @@
     if(popup){
       cyto_plot_window()
     }
-  
-    # MARGINS
-    .cyto_plot_margins(x,
-                       legend = legend,
-                       legend_text = legend_text,
-                       title = title,
-                       axes_text = axes_text)
-  
+    
     # EMPTY PLOT - handles margins and axes limits internally
-    args <- .args_list()
-    .args <- formalArgs("cyto_plot_empty")
-    do.call("cyto_plot_empty", 
-            args[names(args) %in% .args])
+    cyto_plot_empty(x,
+                    channels = channels,
+                    axes_trans = axes_trans,
+                    xlim = xlim,
+                    ylim = ylim,
+                    limits = limits,
+                    title = title,
+                    xlab = xlab,
+                    ylab = ylab,
+                    density_modal = density_modal,
+                    density_smooth = density_smooth,
+                    density_stack = density_stack,
+                    axes_text = axes_text,
+                    axes_text_font = axes_text_font,
+                    axes_text_size = axes_text_size,
+                    axes_text_col = axes_text_col,
+                    axes_label_text_font = axes_label_text_font,
+                    axes_label_text_size = axes_label_text_size,
+                    axes_label_text_col = axes_label_text_col,
+                    title_text_font = title_text_font,
+                    title_text_size = title_text_size,
+                    title_text_col = title_text_col,
+                    border_line_type = border_line_type,
+                    border_line_width = border_line_width,
+                    border_line_col = border_line_col,
+                    border_fill = border_fill,
+                    legend = legend,
+                    legend_text = legend_text)
   
     # POINT COL - list
     if(.all_na(point_col)){
@@ -456,7 +498,7 @@
                              gate_line_width = gate_line_width,
                              gate_line_col = gate_line_col)
     }
-  
+    
     # LABEL
     if(.empty(label)){
       label <- TRUE
@@ -489,7 +531,7 @@
     
     # LABELS WITHOUT GATES  
     }else if(.all_na(gate) &
-             .all_na(label_text) &
+             !.all_na(label_text) &
              label == TRUE){
     
       # label - limited to # layers - arg_split
@@ -502,13 +544,13 @@
                  label_box_x,
                  label_box_y,
                  label_box_alpha) {
-          if (label_stat == "percent") {
+          if (!.all_na(label_stat) & label_stat == "percent") {
             label_stat <- NA
           }
           suppressMessages(cyto_plot_label(
             x = x[[1]],
             channels = channels,
-            gates = gate,
+            gate = gate,
             trans = axes_trans,
             text = label_text,
             stat = label_stat,

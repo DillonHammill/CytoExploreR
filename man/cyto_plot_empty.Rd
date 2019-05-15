@@ -45,8 +45,7 @@ labels of the plot are appropriately transformed. The transformation object
 will NOT be applied to the flowFrame internally and should be applied to
 the flowFrame prior to plotting.}
 
-\item{overlay}{a \code{flowFrame}, \code{flowSet} or list of
-\code{flowFrames} to be overlaid onto the plot.}
+\item{overlay}{a list of flowFrames to overlay onto the plot.}
 
 \item{xlim}{lower and upper limits of x axis (e.g. c(0,5)).}
 
