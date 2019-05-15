@@ -325,6 +325,7 @@
           text_font = label_text_font,
           text_col = label_text_col,
           box_alpha = label_box_alpha,
+          density_smooth = density_smooth,
           offset = FALSE
         ))
       
@@ -387,7 +388,8 @@
         label_box_alpha = label_box_alpha,
         gate_line_col = gate_line_col,
         gate_line_width = gate_line_width,
-        gate_line_type = gate_line_type
+        gate_line_type = gate_line_type,
+        offset = FALSE
       )
       
     }else if(!.all_na(gate) & density_stack == 0){
@@ -398,6 +400,25 @@
     
   # 2D SCATTER PLOTS ----------------------------------------------------------- 
   }else if(length(channels) == 2){
+    
+    # REMOVE NEGATIVE FSC/SSC EVENTS - DENSITY BUG (other linear channels?)
+    if(any(channels %in% c("FSC-A","SSC-A"))){
+      if("FSC-A" %in% channels){
+        x <- lapply(x, function(z){
+          nonDebris <- filter(z, rectangleGate("FSC-A" = c(0, Inf)))
+          z <- Subset(z, nonDebris)
+          return(z)
+        })
+      }
+      if("SSC-A" %in% channels){
+        x <- lapply(x, function(z){
+          nonDebris <- filter(z, rectangleGate("SSC-A" = c(0, Inf)))
+          z <- Subset(z, nonDebris)
+          return(z)
+        })
+        
+      }
+    }
     
     # POPUP
     if(popup){
@@ -528,7 +549,9 @@
                       text_font = label_text_font,
                       text_size = label_text_size,
                       text_col = label_text_col,
-                      box_alpha = label_box_alpha)
+                      box_alpha = label_box_alpha,
+                      density_smooth = density_smooth,
+                      offset = FALSE)
     
     # LABELS WITHOUT GATES  
     }else if(.all_na(gate) &
@@ -561,6 +584,7 @@
             text_font = label_text_font,
             text_col = label_text_col,
             box_alpha = label_box_alpha,
+            density_smooth = density_smooth,
             offset = FALSE
           ))
         }, label_text,

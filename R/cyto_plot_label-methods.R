@@ -44,6 +44,8 @@
 #'   calculation.
 #' @param offset logical indicating whether label co-ordinates should be
 #'   adjusted to prevent labels from overlapping.
+#' @param plot logical indicating whether the labels should be added to the
+#'   plot. Can be turned off to obtain co-ordinates for the labels.
 #' @param ... passes additional list method arguments to other methods.
 #'
 #' @return add a boxed text label to an existing plot.
@@ -52,27 +54,27 @@
 #'
 #' @examples
 #' #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Gate using gate_draw
 #' gating(Activation_gatingTemplate, gs)
-#' 
+#'
 #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "T Cells",
 #'   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A")
 #' )
-#' 
+#'
 #' # Labels without gates - position using text_x and text_y
 #' cyto_plot_label(getData(gs, "T Cells")[[4]],
 #'   gate = NULL,
@@ -82,19 +84,19 @@
 #'   text_x = c(3.1, 1),
 #'   text_y = c(-0.2, 3.2)
 #' )
-#' 
+#'
 #' #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "CD4 T Cells",
 #'   channels = "7-AAD-A"
 #' )
-#' 
+#'
 #' # CD69+ CD4 T Cells gate
 #' gt <- getGate(gs, "CD69+ CD4 T Cells")[[1]]
 #' cyto_plot_gate(gt,
 #'   channels = "7-AAD-A"
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "CD4 T Cells")[[4]],
 #'   gate = gt,
@@ -104,19 +106,19 @@
 #'   stat = "freq",
 #'   text_col = "blue"
 #' )
-#' 
+#'
 #' #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "root",
 #'   channels = c("FSC-A", "SSC-A")
 #' )
-#' 
+#'
 #' # Cells gate
 #' gt <- getGate(gs, "Cells")[[1]]
 #' cyto_plot_gate(gt,
 #'   channels = c("FSC-A", "SSC-A")
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "root")[[4]],
 #'   gate = gt,
@@ -127,19 +129,19 @@
 #'   text_col = "magenta",
 #'   text_size = 1.2
 #' )
-#' 
+#'
 #' #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "Live Cells",
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # T Cells gate
 #' gt <- getGate(gs, "T Cells")[[1]]
 #' cyto_plot_gate(gt,
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "Live Cells")[[4]],
 #'   gate = gt,
@@ -151,19 +153,19 @@
 #'   text_size = 1.2,
 #'   box_alpha = 1
 #' )
-#' 
+#'
 #' #' # Plot
 #' cyto_plot(gs[[4]],
 #'   parent = "Live Cells",
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # T Cells & Dendritic Cells gates
 #' gts <- list(getGate(gs, "T Cells")[[1]], getGate(gs, "Dendritic Cells")[[1]])
 #' cyto_plot_gate(gts,
 #'   channels = c("APC-Cy7-A", "PE-A")
 #' )
-#' 
+#'
 #' # Labels
 #' cyto_plot_label(getData(gs, "Live Cells")[[4]],
 #'   gate = gts,
@@ -211,7 +213,8 @@ cyto_plot_label.NULL <- function(x,
                                  text_size = 0.8,
                                  text_col = "black",
                                  box_alpha = 0.6,
-                                 density_smooth = 0.6, ...) {
+                                 density_smooth = 0.6,
+                                 plot = TRUE, ...) {
 
   # Check statistic
   if (!.all_na(stat)) {
@@ -271,47 +274,53 @@ cyto_plot_label.NULL <- function(x,
   }
 
   # Label co-ordinate
-  text_xy <- .cyto_plot_label_coords(gate,
+  text_xy <- .cyto_plot_label_center(gate,
     channels = channels,
     text_x = text_x,
     text_y = text_y
   )
 
-  # Add labels
-  if (!.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = paste(text, st, sep = "\n"),
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (!.all_na(text) & .all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = text,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = st,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
+  # Add labels to plot?
+  if(plot == TRUE){
+    # Add labels
+    if (!.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (!.all_na(text) & .all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    }
+  }else if(plot == FALSE){
+    return(text_xy)
   }
+
 }
 
 #' @rdname cyto_plot_label
@@ -328,7 +337,8 @@ cyto_plot_label.rectangleGate <- function(x,
                                           text_size = 0.8,
                                           text_col = "black",
                                           box_alpha = 0.6,
-                                          density_smooth = 0.6, ...) {
+                                          density_smooth = 0.6,
+                                          plot = TRUE, ...) {
 
   # Check statistic
   if (!.all_na(stat)) {
@@ -387,47 +397,53 @@ cyto_plot_label.rectangleGate <- function(x,
   }
 
   # Label co-ordinate
-  text_xy <- .cyto_plot_label_coords(gate,
+  text_xy <- .cyto_plot_label_center(gate,
     channels = channels,
     text_x = text_x,
     text_y = text_y
   )
 
-  # Add labels
-  if (!.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = paste(text, st, sep = "\n"),
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (!.all_na(text) & .all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = text,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = st,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
+  # Add labels to plot?
+  if(plot == TRUE){
+    # Add labels
+    if (!.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (!.all_na(text) & .all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    }
+  }else if(plot == FALSE){
+    return(text_xy)
   }
+
 }
 
 #' @rdname cyto_plot_label
@@ -444,7 +460,8 @@ cyto_plot_label.polygonGate <- function(x,
                                         text_size = 0.8,
                                         text_col = "black",
                                         box_alpha = 0.6,
-                                        density_smooth = 0.6, ...) {
+                                        density_smooth = 0.6,
+                                        plot = TRUE, ...) {
 
   # Check statistic
   if (!.all_na(stat)) {
@@ -489,47 +506,53 @@ cyto_plot_label.polygonGate <- function(x,
   }
 
   # Label co-ordinate
-  text_xy <- .cyto_plot_label_coords(gate,
+  text_xy <- .cyto_plot_label_center(gate,
     channels = channels,
     text_x = text_x,
     text_y = text_y
   )
 
-  # Add labels
-  if (!.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = paste(text, st, sep = "\n"),
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (!.all_na(text) & .all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = text,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = st,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
+  # Add labels to plot?
+  if(plot == TRUE){
+    # Add labels
+    if (!.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (!.all_na(text) & .all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    }
+  }else if(plot == FALSE){
+    return(text_xy)
   }
+  
 }
 
 #' @rdname cyto_plot_label
@@ -546,7 +569,8 @@ cyto_plot_label.ellipsoidGate <- function(x,
                                           text_size = 0.8,
                                           text_col = "black",
                                           box_alpha = 0.6,
-                                          density_smooth = 0.6, ...) {
+                                          density_smooth = 0.6,
+                                          plot = TRUE, ...) {
 
   # Check statistic
   if (!.all_na(stat)) {
@@ -591,48 +615,54 @@ cyto_plot_label.ellipsoidGate <- function(x,
     }
   }
 
-  # Label co-ordinate
-  text_xy <- .cyto_plot_label_coords(gate,
+  # Label co-ordinates
+  text_xy <- .cyto_plot_label_center(gate,
     channels = channels,
     text_x = text_x,
     text_y = text_y
   )
 
-  # Add labels
-  if (!.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = paste(text, st, sep = "\n"),
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (!.all_na(text) & .all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = text,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
-  } else if (.all_na(text) & !.all_na(stat)) {
-    .boxed.labels(
-      x = text_xy[1],
-      y = text_xy[2],
-      labels = st,
-      border = FALSE,
-      font = text_font,
-      col = text_col,
-      alpha.bg = box_alpha,
-      cex = text_size
-    )
+  # Add labels to plot?
+  if(plot == TRUE){
+    # Add labels
+    if (!.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = paste(text, st, sep = "\n"),
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (!.all_na(text) & .all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = text,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    } else if (.all_na(text) & !.all_na(stat)) {
+      .boxed.labels(
+        x = text_xy[1,],
+        y = text_xy[2,],
+        labels = st,
+        border = FALSE,
+        font = text_font,
+        col = text_col,
+        alpha.bg = box_alpha,
+        cex = text_size
+      )
+    }
+  }else if(plot == FALSE){
+    return(text_xy)
   }
+  
 }
 
 #' @rdname cyto_plot_label
@@ -650,31 +680,52 @@ cyto_plot_label.list <- function(x,
                                  text_col = "black",
                                  box_alpha = 0.6,
                                  density_smooth = 0.6,
-                                 offset = TRUE, ...) {
+                                 offset = TRUE,
+                                 plot = TRUE, ...) {
 
-  # Get adjusted label coords to prevent overlap
-  if (offset == TRUE |
-      (.all_na(text_x) & .all_na(text_y))) {
-    coords <- .cyto_plot_label_offset(x,
-      gate = gate,
-      channels = channels,
-      text = text,
-      text_x = text_x,
-      text_y = text_y,
-      stat = stat,
-      text_size = text_size
-    )
-
-    # Replace x coords if text_x
-    text_x <- coords[["x"]]
-
-    # Replace y coords if text_y
-    text_y <- coords[["y"]]
+  # List of filters to list of gate objects
+  gate <- unlist(gate)
+  
+  # Missing coordinates
+  if(.all_na(text_x) & .all_na(text_y)){
+    text_xy_NA <- TRUE
+  }else{
+    text_xy_NA <- FALSE
   }
+  
+  # Get co-ordinates of gate centers for labels
+  text_xy <- .cyto_plot_label_center(gate,
+                                     channels = channels,
+                                     text_x = text_x,
+                                     text_y = text_y)
+  
+  # Update co-ordinates
+  text_x <- text_xy[1,]
+  text_y <- text_xy[2,]
+  
+  # Get adjusted co-ordinates if not manually supplied
+  if(offset == TRUE){
+    if(text_xy_NA == TRUE){
+      text_xy <- .cyto_plot_label_offset(x,
+                                        gate = gate,
+                                        channels = channels,
+                                        text = text,
+                                        text_x = text_x,
+                                        text_y = text_y,
+                                        stat = stat,
+                                        text_size = text_size
+      )
+      text_xy <- do.call("cbind", text_xy)
+    }
+  }
+  
+  # Update co-ordinates
+  text_x <- text_xy[1,]
+  text_y <- text_xy[2,]
 
   # Make calls to cyto_plot_label
-  invisible(
-    mapply(
+  if(plot == TRUE){
+  mapply(
       function(gate,
                      text,
                      stat,
@@ -696,7 +747,8 @@ cyto_plot_label.list <- function(x,
           text_font = text_font,
           text_col = text_col,
           text_size = text_size,
-          box_alpha = box_alpha
+          box_alpha = box_alpha,
+          plot = plot
         )
       }, gate,
       text,
@@ -707,8 +759,11 @@ cyto_plot_label.list <- function(x,
       text_col,
       text_size,
       box_alpha
-    )
-  )
+    , SIMPLIFY = FALSE)
+  }else{
+    return(text_xy)
+  }
+    
 }
 
 #' @rdname cyto_plot_label
@@ -725,13 +780,15 @@ cyto_plot_label.filters <- function(x,
                                     text_size = 0.8,
                                     text_col = "black",
                                     box_alpha = 0.6,
-                                    density_smooth = 0.6, ...) {
+                                    density_smooth = 0.6,
+                                    offset = TRUE,
+                                    plot = TRUE, ...) {
 
   # Convert gate to a list of gates
   gate <- unlist(gate)
 
   # Make calls to cyto_plot_label list method
-  cyto_plot_label(
+  text_xy <- cyto_plot_label(
     x = x,
     trans = trans,
     gate = gate,
@@ -743,6 +800,15 @@ cyto_plot_label.filters <- function(x,
     text_font = text_font,
     text_col = text_col,
     text_size = text_size,
-    box_alpha = box_alpha
+    box_alpha = box_alpha,
+    density_smooth = density_smooth,
+    offset = offset,
+    plot = plot
   )
+  
+  if(plot == TRUE){
+    return(text_xy)
+  }else{
+    invisible(text_xy)
+  }
 }

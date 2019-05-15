@@ -1545,6 +1545,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' @param density_stack degree of stacking.
 #' @param density_modal logical indicating whether y axis should be normalised
 #'   to mode.
+#' @param density_smooth smoothing parameter passed to kernal density
+#'   calculation.
 #' @param label_text text to use in label.
 #' @param label_stat statistic to use in label.
 #' @param gate_line_col gate(s) colour(s).
@@ -1571,6 +1573,7 @@ cyto_plot_overlay_convert <- function(x, ...){
                                     trans = NA,
                                     density_stack = 0.6,
                                     density_modal = FALSE,
+                                    density_smooth = 0.6,
                                     label_text = NA,
                                     label_stat = "median",
                                     gate_line_col = "red",
@@ -1687,6 +1690,7 @@ cyto_plot_overlay_convert <- function(x, ...){
           text_col = label_text_col[x],
           text_size = label_text_size[x],
           box_alpha = label_box_alpha[x],
+          density_smooth = density_smooth,
           offset = offset
         ))
       
@@ -1740,6 +1744,7 @@ cyto_plot_overlay_convert <- function(x, ...){
           text_col = label_text_col,
           text_size = label_text_size,
           box_alpha = label_box_alpha,
+          density_smooth = density_smooth,
           offset = offset
         ))
         
@@ -1759,9 +1764,9 @@ cyto_plot_overlay_convert <- function(x, ...){
   
 }
 
-# LABEL CO-ORDINATES -----------------------------------------------------------
+# LABEL CENTERS -----------------------------------------------------------
 
-#' Get label coordinates for cyto_plot_label
+#' Get gate centers to use to position labels
 #' 
 #' @param x gate object.
 #' @param channels channels used to construct the plot.
@@ -1772,12 +1777,12 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' @importFrom flowCore parameters Subset rectangleGate
 #' 
 #' @noRd
-.cyto_plot_label_coords <- function(x, ...){
-  UseMethod(".cyto_plot_label_coords")
+.cyto_plot_label_center <- function(x, ...){
+  UseMethod(".cyto_plot_label_center")
 }
 
 #' @noRd
-.cyto_plot_label_coords.default <- function(x,
+.cyto_plot_label_center.default <- function(x,
                                             channels,
                                             text_x = NA,
                                             text_y = NA){
@@ -1802,7 +1807,9 @@ cyto_plot_overlay_convert <- function(x, ...){
     }
     
     # Return co-ordinates
-    text_xy <- c(text_x, text_y)
+    text_xy <- matrix(c(text_x, text_y), 
+                      dimnames = list(c("x","y")), 
+                      byrow = TRUE)
     
     return(text_xy)
     
@@ -1814,7 +1821,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 }
 
 #' @noRd
-.cyto_plot_label_coords.rectangleGate <- function(x,
+.cyto_plot_label_center.rectangleGate <- function(x,
                                                   channels,
                                                   text_x = NA,
                                                   text_y = NA){
@@ -1935,14 +1942,16 @@ cyto_plot_overlay_convert <- function(x, ...){
   }
   
   # Return co-ordinates
-  text_xy <- c(text_x, text_y)
+  text_xy <- matrix(c(text_x, text_y), 
+                    dimnames = list(c("x","y")), 
+                    byrow = TRUE)
   
   return(text_xy)
   
 }
 
 #' @noRd
-.cyto_plot_label_coords.polygonGate <- function(x,
+.cyto_plot_label_center.polygonGate <- function(x,
                                                 channels,
                                                 text_x = NA,
                                                 text_y = NA){
@@ -1966,14 +1975,16 @@ cyto_plot_overlay_convert <- function(x, ...){
   }
   
   # Return co-ordinates
-  text_xy <- c(text_x, text_y)
+  text_xy <- matrix(c(text_x, text_y), 
+                    dimnames = list(c("x","y")), 
+                    byrow = TRUE)
   
   return(text_xy)
   
 }
 
 #' @noRd
-.cyto_plot_label_coords.ellipsoidGate <- function(x,
+.cyto_plot_label_center.ellipsoidGate <- function(x,
                                                   channels,
                                                   text_x = NA,
                                                   text_y = NA){
@@ -1997,9 +2008,56 @@ cyto_plot_overlay_convert <- function(x, ...){
   }
   
   # Return co-ordinate
-  text_xy <- c(text_x, text_y)
+  text_xy <- matrix(c(text_x, text_y), 
+                    dimnames = list(c("x","y")), 
+                    byrow = TRUE)
 
   return(text_xy)  
+  
+}
+
+#' @noRd
+.cyto_plot_label_center.filters <- function(x, 
+                                            channels,
+                                            text_x = NA,
+                                            text_y = NA){
+  
+  # Convert filters object to list of gate objects
+  x <- unlist(x)
+  
+  # Make call to list method
+  text_xy <- .cyto_plot_label_center(x,
+                                     channels = channels,
+                                     text_x = text_x,
+                                     text_y = text_y)
+  
+  return(text_xy)
+  
+}
+
+#' @noRd
+.cyto_plot_label_center.list <- function(x,
+                                         channels,
+                                         text_x = NA,
+                                         text_y= NA){
+  
+  # List of matrices with gate centers
+  text_xy <- mapply(function(x, 
+                  text_x,
+                  text_y){
+    .cyto_plot_label_center(x, 
+                           channels = channels,
+                           text_x = text_x,
+                           text_y = text_y)
+  }, x,
+  text_x,
+  text_y, 
+  SIMPLIFY = FALSE)
+  
+  # Merge matrices by column
+  text_xy <- do.call("cbind", text_xy)
+  
+  return(text_xy)
   
 }
 
@@ -2188,23 +2246,33 @@ cyto_plot_overlay_convert <- function(x, ...){
   xrange <- xmax - xmin
   yrange <- ymax - ymin
   
-  # Co-ordinates for gate centers
-  coords <- mapply(function(gt,
-                            text_x,
-                            text_y){
+  # No co-ordinates supplied
+  if(.all_na(text_x) & .all_na(text_y)){
     
-    # Label co-ordinate
-    .cyto_plot_label_coords(gt,
-                            channels = channels,
-                            text_x = text_x,
-                            text_y = text_y)
+    # Co-ordinates for gate centers
+    coords <- mapply(function(gt,
+                              text_x,
+                              text_y){
     
-  },gts,
-  text_x,
-  text_y)
+      # Label co-ordinate
+      .cyto_plot_label_center(gt,
+                              channels = channels,
+                              text_x = text_x,
+                              text_y = text_y)
+    
+    },gts,
+    text_x,
+    text_y)
   
-  # Each column different gate
-  rownames(coords) <- c("x", "y")
+    # Combine results into a single matrix
+    coords <- do.call("cbind", coords)
+    
+  }else{
+    coords <- matrix(c(text_x,text_y), 
+                     nrow = 2,
+                     byrow = TRUE,
+                     dimnames = list(c("x","y")))
+  }
   
   # Repeat text_size
   text_size <- rep(text_size, length.out = length(gts))

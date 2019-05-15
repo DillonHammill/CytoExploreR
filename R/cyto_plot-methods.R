@@ -1691,7 +1691,28 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Label positions - lable_box_x & label_box_y
-  
+  if(!.all_na(gate)){
+    # Label positions not manually supplied
+    if(all(.all_na(label_box_x),.all_na(label_box_y))){
+      label_text_xy <- cyto_plot_label(fr_list[[1]],
+                                   gate = gate[[1]],
+                                   trans = axes_trans,
+                                   channels = channels,
+                                   text = label_text,
+                                   stat = label_stat,
+                                   text_x = label_box_x,
+                                   text_y = label_box_y,
+                                   text_font = label_text_font,
+                                   text_size = label_text_size,
+                                   text_col = label_text_col,
+                                   box_alpha = label_box_alpha,
+                                   density_smooth = density_smooth,
+                                   offset = TRUE,
+                                   plot = FALSE)
+      label_box_x <- label_text_xy[1,]
+      label_box_y <- label_text_xy[2,]
+    }
+  }
   
   # Legend text
   if (.empty(legend_text)) {
@@ -1764,7 +1785,7 @@ cyto_plot.GatingSet <- function(x,
     })
     xlim <- c(min(unlist(xlim)), max(unlist(xlim)))
   }
-
+  
   # Y axis limits - 1D y limit calculated downstream
   if (.all_na(ylim) & length(channels) != 1) {
     ylim <- lapply(fr_list, function(z) {
@@ -1826,8 +1847,6 @@ cyto_plot.GatingSet <- function(x,
                  gate,
                  limits,
                  display,
-                 xlim,
-                 ylim,
                  xlab,
                  ylab,
                  title,
@@ -1965,8 +1984,6 @@ cyto_plot.GatingSet <- function(x,
     gate,
     limits,
     display,
-    xlim,
-    ylim,
     xlab,
     ylab,
     title,
