@@ -664,16 +664,12 @@ cyto_plot_label.list <- function(x,
                                               text_y = text_y,
                                               stat = stat,
                                               text_size = text_size)
-
-            # Replace x coords if text_x is NA
-            if(.all_na(text_x)){
-              text_x <- coords[["x"]]
-            }
             
-            # Replace y coords if text_y is NA
-            if(.all_na(text_y)){
-              text_y <- coords[["y"]]
-            }
+            # Replace x coords if text_x
+            text_x <- coords[["x"]]
+            
+            # Replace y coords if text_y
+            text_y <- coords[["y"]]
             
             # Make calls to cyto_plot_label
             invisible(

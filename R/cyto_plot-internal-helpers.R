@@ -2221,7 +2221,7 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Check if any labels will be overlapping and offset coords
   if(any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))){
     
-    if(all(!is.na(stat))){
+    if(!.all_na(stat)){
       text <- paste(text, "\n")
     }
     
