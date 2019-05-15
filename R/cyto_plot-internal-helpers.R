@@ -1557,6 +1557,8 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' @param label_box_x x co-ordinate(s) for label(s).
 #' @param label_box_y y co-ordinates for label(s).
 #' @param label_box_alpha transparency for label(s).
+#' @param offset logical passed to cyto_plot_label to indicate whether
+#'   offsetting is required.
 #'
 #' @importFrom flowCore parameters
 #' @importFrom graphics par
@@ -1580,7 +1582,8 @@ cyto_plot_overlay_convert <- function(x, ...){
                                     label_text_col = "black",
                                     label_box_x = NA,
                                     label_box_y = NA,
-                                    label_box_alpha = 0.6, ...) {
+                                    label_box_alpha = 0.6,
+                                    offset = TRUE, ...) {
   
   # Add support for adding labels without gates
   
@@ -1683,7 +1686,8 @@ cyto_plot_overlay_convert <- function(x, ...){
           text_font = label_text_font[x],
           text_col = label_text_col[x],
           text_size = label_text_size[x],
-          box_alpha = label_box_alpha[x]
+          box_alpha = label_box_alpha[x],
+          offset = offset
         ))
       
       }, fr.lst,
@@ -1735,7 +1739,8 @@ cyto_plot_overlay_convert <- function(x, ...){
           text_font = label_text_font,
           text_col = label_text_col,
           text_size = label_text_size,
-          box_alpha = label_box_alpha
+          box_alpha = label_box_alpha,
+          offset = offset
         ))
         
       }, fr.lst,

@@ -1690,6 +1690,9 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
+  # Label positions - lable_box_x & label_box_y
+  
+  
   # Legend text
   if (.empty(legend_text)) {
     if (!.all_na(overlay)) {

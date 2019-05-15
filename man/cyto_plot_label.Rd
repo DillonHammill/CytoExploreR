@@ -18,28 +18,32 @@ cyto_plot_label(x, gate, ...)
 \method{cyto_plot_label}{NULL}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
-  density_smooth = 0.6)
+  density_smooth = 0.6, ...)
 
 \method{cyto_plot_label}{rectangleGate}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
-  density_smooth = 0.6)
+  density_smooth = 0.6, ...)
 
 \method{cyto_plot_label}{polygonGate}(x, gate, channels, trans = NA,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
-  text_size = 0.8, text_col = "black", box_alpha = 0.6)
+  text_size = 0.8, text_col = "black", box_alpha = 0.6,
+  density_smooth = 0.6, ...)
 
 \method{cyto_plot_label}{ellipsoidGate}(x, gate, channels, trans = NA,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
-  text_size = 0.8, text_col = "black", box_alpha = 0.6)
+  text_size = 0.8, text_col = "black", box_alpha = 0.6,
+  density_smooth = 0.6, ...)
 
 \method{cyto_plot_label}{list}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
-  text_size = 0.8, text_col = "black", box_alpha = 0.6)
+  text_size = 0.8, text_col = "black", box_alpha = 0.6,
+  density_smooth = 0.6, offset = TRUE, ...)
 
 \method{cyto_plot_label}{filters}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
-  text_size = 0.8, text_col = "black", box_alpha = 0.6)
+  text_size = 0.8, text_col = "black", box_alpha = 0.6,
+  density_smooth = 0.6, ...)
 }
 \arguments{
 \item{x}{object of class \code{"flowFrame"}.}
@@ -49,6 +53,8 @@ cyto_plot_label(x, gate, ...)
 \code{\link[flowCore:polygonGate-class]{polygonGate}},
 \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{"list"} or
 \code{\link[flowCore:filters-class]{filters}}.}
+
+\item{...}{passes additional list method arguments to other methods.}
 
 \item{trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or
@@ -90,6 +96,9 @@ set to \code{0.6} by default.}
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} to adjust kernel density for mode
 calculation.}
+
+\item{offset}{logical indicating whether label co-ordinates should be
+adjusted to prevent labels from overlapping.}
 }
 \value{
 add a boxed text label to an existing plot.
@@ -226,7 +235,6 @@ cyto_plot_label(getData(gs, "Live Cells")[[4]],
   text_size = 1.2,
   box_alpha = 1
 )
-
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

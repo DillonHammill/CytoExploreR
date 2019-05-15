@@ -324,7 +324,8 @@
           text_size = label_text_size,
           text_font = label_text_font,
           text_col = label_text_col,
-          box_alpha = label_box_alpha
+          box_alpha = label_box_alpha,
+          offset = FALSE
         ))
       
       }
@@ -559,7 +560,8 @@
             text_size = label_text_size,
             text_font = label_text_font,
             text_col = label_text_col,
-            box_alpha = label_box_alpha
+            box_alpha = label_box_alpha,
+            offset = FALSE
           ))
         }, label_text,
         label_stat,
