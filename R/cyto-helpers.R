@@ -775,18 +775,24 @@ cyto_group_by <- function(x,
   }
   
   # Split pd based on group_by into a named list
-  if(group_by == "all"){
+  if(group_by[1] == "all"){
     pd_split <- list("all" = pd)
   }else{
-    pd_split <- split(pd, as.vector(pd[,group_by]), sep = " ")
+    pd_split <- split(pd, pd[,group_by], sep = " ")
+    
+    # Remove missing factor levels
+    rm <- which(unlist(lapply(pd_split,"nrow")) == 0)
+    pd_split[rm] <- NULL
   }
   
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z){
     
-    x[pd_split[[z]][,"name"]]
+    ind <- match(pd_split[[z]][,"name"], sampleNames(x))
+    x[ind]
     
   })
+  names(x_list) <- names(pd_split)
   
   return(x_list)
   
