@@ -485,6 +485,47 @@ cyto_plot_window <- function() {
   }
 }
 
+#' Open new graphics device for cyto_plot
+#'
+#' @param popup logical indicating whether a popup graphics device should be
+#'   opened.
+#' @param ... additional arguments passed to
+#'   \code{\link[grDevices:dev.new]{dev.new}}:
+#'
+#' @importFrom grDevices dev.cur dev.new
+#'
+#' @examples
+#' \dontrun{
+#' # Open platform-specific graphics device
+#' cyto_plot_new()
+#' }
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_plot_new <- function(popup, ...){
+  
+  # Null graphics device -> RStudioGD
+  if(dev.cur == 1){
+    dev.new()
+  }
+  
+  # Open popup window - either windows/X11/xquartz
+  if(popup == TRUE){
+    
+    # Linux machine require cairo type X11 device
+    if (Sys.info()["sysname"] == "Linux") {
+      
+      # Cairo needed for semi-transparency
+      dev.new(type = "cairo", ...)
+    }else{
+      dev.new(...)
+    }
+    
+  }
+  
+}
+
 # CYTO_PLOT_SAVE ---------------------------------------------------------------
 
 #' Save High Resolution cyto_plot Images
