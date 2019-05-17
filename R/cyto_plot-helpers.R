@@ -503,23 +503,26 @@ cyto_plot_window <- function() {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup, ...){
+cyto_plot_new <- function(popup = FALSE, ...){
   
   # Null graphics device -> RStudioGD
-  if(dev.cur == 1){
+  if(dev.cur() == 1) {
     dev.new()
   }
   
   # Open popup window - either windows/X11/xquartz
-  if(popup == TRUE){
+  if(popup){
     
-    # Linux machine require cairo type X11 device
-    if (Sys.info()["sysname"] == "Linux") {
-      
-      # Cairo needed for semi-transparency
-      dev.new(type = "cairo", ...)
-    }else{
+    if(.Platform$OS.type == "windows"){
       dev.new(...)
+    }else if (.Platform$OS.type == "unix") {
+      if (Sys.info()["sysname"] == "Linux") {
+        
+        # Cairo needed for semi-transparency
+        dev.new(type = "cairo", ...)
+      }else if(Sys.info()["sysname"] == "Darwin"){
+        dev.new(...)
+      }
     }
     
   }
