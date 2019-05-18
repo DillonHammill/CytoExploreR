@@ -73,40 +73,57 @@ cyto_plot_density.flowFrame <- function(x,
                                    args[["density_modal"]]))
   })
   
-  # Get height of y axis for each density distribution
-  if(args[["density_modal"]]){
-    y_max <- 100
-  }else{
-    y_max <- mean(unlist(lapply(fr_dens, function(z){
+  # fr_dens contains some density objects
+  if(!.all_na(fr_dens)){
+    # Get height of y axis for each density distribution
+    if(args[["density_modal"]]){
+      y_max <- 100
+    }else{
+      y_max <- mean(unlist(lapply(fr_dens, function(z){
     
-      if(!.all_na(z)){
-        max(z$y)
-      }else{
-        NA
+        if(!.all_na(z)){
+          max(z$y)
+        }else{
+          NA
+        }
+    
+      })), na.rm = TRUE)
+    
+    }
+  
+    # Get vector of density_stack values
+    ofst <- seq(
+      0,
+      ovn * args[["density_stack"]] * y_max,
+      args[["density_stack"]] * y_max
+    )
+
+    # Get a list of offset kernel densities
+    fr_dens <- mapply(function(fr_dens, ofst) {
+
+      # Adjust values for stacking
+      if (ofst != 0 & !.all_na(fr_dens)) {
+        fr_dens$y <- fr_dens$y + ofst
       }
+
+      return(fr_dens)
     
-    })), na.rm = TRUE)
+    }, fr_dens, ofst, SIMPLIFY = FALSE)
+    
+  # fr_dens does not contain any density objects
+  } else if(.all_na(fr_dens)){
+    
+    # Set y_max to 100
+    y_max <- 100
+    
+    # Get positions for horizontal lines
+    ofst <- seq(
+      0,
+      ovn * args[["density_stack"]] * y_max,
+      args[["density_stack"]] * y_max
+    )
     
   }
-  
-  # Get vector of density_stack values
-  ofst <- seq(
-    0,
-    ovn * args[["density_stack"]] * y_max,
-    args[["density_stack"]] * y_max
-  )
-
-  # Get a list of kernel densities
-  fr_dens <- mapply(function(fr_dens, ofst) {
-
-    # Adjust values for stacking
-    if (ofst != 0 & !.all_na(fr_dens)) {
-      fr_dens$y <- fr_dens$y + ofst
-    }
-
-    return(fr_dens)
-    
-  }, fr_dens, ofst, SIMPLIFY = FALSE)
 
   # Get density_fill
   .args <- formalArgs(".cyto_plot_density")
@@ -181,11 +198,6 @@ cyto_plot_density.list <- function(x,
                                    density_line_width = 1,
                                    density_line_col = "black", ...){
   
-  # Check x contains density objects (may contain NA as well)
-  if(!any(unlist(lapply(x, "class")) == "density")){
-    stop("'x' should be a list of density objects.")
-  }
-  
   # Pull down arguments to named list
   args <- .args_list()
   
@@ -204,9 +216,9 @@ cyto_plot_density.list <- function(x,
   
   # Calculate the mean maximum y value for kernel densities
   if(args[["density_modal"]]){
-    y_range <- 100
+    y_max <- 100
   }else{
-    y_range<- mean(unlist(lapply(x, function(d){
+    y_max<- mean(unlist(lapply(x, function(d){
       if(!.all_na(d)){
         max(d$y) - min(d$y)
       }else{
@@ -214,9 +226,16 @@ cyto_plot_density.list <- function(x,
       }
     })), na.rm = TRUE)
   }
+  
+  # Empty list - all NA without density objects
+  if(is.nan(y_max)){
+    y_max <- 100
+  }
+  
   ofst <- seq(0,
-              ovn * args[["density_stack"]] * y_range,
-              args[["density_stack"]] * y_range)
+              ovn * args[["density_stack"]] * y_max,
+              args[["density_stack"]] * y_max)
+  
   abline(
     h = ofst,
     col = args[["density_line_col"]],

@@ -393,7 +393,7 @@
 #' @noRd
 .cyto_density <- function(x,
                           channel = NULL,
-                          smooth = 1.5,
+                          smooth = 0.6,
                           modal = TRUE) {
   
   # Throw error for invalid object

@@ -1651,8 +1651,18 @@ cyto_plot.GatingSet <- function(x,
     if (all(alias == "")) {
       gt <- templateGen(x[[1]])
       gt <- gt[basename(gt$parent) == parent, ]
-      alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
-
+      
+      # Match both channels for 2D plots
+      if(length(channels) == 2){
+        alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+        
+      # At least 1 channel match
+      }else if(length(channels) == 1){
+        ind <- lapply(gt$dims, function(z){grep(channels, z)})
+        ind <- unlist(lapply(ind, "length")) != 0
+        alias <- gt$alias[ind]
+      }
+      
       # No gates constructed in the supplied channels
       if (length(alias) == 0) {
         alias <- NA
@@ -1690,30 +1700,6 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
-  # Label positions - lable_box_x & label_box_y
-  if(!.all_na(gate)){
-    # Label positions not manually supplied
-    if(all(.all_na(label_box_x),.all_na(label_box_y))){
-      label_text_xy <- cyto_plot_label(fr_list[[1]],
-                                   gate = gate[[1]],
-                                   trans = axes_trans,
-                                   channels = channels,
-                                   text = label_text,
-                                   stat = label_stat,
-                                   text_x = label_box_x,
-                                   text_y = label_box_y,
-                                   text_font = label_text_font,
-                                   text_size = label_text_size,
-                                   text_col = label_text_col,
-                                   box_alpha = label_box_alpha,
-                                   density_smooth = density_smooth,
-                                   offset = TRUE,
-                                   plot = FALSE)
-      label_box_x <- label_text_xy[1,]
-      label_box_y <- label_text_xy[2,]
-    }
-  }
-  
   # Legend text
   if (.empty(legend_text)) {
     if (!.all_na(overlay)) {
@@ -1773,36 +1759,26 @@ cyto_plot.GatingSet <- function(x,
     axes_text_y <- FALSE
   }
   axes_text <- list(axes_text_x, axes_text_y)
-
+  axes_text <- rep(axes_text, length(fr_list))
+  
   # X axis limits
   if (.all_na(xlim)) {
-    xlim <- lapply(fr_list, function(z) {
-      .cyto_range(z,
+    xlim <- .cyto_range(fr_list,
         channels = channels[1],
         limits = limits,
         plot = TRUE
       )[, 1]
-    })
-    xlim <- c(min(unlist(xlim)), max(unlist(xlim)))
   }
   
   # Y axis limits - 1D y limit calculated downstream
   if (.all_na(ylim) & length(channels) != 1) {
-    ylim <- lapply(fr_list, function(z) {
-      .cyto_range(z,
-        channels = channels[1],
+    ylim <- .cyto_range(fr_list,
+        channels = channels[2],
         limits = limits,
         plot = TRUE
-      )[, 1]
-    })
-    ylim <- c(min(unlist(ylim)), max(unlist(ylim)))
+      )[,1]
   }
-
-  # Pop-up window
-  if (popup == TRUE) {
-    cyto_plot_window()
-  }
-
+  
   # Layout - missing/off/supplied
   if (.empty(layout)) {
 
@@ -1820,7 +1796,10 @@ cyto_plot.GatingSet <- function(x,
   }
   par("mfrow" = layout)
   np <- layout[1] * layout[2]
-
+  
+  # GRAPHICS DEVICE
+  cyto_plot_new(popup = popup)
+  
   # Repeat arguments as required -----------------------------------------------
 
   # Pull down arguments to named list - missing converted to ""
@@ -2042,6 +2021,10 @@ cyto_plot.GatingSet <- function(x,
     border_fill
   )
 
+  # Return global options to default -------------------------------------------
+  
+  options("CytoRSuite_cyto_plot_label_coords" = NULL)
+  
   # Record and/or save ---------------------------------------------------------
 
   # Turn off graphics device for saving

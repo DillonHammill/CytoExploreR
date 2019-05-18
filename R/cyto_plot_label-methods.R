@@ -317,9 +317,9 @@ cyto_plot_label.NULL <- function(x,
         cex = text_size
       )
     }
-  }else if(plot == FALSE){
-    return(text_xy)
   }
+  
+  invisible(text_xy)
 
 }
 
@@ -440,9 +440,9 @@ cyto_plot_label.rectangleGate <- function(x,
         cex = text_size
       )
     }
-  }else if(plot == FALSE){
-    return(text_xy)
   }
+  
+  invisible(text_xy)
 
 }
 
@@ -549,9 +549,9 @@ cyto_plot_label.polygonGate <- function(x,
         cex = text_size
       )
     }
-  }else if(plot == FALSE){
-    return(text_xy)
   }
+  
+  invisible(text_xy)
   
 }
 
@@ -659,9 +659,9 @@ cyto_plot_label.ellipsoidGate <- function(x,
         cex = text_size
       )
     }
-  }else if(plot == FALSE){
-    return(text_xy)
   }
+  
+  invisible(text_xy)
   
 }
 
@@ -760,9 +760,9 @@ cyto_plot_label.list <- function(x,
       text_size,
       box_alpha
     , SIMPLIFY = FALSE)
-  }else{
-    return(text_xy)
   }
+  
+  invisible(text_xy)
     
 }
 
@@ -806,9 +806,5 @@ cyto_plot_label.filters <- function(x,
     plot = plot
   )
   
-  if(plot == TRUE){
-    return(text_xy)
-  }else{
-    invisible(text_xy)
-  }
+  invisible(text_xy)
 }

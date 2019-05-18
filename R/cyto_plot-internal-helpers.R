@@ -344,7 +344,6 @@
     "title_text_size",
     "title_text_col",
     "density_stack",
-    "axes_text",
     "axes_text_font",
     "axes_text_size",
     "axes_text_col",
@@ -1477,7 +1476,7 @@ cyto_plot_overlay_convert <- function(x, ...){
     fr_exprs <- exprs(x[[1]])[, channels]
     
     # Too few events for density computation
-    if(nrow(fr_exprs) <= 2){
+    if(nrow(fr_exprs) >= 2){
       # Get density colour for each point
       args[["point_col"]][[1]] <- densCols(fr_exprs, 
                                        colramp = col_scale)
@@ -1497,7 +1496,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       fr_exprs <- exprs(x[[z]])[,channels]
       
       # Too few events for density computation
-      if(nrow(fr_exprs) <= 2){
+      if(nrow(fr_exprs) >= 2){
         # Get density colour for each point
         args[["point_col"]][[z]] <<- densCols(fr_exprs,
                                               colramp = col_scale)
@@ -1653,7 +1652,8 @@ cyto_plot_overlay_convert <- function(x, ...){
                                          length.out = length(gate), 
                                          each = length(unique(gate))), 
                                      function(x) {
-                                     (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
+                                     (0.5 * density_stack * 100) + 
+                                         ((x - 1) * density_stack * 100)
                                      }))
       
       # Too much computation required here - do this in .cyto_plot
@@ -1675,7 +1675,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       label_text_col <- rep(label_text_col, length.out = length(gate))
       label_box_alpha <- rep(label_box_alpha, length.out = length(gate))
     
-      mapply(function(fr,x) {
+      text_xy <- mapply(function(fr,x) {
         
         suppressMessages(cyto_plot_label(
           x = fr,
@@ -1695,7 +1695,11 @@ cyto_plot_overlay_convert <- function(x, ...){
         ))
       
       }, fr.lst,
-      ind)
+      ind,
+      SIMPLIFY = FALSE)
+      
+      text_xy <- do.call("cbind", text_xy)
+      
     }
     
   # No gates - allow labels if label = TRUE
@@ -1721,7 +1725,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       } 
       
       # Add labels to plot
-      mapply(function(fr,
+      text_xy <- mapply(function(fr,
                       label_box_x,
                       label_box_y,
                       label_text,
@@ -1756,11 +1760,17 @@ cyto_plot_overlay_convert <- function(x, ...){
       label_text_font,
       label_text_size,
       label_text_col,
-      label_box_alpha)
+      label_box_alpha,
+      SIMPLIFY = FALSE)
+      
+      # Cbind label co-ordinates
+      text_xy <- do.call("cbind", text_xy)
       
     }
     
   }
+  
+  invisible(text_xy)
   
 }
 
@@ -1809,7 +1819,8 @@ cyto_plot_overlay_convert <- function(x, ...){
     # Return co-ordinates
     text_xy <- matrix(c(text_x, text_y), 
                       dimnames = list(c("x","y")), 
-                      byrow = TRUE)
+                      byrow = TRUE,
+                      nrow = 2)
     
     return(text_xy)
     
@@ -1944,7 +1955,8 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Return co-ordinates
   text_xy <- matrix(c(text_x, text_y), 
                     dimnames = list(c("x","y")), 
-                    byrow = TRUE)
+                    byrow = TRUE,
+                    nrow = 2)
   
   return(text_xy)
   
@@ -1977,7 +1989,8 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Return co-ordinates
   text_xy <- matrix(c(text_x, text_y), 
                     dimnames = list(c("x","y")), 
-                    byrow = TRUE)
+                    byrow = TRUE,
+                    nrow = 2)
   
   return(text_xy)
   
@@ -2010,7 +2023,8 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Return co-ordinate
   text_xy <- matrix(c(text_x, text_y), 
                     dimnames = list(c("x","y")), 
-                    byrow = TRUE)
+                    byrow = TRUE,
+                    nrow = 2)
 
   return(text_xy)  
   

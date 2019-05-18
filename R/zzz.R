@@ -33,8 +33,8 @@
   # Signal when cyto_plot_grid method is being called
   options("CytoRSuite_cyto_plot_grid" = FALSE)
   
-  # Signal when axes text has already been calculated
-  options("CytoRSuite_cyto_plot_axes_text" = NULL)
+  # Save label co-ordinates for multi-plotting methods
+  options("CytoRSuite_cyto_plot_label_coords" = NULL)
   
   # Register gating and preprocessing functions with openCyto
   openCyto::registerPlugins(fun = .gate_manual, 
