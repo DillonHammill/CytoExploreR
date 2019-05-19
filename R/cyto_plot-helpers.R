@@ -140,6 +140,11 @@ cyto_plot_empty.flowFrame <- function(x,
                                     channels,
                                     TRUE)
   
+  # Convert axes_text to list - allows inheritance from cyto_plot
+  if(!inherits(axes_text, "list")){
+    axes_text <- list(axes_text[1], axes_text[2])
+  }
+  
   # Convert overlay to list of flowFrames
   if(!.all_na(overlay) & 
      any(inherits(overlay, "flowFrame")|
@@ -174,33 +179,44 @@ cyto_plot_empty.flowFrame <- function(x,
       # Get kernel density for each list element
       fr_dens <- lapply(fr_list, function(x){
         
-        .cyto_density(x,
+        suppressWarnings(.cyto_density(x,
                       channel = channels,
                       smooth = density_smooth,
-                      modal = density_modal)
+                      modal = density_modal))
         
       })
       
-      # Calculate the mean maximum y value for kernel densities
-      if(density_modal){
-        y_max <- 100
-      }else{
-        y_max <- mean(unlist(lapply(fr_dens, function(d){
-          max(d$y) # max(NA) returns NA
-        })), na.rm = TRUE)
-      }
-      
-      # Stacked distributions require shifting of y values
-      shft <- seq(0,
-                  ovn * density_stack * y_max,
-                  density_stack * y_max)
-      
-      # Shift distributions for stacking
-      if(density_stack > 0 & !.all_na(overlay)){
-        lapply(seq_len(length(fr_dens)), function(z){
-          fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
-        })
-      }
+      # fr_dens does contain some valid density objects
+      if (!.all_na(fr_dens)) {
+        # Calculate the mean maximum y value for kernel densities
+        if (density_modal) {
+          y_max <- 100
+        } else {
+          y_max <- mean(unlist(lapply(fr_dens, function(d) {
+            if (!.all_na(d)) {
+              max(d$y)
+            } else {
+              NA
+            }
+          })), na.rm = TRUE)
+        }
+        
+        # Stacked distributions require shifting of y values
+        shft <- seq(
+          0,
+          ovn * density_stack * y_max,
+          density_stack * y_max
+        )
+        
+        # Adjust y values if stacking is been applied
+        if (density_stack > 0 & length(x) > 1) {
+          # Shift distributions for stacking
+          lapply(seq_len(length(fr_dens)), function(z) {
+            if (!.all_na(fr_dens[[z]])) {
+              fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
+            }
+          })
+        }
       
       # YLIM 
       if(.all_na(ylim)){
@@ -210,6 +226,25 @@ cyto_plot_empty.flowFrame <- function(x,
           ylim <- c(0, y_max)
         }
       }
+        
+      }else if(.all_na(fr_dens)){
+        
+        # Turn off y axis text
+        axes_text[[2]] <- FALSE
+        
+        # Set y_max to 100
+        y_max <- 100
+        
+        # Set y axis limits to 0-100
+        ylim <- c(0, y_max + ovn * density_stack * y_max)
+        
+        # Stacked distributions require shifting of y values
+        shft <- seq(
+          0,
+          ovn * density_stack * y_max,
+          density_stack * y_max
+        )
+      }
       
     }else if(length(channels) == 2){
       ylim <- .cyto_range(fr_list,
@@ -218,11 +253,6 @@ cyto_plot_empty.flowFrame <- function(x,
                           plot = TRUE)[,1]
     }
 
-  }
-  
-  # Convert axes_text to list - allows inheritance from cyto_plot
-  if(!inherits(axes_text, "list")){
-    axes_text <- list(axes_text[1], axes_text[2])
   }
   
   # X axis breaks and labels -  can be inherited from cyto_plot

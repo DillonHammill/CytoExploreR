@@ -1769,6 +1769,9 @@ cyto_plot.GatingSet <- function(x,
       # Stacked 1D plots lack sampleNames in titles if no overlay
       if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
         pt
+      # Stacked with overlay display sampleNames only  
+      }else if(length(channels) == 1 & !.all_na(overlay) & density_stack != 0){
+        z
       # Paste together sampleName and parent name
       }else{
         paste(z, "\n", pt, sep = " ")

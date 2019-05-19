@@ -558,10 +558,10 @@
   rng <- do.call("rbind", rng)
   
   # Compute range for all samples for each channel
-  rng <- lapply(channels, function(z){
+  rng <- suppressWarnings(lapply(channels, function(z){
     c(min(rng[,z][is.finite(rng[,z])]),
       max(rng[,z][is.finite(rng[,z])]))
-  })
+  }))
   rng <- do.call("cbind",rng)
   rownames(rng) <- c("min","max")
   colnames(rng) <- channels
@@ -636,10 +636,10 @@
   rng <- do.call("rbind", rng)
   
   # Compute range for all samples for each channel
-  rng <- lapply(channels, function(z){
+  rng <- suppressWarnings(lapply(channels, function(z){
     c(min(rng[,z][is.finite(rng[,z])]),
       max(rng[,z][is.finite(rng[,z])]))
-  })
+  }))
   rng <- do.call("cbind",rng)
   rownames(rng) <- c("min","max")
   colnames(rng) <- channels

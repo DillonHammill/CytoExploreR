@@ -206,6 +206,7 @@
           }
         })
       }
+      
       # fr_dens is composed of NA - no events in any fr_list
     } else if (.all_na(fr_dens)) {
 
