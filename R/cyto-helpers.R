@@ -778,11 +778,10 @@ cyto_group_by <- function(x,
   if(group_by[1] == "all"){
     pd_split <- list("all" = pd)
   }else{
-    pd_split <- split(pd, pd[,group_by], sep = " ")
-    
-    # Remove missing factor levels
-    rm <- which(unlist(lapply(pd_split,"nrow")) == 0)
-    pd_split[rm] <- NULL
+    pd_split <- split(pd, pd[,group_by], 
+                      sep = " ", 
+                      lex.order = TRUE, 
+                      drop = TRUE)
   }
   
   # Replace each element of pd_split with matching samples
