@@ -113,7 +113,8 @@ cyto_plot_empty.flowFrame <- function(x,
                             border_line_col = "black",
                             border_fill = "white",
                             legend = FALSE,
-                            legend_text){
+                            legend_text,
+                            legend_text_size = 1){
 
   # Prevent scientific notation on axes - reset on exit
   scipen <- getOption("scipen")
@@ -295,6 +296,7 @@ cyto_plot_empty.flowFrame <- function(x,
   .cyto_plot_margins(c(list(x), overlay),
                      legend = legend,
                      legend_text = legend_text,
+                     legend_text_size = legend_text_size,
                      title = title,
                      axes_text = axes_text)
   
@@ -437,7 +439,8 @@ cyto_plot_empty.list <- function(x,
                                  border_line_col = "black",
                                  border_fill = "white",
                                  legend = FALSE,
-                                 legend_text){
+                                 legend_text,
+                                 legend_text_size = 1){
   
   # Overlay
   if(length(x) == 1){
@@ -477,7 +480,8 @@ cyto_plot_empty.list <- function(x,
                    border_line_col = border_line_col,
                    border_fill = border_fill,
                    legend = legend,
-                   legend_text = legend_text)
+                   legend_text = legend_text,
+                   legend_text_size = legend_text_size)
   
 }
 

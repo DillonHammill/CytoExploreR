@@ -888,16 +888,15 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' @param x list of flowFrames.
 #' @param legend logical indicating whether a legend should be included in the
 #'   plot.
-#' @param legend_text text to be used in the legend, used to calculate required
-#'   space.
 #' @param title if NULL remove excess space above plot.
 #' @param axes_text vector of logicals indicating whether the x and y axes
-#'   should be included on the plot.
+#'   should be included on the plot. 
 #'
 #' @noRd
 .cyto_plot_margins <- function(x,
                                legend = FALSE,
                                legend_text = NA,
+                               legend_text_size = 1,
                                title,
                                axes_text = list(TRUE,TRUE)) {
   
@@ -914,7 +913,7 @@ cyto_plot_overlay_convert <- function(x, ...){
     if(length(x) > 1 & 
        legend != FALSE & 
        !.all_na(legend_text)){
-      mar[4] <- 7 + max(nchar(legend_text)) * 0.32
+      mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * legend_text_size
     }
       
     # Remove space above plot if no title
@@ -1037,7 +1036,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 
       # Construct legend
       legend(
-        x = 1.12 * par("usr")[2],
+        x = 1.07 * par("usr")[2],
         y = cnt + 0.6 * lgnd_height,
         legend = legend_text,
         text_font = rev(legend_text_font),
@@ -1069,7 +1068,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 
       # Construct legend
       legend(
-        x = 1.12 * par("usr")[2],
+        x = 1.07 * par("usr")[2],
         y = cnt + 0.6 * lgnd_height,
         legend = legend_text,
         fill = rev(legend_box_fill),
@@ -1085,8 +1084,6 @@ cyto_plot_overlay_convert <- function(x, ...){
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
 
-    # 
-    
     # Revert to point_col if no legen point cols supplied
     if(.all_na(legend_point_col)){
       legend_point_col <- point_col
@@ -1099,7 +1096,7 @@ cyto_plot_overlay_convert <- function(x, ...){
     }
 
     legend(
-      x = 1.12 * par("usr")[2],
+      x = 1.07 * par("usr")[2],
       y = cnt + 0.6 * lgnd_height,
       legend = rev(legend_text),
       col = rev(legend_point_col),
@@ -1107,7 +1104,10 @@ cyto_plot_overlay_convert <- function(x, ...){
       pt.cex = rev(2 * point_size),
       xpd = TRUE,
       bty = "n",
-      x.intersp = 0.5
+      x.intersp = 0.5,
+      cex = legend_text_size,
+      text.col = rev(legend_text_col),
+      text.font = rev(legend_text_font)
     )
   }
 }

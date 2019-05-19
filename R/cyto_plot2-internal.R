@@ -258,7 +258,8 @@
       border_line_col = border_line_col,
       border_fill = border_fill,
       legend = legend,
-      legend_text = legend_text
+      legend_text = legend_text,
+      legend_text_size = legend_text_size
     )
 
     # DENSITY FILL - inherits theme internally
@@ -503,7 +504,8 @@
       border_line_col = border_line_col,
       border_fill = border_fill,
       legend = legend,
-      legend_text = legend_text
+      legend_text = legend_text,
+      legend_text_size = legend_text_size
     )
 
     # POINT COL - list

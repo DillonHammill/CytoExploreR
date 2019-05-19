@@ -18,7 +18,8 @@ cyto_plot_empty(x, ...)
   title_text_font = 2, title_text_size = 1.1,
   title_text_col = "black", border_line_type = 1,
   border_line_width = 1, border_line_col = "black",
-  border_fill = "white", legend = FALSE, legend_text)
+  border_fill = "white", legend = FALSE, legend_text,
+  legend_text_size = 1)
 
 \method{cyto_plot_empty}{list}(x, channels, axes_trans = NA, xlim = NA,
   ylim = NA, limits = "machine", title = NA, xlab = NA,
@@ -30,7 +31,7 @@ cyto_plot_empty(x, ...)
   title_text_size = 1.1, title_text_col = "black",
   border_line_type = 1, border_line_width = 1,
   border_line_col = "black", border_fill = "white", legend = FALSE,
-  legend_text)
+  legend_text, legend_text_size = 1)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
