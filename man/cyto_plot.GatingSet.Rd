@@ -4,7 +4,7 @@
 \alias{cyto_plot.GatingSet}
 \title{cyto_plot - GatingSet Method}
 \usage{
-\method{cyto_plot}{GatingSet}(x, parent, alias, channels,
+\method{cyto_plot}{GatingSet}(x, parent, alias = NA, channels,
   axes_trans = NA, group_by, overlay = NA, gate = NA,
   limits = "machine", display = 1, layout, popup = FALSE,
   xlim = NA, ylim = NA, title, xlab, ylab, density_modal = TRUE,

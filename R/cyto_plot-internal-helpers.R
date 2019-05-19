@@ -862,19 +862,6 @@ cyto_plot_overlay_convert <- function(x, ...){
   # Number of samples
   smp <- length(x)
 
-  # Stacking
-  if(length(channels) == 1){
-    if (density_stack != 0) {
-      if(!.all_na(density_layers)){
-        if (density_layers == smp) {
-          smp <- ceiling(smp / smp)
-        }else {
-          smp <- ceiling(smp / density_layers)
-        }
-      }
-    }
-  }
-
   # Plot layout
   if (.empty(layout)) {
     if (smp > 1) {

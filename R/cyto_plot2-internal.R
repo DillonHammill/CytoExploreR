@@ -351,10 +351,6 @@
           label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
         }
         
-        print(label_text)
-        print(label_box_x)
-        print(label_box_y)
-        
         text_xy <- suppressMessages(cyto_plot_label(
           x = x[[1]],
           channels = channels,
@@ -421,10 +417,6 @@
           label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
           label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
         }
-
-        print(label_text)
-        print(label_box_x)
-        print(label_box_y)
         
         # Gate density overlays
           text_xy <- .cyto_plot_overlay_gate(

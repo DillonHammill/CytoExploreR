@@ -1395,7 +1395,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #' @export
 cyto_plot.GatingSet <- function(x,
                                 parent,
-                                alias,
+                                alias = NA,
                                 channels,
                                 axes_trans = NA,
                                 group_by,
@@ -1644,6 +1644,30 @@ cyto_plot.GatingSet <- function(x,
     names(fr_list) <- nms
   }
 
+  # Support splitting stacked samples without overlay
+  if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
+    
+    # Convert list of individual flowFrame lists into list(list of flowFrames)
+    fr_list <- list(unlist(fr_list))
+    
+    # Change legend text to sampleNames
+    if(.empty(legend_text)){
+      legend_text <- nms
+    }
+    
+    # Support splitting into separate plots by density_layers
+    if(!.all_na(density_layers)){
+      ind <- rep(seq_len(length(fr_list[[1]])),
+                 each = density_layers,
+                 length.out = length(fr_list[[1]]))
+      fr_list <- lapply(unique(ind), function(z){
+        fr_list[[1]][ind == z]
+      })
+      
+    }
+    
+  }
+  
   # Extract gate objects -------------------------------------------------------
 
   # Allow alias = "" to plot all appropriate gates
@@ -1691,7 +1715,16 @@ cyto_plot.GatingSet <- function(x,
       })
     }
   }
-
+  
+  # Organise gates for stacked 1D without overlay
+  if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
+    
+    # Can't plot per sample 1D gates - must all be the same
+    # Repeated in mapply as required
+    gate <- list(gate[[1]])  # uses gates from first sample only
+    
+  }
+  
   # Prepare arguments for plotting ---------------------------------------------
 
   # Labels - use alias  if no text supplied
@@ -1730,11 +1763,17 @@ cyto_plot.GatingSet <- function(x,
 
       # All samples grouped together
       if (z == "all") {
-        z <- "Combine Events"
+        z <- "Combined Events"
       }
 
+      # Stacked 1D plots lack sampleNames in titles if no overlay
+      if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
+        pt
       # Paste together sampleName and parent name
-      paste(z, "\n", pt, sep = " ")
+      }else{
+        paste(z, "\n", pt, sep = " ")
+      }
+      
     }))
   }
 
@@ -1790,6 +1829,7 @@ cyto_plot.GatingSet <- function(x,
       density_stack = density_stack,
       density_layers = density_layers
     )
+    
   } else if (all(layout == FALSE) | .all_na(layout)) {
 
     # Use current dimensions
@@ -1814,7 +1854,7 @@ cyto_plot.GatingSet <- function(x,
     layers = length(fr_list[[1]]),
     gates = length(gate[[1]])
   )
-
+  
   # Update arguments
   .args_update(args)
   
