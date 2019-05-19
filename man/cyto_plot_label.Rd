@@ -38,12 +38,12 @@ cyto_plot_label(x, gate, ...)
 \method{cyto_plot_label}{list}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
-  density_smooth = 0.6, offset = TRUE, plot = TRUE, ...)
+  density_smooth = 0.6, plot = TRUE, ...)
 
 \method{cyto_plot_label}{filters}(x, gate, trans = NA, channels,
   text = NA, stat = NA, text_x = NA, text_y = NA, text_font = 2,
   text_size = 0.8, text_col = "black", box_alpha = 0.6,
-  density_smooth = 0.6, offset = TRUE, plot = TRUE, ...)
+  density_smooth = 0.6, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{"flowFrame"}.}
@@ -99,9 +99,6 @@ calculation.}
 
 \item{plot}{logical indicating whether the labels should be added to the
 plot. Can be turned off to obtain co-ordinates for the labels.}
-
-\item{offset}{logical indicating whether label co-ordinates should be
-adjusted to prevent labels from overlapping.}
 }
 \value{
 add a boxed text label to an existing plot.

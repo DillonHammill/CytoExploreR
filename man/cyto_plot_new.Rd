@@ -4,7 +4,7 @@
 \alias{cyto_plot_new}
 \title{Open new graphics device for cyto_plot}
 \usage{
-cyto_plot_new(popup, ...)
+cyto_plot_new(popup = FALSE, ...)
 }
 \arguments{
 \item{popup}{logical indicating whether a popup graphics device should be

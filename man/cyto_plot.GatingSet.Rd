@@ -137,17 +137,17 @@ lines, set to 1 by default.}
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default.}
 
-\item{point_col_scale}{vector of ordered colours to use for the density colour
-gradient of points.}
+\item{point_col_scale}{vector of ordered colours to use for the density
+colour gradient of points.}
 
-\item{point_cols}{vector colours to draw from when selecting colours for points
-if none are supplied to point_col.}
+\item{point_cols}{vector colours to draw from when selecting colours for
+points if none are supplied to point_col.}
 
 \item{point_col}{colour(s) to use for points in 2-D scatter plots, set to NA
 by default to use a blue-red density colour scale.}
 
-\item{point_col_alpha}{numeric [0,1] to control point colour transparency in 2-D
-scatter plots, set to 1 by default to use solid colours.}
+\item{point_col_alpha}{numeric [0,1] to control point colour transparency in
+2-D scatter plots, set to 1 by default to use solid colours.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines in 2-D scatter plots, set to 0 by default to turn off contour
@@ -235,7 +235,8 @@ default.}
 \item{label}{logical indicating whether gated populations should be labelled.
 To include the names of the populations in these labels, supply the
 population names to the \code{label_text} argument. The default statistic
-is \code{"percent"} for gated data and \code{"count"} for un-gated data.}
+is \code{"percent"} for gated data and \code{"count"} for un-gated data.
+This argument must be set to TRUE in order to add labels with gates.}
 
 \item{label_text}{vector of population names to use in the labels. Set to
 \code{NA} by default to exclude population names.}

@@ -1558,8 +1558,6 @@ cyto_plot_overlay_convert <- function(x, ...){
 #' @param label_box_x x co-ordinate(s) for label(s).
 #' @param label_box_y y co-ordinates for label(s).
 #' @param label_box_alpha transparency for label(s).
-#' @param offset logical passed to cyto_plot_label to indicate whether
-#'   offsetting is required.
 #'
 #' @importFrom flowCore parameters
 #' @importFrom graphics par
@@ -1584,8 +1582,7 @@ cyto_plot_overlay_convert <- function(x, ...){
                                     label_text_col = "black",
                                     label_box_x = NA,
                                     label_box_y = NA,
-                                    label_box_alpha = 0.6,
-                                    offset = TRUE, ...) {
+                                    label_box_alpha = 0.6, ...) {
   
   # Add support for adding labels without gates
   
@@ -1690,8 +1687,7 @@ cyto_plot_overlay_convert <- function(x, ...){
           text_col = label_text_col[x],
           text_size = label_text_size[x],
           box_alpha = label_box_alpha[x],
-          density_smooth = density_smooth,
-          offset = offset
+          density_smooth = density_smooth
         ))
       
       }, fr.lst,
@@ -1700,6 +1696,8 @@ cyto_plot_overlay_convert <- function(x, ...){
       
       text_xy <- do.call("cbind", text_xy)
       
+    }else{
+      text_xy <- NULL
     }
     
   # No gates - allow labels if label = TRUE
@@ -1748,8 +1746,7 @@ cyto_plot_overlay_convert <- function(x, ...){
           text_col = label_text_col,
           text_size = label_text_size,
           box_alpha = label_box_alpha,
-          density_smooth = density_smooth,
-          offset = offset
+          density_smooth = density_smooth
         ))
         
       }, fr.lst,
@@ -1766,6 +1763,8 @@ cyto_plot_overlay_convert <- function(x, ...){
       # Cbind label co-ordinates
       text_xy <- do.call("cbind", text_xy)
       
+    }else{
+      text_xy <- NULL
     }
     
   }
@@ -2276,7 +2275,8 @@ cyto_plot_overlay_convert <- function(x, ...){
     
     },gts,
     text_x,
-    text_y)
+    text_y,
+    SIMPLIFY = FALSE)
   
     # Combine results into a single matrix
     coords <- do.call("cbind", coords)
@@ -2322,10 +2322,6 @@ cyto_plot_overlay_convert <- function(x, ...){
                                 max = ymax - 0.05*yrange)
     
   }
-  
-  # Return a list of adjusted label positions
-  coords <- list(coords["x",], coords["y",])
-  names(coords) <- c("x","y")
   
   return(coords)
   

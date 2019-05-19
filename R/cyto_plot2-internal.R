@@ -14,7 +14,7 @@
 # missing by default and replaced if not assigned NA. Arguments that can be
 # either supplied or not are set to NA by default. Stick to using "channels"
 # for arguments accepting channel name(s) this make it easier to pass arguments
-# through do.call. 
+# through do.call.
 
 # MISSING ARGUMENTS:
 # - title
@@ -24,12 +24,12 @@
 # - label_stat
 # - legend_text
 
-# ADDING NEW FEATURES TO CYTO_PLOT: 
-# 1. Add the argument to cyto_plot with an appropriate default. 
-# 2. Add correct implementation in .cyto_plot_args_split to repeat arguments as 
+# ADDING NEW FEATURES TO CYTO_PLOT:
+# 1. Add the argument to cyto_plot with an appropriate default.
+# 2. Add correct implementation in .cyto_plot_args_split to repeat arguments as
 # required for downstream mapply call.
 # 3. Add argument to downstream mapply calls.
-# 3. Modify the code in the called .cyto_plot function (below) to add 
+# 3. Modify the code in the called .cyto_plot function (below) to add
 # the new feature.
 
 #' @importFrom flowCore exprs parameters identifier
@@ -74,7 +74,7 @@
                        contour_line_type = 1,
                        contour_line_width = 1,
                        contour_line_col = "black",
-                       axes_text = list(TRUE,TRUE),
+                       axes_text = list(TRUE, TRUE),
                        axes_text_font = 1,
                        axes_text_size = 1,
                        axes_text_col = "black",
@@ -105,237 +105,255 @@
                        border_line_width = 1,
                        border_line_col = "black",
                        border_fill = "white", ...) {
-  
+
   # Get current graphics parameters and reset on exit
   pars <- par("mar")
   on.exit(par(pars))
-  
+
   # ARGUMENTS ------------------------------------------------------------------
-  
+
   # Pull down arguments to named list - convert missing to ""
   args <- .args_list()
-  
+
   # Update arguments
   .args_update(args)
-  
+
   # SAMPLING -------------------------------------------------------------------
-   
+
   # Sample to display percentage events
-  if(display != 1){
+  if (display != 1) {
     # Turn off overlay sampling in gate_draw
-    if(!getOption("CytoRSuite_gate_draw")){
+    if (!getOption("CytoRSuite_gate_draw")) {
       ind <- 1
-    }else{
+    } else {
       ind <- seq(1, length(x))
     }
-    lapply(ind, function(z){
+    lapply(ind, function(z) {
       x[[z]] <<- cyto_sample(x[[z]], display)
     })
   }
 
   # CONSERVED ARGUMENTS --------------------------------------------------------
-      
+
   # TITLE
   title <- .cyto_plot_title(x[[1]],
-                            channels = channels,
-                            overlay = x[2:length(x)],
-                            title = title)
+    channels = channels,
+    overlay = x[2:length(x)],
+    title = title
+  )
   # AXES LABELS
   labs <- .cyto_plot_axes_label(x[[1]],
-                                channels = channels,
-                                xlab = xlab,
-                                ylab = ylab,
-                                density_modal = density_modal)
-  
+    channels = channels,
+    xlab = xlab,
+    ylab = ylab,
+    density_modal = density_modal
+  )
+
   # XLAB
   xlab <- labs[[1]]
-  
+
   # YLAB
   ylab <- labs[[2]]
-  
+
   # LEGEND TEXT - required for setting plot margins
-  if(.all_na(legend_text)){
+  if (.all_na(legend_text)) {
     legend_text <- names(x)
   }
-  
+
   # 1D DENSITY DISTRIBUTIONS ---------------------------------------------------
-  if(length(channels) == 1){
-  
+  if (length(channels) == 1) {
+
     # Get kernel density for each list element
-    fr_dens <- lapply(x, function(z){
-    
+    fr_dens <- lapply(x, function(z) {
       suppressWarnings(.cyto_density(z,
-                                     channel = channels,
-                                     smooth = density_smooth,
-                                     modal = density_modal))
-    
+        channel = channels,
+        smooth = density_smooth,
+        modal = density_modal
+      ))
     })
-    
+
     # Number of overlays
     ovn <- length(fr_dens) - 1
-    
+
     # fr_dens does contain some valid density objects
-    if(!.all_na(fr_dens)){
-          # Calculate the mean maximum y value for kernel densities
-    if(density_modal){
-      y_max <- 100
-    }else{
-      y_max <- mean(unlist(lapply(fr_dens, function(d){
-        if(!.all_na(d)){
-          max(d$y)
-        }else{
-          NA
-        }
-      })), na.rm = TRUE)
-    }
-    
-    # Stacked distributions require shifting of y values
-    shft <- seq(0,
-                ovn * density_stack * y_max,
-                density_stack * y_max)
-  
-    # Adjust y values if stacking is been applied
-    if(density_stack > 0 & length(x) > 1){  
-      # Shift distributions for stacking
-      lapply(seq_len(length(fr_dens)), function(z){
-        if(!.all_na(fr_dens[[z]])){
-          fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
-        }
-      })
-    }
-    # fr_dens is composed of NA - no events in any fr_list
-    }else if(.all_na(fr_dens)){
-      
+    if (!.all_na(fr_dens)) {
+      # Calculate the mean maximum y value for kernel densities
+      if (density_modal) {
+        y_max <- 100
+      } else {
+        y_max <- mean(unlist(lapply(fr_dens, function(d) {
+          if (!.all_na(d)) {
+            max(d$y)
+          } else {
+            NA
+          }
+        })), na.rm = TRUE)
+      }
+
+      # Stacked distributions require shifting of y values
+      shft <- seq(
+        0,
+        ovn * density_stack * y_max,
+        density_stack * y_max
+      )
+
+      # Adjust y values if stacking is been applied
+      if (density_stack > 0 & length(x) > 1) {
+        # Shift distributions for stacking
+        lapply(seq_len(length(fr_dens)), function(z) {
+          if (!.all_na(fr_dens[[z]])) {
+            fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
+          }
+        })
+      }
+      # fr_dens is composed of NA - no events in any fr_list
+    } else if (.all_na(fr_dens)) {
+
       # Turn off y axis text
       axes_text[[2]] <- FALSE
-      
+
       # Set y_max to 100
       y_max <- 100
-      
+
       # Set y axis limits to 0-100
       ylim <- c(0, y_max + ovn * density_stack * y_max)
-      
+
+      # Stacked distributions require shifting of y values
+      shft <- seq(
+        0,
+        ovn * density_stack * y_max,
+        density_stack * y_max
+      )
     }
 
     # GRAPHICS DEVICE
     cyto_plot_new(popup)
-    
+
     # EMPTY PLOT - handles margins and axes limits internally
     cyto_plot_empty(x,
-                              channels = channels,
-                              axes_trans = axes_trans,
-                              xlim = xlim,
-                              ylim = ylim,
-                              limits = limits,
-                              title = title,
-                              xlab = xlab,
-                              ylab = ylab,
-                              density_modal = density_modal,
-                              density_smooth = density_smooth,
-                              density_stack = density_stack,
-                              axes_text = axes_text,
-                              axes_text_font = axes_text_font,
-                              axes_text_size = axes_text_size,
-                              axes_text_col = axes_text_col,
-                              axes_label_text_font = axes_label_text_font,
-                              axes_label_text_size = axes_label_text_size,
-                              axes_label_text_col = axes_label_text_col,
-                              title_text_font = title_text_font,
-                              title_text_size = title_text_size,
-                              title_text_col = title_text_col,
-                              border_line_type = border_line_type,
-                              border_line_width = border_line_width,
-                              border_line_col = border_line_col,
-                              border_fill = border_fill,
-                              legend = legend,
-                              legend_text = legend_text)
+      channels = channels,
+      axes_trans = axes_trans,
+      xlim = xlim,
+      ylim = ylim,
+      limits = limits,
+      title = title,
+      xlab = xlab,
+      ylab = ylab,
+      density_modal = density_modal,
+      density_smooth = density_smooth,
+      density_stack = density_stack,
+      axes_text = axes_text,
+      axes_text_font = axes_text_font,
+      axes_text_size = axes_text_size,
+      axes_text_col = axes_text_col,
+      axes_label_text_font = axes_label_text_font,
+      axes_label_text_size = axes_label_text_size,
+      axes_label_text_col = axes_label_text_col,
+      title_text_font = title_text_font,
+      title_text_size = title_text_size,
+      title_text_col = title_text_col,
+      border_line_type = border_line_type,
+      border_line_width = border_line_width,
+      border_line_col = border_line_col,
+      border_fill = border_fill,
+      legend = legend,
+      legend_text = legend_text
+    )
 
     # DENSITY FILL - inherits theme internally
-    if(.all_na(density_fill)){
+    if (.all_na(density_fill)) {
       density_fill <- .cyto_plot_density_fill(fr_dens,
-                                              density_fill = density_fill,
-                                              density_cols = density_cols,
-                                              density_fill_alpha = density_fill_alpha)
+        density_fill = density_fill,
+        density_cols = density_cols,
+        density_fill_alpha = density_fill_alpha
+      )
     }
 
-    # DENSITY 
+    # DENSITY
     cyto_plot_density(fr_dens,
-                      density_modal = density_modal,
-                      density_stack = density_stack,
-                      density_cols = density_cols,
-                      density_fill = density_fill,
-                      density_fill_alpha = density_fill_alpha,
-                      density_line_type = density_line_type,
-                      density_line_width = density_line_width,
-                      density_line_col = density_line_col)
-  
+      density_modal = density_modal,
+      density_stack = density_stack,
+      density_cols = density_cols,
+      density_fill = density_fill,
+      density_fill_alpha = density_fill_alpha,
+      density_line_type = density_line_type,
+      density_line_width = density_line_width,
+      density_line_col = density_line_col
+    )
+
     # LEGEND
-    if(legend != FALSE){
-      .cyto_plot_legend(channels = channels,
-                        legend = legend,
-                        legend_text = legend_text,
-                        legend_text_font = legend_text_font,
-                        legend_text_size = legend_text_size,
-                        legend_text_col = legend_text_col,
-                        legend_line_col = legend_line_col,
-                        legend_box_fill = legend_box_fill,
-                        legend_point_col = legend_point_col,
-                        density_fill = density_fill,
-                        density_fill_alpha = density_fill_alpha,
-                        density_line_type = density_line_type,
-                        density_line_width = density_line_width,
-                        density_line_col = density_line_col,
-                        point_shape = point_shape,
-                        point_size = point_size,
-                        point_col = point_col,
-                        point_col_alpha = point_col_alpha)
+    if (legend != FALSE) {
+      .cyto_plot_legend(
+        channels = channels,
+        legend = legend,
+        legend_text = legend_text,
+        legend_text_font = legend_text_font,
+        legend_text_size = legend_text_size,
+        legend_text_col = legend_text_col,
+        legend_line_col = legend_line_col,
+        legend_box_fill = legend_box_fill,
+        legend_point_col = legend_point_col,
+        density_fill = density_fill,
+        density_fill_alpha = density_fill_alpha,
+        density_line_type = density_line_type,
+        density_line_width = density_line_width,
+        density_line_col = density_line_col,
+        point_shape = point_shape,
+        point_size = point_size,
+        point_col = point_col,
+        point_col_alpha = point_col_alpha
+      )
     }
-    
+
     # Turn off gates and labels if no density in fr_dens
-    if(.all_na(fr_dens)){
+    if (.all_na(fr_dens)) {
       label <- FALSE
       gate <- NA
     }
-    
+
     # GATES & LABEL - without overlay
     if (length(x) == 1) {
-    
+
       # GATES
-      if(!.all_na(gate)){
+      if (!.all_na(gate)) {
         gate <- cyto_plot_gate(gate,
-                               channels = channels,
-                               gate_line_col = gate_line_col,
-                               gate_line_width = gate_line_width,
-                               gate_line_type = gate_line_type)
+          channels = channels,
+          gate_line_col = gate_line_col,
+          gate_line_width = gate_line_width,
+          gate_line_type = gate_line_type
+        )
       }
-    
+
       # LABEL?
-      if(!.all_na(gate) & 
-         .empty(label)){
+      if (!.all_na(gate) &
+        .empty(label)) {
         label <- TRUE # turn on labels if gate
-      
-      }else if(.all_na(gate) &
-               .empty(label)){
+      } else if (.all_na(gate) &
+        .empty(label)) {
         label <- FALSE # turn off labels if no gate
       }
-    
+
       # STAT
-      if(!.all_na(gate) &
-         .empty(label_stat)){
+      if (!.all_na(gate) &
+        .empty(label_stat)) {
         label_stat <- "freq"
-      }else if(.all_na(gate) &
-               .empty(label_stat)){
+      } else if (.all_na(gate) &
+        .empty(label_stat)) {
         label_stat <- NA
       }
-      
-      # LABELS 
+
+      # LABELS
       if (label == TRUE) {
-      
+
         # Use saved label co-ordinates for multi-plotting methods
-        if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
-          label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1,]
-          label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2,]
+        if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
+          label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
+          label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
         }
+        
+        print(label_text)
+        print(label_box_x)
+        print(label_box_y)
         
         text_xy <- suppressMessages(cyto_plot_label(
           x = x[[1]],
@@ -350,285 +368,290 @@
           text_font = label_text_font,
           text_col = label_text_col,
           box_alpha = label_box_alpha,
-          density_smooth = density_smooth,
-          offset = FALSE
+          density_smooth = density_smooth
         ))
         
-        if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
+        # Only re-use co-ordinates if modal density - otherwise different
+        if (is.null(getOption("CytoRSuite_cyto_plot_label_coords")) &
+            density_modal == TRUE) {
           options("CytoRSuite_cyto_plot_label_coords" = text_xy)
         }
-      
       }
 
-    # GATE & LABEL - with overlay
+      # GATE & LABEL - with overlay
     } else if (length(x) != 1) {
-    
-    # Calculate label y positions for stacked overlays
-    if(density_stack != 0){
-     
-      # Need to compute y label positions
-      if(.all_na(label_box_y)){
-        label_box_y <- unlist(
-          lapply(rep(seq(1,length(x)),
-                     length.out = length(gate) * length(x),
-                     each = length(gate)),
-                function(z){
-                (0.5 * density_stack * y_max) +
-                ((z-1) * density_stack * y_max)
-          }))
-        
-      }
-    
-      # LABEL?
-      if(!.all_na(gate) & 
-         .empty(label)){
-        label<- TRUE # turn on labels if gate
-      }else if(.all_na(gate) &
-               .empty(label)){
-        label <- FALSE # turn off labels if no gate
-      }
-      
-      # STAT
-      if(!.all_na(gate) &
-         .empty(label_stat)){
-        label_stat <- "freq"
-      }else if(.all_na(gate) &
-               .empty(label_stat)){
-        label_stat <- NA
-      }
-      
-      # Use saved label co-ordinates for multi-plotting methods
-      if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
-        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1,]
-        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2,]
-      }
-      
-      # Gate density overlays
-      if(!.all_na(gate)){
-              text_xy <- .cyto_plot_overlay_gate(
-        x = x[[1]],
-        channel = channels,
-        trans = axes_trans,
-        overlay = x[2:length(x)],
-        gate = gate,
-        density_stack = density_stack,
-        density_modal = density_modal,
-        label = label,
-        label_text = label_text,
-        label_stat = label_stat,
-        label_text_size = label_text_size,
-        label_text_font = label_text_font,
-        label_text_col = label_text_col,
-        label_box_x = label_box_x,
-        label_box_y = label_box_y,
-        label_box_alpha = label_box_alpha,
-        gate_line_col = gate_line_col,
-        gate_line_width = gate_line_width,
-        gate_line_type = gate_line_type,
-        offset = FALSE
-      )
-      }
 
-      if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
-        options("CytoRSuite_cyto_plot_label_coords" = text_xy)
+      # Calculate label y positions for stacked overlays
+      if (density_stack != 0) {
+
+        # Need to compute y label positions
+        if (.all_na(label_box_y)) {
+          # Default is half way beteen horizontal lines (shft)
+          shft <- c(shft, shft[length(shft)] + shft[2])
+          label_box_y <- unlist(lapply(seq(1, length(shft) - 1), function(z) {
+            (shft[z] + shft[z + 1]) / 2
+          }))
+
+          # Repeat gate times if gate supplied - one label per layer if no gates
+          if (!.all_na(gate)) {
+            label_box_y <- rep(label_box_y, each = length(gate))
+          }
+        }
+
+        # LABEL?
+        if (!.all_na(gate) &
+          .empty(label)) {
+          label <- TRUE # turn on labels if gate
+        } else if (.all_na(gate) &
+          .empty(label)) {
+          label <- FALSE # turn off labels if no gate
+        }
+
+        # STAT
+        if (!.all_na(gate) &
+          .empty(label_stat)) {
+          label_stat <- "freq"
+        } else if (.all_na(gate) &
+          .empty(label_stat)) {
+          label_stat <- NA
+        }
+
+        # Use saved label co-ordinates for multi-plotting methods
+        if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
+          label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
+          label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
+        }
+
+        print(label_text)
+        print(label_box_x)
+        print(label_box_y)
+        
+        # Gate density overlays
+          text_xy <- .cyto_plot_overlay_gate(
+            x = x[[1]],
+            channel = channels,
+            trans = axes_trans,
+            overlay = x[2:length(x)],
+            gate = gate,
+            density_stack = density_stack,
+            density_modal = density_modal,
+            label = label,
+            label_text = label_text,
+            label_stat = label_stat,
+            label_text_size = label_text_size,
+            label_text_font = label_text_font,
+            label_text_col = label_text_col,
+            label_box_x = label_box_x,
+            label_box_y = label_box_y,
+            label_box_alpha = label_box_alpha,
+            gate_line_col = gate_line_col,
+            gate_line_width = gate_line_width,
+            gate_line_type = gate_line_type
+          )
+
+          if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
+            options("CytoRSuite_cyto_plot_label_coords" = text_xy)
+          }
+          
+      } else if (!.all_na(gate) & density_stack == 0) {
+        message("Gating overlays without stacking is not supported.")
       }
-      
-    }else if(!.all_na(gate) & density_stack == 0){
-      message("Gating overlays without stacking is not supported.")
     }
-      
-    }
-    
-  # 2D SCATTER PLOTS ----------------------------------------------------------- 
-  }else if(length(channels) == 2){
-    
+
+    # 2D SCATTER PLOTS -----------------------------------------------------------
+  } else if (length(channels) == 2) {
+
     # REMOVE NEGATIVE FSC/SSC EVENTS - DENSITY BUG (other linear channels?)
-    if(any(channels %in% c("FSC-A","SSC-A"))){
-      if("FSC-A" %in% channels){
-        x <- lapply(x, function(z){
+    if (any(channels %in% c("FSC-A", "SSC-A"))) {
+      if ("FSC-A" %in% channels) {
+        x <- lapply(x, function(z) {
           nonDebris <- rectangleGate("FSC-A" = c(0, Inf))
           z <- Subset(z, nonDebris)
           return(z)
         })
       }
-      if("SSC-A" %in% channels){
-        x <- lapply(x, function(z){
+      if ("SSC-A" %in% channels) {
+        x <- lapply(x, function(z) {
           nonDebris <- rectangleGate("SSC-A" = c(0, Inf))
           z <- Subset(z, nonDebris)
           return(z)
         })
-        
       }
     }
-    
+
     # GRAPHICS DEVICE
     cyto_plot_new(popup)
-    
+
     # EMPTY PLOT - handles margins and axes limits internally
     cyto_plot_empty(x,
-                    channels = channels,
-                    axes_trans = axes_trans,
-                    xlim = xlim,
-                    ylim = ylim,
-                    limits = limits,
-                    title = title,
-                    xlab = xlab,
-                    ylab = ylab,
-                    density_modal = density_modal,
-                    density_smooth = density_smooth,
-                    density_stack = density_stack,
-                    axes_text = axes_text,
-                    axes_text_font = axes_text_font,
-                    axes_text_size = axes_text_size,
-                    axes_text_col = axes_text_col,
-                    axes_label_text_font = axes_label_text_font,
-                    axes_label_text_size = axes_label_text_size,
-                    axes_label_text_col = axes_label_text_col,
-                    title_text_font = title_text_font,
-                    title_text_size = title_text_size,
-                    title_text_col = title_text_col,
-                    border_line_type = border_line_type,
-                    border_line_width = border_line_width,
-                    border_line_col = border_line_col,
-                    border_fill = border_fill,
-                    legend = legend,
-                    legend_text = legend_text)
-  
+      channels = channels,
+      axes_trans = axes_trans,
+      xlim = xlim,
+      ylim = ylim,
+      limits = limits,
+      title = title,
+      xlab = xlab,
+      ylab = ylab,
+      density_modal = density_modal,
+      density_smooth = density_smooth,
+      density_stack = density_stack,
+      axes_text = axes_text,
+      axes_text_font = axes_text_font,
+      axes_text_size = axes_text_size,
+      axes_text_col = axes_text_col,
+      axes_label_text_font = axes_label_text_font,
+      axes_label_text_size = axes_label_text_size,
+      axes_label_text_col = axes_label_text_col,
+      title_text_font = title_text_font,
+      title_text_size = title_text_size,
+      title_text_col = title_text_col,
+      border_line_type = border_line_type,
+      border_line_width = border_line_width,
+      border_line_col = border_line_col,
+      border_fill = border_fill,
+      legend = legend,
+      legend_text = legend_text
+    )
+
     # POINT COL - list
-    if(.all_na(point_col)){
+    if (.all_na(point_col)) {
       point_col <- .cyto_plot_point_col(x,
-                                        channels = channels,
-                                        point_col_scale = point_col_scale,
-                                        point_cols = point_cols,
-                                        point_col = point_col,
-                                        point_col_alpha = point_col_alpha)
+        channels = channels,
+        point_col_scale = point_col_scale,
+        point_cols = point_cols,
+        point_col = point_col,
+        point_col_alpha = point_col_alpha
+      )
     }
-  
+
     # POINTS - list of point colours
     cyto_plot_point(x,
-                    channels = channels,
-                    point_shape = point_shape,
-                    point_size = point_size,
-                    point_col_scale = point_col_scale,
-                    point_cols = point_cols,
-                    point_col = point_col,
-                    point_col_alpha = point_col_alpha)
-  
+      channels = channels,
+      point_shape = point_shape,
+      point_size = point_size,
+      point_col_scale = point_col_scale,
+      point_cols = point_cols,
+      point_col = point_col,
+      point_col_alpha = point_col_alpha
+    )
+
     # POINT DENSITY COLOUR SCALE
     point_cols <- .cyto_plot_point_cols(point_cols)
-  
+
     # POINT_COL LEGEND - vector (replace density colours with first point_cols)
-    point_col <- unlist(lapply(point_col, function(z){
-    
+    point_col <- unlist(lapply(point_col, function(z) {
+
       # colours defined for each point
-      if(length(z) > 1){
+      if (length(z) > 1) {
         return(point_cols[1])
-      }else{
+      } else {
         return(z)
       }
-    
     }))
-  
+
     # LEGEND
-    if(legend != FALSE){
-      .cyto_plot_legend(channels = channels,
-                        legend = legend,
-                        legend_text = legend_text,
-                        legend_text_font = legend_text_font,
-                        legend_text_size = legend_text_size,
-                        legend_text_col = legend_text_col,
-                        legend_line_col = legend_line_col,
-                        legend_box_fill = legend_box_fill,
-                        legend_point_col = legend_point_col,
-                        density_fill = density_fill,
-                        density_fill_alpha = density_fill_alpha,
-                        density_line_type = density_line_type,
-                        density_line_width = density_line_width,
-                        density_line_col = density_line_col,
-                        point_shape = point_shape,
-                        point_size = point_size,
-                        point_col = point_col,
-                        point_col_alpha = point_col_alpha)
+    if (legend != FALSE) {
+      .cyto_plot_legend(
+        channels = channels,
+        legend = legend,
+        legend_text = legend_text,
+        legend_text_font = legend_text_font,
+        legend_text_size = legend_text_size,
+        legend_text_col = legend_text_col,
+        legend_line_col = legend_line_col,
+        legend_box_fill = legend_box_fill,
+        legend_point_col = legend_point_col,
+        density_fill = density_fill,
+        density_fill_alpha = density_fill_alpha,
+        density_line_type = density_line_type,
+        density_line_width = density_line_width,
+        density_line_col = density_line_col,
+        point_shape = point_shape,
+        point_size = point_size,
+        point_col = point_col,
+        point_col_alpha = point_col_alpha
+      )
     }
-  
+
     # If no events turn off gates and labels
-    if(all(unlist(lapply(x, "nrow")) == 0)){
+    if (all(unlist(lapply(x, "nrow")) == 0)) {
       gate <- NA
-      label = FALSE
+      label <- FALSE
     }
-    
+
     # GATES
-    if(!.all_na(gate)){
+    if (!.all_na(gate)) {
       gate <- cyto_plot_gate(gate,
-                             channels = channels,
-                             gate_line_type = gate_line_type,
-                             gate_line_width = gate_line_width,
-                             gate_line_col = gate_line_col)
+        channels = channels,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col
+      )
     }
-    
+
     # LABEL
-    if(.empty(label)){
+    if (.empty(label)) {
       label <- TRUE
     }
-  
+
     # LABEL STAT
-    if(!.all_na(gate) &
-       .empty(label_stat)){
+    if (!.all_na(gate) &
+      .empty(label_stat)) {
       label_stat <- "freq"
-    }else if(.all_na(gate) &
-             .empty(label_stat)){
+    } else if (.all_na(gate) &
+      .empty(label_stat)) {
       label_stat <- NA
     }
-  
+
     # LABELS
-    if(!.all_na(gate) & label == TRUE){
-    
+    if (!.all_na(gate) & label == TRUE) {
+
       # Use saved label co-ordinates for multi-plotting methods
-      if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
-        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1,]
-        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2,]
+      if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
+        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
+        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
       }
-      
+
       text_xy <- cyto_plot_label(x[[1]],
-                      channels = channels,
-                      trans = axes_trans,
-                      text = label_text,
-                      gate = gate,
-                      stat = label_stat,
-                      text_x = label_box_x,
-                      text_y = label_box_y,
-                      text_font = label_text_font,
-                      text_size = label_text_size,
-                      text_col = label_text_col,
-                      box_alpha = label_box_alpha,
-                      density_smooth = density_smooth,
-                      offset = FALSE)
-      
-      if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
+        channels = channels,
+        trans = axes_trans,
+        text = label_text,
+        gate = gate,
+        stat = label_stat,
+        text_x = label_box_x,
+        text_y = label_box_y,
+        text_font = label_text_font,
+        text_size = label_text_size,
+        text_col = label_text_col,
+        box_alpha = label_box_alpha,
+        density_smooth = density_smooth
+      )
+
+      if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
         options("CytoRSuite_cyto_plot_label_coords" = text_xy)
       }
-    
-    # LABELS WITHOUT GATES  
-    }else if(.all_na(gate) &
-             !.all_na(label_text) &
-             label == TRUE){
-    
+
+      # LABELS WITHOUT GATES
+    } else if (.all_na(gate) &
+      !.all_na(label_text) &
+      label == TRUE) {
+
       # Use saved label co-ordinates for multi-plotting methods
-      if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
-        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1,]
-        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2,]
+      if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
+        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
+        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
       }
-      
+
       # label - limited to # layers - arg_split
       text_xy <- mapply(
         function(label_text,
-                 label_stat,
-                 label_text_font,
-                 label_text_size,
-                 label_text_col,
-                 label_box_x,
-                 label_box_y,
-                 label_box_alpha) {
+                         label_stat,
+                         label_text_font,
+                         label_text_size,
+                         label_text_col,
+                         label_box_x,
+                         label_box_y,
+                         label_box_alpha) {
           if (!.all_na(label_stat) & label_stat == "percent") {
             label_stat <- NA
           }
@@ -645,8 +668,7 @@
             text_font = label_text_font,
             text_col = label_text_col,
             box_alpha = label_box_alpha,
-            density_smooth = density_smooth,
-            offset = FALSE
+            density_smooth = density_smooth
           ))
         }, label_text,
         label_stat,
@@ -659,12 +681,10 @@
         SIMPLIFY = FALSE
       )
       text_xy <- do.call("cbind", text_xy)
-      
-      if(!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
+
+      if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
         options("CytoRSuite_cyto_plot_label_coords" = text_xy)
       }
-    
     }
-    
   }
 }

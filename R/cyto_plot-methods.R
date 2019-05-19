@@ -1242,14 +1242,14 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   \code{\link[graphics:par]{pch}} for alternatives.
 #' @param point_size numeric to control the size of points in 2-D scatter plots
 #'   set to 2 by default.
-#' @param point_col_scale vector of ordered colours to use for the density colour
-#'  gradient of points.
-#' @param point_cols vector colours to draw from when selecting colours for points
-#'   if none are supplied to point_col.
+#' @param point_col_scale vector of ordered colours to use for the density
+#'   colour gradient of points.
+#' @param point_cols vector colours to draw from when selecting colours for
+#'   points if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
 #'   by default to use a blue-red density colour scale.
-#' @param point_col_alpha numeric [0,1] to control point colour transparency in 2-D
-#'   scatter plots, set to 1 by default to use solid colours.
+#' @param point_col_alpha numeric [0,1] to control point colour transparency in
+#'   2-D scatter plots, set to 1 by default to use solid colours.
 #' @param contour_lines numeric indicating the number of levels to use for
 #'   contour lines in 2-D scatter plots, set to 0 by default to turn off contour
 #'   lines.
@@ -1312,6 +1312,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   To include the names of the populations in these labels, supply the
 #'   population names to the \code{label_text} argument. The default statistic
 #'   is \code{"percent"} for gated data and \code{"count"} for un-gated data.
+#'   This argument must be set to TRUE in order to add labels with gates.
 #' @param label_text vector of population names to use in the labels. Set to
 #'   \code{NA} by default to exclude population names.
 #' @param label_stat indicates the type of statistic to include in the plot
@@ -1346,22 +1347,22 @@ cyto_plot.GatingHierarchy <- function(x,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load samples into GatingSet
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply coompensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
-#' 
+#'
 #' # 2-D scatter plot with overlay & Gates
 #' cyto_plot(gs,
 #'   parent = "CD4 T Cells",
@@ -1369,7 +1370,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   overlay = "CD8 T Cells"
 #' )
-#' 
+#'
 #' # 2-D Scatter Plots with Back-Gating & Gates
 #' cyto_plot(gs,
 #'   parent = "T Cells",
@@ -1707,7 +1708,7 @@ cyto_plot.GatingSet <- function(x,
         legend_text <- c(parent, overlay)
       }
     } else {
-      legend_text <- paste0("layer", seq_len(length(fr_list[[1]])))
+      legend_text <- parent
     }
   }
 
@@ -2023,6 +2024,7 @@ cyto_plot.GatingSet <- function(x,
 
   # Return global options to default -------------------------------------------
   
+  # Remove save label co-ordinates
   options("CytoRSuite_cyto_plot_label_coords" = NULL)
   
   # Record and/or save ---------------------------------------------------------

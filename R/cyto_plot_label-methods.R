@@ -42,8 +42,6 @@
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density for mode
 #'   calculation.
-#' @param offset logical indicating whether label co-ordinates should be
-#'   adjusted to prevent labels from overlapping.
 #' @param plot logical indicating whether the labels should be added to the
 #'   plot. Can be turned off to obtain co-ordinates for the labels.
 #' @param ... passes additional list method arguments to other methods.
@@ -680,32 +678,29 @@ cyto_plot_label.list <- function(x,
                                  text_col = "black",
                                  box_alpha = 0.6,
                                  density_smooth = 0.6,
-                                 offset = TRUE,
                                  plot = TRUE, ...) {
 
   # List of filters to list of gate objects
   gate <- unlist(gate)
-  
-  # Missing coordinates
-  if(.all_na(text_x) & .all_na(text_y)){
-    text_xy_NA <- TRUE
-  }else{
-    text_xy_NA <- FALSE
-  }
-  
+
   # Get co-ordinates of gate centers for labels
   text_xy <- .cyto_plot_label_center(gate,
                                      channels = channels,
                                      text_x = text_x,
                                      text_y = text_y)
   
-  # Update co-ordinates
-  text_x <- text_xy[1,]
-  text_y <- text_xy[2,]
+  # Update x co-ordinates if not supplied
+  if(.all_na(text_x)){
+    text_x <- text_xy[1,]
+  }
+  
+  # Update y coordinates if not supplied
+  if(.all_na(text_y)){
+    text_y <- text_xy[2,]
+  }
   
   # Get adjusted co-ordinates if not manually supplied
-  if(offset == TRUE){
-    if(text_xy_NA == TRUE){
+    if(is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
       text_xy <- .cyto_plot_label_offset(x,
                                         gate = gate,
                                         channels = channels,
@@ -715,14 +710,12 @@ cyto_plot_label.list <- function(x,
                                         stat = stat,
                                         text_size = text_size
       )
-      text_xy <- do.call("cbind", text_xy)
     }
-  }
   
   # Update co-ordinates
   text_x <- text_xy[1,]
   text_y <- text_xy[2,]
-
+  
   # Make calls to cyto_plot_label
   if(plot == TRUE){
   mapply(
@@ -781,7 +774,6 @@ cyto_plot_label.filters <- function(x,
                                     text_col = "black",
                                     box_alpha = 0.6,
                                     density_smooth = 0.6,
-                                    offset = TRUE,
                                     plot = TRUE, ...) {
 
   # Convert gate to a list of gates
