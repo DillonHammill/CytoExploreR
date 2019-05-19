@@ -993,6 +993,8 @@ cyto_plot_overlay_convert <- function(x, ...){
                               legend_text_font = 1,
                               legend_text_size = 1,
                               legend_text_col = "black",
+                              legend_line_type = 1,
+                              legend_line_width = 1,
                               legend_line_col = NA,
                               legend_box_fill = NA,
                               legend_point_col = NA,
@@ -1037,9 +1039,9 @@ cyto_plot_overlay_convert <- function(x, ...){
       # Construct legend
       legend(
         x = 1.07 * par("usr")[2],
-        y = cnt + 0.6 * lgnd_height,
+        y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
-        text_font = rev(legend_text_font),
+        text.font = rev(legend_text_font),
         cex = legend_text_size,
         text.col = rev(legend_text_col),
         col = rev(legend_line_col),
@@ -1069,7 +1071,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       # Construct legend
       legend(
         x = 1.07 * par("usr")[2],
-        y = cnt + 0.6 * lgnd_height,
+        y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
         fill = rev(legend_box_fill),
         xpd = TRUE,

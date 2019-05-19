@@ -1445,6 +1445,8 @@ cyto_plot.GatingSet <- function(x,
                                 legend_text_font = 1,
                                 legend_text_size = 1,
                                 legend_text_col = "black",
+                                legend_line_type = 1,
+                                legend_line_width = 1,
                                 legend_line_col = NA,
                                 legend_box_fill = NA,
                                 legend_point_col = NA,
@@ -1481,7 +1483,7 @@ cyto_plot.GatingSet <- function(x,
 
   # No parent supplied
   if (missing(parent)) {
-    stop("Please supply the name of the parent population to plot.")
+    stop("Supply the name of the 'parent' population to plot.")
   }
 
   # Check if channels are supplied
@@ -1547,20 +1549,23 @@ cyto_plot.GatingSet <- function(x,
 
   # Extract & format data for plotting (list of flowFrame lists) ---------------
 
+  # Extract experiment details
+  pd <- cyto_details(gs)
+  
   # Extract data from GatingSet
   fs <- cyto_extract(x, parent)
 
   # Add data to list and group if necessary - convert groups to flowFrames
   if (!.empty(group_by)) {
     fs_list <- cyto_group_by(fs, group_by)
-    fr_list <- lapply(fr_list, function(z) {
+    fr_list <- lapply(fs_list, function(z) {
       cyto_convert(z, "flowFrame")
     })
   } else {
     fr_list <- cyto_convert(fs, "list of flowFrames")
     names(fr_list) <- sampleNames(x)
   }
-
+  
   # Add overlay to list and group if necessary
   if (!.all_na(overlay)) {
 
@@ -1657,6 +1662,12 @@ cyto_plot.GatingSet <- function(x,
     
     # Support splitting into separate plots by density_layers
     if(!.all_na(density_layers)){
+      
+      # Only supported if same number of layers in each plot
+      if(length(fr_list[[1]]) %% density_layers != 0){
+        stop("Each plot must have the same number of layers!")
+      }
+      
       ind <- rep(seq_len(length(fr_list[[1]])),
                  each = density_layers,
                  length.out = length(fr_list[[1]]))
@@ -1907,6 +1918,8 @@ cyto_plot.GatingSet <- function(x,
                  legend_text_font,
                  legend_text_size,
                  legend_text_col,
+                 legend_line_type,
+                 legend_line_width,
                  legend_line_col,
                  legend_box_fill,
                  legend_point_col,
@@ -1975,6 +1988,8 @@ cyto_plot.GatingSet <- function(x,
         legend_text_font = legend_text_font,
         legend_text_size = legend_text_size,
         legend_text_col = legend_text_col,
+        legend_line_type = legend_line_type,
+        legend_line_width = legend_line_width,
         legend_line_col = legend_line_col,
         legend_box_fill = legend_box_fill,
         legend_point_col = legend_point_col,
@@ -2044,6 +2059,8 @@ cyto_plot.GatingSet <- function(x,
     legend_text_font,
     legend_text_size,
     legend_text_col,
+    legend_line_type,
+    legend_line_width,
     legend_line_col,
     legend_box_fill,
     legend_point_col,
