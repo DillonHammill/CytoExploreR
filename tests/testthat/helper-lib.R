@@ -40,12 +40,12 @@ nms <- sampleNames(fs)
 chans <- colnames(fs)
 
 # pData information -
-pData(fs)$OVAConc <- c(rep(c(0,0,0.005,0.005,0.05,0.05,0.5,0.5), 4), NA)
+pData(fs)$OVAConc <- c(rep(c(0,0,0.005,0.005,0.05,0.05,0.5,0.5), 4), 0)
 pData(fs)$Treatment <- c(rep("Stim-A", 8),
                          rep("Stim-B", 8),
                          rep("Stim-C", 8),
                          rep("Stim-D", 8),
-                         NA)
+                         "NA")
 pData(fs)$Treatment <- factor(pData(fs)$Treatment, levels = c("Stim-A",
                                                               "Stim-B",
                                                               "Stim-C",

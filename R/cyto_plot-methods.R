@@ -1343,7 +1343,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   default.
 #' @param border_fill border_fill fill colour to use inside the plot border
 #'   (i.e. background colour), set to "white" by default.
-#' @param ... additional arguments passed to \code{\link[graphics:plot]{plot}}.
+#' @param ... additional arguments not currently in use.
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -1398,7 +1398,7 @@ cyto_plot.GatingSet <- function(x,
                                 alias = NA,
                                 channels,
                                 axes_trans = NA,
-                                group_by,
+                                group_by = NA,
                                 overlay = NA,
                                 gate = NA,
                                 limits = "machine",
@@ -1547,16 +1547,31 @@ cyto_plot.GatingSet <- function(x,
     axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
   }
 
+  # Extract experiment details & add grouping ----------------------------------
+  
+  # Extract experiment details
+  pd <- cyto_details(x)
+  
+  # Add group_by column if group_by supplied
+  if(!.all_na(group_by)){
+    if(length(group_by) == 1){
+      if(group_by == "all"){
+        pd$group_by <- rep("all", nrow(pd))
+      }else{
+        pd$group_by <- pd[, group_by]
+      }
+    }else{
+      pd$group_by <- do.call("paste", pd[, group_by])
+    }
+  }
+  
   # Extract & format data for plotting (list of flowFrame lists) ---------------
 
-  # Extract experiment details
-  pd <- cyto_details(gs)
-  
   # Extract data from GatingSet
   fs <- cyto_extract(x, parent)
 
   # Add data to list and group if necessary - convert groups to flowFrames
-  if (!.empty(group_by)) {
+  if (!.all_na(group_by)) {
     fs_list <- cyto_group_by(fs, group_by)
     fr_list <- lapply(fs_list, function(z) {
       cyto_convert(z, "flowFrame")
@@ -1589,7 +1604,7 @@ cyto_plot.GatingSet <- function(x,
     } else if (inherits(overlay, "flowSet")) {
 
       # Apply same grouping to overlay
-      if (!.empty(group_by)) {
+      if (!.all_na(group_by)) {
         overlay_list <- cyto_group_by(overlay, group_by)
         overlay_list <- lapply(overlay_list, function(z) {
           cyto_convert(z, "flowFrame")
@@ -1612,7 +1627,7 @@ cyto_plot.GatingSet <- function(x,
       }
 
       # Apply same grouping to overlay
-      if (!.empty(group_by)) {
+      if (!.all_na(group_by)) {
         overlay_list <- lapply(overlay, function(z) {
           cyto_group_by(z, group_by)
         })
@@ -1833,6 +1848,9 @@ cyto_plot.GatingSet <- function(x,
       )[,1]
   }
   
+  # GRAPHICS DEVICE
+  cyto_plot_new(popup)
+  
   # Layout - missing/off/supplied
   if (.empty(layout)) {
 
@@ -1851,9 +1869,6 @@ cyto_plot.GatingSet <- function(x,
   }
   par("mfrow" = layout)
   np <- layout[1] * layout[2]
-  
-  # GRAPHICS DEVICE
-  cyto_plot_new(popup = popup)
   
   # Repeat arguments as required -----------------------------------------------
 
@@ -1877,7 +1892,7 @@ cyto_plot.GatingSet <- function(x,
   # Pass arguments to .cyto_plot to construct plot
   cnt <- 0
   mapply(
-    function(fr_list,
+    function(x,
                  gate,
                  limits,
                  display,
@@ -1942,7 +1957,7 @@ cyto_plot.GatingSet <- function(x,
       
       cnt <<- cnt + 1
       
-      .cyto_plot(fr_list,
+      .cyto_plot(x,
         channels = channels,
         gate = gate,
         axes_trans = axes_trans,
@@ -2014,7 +2029,7 @@ cyto_plot.GatingSet <- function(x,
       if (popup == TRUE &
         cnt %% np == 0 &
         length(fr_list) > cnt) {
-        cyto_plot_window()
+        cyto_plot_new(popup = popup)
         par("mfrow" = layout)
       }
     },
