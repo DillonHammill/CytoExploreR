@@ -1347,22 +1347,22 @@ cyto_plot.GatingHierarchy <- function(x,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Load samples into GatingSet
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#'
+#' 
 #' # Apply coompensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#'
+#' 
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
-#'
+#' 
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
-#'
+#' 
 #' # 2-D scatter plot with overlay & Gates
 #' cyto_plot(gs,
 #'   parent = "CD4 T Cells",
@@ -1370,7 +1370,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   overlay = "CD8 T Cells"
 #' )
-#'
+#' 
 #' # 2-D Scatter Plots with Back-Gating & Gates
 #' cyto_plot(gs,
 #'   parent = "T Cells",
@@ -1380,7 +1380,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #' )
 #' @importFrom flowWorkspace getGate getData sampleNames getTransformations
 #'   sampleNames pData getNodes
-#' @importFrom flowCore flowSet
+#' @importFrom flowCore flowSet identifier
 #' @importFrom openCyto templateGen
 #' @importFrom grDevices recordPlot
 #' @importFrom methods formalArgs
@@ -1441,7 +1441,7 @@ cyto_plot.GatingSet <- function(x,
                                 title_text_size = 1.1,
                                 title_text_col = "black",
                                 legend = FALSE,
-                                legend_text,
+                                legend_text = NA,
                                 legend_text_font = 1,
                                 legend_text_size = 1,
                                 legend_text_col = "black",
@@ -1466,7 +1466,7 @@ cyto_plot.GatingSet <- function(x,
                                 border_line_width = 1,
                                 border_line_col = "black",
                                 border_fill = "white", ...) {
-
+    
   # Checks ---------------------------------------------------------------------
 
   # Set plot method - determine when dev.off should be called when saving
@@ -1479,6 +1479,11 @@ cyto_plot.GatingSet <- function(x,
     if (all(layout == FALSE)) {
       options("CytoRSuite_cyto_plot_custom" = TRUE)
     }
+  }
+
+  # Turn off popup if cyto_plot_save has been called
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    popup <- FALSE
   }
 
   # No parent supplied
@@ -1548,24 +1553,33 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Extract experiment details & add grouping ----------------------------------
-  
+
   # Extract experiment details
   pd <- cyto_details(x)
-  
+
   # Add group_by column if group_by supplied
-  if(!.all_na(group_by)){
-    if(length(group_by) == 1){
-      if(group_by == "all"){
+  if (!.all_na(group_by)) {
+    if (length(group_by) == 1) {
+      if (group_by == "all") {
         pd$group_by <- rep("all", nrow(pd))
-      }else{
+      } else {
         pd$group_by <- pd[, group_by]
       }
-    }else{
+    } else {
       pd$group_by <- do.call("paste", pd[, group_by])
     }
   }
-  
+
   # Extract & format data for plotting (list of flowFrame lists) ---------------
+
+  # Names of each flowFrame is parent and overlay
+  if (!.all_na(overlay)) {
+    if (is.character(overlay)) {
+      if (.all_na(legend_text)) {
+        legend_text <- c(parent, overlay)
+      }
+    }
+  }
 
   # Extract data from GatingSet
   fs <- cyto_extract(x, parent)
@@ -1580,21 +1594,23 @@ cyto_plot.GatingSet <- function(x,
     fr_list <- cyto_convert(fs, "list of flowFrames")
     names(fr_list) <- sampleNames(x)
   }
-  
+
   # Add overlay to list and group if necessary
   if (!.all_na(overlay)) {
 
     # overlay must be list of flowFrame lists
 
     # Overlay is the names of populations
-    if (is.character(overlay) & all(overlay %in% basename(getNodes(x)))) {
+    if (is.character(overlay)) {
+      if (all(overlay %in% basename(getNodes(x)))) {
 
-      # Pull out list of flowSets
-      nms <- overlay
-      overlay <- lapply(overlay, function(z) {
-        cyto_extract(x, z)
-      })
-      names(overlay) <- nms
+        # Pull out list of flowSets
+        nms <- overlay
+        overlay <- lapply(overlay, function(z) {
+          cyto_extract(x, z)
+        })
+        names(overlay) <- nms
+      }
     }
 
     # Repeat flowFrame once per plot - no grouping
@@ -1618,37 +1634,60 @@ cyto_plot.GatingSet <- function(x,
       })
       # Convert list of flowSets to list of flowFrame lists
     } else if (inherits(overlay, "list")) {
+      
+      # Allow list of flowFrame lists of length fr_list
+      if (all(unlist(lapply(unlist(overlay), function(z) {
+        inherits(z, "flowFrame")
+      })))) {
+        
+        # Must be of same length as fr_list
+        if (length(overlay) != length(fr_list)) {
+          stop(paste(
+            "'overlay' must be a list of flowFrame lists -",
+            "one flowFrame list per plot."
+          ))
+        }
+        
+        # No grouping is applied internally for these types of overlays
+        overlay_list <- overlay
 
-      # Only lists of flowSets are supported
-      if (!all(unlist(lapply(overlay, function(z) {
+        # list of flowSet lists
+      } else if (all(unlist(lapply(overlay, function(z) {
         inherits(z, "flowSet")
       })))) {
-        stop("Only lists of flowSets are supported for overlay.")
-      }
 
-      # Apply same grouping to overlay
-      if (!.all_na(group_by)) {
-        overlay_list <- lapply(overlay, function(z) {
-          cyto_group_by(z, group_by)
-        })
-        overlay_list <- lapply(overlay_list, function(z) {
-          lapply(z, function(y) {
-            cyto_convert(y, "flowFrame")
+        # Apply same grouping to overlay
+        if (!.all_na(group_by)) {
+          overlay_list <- lapply(overlay, function(z) {
+            cyto_group_by(z, group_by)
           })
-        })
-      } else {
-        overlay_list <- lapply(overlay, function(z) {
-          cyto_convert(z, "list of flowFrames")
-        })
-      }
+          overlay_list <- lapply(overlay_list, function(z) {
+            lapply(z, function(y) {
+              cyto_convert(y, "flowFrame")
+            })
+          })
+        } else {
+          overlay_list <- lapply(overlay, function(z) {
+            cyto_convert(z, "list of flowFrames")
+          })
+        }
 
-      overlay_list <- overlay_list %>% transpose()
+        overlay_list <- overlay_list %>% transpose()
+
+        # Overlay is not supported
+      } else {
+        stop(paste(
+          "'overlay' should be either the names of the populations to",
+          "overlay, a flowFrame, a flowSet, list of flowFrame lists",
+          "or list of flowSet lists."
+        ))
+      }
     }
-    
-  # No overlay
-  }else if(.all_na(overlay)){
+
+    # No overlay
+  } else if (.all_na(overlay)) {
     nms <- names(fr_list)
-    fr_list <- lapply(seq(1,length(fr_list)), function(z){
+    fr_list <- lapply(seq(1, length(fr_list)), function(z) {
       lst <- list(fr_list[[z]])
       names(lst) <- nms[z]
       return(lst)
@@ -1665,35 +1704,34 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # Support splitting stacked samples without overlay
-  if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
-    
+  if (length(channels) == 1 & .all_na(overlay) & density_stack != 0) {
+
     # Convert list of individual flowFrame lists into list(list of flowFrames)
     fr_list <- list(unlist(fr_list))
-    
+
     # Change legend text to sampleNames
-    if(.empty(legend_text)){
+    if (.all_na(legend_text)) {
       legend_text <- nms
     }
-    
+
     # Support splitting into separate plots by density_layers
-    if(!.all_na(density_layers)){
-      
+    if (!.all_na(density_layers)) {
+
       # Only supported if same number of layers in each plot
-      if(length(fr_list[[1]]) %% density_layers != 0){
+      if (length(fr_list[[1]]) %% density_layers != 0) {
         stop("Each plot must have the same number of layers!")
       }
-      
+
       ind <- rep(seq_len(length(fr_list[[1]])),
-                 each = density_layers,
-                 length.out = length(fr_list[[1]]))
-      fr_list <- lapply(unique(ind), function(z){
+        each = density_layers,
+        length.out = length(fr_list[[1]])
+      )
+      fr_list <- lapply(unique(ind), function(z) {
         fr_list[[1]][ind == z]
       })
-      
     }
-    
   }
-  
+
   # Extract gate objects -------------------------------------------------------
 
   # Allow alias = "" to plot all appropriate gates
@@ -1702,18 +1740,20 @@ cyto_plot.GatingSet <- function(x,
     if (all(alias == "")) {
       gt <- templateGen(x[[1]])
       gt <- gt[basename(gt$parent) == parent, ]
-      
+
       # Match both channels for 2D plots
-      if(length(channels) == 2){
+      if (length(channels) == 2) {
         alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
-        
-      # At least 1 channel match
-      }else if(length(channels) == 1){
-        ind <- lapply(gt$dims, function(z){grep(channels, z)})
+
+        # At least 1 channel match
+      } else if (length(channels) == 1) {
+        ind <- lapply(gt$dims, function(z) {
+          grep(channels, z)
+        })
         ind <- unlist(lapply(ind, "length")) != 0
         alias <- gt$alias[ind]
       }
-      
+
       # No gates constructed in the supplied channels
       if (length(alias) == 0) {
         alias <- NA
@@ -1723,7 +1763,7 @@ cyto_plot.GatingSet <- function(x,
 
   # Extract gate objects directly from x
   if (!.all_na(alias)) {
-    if (!.empty(group_by)) {
+    if (!.all_na(group_by)) {
       gate <- lapply(nms, function(nm) {
         gt <- lapply(alias, function(z) {
           getGate(x[[match(nm, pd$group_by)]], z)
@@ -1741,16 +1781,15 @@ cyto_plot.GatingSet <- function(x,
       })
     }
   }
-  
+
   # Organise gates for stacked 1D without overlay
-  if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
-    
+  if (length(channels) == 1 & .all_na(overlay) & density_stack != 0) {
+
     # Can't plot per sample 1D gates - must all be the same
     # Repeated in mapply as required
-    gate <- list(gate[[1]])  # uses gates from first sample only
-    
+    gate <- list(gate[[1]]) # uses gates from first sample only
   }
-  
+
   # Prepare arguments for plotting ---------------------------------------------
 
   # Labels - use alias  if no text supplied
@@ -1760,15 +1799,13 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
-  # Legend text
-  if (.empty(legend_text)) {
-    if (!.all_na(overlay)) {
-      if (class(overlay) == "character") {
-        legend_text <- c(parent, overlay)
-      }
-    } else {
-      legend_text <- parent
-    }
+  # Legend text - names of fr_list[[i]]
+  if (.all_na(legend_text)) {
+    legend_text <- unlist(lapply(fr_list, function(z) {
+      lapply(z, function(y) {
+        identifier(y)
+      })
+    }))
   }
 
   # Title
@@ -1793,16 +1830,15 @@ cyto_plot.GatingSet <- function(x,
       }
 
       # Stacked 1D plots lack sampleNames in titles if no overlay
-      if(length(channels) == 1 & .all_na(overlay) & density_stack != 0){
+      if (length(channels) == 1 & .all_na(overlay) & density_stack != 0) {
         pt
-      # Stacked with overlay display sampleNames only  
-      }else if(length(channels) == 1 & !.all_na(overlay) & density_stack != 0){
+        # Stacked with overlay display sampleNames only
+      } else if (length(channels) == 1 & !.all_na(overlay) & density_stack != 0) {
         z
-      # Paste together sampleName and parent name
-      }else{
+        # Paste together sampleName and parent name
+      } else {
         paste(z, "\n", pt, sep = " ")
       }
-      
     }))
   }
 
@@ -1829,28 +1865,28 @@ cyto_plot.GatingSet <- function(x,
   }
   axes_text <- list(axes_text_x, axes_text_y)
   axes_text <- rep(axes_text, length(fr_list))
-  
+
   # X axis limits
   if (.all_na(xlim)) {
     xlim <- .cyto_range(fr_list,
-        channels = channels[1],
-        limits = limits,
-        plot = TRUE
-      )[, 1]
+      channels = channels[1],
+      limits = limits,
+      plot = TRUE
+    )[, 1]
   }
-  
+
   # Y axis limits - 1D y limit calculated downstream
   if (.all_na(ylim) & length(channels) != 1) {
     ylim <- .cyto_range(fr_list,
-        channels = channels[2],
-        limits = limits,
-        plot = TRUE
-      )[,1]
+      channels = channels[2],
+      limits = limits,
+      plot = TRUE
+    )[, 1]
   }
-  
+
   # GRAPHICS DEVICE
   cyto_plot_new(popup)
-  
+
   # Layout - missing/off/supplied
   if (.empty(layout)) {
 
@@ -1861,7 +1897,6 @@ cyto_plot.GatingSet <- function(x,
       density_stack = density_stack,
       density_layers = density_layers
     )
-    
   } else if (all(layout == FALSE) | .all_na(layout)) {
 
     # Use current dimensions
@@ -1869,9 +1904,9 @@ cyto_plot.GatingSet <- function(x,
   }
   par("mfrow" = layout)
   np <- layout[1] * layout[2]
-  
-  # Repeat arguments as required -----------------------------------------------
 
+  # Repeat arguments as required -----------------------------------------------
+  
   # Pull down arguments to named list - missing converted to ""
   args <- .args_list()
 
@@ -1883,12 +1918,12 @@ cyto_plot.GatingSet <- function(x,
     layers = length(fr_list[[1]]),
     gates = length(gate[[1]])
   )
-  
+
   # Update arguments
   .args_update(args)
   
   # Calls to cyto_plot flowFrame method ----------------------------------------
-  
+
   # Pass arguments to .cyto_plot to construct plot
   cnt <- 0
   mapply(
@@ -1913,7 +1948,6 @@ cyto_plot.GatingSet <- function(x,
                  density_line_col,
                  point_shape,
                  point_size,
-                 point_col_scale,
                  point_cols,
                  point_col,
                  point_col_alpha,
@@ -1954,9 +1988,8 @@ cyto_plot.GatingSet <- function(x,
                  border_line_width,
                  border_line_col,
                  border_fill) {
-      
       cnt <<- cnt + 1
-      
+
       .cyto_plot(x,
         channels = channels,
         gate = gate,
@@ -2054,7 +2087,6 @@ cyto_plot.GatingSet <- function(x,
     density_line_col,
     point_shape,
     point_size,
-    point_col_scale,
     point_cols,
     point_col,
     point_col_alpha,
@@ -2098,10 +2130,10 @@ cyto_plot.GatingSet <- function(x,
   )
 
   # Return global options to default -------------------------------------------
-  
+
   # Remove save label co-ordinates
   options("CytoRSuite_cyto_plot_label_coords" = NULL)
-  
+
   # Record and/or save ---------------------------------------------------------
 
   # Turn off graphics device for saving

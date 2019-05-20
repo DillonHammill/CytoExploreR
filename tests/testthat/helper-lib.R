@@ -31,7 +31,7 @@ fs <- fs[c(1,12,23,28,29,30,31,32,33,2,3,4,5,6,7,8,9,10,
            11,13,14,15,16,17,18,19,20,21,22,24,25,26,27)]
 
 # Sample for speed -
-fs <- fsApply(fs, function(fr){cyto_sample(fr, display = 0.04, seed = 20)})
+fs <- cyto_sample(fs, display = 0.04, seed = 20)
 
 # Samplenames
 nms <- sampleNames(fs)

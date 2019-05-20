@@ -5,7 +5,7 @@
 \title{cyto_plot - GatingSet Method}
 \usage{
 \method{cyto_plot}{GatingSet}(x, parent, alias = NA, channels,
-  axes_trans = NA, group_by, overlay = NA, gate = NA,
+  axes_trans = NA, group_by = NA, overlay = NA, gate = NA,
   limits = "machine", display = 1, layout, popup = FALSE,
   xlim = NA, ylim = NA, title, xlab, ylab, density_modal = TRUE,
   density_smooth = 0.6, density_stack = 0.5, density_layers = NA,
@@ -19,7 +19,7 @@
   axes_text_col = "black", axes_label_text_font = 1,
   axes_label_text_size = 1.1, axes_label_text_col = "black",
   title_text_font = 2, title_text_size = 1.1,
-  title_text_col = "black", legend = FALSE, legend_text,
+  title_text_col = "black", legend = FALSE, legend_text = NA,
   legend_text_font = 1, legend_text_size = 1,
   legend_text_col = "black", legend_line_type = 1,
   legend_line_width = 1, legend_line_col = NA, legend_box_fill = NA,
@@ -280,7 +280,7 @@ default.}
 \item{border_fill}{border_fill fill colour to use inside the plot border
 (i.e. background colour), set to "white" by default.}
 
-\item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
+\item{...}{additional arguments not currently in use.}
 }
 \description{
 Explore & visualise a GatingSet.

@@ -43,7 +43,7 @@ cyto_plot_point.flowFrame <- function(x,
                                       point_col_scale = NA,
                                       point_cols = NA,
                                       point_col = NA,
-                                      point_col_alpha = NA, ...){
+                                      point_col_alpha = 1, ...){
  
   # Combine x and overlay into a list
   if(!.all_na(overlay)){
@@ -58,13 +58,18 @@ cyto_plot_point.flowFrame <- function(x,
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
   
-  # Get point colours
-  args[["point_col"]] <- .cyto_plot_point_col(args[["fr_list"]],
-                                              args[["channels"]],
-                                              args[["point_col_scale"]],
-                                              args[["point_cols"]],
-                                              args[["point_col"]],
-                                              args[["point_col_alpha"]])
+  # Update arguments
+  .args_update(args)
+  
+  # Get point colours if point_col is not a list
+  if(!inherits(point_col, "list")){
+      point_col <- .cyto_plot_point_col(fr_list,
+                                              channels,
+                                              point_col_scale,
+                                              point_cols,
+                                              point_col,
+                                              point_col_alpha)
+  }
   
   # Extract data and plot points
   mapply(function(x,
@@ -85,10 +90,10 @@ cyto_plot_point.flowFrame <- function(x,
              col = point_col)
     }
 
-  }, args[["fr_list"]],
-  args[["point_shape"]],
-  args[["point_size"]],
-  args[["point_col"]])
+  }, fr_list,
+  point_shape,
+  point_size,
+  point_col)
   
 }
 
@@ -103,22 +108,25 @@ cyto_plot_point.list <- function(x,
                                  point_col = NA,
                                  point_col_alpha = NA, ...){
   
-  # Must
-  
   # Pull down arguments to named list
   args <- .args_list()
   
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
   
-  # Get point colours
-  args[["point_col"]] <- .cyto_plot_point_col(args[["x"]],
-                                              args[["channels"]],
-                                              args[["point_col_scale"]],
-                                              args[["point_cols"]],
-                                              args[["point_col"]],
-                                              args[["point_col_alpha"]])
+  # Update arguments
+  .args_update(args)
   
+  # Get point colours if point_col is not a list
+  if(!inherits(point_col, "list")){
+      point_col <- .cyto_plot_point_col(x,
+                                              channels,
+                                              point_col_scale,
+                                              point_cols,
+                                              point_col,
+                                              point_col_alpha)
+  }
+
   # Extract data and plot points
   mapply(function(x,
                   point_shape,
@@ -138,9 +146,9 @@ cyto_plot_point.list <- function(x,
              col = point_col)
     }
     
-  }, args[["x"]],
-  args[["point_shape"]],
-  args[["point_size"]],
-  args[["point_col"]])
+  }, x,
+  point_shape,
+  point_size,
+  point_col)
   
 }

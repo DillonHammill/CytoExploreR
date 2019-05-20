@@ -22,7 +22,6 @@
 # - ylab
 # - label
 # - label_stat
-# - legend_text
 
 # ADDING NEW FEATURES TO CYTO_PLOT:
 # 1. Add the argument to cyto_plot with an appropriate default.
@@ -463,15 +462,19 @@
     if (any(channels %in% c("FSC-A", "SSC-A"))) {
       if ("FSC-A" %in% channels) {
         x <- lapply(x, function(z) {
-          nonDebris <- rectangleGate("FSC-A" = c(0, Inf))
-          z <- Subset(z, nonDebris)
+          if(min(range(z)[,"FSC-A"]) < 0){
+            nonDebris <- rectangleGate("FSC-A" = c(0, Inf))
+            z <- Subset(z, nonDebris)
+          }
           return(z)
         })
       }
       if ("SSC-A" %in% channels) {
         x <- lapply(x, function(z) {
-          nonDebris <- rectangleGate("SSC-A" = c(0, Inf))
-          z <- Subset(z, nonDebris)
+          if(min(range(z)[,"SSC-A"]) < 0){
+            nonDebris <- rectangleGate("SSC-A" = c(0, Inf))
+            z <- Subset(z, nonDebris)
+          }
           return(z)
         })
       }
@@ -511,7 +514,7 @@
       legend_text = legend_text,
       legend_text_size = legend_text_size
     )
-
+    
     # POINT COL - list
     if (.all_na(point_col)) {
       point_col <- .cyto_plot_point_col(x,
@@ -522,7 +525,7 @@
         point_col_alpha = point_col_alpha
       )
     }
-
+    
     # POINTS - list of point colours
     cyto_plot_point(x,
       channels = channels,

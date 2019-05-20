@@ -28,7 +28,7 @@
 .cyto_plot_axes_text.flowFrame <- function(x,
                                            channels,
                                            axes_trans = NA) {
-  
+
   # Return NA if axes_trans is missing
   if (.all_na(axes_trans)) {
     return(NA)
@@ -359,8 +359,7 @@
     "contour_lines",
     "contour_line_type",
     "contour_line_width",
-    "contour_line_col",
-    "point_col_scale"
+    "contour_line_col"
   )
 
   lapply(args, function(arg) {
@@ -376,7 +375,7 @@
       x[[arg]] <<- res
     }
   })
-
+  
   # Arguments of length 2 per plot
   args <- c("axes_text")
 
@@ -575,10 +574,10 @@
 
   # Pull down arguments to named list
   args <- .args_list()
-  
+
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # Use default colour scale
   if (.all_na(args[["point_cols"]])) {
     args[["point_cols"]] <- c(
@@ -659,104 +658,109 @@
 #' @param x object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param overlay object to overlay.
-#' 
+#'
 #' @return converted overlay
-#' 
+#'
 #' @importFrom flowCore fsApply
 #' @importFrom flowWorkspace getData getNodes
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-cyto_plot_overlay_convert <- function(x, ...){
+cyto_plot_overlay_convert <- function(x, ...) {
   UseMethod(".cyto_plot_overlay_convert")
 }
 
 #' @noRd
-.cyto_plot_overlay_convert.flowFrame <- function(x, 
-                                                 overlay = NA){
-  
+.cyto_plot_overlay_convert.flowFrame <- function(x,
+                                                 overlay = NA) {
+
   # No overlay supplied
-  if(.all_na(overlay)){
+  if (.all_na(overlay)) {
     return(overlay)
   }
-  
+
   # Convert overlay to list of flowFrames
-  
+
   # flowFrame -> flowFrame list
   if (inherits(x, "flowFrame")) {
-      overlay <- cyto_convert(overlay,
-                              "flowFrame list")
-  # flowSet -> list of flowFrames
+    overlay <- cyto_convert(
+      overlay,
+      "flowFrame list"
+    )
+    # flowSet -> list of flowFrames
   } else if (inherits(overlay, "flowSet")) {
-      overlay <- cyto_convert(overlay,
-                              "list of flowFrames")
-  # list of flowFrames
+    overlay <- cyto_convert(
+      overlay,
+      "list of flowFrames"
+    )
+    # list of flowFrames
   } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
-    
-  # flowSet list -> list of flowFrames
+
+    # flowSet list -> list of flowFrames
   } else if (all(unlist(lapply(overlay, function(x) {
     inherits(x, "flowSet")
   }))) &
-  length(overlay) == 1) {
-    
-    overlay <- cyto_convert(overlay[[1]],
-                            "list of flowFrames")
+    length(overlay) == 1) {
+    overlay <- cyto_convert(
+      overlay[[1]],
+      "list of flowFrames"
+    )
   } else {
     stop(paste("'overlay' must be a flowFrame, flowSet,",
-               "list of flowFrames or a list containing a flowSet.",
-               sep = " "
+      "list of flowFrames or a list containing a flowSet.",
+      sep = " "
     ))
   }
-  
+
   # return is a list of flowFrames to overlay
   return(overlay)
 }
 
 #' @noRd
 .cyto_plot_overlay_convert.flowSet <- function(x,
-                                               overlay = NA){
-  
+                                               overlay = NA) {
+
   # No overlay supplied
-  if(.all_na(overlay)){
+  if (.all_na(overlay)) {
     return(overlay)
   }
-  
+
   # Convert overlay to list of lists of flowFrames (1 list per element in x)
-  
+
   # flowFrame
   if (class(overlay) == "flowFrame") {
     overlay <- lapply(rep(list(overlay), length(x)), "list")
-  # flowSet
+    # flowSet
   } else if (inherits(overlay, "flowSet")) {
     overlay <- lapply(lapply(
       seq(1, length(overlay), 1),
       function(z) overlay[[z]]
     ), "list")
-  # list of flowFrames
+    # list of flowFrames
   } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
     if (length(overlay) == 1) {
       overlay <- lapply(rep(list(overlay[[1]]), length(x)), "list")
     } else {
       if (length(overlay) != length(x)) {
         stop(paste("Supplied list of flowFrames must be of the",
-                   "same length as the flowSet.",
-                   sep = " "
+          "same length as the flowSet.",
+          sep = " "
         ))
       }
       overlay <- lapply(overlay, "list")
     }
-  # list of flowSets
+    # list of flowSets
   } else if (all(unlist(lapply(overlay, function(x) {
     inherits(x, "flowSet")
   })))) {
     if (!all(unlist(lapply(overlay, length)) == length(x))) {
       stop(paste("Each flowSet in supplied list should be of the",
-                 "same length as the supplied flowSet.",
-                 sep = " "
+        "same length as the supplied flowSet.",
+        sep = " "
       ))
     }
-    
+
     # list of flowFrame lists
     overlay <- lapply(overlay, function(z) {
       lapply(seq(1, length(z), 1), function(y) z[[y]])
@@ -770,32 +774,32 @@ cyto_plot_overlay_convert <- function(x, ...){
     if (length(overlay) != length(x)) {
       stop(
         paste("'overlay' should be a list of flowFrames lists",
-              "to overlay on each flowFrame in the flowSet.",
-              sep = " "
+          "to overlay on each flowFrame in the flowSet.",
+          sep = " "
         )
       )
     }
   } else {
     stop(paste("'overlay' must be a flowFrame, flowSet,",
-               "list of flowFrames or a list of flowSets.",
-               sep = " "
+      "list of flowFrames or a list of flowSets.",
+      sep = " "
     ))
   }
-  
+
   # return is a list of flowFrame lists to overlay
   # 1 flowFrame list per flowFrame in x
   return(overlay)
 }
 
 #' @noRd
-.cyto_plot_overlay_convert_GatingHierarchy <- function(x, 
-                                                       overlay = NA){
-  
+.cyto_plot_overlay_convert_GatingHierarchy <- function(x,
+                                                       overlay = NA) {
+
   # Overlay could be character vector of population names
   if (inherits(overlay, "flowFrame") |
-      inherits(overlay, "flowSet") |
-      inherits(overlay, "list")) {
-    
+    inherits(overlay, "flowSet") |
+    inherits(overlay, "list")) {
+
   } else if (inherits(overlay, "character")) {
     if (!all(overlay %in% basename(getNodes(x)))) {
       stop("'overlay' does not exist in the GatingHierarchy.")
@@ -807,37 +811,37 @@ cyto_plot_overlay_convert <- function(x, ...){
       names(overlay) <- nms
     }
   }
-  
+
   # .cyto_plot_overlay_convert to convert overlay to correct format
   .cyto_plot_overlay_convert(getData(x, "root"),
-                             overlay = overlay)
-  
+    overlay = overlay
+  )
 }
 
 #' @noRd
-.cyto_plot_overlay_convert.GatingSet <- function(x, 
-                                                 overlay = NA){
-    # Overlay could be character vector of population names
-    if (inherits(overlay, "flowFrame") |
-      inherits(overlay, "flowSet") |
-      inherits(overlay, "list")) {
+.cyto_plot_overlay_convert.GatingSet <- function(x,
+                                                 overlay = NA) {
+  # Overlay could be character vector of population names
+  if (inherits(overlay, "flowFrame") |
+    inherits(overlay, "flowSet") |
+    inherits(overlay, "list")) {
 
-    } else if (inherits(overlay, "character")) {
-      if (!all(overlay %in% basename(getNodes(x)))) {
-        stop("overlay' does not exist in the GatingHierarchy.")
-      } else {
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          getData(x, z)
-        })
-        names(overlay) <- nms
-      }
+  } else if (inherits(overlay, "character")) {
+    if (!all(overlay %in% basename(getNodes(x)))) {
+      stop("overlay' does not exist in the GatingHierarchy.")
+    } else {
+      nms <- overlay
+      overlay <- lapply(overlay, function(z) {
+        getData(x, z)
+      })
+      names(overlay) <- nms
     }
+  }
 
-    # .cyto_plot_overlay_convert to convert overlay to correct format
-    .cyto_plot_overlay_convert(getData(x, "root"),
-      overlay = overlay)
-    
+  # .cyto_plot_overlay_convert to convert overlay to correct format
+  .cyto_plot_overlay_convert(getData(x, "root"),
+    overlay = overlay
+  )
 }
 
 # LAYOUT -----------------------------------------------------------------------
@@ -890,7 +894,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'   plot.
 #' @param title if NULL remove excess space above plot.
 #' @param axes_text vector of logicals indicating whether the x and y axes
-#'   should be included on the plot. 
+#'   should be included on the plot.
 #'
 #' @noRd
 .cyto_plot_margins <- function(x,
@@ -898,47 +902,47 @@ cyto_plot_overlay_convert <- function(x, ...){
                                legend_text = NA,
                                legend_text_size = 1,
                                title,
-                               axes_text = list(TRUE,TRUE)) {
-  
+                               axes_text = list(TRUE, TRUE)) {
+
   # Bypass setting margins on cyto_plot_grid
   if (!getOption("CytoRSuite_cyto_plot_grid")) {
-      
+
     # Pull down arguments to named lis
     args <- .args_list()
-    
+
     # Default margins
-    mar <- c(5.1,5.1,4.1,2.1)
-      
+    mar <- c(5.1, 5.1, 4.1, 2.1)
+
     # Make space for legend text on right
-    if(length(x) > 1 & 
-       legend != FALSE & 
-       !.all_na(legend_text)){
+    if (length(x) > 1 &
+      legend != FALSE &
+      !.all_na(legend_text)) {
       mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * legend_text_size
     }
-      
+
     # Remove space above plot if no title
-    if(.all_na(title)){
+    if (.all_na(title)) {
       mar[3] <- 2.1
     }
-    
+
     # Remove space below plot if x axis is missing
-    if(!all(inherits(axes_text[[1]], "list"))){
-      if(.all_na(axes_text[[1]])){
+    if (!all(inherits(axes_text[[1]], "list"))) {
+      if (.all_na(axes_text[[1]])) {
         # NA == FALSE returns NA not T/F
-      }else if(all(axes_text[[1]] == FALSE)){
+      } else if (all(axes_text[[1]] == FALSE)) {
         mar[1] <- 4.1
       }
     }
-      
+
     # Remove space below plot if y axis is missing
-    if(!all(inherits(axes_text[[2]], "list"))){
-      if(.all_na(axes_text[[2]])){
+    if (!all(inherits(axes_text[[2]], "list"))) {
+      if (.all_na(axes_text[[2]])) {
         # NA == FALSE return NA not T/F
-      }else if(all(axes_text[[2]] == FALSE)){
+      } else if (all(axes_text[[2]] == FALSE)) {
         mar[2] <- 4.1
       }
     }
-    
+
     # Set update graphics parameter
     par("mar" = mar)
   }
@@ -1007,16 +1011,17 @@ cyto_plot_overlay_convert <- function(x, ...){
                               point_size = 2,
                               point_col = NA,
                               point_col_alpha = 1) {
-  
+
   # Estimate legend height using strheight
   lgnd <- paste(legend_text, collapse = " \n ")
   lgnd_height <- strheight(lgnd,
-                           cex = legend_text_size,
-                           font = legend_text_font)
-  
+    cex = legend_text_size,
+    font = legend_text_font
+  )
+
   # Calculate y center of plot
-  cnt <- par("usr")[3] + (par("usr")[4] - par("usr")[3])/2
-  
+  cnt <- par("usr")[3] + (par("usr")[4] - par("usr")[3]) / 2
+
   # Legend for 1D density distributions
   if (length(channels) == 1) {
 
@@ -1024,7 +1029,7 @@ cyto_plot_overlay_convert <- function(x, ...){
     if (legend == TRUE) {
       legend <- "fill"
     }
-    
+
     # Reverse legend text order for legend
     legend_text <- rev(legend_text)
 
@@ -1056,10 +1061,10 @@ cyto_plot_overlay_convert <- function(x, ...){
       # Revert to density_fill if no legend fill colours supplied
       if (.all_na(legend_box_fill)) {
         legend_box_fill <- density_fill
-        
-      # Alpha adjust colours if suppplied directly to legend_box_fill
-      }else if (!.all_na(legend_box_fill) &
-                !all(density_fill_alpha == 1)) {
+
+        # Alpha adjust colours if suppplied directly to legend_box_fill
+      } else if (!.all_na(legend_box_fill) &
+        !all(density_fill_alpha == 1)) {
         legend_box_fill <- mapply(
           function(legend_box_fill,
                              density_fill_alpha) {
@@ -1087,18 +1092,18 @@ cyto_plot_overlay_convert <- function(x, ...){
   } else if (length(channels) == 2) {
 
     # Revert to point_col if no legen point cols supplied
-    if(.all_na(legend_point_col)){
+    if (.all_na(legend_point_col)) {
       legend_point_col <- point_col
-    # Alpha adjust colours supplied directly to legend_point_col
-    }else if (!.all_na(legend_point_col) &
-              !all(point_col_alpha == 1)) {
+      # Alpha adjust colours supplied directly to legend_point_col
+    } else if (!.all_na(legend_point_col) &
+      !all(point_col_alpha == 1)) {
       legend_point_col <- mapply(function(col, alpha) {
         adjustcolor(col, alpha)
       }, legend_point_col, point_col_alpha)
     }
 
     legend(
-      x = 1.07 * par("usr")[2],
+      x = 1.1 * par("usr")[2],
       y = cnt + 0.6 * lgnd_height,
       legend = rev(legend_text),
       col = rev(legend_point_col),
@@ -1106,7 +1111,7 @@ cyto_plot_overlay_convert <- function(x, ...){
       pt.cex = rev(2 * point_size),
       xpd = TRUE,
       bty = "n",
-      x.intersp = 0.5,
+      x.intersp = 0.7,
       cex = legend_text_size,
       text.col = rev(legend_text_col),
       text.font = rev(legend_text_font)
@@ -1126,12 +1131,12 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @noRd
 .cyto_plot_theme_inherit <- function(x) {
-  
+
   # extract cyto_plot_theme arguments
   args <- getOption("CytoRSuite_cyto_plot_theme")
-  
+
   if (!is.null(args)) {
-    lapply(names(args), function(y){
+    lapply(names(args), function(y) {
       x[[y]] <<- args[[y]]
     })
   }
@@ -1152,31 +1157,31 @@ cyto_plot_overlay_convert <- function(x, ...){
                              channels,
                              overlay = NA,
                              title = "") {
-  
+
   # Pull down arguments to named list
   args <- .args_list()
-  
+
   # Update arguments
   .args_update(args)
-  
+
   # 1D density distributions
   if (length(channels) == 1) {
 
     # missing/empty replace with valid title
-    if(.empty(title)){
-    
+    if (.empty(title)) {
+
       # stacked/overlays lack a title
-      if(.all_na(overlay)){
+      if (.all_na(overlay)) {
         title <- identifier(x)
-        if(title == "anonymous"){
+        if (title == "anonymous") {
           title <- "Combined Events"
         }
-      }else{
+      } else {
         title <- NA
       }
-      
-    # NA will remove title in cyto_plot_empty  
-    }else if(.all_na(title)){
+
+      # NA will remove title in cyto_plot_empty
+    } else if (.all_na(title)) {
       title <- NA
     }
 
@@ -1184,17 +1189,16 @@ cyto_plot_overlay_convert <- function(x, ...){
   } else if (length(channels) == 2) {
 
     # missing title replaced with sample name
-    if(.empty(title)){
+    if (.empty(title)) {
       title <- identifier(x)
-      if(title == "anonymous"){
+      if (title == "anonymous") {
         title <- "Combined Events"
       }
-      
-    # NA will remove title in cyto_plot_empty  
-    }else if(.all_na(title)){
+
+      # NA will remove title in cyto_plot_empty
+    } else if (.all_na(title)) {
       title <- NA
     }
-    
   }
 
   return(title)
@@ -1223,67 +1227,66 @@ cyto_plot_overlay_convert <- function(x, ...){
   if (length(channels) == 1) {
 
     # x axis label
-    if(missing(xlab) | .empty(xlab)){
+    if (missing(xlab) | .empty(xlab)) {
       # Marker assigned to channel
       if (!is.na(fr_data$desc[which(fr_channels == channels)])) {
         xlab <- paste(fr_data$desc[which(fr_channels == channels)],
-                      channels,
-                      sep = " "
+          channels,
+          sep = " "
         )
         # No assigned marker to channel
       } else if (is.na(fr_data$desc[which(fr_channels == channels)])) {
         xlab <- paste(channels)
       }
-    }else if(.all_na(xlab)){
+    } else if (.all_na(xlab)) {
       xlab <- NA
     }
-    
+
     # y axis label
-    if(missing(ylab) | .empty(ylab)){
+    if (missing(ylab) | .empty(ylab)) {
       if (density_modal) {
         ylab <- "Density Normalised to Mode (%)"
       } else {
         ylab <- "Density"
       }
-    }else if(.all_na(ylab)){
+    } else if (.all_na(ylab)) {
       ylab <- NA
     }
-    
+
     # 2D scatterplots
   } else if (length(channels) == 2) {
 
     # x axis label
-    if(missing(xlab) | .empty(xlab)){
+    if (missing(xlab) | .empty(xlab)) {
       # Marker assigned to channel
       if (!is.na(fr_data$desc[which(fr_channels == channels[1])])) {
         xlab <- paste(fr_data$desc[which(fr_channels == channels[1])],
-                      channels[1],
-                      sep = " "
+          channels[1],
+          sep = " "
         )
         # No assigned marker to channel
       } else if (is.na(fr_data$desc[which(fr_channels == channels[1])])) {
         xlab <- paste(channels[1])
       }
-    }else if(.all_na(xlab)){
+    } else if (.all_na(xlab)) {
       xlab <- NA
     }
-    
+
     # y axis label
-    if(missing(ylab) | .empty(ylab)){
+    if (missing(ylab) | .empty(ylab)) {
       # Marker assigned to channel
       if (!is.na(fr_data$desc[which(fr_channels == channels[2])])) {
         ylab <- paste(fr_data$desc[which(fr_channels == channels[2])],
-                      channels[2],
-                      sep = " "
+          channels[2],
+          sep = " "
         )
         # No assigned marker to channel
       } else if (is.na(fr_data$desc[which(fr_channels == channels[2])])) {
         ylab <- paste(channels[2])
       }
-    }else if(.all_na(ylab)){
+    } else if (.all_na(ylab)) {
       ylab <- NA
     }
-    
   }
 
   return(list(xlab, ylab))
@@ -1292,91 +1295,90 @@ cyto_plot_overlay_convert <- function(x, ...){
 # DENSITY FILL -----------------------------------------------------------------
 
 #' Get density fill colours for cyto_plot
-#' 
+#'
 #' @param x list of flowFrame or density objects.
 #' @param density_fill vector of colours to use for each layer.
 #' @param density_cols vector of colls to use to select density_fill colours.
-#' 
+#'
 #' @importFrom grDevices adjustcolor colorRampPalette
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @noRd
 .cyto_plot_density_fill <- function(x,
                                     density_fill = NA,
                                     density_cols = NA,
                                     density_fill_alpha = 1) {
-  
+
   # Expected number of colours
   n <- length(x)
 
   # Pull down arguments to named list
   args <- as.list(environment())
-  
+
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # No density_cols supplied
-  if(.all_na(args[["density_cols"]])){
-    args[["density_cols"]] <- c("grey",
-                                "bisque4",
-                                "brown1",
-                                "red",
-                                "darkred",
-                                "chocolate",
-                                "orange",
-                                "yellow",
-                                "yellowgreen",
-                                "green",
-                                "aquamarine",
-                                "cyan",
-                                "cornflowerblue",
-                                "blue",
-                                "blueviolet",
-                                "purple",
-                                "magenta",
-                                "deeppink")
+  if (.all_na(args[["density_cols"]])) {
+    args[["density_cols"]] <- c(
+      "grey",
+      "bisque4",
+      "brown1",
+      "red",
+      "darkred",
+      "chocolate",
+      "orange",
+      "yellow",
+      "yellowgreen",
+      "green",
+      "aquamarine",
+      "cyan",
+      "cornflowerblue",
+      "blue",
+      "blueviolet",
+      "purple",
+      "magenta",
+      "deeppink"
+    )
   }
 
-  
+
   # Make colorRampPalette
-  if(class(args[["density_cols"]]) != "function"){
+  if (class(args[["density_cols"]]) != "function") {
     cols <- colorRampPalette(args[["density_cols"]])
-  }else{
+  } else {
     cols <- args[["density_cols"]]
   }
 
   # No colours supplied to density_fill either
-  if(.all_na(args[["density_fill"]])){
-      
+  if (.all_na(args[["density_fill"]])) {
+
     # Pull out a single colour per layer
     args[["density_fill"]] <- cols(n)
-    
-  # Colours supplied manually to density_fill 
-  }else{
-      
+
+    # Colours supplied manually to density_fill
+  } else {
+
     # Too few colours supplied - pull others from cols
-    if(length(args[["density_fill"]]) < n){
-        
-      args[["density_fill"]] <- c(args[["density_fill"]],
-                                    cols(n - length(args[["density_fill"]])))
-        
-    # Too many colours supplied
-    }else if(length(args[["density_fill"]]) > n){
-        
-      args[["density_fill"]] <- args[["density_fill"]][seq(1,n)]
-        
+    if (length(args[["density_fill"]]) < n) {
+      args[["density_fill"]] <- c(
+        args[["density_fill"]],
+        cols(n - length(args[["density_fill"]]))
+      )
+
+      # Too many colours supplied
+    } else if (length(args[["density_fill"]]) > n) {
+      args[["density_fill"]] <- args[["density_fill"]][seq(1, n)]
     }
-    
   }
-  
+
   # Adjust colors by density_fill_alpha
-  args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha){
+  args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha) {
     adjustcolor(density_fill, density_fill_alpha)
   }, args[["density_fill"]], args[["density_fill_alpha"]], USE.NAMES = FALSE)
-  
+
   return(args[["density_fill"]])
-  
 }
 
 # POINT COLOUR -----------------------------------------------------------------
@@ -1394,7 +1396,7 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @importFrom grDevices densCols colorRampPalette adjustcolor
 #' @importFrom flowCore exprs
-#' 
+#'
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1404,120 +1406,136 @@ cyto_plot_overlay_convert <- function(x, ...){
                                  point_col_scale,
                                  point_cols,
                                  point_col,
-                                 point_col_alpha){
-  
+                                 point_col_alpha = 1) {
+
   # Expected number of colours
   n <- length(x)
   
   # Pull down arguments to named list
   args <- .args_list()
-  
-  # Inherit arguments from cyto_plot_theme
+
+  # Inherit arguments from cyto_plot_theme - possibly remove?
   args <- .cyto_plot_theme_inherit(args)
-  
+
+  # Update arguments
+  .args_update(args)
+
   # No colours supplied for density gradient
-  if(.all_na(args[["point_col_scale"]])){
-    args[["point_col_scale"]] <- c("blue",
-                                   "turquoise",
-                                   "green",
-                                   "yellow",
-                                   "orange",
-                                   "red",
-                                   "darkred")
+  if (.all_na(point_col_scale)) {
+    point_col_scale <- c(
+      "blue",
+      "turquoise",
+      "green",
+      "yellow",
+      "orange",
+      "red",
+      "darkred"
+    )
   }
   
   # Make colorRampPalette
-  if(class(args[["point_col_scale"]]) != "function"){
-    col_scale <- colorRampPalette(args[["point_col_scale"]])
-  }else{
-    cols_scale <- args[["point_col_scale"]]
+  if (class(point_col_scale) != "function") {
+    col_scale <- colorRampPalette(point_col_scale)
+  } else {
+    col_scale <- point_col_scale
   }
-  
+
   # No colours supplied for selection
-  if(.all_na(args[["point_cols"]])){
-    args[["point_cols"]] <- c("black",
-                              "darkorchid",
-                              "blueviolet",
-                              "magenta",
-                              "deeppink",
-                              "red4",
-                              "orange",
-                              "springgreen4")
+  if (.all_na(point_cols)) {
+    point_cols <- c(
+      "black",
+      "darkorchid",
+      "blueviolet",
+      "magenta",
+      "deeppink",
+      "red4",
+      "orange",
+      "springgreen4"
+    )
   }
-  
+
   # Make colorRampPalette
-  if(class(args[["point_cols"]]) != "function"){
-    cols <- colorRampPalette(args[["point_cols"]])
-  }else{
-    cols <- args[["point_cols"]]
+  if (class(point_cols) != "function") {
+    cols <- colorRampPalette(point_cols)
+  } else {
+    cols <- point_cols
   }
+
+  # Repeat point_col n times
+  point_col <- rep(point_col,
+    length.out = n
+  )
   
-  # Repeat point_col length of x and convert to list
-  args[["point_col"]] <- rep(args[["point_col"]], 
-                             length.out = length(x))
-  args[["point_col"]] <- lapply(seq(1,length(x)), function(z){
-                                args[["point_col"]][z]})
-  
+  # Convert point_col to list
+  if(!inherits(point_col, "list")){
+    point_col <- lapply(seq(1, n), function(z) {
+      point_col[z]
+    })
+  }
+
   # First layer contains density gradient in no other colour is designated
-  if(.all_na(args[["point_col"]])){
-    
+  if (.all_na(point_col)) {
+
     # Extract data
     fr_exprs <- exprs(x[[1]])[, channels]
-    
+
     # Too few events for density computation
-    if(nrow(fr_exprs) >= 2){
+    if (nrow(fr_exprs) >= 2) {
       # Get density colour for each point
-      args[["point_col"]][[1]] <- densCols(fr_exprs, 
-                                       colramp = col_scale)
-    }else{
-      args[["point_col"]][[1]] <- args[["point_col_scale"]][1]
+      point_col[[1]] <- densCols(fr_exprs,
+        colramp = col_scale
+      )
+    } else {
+      point_col[[1]] <- point_col_scale[1]
     }
-
-  }else if(any(is.na(args[["point_col"]]))){
     
+  } else if (any(is.na(point_col))) {
+
     # Get position of NAs in point_col - replace with density scale
-    ind <- which(is.na(args[["point_col"]]))
-    
-    # Run through each ind and get density gradient colours
-    lapply(ind, function(z){
-      
-      # Extract data
-      fr_exprs <- exprs(x[[z]])[,channels]
-      
-      # Too few events for density computation
-      if(nrow(fr_exprs) >= 2){
-        # Get density colour for each point
-        args[["point_col"]][[z]] <<- densCols(fr_exprs,
-                                              colramp = col_scale)
-      }else{
-        args[["point_col"]][[z]] <- args[["point_col_scale"]][1]
-      }
+    ind <- which(is.na(point_col))
 
+    # Run through each ind and get density gradient colours
+    lapply(ind, function(z) {
+
+      # Extract data
+      fr_exprs <- exprs(x[[z]])[, channels]
+
+      # Too few events for density computation
+      if (nrow(fr_exprs) > 2) {
+        # Get density colour for each point
+        point_col[[z]] <<- densCols(fr_exprs,
+          colramp = col_scale
+        )
+      } else {
+        point_col[[z]] <- point_col_scale[1]
+      }
     })
-    
   }
-  
+
   # Remaining colours are selected one per layer from point_cols
-  if(any(is.na(args[["point_col"]]))){
-    
+  if (any(is.na(point_col))) {
+
     # Number of layers missing colours
-    n <- length(args[["point_col"]][is.na(args[["point_col"]])])
-    
+    n <- length(point_col[is.na(point_col)])
+
     # Pull colours out of point_cols
-    clrs <- cols(n) 
-    
+    clrs <- cols(n)
+
     # Replace NA values in point_col with selected colours
-    args[["point_col"]][is.na(args[["point_col"]])] <- clrs
-    
+    point_col[is.na(point_col)] <- clrs
   }
   
   # Adjust colors by point_fill_alpha
-  args[["point_col"]] <- mapply(function(point_col, point_col_alpha){
+  point_col <- mapply(function(point_col, 
+                               point_col_alpha) {
     adjustcolor(point_col, point_col_alpha)
-  }, args[["point_col"]], args[["point_col_alpha"]], USE.NAMES = FALSE)
+  }, 
+  point_col, 
+  point_col_alpha, 
+  USE.NAMES = FALSE, 
+  SIMPLIFY = FALSE)
   
-  return(args[["point_col"]])
-
+  return(point_col)
 }
 
 # GATE STACKED DENSITY ---------------------------------------------------------
@@ -1572,58 +1590,57 @@ cyto_plot_overlay_convert <- function(x, ...){
                                     label_box_x = NA,
                                     label_box_y = NA,
                                     label_box_alpha = 0.6, ...) {
-  
+
   # Add support for adding labels without gates
-  
+
   # Check class of x
   if (!inherits(x, "flowFrame")) {
     stop("x should be a flowFrame object.")
   }
-  
+
   # Samples
   smp <- length(overlay) + 1
-  
+
   # Check channels
   channels <- cyto_channels_extract(
     x = x,
     channels = channels,
     plot = TRUE
   )
-  
+
   # List of flowFrames for cyto_plot_label
   fr.lst <- c(list(x), overlay)
-  
+
   # Gates supplied
-  if(!.all_na(gate)){
-  
+  if (!.all_na(gate)) {
+
     # list of gate
     if (inherits(gate, "filters")) {
-      
+
       # Convert to list of gate
       gate <- lapply(seq_len(length(gate)), function(x) gate[[x]])
-      
     } else if (inherits(gate, "list")) {
-      
+
     } else if (inherits(gate, "rectangleGate") |
-               inherits(gate, "polygonGate") |
-               inherits(gate, "ellipsoidGate")) {
+      inherits(gate, "polygonGate") |
+      inherits(gate, "ellipsoidGate")) {
       gate <- list(gate)
     }
-    
+
     # Plot gate
     gate <- cyto_plot_gate(gate,
-                           channels = channels,
-                           gate_line_col = gate_line_col,
-                           gate_line_width = gate_line_width,
-                           gate_line_type = gate_line_type
+      channels = channels,
+      gate_line_col = gate_line_col,
+      gate_line_width = gate_line_width,
+      gate_line_type = gate_line_type
     )
-    
+
     # Add labels to gated plot
-    if(label == TRUE){
-      
+    if (label == TRUE) {
+
       # Repeat gate number of layers -
       gate <- do.call("rep", list(gate, smp))
-    
+
       # Find center x co-ord for label position in each gate
       if (all(is.na(label_box_x))) {
         label_box_x <- unlist(lapply(unique(gate), function(x) {
@@ -1631,28 +1648,32 @@ cyto_plot_overlay_convert <- function(x, ...){
         }))
       }
       label_box_x <- do.call("rep", list(label_box_x, smp))
-    
+
       # Find y co-ord for each sample
       if (.all_na(label_box_y) & density_modal) {
-        label_box_y <- unlist(lapply(rep(seq(1, smp), 
-                                         length.out = length(gate), 
-                                         each = length(unique(gate))), 
-                                     function(x) {
-                                     (0.5 * density_stack * 100) + 
-                                         ((x - 1) * density_stack * 100)
-                                     }))
-      
-      # Too much computation required here - do this in .cyto_plot
-      }else if(.all_na(label_box_y) & !density_modal){
+        label_box_y <- unlist(lapply(
+          rep(seq(1, smp),
+            length.out = length(gate),
+            each = length(unique(gate))
+          ),
+          function(x) {
+            (0.5 * density_stack * 100) +
+              ((x - 1) * density_stack * 100)
+          }
+        ))
+
+        # Too much computation required here - do this in .cyto_plot
+      } else if (.all_na(label_box_y) & !density_modal) {
         stop("Need to supply y positions for labels")
-      } 
-    
+      }
+
       # Plot labels
-      ind <- rep(seq_len(smp), 
-                 each = length(unique(gate)), 
-                 length.out = smp*length(unique(gate)))
-      ind <- split(seq_len(smp*length(unique(gate))), ind)
-    
+      ind <- rep(seq_len(smp),
+        each = length(unique(gate)),
+        length.out = smp * length(unique(gate))
+      )
+      ind <- split(seq_len(smp * length(unique(gate))), ind)
+
       # Repeat arguments
       label_text <- rep(label_text, length.out = length(gate))
       label_stat <- rep(label_stat, length.out = length(gate))
@@ -1660,9 +1681,8 @@ cyto_plot_overlay_convert <- function(x, ...){
       label_text_size <- rep(label_text_size, length.out = length(gate))
       label_text_col <- rep(label_text_col, length.out = length(gate))
       label_box_alpha <- rep(label_box_alpha, length.out = length(gate))
-    
-      text_xy <- mapply(function(fr,x) {
-        
+
+      text_xy <- mapply(function(fr, x) {
         suppressMessages(cyto_plot_label(
           x = fr,
           channels = channels,
@@ -1678,50 +1698,51 @@ cyto_plot_overlay_convert <- function(x, ...){
           box_alpha = label_box_alpha[x],
           density_smooth = density_smooth
         ))
-      
       }, fr.lst,
       ind,
-      SIMPLIFY = FALSE)
-      
+      SIMPLIFY = FALSE
+      )
+
       text_xy <- do.call("cbind", text_xy)
-      
-    }else{
+    } else {
       text_xy <- NULL
     }
-    
-  # No gates - allow labels if label = TRUE
-  }else{
-    
+
+    # No gates - allow labels if label = TRUE
+  } else {
+
     # Allow a single label per layer if label = TRUE
-    if(label == TRUE){
-      
+    if (label == TRUE) {
+
       # Default x co-ord is 0.75 * x axis range
-      
+
       # Find y co-ord for each sample
       if (.all_na(label_box_y) & density_modal) {
-        label_box_y <- unlist(lapply(rep(seq(1, smp), 
-                                         length.out = length(gate), 
-                                         each = length(unique(gate))), 
-                                     function(x) {
-                                       (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
-                                     }))
-        
+        label_box_y <- unlist(lapply(
+          rep(seq(1, smp),
+            length.out = length(gate),
+            each = length(unique(gate))
+          ),
+          function(x) {
+            (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
+          }
+        ))
+
         # Too much computation required here - do this in cyto_plot_1d flowFrame
-      }else if(.all_na(label_box_y) & !density_modal){
+      } else if (.all_na(label_box_y) & !density_modal) {
         stop("Need to supply y positions for labels")
-      } 
-      
+      }
+
       # Add labels to plot
       text_xy <- mapply(function(fr,
-                      label_box_x,
-                      label_box_y,
-                      label_text,
-                      label_stat,
-                      label_text_font,
-                      label_text_size,
-                      label_text_col,
-                      label_box_alpha) {
-        
+                                       label_box_x,
+                                       label_box_y,
+                                       label_text,
+                                       label_stat,
+                                       label_text_font,
+                                       label_text_size,
+                                       label_text_col,
+                                       label_box_alpha) {
         suppressMessages(cyto_plot_label(
           x = fr,
           channels = channels,
@@ -1737,7 +1758,6 @@ cyto_plot_overlay_convert <- function(x, ...){
           box_alpha = label_box_alpha,
           density_smooth = density_smooth
         ))
-        
       }, fr.lst,
       label_box_x,
       label_box_y,
@@ -1747,35 +1767,33 @@ cyto_plot_overlay_convert <- function(x, ...){
       label_text_size,
       label_text_col,
       label_box_alpha,
-      SIMPLIFY = FALSE)
-      
+      SIMPLIFY = FALSE
+      )
+
       # Cbind label co-ordinates
       text_xy <- do.call("cbind", text_xy)
-      
-    }else{
+    } else {
       text_xy <- NULL
     }
-    
   }
-  
+
   invisible(text_xy)
-  
 }
 
 # LABEL CENTERS -----------------------------------------------------------
 
 #' Get gate centers to use to position labels
-#' 
+#'
 #' @param x gate object.
 #' @param channels channels used to construct the plot.
 #' @param text_x x co-ordinate for label.
 #' @param text_y y co-ordinate for label.
-#' 
+#'
 #' @importFrom graphics par
 #' @importFrom flowCore parameters Subset rectangleGate
-#' 
+#'
 #' @noRd
-.cyto_plot_label_center <- function(x, ...){
+.cyto_plot_label_center <- function(x, ...) {
   UseMethod(".cyto_plot_label_center")
 }
 
@@ -1783,52 +1801,53 @@ cyto_plot_overlay_convert <- function(x, ...){
 .cyto_plot_label_center.default <- function(x,
                                             channels,
                                             text_x = NA,
-                                            text_y = NA){
-  
+                                            text_y = NA) {
+
   # NULL or NA gate
-  if(.all_na(x) | is.null(x)){
-    
+  if (.all_na(x) | is.null(x)) {
+
     # No gates - use plot limits to set co-ordinates for label
     xmin <- par("usr")[1]
     xmax <- par("usr")[2]
     ymin <- par("usr")[3]
     ymax <- par("usr")[4]
-    
+
     # x label position - defaults to 3/4 * range of x axis
-    if(.all_na(text_x)){
+    if (.all_na(text_x)) {
       text_x <- xmin + (xmax - xmin) * 0.75
     }
-    
+
     # y label position - defaults to 1/2 * range of y axis
-    if(.all_na(text_y)){
+    if (.all_na(text_y)) {
       text_y <- (ymax - ymin) * 0.5
     }
-    
+
     # Return co-ordinates
-    text_xy <- matrix(c(text_x, text_y), 
-                      dimnames = list(c("x","y")), 
-                      byrow = TRUE,
-                      nrow = 2)
-    
+    text_xy <- matrix(c(text_x, text_y),
+      dimnames = list(c("x", "y")),
+      byrow = TRUE,
+      nrow = 2
+    )
+
     return(text_xy)
-    
-  }else{
-    stop(paste0("cyto_plot_label does not support gate objects of ",
-                class(x),"!"))
+  } else {
+    stop(paste0(
+      "cyto_plot_label does not support gate objects of ",
+      class(x), "!"
+    ))
   }
-  
 }
 
 #' @noRd
 .cyto_plot_label_center.rectangleGate <- function(x,
                                                   channels,
                                                   text_x = NA,
-                                                  text_y = NA){
-  
+                                                  text_y = NA) {
+
   # 1D gate plotted in 2D
   if (length(channels) == 2 & length(parameters(x)) == 1) {
     rg <- matrix(c(as.numeric(x@min), as.numeric(x@max), -Inf, Inf),
-                 ncol = 2, nrow = 2
+      ncol = 2, nrow = 2
     )
     colnames(rg) <- c(
       as.vector(parameters(x)),
@@ -1837,16 +1856,16 @@ cyto_plot_overlay_convert <- function(x, ...){
     rownames(rg) <- c("min", "max")
     x <- rectangleGate(.gate = rg)
   }
-  
+
   # Gate channels
   chans <- as.vector(parameters(x))
-  
+
   # Plot limits
   xmin <- par("usr")[1]
   xmax <- par("usr")[2]
   ymin <- par("usr")[3]
   ymax <- par("usr")[4]
-  
+
   # 1D gate supplied
   if (length(chans) == 1) {
     if (length(channels) == 1) {
@@ -1856,7 +1875,7 @@ cyto_plot_overlay_convert <- function(x, ...){
         if (.all_na(text_x)) {
           xmin <- x@min
           xmax <- x@max
-          
+
           if (is.infinite(xmin)) {
             xmin <- par("usr")[1]
           }
@@ -1872,31 +1891,31 @@ cyto_plot_overlay_convert <- function(x, ...){
         if (.all_na(text_x)) {
           xmin <- x@min[channels[1]]
           xmax <- x@max[channels[1]]
-          
+
           if (is.infinite(xmin)) {
             xmin <- par("usr")[1]
           }
-          
+
           if (is.infinite(xmax)) {
             xmax <- par("usr")[2]
           }
         }
-        
+
         if (.all_na(text_y)) {
           ymin <- x@min[channels[2]]
           ymax <- x@max[channels[2]]
-          
+
           if (is.infinite(ymin)) {
             ymin <- par("usr")[3]
           }
-          
+
           if (is.infinite(ymax)) {
             ymax <- par("usr")[4]
           }
         }
       }
     }
-    
+
     # 2D gate supplied
   } else if (length(chans) == 2) {
     if (!all(chans %in% channels)) {
@@ -1905,304 +1924,293 @@ cyto_plot_overlay_convert <- function(x, ...){
       if (.all_na(text_x)) {
         xmin <- x@min[channels[1]]
         xmax <- x@max[channels[1]]
-        
+
         if (is.infinite(xmin)) {
           xmin <- par("usr")[1]
         }
-        
+
         if (is.infinite(xmax)) {
           xmax <- par("usr")[2]
         }
       }
-      
+
       if (.all_na(text_y)) {
         ymin <- x@min[channels[2]]
         ymax <- x@max[channels[2]]
-        
+
         if (is.infinite(ymin)) {
           ymin <- par("usr")[3]
         }
-        
+
         if (is.infinite(ymax)) {
           ymax <- par("usr")[4]
         }
       }
     }
   }
-  
+
   # Label position - x - gate center
   if (.all_na(text_x)) {
     text_x <- c(xmin + xmax) / 2
   }
-  
+
   # Label position - y - gate center
   if (.all_na(text_y)) {
     text_y <- c(ymin + ymax) / 2
   }
-  
+
   # Return co-ordinates
-  text_xy <- matrix(c(text_x, text_y), 
-                    dimnames = list(c("x","y")), 
-                    byrow = TRUE,
-                    nrow = 2)
-  
+  text_xy <- matrix(c(text_x, text_y),
+    dimnames = list(c("x", "y")),
+    byrow = TRUE,
+    nrow = 2
+  )
+
   return(text_xy)
-  
 }
 
 #' @noRd
 .cyto_plot_label_center.polygonGate <- function(x,
                                                 channels,
                                                 text_x = NA,
-                                                text_y = NA){
-  
+                                                text_y = NA) {
+
   # Check supplied channels & gate channels
   chans <- parameters(x)
-  
+
   # Check gate parameters against channels
   if (!all(chans %in% channels)) {
     stop("Supplied channels do not match that of the supplied gate.")
   }
-  
+
   # Label position - x
   if (.all_na(text_x)) {
     text_x <- sum(x@boundaries[, channels[1]]) / nrow(x@boundaries)
   }
-  
+
   # Label position - y
   if (.all_na(text_y)) {
     text_y <- sum(x@boundaries[, channels[2]]) / nrow(x@boundaries)
   }
-  
+
   # Return co-ordinates
-  text_xy <- matrix(c(text_x, text_y), 
-                    dimnames = list(c("x","y")), 
-                    byrow = TRUE,
-                    nrow = 2)
-  
+  text_xy <- matrix(c(text_x, text_y),
+    dimnames = list(c("x", "y")),
+    byrow = TRUE,
+    nrow = 2
+  )
+
   return(text_xy)
-  
 }
 
 #' @noRd
 .cyto_plot_label_center.ellipsoidGate <- function(x,
                                                   channels,
                                                   text_x = NA,
-                                                  text_y = NA){
-  
+                                                  text_y = NA) {
+
   # Check supplied channels & gate channels
   chans <- parameters(x)
-  
+
   # Check gate parameters against channels
   if (!all(chans %in% channels)) {
     stop("Supplied channels do not match that of the supplied gate.")
   }
-  
+
   # Label position - x
   if (.all_na(text_x)) {
     text_x <- x@mean[channels[1]]
   }
-  
+
   # Label position - y
   if (.all_na(text_y)) {
     text_y <- x@mean[channels[2]]
   }
-  
-  # Return co-ordinate
-  text_xy <- matrix(c(text_x, text_y), 
-                    dimnames = list(c("x","y")), 
-                    byrow = TRUE,
-                    nrow = 2)
 
-  return(text_xy)  
-  
+  # Return co-ordinate
+  text_xy <- matrix(c(text_x, text_y),
+    dimnames = list(c("x", "y")),
+    byrow = TRUE,
+    nrow = 2
+  )
+
+  return(text_xy)
 }
 
 #' @noRd
-.cyto_plot_label_center.filters <- function(x, 
+.cyto_plot_label_center.filters <- function(x,
                                             channels,
                                             text_x = NA,
-                                            text_y = NA){
-  
+                                            text_y = NA) {
+
   # Convert filters object to list of gate objects
   x <- unlist(x)
-  
+
   # Make call to list method
   text_xy <- .cyto_plot_label_center(x,
-                                     channels = channels,
-                                     text_x = text_x,
-                                     text_y = text_y)
-  
+    channels = channels,
+    text_x = text_x,
+    text_y = text_y
+  )
+
   return(text_xy)
-  
 }
 
 #' @noRd
 .cyto_plot_label_center.list <- function(x,
                                          channels,
                                          text_x = NA,
-                                         text_y= NA){
-  
+                                         text_y = NA) {
+
   # List of matrices with gate centers
-  text_xy <- mapply(function(x, 
-                  text_x,
-                  text_y){
-    .cyto_plot_label_center(x, 
-                           channels = channels,
-                           text_x = text_x,
-                           text_y = text_y)
+  text_xy <- mapply(function(x,
+                               text_x,
+                               text_y) {
+    .cyto_plot_label_center(x,
+      channels = channels,
+      text_x = text_x,
+      text_y = text_y
+    )
   }, x,
   text_x,
-  text_y, 
-  SIMPLIFY = FALSE)
-  
+  text_y,
+  SIMPLIFY = FALSE
+  )
+
   # Merge matrices by column
   text_xy <- do.call("cbind", text_xy)
-  
+
   return(text_xy)
-  
 }
 
 # LABEL DIMENSIONS -------------------------------------------------------------
 
 #' Get dimensions of labels for cyto_plot_label
-#' 
+#'
 #' @importFrom graphics strwidth strheight
-#' 
+#'
 #' @return upper left and bottom right x and y co-ordinates of labels
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
+#'
 #' @noRd
 .cyto_plot_label_dims <- function(text,
                                   stat = NA,
                                   box_x,
                                   box_y = NA,
-                                  text_size = 1,  
+                                  text_size = 1,
                                   bg = ifelse(match(par("bg"), "transparent", 0),
-                                                "white", par("bg")
+                                    "white", par("bg")
                                   ),
                                   xpad = 1.2,
                                   ypad = 1.2,
                                   adj = 0.5,
-                                  alpha.bg = 0.5, ...){
-  
+                                  alpha.bg = 0.5, ...) {
+
   # Get parameters for reset after calculation
   cex_reset <- par("cex")
   xpd_reset <- par("xpd")
-  
+
   par(cex = text_size)
   par(xpd = TRUE)
-  
-  if(all(is.na(box_y))){
+
+  if (all(is.na(box_y))) {
     box_y <- box_x
   }
   box.adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
-  
+
   # Rectangle dimensions
   lwidths <- strwidth(text)
   rwidths <- lwidths * (1 - box.adj)
   lwidths <- lwidths * box.adj
   bheights <- theights <- strheight(text) * 0.5
-  
+
   # Rectangle co-ordinates
   xr <- box_x - lwidths * xpad
   xl <- box_x + lwidths * xpad
-  
+
   # y co-ordinates must make space for stat
-  if(is.na(stat)){
-    
+  if (is.na(stat)) {
     yb <- box_y - bheights * ypad
     yt <- box_y + theights * ypad
-    
-  }else {
-    
+  } else {
     yb <- box_y - bheights * ypad * 2
     yt <- box_y + theights * ypad * 2
-    
   }
-  
+
   # Return top left then bottom right co-ordinates
-  coords <- matrix(c(min(c(xl,xr)),
-                     max(c(yb,yt)),
-                     max(c(xl,xr)),
-                     min(c(yb,yt))),
-                   ncol = 2,
-                   byrow = TRUE)
-  colnames(coords) <- c("x","y")
-  
+  coords <- matrix(c(
+    min(c(xl, xr)),
+    max(c(yb, yt)),
+    max(c(xl, xr)),
+    min(c(yb, yt))
+  ),
+  ncol = 2,
+  byrow = TRUE
+  )
+  colnames(coords) <- c("x", "y")
+
   # Reset par(cex)
   par(cex = cex_reset)
   par(xpd = xpd_reset)
-  
+
   return(coords)
-  
 }
 
 # LABEL OVERLAP ----------------------------------------------------------------
 
 #' Check if any cyto_plot labels overlap
-#' 
+#'
 #' @param x list containing the x and y coordinates defining rectangles of plot
 #' labels
-#' 
-#' @return list of length x. Each element compares the label to all others and 
+#'
+#' @return list of length x. Each element compares the label to all others and
 #' returns TRUE is any overlap is detected. NA is returned when comparing the
 #' same label co-ordinates.
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
+#'
 #' @noRd
 .cyto_plot_label_overlap <- function(x) {
-  
+
   # For each rectangle in x
-  overlaps <- lapply(seq_len(length(x)), function(y){
-    
+  overlaps <- lapply(seq_len(length(x)), function(y) {
+
     # Check if other rectangles overlap
-    unlist(lapply(seq_len(length(x)), function(z){
-      
+    unlist(lapply(seq_len(length(x)), function(z) {
+
       # Co-ordinates of reference label
-      x1 <- x[[y]][,"x"]
-      y1 <- x[[y]][,"y"]
-      
+      x1 <- x[[y]][, "x"]
+      y1 <- x[[y]][, "y"]
+
       # Co-ordinates of comparison label
-      x2 <- x[[z]][,"x"]
-      y2 <- x[[z]][,"y"]
-      
+      x2 <- x[[z]][, "x"]
+      y2 <- x[[z]][, "y"]
+
       # Return NA for same label
-      if(z == y){
-        
+      if (z == y) {
         return(NA)
-        
       }
-      
+
       # X co-ordinates are overlapping
-      if(min(x2) >= min(x1) & min(x2) <= max(x1) |
-         max(x2) >= min(x1) & max(x2) <= max(x1)){
-        
+      if (min(x2) >= min(x1) & min(x2) <= max(x1) |
+        max(x2) >= min(x1) & max(x2) <= max(x1)) {
+
         # Y co-ordinates are also overlapping
-        if(min(y2) >= min(y1) & min(y2) <= max(y1) |
-           max(y2) >= min(y1) & max(y2) <= max(y1)){
-          
+        if (min(y2) >= min(y1) & min(y2) <= max(y1) |
+          max(y2) >= min(y1) & max(y2) <= max(y1)) {
           return(TRUE)
-          
-        }else{
-          
+        } else {
           return(FALSE)
-          
         }
-        
       }
-      
+
       # Non-overlapping x and y co-ordinates
       return(FALSE)
-      
     }))
-    
   })
-  
+
   return(overlaps)
-  
 }
 
 # LABEL OFFSET -----------------------------------------------------------------
@@ -2216,102 +2224,101 @@ cyto_plot_overlay_convert <- function(x, ...){
 #'
 #' @return list containing adjusted x and y coordinates for labels if any
 #'   overlap is detected.
-#'   
+#'
 #' @importFrom stats na.omit
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
 .cyto_plot_label_offset <- function(x,
-                                    gate, 
+                                    gate,
                                     channels,
                                     text,
                                     text_x = NA,
                                     text_y = NA,
                                     stat,
                                     text_size) {
-  
+
   # Invalid gate objects
-  if(!inherits(gate, "list")){
+  if (!inherits(gate, "list")) {
     stop("'gate' should be a list of gate objects.")
   }
-  
+
   # Assign gate to gts
   gts <- gate
-  
+
   # Plot limits
   xmin <- par("usr")[1]
   xmax <- par("usr")[2]
   ymin <- par("usr")[3]
   ymax <- par("usr")[4]
-  
+
   xrange <- xmax - xmin
   yrange <- ymax - ymin
-  
+
   # No co-ordinates supplied
-  if(.all_na(text_x) & .all_na(text_y)){
-    
+  if (.all_na(text_x) & .all_na(text_y)) {
+
     # Co-ordinates for gate centers
     coords <- mapply(function(gt,
-                              text_x,
-                              text_y){
-    
+                                  text_x,
+                                  text_y) {
+
       # Label co-ordinate
       .cyto_plot_label_center(gt,
-                              channels = channels,
-                              text_x = text_x,
-                              text_y = text_y)
-    
-    },gts,
+        channels = channels,
+        text_x = text_x,
+        text_y = text_y
+      )
+    }, gts,
     text_x,
     text_y,
-    SIMPLIFY = FALSE)
-  
+    SIMPLIFY = FALSE
+    )
+
     # Combine results into a single matrix
     coords <- do.call("cbind", coords)
-    
-  }else{
-    coords <- matrix(c(text_x,text_y), 
-                     nrow = 2,
-                     byrow = TRUE,
-                     dimnames = list(c("x","y")))
+  } else {
+    coords <- matrix(c(text_x, text_y),
+      nrow = 2,
+      byrow = TRUE,
+      dimnames = list(c("x", "y"))
+    )
   }
-  
+
   # Repeat text_size
   text_size <- rep(text_size, length.out = length(gts))
-  
+
   # Repeat stat
   stat <- rep(stat, length.out = length(gts))
-  
+
   # Calculate label dimensions
-  label_dims <- lapply(seq_len(length(gts)), function(z){
-    
-    .cyto_plot_label_dims(text = text[z],
-                          stat = stat[z],
-                          box_x = coords["x",][z],
-                          box_y = coords["y",][z],
-                          text_size = text_size[z])
-    
+  label_dims <- lapply(seq_len(length(gts)), function(z) {
+    .cyto_plot_label_dims(
+      text = text[z],
+      stat = stat[z],
+      box_x = coords["x", ][z],
+      box_y = coords["y", ][z],
+      text_size = text_size[z]
+    )
   })
-  
+
   # Check if any labels will be overlapping and offset coords
-  if(any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))){
-    
-    if(!.all_na(stat)){
+  if (any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))) {
+    if (!.all_na(stat)) {
       text <- paste(text, "\n")
     }
-    
+
     # Use spread.labs TeachingDemos to offset y values
-    label_height <- max(label_dims[[1]][,"y"]) - 
-      min(label_dims[[1]][,"y"])
-    label_height <- label_height + 0.18*label_height
-    coords["y",] <- spread.labs(coords["y",],
-                                mindiff = label_height,
-                                min = ymin + 0.05*yrange,
-                                max = ymax - 0.05*yrange)
-    
+    label_height <- max(label_dims[[1]][, "y"]) -
+      min(label_dims[[1]][, "y"])
+    label_height <- label_height + 0.18 * label_height
+    coords["y", ] <- spread.labs(coords["y", ],
+      mindiff = label_height,
+      min = ymin + 0.05 * yrange,
+      max = ymax - 0.05 * yrange
+    )
   }
-  
+
   return(coords)
-  
 }
