@@ -526,16 +526,41 @@
       )
     }
     
-    # POINTS - list of point colours
-    cyto_plot_point(x,
+    # POINTS - base layer
+    cyto_plot_point(x[[1]],
       channels = channels,
-      point_shape = point_shape,
-      point_size = point_size,
+      point_shape = point_shape[[1]],
+      point_size = point_size[[1]],
       point_col_scale = point_col_scale,
       point_cols = point_cols,
-      point_col = point_col,
-      point_col_alpha = point_col_alpha
+      point_col = point_col[1],
+      point_col_alpha = point_col_alpha[[1]]
     )
+    
+    # CONTOUR LINES
+    if (contour_lines != 0) {
+      cyto_plot_contour(
+        x = x[[1]],
+        channels = channels,
+        contour_lines = contour_lines,
+        contour_line_type = contour_line_type,
+        contour_line_width = contour_line_width,
+        contour_line_col = contour_line_col
+      )
+    }
+    
+    # POINTS - overlay layers
+    if(length(x) > 1){
+          cyto_plot_point(x[-1],
+                    channels = channels,
+                    point_shape = point_shape[-1],
+                    point_size = point_size[-1],
+                    point_col_scale = point_col_scale,
+                    point_cols = point_cols,
+                    point_col = point_col[-1],
+                    point_col_alpha = point_col_alpha[-1]
+    )
+    }
 
     # POINT DENSITY COLOUR SCALE
     point_cols <- .cyto_plot_point_cols(point_cols)

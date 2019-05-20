@@ -37,7 +37,7 @@ cyto_plot_point <- function(x, ...){
 #' @export
 cyto_plot_point.flowFrame <- function(x,
                                       channels,
-                                      overlay,
+                                      overlay = NA,
                                       point_shape = ".",
                                       point_size = 2,
                                       point_col_scale = NA,

@@ -30,7 +30,7 @@ setGeneric(
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom MASS kde2d
-#' @importFrom graphics contour
+#' @importFrom graphics contour par
 #' @importFrom flowCore exprs
 #'
 #' @examples
@@ -75,8 +75,11 @@ setMethod(cyto_plot_contour,
     if (contour_lines != 0) {
 
       # Calculate 2D kernel density using kde2d from MASS
-      z <- MASS::kde2d(fr.exprs[, 1], fr.exprs[, 2], n = 75)
-
+      z <- MASS::kde2d(x = fr.exprs[, 1], 
+                       y = fr.exprs[, 2], 
+                       n = 75, 
+                       lims = par("usr"))
+      
       # Add contour lines to plot
       graphics::contour(
         z = z$z,

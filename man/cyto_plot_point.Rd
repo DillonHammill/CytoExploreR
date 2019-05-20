@@ -8,7 +8,7 @@
 \usage{
 cyto_plot_point(x, ...)
 
-\method{cyto_plot_point}{flowFrame}(x, channels, overlay,
+\method{cyto_plot_point}{flowFrame}(x, channels, overlay = NA,
   point_shape = ".", point_size = 2, point_col_scale = NA,
   point_cols = NA, point_col = NA, point_col_alpha = 1, ...)
 
