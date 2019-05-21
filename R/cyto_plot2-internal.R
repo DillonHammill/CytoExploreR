@@ -85,8 +85,8 @@
                        legend_text_font = 1,
                        legend_text_size = 1,
                        legend_text_col = "black",
-                       legend_line_type = 1,
-                       legend_line_width = 1,
+                       legend_line_type = NA,
+                       legend_line_width = NA,
                        legend_line_col = NA,
                        legend_box_fill = NA,
                        legend_point_col = NA,
@@ -283,7 +283,7 @@
       density_line_width = density_line_width,
       density_line_col = density_line_col
     )
-
+    
     # LEGEND
     if (legend != FALSE) {
       .cyto_plot_legend(
