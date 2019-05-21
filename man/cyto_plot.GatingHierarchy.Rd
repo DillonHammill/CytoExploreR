@@ -4,36 +4,37 @@
 \alias{cyto_plot.GatingHierarchy}
 \title{cyto_plot - GatingHierarchy Method}
 \usage{
-\method{cyto_plot}{GatingHierarchy}(x, parent, alias, channels,
+\method{cyto_plot}{GatingHierarchy}(x, parent, alias = NA, channels,
   axes_trans = NA, overlay = NA, gate = NA, limits = "machine",
-  popup = FALSE, xlim = NA, ylim = NA, title, xlab, ylab,
-  density_modal = TRUE, density_smooth = 0.6, density_stack = 0.5,
-  density_cols = NA, density_fill = NA, density_fill_alpha = 1,
-  density_line_type = 1, density_line_width = 1,
-  density_line_col = "black", point_shape = ".", point_size = 2,
-  point_col_scale = NA, point_cols = NA, point_col = NA,
-  point_col_alpha = 1, contour_lines = 0, contour_line_type = 1,
-  contour_line_width = 1, contour_line_col = "black",
-  axes_text = axes_text, axes_text_font = 1, axes_text_size = 1,
-  axes_text_col = "black", axes_label_text_font = 1,
-  axes_label_text_size = 1.1, axes_label_text_col = "black",
-  title_text_font = 2, title_text_size = 1.1,
-  title_text_col = "black", legend = FALSE, legend_text,
-  legend_text_font = 1, legend_text_size = 1,
-  legend_text_col = "black", legend_line_col = NA,
-  legend_box_fill = NA, legend_point_col = NA, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", label,
-  label_text = NA, label_stat, label_text_font = 2,
-  label_text_size = 1, label_text_col = "black", label_box_x = NA,
-  label_box_y = NA, label_box_alpha = 0.6, border_line_type = 1,
-  border_line_width = 1, border_line_col = "black",
-  border_fill = "white", ...)
+  display = 1, popup = FALSE, xlim = NA, ylim = NA, title, xlab,
+  ylab, density_modal = TRUE, density_smooth = 0.6,
+  density_stack = 0.5, density_cols = NA, density_fill = NA,
+  density_fill_alpha = 1, density_line_type = 1,
+  density_line_width = 1, density_line_col = "black",
+  point_shape = ".", point_size = 2, point_col_scale = NA,
+  point_cols = NA, point_col = NA, point_col_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", axes_text = c(TRUE, TRUE),
+  axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
+  axes_label_text_font = 1, axes_label_text_size = 1.1,
+  axes_label_text_col = "black", title_text_font = 2,
+  title_text_size = 1.1, title_text_col = "black", legend = FALSE,
+  legend_text = NA, legend_text_font = 1, legend_text_size = 1,
+  legend_text_col = "black", legend_line_type = 1,
+  legend_line_width = 1, legend_line_col = NA, legend_box_fill = NA,
+  legend_point_col = NA, gate_line_type = 1, gate_line_width = 2.5,
+  gate_line_col = "red", label, label_text = NA, label_stat,
+  label_text_font = 2, label_text_size = 1, label_text_col = "black",
+  label_box_x = NA, label_box_y = NA, label_box_alpha = 0.6,
+  border_line_type = 1, border_line_width = 1,
+  border_line_col = "black", border_fill = "white",
+  border_fill_alpha = 1, ...)
 }
 \arguments{
 \item{x}{object of class
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}.}
 
-\item{parent}{name of the population to plot.}
+\item{parent}{name of the population containing the events to plot.}
 
 \item{alias}{name of the gated population for which the gate should be drawn
 on the plot. Setting \code{alias} to "" will automatically plot any gates
@@ -69,6 +70,10 @@ dimensions are supported. Multiple gates can be supplied either as a
 \code{"data"} or \code{"machine"}, set to "machine" by default to show
 complete axes ranges. This argument will only alter the upper axis limits,
 to modify the lower limits use \code{xlim} and \code{ylim}.}
+
+\item{display}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{display} can substantial improve
+plotting speed for less powerful machines.}
 
 \item{popup}{logical indicating whether the plot should be constructed in a
 pop-up window, set to FALSE by default. \code{popup} will open OS-specific
@@ -122,17 +127,17 @@ lines, set to 1 by default.}
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default.}
 
-\item{point_col_scale}{vector of ordered colours to use for the density colour
-gradient of points.}
+\item{point_col_scale}{vector of ordered colours to use for the density
+colour gradient of points.}
 
-\item{point_cols}{vector colours to draw from when selecting colours for points
-if none are supplied to point_col.}
+\item{point_cols}{vector colours to draw from when selecting colours for
+points if none are supplied to point_col.}
 
 \item{point_col}{colour(s) to use for points in 2-D scatter plots, set to NA
 by default to use a blue-red density colour scale.}
 
-\item{point_col_alpha}{numeric [0,1] to control point colour transparency in 2-D
-scatter plots, set to 1 by default to use solid colours.}
+\item{point_col_alpha}{numeric [0,1] to control point colour transparency in
+2-D scatter plots, set to 1 by default to use solid colours.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines in 2-D scatter plots, set to 0 by default to turn off contour
@@ -220,7 +225,8 @@ default.}
 \item{label}{logical indicating whether gated populations should be labelled.
 To include the names of the populations in these labels, supply the
 population names to the \code{label_text} argument. The default statistic
-is \code{"percent"} for gated data and \code{"count"} for un-gated data.}
+is \code{"percent"} for gated data and \code{"count"} for un-gated data.
+This argument must be set to TRUE in order to add labels with gates.}
 
 \item{label_text}{vector of population names to use in the labels. Set to
 \code{NA} by default to exclude population names.}
@@ -264,7 +270,10 @@ default.}
 \item{border_fill}{border_fill fill colour to use inside the plot border
 (i.e. background colour), set to "white" by default.}
 
-\item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
+\item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
+by default for no transparency.}
+
+\item{...}{additional arguments not currently in use.}
 }
 \description{
 Explore & visualise a GatingHierarchy.
@@ -315,7 +324,7 @@ cyto_plot(gs[[4]],
 
 \code{\link{cyto_plot,flowSet-method}}
 
-\code{\link{cyto_plot,GatingSet-method}}
+\code{\link{cyto_plot,GatingHierarchy-method}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
