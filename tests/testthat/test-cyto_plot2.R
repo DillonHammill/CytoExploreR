@@ -20,7 +20,21 @@ test_that("cyto_plot GatingHierarchy method", {
   
   # 1D density distributions ---------------------------------------------------
   
+  p <- function() cyto_plot(gs[[1]],
+            parent = "T Cells",
+            channels = "CD4",
+            overlay = c("CD4 T Cells","CD8 T Cells"),
+            border_fill = "grey",
+            legend = "line",
+            density_line_type = c(1,2,3),
+            density_line_width = 2,
+            density_fill = "white",
+            density_line_col = c("red","blue","green"),
+            density_stack = 0.5,
+            density_fill_alpha = c(0,0.5,1))
   
+  expect_doppelganger("cyto_plot-GatingHierarchy-1D_001", p)
+
   # 2D scatter plots -----------------------------------------------------------
   
   cyto_plot(gs[[1]],
