@@ -1030,6 +1030,16 @@ cyto_plot_overlay_convert <- function(x, ...) {
         legend_line_col <- density_line_col
       }
 
+      # Revert to density_line_type if not specified
+      if(.all_na(legend_line_type)){
+        legend_line_type <- density_line_type
+      }
+      
+      # Revert to density_line_width if not specified
+      if(.all_na(legend_line_width)){
+        legend_line_width <- density_line_width
+      }
+      
       # Construct legend
       legend(
         x = 1.07 * par("usr")[2],
@@ -1080,7 +1090,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
 
-    # Revert to point_col if no legen point cols supplied
+    # Revert to point_col if no legend point cols supplied
     if (.all_na(legend_point_col)) {
       legend_point_col <- point_col
       # Alpha adjust colours supplied directly to legend_point_col
@@ -1298,7 +1308,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
                                     density_fill = NA,
                                     density_cols = NA,
                                     density_fill_alpha = 1) {
-
+  
   # Expected number of colours
   n <- length(x)
 
@@ -1341,7 +1351,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
   }
 
   # No colours supplied to density_fill either
-  if (.all_na(args[["density_fill"]])) {
+  if (.all_na(args[["density_fill"]]) | .empty(args[["density_fill"]])) {
 
     # Pull out a single colour per layer
     args[["density_fill"]] <- cols(n)
@@ -1363,9 +1373,16 @@ cyto_plot_overlay_convert <- function(x, ...) {
   }
 
   # Adjust colors by density_fill_alpha
-  args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha) {
-    adjustcolor(density_fill, density_fill_alpha)
+  if(any(args[["density_fill_alpha"]] != 1)){
+      args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha) {
+    if(density_fill_alpha != 1){
+          adjustcolor(density_fill, density_fill_alpha)
+    }else{
+      density_fill
+    }
   }, args[["density_fill"]], args[["density_fill_alpha"]], USE.NAMES = FALSE)
+
+  }
 
   return(args[["density_fill"]])
 }

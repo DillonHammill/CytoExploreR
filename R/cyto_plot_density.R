@@ -60,6 +60,9 @@ cyto_plot_density.flowFrame <- function(x,
   # Inherit cyto_plot_theme arguments
   args <- .cyto_plot_theme_inherit(args)
 
+  # Update arguments
+  .args_update(args)
+  
   # Number of overlays
   ovn <- length(fr_list) - 1
   
@@ -69,14 +72,14 @@ cyto_plot_density.flowFrame <- function(x,
     # Calculate kernel density
     suppressWarnings(.cyto_density(fr,
                                    channel,
-                                   args[["density_smooth"]],
-                                   args[["density_modal"]]))
+                                   density_smooth,
+                                   density_modal))
   })
   
   # fr_dens contains some density objects
   if(!.all_na(fr_dens)){
     # Get height of y axis for each density distribution
-    if(args[["density_modal"]]){
+    if(density_modal){
       y_max <- 100
     }else{
       y_max <- mean(unlist(lapply(fr_dens, function(z){
@@ -94,8 +97,8 @@ cyto_plot_density.flowFrame <- function(x,
     # Get vector of density_stack values
     ofst <- seq(
       0,
-      ovn * args[["density_stack"]] * y_max,
-      args[["density_stack"]] * y_max
+      ovn * density_stack * y_max,
+      density_stack * y_max
     )
 
     # Get a list of offset kernel densities
@@ -119,28 +122,29 @@ cyto_plot_density.flowFrame <- function(x,
     # Get positions for horizontal lines
     ofst <- seq(
       0,
-      ovn * args[["density_stack"]] * y_max,
-      args[["density_stack"]] * y_max
+      ovn * density_stack * y_max,
+      density_stack * y_max
     )
     
   }
 
   # Get density_fill
-  .args <- formalArgs(".cyto_plot_density")
-  args[["density_fill"]] <- do.call(".cyto_plot_density", 
-                                    c(fr_dens, args[.args]))
+  density_fill <- .cyto_plot_density_fill(fr_dens,
+                                          density_fill = density_fill,
+                                          density_cols = density_cols,
+                                          density_fill_alpha = density_fill_alpha)
 
   # Add horizontal lines
   abline(
     h = ofst,
-    col = args[["density_line_col"]],
-    lwd = args[["density_line_width"]],
-    lty = args[["density_line_type"]]
+    col = density_line_col,
+    lwd = density_line_width,
+    lty = density_line_type
   )
   
   # Add density distributions - reverse plot order and colours
-  if (!.all_na(args[["overlay"]]) & 
-      args[["density_stack"]] == 0) {
+  if (!.all_na(overlay) & 
+      density_stack == 0) {
     
     mapply(
       function(fr_dens,
@@ -156,10 +160,10 @@ cyto_plot_density.flowFrame <- function(x,
             lty = density_line_type)
         }
       }, frs_dens,
-      args[["density_fill"]],
-      args[["density_line_col"]],
-      args[["density_line_width"]],
-      args[["density_line_type"]])
+      density_fill,
+      density_line_col,
+      density_line_width,
+      density_line_type)
     
   } else {
     
@@ -178,10 +182,10 @@ cyto_plot_density.flowFrame <- function(x,
         }
 
       }, rev(frs_dens),
-      rev(args[["density_fill"]]),
-      rev(args[["density_line_col"]]),
-      rev(args[["density_line_width"]]),
-      rev(args[["density_line_type"]]))
+      rev(density_fill),
+      rev(density_line_col),
+      rev(density_line_width),
+      rev(density_line_type))
     
   }
 }
@@ -204,18 +208,20 @@ cyto_plot_density.list <- function(x,
   # Inherit theme arguments
   args <- .cyto_plot_theme_inherit(args)
   
+  # Update arguments
+  .args_update(args)
+  
   # Get density_fill colours (inherits from theme internally)
-  if(.all_na(density_fill) | .empty(density_fill)){
-    .args <- formalArgs(".cyto_plot_density_fill")
-    args[["density_fill"]] <- do.call(".cyto_plot_density_fill",
-                                      args[.args])
-  }
+    density_fill <- .cyto_plot_density_fill(x,
+                                            density_fill = density_fill,
+                                            density_cols = density_cols,
+                                            density_fill_alpha = density_fill_alpha)
 
   # Number of overlays
   ovn <- length(x) - 1
   
   # Calculate the mean maximum y value for kernel densities
-  if(args[["density_modal"]]){
+  if(density_modal){
     y_max <- 100
   }else{
     y_max<- mean(unlist(lapply(x, function(d){
@@ -233,14 +239,14 @@ cyto_plot_density.list <- function(x,
   }
   
   ofst <- seq(0,
-              ovn * args[["density_stack"]] * y_max,
-              args[["density_stack"]] * y_max)
+              ovn * density_stack * y_max,
+              density_stack * y_max)
   
   abline(
     h = ofst,
-    col = args[["density_line_col"]],
-    lwd = args[["density_line_width"]],
-    lty = args[["density_line_type"]],
+    col = density_line_col,
+    lwd = density_line_width,
+    lty = density_line_type,
     xpd = FALSE
   )
   
@@ -271,10 +277,10 @@ cyto_plot_density.list <- function(x,
                   lty = density_line_type)
         }
       }, x,
-      args[["density_fill"]],
-      args[["density_line_col"]],
-      args[["density_line_width"]],
-      args[["density_line_type"]])
+      density_fill,
+      density_line_col,
+      density_line_width,
+      density_line_type)
     
   } else {
     
@@ -292,10 +298,10 @@ cyto_plot_density.list <- function(x,
                   lty = density_line_type)
         }
       }, rev(x),
-      rev(args[["density_fill"]]),
-      rev(args[["density_line_col"]]),
-      rev(args[["density_line_width"]]),
-      rev(args[["density_line_type"]]))
+      rev(density_fill),
+      rev(density_line_col),
+      rev(density_line_width),
+      rev(density_line_type))
     
   }
   

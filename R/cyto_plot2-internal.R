@@ -266,21 +266,19 @@
     )
 
     # DENSITY FILL - inherits theme internally
-    if (.all_na(density_fill)) {
       density_fill <- .cyto_plot_density_fill(fr_dens,
         density_fill = density_fill,
         density_cols = density_cols,
         density_fill_alpha = density_fill_alpha
       )
-    }
 
-    # DENSITY
+    # DENSITY - no alpha adjustment here - happens above
     cyto_plot_density(fr_dens,
       density_modal = density_modal,
       density_stack = density_stack,
       density_cols = density_cols,
       density_fill = density_fill,
-      density_fill_alpha = density_fill_alpha,
+      density_fill_alpha = 1,
       density_line_type = density_line_type,
       density_line_width = density_line_width,
       density_line_col = density_line_col

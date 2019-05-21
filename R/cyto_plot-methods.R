@@ -1311,8 +1311,10 @@ cyto_plot.GatingHierarchy <- function(x,
   }
   
   # GRAPHICS DEVICE
-  cyto_plot_new(popup)
-  
+  if(popup == TRUE){
+    cyto_plot_new(popup)
+  }
+
   # Repeat arguments as required -----------------------------------------------
   
   # Pull down arguments to named list - missing converted to ""
@@ -2161,8 +2163,10 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # GRAPHICS DEVICE
-  cyto_plot_new(popup)
-
+  if(popup == TRUE){
+    cyto_plot_new(popup)
+  }
+  
   # Layout - missing/off/supplied
   if (.empty(layout)) {
 
