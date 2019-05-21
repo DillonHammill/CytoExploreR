@@ -64,4 +64,21 @@
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='637.65' y='280.06' style='font-size: 12.00px; font-family: Liberation Sans;' textLength='64.25px' lengthAdjust='spacingAndGlyphs'>CD8 T Cells</text></g>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='637.65' y='294.46' style='font-size: 12.00px; font-family: Liberation Sans;' textLength='64.25px' lengthAdjust='spacingAndGlyphs'>CD4 T Cells</text></g>
 <g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='637.65' y='308.86' style='font-size: 12.00px; font-family: Liberation Sans;' textLength='37.12px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<defs>
+  <clipPath id='cpNTkuMDR8NTY4LjUxfDUwMi41Nnw1OS4wNA=='>
+    <rect x='59.04' y='59.04' width='509.47' height='443.52' />
+  </clipPath>
+</defs>
+<rect x='305.38' y='65.45' width='126.95' height='430.54' style='stroke-width: 1.88; stroke: #FF0000;' clip-path='url(#cpNTkuMDR8NTY4LjUxfDUwMi41Nnw1OS4wNA==)' />
+<defs>
+  <clipPath id='cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA='>
+    <rect x='0.00' y='0.00' width='720.00' height='576.00' />
+  </clipPath>
+</defs>
+<rect x='342.44' y='429.85' width='52.82' height='9.90' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF; fill-opacity: 0.60;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='346.84' y='438.93' style='font-size: 12.00px; font-weight: bold; font-family: Liberation Sans;' textLength='44.02px' lengthAdjust='spacingAndGlyphs'>48.60 %</text></g>
+<rect x='338.44' y='327.18' width='60.82' height='9.90' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF; fill-opacity: 0.60;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='343.51' y='336.26' style='font-size: 12.00px; font-weight: bold; font-family: Liberation Sans;' textLength='50.69px' lengthAdjust='spacingAndGlyphs'>100.00 %</text></g>
+<rect x='346.44' y='224.52' width='44.81' height='9.90' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF; fill-opacity: 0.60;' clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)' />
+<g clip-path='url(#cpMC4wMHw3MjAuMDB8NTc2LjAwfDAuMDA=)'><text x='350.18' y='233.59' style='font-size: 12.00px; font-weight: bold; font-family: Liberation Sans;' textLength='37.34px' lengthAdjust='spacingAndGlyphs'>0.00 %</text></g>
 </svg>

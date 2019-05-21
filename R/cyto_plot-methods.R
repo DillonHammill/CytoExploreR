@@ -2058,6 +2058,9 @@ cyto_plot.GatingSet <- function(x,
         return(gt)
       })
     }
+  # Gates manually supplied are added to list
+  }else if(!.all_na(gate)){
+    gate <- rep(list(gate), length(fr_list))
   }
 
   # Organise gates for stacked 1D without overlay

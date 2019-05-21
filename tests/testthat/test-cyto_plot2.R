@@ -24,6 +24,7 @@ test_that("cyto_plot GatingHierarchy method", {
             parent = "T Cells",
             channels = "CD4",
             overlay = c("CD4 T Cells","CD8 T Cells"),
+            gate = getGate(gs, "CD4 T Cells")[[1]],
             border_fill = "grey",
             legend = "line",
             density_line_type = c(1,2,3),
@@ -34,7 +35,7 @@ test_that("cyto_plot GatingHierarchy method", {
             density_fill_alpha = c(0,0.5,1))
   
   expect_doppelganger("cyto_plot-GatingHierarchy-1D_001", p)
-
+  
   # 2D scatter plots -----------------------------------------------------------
   
   cyto_plot(gs[[1]],
@@ -247,4 +248,15 @@ test_that("cyto_plot GatingSet method", {
     )
 
   expect_doppelganger("cyto_plot-GatingSet-2D_003", p)
+  
+  # Supply gate objects through gate argument
+  
+  p <- function() cyto_plot(gs[1:4],
+            parent = "T Cells",
+            channels = c("CD4","CD8"),
+            gate = list(getGate(gs, "CD4 T Cells")[[1]],
+                        getGate(gs, "CD8 T Cells")[[1]]))
+
+  expect_doppelganger("cyto_plot-GatingSet-2D_004", p)
+  
 })
