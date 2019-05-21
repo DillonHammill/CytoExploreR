@@ -18,8 +18,8 @@ cyto_plot_empty(x, ...)
   title_text_font = 2, title_text_size = 1.1,
   title_text_col = "black", border_line_type = 1,
   border_line_width = 1, border_line_col = "black",
-  border_fill = "white", legend = FALSE, legend_text,
-  legend_text_size = 1)
+  border_fill = "white", border_fill_alpha = 1, legend = FALSE,
+  legend_text, legend_text_size = 1)
 
 \method{cyto_plot_empty}{list}(x, channels, axes_trans = NA, xlim = NA,
   ylim = NA, limits = "machine", title = NA, xlab = NA,
@@ -30,8 +30,9 @@ cyto_plot_empty(x, ...)
   axes_label_text_col = "black", title_text_font = 2,
   title_text_size = 1.1, title_text_col = "black",
   border_line_type = 1, border_line_width = 1,
-  border_line_col = "black", border_fill = "white", legend = FALSE,
-  legend_text, legend_text_size = 1)
+  border_line_col = "black", border_fill = "white",
+  border_fill_alpha = 1, legend = FALSE, legend_text,
+  legend_text_size = 1)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
@@ -111,6 +112,9 @@ default.}
 
 \item{border_fill}{colour to use for the plot background, set to "white" by
 default.}
+
+\item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
+by default to add no transparency.}
 }
 \description{
 \code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
@@ -124,7 +128,7 @@ library(CytoRSuiteData)
 cyto_plot_empty(Activation[1],
                 channels = c("FSC-A","SSC-A"),
                 border_fill = "black)
-                
+
 # Construct an empty 1D plot
 cyto_plot_empty(Activation[1],
                 channels = c("FSC-A),

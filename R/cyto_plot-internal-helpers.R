@@ -303,8 +303,7 @@
       "point_shape",
       "point_size",
       "point_col",
-      "point_alpha",
-      "point_col_scale",
+      "point_col_alpha",
       "contour_lines",
       "contour_line_type",
       "contour_line_width",
@@ -356,6 +355,8 @@
     "border_line_type",
     "border_line_width",
     "border_line_col",
+    "border_fill",
+    "border_fill_alpha",
     "contour_lines",
     "contour_line_type",
     "contour_line_width",
@@ -409,7 +410,7 @@
     "point_shape",
     "point_size",
     "point_col",
-    "point_alpha"
+    "point_col_alpha"
   )
 
   lapply(args, function(arg) {
@@ -1472,7 +1473,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
       point_col[z]
     })
   }
-
+  
   # First layer contains density gradient in no other colour is designated
   if (.all_na(point_col)) {
 

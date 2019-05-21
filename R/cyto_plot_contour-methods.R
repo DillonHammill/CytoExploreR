@@ -74,24 +74,30 @@ setMethod(cyto_plot_contour,
     # Contours
     if (contour_lines != 0) {
 
-      # Calculate 2D kernel density using kde2d from MASS
-      z <- MASS::kde2d(x = fr.exprs[, 1], 
-                       y = fr.exprs[, 2], 
-                       n = 75, 
-                       lims = par("usr"))
-      
-      # Add contour lines to plot
-      graphics::contour(
-        z = z$z,
-        x = z$x,
-        y = z$y,
-        add = TRUE,
-        drawlabels = FALSE,
-        nlevels = contour_lines,
-        col = contour_line_col,
-        lwd = contour_line_width,
-        lty = contour_line_type
-      )
+      # Bypass contours if there are insufficient events
+      if (nrow(fr.exprs) > 2) {
+
+        # Calculate 2D kernel density using kde2d from MASS
+        z <- MASS::kde2d(
+          x = fr.exprs[, 1],
+          y = fr.exprs[, 2],
+          n = 75,
+          lims = par("usr")
+        )
+
+        # Add contour lines to plot
+        graphics::contour(
+          z = z$z,
+          x = z$x,
+          y = z$y,
+          add = TRUE,
+          drawlabels = FALSE,
+          nlevels = contour_lines,
+          col = contour_line_col,
+          lwd = contour_line_width,
+          lty = contour_line_type
+        )
+      }
     }
   }
 )

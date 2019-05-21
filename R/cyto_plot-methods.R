@@ -1343,26 +1343,28 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   default.
 #' @param border_fill border_fill fill colour to use inside the plot border
 #'   (i.e. background colour), set to "white" by default.
+#' @param border_fill_alpha transparency to use for border_fill colour, set to 1
+#'   by default for no transparency.
 #' @param ... additional arguments not currently in use.
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load samples into GatingSet
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply coompensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
-#' 
+#'
 #' # 2-D scatter plot with overlay & Gates
 #' cyto_plot(gs,
 #'   parent = "CD4 T Cells",
@@ -1370,7 +1372,7 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   overlay = "CD8 T Cells"
 #' )
-#' 
+#'
 #' # 2-D Scatter Plots with Back-Gating & Gates
 #' cyto_plot(gs,
 #'   parent = "T Cells",
@@ -1465,7 +1467,8 @@ cyto_plot.GatingSet <- function(x,
                                 border_line_type = 1,
                                 border_line_width = 1,
                                 border_line_col = "black",
-                                border_fill = "white", ...) {
+                                border_fill = "white",
+                                border_fill_alpha = 1, ...) {
     
   # Checks ---------------------------------------------------------------------
 
@@ -1985,7 +1988,8 @@ cyto_plot.GatingSet <- function(x,
                  border_line_type,
                  border_line_width,
                  border_line_col,
-                 border_fill) {
+                 border_fill,
+                 border_fill_alpha) {
       cnt <<- cnt + 1
 
       .cyto_plot(x,
@@ -2054,7 +2058,8 @@ cyto_plot.GatingSet <- function(x,
         border_line_type = border_line_type,
         border_line_width = border_line_width,
         border_line_col = border_line_col,
-        border_fill = border_fill
+        border_fill = border_fill,
+        border_fill_alpha = border_fill_alpha
       )
 
       if (popup == TRUE &
@@ -2122,7 +2127,8 @@ cyto_plot.GatingSet <- function(x,
     border_line_type,
     border_line_width,
     border_line_col,
-    border_fill
+    border_fill,
+    border_fill_alpha
   )
 
   # Return global options to default -------------------------------------------

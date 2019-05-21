@@ -18,7 +18,7 @@ test_that("cyto_plot GatingSet method",{
                          channels = "CD4",
                          density_layers = 8),
                "Each plot must have the same number of layers!")
-  
+
   # 1D Density distributions ---------------------------------------------------
   
   # 1D stacked samples - labels without gates + stats
@@ -81,6 +81,7 @@ test_that("cyto_plot GatingSet method",{
             border_line_width = 2,
             border_line_col = "orange",
             border_fill = "black",
+            border_fill_alpha = 0.2,
             density_line_col = "white")
   
   expect_doppelganger("cyto_plot-GatingSet-1D_003", p)
@@ -97,34 +98,68 @@ test_that("cyto_plot GatingSet method",{
   
   # 2D Scatter plots -----------------------------------------------------------
   
-  cyto_plot(gs[1:4],
+  # Multiple plots - check most arguments
+  p <- function() cyto_plot(gs[1:4],
             parent = "T Cells",
             alias = "",
             channels = c("CD4","CD8"),
             overlay = c("CD4 T Cells","Dendritic Cells"),
-            label = FALSE,
-            point_size = 3,
+            title = paste0("Test", 1:4),
+            title_text_size = 0.8,
+            title_text_font = 1,
+            title_text_col = c("red","brown","orange","green"),
+            axes_text = c(FALSE,TRUE),
+            axes_text_font = 3,
+            axes_text_size = 0.8,
+            axes_text_col = "deepskyblue",
+            axes_label_text_font = 2,
+            axes_label_text_size = 1.5,
+            axes_label_text_col = "purple",
+            gate_line_type = c(1,2),
+            gate_line_width = 3,
+            gate_line_col = c("cyan","green"),
             legend = TRUE,
-            border_fill = "black",
-            contour_lines = 15,
-            contour_line_col = "orange")
+            legend_text_col = c("green","orange","blue"),
+            legend_text_size = 2,
+            legend_text_font = 2,
+            point_size = c(2,3,4),
+            label_box_alpha = 0.2,
+            label_text_size = 0.8,
+            label_text_col = c("red","blue"),
+            label_text_font = 1,
+            border_fill = "grey",
+            border_line_col = "red",
+            border_line_type = 2,
+            border_line_width = 2)
   
-  cyto_plot(gs[1:4],
+  expect_doppelganger("cyto_plot-GatingSet-2D_001", p)
+  
+  # Grouped samples with contours
+  p <- function() cyto_plot(gs[1:32],
+            group_by = c("Treatment","OVAConc"),
             parent = "T Cells",
             alias = "",
             channels = c("CD4","CD8"),
-            overlay = rep(list(list(getData(gs, "Live Cells")[[1]],
-                           getData(gs, "CD4 T Cells")[[1]])), 4),
-            label = FALSE,
-            point_size = 3,
-            legend = TRUE)
+            overlay = c("CD4 T Cells","CD8 T Cells"),
+            point_col = c("black","red","green4"),
+            contour_lines = 15,
+            contour_line_col = "blue")
   
-  cyto_plot(gs[1], 
+  expect_doppelganger("cyto_plot-GatingSet-2D_002", p)
+  
+  # Multiple with zero event sample
+  p <- function() cyto_plot(gs[c(1,33,2:3,4:8)], 
             parent = "T Cells", 
             channels = c("CD4","CD8"), 
             alias = "", 
-            border_fill = "black", 
+            overlay = c("CD4 T Cells","CD8 T Cells"),
             point_size = 3, 
-            point_col_scale = c("white","yellow","orange","red","brown"))
+            label_text_size = 0.6,
+            contour_lines = 15,
+            contour_line_col = "magenta",
+            border_fill = "black",
+            border_fill_alpha = 0.2)
+  
+  expect_doppelganger("cyto_plot-GatingSet-2D_003", p)
   
 })

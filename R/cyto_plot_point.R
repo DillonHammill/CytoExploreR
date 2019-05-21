@@ -106,7 +106,7 @@ cyto_plot_point.list <- function(x,
                                  point_col_scale = NA,
                                  point_cols = NA,
                                  point_col = NA,
-                                 point_col_alpha = NA, ...){
+                                 point_col_alpha = 1, ...){
   
   # Pull down arguments to named list
   args <- .args_list()

@@ -105,7 +105,8 @@
                        border_line_type = 1,
                        border_line_width = 1,
                        border_line_col = "black",
-                       border_fill = "white", ...) {
+                       border_fill = "white",
+                       border_fill_alpha = 1, ...) {
 
   # Get current graphics parameters and reset on exit
   pars <- par("mar")
@@ -207,7 +208,7 @@
           }
         })
       }
-      
+
       # fr_dens is composed of NA - no events in any fr_list
     } else if (.all_na(fr_dens)) {
 
@@ -258,6 +259,7 @@
       border_line_width = border_line_width,
       border_line_col = border_line_col,
       border_fill = border_fill,
+      border_fill_alpha = border_fill_alpha,
       legend = legend,
       legend_text = legend_text,
       legend_text_size = legend_text_size
@@ -355,7 +357,7 @@
           label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
           label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
         }
-        
+
         text_xy <- suppressMessages(cyto_plot_label(
           x = x[[1]],
           channels = channels,
@@ -371,10 +373,10 @@
           box_alpha = label_box_alpha,
           density_smooth = density_smooth
         ))
-        
+
         # Only re-use co-ordinates if modal density - otherwise different
         if (is.null(getOption("CytoRSuite_cyto_plot_label_coords")) &
-            density_modal == TRUE) {
+          density_modal == TRUE) {
           options("CytoRSuite_cyto_plot_label_coords" = text_xy)
         }
       }
@@ -422,34 +424,33 @@
           label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
           label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
         }
-        
-        # Gate density overlays
-          text_xy <- .cyto_plot_overlay_gate(
-            x = x[[1]],
-            channel = channels,
-            trans = axes_trans,
-            overlay = x[2:length(x)],
-            gate = gate,
-            density_stack = density_stack,
-            density_modal = density_modal,
-            label = label,
-            label_text = label_text,
-            label_stat = label_stat,
-            label_text_size = label_text_size,
-            label_text_font = label_text_font,
-            label_text_col = label_text_col,
-            label_box_x = label_box_x,
-            label_box_y = label_box_y,
-            label_box_alpha = label_box_alpha,
-            gate_line_col = gate_line_col,
-            gate_line_width = gate_line_width,
-            gate_line_type = gate_line_type
-          )
 
-          if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-            options("CytoRSuite_cyto_plot_label_coords" = text_xy)
-          }
-          
+        # Gate density overlays
+        text_xy <- .cyto_plot_overlay_gate(
+          x = x[[1]],
+          channel = channels,
+          trans = axes_trans,
+          overlay = x[2:length(x)],
+          gate = gate,
+          density_stack = density_stack,
+          density_modal = density_modal,
+          label = label,
+          label_text = label_text,
+          label_stat = label_stat,
+          label_text_size = label_text_size,
+          label_text_font = label_text_font,
+          label_text_col = label_text_col,
+          label_box_x = label_box_x,
+          label_box_y = label_box_y,
+          label_box_alpha = label_box_alpha,
+          gate_line_col = gate_line_col,
+          gate_line_width = gate_line_width,
+          gate_line_type = gate_line_type
+        )
+
+        if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
+          options("CytoRSuite_cyto_plot_label_coords" = text_xy)
+        }
       } else if (!.all_na(gate) & density_stack == 0) {
         message("Gating overlays without stacking is not supported.")
       }
@@ -462,7 +463,7 @@
     if (any(channels %in% c("FSC-A", "SSC-A"))) {
       if ("FSC-A" %in% channels) {
         x <- lapply(x, function(z) {
-          if(min(range(z)[,"FSC-A"]) < 0){
+          if (min(range(z)[, "FSC-A"]) < 0) {
             nonDebris <- rectangleGate("FSC-A" = c(0, Inf))
             z <- Subset(z, nonDebris)
           }
@@ -471,7 +472,7 @@
       }
       if ("SSC-A" %in% channels) {
         x <- lapply(x, function(z) {
-          if(min(range(z)[,"SSC-A"]) < 0){
+          if (min(range(z)[, "SSC-A"]) < 0) {
             nonDebris <- rectangleGate("SSC-A" = c(0, Inf))
             z <- Subset(z, nonDebris)
           }
@@ -510,6 +511,7 @@
       border_line_width = border_line_width,
       border_line_col = border_line_col,
       border_fill = border_fill,
+      border_fill_alpha = border_fill_alpha,
       legend = legend,
       legend_text = legend_text,
       legend_text_size = legend_text_size
@@ -527,39 +529,39 @@
     }
     
     # POINTS - base layer
-    cyto_plot_point(x[[1]],
+    cyto_plot_point(x[1],
       channels = channels,
-      point_shape = point_shape[[1]],
-      point_size = point_size[[1]],
+      point_shape = point_shape[1],
+      point_size = point_size[1],
       point_col_scale = point_col_scale,
       point_cols = point_cols,
       point_col = point_col[1],
-      point_col_alpha = point_col_alpha[[1]]
+      point_col_alpha = point_col_alpha[1]
     )
-    
+
     # CONTOUR LINES -  only supported for base layer
     if (contour_lines != 0) {
       cyto_plot_contour(
         x = x[[1]],
         channels = channels,
-        contour_lines = contour_lines,
-        contour_line_type = contour_line_type,
-        contour_line_width = contour_line_width,
-        contour_line_col = contour_line_col
+        contour_lines = contour_lines[1],
+        contour_line_type = contour_line_type[1],
+        contour_line_width = contour_line_width[1],
+        contour_line_col = contour_line_col[1]
       )
     }
-    
+
     # POINTS - overlay layers
-    if(length(x) > 1){
-          cyto_plot_point(x[-1],
-                    channels = channels,
-                    point_shape = point_shape[-1],
-                    point_size = point_size[-1],
-                    point_col_scale = point_col_scale,
-                    point_cols = point_cols,
-                    point_col = point_col[-1],
-                    point_col_alpha = point_col_alpha[-1]
-    )
+    if (length(x) > 1) {
+      cyto_plot_point(x[-1],
+        channels = channels,
+        point_shape = point_shape[-1],
+        point_size = point_size[-1],
+        point_col_scale = point_col_scale,
+        point_cols = point_cols,
+        point_col = point_col[-1],
+        point_col_alpha = point_col_alpha[-1]
+      )
     }
 
     # POINT DENSITY COLOUR SCALE

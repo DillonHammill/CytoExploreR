@@ -58,7 +58,10 @@
 #'   default.
 #' @param border_fill colour to use for the plot background, set to "white" by
 #'   default.
+#' @param border_fill_alpha transparency to use for border_fill colour, set to 1
+#'   by default to add no transparency.
 #'
+#' @importFrom grDevices adjustcolor
 #' @importFrom graphics plot box axis title par
 #' @importFrom methods formalArgs
 #'
@@ -66,12 +69,12 @@
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Construct an empty 2D plot with black background
 #' cyto_plot_empty(Activation[1],
 #'                 channels = c("FSC-A","SSC-A"),
 #'                 border_fill = "black)
-#'                 
+#'
 #' # Construct an empty 1D plot
 #' cyto_plot_empty(Activation[1],
 #'                 channels = c("FSC-A),
@@ -112,6 +115,7 @@ cyto_plot_empty.flowFrame <- function(x,
                             border_line_width = 1,
                             border_line_col = "black",
                             border_fill = "white",
+                            border_fill_alpha = 1,
                             legend = FALSE,
                             legend_text,
                             legend_text_size = 1){
@@ -350,7 +354,7 @@ cyto_plot_empty.flowFrame <- function(x,
   # Border fill
   if(border_fill != "white"){
     rect(par("usr")[1],par("usr")[3],par("usr")[2],par("usr")[4],
-         col = border_fill,
+         col = adjustcolor(border_fill, border_fill_alpha),
          border = NA)
   }
   
@@ -438,6 +442,7 @@ cyto_plot_empty.list <- function(x,
                                  border_line_width = 1,
                                  border_line_col = "black",
                                  border_fill = "white",
+                                 border_fill_alpha = 1,
                                  legend = FALSE,
                                  legend_text,
                                  legend_text_size = 1){
@@ -479,6 +484,7 @@ cyto_plot_empty.list <- function(x,
                    border_line_width = border_line_width,
                    border_line_col = border_line_col,
                    border_fill = border_fill,
+                   border_fill_alpha = border_fill_alpha,
                    legend = legend,
                    legend_text = legend_text,
                    legend_text_size = legend_text_size)

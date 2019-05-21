@@ -14,7 +14,7 @@ cyto_plot_point(x, ...)
 
 \method{cyto_plot_point}{list}(x, channels, point_shape = ".",
   point_size = 2, point_col_scale = NA, point_cols = NA,
-  point_col = NA, point_col_alpha = NA, ...)
+  point_col = NA, point_col_alpha = 1, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or a list of \code{flowFrame}

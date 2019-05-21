@@ -28,7 +28,8 @@
   label_text_font = 2, label_text_size = 1, label_text_col = "black",
   label_box_x = NA, label_box_y = NA, label_box_alpha = 0.6,
   border_line_type = 1, border_line_width = 1,
-  border_line_col = "black", border_fill = "white", ...)
+  border_line_col = "black", border_fill = "white",
+  border_fill_alpha = 1, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -279,6 +280,9 @@ default.}
 
 \item{border_fill}{border_fill fill colour to use inside the plot border
 (i.e. background colour), set to "white" by default.}
+
+\item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
+by default for no transparency.}
 
 \item{...}{additional arguments not currently in use.}
 }
