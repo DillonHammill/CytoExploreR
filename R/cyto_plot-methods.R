@@ -1121,7 +1121,7 @@ cyto_plot.GatingHierarchy <- function(x,
   
   # Add data to list and group if necessary - convert groups to flowFrames
   fr_list <- list(fr)
-  names(fr_list) <- identifier(x)
+  names(fr_list) <- identifier(fr)
   
   # Add overlay to list and group if necessary
   if (!.all_na(overlay)) {
@@ -1235,7 +1235,7 @@ cyto_plot.GatingHierarchy <- function(x,
   if (.empty(title)) {
     
     # Extract plot title from names of fr_list
-    title <- nms
+    title <- identifier(fr)
     
     # Add parent name to each plot
     title <- unlist(lapply(title, function(z) {
@@ -1313,34 +1313,38 @@ cyto_plot.GatingHierarchy <- function(x,
   # GRAPHICS DEVICE
   cyto_plot_new(popup)
   
-  # Layout - missing/off/supplied
-  if (.empty(layout)) {
-    
-    # Layout dimensions
-    layout <- .cyto_plot_layout(fr_list,
-                                channels = channels,
-                                layout = layout,
-                                density_stack = density_stack,
-                                density_layers = density_layers
-    )
-  } else if (all(layout == FALSE) | .all_na(layout)) {
-    
-    # Use current dimensions
-    layout <- par("mfrow")
-  }
-  par("mfrow" = layout)
-  np <- layout[1] * layout[2]
+  # Repeat arguments as required -----------------------------------------------
   
+  # Pull down arguments to named list - missing converted to ""
+  args <- .args_list()
+  
+  # Repeat arguments as required using .cyto_plot_args_split
+  args <- .cyto_plot_args_split(args,
+                                channels = channels,
+                                n = length(fr_list),
+                                plots = 1,
+                                layers = length(fr_list),
+                                gates = length(gate)
+  )
+  
+  # Unlist arguments modified by .cyto_plot_args_split
+  lapply(.cyto_plot_args(), function(z){
+    args[[z]] <<- args[[z]][[1]]
+  })
+  
+  # Update arguments
+  .args_update(args)
+
   # Calls to .cyto_plot internal -----------------------------------------------
   
   # Pass arguments to .cyto_plot to construct plot
-  .cyto_plot(x,
+  .cyto_plot(fr_list,
              channels = channels,
              gate = gate,
              axes_trans = axes_trans,
              limits = limits,
              display = display,
-             popup = FALSE,
+             popup = popup,
              xlim = xlim,
              ylim = ylim,
              xlab = xlab,

@@ -577,7 +577,7 @@
         return(z)
       }
     }))
-
+    
     # LEGEND
     if (legend != FALSE) {
       .cyto_plot_legend(

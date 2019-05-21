@@ -235,15 +235,12 @@
 #' This returns a vector argument names currently accepted by
 #' .cyto_plot_args_split.
 #'
-#' @param channels name(s) of channel(s) used to contruct the plot. This is used
-#'   internally to filter arguments for .cyto_plot_1d or .cyto_plot_2d.
-#'
 #' @return vector of accepted .cyto_plot_args_split arguments
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_plot_args <- function(channels) {
+.cyto_plot_args <- function() {
 
   # list of supported arguments
   args <- c(
@@ -253,21 +250,44 @@
     "title_text_font",
     "title_text_size",
     "title_text_col",
+    "density_stack",
+    "axes_text",
     "axes_text_font",
     "axes_text_size",
     "axes_text_col",
     "axes_label_text_font",
     "axes_label_text_size",
     "axes_label_text_col",
+    "legend",
+    "legend_text_size",
+    "label",
     "border_line_type",
     "border_line_width",
     "border_line_col",
-    "legend",
+    "border_fill",
+    "border_fill_alpha",
+    "contour_lines",
+    "contour_line_type",
+    "contour_line_width",
+    "contour_line_col",
+    "density_fill",
+    "density_fill_alpha",
+    "density_line_type",
+    "density_line_width",
+    "density_line_col",
     "legend_text",
     "legend_text_font",
-    "legend_text_size",
     "legend_text_col",
-    "label",
+    "legend_line_col",
+    "legend_box_fill",
+    "legend_point_col",
+    "point_shape",
+    "point_size",
+    "point_col",
+    "point_col_alpha",
+    "gate_line_type", 
+    "gate_line_width", 
+    "gate_line_col",
     "label_text",
     "label_stat",
     "label_text_font",
@@ -275,42 +295,8 @@
     "label_text_col",
     "label_box_x",
     "label_box_y",
-    "label_box_alpha",
-    "gate_line_type",
-    "gate_line_width",
-    "gate_line_col"
+    "label_box_alpha"
   )
-
-  # Arguments only present in 1D plots
-  if (length(channels) == 1) {
-    args <- c(
-      args,
-      "density_stack",
-      "density_fill",
-      "density_fill_alpha",
-      "density_line_type",
-      "density_line_width",
-      "density_line_col",
-      "legend_line_col",
-      "legend_box_fill"
-    )
-  }
-
-  # Arguments only present in 2D plots
-  if (length(channels) == 2) {
-    args <- c(
-      args,
-      "point_shape",
-      "point_size",
-      "point_col",
-      "point_col_alpha",
-      "contour_lines",
-      "contour_line_type",
-      "contour_line_width",
-      "contour_line_col",
-      "legend_point_col"
-    )
-  }
 
   return(args)
 }
@@ -428,7 +414,9 @@
   })
 
   # Arguments per gate
-  args <- c("gate_line_type", "gate_line_width", "gate_line_col")
+  args <- c("gate_line_type", 
+            "gate_line_width", 
+            "gate_line_col")
 
   if (gates != 0) {
     lapply(args, function(arg) {
@@ -1104,7 +1092,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
     }
 
     legend(
-      x = 1.1 * par("usr")[2],
+      x = 1.08 * par("usr")[2],
       y = cnt + 0.6 * lgnd_height,
       legend = rev(legend_text),
       col = rev(legend_point_col),
