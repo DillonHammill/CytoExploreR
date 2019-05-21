@@ -537,7 +537,7 @@
       point_col_alpha = point_col_alpha[[1]]
     )
     
-    # CONTOUR LINES
+    # CONTOUR LINES -  only supported for base layer
     if (contour_lines != 0) {
       cyto_plot_contour(
         x = x[[1]],

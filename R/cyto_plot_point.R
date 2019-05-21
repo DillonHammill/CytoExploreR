@@ -61,7 +61,7 @@ cyto_plot_point.flowFrame <- function(x,
   # Update arguments
   .args_update(args)
   
-  # Get point colours if point_col is not a list
+  # Get point colours if point_col is not a list - avoids double adjustcolor 
   if(!inherits(point_col, "list")){
       point_col <- .cyto_plot_point_col(fr_list,
                                               channels,
@@ -117,7 +117,7 @@ cyto_plot_point.list <- function(x,
   # Update arguments
   .args_update(args)
   
-  # Get point colours if point_col is not a list
+  # Get point colours if point_col is not a list - avoids double adjustcolor 
   if(!inherits(point_col, "list")){
       point_col <- .cyto_plot_point_col(x,
                                               channels,
