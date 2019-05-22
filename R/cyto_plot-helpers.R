@@ -874,7 +874,11 @@ cyto_plot_theme <- function(...) {
   }else{
     # Check supplied arguments are supported.
     if(!all(names(args) %in% cyto_plot_theme_args())){
-      message("Some supplied arguments are not supported for cyto_plot_theme.")
+      lapply(names(args), function(x){
+        if(!x %in% cyto_plot_theme_args()){
+          message(paste(x,"is not a supported argument for cyto_plot_theme."))
+        }
+      })
     }
 
     # Restrict list to supported arguments only
@@ -945,6 +949,7 @@ cyto_plot_theme_args <- function(){
   "label_text_col",
   "label_box_alpha",
   "border_fill",
+  "border_fill_alpha",
   "border_line_type",
   "border_line_width",
   "border_line_col",
@@ -952,8 +957,8 @@ cyto_plot_theme_args <- function(){
   "point_size",
   "point_col_scale",
   "point_cols",
-  "point_col",
-  "point_alpha",
+  "point_col_alpha",
+  "contour_lines",
   "contour_line_type",
   "contour_line_width",
   "contour_line_col")
