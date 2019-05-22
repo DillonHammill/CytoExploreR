@@ -278,9 +278,10 @@ setMethod(gate_draw,
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
-#' @param select vector containing the indices of samples within gs to use for
-#'   plotting. For large \code{flowSet} objects \code{select} is set to 20
-#'   random \code{flowFrame} objects to improve processing speed.
+#' @param filter designates which samples will be plotted and used for
+#'   determining the best location to set the drawn gate(s). Filtering steps
+#'   should be comma separated and wrapped in a list (e.g. list(Treatment ==
+#'   "Stim-A", OVAConc %in% c(0,0.5))).
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
 #' @param label logical indicating whether to include
@@ -308,10 +309,10 @@ setMethod(gate_draw,
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # draw gates using gate_draw - add contour lines & overlay control
 #' gate_draw(fs,
 #'   channels = c("FSC-A", "SSC-A"),
@@ -320,11 +321,11 @@ setMethod(gate_draw,
 #'   contour_lines = 15,
 #'   overlay = fs[[1]]
 #' )
-#' 
+#'
 #' # gt is a filters object containing the contructed polygonGate
 #' gt[[1]]
 #' }
-#' 
+#'
 #' @export
 setMethod(gate_draw,
           signature = "flowSet",
@@ -333,7 +334,7 @@ setMethod(gate_draw,
                                 channels = NULL,
                                 type = "polygon",
                                 display = 1 / length(x),
-                                select = NULL,
+                                filter = NULL,
                                 axis = "x",
                                 density_smooth = 1.5,
                                 label = TRUE,
@@ -346,7 +347,7 @@ setMethod(gate_draw,
             fs <- x
             
             # Restrict to samples based on indices
-            if (!is.null(select)) {
+            if (!is.null(filter)) {
               if (class(select) != "numeric") {
                 stop(
                   "'select' must contain the numeric indices of the samples to plot."

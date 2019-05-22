@@ -434,7 +434,7 @@ cyto_extract <- function(x, parent = "root", ...) {
   # Extract data from GatingHierarchy or GatingSet
   if (any(inherits(x, "GatingHierarchy") |
     inherits(x, "GatingSet"))) {
-    x <- getData(x, parent, ... = )
+    x <- getData(x, parent, ...)
   }
 
   return(x)
@@ -456,8 +456,8 @@ cyto_extract <- function(x, parent = "root", ...) {
 #'
 #' @return object specified by 'return' argument.
 #'
-#' @importFrom flowCore flowSet sampleNames
-#' @importFrom flowWorkspace getData GatingSet
+#' @importFrom flowCore flowSet
+#' @importFrom flowWorkspace GatingSet
 #' @importFrom methods as
 #'
 #' @examples
@@ -532,7 +532,7 @@ cyto_convert.flowSet <- function(x,
     x <- lapply(seq_len(length(x)), function(y) {
       x[[y]]
     })
-    names(x) <- sampleNames(x)
+    names(x) <- cyto_names(x)
   } else if (return == "flowSet list") {
     x <- list(x)
   } else if (return == "GatingSet") {
@@ -586,7 +586,7 @@ cyto_convert.GatingSet <- function(x,
     x <- lapply(seq(1, length(x)), function(z) {
       cyto_extract(x[[z]], parent)
     })
-    names(x) <- sampleNames(x)
+    names(x) <- cyto_names(x)
   } else if (return == "flowSet") {
     x <- cyto_extract(x, parent)
   } else if (return == "flowSet list") {
@@ -765,8 +765,6 @@ cyto_select <- function(x, ...) {
 #' @return a named list of \code{flowSet} or \code{GatingSet} objects
 #'   respectively.
 #'
-#' @importFrom flowWorkspace pData sampleNames
-#'
 #' @examples
 #' library(CytoRSuiteData)
 #' 
@@ -798,7 +796,7 @@ cyto_group_by <- function(x,
   }
 
   # Extract sample names
-  nms <- sampleNames(x)
+  nms <- cyto_names(x)
 
   # Check group_by
   if (!all(group_by %in% colnames(pd))) {
@@ -822,7 +820,7 @@ cyto_group_by <- function(x,
 
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z) {
-    ind <- match(pd_split[[z]][, "name"], sampleNames(x))
+    ind <- match(pd_split[[z]][, "name"], cyto_names(x))
     x[ind]
   })
   names(x_list) <- names(pd_split)
@@ -1153,7 +1151,6 @@ cyto_annotate <- function(x, file = NULL) {
 #'   object.
 #'
 #' @importFrom utils read.csv
-#' @importFrom flowWorkspace sampleNames getData
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -1231,16 +1228,16 @@ cyto_compensate.flowSet <- function(x,
 
     # Convert spill into a named list
     spill <- rep(list(spill), length(x))
-    names(spill) <- sampleNames(x)
+    names(spill) <- cyto_names(x)
   }
 
   # Extract spillover directly from x
   if (is.null(spillover)) {
     if (!is.null(select)) {
       spill <- rep(list(x[[select]]@description$SPILL), length(x))
-      names(spill) <- sampleNames(x)
+      names(spill) <- cyto_names(x)
     } else {
-      spill <- lapply(sampleNames(x), function(y) {
+      spill <- lapply(cyto_names(x), function(y) {
         x[[y]]@description$SPILL
       })
     }
@@ -1257,7 +1254,7 @@ cyto_compensate.GatingSet <- function(x,
                                       select = 1) {
 
   # Extract flowSet
-  fs <- getData(gs, "root")
+  fs <- cyto_extract(x, parent = "root")
 
   # Read in spillover matrix file
   if (!is.null(spillover)) {
@@ -1271,16 +1268,16 @@ cyto_compensate.GatingSet <- function(x,
 
     # Convert spill into a named list
     spill <- rep(list(spill), length(x))
-    names(spill) <- sampleNames(x)
+    names(spill) <- cyto_names(x)
   }
 
   # Extract spillover directly from x
   if (is.null(spillover)) {
     if (!is.null(select)) {
       spill <- rep(list(fs[[select]]@description$SPILL), length(x))
-      names(spill) <- sampleNames(x)
+      names(spill) <- cyto_names(x)
     } else {
-      spill <- lapply(sampleNames(x), function(y) {
+      spill <- lapply(cyto_names(x), function(y) {
         fs[[y]]@description$SPILL
       })
     }
@@ -1289,22 +1286,3 @@ cyto_compensate.GatingSet <- function(x,
   # Apply compensation
   flowWorkspace::compensate(x, spill)
 }
-
-# CYTO_TRANSFORM ---------------------------------------------------------------
-
-# Possibly assign transform object to global option that can be accessed
-# internally by cyto_plot.
-
-# Challenges:
-# - which samples do you use with estimateLogicle? Maybe sample a percentage of
-#   samples and pool?
-# - needs to support adjustment of transformation parameters on a per channel
-#   basis.
-
-# CYTO_INVERSE_TRANSFORM -------------------------------------------------------
-
-# Extract transform object from global option or supplied. Get inverse
-# transformations for designated channels and apply to samples.
-
-# These transform functions can then be used by cyto_plot to make in-line
-# transformations. Need to come up with a new argument/s to implement this.

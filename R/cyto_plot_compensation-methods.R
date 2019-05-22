@@ -17,12 +17,9 @@
 #' @seealso \code{\link{cyto_plot_compensation,GatingSet-method}}
 #'
 #' @export
-setGeneric(
-  name = "cyto_plot_compensation",
-  def = function(x, ...) {
-    standardGeneric("cyto_plot_compensation")
-  }
-)
+cyto_plot_compensation <- function(x, ...) {
+  UseMethod("cyto_plot_compensation")
+}
 
 #' Plot Compensation in All Fluorescent Channels - flowFrame Method
 #'
@@ -60,16 +57,13 @@ setGeneric(
 #' @param title text to include above each plot, set to NA by default to remove
 #'   titles.
 #' @param header title to use for the plots, set to the name of the sample by
-#'   default.
+#'   default. Turn off the header by setting this argument to NA.
 #' @param header_text_font font to use for header text, set to 2 by default.
 #' @param header_text_size text size for header, set to 1 by default.
 #' @param header_text_col colour for header text, set to "black" by default.
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @importFrom flowWorkspace sampleNames pData
-#' @importFrom flowCore parameters compensate identifier
-#' @importFrom utils read.csv
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par mtext
 #'
@@ -99,153 +93,120 @@ setGeneric(
 #' # Don't run - return "CytoRSuite_wd_check" to default
 #' options("CytoRSuite_wd_check" = TRUE)
 #' @export
-setMethod(cyto_plot_compensation,
-  signature = "flowFrame",
-  definition = function(x,
-                          channel_match = NULL,
-                          compensate = FALSE,
-                          spillover = NULL,
-                          axes_trans = NULL,
-                          layout,
-                          popup = FALSE,
-                          title = NA,
-                          header = NA,
-                          header_text_font = 2,
-                          header_text_size = 1,
-                          header_text_col = "black", ...) {
+cyto_plot_compensation.flowFrame <- function(x,
+                                             channel_match = NULL,
+                                             compensate = FALSE,
+                                             spillover = NULL,
+                                             axes_trans = NA,
+                                             layout,
+                                             popup = FALSE,
+                                             title = NA,
+                                             header = NULL,
+                                             header_text_font = 2,
+                                             header_text_size = 1,
+                                             header_text_col = "black", ...) {
 
-    # Set plot method 
-    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-      options("CytoRSuite_cyto_plot_method" = "Comp/flowFrame")
-    }
-    
-    # Assign x to fr
-    fr <- x
-
-    # Sample names
-    nm <- identifier(fr)
-
-    # Extract channels
-    channels <- cyto_fluor_channels(fr)
-
-    # Compensation
-    if (compensate == TRUE) {
-      if (is.null(spillover)) {
-        spill <- fr@description$SPILL
-        fr <- suppressMessages(compensate(fr, spill))
-      } else if (!is.null(spillover)) {
-        if (inherits(spillover, "matrix") |
-          inherits(spillover, "data.frame") |
-          inherits(spillover, "tibble")) {
-          spill <- spillover
-        } else {
-          if (getOption("CytoRSuite_wd_check") == TRUE) {
-            if (.file_wd_check(spillover)) {
-              spill <- read.csv(spillover, header = TRUE, row.names = 1)
-              colnames(spill) <- rownames(spill)
-            } else {
-              message(paste(spillover, "is not in this working directory."))
-              spill <- fr@description$SPILL
-            }
-          } else {
-            spill <- read.csv(spillover, header = TRUE, row.names = 1)
-            colnames(spill) <- rownames(spill)
-          }
-        }
-        fr <- suppressMessages(compensate(fr, spill))
-      }
-    }
-
-    # Transformations
-    axes_trans <- .getCompleteTransList(fr, axes_trans)
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
-
-    # Transfomed Data
-    fr <- .getTransformedData(fr, axes_trans)
-
-    # Select channel associated with flowFrame
-    if (is.null(channel_match)) {
-      chan <- cyto_channel_select(fr)
-    } else {
-      chan <- channel_match
-    }
-
-    # Pop-up
-    if (popup == TRUE) {
-      .cyto_plot_window()
-    }
-
-    # layout
-    if (missing(layout)) {
-      layout <- c(
-        n2mfrow(length(channels))[2],
-        n2mfrow(length(channels))[1]
-      )
-      par(mfrow = layout)
-    } else if (!missing(layout)) {
-      if (layout[1] == FALSE) {
-
-        # Do nothing
-      } else {
-        par(mfrow = layout)
-      }
-    }
-
-    # Title space
-    if (!is.null(header)) {
-      par(oma = c(0, 0, 3, 0))
-    }
-
-    # Title
-    if (!is.null(header) & is.na(header)) {
-      header <- identifier(fr)
-    }
-
-    # Plots
-    lapply(seq_len(length(channels)), function(y) {
-      cyto_plot(fr,
-        channels = c(chan, channels[y]),
-        axes_trans = axes_trans,
-        legend = FALSE,
-        title = title, ...
-      )
-
-      if (channels[y] == channels[length(channels)]) {
-        if (!is.null(header)) {
-          mtext(header,
-            outer = TRUE,
-            cex = header_text_size,
-            font = header_text_font,
-            col = header_text_col
-          )
-        }
-      }
-    })
-
-    # Return defaults
-    par(mfrow = c(1, 1))
-    par(oma = c(0, 0, 0, 0))
-    
-    # Turn off graphics device for saving
-    if(getOption("CytoRSuite_cyto_plot_save")){
-      
-      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
-        
-        # Close graphics device
-        dev.off()
-        
-        # Reset CytoRSuite_cyto_plot_save
-        options("CytoRSuite_cyto_plot_save" = FALSE)
-        
-        # Reset CytoRSuite_cyto_plot_method
-        options("cytoRSuite_cyto_plot_method" = NULL)
-        
-      }
-      
-    }
-    
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Comp/flowFrame")
   }
-)
+
+  # Sample names
+  nm <- cyto_names(x)
+
+  # Extract channels
+  channels <- cyto_fluor_channels(x)
+
+  # Compensation
+  if (compensate == TRUE) {
+    x <- cyto_compensate(x, spillover = spillover)
+  }
+
+  # Transformations
+  axes_trans <- .cyto_transform_complete(x, axes_trans)
+  axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+
+  # Transfomed Data
+  x <- .cyto_transformed(x, axes_trans)
+
+  # Select channel associated with flowFrame
+  if (is.null(channel_match)) {
+    chan <- cyto_channel_select(x)
+  } else {
+    chan <- channel_match
+  }
+
+  # Pop-up
+  if (popup == TRUE) {
+    cyto_plot_new(popup)
+  }
+
+  # layout
+  if (missing(layout)) {
+    layout <- c(
+      n2mfrow(length(channels))[2],
+      n2mfrow(length(channels))[1]
+    )
+    par(mfrow = layout)
+  } else if (!missing(layout)) {
+    if (layout[1] == FALSE) {
+
+      # Do nothing
+    } else {
+      par(mfrow = layout)
+    }
+  }
+
+  # Title space
+  if (!.all_na(header)) {
+    par(oma = c(0, 0, 3, 0))
+  }
+
+  # Title
+  if (is.null(header)) {
+    header <- cyto_names(x)
+  }
+
+  # Plots
+  lapply(seq_len(length(channels)), function(y) {
+    cyto_plot(x,
+      channels = c(chan, channels[y]),
+      axes_trans = axes_trans,
+      legend = FALSE,
+      title = title, ...
+    )
+
+    if (channels[y] == channels[length(channels)]) {
+      if (!.all_na(header)) {
+        mtext(header,
+          outer = TRUE,
+          cex = header_text_size,
+          font = header_text_font,
+          col = header_text_col
+        )
+      }
+    }
+  })
+
+  # Return defaults
+  par(mfrow = c(1, 1))
+  par(oma = c(0, 0, 0, 0))
+
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+
+      # Close graphics device
+      dev.off()
+
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
+}
 
 #' Plot Compensation in All Fluorescent Channels - flowSet Method
 #'
@@ -290,20 +251,15 @@ setMethod(cyto_plot_compensation,
 #' @param title text to include above each plot, set to NA by default to remove
 #'   titles.
 #' @param header vector of titles to use for the plots, set to the name of the
-#'   sample by default.
+#'   sample by default. Turn off the header by setting this argument to NA.
 #' @param header_text_font font to use for header text, set to 2 by default.
 #' @param header_text_size text size for header, set to 1 by default.
 #' @param header_text_col colour for header text, set to "black" by default.
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @importFrom flowWorkspace sampleNames pData
-#' @importFrom flowCore parameters compensate fsApply
-#' @importFrom ncdfFlow ncfsApply
-#' @importFrom utils read.csv write.csv
-#' @importFrom methods as
 #' @importFrom grDevices n2mfrow
-#' @importFrom graphics par mtext plot.new
+#' @importFrom graphics par mtext
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -336,236 +292,195 @@ setMethod(cyto_plot_compensation,
 #' @seealso \code{\link{cyto_plot,flowFrame-method}}
 #'
 #' @export
-setMethod(cyto_plot_compensation,
-  signature = "flowSet",
-  definition = function(x,
-                          channel_match = NULL,
-                          compensate = FALSE,
-                          spillover = NULL,
-                          axes_trans = NULL,
-                          overlay = TRUE,
-                          layout,
-                          popup = FALSE,
-                          title = NA,
-                          header = NA,
-                          header_text_font = 2,
-                          header_text_size = 1,
-                          header_text_col = "black", ...) {
+cyto_plot_compensation.flowSet <- function(x,
+                                           channel_match = NULL,
+                                           compensate = FALSE,
+                                           spillover = NULL,
+                                           axes_trans = NA,
+                                           overlay = TRUE,
+                                           layout,
+                                           popup = FALSE,
+                                           title = NA,
+                                           header = NULL,
+                                           header_text_font = 2,
+                                           header_text_size = 1,
+                                           header_text_col = "black", ...) {
 
-    # Set plot method 
-    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-      options("CytoRSuite_cyto_plot_method" = "Comp/flowSet")
-    }
-    
-    # Assign x to fs
-    fs <- x
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Comp/flowSet")
+  }
 
-    # Number of samples
-    smp <- length(fs)
+  # Number of samples
+  smp <- length(x)
 
-    # Extract channels
-    channels <- cyto_fluor_channels(fs)
+  # Extract channels
+  channels <- cyto_fluor_channels(x)
 
-    # Compensation
-    if (compensate == TRUE) {
-      if (is.null(spillover)) {
-        spill <- fs[[1]]@description$SPILL
-      } else if (!is.null(spillover)) {
-        if (inherits(spillover, "matrix") |
-          inherits(spillover, "data.frame") |
-          inherits(spillover, "tibble")) {
-          spill <- spillover
-        } else {
-          if (getOption("CytoRSuite_wd_check") == TRUE) {
-            if (.file_wd_check(spillover)) {
-              spill <- read.csv(spillover, header = TRUE, row.names = 1)
-              colnames(spill) <- rownames(spill)
-            } else {
-              message(paste(spillover, "is not in this working directory."))
-              spill <- fs[[1]]@description$SPILL
-            }
-          } else {
-            spill <- read.csv(spillover, header = TRUE, row.names = 1)
-            colnames(spill) <- rownames(spill)
-          }
-        }
+  # Compensation
+  if (compensate == TRUE) {
+    x <- cyto_compensate(x, spillover = spillover)
+  }
 
-        if (inherits(fs, "ncdfFlowSet") == TRUE) {
-          fs <- suppressMessages(ncfsApply(fs, function(fr) {
-            compensate(fr, spill)
-          }))
-        } else if (inherits(fs, "flowSet")) {
-          fs <- suppressMessages(fsApply(fs, function(fr) {
-            compensate(fr, spill)
-          }))
-        }
-      }
-    }
+  # Transformations
+  axes_trans <- .cyto_transform_complete(x, axes_trans)
+  axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
 
-    # Transformations
-    axes_trans <- .getCompleteTransList(fs, axes_trans)
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+  # Transformed Data
+  x <- .cyto_transformed(x, axes_trans)
 
-    # Transformed Data
-    fs <- .getTransformedData(fs, axes_trans)
+  # Extract pData information
+  pd <- cyto_details(x)
 
-    # Extract pData information
-    pd <- pData(fs)
+  # Channel match file
+  if (is.null(channel_match)) {
 
-    # Channel match file
-    if (is.null(channel_match)) {
+    # No channel_match file supplied
+    message("Select a channel for each sample from the dropdown menu.")
+    pd$channel <- paste(cyto_channel_select(x))
 
-      # No channel_match file supplied
-      message("Select a channel for each sample from the dropdown menu.")
-      pd$channel <- paste(cyto_channel_select(fs))
-
-      # Save new channel_match csv file
-      message("Saving channel selections to 'Compensation-Channels.csv'.")
-      write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
-    } else if (!is.null(channel_match)) {
-      if (getOption("CytoRSuite_wd_check") == TRUE) {
-        if (.file_wd_check(channel_match) == FALSE) {
-          message(paste(channel_match, "is not in this working directory."))
-          pd$channel <- paste(cyto_channel_select(fs))
-        } else {
-          cm <- read.csv(channel_match, header = TRUE, row.names = 1)
-          chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
-          pd$channel <- paste(chans)
-        }
+    # Save new channel_match csv file
+    message("Saving channel selections to 'Compensation-Channels.csv'.")
+    write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
+  } else if (!is.null(channel_match)) {
+    if (getOption("CytoRSuite_wd_check") == TRUE) {
+      if (.file_wd_check(channel_match) == FALSE) {
+        message(paste(channel_match, "is not in this working directory."))
+        pd$channel <- paste(cyto_channel_select(x))
       } else {
         cm <- read.csv(channel_match, header = TRUE, row.names = 1)
-        chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
+        chans <- cm$channel[match(cyto_names(x), row.names(cm))]
         pd$channel <- paste(chans)
       }
-    }
-
-    # Pull out unstained control if supplied
-    if ("Unstained" %in% pd$channel) {
-      unst <- TRUE
-      NIL <- fs[[match("Unstained", pd$channel)]]
-      fs <- fs[-match("Unstained", pd$channel)]
-      smp <- smp - 1
     } else {
-      unst <- FALSE
+      cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+      chans <- cm$channel[match(cyto_names(x), row.names(cm))]
+      pd$channel <- paste(chans)
     }
-
-    # Sample names
-    nms <- sampleNames(fs)
-
-    # Restrict pd to fs
-    pd <- pd[!pd$channel == "Unstained", ]
-
-    # Convert fs into list of flowFrames
-    fs.lst <- lapply(seq(1, smp, 1), function(x) fs[[x]])
-
-    # Pop-up
-    if (popup == TRUE) {
-      .cyto_plot_window()
-    }
-
-    # layout
-    if (missing(layout)) {
-      layout <- c(
-        n2mfrow(length(channels))[2],
-        n2mfrow(length(channels))[1]
-      )
-      par(mfrow = layout)
-    } else if (!missing(layout)) {
-      if (layout[1] == FALSE) {
-
-        # Do nothing
-      } else {
-        par(mfrow = layout)
-      }
-    }
-
-    # Title space
-    if (!is.null(header)) {
-      par(oma = c(0, 0, 3, 0))
-    }
-
-    # Title
-    if (!is.null(header) & is.na(header)) {
-      header <- nms
-    }
-
-    # Loop through fs.lst
-    lapply(1:smp, function(x) {
-      lapply(seq_len(length(channels)), function(y) {
-        if (unst == TRUE & overlay == TRUE) {
-          cyto_plot(fs.lst[[x]],
-            channels = c(pd$channel[x], channels[y]),
-            overlay = NIL,
-            axes_trans = axes_trans,
-            legend = FALSE,
-            title = title, ...
-          )
-        } else {
-          cyto_plot(fs.lst[[x]],
-            channels = c(pd$channel[x], channels[y]),
-            axes_trans = axes_trans,
-            legend = FALSE,
-            title = title, ...
-          )
-        }
-
-        # Call new plot
-        if (x != smp & channels[y] == channels[length(channels)]) {
-          if (!is.null(header)) {
-            mtext(header[x],
-              outer = TRUE,
-              cex = header_text_size,
-              font = header_text_font,
-              col = header_text_col
-            )
-          }
-
-          if (popup == TRUE) {
-            .cyto_plot_window()
-            par(mfrow = layout)
-            par(oma = c(0, 0, 3, 0))
-          } else {
-            plot.new()
-            par(mfrow = layout)
-            par(oma = c(0, 0, 3, 0))
-          }
-        } else if (x == smp & channels[y] == channels[length(channels)]) {
-          if (!is.null(header)) {
-            mtext(header[x],
-              outer = TRUE,
-              cex = header_text_size,
-              font = header_text_font,
-              col = header_text_col
-            )
-          }
-        }
-      })
-    })
-
-    # Return defaults
-    par(mfrow = c(1, 1))
-    par(oma = c(0, 0, 0, 0))
-    
-    # Turn off graphics device for saving
-    if(getOption("CytoRSuite_cyto_plot_save")){
-      
-      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
-        
-        # Close graphics device
-        dev.off()
-        
-        # Reset CytoRSuite_cyto_plot_save
-        options("CytoRSuite_cyto_plot_save" = FALSE)
-        
-        # Reset CytoRSuite_cyto_plot_method
-        options("cytoRSuite_cyto_plot_method" = NULL)
-        
-      }
-      
-    }
-    
   }
-)
+
+  # Pull out unstained control if supplied
+  if ("Unstained" %in% pd$channel) {
+    unst <- TRUE
+    NIL <- x[[match("Unstained", pd$channel)]]
+    x <- x[-match("Unstained", pd$channel)]
+    smp <- smp - 1
+  } else {
+    unst <- FALSE
+  }
+
+  # Sample names
+  nms <- cyto_names(x)
+
+  # Restrict pd to x
+  pd <- pd[!pd$channel == "Unstained", ]
+
+  # Convert x into list of flowFrames
+  fs_list <- lapply(seq(1, smp, 1), function(z) x[[z]])
+
+  # Pop-up
+  if (popup == TRUE) {
+    cyto_plot_new(popup)
+  }
+
+  # layout
+  if (missing(layout)) {
+    layout <- c(
+      n2mfrow(length(channels))[2],
+      n2mfrow(length(channels))[1]
+    )
+    par(mfrow = layout)
+  } else if (!missing(layout)) {
+    if (layout[1] == FALSE) {
+
+      # Do nothing
+    } else {
+      par(mfrow = layout)
+    }
+  }
+
+  # Title space
+  if (!.all_na(header)) {
+    par(oma = c(0, 0, 3, 0))
+  }
+
+  # Title
+  if (is.null(header)) {
+    header <- nms
+  }
+
+  # Loop through fs_list
+  lapply(1:smp, function(x) {
+    lapply(seq_len(length(channels)), function(y) {
+      if (unst == TRUE & overlay == TRUE) {
+        cyto_plot(fs_list[[x]],
+          channels = c(pd$channel[x], channels[y]),
+          overlay = NIL,
+          axes_trans = axes_trans,
+          legend = FALSE,
+          title = title, ...
+        )
+      } else {
+        cyto_plot(fs_list[[x]],
+          channels = c(pd$channel[x], channels[y]),
+          axes_trans = axes_trans,
+          legend = FALSE,
+          title = title, ...
+        )
+      }
+
+      # Call new plot
+      if (x != smp & channels[y] == channels[length(channels)]) {
+        if (!is.null(header)) {
+          mtext(header[x],
+            outer = TRUE,
+            cex = header_text_size,
+            font = header_text_font,
+            col = header_text_col
+          )
+        }
+
+        if (popup == TRUE) {
+          cyto_plot_new(popup)
+          par(mfrow = layout)
+          par(oma = c(0, 0, 3, 0))
+        } else {
+          plot.new()
+          par(mfrow = layout)
+          par(oma = c(0, 0, 3, 0))
+        }
+      } else if (x == smp & channels[y] == channels[length(channels)]) {
+        if (!is.null(header)) {
+          mtext(header[x],
+            outer = TRUE,
+            cex = header_text_size,
+            font = header_text_font,
+            col = header_text_col
+          )
+        }
+      }
+    })
+  })
+
+  # Return defaults
+  par(mfrow = c(1, 1))
+  par(oma = c(0, 0, 0, 0))
+
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+
+      # Close graphics device
+      dev.off()
+
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
+}
 
 #' Plot Compensation in All Fluorescent Channels - GatingSet Method
 #'
@@ -612,18 +527,13 @@ setMethod(cyto_plot_compensation,
 #' @param title text to include above each plot, set to NA by default to remove
 #'   titles.
 #' @param header vector of titles to use for the plots, set to the name of the
-#'   sample by default.
+#'   sample by default. Turn off the header by setting this argument to NA.
 #' @param header_text_font font to use for header text, set to 2 by default.
 #' @param header_text_size text size for header, set to 1 by default.
 #' @param header_text_col colour for header text, set to "black" by default.
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @importFrom flowWorkspace sampleNames pData getNodes GatingSet
-#' @importFrom flowCore parameters compensate flowSet fsApply
-#' @importFrom ncdfFlow ncfsApply
-#' @importFrom utils read.csv
-#' @importFrom methods as
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -658,122 +568,81 @@ setMethod(cyto_plot_compensation,
 #' @seealso \code{\link{cyto_plot,flowFrame-method}}
 #'
 #' @export
-setMethod(cyto_plot_compensation,
-  signature = "GatingSet",
-  definition = function(x,
-                          parent = NULL,
-                          channel_match = NULL,
-                          compensate = FALSE,
-                          spillover = NULL,
-                          axes_trans = NULL,
-                          overlay = TRUE,
-                          layout,
-                          popup = FALSE,
-                          title = NA,
-                          header = NA,
-                          header_text_font = 2,
-                          header_text_size = 1,
-                          header_text_col = "black", ...) {
+cyto_plot_compensation.GatingSet <- function(x,
+                                             parent = NULL,
+                                             channel_match = NULL,
+                                             compensate = FALSE,
+                                             spillover = NA,
+                                             axes_trans = NULL,
+                                             overlay = TRUE,
+                                             layout,
+                                             popup = FALSE,
+                                             title = NA,
+                                             header = NULL,
+                                             header_text_font = 2,
+                                             header_text_size = 1,
+                                             header_text_col = "black", ...) {
 
-    # Set plot method 
-    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-      options("CytoRSuite_cyto_plot_method" = "Comp/GatingSet")
-    }
-    
-    # Assign x to gs
-    gs <- x
-
-    # Parent
-    if (is.null(parent)) {
-      parent <- basename(getNodes(gs))[length(getNodes(gs))]
-      message(paste(
-        "No parent supplied -",
-        parent,
-        "population will be used for plots."
-      ))
-    }
-
-    # Extract channels
-    channels <- cyto_fluor_channels(gs)
-
-    # Extract parent
-    fs <- getData(gs, parent)
-
-    # Compensation
-    if (compensate == TRUE) {
-      if (is.null(spillover)) {
-        spill <- fs[[1]]@description$SPILL
-      } else if (!is.null(spillover)) {
-        if (inherits(spillover, "matrix") |
-          inherits(spillover, "data.frame") |
-          inherits(spillover, "tibble")) {
-          spill <- spillover
-        } else {
-          if (getOption("CytoRSuite_wd_check") == TRUE) {
-            if (.file_wd_check(spillover)) {
-              spill <- read.csv(spillover, header = TRUE, row.names = 1)
-              colnames(spill) <- rownames(spill)
-            } else {
-              message(paste(spillover, "is not in this working directory."))
-              spill <- fs[[1]]@description$SPILL
-            }
-          } else {
-            spill <- read.csv(spillover, header = TRUE, row.names = 1)
-            colnames(spill) <- rownames(spill)
-          }
-        }
-
-        if (inherits(fs, "ncdfFlowSet") == TRUE) {
-          fs <- suppressMessages(ncfsApply(fs, function(fr) {
-            compensate(fr, spill)
-          }))
-        } else if (inherits(fs, "flowSet")) {
-          fs <- suppressMessages(fsApply(fs, function(fr) {
-            compensate(fr, spill)
-          }))
-        }
-      }
-    }
-
-    # Transformations
-    axes_trans <- .getCompleteTransList(gs, axes_trans)
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
-
-    # Make to cyto_plot_compensation
-    cyto_plot_compensation(
-      x = fs,
-      axes_trans = axes_trans,
-      channel_match = channel_match,
-      overlay = overlay,
-      popup = popup,
-      title = title,
-      header = header,
-      header_text_font = header_text_font,
-      header_text_size = header_text_size,
-      header_text_col = header_text_col, ...
-    )
-
-    # Return defaults
-    par(mfrow = c(1, 1))
-    par(oma = c(0, 0, 0, 0))
-    
-    # Turn off graphics device for saving
-    if(getOption("CytoRSuite_cyto_plot_save")){
-      
-      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
-        
-        # Close graphics device
-        dev.off()
-        
-        # Reset CytoRSuite_cyto_plot_save
-        options("CytoRSuite_cyto_plot_save" = FALSE)
-        
-        # Reset CytoRSuite_cyto_plot_method
-        options("cytoRSuite_cyto_plot_method" = NULL)
-        
-      }
-      
-    }
-    
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Comp/GatingSet")
   }
-)
+
+  # Parent
+  if (is.null(parent)) {
+    parent <- basename(getNodes(x))[length(getNodes(x))]
+    message(paste(
+      "No parent supplied -",
+      parent,
+      "population will be used for plots."
+    ))
+  }
+
+  # Extract channels
+  channels <- cyto_fluor_channels(x)
+
+  # Extract parent
+  fs <- cyto_extract(x, parent)
+
+  # Compensation
+  if (compensate == TRUE) {
+    fs <- cyto_compensate(fs, spillover = spillover)
+  }
+
+  # Transformations
+  axes_trans <- .cyto_transform_complete(x, axes_trans)
+  axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+
+  # Make call to cyto_plot_compensation
+  cyto_plot_compensation(
+    x = fs,
+    axes_trans = axes_trans,
+    channel_match = channel_match,
+    overlay = overlay,
+    popup = popup,
+    title = title,
+    header = header,
+    header_text_font = header_text_font,
+    header_text_size = header_text_size,
+    header_text_col = header_text_col, ...
+  )
+
+  # Return defaults
+  par(mfrow = c(1, 1))
+  par(oma = c(0, 0, 0, 0))
+
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+
+      # Close graphics device
+      dev.off()
+
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
+}

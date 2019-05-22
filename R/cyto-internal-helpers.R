@@ -1,4 +1,4 @@
-# CYTO_DATA_TRANSFORMED --------------------------------------------------------
+# CYTO_TRANSFORMED --------------------------------------------------------
 
 #' .cyto_transformed
 #'
@@ -72,7 +72,7 @@
   return(x)
 }
 
-# CYTO_DATA_RAW ----------------------------------------------------------------
+# CYTO_RAW ----------------------------------------------------------------
 
 #' .cyto_raw
 #' return data which is untransformed - flowFrame/flowSet/GatingSet
@@ -167,7 +167,7 @@
   return(x)
 }
 
-# CYTO_DATA_TRANSFORM ----------------------------------------------------------
+# CYTO_TRANSFORM_CHECK ----------------------------------------------------------
 
 #' .cyto_transform_check
 #'
@@ -236,13 +236,33 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_transform_complete <- function(x, trans = NULL) {
+.cyto_transform_complete <- function(x, trans = NA) {
   
   # Check class of trans
-  if (!is.null(trans)) {
+  if (!.all_na(trans)) {
     if (!any(inherits(trans, "transformList") |
              inherits(trans, "transformerList"))) {
       stop("'trans' should be a transformList or transformerList object.")
+    }
+  }
+  
+  # Extract transformations directly from GatingHierachy
+  if(inherits(x, "GatingHierarchy")){
+    if(.all_na(trans)){
+      trans <- getTransformations(x)
+      if(is.null(trans)){
+        trans <- NA
+      }
+    }
+  }
+  
+  # Extract transformations directly from GatingSet
+  if(inherits(x, "GatingSet")){
+    if(.all_na(trans)){
+      trans <- getTransformations(x[[1]])
+      if(is.null(trans)){
+        trans <- NA
+      }
     }
   }
   
@@ -250,7 +270,7 @@
   channels <- cyto_fluor_channels(x)
   
   # If NULL trans get all transformations
-  if (is.null(trans)) {
+  if (.all_na(trans)) {
     if (inherits(x, "flowFrame")) {
       if (.cyto_transform_check(x) == TRUE) {
         stop(paste(
@@ -347,7 +367,7 @@
         }
       }
     }
-  } else if (!is.null(trans)) {
+  } else if (!.all_na(trans)) {
     
     # flowFrame or flowSet return transformList
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
