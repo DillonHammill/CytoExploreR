@@ -51,6 +51,7 @@
 #'
 #' @return add a boxed text label to an existing plot.
 #'
+#' @importFrom purrr transpose
 #' @importFrom flowCore Subset parameters
 #' @importFrom graphics locator
 #'
@@ -285,6 +286,7 @@ cyto_plot_label.NULL <- function(x,
         locator(n=1)
       })
       text_xy <- transpose(text_xy)
+      text_xy <- lapply(text_xy, function(z){unlist(z)})
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
     }
@@ -744,6 +746,7 @@ cyto_plot_label.list <- function(x,
         locator(n=1)
       })
       text_xy <- transpose(text_xy)
+      text_xy <- lapply(text_xy, function(z){unlist(z)})
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
     }
