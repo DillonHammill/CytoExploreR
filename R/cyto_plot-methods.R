@@ -362,14 +362,6 @@ cyto_plot.flowFrame <- function(x,
     stop("Supply channel/marker(s) to construct the plot.")
   }
   
-  # Graphics parameters --------------------------------------------------------
-  
-  # Current graphics parameters
-  old_pars <- par(c("mar", "mfrow"))
-  
-  # Reset graphics parameters on exit
-  on.exit(par(old_pars))
-  
   # cyto_plot_theme ------------------------------------------------------------
   
   # Remember all missing arguments now converted to "" (use .empty())
@@ -1858,14 +1850,6 @@ cyto_plot.GatingHierarchy <- function(x,
     stop("Supply channel/marker(s) to construct the plot.")
   }
   
-  # Graphics parameters --------------------------------------------------------
-  
-  # Current graphics parameters
-  old_pars <- par(c("mar", "mfrow"))
-  
-  # Reset graphics parameters on exit
-  on.exit(par(old_pars))
-  
   # cyto_plot_theme ------------------------------------------------------------
   
   # Remember all missing arguments now converted to "" (use .empty())
@@ -2248,6 +2232,7 @@ cyto_plot.GatingHierarchy <- function(x,
   
   # Record plot for assignment
   invisible(recordPlot())
+  
 }
 
 #' cyto_plot - GatingSet Method
