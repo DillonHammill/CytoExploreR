@@ -1,5 +1,38 @@
 context("cyto_plot")
 
+# flowFrame Method -------------------------------------------------------------
+
+test_that("cyto_plot flowFrame method", {
+  
+  expect_error(cyto_plot(fs[[1]],
+                         parent = "root"
+  ),
+  "Supply channel/marker(s) to construct the plot.",
+  fixed = TRUE)
+  
+  # 1D density distribution
+  p <- function() cyto_plot(cyto_extract(gs,"T Cells")[[1]],
+                            channels = "CD4",
+                            overlay = list(cyto_extract(gs, "CD4 T Cells")[[1]],
+                                           cyto_extract(gs, "CD8 T Cells")[[1]]))
+  
+  expect_doppelganger("cyto_plot-flowFrame-1D_001", p)
+  
+  # 2D scatter plot
+  p <- function() cyto_plot(as(getData(gs, "T Cells"),"flowFrame"),
+            channels = c("CD8","CD4"),
+            gate = getGate(gs, "CD4 T Cells")[[1]],
+            axes_trans = trans,
+            legend = TRUE,
+            contour_lines = 5,
+            contour_line_col = "magenta",
+            border_fill = "black",
+            limits = "data")
+  
+  expect_doppelganger("cyto_plot-flowFrame-2D_001", p)
+  
+})
+
 # GatingHierarchy Method -------------------------------------------------------
 
 test_that("cyto_plot GatingHierarchy method", {

@@ -453,7 +453,11 @@ cyto_plot.flowFrame <- function(x,
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
     legend_text <- unlist(lapply(fr_list, function(z) {
-      identifier(z)
+      nm <- identifier(z)
+      if(nm == "anonymous"){
+        nm <- "Combined Events"
+      }
+      return(nm)
     }))
   }
   
