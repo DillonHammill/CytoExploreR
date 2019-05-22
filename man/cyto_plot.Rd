@@ -7,17 +7,17 @@
 cyto_plot(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet} or
-\code{GatingSet}.}
+\item{x}{object of class \code{flowFrame}, \code{flowSet},
+\code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{...}{additional method-specific arguments for cyto_plot.}
 }
 \description{
-Explore & visualise flow cytometry data.
+Explore & visualise cytometry data.
 }
 \details{
-\code{cyto_plot} is a flow cytometry visualisation tool built on base
-graphics which supports all existing flow cytometry objects including
+\code{cyto_plot} is a cytometry visualisation tool built on base graphics
+which supports all existing cytometry objects including
 \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} and
