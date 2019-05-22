@@ -274,11 +274,17 @@ cyto_plot_label.NULL <- function(x,
     )
     st <- round(st[, ncol(st)], 2)
   }
-
+  
   # Interactively select co-ordinates
   if(!.all_na(text_x) | !.all_na(text_y)){
     if(text_x[1] == "select" | text_y[1] == "select"){
-      text_xy <- locator(n = length(gate))
+      text_xy <- lapply(text, function(z){
+        message(
+          paste("Select a location on the plot for the", z, "label.")
+        )
+        locator(n=1)
+      })
+      text_xy <- transpose(text_xy)
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
     }
@@ -409,6 +415,9 @@ cyto_plot_label.rectangleGate <- function(x,
   # Interactively select co-ordinates
   if(!.all_na(text_x) | !.all_na(text_y)){
     if(text_x[1] == "select" | text_y[1] == "select"){
+      message(
+        paste("Select a location on the plot for the", text, "label.")
+      )
       text_xy <- locator(n = length(gate))
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
@@ -526,6 +535,9 @@ cyto_plot_label.polygonGate <- function(x,
   # Interactively select co-ordinates
   if(!.all_na(text_x) | !.all_na(text_y)){
     if(text_x[1] == "select" | text_y[1] == "select"){
+      message(
+        paste("Select a location on the plot for the", text, "label.")
+      )
       text_xy <- locator(n = length(gate))
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
@@ -644,6 +656,9 @@ cyto_plot_label.ellipsoidGate <- function(x,
   # Interactively select co-ordinates
   if(!.all_na(text_x) | !.all_na(text_y)){
     if(text_x[1] == "select" | text_y[1] == "select"){
+      message(
+        paste("Select a location on the plot for the", text, "label.")
+      )
       text_xy <- locator(n = length(gate))
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
@@ -722,7 +737,13 @@ cyto_plot_label.list <- function(x,
   # Interactively select co-ordinates
   if(!.all_na(text_x) | !.all_na(text_y)){
     if(text_x[1] == "select" | text_y[1] == "select"){
-      text_xy <- locator(n = length(gate))
+      text_xy <- lapply(text, function(z){
+        message(
+          paste("Select a location on the plot for the", z, "label.")
+          )
+        locator(n=1)
+      })
+      text_xy <- transpose(text_xy)
       text_x <- text_xy[[1]]
       text_y <- text_xy[[2]]
     }
