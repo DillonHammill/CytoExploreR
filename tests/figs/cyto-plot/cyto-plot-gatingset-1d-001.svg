@@ -43,7 +43,7 @@
     <rect x='0.00' y='0.00' width='360.00' height='288.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHwzNjAuMDB8Mjg4LjAwfDAuMDA=)'><text x='114.11' y='28.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='35.92px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<g clip-path='url(#cpMC4wMHwzNjAuMDB8Mjg4LjAwfDAuMDA=)'><text x='90.07' y='28.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='84.00px' lengthAdjust='spacingAndGlyphs'>Activation_1.fcs</text></g>
 <g clip-path='url(#cpMC4wMHwzNjAuMDB8Mjg4LjAwfDAuMDA=)'><text x='76.05' y='272.46' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='112.05px' lengthAdjust='spacingAndGlyphs'>CD4 Alexa Fluor 700-A</text></g>
 <g clip-path='url(#cpMC4wMHwzNjAuMDB8Mjg4LjAwfDAuMDA=)'><text transform='translate(22.71,216.88) rotate(-90)' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='157.70px' lengthAdjust='spacingAndGlyphs'>Density Normalised to Mode (%)</text></g>
 <defs>
@@ -148,7 +148,7 @@
     <rect x='360.00' y='0.00' width='360.00' height='288.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMzYwLjAwfDcyMC4wMHwyODguMDB8MC4wMA==)'><text x='472.20' y='28.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='35.92px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<g clip-path='url(#cpMzYwLjAwfDcyMC4wMHwyODguMDB8MC4wMA==)'><text x='448.16' y='28.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='84.00px' lengthAdjust='spacingAndGlyphs'>Activation_2.fcs</text></g>
 <g clip-path='url(#cpMzYwLjAwfDcyMC4wMHwyODguMDB8MC4wMA==)'><text x='434.14' y='272.46' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='112.05px' lengthAdjust='spacingAndGlyphs'>CD4 Alexa Fluor 700-A</text></g>
 <g clip-path='url(#cpMzYwLjAwfDcyMC4wMHwyODguMDB8MC4wMA==)'><text transform='translate(382.71,216.88) rotate(-90)' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='157.70px' lengthAdjust='spacingAndGlyphs'>Density Normalised to Mode (%)</text></g>
 <defs>
@@ -253,7 +253,7 @@
     <rect x='0.00' y='288.00' width='360.00' height='288.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDI4OC4wMA==)'><text x='112.20' y='316.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='35.92px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDI4OC4wMA==)'><text x='88.16' y='316.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='84.00px' lengthAdjust='spacingAndGlyphs'>Activation_3.fcs</text></g>
 <g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDI4OC4wMA==)'><text x='74.14' y='560.46' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='112.05px' lengthAdjust='spacingAndGlyphs'>CD4 Alexa Fluor 700-A</text></g>
 <g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDI4OC4wMA==)'><text transform='translate(22.71,504.88) rotate(-90)' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='157.70px' lengthAdjust='spacingAndGlyphs'>Density Normalised to Mode (%)</text></g>
 <defs>
@@ -358,7 +358,7 @@
     <rect x='360.00' y='288.00' width='360.00' height='288.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8Mjg4LjAw)'><text x='472.20' y='316.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='35.92px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8Mjg4LjAw)'><text x='448.16' y='316.27' style='font-size: 10.96px; font-weight: bold; font-family: Liberation Sans;' textLength='84.00px' lengthAdjust='spacingAndGlyphs'>Activation_4.fcs</text></g>
 <g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8Mjg4LjAw)'><text x='434.14' y='560.46' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='112.05px' lengthAdjust='spacingAndGlyphs'>CD4 Alexa Fluor 700-A</text></g>
 <g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8Mjg4LjAw)'><text transform='translate(382.71,504.88) rotate(-90)' style='font-size: 10.96px; font-family: Liberation Sans;' textLength='157.70px' lengthAdjust='spacingAndGlyphs'>Density Normalised to Mode (%)</text></g>
 <defs>

@@ -320,6 +320,8 @@ cyto_transform_convert <- function(x, inverse = FALSE) {
 cyto_transform_convert.default <- function(x, inverse = FALSE){
   if(is.null(x)){
     return(x)
+  }else if(.all_na(x)){
+    return(x)
   }else{
     warning(
       paste("cyto_transform_convert expects objects of class",

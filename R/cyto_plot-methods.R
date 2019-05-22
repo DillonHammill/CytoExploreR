@@ -472,6 +472,13 @@ cyto_plot.flowFrame <- function(x,
       title <- "Combined Events"
     }
     
+    # Remove title for stacked density distributions
+    if (length(channels) == 1 & 
+        length(fr_list) > 1 & 
+        density_stack != 0) {
+      title <- NA
+    }
+    
   }
   
   # X axis breaks and labels - pass through axes_text argument
@@ -1192,6 +1199,18 @@ cyto_plot.flowSet <- function(x,
     
     # Extract plot title from names of fr_list
     title <- nms
+    
+    # Convert anonymous to "Combined Events"
+    if (any(title %in% c("all","anonymous"))) {
+      title[title %in% c("all","anonymous")] <- "Combined Events"
+    }
+    
+    # Remove title for stacked density distributions
+    if (length(channels) == 1 & 
+        length(fr_list[[1]]) > 1 & 
+        density_stack != 0) {
+      title <- NA
+    }
     
   }
   
@@ -2038,7 +2057,7 @@ cyto_plot.GatingHierarchy <- function(x,
       }
       
       # All samples grouped together
-      if (z == "all") {
+      if (z == "anonymous") {
         z <- "Combined Events"
       }
       
@@ -2896,15 +2915,19 @@ cyto_plot.GatingSet <- function(x,
       }
 
       # All samples grouped together
-      if (z == "all") {
+      if (z %in% c("all","anonymous")) {
         z <- "Combined Events"
       }
 
       # Stacked 1D plots lack sampleNames in titles if no overlay
-      if (length(channels) == 1 & .all_na(overlay) & density_stack != 0) {
+      if (length(channels) == 1 & 
+          .all_na(overlay) > 1 & 
+          density_stack != 0) {
         pt
         # Stacked with overlay display sampleNames only
-      } else if (length(channels) == 1 & !.all_na(overlay) & density_stack != 0) {
+      } else if (length(channels) == 1 & 
+                 !.all_na(overlay) > 1 & 
+                 density_stack != 0) {
         z
         # Paste together sampleName and parent name
       } else {

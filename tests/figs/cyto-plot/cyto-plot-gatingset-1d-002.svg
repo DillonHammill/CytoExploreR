@@ -43,7 +43,7 @@
     <rect x='0.00' y='0.00' width='360.00' height='576.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDAuMDA=)'><text x='109.86' y='34.06' style='font-size: 13.20px; font-weight: bold; font-family: Liberation Sans;' textLength='43.22px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDAuMDA=)'><text x='104.98' y='34.06' style='font-size: 13.20px; font-weight: bold; font-family: Liberation Sans;' textLength='52.98px' lengthAdjust='spacingAndGlyphs'>Stim-A 0</text></g>
 <g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDAuMDA=)'><text x='64.06' y='557.28' style='font-size: 13.20px; font-family: Liberation Sans;' textLength='134.83px' lengthAdjust='spacingAndGlyphs'>CD4 Alexa Fluor 700-A</text></g>
 <g clip-path='url(#cpMC4wMHwzNjAuMDB8NTc2LjAwfDAuMDA=)'><text transform='translate(27.36,302.78) rotate(-90)' style='font-size: 13.20px; font-family: Liberation Sans;' textLength='43.97px' lengthAdjust='spacingAndGlyphs'>Density</text></g>
 <defs>
@@ -184,7 +184,7 @@
     <rect x='360.00' y='0.00' width='360.00' height='576.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8MC4wMA==)'><text x='469.86' y='34.06' style='font-size: 13.20px; font-weight: bold; font-family: Liberation Sans;' textLength='43.22px' lengthAdjust='spacingAndGlyphs'>T Cells</text></g>
+<g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8MC4wMA==)'><text x='452.16' y='34.06' style='font-size: 13.20px; font-weight: bold; font-family: Liberation Sans;' textLength='78.62px' lengthAdjust='spacingAndGlyphs'>Stim-A 0.005</text></g>
 <g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8MC4wMA==)'><text x='424.06' y='557.28' style='font-size: 13.20px; font-family: Liberation Sans;' textLength='134.83px' lengthAdjust='spacingAndGlyphs'>CD4 Alexa Fluor 700-A</text></g>
 <g clip-path='url(#cpMzYwLjAwfDcyMC4wMHw1NzYuMDB8MC4wMA==)'><text transform='translate(387.36,302.78) rotate(-90)' style='font-size: 13.20px; font-family: Liberation Sans;' textLength='43.97px' lengthAdjust='spacingAndGlyphs'>Density</text></g>
 <defs>
