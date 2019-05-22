@@ -9,7 +9,7 @@ cyto_group_by(x, group_by = "all")
 \arguments{
 \item{x}{an object of class \code{flowSet} or \code{GatingSet}.}
 
-\item{group_by}{names of pData variables to use for merging. Set to "all" to
+\item{group_by}{names of cyto_details variables to use for merging. Set to "all" to
 merge all samples in \code{x}.}
 
 \item{parent}{name of the parent population to extract from GatingSet object.}
@@ -29,8 +29,7 @@ cyto_group_by(Activation, "Treatment")
 
 # Group GatingSet by Treatment and OVAConc
 gs <- GatingSet(Activation)
-cyto_group_by(gs, c("Treatment","OVAConc"))
-
+cyto_group_by(gs, c("Treatment", "OVAConc"))
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

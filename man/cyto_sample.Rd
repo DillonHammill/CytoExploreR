@@ -40,7 +40,6 @@ fs <- Activation
 
 # Constrict first sample by 50\%
 cyto_sample(fs[[1]], 0.5)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

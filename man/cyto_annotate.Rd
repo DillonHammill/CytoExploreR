@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_annotate}
 \alias{cyto_annotate}
-\title{Interactively edit pData Information for a flowSet or GatingSet}
+\title{Interactively edit cyto_details for a flowSet or GatingSet}
 \usage{
 cyto_annotate(x, file = NULL)
 }
@@ -12,10 +12,10 @@ cyto_annotate(x, file = NULL)
 \item{file}{name of csv file containing experimental information.}
 }
 \value{
-NULL and update pData for the \code{flowSet} or \code{GatingSet}.
+NULL and update cyto_details for the \code{flowSet} or \code{GatingSet}.
 }
 \description{
-Interactively edit pData Information for a flowSet or GatingSet
+Interactively edit cyto_details for a flowSet or GatingSet
 }
 \examples{
 \dontrun{
@@ -24,7 +24,7 @@ library(CytoRSuiteData)
 # Load in samples
 fs <- Activation
 
-# Edit pData in table editor
+# Edit cyto_details in table editor
 cyto_annotate(fs)
 }
 

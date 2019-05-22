@@ -4,7 +4,7 @@
 \alias{cyto_extract}
 \title{Extract a valid flowFrame or flowSet}
 \usage{
-cyto_extract(x, parent = "root")
+cyto_extract(x, parent = "root", ...)
 }
 \arguments{
 \item{x}{object of class flowFrame, flowSet, GatingHierarchy or GatingSet.}
@@ -29,7 +29,6 @@ gs <- GatingSet(Activation)
 
 # Extract root population
 cyto_extract(gs, "root")
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

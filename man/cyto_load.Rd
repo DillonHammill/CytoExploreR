@@ -25,14 +25,13 @@ library(CytoRSuiteData)
 
 # Get path to Activation .fcs files in CytoRSuiteData
 datadir <- system.file("extdata", package = "CytoRSuiteData")
-path <- paste0(datadir,"/Activation")
+path <- paste0(datadir, "/Activation")
 
 # Load in .fcs files into ncdfFlowSet
 fs <- cyto_load(path)
 
 # fs is a ncdfFlowSet
 class(fs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

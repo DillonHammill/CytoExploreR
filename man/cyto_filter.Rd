@@ -10,7 +10,7 @@ cyto_filter(x, ...)
 \item{x}{object of class \code{flowSet} or \code{GatingSet}.}
 
 \item{...}{tidyverse-style subsetting using comma separated logical
-predicates based on experimental variables stored in \code{pData(x)}. See
+predicates based on experimental variables stored in \code{cyto_details(x)}. See
 examples below for demonstration.}
 }
 \value{
@@ -24,17 +24,20 @@ Filter samples based on experiment variables
 library(CytoRSuite)
 
 # Look at experiment details
-pData(Activation)
+cyto_details(Activation)
 
 # Select Stim-C samples with 0 and 0.5 OVA concentrations
-fs <- cyto_filter(Activation,
-                  Treatment == "Stim-C",
-                  OVAConc \%in\% c(0,0.5))
+fs <- cyto_filter(
+  Activation,
+  Treatment == "Stim-C",
+  OVAConc \%in\% c(0, 0.5)
+)
 
 # Select Stim-A and Stim-C treatment groups
-fs <- cyto_filter(Activation,
-                  Treatment \%in\% c("Stim-A","Stim-C"))
-
+fs <- cyto_filter(
+  Activation,
+  Treatment \%in\% c("Stim-A", "Stim-C")
+)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

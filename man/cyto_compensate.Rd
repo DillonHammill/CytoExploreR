@@ -49,9 +49,11 @@ cyto_compensate(Activation)
 # Save spillover matrix in correct format
 spill <- Activation[[1]]@description$SPILL
 rownames(spill) <- colnames(spill)
-write.csv(spill,
-          "Spillover-Matrix.csv")
-          
+write.csv(
+  spill,
+  "Spillover-Matrix.csv"
+)
+
 # Apply saved spillover matrix csv file to flowSet
 cyto_compensate(Activation, "Spillover-Matrix.csv")
 
@@ -61,7 +63,6 @@ cyto_compensate(gs)
 
 # Apply saved spillover matrix csv file to GatingSet
 cyto_compensate(gs, "Spillover-Matrix.csv")
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

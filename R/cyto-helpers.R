@@ -16,28 +16,26 @@
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Get path to Activation .fcs files in CytoRSuiteData
 #' datadir <- system.file("extdata", package = "CytoRSuiteData")
-#' path <- paste0(datadir,"/Activation")
-#'
+#' path <- paste0(datadir, "/Activation")
+#' 
 #' # Load in .fcs files into ncdfFlowSet
 #' fs <- cyto_load(path)
-#'
+#' 
 #' # fs is a ncdfFlowSet
 #' class(fs)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_load <- function(path = ".", ...){
-  
+cyto_load <- function(path = ".", ...) {
+
   # Get paths to files
   files <- list.files(path, full.names = TRUE, pattern = ".fcs")
-  
+
   # Read into a ncdfFlowSet
   read.ncdfFlowSet(files = files, ...)
-  
 }
 
 # CYTO_SETUP -------------------------------------------------------------------
@@ -56,7 +54,7 @@ cyto_load <- function(path = ".", ...){
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
 #' @return \code{GatingSet}
-#' 
+#'
 #' @importFrom flowWorkspace GatingSet
 #'
 #' @examples
@@ -64,7 +62,7 @@ cyto_load <- function(path = ".", ...){
 #' 
 #' # Get path to Activation .fcs files in CytoRSuiteData
 #' datadir <- system.file("extdata", package = "CytoRSuiteData")
-#' path <- paste0(datadir,"/Activation")
+#' path <- paste0(datadir, "/Activation")
 #' 
 #' # Load in .fcs files into an annotated GatingSet
 #' fs <- cyto_setup(path)
@@ -74,47 +72,93 @@ cyto_load <- function(path = ".", ...){
 #' 
 #' # Experiment details have been updated
 #' cyto_details(gs)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_setup <- function(path = ".", ...){
-  
+cyto_setup <- function(path = ".", ...) {
+
   # Load in .fsc files to ncdfFlowSet
   fs <- cyto_load(path, ...)
 
   # Add fs to GatingSet
-  message("Adding samples to GatingSet.")
+  message("Adding samples to a GatingSet.")
   gs <- GatingSet(fs)
-    
+
   # Markers
   message("Associate markers with their respective channels.")
   cyto_markers(gs)
-  
+
   # Annotate
   message("Annotate samples with experiment details.")
   cyto_annotate(gs)
-  
+
   return(gs)
-  
 }
 
 # CYTO_DETAILS -----------------------------------------------------------------
 
 #' Extract experiment details from flowSet or GatingSet
 #'
-#' Simply a autocomplete-friendly wrapper around
+#' Simply an autocomplete-friendly wrapper around
 #' \code{\link[flowWorkspace:pData]{pData}}.
-#' 
+#'
 #' @param object of class \code{flowSet} or \code{GatingSet}.
-#' 
+#'
+#' @importFrom flowWorkspace pData
+#'
 #' @return experiment details as data.frame.
-#' 
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}  
-#' 
+#'
 #' @export
-cyto_details <- function(x){
+cyto_details <- function(x) {
   pData(x)
+}
+
+# CYTO_NAMES -------------------------------------------------------------------
+
+#' Extract sample names
+#'
+#' Simply a convenient and autocomplete-friendly wrapper around
+#' \code{\link[flowCore:identifier]{identifier}}
+#' \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
+#' names from flowFrame, flowSet GatingHierarchy or GatingSet.
+#'
+#' @param object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
+#'
+#' @importFrom flowCore identifier
+#' @importFrom flowWorkspace sampleNames
+#'
+#' @return names associated with the supplied object.
+#'
+#' @rdname cyto_names
+#'
+#' @export
+cyto_names <- function(x) {
+  UseMethod("cyto_names")
+}
+
+#' @rdname cyto_names
+#' @export
+cyto_names.flowFrame <- function(x){
+  identifier(x)
+}
+
+#' @rdname cyto_names
+#' @export
+cyto_names.flowSet <- function(x){
+  sampleNames(x)
+}
+
+#' @rdname cyto_names
+#' @export
+cyto_names.GatingHierarchy <- function(x){
+  x@name
+}
+
+#' @rdname cyto_names
+#' @export
+cyto_names.GatingSet <- function(x){
+  sampleNames(x)
 }
 
 # CYTO_CHECK -------------------------------------------------------------------
@@ -123,9 +167,9 @@ cyto_details <- function(x){
 #'
 #' @param x object of class flowFrame, flowSet, GatingHierarchy or GatingSet to
 #'   be checked.
-#'   
-#' @return TRUE or FALSE if object meets this class criteria.   
-#'   
+#'
+#' @return TRUE or FALSE if object meets this class criteria.
+#'
 #' @examples
 #' library(CytoRSuiteData)
 #' 
@@ -134,24 +178,20 @@ cyto_details <- function(x){
 #' 
 #' # Invalid list object
 #' cyto_check(list(Activation))
-#'   
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}   
-#'   
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
 #' @export
-cyto_check <- function(x){
-  
+cyto_check <- function(x) {
+
   # Check for valid class of object
-  if(!any(inherits(x, "flowFrame") |
-          inherits(x, "flowSet") |
-          inherits(x, "GatingHierarchy") |
-          inherits(x, "GatingSet"))){
-    
+  if (!any(inherits(x, "flowFrame") |
+    inherits(x, "flowSet") |
+    inherits(x, "GatingHierarchy") |
+    inherits(x, "GatingSet"))) {
     stop("'x' should be a flowFrame, flowSet, GatingHierarchy or GatingSet.")
-    
   }
-  
+
   return(TRUE)
-  
 }
 
 # CYTO_TRANSFORM ---------------------------------------------------------------
@@ -185,43 +225,42 @@ cyto_check <- function(x){
 #' @rdname cyto_transform
 #'
 #' @export
-cyto_transform <- function(x, ...){
+cyto_transform <- function(x, ...) {
   UseMethod("cyto_transform")
 }
 
 #' @rdname cyto_transform
 #' @export
 cyto_transform.flowSet <- function(x,
-                                   channels, 
+                                   channels,
                                    select = NULL,
-                                   ...){
-  
+                                   ...) {
+
   # Backwards compatibility - transformList will not be available!
-  
+
   # Select a subset of samples for parameter estimation
-  if(!is.null(select)){
+  if (!is.null(select)) {
     x <- cyto_select(x, select)
   }
-  
+
   # Missing channels - use fluorescent channels
-  if(missing(channels)){
+  if (missing(channels)) {
     channels <- cyto_fluor_channels(x)
   }
-  
+
   # Convert channels argument to valid channel names
   channels <- cyto_channels_extract(x, channels)
-  
+
   # Coerce flowSet to flowFrame for parameter estimation
   fr <- as(x, "flowFrame")
-  
+
   # Logicle parameter estimates using estimateLogicle
   trans <- estimateLogicle(fr, channels, ...)
-  
+
   # Apply transformation using flowCore:;transform
   x <- transform(x, trans)
-  
+
   return(x)
-  
 }
 
 #' @rdname cyto_transform
@@ -229,38 +268,37 @@ cyto_transform.flowSet <- function(x,
 cyto_transform.GatingSet <- function(x,
                                      channels,
                                      select = NULL,
-                                     ...){
-  
+                                     ...) {
+
   # Select a subset of samples for parameter estimation
-  if(!is.null(select)){
+  if (!is.null(select)) {
     x <- cyto_select(x, select)
   }
-  
+
   # Missing channels - use fluorescent channels
-  if(missing(channels)){
+  if (missing(channels)) {
     channels <- cyto_fluor_channels(x)
   }
-  
+
   # Convert channels argument to valid channel names
   channels <- cyto_channels_extract(x, channels)
-  
+
   # Extract data from GatingSet
   fs <- cyto_extract(x, "root")
-  
+
   # Coerce flowSet to flowFrame
   fr <- cyto_convert(fs, "flowFrame")
-  
+
   # Add collapsed flowFrame to GatingSet
   gs <- GatingSet(flowSet(fr))
-  
+
   # Logicle parameter estimates using estimateLogicle
   trans <- estimateLogicle(gs[[1]], channels, ...)
-  
+
   # Apply transformation using flowCore::transform
   x <- transform(x, trans)
-  
+
   return(x)
-  
 }
 
 # CYTO_TRANSFORM_INVERSE -------------------------------------------------------
@@ -289,25 +327,24 @@ cyto_transform.GatingSet <- function(x,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Load in samples to flowSet
 #' fs <- Activation
-#'
+#' 
 #' # Add fs to GatingSet
 #' gs <- GatingSet(fs)
-#'
+#' 
 #' # Get transformList using estimateLogicle
 #' trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
-#'
+#' 
 #' # Get transformList containing inverse transformarions
 #' inv <- cyto_transform_convert(trans, inverse = TRUE)
-#'
+#' 
 #' # Convert transformerList into transformList
 #' trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
-#'
+#' 
 #' # Convert transformerList into inverse transformList
 #' inv <- cyto_transform_convert(trans, inverse = FALSE)
-#'
 #' @rdname cyto_transform_convert
 #'
 #' @export
@@ -317,43 +354,41 @@ cyto_transform_convert <- function(x, inverse = FALSE) {
 
 #' @rdname cyto_transform_convert
 #' @noRd
-cyto_transform_convert.default <- function(x, inverse = FALSE){
-  if(is.null(x)){
+cyto_transform_convert.default <- function(x, inverse = FALSE) {
+  if (is.null(x)) {
     return(x)
-  }else if(.all_na(x)){
+  } else if (.all_na(x)) {
     return(x)
-  }else{
+  } else {
     warning(
-      paste("cyto_transform_convert expects objects of class",
-            "transformList or transformerList.")
+      paste(
+        "cyto_transform_convert expects objects of class",
+        "transformList or transformerList."
+      )
     )
   }
 }
 
 #' @rdname cyto_transform_convert
 #' @export
-cyto_transform_convert.transformList <- function(x, inverse = FALSE){
-  
-  if(inverse){
+cyto_transform_convert.transformList <- function(x, inverse = FALSE) {
+  if (inverse) {
     x <- inverseLogicleTransform(x)
   }
-  
+
   return(x)
-  
 }
 
 #' @rdname cyto_transform_convert
 #' @export
-cyto_transform_convert.transformerList <- function(x, inverse = FALSE){
-  
-  if(inverse){
+cyto_transform_convert.transformerList <- function(x, inverse = FALSE) {
+  if (inverse) {
     x <- transformList(names(x), lapply(x, `[[`, "inverse"))
-  }else{
+  } else {
     x <- transformList(names(x), lapply(x, `[[`, "transform"))
   }
-  
+
   return(x)
-  
 }
 
 # CYTO_EXTRACT -----------------------------------------------------------------
@@ -375,30 +410,31 @@ cyto_transform_convert.transformerList <- function(x, inverse = FALSE){
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # GatingSet
 #' gs <- GatingSet(Activation)
-#'
+#' 
 #' # Extract root population
 #' cyto_extract(gs, "root")
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_extract <- function(x, parent = "root"){
-  
+cyto_extract <- function(x, parent = "root", ...) {
+
   # Throw error for invalid object
-  if(!cyto_check(x)){
+  if (!cyto_check(x)) {
     stop(
-      paste("'x' should be either a flowFrame, flowSet, GatingHierarchy",
-            "or GatingSet.")
+      paste(
+        "'x' should be either a flowFrame, flowSet, GatingHierarchy",
+        "or GatingSet."
+      )
     )
   }
-  
+
   # Extract data from GatingHierarchy or GatingSet
-  if(any(inherits(x, "GatingHierarchy") |
-         inherits(x, "GatingSet"))){
-    x <- getData(x, parent)
+  if (any(inherits(x, "GatingHierarchy") |
+    inherits(x, "GatingSet"))) {
+    x <- getData(x, parent, ... = )
   }
 
   return(x)
@@ -426,69 +462,65 @@ cyto_extract <- function(x, parent = "root"){
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Convert flowSet to 'list of flowFrames'
 #' cyto_convert(Activation, "list of flowFrames")
-#'
+#' 
 #' # Convert flowSet to 'flowFrame'
 #' cyto_convert(Activation, "flowFrame")
-#'
+#' 
 #' # Convert GatingSet to flowFrame
 #' cyto_convert(GatingSet(Activation), "flowFrame", parent = "T Cells")
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_convert
 #'
 #' @export
-cyto_convert <- function(x, ...){
+cyto_convert <- function(x, ...) {
   UseMethod("cyto_convert")
 }
 
 #' @rdname cyto_convert
 #' @export
 cyto_convert.flowFrame <- function(x,
-                                   return = "flowFrame"){
-  
-  if(return == "list of flowFrames"){
+                                   return = "flowFrame") {
+  if (return == "list of flowFrames") {
     return <- "flowFrame list"
   }
-  
-  if(return == "flowFrame"){
-    
-  }else if(return == "flowFrame list"){
+
+  if (return == "flowFrame") {
+
+  } else if (return == "flowFrame list") {
     x <- list(x)
-  }else if(return == "flowSet"){
+  } else if (return == "flowSet") {
     x <- flowSet(x)
-  }else if(return == "flowSet list"){
+  } else if (return == "flowSet list") {
     x <- list(flowSet(x))
-  }else if(return == "GatingSet"){
+  } else if (return == "GatingSet") {
     x <- flowSet(x)
     x <- GatingSet(x)
-  }else if(return == "GatingHierarchy"){
+  } else if (return == "GatingHierarchy") {
     x <- flowSet(x)
     x <- GatingSet(x)[[1]]
   }
-  
+
   return(x)
-  
 }
 
 #' @rdname cyto_convert
 #' @export
 cyto_convert.flowSet <- function(x,
-                                 return = "flowSet"){
-  
-  if(return == "flowSet"){
-    
-  }else if(return == "flowFrame"){
+                                 return = "flowSet") {
+  if (return == "flowSet") {
+
+  } else if (return == "flowFrame") {
     x <- as(x, "flowFrame")
     if ("Original" %in% BiocGenerics::colnames(x)) {
       x <- suppressWarnings(
         x[, -match("Original", BiocGenerics::colnames(x))]
       )
     }
-  }else if(return == "flowFrame list"){
+  } else if (return == "flowFrame list") {
     x <- as(x, "flowFrame")
     if ("Original" %in% BiocGenerics::colnames(x)) {
       x <- suppressWarnings(
@@ -496,14 +528,16 @@ cyto_convert.flowSet <- function(x,
       )
     }
     x <- list(x)
-  }else if(return == "list of flowFrames"){
-    x <- lapply(seq_len(length(x)), function(y){x[[y]]})
+  } else if (return == "list of flowFrames") {
+    x <- lapply(seq_len(length(x)), function(y) {
+      x[[y]]
+    })
     names(x) <- sampleNames(x)
-  }else if(return == "flowSet list"){
+  } else if (return == "flowSet list") {
     x <- list(x)
-  }else if(return == "GatingSet"){
+  } else if (return == "GatingSet") {
     x <- GatingSet(x)
-  }else if(return == "GatingHierarchy"){
+  } else if (return == "GatingHierarchy") {
     x <- as(x, "flowFrame")
     if ("Original" %in% BiocGenerics::colnames(x)) {
       x <- suppressWarnings(
@@ -513,59 +547,56 @@ cyto_convert.flowSet <- function(x,
     x <- flowSet(x)
     x <- GatingSet(x)[[1]]
   }
-  
+
   return(x)
-  
 }
 
 #' @rdname cyto_convert
 #' @export
-cyto_convert.GatingHierarchy <- function(x, 
+cyto_convert.GatingHierarchy <- function(x,
                                          parent = "root",
-                                         return = "GatingHierarchy"){
-  
-  if(return == "GatingHierarchy"){
-    
-  }else if(return == "flowFrame"){
+                                         return = "GatingHierarchy") {
+  if (return == "GatingHierarchy") {
+
+  } else if (return == "flowFrame") {
     x <- cyto_extract(x, parent)
-  }else if(return == "flowFrame list"){
+  } else if (return == "flowFrame list") {
     x <- list(cyto_extract(x, parent))
-  }else if(return == "flowSet"){
+  } else if (return == "flowSet") {
     x <- flowSet(cyto_extract(x, parent))
-  }else if(return == "flowSet list"){
+  } else if (return == "flowSet list") {
     x <- list(flowSet(cyto_extract(x, parent)))
   }
-  
+
   return(x)
-  
 }
 
 #' @rdname cyto_convert
 #' @export
 cyto_convert.GatingSet <- function(x,
                                    parent = "root",
-                                   return = "GatingSet"){
-  
-  if(return == "GatingSet"){
-    
-  }else if(return == "flowFrame"){
-    x <- cyto_convert(cyto_extract(x, parent),"flowFrame")
-  }else if(return == "flowFrame list"){
-    x <- list(cyto_convert(cyto_extract(x, parent),"flowFrame"))
-  }else if(return == "list of flowFrames"){
-    x <- lapply(seq(1,length(x)), function(z){cyto_extract(x[[z]], parent)})
+                                   return = "GatingSet") {
+  if (return == "GatingSet") {
+
+  } else if (return == "flowFrame") {
+    x <- cyto_convert(cyto_extract(x, parent), "flowFrame")
+  } else if (return == "flowFrame list") {
+    x <- list(cyto_convert(cyto_extract(x, parent), "flowFrame"))
+  } else if (return == "list of flowFrames") {
+    x <- lapply(seq(1, length(x)), function(z) {
+      cyto_extract(x[[z]], parent)
+    })
     names(x) <- sampleNames(x)
-  }else if(return == "flowSet"){
+  } else if (return == "flowSet") {
     x <- cyto_extract(x, parent)
-  }else if(return == "flowSet list"){
+  } else if (return == "flowSet list") {
     x <- list(cyto_extract(x, parent))
-  }else if(return == "GatingHierachy"){
-    x <- flowSet(cyto_convert(cyto_extract(x, parent),"flowFrame"))
+  } else if (return == "GatingHierachy") {
+    x <- flowSet(cyto_convert(cyto_extract(x, parent), "flowFrame"))
     x <- GatingSet(x)[[1]]
   }
-  
+
   return(x)
-  
 }
 
 # CYTO_FILTER ------------------------------------------------------------------
@@ -574,7 +605,7 @@ cyto_convert.GatingSet <- function(x,
 #'
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
 #' @param ... tidyverse-style subsetting using comma separated logical
-#'   predicates based on experimental variables stored in \code{pData(x)}. See
+#'   predicates based on experimental variables stored in \code{cyto_details(x)}. See
 #'   examples below for demonstration.
 #'
 #' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
@@ -586,46 +617,48 @@ cyto_convert.GatingSet <- function(x,
 #'
 #' @examples
 #' library(CytoRSuite)
-#'
+#' 
 #' # Look at experiment details
-#' pData(Activation)
-#'
+#' cyto_details(Activation)
+#' 
 #' # Select Stim-C samples with 0 and 0.5 OVA concentrations
-#' fs <- cyto_filter(Activation,
-#'                   Treatment == "Stim-C",
-#'                   OVAConc %in% c(0,0.5))
-#'
+#' fs <- cyto_filter(
+#'   Activation,
+#'   Treatment == "Stim-C",
+#'   OVAConc %in% c(0, 0.5)
+#' )
+#' 
 #' # Select Stim-A and Stim-C treatment groups
-#' fs <- cyto_filter(Activation,
-#'                   Treatment %in% c("Stim-A","Stim-C"))
-#'
+#' fs <- cyto_filter(
+#'   Activation,
+#'   Treatment %in% c("Stim-A", "Stim-C")
+#' )
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_filter <- function(x, ...){
-  
+cyto_filter <- function(x, ...) {
+
   # Check class of x
-  if(!any(inherits(x, "flowSet") |
-     inherits(x, "GatingSet"))){
+  if (!any(inherits(x, "flowSet") |
+    inherits(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
-  
+
   # Extract experiment details
-  pd <- pData(x)
-  
+  pd <- cyto_details(x)
+
   # Perform filtering on pd to pull out samples
   pd_filter <- filter(pd, ...)
-  
+
   # Get indices for selected samples
-  if(nrow(pd_filter) == 0){
+  if (nrow(pd_filter) == 0) {
     message("No samples match the filtering criteria. Returning all samples.")
     ind <- seq_len(length(x))
-  }else{
-    ind <- match(pd_filter[,"name"], pd[,"name"])
+  } else {
+    ind <- match(pd_filter[, "name"], pd[, "name"])
   }
-  
+
   return(x[ind])
-  
 }
 
 # CYTO_SELECT ------------------------------------------------------------------
@@ -644,79 +677,80 @@ cyto_filter <- function(x, ...){
 #'
 #' @examples
 #' library(CytoRSuite)
-#'
+#' 
 #' # Look at experiment details
-#' pData(Activation)
-#'
+#' cyto_details(Activation)
+#' 
 #' # Select Stim-C samples with 0 and 0.5 OVA concentrations
 #' fs <- cyto_select(Activation,
-#'                   Treatment = "Stim-C",
-#'                   OVAConc = c(0,0.5))
-#'
+#'   Treatment = "Stim-C",
+#'   OVAConc = c(0, 0.5)
+#' )
+#' 
 #' # Select Stim-A and Stim-C treatment groups
-#' fs <- cyto_select(Activation,
-#'                   list("Treatment" = c("Stim-A","Stim-C")))
-#'
+#' fs <- cyto_select(
+#'   Activation,
+#'   list("Treatment" = c("Stim-A", "Stim-C"))
+#' )
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_select <- function(x, ...) {
-  
+
   # Check class of x
-  if(!any(inherits(x, "flowSet") |
-          inherits(x, "GatingSet"))){
+  if (!any(inherits(x, "flowSet") |
+    inherits(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
-  
+
   # Pull down ... arguments to list
   args <- list(...)
-  
+
   # ... is already a named list of arguments
-  if(class(args[[1]]) == "list"){
+  if (class(args[[1]]) == "list") {
     args <- args[[1]]
   }
-  
+
   # Extract experiment details
-  pd <- pData(x)
-  
+  pd <- cyto_details(x)
+
   # Check that all varaibles are valid
-  if(!all(names(args) %in% colnames(pd))){
-    lapply(names(args), function(y){
-      if(!y %in% names(pd)){
-        stop(paste(y, "is not a valid variable in pData(x)."))
+  if (!all(names(args) %in% colnames(pd))) {
+    lapply(names(args), function(y) {
+      if (!y %in% names(pd)) {
+        stop(paste(y, "is not a valid variable in cyto_details(x)."))
       }
     })
   }
-  
+
   # Check that all variable levels at least exist in pd
-  lapply(names(args), function(z){
-    var <- factor(pd[,z], exclude = NULL) # keep <NA> as factor level
+  lapply(names(args), function(z) {
+    var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
     lvls <- levels(var)
     # some variable levels do not exist in pd
-    if(!all(args[[z]] %in% lvls)){
-      lapply(args[[z]], function(v){
-        if(!v %in% lvls){
-          stop(paste0(v, " is not a valid level for ", z,"!"))
+    if (!all(args[[z]] %in% lvls)) {
+      lapply(args[[z]], function(v) {
+        if (!v %in% lvls) {
+          stop(paste0(v, " is not a valid level for ", z, "!"))
         }
       })
     }
   })
-  
+
   # Get filtered pd
   pd_filter <- pd
-  lapply(names(args), function(y){
-    ind <- which(pd_filter[,y] %in% args[[y]])
+  lapply(names(args), function(y) {
+    ind <- which(pd_filter[, y] %in% args[[y]])
     # No filtering if variable level is missing
-    if(length(ind) != 0){
+    if (length(ind) != 0) {
       pd_filter <<- pd_filter[ind, ]
     }
   })
-  
+
   # Get indices for selected samples
-  ind <- match(pd_filter[,"name"], pd[,"name"])
-  
+  ind <- match(pd_filter[, "name"], pd[, "name"])
+
   return(x[ind])
-  
 }
 
 # CYTO_GROUP_BY ----------------------------------------------------------------
@@ -725,7 +759,7 @@ cyto_select <- function(x, ...) {
 #'
 #' @param x an object of class \code{flowSet} or \code{GatingSet}.
 #' @param parent name of the parent population to extract from GatingSet object.
-#' @param group_by names of pData variables to use for merging. Set to "all" to
+#' @param group_by names of cyto_details variables to use for merging. Set to "all" to
 #'   merge all samples in \code{x}.
 #'
 #' @return a named list of \code{flowSet} or \code{GatingSet} objects
@@ -733,7 +767,7 @@ cyto_select <- function(x, ...) {
 #'
 #' @importFrom flowWorkspace pData sampleNames
 #'
-#' @examples 
+#' @examples
 #' library(CytoRSuiteData)
 #' 
 #' # Group flowSet by Treatment
@@ -741,62 +775,59 @@ cyto_select <- function(x, ...) {
 #' 
 #' # Group GatingSet by Treatment and OVAConc
 #' gs <- GatingSet(Activation)
-#' cyto_group_by(gs, c("Treatment","OVAConc"))
-#'
+#' cyto_group_by(gs, c("Treatment", "OVAConc"))
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
 #'
 #' @export
 cyto_group_by <- function(x,
-                          group_by = "all"){
-  
+                          group_by = "all") {
+
   # Check class of x
-  if(!any(inherits(x,"flowSet")|inherits(x,"GatingSet"))){
+  if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
-  
+
   # Extract experiment details
-  pd <- pData(x)
-  
+  pd <- cyto_details(x)
+
   # Repace any NA with "NA" to avoid missing rows
-  if(any(is.na(pd))){
+  if (any(is.na(pd))) {
     pd[is.na(pd)] <- "NA"
   }
-  
+
   # Extract sample names
   nms <- sampleNames(x)
-  
+
   # Check group_by
-  if(!all(group_by %in% colnames(pd))){
-    lapply(group_by, function(y){
-      if(!y %in% colnames(pd)){
-        stop(paste0(y, " is not a valid variable for this ", class(x),"."))
+  if (!all(group_by %in% colnames(pd))) {
+    lapply(group_by, function(y) {
+      if (!y %in% colnames(pd)) {
+        stop(paste0(y, " is not a valid variable for this ", class(x), "."))
       }
     })
   }
-  
+
   # Split pd based on group_by into a named list
-  if(group_by[1] == "all"){
+  if (group_by[1] == "all") {
     pd_split <- list("all" = pd)
-  }else{
-    pd_split <- split(pd, pd[,group_by], 
-                      sep = " ", 
-                      lex.order = TRUE, 
-                      drop = TRUE)
+  } else {
+    pd_split <- split(pd, pd[, group_by],
+      sep = " ",
+      lex.order = TRUE,
+      drop = TRUE
+    )
   }
-  
+
   # Replace each element of pd_split with matching samples
-  x_list <- lapply(seq_len(length(pd_split)), function(z){
-    
-    ind <- match(pd_split[[z]][,"name"], sampleNames(x))
+  x_list <- lapply(seq_len(length(pd_split)), function(z) {
+    ind <- match(pd_split[[z]][, "name"], sampleNames(x))
     x[ind]
-    
   })
   names(x_list) <- names(pd_split)
-  
+
   return(x_list)
-  
 }
 
 # CYTO_SAMPLE ------------------------------------------------------------------
@@ -818,46 +849,45 @@ cyto_group_by <- function(x,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Load in samples
 #' fs <- Activation
-#'
+#' 
 #' # Constrict first sample by 50%
 #' cyto_sample(fs[[1]], 0.5)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
 #'
 #' @export
-cyto_sample <- function(x, ...){
+cyto_sample <- function(x, ...) {
   UseMethod("cyto_sample")
 }
 
 #' @rdname cyto_sample
 #' @export
-cyto_sample.flowFrame <- function(x, 
-                                  display = 1, 
+cyto_sample.flowFrame <- function(x,
+                                  display = 1,
                                   seed = NULL) {
-  
+
   # Do nothing if no sampling required
-  if(display != 1){
+  if (display != 1) {
     # Number of events
     events <- nrow(x)
-    
+
     # Size
     size <- display * events
-    
+
     # Set seed
-    if(!is.null(seed)){
+    if (!is.null(seed)) {
       set.seed(seed)
     }
-    
+
     # Sample
     smp <- sampleFilter(size = size)
     x <- Subset(x, smp)
   }
-  
+
   return(x)
 }
 
@@ -865,22 +895,18 @@ cyto_sample.flowFrame <- function(x,
 #' @export
 cyto_sample.flowSet <- function(x,
                                 display = 1,
-                                seed = NULL){
-  
+                                seed = NULL) {
   fsApply(x, cyto_sample, display = display, seed = seed)
-  
 }
 
 #' @rdname cyto_sample
 #' @export
 cyto_sample.list <- function(x,
                              display = 1,
-                             seed = NULL){
-  
-  lapply(x, function(z){
+                             seed = NULL) {
+  lapply(x, function(z) {
     cyto_sample(z, display, seed)
   })
-  
 }
 
 # CYTO_MARKERS -----------------------------------------------------------------
@@ -908,63 +934,59 @@ cyto_sample.list <- function(x,
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Load in samples
 #' fs <- Activation
-#'
+#' 
 #' # Add marker names to channels - edit table
 #' cyto_markers(fs)
 #' }
-#'
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_markers <- function(x, file = NULL) {
-  
+
   # check class of x
   cyto_check(x)
-  
+
   # flowFrame
   if (inherits(x, "flowFrame")) {
-    
-    # Extract pData of parameters
-    pd <- pData(parameters(x))
-    
-  # flowSet
+
+    # Extract details of parameters
+    pd <- cyto_details(parameters(x))
+
+    # flowSet
   } else if (inherits(x, "flowSet")) {
-    
-    # Extract pData of parameters
-    pd <- pData(parameters(x[[1]]))
-    
-  # GatingHierachy
-  }else if(inherits(x, "GatingHierarchy")){
+
+    # Extract details of parameters
+    pd <- cyto_details(parameters(x[[1]]))
+
+    # GatingHierachy
+  } else if (inherits(x, "GatingHierarchy")) {
     fr <- cyto_extract(x, "root")
-    pd <- pData(parameters(fr))
-    
-  # GatingSet
-  }else if(inherits(x, "GatingSet")){
-    fr <- cyto_extract(gs,"root")[[1]]
-    pd <- pData(parameters(fr))
+    pd <- cyto_details(parameters(fr))
+
+    # GatingSet
+  } else if (inherits(x, "GatingSet")) {
+    fr <- cyto_extract(gs, "root")[[1]]
+    pd <- cyto_details(parameters(fr))
   }
-  
+
   # file missing
   if (is.null(file)) {
-    
-    if(length(grep("Experiment-Markers.csv", list.files())) != 0){
-      
+    if (length(grep("Experiment-Markers.csv", list.files())) != 0) {
       message("Experiment-Markers.csv found in working directory.")
       dt <- read.csv(list.files()[grep("Experiment-Markers.csv", list.files())],
-                     header = TRUE, stringsAsFactors = FALSE)
-      
-    }else{
-      
+        header = TRUE, stringsAsFactors = FALSE
+      )
+    } else {
+
       # Make data.frame with channel and marker columns
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("Channel", "Marker")
       rownames(dt) <- NULL
-      
     }
-    
   } else {
     if (getOption("CytoRSuite_wd_check")) {
       if (!.file_wd_check(file)) {
@@ -973,52 +995,54 @@ cyto_markers <- function(x, file = NULL) {
     }
     dt <- read.csv(file, header = TRUE)
   }
-  
+
   # Channels with markers
   chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
-  
+
   # Edit dt
   dt <- suppressWarnings(edit(dt))
-  
+
   # Update channels
   BiocGenerics::colnames(x) <- dt$Channel
-  
+
   # Write result to csv file
   if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
-    
-    write.csv(dt, c(file, list.files())[grep("Experiment-Markers.csv",
-                                             c(file, list.files()))[1]]
-              , row.names = FALSE)
-    
+    write.csv(dt,
+      c(file, list.files())[grep(
+        "Experiment-Markers.csv",
+        c(file, list.files())
+      )[1]],
+      row.names = FALSE
+    )
   } else {
     write.csv(dt, paste0(
       format(Sys.Date(), "%d%m%y"),
       "-Experiment-Markers.csv"
     ), row.names = FALSE)
   }
-  
+
   # Channels with markers added
   tb <- dt[!dt$Channel %in% chans, ]
   chns <- tb$Channel[!is.na(tb$Marker)]
-  
+
   # Pull out assigned markers
   mrk <- dt$Marker[dt$Channel %in% c(chans, chns)]
   names(mrk) <- dt$Channel[dt$Channel %in% c(chans, chns)]
-  
+
   # Assign markers to x
   markernames(x) <- mrk
-  
+
   invisible(NULL)
 }
 
 # CYTO_ANNOTATE ----------------------------------------------------------------
 
-#' Interactively edit pData Information for a flowSet or GatingSet
+#' Interactively edit cyto_details for a flowSet or GatingSet
 #'
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
 #' @param file name of csv file containing experimental information.
 #'
-#' @return NULL and update pData for the \code{flowSet} or \code{GatingSet}.
+#' @return NULL and update cyto_details for the \code{flowSet} or \code{GatingSet}.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore pData<-
@@ -1033,78 +1057,74 @@ cyto_markers <- function(x, file = NULL) {
 #' # Load in samples
 #' fs <- Activation
 #' 
-#' # Edit pData in table editor
+#' # Edit cyto_details in table editor
 #' cyto_annotate(fs)
 #' }
 #' 
 #' @export
 cyto_annotate <- function(x, file = NULL) {
-  
+
   # x should be a flowSet or GatingSet
   if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
     stop("Please supply either a flowSet or a GatingSet")
   }
-  
+
   # Assign x to cyto
   cyto <- x
-  
+
   # File missing
   if (is.null(file)) {
-    
-    if(length(grep("Experiment-Details.csv", list.files())) != 0){
-      
+    if (length(grep("Experiment-Details.csv", list.files())) != 0) {
       message("Experiment-Details.csv found in working directory.")
       pd <- read.csv(list.files()[grep("Experiment-Details.csv", list.files())],
-                     header = TRUE, stringsAsFactors = FALSE)
-      
-    }else{
-      
-      # Extract pData
-      pd <- pData(cyto)
+        header = TRUE, stringsAsFactors = FALSE
+      )
+    } else {
+
+      # Extract cyto_details
+      pd <- cyto_details(cyto)
       rownames(pd) <- NULL
-      
     }
-    
   } else {
     if (getOption("CytoRSuite_wd_check")) {
       if (!.file_wd_check(file)) {
         stop(paste(file, "does not exist in this working directory"))
       }
     }
-    
+
     # Read in file
     pd <- read.csv(file, header = TRUE)
-    
-    # Update pData
-    pData(cyto) <- pd
+
+    # Update cyto_details
+    cyto_details(cyto) <- pd
   }
-  
-  # Edit pData
+
+  # Edit cyto_details
   pd <- suppressWarnings(edit(pd))
   rownames(pd) <- pd$name
-  
-  # Update pData
-  pData(cyto) <- pd
-  
+
+  # Update cyto_details
+  cyto_details(cyto) <- pd
+
   # Write result to csv file
   if (length(grep("Experiment-Details.csv", c(file, list.files()))) != 0) {
-    
-    write.csv(pd, c(file, list.files())[grep("Experiment-Details.csv",
-                                             c(file, list.files()))[1]]
-              , row.names = FALSE)
-    
+    write.csv(pd,
+      c(file, list.files())[grep(
+        "Experiment-Details.csv",
+        c(file, list.files())
+      )[1]],
+      row.names = FALSE
+    )
   } else {
-    
-    write.csv(pData(cyto), paste0(
+    write.csv(cyto_details(cyto), paste0(
       format(Sys.Date(), "%d%m%y"),
       "-Experiment-Details.csv"
     ), row.names = FALSE)
-    
   }
-  
+
   # Update globally
   assign(deparse(substitute(x)), cyto, envir = globalenv())
-  
+
   invisible(NULL)
 }
 
@@ -1137,32 +1157,33 @@ cyto_annotate <- function(x, file = NULL) {
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#'
+#' 
 #' # Apply stored spillover matrix to flowSet
 #' cyto_compensate(Activation)
-#'
+#' 
 #' # Save spillover matrix in correct format
 #' spill <- Activation[[1]]@description$SPILL
 #' rownames(spill) <- colnames(spill)
-#' write.csv(spill,
-#'           "Spillover-Matrix.csv")
-#'           
+#' write.csv(
+#'   spill,
+#'   "Spillover-Matrix.csv"
+#' )
+#' 
 #' # Apply saved spillover matrix csv file to flowSet
 #' cyto_compensate(Activation, "Spillover-Matrix.csv")
-#'
+#' 
 #' # Apply stored spillover matrix to GatingSet
 #' gs <- GatingSet(Activation)
 #' cyto_compensate(gs)
-#'
+#' 
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
 #'
 #' @export
-cyto_compensate <- function(x, ...){
+cyto_compensate <- function(x, ...) {
   UseMethod("cyto_compensate")
 }
 
@@ -1170,118 +1191,114 @@ cyto_compensate <- function(x, ...){
 #' @export
 cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
-                                      select = 1){
-  
+                                      select = 1) {
+
   # Read in spillover matrix file
-  if(!is.null(spillover)){
-    if(getOption("CytoRSuite_wd_check")){
-      if(!file_wd_check(spillover)){
+  if (!is.null(spillover)) {
+    if (getOption("CytoRSuite_wd_check")) {
+      if (!file_wd_check(spillover)) {
         stop(paste(spillover, "does not exist in this working directory."))
       }
     }
     spill <- read.csv(spillover, header = TRUE, row.names = 1)
     colnames(spill) <- rownames(spill)
   }
-  
+
   # Extract spillover directly from x
-  if(is.null(spillover)){
+  if (is.null(spillover)) {
     spill <- x@description$SPILL
   }
-  
+
   # Apply compensation
   flowCore::compensate(x, spill)
 }
 
 #' @rdname cyto_compensate
 #' @export
-cyto_compensate.flowSet <- function(x, 
+cyto_compensate.flowSet <- function(x,
                                     spillover = NULL,
-                                    select = 1){
-  
+                                    select = 1) {
+
   # Read in spillover matrix file
-  if(!is.null(spillover)){
-    if(getOption("CytoRSuite_wd_check")){
-      if(!file_wd_check(spillover)){
+  if (!is.null(spillover)) {
+    if (getOption("CytoRSuite_wd_check")) {
+      if (!file_wd_check(spillover)) {
         stop(paste(spillover, "does not exist in this working directory."))
       }
     }
     spill <- read.csv(spillover, header = TRUE, row.names = 1)
     colnames(spill) <- rownames(spill)
-    
+
     # Convert spill into a named list
     spill <- rep(list(spill), length(x))
     names(spill) <- sampleNames(x)
   }
-  
+
   # Extract spillover directly from x
-  if(is.null(spillover)){
-    if(!is.null(select)){
+  if (is.null(spillover)) {
+    if (!is.null(select)) {
       spill <- rep(list(x[[select]]@description$SPILL), length(x))
       names(spill) <- sampleNames(x)
-    }else{
-      spill <- lapply(sampleNames(x), function(y){
+    } else {
+      spill <- lapply(sampleNames(x), function(y) {
         x[[y]]@description$SPILL
       })
     }
-
   }
 
   # Apply compensation
   flowCore::compensate(x, spill)
-  
 }
 
 #' @rdname cyto_compensate
 #' @export
-cyto_compensate.GatingSet <- function(x, 
+cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
-                                      select = 1){
-  
+                                      select = 1) {
+
   # Extract flowSet
   fs <- getData(gs, "root")
-  
+
   # Read in spillover matrix file
-  if(!is.null(spillover)){
-    if(getOption("CytoRSuite_wd_check")){
-      if(!file_wd_check(spillover)){
+  if (!is.null(spillover)) {
+    if (getOption("CytoRSuite_wd_check")) {
+      if (!file_wd_check(spillover)) {
         stop(paste(spillover, "does not exist in this working directory."))
       }
     }
     spill <- read.csv(spillover, header = TRUE, row.names = 1)
     colnames(spill) <- rownames(spill)
-    
+
     # Convert spill into a named list
     spill <- rep(list(spill), length(x))
     names(spill) <- sampleNames(x)
   }
-  
+
   # Extract spillover directly from x
-  if(is.null(spillover)){
-    if(!is.null(select)){
+  if (is.null(spillover)) {
+    if (!is.null(select)) {
       spill <- rep(list(fs[[select]]@description$SPILL), length(x))
       names(spill) <- sampleNames(x)
-    }else{
-      spill <- lapply(sampleNames(x), function(y){
+    } else {
+      spill <- lapply(sampleNames(x), function(y) {
         fs[[y]]@description$SPILL
       })
     }
-    
   }
-  
+
   # Apply compensation
   flowWorkspace::compensate(x, spill)
-  
 }
 
 # CYTO_TRANSFORM ---------------------------------------------------------------
 
 # Possibly assign transform object to global option that can be accessed
-# internally by cyto_plot. 
+# internally by cyto_plot.
 
 # Challenges:
-# - which samples do you use with estimateLogicle? Maybe sample a percentage of 
-#   samples and pool? 
-# - needs to support adjustment of transformation parameters on a per channel 
+# - which samples do you use with estimateLogicle? Maybe sample a percentage of
+#   samples and pool?
+# - needs to support adjustment of transformation parameters on a per channel
 #   basis.
 
 # CYTO_INVERSE_TRANSFORM -------------------------------------------------------

@@ -51,7 +51,6 @@ trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 
 # Convert transformerList into inverse transformList
 inv <- cyto_transform_convert(trans, inverse = FALSE)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

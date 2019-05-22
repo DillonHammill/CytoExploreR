@@ -24,17 +24,19 @@ Select samples based on experiment variables
 library(CytoRSuite)
 
 # Look at experiment details
-pData(Activation)
+cyto_details(Activation)
 
 # Select Stim-C samples with 0 and 0.5 OVA concentrations
 fs <- cyto_select(Activation,
-                  Treatment = "Stim-C",
-                  OVAConc = c(0,0.5))
+  Treatment = "Stim-C",
+  OVAConc = c(0, 0.5)
+)
 
 # Select Stim-A and Stim-C treatment groups
-fs <- cyto_select(Activation,
-                  list("Treatment" = c("Stim-A","Stim-C")))
-
+fs <- cyto_select(
+  Activation,
+  list("Treatment" = c("Stim-A", "Stim-C"))
+)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -13,9 +13,6 @@ cyto_details(x)
 experiment details as data.frame.
 }
 \description{
-Simply a autocomplete-friendly wrapper around
+Simply an autocomplete-friendly wrapper around
 \code{\link[flowWorkspace:pData]{pData}}.
-}
-\author{
-Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
