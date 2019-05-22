@@ -249,7 +249,7 @@
   # Extract transformations directly from GatingHierachy
   if(inherits(x, "GatingHierarchy")){
     if(.all_na(trans)){
-      trans <- getTransformations(x)
+      trans <- x@transformation
       if(is.null(trans)){
         trans <- NA
       }
@@ -259,7 +259,7 @@
   # Extract transformations directly from GatingSet
   if(inherits(x, "GatingSet")){
     if(.all_na(trans)){
-      trans <- getTransformations(x[[1]])
+      trans <- x[[1]]@transformation
       if(is.null(trans)){
         trans <- NA
       }
