@@ -262,7 +262,7 @@ cyto_plot_empty.flowFrame <- function(x,
   
   # X axis breaks and labels -  can be inherited from cyto_plot
   if(!inherits(axes_text[[1]], "list")){
-    if(.all_na(axes_text[[2]])){
+    if(.all_na(axes_text[[1]])){
       # NA == TRUE returns NA not T/F
     }else if(axes_text[[1]] == TRUE){
       axes_text[[1]] <- .cyto_plot_axes_text(x,

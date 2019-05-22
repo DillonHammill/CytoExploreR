@@ -38,38 +38,44 @@ test_that("cyto_plot GatingHierarchy method", {
   
   # 2D scatter plots -----------------------------------------------------------
   
-  cyto_plot(gs[[1]],
+  # overlay by name
+  p <- function() cyto_plot(gs[[1]],
             parent = "T Cells",
             alias = "",
-            channels = c("CD4","CD8"),
+            channels = c("CD44","CD69"),
             overlay = c("CD4 T Cells","CD8 T Cells"),
             point_size = 3,
             legend = TRUE,
-            contour_lines = 15)
-  cyto_plot(gs[[1]],
-            parent = "T Cells",
-            alias = "",
-            channels = c("FSC-A","SSC-A"),
-            overlay = c("CD4 T Cells","CD8 T Cells"),
-            point_size = 3,
-            legend = TRUE,
-            contour_lines = 15)
-  cyto_plot(gs[[1]],
+            contour_lines = 15,
+            border_fill = "black",
+            point_col = c("red","orange","yellow"),
+            gate_line_col = "magenta")
+  
+  expect_doppelganger("cyto_plot-GatingHierarchy-2D_001", p)
+  
+  # flowSet overlay
+  p <- function() cyto_plot(gs[[1]],
             parent = "T Cells",
             alias = "",
             channels = c("CD4","CD8"),
             overlay = getData(gs, "CD4 T Cells")[1:2],
             point_size = 3,
+            point_col_scale = c("green","yellow","magenta","purple"),
             legend = TRUE,
-            contour_lines = 15)
-  cyto_plot(gs[[1]],
+            axes_text = c(FALSE,FALSE),
+            border_fill = "black")
+  
+  expect_doppelganger("cyto_plot-GatingHierarchy-2D_002", p)
+  
+  # flowFrame overlay
+  p <- function() cyto_plot(gs[[1]],
             parent = "T Cells",
             alias = "",
             channels = c("CD4","CD8"),
             overlay = getData(gs, "CD4 T Cells")[[1]],
-            point_size = 3,
-            legend = TRUE,
-            contour_lines = 15)
+            point_size = 3)
+  
+  expect_doppelganger("cyto_plot-GatingHierarchy-2D_003", p)
   
 })
 

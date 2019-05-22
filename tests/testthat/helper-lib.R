@@ -1,7 +1,3 @@
-## -----------------------------------------------------------------------------
-# Set CytoRSuite_interact to FALSE -
-options("CytoRSuite_interact" = FALSE)
-
 # Load Packages ----------------------------------------------------------------
 library(CytoRSuiteData)
 
