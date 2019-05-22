@@ -5,8 +5,8 @@
 \title{Plot Compensation in All Fluorescent Channels - GatingSet Method}
 \usage{
 \method{cyto_plot_compensation}{GatingSet}(x, parent = NULL,
-  channel_match = NULL, compensate = FALSE, spillover = NA,
-  axes_trans = NULL, overlay = TRUE, layout, popup = FALSE,
+  channel_match = NULL, compensate = FALSE, spillover = NULL,
+  axes_trans = NA, overlay = TRUE, layout, popup = FALSE,
   title = NA, header = NULL, header_text_font = 2,
   header_text_size = 1, header_text_col = "black", ...)
 }

@@ -111,6 +111,10 @@ cyto_plot_compensation.flowFrame <- function(x,
     options("CytoRSuite_cyto_plot_method" = "Comp/flowFrame")
   }
 
+  # Graphics parameters
+  pars <- par(c("mfrow","oma"))
+  on.exit(par(pars))
+  
   # Sample names
   nm <- cyto_names(x)
 
@@ -187,10 +191,6 @@ cyto_plot_compensation.flowFrame <- function(x,
       }
     }
   })
-
-  # Return defaults
-  par(mfrow = c(1, 1))
-  par(oma = c(0, 0, 0, 0))
 
   # Turn off graphics device for saving
   if (getOption("CytoRSuite_cyto_plot_save")) {
@@ -311,6 +311,10 @@ cyto_plot_compensation.flowSet <- function(x,
     options("CytoRSuite_cyto_plot_method" = "Comp/flowSet")
   }
 
+  # Graphics parameters
+  pars <- par(c("mfrow","oma"))
+  on.exit(par(pars))
+  
   # Number of samples
   smp <- length(x)
 
@@ -344,7 +348,7 @@ cyto_plot_compensation.flowSet <- function(x,
     write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
   } else if (!is.null(channel_match)) {
     if (getOption("CytoRSuite_wd_check") == TRUE) {
-      if (.file_wd_check(channel_match) == FALSE) {
+      if (file_wd_check(channel_match) == FALSE) {
         message(paste(channel_match, "is not in this working directory."))
         pd$channel <- paste(cyto_channel_select(x))
       } else {
@@ -410,19 +414,19 @@ cyto_plot_compensation.flowSet <- function(x,
   }
 
   # Loop through fs_list
-  lapply(1:smp, function(x) {
+  lapply(1:smp, function(z) {
     lapply(seq_len(length(channels)), function(y) {
       if (unst == TRUE & overlay == TRUE) {
-        cyto_plot(fs_list[[x]],
-          channels = c(pd$channel[x], channels[y]),
+        cyto_plot(fs_list[[z]],
+          channels = c(pd$channel[z], channels[y]),
           overlay = NIL,
           axes_trans = axes_trans,
           legend = FALSE,
           title = title, ...
         )
       } else {
-        cyto_plot(fs_list[[x]],
-          channels = c(pd$channel[x], channels[y]),
+        cyto_plot(fs_list[[z]],
+          channels = c(pd$channel[z], channels[y]),
           axes_trans = axes_trans,
           legend = FALSE,
           title = title, ...
@@ -430,9 +434,9 @@ cyto_plot_compensation.flowSet <- function(x,
       }
 
       # Call new plot
-      if (x != smp & channels[y] == channels[length(channels)]) {
+      if (z != smp & channels[y] == channels[length(channels)]) {
         if (!is.null(header)) {
-          mtext(header[x],
+          mtext(header[z],
             outer = TRUE,
             cex = header_text_size,
             font = header_text_font,
@@ -449,9 +453,9 @@ cyto_plot_compensation.flowSet <- function(x,
           par(mfrow = layout)
           par(oma = c(0, 0, 3, 0))
         }
-      } else if (x == smp & channels[y] == channels[length(channels)]) {
+      } else if (z == smp & channels[y] == channels[length(channels)]) {
         if (!is.null(header)) {
-          mtext(header[x],
+          mtext(header[z],
             outer = TRUE,
             cex = header_text_size,
             font = header_text_font,
@@ -461,10 +465,6 @@ cyto_plot_compensation.flowSet <- function(x,
       }
     })
   })
-
-  # Return defaults
-  par(mfrow = c(1, 1))
-  par(oma = c(0, 0, 0, 0))
 
   # Turn off graphics device for saving
   if (getOption("CytoRSuite_cyto_plot_save")) {
@@ -572,8 +572,8 @@ cyto_plot_compensation.GatingSet <- function(x,
                                              parent = NULL,
                                              channel_match = NULL,
                                              compensate = FALSE,
-                                             spillover = NA,
-                                             axes_trans = NULL,
+                                             spillover = NULL,
+                                             axes_trans = NA,
                                              overlay = TRUE,
                                              layout,
                                              popup = FALSE,
@@ -588,6 +588,10 @@ cyto_plot_compensation.GatingSet <- function(x,
     options("CytoRSuite_cyto_plot_method" = "Comp/GatingSet")
   }
 
+  # Graphics parameters
+  pars <- par(c("mfrow","oma"))
+  on.exit(par(pars))
+  
   # Parent
   if (is.null(parent)) {
     parent <- basename(getNodes(x))[length(getNodes(x))]
@@ -626,10 +630,6 @@ cyto_plot_compensation.GatingSet <- function(x,
     header_text_size = header_text_size,
     header_text_col = header_text_col, ...
   )
-
-  # Return defaults
-  par(mfrow = c(1, 1))
-  par(oma = c(0, 0, 0, 0))
 
   # Turn off graphics device for saving
   if (getOption("CytoRSuite_cyto_plot_save")) {
