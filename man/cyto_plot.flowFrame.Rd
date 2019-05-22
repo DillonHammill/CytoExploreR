@@ -31,8 +31,7 @@
   border_fill_alpha = 1, ...)
 }
 \arguments{
-\item{x}{object of class
-\code{\link[flowCore:flowFrame-class]{flowFrame}}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
@@ -243,10 +242,12 @@ labels, set to 1 by default.}
 \code{"black"} by default.}
 
 \item{label_box_x}{vector of x co-ordinate(s) to manually adjust the position
-plot label(s) on the plot.}
+plot label(s) on the plot. To interactively position labels set either
+\code{label_box_x} or \code{label_box_y} to "select".}
 
 \item{label_box_y}{vector of y co-ordinate(s) to manually adjust the position
-plot label(s) on the plot.}
+plot label(s) on the plot. To interactively position labels set either
+\code{label_box_x} or \code{label_box_y} to "select".}
 
 \item{label_box_alpha}{numeric to control background fill transparency of
 label boxes, set to 0.6 by default to introduce some transparency.}

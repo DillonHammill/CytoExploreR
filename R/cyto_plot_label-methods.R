@@ -4,7 +4,8 @@
 #' \code{text}, \code{channels} and a gate object to construct a text label for
 #' the plot with the population name and frequency. In the absence of a gate,
 #' users can manually specify the label position using the \code{text_x} and
-#' \code{text_y} arguments.
+#' \code{text_y} arguments. To interactively position labels through mouse click
+#' set either \code{text_x} or \code{text_y} to "select".
 #'
 #' @param x object of class \code{"flowFrame"}.
 #' @param gate object of class
@@ -27,9 +28,11 @@
 #'   default. Statistics for fluorescent intensity are calculated for the entire
 #'   distribution. Only count and percent statistics are supported for 2D plots.
 #' @param text_x vector containing the x co-ordinates for the plot labels. Set
-#'   to \code{NULL} by default to place labels in the center of the gates.
+#'   to \code{NULL} by default to place labels in the center of the gates. To
+#'   interactively position labels set this argument to "select".
 #' @param text_y vector containing the x co-ordinates for the plot labels. Set
-#'   to \code{NULL} by default to place labels in the center of the gates.
+#'   to \code{NULL} by default to place labels in the center of the gates. To
+#'   interactively position labels set this argument to "select".
 #' @param text_font integer [1,2,3,4] passed to \code{text} to alter the font,
 #'   set to \code{2} by default for a bold font.
 #' @param text_size numeric character expansion used to control the size of the
@@ -49,6 +52,7 @@
 #' @return add a boxed text label to an existing plot.
 #'
 #' @importFrom flowCore Subset parameters
+#' @importFrom graphics locator
 #'
 #' @examples
 #' #' library(CytoRSuiteData)
@@ -271,12 +275,20 @@ cyto_plot_label.NULL <- function(x,
     st <- round(st[, ncol(st)], 2)
   }
 
-  # Label co-ordinate
+  # Interactively select co-ordinates
+  if(!.all_na(text_x) | !.all_na(text_y)){
+    if(text_x[1] == "select" | text_y[1] == "select"){
+      text_xy <- locator(n = length(gate))
+      text_x <- text_xy[[1]]
+      text_y <- text_xy[[2]]
+    }
+  }
+  
+  # Get co-ordinates of gate centers
   text_xy <- .cyto_plot_label_center(gate,
-    channels = channels,
-    text_x = text_x,
-    text_y = text_y
-  )
+                                     channels = channels,
+                                     text_x = text_x,
+                                     text_y = text_y)
 
   # Add labels to plot?
   if(plot == TRUE){
@@ -394,12 +406,20 @@ cyto_plot_label.rectangleGate <- function(x,
     }
   }
 
-  # Label co-ordinate
+  # Interactively select co-ordinates
+  if(!.all_na(text_x) | !.all_na(text_y)){
+    if(text_x[1] == "select" | text_y[1] == "select"){
+      text_xy <- locator(n = length(gate))
+      text_x <- text_xy[[1]]
+      text_y <- text_xy[[2]]
+    }
+  }
+  
+  # Get co-ordinates of gate centers
   text_xy <- .cyto_plot_label_center(gate,
-    channels = channels,
-    text_x = text_x,
-    text_y = text_y
-  )
+                                     channels = channels,
+                                     text_x = text_x,
+                                     text_y = text_y)
 
   # Add labels to plot?
   if(plot == TRUE){
@@ -503,12 +523,20 @@ cyto_plot_label.polygonGate <- function(x,
     }
   }
 
-  # Label co-ordinate
+  # Interactively select co-ordinates
+  if(!.all_na(text_x) | !.all_na(text_y)){
+    if(text_x[1] == "select" | text_y[1] == "select"){
+      text_xy <- locator(n = length(gate))
+      text_x <- text_xy[[1]]
+      text_y <- text_xy[[2]]
+    }
+  }
+  
+  # Get co-ordinates of gate centers
   text_xy <- .cyto_plot_label_center(gate,
-    channels = channels,
-    text_x = text_x,
-    text_y = text_y
-  )
+                                     channels = channels,
+                                     text_x = text_x,
+                                     text_y = text_y)
 
   # Add labels to plot?
   if(plot == TRUE){
@@ -613,12 +641,20 @@ cyto_plot_label.ellipsoidGate <- function(x,
     }
   }
 
-  # Label co-ordinates
+  # Interactively select co-ordinates
+  if(!.all_na(text_x) | !.all_na(text_y)){
+    if(text_x[1] == "select" | text_y[1] == "select"){
+      text_xy <- locator(n = length(gate))
+      text_x <- text_xy[[1]]
+      text_y <- text_xy[[2]]
+    }
+  }
+  
+  # Get co-ordinates of gate centers
   text_xy <- .cyto_plot_label_center(gate,
-    channels = channels,
-    text_x = text_x,
-    text_y = text_y
-  )
+                                     channels = channels,
+                                     text_x = text_x,
+                                     text_y = text_y)
 
   # Add labels to plot?
   if(plot == TRUE){
@@ -683,11 +719,20 @@ cyto_plot_label.list <- function(x,
   # List of filters to list of gate objects
   gate <- unlist(gate)
 
-  # Get co-ordinates of gate centers for labels
+  # Interactively select co-ordinates
+  if(!.all_na(text_x) | !.all_na(text_y)){
+    if(text_x[1] == "select" | text_y[1] == "select"){
+      text_xy <- locator(n = length(gate))
+      text_x <- text_xy[[1]]
+      text_y <- text_xy[[2]]
+    }
+  }
+  
+  # Get co-ordinates of gate centers
   text_xy <- .cyto_plot_label_center(gate,
-                                     channels = channels,
-                                     text_x = text_x,
-                                     text_y = text_y)
+                                       channels = channels,
+                                       text_x = text_x,
+                                       text_y = text_y)
   
   # Update x co-ordinates if not supplied
   if(.all_na(text_x)){

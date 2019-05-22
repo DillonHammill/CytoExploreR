@@ -161,6 +161,12 @@ cyto_names.GatingSet <- function(x){
   sampleNames(x)
 }
 
+#' @rdname cyto_names
+#' @export
+cyto_names.list <- function(x){
+  unlist(lapply(x,"cyto_names"))
+}
+
 # CYTO_CHECK -------------------------------------------------------------------
 
 #' Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied

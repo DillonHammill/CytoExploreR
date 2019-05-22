@@ -6,6 +6,7 @@
 \alias{cyto_names.flowSet}
 \alias{cyto_names.GatingHierarchy}
 \alias{cyto_names.GatingSet}
+\alias{cyto_names.list}
 \title{Extract sample names}
 \usage{
 cyto_names(x)
@@ -17,6 +18,8 @@ cyto_names(x)
 \method{cyto_names}{GatingHierarchy}(x)
 
 \method{cyto_names}{GatingSet}(x)
+
+\method{cyto_names}{list}(x)
 }
 \arguments{
 \item{object}{of class \code{flowFrame}, \code{flowSet},

@@ -75,10 +75,12 @@ default. Statistics for fluorescent intensity are calculated for the entire
 distribution. Only count and percent statistics are supported for 2D plots.}
 
 \item{text_x}{vector containing the x co-ordinates for the plot labels. Set
-to \code{NULL} by default to place labels in the center of the gates.}
+to \code{NULL} by default to place labels in the center of the gates. To
+interactively position labels set this argument to "select".}
 
 \item{text_y}{vector containing the x co-ordinates for the plot labels. Set
-to \code{NULL} by default to place labels in the center of the gates.}
+to \code{NULL} by default to place labels in the center of the gates. To
+interactively position labels set this argument to "select".}
 
 \item{text_font}{integer [1,2,3,4] passed to \code{text} to alter the font,
 set to \code{2} by default for a bold font.}
@@ -108,7 +110,8 @@ add a boxed text label to an existing plot.
 \code{text}, \code{channels} and a gate object to construct a text label for
 the plot with the population name and frequency. In the absence of a gate,
 users can manually specify the label position using the \code{text_x} and
-\code{text_y} arguments.
+\code{text_y} arguments. To interactively position labels through mouse click
+set either \code{text_x} or \code{text_y} to "select".
 }
 \examples{
 #' library(CytoRSuiteData)

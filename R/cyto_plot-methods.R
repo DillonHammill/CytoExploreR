@@ -67,8 +67,7 @@ cyto_plot <- function(x, ...) {
 #'
 #' Explore & visualise a flowFrame.
 #'
-#' @param x object of class
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
 #'   the plot. The length of channels determines the type of plot to be
 #'   constructed, either a 1-D density distribution for a single channel or a
@@ -220,9 +219,11 @@ cyto_plot <- function(x, ...) {
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
 #' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_alpha numeric to control background fill transparency of
 #'   label boxes, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
@@ -240,17 +241,17 @@ cyto_plot <- function(x, ...) {
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Apply compensation
 #' fs <- compensate(fs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(fs[[4]], cyto_fluor_channels(fs))
 #' fs <- transform(fs, trans)
-#' 
+#'
 #' # 1-D Density Distribution
 #' cyto_plot(fs[[1]],
 #'   channels = "PE-A",
@@ -258,7 +259,7 @@ cyto_plot <- function(x, ...) {
 #'   overlay = fs[2:4],
 #'   density_stack = 0.5
 #' )
-#' 
+#'
 #' # 2-D Scatter Plot
 #' cyto_plot(fs[[4]],
 #'   channels = c("FSC-A", "PE-A"),
@@ -811,9 +812,11 @@ cyto_plot.flowFrame <- function(x,
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
 #' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_alpha numeric to control background fill transparency of
 #'   label boxes, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
@@ -1688,9 +1691,11 @@ cyto_plot.flowSet <- function(x,
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
 #' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_alpha numeric to control background fill transparency of
 #'   label boxes, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
@@ -2403,9 +2408,11 @@ cyto_plot.GatingHierarchy <- function(x,
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
 #' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot.
+#'   plot label(s) on the plot. To interactively position labels set either
+#'   \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_box_alpha numeric to control background fill transparency of
 #'   label boxes, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
