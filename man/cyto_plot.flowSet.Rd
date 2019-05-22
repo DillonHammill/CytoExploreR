@@ -4,13 +4,12 @@
 \alias{cyto_plot.flowSet}
 \title{cyto_plot - flowSet Method}
 \usage{
-\method{cyto_plot}{flowSet}(x, channels, group_by = FALSE,
-  overlay = NA, gate = NA, axes_trans = NA, display = 1,
-  limits = "machine", layout = NA, popup = FALSE, xlim = NA,
-  ylim = NA, title, xlab, ylab, density_modal = TRUE,
-  density_smooth = 0.6, density_stack = 0.5,
-  density_layers = length(x), density_cols = NA, density_fill = NA,
-  density_fill_alpha = 1, density_line_type = 1,
+\method{cyto_plot}{flowSet}(x, channels, axes_trans = NA,
+  group_by = NA, overlay = NA, gate = NA, limits = "machine",
+  display = 1, layout, popup = FALSE, xlim = NA, ylim = NA, title,
+  xlab, ylab, density_modal = TRUE, density_smooth = 0.6,
+  density_stack = 0.5, density_layers = NA, density_cols = NA,
+  density_fill = NA, density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black",
   point_shape = ".", point_size = 2, point_col_scale = NA,
   point_cols = NA, point_col = NA, point_col_alpha = 1,
@@ -21,36 +20,24 @@
   axes_label_text_col = "black", title_text_font = 2,
   title_text_size = 1.1, title_text_col = "black", legend = FALSE,
   legend_text = NA, legend_text_font = 1, legend_text_size = 1,
-  legend_text_col = "black", legend_line_col = NA,
-  legend_box_fill = NA, legend_point_col = NA, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", label,
-  label_text = NA, label_stat, label_text_font = 2,
-  label_text_size = 1, label_text_col = "black", label_box_x = NA,
-  label_box_y = NA, label_box_alpha = 0.6, border_line_type = 1,
-  border_line_width = 1, border_line_col = "black",
-  border_fill = "white", ...)
+  legend_text_col = "black", legend_line_type = NA,
+  legend_line_width = NA, legend_line_col = NA, legend_box_fill = NA,
+  legend_point_col = NA, gate_line_type = 1, gate_line_width = 2.5,
+  gate_line_col = "red", label, label_text = NA, label_stat,
+  label_text_font = 2, label_text_size = 1, label_text_col = "black",
+  label_box_x = NA, label_box_y = NA, label_box_alpha = 0.6,
+  border_line_type = 1, border_line_width = 1,
+  border_line_col = "black", border_fill = "white",
+  border_fill_alpha = 1, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
+\item{x}{object of class
+\code{\link[flowCore:flowSet-class]{flowSet}}.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
 constructed, either a 1-D density distribution for a single channel or a
 2-D scatterplot with blue-red colour scale for two channels.}
-
-\item{group_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to NULL by default to prevent merging. To
-merge all samples set this argument to \code{TRUE} or \code{"all"}.}
-
-\item{overlay}{a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
-\code{list of flowSets} or \code{list of flowFrame lists} containing
-populations to be overlaid onto the plot(s).}
-
-\item{gate}{gate object(s) to be added to plot.  For \code{cyto_1d_plot} only
-gate objects of class
-\code{\link[flowCore:rectangleGate-class]{rectangleGate}} in either 1 or 2
-dimensions are supported. Multiple gates can be supplied either as a
-\code{list} or \code{\link[flowCore:filters-class]{filters}} object.}
 
 \item{axes_trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or
@@ -62,14 +49,29 @@ labels of the plot are appropriately transformed. The transformation object
 will NOT be applied to the flowFrame internally and should be applied to
 the flowFrame prior to plotting.}
 
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
+\item{group_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to NULL by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+
+\item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
+\code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
+\code{list of flowFrame lists} containing populations to be overlaid onto
+the plot(s).}
+
+\item{gate}{gate object(s) to be added to plot.  For \code{cyto_1d_plot} only
+gate objects of class
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}} in either 1 or 2
+dimensions are supported. Multiple gates can be supplied either as a
+\code{list} or \code{\link[flowCore:filters-class]{filters}} object.}
 
 \item{limits}{indicates whether the axes limits should be based on the
 \code{"data"} or \code{"machine"}, set to "machine" by default to show
 complete axes ranges. This argument will only alter the upper axis limits,
 to modify the lower limits use \code{xlim} and \code{ylim}.}
+
+\item{display}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{display} can substantial improve
+plotting speed for less powerful machines.}
 
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}
@@ -129,17 +131,17 @@ lines, set to 1 by default.}
 \item{point_size}{numeric to control the size of points in 2-D scatter plots
 set to 2 by default.}
 
-\item{point_col_scale}{vector of ordered colours to use for the density colour
-gradient of points.}
+\item{point_col_scale}{vector of ordered colours to use for the density
+colour gradient of points.}
 
-\item{point_cols}{vector colours to draw from when selecting colours for points
-if none are supplied to point_col.}
+\item{point_cols}{vector colours to draw from when selecting colours for
+points if none are supplied to point_col.}
 
 \item{point_col}{colour(s) to use for points in 2-D scatter plots, set to NA
 by default to use a blue-red density colour scale.}
 
-\item{point_col_alpha}{numeric [0,1] to control point colour transparency in 2-D
-scatter plots, set to 1 by default to use solid colours.}
+\item{point_col_alpha}{numeric [0,1] to control point colour transparency in
+2-D scatter plots, set to 1 by default to use solid colours.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines in 2-D scatter plots, set to 0 by default to turn off contour
@@ -227,7 +229,8 @@ default.}
 \item{label}{logical indicating whether gated populations should be labelled.
 To include the names of the populations in these labels, supply the
 population names to the \code{label_text} argument. The default statistic
-is \code{"percent"} for gated data and \code{"count"} for un-gated data.}
+is \code{"percent"} for gated data and \code{"count"} for un-gated data.
+This argument must be set to TRUE in order to add labels with gates.}
 
 \item{label_text}{vector of population names to use in the labels. Set to
 \code{NA} by default to exclude population names.}
@@ -271,7 +274,10 @@ default.}
 \item{border_fill}{border_fill fill colour to use inside the plot border
 (i.e. background colour), set to "white" by default.}
 
-\item{...}{additional arguments passed to \code{\link[graphics:plot]{plot}}.}
+\item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
+by default for no transparency.}
+
+\item{...}{additional arguments not currently in use.}
 }
 \description{
 Explore & visualise a flowSet.

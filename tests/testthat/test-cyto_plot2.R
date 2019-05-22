@@ -33,6 +33,15 @@ test_that("cyto_plot flowFrame method", {
   
 })
 
+# flowSet Method ---------------------------------------------------------------
+
+test_that("cyto_plot flowSet method", {
+  
+  
+  
+  
+})
+
 # GatingHierarchy Method -------------------------------------------------------
 
 test_that("cyto_plot GatingHierarchy method", {
