@@ -2008,7 +2008,7 @@ cyto_plot.GatingHierarchy <- function(x,
   # Extract gate objects directly from x
   if (!.all_na(alias)) {
     gate <- lapply(alias, function(z) {
-      getGate(x, z)
+      getGate(x, paste(parent, z, sep = "/"))
     })
     names(gate) <- alias
   }
@@ -2845,7 +2845,7 @@ cyto_plot.GatingSet <- function(x,
     if (!.all_na(group_by)) {
       gate <- lapply(nms, function(nm) {
         gt <- lapply(alias, function(z) {
-          getGate(x[[match(nm, pd$group_by)]], z)
+          getGate(x[[match(nm, pd$group_by)]], paste(parent, z, sep = "/"))
         })
         names(gt) <- alias
         return(gt)
@@ -2853,7 +2853,7 @@ cyto_plot.GatingSet <- function(x,
     } else {
       gate <- lapply(seq_len(length(x)), function(z) {
         gt <- lapply(alias, function(y) {
-          getGate(x[[z]], y)
+          getGate(x[[z]], paste(parent, y, sep = "/"))
         })
         names(gt) <- alias
         return(gt)
