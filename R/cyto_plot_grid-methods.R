@@ -583,8 +583,8 @@ setMethod(
       if(panel_label[2] & !is.na(panel_y_label)){
         
         # mtext does not support text rotation - need to use text for y labels
-        text(x = par("usr")[3] + 0.07*(par("usr")[3] - par("usr")[1]),
-             y = mean(par("usr")[c(2,4)]),
+        text(x = par("usr")[2] + 0.07*(par("usr")[2] - par("usr")[1]),
+             y = mean(par("usr")[3:4]),
              labels = panel_y_label[x/(ncol*sht)],
              font = panel_label_font[2],
              cex = 1.25*panel_label_size[2],
@@ -638,7 +638,7 @@ setMethod(
         if(!is.na(title[2])){
             
           # mtext does not support text rotation - need to use text for y labels
-          text(x = par("usr")[3] + 0.18*(par("usr")[3] - par("usr")[1]),
+          text(x = par("usr")[2] + 0.18*(par("usr")[2] - par("usr")[1]),
                y = par("usr")[4],
                labels = title[2],
                font = title_text_font[2],

@@ -82,7 +82,7 @@ setMethod(cyto_plot_contour,
           x = fr.exprs[, 1],
           y = fr.exprs[, 2],
           n = 75,
-          lims = c(par("usr")[c(1,3)], par("usr")[c(2,4)])
+          lims = par("usr")
         )
 
         # Add contour lines to plot
