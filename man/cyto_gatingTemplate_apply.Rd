@@ -24,3 +24,23 @@ A convenient wrapper for
 \code{\link[openCyto:gating]{gating}} to apply a gatingTemplate csv file to a
 GatingSet.
 }
+\examples{
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples
+fs <- Activation
+gs <- GatingSet(fs)
+
+# Apply compensation
+gs <- compensate(gs, fs[[1]]@description$SPILL)
+
+# Transform fluorescent channels
+trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
+gs <- transform(gs, trans)
+
+# Apply gatingTemplate in working directory to GatingSet
+cyto_gatingTemplate_apply(gs, "gatingTemplate.csv")
+}
+
+}

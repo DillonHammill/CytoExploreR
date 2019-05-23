@@ -139,6 +139,25 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 #'
 #' @importFrom openCyto gatingTemplate gating
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#' 
+#' # Apply compensation
+#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' 
+#' # Transform fluorescent channels
+#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
+#' gs <- transform(gs, trans)
+#' 
+#' # Apply gatingTemplate in working directory to GatingSet
+#' cyto_gatingTemplate_apply(gs, "gatingTemplate.csv")
+#' }
+#'
 #' @export
 cyto_gatingTemplate_apply <- function(x, 
                                       gatingTemplate = NULL, ...){
@@ -152,6 +171,13 @@ cyto_gatingTemplate_apply <- function(x,
         paste("Supply the name of the gatingTemplate csv file to apply",
               "to the GatingSet.")
         )
+    }
+  }
+  
+  # Working directory checks if name of csv file is supplied
+  if(getOption("CytoRSuite_wd_check")){
+    if(!file_wd_check(gatingTemplate)){
+      stop(paste(gatingTemplate, "is not in this working directory."))
     }
   }
   
