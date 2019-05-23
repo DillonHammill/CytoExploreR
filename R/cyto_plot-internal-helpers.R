@@ -1623,8 +1623,8 @@ cyto_plot_overlay_convert <- function(x, ...) {
     # list of gate
     if (inherits(gate, "filters")) {
 
-      # Convert to list of gate
-      gate <- lapply(seq_len(length(gate)), function(x) gate[[x]])
+      # Convert to list of gates
+      gate <- unlist(gate)
     } else if (inherits(gate, "list")) {
 
     } else if (inherits(gate, "rectangleGate") |

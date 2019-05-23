@@ -2869,7 +2869,12 @@ cyto_plot.GatingSet <- function(x,
 
     # Can't plot per sample 1D gates - must all be the same
     # Repeated in mapply as required
-    gate <- list(gate[[1]]) # uses gates from first sample only
+    # Must be selected from non-empty sample - co-ordinates modified to -Inf Inf
+    ind <- unlist(lapply(fr_list[[1]], function(z){
+      BiocGenerics::nrow(z)
+    }))
+    ind <- which(ind > 0)
+    gate <- list(gate[[ind[1]]]) # uses gates from first sample only
   }
 
   # Prepare arguments for plotting ---------------------------------------------
