@@ -2,11 +2,11 @@
 
 #' Select a gatingTemplate for downstream analyses
 #'
-#' \code{gatingTemplate_select} will designate which gatingTemplate should be
-#' used for storing downstream gating results. \code{gatingTemplate_select}
+#' \code{cyto_gatingTemplate_select} will designate which gatingTemplate should be
+#' used for storing downstream gating results. \code{cyto_gatingTemplate_select}
 #' should therefore be called prior to gating or \code{gate_draw} will resort to
 #' using \code{"gatingTemplate.csv"} to save the constructed gates.
-#' \code{gatingTemplate_select} also provides an easy way to switch between
+#' \code{cyto_gatingTemplate_select} also provides an easy way to switch between
 #' gatingTemplates when multiple templates are required.
 #' 
 #' @param x name of the gatingTemplate csv file to assign as the active
@@ -18,14 +18,14 @@
 #' @importFrom tools file_ext
 #'
 #' @examples
-#' gatingTemplate_select("Activation_gatingTemplate")
+#' cyto_gatingTemplate_select("Activation_gatingTemplate")
 #'
-#' @seealso \code{\link{gatingTemplate_edit}}
+#' @seealso \code{\link{cyto_gatingTemplate_edit}}
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-gatingTemplate_select <- function(x){
+cyto_gatingTemplate_select <- function(x){
   
   # Name does not include a file extension
   if(.empty(file_ext(x))){
@@ -46,7 +46,7 @@ gatingTemplate_select <- function(x){
 
 #' Interactively Edit a gatingTemplate
 #' 
-#' \code{gatingTemplate_edit} provides an interactive interface to editing the
+#' \code{cyto_gatingTemplate_edit} provides an interactive interface to editing the
 #' openCyto gatingTemplate. This function is intended to aid in adding boolean
 #' and reference gates to the gatingTemplate. Users should NOT modify existing
 #' entries in the gatingTemplate.
@@ -68,11 +68,11 @@ gatingTemplate_select <- function(x){
 #' library(CytoRSuite)
 #' 
 #' # gs is a GatingSet object
-#' gatingTemplate_edit(gs, "gatingTemplate.csv")
+#' cyto_gatingTemplate_edit(gs, "gatingTemplate.csv")
 #' }
 #' 
 #' @export
-gatingTemplate_edit <- function(x, gatingTemplate = NULL){
+cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
   
   # x of wrong class
   if(!inherits(x, "GatingSet")){
@@ -120,6 +120,52 @@ gatingTemplate_edit <- function(x, gatingTemplate = NULL){
   invisible(return(gt))
 }
 
+# GATINGTEMPLATE APPLY ---------------------------------------------------------
+
+#' Apply gates saved in gatingTemplate to a GatingSet
+#'
+#' A convenient wrapper for
+#' \code{\link[openCyto:gatingTemplate]{gatingTemplate}} and
+#' \code{\link[openCyto:gating]{gating}} to apply a gatingTemplate csv file to a
+#' GatingSet.
+#'
+#' @param x object of class \code{GatingSet}.
+#' @param gatingTemplate name of the gatingTemplate csv file which contains the
+#'   gates to be applied to the GatingSet.
+#' @param ... additional arguments passed to gating.
+#'
+#' @return NULL and update the GatingSet in the global environment with the
+#'   gates in the gatingTemplate.
+#'
+#' @importFrom openCyto gatingTemplate gating
+#'
+#' @export
+cyto_gatingTemplate_apply <- function(x, 
+                                      gatingTemplate = NULL, ...){
+  
+  # See if a gatingTemplate has been assigned globally
+  if(is.null(gatingTemplate)){
+    if(!is.null(getOption("CytoRSuite_gatingTemplate"))){
+      gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+    }else{
+      stop(
+        paste("Supply the name of the gatingTemplate csv file to apply",
+              "to the GatingSet.")
+        )
+    }
+  }
+  
+  # Message to indicate which gatingTemplate is being applied
+  message(paste("Applying", gatingTemplate, "to the GatingSet."))
+  
+  # Read in gatingTemplate csv file to gatingTemplate object
+  gt <- gatingTemplate(gatingTemplate)
+  
+  # Apply gatingTemplate to GatingSet
+  gating(gt, x, ...)
+  
+}
+
 # GATINGTEMPLATE CONVERT -------------------------------------------------------
 
 #' Convert Old gatingTemplates to New Format
@@ -153,7 +199,7 @@ gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 #' gs <- transform(gs, trans)
 #' 
 #' # Convert gatingTemplate CytoRSuite <= 0.9.5 to new format
-#' gatingTemplate_convert(gs, "gatingTemplate.csv")
+#' cyto_gatingTemplate_convert(gs, "gatingTemplate.csv")
 #' 
 #' # Updated gatingTemplate will work as expected
 #' gt <- gatingTemplate("gatingTemplate.csv")
@@ -161,7 +207,7 @@ gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 #' }
 #' 
 #' @export
-gatingTemplate_convert <- function(gs, gatingTemplate) {
+cyto_gatingTemplate_convert <- function(gs, gatingTemplate) {
   
   # data.table R CMD Check NOTE
   alias <- NULL
