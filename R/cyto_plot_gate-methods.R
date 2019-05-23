@@ -165,14 +165,14 @@ cyto_plot_gate.rectangleGate <- function(x,
 
     # Replace Inf x values for plotting
     if (is.infinite(gt@max[channels[1]]) |
-      gt@max[channels[1]] > 0.98 * par("usr")[2]) {
-      gt@max[channels[1]] <- 0.98 * par("usr")[2]
+      gt@max[channels[1]] > 0.98 * par("usr")[3]) {
+      gt@max[channels[1]] <- 0.98 * par("usr")[3]
     }
 
     # Replace -Inf y values for plotting
     if (is.infinite(gt@min[channels[2]]) |
-      gt@min[channels[2]] < (par("usr")[3] - 0.13 * par("usr")[3])) {
-      gt@min[channels[2]] <- (par("usr")[3] - 0.13 * par("usr")[3])
+      gt@min[channels[2]] < (par("usr")[2] - 0.13 * par("usr")[2])) {
+      gt@min[channels[2]] <- (par("usr")[2] - 0.13 * par("usr")[2])
     }
 
     # Replace Inf y values for plotting
@@ -211,8 +211,8 @@ cyto_plot_gate.rectangleGate <- function(x,
 
     # Replace Inf values for plotting
     if (is.infinite(gt@max[1]) |
-      gt@max[1] > 0.98 * par("usr")[2]) {
-      gt@max[1] <- 0.98 * par("usr")[2]
+      gt@max[1] > 0.98 * par("usr")[3]) {
+      gt@max[1] <- 0.98 * par("usr")[3]
     }
 
     # Add points (x1,hln) and (x2, hln)
@@ -235,7 +235,7 @@ cyto_plot_gate.rectangleGate <- function(x,
     # Add rectangle
     rect(
       xleft = gt@min,
-      ybottom = 0.6 * par("usr")[3],
+      ybottom = 0.6 * par("usr")[2],
       xright = gt@max,
       ytop = 0.985 * par("usr")[4],
       border = gate_line_col,

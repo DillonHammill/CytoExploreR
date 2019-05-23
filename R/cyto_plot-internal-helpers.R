@@ -1009,7 +1009,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
   )
 
   # Calculate y center of plot
-  cnt <- par("usr")[3] + (par("usr")[4] - par("usr")[3]) / 2
+  cnt <- par("usr")[2] + (par("usr")[4] - par("usr")[2]) / 2
 
   # Legend for 1D density distributions
   if (length(channels) == 1) {
@@ -1042,7 +1042,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
       
       # Construct legend
       legend(
-        x = 1.07 * par("usr")[2],
+        x = 1.07 * par("usr")[3],
         y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
         text.font = rev(legend_text_font),
@@ -1074,7 +1074,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
       # Construct legend
       legend(
-        x = 1.07 * par("usr")[2],
+        x = 1.07 * par("usr")[3],
         y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
         fill = rev(legend_box_fill),
@@ -1102,7 +1102,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
     }
 
     legend(
-      x = 1.08 * par("usr")[2],
+      x = 1.08 * par("usr")[3],
       y = cnt + 0.6 * lgnd_height,
       legend = rev(legend_text),
       col = rev(legend_point_col),
@@ -1814,8 +1814,8 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
     # No gates - use plot limits to set co-ordinates for label
     xmin <- par("usr")[1]
-    xmax <- par("usr")[2]
-    ymin <- par("usr")[3]
+    xmax <- par("usr")[3]
+    ymin <- par("usr")[2]
     ymax <- par("usr")[4]
 
     # x label position - defaults to 3/4 * range of x axis
@@ -1868,8 +1868,8 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
   # Plot limits
   xmin <- par("usr")[1]
-  xmax <- par("usr")[2]
-  ymin <- par("usr")[3]
+  xmax <- par("usr")[3]
+  ymin <- par("usr")[2]
   ymax <- par("usr")[4]
 
   # 1D gate supplied
@@ -1886,7 +1886,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
             xmin <- par("usr")[1]
           }
           if (is.infinite(xmax)) {
-            xmax <- par("usr")[2]
+            xmax <- par("usr")[3]
           }
         }
       }
@@ -1903,7 +1903,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
           }
 
           if (is.infinite(xmax)) {
-            xmax <- par("usr")[2]
+            xmax <- par("usr")[3]
           }
         }
 
@@ -1912,7 +1912,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
           ymax <- x@max[channels[2]]
 
           if (is.infinite(ymin)) {
-            ymin <- par("usr")[3]
+            ymin <- par("usr")[2]
           }
 
           if (is.infinite(ymax)) {
@@ -1936,7 +1936,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
         }
 
         if (is.infinite(xmax)) {
-          xmax <- par("usr")[2]
+          xmax <- par("usr")[3]
         }
       }
 
@@ -1945,7 +1945,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
         ymax <- x@max[channels[2]]
 
         if (is.infinite(ymin)) {
-          ymin <- par("usr")[3]
+          ymin <- par("usr")[2]
         }
 
         if (is.infinite(ymax)) {
@@ -2255,8 +2255,8 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
   # Plot limits
   xmin <- par("usr")[1]
-  xmax <- par("usr")[2]
-  ymin <- par("usr")[3]
+  xmax <- par("usr")[3]
+  ymin <- par("usr")[2]
   ymax <- par("usr")[4]
 
   xrange <- xmax - xmin
