@@ -2126,7 +2126,11 @@ cyto_plot_overlay_convert <- function(x, ...) {
   box.adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
 
   # Rectangle dimensions
-  lwidths <- strwidth(text)
+  if(.all_na(stat)){
+    lwidths <- strwidth(text)
+  }else{
+    lwidths <- max(strwidth(text), strwidth("stats %")) # stat will take up space
+  }
   rwidths <- lwidths * (1 - box.adj)
   lwidths <- lwidths * box.adj
   bheights <- theights <- strheight(text) * 0.5

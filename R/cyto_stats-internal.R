@@ -294,7 +294,7 @@
   res <- unlist(lapply(channels, function(z){
     d <- .cyto_density(x, 
                        channel = z, 
-                       density_smooth = density_smooth, 
+                       smooth = density_smooth, 
                        modal = FALSE)
     d$x[d$y == max(d$y)]
   }))
