@@ -2323,7 +2323,8 @@ cyto_plot_overlay_convert <- function(x, ...) {
     label_height <- max(label_dims[[1]][, "y"]) -
       min(label_dims[[1]][, "y"])
     label_height <- label_height + 0.18 * label_height
-    coords["y", ] <- spread.labs(coords["y", ],
+    # not perfect but users can manually "select" locations now
+    coords["y", ] <- .spread.labels(coords["y",],
       mindiff = label_height,
       min = ymin + 0.05 * yrange,
       max = ymax - 0.05 * yrange

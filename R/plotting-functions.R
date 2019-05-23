@@ -111,7 +111,7 @@
 #' @author Greg Snow \email{538280@gmail.com}
 #' 
 #' @noRd
-spread.labs <- function(x, 
+.spread.labels <- function(x, 
                         mindiff, 
                         maxiter=1000, 
                         stepsize=1/10,
