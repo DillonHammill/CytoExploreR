@@ -6,7 +6,7 @@
 \usage{
 \method{cyto_plot_compensation}{flowSet}(x, channel_match = NULL,
   compensate = FALSE, spillover = NULL, axes_trans = NA,
-  overlay = TRUE, layout, popup = FALSE, title = NA, header = NULL,
+  overlay = TRUE, layout, popup = FALSE, title = NA, header,
   header_text_font = 2, header_text_size = 1,
   header_text_col = "black", ...)
 }

@@ -101,7 +101,7 @@ cyto_plot_compensation.flowFrame <- function(x,
                                              layout,
                                              popup = FALSE,
                                              title = NA,
-                                             header = NULL,
+                                             header,
                                              header_text_font = 2,
                                              header_text_size = 1,
                                              header_text_col = "black", ...) {
@@ -160,15 +160,15 @@ cyto_plot_compensation.flowFrame <- function(x,
       par(mfrow = layout)
     }
   }
-
+  
+    # Title
+  if (missing(header)) {
+    header <- cyto_names(x)
+  }
+  
   # Title space
   if (!.all_na(header)) {
     par(oma = c(0, 0, 3, 0))
-  }
-
-  # Title
-  if (is.null(header)) {
-    header <- cyto_names(x)
   }
 
   # Plots
@@ -301,7 +301,7 @@ cyto_plot_compensation.flowSet <- function(x,
                                            layout,
                                            popup = FALSE,
                                            title = NA,
-                                           header = NULL,
+                                           header,
                                            header_text_font = 2,
                                            header_text_size = 1,
                                            header_text_col = "black", ...) {
@@ -403,16 +403,16 @@ cyto_plot_compensation.flowSet <- function(x,
     }
   }
 
+    # Title
+  if (missing(header)) {
+    header <- pd$name
+  }
+  
   # Title space
   if (!.all_na(header)) {
     par(oma = c(0, 0, 3, 0))
   }
-
-  # Title
-  if (is.null(header)) {
-    header <- nms
-  }
-
+  
   # Loop through fs_list
   lapply(1:smp, function(z) {
     lapply(seq_len(length(channels)), function(y) {
@@ -435,7 +435,7 @@ cyto_plot_compensation.flowSet <- function(x,
 
       # Call new plot
       if (z != smp & channels[y] == channels[length(channels)]) {
-        if (!is.null(header)) {
+        if (!.all_na(header)) {
           mtext(header[z],
             outer = TRUE,
             cex = header_text_size,
@@ -454,7 +454,7 @@ cyto_plot_compensation.flowSet <- function(x,
           par(oma = c(0, 0, 3, 0))
         }
       } else if (z == smp & channels[y] == channels[length(channels)]) {
-        if (!is.null(header)) {
+        if (!.all_na(header)) {
           mtext(header[z],
             outer = TRUE,
             cex = header_text_size,
@@ -578,7 +578,7 @@ cyto_plot_compensation.GatingSet <- function(x,
                                              layout,
                                              popup = FALSE,
                                              title = NA,
-                                             header = NULL,
+                                             header,
                                              header_text_font = 2,
                                              header_text_size = 1,
                                              header_text_col = "black", ...) {
@@ -616,7 +616,7 @@ cyto_plot_compensation.GatingSet <- function(x,
   # Transformations
   axes_trans <- .cyto_transform_complete(x, axes_trans)
   axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
-
+  
   # Make call to cyto_plot_compensation
   cyto_plot_compensation(
     x = fs,

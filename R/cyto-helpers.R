@@ -1157,6 +1157,7 @@ cyto_annotate <- function(x, file = NULL) {
 #'   object.
 #'
 #' @importFrom utils read.csv
+#' @importFrom tools file_ext
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -1196,19 +1197,49 @@ cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
                                       select = 1) {
 
-  # Read in spillover matrix file
-  if (!is.null(spillover)) {
-    if (getOption("CytoRSuite_wd_check")) {
-      if (!file_wd_check(spillover)) {
-        stop(paste(spillover, "does not exist in this working directory."))
+  # Spillover matrix supplied - matrix, data.frame or csv file
+  if(!is.null(spillover)){
+    
+    # spillover is a character string containing name of csv file
+    if(inherits(spillover, "character")){
+      # No file extension
+      if(file_ext(spillover) == ""){
+        spillover <- paste0(spillover, ".csv")
       }
+      
+      # Check working directory for csv file
+      if(getOption("CytoRSuite_wd_check")){
+        if(!file_wd_check(spillover)){
+          stop(paste(spillover, "does not exist in this working directory."))
+        }
+      }
+      spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      colnames(spill) <- rownames(spill)
+    
+      # column/row names must be valid channels
+      if(!all(rownames(spill) %in% BiocGenerics::colnames(x)) |
+         !all(rownames(spill) %in% BiocGenerics::colnames(x))){
+        stop(
+          paste("'spillover' must have valid fluorescent channels as rownames",
+                "and colnames.")
+        )
+      }
+      
+    # spillover is a matrix/data.frame
+    }else if(inherits(spillover, "matrix") |
+             inherits(spillover, "data.frame")){
+      
+      # column names must be valid channels (rownames not essential)
+      if(!all(colnames(spillover) %in% BiocGenerics::colnames(x))){
+        stop("'spillover' must have valid fluorescent channels as colnames.")
+      }else{
+        spill <- spillover
+      }
+    
     }
-    spill <- read.csv(spillover, header = TRUE, row.names = 1)
-    colnames(spill) <- rownames(spill)
-  }
-
-  # Extract spillover directly from x
-  if (is.null(spillover)) {
+  
+  # Extract spillover matrix directly from x  
+  }else if (is.null(spillover)) {
     spill <- x@description$SPILL
   }
 
@@ -1222,23 +1253,57 @@ cyto_compensate.flowSet <- function(x,
                                     spillover = NULL,
                                     select = 1) {
 
-  # Read in spillover matrix file
-  if (!is.null(spillover)) {
-    if (getOption("CytoRSuite_wd_check")) {
-      if (!file_wd_check(spillover)) {
-        stop(paste(spillover, "does not exist in this working directory."))
+  # Spillover matrix supplied - matrix, data.frame or csv file
+  if(!is.null(spillover)){
+    
+    # spillover is a character string containing name of csv file
+    if(inherits(spillover, "character")){
+      # No file extension
+      if(file_ext(spillover) == ""){
+        spillover <- paste0(spillover, ".csv")
       }
+      
+      # Check working directory for csv file
+      if(getOption("CytoRSuite_wd_check")){
+        if(!file_wd_check(spillover)){
+          stop(paste(spillover, "does not exist in this working directory."))
+        }
+      }
+      spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      colnames(spill) <- rownames(spill)
+      
+      # column/row names must be valid channels
+      if(!all(rownames(spill) %in% BiocGenerics::colnames(x)) |
+         !all(rownames(spill) %in% BiocGenerics::colnames(x))){
+        stop(
+          paste("'spillover' must have valid fluorescent channels as rownames",
+                "and colnames.")
+        )
+      }
+      
+      # Convert spill into a named list
+      spill <- rep(list(spill), length(x))
+      names(spill) <- cyto_names(x)
+      
+    # spillover is a matrix/data.frame
+    }else if(inherits(spillover, "matrix") |
+             inherits(spillover, "data.frame")){
+      
+      # column names must be valid channels (rownames not essential)
+      if(!all(colnames(spillover) %in% BiocGenerics::colnames(x))){
+        stop("'spillover' must have valid fluorescent channels as colnames.")
+      }else{
+        spill <- spillover
+      }
+      
+      # Convert spill into a named list
+      spill <- rep(list(spill), length(x))
+      names(spill) <- cyto_names(x)
+      
     }
-    spill <- read.csv(spillover, header = TRUE, row.names = 1)
-    colnames(spill) <- rownames(spill)
-
-    # Convert spill into a named list
-    spill <- rep(list(spill), length(x))
-    names(spill) <- cyto_names(x)
-  }
-
-  # Extract spillover directly from x
-  if (is.null(spillover)) {
+    
+    # Extract spillover matrix directly from x  
+  }else if (is.null(spillover)) {
     if (!is.null(select)) {
       spill <- rep(list(x[[select]]@description$SPILL), length(x))
       names(spill) <- cyto_names(x)
@@ -1258,32 +1323,66 @@ cyto_compensate.flowSet <- function(x,
 cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
                                       select = 1) {
-
+  
   # Extract flowSet
   fs <- cyto_extract(x, parent = "root")
-
-  # Read in spillover matrix file
-  if (!is.null(spillover)) {
-    if (getOption("CytoRSuite_wd_check")) {
-      if (!file_wd_check(spillover)) {
-        stop(paste(spillover, "does not exist in this working directory."))
+  
+  # Spillover matrix supplied - matrix, data.frame or csv file
+  if(!is.null(spillover)){
+    
+    # spillover is a character string containing name of csv file
+    if(inherits(spillover, "character")){
+      # No file extension
+      if(file_ext(spillover) == ""){
+        spillover <- paste0(spillover, ".csv")
       }
+      
+      # Check working directory for csv file
+      if(getOption("CytoRSuite_wd_check")){
+        if(!file_wd_check(spillover)){
+          stop(paste(spillover, "does not exist in this working directory."))
+        }
+      }
+      spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      colnames(spill) <- rownames(spill)
+      
+      # column/row names must be valid channels
+      if(!all(rownames(spill) %in% BiocGenerics::colnames(fs)) |
+         !all(rownames(spill) %in% BiocGenerics::colnames(fs))){
+        stop(
+          paste("'spillover' must have valid fluorescent channels as rownames",
+                "and colnames.")
+        )
+      }
+      
+      # Convert spill into a named list
+      spill <- rep(list(spill), length(fs))
+      names(spill) <- cyto_names(fs)
+      
+      # spillover is a matrix/data.frame
+    }else if(inherits(spillover, "matrix") |
+             inherits(spillover, "data.frame")){
+      
+      # column names must be valid channels (rownames not essential)
+      if(!all(colnames(spillover) %in% BiocGenerics::colnames(fs))){
+        stop("'spillover' must have valid fluorescent channels as colnames.")
+      }else{
+        spill <- spillover
+      }
+      
+      # Convert spill into a named list
+      spill <- rep(list(spill), length(fs))
+      names(spill) <- cyto_names(fs)
+      
     }
-    spill <- read.csv(spillover, header = TRUE, row.names = 1)
-    colnames(spill) <- rownames(spill)
-
-    # Convert spill into a named list
-    spill <- rep(list(spill), length(x))
-    names(spill) <- cyto_names(x)
-  }
-
-  # Extract spillover directly from x
-  if (is.null(spillover)) {
+    
+    # Extract spillover matrix directly from fs  
+  }else if (is.null(spillover)) {
     if (!is.null(select)) {
-      spill <- rep(list(fs[[select]]@description$SPILL), length(x))
-      names(spill) <- cyto_names(x)
+      spill <- rep(list(fs[[select]]@description$SPILL), length(fs))
+      names(spill) <- cyto_names(fs)
     } else {
-      spill <- lapply(cyto_names(x), function(y) {
+      spill <- lapply(cyto_names(fs), function(y) {
         fs[[y]]@description$SPILL
       })
     }
