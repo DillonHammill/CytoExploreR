@@ -1430,12 +1430,20 @@ cyto_plot.flowSet <- function(x,
                  border_fill_alpha = border_fill_alpha
       )
       
+      # New plot
       if (popup == TRUE &
           cnt %% np == 0 &
           length(fr_list) > cnt) {
         cyto_plot_new(popup = popup)
         par("mfrow" = layout)
       }
+      
+      # Turn off label_coords if density_modal == FALSE
+      # re-used labels will be incorrectly positioned
+      if(density_modal == FALSE){
+        options("CytoRSuite_cyto_plot_label_coords" = NULL)
+      }
+      
     },
     fr_list,
     gate,
@@ -3152,12 +3160,20 @@ cyto_plot.GatingSet <- function(x,
         border_fill_alpha = border_fill_alpha
       )
 
+      # New plot
       if (popup == TRUE &
         cnt %% np == 0 &
         length(fr_list) > cnt) {
         cyto_plot_new(popup = popup)
         par("mfrow" = layout)
       }
+      
+      # Turn off label_coords if density_modal == FALSE
+      # re-used labels will be incorrectly positioned
+      if(density_modal == FALSE){
+        options("CytoRSuite_cyto_plot_label_coords" = NULL)
+      }
+      
     },
     fr_list,
     gate,
