@@ -230,23 +230,12 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = TRUE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = TRUE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   # Construct gates
@@ -259,7 +248,6 @@
     )
     
     # Extract gate coordinates
-    if (getOption("CytoRSuite_interact") == TRUE) {
       options("show.error.messages" = FALSE)
       on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
@@ -269,13 +257,6 @@
         pch = 16,
         col = "red"
       )
-    } else {
-      coords <- list(
-        c(25000, 150000),
-        c(5000, 150000)
-      )
-      names(coords) <- c("x", "y")
-    }
     
     coords <- data.frame(coords)
     coords <- as.matrix(coords)
@@ -409,23 +390,12 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = FALSE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   # Construct gates
@@ -438,7 +408,6 @@
     )
     
     # Extract gate coordinates
-    if (getOption("CytoRSuite_interact") == TRUE) {
       options("show.error.messages" = FALSE)
       on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
@@ -448,13 +417,6 @@
         pch = 16,
         col = "red"
       )
-    } else {
-      coords <- list(
-        c(25000, 150000),
-        c(-Inf, Inf)
-      )
-      names(coords) <- c("x", "y")
-    }
     coords <- data.frame(coords)
     coords <- as.matrix(coords)
     
@@ -626,23 +588,12 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = FALSE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   # Construct gates
@@ -658,7 +609,6 @@
   }
   
   # Extract gate coordinates
-  if (getOption("CytoRSuite_interact") == TRUE) {
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
@@ -668,13 +618,6 @@
       pch = 16,
       col = "red"
     )
-  } else {
-    coords <- list(
-      c(25000),
-      c(5000)
-    )
-    names(coords) <- c("x", "y")
-  }
   
   if (length(channels) == 1) {
     pts <- data.frame(x = c(coords$x, Inf))
@@ -805,23 +748,12 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = FALSE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   # Construct gates
@@ -837,7 +769,6 @@
   }
   
   # Extract gate coordinates
-  if (getOption("CytoRSuite_interact") == TRUE) {
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
@@ -847,13 +778,6 @@
       pch = 16,
       col = "red"
     )
-  } else {
-    coords <- list(
-      c(200000),
-      c(200000)
-    )
-    names(coords) <- c("x", "y")
-  }
   
   if (length(channels) == 1) {
     pts <- data.frame(x = c(-Inf, coords$x))
@@ -974,23 +898,12 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = FALSE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   # Construct gates
@@ -1003,7 +916,6 @@
     )
     
     # Extract gate coordinates
-    if (getOption("CytoRSuite_interact") == TRUE) {
       options("show.error.messages" = FALSE)
       on.exit(options("show.error.messages" = TRUE))
       coords <- locator(
@@ -1013,13 +925,6 @@
         pch = 16,
         col = "red"
       )
-    } else {
-      coords <- list(
-        c(40000, 60000, 100000, 60000),
-        c(50000, 5000, 50000, 100000)
-      )
-      names(coords) <- c("x", "y")
-    }
     
     coords <- data.frame(coords)
     
@@ -1191,23 +1096,12 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = FALSE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   if (!length(alias) == 4) {
@@ -1220,7 +1114,6 @@
   )
   
   # Extract points of drawn gate
-  if (getOption("CytoRSuite_interact") == TRUE) {
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     pts <- locator(
@@ -1229,10 +1122,6 @@
       lwd = 2,
       pch = 16
     )
-  } else {
-    pts <- list(c(150000), c(150000))
-    names(pts) <- c("x", "y")
-  }
   
   lines(
     x = pts$x[c(1, length(pts$x))],
@@ -1413,30 +1302,18 @@
   
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("CytoRSuite_interact") == FALSE) {
-      cyto_plot(fr,
-                channels = channels,
-                popup = FALSE,
-                legend = FALSE,
-                label = FALSE, ...
-      )
-    } else {
       cyto_plot(fr,
                 channels = channels,
                 popup = TRUE,
                 legend = FALSE,
                 label = FALSE, ...
       )
-    }
-  } else if (plot == FALSE) {
-    
   }
   
   # Construct gates
   # Select center of the web gate
   message("Select the center of the web gate.")
   
-  if (getOption("CytoRSuite_interact") == TRUE) {
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     center <- locator(
@@ -1446,13 +1323,6 @@
       pch = 16,
       col = "red"
     )
-  } else {
-    center <- list(c(120627.9), c(147367.9))
-    names(center) <- c("x", "y")
-    
-    # Number of populations for tests set to 8
-    alias <- c("A", "B", "C", "D", "E", "F", "G", "H")
-  }
   
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
@@ -1467,7 +1337,6 @@
   
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
-    if (getOption("CytoRSuite_interact") == TRUE) {
       options("show.error.messages" = FALSE)
       on.exit(options("show.error.messages" = TRUE))
       pt <- locator(n = 1, 
@@ -1475,21 +1344,6 @@
                     lwd = 2.5, 
                     pch = 16, 
                     col = "red")
-    } else {
-      # Test co-ordinates
-      tst <- list(
-        list(c(18175.99), c(109811.2)),
-        list(c(59368), c(-8549.33)),
-        list(c(167629), c(4538.609)),
-        list(c(246316.3), c(3400.527)),
-        list(c(264799.9), c(184924.5)),
-        list(c(238922.9), c(267435.5)),
-        list(c(107425.3), c(258899.9)),
-        list(c(-4004.315), c(244104.8))
-      )
-      pt <- tst[[x]]
-      names(pt) <- c("x", "y")
-    }
     
     lines(
       x = c(center$x, pt$x),
