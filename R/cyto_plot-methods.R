@@ -533,7 +533,7 @@ cyto_plot.flowFrame <- function(x,
                                 n = length(fr_list),
                                 plots = 1,
                                 layers = length(fr_list),
-                                gates = length(gate)
+                                gates = length(unlist(gate))
   )
   
   # Unlist arguments modified by .cyto_plot_args_split
@@ -1287,7 +1287,7 @@ cyto_plot.flowSet <- function(x,
                                 n = length(fr_list[[1]]) * length(fr_list),
                                 plots = length(fr_list),
                                 layers = length(fr_list[[1]]),
-                                gates = length(gate[[1]])
+                                gates = length(unlist(gate[[1]]))
   )
   
   # Update arguments
@@ -2132,7 +2132,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                 n = length(fr_list),
                                 plots = 1,
                                 layers = length(fr_list),
-                                gates = length(gate)
+                                gates = length(unlist(gate))
   )
   
   # Unlist arguments modified by .cyto_plot_args_split
@@ -3017,7 +3017,7 @@ cyto_plot.GatingSet <- function(x,
     n = length(fr_list[[1]]) * length(fr_list),
     plots = length(fr_list),
     layers = length(fr_list[[1]]),
-    gates = length(gate[[1]])
+    gates = length(unlist(gate[[1]]))
   )
 
   # Update arguments
