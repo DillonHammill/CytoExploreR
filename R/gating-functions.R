@@ -59,8 +59,8 @@
 #' pg[[1]]
 #' }
 #' 
-#' @export
-gate_polygon_draw <- function(fr,
+#' @noRd
+.cyto_gate_polygon_draw <- function(fr,
                               alias = NULL,
                               channels,
                               plot = TRUE,
@@ -130,7 +130,7 @@ gate_polygon_draw <- function(fr,
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
-        gates = gate,
+        gate = gate,
         channels = channels,
         text = alias,
         text_size = 1,
@@ -210,8 +210,8 @@ gate_polygon_draw <- function(fr,
 #' rg[[1]]
 #' }
 #' 
-#' @export
-gate_rectangle_draw <- function(fr,
+#' @noRd
+.cyto_gate_rectangle_draw <- function(fr,
                                 alias = NULL,
                                 channels,
                                 plot = TRUE,
@@ -295,7 +295,7 @@ gate_rectangle_draw <- function(fr,
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
-        gates = gate,
+        gate = gate,
         channels = channels,
         text = alias,
         text_size = 1,
@@ -388,8 +388,8 @@ gate_rectangle_draw <- function(fr,
 #' ig[[1]]
 #' }
 #' 
-#' @export
-gate_interval_draw <- function(fr,
+#' @noRd
+.cyto_gate_interval_draw <- function(fr,
                                alias = NULL,
                                channels,
                                plot = TRUE,
@@ -495,7 +495,7 @@ gate_interval_draw <- function(fr,
       if (label == TRUE) {
         cyto_plot_label(
           x = fr,
-          gates = gate,
+          gate = gate,
           channels = channels,
           text = alias,
           text_size = 1,
@@ -517,7 +517,7 @@ gate_interval_draw <- function(fr,
       if (label == TRUE) {
         cyto_plot_label(
           x = fr,
-          gates = gate,
+          gate = gate,
           channels = channels,
           text = alias,
           text_size = 1,
@@ -606,8 +606,8 @@ gate_interval_draw <- function(fr,
 #' tg[[1]]
 #' }
 #' 
-#' @export
-gate_threshold_draw <- function(fr,
+#' @noRd
+.cyto_gate_threshold_draw <- function(fr,
                                 alias = NULL,
                                 channels,
                                 plot = TRUE,
@@ -702,7 +702,7 @@ gate_threshold_draw <- function(fr,
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
-      gates = gate,
+      gate = gate,
       channels = channels,
       text = alias,
       text_size = 1,
@@ -785,8 +785,8 @@ gate_threshold_draw <- function(fr,
 #' bg[[1]]
 #' }
 #' 
-#' @export
-gate_boundary_draw <- function(fr,
+#' @noRd
+.cyto_gate_boundary_draw <- function(fr,
                                alias = NULL,
                                channels,
                                plot = TRUE,
@@ -880,7 +880,7 @@ gate_boundary_draw <- function(fr,
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
-      gates = gate,
+      gate = gate,
       channels = channels,
       text = alias,
       text_size = 1,
@@ -954,8 +954,8 @@ gate_boundary_draw <- function(fr,
 #' eg[[1]]
 #' }
 #' 
-#' @export
-gate_ellipse_draw <- function(fr,
+#' @noRd
+.cyto_gate_ellipse_draw <- function(fr,
                               alias = NULL,
                               channels,
                               plot = TRUE,
@@ -1096,7 +1096,7 @@ gate_ellipse_draw <- function(fr,
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
-        gates = gate,
+        gate = gate,
         channels = channels,
         text = alias,
         text_size = 1,
@@ -1171,8 +1171,8 @@ gate_ellipse_draw <- function(fr,
 #' qg[[4]]
 #' }
 #' 
-#' @export
-gate_quadrant_draw <- function(fr,
+#' @noRd
+.cyto_gate_quadrant_draw <- function(fr,
                                alias = NULL,
                                channels,
                                plot = TRUE,
@@ -1259,7 +1259,7 @@ gate_quadrant_draw <- function(fr,
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
-      gates = q1,
+      gate = q1,
       channels = channels,
       text = alias[1],
       text_size = 1,
@@ -1277,7 +1277,7 @@ gate_quadrant_draw <- function(fr,
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
-      gates = q2,
+      gate = q2,
       channels = channels,
       text = alias[2],
       text_size = 1,
@@ -1298,7 +1298,7 @@ gate_quadrant_draw <- function(fr,
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
-      gates = q3,
+      gate = q3,
       channels = channels,
       text = alias[3],
       text_size = 1,
@@ -1316,7 +1316,7 @@ gate_quadrant_draw <- function(fr,
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
-      gates = q4,
+      gate = q4,
       channels = channels,
       text = alias[4],
       text_size = 1,
@@ -1393,8 +1393,8 @@ gate_quadrant_draw <- function(fr,
 #' wg[[4]]
 #' }
 #' 
-#' @export
-gate_web_draw <- function(fr,
+#' @noRd
+.cyto_gate_web_draw <- function(fr,
                           alias = NULL,
                           channels,
                           plot = TRUE,
@@ -1993,7 +1993,7 @@ gate_web_draw <- function(fr,
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
-        gates = gate,
+        gate = gate,
         channels = channels,
         text = alias[x],
         text_size = 1,
