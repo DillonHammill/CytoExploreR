@@ -1832,7 +1832,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       gate_line_width = 2.5,
                                       gate_line_col = "red",
                                       label,
-                                      label_text = NA,
+                                      label_text,
                                       label_stat,
                                       label_text_font = 2,
                                       label_text_size = 1,
@@ -2024,9 +2024,11 @@ cyto_plot.GatingHierarchy <- function(x,
   # Prepare arguments for plotting ---------------------------------------------
   
   # Labels - use alias  if no text supplied
-  if (.all_na(label_text)) {
+  if (.empty(label_text)) {
     if (!.all_na(alias)) {
       label_text <- alias
+    }else{
+      label_text <- NA
     }
   }
   
@@ -2545,7 +2547,7 @@ cyto_plot.GatingSet <- function(x,
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
                                 label,
-                                label_text = NA,
+                                label_text,
                                 label_stat,
                                 label_text_font = 2,
                                 label_text_size = 1,
@@ -2888,9 +2890,11 @@ cyto_plot.GatingSet <- function(x,
   # Prepare arguments for plotting ---------------------------------------------
 
   # Labels - use alias  if no text supplied
-  if (.all_na(label_text)) {
+  if (.empty(label_text)) {
     if (!.all_na(alias)) {
       label_text <- alias
+    }else{
+      label_text <- NA
     }
   }
 
