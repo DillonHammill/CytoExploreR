@@ -74,7 +74,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Supply a name for the gated population to the 'alias' argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -225,7 +225,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -385,7 +385,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -583,7 +583,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -743,7 +743,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -893,7 +893,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -991,7 +991,7 @@
       mean = center,
       filterId = alias
     )
-
+    
     polygon(as(gate, "polygonGate")@boundaries[, 1],
       as(gate, "polygonGate")@boundaries[, 2],
       border = "red",
@@ -1091,7 +1091,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -1105,7 +1105,7 @@
   }
 
   if (!length(alias) == 4) {
-    stop("'alias' should contain 4 population names for quadrant gates.")
+    stop("'alias' must contain 4 population names for quadrant gates.")
   }
 
   # Construct gates
@@ -1252,7 +1252,7 @@
 #'
 #' @importFrom flowCore polygonGate filters
 #' @importFrom flowCore exprs
-#' @importFrom graphics locator lines
+#' @importFrom graphics locator lines par
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1327,13 +1327,11 @@
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
 
-  # Extract data for use later & Calculate min and max values
-  vals <- exprs(fr)[, channels]
-  xmin <- round(min(vals[, channels[1]]), 4)
-  xmax <- round(max(vals[, channels[1]]), 4)
-  ymin <- round(min(vals[, channels[2]]), 4)
-  ymax <- round(max(vals[, channels[2]]), 4)
-
+  # Minimum and maximum limits of plot
+  xmin <- par("usr")[1]
+  xmax <- par("usr")[2]
+  ymin <- par("usr")[3]
+  ymax <- par("usr")[4]
 
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {

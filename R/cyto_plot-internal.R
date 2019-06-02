@@ -229,9 +229,6 @@
       )
     }
 
-    # GRAPHICS DEVICE
-    cyto_plot_new(popup)
-
     # EMPTY PLOT - handles margins and axes limits internally
     cyto_plot_empty(x,
       channels = channels,
@@ -478,9 +475,6 @@
         })
       }
     }
-
-    # GRAPHICS DEVICE
-    cyto_plot_new(popup)
 
     # EMPTY PLOT - handles margins and axes limits internally
     cyto_plot_empty(x,
