@@ -316,12 +316,12 @@ setMethod(spillover_edit,
                                ),
                                checkboxInput(
                                  inputId = "Uncomp",
-                                 label = "Underlay Uncompenasted Control",
+                                 label = "Underlay Uncompensated Control",
                                  value = TRUE
                                ),
                                checkboxInput(
                                  inputId = "Comp",
-                                 label = "Overlay Compenasted Control",
+                                 label = "Overlay Compensated Control",
                                  value = TRUE
                                )
                              ),
