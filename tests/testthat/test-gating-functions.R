@@ -1,224 +1,727 @@
-context("Gating Functions")
+context("gating functions")
 
-## gate_polygon_draw -----------------------------------------------------------
+cyto_plot(Va2[[1]],
+          channels = c("FSC-A","SSC-A"))
 
-test_that("gate_polygon_draw", {
-  expect_error(gate_polygon_draw(fr_test, 
-                                 channels = "FSC-A"), 
-      "Please supply a name for the gated population as the alias argument.")
+xmin <- par("usr")[1]
+xmax <- par("usr")[2]
+ymin <- par("usr")[3]
+ymax <- par("usr")[4]
+
+# .cyto_gate_polygon_draw ------------------------------------------------------
+
+test_that(".cyto_gate_polygon_draw", {
   
-  # Reference polygonGate -
-  coords <- list("x" = c(50000, 100000, 100000, 75000, 50000),
-                 "y" = c(10000, 10000, 60000, 85000, 60000))
-  coords <- matrix(c(50000, 100000, 100000, 75000, 50000, 
-                     10000, 10000, 60000, 85000, 60000), 
-                   ncol = 2, nrow = 5)
-  colnames(coords) <- c("FSC-A", "SSC-A")
-  ref <- polygonGate(filterId = "Cells", .gate = coords)
-  mock_locator <- mock(coords)
-  testthat::with_mock(locator = mock_locator,
-                      expect_equal(
-                        gate_polygon_draw(fr_test,
-                                          alias = "Cells",
-                                          channels = c("FSC-A","SSC-A"),
-                                          plot = FALSE),
-                        ref))
-
+  # Alias error
+  expect_error(.cyto_gate_polygon_draw(Va2[[1]],
+                                       channels = c("FSC-A","SSC-A")),
+        "Supply a name for the gated population(s) to the 'alias' argument.",
+        fixed = TRUE)
+  
+  # Too few points selected
+  mock_locator <- mock(list("x" = c(50000, 100000), "y" = c(50000, 100000)))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_error(.cyto_gate_polygon_draw(Va2[[1]],
+                                         alias = "Cells",
+                                         channels = c("FSC-A","SSC-A"),
+                                         plot = FALSE),
+             "A minimum of 3 points is required to construct a polygon gate."))
+  
+  # 2D -------------------------------------------------------------------------
+  pg <- matrix(c(
+    50000,
+    75000,
+    100000,
+    75000,
+    50000,
+    50000,
+    100000,
+    100000
+  ),
+  ncol = 2,
+  nrow = 4,
+  byrow = FALSE
+  )
+  colnames(pg) <- c("FSC-A", "SSC-A")
+  pg <- polygonGate(filterId = "Cells", .gate = pg)
+  pg <- filters(list(pg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      75000,
+      100000,
+      75000
+    ),
+    "y" = c(
+      50000,
+      50000,
+      100000,
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_polygon_draw(Va2[[1]],
+        alias = "Cells",
+        channels = c("FSC-A", "SSC-A"),
+        plot = FALSE
+      ),
+      pg
+    )
+  )
+  
 })
 
-## gate_rectangle_draw ---------------------------------------------------------
+# .cyto_gate_rectangle_draw ----------------------------------------------------
 
-test_that("gate_rectangle_draw", {
-  expect_error(gate_rectangle_draw(fs[[1]], 
-                                   channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
+test_that(".cyto_gate_rectangle_draw", {
   
-  dr <- gate_rectangle_draw(fs[[1]], 
-                            alias = "Cells", 
-                            channels = c("FSC-A", "SSC-A"), 
-                            display = 0.05)
+  # Alias error
+  expect_error(.cyto_gate_rectangle_draw(Va2[[1]],
+                                         channels = c("FSC-A","SSC-A")),
+        "Supply a name for the gated population(s) to the 'alias' argument.",
+        fixed = TRUE)
+
+  # 2D -------------------------------------------------------------------------
+  rg <- matrix(c(
+    50000,
+    100000,
+    50000,
+    100000
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A", "SSC-A")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      100000
+    ),
+    "y" = c(
+      50000,
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_rectangle_draw(Va2[[1]],
+        alias = "Cells",
+        channels = c("FSC-A", "SSC-A"),
+        plot = FALSE
+      ),
+      rg
+    )
+  )
   
-  expect_s4_class(dr, "filters")
-  expect_s4_class(dr[[1]], "rectangleGate")
-  expect_equal(dr[[1]], rg)
-  expect_equal(parameters(dr[[1]]), parameters(rg))
 })
 
-## gate_interval_draw ----------------------------------------------------------
+# .cyto_gate_interval_draw -----------------------------------------------------
 
-test_that("gate_interval_draw", {
+test_that(".cyto_gate_interval_draw", {
   
-  # 1-D ------------------------------------------------------------------------
-  di <- gate_interval_draw(fs[[1]], alias = "Cells", channels = "FSC-A")
+  # Alias error
+  expect_error(.cyto_gate_interval_draw(Va2[[1]],
+                                         channels = c("FSC-A","SSC-A")),
+          "Supply a name for the gated population(s) to the 'alias' argument.",
+          fixed = TRUE)
   
-  expect_s4_class(di, "filters")
-  expect_s4_class(di[[1]], "rectangleGate")
-  expect_equal(di[[1]], igx)
-  expect_equal(parameters(di[[1]]), parameters(igx))
+  # 1D - x axis ----------------------------------------------------------------
+  rg <- matrix(c(
+    50000,
+    100000
+  ),
+  ncol = 1,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      100000
+    ),
+    "y" = c(
+      50000,
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_interval_draw(Va2[[1]],
+                               alias = "Cells",
+                               channels = c("FSC-A"),
+                               axis = "x",
+                               plot = FALSE
+      ),
+      rg
+    )
+  )
+
+  # 1D - y axis (error) --------------------------------------------------------
+  rg <- matrix(c(
+    50000,
+    100000
+  ),
+  ncol = 1,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      100000
+    ),
+    "y" = c(
+      50000,
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_error(
+      .cyto_gate_interval_draw(Va2[[1]],
+                               alias = "Cells",
+                               channels = c("FSC-A"),
+                               axis = "y",
+                               plot = FALSE
+      ),
+      "Cannot gate y axis if a single channel is supplied."
+    )
+  )
   
-  expect_error(gate_interval_draw(fs[[1]],
-                                  alias = "Cells", 
-                                  channels = "FSC-A", 
-                                  axis = "y"), 
-               "Cannot gate y axis if a single channel is supplied.")
-  expect_error(gate_interval_draw(fs[[1]], 
-                                  channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
+  # 2D - x axis ----------------------------------------------------------------
+  rg <- matrix(c(
+    50000,
+    100000,
+    -Inf,
+    Inf
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A", "SSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      100000
+    ),
+    "y" = c(
+      50000,
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_interval_draw(Va2[[1]],
+                                alias = "Cells",
+                                channels = c("FSC-A", "SSC-A"),
+                                axis = "x",
+                                plot = FALSE
+      ),
+      rg
+    )
+  )
   
-  # 2-D x axis -----------------------------------------------------------------
-  di <- gate_interval_draw(fs[[1]], 
-                           alias = "Cells", 
-                           channels = c("FSC-A", "SSC-A"), 
-                           display = 0.05)
+  # 2D - y axis ----------------------------------------------------------------
+  rg <- matrix(c(
+    -Inf,
+    Inf,
+    50000,
+    100000
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A", "SSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      100000
+    ),
+    "y" = c(
+      50000,
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_interval_draw(Va2[[1]],
+                               alias = "Cells",
+                               channels = c("FSC-A", "SSC-A"),
+                               axis = "y",
+                               plot = FALSE
+      ),
+      rg
+    )
+  )
   
-  expect_s4_class(di, "filters")
-  expect_s4_class(di[[1]], "rectangleGate")
-  expect_equal(di[[1]], ig)
-  expect_equal(parameters(di[[1]]), parameters(ig))
-  
-  # 2-D y axis -----------------------------------------------------------------
-  di <- gate_interval_draw(fs[[1]], 
-                           alias = "Cells", 
-                           channels = c("FSC-A", "SSC-A"), 
-                           display = 0.05, 
-                           axis = "y")
-  
-  coords <- matrix(c(di[[1]]@min[1], 
-                     di[[1]]@max[1],
-                     25000, 
-                     150000),
-                   ncol = 2, nrow = 2)
-  colnames(coords) <- c("FSC-A", "SSC-A")
-  rownames(coords) <- c("min", "max")
-  di <- rectangleGate(filterId = "Cells", .gate = coords)
-  di <- filters(list(di))
-  
-  expect_s4_class(di, "filters")
-  expect_s4_class(di[[1]], "rectangleGate")
-  expect_equal(di[[1]], igy)
-  expect_equal(parameters(di[[1]]), parameters(igy))
 })
 
-## gate_threshold_draw ---------------------------------------------------------
+# .cyto_gate_threshold_draw ----------------------------------------------------
 
-test_that("gate_threshold_draw", {
-  expect_error(gate_threshold_draw(fs[[1]], 
-                                   channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
-  expect_error(gate_threshold_draw(fs[[1]], 
-                                   alias = c("A", "B"), 
-                                   channels = "FSC-A"), 
-               "Multiple threshold gates are not supported.")
+test_that(".cyto_gate_threshold_draw", {
   
-  # 1-D ------------------------------------------------------------------------
-  dt <- gate_threshold_draw(fs[[1]], 
-                            alias = "Cells", 
-                            channels = "FSC-A")
+  # Multiple alias error
+  expect_error(.cyto_gate_threshold_draw(Va2[[1]],
+                                         alias = c("A","B","C"),
+                                         channels = c("FSC-A","SSC-A"),
+                                         plot = FALSE),
+          "Multiple threshold gates are not supported.",
+          fixed = TRUE)
   
-  expect_s4_class(dt, "filters")
-  expect_s4_class(dt[[1]], "rectangleGate")
-  expect_equal(dt[[1]], tg1)
-  expect_equal(parameters(dt[[1]]), parameters(tg1))
+  # Alias error
+  expect_error(.cyto_gate_threshold_draw(Va2[[1]],
+                                         channels = c("FSC-A","SSC-A")),
+          "Supply a name for the gated population(s) to the 'alias' argument.",
+          fixed = TRUE)
   
-  # 2-D ------------------------------------------------------------------------
-  dt <- gate_threshold_draw(fs[[1]], 
-                            alias = "Cells", 
-                            channels = c("FSC-A", "SSC-A"),
-                            display = 0.05)
+  # 1D -------------------------------------------------------------------------
+  rg <- matrix(c(
+    50000,
+    Inf
+  ),
+  ncol = 1,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000
+    ),
+    "y" = c(
+      50000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_threshold_draw(Va2[[1]],
+                               alias = "Cells",
+                               channels = c("FSC-A"),
+                               plot = FALSE
+      ),
+      rg
+    )
+  )
   
-  expect_s4_class(dt, "filters")
-  expect_s4_class(dt[[1]], "rectangleGate")
-  expect_equal(dt[[1]], tg)
-  expect_equal(parameters(dt[[1]]), parameters(tg))
+  # 2D -------------------------------------------------------------------------
+  rg <- matrix(c(
+    50000,
+    Inf,
+    50000,
+    Inf
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A", "SSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000
+    ),
+    "y" = c(
+      50000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_threshold_draw(Va2[[1]],
+                                alias = "Cells",
+                                channels = c("FSC-A", "SSC-A"),
+                                plot = FALSE
+      ),
+      rg
+    )
+  )
+  
 })
 
-## gate_boundary_draw ----------------------------------------------------------
+# .cyto_gate_boundary_draw -----------------------------------------------------
 
-test_that("gate_boundary_draw", {
-  expect_error(gate_boundary_draw(fs[[1]], 
-                                  channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
-  expect_error(gate_boundary_draw(fs[[1]], 
-                                  alias = c("A", "B"), 
-                                  channels = "FSC-A"), 
-               "Multiple boundary gates are not supported.")
+test_that(".cyto_gate_boundary_draw", {
   
-  # 1-D ------------------------------------------------------------------------
-  db <- gate_boundary_draw(fs[[1]], 
-                           alias = "Cells", 
-                           channels = "FSC-A")
+  # Multiple alias error
+  expect_error(.cyto_gate_boundary_draw(Va2[[1]],
+                                         alias = c("A","B","C"),
+                                         channels = c("FSC-A","SSC-A"),
+                                         plot = FALSE),
+               "Multiple boundary gates are not supported.",
+               fixed = TRUE)
   
-  expect_s4_class(db, "filters")
-  expect_s4_class(db[[1]], "rectangleGate")
-  expect_equal(db[[1]], bg1)
-  expect_equal(parameters(db[[1]]), parameters(bg1))
+  # Alias error
+  expect_error(.cyto_gate_boundary_draw(Va2[[1]],
+                                         channels = c("FSC-A","SSC-A")),
+          "Supply a name for the gated population(s) to the 'alias' argument.",
+          fixed = TRUE)
   
-  # 2-D ------------------------------------------------------------------------
-  db <- gate_boundary_draw(fs[[1]], 
-                           alias = "Cells", 
-                           channels = c("FSC-A", "SSC-A"), 
-                           display = 0.05)
+  # 1D -------------------------------------------------------------------------
+  rg <- matrix(c(
+    -Inf,
+    100000
+  ),
+  ncol = 1,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      100000
+    ),
+    "y" = c(
+      50
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_boundary_draw(Va2[[1]],
+                                alias = "Cells",
+                                channels = c("FSC-A"),
+                                plot = FALSE
+      ),
+      rg
+    )
+  )
   
-  expect_s4_class(db, "filters")
-  expect_s4_class(db[[1]], "rectangleGate")
-  expect_equal(db[[1]], bg)
-  expect_equal(parameters(db[[1]]), parameters(bg))
+  # 2D -------------------------------------------------------------------------
+  rg <- matrix(c(
+    -Inf,
+    100000,
+    -Inf,
+    100000
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(rg) <- c("FSC-A", "SSC-A")
+  rownames(rg) <- c("min","max")
+  rg <- rectangleGate(filterId = "Cells", .gate = rg)
+  rg <- filters(list(rg))
+  mock_locator <- mock(list(
+    "x" = c(
+      100000
+    ),
+    "y" = c(
+      100000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_boundary_draw(Va2[[1]],
+                                alias = "Cells",
+                                channels = c("FSC-A", "SSC-A"),
+                                plot = FALSE
+      ),
+      rg
+    )
+  )
+  
 })
 
-## gate_ellipse_draw -----------------------------------------------------------
+# .cyto_gate_ellipse_draw ------------------------------------------------------
 
-test_that("gate_ellipse_draw", {
-  expect_error(gate_ellipse_draw(fs[[1]], 
-                                 channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
+test_that(".cyto_gate_ellipse_draw", {
   
-  de <- gate_ellipse_draw(fs[[1]], 
-                          alias = "Cells", 
-                          channels = c("FSC-A", "SSC-A"), 
-                          display = 0.05)
+  # NOTE: Horizontal Major axis not supported!
   
-  expect_s4_class(de, "filters")
-  expect_s4_class(de[[1]], "ellipsoidGate")
-  expect_equal(de[[1]]@mean, eg@mean)
-  expect_equal(round(de[[1]]@cov, 8), round(eg@cov, 8))
+  # Alias error
+  expect_error(.cyto_gate_ellipse_draw(Va2[[1]],
+                                       channels = c("FSC-A","SSC-A")),
+          "Supply a name for the gated population(s) to the 'alias' argument.",
+          fixed = TRUE)
+  
+  # 2D -------------------------------------------------------------------------
+  cov <- matrix(c(850000000,
+                  400000000,
+                  400000000,
+                  850000000),
+                ncol = 2,
+                nrow = 2,
+                byrow = FALSE)
+  rownames(cov) <- c("FSC-A","SSC-A")
+  colnames(cov) <- c("FSC-A", "SSC-A")
+  cnt <- c(75000, 75000)
+  eg <- ellipsoidGate(filterId = "Cells",
+                      mean = cnt,
+                      .gate = cov)
+  eg <- filters(list(eg))
+  mock_locator <- mock(list(
+    "x" = c(
+      50000,
+      90000,
+      100000,
+      60000
+    ),
+    "y" = c(
+      50000,
+      60000,
+      100000,
+      90000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_ellipse_draw(Va2[[1]],
+                              alias = "Cells",
+                              channels = c("FSC-A", "SSC-A"),
+                              plot = FALSE
+      ),
+      eg
+    )
+  )
+  
 })
 
-## gate_quadrant_draw ----------------------------------------------------------
+# .cyto_gate_quadrant_draw -----------------------------------------------------
 
-test_that("gate_quadrant_draw", {
-  expect_error(gate_quadrant_draw(fs[[1]], 
-                                  channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
-  expect_error(gate_quadrant_draw(fs[[1]], 
-                                  alias = "A", 
-                                  channels = "FSC-A"), 
-               "'alias' should contain 4 population names for quadrant gates.")
+test_that(".cyto_gate_quadrant_draw", {
   
-  dq <- gate_quadrant_draw(fs[[1]], 
-                           alias = c("A", "B", "C", "D"), 
-                           channels = c("FSC-A", "SSC-A"), 
-                           display = 0.05)
+  # Alias error
+  expect_error(.cyto_gate_quadrant_draw(Va2[[1]],
+                                       channels = c("FSC-A","SSC-A")),
+          "Supply a name for the gated population(s) to the 'alias' argument.",
+          fixed = TRUE)
   
-  expect_s4_class(dq, "filters")
-  expect_length(dq, 4)
-  expect_equal(unlist(lapply(dq, class)), rep("rectangleGate", 4))
-  expect_equal(qg, dq)
+  # length(alias) != 4
+  expect_error(.cyto_gate_quadrant_draw(Va2[[1]],
+                                        alias = c("A","B"),
+                                        channels = c("FSC-A","SSC-A"),
+                                        plot = FALSE),
+               "'alias' must contain 4 population names for quadrant gates.",
+               fixed = TRUE)
+  
+  # 2D -------------------------------------------------------------------------
+  # Q1 - bottom left
+  q1 <- matrix(c(
+    -Inf,
+    75000,
+    -Inf,
+    75000
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(q1) <- c("FSC-A", "SSC-A")
+  rownames(q1) <- c("min","max")
+  q1 <- rectangleGate(filterId = "A", .gate = q1)
+  
+  # Q2
+  q2 <- matrix(c(
+    75000,
+    Inf,
+    75000,
+    -Inf
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(q2) <- c("FSC-A", "SSC-A")
+  rownames(q2) <- c("min","max")
+  q2 <- rectangleGate(filterId = "B", .gate = q2)
+  
+  # Q3
+  q3 <- matrix(c(
+    75000,
+    Inf,
+    75000,
+    Inf
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(q3) <- c("FSC-A", "SSC-A")
+  rownames(q3) <- c("min","max")
+  q3 <- rectangleGate(filterId = "C", .gate = q3)
+  
+  # Q4
+  q4 <- matrix(c(
+    75000,
+    -Inf,
+    75000,
+    Inf
+  ),
+  ncol = 2,
+  nrow = 2,
+  byrow = FALSE
+  )
+  colnames(q4) <- c("FSC-A", "SSC-A")
+  rownames(q4) <- c("min","max")
+  q4 <- rectangleGate(filterId = "D", .gate = q4)
+  
+  # combined quadrants
+  q <- filters(list(q1,q2,q3,q4))
+  
+  mock_locator <- mock(list(
+    "x" = c(
+      75000
+    ),
+    "y" = c(
+      75000
+    )
+  ))
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_quadrant_draw(Va2[[1]],
+                              alias = c("A","B","C","D"),
+                              channels = c("FSC-A","SSC-A"),
+                              plot = FALSE
+      ),
+      q
+    )
+  )
+  
 })
 
-## gate_web_draw ---------------------------------------------------------------
+# .cyto_gate_web_draw ----------------------------------------------------------
 
-test_that("gate_web_draw", {
-  expect_error(gate_web_draw(fs[[1]], 
-                             channels = "FSC-A"), 
-               "Please supply a name for the gated population as the alias argument.")
+test_that(".cyto_gate_web_draw", {
   
-  dw <- gate_web_draw(fs[[1]], 
-                      alias = c("A", "B", "C", "D", "E", "F", "G", "H"), 
-                      channels = c("FSC-A", "SSC-A"), 
-                      display = 0.05)
+  # Alias error
+  expect_error(.cyto_gate_web_draw(Va2[[1]],
+                                        channels = c("FSC-A","SSC-A")),
+          "Supply a name for the gated population(s) to the 'alias' argument.",
+          fixed = TRUE)
   
-  expect_s4_class(dw, "filters")
-  expect_length(dw, 8)
-  expect_equal(unlist(lapply(dw, class)), rep("polygonGate", 8))
-  expect_equal(wg, dw, tolerance = 0.01)
+  # W1
+  w1 <- matrix(c(
+    133872.17,
+    xmin,
+    xmin,
+    167267.80,
+    155121.92,
+    81904.57,
+    ymin,
+    ymin
+  ),
+  ncol = 2,
+  nrow = 4,
+  byrow = FALSE
+  )
+  colnames(w1) <- c("FSC-A", "SSC-A")
+  w1 <- polygonGate(filterId = "A", .gate = w1)
+
+  # W2
+  w2 <- matrix(c(
+    133872.2,
+    167267.8,
+    xmax,
+    xmax,
+    155121.92,
+    ymin,
+    ymin,
+    216622.7
+  ),
+  ncol = 2,
+  nrow = 4,
+  byrow = FALSE
+  )
+  colnames(w2) <- c("FSC-A", "SSC-A")
+  w2 <- polygonGate(filterId = "B", .gate = w2)
+  
+  # W3
+  w3 <- matrix(c(
+    133872.17,
+    xmax,
+    xmax,
+    77791.76,
+    155121.9,
+    216622.7,
+    ymax,
+    ymax
+  ),
+  ncol = 2,
+  nrow = 4,
+  byrow = FALSE
+  )
+  colnames(w3) <- c("FSC-A", "SSC-A")
+  w3 <- polygonGate(filterId = "C", .gate = w3)
+  
+  # W4
+  w4 <- matrix(c(
+    133872.17,
+    77791.76,
+    xmin,
+    xmin,
+    155121.92,
+    ymax,
+    ymax,
+    81904.57
+  ),
+  ncol = 2,
+  nrow = 4,
+  byrow = FALSE
+  )
+  colnames(w4) <- c("FSC-A", "SSC-A")
+  w4 <- polygonGate(filterId = "D", .gate = w4)
+  
+  w <- filters(list(w1,w2,w3,w4))
+  
+  mock_locator <- mock(list("x" = 125000, 
+                            "y" = 125000),
+                       list("x" = xmin,
+                            "y" = 80000),
+                       list("x" = 170000,
+                            "y" = ymin),
+                       list("x" = xmax,
+                            "y" = 210000),
+                       list("x" = 80000,
+                            "y" = ymax))
+  
+  testthat::with_mock(
+    locator = mock_locator,
+    expect_equal(
+      .cyto_gate_web_draw(Va2[[1]],
+                               alias = c("A","B","C","D"),
+                               channels = c("FSC-A","SSC-A"),
+                               plot = FALSE
+      ),
+      w, tolerance = 0.2
+    )
+  )
+  
 })

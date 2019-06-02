@@ -1,6 +1,6 @@
 #' Draw Polygon Gate(s) Around Populations.
 #'
-#' \code{gate_polygon_draw} constructs an interactive plotting window to allow
+#' \code{.cyto_gate_polygon_draw} constructs an interactive plotting window to allow
 #' manual selection of the co-ordinates of a polygon gate(s) (through mouse
 #' click) which are constructed into
 #' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
@@ -49,8 +49,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get polygonGate using gate_polygon_draw
-#' pg <- gate_polygon_draw(fs[[4]],
+#' # Get polygonGate using .cyto_gate_polygon_draw
+#' pg <- .cyto_gate_polygon_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("FSC-A", "SSC-A")
 #' )
@@ -148,7 +148,7 @@
 
 #' Draw Rectangle Gate(s) Around Populations.
 #'
-#' \code{gate_rectangle_draw} constructs an interactive plotting window to allow
+#' \code{.cyto_gate_rectangle_draw} constructs an interactive plotting window to allow
 #' manual selection of the co-ordinates of a rectangle gate(s) (through mouse
 #' click) which are constructed into
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects and stored
@@ -199,8 +199,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get polygonGate using gate_rectangle_draw - add contour lines
-#' rg <- gate_rectangle_draw(fs[[4]],
+#' # Get polygonGate using .cyto_gate_rectangle_draw - add contour lines
+#' rg <- .cyto_gate_rectangle_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("FSC-A", "SSC-A"),
 #'   contour_lines = 15
@@ -294,7 +294,7 @@
 
 #' Draw Interval Gate(s) Around Populations.
 #'
-#' \code{gate_interval_draw} constructs an interactive plotting window for user
+#' \code{.cyto_gate_interval_draw} constructs an interactive plotting window for user
 #' to select the lower and upper bounds of a population (through mouse click)
 #' which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
@@ -347,8 +347,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get 1-D interval gate using gate_interval_draw - overlay control
-#' ig <- gate_interval_draw(fs[[4]],
+#' # Get 1-D interval gate using .cyto_gate_interval_draw - overlay control
+#' ig <- .cyto_gate_interval_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = "PE-A",
 #'   overlay = fs[[1]],
@@ -358,8 +358,8 @@
 #' # ig is a filters object - extract rectangleGate using `[[`
 #' ig[[1]]
 #'
-#' # Get 2-D interval gate on y axis using gate_interval_draw
-#' ig <- gate_interval_draw(fs[[4]],
+#' # Get 2-D interval gate on y axis using .cyto_gate_interval_draw
+#' ig <- .cyto_gate_interval_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("PE-A", "Alexa Fluor 488-A"),
 #'   axis = "y"
@@ -498,7 +498,7 @@
 
 #' Draw Threshold Gate(s) Around Populations.
 #'
-#' \code{gate_threshold_draw} constructs an interactive plotting window for user
+#' \code{.cyto_gate_threshold_draw} constructs an interactive plotting window for user
 #' to select the lower bound of a population which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
@@ -548,8 +548,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get 1-D threshold gate using gate_threshold_draw
-#' tg <- gate_threshold_draw(fs[[4]],
+#' # Get 1-D threshold gate using .cyto_gate_threshold_draw
+#' tg <- .cyto_gate_threshold_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("PE-A")
 #' )
@@ -557,8 +557,8 @@
 #' # tg is a filters object - extract rectangleGate using `[[`
 #' tg[[1]]
 #'
-#' #' # Get 2-D threshold gate using gate_threshold_draw - overlay control
-#' tg <- gate_threshold_draw(fs[[4]],
+#' #' # Get 2-D threshold gate using .cyto_gate_threshold_draw - overlay control
+#' tg <- .cyto_gate_threshold_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   overlay = fs[[1]]
@@ -659,7 +659,7 @@
 
 #' Draw Boundary Gate(s) Around Populations.
 #'
-#' \code{gate_boundary_draw} constructs an interactive plotting window for user
+#' \code{.cyto_gate_boundary_draw} constructs an interactive plotting window for user
 #' to select the upper bound of a population which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
@@ -709,8 +709,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get 1-D boundary gate using gate_boundary_draw
-#' bg <- gate_boundary_draw(fs[[4]],
+#' # Get 1-D boundary gate using .cyto_gate_boundary_draw
+#' bg <- .cyto_gate_boundary_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("PE-A")
 #' )
@@ -718,8 +718,8 @@
 #' # bg is a filters object - extract rectangleGate using `[[`
 #' bg[[1]]
 #'
-#' #' # Get 2-D boundary gate using gate_boundary_draw
-#' tg <- gate_boundary_draw(fs[[2]],
+#' #' # Get 2-D boundary gate using .cyto_gate_boundary_draw
+#' tg <- .cyto_gate_boundary_draw(fs[[2]],
 #'   alias = "Cells",
 #'   channels = c("PE-A", "Alexa Fluor 700-A")
 #' )
@@ -818,7 +818,7 @@
 
 #' Draw Ellipsoid Gate(s) Around Populations.
 #'
-#' \code{gate_ellipse_draw} constructs an interactive plotting window for user
+#' \code{.cyto_gate_ellipse_draw} constructs an interactive plotting window for user
 #' to select the limits of a population in 2 dimensions (4 points) which is
 #' constructed into \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 #' object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
@@ -867,8 +867,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get ellipsoidGate using gate_ellipse_draw
-#' eg <- gate_ellipse_draw(fs[[4]],
+#' # Get ellipsoidGate using .cyto_gate_ellipse_draw
+#' eg <- .cyto_gate_ellipse_draw(fs[[4]],
 #'   alias = "Cells",
 #'   channels = c("PE-A", "Alexa Fluor 700-A"),
 #'   overlay = fs[[1]]
@@ -1018,7 +1018,7 @@
 
 #' Draw Quadrant Gates Around Populations.
 #'
-#' \code{gate_quadrant_draw} constructs an interactive plotting window for user
+#' \code{.cyto_gate_quadrant_draw} constructs an interactive plotting window for user
 #' to select the crosshair center of 4 populations which is used to construct 4
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects which are
 #' stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
@@ -1066,8 +1066,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get quadrant gates using gate_quadrant_draw
-#' qg <- gate_quadrant_draw(fs[[4]],
+#' # Get quadrant gates using .cyto_gate_quadrant_draw
+#' qg <- .cyto_gate_quadrant_draw(fs[[4]],
 #'   alias = c("DN", "CD4", "DP", "CD8"),
 #'   channels = c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
 #' )
@@ -1220,11 +1220,11 @@
 
 #' Draw Web Gates Around Populations.
 #'
-#' \code{gate_web_draw} is a variation of drawQuadrant which allows more
+#' \code{.cyto_gate_web_draw} is a variation of drawQuadrant which allows more
 #' flexibility with gate co-ordinates (angled lines) and supports any number of
 #' gates as indicated by the \code{alias} argument. To construct the gate simply
 #' select the center point and surrounding divider points on plot edge.
-#' \code{gate_web_draw} will construct the
+#' \code{.cyto_gate_web_draw} will construct the
 #' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and store them
 #' in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
@@ -1248,7 +1248,7 @@
 #'   constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
 #'   object(s).
 #'
-#' @keywords manual, gating, draw, polygonGate, openCyto, gate_web_draw
+#' @keywords manual, gating, draw, polygonGate, openCyto, .cyto_gate_web_draw
 #'
 #' @importFrom flowCore polygonGate filters
 #' @importFrom flowCore exprs
@@ -1272,8 +1272,8 @@
 #' # Transform fluorescent channels
 #' fs <- transform(fs, estimateLogicle(fs[[4]], cyto_fluor_channels(fs)))
 #'
-#' # Get web gates using gate_web_draw
-#' wg <- gate_web_draw(fs[[4]],
+#' # Get web gates using .cyto_gate_web_draw
+#' wg <- .cyto_gate_web_draw(fs[[4]],
 #'   alias = c("DN", "CD4", "CD8"),
 #'   channels = c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
 #' )
@@ -1297,7 +1297,7 @@
 
   # Check alias
   if (is.null(alias)) {
-    stop("Please supply a name for the gated population as the alias argument.")
+    stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
   # Call new plot?
@@ -1323,7 +1323,7 @@
     pch = 16,
     col = "red"
   )
-
+  
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
 
@@ -1332,7 +1332,7 @@
   xmax <- par("usr")[2]
   ymin <- par("usr")[3]
   ymax <- par("usr")[4]
-
+  
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
     options("show.error.messages" = FALSE)
@@ -1842,6 +1842,7 @@
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
     rownames(coords) <- NULL
+    
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
     if (label == TRUE) {
