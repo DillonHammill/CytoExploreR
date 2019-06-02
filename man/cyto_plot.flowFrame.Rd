@@ -23,7 +23,7 @@
   legend_text_col = "black", legend_line_type = NA,
   legend_line_width = NA, legend_line_col = NA, legend_box_fill = NA,
   legend_point_col = NA, gate_line_type = 1, gate_line_width = 2.5,
-  gate_line_col = "red", label, label_text = NA, label_stat,
+  gate_line_col = "red", label, label_text, label_stat,
   label_text_font = 2, label_text_size = 1, label_text_col = "black",
   label_box_x = NA, label_box_y = NA, label_box_alpha = 0.6,
   border_line_type = 1, border_line_width = 1,
@@ -221,8 +221,7 @@ population names to the \code{label_text} argument. The default statistic
 is \code{"percent"} for gated data and \code{"count"} for un-gated data.
 This argument must be set to TRUE in order to add labels with gates.}
 
-\item{label_text}{vector of population names to use in the labels. Set to
-\code{NA} by default to exclude population names.}
+\item{label_text}{vector of population names to use in the labels.}
 
 \item{label_stat}{indicates the type of statistic to include in the plot
 labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},

@@ -228,8 +228,8 @@ population names to the \code{label_text} argument. The default statistic
 is \code{"percent"} for gated data and \code{"count"} for un-gated data.
 This argument must be set to TRUE in order to add labels with gates.}
 
-\item{label_text}{vector of population names to use in the labels. Set to
-\code{NA} by default to exclude population names.}
+\item{label_text}{vector of population names to use in the labels.The exclude
+the population names set this argument to NA.}
 
 \item{label_stat}{indicates the type of statistic to include in the plot
 labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},

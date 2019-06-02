@@ -203,8 +203,7 @@ cyto_plot <- function(x, ...) {
 #'   population names to the \code{label_text} argument. The default statistic
 #'   is \code{"percent"} for gated data and \code{"count"} for un-gated data.
 #'   This argument must be set to TRUE in order to add labels with gates.
-#' @param label_text vector of population names to use in the labels. Set to
-#'   \code{NA} by default to exclude population names.
+#' @param label_text vector of population names to use in the labels.
 #' @param label_stat indicates the type of statistic to include in the plot
 #'   labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
 #'   \code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
@@ -337,7 +336,7 @@ cyto_plot.flowFrame <- function(x,
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
                                 label,
-                                label_text = NA,
+                                label_text,
                                 label_stat,
                                 label_text_font = 2,
                                 label_text_size = 1,
@@ -472,6 +471,11 @@ cyto_plot.flowFrame <- function(x,
       title <- NA
     }
     
+  }
+  
+  # Label text
+  if(.empty(label_text)){
+    label_text <- NA
   }
   
   # X axis breaks and labels - pass through axes_text argument
@@ -796,8 +800,7 @@ cyto_plot.flowFrame <- function(x,
 #'   population names to the \code{label_text} argument. The default statistic
 #'   is \code{"percent"} for gated data and \code{"count"} for un-gated data.
 #'   This argument must be set to TRUE in order to add labels with gates.
-#' @param label_text vector of population names to use in the labels. Set to
-#'   \code{NA} by default to exclude population names.
+#' @param label_text vector of population names to use in the labels.
 #' @param label_stat indicates the type of statistic to include in the plot
 #'   labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
 #'   \code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
@@ -1207,6 +1210,11 @@ cyto_plot.flowSet <- function(x,
       title <- NA
     }
     
+  }
+  
+  # Label text
+  if(.empty(label_text)){
+    label_text <- NA
   }
   
   # X axis breaks and labels - pass through axes_text argument
@@ -1683,8 +1691,8 @@ cyto_plot.flowSet <- function(x,
 #'   population names to the \code{label_text} argument. The default statistic
 #'   is \code{"percent"} for gated data and \code{"count"} for un-gated data.
 #'   This argument must be set to TRUE in order to add labels with gates.
-#' @param label_text vector of population names to use in the labels. Set to
-#'   \code{NA} by default to exclude population names.
+#' @param label_text vector of population names to use in the labels.The exclude
+#'   the population names set this argument to NA.
 #' @param label_stat indicates the type of statistic to include in the plot
 #'   labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
 #'   \code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
@@ -2402,8 +2410,8 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   population names to the \code{label_text} argument. The default statistic
 #'   is \code{"percent"} for gated data and \code{"count"} for un-gated data.
 #'   This argument must be set to TRUE in order to add labels with gates.
-#' @param label_text vector of population names to use in the labels. Set to
-#'   \code{NA} by default to exclude population names.
+#' @param label_text vector of population names to use in the labels.The exclude
+#'   the population names set this argument to NA.
 #' @param label_stat indicates the type of statistic to include in the plot
 #'   labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
 #'   \code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
