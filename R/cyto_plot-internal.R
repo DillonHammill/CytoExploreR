@@ -455,27 +455,42 @@
   } else if (length(channels) == 2) {
 
     # REMOVE NEGATIVE FSC/SSC EVENTS - DENSITY BUG (other linear channels?)
-    if (any(channels %in% c("FSC-A", "SSC-A"))) {
-      if ("FSC-A" %in% channels) {
-        x <- lapply(x, function(z) {
-          if (min(range(z, type = "data")[, "FSC-A"]) < 0) {
-            nonDebris <- rectangleGate("FSC-A" = c(0, Inf))
-            z <- Subset(z, nonDebris)
+    lapply(seq_len(2), function(z){
+      if(channels[z] %in% c("FSC-A",
+                            "FSC-H",
+                            "FSC-W",
+                            "SSC-A",
+                            "SSC-H",
+                            "SSC-W")){
+        
+        x <<- lapply(x, function(y){
+          if(min(range(y, type = "data")[, channels[z]]) < 0){
+            # Gate out negative events
+            coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
+            rownames(coords) <- c("min","max")
+            colnames(coords) <- channels[z]
+            nonDebris <- rectangleGate(.gate = coords)
+            y <- Subset(y, nonDebris)
+            # Fix plot limits
+            if(z == 1){
+              if(xlim[1] < 0){
+                xlim[1] <<- 0
+              }
+            }else if(z == 2){
+              if(ylim[1] < 0){
+                ylim[1] <<- 0
+              }
+            }
           }
-          return(z)
+          return(y)
         })
+        
+        xlim <<- xlim
+        ylim <<- ylim
+        
       }
-      if ("SSC-A" %in% channels) {
-        x <- lapply(x, function(z) {
-          if (min(range(z, type = "data")[, "SSC-A"]) < 0) {
-            nonDebris <- rectangleGate("SSC-A" = c(0, Inf))
-            z <- Subset(z, nonDebris)
-          }
-          return(z)
-        })
-      }
-    }
-
+    })
+    
     # EMPTY PLOT - handles margins and axes limits internally
     cyto_plot_empty(x,
       channels = channels,
