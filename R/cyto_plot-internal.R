@@ -125,7 +125,7 @@
   # Sample to display percentage events
   if (display != 1) {
     # Turn off overlay sampling in gate_draw
-    if (!getOption("CytoRSuite_gate_draw")) {
+    if (!getOption("CytoRSuite_cyto_gate_draw")) {
       ind <- 1
     } else {
       ind <- seq(1, length(x))
@@ -458,7 +458,7 @@
     if (any(channels %in% c("FSC-A", "SSC-A"))) {
       if ("FSC-A" %in% channels) {
         x <- lapply(x, function(z) {
-          if (min(range(z)[, "FSC-A"]) < 0) {
+          if (min(range(z, type = "data")[, "FSC-A"]) < 0) {
             nonDebris <- rectangleGate("FSC-A" = c(0, Inf))
             z <- Subset(z, nonDebris)
           }
@@ -467,7 +467,7 @@
       }
       if ("SSC-A" %in% channels) {
         x <- lapply(x, function(z) {
-          if (min(range(z)[, "SSC-A"]) < 0) {
+          if (min(range(z, type = "data")[, "SSC-A"]) < 0) {
             nonDebris <- rectangleGate("SSC-A" = c(0, Inf))
             z <- Subset(z, nonDebris)
           }
