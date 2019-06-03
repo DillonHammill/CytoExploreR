@@ -15,7 +15,7 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' .cyto_gate_type_check(type = "r", alias = c("A", "B", "C"))
+#' .cyto_gate_type(type = "r", alias = c("A", "B", "C"))
 #' @noRd
 .cyto_gate_type_check <- function(type, alias) {
   if (all(type %in% c("q", "Q", "quadrant", "Quadrant")) & 
@@ -150,7 +150,7 @@
     stop("'gatingTemplate' should be the name of the gatingTemplate csv file.")
   } else {
     if (getOption("CytoRSuite_wd_check") == TRUE) {
-      if (.file_wd_check(gatingTemplate)) {
+      if (file_wd_check(gatingTemplate)) {
         gt <- read.csv(gatingTemplate, header = TRUE)
         
         # Parent and alias entries match file

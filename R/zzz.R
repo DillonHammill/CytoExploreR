@@ -16,7 +16,7 @@
   options("CytoRSuite_wd_check" = TRUE)
   
   # Signal when gate_draw has been called - turn off overlay sampling
-  options("CytoRSuite_gate_draw" = FALSE)
+  options("CytoRSuite_cyto_gate_draw" = FALSE)
   
   # Create custom theme for cyto_plot
   options("CytoRSuite_cyto_plot_theme" = NULL)
@@ -39,10 +39,10 @@
   # Register gating and preprocessing functions with openCyto
   openCyto::registerPlugins(fun = .gate_manual, 
                             methodName = "gate_manual")
-  openCyto::registerPlugins(fun = .gate_draw, 
-                            methodName = "gate_draw")
-  openCyto::registerPlugins(fun = .pp_gate_draw, 
-                            methodName = "pp_gate_draw", 
+  openCyto::registerPlugins(fun = .cyto_gate_draw, 
+                            methodName = "cyto_gate_draw")
+  openCyto::registerPlugins(fun = .pp_cyto_gate_draw, 
+                            methodName = "pp_cyto_gate_draw", 
                             dep = NA, "preprocessing")
   
 }
