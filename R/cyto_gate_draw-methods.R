@@ -394,7 +394,6 @@ cyto_gate_draw.flowSet <- function(x,
         # Select or return all samples if criteria not met
         tryCatch(cyto_select(z, select), error = function(e){z})
       })
-    # Maximum 20 samples per group for speed
     }
     
     # Maximum 20 samples per group for speed 
@@ -402,6 +401,7 @@ cyto_gate_draw.flowSet <- function(x,
       if(length(z) > 20){
         z[sample(seq_len(length(z)), 20)]
       }
+      return(z)
     })
 
     # Merge each flowSet in fs_list
@@ -631,22 +631,19 @@ cyto_gate_draw.GatingSet <- function(x,
                                      label = TRUE,
                                      plot = TRUE, ...) {
 
-  # Check whether a gatingTemplate already exists for this population
-  if (!is.null(gatingTemplate)) {
-
-    # Add file extension if missing
-    if(file_ext(gatingTemplate) == ""){
-      gatingTemplate <- paste0(gatingTemplate, ".csv")
-    }
-    
   # No gatingTemplate supplied check global option  
-  }else if(is.null(gatingTemplate)){
+  if(is.null(gatingTemplate)){
     # No gatingTemplate signalled globally - resort to gatingTemplate.csv
     if(is.null(getOption("CytoRSuite_gatingTemplate"))){
       gatingTemplate <- "gatingTemplate.csv"
     }else{
       gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
     }
+  }
+  
+  # Add file extension to gatingTemplate if missing
+  if(file_ext(gatingTemplate) == ""){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
   }
   
    # Check whether gate already exists in gatingTemplate
@@ -730,8 +727,9 @@ cyto_gate_draw.GatingSet <- function(x,
     # Restrict to maximum 20 samples per group for speed
     fs_list <- lapply(fs_list, function(z){
       if(length(z) > 20){
-        z <- z[sample(seq_len(length(z), 20))]
+        z <- z[sample(seq_len(length(z)), 20)]
       }
+      return(z)
     })
     
     # Merge each flowSet in fs_list
