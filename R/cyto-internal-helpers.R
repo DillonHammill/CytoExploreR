@@ -7,7 +7,7 @@
 #'
 #' @return data which is appropriately transformed
 #'
-#' @importFrom flowWorkspace pData getData transformerList
+#' @importFrom flowWorkspace transformerList
 #' @importFrom flowCore transform transformList
 #'
 #' @noRd
@@ -32,11 +32,11 @@
   
   # Extract summary stats
   if (inherits(x, "flowFrame")) {
-    sm <- flowWorkspace::pData(flowCore::parameters(x))
+    sm <- cyto_details(flowCore::parameters(x))
   } else if (inherits(x, "flowSet")) {
-    sm <- flowWorkspace::pData(flowCore::parameters(x[[1]]))
+    sm <- cyto_details(flowCore::parameters(x[[1]]))
   } else if (inherits(x, "GatingSet")) {
-    sm <- flowWorkspace::pData(flowCore::parameters(getData(x, "root")[[1]]))
+    sm <- cyto_details(flowCore::parameters(cyto_extract(x, "root")[[1]]))
   }
   
   # Extract channels that have been transformed
@@ -92,7 +92,7 @@
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
       return(x)
     } else if (inherits(x, "GatingSet")) {
-      return(flowWorkspace::getData(x, parent))
+      return(cyto_extract(x, parent))
     }
     
     # Data is transformed
@@ -106,16 +106,7 @@
   
   # Extract transformations from GatingSet
   if (is.null(trans) & inherits(x, "GatingSet")) {
-    channels <- colnames(x)
-    
-    trnsfrms <- lapply(channels, function(channel) {
-      getTransformations(x[[1]], channel, only.function = FALSE)
-    })
-    names(trnsfrms) <- channels
-    
-    # Remove NULL transforms
-    trnsfrms[unlist(lapply(trnsfrms, is.null))] <- NULL
-    trans <- transformerList(names(trnsfrms), trnsfrms)
+    trans <- x[[1]]@transformation
   }
   
   # Get inverse trans
@@ -130,11 +121,11 @@
   
   # Extract summary stats
   if (inherits(x, "flowFrame")) {
-    sm <- flowWorkspace::pData(flowCore::parameters(x))
+    sm <- cyto_details(flowCore::parameters(x))
   } else if (inherits(x, "flowSet")) {
-    sm <- flowWorkspace::pData(flowCore::parameters(x[[1]]))
+    sm <- cyto_details(flowCore::parameters(x[[1]]))
   } else if (inherits(x, "GatingSet")) {
-    sm <- pData(flowCore::parameters(flowWorkspace::getData(x, "root")[[1]]))
+    sm <- cyto_details(flowCore::parameters(cyto_extract(x, "root")[[1]]))
   }
   
   # Extract channels that have been transformed - apply inverse transform
@@ -142,7 +133,7 @@
   
   # Extract flowSet from GatingSet
   if (inherits(x, "GatingSet")) {
-    x <- flowWorkspace::getData(x, parent)
+    x <- cyto_extract(x, parent)
   }
   
   # Check all chans have been transformed
@@ -177,14 +168,13 @@
 #' @param x flowFrame, flowSet or GatingSet object to check
 #'
 #' @importFrom flowCore parameters
-#' @importFrom flowWorkspace pData getData
 #'
 #' @noRd
 .cyto_transform_check <- function(x) {
   if (inherits(x, "flowFrame")) {
     
     # Extract summary stats
-    sm <- pData(parameters(x))
+    sm <- cyto_details(parameters(x))
     
     # Check if any maxRange < 6
     if (any(sm[, "maxRange"] < 6)) {
@@ -195,7 +185,7 @@
   } else if (inherits(x, "flowSet")) {
     
     # Extract summary stats
-    sm <- pData(parameters(x[[1]]))
+    sm <- cyto_details(parameters(x[[1]]))
     
     # Check if any maxRange < 6
     if (any(sm[, "maxRange"] < 6)) {
@@ -206,10 +196,10 @@
   } else if (inherits(x, "GatingSet")) {
     
     # Extract root flowSet
-    fs <- getData(x, "root")
+    fs <- cyto_extract(x, "root")
     
     # Extract summary stats
-    sm <- pData(parameters(fs[[1]]))
+    sm <- cyto_details(parameters(fs[[1]]))
     
     # Check if any maxRange < 6
     if (any(sm[, "maxRange"] < 6)) {
@@ -306,8 +296,8 @@
       if (length(x@transformation) == 0) {
         
         # GatingSet is not transformed
-        fs <- flowWorkspace::getData(x, "root")
-        fr <- as(fs, "flowFrame")
+        fs <- cyto_extract(x, "root")
+        fr <- cyto_convert(fs, "flowFrame")
         fs <- flowCore::flowSet(fr)
         gs <- suppressMessages(flowWorkspace::GatingSet(fs))
         
@@ -337,8 +327,8 @@
           } else {
             
             # Get remaining transformations with estimateLogicle
-            fs <- flowWorkspace::getData(x, "root")
-            fr <- as(fs, "flowFrame")
+            fs <- cyto_extract(x, "root")
+            fr <- cyto_convert(fs, "flowFrame")
             fs <- flowCore::flowSet(fr)
             gs <- suppressMessages(flowWorkspace::GatingSet(fs))
             
@@ -354,7 +344,7 @@
         } else {
           
           # GatingSet does not contain transformations for fluorescent channels
-          fs <- flowWorkspace::getData(x, "root")
+          fs <- cyto_extract(x, "root")
           fr <- as(fs, "flowFrame")
           fs <- flowCore::flowSet(fr)
           gs <- suppressMessages(flowWorkspace::GatingSet(fs))
@@ -395,7 +385,7 @@
         }
         
         # Generate merged flowFrame for use with estimateLogicle
-        fr <- as(fs, "flowFrame")
+        fr <- cyto_convert(fs, "flowFrame")
         
         # Find channels excluded from trans
         excl <- channels[!channels %in% chans]
@@ -489,8 +479,8 @@
               } else {
                 
                 # Some channels are still missing transformations
-                fs <- flowWorkspace::getData(x, "root")
-                fr <- as(fs, "flowFrame")
+                fs <- cyto_extract(x, "root")
+                fr <- cyto_convert(fs, "flowFrame")
                 fs <- flowCore::flowSet(fr)
                 gs <- suppressMessages(flowWorkspace::GatingSet(fs))
                 
@@ -518,8 +508,8 @@
           } else {
             
             # Get remaining transformations with estimateLogicle
-            fs <- flowWorkspace::getData(x, "root")
-            fr <- as(fs, "flowFrame")
+            fs <- cyto_extract(x, "root")
+            fr <- cyto_convert(fs, "flowFrame")
             fs <- flowCore::flowSet(fr)
             gs <- suppressMessages(flowWorkspace::GatingSet(fs))
             
