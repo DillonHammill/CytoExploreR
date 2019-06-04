@@ -965,6 +965,176 @@ cyto_gate_draw.GatingSet <- function(x,
     
   }
   
+  # Number of groups
+  N <- length(fr_list)
+  
+  # Organise overlays - list of flowFrame lists of length(fr_list)
+  if(!.all_na(overlay)){
+    
+    # Overlay is the names of populations
+    if (is.character(overlay)) {
+      if (all(overlay %in% basename(getNodes(x)))) {
+        
+        # Pull out list of flowSets
+        nms <- overlay
+        overlay <- lapply(overlay, function(z) {
+          cyto_extract(x, z)
+        })
+        names(overlay) <- nms
+      }
+    }
+    
+    # flowFrame repeated in list - no sampling
+    if(inherits(overlay, "flowFrame")){
+      # Always show all events
+      overlay <- rep(list(list(overlay)), N)
+      # flowSet to lists of flowFrame lists
+    }else if(inherits(overlay, "flowSet")){
+      # Group by variables
+      if(group_by[1] != "all"){
+        # Grouping
+        overlay <- cyto_group_by(overlay, group_by)
+        # Coercion to list of flowFrames & sampling
+        overlay <- lapply(overlay, function(z){
+          # Select
+          if(!is.null(select)){
+            z <- tryCatch(cyto_select(z, select), error = function(e){z})
+          }
+          # Restrict
+          if(length(z) > 20){
+            z <- z[sample(seq_len(length(z)), 20)]
+          }
+          n <- length(z)
+          y <- cyto_convert(z, "flowFrame")
+          if(is.null(display)){
+            return(cyto_sample(z, 1/n))
+          }else{
+            return(cyto_sample(y, display))
+          }
+        })
+        # Group all samples togther
+      }else{
+        
+        # Number of samples
+        n <- length(overlay)
+        
+        # Select
+        if(!is.null(select)){
+          overlay <- cyto_select(overlay, select)
+        }
+        
+        # Restrict
+        if(length(overlay) > 20){
+          overlay <- overlay[sample(seq_len(length(overlay)), 20)]
+        }
+        
+        # Convert overlay to flowFrame
+        overlay <- cyto_convert(overlay, "flowFrame")
+        
+        # Apply sampling
+        if(is.null(display)){
+          overlay <- cyto_sample(overlay, 1/n)
+        }else{
+          overlay <- cyto_sample(overlay, display)
+        }
+        overlay <- list(overlay)
+      }
+      # Convert list of flowFrames to list of flowFrame lists
+      overlay <- lapply(overlay, function(z){
+        list(z)
+      })
+      # Overlay is list of flowFrames or flowSets
+    }else if(inherits(overlay, "list")){
+      
+      # List of flowFrames repeat fr_list times - no sampling or grouping
+      if(all(unlist(lapply(overlay, function(z){
+        inherits(z, "flowFrame")
+      })))){
+        
+        overlay <- rep(list(overlay), N)
+        
+        # Allow list of flowFrame lists of length(fr_list)
+      }else if (all(unlist(lapply(unlist(overlay), function(z) {
+        inherits(z, "flowFrame")
+      })))) {
+        
+        # Must be of same length as fr_list
+        # No grouping, selecting or sampling - used as supplied
+        if (length(overlay) != N) {
+          stop(paste(
+            "'overlay' must be a list of flowFrame lists -",
+            "one flowFrame list per group."
+          ))
+        }
+        
+        # list of flowSets
+      }else if(all(unlist(lapply(overlay, function(z){
+        inherits(z, "flowSet")
+      })))){
+        
+        # Group each flowSet, merge and sample
+        overlay <- lapply(overlay, function(z){
+          
+          # Group by variables
+          if(group_by[1] != "all"){
+            # Grouping
+            x <- cyto_group_by(z, group_by)
+            # Coercion and sampling
+            x <- lapply(x, function(y){
+              # Selection
+              if(!is.null(select)){
+                y <- tryCatch(cyto_select(y, select), error = function(e){y})
+              }
+              # Restriction
+              if(length(y) > 20){
+                y <- y[sample(seq_len(length(y)), 20)]
+              }
+              n <- length(y)
+              y <- cyto_convert(y, "flowFrame")
+              if(is.null(display)){
+                return(cyto_sample(y, 1/n))
+              }else{
+                return(cyto_sample(y, display))
+              }
+            })
+            # Group all samples together
+          }else{
+            # Select
+            if(!is.null(select)){
+              z <- tryCatch(cyto_select(z, select), error = function(e){z})
+            }
+            # Restrict
+            if(length(z) > 20){
+              z <- z[sample(seq_len(length(z)), 20)]
+            }
+            # Coerce and sample
+            n <- length(z)
+            z <- cyto_convert(z, "flowFrame")
+            if(is.null(display)){
+              z <- cyto_sample(z, 1/n)
+            }else{
+              z <- cyto_sample(z, display)
+            }
+            z <- list(z)
+            return(z)
+          }
+          
+        })   
+        
+        # Overlay is a list of 
+        overlay <- overlay %>% transpose()
+        
+        # Overlay is not supported   
+      }else{
+        stop(paste(
+          "'overlay' should be either a flowFrame, a flowSet,",
+          "list of flowFrames or a list of flowSets."
+        ))
+      }
+    }
+    
+  }
+  
   # Gate each group separately - named list of filters
   filters_list <- lapply(seq_len(length(fr_list)), function(z){
     
