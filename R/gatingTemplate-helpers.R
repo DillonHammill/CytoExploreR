@@ -367,7 +367,7 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate) {
           "already exists in", gatingTemplate, "."
         )
       )
-      stop("Supply another gatingTemplate or edit gate(s) using gate_edit.")
+      stop("Supply another gatingTemplate or edit gate(s) using cyto_gate_edit.")
     }
   }
 }
