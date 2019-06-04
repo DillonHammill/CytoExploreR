@@ -3,27 +3,28 @@
 #' @param gs an object of class \code{GatingSet}.
 #' @param parent name of the parent population from which to remove the gate.
 #'   This argument is not necessary but is included to allow conversion of
-#'   \code{gate_draw} code to \code{gate_remove} code by simply changing
-#'   \code{"draw"} to \code{"remove"}.
+#'   \code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply
+#'   changing \code{"draw"} to \code{"remove"}.
 #' @param alias name(s) of the population(s) to remove (e.g. "Single Cells"). By
 #'   default all descendant populations will be removed as well.
 #' @param channels names of the channel(s) used to gate the population. This
 #'   argument is not necessary but is included to allow conversion of
-#'   \code{gate_draw} code to \code{gate_remove} code by simply changing
-#'   \code{"draw"} to \code{"remove"}.
+#'   \code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply
+#'   changing \code{"draw"} to \code{"remove"}.
 #' @param type gate type(s) used to for the gates to be removed. This argument
-#'   is not necessary but is included to allow conversion of \code{gate_draw}
-#'   code to \code{gate_remove} code by simply changing \code{"draw"} to
-#'   \code{"remove"}.
+#'   is not necessary but is included to allow conversion of
+#'   \code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply
+#'   changing \code{"draw"} to \code{"remove"}.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv").
-#' @param ... additional \code{gate_draw} arguments that will be ignored.
+#' @param ... additional \code{cyto_gate_draw} arguments that will be ignored.
 #'
 #' @return an object of class \code{GatingSet} with gate and children removed
 #'   and updated gatingTemplate to reflect these changes.
 #'
 #' @importFrom flowWorkspace getDescendants Rm getNodes
 #' @importFrom utils read.csv write.csv
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -42,15 +43,15 @@
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
 #'
-#' # Gate using gate_draw
+#' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
 #'
 #' # Remove T Cells population - replace gatingTemplate name
-#' gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")
+#' cyto_gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")
 #' }
 #' @export
-gate_remove <- function(gs,
+cyto_gate_remove <- function(gs,
                         parent = NULL,
                         alias = NULL,
                         channels = NULL,
@@ -67,9 +68,11 @@ gate_remove <- function(gs,
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
-  # Use activae gatingTemplate if set
+  # Use active gatingTemplate if set
   if(is.null(gatingTemplate)){
+    
     gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+
   }
   
   # Supply gatingTemplate
@@ -77,9 +80,14 @@ gate_remove <- function(gs,
     stop("Supply the name of the gatingTemplate csv file to remove the gate.")
   }
   
+  # Add file extension if required
+  if(file_ext(gatingTemplate) == ""){
+    gatingTemplate <- paste0(gatingTemplate,".csv")
+  }  
+  
   # Check gatingTemplate
   if (getOption("CytoRSuite_wd_check") == TRUE) {
-    if (.file_wd_check(gatingTemplate) == FALSE) {
+    if (file_wd_check(gatingTemplate) == FALSE) {
       stop(paste(gatingTemplate, "is not in this working directory."))
     }
   }
@@ -114,10 +122,12 @@ gate_remove <- function(gs,
 #' @param alias name of the population for which the gate must be extracted.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the gate(s) are saved.
+#' @param ... not used.
 #'
 #' @importFrom flowWorkspace getGate getNodes
 #' @importFrom openCyto gating
 #' @importFrom flowCore filters parameters<-
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -138,7 +148,7 @@ gate_remove <- function(gs,
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
 #' 
-#' # Gate using gate_draw
+#' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
 #' 
@@ -154,9 +164,9 @@ gate_remove <- function(gs,
 #' # Reset CytoRSuite_wd_check to default
 #' options("CytoRSuite_wd_check" = TRUE)
 #' @export
-gate_extract <- function(parent,
+cyto_gate_extract <- function(parent,
                          alias,
-                         gatingTemplate = NULL) {
+                         gatingTemplate = NULL, ...) {
   
   # Parent
   if (missing(parent)) {
@@ -176,13 +186,20 @@ gate_extract <- function(parent,
   # gatingTemplate
   if (is.null(gatingTemplate)) {
     stop("Please supply the name of the gatingTemplate to extract gates from.")
-  } else {
-    if (getOption("CytoRSuite_wd_check") == TRUE) {
-      if (.file_wd_check(gatingTemplate) == FALSE) {
-        stop(paste(gatingTemplate, "is not in this working directory."))
-      }
+  }
+  
+  # Add file extension if necessary
+  if(file_ext(gatingtemplate) == ""){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
+  # Check gatingTemplate
+  if (getOption("CytoRSuite_wd_check") == TRUE) {
+    if (.file_wd_check(gatingTemplate) == FALSE) {
+      stop(paste(gatingTemplate, "is not in this working directory."))
     }
   }
+
   
   # Load gatingTemplate into gatingTemplate
   gt <- suppressMessages(gatingTemplate(gatingTemplate))
@@ -216,7 +233,7 @@ gate_extract <- function(parent,
 #' @param alias name(s) of the gate to edit (e.g. "Single Cells").
 #' @param channels name(s) of the channel(s) used to construct the gate(s). This
 #'   argument is not necessary but is included to allow conversion of
-#'   \code{gate_draw} code to \code{gate_remove} code by simply changing
+#'   \code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply changing
 #'   \code{"draw"} to \code{"remove"}.
 #' @param type vector of gate type names used to construct the gates. Multiple
 #'   \code{types} are supported but should be accompanied with an \code{alias}
@@ -264,7 +281,7 @@ gate_extract <- function(parent,
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
 #'
-#' # Gate using gate_draw
+#' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
 #'
@@ -277,7 +294,7 @@ gate_extract <- function(parent,
 #' }
 #'
 #' @export
-gate_edit <- function(x,
+cyto_gate_edit <- function(x,
                       parent = NULL,
                       alias = NULL,
                       channels = NULL,
@@ -311,6 +328,11 @@ gate_edit <- function(x,
     stop("Please supply the name of gatingTemplate to the 'gatingTemplate'.")
   }
   
+  # Add file extension if necessary
+  if(file_ext(gatingTemplate) == ""){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
   # Check gatingTemplate
   if (getOption("CytoRSuite_wd_check") == TRUE) {
     if (.file_wd_check(gatingTemplate) == FALSE) {
@@ -322,7 +344,7 @@ gate_edit <- function(x,
   gs <- x
   
   # Extract pData information
-  pd <- pData(gs)
+  pd <- cyto_details(gs)
   
   # Extract transList from gs
   if (length(getTransformations(gs[[1]])) != 0) {
@@ -564,7 +586,7 @@ gate_edit <- function(x,
     }
     
     # Draw new gates - set plot to FALSE (filters object of length alias)
-    new_gates <- gate_draw(fr,
+    new_gates <- cyto_gate_draw(fr,
                            alias = alias,
                            channels = channels,
                            type = type,
@@ -587,8 +609,8 @@ gate_edit <- function(x,
   # Re-name parent and pop to be data.table friendly
   prnt <- parent
   als <- alias
-  gtmd <- "gate_draw"
-  ppmd <- "pp_gate_draw"
+  gtmd <- "cyto_gate_draw"
+  ppmd <- "pp_cyto_gate_draw"
   
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <- data.table::fread(gatingTemplate)
@@ -658,7 +680,7 @@ gate_edit <- function(x,
 #' @importFrom utils read.csv write.csv
 #'
 #' @export
-gate_rename <- function(x,
+cyto_gate_rename <- function(x,
                         gates = NULL,
                         names = NULL,
                         gatingTemplate = NULL){
@@ -671,10 +693,11 @@ gate_rename <- function(x,
   # gatingTemplate missing
   if(is.null(gatingTemplate)){
     stop("Supply the name of the gatingTemplate csv file to be edited.")
-  }else{
-    if(.file_wd_check(gatingTemplate) == FALSE){
-      stop("Supplied gatingTemplate does not exist in this working directory.")
-    }
+  }
+  
+  # Check gatingTemplate
+  if(file_wd_check(gatingTemplate) == FALSE){
+    stop("Supplied gatingTemplate does not exist in this working directory.")
   }
   
   # Gates do not exist
@@ -732,7 +755,7 @@ gate_rename <- function(x,
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
 #' 
-#' # Gate using gate_draw
+#' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
 #' 
@@ -741,7 +764,7 @@ gate_rename <- function(x,
 #' gate_type(getGate(gs, "T Cells")[[1]])
 #' gate_type(getGate(gs, "CD69+ CD4 T Cells")[[1]])
 #' @export
-gate_type <- function(gates) {
+cyto_gate_type <- function(gates) {
   
   # One gate supplied
   if (length(gates) == 1) {
