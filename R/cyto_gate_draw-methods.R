@@ -150,10 +150,8 @@ cyto_gate_draw.flowFrame <- function(x,
                                     plot = TRUE
   )
   
-  # Organise overlays
+  # Organise overlays to list of flowFrames
   if(!.all_na(overlay)){
-    
-    # Overlay must be a list of flowFrames
     
     # flowFrame overlay added to list
     if(inherits(overlay, "flowFrame")){
@@ -172,13 +170,14 @@ cyto_gate_draw.flowFrame <- function(x,
       if (all(unlist(lapply(overlay, function(z) {
         inherits(z, "flowFrame")
       })))) {
-        overlay <- overlay
+        
         # overlay list of flowSets - use first fs convert to list of flowFrames
       } else if (all(unlist(lapply(overlay, function(z) {
         inherits(z, "flowSet")
       })))) {
         overlay <- overlay[[1]]
         overlay <- cyto_convert(overlay, "list of flowFrames")
+        
         # overlay not supported
       } else {
         stop(paste(
@@ -189,13 +188,24 @@ cyto_gate_draw.flowFrame <- function(x,
       
     }
     
+    # Overlay sampling - list of flowFrames
+    if(!is.null(display)){
+      overlay <- lapply(overlay, function(z){
+        cyto_sample(z, display)
+      })
+    }
+    
   }
   
-  # Generate plot - x and overlay subjected to same display internally
+  # Sampling
+  if(!is.null(display)){
+    x <- cyto_sample(x, display)
+  }
+  
+  # Generate plot - display already used - not passsed to cyto_plot
   if (plot == TRUE) {
     cyto_plot(x,
       channels = channels,
-      display = display,
       overlay = overlay,
       popup = TRUE,
       legend = FALSE, ...
@@ -468,20 +478,32 @@ cyto_gate_draw.flowSet <- function(x,
     })
   }
 
+  # Number of groups
+  N <- length(fr_list)
+  
   # Organise overlays - list of flowFrame lists of length(fr_list)
   if(!.all_na(overlay)){
     
-    # Overlay must be a list of flowFrame lists
-    
     # flowFrame repeated in list - no sampling
     if(inherits(overlay, "flowFrame")){
-      overlay <- rep(list(list(overlay)), length(fr_list))
+      # Always show all events
+      overlay <- rep(list(list(overlay)), N)
     # flowSet to lists of flowFrame lists
     }else if(inherits(overlay, "flowSet")){
       # Group by variables
       if(group_by[1] != "all"){
+        # Grouping
         overlay <- cyto_group_by(overlay, group_by)
+        # Coercion to list of flowFrames & sampling
         overlay <- lapply(overlay, function(z){
+          # Select
+          if(!is.null(select)){
+            z <- tryCatch(cyto_select(z, select), error = function(e){z})
+          }
+          # Restrict
+          if(length(z) > 20){
+            z <- z[sample(seq_len(length(z)), 20)]
+          }
           n <- length(z)
           y <- cyto_convert(z, "flowFrame")
           if(is.null(display)){
@@ -495,6 +517,16 @@ cyto_gate_draw.flowSet <- function(x,
         
         # Number of samples
         n <- length(overlay)
+        
+        # Select
+        if(!is.null(select)){
+          overlay <- cyto_select(overlay, select)
+        }
+        
+        # Restrict
+        if(length(overlay) > 20){
+          overlay <- overlay[sample(seq_len(length(overlay)), 20)]
+        }
         
         # Convert overlay to flowFrame
         overlay <- cyto_convert(overlay, "flowFrame")
@@ -520,12 +552,14 @@ cyto_gate_draw.flowSet <- function(x,
       })))) {
         
         # Must be of same length as fr_list
+        # No grouping, selecting or sampling - used as supplied
         if (length(overlay) != length(fr_list)) {
           stop(paste(
             "'overlay' must be a list of flowFrame lists -",
             "one flowFrame list per group."
           ))
         }
+        
       # list of flowSets
       }else if(all(unlist(lapply(overlay, function(z){
         inherits(z, "flowSet")
@@ -536,8 +570,18 @@ cyto_gate_draw.flowSet <- function(x,
           
           # Group by variables
           if(group_by[1] != "all"){
+            # Grouping
             x <- cyto_group_by(z, group_by)
+            # Coercion and sampling
             x <- lapply(x, function(y){
+              # Selection
+              if(!is.null(select)){
+                y <- tryCatch(cyto_select(y, select), error = function(e){y})
+              }
+              # Restriction
+              if(length(y) > 20){
+                y <- y[sample(seq_len(length(y)), 20)]
+              }
               n <- length(y)
               y <- cyto_convert(y, "flowFrame")
               if(is.null(display)){
@@ -548,6 +592,15 @@ cyto_gate_draw.flowSet <- function(x,
             })
           # Group all samples together
           }else{
+            # Select
+            if(!is.null(select)){
+              z <- tryCatch(cyto_select(z, select), error = function(e){z})
+            }
+            # Restrict
+            if(length(z) > 20){
+              z <- z[sample(seq_len(length(z)), 20)]
+            }
+            # Coerce and sample
             n <- length(z)
             z <- cyto_convert(z, "flowFrame")
             if(is.null(display)){
@@ -1229,4 +1282,3 @@ cyto_gate_draw.GatingSet <- function(x,
     }
   }
 }
-
