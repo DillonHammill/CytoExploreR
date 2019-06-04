@@ -65,24 +65,21 @@ cyto_gatingTemplate_active <- function(){
 #' @param gatingTemplate name of the gatingTemplate csv file to create.
 #' 
 #' @importFrom utils write.csv
+#' @importFrom stats setNames
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
 #' @export
 cyto_gatingTemplate_create <- function(gatingTemplate = NULL){
   
-  # No gatingTemplate
+  # Inherit global option
   if(is.null(gatingTemplate)){
     gatingTemplate <- cyto_gatingTemplate_active()
   }
   
-  # Still no gatingTemplate - revert to gatingTemplate.csv
-  if(is.null(gatingTemplate)){
-    gatingTemplate <- "gatingTemplate.csv"
-  }
-  
   # Create gatingTemplate for saving
-  cols <- c("alias",
+  if(!is.null(gatingtemplate)){
+    cols <- c("alias",
             "pop",
             "parent",
             "dims",
@@ -93,12 +90,13 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL){
             "preprocessing_method",
             "preprocessing_args")
   
-  # Make empty gatingTemplate
-  gt <- setNames(data.frame(matrix(ncol = length(cols), nrow = 0)), cols)
+    # Make empty gatingTemplate
+    gt <- setNames(data.frame(matrix(ncol = length(cols), nrow = 0)), cols)
   
-  # Write to csv file
-  write.csv(gt, gatingTemplate, row.names = FALSE)
-  
+    # Write to csv file
+    write.csv(gt, gatingTemplate, row.names = FALSE)
+  }
+
 }
 
 # GATINGTEMPLATE EDIT ----------------------------------------------------------
@@ -141,8 +139,20 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
   # Assign x to gs
   gs <- x
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingTemplate - check global ooption
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate csv file to edit.")
+  }
+  
+  # File extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
   
   # Working directory check
   if(getOption("CytoRSuite_wd_check") == TRUE){
@@ -220,8 +230,20 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 cyto_gatingTemplate_apply <- function(x, 
                                       gatingTemplate = NULL, ...){
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingtemplate - check global option
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingtemplate csv file to apply.")
+  }
+
+  # File extension if missing
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
   
   # Working directory check
   if(getOption("CytoRSuite_wd_check") == TRUE){
@@ -296,8 +318,20 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
   # Number of samples
   smp <- length(gs)
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingTemplate - check global option
+  if(is.null(gatingtemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # gatingtemplate sill missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate csv file to convert.")
+  }
+  
+  # File extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
   
   # Working directory check
   if(getOption("CytoRSuite_wd_check") == TRUE){
@@ -349,36 +383,6 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
   gt$preprocessing_args <- rep(NA, nrow(gt))
   
   write.csv(gt, gatingTemplate, row.names = FALSE)
-}
-
-# GATINGTEMPLATE ACQUIRE ------------------------------------------------------
-
-#' Acquire valid gatingTemplate name or throw error
-#' Pulls down from global option if none supplied
-#' Adds file extension if missing
-#' Perform working directory check as well
-#' @importFrom tools file_ext
-#' @noRd
-.cyto_gatingTemplate_acquire <- function(gatingTemplate = NULL){
-  
-  # No gatingTemplate supplied - access global option
-  if(is.null(gatingTemplate)){
-    gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
-  }
-  
-  # gatingTemplate still NULL
-  if(is.null(gatingTemplate)){
-    message("Setting active gatingTemplate to gatingTemplate.csv")
-    gatingTemplate <- "gatingTemplate.csv"
-    cyto_gatingTemplate_select("gatingTemplate.csv")
-  }
-  
-  # Add file extension to getingTemplate if missing
-  if(.empty(file_ext(gatingTemplate))){
-    gatingTemplate <- paste0(gatingTemplate, ".csv")
-  }
-  
-  return(gatingTemplate)
 }
 
 # GATINGTEMPLATE CHECK ---------------------------------------------------------

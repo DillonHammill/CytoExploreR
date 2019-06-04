@@ -145,7 +145,7 @@ cyto_gate_draw.flowFrame <- function(x,
   .cyto_alias_check(alias = alias, type = type)
 
   # Check supplied channel(s) are valid - for gating functions
-  channels <- cyto_channels_extract(fr,
+  channels <- cyto_channels_extract(x,
                                     channels = channels,
                                     plot = TRUE
   )
@@ -396,7 +396,7 @@ cyto_gate_draw.flowSet <- function(x,
   }
 
   # Check supplied channel(s) are valid - for gating functions
-  channels <- cyto_channels_extract(fr,
+  channels <- cyto_channels_extract(fs,
                                     channels = channels,
                                     plot = TRUE
   )
@@ -629,7 +629,7 @@ cyto_gate_draw.flowSet <- function(x,
   }
   
   # Gate each group separately - list of filters
-  filters_list <- mapply(seq_len(length(fr_list)), function(z){
+  filters_list <- lapply(seq_len(length(fr_list)), function(z){
     
     # Title 
     if(group_by[1] == "all"){
@@ -841,12 +841,21 @@ cyto_gate_draw.GatingSet <- function(x,
                                      label = TRUE,
                                      plot = TRUE, ...) {
 
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingtemplate
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
   
-  # Check whether gate already exists in gatingTemplate
-  .cyto_gatingTemplate_check(parent, alias, gatingTemplate)
-    
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate csv file to save the gate(s),")
+  }
+  
+  # Fil extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
   # Extract parent population
   fs <- cyto_extract(x, parent)
 
