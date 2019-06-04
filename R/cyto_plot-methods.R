@@ -1081,7 +1081,7 @@ cyto_plot.flowSet <- function(x,
         # No grouping is applied internally for these types of overlays
         overlay_list <- overlay
         
-        # list of flowSet lists
+        # list of flowSets
       } else if (all(unlist(lapply(overlay, function(z) {
         inherits(z, "flowSet")
       })))) {

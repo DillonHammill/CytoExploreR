@@ -838,7 +838,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 #' Set plot layout
 #'
 #' @param x list of flowFrame lists to be plotted.
-#' @param channels
+#' @param channels vector channels to be used for plot construction.
 #' @param layout grid dimensions c(nr, nc), NA or FALSE.
 #' @param density_stack degree of offset.
 #' @param denisity_layers number of layers per plot.

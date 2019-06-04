@@ -5,8 +5,8 @@
 \title{cyto_gate_draw flowSet Method}
 \usage{
 \method{cyto_gate_draw}{flowSet}(x, alias = NULL, channels = NULL,
-  type = NULL, display = NULL, group_by = "all", select = NULL,
-  axis = "x", label = TRUE, plot = TRUE, ...)
+  type = NULL, display = NULL, overlay = NA, group_by = "all",
+  select = NULL, axis = "x", label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -30,6 +30,11 @@ for 1D gates and \code{"polygon"} for 2D gates.}
 \item{display}{numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
+
+\item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
+\code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
+containing populations to be overlaid onto the plot(s). Only overlaid
+flowSet objects are subjected to sampling by \code{display}.}
 
 \item{group_by}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped

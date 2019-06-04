@@ -1,3 +1,8 @@
+# cyto_gate_draw ---------------------------------------------------------------
+
+# NOTES ON SAMPLING:
+# - flowFrame method - display applied to flowFrame and overlay
+
 #' cyto_gate_draw
 #'
 #' Manually draw gates around populations for analysis of flow cytometry data.
@@ -59,8 +64,8 @@ cyto_gate_draw <- function(x, ...) {
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
 #' @param overlay a \code{flowFrame}, \code{flowSet} or list of flowFrames to
-#'   overlay. To improve plotting speed, overlays are subjected to the same \code{display} requirements as
-#'   the underlying \code{flowFrame}.
+#'   overlay. To improve plotting speed, overlays are subjected to the same
+#'   \code{display} requirements as the underlying \code{flowFrame}.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
 #' @param label logical indicating whether to include
@@ -108,7 +113,7 @@ cyto_gate_draw.flowFrame <- function(x,
                                      channels = NULL,
                                      type = NULL,
                                      display = 1,
-                                     overlay = NULL,
+                                     overlay = NA,
                                      axis = "x",
                                      label = TRUE,
                                      plot = TRUE, ...) {
@@ -145,15 +150,53 @@ cyto_gate_draw.flowFrame <- function(x,
                                     plot = TRUE
   )
   
-  # Subset by display if supplied
-  if(!is.null(display)){
-    x <- cyto_sample(x, display)
+  # Organise overlays
+  if(!.all_na(overlay)){
+    
+    # Overlay must be a list of flowFrames
+    
+    # flowFrame overlay added to list
+    if(inherits(overlay, "flowFrame")){
+      
+      overlay <- list(overlay)
+    
+    # flowSet overlay converted to list of flowFrames  
+    }else if(inherits(overlay, "flowSet")){
+      
+      overlay <- cyto_convert(overlay, "list of flowFrames")
+    
+    # flowFrame list as is - flowSet list use overlay[[1]]  
+    }else if(inherits(overlay, "list")){
+      
+      # overlay should be list of flowFrames
+      if (all(unlist(lapply(overlay, function(z) {
+        inherits(z, "flowFrame")
+      })))) {
+        overlay <- overlay
+        # overlay list of flowSets - use first fs convert to list of flowFrames
+      } else if (all(unlist(lapply(overlay, function(z) {
+        inherits(z, "flowSet")
+      })))) {
+        overlay <- overlay[[1]]
+        overlay <- cyto_convert(overlay, "list of flowFrames")
+        # overlay not supported
+      } else {
+        stop(paste(
+          "'overlay' should be either the names of the populations to",
+          "overlay, a flowFrame, a flowSet or a list of flowFrames."
+        ))
+      }
+      
+    }
+    
   }
   
-  # Generate plot - overlays are no longer subsetted by display
+  # Generate plot - x and overlay subjected to same display internally
   if (plot == TRUE) {
     cyto_plot(x,
       channels = channels,
+      display = display,
+      overlay = overlay,
       popup = TRUE,
       legend = FALSE, ...
     )
@@ -256,6 +299,10 @@ cyto_gate_draw.flowFrame <- function(x,
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
+#' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
+#'   \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
+#'   containing populations to be overlaid onto the plot(s). Only overlaid
+#'   flowSet objects are subjected to sampling by \code{display}.
 #' @param group_by vector of pData column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
 #'   prior to gating, set to "all" by default to construct a single gate for all
@@ -281,6 +328,7 @@ cyto_gate_draw.flowFrame <- function(x,
 #' @importFrom BiocGenerics colnames
 #' @importFrom flowCore filters
 #' @importFrom methods as
+#' @importFrom purrr transpose
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -314,6 +362,7 @@ cyto_gate_draw.flowSet <- function(x,
                                    channels = NULL,
                                    type = NULL,
                                    display = NULL,
+                                   overlay = NA,
                                    group_by = "all",
                                    select = NULL,
                                    axis = "x",
@@ -419,8 +468,115 @@ cyto_gate_draw.flowSet <- function(x,
     })
   }
 
+  # Organise overlays - list of flowFrame lists of length(fr_list)
+  if(!.all_na(overlay)){
+    
+    # Overlay must be a list of flowFrame lists
+    
+    # flowFrame repeated in list - no sampling
+    if(inherits(overlay, "flowFrame")){
+      overlay <- rep(list(list(overlay)), length(fr_list))
+    # flowSet to lists of flowFrame lists
+    }else if(inherits(overlay, "flowSet")){
+      # Group by variables
+      if(group_by[1] != "all"){
+        overlay <- cyto_group_by(overlay, group_by)
+        overlay <- lapply(overlay, function(z){
+          n <- length(z)
+          y <- cyto_convert(z, "flowFrame")
+          if(is.null(display)){
+            return(cyto_sample(z, 1/n))
+          }else{
+            return(cyto_sample(y, display))
+          }
+        })
+      # Group all samples togther
+      }else{
+        
+        # Number of samples
+        n <- length(overlay)
+        
+        # Convert overlay to flowFrame
+        overlay <- cyto_convert(overlay, "flowFrame")
+        
+        # Apply sampling
+        if(is.null(display)){
+          overlay <- cyto_sample(overlay, 1/n)
+        }else{
+          overlay <- cyto_sample(overlay, display)
+        }
+        overlay <- list(overlay)
+      }
+      # Convert list of flowFrames to list of flowFrame lists
+      overlay <- lapply(overlay, function(z){
+        list(z)
+      })
+    # Overlay is list of flowFrames or flowSets
+    }else if(inherits(overlay, "list")){
+      
+      # Allow list of flowFrame lists of length(fr_list)
+      if (all(unlist(lapply(unlist(overlay), function(z) {
+        inherits(z, "flowFrame")
+      })))) {
+        
+        # Must be of same length as fr_list
+        if (length(overlay) != length(fr_list)) {
+          stop(paste(
+            "'overlay' must be a list of flowFrame lists -",
+            "one flowFrame list per group."
+          ))
+        }
+      # list of flowSets
+      }else if(all(unlist(lapply(overlay, function(z){
+        inherits(z, "flowSet")
+      })))){
+        
+        # Group each flowSet, merge and sample
+        overlay <- lapply(overlay, function(z){
+          
+          # Group by variables
+          if(group_by[1] != "all"){
+            x <- cyto_group_by(z, group_by)
+            x <- lapply(x, function(y){
+              n <- length(y)
+              y <- cyto_convert(y, "flowFrame")
+              if(is.null(display)){
+                return(cyto_sample(y, 1/n))
+              }else{
+                return(cyto_sample(y, display))
+              }
+            })
+          # Group all samples together
+          }else{
+            n <- length(z)
+            z <- cyto_convert(z, "flowFrame")
+            if(is.null(display)){
+              z <- cyto_sample(z, 1/n)
+            }else{
+              z <- cyto_sample(z, display)
+            }
+            z <- list(z)
+            return(z)
+          }
+          
+        })   
+        
+        # Overlay is a list of 
+        overlay <- overlay %>% transpose()
+      
+      # Overlay is not supported   
+      }else{
+        stop(paste(
+          "'overlay' should be either a flowFrame, a flowSet,",
+          "list of flowFrames or a list of flowSets."
+        ))
+      }
+    }
+    
+  }
+  
   # Gate each group separately - list of filters
-  filters_list <- lapply(seq_len(length(fr_list)), function(z){
+  filters_list <- mapply(seq_len(length(fr_list)), function(z){
     
     # Title 
     if(group_by[1] == "all"){
@@ -433,6 +589,7 @@ cyto_gate_draw.flowSet <- function(x,
     if (plot == TRUE) {
       cyto_plot(fr_list[[z]],
                 channels = channels,
+                overlay = overlay[[z]],
                 popup = TRUE,
                 legend = FALSE,
                 title = title, ...

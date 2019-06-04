@@ -5,7 +5,7 @@
 \title{cyto_gate_draw flowFrame Method.}
 \usage{
 \method{cyto_gate_draw}{flowFrame}(x, alias = NULL, channels = NULL,
-  type = NULL, display = 1, overlay = NULL, axis = "x",
+  type = NULL, display = 1, overlay = NA, axis = "x",
   label = TRUE, plot = TRUE, ...)
 }
 \arguments{
@@ -32,8 +32,8 @@ plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet} or list of flowFrames to
-overlay. To improve plotting speed, overlays are subjected to the same \code{display} requirements as
-the underlying \code{flowFrame}.}
+overlay. To improve plotting speed, overlays are subjected to the same
+\code{display} requirements as the underlying \code{flowFrame}.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}
