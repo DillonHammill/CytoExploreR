@@ -680,6 +680,57 @@ setMethod(cyto_stats_compute,
           }
 )
 
+#' Check Statistic for cyto_stats_compute
+#'
+#' @param stat cyto_stats_compute statistic.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_stat_check <- function(stat) {
+  if (!stat %in% c(
+    "mean",
+    "Mean",
+    "median",
+    "Median",
+    "mode",
+    "Mode",
+    "count",
+    "Count",
+    "events",
+    "Events",
+    "percent",
+    "Percent",
+    "freq",
+    "Freq",
+    "geo mean",
+    "Geo mean",
+    "Geo Mean",
+    "CV",
+    "cv"
+  )) {
+    stop("Supplied statistic not supported.")
+  }
+  
+  if (stat %in% c("mean", "Mean")) {
+    stat <- "mean"
+  } else if (stat %in% c("median", "Median")) {
+    stat <- "median"
+  } else if (stat %in% c("mode", "Mode")) {
+    stat <- "mode"
+  } else if (stat %in% c("count", "Count","events", "Events")) {
+    stat <- "count"
+  } else if (stat %in% c("percent", "Percent", "freq", "Freq")) {
+    stat <- "freq"
+  } else if (stat %in% c("geo mean", "Geo mean", "Geo Mean")) {
+    stat <- "geo mean"
+  } else if (stat %in% c("cv", "CV")) {
+    stat <- "CV"
+  }
+  
+  return(stat)
+}
+
 #' Get column name for statistic
 #' 
 #' @param x statistic.
