@@ -232,6 +232,15 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 cyto_gatingTemplate_apply <- function(x, 
                                       gatingTemplate = NULL, ...){
   
+  # No GatingSet supplied
+  if(missing(x)){
+    stop("Supply the GatingSet to 'x'.")
+  }else{
+    if(!inherits(x, "GatingSet")){
+      stop("'x' must be an object of class GatingSet.")
+    }
+  }
+  
   # Missing gatingtemplate - check global option
   if(is.null(gatingTemplate)){
     gatingTemplate <- cyto_gatingTemplate_active()
