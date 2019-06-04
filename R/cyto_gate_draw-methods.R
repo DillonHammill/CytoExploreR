@@ -546,14 +546,21 @@ cyto_gate_draw.flowSet <- function(x,
     # Overlay is list of flowFrames or flowSets
     }else if(inherits(overlay, "list")){
       
+      # List of flowFrames repeat fr_list times - no sampling or grouping
+      if(all(lapply(overlay, function(z){
+        inherits(z, "flowFrame")
+      }))){
+        
+        overlay <- rep(list(overlay), N)
+      
       # Allow list of flowFrame lists of length(fr_list)
-      if (all(unlist(lapply(unlist(overlay), function(z) {
+      }else if (all(unlist(lapply(unlist(overlay), function(z) {
         inherits(z, "flowFrame")
       })))) {
         
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
-        if (length(overlay) != length(fr_list)) {
+        if (length(overlay) != N) {
           stop(paste(
             "'overlay' must be a list of flowFrame lists -",
             "one flowFrame list per group."
