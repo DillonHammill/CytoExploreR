@@ -48,34 +48,40 @@ cyto_load <- function(path = ".", ...) {
 #' a \code{GatingSet}. Calls are then made to \code{cyto_markers} and
 #' \code{cyto_annotate} to update the GtaingSet with the details of the
 #' experiment. These details can be modified later with additional calls to
-#' \code{cyto_markers} and/or \code{cyto_annotate}.
+#' \code{cyto_markers} and/or \code{cyto_annotate}. Users are also asked to
+#' provide a name for a gatingTemplate csv file which will be created if
+#' necessary and assigned as the active gatingTemplate.
 #'
 #' @param path points to the location of the .fcs files to read in.
+#' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
+#'   saving.
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
 #' @return \code{GatingSet}
 #'
 #' @importFrom flowWorkspace GatingSet
+#' @importFrom tools file_ext
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Get path to Activation .fcs files in CytoRSuiteData
 #' datadir <- system.file("extdata", package = "CytoRSuiteData")
 #' path <- paste0(datadir, "/Activation")
-#' 
+#'
 #' # Load in .fcs files into an annotated GatingSet
 #' fs <- cyto_setup(path)
-#' 
+#'
 #' # Markers have been assigned
 #' cyto_extract(gs, "root")[[1]]
-#' 
+#'
 #' # Experiment details have been updated
 #' cyto_details(gs)
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_setup <- function(path = ".", ...) {
+cyto_setup <- function(path = ".",
+                       gatingTemplate = NULL, ...) {
 
   # Load in .fsc files to ncdfFlowSet
   fs <- cyto_load(path, ...)
@@ -91,6 +97,43 @@ cyto_setup <- function(path = ".", ...) {
   # Annotate
   message("Annotate samples with experiment details.")
   cyto_annotate(gs)
+  
+  # Assign gatingTemplate
+  if(is.null(gatingTemplate)){
+    
+    if(interctive()){
+      # User prompt
+      gatingTemplate <- readline("Provide a name for the gatingTemplate:")
+    }
+    
+  }
+  
+  # No gatingTemplate specified in user prompt
+  if(!is.null(gatingTemplate)){
+    if(.empty(gatingTemplate)){
+       gatingTemplate <- NULL
+    }
+  }
+  
+  # Check gatingTemplate
+  if(!is.null(gatingTemplate)){
+    
+    # Add file extension if missing
+    if(.empty(file_ext(gatingTemplate))){
+      gatingTemplate <- paste0(gatingTemplate,".csv")
+    }
+    
+    # Assign globally
+    message(paste("Setting", gatingTemplate, "as the active gatingTemplate."))
+    cyto_gatingTemplate_select(gatingTemplate)
+    
+    # Write new csv file if not in current directory
+    if(!any(grepl(gatingTemplate, list.files()))){
+      message(paste("Creating", gatingTemplate, "."))
+      cyto_gatingTemplate_create(gatingTemplate)
+    }
+    
+  }
 
   return(gs)
 }

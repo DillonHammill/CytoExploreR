@@ -4,10 +4,13 @@
 \alias{cyto_setup}
 \title{Load.fcs files into GatingSet and annotate with experiment details}
 \usage{
-cyto_setup(path = ".", ...)
+cyto_setup(path = ".", gatingTemplate = NULL, ...)
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in.}
+
+\item{gatingTemplate}{name of a gatingTemplate csv file to be used for gate
+saving.}
 
 \item{...}{additional arguments passed to read.ncdfFlowSet.}
 }
@@ -21,7 +24,9 @@ read into a \code{ncdfFlowSet} using \code{cyto_load} which is then added to
 a \code{GatingSet}. Calls are then made to \code{cyto_markers} and
 \code{cyto_annotate} to update the GtaingSet with the details of the
 experiment. These details can be modified later with additional calls to
-\code{cyto_markers} and/or \code{cyto_annotate}.
+\code{cyto_markers} and/or \code{cyto_annotate}. Users are also asked to
+provide a name for a gatingTemplate csv file which will be created if
+necessary and assigned as the active gatingTemplate.
 }
 \examples{
 library(CytoRSuiteData)

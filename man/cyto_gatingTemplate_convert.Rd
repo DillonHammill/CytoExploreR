@@ -4,7 +4,7 @@
 \alias{cyto_gatingTemplate_convert}
 \title{Convert Old gatingTemplates to New Format}
 \usage{
-cyto_gatingTemplate_convert(gs, gatingTemplate)
+cyto_gatingTemplate_convert(gs, gatingTemplate = NULL)
 }
 \arguments{
 \item{gs}{object of class GatingSet.}
