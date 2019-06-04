@@ -788,22 +788,10 @@ cyto_gate_draw.GatingSet <- function(x,
                                      label = TRUE,
                                      plot = TRUE, ...) {
 
-  # No gatingTemplate supplied check global option  
-  if(is.null(gatingTemplate)){
-    # No gatingTemplate signalled globally - resort to gatingTemplate.csv
-    if(is.null(getOption("CytoRSuite_gatingTemplate"))){
-      gatingTemplate <- "gatingTemplate.csv"
-    }else{
-      gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
-    }
-  }
+  # Acquire valid gatingTemplate
+  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
   
-  # Add file extension to gatingTemplate if missing
-  if(file_ext(gatingTemplate) == ""){
-    gatingTemplate <- paste0(gatingTemplate, ".csv")
-  }
-  
-   # Check whether gate already exists in gatingTemplate
+  # Check whether gate already exists in gatingTemplate
   .cyto_gatingTemplate_check(parent, alias, gatingTemplate)
     
   # Extract parent population
