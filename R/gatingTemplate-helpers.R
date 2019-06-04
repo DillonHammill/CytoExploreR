@@ -301,3 +301,38 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate) {
   
   write.csv(gt, gatingTemplate, row.names = FALSE)
 }
+
+# GATINGTEMPLATE ACQUIRE ------------------------------------------------------
+
+#' Acquire valid gatingTemplate name or throw error
+#' Pulls down from global option if none supplied
+#' Adds file extension if missing
+#' Perform working directory check as well
+#' @importFrom tools file_ext
+#' @noRd
+.cyto_gatingTemplate_acquire<- function(gatingTenmplate = NULL){
+  
+  # No gatingTemplate supplied - access global option
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- getOption("CytoRSuite_gatingTemplate")
+  }
+  
+  # gatingTemplate still NULL
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate csv file.")
+  }
+  
+  # Add file extension to getingTemplate if missing
+  if(file_ext(gatingTemplate) == ""){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
+  # Working directory check
+  if(getOption("CytoRSuite_wd_check") == TRUE){
+    if(file_wd_check(gatingTemplate) == FALSE){
+      stop(paste(gatingTemplate, "is not in this working directory."))
+    }
+  }
+  
+  return(gatingTemplate)
+}
