@@ -547,9 +547,9 @@ cyto_gate_draw.flowSet <- function(x,
     }else if(inherits(overlay, "list")){
       
       # List of flowFrames repeat fr_list times - no sampling or grouping
-      if(all(lapply(overlay, function(z){
+      if(all(unlist(lapply(overlay, function(z){
         inherits(z, "flowFrame")
-      }))){
+      })))){
         
         overlay <- rep(list(overlay), N)
       
