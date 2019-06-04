@@ -24,6 +24,7 @@
 #'
 #' @importFrom flowWorkspace getDescendants Rm getNodes
 #' @importFrom utils read.csv write.csv
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -67,9 +68,21 @@ cyto_gate_remove <- function(gs,
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
-
+  # Missing gatingTemplate
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Suppply the name of the gatingTemplate to remove gate(s).")
+  }
+  
+  # File extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
   # Get children from GatingSet
   chldrn <- unlist(lapply(
     alias,
@@ -105,6 +118,7 @@ cyto_gate_remove <- function(gs,
 #' @importFrom flowWorkspace getGate getNodes
 #' @importFrom openCyto gating
 #' @importFrom flowCore filters parameters<-
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -155,9 +169,21 @@ cyto_gate_extract <- function(parent,
     stop("Please supply the name(s) of the alias to extract.")
   }
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingTemplate
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
   
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate to extract gate(s).")
+  }
+  
+  # File extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+
   # Load gatingTemplate into gatingTemplate
   gt <- suppressMessages(gatingTemplate(gatingTemplate))
   
@@ -220,6 +246,7 @@ cyto_gate_extract <- function(parent,
 #' @importFrom data.table as.data.table fread :=
 #' @importFrom methods as
 #' @importFrom utils select.list write.csv
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -275,8 +302,20 @@ cyto_gate_edit <- function(x,
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingTemplate
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate to edit gate(s).")
+  }
+  
+  # File extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
   
   # Assign x to gs
   gs <- x
@@ -616,6 +655,7 @@ cyto_gate_edit <- function(x,
 #'
 #' @importFrom flowWorkspace getNodes setNode
 #' @importFrom utils read.csv write.csv
+#' @importFrom tools file_ext
 #'
 #' @export
 cyto_gate_rename <- function(x,
@@ -623,8 +663,20 @@ cyto_gate_rename <- function(x,
                         names = NULL,
                         gatingTemplate = NULL){
   
-  # Acquire valid gatingTemplate
-  gatingTemplate <- .cyto_gatingTemplate_acquire(gatingTemplate)
+  # Missing gatingTemplate
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # gatingTemplate still missing
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate to rename gate(s).")
+  }
+  
+  # File extension
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
   
   # Gates do not exist
   if(!all(gates %in% basename(getNodes(x)))){

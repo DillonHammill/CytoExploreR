@@ -78,7 +78,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL){
   }
   
   # Create gatingTemplate for saving
-  if(!is.null(gatingtemplate)){
+  if(!is.null(gatingTemplate)){
     cols <- c("alias",
             "pop",
             "parent",
@@ -119,6 +119,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL){
 #' @importFrom openCyto gatingTemplate gating
 #' @importFrom flowWorkspace recompute
 #' @importFrom utils edit read.csv write.csv
+#' @importFrom tools file_ext
 #' 
 #' @examples
 #' \dontrun{
@@ -206,6 +207,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 #'   gates in the gatingTemplate.
 #'
 #' @importFrom openCyto gatingTemplate gating
+#' @importfrom tools file_ext
 #'
 #' @examples 
 #' \dontrun{
@@ -279,6 +281,7 @@ cyto_gatingTemplate_apply <- function(x,
 #' @importFrom flowWorkspace getGate getNodes
 #' @importFrom flowCore parameters filters
 #' @importFrom utils read.csv write.csv
+#' @importFrom tools file_ext
 #'
 #' @examples
 #' \dontrun{
@@ -406,7 +409,7 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
     stop("'gatingTemplate' should be the name of the gatingTemplate csv file.")
   } else {
     # Bypass checks if gatingTemplate does not yet exist
-    gt <- tryCatch(read.csv(gatingTemplate, header = TRUE),
+    gt <- tryCatch(suppressWarnings(read.csv(gatingTemplate, header = TRUE)),
                    error = function(e){NULL})
         
     # Parent and alias entries match file

@@ -851,10 +851,13 @@ cyto_gate_draw.GatingSet <- function(x,
     stop("Supply the name of the gatingTemplate csv file to save the gate(s),")
   }
   
-  # Fil extension
+  # File extension
   if(.empty(file_ext(gatingTemplate))){
     gatingTemplate <- paste0(gatingTemplate, ".csv")
   }
+  
+  # Check gatingTemplate for existing entries
+  .cyto_gatingTemplate_check(parent, alias, gatingTemplate)
   
   # Extract parent population
   fs <- cyto_extract(x, parent)
@@ -1080,86 +1083,38 @@ cyto_gate_draw.GatingSet <- function(x,
     group_by <- NA
   }
 
-  # Use add_pop to apply gates to GatingSet and construct gatingTemplate
-  if(getOption("CytoRSuite_wd_check")){
-    
-    # gatingTemplate does not exist in working directory
-    if(file_wd_check(gatingTemplate) == FALSE){
-      message(paste("Writing", gatingTemplate, "to store gates."))
-      
-      # need to extract alias from gates list into new named list
-      pops <- list()
-      for (i in seq_len(length(alias))) {
-        pops[[i]] <- suppressWarnings(add_pop(
-          gs = x,
-          alias = alias[i],
-          parent = parent,
-          pop = pop,
-          dims = paste(channels, collapse = ","),
-          gating_method = "cyto_gate_draw",
-          gating_args = list(gate = gates[[i]]),
-          groupBy = group_by,
-          collapseDataForGating = TRUE,
-          preprocessing_method = "pp_cyto_gate_draw"
-        ))
-      }
-      pops <- do.call("rbind", pops)
-      
-      write.csv(pops, "gatingTemplate.csv", row.names = FALSE)
-    }else{
-      message(paste("Adding newly constructed gates to", gatingTemplate, "."))
-      
-      gt <- read.csv(gatingTemplate, header = TRUE)
-      
-      pops <- list()
-      for (i in seq_len(length(alias))) {
-        pops[[i]] <- suppressWarnings(add_pop(
-          gs = x,
-          alias = alias[i],
-          parent = parent,
-          pop = pop,
-          dims = paste(channels, collapse = ","),
-          gating_method = "cyto_gate_draw",
-          gating_args = list(gate = gates[[i]]),
-          groupBy = group_by,
-          collapseDataForGating = TRUE,
-          preprocessing_method = "pp_cyto_gate_draw"
-        ))
-      }
-      pops <- do.call("rbind", pops)
-      gt <- rbind(gt, pops)
-      
-      write.csv(gt, gatingTemplate, row.names = FALSE)
-    }
-    
-  }else{
-    
-    # Assume gates are to be added to existing template in external directory
-    message(paste("Adding newly constructed gates to", gatingTemplate, "."))
-    
-    gt <- read.csv(gatingTemplate, header = TRUE)
-    
-    pops <- list()
-    for (i in seq_len(length(alias))) {
-      pops[[i]] <- suppressWarnings(add_pop(
-        gs = x,
-        alias = alias[i],
-        parent = parent,
-        pop = pop,
-        dims = paste(channels, collapse = ","),
-        gating_method = "cyto_gate_draw",
-        gating_args = list(gate = gates[[i]]),
-        groupBy = group_by,
-        collapseDataForGating = TRUE,
-        preprocessing_method = "pp_cyto_gate_draw"
-      ))
-    }
-    pops <- do.call("rbind", pops)
-    gt <- rbind(gt, pops)
-    
-    write.csv(gt, gatingTemplate, row.names = FALSE)
-    
+  # gatingTemplate not created yet
+  if(!any(grepl(gatingTemplate, list.files()))){
+    message(
+      paste("Creating", gatingTemplate, "to save the constructed gate(s).")
+      )
+    cyto_gatingTemplate_create(gatingTemplate)
   }
+  
+  # Use add_pop to apply gates to GatingSet and construct gatingtemplate
+  message(paste("Adding newly constructed gate(s) to", gatingTemplate, "."))
+  
+  gt <- read.csv(gatingTemplate, header = TRUE)
+  
+  pops <- list()
+  for (i in seq_len(length(alias))) {
+    pops[[i]] <- suppressWarnings(add_pop(
+      gs = x,
+      alias = alias[i],
+      parent = parent,
+      pop = pop,
+      dims = paste(channels, collapse = ","),
+      gating_method = "cyto_gate_draw",
+      gating_args = list(gate = gates[[i]]),
+      groupBy = group_by,
+      collapseDataForGating = TRUE,
+      preprocessing_method = "pp_cyto_gate_draw"
+    ))
+  }
+  pops <- do.call("rbind", pops)
+  gt <- rbind(gt, pops)
+  
+  write.csv(gt, gatingTemplate, row.names = FALSE)
 
   # Return new gatingTemplate entries
   invisible(pops)
