@@ -336,3 +336,38 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate) {
   
   return(gatingTemplate)
 }
+
+# GATINGTEMPLATE CHECK ---------------------------------------------------------
+
+#' Check gatingTemplate for Existing Entry
+#'
+#' @param parent name of the parent population.
+#' @param alias name of the population of interest.
+#' @param gatingTemplate csv file name of the gatingTemplate.
+#'
+#' @return stops the gating process if an entry already exists in the
+#'   gatingTemplate for the supplied alias.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom utils read.csv
+#'
+#' @noRd
+.cyto_gatingTemplate_check <- function(parent, alias, gatingTemplate) {
+  if (inherits(gatingTemplate, "gatingTemplate")) {
+    stop("'gatingTemplate' should be the name of the gatingTemplate csv file.")
+  } else {
+    gt <- read.csv(gatingTemplate, header = TRUE)
+        
+    # Parent and alias entries match file
+    if (any(gt$parent %in% parent & gt$alias %in% alias)) {
+      message(
+        paste(
+          paste(gt$alias, collapse = " & "),
+          "already exists in", gatingTemplate, "."
+        )
+      )
+      stop("Supply another gatingTemplate or edit gate(s) using gate_edit.")
+    }
+  }
+}
