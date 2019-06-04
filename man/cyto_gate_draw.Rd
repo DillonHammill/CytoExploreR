@@ -33,15 +33,17 @@ methods simply return the constructed gates as a list of
 automatically applies the constructed gates to the GatingSet and saves the
 constructed gates in an \code{openCyto}
 \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}for future use.
-See \code{\link{gate_edit}} and \code{\link{gate_remove}} to manipulate
+See \code{\link{cyto_gate_edit}} and \code{\link{cyto_gate_remove}} to manipulate
 constructed gates and modify their entries in the gatingTemplate.
 }
 \seealso{
-\code{\link{cyto_gate_draw,flowFrame-method}}
+\code{\link{cyto_plot.flowFrame}}
 
-\code{\link{cyto_gate_draw,flowSet-method}}
+\code{\link{cyto_gate_draw.flowFrame}}
 
-\code{\link{cyto_gate_draw,GatingSet-method}}
+\code{\link{cyto_gate_draw.flowSet}}
+
+\code{\link{cyto_gate_draw.GatingSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

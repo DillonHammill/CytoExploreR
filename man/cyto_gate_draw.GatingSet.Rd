@@ -101,11 +101,11 @@ getNodes(gs)
 
 }
 \seealso{
-\code{\link{cyto_plot,GatingSet-method}}
+\code{\link{cyto_plot.flowFrame}}
 
-\code{\link{cyto_gate_draw,flowFrame-method}}
+\code{\link{cyto_gate_draw.flowFrame}}
 
-\code{\link{cyto_gate_draw,flowSet-method}}
+\code{\link{cyto_gate_draw.flowSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -1,8 +1,5 @@
 # cyto_gate_draw ---------------------------------------------------------------
 
-# NOTES ON SAMPLING:
-# - flowFrame method - display applied to flowFrame and overlay
-
 #' cyto_gate_draw
 #'
 #' Manually draw gates around populations for analysis of flow cytometry data.
@@ -23,7 +20,7 @@
 #' automatically applies the constructed gates to the GatingSet and saves the
 #' constructed gates in an \code{openCyto}
 #' \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}for future use.
-#' See \code{\link{gate_edit}} and \code{\link{gate_remove}} to manipulate
+#' See \code{\link{cyto_gate_edit}} and \code{\link{cyto_gate_remove}} to manipulate
 #' constructed gates and modify their entries in the gatingTemplate.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -33,9 +30,10 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_gate_draw,flowFrame-method}}
-#' @seealso \code{\link{cyto_gate_draw,flowSet-method}}
-#' @seealso \code{\link{cyto_gate_draw,GatingSet-method}}
+#' @seealso \code{\link{cyto_plot.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.flowSet}}
+#' @seealso \code{\link{cyto_gate_draw.GatingSet}}
 #'
 #' @export
 cyto_gate_draw <- function(x, ...) {
@@ -83,9 +81,9 @@ cyto_gate_draw <- function(x, ...) {
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{cyto_gate_draw,flowSet-method}}
-#' @seealso \code{\link{cyto_gate_draw,GatingSet-method}}
+#' @seealso \code{\link{cyto_plot.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.flowSet}}
+#' @seealso \code{\link{cyto_gate_draw.GatingSet}}
 #'
 #' @examples
 #' \dontrun{
@@ -342,9 +340,9 @@ cyto_gate_draw.flowFrame <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_plot,flowSet-method}}
-#' @seealso \code{\link{cyto_gate_draw,flowFrame-method}}
-#' @seealso \code{\link{cyto_gate_draw,GatingSet-method}}
+#' @seealso \code{\link{cyto_plot.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.GatingSet}}
 #'
 #' @examples
 #' \dontrun{
@@ -798,9 +796,9 @@ cyto_gate_draw.flowSet <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_plot,GatingSet-method}}
-#' @seealso \code{\link{cyto_gate_draw,flowFrame-method}}
-#' @seealso \code{\link{cyto_gate_draw,flowSet-method}}
+#' @seealso \code{\link{cyto_plot.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.flowFrame}}
+#' @seealso \code{\link{cyto_gate_draw.flowSet}}
 #'
 #' @examples
 #' \dontrun{

@@ -89,11 +89,11 @@ gt[[1]]
 
 }
 \seealso{
-\code{\link{cyto_plot,flowSet-method}}
+\code{\link{cyto_plot.flowFrame}}
 
-\code{\link{cyto_gate_draw,flowFrame-method}}
+\code{\link{cyto_gate_draw.flowFrame}}
 
-\code{\link{cyto_gate_draw,GatingSet-method}}
+\code{\link{cyto_gate_draw.GatingSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
