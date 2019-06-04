@@ -405,12 +405,17 @@
   channel <- cyto_channels_extract(x, channel, FALSE)
   
   # Calculate kernel density
-  if(length(exprs(x)[,channel]) > 2){
-    dens <- suppressWarnings(density(exprs(x)[,channel],
-                    adjust = smooth))
-  }else{
+  if(is.null(length(exprs(x)[,channel]))){
     warning("Insufficient events to compute kernel density.")
     return(NA)
+  }else{
+    if(length(exprs(x)[,channel]) > 2){
+      dens <- suppressWarnings(density(exprs(x)[,channel],
+                    adjust = smooth))
+    }else{
+      warning("Insufficient events to compute kernel density.")
+      return(NA)
+    }
   }
 
   # Normalise to mode if required

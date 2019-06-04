@@ -81,20 +81,23 @@ cyto_plot_point.flowFrame <- function(x,
     fr_exprs <- exprs(x)[,channels]
     
     # Skip if no events present
-    if(nrow(fr_exprs) != 0){
+    if(!is.null(nrow(fr_exprs))){
+      
+      if(nrow(fr_exprs) != 0){
       # Plot points
       points(x = fr_exprs[,channels[1]],
              y = fr_exprs[,channels[2]],
              pch = point_shape,
              cex = point_size,
              col = point_col)
+      }
+      
     }
 
   }, fr_list,
   point_shape,
   point_size,
   point_col)
-  
 }
 
 #' @rdname cyto_plot_point
@@ -137,13 +140,16 @@ cyto_plot_point.list <- function(x,
     fr_exprs <- exprs(x)[,channels]
     
     # Skip if no events present
-    if(nrow(fr_exprs) != 0){
-      # Plot points
-      points(x = fr_exprs[,channels[1]],
+    if(!is.null(nrow(fr_exprs))){
+      
+      if(nrow(fr_exprs) != 0){
+        points(x = fr_exprs[,channels[1]],
              y = fr_exprs[,channels[2]],
              pch = point_shape,
              cex = point_size,
              col = point_col)
+      }
+      
     }
     
   }, x,
