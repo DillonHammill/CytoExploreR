@@ -267,7 +267,7 @@ cyto_gatingTemplate_apply <- function(x,
   message(paste("Applying", gatingTemplate, "to the GatingSet."))
   
   # Read in gatingTemplate csv file to gatingTemplate object
-  gt <- gatingTemplate(gatingTemplate)
+  gt <- suppressMessages(gatingTemplate(gatingTemplate))
   
   # Apply gatingTemplate to GatingSet
   gating(gt, x, ...)
