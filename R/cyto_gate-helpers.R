@@ -97,6 +97,10 @@ cyto_gate_remove <- function(gs,
   # Remove all rows with alias = chldrn
   gt <- gt[!gt$alias %in% chldrn, ]
   
+  # Message
+  message(paste0("Removing gate(s) from the GatingSet and ",
+                gatingTemplate,"."))
+  
   # Remove nodes from GatingSet
   for (i in seq_len(length(alias))) {
     if (alias[i] %in% basename(getNodes(gs))) {
