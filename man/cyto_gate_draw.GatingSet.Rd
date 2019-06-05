@@ -5,9 +5,9 @@
 \title{cyto_gate_draw GatingSet Method}
 \usage{
 \method{cyto_gate_draw}{GatingSet}(x, parent = "root", alias = NULL,
-  channels = NULL, type = NULL, display = NULL, group_by = "all",
-  select = NULL, gatingTemplate = NULL, axis = "x", label = TRUE,
-  plot = TRUE, ...)
+  channels = NULL, type = NULL, display = NULL, overlay = NA,
+  group_by = "all", select = NULL, gatingTemplate = NULL,
+  axis = "x", label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -32,8 +32,12 @@ lower case first letters as well. Default \code{type} is \code{"interval"}
 for 1D gates and \code{"polygon"} for 2D gates.}
 
 \item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
+ plotted. Specifying a value for \code{display} can substantial improve
+ plotting speed for less powerful machines.
+@param overlay name(s) of the populations to overlay or a \code{flowFrame},
+ \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
+ containing populations to be overlaid onto the plot(s). Only overlaid
+ flowSet objects are subjected to sampling by \code{display}.}
 
 \item{group_by}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped

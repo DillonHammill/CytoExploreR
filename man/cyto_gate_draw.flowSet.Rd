@@ -31,10 +31,10 @@ for 1D gates and \code{"polygon"} for 2D gates.}
 plotted. Specifying a value for \code{display} can substantial improve
 plotting speed for less powerful machines.}
 
-\item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
-\code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
-containing populations to be overlaid onto the plot(s). Only overlaid
-flowSet objects are subjected to sampling by \code{display}.}
+\item{overlay}{a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames}
+or \code{list of flowSets} containing populations to be overlaid onto the
+plot(s). Only overlaid flowSet objects are subjected to sampling by
+\code{display}.}
 
 \item{group_by}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped

@@ -5,7 +5,7 @@
 #' Manually draw gates around populations for analysis of flow cytometry data.
 #'
 #' \code{cyto_gate_draw} is a convenient wrapper for the gating functions
-#' shipped with \code{cytoRSuite} to facilitate analysis of flow cytometry by
+#' shipped with \code{CytoRSuite} to facilitate analysis of flow cytometry by
 #' gate drawing. Using \code{cyto_gate_draw} users can specify the type of
 #' gate(s) to be constructed through the \code{type} argument and
 #' \code{cyto_gate_draw} will automatically handle plotting the data and make
@@ -307,10 +307,10 @@ cyto_gate_draw.flowFrame <- function(x,
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
-#' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
-#'   \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
-#'   containing populations to be overlaid onto the plot(s). Only overlaid
-#'   flowSet objects are subjected to sampling by \code{display}.
+#' @param overlay  a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames}
+#'   or \code{list of flowSets} containing populations to be overlaid onto the
+#'   plot(s). Only overlaid flowSet objects are subjected to sampling by
+#'   \code{display}.
 #' @param group_by vector of pData column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
 #'   prior to gating, set to "all" by default to construct a single gate for all
@@ -771,6 +771,10 @@ cyto_gate_draw.flowSet <- function(x,
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
+#'  @param overlay name(s) of the populations to overlay or a \code{flowFrame},
+#'   \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
+#'   containing populations to be overlaid onto the plot(s). Only overlaid
+#'   flowSet objects are subjected to sampling by \code{display}.
 #' @param select vector containing the indices of samples within gs to use for
 #'   plotting. For large \code{flowSet} objects \code{select} is set to 20
 #'   random \code{flowFrame} objects to improve processing speed.
@@ -839,6 +843,7 @@ cyto_gate_draw.GatingSet <- function(x,
                                      channels = NULL,
                                      type = NULL,
                                      display = NULL,
+                                     overlay = NA,
                                      group_by = "all",
                                      select = NULL,
                                      gatingTemplate = NULL,
@@ -1147,6 +1152,7 @@ cyto_gate_draw.GatingSet <- function(x,
     if (plot == TRUE) {
       cyto_plot(fr_list[[z]],
                 channels = channels,
+                overlay = overlay[[z]],
                 popup = TRUE,
                 legend = FALSE,
                 title = title,

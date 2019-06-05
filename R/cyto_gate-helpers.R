@@ -86,7 +86,7 @@ cyto_gate_remove <- function(gs,
   # Get children from GatingSet
   chldrn <- unlist(lapply(
     alias,
-    function(x) basename(getDescendants(gs[[1]], x))
+    function(x) basename(getDescendants(gs[[1]], paste0(parent,"/",x)))
   ))
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- c(alias, unique(chldrn))
@@ -100,7 +100,7 @@ cyto_gate_remove <- function(gs,
   # Remove nodes from GatingSet
   for (i in seq_len(length(alias))) {
     if (alias[i] %in% basename(getNodes(gs))) {
-      suppressMessages(Rm(alias[i], gs))
+      suppressMessages(Rm(paste0(parent,"/", alias[i]), gs))
     }
   }
   
