@@ -156,6 +156,8 @@ cyto_details <- function(x) {
   pData(x)
 }
 
+
+
 # CYTO_NAMES -------------------------------------------------------------------
 
 #' Extract sample names
@@ -1143,7 +1145,7 @@ cyto_annotate <- function(x, file = NULL) {
     pd <- read.csv(file, header = TRUE)
 
     # Update cyto_details
-    cyto_details(cyto) <- pd
+    pData(cyto) <- pd
   }
 
   # Edit cyto_details
