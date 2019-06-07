@@ -848,7 +848,7 @@ cyto_group_by <- function(x,
   nms <- cyto_names(x)
 
   # Check group_by
-  if (!all(group_by %in% colnames(pd))) {
+  if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
     lapply(group_by, function(y) {
       if (!y %in% colnames(pd)) {
         stop(paste0(y, " is not a valid variable for this ", class(x), "."))
@@ -1016,7 +1016,7 @@ cyto_markers <- function(x, file = NULL) {
 
     # GatingSet
   } else if (inherits(x, "GatingSet")) {
-    fr <- cyto_extract(gs, "root")[[1]]
+    fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
   }
 
