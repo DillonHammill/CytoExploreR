@@ -1,7 +1,8 @@
 #' Extract Fluorescent Channels
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -10,138 +11,68 @@
 #' @seealso \code{\link{cyto_fluor_channels,flowSet-method}}
 #' @seealso \code{\link{cyto_fluor_channels,GatingSet-method}}
 #'
-#' @export
-setGeneric(
-  name = "cyto_fluor_channels",
-  def = function(x) {
-    standardGeneric("cyto_fluor_channels")
-  }
-)
-
-#' Extract Fluorescent Channels - flowFrame Method
-#'
-#' @param x object \code{\link[flowCore:flowFrame-class]{flowFrame}}.
-#'
-#' @return vector of fluorescent channels.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @seealso \code{\link{cyto_fluor_channels,flowSet-method}}
-#' @seealso \code{\link{cyto_fluor_channels,GatingSet-method}}
-#'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
-#' # Get fluorescent channels
+#'
+#' # Add samples to GatingSet
+#' gs <- GtaingSet(fs)
+#'
+#' # Fluorescent channels of flowFrame
 #' cyto_fluor_channels(fs[[1]])
+#'
+#' # Fluorescent channels for a flowSet
+#' cyto_fluor_channels(fs)
+#'
+#' # Fluorescent channels for GatingHierarchy
+#' cyto_fluor_channels(gs[[1]])
+#'
+#' # Fluorescent channels for GatingSet
+#' cyto_fluor_channels(gs)
+#'
+#' @rdname cyto_fluor_channels
+#'
 #' @export
-setMethod(cyto_fluor_channels,
-          signature = "flowFrame",
-          definition = function(x) {
+cyto_fluor_channels <- function(x){
+  UseMethod("cyto_fluor_channels")
+}
+
+#' @rdname cyto_fluor_channels
+#' @export
+cyto_fluor_channels.flowFrame <- function(x){
             channels <- unname(BiocGenerics::colnames(x))
-            channels <- channels[!channels %in% c(
-              "FSC-A",
-              "FSC-H",
-              "FSC-W",
-              "SSC-A",
-              "SSC-H",
-              "SSC-W",
-              "Time",
-              "Original"
-            )]
+            
+            # Remove FSC channels
+            channels <- channels[!grepl("FSC", channels, ignore.case = TRUE)]
+            # Remove SSC channels
+            channels <- channels[!grepl("SSC", channels, ignore.case = TRUE)]
+            # Remove Original channel
+            channels <- channels[!grepl("Original", channels)]
+            # Remove Time channel
+            channels <- channels[!grepl("Time", channels, ignore.case = TRUE)]
             
             return(channels)
           }
-)
 
-#' Extract Fluorescent Channels - flowSet Method
-#'
-#' @param x object \code{\link[flowCore:flowSet-class]{flowSet}}.
-#'
-#' @return vector of fluorescent channels.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @seealso \code{\link{cyto_fluor_channels,flowFrame-method}}
-#' @seealso \code{\link{cyto_fluor_channels,GatingSet-method}}
-#'
-#' @examples
-#' library(CytoRSuiteData)
-#' 
-#' # Load in samples
-#' fs <- Activation
-#' 
-#' # get fluorescent channels
-#' cyto_fluor_channels(fs)
+#' @rdname cyto_fluor_channels
 #' @export
-setMethod(cyto_fluor_channels,
-          signature = "flowSet",
-          definition = function(x) {
-            cyto_fluor_channels(x[[1]])
-          }
-)
+cyto_fluor_channels.flowSet <- function(x){
+  cyto_fluor_channels.flowFrame(x[[1]])
+}
 
-#' Extract Fluorescent Channels - GatingHierarchy Method
-#'
-#' @param x object
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}.
-#'
-#' @return vector of fluorescent channels.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @seealso \code{\link{cyto_fluor_channels,flowFrame-method}}
-#' @seealso \code{\link{cyto_fluor_channels,flowSet-method}}
-#'
-#' @examples
-#' library(CytoRSuiteData)
-#'
-#' # Load in samples
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#'
-#' # Get fluorescent channels
-#' cyto_fluor_channels(gs[[1]])
+#' @rdname cyto_fluor_channels
 #' @export
-setMethod(cyto_fluor_channels,
-          signature = "GatingHierarchy",
-          definition = function(x) {
-            fr <- getData(x, "root")
-            cyto_fluor_channels(fr)
-          }
-)
+cyto_fluor_channels.GatingHierarchy <- function(x){
+  cyto_fluor_channels(cyto_extract(x, "root"))
+}
 
-#' Extract Fluorescent Channels - GatingSet Method
-#'
-#' @param x object \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#'
-#' @return vector of fluorescent channels.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @seealso \code{\link{cyto_fluor_channels,flowFrame-method}}
-#' @seealso \code{\link{cyto_fluor_channels,flowSet-method}}
-#'
-#' @examples
-#' library(CytoRSuiteData)
-#' 
-#' # Load in samples
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#' 
-#' # Get fluorescent channels
-#' cyto_fluor_channels(gs)
+#' @rdname cyto_fluor_channels
 #' @export
-setMethod(cyto_fluor_channels,
-          signature = "GatingSet",
-          definition = function(x) {
-            fr <- getData(x[[1]], "root")
-            cyto_fluor_channels(fr)
-          }
-)
+cyto_fluor_channels.GatingSet <- function(x){
+  cyto_fluor_channels.flowFrame(cyto_extract(x, "root")[[1]])
+}
 
 #' Select Fluorescent Channel for Compensation Controls
 #'

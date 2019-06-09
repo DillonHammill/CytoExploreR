@@ -207,7 +207,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL){
 #'   gates in the gatingTemplate.
 #'
 #' @importFrom openCyto gatingTemplate gating
-#' @importfrom tools file_ext
+#' @importFrom tools file_ext
 #'
 #' @examples 
 #' \dontrun{
