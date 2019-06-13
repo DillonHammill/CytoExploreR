@@ -1038,7 +1038,7 @@ cyto_markers <- function(x, file = NULL) {
     }
   } else {
     if (getOption("CytoRSuite_wd_check")) {
-      if (!.file_wd_check(file)) {
+      if (!file_wd_check(file)) {
         stop(paste(file, "does not exist in this working directory."))
       }
     }
@@ -1096,6 +1096,7 @@ cyto_markers <- function(x, file = NULL) {
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore pData<-
 #' @importFrom utils edit write.csv read.csv
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1135,17 +1136,27 @@ cyto_annotate <- function(x, file = NULL) {
       rownames(pd) <- NULL
     }
   } else {
-    if (getOption("CytoRSuite_wd_check")) {
-      if (!.file_wd_check(file)) {
-        stop(paste(file, "does not exist in this working directory"))
-      }
+      
+    # File name lacks csv extension
+    if(file_ext(file) == ""){
+      file <- paste0(file,".csv")
     }
-
-    # Read in file
-    pd <- read.csv(file, header = TRUE)
-
-    # Update cyto_details
-    pData(cyto) <- pd
+      
+    # File already exists
+    if(length(grep(file, list.files())) != 0){
+        
+      message(paste(file,"found in working directory."))
+      pd <- read.csv(file, header = TRUE)
+        
+    # File does not exist  
+    }else{
+        
+      # Extract cyto_details
+      pd <- cyto_details(cyto)
+      rownames(pd) <- NULL
+        
+    }
+    
   }
 
   # Edit cyto_details
@@ -1153,22 +1164,32 @@ cyto_annotate <- function(x, file = NULL) {
   rownames(pd) <- pd$name
 
   # Update cyto_details
-  cyto_details(cyto) <- pd
+  pData(cyto) <- pd
 
-  # Write result to csv file
-  if (length(grep("Experiment-Details.csv", c(file, list.files()))) != 0) {
-    write.csv(pd,
-      c(file, list.files())[grep(
-        "Experiment-Details.csv",
-        c(file, list.files())
-      )[1]],
-      row.names = FALSE
-    )
-  } else {
-    write.csv(cyto_details(cyto), paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-Experiment-Details.csv"
-    ), row.names = FALSE)
+  # Write result to csv file - file name manually supplied
+  if(!is.null(file)){
+    
+    write.csv(cyto_details(cyto), file, row.names = FALSE)
+   
+  # Write result to csv file - no file name supplied
+  }else{
+    
+    # New file contains "Experiment-Details"
+    if (length(grep("Experiment-Details.csv", c(file, list.files()))) != 0) {
+      write.csv(pd,
+        c(file, list.files())[grep(
+          "Experiment-Details.csv",
+          c(file, list.files())
+        )[1]],
+        row.names = FALSE
+      )
+    } else {
+      write.csv(cyto_details(cyto), paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Experiment-Details.csv"
+      ), row.names = FALSE)
+    }
+    
   }
 
   # Update globally
