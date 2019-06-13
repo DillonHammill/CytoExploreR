@@ -110,7 +110,7 @@ cyto_gate_draw.flowFrame <- function(x,
                                      alias = NULL,
                                      channels = NULL,
                                      type = NULL,
-                                     display = 1,
+                                     display = NULL,
                                      overlay = NA,
                                      axis = "x",
                                      label = TRUE,
@@ -154,12 +154,23 @@ cyto_gate_draw.flowFrame <- function(x,
     # flowFrame overlay added to list
     if(inherits(overlay, "flowFrame")){
       
+      # Overlay sampling
+      if(!is.null(display)){
+        overlay <- cyto_sample(overlay, display)
+      }
       overlay <- list(overlay)
     
     # flowSet overlay converted to list of flowFrames  
     }else if(inherits(overlay, "flowSet")){
       
       overlay <- cyto_convert(overlay, "list of flowFrames")
+      
+      # Overlay sampling
+      if(!is.null(display)){
+        overlay <- lapply(overlay, function(z){
+          cyto_sample(z, display)
+        })
+      }
     
     # flowFrame list as is - flowSet list use overlay[[1]]  
     }else if(inherits(overlay, "list")){
@@ -644,14 +655,26 @@ cyto_gate_draw.flowSet <- function(x,
     }
     
     # Generate plot for gating - no popup or title control or overlay sampling
+    # Careful about NA overlay
     if (plot == TRUE) {
-      cyto_plot(fr_list[[z]],
+      if(!.all_na(overlay)){
+        cyto_plot(fr_list[[z]],
                 channels = channels,
                 overlay = overlay[[z]],
                 popup = TRUE,
                 legend = FALSE,
                 title = title, ...
-      )
+        )
+      }else{
+        cyto_plot(fr_list[[z]],
+                  channels = channels,
+                  overlay = NA,
+                  popup = TRUE,
+                  legend = FALSE,
+                  title = title, ...
+        )
+      }
+
     }
     
     # Construct gates save as filters object
@@ -785,7 +808,7 @@ cyto_gate_draw.flowSet <- function(x,
 #'   default.
 #' @param plot logical indicating whether a plot should be drawn, set to
 #'   \code{TRUE} by default.
-#' @param ... additional arguments for \code{\link{cyto_plot,GatingSet-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot.flowFrame}}.
 #'
 #' @return drawn gates are applied to the
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and saved to a
@@ -1149,15 +1172,27 @@ cyto_gate_draw.GatingSet <- function(x,
     }
     
     # Generate plot for gating - no popup or title control or overlay sampling
+    # Careful about NA overlay
     if (plot == TRUE) {
-      cyto_plot(fr_list[[z]],
+      if(!.all_na(overlay)){
+        cyto_plot(fr_list[[z]],
                 channels = channels,
                 overlay = overlay[[z]],
                 popup = TRUE,
                 legend = FALSE,
                 title = title,
                 axes_trans = axes_trans, ...
-      )
+        )
+      }else{
+        cyto_plot(fr_list[[z]],
+                  channels = channels,
+                  overlay = NA,
+                  popup = TRUE,
+                  legend = FALSE,
+                  title = title,
+                  axes_trans = axes_trans, ...
+        )
+      }
     }
     
     # Construct gates save as filters object

@@ -5,7 +5,7 @@
 \title{cyto_gate_draw flowFrame Method.}
 \usage{
 \method{cyto_gate_draw}{flowFrame}(x, alias = NULL, channels = NULL,
-  type = NULL, display = 1, overlay = NA, axis = "x",
+  type = NULL, display = NULL, overlay = NA, axis = "x",
   label = TRUE, plot = TRUE, ...)
 }
 \arguments{
