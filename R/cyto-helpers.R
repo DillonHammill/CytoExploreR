@@ -976,6 +976,7 @@ cyto_sample.list <- function(x,
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters markernames markernames<-
 #' @importFrom utils edit write.csv read.csv
+#' @importFrom tools file_ext
 #'
 #' @return save inputs to "Experiment-Markers.csv" and update marker names of
 #'   \code{x}.
@@ -1023,26 +1024,45 @@ cyto_markers <- function(x, file = NULL) {
   }
 
   # file missing
-  if (is.null(file)) {
+  if(is.null(file)){
+  
+    # Check if file already exists
     if (length(grep("Experiment-Markers.csv", list.files())) != 0) {
       message("Experiment-Markers.csv found in working directory.")
       dt <- read.csv(list.files()[grep("Experiment-Markers.csv", list.files())],
-        header = TRUE, stringsAsFactors = FALSE
+                     header = TRUE, stringsAsFactors = FALSE
       )
     } else {
-
+      
       # Make data.frame with channel and marker columns
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("Channel", "Marker")
       rownames(dt) <- NULL
     }
-  } else {
-    if (getOption("CytoRSuite_wd_check")) {
-      if (!file_wd_check(file)) {
-        stop(paste(file, "does not exist in this working directory."))
-      }
+    
+  # File manually supplied  
+  }else{
+    
+    # File extansion missing
+    if(file_ext(file) == ""){
+      file <- paste0(file, ".csv")
     }
-    dt <- read.csv(file, header = TRUE)
+    
+    # File already exists
+    if(length(grep(file, list.files())) != 0){
+      
+      message(file, "found in working directory.")
+      dt <- read.csv(file, header = TRUE)
+    # File does not exist (yet) 
+    }else{
+      
+      # Make data.frame with channel and marker columns
+      dt <- pd[, c("name", "desc")]
+      colnames(dt) <- c("Channel", "Marker")
+      rownames(dt) <- NULL
+      
+    }
+    
   }
 
   # Channels with markers
@@ -1054,22 +1074,31 @@ cyto_markers <- function(x, file = NULL) {
   # Update channels
   BiocGenerics::colnames(x) <- dt$Channel
 
-  # Write result to csv file
-  if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
-    write.csv(dt,
-      c(file, list.files())[grep(
-        "Experiment-Markers.csv",
-        c(file, list.files())
-      )[1]],
-      row.names = FALSE
-    )
-  } else {
-    write.csv(dt, paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-Experiment-Markers.csv"
-    ), row.names = FALSE)
+  # Write result to csv file -  file name manually supplied
+  if(!is.null(file)){
+   
+    write.csv(dt, file, row.names = FALSE)
+    
+  # Write result to csv file - no file name supplied
+  }else{
+    
+    if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
+      write.csv(dt,
+        c(file, list.files())[grep(
+          "Experiment-Markers.csv",
+          c(file, list.files())
+        )[1]],
+        row.names = FALSE
+      )
+    } else {
+      write.csv(dt, paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Experiment-Markers.csv"
+      ), row.names = FALSE)
+    }
+    
   }
-
+  
   # Channels with markers added
   tb <- dt[!dt$Channel %in% chans, ]
   chns <- tb$Channel[!is.na(tb$Marker)]
@@ -1135,6 +1164,8 @@ cyto_annotate <- function(x, file = NULL) {
       pd <- cyto_details(cyto)
       rownames(pd) <- NULL
     }
+    
+  # File name supplied manually
   } else {
       
     # File name lacks csv extension
