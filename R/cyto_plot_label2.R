@@ -81,6 +81,12 @@
 #' label_text_x = 3,
 #' label_text_y = 50
 #' )
+#' 
+#' # Label - no statistic
+#' cyto_plot_label2(label_text = "Activated \n Cells",
+#' label_text_x = 3,
+#' label_text_y = 25,
+#' label_fill = "red")
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -129,7 +135,8 @@ cyto_plot_label2 <- function(x,
     
       if(.all_na(trans)){
         stop(
-          paste("Supply transformList/transformerList to calculate", label_stat, ".")
+          paste("Supply transformList/transformerList to calculate", 
+                label_stat, ".")
         )
       }
     
@@ -189,7 +196,7 @@ cyto_plot_label2 <- function(x,
         sts <- cyto_stats_compute(z,
                                  channels = channels,
                                  trans = trans,
-                                 label_stat = label_stat,
+                                 stat = label_stat,
                                  format = "long",
                                  density_smooth = density_smooth)
         sts <- round(sts[, ncol(sts)], 2)
