@@ -4,10 +4,11 @@
 \alias{cyto_plot_label2}
 \title{Add boxed text labels to cyto_plot}
 \usage{
-cyto_plot_label2(x, channels, gate = NA, text = NA, stat = NA,
-  text_x = NA, text_y = NA, trans = NA, text_font = 2,
-  text_size = 0.8, text_col = "black", fill = "white",
-  fill_alpha = 0.6, density_smooth = 0.6)
+cyto_plot_label2(x, channels, gate = NA, label_text = NA,
+  label_stat = NA, label_text_x = NA, label_text_y = NA,
+  trans = NA, label_text_font = 2, label_text_size = 0.8,
+  label_text_col = "black", label_fill = "white",
+  label_fill_alpha = 0.6, density_smooth = 0.6)
 }
 \arguments{
 \item{x}{object of class \code{"flowFrame"}.}
@@ -21,22 +22,21 @@ gating.}
 \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{"list"} or
 \code{\link[flowCore:filters-class]{filters}}.}
 
-\item{text}{character string to include in the label above the statistic
-(e.g. population name(s)).}
+\item{label_text}{character string to include in the label above the
+statistic (e.g. population name(s)).}
 
-\item{stat}{indicates the type of statistic to include in the label, can be
-either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"},
-\code{"geo mean"} or \code{"CV"}. \code{stat} is set to \code{"median"} by
-default. Statistics for fluorescent intensity are calculated for the entire
-distribution. Only count and percent statistics are supported for 2D plots.}
+\item{label_stat}{indicates the type of statistic to include in the label,
+can be either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"},
+\code{"geo mean"} or \code{"CV"}. Only count and percent statistics
+are supported for 2D plots.}
 
-\item{text_x}{vector containing the x co-ordinates for the plot labels. Label
-positions can be interactively selected if no co-ordinates are manually
-supplied.}
+\item{label_text_x}{vector containing the x co-ordinates for the plot labels.
+Label positions can be interactively selected if no co-ordinates are
+manually supplied.}
 
-\item{text_y}{vector containing the x co-ordinates for the plot labels. Label
-positions can be interactively selected if no co-ordinates are manually
-supplied.}
+\item{label_text_y}{vector containing the x co-ordinates for the plot labels.
+Label positions can be interactively selected if no co-ordinates are
+manually supplied.}
 
 \item{trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or
@@ -44,20 +44,20 @@ supplied.}
 \code{\link[flowCore:logicleTransform]{estimateLogicle}} which was used to
 transform the fluorescent channels of the supplied flowFrame.}
 
-\item{text_font}{integer [1,2,3,4] passed to \code{text} to alter the font,
-set to \code{2} by default for a bold font.}
+\item{label_text_font}{integer [1,2,3,4] passed to \code{text} to alter the
+font, set to \code{2} by default for a bold font.}
 
-\item{text_size}{numeric character expansion used to control the size of the
-text in the labels, set to \code{0.8} by default. See \code{?text} for
-details.}
+\item{label_text_size}{numeric character expansion used to control the size
+of the text in the labels, set to \code{0.8} by default. See \code{?text}
+for details.}
 
-\item{text_col}{specify text colour in label for each gate, defaults to
+\item{label_text_col}{specify text colour in label for each gate, defaults to
 \code{"black"} for all gates.}
 
-\item{fill}{fill colour to use for labels, set to "white" by default.}
+\item{label_fill}{fill colour to use for labels, set to "white" by default.}
 
-\item{fill_alpha}{numeric [0,1] controls the transparency of the fill colour,
-set to \code{0.6} by default.}
+\item{label_fill_alpha}{numeric [0,1] controls the transparency of the fill
+colour, set to \code{0.6} by default.}
 
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} to adjust kernel density for mode
@@ -96,11 +96,11 @@ cyto_plot(gs[[32]],
 # Label - median fluorescent intensity
 cyto_plot_label2(getData(gs, "CD4 T Cells")[[32]],
 channels = "CD69",
-stat = "median",
-text = "MedFI",
+label_stat = "median",
+label_text = "MedFI",
 trans = trans,
-text_x = 3,
-text_y = 50
+label_text_x = 3,
+label_text_y = 50
 )
 
 }
