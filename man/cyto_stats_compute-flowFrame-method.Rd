@@ -6,7 +6,7 @@
 \title{Compute Statistics - flowFrame Method}
 \usage{
 \S4method{cyto_stats_compute}{flowFrame}(x, channels = NULL,
-  trans = NULL, stat = "median", format = "long",
+  trans = NULL, stat = "median", gate = NA, format = "long",
   density_smooth = 0.6)
 }
 \arguments{
@@ -26,6 +26,11 @@ on the original linear scale.}
 \item{stat}{name of the statistic to calculate, options include
 \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 \code{"mean"}, \code{"geo mean"} or \code{"CV"}.}
+
+\item{gate}{object of class \code{rectangleGate}, \code{polygonGate} or
+\code{ellipsoidGate} to apply to the flowFrame prior to calculation of
+statistics. A \code{gate} object must be supplied to compute frequency
+statistics.}
 
 \item{format}{indicates whether the data should be returned in the
 \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by

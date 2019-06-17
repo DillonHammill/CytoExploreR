@@ -34,6 +34,11 @@ default.}
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 default.}
+
+\item{gate}{object of class \code{rectangleGate}, \code{polygonGate} or
+\code{ellipsoidGate} to apply to the flowFrame prior to calculation of
+statistics. A \code{gate} object must be supplied to compute frequency
+statistics.}
 }
 \value{
 a tibble containing the computed statistics in the wide or long

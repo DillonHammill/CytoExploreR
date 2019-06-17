@@ -7,6 +7,8 @@
 # To add new statistical functions to cyto_stats_compute follow the same format
 # as below and add the name of the function to cyto_stats_compute options.
 
+# Gates are applied to flowFrame prior to statistics computation.
+
 # NEED TO ADD .getRawData or .getTransformedData where necessary
 
 # COUNT ------------------------------------------------------------------------
@@ -14,28 +16,104 @@
 #' Calculate Number of Events
 #' 
 #' @param x object of class flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
 #'
 #' @return data.frame containing the number events.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore Subset
 #' @importFrom tibble tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @noRd
-.cyto_count <- function(x){
+.cyto_count <- function(x,
+                        gate = NA){
   
   # Throw error for invalid object
   if(!inherits(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
-  # Extract raw data and calculate mean directly
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Gate flowFrame
+  if(!.all_na(gate)){
+    x <- Subset(x, gate)
+  }
+  
+  # Return count statistic
   res <- tibble("count" = BiocGenerics::nrow(x))
   
   return(res)
   
 }
+
+# FREQUENCY --------------------------------------------------------------------
+
+#' Calculate frequency of gated population
+#'
+#' @param x object of class flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
+#'
+#' @return data.frame containing the population frequency.
+#'
+#' @importFrom flowCore Subset
+#' @importFrom tibble tibble
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_freq <- function(x,
+                       gate = NA){
+  
+  # Throw error for invalid object
+  if(!inherits(x, "flowFrame")){
+    stop("'x' should be a flowFrame object.")
+  }
+  
+  # Must supply gate to compute frequency
+  if(.all_na(gate)){
+    stop("A 'gate' object is required to compute frequency.")
+  }
+  
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Extract population
+  fr <- Subset(x, gate)
+  
+  # Compute frequency
+  res <- .cyto_count(fr)/.cyto_count(x) * 100
+  res <- round(res, 2)
+  
+  # Return calculated frequency
+  res <- tibble("freq" = res)
+  
+  return(res)
+  
+}
+
 
 # MEAN -------------------------------------------------------------------------
 
@@ -46,11 +124,13 @@
 #'   intensity should be calculated.
 #' @param trans transformation object used to transform the channels of the
 #'   flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
 #'
 #' @return data.frame containing the mean fluorescent intensity for each of
 #'   the supplied channels.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -58,7 +138,8 @@
 #' @noRd
 .cyto_mean <- function(x, 
                        channels = NULL,
-                       trans = NULL){
+                       trans = NULL,
+                       gate = NA){
   
   # Throw error for invalid object
   if(!inherits(x, "flowFrame")){
@@ -77,6 +158,23 @@
   
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
+  
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Gate flowFrame
+  if(!.all_na(gate)){
+    x <- Subset(x, gate)
+  }
   
   # Get raw data using .cyto_raw
   if(!is.null(trans)){
@@ -104,11 +202,14 @@
 #'   intensity should be calculated.
 #' @param trans transformation object used to transform the channels of the
 #'   flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
+#'   
 #'
 #' @return data.frame containing the geometric mean fluorescent intensity for
 #'   each of the supplied channels.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -116,7 +217,8 @@
 #' @noRd
 .cyto_geometric_mean <- function(x, 
                                  channels = NULL,
-                                 trans = NULL){
+                                 trans = NULL,
+                                 gate = NA){
   
   # Throw error for invalid object
   if(!inherits(x, "flowFrame")){
@@ -125,6 +227,23 @@
 
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
+  
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Gate flowFrame
+  if(!.all_na(gate)){
+    x <- Subset(x, gate)
+  }
   
   # Geometric mean calculate as inverse of arithmetic mean of transformed data
   if(is.null(trans)){
@@ -190,11 +309,13 @@
 #'   intensity should be calculated.
 #' @param trans transformation object used to transform the channels of the
 #'   flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
 #'
 #' @return data.frame containing the median fluorescent intensity for each of
 #'   the supplied channels.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' @importFrom robustbase colMedians
 #' 
@@ -203,7 +324,8 @@
 #' @noRd
 .cyto_median <- function(x, 
                         channels = NULL,
-                        trans = NULL){
+                        trans = NULL,
+                        gate = NA){
   
   # Throw error for invalid object
   if(!inherits(x, "flowFrame")){
@@ -222,6 +344,23 @@
   
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
+  
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Gate flowFrame
+  if(!.all_na(gate)){
+    x <- Subset(x, gate)
+  }
   
   # Get raw data using .cyto_raw
   if(!is.null(trans)){
@@ -249,6 +388,8 @@
 #'   intensity should be calculated.
 #' @param trans transformation object used to transform the channels of the
 #'   flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
 #' @param density_smooth numeric smoothing factor passed to
 #'   \code{\link[stats:density]{density}} to control the degree of smoothing,
 #'   set to 1.5 by default.
@@ -256,7 +397,7 @@
 #' @return data.frame containing the mode fluorescent intensity for each of
 #'   the supplied channels.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -265,6 +406,7 @@
 .cyto_mode <- function(x, 
                        channels = NULL,
                        trans = NULL,
+                       gate = NA,
                        density_smooth = 1.5){
   
   # Throw error for invalid object
@@ -284,6 +426,23 @@
   
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
+  
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Gate flowFrame
+  if(!.all_na(gate)){
+    x <- Subset(x, gate)
+  }
   
   # Get raw data using .cyto_raw
   if(!is.null(trans)){
@@ -317,11 +476,14 @@
 #'   intensity should be calculated.
 #' @param trans transformation object used to transform the channels of the
 #'   flowFrame.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate}.
+#'
 #'
 #' @return data.frame containing the robust coefficient of variation for each
 #'   of the supplied channels.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' @importFrom robustbase colMedians
 #'
@@ -330,7 +492,8 @@
 #' @noRd
 .cyto_CV <- function(x, 
                     channels = NULL,
-                    trans = NULL){
+                    trans = NULL,
+                    gate = NA){
   
   # Throw error for invalid object
   if(!inherits(x, "flowFrame")){
@@ -349,6 +512,23 @@
 
   # Check channels
   channels <- cyto_channels_extract(x, channels, FALSE)
+  
+  # Only single gate objects are supported - calculate stats separately
+  if(!.all_na(gate)){
+    if(!any(c(inherits(gate, "rectangleGate"),
+              inherits(gate, "polygonGate"),
+              inherits(gate, "ellipsoidGate")))){
+      stop(
+        paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
+              "supported.")
+      )
+    }
+  }
+  
+  # Gate flowFrame
+  if(!.all_na(gate)){
+    x <- Subset(x, gate)
+  }
   
   # Get raw data using .cyto_raw
   if(!is.null(trans)){

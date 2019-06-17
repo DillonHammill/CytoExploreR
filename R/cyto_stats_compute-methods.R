@@ -38,6 +38,10 @@ setGeneric(
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"} or \code{"CV"}.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate} to apply to the flowFrame prior to calculation of
+#'   statistics. A \code{gate} object must be supplied to compute frequency
+#'   statistics.
 #' @param format indicates whether the data should be returned in the
 #'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
 #'   default.
@@ -96,6 +100,7 @@ setMethod(cyto_stats_compute,
                                 channels = NULL,
                                 trans = NULL,
                                 stat = "median",
+                                gate = NA,
                                 format = "long",
                                 density_smooth = 0.6) {
             
@@ -129,44 +134,56 @@ setMethod(cyto_stats_compute,
             # Statistics
             if (stat == "count") {
               
-              res <- .cyto_count(fr)
+              res <- .cyto_count(fr,
+                                 gate = gate)
 
             }else if(stat == "mean"){
               
               res <- suppressMessages(.cyto_mean(fr,
-                                                 channels,
-                                                 trans))
+                                                 channels = channels,
+                                                 trans = trans,
+                                                 gate = gate))
               
             }else if(stat == "geo mean"){
               
               res <- suppressMessages(.cyto_geometric_mean(fr,
-                                                           channels,
-                                                           trans))
+                                                           channels = channels,
+                                                           trans = trans,
+                                                           gate = gate))
               
             }else if(stat == "median"){
               
               res <- suppressMessages(.cyto_median(fr,
-                                                   channels,
-                                                   trans))
+                                                   channels = channels,
+                                                   trans = trans,
+                                                   gate = gate))
               
             }else if(stat == "mode"){
               
               res <- suppressMessages(.cyto_mode(fr,
-                                                 channels,
-                                                 trans,
-                                                 density_smooth))
+                                                 channels = channels,
+                                                 trans = trans,
+                                                 gate = gate,
+                                                 density_smooth=density_smooth))
               
             }else if(stat == "CV"){
               
               res <- suppressMessages(.cyto_CV(fr,
-                                               channels,
-                                               trans))
+                                               channels = channels,
+                                               trans = trans,
+                                               gate = gate))
+              
+            }else if(stat == "freq"){
+              
+              # Calculate statistics
+              res <- .cyto_freq(x,
+                                gate = gate)
               
             }  
           
             # Convert to long format
             if(format == "long" &
-               stat != "count" &
+               stat %in% c("count","freq") &
                length(channels) > 1){
               
               res <- res %>%
@@ -202,6 +219,10 @@ setMethod(cyto_stats_compute,
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"} or \code{"CV"}.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate} to apply to the flowFrame prior to calculation of
+#'   statistics. A \code{gate} object must be supplied to compute frequency
+#'   statistics.
 #' @param format indicates whether the data should be returned in the
 #'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
 #'   default.
@@ -269,6 +290,7 @@ setMethod(cyto_stats_compute,
                                  channels = channels,
                                  trans = trans,
                                  stat = stat,
+                                 gate = gate,
                                  density_smooth = density_smooth,
                                  format = "wide"
               )
@@ -415,6 +437,11 @@ setMethod(cyto_stats_compute,
                 names(getTransformations(gh)),
                 getTransformations(gh)
               )
+            }
+            
+            # Alias must be supplied
+            if(is.null(alias)){
+              stop("Supply the name of the population to 'alias'.")
             }
             
             # Extract population(s) - list of flowFrames
@@ -650,6 +677,11 @@ setMethod(cyto_stats_compute,
                 names(getTransformations(gs[[1]])),
                 getTransformations(gs[[1]])
               )
+            }
+            
+            # Alias must be supplied
+            if(is.null(alias)){
+              stop("Supply the name of the population to 'alias'.")
             }
             
             # Make calls to GatingHierarchy method
