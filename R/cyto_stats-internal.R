@@ -97,6 +97,11 @@
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
+    }else{
+      # Gating with rectangleGate objects is slow ...
+      if(inherits(gate, "rectangleGate")){
+        gate <- as(gate, "polygonGate")
+      }
     }
   }
   
@@ -168,8 +173,14 @@
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
+    }else{
+      # Gating with rectangleGate objects is slow ...
+      if(inherits(gate, "rectangleGate")){
+        gate <- as(gate, "polygonGate")
+      }
     }
   }
+  
   
   # Gate flowFrame
   if(!.all_na(gate)){
@@ -237,8 +248,14 @@
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
+    }else{
+      # Gating with rectangleGate objects is slow ...
+      if(inherits(gate, "rectangleGate")){
+        gate <- as(gate, "polygonGate")
+      }
     }
   }
+  
   
   # Gate flowFrame
   if(!.all_na(gate)){
@@ -354,8 +371,14 @@
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
+    }else{
+      # Gating with rectangleGate objects is slow ...
+      if(inherits(gate, "rectangleGate")){
+        gate <- as(gate, "polygonGate")
+      }
     }
   }
+  
   
   # Gate flowFrame
   if(!.all_na(gate)){
@@ -436,8 +459,14 @@
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
+    }else{
+      # Gating with rectangleGate objects is slow ...
+      if(inherits(gate, "rectangleGate")){
+        gate <- as(gate, "polygonGate")
+      }
     }
   }
+  
   
   # Gate flowFrame
   if(!.all_na(gate)){
@@ -522,8 +551,14 @@
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
+    }else{
+      # Gating with rectangleGate objects is slow ...
+      if(inherits(gate, "rectangleGate")){
+        gate <- as(gate, "polygonGate")
+      }
     }
   }
+  
   
   # Gate flowFrame
   if(!.all_na(gate)){
