@@ -7,7 +7,7 @@
 \usage{
 \S4method{cyto_stats_compute}{flowFrame}(x, channels = NULL,
   trans = NULL, stat = "median", gate = NA, format = "long",
-  density_smooth = 0.6)
+  density_smooth = 0.6, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
@@ -38,7 +38,8 @@ default.}
 
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
-default.}
+default.
+@param ... not in use.}
 }
 \value{
 a tibble containing the computed statistics in the wide or long

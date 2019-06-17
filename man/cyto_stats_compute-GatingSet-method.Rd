@@ -7,7 +7,7 @@
 \usage{
 \S4method{cyto_stats_compute}{GatingSet}(x, alias = NULL,
   parent = NULL, channels = NULL, trans = NULL, stat = "median",
-  format = "long", save_as = NULL, density_smooth = 0.6)
+  format = "long", save_as = NULL, density_smooth = 0.6, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -43,8 +43,9 @@ default.}
 saved.}
 
 \item{density_smooth}{smoothing parameter passed to
-\code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
-default.}
+ \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
+ default.
+@param ... not in use.}
 }
 \value{
 a tibble containing the computed statistics in the wide or long

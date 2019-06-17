@@ -48,6 +48,7 @@ setGeneric(
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
+#'   @param ... not in use.
 #'
 #' @return a tibble containing the computed statistics in the wide or long
 #'   format.
@@ -102,7 +103,7 @@ setMethod(cyto_stats_compute,
                                 stat = "median",
                                 gate = NA,
                                 format = "long",
-                                density_smooth = 0.6) {
+                                density_smooth = 0.6, ...) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
@@ -229,6 +230,7 @@ setMethod(cyto_stats_compute,
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
+#' @param ... not in use.
 #'  
 #' @return a tibble containing the computed statistics in the wide or long
 #'   format.
@@ -276,7 +278,7 @@ setMethod(cyto_stats_compute,
                                 trans = NULL,
                                 stat = "median",
                                 format = "long",
-                                density_smooth = 0.6) {
+                                density_smooth = 0.6, ...) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
@@ -357,6 +359,7 @@ setMethod(cyto_stats_compute,
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
+#' @param ... not in use.
 #'
 #' @return a tibble containing the computed statistics in the wide or long
 #'   format.
@@ -423,7 +426,7 @@ setMethod(cyto_stats_compute,
                                 stat = "median",
                                 format = "long",
                                 save_as = NULL,
-                                density_smooth = 0.6) {
+                                density_smooth = 0.6, ...) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)
@@ -607,6 +610,7 @@ setMethod(cyto_stats_compute,
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
+#'  @param ... not in use.
 #'
 #' @return a tibble containing the computed statistics in the wide or long
 #'   format.
@@ -663,7 +667,7 @@ setMethod(cyto_stats_compute,
                                 stat = "median",
                                 format = "long",
                                 save_as = NULL,
-                                density_smooth = 0.6) {
+                                density_smooth = 0.6, ...) {
             
             # Check statistic
             stat <- .cyto_stat_check(stat = stat)

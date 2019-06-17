@@ -7,7 +7,7 @@
 \usage{
 \S4method{cyto_stats_compute}{flowSet}(x, channels = NULL,
   trans = NULL, stat = "median", format = "long",
-  density_smooth = 0.6)
+  density_smooth = 0.6, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -34,6 +34,8 @@ default.}
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 default.}
+
+\item{...}{not in use.}
 
 \item{gate}{object of class \code{rectangleGate}, \code{polygonGate} or
 \code{ellipsoidGate} to apply to the flowFrame prior to calculation of
