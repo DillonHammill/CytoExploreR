@@ -184,7 +184,7 @@ setMethod(cyto_stats_compute,
           
             # Convert to long format
             if(format == "long" &
-               stat %in% c("count","freq") &
+               !stat %in% c("count","freq") &
                length(channels) > 1){
               
               res <- res %>%
@@ -277,6 +277,7 @@ setMethod(cyto_stats_compute,
                                 channels = NULL,
                                 trans = NULL,
                                 stat = "median",
+                                gate = NA,
                                 format = "long",
                                 density_smooth = 0.6, ...) {
             

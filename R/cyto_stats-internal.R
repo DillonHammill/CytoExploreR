@@ -113,7 +113,7 @@
   res <- round(res, 2)
   
   # Return calculated frequency
-  res <- tibble("freq" = res)
+  res <- tibble("freq" = as.numeric(res))
   
   return(res)
   
