@@ -913,8 +913,7 @@ cyto_plot_gate2.list <- function(x,
       }
       # Statistic for gated population
       if (label_stat[N] == "freq") {
-        fr_negated_stat <- .cyto_count(fr_negated) / 
-          sum(.cyto_count(fr), .cyto_count(fr_negated)) * 100
+        fr_negated_stat <- .cyto_count(fr_negated) / .cyto_count(x) * 100
         fr_negated_stat <- round(fr_negated_stat, 2)
       } else {
         fr_negated_stat <- cyto_stats_compute(fr_negated,
