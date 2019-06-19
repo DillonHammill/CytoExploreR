@@ -823,7 +823,8 @@ cyto_plot_gate2.list <- function(x,
 
   # Make calls to rectangleGate, polygonGate or ellipsoidGate method
   gate <- mapply(
-    function(label,
+    function(gate,
+             label,
                  label_text,
                  label_stat,
                  label_text_x,
@@ -864,7 +865,8 @@ cyto_plot_gate2.list <- function(x,
         label_fill_alpha = label_fill_alpha,
         density_smooth = density_smooth
       )
-    }, label[seq_len(n)],
+    }, gate, 
+    label[seq_len(n)],
     label_text[seq_len(n)],
     label_stat[seq_len(n)],
     label_text_x[seq_len(n)],
