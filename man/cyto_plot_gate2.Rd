@@ -13,7 +13,7 @@
 cyto_plot_gate2(x, channels, gate = NA, ...)
 
 \method{cyto_plot_gate2}{default}(x, channels, gate = NA, label = TRUE,
-  label_text, label_stat = "freq", label_text_x, label_text_y,
+  label_text = NA, label_stat = "freq", label_text_x, label_text_y,
   label_position = "auto", trans = NA, negate = FALSE,
   gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
   gate_fill = "white", gate_fill_alpha = 0, label_text_font,
@@ -21,34 +21,34 @@ cyto_plot_gate2(x, channels, gate = NA, ...)
   label_fill_alpha = 0.6, density_smooth = 0.6)
 
 \method{cyto_plot_gate2}{rectangleGate}(x, channels, gate = NA,
-  label = TRUE, label_text, label_stat = "freq", label_text_x = NA,
-  label_text_y = NA, label_position = "auto", trans = NA,
-  negate = FALSE, gate_line_type = 1, gate_line_width = 2.5,
-  gate_line_col = "red", gate_fill = "white", gate_fill_alpha = 0,
-  label_text_font = 2, label_text_size = 0.8,
+  label = TRUE, label_text = NA, label_stat = "freq",
+  label_text_x = NA, label_text_y = NA, label_position = "auto",
+  trans = NA, negate = FALSE, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
+  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
   label_text_col = "black", label_fill = "white",
   label_fill_alpha = 0.6, density_smooth = 0.6)
 
 \method{cyto_plot_gate2}{polygonGate}(x, channels, gate = NA,
-  label = TRUE, label_text, label_stat = "freq", label_text_x = NA,
-  label_text_y = NA, label_position = "auto", trans = NA,
-  negate = FALSE, gate_line_type = 1, gate_line_width = 2.5,
-  gate_line_col = "red", gate_fill = "white", gate_fill_alpha = 0,
-  label_text_font = 2, label_text_size = 0.8,
+  label = TRUE, label_text = NA, label_stat = "freq",
+  label_text_x = NA, label_text_y = NA, label_position = "auto",
+  trans = NA, negate = FALSE, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
+  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
   label_text_col = "black", label_fill = "white",
   label_fill_alpha = 0.6, density_smooth = 0.6)
 
 \method{cyto_plot_gate2}{ellipsoidGate}(x, channels, gate = NA,
-  label = TRUE, label_text, label_stat = "freq", label_text_x = NA,
-  label_text_y = NA, label_position = "auto", trans = NA,
-  negate = FALSE, gate_line_type = 1, gate_line_width = 2.5,
-  gate_line_col = "red", gate_fill = "white", gate_fill_alpha = 0,
-  label_text_font = 2, label_text_size = 0.8,
+  label = TRUE, label_text = NA, label_stat = "freq",
+  label_text_x = NA, label_text_y = NA, label_position = "auto",
+  trans = NA, negate = FALSE, gate_line_type = 1,
+  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
+  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
   label_text_col = "black", label_fill = "white",
   label_fill_alpha = 0.6, density_smooth = 0.6)
 
 \method{cyto_plot_gate2}{list}(x, channels, gate = NA, label = TRUE,
-  label_text, label_stat = "freq", label_text_x = NA,
+  label_text = NA, label_stat = "freq", label_text_x = NA,
   label_text_y = NA, label_position = "auto", trans = NA,
   negate = FALSE, gate_line_type = 1, gate_line_width = 2.5,
   gate_line_col = "red", gate_fill = "white", gate_fill_alpha = 0,
@@ -57,7 +57,7 @@ cyto_plot_gate2(x, channels, gate = NA, ...)
   label_fill_alpha = 0.6, density_smooth = 0.6)
 
 \method{cyto_plot_gate2}{filters}(x, channels, gate = NA, label = TRUE,
-  label_text, label_stat = "freq", label_text_x = NA,
+  label_text = NA, label_stat = "freq", label_text_x = NA,
   label_text_y = NA, label_position = "auto", trans = NA,
   negate = FALSE, gate_line_type = 1, gate_line_width = 2.5,
   gate_line_col = "red", gate_fill = "white", gate_fill_alpha = 0,

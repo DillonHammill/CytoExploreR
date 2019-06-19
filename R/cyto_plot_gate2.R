@@ -13,7 +13,7 @@ cyto_plot_gate2.default <- function(x,
                                     channels,
                                     gate = NA,
                                     label = TRUE,
-                                    label_text,
+                                    label_text = NA,
                                     label_stat = "freq",
                                     label_text_x,
                                     label_text_y,
@@ -44,7 +44,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
                                           channels,
                                           gate = NA,
                                           label = TRUE,
-                                          label_text,
+                                          label_text = NA,
                                           label_stat = "freq",
                                           label_text_x = NA,
                                           label_text_y = NA,
@@ -139,7 +139,8 @@ cyto_plot_gate2.rectangleGate <- function(x,
       ytop = gate@max[channels[2]],
       border = gate_line_col,
       lwd = gate_line_width,
-      lty = gate_line_type
+      lty = gate_line_type,
+      col = adjustcolor(gate_fill, gate_fill_alpha)
     )
   } else if (length(gate@min) == 1) {
 
@@ -173,11 +174,11 @@ cyto_plot_gate2.rectangleGate <- function(x,
 
     # Gate flowFrame
     if (negate == TRUE) {
-      fr_list <- split(x, gate)
+      fr_list <- flowCore::split(x, gate)
       fr <- fr_list[[1]]
       fr_negated <- fr_list[[2]]
     } else {
-      fr <- Subset(x, gate)
+      fr <- flowCore::Subset(x, gate)
     }
 
     # Need to add extra label if negate == TRUE
@@ -251,7 +252,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
       # Interactively select
       if (any(.all_na(c(label_text_x[1], label_text_y[1])))) {
         message(
-          paste("Select a label location for the", gate@filterId, "gate:")
+          paste("Select a label location for the", gate@filterId, "gate.")
         )
         label_text_xy <- locator(n = 1)
         label_text_x[1] <- label_text_xy[[1]]
@@ -260,7 +261,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
     }
 
     # Add label to plot
-    cyto_plot_label2(
+    suppressMessages(cyto_plot_label2(
       label_text = label_text[1],
       label_text_x = label_text_x[1],
       label_text_y = label_text_y[1],
@@ -269,7 +270,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
       label_text_col = label_text_col[1],
       label_fill = label_fill[1],
       label_fill_alpha = label_fill_alpha[1]
-    )
+    ))
 
     # Calculate statistics for negated population
     if (negate == TRUE) {
@@ -301,10 +302,6 @@ cyto_plot_gate2.rectangleGate <- function(x,
           fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
         }
 
-        # Add % sign to freq statistic
-        if (label_stat[2] == "freq") {
-          fr_stat <- paste(fr_stat, "%")
-        }
         # Combine label_text with statistic
         if (!.all_na(label_text[2])) {
           if (label_stat[2] == "freq") {
@@ -325,7 +322,8 @@ cyto_plot_gate2.rectangleGate <- function(x,
         }
       }
       # Add label to plot
-      cyto_plot_label2(
+      message("Select a label location for the negated population.")
+      suppressMessages(cyto_plot_label2(
         label_text = label_text[2],
         label_text_x = label_text_x[2],
         label_text_y = label_text_y[2],
@@ -334,7 +332,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
         label_text_col = label_text_col[2],
         label_fill = label_fill[2],
         label_fill_alpha = label_fill_alpha[2]
-      )
+      ))
     }
   }
 
@@ -348,7 +346,7 @@ cyto_plot_gate2.polygonGate <- function(x,
                                         channels,
                                         gate = NA,
                                         label = TRUE,
-                                        label_text,
+                                        label_text = NA,
                                         label_stat = "freq",
                                         label_text_x = NA,
                                         label_text_y = NA,
@@ -466,7 +464,8 @@ cyto_plot_gate2.polygonGate <- function(x,
       gate@boundaries[, channels[2]],
       border = gate_line_col,
       lwd = gate_line_width,
-      lty = gate_line_type
+      lty = gate_line_type,
+      col = adjustcolor(gate_fill, gate_fill_alpha)
     )
   }
 
@@ -475,11 +474,11 @@ cyto_plot_gate2.polygonGate <- function(x,
 
     # Gate flowFrame
     if (negate == TRUE) {
-      fr_list <- split(x, gate)
+      fr_list <- flowCore::split(x, gate)
       fr <- fr_list[[1]]
       fr_negated <- fr_list[[2]]
     } else {
-      fr <- Subset(x, gate)
+      fr <- flowCore::Subset(x, gate)
     }
 
     # Need to add extra label if negate == TRUE
@@ -554,7 +553,7 @@ cyto_plot_gate2.polygonGate <- function(x,
       # Interactively select
       if (any(.all_na(c(label_text_x[1], label_text_y[1])))) {
         message(
-          paste("Select a label location for the", gate@filterId, "gate:")
+          paste("Select a label location for the", gate@filterId, "gate.")
         )
         label_text_xy <- locator(n = 1)
         label_text_x[1] <- label_text_xy[[1]]
@@ -563,7 +562,7 @@ cyto_plot_gate2.polygonGate <- function(x,
     }
 
     # Add label to plot
-    cyto_plot_label2(
+    suppressMessages(cyto_plot_label2(
       label_text = label_text[1],
       label_text_x = label_text_x[1],
       label_text_y = label_text_y[1],
@@ -572,7 +571,7 @@ cyto_plot_gate2.polygonGate <- function(x,
       label_text_col = label_text_col[1],
       label_fill = label_fill[1],
       label_fill_alpha = label_fill_alpha[1]
-    )
+    ))
 
     # Calculate statistics for negated population
     if (negate == TRUE) {
@@ -603,11 +602,7 @@ cyto_plot_gate2.polygonGate <- function(x,
           )
           fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
         }
-
-        # Add % sign to freq statistic
-        if (label_stat[2] == "freq") {
-          fr_stat <- paste(fr_stat, "%")
-        }
+        
         # Combine label_text with statistic
         if (!.all_na(label_text[2])) {
           if (label_stat[2] == "freq") {
@@ -628,7 +623,8 @@ cyto_plot_gate2.polygonGate <- function(x,
         }
       }
       # Add label to plot
-      cyto_plot_label2(
+      message("Select a label location for the negated population.")
+      suppressmessages(cyto_plot_label2(
         label_text = label_text[2],
         label_text_x = label_text_x[2],
         label_text_y = label_text_y[2],
@@ -637,7 +633,7 @@ cyto_plot_gate2.polygonGate <- function(x,
         label_text_col = label_text_col[2],
         label_fill = label_fill[2],
         label_fill_alpha = label_fill_alpha[2]
-      )
+      ))
     }
   }
 
@@ -651,7 +647,7 @@ cyto_plot_gate2.ellipsoidGate <- function(x,
                                           channels,
                                           gate = NA,
                                           label = TRUE,
-                                          label_text,
+                                          label_text = NA,
                                           label_stat = "freq",
                                           label_text_x = NA,
                                           label_text_y = NA,
@@ -767,7 +763,7 @@ cyto_plot_gate2.list <- function(x,
                                  channels,
                                  gate = NA,
                                  label = TRUE,
-                                 label_text,
+                                 label_text = NA,
                                  label_stat = "freq",
                                  label_text_x = NA,
                                  label_text_y = NA,
@@ -790,6 +786,12 @@ cyto_plot_gate2.list <- function(x,
   # Extract gates from any filters objects
   gate <- unlist(gate)
 
+  # Missing channels - use unique gate parameters
+  if(missing(channels)){
+    channels <- unique(unlist(lapply(gate, function(z){
+      as.vector(parameters(z))})))
+  }
+  
   # Number of gates
   n <- length(gate)
 
@@ -805,16 +807,19 @@ cyto_plot_gate2.list <- function(x,
 
   # Arguments to repeat
   args_to_repeat <- names(args)[!names(args) %in% c(
-    x,
-    channels,
-    gate,
-    trans,
-    negate,
-    density_smooth
+    "x",
+    "channels",
+    "gate",
+    "trans",
+    "negate",
+    "density_smooth",
+    "n",
+    "N"
   )]
-
+  
   # Repeat arguments
   lapply(args_to_repeat, function(z) {
+    print(args[[z]])
     args[[z]] <<- rep(args[[z]], length.out = N)
   })
 
@@ -885,21 +890,21 @@ cyto_plot_gate2.list <- function(x,
   )
 
   # Label for negated population
-  if (label == TRUE & negate == TRUE) {
+  if (label[N] == TRUE & negate == TRUE) {
 
     # Get negated population
     gate_filter <- do.call("|", gate)
-    fr_list <- split(x, gate_filter)[[2]]
+    fr_list <- flowCore::split(x, gate_filter)
     fr <- fr_list[[1]]
     fr_negated <- fr_list[[2]]
-
-    # Calculate statistics for gated population
+    
+    # Calculate statistics for negated population
     if (!.all_na(label_stat[N])) {
       # Unsupported statistics in 2D
       if (length(channels) == 2) {
         if (!label_stat[N] %in% c("count", "freq")) {
           stop(
-            "Only count and frequencystatistics are supported in 2D plots."
+            "Only count and frequency statistics are supported in 2D plots."
           )
         }
         if (label_stat[N] == "freq" & .all_na(gate)) {
@@ -908,7 +913,8 @@ cyto_plot_gate2.list <- function(x,
       }
       # Statistic for gated population
       if (label_stat[N] == "freq") {
-        fr_negated_stat <- .cyto_count(fr_negated) / .cyto_count(fr) * 100
+        fr_negated_stat <- .cyto_count(fr_negated) / 
+          sum(.cyto_count(fr), .cyto_count(fr_negated)) * 100
         fr_negated_stat <- round(fr_negated_stat, 2)
       } else {
         fr_negated_stat <- cyto_stats_compute(fr_negated,
@@ -922,10 +928,6 @@ cyto_plot_gate2.list <- function(x,
         fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
       }
 
-      # Add % sign to freq statistic
-      if (label_stat[N] == "freq") {
-        fr_stat <- paste(fr_stat, "%")
-      }
       # Combine label_text with statistic
       if (!.all_na(label_text[N])) {
         if (label_stat[N] == "freq") {
@@ -946,7 +948,8 @@ cyto_plot_gate2.list <- function(x,
       }
     }
     # Add label to plot
-    cyto_plot_label2(
+    message("Select a label location for the negated population.")
+    suppressMessages(cyto_plot_label2(
       label_text = label_text[N],
       label_text_x = label_text_x[N],
       label_text_y = label_text_y[N],
@@ -955,7 +958,7 @@ cyto_plot_gate2.list <- function(x,
       label_text_col = label_text_col[N],
       label_fill = label_fill[N],
       label_fill_alpha = label_fill_alpha[N]
-    )
+    ))
   }
 
   # Return modified gates
@@ -968,7 +971,7 @@ cyto_plot_gate2.filters <- function(x,
                                     channels,
                                     gate = NA,
                                     label = TRUE,
-                                    label_text,
+                                    label_text = NA,
                                     label_stat = "freq",
                                     label_text_x = NA,
                                     label_text_y = NA,
