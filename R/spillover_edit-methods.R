@@ -233,12 +233,6 @@ setMethod(spillover_edit,
             colnames(spill) <- channels
             rownames(spill) <- channels
             
-            # Rhandsontable does not handle decimal points if none are in the dataset
-            # if matrix is empty edit first value in second column to 0.0001
-            if (all(spill %in% c(0, 1))) {
-              spill[1, 2] <- 0.0001
-            }
-            
             shinyApp(
               ui <- fluidPage(
                 theme = shinytheme("yeti"),

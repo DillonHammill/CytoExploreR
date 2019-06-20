@@ -26,7 +26,7 @@ Imports:
   BiocGenerics,
   shiny, 
   shinythemes, 
-  rhandsontable, 
+  rhandsontable (>= 0.3.7), 
   superheat,
   MASS,
   methods,
