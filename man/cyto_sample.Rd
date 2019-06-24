@@ -19,7 +19,8 @@ cyto_sample(x, ...)
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 \code{\link[flowCore:flowSet-class]{flowSet}}.}
 
-\item{display}{numeric [0,1] indicating the percentage of events to keep.}
+\item{display}{can be either a numeric [0,1] or integer to indicate the
+percentage or number of events to keep respectively.}
 
 \item{seed}{value used to \code{set.seed()} internally. Setting a value for
 seed will return the same result with each run.}
@@ -30,7 +31,13 @@ seed will return the same result with each run.}
   percentage events.
 }
 \description{
-Sample a flowFrame or flowSet
+\code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
+the percentage or number of events to retain.
+}
+\details{
+The list method expects a list of flowFrame objects and is used internally by
+\code{cyto_plot} to ensure that overlays are appropriately sampled relative
+to the base layer.
 }
 \examples{
 library(CytoRSuiteData)
@@ -38,8 +45,12 @@ library(CytoRSuiteData)
 # Load in samples
 fs <- Activation
 
-# Constrict first sample by 50\%
+# Restrict first sample by 50\%
 cyto_sample(fs[[1]], 0.5)
+
+# Restrict first sample to 10000 events
+cyto_sample(fs[[1]], 10000)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

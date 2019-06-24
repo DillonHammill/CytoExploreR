@@ -883,9 +883,17 @@ cyto_group_by <- function(x,
 
 #' Sample a flowFrame or flowSet
 #'
+#' \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
+#' the percentage or number of events to retain.
+#'
+#' The list method expects a list of flowFrame objects and is used internally by
+#' \code{cyto_plot} to ensure that overlays are appropriately sampled relative
+#' to the base layer.
+#'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 #'   \code{\link[flowCore:flowSet-class]{flowSet}}.
-#' @param display numeric [0,1] indicating the percentage of events to keep.
+#' @param display can be either a numeric [0,1] or integer to indicate the
+#'   percentage or number of events to keep respectively.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
 #'
@@ -894,16 +902,20 @@ cyto_group_by <- function(x,
 #'   percentage events.
 #'
 #' @importFrom BiocGenerics nrow
-#' @importFrom flowCore sampleFilter Subset fsApply
+#' @importFrom flowCore sampleFilter Subset fsApply identifier
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
-#' # Constrict first sample by 50%
+#'
+#' # Restrict first sample by 50%
 #' cyto_sample(fs[[1]], 0.5)
+#'
+#' # Restrict first sample to 10000 events
+#' cyto_sample(fs[[1]], 10000)
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -921,12 +933,28 @@ cyto_sample.flowFrame <- function(x,
 
   # Do nothing if no sampling required
   if (display != 1) {
+    
     # Number of events
     events <- nrow(x)
 
-    # Size
-    size <- display * events
+    # display is the number of events to keep
+    if(display > 1){
+      
+      # display is too large - retain all events
+      if(display > events){
+        return(x)
+      # display is sample of x
+      }else{
+        size <- display
+      }
+      
+    # display is a proportion of events to keep
+    }else{
 
+      # Size
+      size <- display * events
+    }
+    
     # Set seed
     if (!is.null(seed)) {
       set.seed(seed)
@@ -945,6 +973,7 @@ cyto_sample.flowFrame <- function(x,
 cyto_sample.flowSet <- function(x,
                                 display = 1,
                                 seed = NULL) {
+  # Apply same degree of sampling to each flowFrame in the flowSet
   fsApply(x, cyto_sample, display = display, seed = seed)
 }
 
@@ -953,9 +982,58 @@ cyto_sample.flowSet <- function(x,
 cyto_sample.list <- function(x,
                              display = 1,
                              seed = NULL) {
-  lapply(x, function(z) {
-    cyto_sample(z, display, seed)
-  })
+  
+  # list of flowSets allowed
+  if(all(unlist(lapply(x, function(z){inherits(z,"flowSet")})))){
+    # Same sampling applied to all samples
+    x <- lapply(x, function(z){
+      cyto_sample(z, display = display, seed = seed)
+    })
+  # list of flowFrames  
+  }else if(all(unlist(lapply(x, function(z){inherits(z, "flowFrame")})))){
+    # Same percentage sampling applied to each flowFrame
+    if(display <= 1){
+      # Same sampling applied to all samples
+      x <- lapply(x, function(z){
+        cyto_sample(z, display = display, seed = seed)
+      })
+    # Sampling by event number is more complex
+    }else if(display > 1){
+      # Identifiers
+      nms <- unlist(lapply(x, function(z){identifier(z)}))
+      ind <- seq_len(length(nms))
+    
+      # Sampling
+      x <- lapply(ind, function(z){
+        # Base layer sampled as per usual
+        if(z == 1){
+          cyto_sample(x[[z]], display = display, seed = seed)
+        }else{
+          # Identifier matches base - sample size decreased
+          if(nms[z] == nms[1]){
+            # Number of events in base layer
+            events <- nrow(x[[1]])
+            # Events in overlay
+            overlay_events <- nrow(x[[z]])
+            # Proportion of overlay relative to base
+            prop <- overlay_events/events
+            # Update display prop * display
+            if(prop < 1){
+              display <- ceiling(prop * display)
+            }
+            # Sampling
+            cyto_sample(x[[z]], display = display, seed = seed)
+          # Identifiers don't match - separate samples - same sampling  
+          }else{
+            cyto_sample(x[[z]], display = display, seed = seed)
+          }
+        }
+      })
+    }
+  }
+  
+  # Return sampled list
+  return(x)
 }
 
 # CYTO_MARKERS -----------------------------------------------------------------
