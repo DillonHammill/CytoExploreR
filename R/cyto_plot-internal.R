@@ -122,17 +122,9 @@
 
   # SAMPLING -------------------------------------------------------------------
 
-  # Sample to display percentage events
+  # Sample to display percentage events - set seed for consistency
   if (display != 1) {
-    # Turn off overlay sampling in gate_draw
-    if (!getOption("CytoRSuite_cyto_gate_draw")) {
-      ind <- 1
-    } else {
-      ind <- seq(1, length(x))
-    }
-    lapply(ind, function(z) {
-      x[[z]] <<- cyto_sample(x[[z]], display)
-    })
+    x <- cyto_sample(x, display = display, seed = 56)
   }
 
   # CONSERVED ARGUMENTS --------------------------------------------------------
@@ -263,11 +255,11 @@
     )
 
     # DENSITY FILL - inherits theme internally
-      density_fill <- .cyto_plot_density_fill(fr_dens,
-        density_fill = density_fill,
-        density_cols = density_cols,
-        density_fill_alpha = density_fill_alpha
-      )
+    density_fill <- .cyto_plot_density_fill(fr_dens,
+      density_fill = density_fill,
+      density_cols = density_cols,
+      density_fill_alpha = density_fill_alpha
+    )
 
     # DENSITY - no alpha adjustment here - happens above
     cyto_plot_density(fr_dens,
@@ -334,7 +326,7 @@
         .empty(label)) {
         label <- FALSE # turn off labels if no gate
       }
-
+      
       # STAT
       if (!.all_na(gate) &
         .empty(label_stat)) {
@@ -347,43 +339,34 @@
       # LABELS
       if (label == TRUE) {
 
-        # Use saved label co-ordinates for multi-plotting methods
-        if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-          label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
-          label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
-        }
-
-        text_xy <- suppressMessages(cyto_plot_label(
-          x = x[[1]],
-          channels = channels,
-          gate = gate,
-          trans = axes_trans,
-          text_x = label_box_x,
-          text_y = label_box_y,
-          text = label_text,
-          stat = label_stat,
-          text_size = label_text_size,
-          text_font = label_text_font,
-          text_col = label_text_col,
-          box_alpha = label_box_alpha,
-          density_smooth = density_smooth
-        ))
-
-        # Only re-use co-ordinates if modal density - otherwise different
-        if (is.null(getOption("CytoRSuite_cyto_plot_label_coords")) &
-          density_modal == TRUE) {
-          options("CytoRSuite_cyto_plot_label_coords" = text_xy)
-        }
+        suppressMessages(
+          cyto_plot_label(
+            x = x[[1]],
+            channels = channels,
+            gate = gate,
+            trans = axes_trans,
+            text_x = label_box_x,
+            text_y = label_box_y,
+            text = label_text,
+            stat = label_stat,
+            text_size = label_text_size,
+            text_font = label_text_font,
+            text_col = label_text_col,
+            box_alpha = label_box_alpha,
+            density_smooth = density_smooth
+          )
+        )
+        
       }
 
       # GATE & LABEL - with overlay
-    } else if (length(x) != 1) {
+    } else if(length(x) != 1) {
 
       # Calculate label y positions for stacked overlays
       if (density_stack != 0) {
 
         # Need to compute y label positions
-        if (.all_na(label_box_y)) {
+        if (.all_na(label_box_y) & label_position == "auto") {
           # Default is half way beteen horizontal lines (shft)
           shft <- c(shft, shft[length(shft)] + shft[2])
           label_box_y <- unlist(lapply(seq(1, length(shft) - 1), function(z) {
@@ -404,7 +387,7 @@
           .empty(label)) {
           label <- FALSE # turn off labels if no gate
         }
-
+        
         # STAT
         if (!.all_na(gate) &
           .empty(label_stat)) {
@@ -414,14 +397,8 @@
           label_stat <- NA
         }
 
-        # Use saved label co-ordinates for multi-plotting methods
-        if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-          label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
-          label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
-        }
-
         # Gate density overlays
-        text_xy <- .cyto_plot_overlay_gate(
+        .cyto_plot_overlay_gate(
           x = x[[1]],
           channel = channels,
           trans = axes_trans,
@@ -442,13 +419,8 @@
           gate_line_width = gate_line_width,
           gate_line_type = gate_line_type
         )
-
-        if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-          options("CytoRSuite_cyto_plot_label_coords" = text_xy)
-        }
-      } else if (!.all_na(gate) & density_stack == 0) {
-        message("Gating overlays without stacking is not supported.")
-      }
+        
+      } 
     }
 
     # 2D SCATTER PLOTS -----------------------------------------------------------
@@ -456,12 +428,8 @@
 
     # REMOVE NEGATIVE FSC/SSC EVENTS - DENSITY BUG (other linear channels?)
     lapply(seq_len(2), function(z){
-      if(channels[z] %in% c("FSC-A",
-                            "FSC-H",
-                            "FSC-W",
-                            "SSC-A",
-                            "SSC-H",
-                            "SSC-W")){
+      if(grepl("FSC", channels[z], ignore.case = TRUE) |
+         grepl("SSC", channels[z], ignore.case = TRUE)){
         
         x <<- lapply(x, function(y){
           if(min(range(y, type = "data")[, channels[z]]) < 0){
@@ -631,7 +599,7 @@
     if (.empty(label)) {
       label <- TRUE
     }
-
+    
     # LABEL STAT
     if (!.all_na(gate) &
       .empty(label_stat)) {
@@ -644,13 +612,7 @@
     # LABELS
     if (!.all_na(gate) & label == TRUE) {
 
-      # Use saved label co-ordinates for multi-plotting methods
-      if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
-        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
-      }
-
-      text_xy <- cyto_plot_label(x[[1]],
+      cyto_plot_label(x[[1]],
         channels = channels,
         trans = axes_trans,
         text = label_text,
@@ -665,20 +627,10 @@
         density_smooth = density_smooth
       )
 
-      if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-        options("CytoRSuite_cyto_plot_label_coords" = text_xy)
-      }
-
       # LABELS WITHOUT GATES
     } else if (.all_na(gate) &
       !.all_na(label_text) &
       label == TRUE) {
-
-      # Use saved label co-ordinates for multi-plotting methods
-      if (!is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-        label_box_x <- getOption("CytoRSuite_cyto_plot_label_coords")[1, ]
-        label_box_y <- getOption("CytoRSuite_cyto_plot_label_coords")[2, ]
-      }
 
       # label - limited to # layers - arg_split
       text_xy <- mapply(
@@ -718,11 +670,7 @@
         label_box_alpha,
         SIMPLIFY = FALSE
       )
-      text_xy <- do.call("cbind", text_xy)
 
-      if (is.null(getOption("CytoRSuite_cyto_plot_label_coords"))) {
-        options("CytoRSuite_cyto_plot_label_coords" = text_xy)
-      }
     }
   }
 }
