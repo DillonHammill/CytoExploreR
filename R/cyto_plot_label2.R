@@ -1,5 +1,3 @@
-# polygonGates have the fastest subsetting time
-
 #' Add boxed text labels to cyto_plot
 #'
 #' Interactively label existing plots with boxed labels containing text and
@@ -43,6 +41,9 @@
 #' @param label_fill fill colour to use for labels, set to "white" by default.
 #' @param label_fill_alpha numeric [0,1] controls the transparency of the fill
 #'   colour, set to \code{0.6} by default.
+#' @param display numeric [0,1] to control the percentage of events to be
+#'   plotted. Specifying a value for \code{display} can substantial improve
+#'   plotting speed for less powerful machines.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density for mode
 #'   calculation.
@@ -94,140 +95,6 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_plot_label2 <- function(x, ...) {
-  UseMethod("cyto_plot_label2", gate)
-}
-
-#' @rdname cyto_plot_label2
-#' @export
-cyto_plot_label2.default <- function(x,
-                                     channels,
-                                     gate = NA,
-                                     label_text = NA,
-                                     label_stat = NA,
-                                     label_text_x = NA,
-                                     label_text_y = NA,
-                                     trans = NA,
-                                     negate = FALSE,
-                                     label_text_font = 2,
-                                     label_text_size = 0.8,
-                                     label_text_col = "black",
-                                     label_fill = "white",
-                                     label_fill_alpha = 0.6,
-                                     density_smooth = 0.6) {
-
-  # No gate supplied
-  if (.all_na(gate)) {
-
-  }
-  
-}
-
-#' @rdname cyto_plot_label2
-#' @export
-cyto_plot_label2.rectangleGate <- function(x,
-                                           channels,
-                                           gate = NA,
-                                           label_text = NA,
-                                           label_stat = NA,
-                                           label_text_x = NA,
-                                           label_text_y = NA,
-                                           trans = NA,
-                                           negate = FALSE,
-                                           label_text_font = 2,
-                                           label_text_size = 0.8,
-                                           label_text_col = "black",
-                                           label_fill = "white",
-                                           label_fill_alpha = 0.6,
-                                           density_smooth = 0.6) {
-
-  # x must be a flowFrame for statistic calculation
-  if(!.all_na(label_stat)){
-    if(missing(x)){
-      stop("Supply a flowFrame to 'x' to calculate statistics.")
-    }else if(!inherits(x, "flowFrame")){
-      stop("'x' must be a flowFrame object.")
-    }
-  }
-  
-  # Obtain valid label_stat
-  if(!.all_na(label_stat)){
-    label_stat <- unlist(lapply(label_stat, function(z) {
-      .cyto_stat_check(z)
-    }))
-  }
-  
-  # Convert trans to transformList - required for stats calculation
-  if (!.all_na(label_stat)) {
-    trans <- cyto_transform_convert(trans, inverse = FALSE)
-  }
-  
-  # Subsetting with rectangleGates takes too long -> polygonGate
-  gate <- as(gate, "polygonGate")
-  
-  
-}
-
-#' @rdname cyto_plot_label2
-#' @export
-cyto_plot_label2.polygonGate <- function(x,
-                                         channels,
-                                         gate = NA,
-                                         label_text = NA,
-                                         label_stat = NA,
-                                         label_text_x = NA,
-                                         label_text_y = NA,
-                                         trans = NA,
-                                         negate = FALSE,
-                                         label_text_font = 2,
-                                         label_text_size = 0.8,
-                                         label_text_col = "black",
-                                         label_fill = "white",
-                                         label_fill_alpha = 0.6,
-                                         density_smooth = 0.6) {
-
-}
-
-#' @rdname cyto_plot_label2
-#' @export
-cyto_plot_label2.ellipsoidGate <- function(x,
-                                           channels,
-                                           gate = NA,
-                                           label_text = NA,
-                                           label_stat = NA,
-                                           label_text_x = NA,
-                                           label_text_y = NA,
-                                           trans = NA,
-                                           negate = FALSE,
-                                           label_text_font = 2,
-                                           label_text_size = 0.8,
-                                           label_text_col = "black",
-                                           label_fill = "white",
-                                           label_fill_alpha = 0.6,
-                                           density_smooth = 0.6) {
-
-}
-
-#' @rdname cyto_plot_label2
-#' @export
-cyto_plot_label2.list <- function(x,
-                                  channels,
-                                  gate = NA,
-                                  label_text = NA,
-                                  label_stat = NA,
-                                  label_text_x = NA,
-                                  label_text_y = NA,
-                                  trans = NA,
-                                  negate = FALSE,
-                                  label_text_font = 2,
-                                  label_text_size = 0.8,
-                                  label_text_col = "black",
-                                  label_fill = "white",
-                                  label_fill_alpha = 0.6,
-                                  density_smooth = 0.6) {
-
-}
-
 cyto_plot_label2 <- function(x,
                              channels,
                              gate = NA,
@@ -237,6 +104,7 @@ cyto_plot_label2 <- function(x,
                              label_text_y = NA,
                              trans = NA,
                              negate = FALSE,
+                             display = 1,
                              label_text_font = 2,
                              label_text_size = 0.8,
                              label_text_col = "black",
@@ -251,6 +119,11 @@ cyto_plot_label2 <- function(x,
     }
   }
 
+  # Sample if required to get sampled statistics
+  if(display != 1){
+    x <- cyto_sample(x, display = display, seed = 56)
+  }
+  
   # Convert to valid statistic
   if (!.all_na(label_stat)) {
     label_stat <- unlist(lapply(label_stat, function(z) {
@@ -290,8 +163,8 @@ cyto_plot_label2 <- function(x,
     }
 
     # Only count, freq and CV are supported in 2D plots
-    if (length(channels) == 2 & !all(label_stat %in% c("count", "freq", "CV"))) {
-      stop("Only 'count', 'precent' and 'CV' are supported in 2D plots.")
+    if (length(channels) == 2 & !all(label_stat %in% c("count", "freq"))) {
+      stop("Only 'count' and 'frequency' are supported in 2D plots.")
     }
 
     # Freq only supported if gates supplied
@@ -323,9 +196,8 @@ cyto_plot_label2 <- function(x,
           Subset(x, gate[[z]])
         })
       } else if (negate == TRUE) {
-        pops <- lapply(seq_len(length(gate)), function(z) {
-          split(x, gate[[z]])[[2]]
-        })
+        gate_filter <- do.call("|", gate)
+        pops <- list(split(x, gate_filter)[[2]])
       }
     } else {
       pops <- list(x)

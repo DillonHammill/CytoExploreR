@@ -20,6 +20,7 @@ cyto_plot_gate2.default <- function(x,
                                     label_position = "auto",
                                     trans = NA,
                                     negate = FALSE,
+                                    display = 1,
                                     gate_line_type = 1,
                                     gate_line_width = 2.5,
                                     gate_line_col = "red",
@@ -51,6 +52,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
                                           label_position = "auto",
                                           trans = NA,
                                           negate = FALSE,
+                                          display = 1,
                                           gate_line_type = 1,
                                           gate_line_width = 2.5,
                                           gate_line_col = "red",
@@ -68,6 +70,9 @@ cyto_plot_gate2.rectangleGate <- function(x,
     stop("'x' must be a flowFrame object.")
   }
 
+  # Sample x
+  x <- cyto_sample(x, display = display, seed = 56)
+  
   # Allow 1D gate plotted in 2D
   if (!missing(channels)) {
     if (length(channels) == 2 & length(parameters(gate)) == 1) {
@@ -353,6 +358,7 @@ cyto_plot_gate2.polygonGate <- function(x,
                                         label_position = "auto",
                                         trans = NA,
                                         negate = FALSE,
+                                        display = 1,
                                         gate_line_type = 1,
                                         gate_line_width = 2.5,
                                         gate_line_col = "red",
@@ -370,6 +376,9 @@ cyto_plot_gate2.polygonGate <- function(x,
     stop("'x' must be a flowFrame object.")
   }
 
+  # Sample x
+  x <- cyto_sample(x, display = display, seed = 56)
+  
   # Get channels from gate
   if (missing(channels)) {
     channels <- as.vector(parameters(gate))
@@ -602,7 +611,7 @@ cyto_plot_gate2.polygonGate <- function(x,
           )
           fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
         }
-        
+
         # Combine label_text with statistic
         if (!.all_na(label_text[2])) {
           if (label_stat[2] == "freq") {
@@ -654,6 +663,7 @@ cyto_plot_gate2.ellipsoidGate <- function(x,
                                           label_position = "auto",
                                           trans = NA,
                                           negate = FALSE,
+                                          display = 1,
                                           gate_line_type = 1,
                                           gate_line_width = 2.5,
                                           gate_line_col = "red",
@@ -671,6 +681,9 @@ cyto_plot_gate2.ellipsoidGate <- function(x,
     channels <- as.vector(parameters(gate))
   }
 
+  # Sample x
+  x <- cyto_sample(x, display = display, seed = 56)
+  
   # Allow plotting ploygonGate in 1D plot - use min/max coords in channel
   if (length(channels) == 1) {
 
@@ -770,6 +783,7 @@ cyto_plot_gate2.list <- function(x,
                                  label_position = "auto",
                                  trans = NA,
                                  negate = FALSE,
+                                 display = 1,
                                  gate_line_type = 1,
                                  gate_line_width = 2.5,
                                  gate_line_col = "red",
@@ -783,15 +797,21 @@ cyto_plot_gate2.list <- function(x,
                                  density_smooth = 0.6) {
 
 
+  # Note: Negated label always positioned manually only gate labels are offset
+  
+  # Sample x
+  x <- cyto_sample(x, display = display, seed = 56)
+  
   # Extract gates from any filters objects
   gate <- unlist(gate)
 
   # Missing channels - use unique gate parameters
-  if(missing(channels)){
-    channels <- unique(unlist(lapply(gate, function(z){
-      as.vector(parameters(z))})))
+  if (missing(channels)) {
+    channels <- unique(unlist(lapply(gate, function(z) {
+      as.vector(parameters(z))
+    })))
   }
-  
+
   # Number of gates
   n <- length(gate)
 
@@ -807,34 +827,62 @@ cyto_plot_gate2.list <- function(x,
 
   # Arguments to repeat
   args_to_repeat <- names(args)[!names(args) %in% c(
+    "n",
+    "N",
     "x",
     "channels",
     "gate",
     "trans",
     "negate",
     "density_smooth",
-    "n",
-    "N"
+    "label",
+    "label_position"
   )]
-  
+
   # Repeat arguments
   lapply(args_to_repeat, function(z) {
-    print(args[[z]])
     args[[z]] <<- rep(args[[z]], length.out = N)
   })
 
   # Update arguments
   .args_update(args)
 
+  # Need to offset label locations for multiple gates
+  if (label == TRUE) {
+
+    # Multiple gates supplied & automatic placement selected
+    if (length(gate) > 1 & label_position == "auto") {
+
+      # Label locations must be automatically determined
+      if (.all_na(c(label_text_x[seq_len(n)], 
+                    label_text_y[seq_len(n)])) &
+        label_position == "auto") {
+
+        # Label offset
+        label_text_xy <- .cyto_plot_label_offset(
+          x = gate,
+          channels = channels,
+          text = label_text[seq_len(n)],
+          stat = label_stat[seq_len(n)],
+          text_x = label_text_x[seq_len(n)],
+          text_y = label_text_y[seq_len(n)],
+          text_size = label_text_size[seq_len(n)]
+        )
+
+        # Update label co-ordinates with offset locations
+        label_text_x[seq_len(n)] <- label_text_xy[1,]
+        label_text_y[seq_len(n)] <- label_text_xy[2,]
+      }
+    }
+  }
+
   # Make calls to rectangleGate, polygonGate or ellipsoidGate method
   gate <- mapply(
     function(gate,
-             label,
                  label_text,
                  label_stat,
                  label_text_x,
                  label_text_y,
-                 label_position,
                  gate_line_type,
                  gate_line_width,
                  gate_line_col,
@@ -858,6 +906,7 @@ cyto_plot_gate2.list <- function(x,
         label_position = label_position,
         trans = trans,
         negate = FALSE,
+        display = 1,
         gate_line_type = gate_line_type,
         gate_line_width = gate_line_width,
         gate_line_col = gate_line_col,
@@ -870,13 +919,11 @@ cyto_plot_gate2.list <- function(x,
         label_fill_alpha = label_fill_alpha,
         density_smooth = density_smooth
       )
-    }, gate, 
-    label[seq_len(n)],
+    }, gate,
     label_text[seq_len(n)],
     label_stat[seq_len(n)],
     label_text_x[seq_len(n)],
     label_text_y[seq_len(n)],
-    label_position[seq_len(n)],
     gate_line_type[seq_len(n)],
     gate_line_width[seq_len(n)],
     gate_line_col[seq_len(n)],
@@ -890,14 +937,14 @@ cyto_plot_gate2.list <- function(x,
   )
 
   # Label for negated population
-  if (label[N] == TRUE & negate == TRUE) {
+  if (label == TRUE & negate == TRUE) {
 
     # Get negated population
     gate_filter <- do.call("|", gate)
     fr_list <- flowCore::split(x, gate_filter)
     fr <- fr_list[[1]]
     fr_negated <- fr_list[[2]]
-    
+
     # Calculate statistics for negated population
     if (!.all_na(label_stat[N])) {
       # Unsupported statistics in 2D
@@ -977,6 +1024,7 @@ cyto_plot_gate2.filters <- function(x,
                                     label_position = "auto",
                                     trans = NA,
                                     negate = FALSE,
+                                    display = 1,
                                     gate_line_type = 1,
                                     gate_line_width = 2.5,
                                     gate_line_col = "red",
@@ -989,6 +1037,9 @@ cyto_plot_gate2.filters <- function(x,
                                     label_fill_alpha = 0.6,
                                     density_smooth = 0.6) {
 
+  # Sample x
+  x <- cyto_sample(x, display = display, seed = 56)
+  
   # Convert filters object to list and call list method
   gate <- unlist(gate)
 
@@ -1004,6 +1055,7 @@ cyto_plot_gate2.filters <- function(x,
     label_position = label_position,
     trans = trans,
     negate = negate,
+    display = 1,
     gate_line_type = gate_line_type,
     gate_line_width = gate_line_width,
     gate_line_col = gate_line_col,

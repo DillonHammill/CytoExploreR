@@ -103,10 +103,12 @@ cyto_plot <- function(x, ...) {
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
-#' @param title title to use for the plot, set to the name of the sample by
-#'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
+#' @param title title to use for the plot, set to the name of the sample by
+#'   default. Title can be removed by setting this argument to \code{NA}.
+#' @param negate logical indicating whether a label should be included for the
+#'   negated population if gate objects are supplied, set to FALSE by default.
 #' @param density_modal logical indicating whether density should be normalised
 #'   to mode and presented as a percentage for 1-D plots. Set to \code{TRUE} by
 #'   default.
@@ -198,6 +200,9 @@ cyto_plot <- function(x, ...) {
 #'   \code{2.5} by default.
 #' @param gate_line_col colour(s) to use for gates, set to \code{"red"} by
 #'   default.
+#' @param gate_fill fill colour(s) to use for gates, set to "white by default.
+#' @param gate_fill_alpha numeric to control the fill transparency of gates, set
+#'   to 0 by default to remove fill colour(s).
 #' @param label logical indicating whether gated populations should be labelled.
 #'   To include the names of the populations in these labels, supply the
 #'   population names to the \code{label_text} argument. The default statistic
@@ -210,6 +215,18 @@ cyto_plot <- function(x, ...) {
 #'   \code{"percent"} for gated data or \code{NA} to exclude statistics for
 #'   un-gated data. Currently, only \code{"percent"} and \code{"count"} are
 #'   supported for 2-D scatter plots.
+#' @param label_position either "auto" or "manual". The "auto" option (default)
+#'   positions labels will be placed in the center of gates and offset if
+#'   necessary. The "manual" option will allow label positioning by mouse click.
+#'   Label positions are set on a per gate basis, all samples in the same group
+#'   will have the same label positions. To individually label plots users must
+#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#' @param label_text_x vector of x co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#' @param label_text_y vector of y co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -217,14 +234,10 @@ cyto_plot <- function(x, ...) {
 #'   labels, set to 1 by default.
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
-#' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_alpha numeric to control background fill transparency of
-#'   label boxes, set to 0.6 by default to introduce some transparency.
+#' @param label_fill fill colour(s) to use for labels, set to "white" by
+#'   default.
+#' @param label_fill_alpha numeric to control background fill transparency of
+#'   label, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
 #'   border, set to \code{1} by default for a solid border. See
 #'   \code{\link[graphics:par]{lty}} for alternatives.
@@ -290,9 +303,10 @@ cyto_plot.flowFrame <- function(x,
                                 popup = FALSE,
                                 xlim = NA,
                                 ylim = NA,
-                                title,
                                 xlab,
                                 ylab,
+                                title,
+                                negate = FALSE,
                                 density_modal = TRUE,
                                 density_smooth = 0.6,
                                 density_stack = 0.5,
@@ -335,15 +349,19 @@ cyto_plot.flowFrame <- function(x,
                                 gate_line_type = 1,
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
+                                gate_fill = "white",
+                                gate_fill_alpha = 0,
                                 label,
                                 label_text,
                                 label_stat,
+                                label_position = "auto",
+                                label_text_x = NA,
+                                label_text_y = NA,
                                 label_text_font = 2,
                                 label_text_size = 1,
                                 label_text_col = "black",
-                                label_box_x = NA,
-                                label_box_y = NA,
-                                label_box_alpha = 0.6,
+                                label_fill = "white",
+                                label_fill_alpha = 0.6,
                                 border_line_type = 1,
                                 border_line_width = 1,
                                 border_line_col = "black",
@@ -548,6 +566,134 @@ cyto_plot.flowFrame <- function(x,
   # Update arguments
   .args_update(args)
   
+  # Check if current call is the same as previous call -------------------------
+  
+  previous_call <- getOption("CytoRSuite_cyto_plot_call")
+  current_call <- list(x,
+                       channels,
+                       gate,
+                       label,
+                       label_text,
+                       label_position)
+  names(current_call) <- c("data",
+                           "channels",
+                           "gate",
+                           "label",
+                           "label_text",
+                           "label_position")
+    
+  print(previous_call)
+  print(current_call)
+  print(identical(previous_call, current_call))
+  print(getOption("CytoRSuite_cyto_plot_save"))
+  
+  # Reset saved gates and labels if cyto_plot_save and calls match
+  if(identical(previous_call, current_call) |
+     getOption("CytoRSuite_cyto_plot_save") == FALSE){
+      
+    # Reset saved gates
+    options("CytoRSuite_cyto_plot_gates" = NULL)
+      
+    # Reset saved label co-ordinates
+    options("CytoRSuite_cyto_plot_labels" = NULL)
+
+  }
+  
+  # Update previous call -
+  options("CytoRSuite_cyto_plot_call" = current_call)
+  
+  # Organise gates -------------------------------------------------------------
+  
+  # Must be list of gates
+  if(!.all_na(gate)){
+    if(class(gate) %in% c("rectangleGate","polygonGate","ellipsoidGate")){
+      # Add gate to list
+      gate <- list(gate)
+    }else if(class(gate) == "list"){
+      # extract gate objects from filters
+      gate <- unlist(gate)
+    }else if(class(gate) == "filters"){
+      gate <- unlist(gate)
+    }
+    
+  }
+  
+  # Save gates globally --------------------------------------------------------
+  
+  # Gates have not been assigned globally - list of gate lists 1 per sample
+  if(is.null(getOption("CytoRSuite_cyto_plot_gates"))){
+    # Assign gates
+    if(!.all_na(gate)){
+      # Assign globally - list of gate lists 1 per sample
+      if(length(channels) == 2){
+        options("CytoRSuite_cyto_plot_gates" = list(gate))
+      # Only 1 layer no need to repeat saved gates
+      }else if(length(channels) == 1 & .all_na(overlay)){
+        options("CytoRSuite_cyto_plot_gates" = list(gate))
+      # Repeat saved gates to get one per layer
+      }else if(length(channels) == 1 &
+               !.all_na(overlay) & 
+               density_stack != 0){
+        options("CytoRSuite_cyto_plot_gates" = rep(list(gate)), length(fr_list))
+      }
+      
+    }
+    
+  }
+  
+  # Manual label co-ordinate selection -----------------------------------------
+  
+  # Manual label positioning sets label_box_x and label_box_y to "select"
+  if(label_position == "manual"){
+    
+    # Either all coords manually supplied or must be manually selected
+    if(!all(is.numeric(c(label_box_x,label_box_y)))){
+      label_box_x <- rep("select", length(label_box_x))
+      label_box_y <- rep("select", length(label_box_y))
+    }
+
+  }
+  
+  # Organise global option for saving label coords -----------------------------
+  
+  # Gates
+  if(!.all_na(gate)){
+    # One set of label coords per gate
+    if(is.null(getOption("CytoRSuite_cyto_plot_labels"))){
+      # Prepare empty list for saving label coords later
+      gts <- length(getOption("CytoRSuite_cyto_plot_gates"))
+      options("CytoRSuite_cyto_plot_labels" = rep(list(list()), gts))
+    }
+  # No gates  
+  }else{
+    # One set of label coords per label
+    if(is.null(getOption("CytoRSuite_cyto_plot_labels"))){
+      # Prepare empty list for saving label coords later
+      lbls <- length(label_text)
+      options("CytoRSuite_cyto_plot_labels" = rep(list(list()), lbls))
+    }
+  }
+  
+  # Inherit saved label coords -------------------------------------------------
+  
+  # Pull down saved label coords
+  saved_label_coords <- getOption("CytoRSuite_cyto_plot_labels")
+  
+  # Only inherit saved labels if calls match and saving is not activated
+  if(identical(previous_call, current_call) &
+     getOption("CytoRSuite_cyto_plot_save") == TRUE){
+    
+    # Each saved element is a data frame of coords per layer
+    if(!is.null(unlist(getOption("CytoRSuite_cyto_plot_labels")))){
+      label_box_x <- lapply(saved_label_coords, function(z){z[,1]})
+      label_box_y <- lapply(saved_label_coords, function(z){z[,2]})
+    }
+    
+  }
+  
+  print(label_box_x)
+  print(label_box_y)
+  
   # Calls to .cyto_plot internal -----------------------------------------------
   
   # Pass arguments to .cyto_plot to construct plot
@@ -563,6 +709,7 @@ cyto_plot.flowFrame <- function(x,
              xlab = xlab,
              ylab = ylab,
              title = title,
+             negate = negate,
              title_text_font = title_text_font,
              title_text_size = title_text_size,
              title_text_col = title_text_col,
@@ -605,26 +752,25 @@ cyto_plot.flowFrame <- function(x,
              gate_line_type = gate_line_type,
              gate_line_width = gate_line_width,
              gate_line_col = gate_line_col,
+             gate_fill = gate_fill,
+             gate_fill_alpha = gate_fill_alpha,
              label = label,
              label_text = label_text,
              label_stat = label_stat,
+             label_position = label_position,
+             label_text_x = label_text_x,
+             label_text_y = label_text_y,
              label_text_font = label_text_font,
              label_text_size = label_text_size,
              label_text_col = label_text_col,
-             label_box_x = label_box_x,
-             label_box_y = label_box_y,
-             label_box_alpha = label_box_alpha,
+             label_fill = label_fill,
+             label_fill_alpha = label_fill_alpha,
              border_line_type = border_line_type,
              border_line_width = border_line_width,
              border_line_col = border_line_col,
              border_fill = border_fill,
              border_fill_alpha = border_fill_alpha
   )
-  
-  # Return global options to default -------------------------------------------
-  
-  # Remove save label co-ordinates
-  options("CytoRSuite_cyto_plot_label_coords" = NULL)
   
   # Record and/or save ---------------------------------------------------------
   
@@ -656,8 +802,7 @@ cyto_plot.flowFrame <- function(x,
 #'
 #' Explore & visualise a flowSet.
 #'
-#' @param x object of class
-#'   \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
 #'   the plot. The length of channels determines the type of plot to be
 #'   constructed, either a 1-D density distribution for a single channel or a
@@ -698,10 +843,12 @@ cyto_plot.flowFrame <- function(x,
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
-#' @param title title to use for the plot, set to the name of the sample by
-#'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
+#' @param title title to use for the plot, set to the name of the sample by
+#'   default. Title can be removed by setting this argument to \code{NA}.
+#' @param negate logical indicating whether a label should be included for the
+#'   negated population when gate objects are supplied, set to FALSE by default.
 #' @param density_modal logical indicating whether density should be normalised
 #'   to mode and presented as a percentage for 1-D plots. Set to \code{TRUE} by
 #'   default.
@@ -795,6 +942,9 @@ cyto_plot.flowFrame <- function(x,
 #'   \code{2.5} by default.
 #' @param gate_line_col colour(s) to use for gates, set to \code{"red"} by
 #'   default.
+#' @param gate_fill fill colour(s) to use for gates, set to "white by default.
+#' @param gate_fill_alpha numeric to control the fill transparency of gates, set
+#'   to 0 by default to remove fill colour(s).
 #' @param label logical indicating whether gated populations should be labelled.
 #'   To include the names of the populations in these labels, supply the
 #'   population names to the \code{label_text} argument. The default statistic
@@ -807,6 +957,18 @@ cyto_plot.flowFrame <- function(x,
 #'   \code{"percent"} for gated data or \code{NA} to exclude statistics for
 #'   un-gated data. Currently, only \code{"percent"} and \code{"count"} are
 #'   supported for 2-D scatter plots.
+#' @param label_position either "auto" or "manual". The "auto" option (default)
+#'   positions labels will be placed in the center of gates and offset if
+#'   necessary. The "manual" option will allow label positioning by mouse click.
+#'   Label positions are set on a per gate basis, all samples in the same group
+#'   will have the same label positions. To individually label plots users must
+#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#' @param label_text_x vector of x co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#' @param label_text_y vector of y co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -814,14 +976,10 @@ cyto_plot.flowFrame <- function(x,
 #'   labels, set to 1 by default.
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
-#' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_alpha numeric to control background fill transparency of
-#'   label boxes, set to 0.6 by default to introduce some transparency.
+#' @param label_fill fill colour(s) to use for labels, set to "white" by
+#'   default.
+#' @param label_fill_alpha numeric to control background fill transparency of
+#'   label, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
 #'   border, set to \code{1} by default for a solid border. See
 #'   \code{\link[graphics:par]{lty}} for alternatives.
@@ -837,17 +995,17 @@ cyto_plot.flowFrame <- function(x,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Apply compensation
 #' fs <- compensate(fs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(fs[[4]], cyto_fluor_channels(fs))
 #' fs <- transform(fs, trans)
-#' 
+#'
 #' # 1-D Density Distribution
 #' cyto_plot(fs,
 #'   channels = c("PE-A"),
@@ -855,7 +1013,7 @@ cyto_plot.flowFrame <- function(x,
 #'   overlay = fs[[1]],
 #'   density_stack = 0.4
 #' )
-#' 
+#'
 #' # 2-D Scatter Plot with Contour Lines
 #' cyto_plot(fs,
 #'   channels = c("Alexa Fluor 700-A", "PE-A"),
@@ -873,7 +1031,7 @@ cyto_plot.flowFrame <- function(x,
 #' @seealso \code{\link{cyto_plot,flowFrame-method}}
 #' @seealso \code{\link{cyto_plot,GatingHierarchy-method}}
 #' @seealso \code{\link{cyto_plot,GatingSet-method}}
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -889,9 +1047,10 @@ cyto_plot.flowSet <- function(x,
                               popup = FALSE,
                               xlim = NA,
                               ylim = NA,
-                              title,
                               xlab,
                               ylab,
+                              title,
+                              negate = FALSE,
                               density_modal = TRUE,
                               density_smooth = 0.6,
                               density_stack = 0.5,
@@ -935,15 +1094,19 @@ cyto_plot.flowSet <- function(x,
                               gate_line_type = 1,
                               gate_line_width = 2.5,
                               gate_line_col = "red",
+                              gate_fill = "white",
+                              gate_fill_alpha = 0,
                               label,
                               label_text = NA,
                               label_stat,
+                              label_position = "auto",
+                              label_text_x = NA,
+                              label_text_y = NA,
                               label_text_font = 2,
                               label_text_size = 1,
                               label_text_col = "black",
-                              label_box_x = NA,
-                              label_box_y = NA,
-                              label_box_alpha = 0.6,
+                              label_fill = "white",
+                              label_fill_alpha = 0.6,
                               border_line_type = 1,
                               border_line_width = 1,
                               border_line_col = "black",
@@ -963,6 +1126,9 @@ cyto_plot.flowSet <- function(x,
       options("CytoRSuite_cyto_plot_custom" = TRUE)
     }
   }
+  
+  # Reset saved label co-ordinates
+  options("CytoRSuite_cyto_plot_label_coords" = NULL)
   
   # Check if channels are supplied
   if (missing(channels)) {
@@ -1352,15 +1518,18 @@ cyto_plot.flowSet <- function(x,
              gate_line_type,
              gate_line_width,
              gate_line_col,
+             gate_fill,
+             gate_fill_alpha,
              label,
              label_text,
              label_stat,
+             label_text_x,
+             label_text_y,
              label_text_font,
              label_text_size,
              label_text_col,
-             label_box_x,
-             label_box_y,
-             label_box_alpha,
+             label_fill,
+             label_fill_alpha,
              border_line_type,
              border_line_width,
              border_line_col,
@@ -1380,6 +1549,7 @@ cyto_plot.flowSet <- function(x,
                  xlab = xlab,
                  ylab = ylab,
                  title = title,
+                 negate = negate,
                  title_text_font = title_text_font,
                  title_text_size = title_text_size,
                  title_text_col = title_text_col,
@@ -1422,15 +1592,19 @@ cyto_plot.flowSet <- function(x,
                  gate_line_type = gate_line_type,
                  gate_line_width = gate_line_width,
                  gate_line_col = gate_line_col,
+                 gate_fill = gate_fill,
+                 gate_fill_alpha = gate_fill_alpha,
                  label = label,
                  label_text = label_text,
                  label_stat = label_stat,
+                 label_position = label_position,
+                 label_text_x = label_text_x,
+                 label_text_y = label_text_y,
                  label_text_font = label_text_font,
                  label_text_size = label_text_size,
                  label_text_col = label_text_col,
-                 label_box_x = label_box_x,
-                 label_box_y = label_box_y,
-                 label_box_alpha = label_box_alpha,
+                 label_fill = label_fill,
+                 label_fill_alpha = label_fill_alpha,
                  border_line_type = border_line_type,
                  border_line_width = border_line_width,
                  border_line_col = border_line_col,
@@ -1444,12 +1618,6 @@ cyto_plot.flowSet <- function(x,
           length(fr_list) > cnt) {
         cyto_plot_new(popup = popup)
         par("mfrow" = layout)
-      }
-      
-      # Turn off label_coords if density_modal == FALSE
-      # re-used labels will be incorrectly positioned
-      if(density_modal == FALSE){
-        options("CytoRSuite_cyto_plot_label_coords" = NULL)
       }
       
     },
@@ -1499,27 +1667,25 @@ cyto_plot.flowSet <- function(x,
     gate_line_type,
     gate_line_width,
     gate_line_col,
+    gate_fill,
+    gate_fill_alpha,
     label,
     label_text,
     label_stat,
+    label_text_x,
+    label_text_y,
     label_text_font,
     label_text_size,
     label_text_col,
-    label_box_x,
-    label_box_y,
-    label_box_alpha,
+    label_fill,
+    label_fill_alpha,
     border_line_type,
     border_line_width,
     border_line_col,
     border_fill,
     border_fill_alpha
   )
-  
-  # Return global options to default -------------------------------------------
-  
-  # Remove save label co-ordinates
-  options("CytoRSuite_cyto_plot_label_coords" = NULL)
-  
+
   # Record and/or save ---------------------------------------------------------
   
   # Turn off graphics device for saving
@@ -1591,10 +1757,12 @@ cyto_plot.flowSet <- function(x,
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
-#' @param title title to use for the plot, set to the name of the sample by
-#'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
+#' @param title title to use for the plot, set to the name of the sample by
+#'   default. Title can be removed by setting this argument to \code{NA}.
+#' @param negate logical indicating whether a label should be included for the
+#'   negated population when gate objects are supplied, set to FALSE by default.
 #' @param density_modal logical indicating whether density should be normalised
 #'   to mode and presented as a percentage for 1-D plots. Set to \code{TRUE} by
 #'   default.
@@ -1686,6 +1854,9 @@ cyto_plot.flowSet <- function(x,
 #'   \code{2.5} by default.
 #' @param gate_line_col colour(s) to use for gates, set to \code{"red"} by
 #'   default.
+#' @param gate_fill fill colour(s) to use for gates, set to "white by default.
+#' @param gate_fill_alpha numeric to control the fill transparency of gates, set
+#'   to 0 by default to remove fill colour(s).
 #' @param label logical indicating whether gated populations should be labelled.
 #'   To include the names of the populations in these labels, supply the
 #'   population names to the \code{label_text} argument. The default statistic
@@ -1699,6 +1870,18 @@ cyto_plot.flowSet <- function(x,
 #'   \code{"percent"} for gated data or \code{NA} to exclude statistics for
 #'   un-gated data. Currently, only \code{"percent"} and \code{"count"} are
 #'   supported for 2-D scatter plots.
+#' @param label_position either "auto" or "manual". The "auto" option (default)
+#'   positions labels will be placed in the center of gates and offset if
+#'   necessary. The "manual" option will allow label positioning by mouse click.
+#'   Label positions are set on a per gate basis, all samples in the same group
+#'   will have the same label positions. To individually label plots users must
+#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#' @param label_text_x vector of x co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#' @param label_text_y vector of y co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -1706,14 +1889,10 @@ cyto_plot.flowSet <- function(x,
 #'   labels, set to 1 by default.
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
-#' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_alpha numeric to control background fill transparency of
-#'   label boxes, set to 0.6 by default to introduce some transparency.
+#' @param label_fill fill colour(s) to use for labels, set to "white" by
+#'   default.
+#' @param label_fill_alpha numeric to control background fill transparency of
+#'   label, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
 #'   border, set to \code{1} by default for a solid border. See
 #'   \code{\link[graphics:par]{lty}} for alternatives.
@@ -1729,22 +1908,22 @@ cyto_plot.flowSet <- function(x,
 #'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load samples into GatingSet
 #' fs <- Activation
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply coompensation
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' # Transform fluorescent channels
 #' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
-#' 
+#'
 #' # 2-D scatter plot with Overlays & Gate
 #' cyto_plot(gs[[4]],
 #'   parent = "CD4 T Cells",
@@ -1752,7 +1931,7 @@ cyto_plot.flowSet <- function(x,
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   overlay = "CD69+ CD4 T Cells",
 #' )
-#' 
+#'
 #' # 2-D Scatter plot with Back-Gating & Gates
 #' cyto_plot(gs[[4]],
 #'   parent = "T Cells",
@@ -1760,7 +1939,7 @@ cyto_plot.flowSet <- function(x,
 #'   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
 #'   overlay = c("CD69+ CD4 T Cells", "CD69+ CD8 T Cells")
 #' )
-#' 
+#'
 #' # 1-D density distribution
 #' cyto_plot(gs[[4]],
 #'   parent = "CD4 T Cells",
@@ -1794,9 +1973,10 @@ cyto_plot.GatingHierarchy <- function(x,
                                       popup = FALSE,
                                       xlim = NA,
                                       ylim = NA,
-                                      title,
                                       xlab,
                                       ylab,
+                                      title,
+                                      negate = FALSE,
                                       density_modal = TRUE,
                                       density_smooth = 0.6,
                                       density_stack = 0.5,
@@ -1839,15 +2019,19 @@ cyto_plot.GatingHierarchy <- function(x,
                                       gate_line_type = 1,
                                       gate_line_width = 2.5,
                                       gate_line_col = "red",
+                                      gate_fill = "white",
+                                      gate_fill_alpha = 0,
                                       label,
                                       label_text,
                                       label_stat,
+                                      label_position = "auto",
+                                      label_text_x = NA,
+                                      label_text_y = NA,
                                       label_text_font = 2,
                                       label_text_size = 1,
                                       label_text_col = "black",
-                                      label_box_x = NA,
-                                      label_box_y = NA,
-                                      label_box_alpha = 0.6,
+                                      label_fill = "white",
+                                      label_fill_alpha = 0.6,
                                       border_line_type = 1,
                                       border_line_width = 1,
                                       border_line_col = "black",
@@ -1860,6 +2044,9 @@ cyto_plot.GatingHierarchy <- function(x,
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
     options("CytoRSuite_cyto_plot_method" = "GatingHierarchy")
   }
+  
+  # Reset saved label co-ordinates
+  options("CytoRSuite_cyto_plot_label_coords")
   
   # No parent supplied
   if (missing(parent)) {
@@ -2058,7 +2245,7 @@ cyto_plot.GatingHierarchy <- function(x,
       
       # Parent name
       if (parent == "root") {
-        pt == "All Events"
+        pt <- "All Events"
       } else {
         pt <- parent
       }
@@ -2168,6 +2355,7 @@ cyto_plot.GatingHierarchy <- function(x,
              xlab = xlab,
              ylab = ylab,
              title = title,
+             negate = negate,
              title_text_font = title_text_font,
              title_text_size = title_text_size,
              title_text_col = title_text_col,
@@ -2210,27 +2398,26 @@ cyto_plot.GatingHierarchy <- function(x,
              gate_line_type = gate_line_type,
              gate_line_width = gate_line_width,
              gate_line_col = gate_line_col,
+             gate_fill = gate_fill,
+             gate_fill_alpha = gate_fill_alpha,
              label = label,
              label_text = label_text,
              label_stat = label_stat,
+             label_position = label_position,
+             label_text_x = label_text_x,
+             label_text_y = label_text_y,
              label_text_font = label_text_font,
              label_text_size = label_text_size,
              label_text_col = label_text_col,
-             label_box_x = label_box_x,
-             label_box_y = label_box_y,
-             label_box_alpha = label_box_alpha,
+             label_fill = label_fill,
+             label_fill_alpha = label_fill_alpha,
              border_line_type = border_line_type,
              border_line_width = border_line_width,
              border_line_col = border_line_col,
              border_fill = border_fill,
              border_fill_alpha = border_fill_alpha
   )
-  
-  # Return global options to default -------------------------------------------
-  
-  # Remove save label co-ordinates
-  options("CytoRSuite_cyto_plot_label_coords" = NULL)
-  
+
   # Record and/or save ---------------------------------------------------------
   
   # Turn off graphics device for saving
@@ -2308,10 +2495,12 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
-#' @param title title to use for the plot, set to the name of the sample by
-#'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
+#' @param title title to use for the plot, set to the name of the sample by
+#'   default. Title can be removed by setting this argument to \code{NA}.
+#' @param negate logical indicating whether a label should be included for the
+#'   negated population when gate objects are supplied, set to FALSE by default.
 #' @param density_modal logical indicating whether density should be normalised
 #'   to mode and presented as a percentage for 1-D plots. Set to \code{TRUE} by
 #'   default.
@@ -2405,6 +2594,9 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   \code{2.5} by default.
 #' @param gate_line_col colour(s) to use for gates, set to \code{"red"} by
 #'   default.
+#' @param gate_fill fill colour(s) to use for gates, set to "white by default.
+#' @param gate_fill_alpha numeric to control the fill transparency of gates, set
+#'   to 0 by default to remove fill colour(s).
 #' @param label logical indicating whether gated populations should be labelled.
 #'   To include the names of the populations in these labels, supply the
 #'   population names to the \code{label_text} argument. The default statistic
@@ -2418,6 +2610,18 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   \code{"percent"} for gated data or \code{NA} to exclude statistics for
 #'   un-gated data. Currently, only \code{"percent"} and \code{"count"} are
 #'   supported for 2-D scatter plots.
+#' @param label_position either "auto" or "manual". The "auto" option (default)
+#'   positions labels will be placed in the center of gates and offset if
+#'   necessary. The "manual" option will allow label positioning by mouse click.
+#'   Label positions are set on a per gate basis, all samples in the same group
+#'   will have the same label positions. To individually label plots users must
+#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#' @param label_text_x vector of x co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#' @param label_text_y vector of y co-ordinate(s) to manually adjust the
+#'   position plot label(s) on the plot. To interactively position labels set
+#'   either \code{label_box_x} or \code{label_box_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -2425,14 +2629,10 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   labels, set to 1 by default.
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
-#' @param label_box_x vector of x co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_y vector of y co-ordinate(s) to manually adjust the position
-#'   plot label(s) on the plot. To interactively position labels set either
-#'   \code{label_box_x} or \code{label_box_y} to "select".
-#' @param label_box_alpha numeric to control background fill transparency of
-#'   label boxes, set to 0.6 by default to introduce some transparency.
+#' @param label_fill fill colour(s) to use for labels, set to "white" by
+#'   default.
+#' @param label_fill_alpha numeric to control background fill transparency of
+#'   label, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type integer [0,6] to control the line type of plot
 #'   border, set to \code{1} by default for a solid border. See
 #'   \code{\link[graphics:par]{lty}} for alternatives.
@@ -2508,9 +2708,10 @@ cyto_plot.GatingSet <- function(x,
                                 popup = FALSE,
                                 xlim = NA,
                                 ylim = NA,
-                                title,
                                 xlab,
                                 ylab,
+                                title,
+                                negate = FALSE,
                                 density_modal = TRUE,
                                 density_smooth = 0.6,
                                 density_stack = 0.5,
@@ -2554,15 +2755,19 @@ cyto_plot.GatingSet <- function(x,
                                 gate_line_type = 1,
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
+                                gate_fill = "white",
+                                gate_fill_alpha = 0,
                                 label,
                                 label_text,
                                 label_stat,
+                                label_position = "auto",
+                                label_text_x = NA,
+                                label_text_y = NA,
                                 label_text_font = 2,
                                 label_text_size = 1,
                                 label_text_col = "black",
-                                label_box_x = NA,
-                                label_box_y = NA,
-                                label_box_alpha = 0.6,
+                                label_fill = "white",
+                                label_fill_alpha = 0.6,
                                 border_line_type = 1,
                                 border_line_width = 1,
                                 border_line_col = "black",
@@ -2583,6 +2788,9 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
+  # Reset saved label co-ordinates
+  options("CytoRSuite_cyto_plot_label_coords" = NULL)
+  
   # No parent supplied
   if (missing(parent)) {
     stop("Supply the name of the 'parent' population to plot.")
@@ -2926,7 +3134,7 @@ cyto_plot.GatingSet <- function(x,
 
       # Parent name
       if (parent == "root") {
-        pt == "All Events"
+        pt <- "All Events"
       } else {
         pt <- parent
       }
@@ -3086,15 +3294,18 @@ cyto_plot.GatingSet <- function(x,
                  gate_line_type,
                  gate_line_width,
                  gate_line_col,
+                 gate_fill,
+                 gate_fill_alpha,
                  label,
                  label_text,
                  label_stat,
+                 label_text_x,
+                 label_text_y,
                  label_text_font,
                  label_text_size,
                  label_text_col,
-                 label_box_x,
-                 label_box_y,
-                 label_box_alpha,
+                 label_fill,
+                 label_fill_alpha,
                  border_line_type,
                  border_line_width,
                  border_line_col,
@@ -3114,6 +3325,7 @@ cyto_plot.GatingSet <- function(x,
         xlab = xlab,
         ylab = ylab,
         title = title,
+        negate = negate,
         title_text_font = title_text_font,
         title_text_size = title_text_size,
         title_text_col = title_text_col,
@@ -3156,15 +3368,19 @@ cyto_plot.GatingSet <- function(x,
         gate_line_type = gate_line_type,
         gate_line_width = gate_line_width,
         gate_line_col = gate_line_col,
+        gate_fill = gate_fill,
+        gate_fill_alpha = gate_fill_alpha,
         label = label,
         label_text = label_text,
         label_stat = label_stat,
+        label_position = label_position,
+        label_text_x = label_text_x,
+        label_text_y = label_text_y,
         label_text_font = label_text_font,
         label_text_size = label_text_size,
         label_text_col = label_text_col,
-        label_box_x = label_box_x,
-        label_box_y = label_box_y,
-        label_box_alpha = label_box_alpha,
+        label_fill = label_fill,
+        label_fill_alpha = label_fill_alpha,
         border_line_type = border_line_type,
         border_line_width = border_line_width,
         border_line_col = border_line_col,
@@ -3178,12 +3394,6 @@ cyto_plot.GatingSet <- function(x,
         length(fr_list) > cnt) {
         cyto_plot_new(popup = popup)
         par("mfrow" = layout)
-      }
-      
-      # Turn off label_coords if density_modal == FALSE
-      # re-used labels will be incorrectly positioned
-      if(density_modal == FALSE){
-        options("CytoRSuite_cyto_plot_label_coords" = NULL)
       }
       
     },
@@ -3233,26 +3443,24 @@ cyto_plot.GatingSet <- function(x,
     gate_line_type,
     gate_line_width,
     gate_line_col,
+    gate_fill,
+    gate_fill_alpha,
     label,
     label_text,
     label_stat,
+    label_text_x,
+    label_text_y,
     label_text_font,
     label_text_size,
     label_text_col,
-    label_box_x,
-    label_box_y,
-    label_box_alpha,
+    label_fill,
+    label_fill_alpha,
     border_line_type,
     border_line_width,
     border_line_col,
     border_fill,
     border_fill_alpha
   )
-
-  # Return global options to default -------------------------------------------
-
-  # Remove save label co-ordinates
-  options("CytoRSuite_cyto_plot_label_coords" = NULL)
 
   # Record and/or save ---------------------------------------------------------
 

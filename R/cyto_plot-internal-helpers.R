@@ -288,14 +288,17 @@
     "gate_line_type", 
     "gate_line_width", 
     "gate_line_col",
+    "gate_fill",
+    "gate_fill_alpha",
     "label_text",
     "label_stat",
     "label_text_font",
     "label_text_size",
     "label_text_col",
-    "label_box_x",
-    "label_box_y",
-    "label_box_alpha"
+    "label_text_x",
+    "label_text_y",
+    "label_fill",
+    "label_fill_alpha"
   )
 
   return(args)
@@ -416,7 +419,9 @@
   # Arguments per gate
   args <- c("gate_line_type", 
             "gate_line_width", 
-            "gate_line_col")
+            "gate_line_col",
+            "gate_fill",
+            "gate_fill_alpha")
 
   if (gates != 0) {
     lapply(args, function(arg) {
@@ -447,9 +452,10 @@
       "label_text_font",
       "label_text_size",
       "label_text_col",
-      "label_box_x",
-      "label_box_y",
-      "label_box_alpha"
+      "label_text_x",
+      "label_text_y",
+      "label_fill",
+      "label_fill_alpha"
     )
 
     lapply(args, function(arg) {
@@ -496,9 +502,10 @@
       "label_text_font",
       "label_text_size",
       "label_text_col",
-      "label_box_x",
-      "label_box_y",
-      "label_box_alpha"
+      "label_text_x",
+      "label_text_y",
+      "label_fill",
+      "label_fill_alpha"
     )
 
     if (gates != 0) {
@@ -1486,11 +1493,14 @@ cyto_plot_overlay_convert <- function(x, ...) {
     fr_exprs <- exprs(x[[1]])[, channels]
 
     # Too few events for density computation
-    if (nrow(fr_exprs) >= 2) {
-      # Get density colour for each point
-      point_col[[1]] <- densCols(fr_exprs,
-        colramp = col_scale
-      )
+    if(!is.null(nrow(fr_exprs))){
+      if (nrow(fr_exprs) >= 2) {
+        # Get density colour for each point
+        point_col[[1]] <- densCols(fr_exprs,
+          colramp = col_scale
+        )
+      }
+
     } else {
       point_col[[1]] <- point_col_scale[1]
     }
@@ -1507,11 +1517,14 @@ cyto_plot_overlay_convert <- function(x, ...) {
       fr_exprs <- exprs(x[[z]])[, channels]
 
       # Too few events for density computation
-      if (nrow(fr_exprs) > 2) {
-        # Get density colour for each point
-        point_col[[z]] <<- densCols(fr_exprs,
-          colramp = col_scale
-        )
+      if(!is.null(nrow(fr_exprs))){
+        if (nrow(fr_exprs) >= 2) {
+          # Get density colour for each point
+          point_col[[z]] <<- densCols(fr_exprs,
+            colramp = col_scale
+          )
+        }
+
       } else {
         point_col[[z]] <- point_col_scale[1]
       }
@@ -2241,7 +2254,6 @@ cyto_plot_overlay_convert <- function(x, ...) {
 #'
 #' @noRd
 .cyto_plot_label_offset <- function(x,
-                                    gate,
                                     channels,
                                     text,
                                     text_x = NA,
@@ -2250,12 +2262,12 @@ cyto_plot_overlay_convert <- function(x, ...) {
                                     text_size) {
 
   # Invalid gate objects
-  if (!inherits(gate, "list")) {
-    stop("'gate' should be a list of gate objects.")
+  if (!inherits(x, "list")) {
+    stop("'x' should be a list of gate objects.")
   }
 
   # Assign gate to gts
-  gts <- gate
+  gts <- x
 
   # Plot limits
   xmin <- par("usr")[1]
@@ -2267,12 +2279,12 @@ cyto_plot_overlay_convert <- function(x, ...) {
   yrange <- ymax - ymin
 
   # No co-ordinates supplied
-  if (.all_na(text_x) & .all_na(text_y)) {
+  if (.all_na(c(text_x,text_y))) {
 
     # Co-ordinates for gate centers
     coords <- mapply(function(gt,
-                                  text_x,
-                                  text_y) {
+                              text_x,
+                              text_y) {
 
       # Label co-ordinate
       .cyto_plot_label_center(gt,
@@ -2318,7 +2330,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
     if (!.all_na(stat)) {
       text <- paste(text, "\n")
     }
-
+    
     # Use spread.labs TeachingDemos to offset y values
     label_height <- max(label_dims[[1]][, "y"]) -
       min(label_dims[[1]][, "y"])

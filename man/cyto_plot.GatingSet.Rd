@@ -7,29 +7,30 @@
 \method{cyto_plot}{GatingSet}(x, parent, alias = NA, channels,
   axes_trans = NA, group_by = NA, overlay = NA, gate = NA,
   limits = "machine", display = 1, layout, popup = FALSE,
-  xlim = NA, ylim = NA, title, xlab, ylab, density_modal = TRUE,
-  density_smooth = 0.6, density_stack = 0.5, density_layers = NA,
-  density_cols = NA, density_fill = NA, density_fill_alpha = 1,
-  density_line_type = 1, density_line_width = 1,
-  density_line_col = "black", point_shape = ".", point_size = 2,
-  point_col_scale = NA, point_cols = NA, point_col = NA,
-  point_col_alpha = 1, contour_lines = 0, contour_line_type = 1,
-  contour_line_width = 1, contour_line_col = "black",
-  axes_text = c(TRUE, TRUE), axes_text_font = 1, axes_text_size = 1,
-  axes_text_col = "black", axes_label_text_font = 1,
-  axes_label_text_size = 1.1, axes_label_text_col = "black",
-  title_text_font = 2, title_text_size = 1.1,
-  title_text_col = "black", legend = FALSE, legend_text = NA,
-  legend_text_font = 1, legend_text_size = 1,
+  xlim = NA, ylim = NA, xlab, ylab, title, negate = FALSE,
+  density_modal = TRUE, density_smooth = 0.6, density_stack = 0.5,
+  density_layers = NA, density_cols = NA, density_fill = NA,
+  density_fill_alpha = 1, density_line_type = 1,
+  density_line_width = 1, density_line_col = "black",
+  point_shape = ".", point_size = 2, point_col_scale = NA,
+  point_cols = NA, point_col = NA, point_col_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", axes_text = c(TRUE, TRUE),
+  axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
+  axes_label_text_font = 1, axes_label_text_size = 1.1,
+  axes_label_text_col = "black", title_text_font = 2,
+  title_text_size = 1.1, title_text_col = "black", legend = FALSE,
+  legend_text = NA, legend_text_font = 1, legend_text_size = 1,
   legend_text_col = "black", legend_line_type = NA,
   legend_line_width = NA, legend_line_col = NA, legend_box_fill = NA,
   legend_point_col = NA, gate_line_type = 1, gate_line_width = 2.5,
-  gate_line_col = "red", label, label_text, label_stat,
-  label_text_font = 2, label_text_size = 1, label_text_col = "black",
-  label_box_x = NA, label_box_y = NA, label_box_alpha = 0.6,
-  border_line_type = 1, border_line_width = 1,
-  border_line_col = "black", border_fill = "white",
-  border_fill_alpha = 1, ...)
+  gate_line_col = "red", gate_fill = "white", gate_fill_alpha = 0,
+  label, label_text, label_stat, label_position = "auto",
+  label_text_x = NA, label_text_y = NA, label_text_font = 2,
+  label_text_size = 1, label_text_col = "black",
+  label_fill = "white", label_fill_alpha = 0.6, border_line_type = 1,
+  border_line_width = 1, border_line_col = "black",
+  border_fill = "white", border_fill_alpha = 1, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -92,12 +93,15 @@ graphic device prior to plotting. Mac users will need to install
 
 \item{ylim}{lower and upper limits of y axis (e.g. c(0,5)).}
 
-\item{title}{title to use for the plot, set to the name of the sample by
-default. Title can be removed by setting this argument to \code{NA}.}
-
 \item{xlab}{x axis label.}
 
 \item{ylab}{y axis label.}
+
+\item{title}{title to use for the plot, set to the name of the sample by
+default. Title can be removed by setting this argument to \code{NA}.}
+
+\item{negate}{logical indicating whether a label should be included for the
+negated population when gate objects are supplied, set to FALSE by default.}
 
 \item{density_modal}{logical indicating whether density should be normalised
 to mode and presented as a percentage for 1-D plots. Set to \code{TRUE} by
@@ -233,6 +237,11 @@ legend.}
 \item{gate_line_col}{colour(s) to use for gates, set to \code{"red"} by
 default.}
 
+\item{gate_fill}{fill colour(s) to use for gates, set to "white by default.}
+
+\item{gate_fill_alpha}{numeric to control the fill transparency of gates, set
+to 0 by default to remove fill colour(s).}
+
 \item{label}{logical indicating whether gated populations should be labelled.
 To include the names of the populations in these labels, supply the
 population names to the \code{label_text} argument. The default statistic
@@ -249,6 +258,21 @@ labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
 un-gated data. Currently, only \code{"percent"} and \code{"count"} are
 supported for 2-D scatter plots.}
 
+\item{label_position}{either "auto" or "manual". The "auto" option (default)
+positions labels will be placed in the center of gates and offset if
+necessary. The "manual" option will allow label positioning by mouse click.
+Label positions are set on a per gate basis, all samples in the same group
+will have the same label positions. To individually label plots users must
+manually supply the co-ordinates to label_box_x and label_box_y.}
+
+\item{label_text_x}{vector of x co-ordinate(s) to manually adjust the
+position plot label(s) on the plot. To interactively position labels set
+either \code{label_box_x} or \code{label_box_y} to "select".}
+
+\item{label_text_y}{vector of y co-ordinate(s) to manually adjust the
+position plot label(s) on the plot. To interactively position labels set
+either \code{label_box_x} or \code{label_box_y} to "select".}
+
 \item{label_text_font}{numeric to control the font of text in plot labels,
 set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 alternatives.}
@@ -259,16 +283,11 @@ labels, set to 1 by default.}
 \item{label_text_col}{colour(s) to use for text in plot labels, set to
 \code{"black"} by default.}
 
-\item{label_box_x}{vector of x co-ordinate(s) to manually adjust the position
-plot label(s) on the plot. To interactively position labels set either
-\code{label_box_x} or \code{label_box_y} to "select".}
+\item{label_fill}{fill colour(s) to use for labels, set to "white" by
+default.}
 
-\item{label_box_y}{vector of y co-ordinate(s) to manually adjust the position
-plot label(s) on the plot. To interactively position labels set either
-\code{label_box_x} or \code{label_box_y} to "select".}
-
-\item{label_box_alpha}{numeric to control background fill transparency of
-label boxes, set to 0.6 by default to introduce some transparency.}
+\item{label_fill_alpha}{numeric to control background fill transparency of
+label, set to 0.6 by default to introduce some transparency.}
 
 \item{border_line_type}{integer [0,6] to control the line type of plot
 border, set to \code{1} by default for a solid border. See

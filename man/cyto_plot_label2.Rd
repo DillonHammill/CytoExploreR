@@ -2,46 +2,11 @@
 % Please edit documentation in R/cyto_plot_label2.R
 \name{cyto_plot_label2}
 \alias{cyto_plot_label2}
-\alias{cyto_plot_label2.default}
-\alias{cyto_plot_label2.rectangleGate}
-\alias{cyto_plot_label2.polygonGate}
-\alias{cyto_plot_label2.ellipsoidGate}
-\alias{cyto_plot_label2.list}
 \title{Add boxed text labels to cyto_plot}
 \usage{
 cyto_plot_label2(x, channels, gate = NA, label_text = NA,
   label_stat = NA, label_text_x = NA, label_text_y = NA,
-  trans = NA, negate = FALSE, label_text_font = 2,
-  label_text_size = 0.8, label_text_col = "black",
-  label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
-
-cyto_plot_label2.default(x, channels, gate = NA, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  trans = NA, negate = FALSE, label_text_font = 2,
-  label_text_size = 0.8, label_text_col = "black",
-  label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
-
-cyto_plot_label2.rectangleGate(x, channels, gate = NA, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  trans = NA, negate = FALSE, label_text_font = 2,
-  label_text_size = 0.8, label_text_col = "black",
-  label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
-
-cyto_plot_label2.polygonGate(x, channels, gate = NA, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  trans = NA, negate = FALSE, label_text_font = 2,
-  label_text_size = 0.8, label_text_col = "black",
-  label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
-
-cyto_plot_label2.ellipsoidGate(x, channels, gate = NA, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  trans = NA, negate = FALSE, label_text_font = 2,
-  label_text_size = 0.8, label_text_col = "black",
-  label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
-
-cyto_plot_label2.list(x, channels, gate = NA, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  trans = NA, negate = FALSE, label_text_font = 2,
+  trans = NA, negate = FALSE, display = 1, label_text_font = 2,
   label_text_size = 0.8, label_text_col = "black",
   label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
 }
@@ -82,6 +47,10 @@ transform the fluorescent channels of the supplied flowFrame.}
 \item{negate}{logical indicating whether a label should be included for the
 neagted population (i.e. events outside the gate). Set to FALSE by default
 to only calculate statistics for events within the gate.}
+
+\item{display}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{display} can substantial improve
+plotting speed for less powerful machines.}
 
 \item{label_text_font}{integer [1,2,3,4] passed to \code{text} to alter the
 font, set to \code{2} by default for a bold font.}

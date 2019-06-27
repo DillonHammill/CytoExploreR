@@ -51,6 +51,7 @@
                        xlab,
                        ylab,
                        title,
+                       negate = FALSE,
                        title_text_font = 2,
                        title_text_size = 1.1,
                        title_text_col = "black",
@@ -93,15 +94,18 @@
                        gate_line_type = 1,
                        gate_line_width = 2.5,
                        gate_line_col = "red",
+                       gate_fill = "white",
+                       gate_fill_alpha = 0,
                        label,
                        label_text = NA,
                        label_stat,
+                       label_text_x = NA,
+                       label_text_y = NA,
                        label_text_font = 2,
                        label_text_size = 1,
-                       label_text_col = "black",
-                       label_box_x = NA,
-                       label_box_y = NA,
-                       label_box_alpha = 0.6,
+                       label_text_col = "black",                       
+                       label_fill = "white",
+                       label_fill_alpha = 0.6,
                        border_line_type = 1,
                        border_line_width = 1,
                        border_line_col = "black",
@@ -122,7 +126,7 @@
 
   # SAMPLING -------------------------------------------------------------------
 
-  # Sample to display percentage events - set seed for consistency
+  # Sample to display percentage/# events - set seed for consistency
   if (display != 1) {
     x <- cyto_sample(x, display = display, seed = 56)
   }
@@ -308,16 +312,6 @@
     # GATES & LABEL - without overlay
     if (length(x) == 1) {
 
-      # GATES
-      if (!.all_na(gate)) {
-        gate <- cyto_plot_gate(gate,
-          channels = channels,
-          gate_line_col = gate_line_col,
-          gate_line_width = gate_line_width,
-          gate_line_type = gate_line_type
-        )
-      }
-
       # LABEL?
       if (!.all_na(gate) &
         .empty(label)) {
@@ -335,28 +329,33 @@
         .empty(label_stat)) {
         label_stat <- NA
       }
-
-      # LABELS
-      if (label == TRUE) {
-
-        suppressMessages(
-          cyto_plot_label(
-            x = x[[1]],
-            channels = channels,
-            gate = gate,
-            trans = axes_trans,
-            text_x = label_box_x,
-            text_y = label_box_y,
-            text = label_text,
-            stat = label_stat,
-            text_size = label_text_size,
-            text_font = label_text_font,
-            text_col = label_text_col,
-            box_alpha = label_box_alpha,
-            density_smooth = density_smooth
-          )
+      
+      # GATES
+      if (!.all_na(gate)) {
+        gate <- cyto_plot_gate2(x[[1]],
+                               channels = channels,
+                               gate = gate,
+                               label = label,
+                               label_text = label_text,
+                               label_stat = label_stat,
+                               label_text_x = label_text_x,
+                               label_text_y = label_text_y,
+                               label_position = label_position,
+                               trans = axes_trans,
+                               negate = negate,
+                               display = display,
+                               gate_line_type = gate_line_type,
+                               gate_line_width = gate_line_width,
+                               gate_line_col = gate_line_col,
+                               gate_fill = gate_fill,
+                               gate_fill_alpha = gate_fill_alpha,
+                               label_text_font = label_text_font,
+                               label_text_size = label_text_size,
+                               label_text_col = label_text_col,
+                               label_fill = label_fill,
+                               label_fill_alpha = label_fill_alpha,
+                               density_smooth = density_smooth
         )
-        
       }
 
       # GATE & LABEL - with overlay
@@ -366,16 +365,16 @@
       if (density_stack != 0) {
 
         # Need to compute y label positions
-        if (.all_na(label_box_y) & label_position == "auto") {
+        if (.all_na(label_text_y) & label_position == "auto") {
           # Default is half way beteen horizontal lines (shft)
           shft <- c(shft, shft[length(shft)] + shft[2])
-          label_box_y <- unlist(lapply(seq(1, length(shft) - 1), function(z) {
+          label_text_y <- unlist(lapply(seq(1, length(shft) - 1), function(z) {
             (shft[z] + shft[z + 1]) / 2
           }))
 
           # Repeat gate times if gate supplied - one label per layer if no gates
           if (!.all_na(gate)) {
-            label_box_y <- rep(label_box_y, each = length(gate))
+            label_text_y <- rep(label_text_y, each = length(gate))
           }
         }
 
@@ -412,9 +411,9 @@
           label_text_size = label_text_size,
           label_text_font = label_text_font,
           label_text_col = label_text_col,
-          label_box_x = label_box_x,
-          label_box_y = label_box_y,
-          label_box_alpha = label_box_alpha,
+          label_text_x = label_text_x,
+          label_text_y = label_text_y,
+          label_fill_alpha = label_fill_alpha,
           gate_line_col = gate_line_col,
           gate_line_width = gate_line_width,
           gate_line_type = gate_line_type
@@ -585,16 +584,6 @@
       label <- FALSE
     }
 
-    # GATES
-    if (!.all_na(gate)) {
-      gate <- cyto_plot_gate(gate,
-        channels = channels,
-        gate_line_type = gate_line_type,
-        gate_line_width = gate_line_width,
-        gate_line_col = gate_line_col
-      )
-    }
-
     # LABEL
     if (.empty(label)) {
       label <- TRUE
@@ -608,26 +597,35 @@
       .empty(label_stat)) {
       label_stat <- NA
     }
-
-    # LABELS
-    if (!.all_na(gate) & label == TRUE) {
-
-      cyto_plot_label(x[[1]],
-        channels = channels,
-        trans = axes_trans,
-        text = label_text,
-        gate = gate,
-        stat = label_stat,
-        text_x = label_box_x,
-        text_y = label_box_y,
-        text_font = label_text_font,
-        text_size = label_text_size,
-        text_col = label_text_col,
-        box_alpha = label_box_alpha,
-        density_smooth = density_smooth
+    
+    # GATES
+    if (!.all_na(gate)) {
+      gate <- cyto_plot_gate2(x = x[[1]],
+                             channels = channels,
+                             gate - gate,
+                             label = label,
+                             label_text = label_text,
+                             label_stat = label_stat,
+                             label_text_x = label_text_x,
+                             label_text_y = label_text_y,
+                             label_position = label_position,
+                             trans = axes_trans,
+                             negate = negate,
+                             display = display,
+                             gate_line_type = gate_line_type,
+                             gate_line_width = gate_line_width,
+                             gate_line_col = gate_line_col,
+                             gate_fill = gate_fill,
+                             gate_fill_alpha = gate_fill_alpha,
+                             label_text_font = label_text_font,
+                             label_text_size = label_text_size,
+                             label_text_col = label_text_col,
+                             label_fill = label_fill,
+                             label_fill_alpha = label_fill_alpha,
+                             density_smooth = density_smooth
       )
 
-      # LABELS WITHOUT GATES
+    # LABELS WITHOUT GATES
     } else if (.all_na(gate) &
       !.all_na(label_text) &
       label == TRUE) {
@@ -636,38 +634,44 @@
       text_xy <- mapply(
         function(label_text,
                          label_stat,
+                         label_text_x,
+                         label_text_y,
                          label_text_font,
                          label_text_size,
                          label_text_col,
-                         label_box_x,
-                         label_box_y,
-                         label_box_alpha) {
+                         label_fill,
+                         label_fill_alpha) {
           if (!.all_na(label_stat) & label_stat == "percent") {
             label_stat <- NA
           }
-          suppressMessages(cyto_plot_label(
+          suppressMessages(cyto_plot_label2(
             x = x[[1]],
             channels = channels,
             gate = gate,
             trans = axes_trans,
-            text = label_text,
-            stat = label_stat,
-            text_x = label_box_x,
-            text_y = label_box_y,
-            text_size = label_text_size,
-            text_font = label_text_font,
-            text_col = label_text_col,
-            box_alpha = label_box_alpha,
+            label_text = label_text,
+            label_stat = label_stat,
+            label_text_x = label_text_x,
+            label_text_y = label_text_y,
+            trans = axes_trans,
+            negate = negate,
+            display = display,
+            label_text_font = label_text_font,
+            label_text_size = label_text_size,
+            label_text_col = label_text_col,
+            label_fill = label_fill,
+            label_fill_alpha = label_fill_alpha,
             density_smooth = density_smooth
           ))
         }, label_text,
         label_stat,
+        label_text_x,
+        label_text_y,
         label_text_font,
         label_text_size,
-        label_text_col,
-        label_box_x,
-        label_box_y,
-        label_box_alpha,
+        label_text_col,        
+        label_fill,
+        label_fill_alpha,
         SIMPLIFY = FALSE
       )
 
