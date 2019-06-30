@@ -99,6 +99,7 @@
                        label,
                        label_text = NA,
                        label_stat,
+                       label_position = "auto",
                        label_text_x = NA,
                        label_text_y = NA,
                        label_text_font = 2,
