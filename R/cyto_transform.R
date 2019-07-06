@@ -1,75 +1,7 @@
-# CytoRSuite Transformation Functions
+# CytoRSuite Implementation of Transformations
 
 # Wrappers for flowCore transformation function which return transformerList
 # objects and use cyto_plot to visualise the transformations.
-
-# CYTO_TRANSFORM_LOG -----------------------------------------------------------
-
-#' Definition(s) of Log Transformation(s)
-#'
-#' @rdname cyto_transform_log
-#' @export
-cyto_transform_log <- function(x, ...) {
-  UseMethod("cyto_transform_log")
-}
-
-#' @rdname cyto_transform_log
-#' @export
-cyto_transform_log.flowFrame <- function() {
-
-}
-
-#' @rdname cyto_transform_log
-#' @export
-cyto_transform_log.flowSet <- function() {
-
-}
-
-#' @rdname cyto_transform_log
-#' @export
-cyto_transform_log.GatingHierarchy <- function() {
-
-}
-
-#' @rdname cyto_transform_log
-#' @export
-cyto_transform_log.GatingSet <- function() {
-
-}
-
-# CYTO_TRANSFORM_HYPERLOG ------------------------------------------------------
-
-#' Definition(s) of Hyperlog Transformation(s)
-#'
-#' @rdname cyto_transform_hyperlog
-#' @export
-cyto_transform_hyperlog <- function(x, ...) {
-  UseMethod("cyto_transform_hyperlog")
-}
-
-#' @rdname cyto_transform_hyperlog
-#' @export
-cyto_transform_hyperlog.flowFrame <- function() {
-
-}
-
-#' @rdname cyto_transform_hyperlog
-#' @export
-cyto_transform_hyperlog.flowSet <- function() {
-
-}
-
-#' @rdname cyto_transform_hyperlog
-#' @export
-cyto_transform_hyperlog.GatingHierarchy <- function() {
-
-}
-
-#' @rdname cyto_transform_hyperlog
-#' @export
-cyto_transform_hyperlog.GatingSet <- function() {
-
-}
 
 # CYTO_TRANSFORM_ARCSINH ---------------------------------------------------------
 
@@ -161,6 +93,8 @@ cyto_transform_arcsinh.flowFrame <- function(x,
     trans = transformer_list
   )
 
+  print(transformer_list)
+  
   # Apply transformations to data for visualisation
   transform_list <- cyto_transform_convert(transformer_list, inverse = FALSE)
   x <- transform(x, transform_list)
