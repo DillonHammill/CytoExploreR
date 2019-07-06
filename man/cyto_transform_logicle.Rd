@@ -10,7 +10,7 @@
 \usage{
 cyto_transform_logicle(x, ...)
 
-\method{cyto_transform_logicle}{flowFrame}(x, channels, trans_max = 4.5,
+\method{cyto_transform_logicle}{flowFrame}(x, channels, width = 4.5,
   raw_max = 262144, trans_min = 0, quantile = 0.05,
   type = "instrument", popup = FALSE, equal_space = FALSE,
   breaks = 6, ...)
@@ -20,13 +20,13 @@ cyto_transform_logicle(x, ...)
   quantile = 0.05, type = "instrument", popup = FALSE,
   equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_logicle}{GatingHierarchy}(x, channels, parent,
-  trans_max = 4.5, raw_max = 262144, trans_min = 0,
-  quantile = 0.05, type = "instrument", popup = FALSE,
-  equal_space = FALSE, breaks = 6, ...)
+\method{cyto_transform_logicle}{GatingHierarchy}(x, channels,
+  parent = "root", trans_max = 4.5, raw_max = 262144,
+  trans_min = 0, quantile = 0.05, type = "instrument",
+  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_logicle}{GatingSet}(x, channels, parent, select,
-  trans_max = 4.5, raw_max = 262144, trans_min = 0,
+\method{cyto_transform_logicle}{GatingSet}(x, channels, parent = "root",
+  select = NULL, trans_max = 4.5, raw_max = 262144, trans_min = 0,
   quantile = 0.05, type = "instrument", popup = FALSE,
   equal_space = FALSE, breaks = 6, ...)
 }
@@ -39,6 +39,8 @@ cyto_transform_logicle(x, ...)
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
 if no channels/markers are supplied.}
+
+\item{width}{width of transformed display in asymptotic decades.}
 
 \item{raw_max}{maximum value of the raw data.}
 
@@ -60,12 +62,10 @@ spaced, set to FALSE by default.}
 \item{breaks}{number of required breaks.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select} to
-select a subset of samples for generating the transformation(s).}
+select a subset of samples for \code{cyto_plot}.}
 
 \item{parent}{name of the parent population to use for generating the
 transformation(s).}
-
-\item{width}{width of transformed display in asymptotic decades.}
 }
 \value{
 transformerList object.

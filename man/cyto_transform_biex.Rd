@@ -60,7 +60,7 @@ spaced, set to FALSE by default.}
 \item{breaks}{number of required breaks.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select} to
-select a subset of samples for generating the transformation(s).}
+select a subset of samples for \code{cyto_plot}.}
 
 \item{parent}{name of the parent population to use for generating the
 transformation(s).}
