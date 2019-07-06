@@ -694,3 +694,37 @@ cyto_transform_logicle.GatingSet <- function(x,
   # Return transformerList
   return(transformer_list)
 }
+
+# CYTO_TRANSFORM_COMBINE -------------------------------------------------------
+
+#' Combine Transformation Definitions
+#'
+#' \code{cyto_transform_combine} makes it easy to combine transformation
+#' definitions obtained from \code{cyto_transform_arcsinh},
+#' \code{cyto_transform_biex} and/or \code{cyto_transform_logicle} prior to
+#' applying these transformations to the data using \code{cyto_transform}.
+#'
+#' @param ... objects of class \code{transformerList} to be combined into a
+#'   single \code{transformerList} object.
+#'
+#' @importFrom flowWorkspace transformerList
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
+#' @seealso \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+#'
+#' @export
+cyto_transform_combine <- function(...) {
+  
+  # Combine transformerList objects
+  transformer_list <- c(...)
+
+  # Convert to transformerList
+  transformer_list <- transformerList(names(transformer_list),
+                                      transformer_list)
+    
+  # Return transformations in a single transformerList for cyto_transform
+  return(transformer_list)
+  
+}
