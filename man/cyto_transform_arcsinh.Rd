@@ -10,27 +10,28 @@
 \usage{
 cyto_transform_arcsinh(x, ...)
 
-\method{cyto_transform_arcsinh}{flowFrame}(x, channels, raw_max = 262144,
-  width = 4.5, trans_min = 0, popup = FALSE, equal_space = FALSE,
-  breaks = 6, ...)
-
-\method{cyto_transform_arcsinh}{flowSet}(x, channels, select = NULL,
+\method{cyto_transform_arcsinh}{flowFrame}(x, channels = NULL,
   raw_max = 262144, width = 4.5, trans_min = 0, popup = FALSE,
   equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_arcsinh}{GatingHierarchy}(x, channels,
+\method{cyto_transform_arcsinh}{flowSet}(x, channels = NULL,
+  select = NULL, raw_max = 262144, width = 4.5, trans_min = 0,
+  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
+
+\method{cyto_transform_arcsinh}{GatingHierarchy}(x, channels = NULL,
   parent = "root", raw_max = 262144, width = 4.5, trans_min = 0,
   popup = FALSE, equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_arcsinh}{GatingSet}(x, channels, parent = "root",
-  select = NULL, raw_max = 262144, width = 4.5, trans_min = 0,
-  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
+\method{cyto_transform_arcsinh}{GatingSet}(x, channels = NULL,
+  parent = "root", select = NULL, raw_max = 262144, width = 4.5,
+  trans_min = 0, popup = FALSE, equal_space = FALSE, breaks = 6,
+  ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{additional arguments passed to \code{cyto_plot}.}
+\item{...}{not in use.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default

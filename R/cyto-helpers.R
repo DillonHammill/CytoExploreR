@@ -247,114 +247,203 @@ cyto_check <- function(x) {
 
 # CYTO_TRANSFORM ---------------------------------------------------------------
 
-#' Apply logicle transformation to channels of flowSet or GatingSet
+#' Apply Transformations to Cytometry Data
 #'
-#' A convenient wrapper for
-#' \code{\link[flowCore:estimateLogicle]{estimateLogicle}} and
-#' \code{\link[flowCore:transform]{transform}} which coerces samples prior to
-#' logicle parameter estimation. For large \code{flowSet} or \code{GatingSet}
-#' objects it is recommended that users select a subset of samples for parameter
-#' estimation using the \code{select} argument.
+#' @param x object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
+#' @param trans object of class \code{transformerList} containing the
+#'   transformation definitions to apply to \code{x}.
+#' @param trans_type type of transformation to apply when no trans object is
+#'   supplied, options include "arcsinh", "biex" and "logicle".
+#' @param channels names of the channels to transform. Only required when no
+#'   \code{trans} object is supplied.
+#' @param parent name of the parent population of \code{GatingHierarchy} or
+#'   \code{GatingSet} objects used to visualise the transformations.
+#' @param select list of selection criteria passed to \code{cyto_select} to
+#'   select a subset of samples for visualising the transformations.
+#' @param inverse logical indicating whether the inverse transformations should
+#'   be applied. Currently only supported for \code{flowFrame} and
+#'   \code{flowSet} objects.
+#' @param ... additional arguments passed to \code{cyto_transform_arcsinh},
+#'   \code{cyto_transform_biex} or \code{cyto_transform_logicle} when no
+#'   \code{trans} object is supplied.
 #'
-#' @param x object of class \code{flowSet} or \code{GatingSet}.
-#' @param channels name(s) of the channels to transform. A call will be made to
-#'   \code{\link{cyto_fluor_channels}} to get the names of the fluorescent
-#'   channels if no channels are supplied.
-#' @param select a named list of experiment variables passed to
-#'   \code{\link{cyto_select}} to select particular samples to use for logicle
-#'   parameter estimation.
-#' @param ... additional arguments passed to
-#'   \code{\link[flowCore:estimateLogicle]{estimateLogicle}}.
+#' @importFrom flowCore transform
 #'
-#' @return transformed \code{flowSet} or \code{GatingSet}.
+#' @examples
+#' 
+#' library(CytoRSuite)
+#' 
+#' # Use Activation flowSet
+#' fs <- Activation
+#' 
+#' # Automatically transform flowSet 
+#' fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
 #'
-#' @importFrom flowCore estimateLogicle transform flowSet
-#' @importFrom flowWorkspace GatingSet
+#' # Manually construct & apply transformations
+#' trans <- cyto_transform_biex(fs)
+#' fs_trans <- cyto_transform(fs, trans)
+#'
+#' # Add fs to GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # Automatically transform GatingSet
+#' gs_trans <- cyto_transform(gs, trans_type = "logicle")
+#' 
+#' # Manually construct & apply transformations
+#' trans <- cyto_transform_logicle(gs)
+#' gs_trans <- cyto_transform(gs, trans)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_transform
-#'
 #' @export
-cyto_transform <- function(x, ...) {
-  UseMethod("cyto_transform")
+cyto_transform <- function(x, trans, ...){
+  UseMethod("cyto_transform", trans)
 }
 
 #' @rdname cyto_transform
 #' @export
-cyto_transform.flowSet <- function(x,
-                                   channels,
+cyto_transform.default <- function(x, 
+                                   trans = NULL,
+                                   trans_type = "logicle",
+                                   channels = NULL,
+                                   parent = "root",
                                    select = NULL,
-                                   ...) {
-
-  # Backwards compatibility - transformList will not be available!
-
-  # Select a subset of samples for parameter estimation
-  if (!is.null(select)) {
-    x <- cyto_select(x, select)
+                                   inverse = FALSE,
+                                   ...){
+  
+  # No transformations supplied - automatically obtain transform definitions
+  if(is.null(trans)){
+    
+    # Message not recommended to auto-transform flowFrame/flowSet objects
+    if(inherits(x, "flowFrame") | inherits(x, "flowSet")){
+      message(paste("Automatically transforming flowFrame/flowSet objects",
+      "is not recommended as transformation definitions will be lost."))
+    }
+    
+    # Dispatch based on trans_type argument to get TransformerList
+    if(trans_type == "arcsinh"){
+      
+      transformer_list <- cyto_transform_arcsinh(x,
+                                                 channels = channels,
+                                                 parent = parent,
+                                                 select = select, ...)
+      
+    }else if(trans_type == "biex"){
+      
+      transformer_list <- cyto_transform_biex(x,
+                                              channels = channels,
+                                              parent = parent,
+                                              select = select, ...)
+      
+    }else if(trans_type == "logicle"){
+      
+      transformer_list <- cyto_transform_logicle(x,
+                                                 channels = channels,
+                                                 parent = parent,
+                                                 select = select, ...)
+      
+    }
+    
   }
-
-  # Missing channels - use fluorescent channels
-  if (missing(channels)) {
-    channels <- cyto_fluor_channels(x)
+  
+  # Apply transformations
+  if(inherits(x, "flowFrame") |
+     inherits(x, "flowSet")){
+    
+    # Extract transformations from transformerList to transformList
+    transform_list <- cyto_transform_convert(transformer_list, 
+                                             inverse = inverse)
+    
+    # Apply transformations
+    x <- transform(x, transform_list)
+    
+  }else if(inherits(x, "GatingHierarchy") |
+           inherits(x, "GatingSet")){
+    
+    # Inverse transformations not yet supported
+    if(inverse == TRUE){
+      stop(paste("Inverse transformations are not yet supported for",
+      "GatingHierarchy/GatingSet objects."))
+    }
+    
+    # Apply transformations
+    x <- transform(x, transformer_list)
+    
   }
-
-  # Convert channels argument to valid channel names
-  channels <- cyto_channels_extract(x, channels)
-
-  # Coerce flowSet to flowFrame for parameter estimation
-  fr <- as(x, "flowFrame")
-
-  # Logicle parameter estimates using estimateLogicle
-  trans <- estimateLogicle(fr, channels, ...)
-
-  # Apply transformation using flowCore:;transform
-  x <- transform(x, trans)
-
+  
+  # Return transformed data
   return(x)
+  
 }
 
 #' @rdname cyto_transform
 #' @export
-cyto_transform.GatingSet <- function(x,
-                                     channels,
-                                     select = NULL,
-                                     ...) {
-
-  # Select a subset of samples for parameter estimation
-  if (!is.null(select)) {
-    x <- cyto_select(x, select)
+cyto_transform.transformList <- function(x, 
+                                         trans = NULL,
+                                         ...){
+  
+  # Added for backwards compatibility - flowFrame/flowSet objects only
+  if(inherits(x, "GatingHierarchy") |
+     inherits(x, "GatingSet")) {
+    
+    stop(paste("GatingHierarchy and GatingSet objects require transformerList",
+               "objects to apply transformations."))
+    
   }
-
-  # Missing channels - use fluorescent channels
-  if (missing(channels)) {
-    channels <- cyto_fluor_channels(x)
+  
+  # Apply transformations to flowFrame/flowSet
+  if(inherits(x, "flowFrame") |
+     inherits(x, "flowSet")){
+    
+    # Transformations applied as is - allow for inverse transformList
+    x <- transform(x, trans)
+    
   }
-
-  # Convert channels argument to valid channel names
-  channels <- cyto_channels_extract(x, channels)
-
-  # Extract data from GatingSet
-  fs <- cyto_extract(x, "root")
-
-  # Coerce flowSet to flowFrame
-  fr <- cyto_convert(fs, "flowFrame")
-
-  # Add collapsed flowFrame to GatingSet
-  gs <- GatingSet(flowSet(fr))
-
-  # Logicle parameter estimates using estimateLogicle
-  trans <- estimateLogicle(gs[[1]], channels, ...)
-
-  # Apply transformation using flowCore::transform
-  x <- transform(x, trans)
-
+  
+  # Return transformed data
   return(x)
+  
 }
 
-# CYTO_TRANSFORM_INVERSE -------------------------------------------------------
+#' @rdname cyto_transform
+#' @export
+cyto_transform.transformerList <- function(x, 
+                                           trans = NULL,
+                                           inverse = FALSE,
+                                           ...){
+  
+  # Apply transformations to flowFrame/flowSet
+  if(inherits(x, "flowFrame") |
+     inherits(x, "flowSet")){
 
-
+    # Extract transformations to transformList
+    transform_list <- cyto_transform_convert(trans, inverse = inverse)
+    
+    # Apply transformations
+    x <- transform(x, transform_list)
+    
+    
+  # Apply transformations to GatingHierarchy/GatingSet
+  }else if(inherits(x, "GatingHierarchy") |
+           inherits(x, "GatingSet")){
+    
+    # Inverse transformations not supported
+    if(inverse == FALSE){
+      stop(paste("Inverse transformations are not yet supported for",
+                 "GatingHierarchy/GatingSet objects."))
+    }
+    
+    # Apply transformations
+    x <- transform(x, trans)
+    
+  }
+  
+  # Return transformed data
+  return(x)
+  
+}
 
 # CYTO_TRANSFORM_CONVERT -------------------------------------------------------
 

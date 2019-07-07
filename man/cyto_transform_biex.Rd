@@ -10,30 +10,31 @@
 \usage{
 cyto_transform_biex(x, ...)
 
-\method{cyto_transform_biex}{flowFrame}(x, channels, trans_max = 4096,
-  raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
-  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
-
-\method{cyto_transform_biex}{flowSet}(x, channels, select = NULL,
+\method{cyto_transform_biex}{flowFrame}(x, channels = NULL,
   trans_max = 4096, raw_max = 262144, width = 4.5, trans_min = 0,
   width_basis = -10, popup = FALSE, equal_space = FALSE,
   breaks = 6, ...)
 
-\method{cyto_transform_biex}{GatingHierarchy}(x, channels,
+\method{cyto_transform_biex}{flowSet}(x, channels = NULL,
+  select = NULL, trans_max = 4096, raw_max = 262144, width = 4.5,
+  trans_min = 0, width_basis = -10, popup = FALSE,
+  equal_space = FALSE, breaks = 6, ...)
+
+\method{cyto_transform_biex}{GatingHierarchy}(x, channels = NULL,
   parent = "root", select = NULL, trans_max = 4096,
   raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
   popup = FALSE, equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_biex}{GatingSet}(x, channels, parent = "root",
-  select = NULL, trans_max = 4096, raw_max = 262144, width = 4.5,
-  trans_min = 0, width_basis = -10, popup = FALSE,
-  equal_space = FALSE, breaks = 6, ...)
+\method{cyto_transform_biex}{GatingSet}(x, channels = NULL,
+  parent = "root", select = NULL, trans_max = 4096,
+  raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
+  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{additional arguments passed to \code{cyto_plot}.}
+\item{...}{not in use.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default

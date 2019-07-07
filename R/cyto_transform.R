@@ -33,7 +33,7 @@
 #' @param equal_space logical indicating whether breaks should be equally
 #'   spaced, set to FALSE by default.
 #' @param breaks number of required breaks.
-#' @param ... additional arguments passed to \code{cyto_plot}.
+#' @param ... not in use.
 #'
 #' @importFrom flowWorkspace asinh_Gml2 flow_trans transformerList
 #'
@@ -48,7 +48,7 @@ cyto_transform_arcsinh <- function(x, ...) {
 #' @rdname cyto_transform_arcsinh
 #' @export
 cyto_transform_arcsinh.flowFrame <- function(x,
-                                             channels,
+                                             channels = NULL,
                                              raw_max = 262144,
                                              width = 4.5,
                                              trans_min = 0,
@@ -57,7 +57,7 @@ cyto_transform_arcsinh.flowFrame <- function(x,
                                              breaks = 6, ...) {
 
   # Prepare Channels
-  if (missing(channels)) {
+  if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
@@ -92,8 +92,6 @@ cyto_transform_arcsinh.flowFrame <- function(x,
     from = channels,
     trans = transformer_list
   )
-
-  print(transformer_list)
   
   # Apply transformations to data for visualisation
   transform_list <- cyto_transform_convert(transformer_list, inverse = FALSE)
@@ -111,8 +109,7 @@ cyto_transform_arcsinh.flowFrame <- function(x,
   lapply(channels, function(chan) {
     cyto_plot(x,
       channels = chan,
-      axes_trans = transformer_list,
-      ...
+      axes_trans = transformer_list
     )
   })
 
@@ -123,7 +120,7 @@ cyto_transform_arcsinh.flowFrame <- function(x,
 #' @rdname cyto_transform_arcsinh
 #' @export
 cyto_transform_arcsinh.flowSet <- function(x,
-                                           channels,
+                                           channels = NULL,
                                            select = NULL,
                                            raw_max = 262144,
                                            width = 4.5,
@@ -156,7 +153,7 @@ cyto_transform_arcsinh.flowSet <- function(x,
 #' @rdname cyto_transform_arcsinh
 #' @export
 cyto_transform_arcsinh.GatingHierarchy <- function(x,
-                                                   channels,
+                                                   channels = NULL,
                                                    parent = "root",
                                                    raw_max = 262144,
                                                    width = 4.5,
@@ -187,7 +184,7 @@ cyto_transform_arcsinh.GatingHierarchy <- function(x,
 #' @rdname cyto_transform_arcsinh
 #' @export
 cyto_transform_arcsinh.GatingSet <- function(x,
-                                             channels,
+                                             channels = NULL,
                                              parent = "root",
                                              select = NULL,
                                              raw_max = 262144,
@@ -253,7 +250,7 @@ cyto_transform_arcsinh.GatingSet <- function(x,
 #' @param equal_space logical indicating whether breaks should be equally
 #'   spaced, set to FALSE by default.
 #' @param breaks number of required breaks.
-#' @param ... additional arguments passed to \code{cyto_plot}.
+#' @param ... not in use.
 #'
 #' @seealso \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
 #' @seealso \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
@@ -273,7 +270,7 @@ cyto_transform_biex <- function(x, ...) {
 #' @rdname cyto_transform_biex
 #' @export
 cyto_transform_biex.flowFrame <- function(x,
-                                          channels,
+                                          channels = NULL,
                                           trans_max = 4096,
                                           raw_max = 262144,
                                           width = 4.5,
@@ -284,7 +281,7 @@ cyto_transform_biex.flowFrame <- function(x,
                                           breaks = 6, ...) {
 
   # Prepare Channels
-  if (missing(channels)) {
+  if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
@@ -340,8 +337,7 @@ cyto_transform_biex.flowFrame <- function(x,
   lapply(channels, function(chan) {
     cyto_plot(x,
       channels = chan,
-      axes_trans = transformer_list,
-      ...
+      axes_trans = transformer_list
     )
   })
 
@@ -352,7 +348,7 @@ cyto_transform_biex.flowFrame <- function(x,
 #' @rdname cyto_transform_biex
 #' @export
 cyto_transform_biex.flowSet <- function(x,
-                                        channels,
+                                        channels = NULL,
                                         select = NULL,
                                         trans_max = 4096,
                                         raw_max = 262144,
@@ -389,7 +385,7 @@ cyto_transform_biex.flowSet <- function(x,
 #' @rdname cyto_transform_biex
 #' @export
 cyto_transform_biex.GatingHierarchy <- function(x,
-                                                channels,
+                                                channels = NULL,
                                                 parent = "root",
                                                 select = NULL,
                                                 trans_max = 4096,
@@ -424,7 +420,7 @@ cyto_transform_biex.GatingHierarchy <- function(x,
 #' @rdname cyto_transform_biex
 #' @export
 cyto_transform_biex.GatingSet <- function(x,
-                                          channels,
+                                          channels = NULL,
                                           parent = "root",
                                           select = NULL,
                                           trans_max = 4096,
@@ -495,7 +491,7 @@ cyto_transform_biex.GatingSet <- function(x,
 #' @param equal_space logical indicating whether breaks should be equally
 #'   spaced, set to FALSE by default.
 #' @param breaks number of required breaks.
-#' @param ... additional arguments passed to \code{cyto_plot}.
+#' @param ... not in use.
 #'
 #' @return transformerList object.
 #'
@@ -516,7 +512,7 @@ cyto_transform_logicle <- function(x, ...) {
 #' @rdname cyto_transform_logicle
 #' @export
 cyto_transform_logicle.flowFrame <- function(x,
-                                             channels,
+                                             channels = NULL,
                                              width = 4.5,
                                              raw_max = 262144,
                                              trans_min = 0,
@@ -527,7 +523,7 @@ cyto_transform_logicle.flowFrame <- function(x,
                                              breaks = 6, ...) {
 
   # Prepare Channels
-  if (missing(channels)) {
+  if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
@@ -574,8 +570,7 @@ cyto_transform_logicle.flowFrame <- function(x,
   lapply(channels, function(chan) {
     cyto_plot(x,
       channels = chan,
-      axes_trans = transformer_list,
-      ...
+      axes_trans = transformer_list
     )
   })
 
@@ -586,7 +581,7 @@ cyto_transform_logicle.flowFrame <- function(x,
 #' @rdname cyto_transform_logicle
 #' @export
 cyto_transform_logicle.flowSet <- function(x,
-                                           channels,
+                                           channels = NULL,
                                            select = NULL,
                                            trans_max = 4.5,
                                            raw_max = 262144,
@@ -623,7 +618,7 @@ cyto_transform_logicle.flowSet <- function(x,
 #' @rdname cyto_transform_logicle
 #' @export
 cyto_transform_logicle.GatingHierarchy <- function(x,
-                                                   channels,
+                                                   channels = NULL,
                                                    parent = "root",
                                                    trans_max = 4.5,
                                                    raw_max = 262144,
@@ -657,7 +652,7 @@ cyto_transform_logicle.GatingHierarchy <- function(x,
 #' @rdname cyto_transform_logicle
 #' @export
 cyto_transform_logicle.GatingSet <- function(x,
-                                             channels,
+                                             channels = NULL,
                                              parent = "root",
                                              select = NULL,
                                              trans_max = 4.5,

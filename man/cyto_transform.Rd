@@ -2,40 +2,76 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_transform}
 \alias{cyto_transform}
-\alias{cyto_transform.flowSet}
-\alias{cyto_transform.GatingSet}
-\title{Apply logicle transformation to channels of flowSet or GatingSet}
+\alias{cyto_transform.default}
+\alias{cyto_transform.transformList}
+\alias{cyto_transform.transformerList}
+\title{Apply Transformations to Cytometry Data}
 \usage{
-cyto_transform(x, ...)
+cyto_transform(x, trans, ...)
 
-\method{cyto_transform}{flowSet}(x, channels, select = NULL, ...)
+\method{cyto_transform}{default}(x, trans = NULL,
+  trans_type = "logicle", channels = NULL, parent = "root",
+  select = NULL, inverse = FALSE, ...)
 
-\method{cyto_transform}{GatingSet}(x, channels, select = NULL, ...)
+\method{cyto_transform}{transformList}(x, trans = NULL, ...)
+
+\method{cyto_transform}{transformerList}(x, trans = NULL,
+  inverse = FALSE, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{flowFrame}, \code{flowSet},
+\code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{additional arguments passed to
-\code{\link[flowCore:estimateLogicle]{estimateLogicle}}.}
+\item{trans}{object of class \code{transformerList} containing the
+transformation definitions to apply to \code{x}.}
 
-\item{channels}{name(s) of the channels to transform. A call will be made to
-\code{\link{cyto_fluor_channels}} to get the names of the fluorescent
-channels if no channels are supplied.}
+\item{...}{additional arguments passed to \code{cyto_transform_arcsinh},
+\code{cyto_transform_biex} or \code{cyto_transform_logicle} when no
+\code{trans} object is supplied.}
 
-\item{select}{a named list of experiment variables passed to
-\code{\link{cyto_select}} to select particular samples to use for logicle
-parameter estimation.}
-}
-\value{
-transformed \code{flowSet} or \code{GatingSet}.
+\item{trans_type}{type of transformation to apply when no trans object is
+supplied, options include "arcsinh", "biex" and "logicle".}
+
+\item{channels}{names of the channels to transform. Only required when no
+\code{trans} object is supplied.}
+
+\item{parent}{name of the parent population of \code{GatingHierarchy} or
+\code{GatingSet} objects used to visualise the transformations.}
+
+\item{select}{list of selection criteria passed to \code{cyto_select} to
+select a subset of samples for visualising the transformations.}
+
+\item{inverse}{logical indicating whether the inverse transformations should
+be applied. Currently only supported for \code{flowFrame} and
+\code{flowSet} objects.}
 }
 \description{
-A convenient wrapper for
-\code{\link[flowCore:estimateLogicle]{estimateLogicle}} and
-\code{\link[flowCore:transform]{transform}} which coerces samples prior to
-logicle parameter estimation. For large \code{flowSet} or \code{GatingSet}
-objects it is recommended that users select a subset of samples for parameter
-estimation using the \code{select} argument.
+Apply Transformations to Cytometry Data
+}
+\examples{
+
+library(CytoRSuite)
+
+# Use Activation flowSet
+fs <- Activation
+
+# Automatically transform flowSet 
+fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
+
+# Manually construct & apply transformations
+trans <- cyto_transform_biex(fs)
+fs_trans <- cyto_transform(fs, trans)
+
+# Add fs to GatingSet
+gs <- GatingSet(fs)
+
+# Automatically transform GatingSet
+gs_trans <- cyto_transform(gs, trans_type = "logicle")
+
+# Manually construct & apply transformations
+trans <- cyto_transform_logicle(gs)
+gs_trans <- cyto_transform(gs, trans)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

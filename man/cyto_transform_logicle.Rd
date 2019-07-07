@@ -10,31 +10,32 @@
 \usage{
 cyto_transform_logicle(x, ...)
 
-\method{cyto_transform_logicle}{flowFrame}(x, channels, width = 4.5,
-  raw_max = 262144, trans_min = 0, quantile = 0.05,
+\method{cyto_transform_logicle}{flowFrame}(x, channels = NULL,
+  width = 4.5, raw_max = 262144, trans_min = 0, quantile = 0.05,
   type = "instrument", popup = FALSE, equal_space = FALSE,
   breaks = 6, ...)
 
-\method{cyto_transform_logicle}{flowSet}(x, channels, select = NULL,
-  trans_max = 4.5, raw_max = 262144, trans_min = 0,
+\method{cyto_transform_logicle}{flowSet}(x, channels = NULL,
+  select = NULL, trans_max = 4.5, raw_max = 262144, trans_min = 0,
   quantile = 0.05, type = "instrument", popup = FALSE,
   equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_logicle}{GatingHierarchy}(x, channels,
+\method{cyto_transform_logicle}{GatingHierarchy}(x, channels = NULL,
   parent = "root", trans_max = 4.5, raw_max = 262144,
   trans_min = 0, quantile = 0.05, type = "instrument",
   popup = FALSE, equal_space = FALSE, breaks = 6, ...)
 
-\method{cyto_transform_logicle}{GatingSet}(x, channels, parent = "root",
-  select = NULL, trans_max = 4.5, raw_max = 262144, trans_min = 0,
-  quantile = 0.05, type = "instrument", popup = FALSE,
-  equal_space = FALSE, breaks = 6, ...)
+\method{cyto_transform_logicle}{GatingSet}(x, channels = NULL,
+  parent = "root", select = NULL, trans_max = 4.5,
+  raw_max = 262144, trans_min = 0, quantile = 0.05,
+  type = "instrument", popup = FALSE, equal_space = FALSE,
+  breaks = 6, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{additional arguments passed to \code{cyto_plot}.}
+\item{...}{not in use.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
