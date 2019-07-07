@@ -43,7 +43,7 @@
 
   # Convert transformerList to transformList
   if (inherits(axes_trans, "transformerList")) {
-    axes_trans <- cyto_transform_convert(axes_trans)
+    axes_trans <- cyto_transform_extract(axes_trans)
   }
 
   # Assign x to fr

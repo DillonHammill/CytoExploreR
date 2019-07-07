@@ -3,7 +3,7 @@
 \docType{methods}
 \name{cyto_plot_gating_scheme,GatingHierarchy-method}
 \alias{cyto_plot_gating_scheme,GatingHierarchy-method}
-\title{Plot Flow Cytometry Gating Strategies - GatingHierarchy Method}
+\title{Plot Cytometry Gating Strategies - GatingHierarchy Method}
 \usage{
 \S4method{cyto_plot_gating_scheme}{GatingHierarchy}(x,
   gatingTemplate = NULL, back_gate = FALSE, gate_track = FALSE,

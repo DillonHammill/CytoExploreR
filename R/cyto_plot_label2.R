@@ -133,7 +133,7 @@ cyto_plot_label2 <- function(x,
 
   # Convert trans to transformList - required for stats calculation
   if (!.all_na(label_stat)) {
-    trans <- cyto_transform_convert(trans, inverse = FALSE)
+    trans <- cyto_transform_extract(trans, inverse = FALSE)
   }
 
   # Check for statistics

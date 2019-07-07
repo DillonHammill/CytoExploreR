@@ -84,6 +84,7 @@
     yb <- y - bheights * ypad
     yt <- y + theights * ypad
   }
+  
   rect(xr,
        yb,
        xl,

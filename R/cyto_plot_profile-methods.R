@@ -108,7 +108,7 @@ setMethod(cyto_plot_profile,
 
     # Transformations
     axes_trans <- .getCompleteTransList(fr, axes_trans)
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
 
     # Grid layout
     if (is.null(layout)) {
@@ -395,7 +395,7 @@ setMethod(cyto_plot_profile,
 
     # Transformations
     axes_trans <- .getCompleteTransList(gs, axes_trans)
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
 
     # Transformed data
     fs <- .getTransformedData(fs, axes_trans)

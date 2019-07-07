@@ -353,7 +353,7 @@ cyto_transform.default <- function(x,
      inherits(x, "flowSet")){
     
     # Extract transformations from transformerList to transformList
-    transform_list <- cyto_transform_convert(transformer_list, 
+    transform_list <- cyto_transform_extract(transformer_list, 
                                              inverse = inverse)
     
     # Apply transformations
@@ -419,7 +419,7 @@ cyto_transform.transformerList <- function(x,
      inherits(x, "flowSet")){
 
     # Extract transformations to transformList
-    transform_list <- cyto_transform_convert(trans, inverse = inverse)
+    transform_list <- cyto_transform_extract(trans, inverse = inverse)
     
     # Apply transformations
     x <- transform(x, transform_list)
@@ -474,7 +474,7 @@ cyto_transform.transformerList <- function(x,
 #' trans_list <- cyto_transfrm_extract(trans)
 #' 
 #' # Convert transformerList into inverse transformList
-#' inv <- cyto_transform_convert(trans, inverse = TRUE)
+#' inv <- cyto_transform_extract(trans, inverse = TRUE)
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 

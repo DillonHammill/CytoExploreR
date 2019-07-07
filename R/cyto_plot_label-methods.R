@@ -237,7 +237,7 @@ cyto_plot_label.NULL <- function(x,
     "geo mean",
     "CV"
   )) {
-    if (is.null(cyto_transform_convert(trans))) {
+    if (is.null(cyto_transform_extract(trans))) {
       stop(
         paste("Supply transformList/transformerList to calculate", stat, ".")
       )
@@ -375,7 +375,7 @@ cyto_plot_label.rectangleGate <- function(x,
 
   # Missing transList
   if (stat %in% c("median", "mode", "mean", "geo mean")) {
-    if (is.null(cyto_transform_convert(trans))) {
+    if (is.null(cyto_transform_extract(trans))) {
       stop(
         paste("Supply transformList/transformerList to calculate", stat, ".")
       )
@@ -733,59 +733,140 @@ cyto_plot_label.list <- function(x,
                                  density_smooth = 0.6,
                                  plot = TRUE, ...) {
 
+  # Previously used co-ordinates have been assigned in cyto_plot
+  
+  # Pull down global options ---------------------------------------------------
+  
+  # Pull down saved gates
+  saved_gates <- getOption("CytoRSuite_cyto_plot_gates")
+  
+  # Pull down saved labels
+  saved_label_coords <- getOption("CytoRSuite_cyto_plot_labels")
+  
+  print(saved_gates)
+  print(saved_label_coords)
+  
+  # Check if cyto_plot_label is being called inside cyto_plot
+  # External calls do not pull down gates and labels
+  if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
+    cyto_plot <- FALSE
+  }else{
+    cyto_plot <- TRUE
+  }
+  
+  # Prepare gates --------------------------------------------------------------
+  
   # List of filters to list of gate objects
   gate <- unlist(gate)
 
-  # Interactively select co-ordinates
-  if(!.all_na(text_x) | !.all_na(text_y)){
-    if(text_x[1] == "select" | text_y[1] == "select"){
-      text_xy <- lapply(text, function(z){
-        message(
-          paste("Select a location on the plot for the", z, "label.")
+  # Get label co-ordinates -----------------------------------------------------
+  
+  # Co-ordinates have been supplied
+  if(all(is.numeric(c(text_x,text_y)))){
+  
+    # Do nothing -  co-ordinates are ready
+    
+  # Some co-ordinates are missing  
+  }else if(!all(is.numeric(c(text_x,text_y)))){
+    
+    # Check if label coords have been saved for this group
+    gate_match <- which(unlist(lapply(saved_gates, function(z){
+      identical(gate, z)
+    })))[1]
+    
+    # No saved label coords
+    if(length(saved_label_coords[[gate_match]]) == 0){
+      
+      # Set both x and y to select if one is set
+      if(all(is.character(text_x)) |
+         all(is.character(text_y))){
+        text_x <- rep("select", length(text_x))
+        text_y <- rep("select", length(text_y))
+      }
+    
+      # Manually select points
+      if(all(is.character(c(text_x,text_y)))){
+      
+        # Manually select co-ordinates
+        text_xy <- lapply(text, function(z){
+         message(
+            paste("Select a location on the plot for the", z, "label.")
           )
-        locator(n=1)
-      })
-      text_xy <- transpose(text_xy)
-      text_xy <- lapply(text_xy, function(z){unlist(z)})
-      text_x <- text_xy[[1]]
-      text_y <- text_xy[[2]]
+          locator(n=1)
+        })
+        text_xy <- transpose(text_xy)
+        text_xy <- lapply(text_xy, function(z){unlist(z)})
+        text_x <- text_xy[[1]]
+        text_y <- text_xy[[2]]
+    
+      # Automatically calculate missing co-ordinates  
+      }else if(any(is.na(c(text_x,text_y)))){
+      
+        # Get co-ordinates of gate centers
+        text_xy <- .cyto_plot_label_center(gate,
+                                         channels = channels,
+                                         text_x = text_x,
+                                         text_y = text_y)
+        
+        # Update x co-ordinates if missing
+        if(.all_na(text_x)){
+          text_x <- text_xy[1,]
+        }
+      
+        # Update y co-ordinates if missing
+        if(.all_na(text_y)){
+          text_y <- text_xy[2,]
+        }
+      
+        # Offset co-ordinates if multiple gates present
+        if(length(gate) > 1){
+        
+          text_xy <- .cyto_plot_label_offset(x,
+                                             gate = gate,
+                                             channels = channels,
+                                             text = text,
+                                             text_x = text_x,
+                                             text_y = text_y,
+                                             stat = stat,
+                                             text_size = text_size
+          )
+        
+        }
+      
+      }
+    
+      # Combine co-ordinates into data.frame -----------------------------------
+  
+      text_xy <- cbind(text_x, text_y)
+      colnames(text_xy) <- c("x","y")
+  
+      # Update saved label co-ordinates ----------------------------------------
+  
+      # Called cyto_plot means label coords will be empty list or supplied
+      if(cyto_plot == TRUE){
+      
+        # Replace associated label coords entries
+        lapply(gate_match, function(z){
+        
+          saved_label_coords[[z]] <<- text_xy
+        
+        })
+        options("CytoRSuite_cyto_plot_labels" = saved_label_coords)
+    
+      }
+      
+    # Label coords have been saved for this group  
+    }else{
+      
+      text_x <- saved_label_coords[[gate_match]][,1]
+      text_y <- saved_label_coords[[gate_match]][,2]
+      text_xy <- cbind(text_x,text_y)
+      colnames(text_xy) <- c("x","y")
     }
+    
   }
   
-  # Get co-ordinates of gate centers
-  text_xy <- .cyto_plot_label_center(gate,
-                                       channels = channels,
-                                       text_x = text_x,
-                                       text_y = text_y)
-  
-  # Update x co-ordinates if not supplied
-  if(.all_na(text_x)){
-    text_x <- text_xy[1,]
-  }
-  
-  # Update y coordinates if not supplied
-  if(.all_na(text_y)){
-    text_y <- text_xy[2,]
-  }
-  
-  # Get adjusted co-ordinates if not manually supplied
-    if(is.null(getOption("CytoRSuite_cyto_plot_label_coords"))){
-      text_xy <- .cyto_plot_label_offset(x,
-                                        gate = gate,
-                                        channels = channels,
-                                        text = text,
-                                        text_x = text_x,
-                                        text_y = text_y,
-                                        stat = stat,
-                                        text_size = text_size
-      )
-    }
-  
-  # Update co-ordinates
-  text_x <- text_xy[1,]
-  text_y <- text_xy[2,]
-  
-  # Make calls to cyto_plot_label
+  # cyto_plot_label ------------------------------------------------------------
   if(plot == TRUE){
   mapply(
       function(gate,

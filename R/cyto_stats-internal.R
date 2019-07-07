@@ -280,7 +280,7 @@
   }else if(!is.null(trans)){
     
     # Convert tranform object to transformList
-    trans <- cyto_transform_convert(trans, inverse = FALSE)
+    trans <- cyto_transform_extract(trans, inverse = FALSE)
     
     fr_mean <- colMeans(exprs(x)[,channels, drop = FALSE])
     
@@ -290,7 +290,7 @@
       if(z %in% BiocGenerics::colnames(trans)){
         
         # Inverse transformations
-        inv <- cyto_transform_convert(trans, inverse = TRUE)
+        inv <- cyto_transform_extract(trans, inverse = TRUE)
         
         # Inverse transformation on calculated arithmetic mean
         geo_mean <- inv@transforms[[z]]@f(fr_mean[z])

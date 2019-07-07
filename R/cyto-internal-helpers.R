@@ -110,7 +110,7 @@
   }
   
   # Get inverse trans
-  inv <- cyto_transform_convert(trans, inverse = TRUE)
+  inv <- cyto_transform_extract(trans, inverse = TRUE)
   
   # Extract channels which have transformations
   if (inherits(trans, "transformList")) {
@@ -362,8 +362,8 @@
     # flowFrame or flowSet return transformList
     if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
       
-      # Run cyto_transform_convert to get transformList
-      trans <- cyto_transform_convert(trans, inverse = FALSE)
+      # Run cyto_transform_extract to get transformList
+      trans <- cyto_transform_extract(trans, inverse = FALSE)
       
       # Check which channels have been transformed
       chans <- names(trans@transforms)

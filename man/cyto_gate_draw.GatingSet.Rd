@@ -61,7 +61,7 @@ default.}
 \item{plot}{logical indicating whether a plot should be drawn, set to
 \code{TRUE} by default.}
 
-\item{...}{additional arguments for \code{\link{cyto_plot,GatingSet-method}}.}
+\item{...}{additional arguments for \code{\link{cyto_plot.flowFrame}}.}
 }
 \value{
 drawn gates are applied to the

@@ -128,7 +128,7 @@ cyto_plot_compensation.flowFrame <- function(x,
 
   # Transformations
   axes_trans <- .cyto_transform_complete(x, axes_trans)
-  axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+  axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
 
   # Transfomed Data
   x <- .cyto_transformed(x, axes_trans)
@@ -328,7 +328,7 @@ cyto_plot_compensation.flowSet <- function(x,
 
   # Transformations
   axes_trans <- .cyto_transform_complete(x, axes_trans)
-  axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+  axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
 
   # Transformed Data
   x <- .cyto_transformed(x, axes_trans)
@@ -615,7 +615,7 @@ cyto_plot_compensation.GatingSet <- function(x,
 
   # Transformations
   axes_trans <- .cyto_transform_complete(x, axes_trans)
-  axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+  axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   
   # Make call to cyto_plot_compensation
   cyto_plot_compensation(

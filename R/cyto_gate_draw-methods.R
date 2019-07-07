@@ -20,8 +20,8 @@
 #' automatically applies the constructed gates to the GatingSet and saves the
 #' constructed gates in an \code{openCyto}
 #' \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}for future use.
-#' See \code{\link{cyto_gate_edit}} and \code{\link{cyto_gate_remove}} to manipulate
-#' constructed gates and modify their entries in the gatingTemplate.
+#' See \code{\link{cyto_gate_edit}} and \code{\link{cyto_gate_remove}} to
+#' manipulate constructed gates and modify their entries in the gatingTemplate.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}} or
@@ -925,7 +925,7 @@ cyto_gate_draw.GatingSet <- function(x,
   .cyto_alias_check(alias = alias, type = type)
   
   # Transformations
-  axes_trans <- cyto_transform_convert(x[[1]]@transformation, inverse = FALSE)
+  axes_trans <- cyto_transform_extract(x[[1]]@transformation, inverse = FALSE)
   
   # Group all samples together
   if(group_by[1] == "all"){

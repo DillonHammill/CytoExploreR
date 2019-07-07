@@ -18,6 +18,9 @@
   # Signal when gate_draw has been called - turn off overlay sampling
   options("CytoRSuite_cyto_gate_draw" = FALSE)
   
+  # Signals args called to cyto_plot - check if call is made twice
+  options("CytoRSuite_cyto_plot_call" = NULL)
+  
   # Create custom theme for cyto_plot
   options("CytoRSuite_cyto_plot_theme" = NULL)
   
@@ -33,8 +36,14 @@
   # Signal when cyto_plot_grid method is being called
   options("CytoRSuite_cyto_plot_grid" = FALSE)
   
-  # Save label co-ordinates for multi-plotting methods
-  options("CytoRSuite_cyto_plot_label_coords" = NULL)
+  # Signal previous call to cyto_plot (same plot?)
+  options("CytoRSuite_cyto_plot_call" = NULL)
+  
+  # Save gates as list
+  options("CytoRSuite_cyto_plot_gates" = NULL)
+  
+  # Save label co-ordinates as list
+  options("CytoRSuite_cyto_plot_labels" = NULL)
   
   # Register gating and preprocessing functions with openCyto
   openCyto::registerPlugins(fun = .gate_manual, 

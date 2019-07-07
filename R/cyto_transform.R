@@ -94,7 +94,7 @@ cyto_transform_arcsinh.flowFrame <- function(x,
   )
   
   # Apply transformations to data for visualisation
-  transform_list <- cyto_transform_convert(transformer_list, inverse = FALSE)
+  transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
   x <- transform(x, transform_list)
 
   # Set up plotting area
@@ -322,7 +322,7 @@ cyto_transform_biex.flowFrame <- function(x,
   )
 
   # Apply transformations to data for visualisation
-  transform_list <- cyto_transform_convert(transformer_list, inverse = FALSE)
+  transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
   x <- transform(x, transform_list)
 
   # Set up plotting area
@@ -555,7 +555,7 @@ cyto_transform_logicle.flowFrame <- function(x,
   )
 
   # Apply transformations to data for visualisation
-  transform_list <- cyto_transform_convert(transformer_list, inverse = FALSE)
+  transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
   x <- transform(x, transform_list)
 
   # Set up plotting area

@@ -177,7 +177,7 @@ setMethod(spillover_edit,
             
             # Transformations
             axes_trans <- .getCompleteTransList(fs, axes_trans)
-            axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+            axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
             
             # Select a fluorescent channel for each compensation control
             if (is.null(channel_match)) {
@@ -836,7 +836,7 @@ setMethod(spillover_edit,
             
             # Transformations
             axes_trans <- .getCompleteTransList(gs, axes_trans)
-            axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+            axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
             
             # Extract population for downstream plotting
             if (!is.null(parent)) {

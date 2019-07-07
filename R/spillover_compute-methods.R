@@ -269,7 +269,7 @@ setMethod(spillover_compute,
             pops <- flowSet(pops)
             
             # Inverse logicle transformation
-            inv <- cyto_transform_convert(axes_trans, inverse = TRUE)
+            inv <- cyto_transform_extract(axes_trans, inverse = TRUE)
             pops <- suppressMessages(transform(pops, inv))
             NIL <- suppressMessages(transform(NIL, inv))
             
@@ -449,7 +449,7 @@ setMethod(spillover_compute,
             axes_trans <- .cyto_transform_complete(gs.m, axes_trans)
             
             # Get complete transformList
-            axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+            axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
             
             spillover_compute(
               x = fs,

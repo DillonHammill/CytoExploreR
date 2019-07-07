@@ -3,7 +3,7 @@
 \docType{methods}
 \name{cyto_plot_gating_scheme,GatingSet-method}
 \alias{cyto_plot_gating_scheme,GatingSet-method}
-\title{Plot Flow Cytometry Gating Strategies - GatingSet Method}
+\title{Plot Cytometry Gating Strategies - GatingSet Method}
 \usage{
 \S4method{cyto_plot_gating_scheme}{GatingSet}(x, gatingTemplate = NULL,
   group_by, back_gate = FALSE, gate_track = FALSE, show_all = FALSE,

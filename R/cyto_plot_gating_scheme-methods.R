@@ -1,4 +1,4 @@
-#' Plot Flow Cytometry Gating Strategies
+#' Plot Cytometry Gating Strategies
 #'
 #' \code{cyto_plot_gating_scheme} automatically plots the entire gating scheme
 #' and has full support for gate tracking and back-gating through
@@ -22,7 +22,7 @@ setGeneric(
   }
 )
 
-#' Plot Flow Cytometry Gating Strategies - GatingHierarchy Method
+#' Plot Cytometry Gating Strategies - GatingHierarchy Method
 #'
 #' \code{cyto_plot_gating_scheme} automatically plots the entire gating scheme
 #' and has full support for gate tracking and back-gating through
@@ -595,7 +595,7 @@ setMethod(cyto_plot_gating_scheme,
 )
 
 
-#' Plot Flow Cytometry Gating Strategies - GatingSet Method
+#' Plot Cytometry Gating Strategies - GatingSet Method
 #'
 #' \code{cyto_plot_gating_scheme} automatically plots the entire gating scheme
 #' and has full support for gate tracking and back-gating through

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_plot_gating_scheme-methods.R
 \name{cyto_plot_gating_scheme}
 \alias{cyto_plot_gating_scheme}
-\title{Plot Flow Cytometry Gating Strategies}
+\title{Plot Cytometry Gating Strategies}
 \usage{
 cyto_plot_gating_scheme(x, ...)
 }

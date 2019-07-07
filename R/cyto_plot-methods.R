@@ -407,7 +407,7 @@ cyto_plot.flowFrame <- function(x,
   
   # Convert axes_trans to transformList object
   if (!.all_na(axes_trans)) {
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   }
   
   # Extract & format data for plotting (list of flowFrames) ---------------
@@ -1170,7 +1170,7 @@ cyto_plot.flowSet <- function(x,
   
   # Convert axes_trans to transformList
   if (.all_na(axes_trans)) {
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   }
   
   # Extract experiment details & add grouping ----------------------------------
@@ -2101,9 +2101,9 @@ cyto_plot.GatingHierarchy <- function(x,
       axes_trans <- transformerList(names(trnsfrms), trnsfrms)
     }
     
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   } else {
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   }
   
   # Extract & format data for plotting (list of flowFrames) ---------------
@@ -2852,9 +2852,9 @@ cyto_plot.GatingSet <- function(x,
       axes_trans <- transformerList(names(trnsfrms), trnsfrms)
     }
 
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   } else {
-    axes_trans <- cyto_transform_convert(axes_trans, inverse = FALSE)
+    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   }
 
   # Extract experiment details & add grouping ----------------------------------

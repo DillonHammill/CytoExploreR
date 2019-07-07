@@ -34,7 +34,7 @@ trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 trans_list <- cyto_transfrm_extract(trans)
 
 # Convert transformerList into inverse transformList
-inv <- cyto_transform_convert(trans, inverse = TRUE)
+inv <- cyto_transform_extract(trans, inverse = TRUE)
 
 }
 \author{

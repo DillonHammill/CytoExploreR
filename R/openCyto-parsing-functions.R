@@ -23,13 +23,3 @@
     as.character(args[[1]])
   }
 }
-
-#' Convert gate object to character string
-#' @param x gate object to convert
-#' @noRd
-.gateDeparser <- function(x){
-  x <- deparse(x)
-  x <- gsub("\"", "'", x)
-  x <- paste(x, collapse = "")
-  return(x)
-}
