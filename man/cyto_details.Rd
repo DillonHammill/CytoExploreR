@@ -7,7 +7,8 @@
 cyto_details(x)
 }
 \arguments{
-\item{object}{of class \code{flowSet} or \code{GatingSet}.}
+\item{object}{of class \code{flowSet}, \code{GatingHierarchy} or
+\code{GatingSet}.}
 }
 \value{
 experiment details as data.frame.
