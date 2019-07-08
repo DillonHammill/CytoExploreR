@@ -140,13 +140,13 @@ cyto_setup <- function(path = ".",
 
 # CYTO_DETAILS -----------------------------------------------------------------
 
-#' Extract experiment details from flowSet or GatingSet
+#' Extract Experiment Details
 #'
 #' Simply an autocomplete-friendly wrapper around
 #' \code{\link[flowWorkspace:pData]{pData}}.
 #'
-#' @param object of class \code{flowSet}, \code{GatingHierarchy} or
-#'   \code{GatingSet}.
+#' @param object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
 #'
 #' @importFrom flowWorkspace pData
 #'
@@ -155,15 +155,16 @@ cyto_setup <- function(path = ".",
 #' @export
 cyto_details <- function(x) {
   
-  # flowSet and GatingSet objects only
-  if(!any(inherits(x, "flowSet") |
-     inherits(x, "GatingHierarchy") |
-     inherits(x, "GatingSet"))){
-    stop("'x' must be an object of class flowSet, GatingHierarchy or GatingSet.")
-  }
+  # Check for valid object
+  cyto_check(x)
   
-  # Retrun experiment details
-  pData(x)
+  # Return identifier for flowFrame
+  if(inherits(x, "flowFrame")){
+    return(cyto_names(x))
+ # Retrun experiment details for other objects  
+  }else{
+    return(pData(x))
+  }
   
 }
 

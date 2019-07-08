@@ -2,13 +2,13 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_details}
 \alias{cyto_details}
-\title{Extract experiment details from flowSet or GatingSet}
+\title{Extract Experiment Details}
 \usage{
 cyto_details(x)
 }
 \arguments{
-\item{object}{of class \code{flowSet}, \code{GatingHierarchy} or
-\code{GatingSet}.}
+\item{object}{of class \code{flowFrame}, \code{flowSet},
+\code{GatingHierarchy} or \code{GatingSet}.}
 }
 \value{
 experiment details as data.frame.
