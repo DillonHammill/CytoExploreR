@@ -255,15 +255,15 @@ positions labels will be placed in the center of gates and offset if
 necessary. The "manual" option will allow label positioning by mouse click.
 Label positions are set on a per gate basis, all samples in the same group
 will have the same label positions. To individually label plots users must
-manually supply the co-ordinates to label_box_x and label_box_y.}
+manually supply the co-ordinates to label_text_x and label_text_y.}
 
 \item{label_text_x}{vector of x co-ordinate(s) to manually adjust the
 position plot label(s) on the plot. To interactively position labels set
-either \code{label_box_x} or \code{label_box_y} to "select".}
+either \code{label_text_x} or \code{label_text_y} to "select".}
 
 \item{label_text_y}{vector of y co-ordinate(s) to manually adjust the
 position plot label(s) on the plot. To interactively position labels set
-either \code{label_box_x} or \code{label_box_y} to "select".}
+either \code{label_text_x} or \code{label_text_y} to "select".}
 
 \item{label_text_font}{numeric to control the font of text in plot labels,
 set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for

@@ -220,13 +220,13 @@ cyto_plot <- function(x, ...) {
 #'   necessary. The "manual" option will allow label positioning by mouse click.
 #'   Label positions are set on a per gate basis, all samples in the same group
 #'   will have the same label positions. To individually label plots users must
-#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#'   manually supply the co-ordinates to label_text_x and label_text_y.
 #' @param label_text_x vector of x co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_y vector of y co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -405,9 +405,12 @@ cyto_plot.flowFrame <- function(x,
   # Get valid channel names if markers are supplied
   channels <- cyto_channels_extract(x, channels, plot = TRUE)
   
-  # Convert axes_trans to transformList object
+  # transformerList required
   if (!.all_na(axes_trans)) {
-    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
+    if(inherits(axes_trans, "transformList")){
+      axes_trans <- NA
+      message("Supply a transformerList object to axes_trans to transform axes.")
+    }
   }
   
   # Extract & format data for plotting (list of flowFrames) ---------------
@@ -643,13 +646,13 @@ cyto_plot.flowFrame <- function(x,
   
   # Manual label co-ordinate selection -----------------------------------------
   
-  # Manual label positioning sets label_box_x and label_box_y to "select"
+  # Manual label positioning sets label_text_x and label_text_y to "select"
   if(label_position == "manual"){
     
     # Either all coords manually supplied or must be manually selected
-    if(!all(is.numeric(c(label_box_x,label_box_y)))){
-      label_box_x <- rep("select", length(label_box_x))
-      label_box_y <- rep("select", length(label_box_y))
+    if(!all(is.numeric(c(label_text_x,label_text_y)))){
+      label_text_x <- rep("select", length(label_text_x))
+      label_text_y <- rep("select", length(label_text_y))
     }
 
   }
@@ -685,14 +688,14 @@ cyto_plot.flowFrame <- function(x,
     
     # Each saved element is a data frame of coords per layer
     if(!is.null(unlist(getOption("CytoRSuite_cyto_plot_labels")))){
-      label_box_x <- lapply(saved_label_coords, function(z){z[,1]})
-      label_box_y <- lapply(saved_label_coords, function(z){z[,2]})
+      label_text_x <- lapply(saved_label_coords, function(z){z[,1]})
+      label_text_y <- lapply(saved_label_coords, function(z){z[,2]})
     }
     
   }
   
-  print(label_box_x)
-  print(label_box_y)
+  print(label_text_x)
+  print(label_text_y)
   
   # Calls to .cyto_plot internal -----------------------------------------------
   
@@ -962,13 +965,13 @@ cyto_plot.flowFrame <- function(x,
 #'   necessary. The "manual" option will allow label positioning by mouse click.
 #'   Label positions are set on a per gate basis, all samples in the same group
 #'   will have the same label positions. To individually label plots users must
-#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#'   manually supply the co-ordinates to label_text_x and label_text_y.
 #' @param label_text_x vector of x co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_y vector of y co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -1168,9 +1171,12 @@ cyto_plot.flowSet <- function(x,
   # Get valid channel names if markers are supplied
   channels <- cyto_channels_extract(x, channels, plot = TRUE)
   
-  # Convert axes_trans to transformList
-  if (.all_na(axes_trans)) {
-    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
+  # transformerList required
+  if (!.all_na(axes_trans)) {
+    if(inherits(axes_trans, "transformList")){
+      axes_trans <- NA
+      message("Supply a transformerList object to axes_trans to transform axes.")
+    }
   }
   
   # Extract experiment details & add grouping ----------------------------------
@@ -1875,13 +1881,13 @@ cyto_plot.flowSet <- function(x,
 #'   necessary. The "manual" option will allow label positioning by mouse click.
 #'   Label positions are set on a per gate basis, all samples in the same group
 #'   will have the same label positions. To individually label plots users must
-#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#'   manually supply the co-ordinates to label_text_x and label_text_y.
 #' @param label_text_x vector of x co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_y vector of y co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -2084,26 +2090,15 @@ cyto_plot.GatingHierarchy <- function(x,
   channels <- cyto_channels_extract(x, channels, plot = TRUE)
   
   # Get transformations
-  if (.all_na(axes_trans)) {
-    
-    # Some transforms found - replace these entries in taxes_trans
-    trnsfrms <- lapply(channels, function(channel) {
-      getTransformations(x, channel, only.function = FALSE)
-    })
-    names(trnsfrms) <- channels
-    
-    # Remove NULL transforms
-    trnsfrms[unlist(lapply(trnsfrms, "is.null"))] <- NULL
-    
-    if (length(trnsfrms) == 0) {
-      axes_trans <- NULL
-    } else {
-      axes_trans <- transformerList(names(trnsfrms), trnsfrms)
+  if(.all_na(axes_trans)){
+    # Extract transformerList from GatingHierarchy
+    axes_trans <- x@transformation
+  }else if(!.all_na(axes_trans)){
+    # transformerList is required
+    if(inherits(axes_trans, "transformList")){
+      axes_trans <- NA
+      message("Supply a transformerList object to axes_trans to transform axes.")
     }
-    
-    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
-  } else {
-    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   }
   
   # Extract & format data for plotting (list of flowFrames) ---------------
@@ -2615,13 +2610,13 @@ cyto_plot.GatingHierarchy <- function(x,
 #'   necessary. The "manual" option will allow label positioning by mouse click.
 #'   Label positions are set on a per gate basis, all samples in the same group
 #'   will have the same label positions. To individually label plots users must
-#'   manually supply the co-ordinates to label_box_x and label_box_y.
+#'   manually supply the co-ordinates to label_text_x and label_text_y.
 #' @param label_text_x vector of x co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_y vector of y co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
-#'   either \code{label_box_x} or \code{label_box_y} to "select".
+#'   either \code{label_text_x} or \code{label_text_y} to "select".
 #' @param label_text_font numeric to control the font of text in plot labels,
 #'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -2835,26 +2830,15 @@ cyto_plot.GatingSet <- function(x,
   channels <- cyto_channels_extract(x, channels, plot = TRUE)
 
   # Get transformations
-  if (.all_na(axes_trans)) {
-
-    # Some transforms found - replace these entries in transList
-    trnsfrms <- lapply(channels, function(channel) {
-      getTransformations(x[[1]], channel, only.function = FALSE)
-    })
-    names(trnsfrms) <- channels
-
-    # Remove NULL transforms
-    trnsfrms[unlist(lapply(trnsfrms, "is.null"))] <- NULL
-
-    if (length(trnsfrms) == 0) {
-      axes_trans <- NULL
-    } else {
-      axes_trans <- transformerList(names(trnsfrms), trnsfrms)
+  if(.all_na(axes_trans)){
+    # Extract transformerList from GatingHierarchy
+    axes_trans <- x[[1]]@transformation
+  }else if(!.all_na(axes_trans)){
+    # transformerList is required
+    if(inherits(axes_trans, "transformList")){
+      axes_trans <- NA
+      message("Supply a transformerList object to axes_trans to transform axes.")
     }
-
-    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
-  } else {
-    axes_trans <- cyto_transform_extract(axes_trans, inverse = FALSE)
   }
 
   # Extract experiment details & add grouping ----------------------------------
