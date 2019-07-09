@@ -497,19 +497,20 @@ cyto_transform.transformerList <- function(x,
 cyto_transform_extract <- function(x, 
                                    inverse = FALSE){
   
-  # Invalid transform object
-  if(!inherits(x, "transformerList")){
-    stop("Transformations can only be extracted from transformerList objects!")
+  # TransformLists are returned unaltered
+  if(inherits(x, "transformList")){
+    return(x)
+  # TransformList extracted from transformerList
+  }else if(inherits(x, "transformerList")){
+    # Extract transformations into transformList
+    if (inverse == TRUE) {
+      x <- transformList(names(x), lapply(x, `[[`, "inverse"))
+    } else {
+      x <- transformList(names(x), lapply(x, `[[`, "transform"))
+    }
+    # Return transformList
+    return(x)
   }
-  
-  # Extract transformations into transformList
-  if (inverse == TRUE) {
-    x <- transformList(names(x), lapply(x, `[[`, "inverse"))
-  } else {
-    x <- transformList(names(x), lapply(x, `[[`, "transform"))
-  }
-  
-  return(x)
   
 }
 
