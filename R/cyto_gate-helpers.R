@@ -160,8 +160,8 @@ cyto_gate_remove <- function(gs,
 #' options("CytoRSuite_wd_check" = TRUE)
 #' @export
 cyto_gate_extract <- function(parent,
-                         alias,
-                         gatingTemplate = NULL, ...) {
+                              alias,
+                              gatingTemplate = NULL, ...) {
   
   # Parent
   if (missing(parent)) {
@@ -813,9 +813,9 @@ cyto_gate_edit <- function(x,
 #'
 #' @export
 cyto_gate_rename <- function(x,
-                        gates = NULL,
-                        names = NULL,
-                        gatingTemplate = NULL){
+                             gates = NULL,
+                             names = NULL,
+                             gatingTemplate = NULL){
   
   # Missing gatingTemplate
   if(is.null(gatingTemplate)){

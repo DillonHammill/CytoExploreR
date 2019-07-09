@@ -925,7 +925,7 @@ cyto_gate_draw.GatingSet <- function(x,
   .cyto_alias_check(alias = alias, type = type)
   
   # Transformations
-  axes_trans <- cyto_transform_extract(x[[1]]@transformation, inverse = FALSE)
+  axes_trans <- gs[[1]]@transformation
   
   # Group all samples together
   if(group_by[1] == "all"){
