@@ -101,7 +101,7 @@ cyto_setup <- function(path = ".",
   # Assign gatingTemplate
   if(is.null(gatingTemplate)){
     
-    if(interctive()){
+    if(interactive()){
       # User prompt
       gatingTemplate <- readline("Provide a name for the gatingTemplate:")
     }
@@ -166,6 +166,7 @@ cyto_details <- function(x) {
 }
 
 #' Replacement Method for cyto_details
+#' @importFrom flowWorkspace pData<-
 #' @noRd
 #' @export
 `cyto_details<-` <- `pData<-`
