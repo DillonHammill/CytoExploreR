@@ -155,9 +155,6 @@ cyto_setup <- function(path = ".",
 #' @export
 cyto_details <- function(x) {
   
-  # Check for valid object
-  cyto_check(x)
-  
   # Return identifier for flowFrame
   if(inherits(x, "flowFrame")){
     return(cyto_names(x))
@@ -313,7 +310,7 @@ cyto_check <- function(x) {
 #'
 #' @rdname cyto_transform
 #' @export
-cyto_transform <- function(x, trans, ...){
+cyto_transform <- function(x, trans = NULL, ...){
   UseMethod("cyto_transform", trans)
 }
 

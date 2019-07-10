@@ -204,7 +204,7 @@ cyto_transform_arcsinh.GatingSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_larcsinh(x,
+  transformer_list <- cyto_transform_arcsinh(x,
     channels = channels,
     raw_max = raw_max,
     width = width,
@@ -279,7 +279,7 @@ cyto_transform_biex.flowFrame <- function(x,
                                           popup = FALSE,
                                           equal_space = FALSE,
                                           breaks = 6, ...) {
-
+  
   # Prepare Channels
   if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
@@ -359,6 +359,9 @@ cyto_transform_biex.flowSet <- function(x,
                                         equal_space = FALSE,
                                         breaks = 6, ...) {
 
+  print("YES")
+  print(width_basis)
+  
   # Select data
   x <- cyto_select(x, select)
 
@@ -396,7 +399,7 @@ cyto_transform_biex.GatingHierarchy <- function(x,
                                                 popup = FALSE,
                                                 equal_space = FALSE,
                                                 breaks = 6, ...) {
-
+  
   # Extract data
   x <- cyto_extract(x, parent = parent)
 
@@ -431,6 +434,14 @@ cyto_transform_biex.GatingSet <- function(x,
                                           popup = FALSE,
                                           equal_space = FALSE,
                                           breaks = 6, ...) {
+  
+  # Update arguments if any ... match arguments
+  if(any(names(list(...)) %in% names(.args_list()))){
+    .args_update(list(...)[names(list(...)) %in% names(.args_list())])
+  }
+  
+  print(.args_list())
+  
   # Extract data
   x <- cyto_extract(x, parent = parent)
 

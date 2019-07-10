@@ -7,7 +7,7 @@
 \alias{cyto_transform.transformerList}
 \title{Apply Transformations to Cytometry Data}
 \usage{
-cyto_transform(x, trans, ...)
+cyto_transform(x, trans = NULL, ...)
 
 \method{cyto_transform}{default}(x, trans = NULL,
   trans_type = "logicle", channels = NULL, parent = "root",
