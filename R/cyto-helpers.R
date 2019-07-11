@@ -399,6 +399,12 @@ cyto_transform.default <- function(x,
   # Construct the plots
   if(plot ==  TRUE){
     
+    # Pull out flowFrame/flowSet to plot
+    cyto_data <- cyto_extract(x)
+    
+    # Convert to flowFrame for plotting
+    cyto_data <- cyto_convert(cyto_data, "flowFrame")
+    
     # Channels
     channels <- names(transformer_list)
     
@@ -413,12 +419,12 @@ cyto_transform.default <- function(x,
     # Generate plot for each channel
     lapply(channels, function(chan) {
       if(inverse == FALSE){
-        cyto_plot(x,
+        cyto_plot(cyto_data,
                   channels = chan,
                   axes_trans = transformer_list
         )
       }else if(inverse == TRUE){
-        cyto_plot(x,
+        cyto_plot(cyto_data,
                   channels = chan
         )
       }
@@ -461,6 +467,12 @@ cyto_transform.transformList <- function(x,
   # Construct plots
   if(plot == TRUE){
     
+    # Pull out flowFrame/flowSet to plot
+    cyto_data <- cyto_extract(x)
+    
+    # Convert to flowFrame for plotting
+    cyto_data <- cyto_convert(cyto_data, "flowFrame")
+    
     # Channels
     channels <- names(trans@transforms)
     
@@ -474,8 +486,8 @@ cyto_transform.transformList <- function(x,
     
     # Generate plot for each channel - axes will not be transformed correctly
     lapply(channels, function(chan) {
-      cyto_plot(x,
-                channels = chan,
+      cyto_plot(cyto_data,
+                channels = chan
       )
     })
     
@@ -511,7 +523,7 @@ cyto_transform.transformerList <- function(x,
            inherits(x, "GatingSet")){
     
     # Inverse transformations not supported
-    if(inverse == FALSE){
+    if(inverse == TRUE){
       stop(paste("Inverse transformations are not yet supported for",
                  "GatingHierarchy/GatingSet objects."))
     }
@@ -524,8 +536,14 @@ cyto_transform.transformerList <- function(x,
   # Construct plots
   if(plot == TRUE){
     
+    # Extract flowFrame/flowSet for plottng
+    cyto_data <- cyto_extract(x)
+    
+    # Convert to flowFrame for plotting
+    cyto_data <- cyto_convert(cyto_data, "flowFrame")
+    
     # Channels
-    channels <- names(transformer_list)
+    channels <- names(trans)
     
     # Set up plotting area
     cyto_plot_new(popup = popup)
@@ -538,12 +556,12 @@ cyto_transform.transformerList <- function(x,
     # Generate plot for each channel
     lapply(channels, function(chan) {
       if(inverse == FALSE){
-        cyto_plot(x,
+        cyto_plot(cyto_data,
                   channels = chan,
-                  axes_trans = transformer_list
+                  axes_trans = trans
         )
       }else if(inverse == TRUE){
-        cyto_plot(x,
+        cyto_plot(cyto_data,
                   channels = chan
         )
       }
@@ -561,35 +579,34 @@ cyto_transform.transformerList <- function(x,
 # CYTO_TRANSFORM_EXTRACT -------------------------------------------------------
 
 #' Extract Transformations from TransformerList
-#' 
-#' @param x object of class
-#'   \code{\link[flowWorkspace]{transformerList}}.
+#'
+#' @param x object of class \code{\link[flowWorkspace]{transformerList}}.
 #' @param inverse logical indicating whether the returned transformList should
 #'   contain the inverse transformations.
 #'
-#' @return A \code{\link[flowCore:transformList-class]{transformList}} containing
-#'   the desired transformations.
+#' @return A \code{\link[flowCore:transformList-class]{transformList}}
+#'   containing the desired transformations.
 #'
 #' @importFrom flowCore transformList
-#' 
+#'
 #' @examples
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples to flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Add fs to GatingSet
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Convert transformerList into transformList
 #' trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 #' trans_list <- cyto_transfrm_extract(trans)
-#' 
+#'
 #' # Convert transformerList into inverse transformList
 #' inv <- cyto_transform_extract(trans, inverse = TRUE)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @export
 cyto_transform_extract <- function(x, 
                                    inverse = FALSE){

@@ -7,15 +7,14 @@
 cyto_transform_extract(x, inverse = FALSE)
 }
 \arguments{
-\item{x}{object of class
-\code{\link[flowWorkspace]{transformerList}}.}
+\item{x}{object of class \code{\link[flowWorkspace]{transformerList}}.}
 
 \item{inverse}{logical indicating whether the returned transformList should
 contain the inverse transformations.}
 }
 \value{
-A \code{\link[flowCore:transformList-class]{transformList}} containing
-  the desired transformations.
+A \code{\link[flowCore:transformList-class]{transformList}}
+  containing the desired transformations.
 }
 \description{
 Extract Transformations from TransformerList
