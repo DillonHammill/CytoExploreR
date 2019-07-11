@@ -12,23 +12,23 @@ cyto_transform_biex(x, ...)
 
 \method{cyto_transform_biex}{flowFrame}(x, channels = NULL,
   trans_max = 4096, raw_max = 262144, width = 4.5, trans_min = 0,
-  width_basis = -10, popup = FALSE, equal_space = FALSE,
-  breaks = 6, ...)
+  width_basis = -10, equal_space = FALSE, breaks = 5, plot = TRUE,
+  popup = FALSE, ...)
 
 \method{cyto_transform_biex}{flowSet}(x, channels = NULL,
   select = NULL, trans_max = 4096, raw_max = 262144, width = 4.5,
-  trans_min = 0, width_basis = -10, popup = FALSE,
-  equal_space = FALSE, breaks = 6, ...)
+  trans_min = 0, width_basis = -10, equal_space = FALSE,
+  breaks = 5, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transform_biex}{GatingHierarchy}(x, channels = NULL,
   parent = "root", select = NULL, trans_max = 4096,
   raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
-  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
+  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
 
 \method{cyto_transform_biex}{GatingSet}(x, channels = NULL,
   parent = "root", select = NULL, trans_max = 4096,
   raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
-  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
+  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
@@ -52,13 +52,16 @@ decades, set to 0 by default.}
 \item{width_basis}{numeric to optimally position transformed data within
 display, set to -10 by default.}
 
-\item{popup}{logical indicating whether the plots should be constructed in a
-pop-up window.}
-
 \item{equal_space}{logical indicating whether breaks should be equally
 spaced, set to FALSE by default.}
 
 \item{breaks}{number of required breaks.}
+
+\item{plot}{logical indicating whether the results of transformations should
+be plotted using \code{cyto_plot}.}
+
+\item{popup}{logical indicating whether the plots should be constructed in a
+pop-up window.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select} to
 select a subset of samples for \code{cyto_plot}.}

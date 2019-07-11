@@ -277,6 +277,8 @@ cyto_check <- function(x) {
 #' @param inverse logical indicating whether the inverse transformations should
 #'   be applied. Currently only supported for \code{flowFrame} and
 #'   \code{flowSet} objects.
+#' @param plot logicla indicating whether the result of the transformations
+#'   should be plotted using \code{cyto_plot}.
 #' @param ... additional arguments passed to \code{cyto_transform_arcsinh},
 #'   \code{cyto_transform_biex} or \code{cyto_transform_logicle} when no
 #'   \code{trans} object is supplied.
@@ -284,13 +286,13 @@ cyto_check <- function(x) {
 #' @importFrom flowCore transform
 #'
 #' @examples
-#' 
+#'
 #' library(CytoRSuite)
-#' 
+#'
 #' # Use Activation flowSet
 #' fs <- Activation
-#' 
-#' # Automatically transform flowSet 
+#'
+#' # Automatically transform flowSet
 #' fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
 #'
 #' # Manually construct & apply transformations
@@ -302,7 +304,7 @@ cyto_check <- function(x) {
 #'
 #' # Automatically transform GatingSet
 #' gs_trans <- cyto_transform(gs, trans_type = "logicle")
-#' 
+#'
 #' # Manually construct & apply transformations
 #' trans <- cyto_transform_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
@@ -324,6 +326,7 @@ cyto_transform.default <- function(x,
                                    parent = "root",
                                    select = NULL,
                                    inverse = FALSE,
+                                   plot = TRUE,
                                    ...){
   
   # No transformations supplied - automatically obtain transform definitions
@@ -341,21 +344,24 @@ cyto_transform.default <- function(x,
       transformer_list <- cyto_transform_arcsinh(x,
                                                  channels = channels,
                                                  parent = parent,
-                                                 select = select, ...)
+                                                 select = select,
+                                                 plot = FALSE, ...)
       
     }else if(trans_type == "biex"){
       
       transformer_list <- cyto_transform_biex(x,
                                               channels = channels,
                                               parent = parent,
-                                              select = select, ...)
+                                              select = select,
+                                              plot = FALSE, ...)
       
     }else if(trans_type == "logicle"){
       
       transformer_list <- cyto_transform_logicle(x,
                                                  channels = channels,
                                                  parent = parent,
-                                                 select = select, ...)
+                                                 select = select,
+                                                 plot = FALSE, ...)
       
     }
     
@@ -386,6 +392,34 @@ cyto_transform.default <- function(x,
     
   }
   
+  # Construct the plots
+  if(plot ==  TRUE){
+    
+    # Set up plotting area
+    cyto_plot_new(popup = popup)
+    n <- length(channels)
+    cyto_plot_layout(
+      n2mfrow(n)[1],
+      n2mfrow(n)[2]
+    )
+    
+    # Generate plot for each channel
+    lapply(channels, function(chan) {
+      if(inverse == FALSE){
+        cyto_plot(x,
+                  channels = chan,
+                  axes_trans = transformer_list
+        )
+      }else if(inverse == TRUE){
+        cyto_plot(x,
+                  channels = chan
+        )
+      }
+
+    })
+    
+  }
+  
   # Return transformed data
   return(x)
   
@@ -395,6 +429,7 @@ cyto_transform.default <- function(x,
 #' @export
 cyto_transform.transformList <- function(x, 
                                          trans = NULL,
+                                         plot = TRUE,
                                          ...){
   
   # Added for backwards compatibility - flowFrame/flowSet objects only
@@ -415,6 +450,26 @@ cyto_transform.transformList <- function(x,
     
   }
   
+  # Construct plots
+  if(plot == TRUE){
+    
+    # Set up plotting area
+    cyto_plot_new(popup = popup)
+    n <- length(channels)
+    cyto_plot_layout(
+      n2mfrow(n)[1],
+      n2mfrow(n)[2]
+    )
+    
+    # Generate plot for each channel - axes will not be transformed correctly
+    lapply(channels, function(chan) {
+      cyto_plot(x,
+                channels = chan,
+      )
+    })
+    
+  }
+  
   # Return transformed data
   return(x)
   
@@ -425,6 +480,7 @@ cyto_transform.transformList <- function(x,
 cyto_transform.transformerList <- function(x, 
                                            trans = NULL,
                                            inverse = FALSE,
+                                           plot = TRUE,
                                            ...){
   
   # Apply transformations to flowFrame/flowSet
@@ -450,6 +506,34 @@ cyto_transform.transformerList <- function(x,
     
     # Apply transformations
     x <- transform(x, trans)
+    
+  }
+  
+  # Construct plots
+  if(plot == TRUE){
+    
+    # Set up plotting area
+    cyto_plot_new(popup = popup)
+    n <- length(channels)
+    cyto_plot_layout(
+      n2mfrow(n)[1],
+      n2mfrow(n)[2]
+    )
+    
+    # Generate plot for each channel
+    lapply(channels, function(chan) {
+      if(inverse == FALSE){
+        cyto_plot(x,
+                  channels = chan,
+                  axes_trans = transformer_list
+        )
+      }else if(inverse == TRUE){
+        cyto_plot(x,
+                  channels = chan
+        )
+      }
+      
+    })
     
   }
   

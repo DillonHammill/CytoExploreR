@@ -28,11 +28,13 @@
 #' @param width width of the transformed display in asymptotic decades.
 #' @param trans_min minimum of transformed data in the display in asymptotic
 #'   decades, set to 0 by default.
-#' @param popup logical indicating whether the plots should be constructed in a
-#'   pop-up window.
 #' @param equal_space logical indicating whether breaks should be equally
 #'   spaced, set to FALSE by default.
 #' @param breaks number of required breaks.
+#' @param plot logical indicating whether the results of transformations should
+#'   be plotted using \code{cyto_plot}.
+#' @param popup logical indicating whether the plots should be constructed in a
+#'   pop-up window.
 #' @param ... not in use.
 #'
 #' @importFrom flowWorkspace asinh_Gml2 flow_trans transformerList
@@ -52,9 +54,10 @@ cyto_transform_arcsinh.flowFrame <- function(x,
                                              raw_max = 262144,
                                              width = 4.5,
                                              trans_min = 0,
-                                             popup = FALSE,
                                              equal_space = FALSE,
-                                             breaks = 6, ...) {
+                                             breaks = 5,
+                                             plot = TRUE,
+                                             popup = FALSE, ...) {
 
   # Prepare Channels
   if (is.null(channels)) {
@@ -93,25 +96,30 @@ cyto_transform_arcsinh.flowFrame <- function(x,
     trans = transformer_list
   )
   
-  # Apply transformations to data for visualisation
-  transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
-  x <- transform(x, transform_list)
+  # Construct plots
+  if(plot == TRUE){
+      
+    # Apply transformations to data for visualisation
+    transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
+    x <- transform(x, transform_list)
 
-  # Set up plotting area
-  cyto_plot_new(popup = popup)
-  n <- length(channels)
-  cyto_plot_layout(
-    n2mfrow(n)[1],
-    n2mfrow(n)[2]
-  )
-
-  # Generate plot for each channel
-  lapply(channels, function(chan) {
-    cyto_plot(x,
-      channels = chan,
-      axes_trans = transformer_list
+    # Set up plotting area
+    cyto_plot_new(popup = popup)
+    n <- length(channels)
+    cyto_plot_layout(
+      n2mfrow(n)[1],
+      n2mfrow(n)[2]
     )
-  })
+
+    # Generate plot for each channel
+    lapply(channels, function(chan) {
+      cyto_plot(x,
+        channels = chan,
+        axes_trans = transformer_list
+      )
+    })
+    
+  }
 
   # Return transformerList
   return(transformer_list)
@@ -125,9 +133,10 @@ cyto_transform_arcsinh.flowSet <- function(x,
                                            raw_max = 262144,
                                            width = 4.5,
                                            trans_min = 0,
-                                           popup = FALSE,
                                            equal_space = FALSE,
-                                           breaks = 6, ...) {
+                                           breaks = 5, 
+                                           plot = TRUE,
+                                           popup = FALSE,...) {
 
   # Select data
   x <- cyto_select(x, select)
@@ -141,9 +150,10 @@ cyto_transform_arcsinh.flowSet <- function(x,
     raw_max = raw_max,
     width = width,
     trans_min = trans_min,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -158,9 +168,10 @@ cyto_transform_arcsinh.GatingHierarchy <- function(x,
                                                    raw_max = 262144,
                                                    width = 4.5,
                                                    trans_min = 0,
-                                                   popup = FALSE,
                                                    equal_space = FALSE,
-                                                   breaks = 6, ...) {
+                                                   breaks = 5,
+                                                   plot = TRUE,
+                                                   popup = FALSE) {
 
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -172,9 +183,10 @@ cyto_transform_arcsinh.GatingHierarchy <- function(x,
     width = width,
     trans_min = trans_min,
     quantile = quantile,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -190,9 +202,10 @@ cyto_transform_arcsinh.GatingSet <- function(x,
                                              raw_max = 262144,
                                              width = 4.5,
                                              trans_min = 0,
-                                             popup = FALSE,
                                              equal_space = FALSE,
-                                             breaks = 6, ...) {
+                                             breaks = 5,
+                                             plot = TRUE,
+                                             popup = FALSE) {
 
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -209,9 +222,10 @@ cyto_transform_arcsinh.GatingSet <- function(x,
     raw_max = raw_max,
     width = width,
     trans_min = trans_min,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -245,11 +259,13 @@ cyto_transform_arcsinh.GatingSet <- function(x,
 #'   decades, set to 0 by default.
 #' @param width_basis numeric to optimally position transformed data within
 #'   display, set to -10 by default.
-#' @param popup logical indicating whether the plots should be constructed in a
-#'   pop-up window.
 #' @param equal_space logical indicating whether breaks should be equally
 #'   spaced, set to FALSE by default.
 #' @param breaks number of required breaks.
+#' @param plot logical indicating whether the results of transformations should
+#'   be plotted using \code{cyto_plot}.
+#' @param popup logical indicating whether the plots should be constructed in a
+#'   pop-up window.
 #' @param ... not in use.
 #'
 #' @seealso \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
@@ -276,9 +292,10 @@ cyto_transform_biex.flowFrame <- function(x,
                                           width = 4.5,
                                           trans_min = 0,
                                           width_basis = -10,
-                                          popup = FALSE,
                                           equal_space = FALSE,
-                                          breaks = 6, ...) {
+                                          breaks = 5, 
+                                          plot = TRUE,
+                                          popup = FALSE,...) {
   
   # Prepare Channels
   if (is.null(channels)) {
@@ -321,25 +338,30 @@ cyto_transform_biex.flowFrame <- function(x,
     trans = transformer_list
   )
 
-  # Apply transformations to data for visualisation
-  transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
-  x <- transform(x, transform_list)
+  # Construct plots
+  if(plot == TRUE){
+    
+    # Apply transformations to data for visualisation
+    transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
+    x <- transform(x, transform_list)
 
-  # Set up plotting area
-  cyto_plot_new(popup = popup)
-  n <- length(channels)
-  cyto_plot_layout(
-    n2mfrow(n)[1],
-    n2mfrow(n)[2]
-  )
-
-  # Generate plot for each channel
-  lapply(channels, function(chan) {
-    cyto_plot(x,
-      channels = chan,
-      axes_trans = transformer_list
+    # Set up plotting area
+    cyto_plot_new(popup = popup)
+    n <- length(channels)
+    cyto_plot_layout(
+      n2mfrow(n)[1],
+      n2mfrow(n)[2]
     )
-  })
+
+    # Generate plot for each channel
+    lapply(channels, function(chan) {
+      cyto_plot(x,
+        channels = chan,
+        axes_trans = transformer_list
+      )
+    })
+  
+  }
 
   # Return transformerList
   return(transformer_list)
@@ -355,12 +377,10 @@ cyto_transform_biex.flowSet <- function(x,
                                         width = 4.5,
                                         trans_min = 0,
                                         width_basis = -10,
-                                        popup = FALSE,
                                         equal_space = FALSE,
-                                        breaks = 6, ...) {
-
-  print("YES")
-  print(width_basis)
+                                        breaks = 5,
+                                        plot = TRUE,
+                                        popup = FALSE, ...) {
   
   # Select data
   x <- cyto_select(x, select)
@@ -376,9 +396,10 @@ cyto_transform_biex.flowSet <- function(x,
     width = width,
     trans_min = trans_min,
     width_basis = width_basis,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -396,9 +417,10 @@ cyto_transform_biex.GatingHierarchy <- function(x,
                                                 width = 4.5,
                                                 trans_min = 0,
                                                 width_basis = -10,
-                                                popup = FALSE,
                                                 equal_space = FALSE,
-                                                breaks = 6, ...) {
+                                                breaks = 5,
+                                                plot = TRUE,
+                                                popup = FALSE) {
   
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -411,9 +433,10 @@ cyto_transform_biex.GatingHierarchy <- function(x,
     width = width,
     trans_min = trans_min,
     width_basis = width_basis,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -431,16 +454,10 @@ cyto_transform_biex.GatingSet <- function(x,
                                           width = 4.5,
                                           trans_min = 0,
                                           width_basis = -10,
-                                          popup = FALSE,
                                           equal_space = FALSE,
-                                          breaks = 6, ...) {
-  
-  # Update arguments if any ... match arguments
-  if(any(names(list(...)) %in% names(.args_list()))){
-    .args_update(list(...)[names(list(...)) %in% names(.args_list())])
-  }
-  
-  print(.args_list())
+                                          breaks = 5,
+                                          plot = TRUE,
+                                          popup = FALSE) {
   
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -459,9 +476,10 @@ cyto_transform_biex.GatingSet <- function(x,
     width = width,
     trans_min = trans_min,
     width_basis = width_basis,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -497,11 +515,13 @@ cyto_transform_biex.GatingSet <- function(x,
 #'   linearisation width (w)).
 #' @param type indicates whether the "instrument" or "data" limits should be
 #'   used as the range for the data.
-#' @param popup logical indicating whether the plots should be constructed in a
-#'   pop-up window.
 #' @param equal_space logical indicating whether breaks should be equally
 #'   spaced, set to FALSE by default.
 #' @param breaks number of required breaks.
+#' @param plot logical indicating whether the results of transformations should
+#'   be plotted using \code{cyto_plot}.
+#' @param popup logical indicating whether the plots should be constructed in a
+#'   pop-up window.
 #' @param ... not in use.
 #'
 #' @return transformerList object.
@@ -529,9 +549,10 @@ cyto_transform_logicle.flowFrame <- function(x,
                                              trans_min = 0,
                                              quantile = 0.05,
                                              type = "instrument",
-                                             popup = FALSE,
                                              equal_space = FALSE,
-                                             breaks = 6, ...) {
+                                             breaks = 5,
+                                             plot = TRUE,
+                                             popup = FALSE, ...) {
 
   # Prepare Channels
   if (is.null(channels)) {
@@ -565,25 +586,30 @@ cyto_transform_logicle.flowFrame <- function(x,
     trans = transformer_list
   )
 
-  # Apply transformations to data for visualisation
-  transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
-  x <- transform(x, transform_list)
+  # Construct plots
+  if(plot == TRUE){
+    
+    # Apply transformations to data for visualisation
+    transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
+    x <- transform(x, transform_list)
 
-  # Set up plotting area
-  cyto_plot_new(popup = popup)
-  n <- length(channels)
-  cyto_plot_layout(
-    n2mfrow(n)[1],
-    n2mfrow(n)[2]
-  )
-
-  # Generate plot for each channel
-  lapply(channels, function(chan) {
-    cyto_plot(x,
-      channels = chan,
-      axes_trans = transformer_list
+    # Set up plotting area
+    cyto_plot_new(popup = popup)
+    n <- length(channels)
+    cyto_plot_layout(
+      n2mfrow(n)[1],
+      n2mfrow(n)[2]
     )
-  })
+
+    # Generate plot for each channel
+    lapply(channels, function(chan) {
+      cyto_plot(x,
+        channels = chan,
+        axes_trans = transformer_list
+      )
+    })
+    
+  }
 
   # Return transformerList
   return(transformer_list)
@@ -599,9 +625,10 @@ cyto_transform_logicle.flowSet <- function(x,
                                            trans_min = 0,
                                            quantile = 0.05,
                                            type = "instrument",
-                                           popup = FALSE,
                                            equal_space = FALSE,
-                                           breaks = 6, ...) {
+                                           breaks = 5,
+                                           plot = FALSE,
+                                           popup = FALSE, ...) {
 
   # Select data
   x <- cyto_select(x, select)
@@ -617,9 +644,10 @@ cyto_transform_logicle.flowSet <- function(x,
     trans_min = trans_min,
     quantile = quantile,
     type = type,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -636,9 +664,10 @@ cyto_transform_logicle.GatingHierarchy <- function(x,
                                                    trans_min = 0,
                                                    quantile = 0.05,
                                                    type = "instrument",
-                                                   popup = FALSE,
                                                    equal_space = FALSE,
-                                                   breaks = 6, ...) {
+                                                   breaks = 5,
+                                                   plot = TRUE,
+                                                   popup = FALSE) {
 
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -651,9 +680,10 @@ cyto_transform_logicle.GatingHierarchy <- function(x,
     trans_min = trans_min,
     quantile = quantile,
     type = type,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList
@@ -671,9 +701,10 @@ cyto_transform_logicle.GatingSet <- function(x,
                                              trans_min = 0,
                                              quantile = 0.05,
                                              type = "instrument",
-                                             popup = FALSE,
                                              equal_space = FALSE,
-                                             breaks = 6, ...) {
+                                             breaks = 5,
+                                             plot = TRUE,
+                                             popup = FALSE) {
 
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -692,9 +723,10 @@ cyto_transform_logicle.GatingSet <- function(x,
     trans_min = trans_min,
     quantile = quantile,
     type = type,
-    popup = popup,
     equal_space = equal_space,
-    breaks = breaks, ...
+    breaks = breaks,
+    plot = plot,
+    popup = popup
   )
 
   # Return transformerList

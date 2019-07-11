@@ -11,12 +11,13 @@ cyto_transform(x, trans = NULL, ...)
 
 \method{cyto_transform}{default}(x, trans = NULL,
   trans_type = "logicle", channels = NULL, parent = "root",
-  select = NULL, inverse = FALSE, ...)
+  select = NULL, inverse = FALSE, plot = TRUE, ...)
 
-\method{cyto_transform}{transformList}(x, trans = NULL, ...)
+\method{cyto_transform}{transformList}(x, trans = NULL, plot = TRUE,
+  ...)
 
 \method{cyto_transform}{transformerList}(x, trans = NULL,
-  inverse = FALSE, ...)
+  inverse = FALSE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
@@ -44,6 +45,9 @@ select a subset of samples for visualising the transformations.}
 \item{inverse}{logical indicating whether the inverse transformations should
 be applied. Currently only supported for \code{flowFrame} and
 \code{flowSet} objects.}
+
+\item{plot}{logicla indicating whether the result of the transformations
+should be plotted using \code{cyto_plot}.}
 }
 \description{
 Apply Transformations to Cytometry Data
@@ -55,7 +59,7 @@ library(CytoRSuite)
 # Use Activation flowSet
 fs <- Activation
 
-# Automatically transform flowSet 
+# Automatically transform flowSet
 fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
 
 # Manually construct & apply transformations

@@ -11,21 +11,21 @@
 cyto_transform_arcsinh(x, ...)
 
 \method{cyto_transform_arcsinh}{flowFrame}(x, channels = NULL,
-  raw_max = 262144, width = 4.5, trans_min = 0, popup = FALSE,
-  equal_space = FALSE, breaks = 6, ...)
+  raw_max = 262144, width = 4.5, trans_min = 0,
+  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transform_arcsinh}{flowSet}(x, channels = NULL,
   select = NULL, raw_max = 262144, width = 4.5, trans_min = 0,
-  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
+  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transform_arcsinh}{GatingHierarchy}(x, channels = NULL,
   parent = "root", raw_max = 262144, width = 4.5, trans_min = 0,
-  popup = FALSE, equal_space = FALSE, breaks = 6, ...)
+  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
 
 \method{cyto_transform_arcsinh}{GatingSet}(x, channels = NULL,
   parent = "root", select = NULL, raw_max = 262144, width = 4.5,
-  trans_min = 0, popup = FALSE, equal_space = FALSE, breaks = 6,
-  ...)
+  trans_min = 0, equal_space = FALSE, breaks = 5, plot = TRUE,
+  popup = FALSE)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
@@ -44,13 +44,16 @@ if no channels/markers are supplied.}
 \item{trans_min}{minimum of transformed data in the display in asymptotic
 decades, set to 0 by default.}
 
-\item{popup}{logical indicating whether the plots should be constructed in a
-pop-up window.}
-
 \item{equal_space}{logical indicating whether breaks should be equally
 spaced, set to FALSE by default.}
 
 \item{breaks}{number of required breaks.}
+
+\item{plot}{logical indicating whether the results of transformations should
+be plotted using \code{cyto_plot}.}
+
+\item{popup}{logical indicating whether the plots should be constructed in a
+pop-up window.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select} to
 select a subset of samples for \code{cyto_plot}.}
