@@ -279,6 +279,8 @@ cyto_check <- function(x) {
 #'   \code{flowSet} objects.
 #' @param plot logicla indicating whether the result of the transformations
 #'   should be plotted using \code{cyto_plot}.
+#' @param popup logical indicating whether plots should be constructed in a
+#'   popup window, set to FALSE by default.
 #' @param ... additional arguments passed to \code{cyto_transform_arcsinh},
 #'   \code{cyto_transform_biex} or \code{cyto_transform_logicle} when no
 #'   \code{trans} object is supplied.
@@ -327,6 +329,7 @@ cyto_transform.default <- function(x,
                                    select = NULL,
                                    inverse = FALSE,
                                    plot = TRUE,
+                                   popup = FALSE,
                                    ...){
   
   # No transformations supplied - automatically obtain transform definitions
@@ -430,6 +433,7 @@ cyto_transform.default <- function(x,
 cyto_transform.transformList <- function(x, 
                                          trans = NULL,
                                          plot = TRUE,
+                                         popup = FALSE,
                                          ...){
   
   # Added for backwards compatibility - flowFrame/flowSet objects only
@@ -481,6 +485,7 @@ cyto_transform.transformerList <- function(x,
                                            trans = NULL,
                                            inverse = FALSE,
                                            plot = TRUE,
+                                           popup = FALSE,
                                            ...){
   
   # Apply transformations to flowFrame/flowSet

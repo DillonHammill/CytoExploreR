@@ -11,13 +11,13 @@ cyto_transform(x, trans = NULL, ...)
 
 \method{cyto_transform}{default}(x, trans = NULL,
   trans_type = "logicle", channels = NULL, parent = "root",
-  select = NULL, inverse = FALSE, plot = TRUE, ...)
+  select = NULL, inverse = FALSE, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transform}{transformList}(x, trans = NULL, plot = TRUE,
-  ...)
+  popup = FALSE, ...)
 
 \method{cyto_transform}{transformerList}(x, trans = NULL,
-  inverse = FALSE, plot = TRUE, ...)
+  inverse = FALSE, plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
@@ -48,6 +48,9 @@ be applied. Currently only supported for \code{flowFrame} and
 
 \item{plot}{logicla indicating whether the result of the transformations
 should be plotted using \code{cyto_plot}.}
+
+\item{popup}{logical indicating whether plots should be constructed in a
+popup window, set to FALSE by default.}
 }
 \description{
 Apply Transformations to Cytometry Data
