@@ -1318,9 +1318,43 @@ cyto_markers <- function(x, file = NULL) {
     # Check if file already exists
     if (length(grep("Experiment-Markers.csv", list.files())) != 0) {
       message("Experiment-Markers.csv found in working directory.")
-      dt <- read.csv(list.files()[grep("Experiment-Markers.csv", list.files())],
-                     header = TRUE, stringsAsFactors = FALSE
-      )
+      
+      # Could be multiple files - check for matching channels
+      found_files <- list.files()[grep("Experiment-Markers.csv", list.files())]
+      n <- length(grep("Experiment-Markers.csv", list.files()))
+      
+      # Run through each file and check channels match samples
+      dt <- lapply(seq_len(n), function(z){
+        mrks <- read.csv(found_files[z],
+                         header = TRUE, 
+                         stringsAsFactors = FALSE)
+        # SampleNames match those of x
+        if(identical(mrks$Channel, colnames(x))){
+          return(mrks)
+        }else{
+          return(NULL)
+        }
+      })
+      names(dt) <- found_files
+      
+      # Files found but don't match
+      if(all(unlist(lapply(dt, "is.null")))){
+        
+        # Make data.frame with channel and marker columns
+        dt <- pd[, c("name", "desc")]
+        colnames(dt) <- c("Channel", "Marker")
+        rownames(dt) <- NULL
+        
+      }else{
+        
+        # Remove NULL entries from list - result should be of length 1
+        dt[unlist(lapply(dt, "is.null"))] <- NULL
+        file <- names(dt)[1]
+        dt <- dt[[1]]
+      
+      }
+      
+
     } else {
       
       # Make data.frame with channel and marker columns
@@ -1371,20 +1405,11 @@ cyto_markers <- function(x, file = NULL) {
   # Write result to csv file - no file name supplied
   }else{
     
-    if (length(grep("Experiment-Markers.csv", c(file, list.files()))) != 0) {
-      write.csv(dt,
-        c(file, list.files())[grep(
-          "Experiment-Markers.csv",
-          c(file, list.files())
-        )[1]],
-        row.names = FALSE
-      )
-    } else {
-      write.csv(dt, paste0(
-        format(Sys.Date(), "%d%m%y"),
-        "-Experiment-Markers.csv"
-      ), row.names = FALSE)
-    }
+    # Save file with date and experiment markers
+    write.csv(dt, paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-Experiment-Markers.csv"
+    ), row.names = FALSE)
     
   }
   
@@ -1444,9 +1469,41 @@ cyto_annotate <- function(x, file = NULL) {
   if (is.null(file)) {
     if (length(grep("Experiment-Details.csv", list.files())) != 0) {
       message("Experiment-Details.csv found in working directory.")
-      pd <- read.csv(list.files()[grep("Experiment-Details.csv", list.files())],
-        header = TRUE, stringsAsFactors = FALSE
-      )
+      
+      # Could be multiple files - check for matching channels
+      found_files <- list.files()[grep("Experiment-Details.csv", list.files())]
+      n <- length(grep("Experiment-Details.csv", list.files()))
+      
+      # Run through each file and check channels match samples
+      pd <- lapply(seq_len(n), function(z){
+        pdata <- read.csv(found_files[z],
+                         header = TRUE, 
+                         stringsAsFactors = FALSE)
+        # SampleNames match those of x
+        if(identical(pdata$name, cyto_names(x))){
+          return(pdata)
+        }else{
+          return(NULL)
+        }
+      })
+      names(pd) <- found_files
+      
+      # Files found but don't match
+      if(all(unlist(lapply(pd,"is.null")))){
+        
+        # Extract cyto_details
+        pd <- cyto_details(cyto)
+        rownames(pd) <- NULL
+        
+      }else{
+        
+        # Remove NULL entries from list - result should be of length 1
+        pd[unlist(lapply(pd, "is.null"))] <- NULL
+        file <- names(pd)[1]
+        pd <- pd[[1]]
+        
+      }
+      
     } else {
 
       # Extract cyto_details
@@ -1494,21 +1551,11 @@ cyto_annotate <- function(x, file = NULL) {
   # Write result to csv file - no file name supplied
   }else{
     
-    # New file contains "Experiment-Details"
-    if (length(grep("Experiment-Details.csv", c(file, list.files()))) != 0) {
-      write.csv(pd,
-        c(file, list.files())[grep(
-          "Experiment-Details.csv",
-          c(file, list.files())
-        )[1]],
-        row.names = FALSE
-      )
-    } else {
-      write.csv(cyto_details(cyto), paste0(
-        format(Sys.Date(), "%d%m%y"),
-        "-Experiment-Details.csv"
-      ), row.names = FALSE)
-    }
+    # Save file with date and experiment markers
+    write.csv(cyto_details(cyto), paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-Experiment-Details.csv"
+    ), row.names = FALSE)
     
   }
 
