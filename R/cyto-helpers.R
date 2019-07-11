@@ -398,6 +398,9 @@ cyto_transform.default <- function(x,
   # Construct the plots
   if(plot ==  TRUE){
     
+    # Channels
+    channels <- names(transformer_list)
+    
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -456,6 +459,9 @@ cyto_transform.transformList <- function(x,
   
   # Construct plots
   if(plot == TRUE){
+    
+    # Channels
+    channels <- names(trans@transforms)
     
     # Set up plotting area
     cyto_plot_new(popup = popup)
@@ -516,6 +522,9 @@ cyto_transform.transformerList <- function(x,
   
   # Construct plots
   if(plot == TRUE){
+    
+    # Channels
+    channels <- names(transformer_list)
     
     # Set up plotting area
     cyto_plot_new(popup = popup)
