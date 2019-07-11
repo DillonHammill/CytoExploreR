@@ -286,6 +286,7 @@ cyto_check <- function(x) {
 #'   \code{trans} object is supplied.
 #'
 #' @importFrom flowCore transform
+#' @importFrom grDevices n2mfrow
 #'
 #' @examples
 #'
