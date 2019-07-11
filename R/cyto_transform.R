@@ -38,8 +38,15 @@
 #' @param ... not in use.
 #'
 #' @importFrom flowWorkspace asinh_Gml2 flow_trans transformerList
+#' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @seealso \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}}
+#' @seealso \code{\link{cyto_transform_biex}}
+#' @seealso \code{\link{cyto_transform_logicle}}
+#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transform}}
 #'
 #' @rdname cyto_transform_arcsinh
 #' @export
@@ -103,6 +110,9 @@ cyto_transform_arcsinh.flowFrame <- function(x,
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
 
+    # Old graphics parameters
+    old_pars <- par("mfrow")
+    
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -118,6 +128,9 @@ cyto_transform_arcsinh.flowFrame <- function(x,
         axes_trans = transformer_list
       )
     })
+    
+    # Reset graphics parameters
+    par(old_pars)
     
   }
 
@@ -270,10 +283,15 @@ cyto_transform_arcsinh.GatingSet <- function(x,
 #'
 #' @seealso \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
 #' @seealso \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
+#' @seealso \code{\link{cyto_transform_arcsinh}}
+#' @seealso \code{\link{cyto_transform_logicle}}
+#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transform}}
 #'
 #' @return transformerList object.
 #'
 #' @importFrom flowWorkspace flowJoTrans flow_trans transformerList
+#' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -345,6 +363,9 @@ cyto_transform_biex.flowFrame <- function(x,
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
 
+    # Old graphics parameters
+    old_pars <- par("mfrow")
+     
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -360,6 +381,9 @@ cyto_transform_biex.flowFrame <- function(x,
         axes_trans = transformer_list
       )
     })
+    
+    # Reset graphics parameters
+    par(old_pars)
   
   }
 
@@ -528,11 +552,16 @@ cyto_transform_biex.GatingSet <- function(x,
 #'
 #' @importFrom flowCore inverseLogicleTransform
 #' @importFrom flowWorkspace flow_trans transformerList
+#' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 #' @seealso \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+#' @seealso \code{\link{cyto_transform_arcsinh}}
+#' @seealso \code{\link{cyto_transform_biex}}
+#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transform}}
 #'
 #' @rdname cyto_transform_logicle
 #' @export
@@ -593,6 +622,9 @@ cyto_transform_logicle.flowFrame <- function(x,
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
 
+    # Old graphics parameters
+    old_pars <- par("mfrow")
+    
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -608,6 +640,9 @@ cyto_transform_logicle.flowFrame <- function(x,
         axes_trans = transformer_list
       )
     })
+    
+    # Reset graphic parameters
+    par(old_pars)
     
   }
 
@@ -749,8 +784,10 @@ cyto_transform_logicle.GatingSet <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
-#' @seealso \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+#' @seealso \code{\link{cyto_transform_arcsinh}}
+#' @seealso \code{\link{cyto_transform_biex}}
+#' @seealso \code{\link{cyto_transform_logicle}}
+#' @seealso \code{\link{cyto_transform}}
 #'
 #' @export
 cyto_transform_combine <- function(...) {

@@ -87,6 +87,14 @@ data.
 \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 
 \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+
+\code{\link{cyto_transform_arcsinh}}
+
+\code{\link{cyto_transform_biex}}
+
+\code{\link{cyto_transform_combine}}
+
+\code{\link{cyto_transform}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

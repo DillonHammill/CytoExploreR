@@ -84,6 +84,14 @@ apply the transformations to the data.
 \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
 
 \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
+
+\code{\link{cyto_transform_arcsinh}}
+
+\code{\link{cyto_transform_logicle}}
+
+\code{\link{cyto_transform_combine}}
+
+\code{\link{cyto_transform}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

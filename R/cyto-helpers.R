@@ -287,6 +287,7 @@ cyto_check <- function(x) {
 #'
 #' @importFrom flowCore transform
 #' @importFrom grDevices n2mfrow
+#' @importFrom graphics par
 #'
 #' @examples
 #'
@@ -313,6 +314,12 @@ cyto_check <- function(x) {
 #' gs_trans <- cyto_transform(gs, trans)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @seealso \code{\link{cyto_transform_arcsinh}}
+#' @seealso \code{\link{cyto_transform_biex}}
+#' @seealso \code{\link{cyto_transform_logicle}}
+#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transform}}
 #'
 #' @rdname cyto_transform
 #' @export
@@ -408,6 +415,9 @@ cyto_transform.default <- function(x,
     # Channels
     channels <- names(transformer_list)
     
+    # Old graphics parameters
+    old_pars <- par("mfrow")
+    
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -430,6 +440,9 @@ cyto_transform.default <- function(x,
       }
 
     })
+    
+    # Reset graphics parameters
+    par(old_pars)
     
   }
   
@@ -476,6 +489,9 @@ cyto_transform.transformList <- function(x,
     # Channels
     channels <- names(trans@transforms)
     
+    # Old graphics parameters
+    old_pars <- par("mfrow")
+    
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -490,6 +506,9 @@ cyto_transform.transformList <- function(x,
                 channels = chan
       )
     })
+    
+    # Reset graphics parameters
+    par(old_pars)
     
   }
   
@@ -545,6 +564,9 @@ cyto_transform.transformerList <- function(x,
     # Channels
     channels <- names(trans)
     
+    # Old graphics parameters
+    old_pars <- par("mfrow")
+    
     # Set up plotting area
     cyto_plot_new(popup = popup)
     n <- length(channels)
@@ -567,6 +589,9 @@ cyto_transform.transformerList <- function(x,
       }
       
     })
+    
+    # Reset graphics parameters
+    par(old_pars)
     
   }
   

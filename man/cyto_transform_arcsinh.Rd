@@ -70,6 +70,17 @@ transformations have a look at \code{cyto_transform_combine}.
 \code{cyto_transform} should be used to apply the transformations to the
 data.
 }
+\seealso{
+\code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}}
+
+\code{\link{cyto_transform_biex}}
+
+\code{\link{cyto_transform_logicle}}
+
+\code{\link{cyto_transform_combine}}
+
+\code{\link{cyto_transform}}
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

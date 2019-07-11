@@ -17,9 +17,13 @@ definitions obtained from \code{cyto_transform_arcsinh},
 applying these transformations to the data using \code{cyto_transform}.
 }
 \seealso{
-\code{\link[flowCore:logicleTransform]{estimateLogicle}}
+\code{\link{cyto_transform_arcsinh}}
 
-\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+\code{\link{cyto_transform_biex}}
+
+\code{\link{cyto_transform_logicle}}
+
+\code{\link{cyto_transform}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
