@@ -40,7 +40,7 @@ cyto_load <- function(path = ".", ...) {
   # Correct GUID slots
   nms <- cyto_names(fs)
   lapply(seq_len(length(nms)), function(z){
-    identifier(fs[[z]]) <<- nms[z]
+    suppressMessages(identifier(fs[[z]]) <<- nms[z])
   })
   
   # Return ncdfFlowSet
