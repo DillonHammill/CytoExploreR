@@ -35,7 +35,17 @@ cyto_load <- function(path = ".", ...) {
   files <- list.files(path, full.names = TRUE, pattern = ".fcs")
 
   # Read into a ncdfFlowSet
-  read.ncdfFlowSet(files = files, ...)
+  fs <- read.ncdfFlowSet(files = files, ...)
+  
+  # Correct GUID slots
+  nms <- cyto_names(fs)
+  lapply(seq_len(length(nms)), function(z){
+    identifier(fs[[z]]) <<- nms[z]
+  })
+  
+  # Return ncdfFlowSet
+  return(fs)
+  
 }
 
 # CYTO_SETUP -------------------------------------------------------------------
@@ -1361,6 +1371,7 @@ cyto_markers <- function(x, file = NULL) {
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("Channel", "Marker")
       rownames(dt) <- NULL
+      
     }
     
   # File manually supplied  
@@ -1376,6 +1387,7 @@ cyto_markers <- function(x, file = NULL) {
       
       message(file, "found in working directory.")
       dt <- read.csv(file, header = TRUE)
+      
     # File does not exist (yet) 
     }else{
       
@@ -1388,12 +1400,13 @@ cyto_markers <- function(x, file = NULL) {
     
   }
 
-  # Channels with markers
-  chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
-
+  print(dt)
+  
   # Edit dt
   dt <- suppressWarnings(edit(dt))
 
+  print(dt)
+  
   # Update channels
   BiocGenerics::colnames(x) <- dt$Channel
 
@@ -1413,18 +1426,18 @@ cyto_markers <- function(x, file = NULL) {
     
   }
   
-  # Channels with markers added
-  tb <- dt[!dt$Channel %in% chans, ]
-  chns <- tb$Channel[!is.na(tb$Marker)]
-
-  # Pull out assigned markers
-  mrk <- dt$Marker[dt$Channel %in% c(chans, chns)]
-  names(mrk) <- dt$Channel[dt$Channel %in% c(chans, chns)]
-
-  # Assign markers to x
-  markernames(x) <- mrk
+  # Markers and channels
+  cyto_channels <- dt$Channel
+  cyto_markers <- dt$Marker
+  names(cyto_markers) <- cyto_channels
+  
+  # NOnly modify markers if supplied
+  if(!all(is.na(cyto_markers))){
+    markernames(x) <- cyto_markers[!is.na(cyto_markers)]
+  }
 
   invisible(NULL)
+  
 }
 
 # CYTO_ANNOTATE ----------------------------------------------------------------
