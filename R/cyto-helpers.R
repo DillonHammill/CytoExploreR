@@ -1338,6 +1338,7 @@ cyto_markers <- function(x, file = NULL) {
         mrks <- read.csv(found_files[z],
                          header = TRUE, 
                          stringsAsFactors = FALSE)
+        rownames(mrks) <- NULL
         # SampleNames match those of x
         if(identical(mrks$Channel, colnames(x))){
           return(mrks)
@@ -1377,7 +1378,7 @@ cyto_markers <- function(x, file = NULL) {
   # File manually supplied  
   }else{
     
-    # File extansion missing
+    # File extension missing
     if(file_ext(file) == ""){
       file <- paste0(file, ".csv")
     }
@@ -1386,26 +1387,24 @@ cyto_markers <- function(x, file = NULL) {
     if(length(grep(file, list.files())) != 0){
       
       message(file, "found in working directory.")
-      dt <- read.csv(file, header = TRUE)
+      dt <- read.csv(file, 
+                     header = TRUE,
+                     stringsAsFactors = FALSE)
       
     # File does not exist (yet) 
     }else{
       
       # Make data.frame with channel and marker columns
-      dt <- pd[, c("name", "desc")]
+      dt <- dt[, c("name", "desc")]
       colnames(dt) <- c("Channel", "Marker")
       rownames(dt) <- NULL
       
     }
     
   }
-
-  print(dt)
   
-  # Edit dt
+  # Edit dt - data.frame must have no rownames for editor
   dt <- suppressWarnings(edit(dt))
-
-  print(dt)
   
   # Update channels
   BiocGenerics::colnames(x) <- dt$Channel
