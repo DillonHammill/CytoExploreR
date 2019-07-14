@@ -12,7 +12,8 @@ cyto_annotate(x, file = NULL)
 \item{file}{name of csv file containing experimental information.}
 }
 \value{
-NULL and update cyto_details for the \code{flowSet} or \code{GatingSet}.
+NULL and return \code{flowSet} or \code{gatingSet} with updated
+  experimental details.
 }
 \description{
 Interactively edit cyto_details for a flowSet or GatingSet

@@ -102,11 +102,11 @@ cyto_setup <- function(path = ".",
 
   # Markers
   message("Associate markers with their respective channels.")
-  cyto_markers(gs)
+  gs <- cyto_markers(gs)
 
   # Annotate
   message("Annotate samples with experiment details.")
-  cyto_annotate(gs)
+  gs <- cyto_annotate(gs)
   
   # Assign gatingTemplate
   if(is.null(gatingTemplate)){
@@ -1277,20 +1277,19 @@ cyto_sample.list <- function(x,
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
 #'
-#' @return save inputs to "Experiment-Markers.csv" and update marker names of
-#'   \code{x}.
+#' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
 #'
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Add marker names to channels - edit table
-#' cyto_markers(fs)
+#' fs <- cyto_markers(fs)
 #' }
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1430,12 +1429,12 @@ cyto_markers <- function(x, file = NULL) {
   cyto_markers <- dt$Marker
   names(cyto_markers) <- cyto_channels
   
-  # NOnly modify markers if supplied
+  # Only modify markers if supplied
   if(!all(is.na(cyto_markers))){
     markernames(x) <- cyto_markers[!is.na(cyto_markers)]
   }
 
-  invisible(NULL)
+  return(x)
   
 }
 
@@ -1446,7 +1445,8 @@ cyto_markers <- function(x, file = NULL) {
 #' @param x object of class \code{flowSet} or \code{GatingSet}.
 #' @param file name of csv file containing experimental information.
 #'
-#' @return NULL and update cyto_details for the \code{flowSet} or \code{GatingSet}.
+#' @return NULL and return \code{flowSet} or \code{gatingSet} with updated
+#'   experimental details.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore pData<-
@@ -1458,14 +1458,14 @@ cyto_markers <- function(x, file = NULL) {
 #' @examples
 #' \dontrun{
 #' library(CytoRSuiteData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Edit cyto_details in table editor
 #' cyto_annotate(fs)
 #' }
-#' 
+#'
 #' @export
 cyto_annotate <- function(x, file = NULL) {
 
@@ -1473,9 +1473,6 @@ cyto_annotate <- function(x, file = NULL) {
   if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
     stop("Please supply either a flowSet or a GatingSet")
   }
-
-  # Assign x to cyto
-  cyto <- x
 
   # File missing
   if (is.null(file)) {
@@ -1504,7 +1501,7 @@ cyto_annotate <- function(x, file = NULL) {
       if(all(unlist(lapply(pd,"is.null")))){
         
         # Extract cyto_details
-        pd <- cyto_details(cyto)
+        pd <- cyto_details(x)
         rownames(pd) <- NULL
         
       }else{
@@ -1519,7 +1516,7 @@ cyto_annotate <- function(x, file = NULL) {
     } else {
 
       # Extract cyto_details
-      pd <- cyto_details(cyto)
+      pd <- cyto_details(x)
       rownames(pd) <- NULL
     }
     
@@ -1541,7 +1538,7 @@ cyto_annotate <- function(x, file = NULL) {
     }else{
         
       # Extract cyto_details
-      pd <- cyto_details(cyto)
+      pd <- cyto_details(x)
       rownames(pd) <- NULL
         
     }
@@ -1553,28 +1550,25 @@ cyto_annotate <- function(x, file = NULL) {
   rownames(pd) <- pd$name
 
   # Update cyto_details
-  pData(cyto) <- pd
+  cyto_details(x) <- pd
 
   # Write result to csv file - file name manually supplied
   if(!is.null(file)){
     
-    write.csv(cyto_details(cyto), file, row.names = FALSE)
+    write.csv(cyto_details(x), file, row.names = FALSE)
    
   # Write result to csv file - no file name supplied
   }else{
     
     # Save file with date and experiment markers
-    write.csv(cyto_details(cyto), paste0(
+    write.csv(cyto_details(x), paste0(
       format(Sys.Date(), "%d%m%y"),
       "-Experiment-Details.csv"
     ), row.names = FALSE)
     
   }
 
-  # Update globally
-  assign(deparse(substitute(x)), cyto, envir = globalenv())
-
-  invisible(NULL)
+  return(x)
 }
 
 # CYTO_COMPENSATE --------------------------------------------------------------

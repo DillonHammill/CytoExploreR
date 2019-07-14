@@ -13,8 +13,7 @@ cyto_markers(x, file = NULL)
 \item{file}{name of csv file containing columns 'Channel' and 'Marker'.}
 }
 \value{
-save inputs to "Experiment-Markers.csv" and update marker names of
-  \code{x}.
+save inputs to "Experiment-Markers.csv" and returns updated samples.
 }
 \description{
 \code{cyto_markers} opens an editable table containing a list of channels and
@@ -32,7 +31,7 @@ library(CytoRSuiteData)
 fs <- Activation
 
 # Add marker names to channels - edit table
-cyto_markers(fs)
+fs <- cyto_markers(fs)
 }
 
 }

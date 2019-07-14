@@ -55,7 +55,7 @@
                          alias, ...) {
 
   # Determine vertices of polygon using gate_draw
-  gates <- gate_draw(x = fr, channels = channels, alias = alias, ...)
+  gates <- cyto_gate_draw(x = fr, channels = channels, alias = alias, ...)
 
   return(gates)
 }
