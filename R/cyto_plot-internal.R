@@ -603,7 +603,7 @@
     if (!.all_na(gate)) {
       gate <- cyto_plot_gate2(x = x[[1]],
                              channels = channels,
-                             gate - gate,
+                             gate = gate,
                              label = label,
                              label_text = label_text,
                              label_stat = label_stat,
