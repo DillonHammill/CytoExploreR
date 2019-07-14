@@ -69,18 +69,18 @@ setMethod(cyto_plot_contour,
 
     # Assign x to fr
     fr <- x
-    fr.exprs <- exprs(fr)[, channels]
+    fr_exprs <- exprs(fr)[, channels]
 
     # Contours
     if (contour_lines != 0) {
 
       # Bypass contours if there are insufficient events
-      if (nrow(fr.exprs) > 2) {
+      if (nrow(fr_exprs) > 2) {
 
         # Calculate 2D kernel density using kde2d from MASS
         z <- MASS::kde2d(
-          x = fr.exprs[, 1],
-          y = fr.exprs[, 2],
+          x = fr_exprs[, 1],
+          y = fr_exprs[, 2],
           n = 75,
           lims = par("usr")
         )
