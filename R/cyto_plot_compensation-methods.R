@@ -614,7 +614,7 @@ cyto_plot_compensation.GatingSet <- function(x,
   
   # Parent
   if (is.null(parent)) {
-    parent <- basename(getNodes(x))[length(getNodes(x))]
+    parent <- cyto_nodes(x, path = "auto")[length(cyto_nodes(x))]
     message(paste(
       "No parent supplied -",
       parent,
