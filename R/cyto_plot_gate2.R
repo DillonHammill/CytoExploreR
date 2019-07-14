@@ -188,7 +188,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
 
     # Need to add extra label if negate == TRUE
     if (negate == TRUE) {
-      label_text <- rep(label_text, length.out = 2)
+      label_text <- rep(c(label_text, NA), length.out = 2)
       label_stat <- rep(label_stat, length.out = 2)
       label_text_x <- rep(label_text_x, length.out = 2)
       label_text_y <- rep(label_text_y, length.out = 2)
@@ -492,7 +492,7 @@ cyto_plot_gate2.polygonGate <- function(x,
 
     # Need to add extra label if negate == TRUE
     if (negate == TRUE) {
-      label_text <- rep(label_text, length.out = 2)
+      label_text <- rep(c(label_text, NA), length.out = 2)
       label_stat <- rep(label_stat, length.out = 2)
       label_text_x <- rep(label_text_x, length.out = 2)
       label_text_y <- rep(label_text_y, length.out = 2)
