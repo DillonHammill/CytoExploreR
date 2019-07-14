@@ -49,7 +49,7 @@ cyto_plot_density.flowFrame <- function(x,
 
   # Combine x and overlay into a list - fr_list
   if (!.all_na(overlay)) {
-    fr_list <- c(list(x), .cyto_convert(overlay, "flowFrame list"))
+    fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
   } else {
     fr_list <- list(x)
   }
