@@ -2,21 +2,21 @@
 % Please edit documentation in R/gatingTemplate-helpers.R
 \name{cyto_gatingTemplate_apply}
 \alias{cyto_gatingTemplate_apply}
-\title{Apply gates saved in gatingTemplate to a GatingSet}
+\title{Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet}
 \usage{
 cyto_gatingTemplate_apply(x, gatingTemplate = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{GatingSet}.}
+\item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{gatingTemplate}{name of the gatingTemplate csv file which contains the
-gates to be applied to the GatingSet.}
+gates to be applied to \code{x}.}
 
 \item{...}{additional arguments passed to gating.}
 }
 \value{
-NULL and update the GatingSet in the global environment with the
-  gates in the gatingTemplate.
+NULL and update the GatingHierarchy/ GatingSet in the global
+  environment with the gates in the gatingTemplate.
 }
 \description{
 A convenient wrapper for

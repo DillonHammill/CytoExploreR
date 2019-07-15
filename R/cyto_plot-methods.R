@@ -2128,6 +2128,17 @@ cyto_plot.GatingHierarchy <- function(x,
     if (is.character(overlay)) {
       if (all(overlay %in% basename(getNodes(x)))) {
         
+        # Overlay should be added to label_text
+        if(.empty(label_text)){
+          if(!.all_na(alias)){
+            if(length(channels) == 1){
+                label_text <- c(alias, overlay)
+            }else if(length(channels) == 2){
+              label_text <- alias
+            }
+          }
+        }
+        
         # Pull out list of flowFrames
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
@@ -2135,6 +2146,16 @@ cyto_plot.GatingHierarchy <- function(x,
         })
         names(overlay) <- nms
       }
+    # Overlay is not the names of populations - labels are NA for histograms
+    }else{
+      
+      # Overlay should be added to label_text
+      if(.empty(label_text)){
+        if(!.all_na(alias)){
+          label_text <- rep(alias, length.out = length(overlay) + 1)
+        }
+      }
+      
     }
     
     # flowFrame overlay added to list
@@ -2167,6 +2188,18 @@ cyto_plot.GatingHierarchy <- function(x,
         ))
       }
     }
+  # No overlays
+  }else if(.all_na(overlay)){
+   
+    # Label text
+    if(.empty(label_text)){
+      if(!.all_na(alias)){
+        label_text <- NA
+      }else{
+        label_text <- alias
+      }
+    }
+     
   }
   
   # Combine base layers with overlay into list of flowFrames
@@ -2212,15 +2245,6 @@ cyto_plot.GatingHierarchy <- function(x,
   }
   
   # Prepare arguments for plotting ---------------------------------------------
-  
-  # Labels - use alias  if no text supplied
-  if (.empty(label_text)) {
-    if (!.all_na(alias)) {
-      label_text <- alias
-    }else{
-      label_text <- NA
-    }
-  }
   
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
@@ -2768,21 +2792,21 @@ cyto_plot.GatingSet <- function(x,
                                 border_line_col = "black",
                                 border_fill = "white",
                                 border_fill_alpha = 1, ...) {
-    
+  
   # Checks ---------------------------------------------------------------------
-
+  
   # Set plot method - determine when dev.off should be called when saving
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
     options("CytoRSuite_cyto_plot_method" = "GatingSet")
   }
-
+  
   # Signal a custom plot if layout is FALSE
   if (!missing(layout)) {
     if (all(layout == FALSE)) {
       options("CytoRSuite_cyto_plot_custom" = TRUE)
     }
   }
-
+  
   # Reset saved label co-ordinates
   options("CytoRSuite_cyto_plot_label_coords" = NULL)
   
@@ -2790,45 +2814,45 @@ cyto_plot.GatingSet <- function(x,
   if (missing(parent)) {
     stop("Supply the name of the 'parent' population to plot.")
   }
-
+  
   # Check if channels are supplied
   if (missing(channels)) {
     stop("Supply channel/marker(s) to construct the plot.")
   }
-
+  
   # Graphics parameters --------------------------------------------------------
-
+  
   # Current graphics parameters
   old_pars <- par(c("mar", "mfrow"))
-
+  
   # Reset graphics parameters on exit
   on.exit(par(old_pars))
-
+  
   # cyto_plot_theme ------------------------------------------------------------
-
+  
   # Remember all missing arguments now converted to "" (use .empty())
-
+  
   # Pull down arguments to named list
   args <- .args_list()
-
+  
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-
+  
   # Update arguments
   .args_update(args)
-
+  
   # cyto_plot_save -------------------------------------------------------------
-
+  
   # Turn off popup if cyto_plot_save is activated
   if (getOption("CytoRSuite_cyto_plot_save") == TRUE) {
     popup <- FALSE
   }
-
+  
   # Extract channels & transformations -----------------------------------------
-
+  
   # Get valid channel names if markers are supplied
   channels <- cyto_channels_extract(x, channels, plot = TRUE)
-
+  
   # Get transformations
   if(.all_na(axes_trans)){
     # Extract transformerList from GatingHierarchy
@@ -2840,12 +2864,12 @@ cyto_plot.GatingSet <- function(x,
       message("Supply a transformerList object to axes_trans to transform axes.")
     }
   }
-
+  
   # Extract experiment details & add grouping ----------------------------------
-
+  
   # Extract experiment details
   pd <- cyto_details(x)
-
+  
   # Add group_by column if group_by supplied
   if (!.all_na(group_by)) {
     if (length(group_by) == 1) {
@@ -2858,9 +2882,9 @@ cyto_plot.GatingSet <- function(x,
       pd$group_by <- do.call("paste", pd[, group_by])
     }
   }
-
+  
   # Extract & format data for plotting (list of flowFrame lists) ---------------
-
+  
   # Names of each flowFrame is parent and overlay
   if (!.all_na(overlay)) {
     if (is.character(overlay)) {
@@ -2869,10 +2893,10 @@ cyto_plot.GatingSet <- function(x,
       }
     }
   }
-
+  
   # Extract data from GatingSet
   fs <- cyto_extract(x, parent)
-
+  
   # Add data to list and group if necessary - convert groups to flowFrames
   if (!.all_na(group_by)) {
     fs_list <- cyto_group_by(fs, group_by)
@@ -2883,16 +2907,27 @@ cyto_plot.GatingSet <- function(x,
     fr_list <- cyto_convert(fs, "list of flowFrames")
     names(fr_list) <- sampleNames(x)
   }
-
+  
   # Add overlay to list and group if necessary
   if (!.all_na(overlay)) {
-
+    
     # overlay must be list of flowFrame lists
-
+    
     # Overlay is the names of populations
     if (is.character(overlay)) {
       if (all(overlay %in% basename(getNodes(x)))) {
-
+        
+        # Overlay should be added to label_text
+        if(.empty(label_text)){
+          if(!.all_na(alias)){
+            if(length(channels) == 1){
+              label_text <- c(alias, overlay)
+            }else if(length(channels) == 2){
+              label_text <- alias
+            }
+          }
+        }
+        
         # Pull out list of flowSets
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
@@ -2900,14 +2935,24 @@ cyto_plot.GatingSet <- function(x,
         })
         names(overlay) <- nms
       }
+      # Overlay is not the names of populations - labels are NA for histograms
+    }else{
+      
+      # Overlay should be added to label_text
+      if(.empty(label_text)){
+        if(!.all_na(alias)){
+          label_text <- rep(alias, length.out = length(overlay) + 1)
+        }
+      }
+      
     }
-
+    
     # Repeat flowFrame once per plot - no grouping
     if (inherits(overlay, "flowFrame")) {
       overlay_list <- rep(list(list(overlay)), length(fr_list))
       # Convert to list of flowFrame lists
     } else if (inherits(overlay, "flowSet")) {
-
+      
       # Apply same grouping to overlay
       if (!.all_na(group_by)) {
         overlay_list <- cyto_group_by(overlay, group_by)
@@ -2917,7 +2962,7 @@ cyto_plot.GatingSet <- function(x,
       } else {
         overlay_list <- cyto_convert(overlay, "list of flowFrames")
       }
-
+      
       overlay_list <- lapply(overlay_list, function(z) {
         list(z)
       })
@@ -2939,12 +2984,12 @@ cyto_plot.GatingSet <- function(x,
         
         # No grouping is applied internally for these types of overlays
         overlay_list <- overlay
-
+        
         # list of flowSet lists
       } else if (all(unlist(lapply(overlay, function(z) {
         inherits(z, "flowSet")
       })))) {
-
+        
         # Apply same grouping to overlay
         if (!.all_na(group_by)) {
           overlay_list <- lapply(overlay, function(z) {
@@ -2960,9 +3005,9 @@ cyto_plot.GatingSet <- function(x,
             cyto_convert(z, "list of flowFrames")
           })
         }
-
+        
         overlay_list <- overlay_list %>% transpose()
-
+        
         # Overlay is not supported
       } else {
         stop(paste(
@@ -2972,7 +3017,7 @@ cyto_plot.GatingSet <- function(x,
         ))
       }
     }
-
+    
     # No overlay
   } else if (.all_na(overlay)) {
     nms <- names(fr_list)
@@ -2981,8 +3026,18 @@ cyto_plot.GatingSet <- function(x,
       names(lst) <- nms[z]
       return(lst)
     })
+    
+    # Label text
+    if(.empty(label_text)){
+      if(!.all_na(alias)){
+        label_text <- NA
+      }else{
+        label_text <- alias
+      }
+    }
+    
   }
-
+  
   # Combine base layers with overlay into list of flowFrame lists
   if (!.all_na(overlay)) {
     nms <- names(fr_list)
@@ -2991,49 +3046,49 @@ cyto_plot.GatingSet <- function(x,
     })
     names(fr_list) <- nms
   }
-
+  
   # Support splitting stacked samples without overlay
   if (length(channels) == 1 & .all_na(overlay) & density_stack != 0) {
-
+    
     # Convert list of individual flowFrame lists into list(list of flowFrames)
     fr_list <- list(unlist(fr_list))
-
+    
     # Change legend text to sampleNames
     if (.all_na(legend_text)) {
       legend_text <- nms
     }
-
+    
     # Support splitting into separate plots by density_layers
     if (!.all_na(density_layers)) {
-
+      
       # Only supported if same number of layers in each plot
       if (length(fr_list[[1]]) %% density_layers != 0) {
         stop("Each plot must have the same number of layers!")
       }
-
+      
       ind <- rep(seq_len(length(fr_list[[1]])),
-        each = density_layers,
-        length.out = length(fr_list[[1]])
+                 each = density_layers,
+                 length.out = length(fr_list[[1]])
       )
       fr_list <- lapply(unique(ind), function(z) {
         fr_list[[1]][ind == z]
       })
     }
   }
-
+  
   # Extract gate objects -------------------------------------------------------
-
+  
   # Allow alias = "" to plot all appropriate gates
   if (.empty(alias)) {
     # Plot all appropriate gates if alias is an empty character string
     if (all(alias == "")) {
       gt <- templateGen(x[[1]])
       gt <- gt[basename(gt$parent) == parent, ]
-
+      
       # Match both channels for 2D plots
       if (length(channels) == 2) {
         alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
-
+        
         # At least 1 channel match
       } else if (length(channels) == 1) {
         ind <- lapply(gt$dims, function(z) {
@@ -3042,14 +3097,14 @@ cyto_plot.GatingSet <- function(x,
         ind <- unlist(lapply(ind, "length")) != 0
         alias <- gt$alias[ind]
       }
-
+      
       # No gates constructed in the supplied channels
       if (length(alias) == 0) {
         alias <- NA
       }
     }
   }
-
+  
   # Extract gate objects directly from x
   if (!.all_na(alias)) {
     if (!.all_na(group_by)) {
@@ -3069,14 +3124,14 @@ cyto_plot.GatingSet <- function(x,
         return(gt)
       })
     }
-  # Gates manually supplied are added to list
+    # Gates manually supplied are added to list
   }else if(!.all_na(gate)){
     gate <- rep(list(gate), length(fr_list))
   }
-
+  
   # Organise gates for stacked 1D without overlay
   if (length(channels) == 1 & .all_na(overlay) & density_stack != 0) {
-
+    
     # Can't plot per sample 1D gates - must all be the same
     # Repeated in mapply as required
     # Must be selected from non-empty sample - co-ordinates modified to -Inf Inf
@@ -3086,18 +3141,9 @@ cyto_plot.GatingSet <- function(x,
     ind <- which(ind > 0)
     gate <- list(gate[[ind[1]]]) # uses gates from first sample only
   }
-
+  
   # Prepare arguments for plotting ---------------------------------------------
-
-  # Labels - use alias  if no text supplied
-  if (.empty(label_text)) {
-    if (!.all_na(alias)) {
-      label_text <- alias
-    }else{
-      label_text <- NA
-    }
-  }
-
+  
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
     legend_text <- unlist(lapply(fr_list, function(z) {
@@ -3106,28 +3152,28 @@ cyto_plot.GatingSet <- function(x,
       })
     }))
   }
-
+  
   # Title
   if (.empty(title)) {
-
+    
     # Extract plot title from names of fr_list
     title <- nms
-
+    
     # Add parent name to each plot
     title <- unlist(lapply(title, function(z) {
-
+      
       # Parent name
       if (parent == "root") {
         pt <- "All Events"
       } else {
         pt <- parent
       }
-
+      
       # All samples grouped together
       if (z %in% c("all","anonymous")) {
         z <- "Combined Events"
       }
-
+      
       # Stacked 1D plots lack sampleNames in titles if no overlay
       if (length(channels) == 1 & 
           .all_na(overlay) & 
@@ -3148,17 +3194,17 @@ cyto_plot.GatingSet <- function(x,
   # X axis breaks and labels - pass through axes_text argument
   if (axes_text[1] == TRUE) {
     axes_text_x <- .cyto_plot_axes_text(x[[1]],
-      channels = channels
+                                        channels = channels
     )[[1]]
   } else {
     axes_text_x <- FALSE
   }
-
+  
   # Y axis breaks and labels - pass through axes_text argument
   if (axes_text[2] == TRUE) {
     if (length(channels) == 2) {
       axes_text_y <- .cyto_plot_axes_text(x[[1]],
-        channels = channels[2]
+                                          channels = channels[2]
       )[[1]]
     } else {
       axes_text_y <- NA
@@ -3168,25 +3214,25 @@ cyto_plot.GatingSet <- function(x,
   }
   axes_text <- list(axes_text_x, axes_text_y)
   axes_text <- rep(axes_text, length(fr_list))
-
+  
   # X axis limits
   if (.all_na(xlim)) {
     xlim <- .cyto_range(fr_list,
-      channels = channels[1],
-      limits = limits,
-      plot = TRUE
+                        channels = channels[1],
+                        limits = limits,
+                        plot = TRUE
     )[, 1]
   }
-
+  
   # Y axis limits - 1D y limit calculated downstream
   if (.all_na(ylim) & length(channels) != 1) {
     ylim <- .cyto_range(fr_list,
-      channels = channels[2],
-      limits = limits,
-      plot = TRUE
+                        channels = channels[2],
+                        limits = limits,
+                        plot = TRUE
     )[, 1]
   }
-
+  
   # GRAPHICS DEVICE
   if(popup == TRUE){
     cyto_plot_new(popup)
@@ -3194,188 +3240,188 @@ cyto_plot.GatingSet <- function(x,
   
   # Layout - missing/off/supplied
   if (.empty(layout)) {
-
+    
     # Layout dimensions
     layout <- .cyto_plot_layout(fr_list,
-      channels = channels,
-      layout = layout,
-      density_stack = density_stack,
-      density_layers = density_layers
+                                channels = channels,
+                                layout = layout,
+                                density_stack = density_stack,
+                                density_layers = density_layers
     )
   } else if (all(layout == FALSE) | .all_na(layout)) {
-
+    
     # Use current dimensions
     layout <- par("mfrow")
   }
   par("mfrow" = layout)
   np <- layout[1] * layout[2]
-
+  
   # Repeat arguments as required -----------------------------------------------
   
   # Pull down arguments to named list - missing converted to ""
   args <- .args_list()
-
+  
   # Repeat arguments as required using .cyto_plot_args_split
   args <- .cyto_plot_args_split(args,
-    channels = channels,
-    n = length(fr_list[[1]]) * length(fr_list),
-    plots = length(fr_list),
-    layers = length(fr_list[[1]]),
-    gates = length(unlist(gate[[1]]))
+                                channels = channels,
+                                n = length(fr_list[[1]]) * length(fr_list),
+                                plots = length(fr_list),
+                                layers = length(fr_list[[1]]),
+                                gates = length(unlist(gate[[1]]))
   )
-
+  
   # Update arguments
   .args_update(args)
   
   # Calls to .cyto_plot internal -----------------------------------------------
-
+  
   # Pass arguments to .cyto_plot to construct plot
   cnt <- 0
   mapply(
     function(x,
-                 gate,
-                 limits,
-                 display,
-                 xlab,
-                 ylab,
-                 title,
-                 title_text_font,
-                 title_text_size,
-                 title_text_col,
-                 density_modal,
-                 density_smooth,
-                 density_stack,
-                 density_fill,
-                 density_fill_alpha,
-                 density_line_type,
-                 density_line_width,
-                 density_line_col,
-                 point_shape,
-                 point_size,
-                 point_col,
-                 point_col_alpha,
-                 contour_lines,
-                 contour_line_type,
-                 contour_line_width,
-                 contour_line_col,
-                 axes_text,
-                 axes_text_font,
-                 axes_text_size,
-                 axes_text_col,
-                 axes_label_text_font,
-                 axes_label_text_size,
-                 axes_label_text_col,
-                 legend,
-                 legend_text,
-                 legend_text_font,
-                 legend_text_size,
-                 legend_text_col,
-                 legend_line_type,
-                 legend_line_width,
-                 legend_line_col,
-                 legend_box_fill,
-                 legend_point_col,
-                 gate_line_type,
-                 gate_line_width,
-                 gate_line_col,
-                 gate_fill,
-                 gate_fill_alpha,
-                 label,
-                 label_text,
-                 label_stat,
-                 label_text_x,
-                 label_text_y,
-                 label_text_font,
-                 label_text_size,
-                 label_text_col,
-                 label_fill,
-                 label_fill_alpha,
-                 border_line_type,
-                 border_line_width,
-                 border_line_col,
-                 border_fill,
-                 border_fill_alpha) {
+             gate,
+             limits,
+             display,
+             xlab,
+             ylab,
+             title,
+             title_text_font,
+             title_text_size,
+             title_text_col,
+             density_modal,
+             density_smooth,
+             density_stack,
+             density_fill,
+             density_fill_alpha,
+             density_line_type,
+             density_line_width,
+             density_line_col,
+             point_shape,
+             point_size,
+             point_col,
+             point_col_alpha,
+             contour_lines,
+             contour_line_type,
+             contour_line_width,
+             contour_line_col,
+             axes_text,
+             axes_text_font,
+             axes_text_size,
+             axes_text_col,
+             axes_label_text_font,
+             axes_label_text_size,
+             axes_label_text_col,
+             legend,
+             legend_text,
+             legend_text_font,
+             legend_text_size,
+             legend_text_col,
+             legend_line_type,
+             legend_line_width,
+             legend_line_col,
+             legend_box_fill,
+             legend_point_col,
+             gate_line_type,
+             gate_line_width,
+             gate_line_col,
+             gate_fill,
+             gate_fill_alpha,
+             label,
+             label_text,
+             label_stat,
+             label_text_x,
+             label_text_y,
+             label_text_font,
+             label_text_size,
+             label_text_col,
+             label_fill,
+             label_fill_alpha,
+             border_line_type,
+             border_line_width,
+             border_line_col,
+             border_fill,
+             border_fill_alpha) {
       cnt <<- cnt + 1
-
+      
       .cyto_plot(x,
-        channels = channels,
-        gate = gate,
-        axes_trans = axes_trans,
-        limits = limits,
-        display = display,
-        popup = FALSE,
-        xlim = xlim,
-        ylim = ylim,
-        xlab = xlab,
-        ylab = ylab,
-        title = title,
-        negate = negate,
-        title_text_font = title_text_font,
-        title_text_size = title_text_size,
-        title_text_col = title_text_col,
-        density_modal = density_modal,
-        density_smooth = density_smooth,
-        density_stack = density_stack,
-        density_cols = density_cols,
-        density_fill = density_fill,
-        density_fill_alpha = density_fill_alpha,
-        density_line_type = density_line_type,
-        density_line_width = density_line_width,
-        density_line_col = density_line_col,
-        point_shape = point_shape,
-        point_size = point_size,
-        point_col_scale = point_col_scale,
-        point_cols = point_cols,
-        point_col = point_col,
-        point_col_alpha = point_col_alpha,
-        contour_lines = contour_lines,
-        contour_line_type = contour_line_type,
-        contour_line_width = contour_line_width,
-        contour_line_col = contour_line_col,
-        axes_text = axes_text,
-        axes_text_font = axes_text_font,
-        axes_text_size = axes_text_size,
-        axes_text_col = axes_text_col,
-        axes_label_text_font = axes_label_text_font,
-        axes_label_text_size = axes_label_text_size,
-        axes_label_text_col = axes_label_text_col,
-        legend = legend,
-        legend_text = legend_text,
-        legend_text_font = legend_text_font,
-        legend_text_size = legend_text_size,
-        legend_text_col = legend_text_col,
-        legend_line_type = legend_line_type,
-        legend_line_width = legend_line_width,
-        legend_line_col = legend_line_col,
-        legend_box_fill = legend_box_fill,
-        legend_point_col = legend_point_col,
-        gate_line_type = gate_line_type,
-        gate_line_width = gate_line_width,
-        gate_line_col = gate_line_col,
-        gate_fill = gate_fill,
-        gate_fill_alpha = gate_fill_alpha,
-        label = label,
-        label_text = label_text,
-        label_stat = label_stat,
-        label_position = label_position,
-        label_text_x = label_text_x,
-        label_text_y = label_text_y,
-        label_text_font = label_text_font,
-        label_text_size = label_text_size,
-        label_text_col = label_text_col,
-        label_fill = label_fill,
-        label_fill_alpha = label_fill_alpha,
-        border_line_type = border_line_type,
-        border_line_width = border_line_width,
-        border_line_col = border_line_col,
-        border_fill = border_fill,
-        border_fill_alpha = border_fill_alpha
+                 channels = channels,
+                 gate = gate,
+                 axes_trans = axes_trans,
+                 limits = limits,
+                 display = display,
+                 popup = FALSE,
+                 xlim = xlim,
+                 ylim = ylim,
+                 xlab = xlab,
+                 ylab = ylab,
+                 title = title,
+                 negate = negate,
+                 title_text_font = title_text_font,
+                 title_text_size = title_text_size,
+                 title_text_col = title_text_col,
+                 density_modal = density_modal,
+                 density_smooth = density_smooth,
+                 density_stack = density_stack,
+                 density_cols = density_cols,
+                 density_fill = density_fill,
+                 density_fill_alpha = density_fill_alpha,
+                 density_line_type = density_line_type,
+                 density_line_width = density_line_width,
+                 density_line_col = density_line_col,
+                 point_shape = point_shape,
+                 point_size = point_size,
+                 point_col_scale = point_col_scale,
+                 point_cols = point_cols,
+                 point_col = point_col,
+                 point_col_alpha = point_col_alpha,
+                 contour_lines = contour_lines,
+                 contour_line_type = contour_line_type,
+                 contour_line_width = contour_line_width,
+                 contour_line_col = contour_line_col,
+                 axes_text = axes_text,
+                 axes_text_font = axes_text_font,
+                 axes_text_size = axes_text_size,
+                 axes_text_col = axes_text_col,
+                 axes_label_text_font = axes_label_text_font,
+                 axes_label_text_size = axes_label_text_size,
+                 axes_label_text_col = axes_label_text_col,
+                 legend = legend,
+                 legend_text = legend_text,
+                 legend_text_font = legend_text_font,
+                 legend_text_size = legend_text_size,
+                 legend_text_col = legend_text_col,
+                 legend_line_type = legend_line_type,
+                 legend_line_width = legend_line_width,
+                 legend_line_col = legend_line_col,
+                 legend_box_fill = legend_box_fill,
+                 legend_point_col = legend_point_col,
+                 gate_line_type = gate_line_type,
+                 gate_line_width = gate_line_width,
+                 gate_line_col = gate_line_col,
+                 gate_fill = gate_fill,
+                 gate_fill_alpha = gate_fill_alpha,
+                 label = label,
+                 label_text = label_text,
+                 label_stat = label_stat,
+                 label_position = label_position,
+                 label_text_x = label_text_x,
+                 label_text_y = label_text_y,
+                 label_text_font = label_text_font,
+                 label_text_size = label_text_size,
+                 label_text_col = label_text_col,
+                 label_fill = label_fill,
+                 label_fill_alpha = label_fill_alpha,
+                 border_line_type = border_line_type,
+                 border_line_width = border_line_width,
+                 border_line_col = border_line_col,
+                 border_fill = border_fill,
+                 border_fill_alpha = border_fill_alpha
       )
-
+      
       # New plot
       if (popup == TRUE &
-        cnt %% np == 0 &
-        length(fr_list) > cnt) {
+          cnt %% np == 0 &
+          length(fr_list) > cnt) {
         cyto_plot_new(popup = popup)
         par("mfrow" = layout)
       }
@@ -3445,29 +3491,29 @@ cyto_plot.GatingSet <- function(x,
     border_fill,
     border_fill_alpha
   )
-
+  
   # Record and/or save ---------------------------------------------------------
-
+  
   # Turn off graphics device for saving
   if (getOption("CytoRSuite_cyto_plot_save")) {
     if (inherits(x, getOption("CytoRSuite_cyto_plot_method"))) {
       if (!getOption("CytoRSuite_cyto_plot_custom")) {
-
+        
         # Close graphics device
         dev.off()
       }
-
+      
       # Reset CytoRSuite_cyto_plot_save
       options("CytoRSuite_cyto_plot_save" = FALSE)
-
+      
       # Reset CytoRSuite_cyto_plot_method
       options("cytoRSuite_cyto_plot_method" = NULL)
-
+      
       # Reset custom plotting flag
       options("CytoRSuite_cyto_plot_custom")
     }
   }
-
+  
   # Record plot for assignment
   invisible(recordPlot())
 }

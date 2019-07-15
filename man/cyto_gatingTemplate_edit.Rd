@@ -7,7 +7,7 @@
 cyto_gatingTemplate_edit(x, gatingTemplate = NULL)
 }
 \arguments{
-\item{x}{object of class \code{GatingSet} which has been gated with the 
+\item{x}{object of class \code{GatingSet} which has been gated with the
 supplied gatingTemplate.}
 
 \item{gatingTemplate}{name of the gatingTemplate csv file to be edited.}

@@ -24,7 +24,6 @@ gatingTemplates when multiple templates are required.
 }
 \examples{
 cyto_gatingTemplate_select("Activation_gatingTemplate")
-
 }
 \seealso{
 \code{\link{cyto_gatingTemplate_edit}}

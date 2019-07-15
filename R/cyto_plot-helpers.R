@@ -555,7 +555,7 @@ cyto_plot_new <- function(popup = FALSE, ...){
   }
   
   # Open popup window - either windows/X11/xquartz
-  if(popup){
+  if(popup == TRUE){
     
     if(.Platform$OS.type == "windows"){
       dev.new(...)
