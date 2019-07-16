@@ -284,7 +284,7 @@
     
     fr_mean <- colMeans(exprs(x)[,channels, drop = FALSE])
     
-    res <- unlist(lapply(channels, function(z){
+    res <- LAPPLY(channels, function(z){
       
       # Channel has been transformed
       if(z %in% BiocGenerics::colnames(trans)){
@@ -304,7 +304,7 @@
       
       return(geo_mean)
       
-    }))
+    })
     
   }
   
@@ -479,13 +479,13 @@
   }
   
   # Extract raw data and calculate mode directly
-  res <- unlist(lapply(channels, function(z){
+  res <- LAPPLY(channels, function(z){
     d <- .cyto_density(x, 
                        channel = z, 
                        smooth = density_smooth, 
                        modal = FALSE)
     d$x[d$y == max(d$y)]
-  }))
+  })
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
@@ -572,11 +572,11 @@
   
   # Extract raw data and calculate CV directly
   fr_median <- colMedians(exprs(x)[,channels,drop = FALSE])
-  res <- unlist(lapply(channels, function(z){
+  res <- LAPPLY(channels, function(z){
     md <- fr_median[z]
     rSD <- median(abs(exprs(x)[,z] - md)) * 1.4826
     rSD/md * 100
-  }))
+  })
   
   # return transposed tibble for cbinding to pData
   res <- t(res)
@@ -654,7 +654,7 @@
 .cyto_density_range <- function(x,
                                 axis = "x"){
   
-  if(!all(unlist(lapply(x,"class")) == "density")){
+  if(!all(LAPPLY(x,"class") == "density")){
     stop("'x should be a list of density objects")
   }
   
