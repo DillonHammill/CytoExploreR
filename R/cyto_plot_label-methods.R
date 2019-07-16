@@ -770,9 +770,9 @@ cyto_plot_label.list <- function(x,
   }else if(!all(is.numeric(c(text_x,text_y)))){
     
     # Check if label coords have been saved for this group
-    gate_match <- which(unlist(lapply(saved_gates, function(z){
+    gate_match <- which(LAPPLY(saved_gates, function(z){
       identical(gate, z)
-    })))[1]
+    }))[1]
     
     # No saved label coords
     if(length(saved_label_coords[[gate_match]]) == 0){
