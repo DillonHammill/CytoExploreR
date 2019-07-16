@@ -176,14 +176,14 @@ cyto_gate_draw.flowFrame <- function(x,
     }else if(inherits(overlay, "list")){
       
       # overlay should be list of flowFrames
-      if (all(unlist(lapply(overlay, function(z) {
+      if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         
         # overlay list of flowSets - use first fs convert to list of flowFrames
-      } else if (all(unlist(lapply(overlay, function(z) {
+      } else if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowSet")
-      })))) {
+      }))) {
         overlay <- overlay[[1]]
         overlay <- cyto_convert(overlay, "list of flowFrames")
         
@@ -556,16 +556,16 @@ cyto_gate_draw.flowSet <- function(x,
     }else if(inherits(overlay, "list")){
       
       # List of flowFrames repeat fr_list times - no sampling or grouping
-      if(all(unlist(lapply(overlay, function(z){
+      if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowFrame")
-      })))){
+      }))){
         
         overlay <- rep(list(overlay), N)
       
       # Allow list of flowFrame lists of length(fr_list)
-      }else if (all(unlist(lapply(unlist(overlay), function(z) {
+      }else if (all(LAPPLY(unlist(overlay), function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -577,9 +577,9 @@ cyto_gate_draw.flowSet <- function(x,
         }
         
       # list of flowSets
-      }else if(all(unlist(lapply(overlay, function(z){
+      }else if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowSet")
-      })))){
+      }))){
         
         # Group each flowSet, merge and sample
         overlay <- lapply(overlay, function(z){
@@ -1073,16 +1073,16 @@ cyto_gate_draw.GatingSet <- function(x,
     }else if(inherits(overlay, "list")){
       
       # List of flowFrames repeat fr_list times - no sampling or grouping
-      if(all(unlist(lapply(overlay, function(z){
+      if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowFrame")
-      })))){
+      }))){
         
         overlay <- rep(list(overlay), N)
         
         # Allow list of flowFrame lists of length(fr_list)
-      }else if (all(unlist(lapply(unlist(overlay), function(z) {
+      }else if (all(LAPPLY(unlist(overlay), function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -1094,9 +1094,9 @@ cyto_gate_draw.GatingSet <- function(x,
         }
         
         # list of flowSets
-      }else if(all(unlist(lapply(overlay, function(z){
+      }else if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowSet")
-      })))){
+      }))){
         
         # Group each flowSet, merge and sample
         overlay <- lapply(overlay, function(z){
