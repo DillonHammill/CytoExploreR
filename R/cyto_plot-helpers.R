@@ -197,13 +197,13 @@ cyto_plot_empty.flowFrame <- function(x,
         if (density_modal) {
           y_max <- 100
         } else {
-          y_max <- mean(unlist(lapply(fr_dens, function(d) {
+          y_max <- mean(LAPPLY(fr_dens, function(d) {
             if (!.all_na(d)) {
               max(d$y)
             } else {
               NA
             }
-          })), na.rm = TRUE)
+          }), na.rm = TRUE)
         }
         
         # Stacked distributions require shifting of y values
