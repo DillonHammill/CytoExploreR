@@ -232,7 +232,7 @@ cyto_names.GatingSet <- function(x){
 #' @rdname cyto_names
 #' @export
 cyto_names.list <- function(x){
-  unlist(lapply(x,"cyto_names"))
+  LAPPLY(x,"cyto_names")
 }
 
 # CYTO_CHECK -------------------------------------------------------------------
@@ -1205,13 +1205,13 @@ cyto_sample.list <- function(x,
                              seed = NULL) {
   
   # list of flowSets allowed
-  if(all(unlist(lapply(x, function(z){inherits(z,"flowSet")})))){
+  if(all(LAPPLY(x, function(z){inherits(z,"flowSet")}))){
     # Same sampling applied to all samples
     x <- lapply(x, function(z){
       cyto_sample(z, display = display, seed = seed)
     })
   # list of flowFrames  
-  }else if(all(unlist(lapply(x, function(z){inherits(z, "flowFrame")})))){
+  }else if(all(LAPPLY(x, function(z){inherits(z, "flowFrame")}))){
     # Same percentage sampling applied to each flowFrame
     if(display <= 1){
       # Same sampling applied to all samples
@@ -1221,7 +1221,7 @@ cyto_sample.list <- function(x,
     # Sampling by event number is more complex
     }else if(display > 1){
       # Identifiers
-      nms <- unlist(lapply(x, function(z){identifier(z)}))
+      nms <- LAPPLY(x, function(z){identifier(z)})
       ind <- seq_len(length(nms))
     
       # Sampling
@@ -1348,7 +1348,7 @@ cyto_markers <- function(x, file = NULL) {
       names(dt) <- found_files
       
       # Files found but don't match
-      if(all(unlist(lapply(dt, "is.null")))){
+      if(all(LAPPLY(dt, "is.null"))){
         
         # Make data.frame with channel and marker columns
         dt <- pd[, c("name", "desc")]
@@ -1358,7 +1358,7 @@ cyto_markers <- function(x, file = NULL) {
       }else{
         
         # Remove NULL entries from list - result should be of length 1
-        dt[unlist(lapply(dt, "is.null"))] <- NULL
+        dt[LAPPLY(dt, "is.null")] <- NULL
         file <- names(dt)[1]
         dt <- dt[[1]]
       
@@ -1498,7 +1498,7 @@ cyto_annotate <- function(x, file = NULL) {
       names(pd) <- found_files
       
       # Files found but don't match
-      if(all(unlist(lapply(pd,"is.null")))){
+      if(all(LAPPLY(pd,"is.null"))){
         
         # Extract cyto_details
         pd <- cyto_details(x)
@@ -1507,7 +1507,7 @@ cyto_annotate <- function(x, file = NULL) {
       }else{
         
         # Remove NULL entries from list - result should be of length 1
-        pd[unlist(lapply(pd, "is.null"))] <- NULL
+        pd[LAPPLY(pd, "is.null")] <- NULL
         file <- names(pd)[1]
         pd <- pd[[1]]
         
