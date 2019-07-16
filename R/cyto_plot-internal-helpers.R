@@ -156,7 +156,7 @@
     myBreaks <- inverse.fun(seq(min, max, by = by))
   } else {
     # log10 (e.g. 0, 10, 1000, ...)
-    base10raw <- unlist(lapply(2:n, function(e) 10^e))
+    base10raw <- LAPPLY(2:n, function(e) 10^e)
     base10raw <- c(0, base10raw)
     myBreaks <- base10raw[base10raw > rng.raw[1] & base10raw < rng.raw[2]]
   }
@@ -204,13 +204,13 @@
     gate_count <- length(x)
   } else if (class(x) == "list") {
     # list of gate objects
-    if (all(unlist(lapply(x, "class")) %in% typs)) {
+    if (all(LAPPLY(x, "class") %in% typs)) {
       gate_count <- length(unlist(x))
       # list of lists
-    } else if (all(unlist(lapply(x, "class")) == "list")) {
-      gate_count <- sum(unlist(lapply(x, function(y) {
+    } else if (all(LAPPLY(x, "class") == "list")) {
+      gate_count <- sum(LAPPLY(x, function(y) {
         length(y)
-      })))
+      }))
     }
   } else {
     gate_count <- 0
@@ -606,7 +606,7 @@
   } else if (inherits(gate, "list")) {
 
     # List of individual gates
-    if (all(unlist(lapply(gate, class)) %in%
+    if (all(LAPPLY(gate, class) %in%
       c("rectangleGate", "polygonGate", "ellipsoidGate"))) {
 
       # Assume 1 gate per sample
@@ -619,7 +619,7 @@
       }
 
       # List of filters objects
-    } else if (all(unlist(lapply(gate, class)) == "filters")) {
+    } else if (all(LAPPLY(gate, class) == "filters")) {
 
       # Assume 1 filters object per sample
       gate <- rep(gate, length.out = smp)
@@ -681,12 +681,12 @@ cyto_plot_overlay_convert <- function(x, ...) {
       "list of flowFrames"
     )
     # list of flowFrames
-  } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
+  } else if (all(LAPPLY(overlay, class) == "flowFrame")) {
 
     # flowSet list -> list of flowFrames
-  } else if (all(unlist(lapply(overlay, function(x) {
+  } else if (all(LAPPLY(overlay, function(x) {
     inherits(x, "flowSet")
-  }))) &
+  })) &
     length(overlay) == 1) {
     overlay <- cyto_convert(
       overlay[[1]],
@@ -724,7 +724,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
       function(z) overlay[[z]]
     ), "list")
     # list of flowFrames
-  } else if (all(unlist(lapply(overlay, class)) == "flowFrame")) {
+  } else if (all(LAPPLY(overlay, class) == "flowFrame")) {
     if (length(overlay) == 1) {
       overlay <- lapply(rep(list(overlay[[1]]), length(x)), "list")
     } else {
@@ -737,10 +737,10 @@ cyto_plot_overlay_convert <- function(x, ...) {
       overlay <- lapply(overlay, "list")
     }
     # list of flowSets
-  } else if (all(unlist(lapply(overlay, function(x) {
+  } else if (all(LAPPLY(overlay, function(x) {
     inherits(x, "flowSet")
-  })))) {
-    if (!all(unlist(lapply(overlay, length)) == length(x))) {
+  }))) {
+    if (!all(LAPPLY(overlay, length) == length(x))) {
       stop(paste("Each flowSet in supplied list should be of the",
         "same length as the supplied flowSet.",
         sep = " "
@@ -1650,15 +1650,15 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
       # Find center x co-ord for label position in each gate
       if (all(is.na(label_box_x))) {
-        label_box_x <- unlist(lapply(unique(gate), function(x) {
+        label_box_x <- LAPPLY(unique(gate), function(x) {
           (unname(x@min) + unname(x@max)) / 2
-        }))
+        })
       }
       label_box_x <- do.call("rep", list(label_box_x, smp))
 
       # Find y co-ord for each sample
       if (.all_na(label_box_y) & density_modal) {
-        label_box_y <- unlist(lapply(
+        label_box_y <- LAPPLY(
           rep(seq(1, smp),
             length.out = length(gate),
             each = length(unique(gate))
@@ -1667,7 +1667,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
             (0.5 * density_stack * 100) +
               ((x - 1) * density_stack * 100)
           }
-        ))
+        )
 
         # Too much computation required here - do this in .cyto_plot
       } else if (.all_na(label_box_y) & !density_modal) {
@@ -1725,7 +1725,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
       # Find y co-ord for each sample
       if (.all_na(label_box_y) & density_modal) {
-        label_box_y <- unlist(lapply(
+        label_box_y <- LAPPLY(
           rep(seq(1, smp),
             length.out = length(gate),
             each = length(unique(gate))
@@ -1733,7 +1733,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
           function(x) {
             (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
           }
-        ))
+        )
 
         # Too much computation required here - do this in cyto_plot_1d flowFrame
       } else if (.all_na(label_box_y) & !density_modal) {
@@ -2188,7 +2188,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
   overlaps <- lapply(seq_len(length(x)), function(y) {
 
     # Check if other rectangles overlap
-    unlist(lapply(seq_len(length(x)), function(z) {
+    LAPPLY(seq_len(length(x)), function(z) {
 
       # Co-ordinates of reference label
       x1 <- x[[y]][, "x"]
@@ -2218,7 +2218,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
       # Non-overlapping x and y co-ordinates
       return(FALSE)
-    }))
+    })
   })
 
   return(overlaps)
