@@ -217,9 +217,9 @@
       
       # if same flowFrame return first only
       if (length(unique(fr.lst)) == 1 |
-          length(unique(unlist(lapply(fr.lst, function(x) {
+          length(unique(LAPPLY(fr.lst, function(x) {
             identifier(x)
-          })))) == 1) {
+          }))) == 1) {
         fr <- fr.lst[[1]]
       } else {
         fs <- flowSet(fr.lst)
