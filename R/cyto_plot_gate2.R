@@ -812,9 +812,9 @@ cyto_plot_gate2.list <- function(x,
 
   # Missing channels - use unique gate parameters
   if (missing(channels)) {
-    channels <- unique(unlist(lapply(gate, function(z) {
+    channels <- unique(LAPPLY(gate, function(z) {
       as.vector(parameters(z))
-    })))
+    }))
   }
 
   # Number of gates
