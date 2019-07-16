@@ -436,14 +436,14 @@ cyto_plot.flowFrame <- function(x,
     } else if (inherits(overlay, "list")) {
       
       # overlay should be list of flowFrames
-      if (all(unlist(lapply(overlay, function(z) {
+      if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         overlay_list <- overlay
         # overlay list of flowSets - use first fs convert to list of flowFrames
-      } else if (all(unlist(lapply(overlay, function(z) {
+      } else if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowSet")
-      })))) {
+      }))) {
         overlay <- overlay[[1]]
         overlay_list <- cyto_convert(overlay, "list of flowFrames")
         # overlay not supported
@@ -465,13 +465,13 @@ cyto_plot.flowFrame <- function(x,
   
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
-    legend_text <- unlist(lapply(fr_list, function(z) {
+    legend_text <- LAPPLY(fr_list, function(z) {
       nm <- identifier(z)
       if(nm == "anonymous"){
         nm <- "Combined Events"
       }
       return(nm)
-    }))
+    })
   }
   
   # Title
@@ -607,17 +607,33 @@ cyto_plot.flowFrame <- function(x,
   
   # Organise gates -------------------------------------------------------------
   
-  # Must be list of gates
+  # Must be list of gate objects
   if(!.all_na(gate)){
     if(class(gate) %in% c("rectangleGate","polygonGate","ellipsoidGate")){
       # Add gate to list
       gate <- list(gate)
-    }else if(class(gate) == "list"){
-      # extract gate objects from filters
-      gate <- unlist(gate)
     }else if(class(gate) == "filters"){
       gate <- unlist(gate)
+    }else if(class(gate) == "list"){
+      # list of valid gate objects
+      if(all(LAPPLY(gates, "class") %in% c("rectangleGate",
+                                                   "polygonGate",
+                                                   "ellipsoidGate",
+                                                   "filters"))){
+        # extract gate objects from filters
+        gate <- unlist(gate)
+      }else if(all(LAPPLY(gates, "class") == "list")){
+        # list of gate object lists supplied - use first element
+        gate <- unlist(gate[[1]])
+      }
     }
+  }
+  
+  # Prepare gates for 1D plots with overlays
+  if(!.all_na(overlay)){
+    # Repeat gates per layer
+    gate <- rep(list(gate), length(fr_list))
+    # Convert any 2D gates to 1D gates
     
   }
   
@@ -1238,9 +1254,9 @@ cyto_plot.flowSet <- function(x,
     } else if (inherits(overlay, "list")) {
       
       # Allow list of flowFrame lists of length fr_list
-      if (all(unlist(lapply(unlist(overlay), function(z) {
+      if (all(LAPPLY(unlist(overlay), function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         
         # Must be of same length as fr_list
         if (length(overlay) != length(fr_list)) {
@@ -1254,9 +1270,9 @@ cyto_plot.flowSet <- function(x,
         overlay_list <- overlay
         
         # list of flowSets
-      } else if (all(unlist(lapply(overlay, function(z) {
+      } else if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowSet")
-      })))) {
+      }))) {
         
         # Apply same grouping to overlay
         if (!.all_na(group_by)) {
@@ -1353,7 +1369,7 @@ cyto_plot.flowSet <- function(x,
   
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
-    legend_text <- unlist(lapply(fr_list, function(z) {
+    legend_text <- LAPPLY(fr_list, function(z) {
       lapply(z, function(y) {
         nm <- identifier(y)
         if(nm == "anonymous"){
@@ -1361,7 +1377,7 @@ cyto_plot.flowSet <- function(x,
         }
         return(nm)
       })
-    }))
+    })
   }
   
   # Title
@@ -2170,14 +2186,14 @@ cyto_plot.GatingHierarchy <- function(x,
     } else if (inherits(overlay, "list")) {
       
       # overlay should be list of flowFrames
-      if (all(unlist(lapply(overlay, function(z) {
+      if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         overlay_list <- overlay
         # overlay list of flowSets - use first fs convert to list of flowFrames
-      } else if (all(unlist(lapply(overlay, function(z) {
+      } else if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowSet")
-      })))) {
+      }))) {
         overlay <- overlay[[1]]
         overlay_list <- cyto_convert(overlay, "list of flowFrames")
         # overlay not supported
@@ -2225,7 +2241,7 @@ cyto_plot.GatingHierarchy <- function(x,
         ind <- lapply(gt$dims, function(z) {
           grep(channels, z)
         })
-        ind <- unlist(lapply(ind, "length")) != 0
+        ind <- LAPPLY(ind, "length") != 0
         alias <- gt$alias[ind]
       }
       
@@ -2248,9 +2264,9 @@ cyto_plot.GatingHierarchy <- function(x,
   
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
-    legend_text <- unlist(lapply(fr_list, function(z) {
+    legend_text <- LAPPLY(fr_list, function(z) {
       identifier(z)
-    }))
+    })
   }
   
   # Title
@@ -2260,7 +2276,7 @@ cyto_plot.GatingHierarchy <- function(x,
     title <- identifier(fr)
     
     # Add parent name to each plot
-    title <- unlist(lapply(title, function(z) {
+    title <- LAPPLY(title, function(z) {
       
       # Parent name
       if (parent == "root") {
@@ -2288,7 +2304,7 @@ cyto_plot.GatingHierarchy <- function(x,
       } else {
         paste(z, "\n", pt, sep = " ")
       }
-    }))
+    })
   }
   
   # X axis breaks and labels - pass through axes_text argument
@@ -2970,9 +2986,9 @@ cyto_plot.GatingSet <- function(x,
     } else if (inherits(overlay, "list")) {
       
       # Allow list of flowFrame lists of length fr_list
-      if (all(unlist(lapply(unlist(overlay), function(z) {
+      if (all(LAPPLY(unlist(overlay), function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         
         # Must be of same length as fr_list
         if (length(overlay) != length(fr_list)) {
@@ -2986,9 +3002,9 @@ cyto_plot.GatingSet <- function(x,
         overlay_list <- overlay
         
         # list of flowSet lists
-      } else if (all(unlist(lapply(overlay, function(z) {
+      } else if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowSet")
-      })))) {
+      }))) {
         
         # Apply same grouping to overlay
         if (!.all_na(group_by)) {
@@ -3094,7 +3110,7 @@ cyto_plot.GatingSet <- function(x,
         ind <- lapply(gt$dims, function(z) {
           grep(channels, z)
         })
-        ind <- unlist(lapply(ind, "length")) != 0
+        ind <- LAPPLY(ind, "length") != 0
         alias <- gt$alias[ind]
       }
       
@@ -3135,9 +3151,9 @@ cyto_plot.GatingSet <- function(x,
     # Can't plot per sample 1D gates - must all be the same
     # Repeated in mapply as required
     # Must be selected from non-empty sample - co-ordinates modified to -Inf Inf
-    ind <- unlist(lapply(fr_list[[1]], function(z){
+    ind <- LAPPLY(fr_list[[1]], function(z){
       BiocGenerics::nrow(z)
-    }))
+    })
     ind <- which(ind > 0)
     gate <- list(gate[[ind[1]]]) # uses gates from first sample only
   }
@@ -3146,11 +3162,11 @@ cyto_plot.GatingSet <- function(x,
   
   # Legend text - names of fr_list[[i]]
   if (.all_na(legend_text)) {
-    legend_text <- unlist(lapply(fr_list, function(z) {
+    legend_text <- LAPPLY(fr_list, function(z) {
       lapply(z, function(y) {
         identifier(y)
       })
-    }))
+    })
   }
   
   # Title
@@ -3160,7 +3176,7 @@ cyto_plot.GatingSet <- function(x,
     title <- nms
     
     # Add parent name to each plot
-    title <- unlist(lapply(title, function(z) {
+    title <- LAPPLY(title, function(z) {
       
       # Parent name
       if (parent == "root") {
@@ -3188,7 +3204,7 @@ cyto_plot.GatingSet <- function(x,
       } else {
         paste(z, "\n", pt, sep = " ")
       }
-    }))
+    })
   }
   
   # X axis breaks and labels - pass through axes_text argument
