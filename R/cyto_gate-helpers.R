@@ -1,3 +1,5 @@
+# CYTO_GATE_REMOVE -------------------------------------------------------------
+
 #' Remove Gate(s) and Edit gatingTemplate csv File
 #'
 #' @param gs an object of class \code{GatingSet}.
@@ -111,6 +113,8 @@ cyto_gate_remove <- function(gs,
   write.csv(gt, gatingTemplate, row.names = FALSE)
 }
 
+# CYTO_GATE_EXTRACT ------------------------------------------------------------
+
 #' Extract Saved Gate(s) from gatingTemplate.
 #'
 #' @param parent name of the parental population.
@@ -212,10 +216,11 @@ cyto_gate_extract <- function(parent,
   return(gates)
 }
 
+# CYTO_GATE_EDIT ---------------------------------------------------------------
+
 #' Edit Existing Gate(s).
 #'
 #' @param x an object of class \code{GatingSet}.
-
 #' @param parent name of the parental population.
 #' @param alias name(s) of the gate to edit (e.g. "Single Cells").
 #' @param channels name(s) of the channel(s) used to construct the gate(s). This
@@ -795,6 +800,8 @@ cyto_gate_edit <- function(x,
   assign(deparse(substitute(x)), gs, envir = globalenv())
 }
 
+# cYTO_GATE_RENAME -------------------------------------------------------------
+
 #' Rename Gates
 #'
 #' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
@@ -863,6 +870,8 @@ cyto_gate_rename <- function(x,
   write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
   
 }
+
+# CYTO_GATE_TYPE ---------------------------------------------------------------
 
 #' Get Gate Type from Saved Gate.
 #'
@@ -1099,4 +1108,233 @@ cyto_gate_type <- function(gates) {
   }
   
   return(types)
+}
+
+# CYTO_GATE_CONVERT ------------------------------------------------------------
+
+#' Convert Between 1D and 2D Gate Objects
+#'
+#' Useful function to convert between 1D and 2D gates once a new plot has been
+#' called.
+#'
+#' @param x gate object(s) to be converted.
+#' @param channels indicates the required dimensions of the gate.
+#'
+#' @return modified gate object.
+#'
+#' @importFrom flowCore parameters rectangleGate
+#' @importFrom graphics par
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @name cyto_gate_convert
+NULL
+
+#' @noRd
+#' @export
+cyto_gate_convert <- function(x, ...){
+  UseMethod("cyto_gate_convert")
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.rectangleGate <- function(x, 
+                                            channels = NULL){
+  
+  # Channels missing
+  if(is.null(channels)){
+    stop("Supply the channels in which the gate will be plotted.")
+  }
+  
+  # Extract channels of gate
+  gate_channels <- parameters(x)
+  gate_channels_length <- length(gate_channels)
+  
+  # Dimensions required
+  channels_length <- length(channels)
+  
+  # Plot dimensions
+  limits <- par("usr")
+  
+  # Plot should be called
+  if(limits == c(0,1,0,1)){
+    message("cyto_plot should be called prior to gate conversion")
+  }
+  
+  # Extract limits
+  xmin <- limits[1]
+  xmax <- limits[2]
+  ymin <- limits[3]
+  ymax <- limits[4]
+  
+  # 1D gate
+  if(gate_channels_length == 1){
+   # 1D gate -> 2D
+   if(channels_length == 2){
+     # Gate has x channel
+     if(chans == channels[1]){
+       # Make a rectangleGate with y coords
+       coords <- matrix(c(ymin, ymax), ncol = 1, nrow = 2)
+       colnames(coords) <- channels[2]
+       rownames(coords) <- c("min", "max")
+       rg <- rectangleGate(filterId = x@filterId, .gate = coords)
+       # Update x to be 2D gate
+       x <- x * rg
+     # Gate has y channel  
+     }else if(chans == channels[2]){
+       # Make a rectangleGate with x coords
+       coords <- matrix(c(xmin, xmax), ncol = 1, nrow = 2)
+       colnames(coords) <- channels[1]
+       rownames(coords) <- c("min", "max")
+       rg <- rectangleGate(filterId = x@filterId, .gate = coords)
+       # Update x to be 2D gate
+       x <- rg * x
+     }
+   }
+  # 2D gate 
+  }else if(gate_channels_length == 2){
+    # 2D gate -> 1D
+    if(channels_length == 1){
+      # Restrict gate to channels
+      x <- x[channels]
+    }
+  }
+  
+  # Return modified gates
+  return(x)
+  
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.polygonGate <- function(x, 
+                                          channels = NULL){
+  
+  # Channels missing
+  if(is.null(channels)){
+    stop("Supply the channels in which the gate will be plotted.")
+  }
+  
+  # Extract channels of gate
+  gate_channels <- parameters(x)
+  gate_channels_length <- length(gate_channels)
+  
+  # Dimensions required
+  channels_length <- length(channels)
+  
+  # Plot dimensions
+  limits <- par("usr")
+  
+  # Plot should be called
+  if(limits == c(0,1,0,1)){
+    message("cyto_plot should be called prior to gate conversion")
+  }
+  
+  # Extract limits
+  xmin <- limits[1]
+  xmax <- limits[2]
+  ymin <- limits[3]
+  ymax <- limits[4]
+  
+  # Must be 2D gate
+  if(channels_length == 1){
+    # Use min and max values of matching channel - > 1D rectangleGate
+    coords <- matrix(c(min(x@boundaries[,channels]), 
+                       max(x@boundaries[,channels])), 
+                     ncol = 1, 
+                     nrow = 2)
+    colnames(coords) <- channels[2]
+    rownames(coords) <- c("min", "max")
+    x <- rectangleGate(filterId = x@filterId, .gate = coords)
+  }
+  
+  # Return modified gates
+  return(x)
+  
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.ellipsoidGate <- function(x, 
+                                            channels = NULL){
+  
+  # Channels missing
+  if(is.null(channels)){
+    stop("Supply the channels in which the gate will be plotted.")
+  }
+  
+  # Extract channels of gate
+  gate_channels <- parameters(x)
+  gate_channels_length <- length(gate_channels)
+  
+  # Dimensions required
+  channels_length <- length(channels)
+  
+  # Plot dimensions
+  limits <- par("usr")
+  
+  # Plot should be called
+  if(limits == c(0,1,0,1)){
+    message("cyto_plot should be called prior to gate conversion")
+  }
+  
+  # Extract limits
+  xmin <- limits[1]
+  xmax <- limits[2]
+  ymin <- limits[3]
+  ymax <- limits[4]
+  
+  # Coerce x to polygonGate
+  x <- as(x, "polygonGate")
+  
+  # Must be 2D gate
+  if(channels_length == 1){
+    # Use min and max values of matching channel - > 1D rectangleGate
+    coords <- matrix(c(min(x@boundaries[,channels]), 
+                       max(x@boundaries[,channels])), 
+                     ncol = 1, 
+                     nrow = 2)
+    colnames(coords) <- channels[2]
+    rownames(coords) <- c("min", "max")
+    x <- rectangleGate(filterId = x@filterId, .gate = coords)
+  }
+  
+  # Return modified gates
+  return(x)
+  
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.filters <- function(x, 
+                                      channels = NULL){
+  
+  # Extract list of gates from filters object
+  x <- unlist(x)
+  
+  # Call to list method
+  x <- cyto_gate_convert(x,
+                         channels)
+  
+  # Return modified gates
+  return(x)
+  
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.list <- function(x, 
+                                   channels = NULL){
+  
+  # Extract gate objects into list
+  x <- unlist(x)
+  
+  # Run through each gate
+  x <- lapply(x, function(z){
+    cyto_gate_convert(z, channels)
+  })
+  
+  # Return list of modified gates
+  return(x)
+  
 }
