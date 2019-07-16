@@ -209,7 +209,8 @@ cyto_plot_label2 <- function(x,
     st <- unlist(lapply(pops, function(z) {
       if (label_stat == "freq") {
         sts <- .cyto_count(z) / .cyto_count(x) * 100
-        sts <- sprintf("%.2f %%", sts)
+        sts <- .round(sts, 2)
+        sts <- paste(sts, "%")
       } else {
         sts <- cyto_stats_compute(z,
           channels = channels,
@@ -218,7 +219,7 @@ cyto_plot_label2 <- function(x,
           format = "long",
           density_smooth = density_smooth
         )
-        sts <- round(sts[, ncol(sts)], 2)
+        sts <- .round(sts[, ncol(sts)], 2)
       }
       return(sts)
     }))

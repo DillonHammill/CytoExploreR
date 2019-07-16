@@ -222,6 +222,8 @@ cyto_plot_gate2.rectangleGate <- function(x,
         density_smooth = density_smooth
       )
       fr_stat <- as.numeric(fr_stat[1, ncol(fr_stat)])
+      fr_stat <- .round(fr_stat, 2)
+      
       # Combine label_text with statistic
       if (!.all_na(label_text[1])) {
         if (label_stat[1] == "freq") {
@@ -305,6 +307,7 @@ cyto_plot_gate2.rectangleGate <- function(x,
             density_smooth = density_smooth
           )
           fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
+          fr_negated_stat <- .round(fr_negated_stat, 2)
         }
 
         # Combine label_text with statistic
@@ -525,6 +528,7 @@ cyto_plot_gate2.polygonGate <- function(x,
         density_smooth = density_smooth
       )
       fr_stat <- as.numeric(fr_stat[1, ncol(fr_stat)])
+      fr_stat <- .round(fr_stat, 2)
       # Combine label_text with statistic
       if (!.all_na(label_text[1])) {
         if (label_stat[1] == "freq") {
@@ -610,6 +614,7 @@ cyto_plot_gate2.polygonGate <- function(x,
             density_smooth = density_smooth
           )
           fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
+          fr_negated_stat <- .round(fr_negated_stat, 2)
         }
 
         # Combine label_text with statistic
@@ -972,6 +977,7 @@ cyto_plot_gate2.list <- function(x,
           density_smooth = density_smooth
         )
         fr_negated_stat <- as.numeric(fr_negated_stat[1, ncol(fr_negated_stat)])
+        fr_negated_stat <- .round(fr_negated_stat, 2)
       }
 
       # Combine label_text with statistic
