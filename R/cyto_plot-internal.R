@@ -180,13 +180,13 @@
       if (density_modal) {
         y_max <- 100
       } else {
-        y_max <- mean(unlist(lapply(fr_dens, function(d) {
+        y_max <- mean(LAPPLY(fr_dens, function(d) {
           if (!.all_na(d)) {
             max(d$y)
           } else {
             NA
           }
-        })), na.rm = TRUE)
+        }), na.rm = TRUE)
       }
 
       # Stacked distributions require shifting of y values
@@ -304,6 +304,9 @@
       )
     }
 
+    # Prepare gates
+    
+    
     # Turn off gates and labels if no density in fr_dens
     if (.all_na(fr_dens)) {
       label <- FALSE
@@ -369,9 +372,9 @@
         if (.all_na(label_text_y) & label_position == "auto") {
           # Default is half way beteen horizontal lines (shft)
           shft <- c(shft, shft[length(shft)] + shft[2])
-          label_text_y <- unlist(lapply(seq(1, length(shft) - 1), function(z) {
+          label_text_y <- LAPPLY(seq(1, length(shft) - 1), function(z) {
             (shft[z] + shft[z + 1]) / 2
-          }))
+          })
 
           # Repeat gate times if gate supplied - one label per layer if no gates
           if (!.all_na(gate)) {
@@ -543,7 +546,7 @@
     point_cols <- .cyto_plot_point_cols(point_cols)
 
     # POINT_COL LEGEND - vector (replace density colours with first point_cols)
-    point_col <- unlist(lapply(point_col, function(z) {
+    point_col <- LAPPLY(point_col, function(z) {
 
       # colours defined for each point
       if (length(z) > 1) {
@@ -551,7 +554,7 @@
       } else {
         return(z)
       }
-    }))
+    })
     
     # LEGEND
     if (legend != FALSE) {
@@ -580,7 +583,7 @@
     }
 
     # If no events turn off gates and labels
-    if (all(unlist(lapply(x, "nrow")) == 0)) {
+    if (all(LAPPLY(x, "nrow") == 0)) {
       gate <- NA
       label <- FALSE
     }
