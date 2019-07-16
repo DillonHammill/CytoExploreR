@@ -256,14 +256,14 @@ setMethod(
     NIL <- suppressMessages(transform(NIL, inv))
     
     # Calculate 50th & 80th percentile in all channels for NIL
-    NIL_50 <- unlist(lapply(channels, function(channel){
+    NIL_50 <- LAPPLY(channels, function(channel){
       quantile(exprs(NIL)[,channel], 0.5)
-    }))
+    })
     names(NIL_50) <- channels
     
-    NIL_84 <- unlist(lapply(channels, function(channel){
+    NIL_84 <- LAPPLY(channels, function(channel){
       quantile(exprs(NIL)[,channel], 0.84)
-    }))
+    })
     names(NIL_84) <- channels
     
     # Combine into a list - NIL_stats
@@ -273,14 +273,14 @@ setMethod(
     POS_stats <- lapply(seq_len(length(pops)), function(x){
       
       # Calculate 50th & 80th percentile in all channels
-      POP_50 <- unlist(lapply(channels, function(channel){
+      POP_50 <- LAPPLY(channels, function(channel){
         quantile(exprs(pops[[x]])[,channel], 0.5)
-      }))
+      })
       names(POP_50) <- channels
       
-      POP_84 <- unlist(lapply(channels, function(channel){
+      POP_84 <- LAPPLY(channels, function(channel){
         quantile(exprs(pops[[x]])[,channel], 0.84)
-      }))
+      })
       names(POP_84) <- channels
       
       # Combine into a list - NIL_stats
