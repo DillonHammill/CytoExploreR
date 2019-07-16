@@ -113,3 +113,8 @@ file_wd_check <- function(name) {
     return(FALSE)
   }
 }
+
+# ROUND ------------------------------------------------------------------------
+
+#' @noRd
+.round <- function(x, k) trimws(format(round(x, k), nsmall=k))

@@ -2,20 +2,35 @@
 % Please edit documentation in R/cyto_plot_grid-methods.R
 \name{cyto_plot_grid}
 \alias{cyto_plot_grid}
+\alias{cyto_plot_grid.flowSet}
+\alias{cyto_plot_grid.GatingSet}
 \title{Grid Layout for cyto_plot}
 \usage{
-cyto_plot_grid(x, ...)
+\method{cyto_plot_grid}{flowSet}(x, channels = NULL, axes_trans = NULL,
+  group_by = FALSE, overlay = NULL, gate = NA, display = 1,
+  layout = NULL, popup = FALSE, xlab, ylab, title = c(NA, NA),
+  format = "row", header = NULL, panel_x_label = NULL,
+  panel_y_label = NULL, axes_label_text_font = 2,
+  axes_label_text_size = 2, axes_label_text_col = "black",
+  title_text_font = c(1, 1), title_text_size = c(1, 1),
+  title_text_col = c("black", "black"), header_text_font = 2,
+  header_text_size = 1.5, header_text_col = "black",
+  panel_label_font = c(2, 2), panel_label_size = c(1, 1),
+  panel_label_col = c("black", "black"), ...)
+
+\method{cyto_plot_grid}{GatingSet}(x, parent, alias, channels, group_by,
+  header, title_text_x, title_text_y, ...)
+}
+\arguments{
+\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+
+\item{...}{additional arguments passed to \code{cyto_plot}.}
 }
 \description{
 \code{cyto_plot_grid} is wrapper for cyto_plot which provides a grid layout
- without excess white space. \code{cyto_plot_grid} is particularly useful for
- visualising data grouped using \code{group_by}.
+without excess white space. \code{cyto_plot_grid} is particularly useful for
+visualising data grouped using \code{group_by}.
 }
-\details{
-@param x object of class \code{flowSet} or \code{GatingSet}.
- @param ... additional method-specific arguments for \code{cyto_plot_grid}.
-
-@author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-
-@export
+\author{
+Dillon Hammill (Dillon.Hammill@anu.edu.au)
 }
