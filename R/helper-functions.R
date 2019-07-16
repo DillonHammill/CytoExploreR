@@ -173,14 +173,14 @@ setMethod(cyto_channel_select,
             opts <- c(cyto_fluor_channels(fs), "Unstained")
             
             # Print sample name and select channel
-            chans <- opts[unlist(lapply(pData(fs)$name, function(x) {
+            chans <- opts[LAPPLY(pData(fs)$name, function(x) {
               message(
                 paste("Select a fluorescent channel for the following sample:",
                       x))
               
               menu(choices = opts, graphics = TRUE)
               
-            }))]
+            })]
             
             return(chans)
           }
@@ -280,14 +280,14 @@ setMethod(cyto_channel_select,
             opts <- c(cyto_fluor_channels(fs), "Unstained")
             
             # Print sample name and select channel
-            chans <- opts[unlist(lapply(pData(fs)$name, function(x) {
+            chans <- opts[uLAPPLY(pData(fs)$name, function(x) {
               message(
                 paste("Select a fluorescent channel for the following sample:",
                       x))
               
               menu(choices = opts, graphics = TRUE)
               
-            }))]
+            })]
             
             return(chans)
             
