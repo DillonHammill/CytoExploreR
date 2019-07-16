@@ -82,7 +82,7 @@ cyto_plot_density.flowFrame <- function(x,
     if(density_modal){
       y_max <- 100
     }else{
-      y_max <- mean(unlist(lapply(fr_dens, function(z){
+      y_max <- mean(LAPPLY(fr_dens, function(z){
     
         if(!.all_na(z)){
           max(z$y)
@@ -90,7 +90,7 @@ cyto_plot_density.flowFrame <- function(x,
           NA
         }
     
-      })), na.rm = TRUE)
+      }), na.rm = TRUE)
     
     }
   
@@ -224,13 +224,13 @@ cyto_plot_density.list <- function(x,
   if(density_modal){
     y_max <- 100
   }else{
-    y_max<- mean(unlist(lapply(x, function(d){
+    y_max<- mean(LAPPLY(x, function(d){
       if(!.all_na(d)){
         max(d$y) - min(d$y)
       }else{
         NA
       }
-    })), na.rm = TRUE)
+    }), na.rm = TRUE)
   }
   
   # Empty list - all NA without density objects
@@ -251,13 +251,13 @@ cyto_plot_density.list <- function(x,
   )
   
   # Minimum for each distribution
-  mn <- unlist(lapply(x, function(z){
+  mn <- LAPPLY(x, function(z){
     if(!.all_na(z)){
       min(z$y)
     }else{
       0
     }
-  }))
+  })
   
   # Add density distributions - reverse plot order and colours
   if (length(x) > 1 & 
