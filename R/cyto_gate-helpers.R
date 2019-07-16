@@ -86,10 +86,10 @@ cyto_gate_remove <- function(gs,
   }
   
   # Get children from GatingSet
-  chldrn <- unlist(lapply(
+  chldrn <-LAPPLY(
     alias,
     function(x) basename(getDescendants(gs[[1]], paste0(parent,"/",x)))
-  ))
+  )
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- c(alias, unique(chldrn))
   
@@ -482,16 +482,16 @@ cyto_gate_edit <- function(x,
     }else if(inherits(overlay, "list")){
       
       # List of flowFrames repeat fr_list times - no sampling or grouping
-      if(all(unlist(lapply(overlay, function(z){
+      if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowFrame")
       })))){
         
         overlay <- rep(list(overlay), N)
         
         # Allow list of flowFrame lists of length(fr_list)
-      }else if (all(unlist(lapply(unlist(overlay), function(z) {
+      }else if (all(LAPPLY(unlist(overlay), function(z) {
         inherits(z, "flowFrame")
-      })))) {
+      }))) {
         
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -503,9 +503,9 @@ cyto_gate_edit <- function(x,
         }
         
         # list of flowSets
-      }else if(all(unlist(lapply(overlay, function(z){
+      }else if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowSet")
-      })))){
+      }))){
         
         # Group each flowSet, merge and sample
         overlay <- lapply(overlay, function(z){
@@ -698,7 +698,7 @@ cyto_gate_edit <- function(x,
     .cyto_alias_check(alias = alias, type = type)
     
     # Extract channels from gates
-    channels <- unique(unlist(lapply(gates, parameters)))
+    channels <- unique(LAPPLY(gates, parameters))
     
     # 2D Interval gates require axis argument
     if ("interval" %in% type) {
@@ -954,9 +954,9 @@ cyto_gate_type <- function(gates) {
   } else if (length(gates) > 1) {
     
     # Get classes of gates
-    classes <- unlist(lapply(gates, function(x) {
+    classes <- LAPPLY(gates, function(x) {
       class(x)
-    }))
+    })
     
     # All gates are of the same class
     if (all(classes[1] == classes)) {
@@ -986,7 +986,7 @@ cyto_gate_type <- function(gates) {
             
             # Each gate could be either rectangle, interval, threshold, boundary
           } else {
-            types <- unlist(lapply(gates, function(x) {
+            types <- LAPPLY(gates, function(x) {
               
               # Includes rectangle, interval, threshold and boundary gate_types
               if (length(parameters(x)) == 1) {
@@ -1013,10 +1013,10 @@ cyto_gate_type <- function(gates) {
                   types <- "rectangle"
                 }
               }
-            }))
+            })
           }
         } else {
-          types <- unlist(lapply(gates, function(x) {
+          types <- LAPPLY(gates, function(x) {
             
             # Includes rectangle, interval, threshold and boundary gate_types
             if (length(parameters(x)) == 1) {
@@ -1043,7 +1043,7 @@ cyto_gate_type <- function(gates) {
                 types <- "rectangle"
               }
             }
-          }))
+          })
         }
         
         # Gates are all polygons
@@ -1066,7 +1066,7 @@ cyto_gate_type <- function(gates) {
       
       # Not all supplied gates are of the same class - treat separately
     } else {
-      types <- unlist(lapply(gates, function(x) {
+      types <- LAPPLY(gates, function(x) {
         if (class(x) == "ellipsoidGate") {
           
           # type == "ellipse"
@@ -1103,7 +1103,7 @@ cyto_gate_type <- function(gates) {
           # type == "polygon"
           types <- "polygon"
         }
-      }))
+      })
     }
   }
   
