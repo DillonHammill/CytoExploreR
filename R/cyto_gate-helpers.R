@@ -1136,6 +1136,24 @@ cyto_gate_convert <- function(x, ...){
   UseMethod("cyto_gate_convert")
 }
 
+#' @noRd
+#' @export
+cyto_gate_convert.default <- function(x, 
+                                      channels = NULL){
+  
+  # Invalid gate object
+  if(!class(x) %in% c("list", 
+                      "filters",
+                      "rectangleGate",
+                      "polygonGate",
+                      "ellipsoidGate")){
+    stop(paste(
+      "'x' should contain either a filters, rectangleGate, polygonGate,",
+      "or ellipsoidGate objects."))
+  }
+  
+}
+
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.rectangleGate <- function(x, 
@@ -1156,11 +1174,6 @@ cyto_gate_convert.rectangleGate <- function(x,
   # Plot dimensions
   limits <- par("usr")
   
-  # Plot should be called
-  if(limits == c(0,1,0,1)){
-    message("cyto_plot should be called prior to gate conversion")
-  }
-  
   # Extract limits
   xmin <- limits[1]
   xmax <- limits[2]
@@ -1172,7 +1185,7 @@ cyto_gate_convert.rectangleGate <- function(x,
    # 1D gate -> 2D
    if(channels_length == 2){
      # Gate has x channel
-     if(chans == channels[1]){
+     if(gate_channels == channels[1]){
        # Make a rectangleGate with y coords
        coords <- matrix(c(ymin, ymax), ncol = 1, nrow = 2)
        colnames(coords) <- channels[2]
@@ -1181,7 +1194,7 @@ cyto_gate_convert.rectangleGate <- function(x,
        # Update x to be 2D gate
        x <- x * rg
      # Gate has y channel  
-     }else if(chans == channels[2]){
+     }else if(gate_channels == channels[2]){
        # Make a rectangleGate with x coords
        coords <- matrix(c(xmin, xmax), ncol = 1, nrow = 2)
        colnames(coords) <- channels[1]
@@ -1225,11 +1238,6 @@ cyto_gate_convert.polygonGate <- function(x,
   # Plot dimensions
   limits <- par("usr")
   
-  # Plot should be called
-  if(limits == c(0,1,0,1)){
-    message("cyto_plot should be called prior to gate conversion")
-  }
-  
   # Extract limits
   xmin <- limits[1]
   xmax <- limits[2]
@@ -1243,7 +1251,7 @@ cyto_gate_convert.polygonGate <- function(x,
                        max(x@boundaries[,channels])), 
                      ncol = 1, 
                      nrow = 2)
-    colnames(coords) <- channels[2]
+    colnames(coords) <- channels
     rownames(coords) <- c("min", "max")
     x <- rectangleGate(filterId = x@filterId, .gate = coords)
   }
@@ -1273,28 +1281,26 @@ cyto_gate_convert.ellipsoidGate <- function(x,
   # Plot dimensions
   limits <- par("usr")
   
-  # Plot should be called
-  if(limits == c(0,1,0,1)){
-    message("cyto_plot should be called prior to gate conversion")
-  }
-  
   # Extract limits
   xmin <- limits[1]
   xmax <- limits[2]
   ymin <- limits[3]
   ymax <- limits[4]
   
-  # Coerce x to polygonGate
-  x <- as(x, "polygonGate")
+  
   
   # Must be 2D gate
   if(channels_length == 1){
+    
+    # Coerce x to polygonGate
+    x <- as(x, "polygonGate")
+    
     # Use min and max values of matching channel - > 1D rectangleGate
     coords <- matrix(c(min(x@boundaries[,channels]), 
                        max(x@boundaries[,channels])), 
                      ncol = 1, 
                      nrow = 2)
-    colnames(coords) <- channels[2]
+    colnames(coords) <- channels
     rownames(coords) <- c("min", "max")
     x <- rectangleGate(filterId = x@filterId, .gate = coords)
   }
