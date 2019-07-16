@@ -9,7 +9,7 @@
 #'
 #' @importFrom flowCore parameters flowFrame
 #' @importFrom flowWorkspace pData
-#' @importfrom graphics par mtext text
+#' @importFrom graphics par mtext text
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'

@@ -1164,6 +1164,8 @@ cyto_gate_convert.rectangleGate <- function(x,
     stop("Supply the channels in which the gate will be plotted.")
   }
   
+
+  
   # Extract channels of gate
   gate_channels <- parameters(x)
   gate_channels_length <- length(gate_channels)
@@ -1171,6 +1173,11 @@ cyto_gate_convert.rectangleGate <- function(x,
   # Dimensions required
   channels_length <- length(channels)
   
+  # Gate must contain at least one channel matching channels
+  if(!any(gate_channels %in% channels)){
+    stop("Cannot plot gates not constructed in the supplied channels.")
+  }  
+    
   # Plot dimensions
   limits <- par("usr")
   
@@ -1210,6 +1217,35 @@ cyto_gate_convert.rectangleGate <- function(x,
     if(channels_length == 1){
       # Restrict gate to channels
       x <- x[channels]
+    }else if(channels_length == 2){
+      # channels don't match - return 2D rectangleGate
+      if(!all(gate_channels %in% channels)){
+        match_channel <- gate_channels[gate_channels %in% channels]
+        # Ned to replace y coords
+        if(match_channel == channels[1]){
+          coords <- matrix(c(min(as.numeric(x@min[match_channel])), 
+                             max(as.numeric(x@max[match_channel])),
+                             ymin,
+                             ymax), 
+                           ncol = 2, 
+                           nrow = 2,
+                           byrow = FALSE)
+          colnames(coords) <- channels
+          rownames(coords) <- c("min", "max")
+          x <- rectangleGate(filterId = x@filterId, .gate = coords)
+        }else if(match_channel == channels[2]){
+          coords <- matrix(c(xmin,
+                             xmax,
+                             min(as.numeric(x@min[match_channel])), 
+                             max(as.numeric(x@max[match_channel]))), 
+                           ncol = 2, 
+                           nrow = 2,
+                           byrow = FALSE)
+          colnames(coords) <- channels
+          rownames(coords) <- c("min", "max")
+          x <- rectangleGate(filterId = x@filterId, .gate = coords)
+        }
+      }
     }
   }
   
@@ -1235,6 +1271,11 @@ cyto_gate_convert.polygonGate <- function(x,
   # Dimensions required
   channels_length <- length(channels)
   
+  # Gate must contain at least one channel matching channels
+  if(!any(gate_channels %in% channels)){
+    stop("Cannot plot gates not constructed in the supplied channels.")
+  }  
+  
   # Plot dimensions
   limits <- par("usr")
   
@@ -1254,6 +1295,35 @@ cyto_gate_convert.polygonGate <- function(x,
     colnames(coords) <- channels
     rownames(coords) <- c("min", "max")
     x <- rectangleGate(filterId = x@filterId, .gate = coords)
+  # Return 2D rectangleGate if one channel does not match
+  }else if(channels_length == 2){
+    if(!all(gate_channels %in% channels)){
+      match_channel <- gate_channels[gate_channels %in% channels]
+      # Ned to replace y coords
+      if(match_channel == channels[1]){
+        coords <- matrix(c(min(x@boundaries[,match_channel]), 
+                           max(x@boundaries[,match_channel]),
+                           ymin,
+                           ymax), 
+                         ncol = 2, 
+                         nrow = 2,
+                         byrow = FALSE)
+        colnames(coords) <- channels
+        rownames(coords) <- c("min", "max")
+        x <- rectangleGate(filterId = x@filterId, .gate = coords)
+      }else if(match_channel == channels[2]){
+        coords <- matrix(c(xmin,
+                           xmax,
+                           min(x@boundaries[,match_channel]), 
+                           max(x@boundaries[,match_channel])), 
+                         ncol = 2, 
+                         nrow = 2,
+                         byrow = FALSE)
+        colnames(coords) <- channels
+        rownames(coords) <- c("min", "max")
+        x <- rectangleGate(filterId = x@filterId, .gate = coords)
+      }
+    }
   }
   
   # Return modified gates
@@ -1278,6 +1348,11 @@ cyto_gate_convert.ellipsoidGate <- function(x,
   # Dimensions required
   channels_length <- length(channels)
   
+  # Gate must contain at least one channel matching channels
+  if(!any(gate_channels %in% channels)){
+    stop("Cannot plot gates not constructed in the supplied channels.")
+  }  
+  
   # Plot dimensions
   limits <- par("usr")
   
@@ -1286,8 +1361,6 @@ cyto_gate_convert.ellipsoidGate <- function(x,
   xmax <- limits[2]
   ymin <- limits[3]
   ymax <- limits[4]
-  
-  
   
   # Must be 2D gate
   if(channels_length == 1){
@@ -1303,6 +1376,37 @@ cyto_gate_convert.ellipsoidGate <- function(x,
     colnames(coords) <- channels
     rownames(coords) <- c("min", "max")
     x <- rectangleGate(filterId = x@filterId, .gate = coords)
+  # Return 2D rectangleGate with correct channels
+  }else if(channels_length == 2){
+    if(!all(gate_channels %in% channels)){
+      # convert ellipsoidgate to polygonGate
+      x <- as(x, "polygonGate")
+      match_channel <- gate_channels[gate_channels %in% channels]
+      # Ned to replace y coords
+      if(match_channel == channels[1]){
+        coords <- matrix(c(min(x@boundaries[,match_channel]), 
+                           max(x@boundaries[,match_channel]),
+                           ymin,
+                           ymax), 
+                         ncol = 2, 
+                         nrow = 2,
+                         byrow = FALSE)
+        colnames(coords) <- channels
+        rownames(coords) <- c("min", "max")
+        x <- rectangleGate(filterId = x@filterId, .gate = coords)
+      }else if(match_channel == channels[2]){
+        coords <- matrix(c(xmin,
+                           xmax,
+                           min(x@boundaries[,match_channel]), 
+                           max(x@boundaries[,match_channel])), 
+                         ncol = 2, 
+                         nrow = 2,
+                         byrow = FALSE)
+        colnames(coords) <- channels
+        rownames(coords) <- c("min", "max")
+        x <- rectangleGate(filterId = x@filterId, .gate = coords)
+      }
+    }
   }
   
   # Return modified gates
