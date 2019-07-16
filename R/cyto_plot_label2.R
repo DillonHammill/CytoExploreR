@@ -126,9 +126,9 @@ cyto_plot_label2 <- function(x,
   
   # Convert to valid statistic
   if (!.all_na(label_stat)) {
-    label_stat <- unlist(lapply(label_stat, function(z) {
+    label_stat <- LAPPLY(label_stat, function(z) {
       .cyto_stat_check(z)
-    }))
+    })
   }
 
   # Convert trans to transformList - required for stats calculation
@@ -206,7 +206,7 @@ cyto_plot_label2 <- function(x,
 
   # Calculate statistics per gate
   if (!.all_na(label_stat)) {
-    st <- unlist(lapply(pops, function(z) {
+    st <- LAPPLY(pops, function(z) {
       if (label_stat == "freq") {
         sts <- .cyto_count(z) / .cyto_count(x) * 100
         sts <- .round(sts, 2)
@@ -222,7 +222,7 @@ cyto_plot_label2 <- function(x,
         sts <- .round(sts[, ncol(sts)], 2)
       }
       return(sts)
-    }))
+    })
   } else {
     st <- NA
   }
