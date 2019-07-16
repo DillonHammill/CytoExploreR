@@ -484,7 +484,7 @@ cyto_gate_edit <- function(x,
       # List of flowFrames repeat fr_list times - no sampling or grouping
       if(all(LAPPLY(overlay, function(z){
         inherits(z, "flowFrame")
-      })))){
+      }))){
         
         overlay <- rep(list(overlay), N)
         
