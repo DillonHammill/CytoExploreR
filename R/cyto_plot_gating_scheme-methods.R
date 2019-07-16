@@ -417,27 +417,27 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
         if (back_gate[1] != FALSE) {
           if (back_gate[1] == "all") {
             if (!show_all) {
-              overlay <- c(alias, unlist(lapply(
+              overlay <- c(alias, LAPPLY(
                 seq_along(alias),
                 function(x) {
                   getDescendants(gh, alias[x], path = "auto")
                 }
-              )))
+              ))
             }
           } else {
             if (!show_all) {
               if (any(back_gate %in%
-                c(alias, unlist(lapply(seq_along(alias), function(x) {
+                c(alias, LAPPLY(seq_along(alias), function(x) {
                   getDescendants(gh, alias[x], path = "auto")
-                }))))) {
+                })))) {
                 ind <- c(
                   alias,
-                  unlist(lapply(
+                  LAPPLY(
                     seq_along(alias),
                     function(x) {
                       getDescendants(gh, alias[x], path = "auto")
                     }
-                  ))
+                  )
                 )
                 overlay <- back_gate[back_gate %in% ind]
               } else {
@@ -477,9 +477,9 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
 
         # Skip boolean gates
         if (any(
-          unlist(lapply(alias, function(x) {
+          LAPPLY(alias, function(x) {
             flowWorkspace:::isNegated(gh, x)
-          }))
+          })
         )) {
           message("Skipping boolean gates.")
           alias <- alias[!unlist(
@@ -945,23 +945,23 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
         if (back_gate[1] != FALSE) {
           if (back_gate[1] == "all") {
             if (!show_all) {
-              overlay <- c(alias, unlist(lapply(
+              overlay <- c(alias, LAPPLY(
                 seq_along(alias),
                 function(x) {
                   getDescendants(gs[[1]], alias[x], path = "auto")
                 }
-              )))
+              ))
             }
           } else {
             if (!show_all) {
               if (any(back_gate %in%
-                      c(alias, unlist(lapply(seq_along(alias), function(x) {
+                      c(alias, LAPPLY(seq_along(alias), function(x) {
                         getDescendants(gs[[1]], alias[x], path = "auto")
-                      }))))) {
+                      })))) {
                 overlay <- back_gate[back_gate %in%
                                        c(
                                          alias,
-                                         unlist(lapply(
+                                         LAPPLY(
                                            seq_along(alias),
                                            function(x) {
                                              getDescendants(
@@ -970,7 +970,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
                                                path = "auto"
                                              )
                                            }
-                                         ))
+                                         )
                                        )]
               } else {
                 overlay <- NULL
@@ -1016,7 +1016,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
         }
         
         # Skip boolean gates
-        if (any(unlist(lapply(
+        if (any(LAPPLY(
           alias,
           function(x) {
             flowWorkspace:::isNegated(
@@ -1024,7 +1024,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
               x
             )
           }
-        )))) {
+        ))) {
           message("skipping boolean gates.")
           alias <- alias[!unlist(
             lapply(alias, function(x) {
