@@ -160,17 +160,17 @@ cyto_plot_grid.flowSet <- function(x,
   })
   
   # Plots requiring Y axis
-  axes_y <- unlist(lapply(grd, function(x){
+  axes_y <- LAPPLY(grd, function(x){
     x[,1]
-  }))
+  })
   lapply(axes_y, function(x){
     axes_text[[x]][2] <<- TRUE
   })
   
   # Plots requiring X axis
-  axes_x <- unlist(lapply(grd, function(x){
+  axes_x <- LAPPLY(grd, function(x){
     x[nrow(x),]
-  }))
+  })
   lapply(axes_x, function(y){
     axes_text[[y]][1] <<- TRUE
   })
@@ -228,24 +228,24 @@ cyto_plot_grid.flowSet <- function(x,
   }else if(length(group_by) == 2){
     grp_exp <- rep(list(NA), nlevels(as.factor(pd[,group_by[1]])) *
                      nlevels(as.factor(pd[,group_by[2]])))
-    names(grp_exp) <- unlist(lapply(
+    names(grp_exp) <- LAPPLY(
       levels(as.factor(pd[,group_by[2]])),
       function(x){
         paste(levels(as.factor(pd[,group_by[1]])), x)
-      }))
+      })
   }else if(length(group_by) == 3){
     grp_exp <- rep(list(NA), nlevels(as.factor(pd[,group_by[1]])) *
                      nlevels(as.factor(pd[,group_by[2]])) *
                      nlevels(as.factor(pd[,group_by[3]])))
-    names(grp_exp) <- unlist(lapply(
+    names(grp_exp) <- LAPPLY(
       levels(as.factor(pd[group_by[3]])),
       function(y){
-        paste(unlist(lapply(
+        paste(LAPPLY(
           levels(as.factor(pd$group_by[2])),
           function(x){
             paste(levels(as.factor(pd$group_by[1])), x)
-          })), y)
-      }))
+          }), y)
+      })
     
   }
   
@@ -290,18 +290,18 @@ cyto_plot_grid.flowSet <- function(x,
   if(any(is.na(grp_exp))){
     
     # Make flowFrame with same range as fs[[1]] - prevent axes issues
-    mn <- unlist(lapply(
+    mn <- LAPPLY(
       colnames(fs[[1]]), 
       function(x){
         min(exprs(fs[[1]])[,x])
       }
-    ))
-    mx <- unlist(lapply(
+    )
+    mx <- LAPPLY(
       colnames(fs[[1]]),
       function(x){
         max(exprs(fs[[1]])[,x])
       }
-    ))
+    )
     
     empty_flowFrame <- matrix(c(mn,mx),
                               ncol = BiocGenerics::ncol(fs[[1]]),
@@ -318,17 +318,17 @@ cyto_plot_grid.flowSet <- function(x,
   panel_label <- rep(list(c(FALSE,FALSE)), length(grp_exp))
   
   # Plots requiring y panel label
-  panel_label_y <- unlist(lapply(grd, function(x){
+  panel_label_y <- LAPPLY(grd, function(x){
     x[,ncol(x)]
-  }))
+  })
   lapply(panel_label_y, function(y){
     panel_label[[y]][2] <<- TRUE
   })
   
   # Plots requiring x axis
-  panel_label_x <- unlist(lapply(grd, function(x){
+  panel_label_x <- LAPPLY(grd, function(x){
     x[1,]
-  }))
+  })
   lapply(panel_label_x, function(y){
     panel_label[[y]][1] <<- TRUE
   })
@@ -427,18 +427,18 @@ cyto_plot_grid.flowSet <- function(x,
     if(is.na(grp_exp[[x]])){
       
       # Make flowFrame with same range as fs[[1]] - prevent axes issues
-      mn <- unlist(lapply(
+      mn <- LAPPLY(
         colnames(fs[[1]]), 
         function(x){
           min(exprs(fs[[1]])[,x])
         }
-      ))
-      mx <- unlist(lapply(
+      )
+      mx <- LAPPLY(
         colnames(fs[[1]]),
         function(x){
           max(exprs(fs[[1]])[,x])
         }
-      ))
+      )
       
       empty_flowFrame <- matrix(c(mn,mx),
                                 ncol = BiocGenerics::ncol(fs[[1]]),
