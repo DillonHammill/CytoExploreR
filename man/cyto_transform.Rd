@@ -26,8 +26,8 @@ cyto_transform(x, trans = NULL, ...)
 \item{trans}{object of class \code{transformerList} containing the
 transformation definitions to apply to \code{x}.}
 
-\item{...}{additional arguments passed to \code{cyto_transform_arcsinh},
-\code{cyto_transform_biex} or \code{cyto_transform_logicle} when no
+\item{...}{additional arguments passed to \code{cyto_transformer_arcsinh},
+\code{cyto_transformer_biex} or \code{cyto_transformer_logicle} when no
 \code{trans} object is supplied.}
 
 \item{trans_type}{type of transformation to apply when no trans object is
@@ -66,7 +66,7 @@ fs <- Activation
 fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
 
 # Manually construct & apply transformations
-trans <- cyto_transform_biex(fs)
+trans <- cyto_transformer_biex(fs)
 fs_trans <- cyto_transform(fs, trans)
 
 # Add fs to GatingSet
@@ -76,18 +76,18 @@ gs <- GatingSet(fs)
 gs_trans <- cyto_transform(gs, trans_type = "logicle")
 
 # Manually construct & apply transformations
-trans <- cyto_transform_logicle(gs)
+trans <- cyto_transformer_logicle(gs)
 gs_trans <- cyto_transform(gs, trans)
 
 }
 \seealso{
-\code{\link{cyto_transform_arcsinh}}
+\code{\link{cyto_transformer_arcsinh}}
 
-\code{\link{cyto_transform_biex}}
+\code{\link{cyto_transformer_biex}}
 
-\code{\link{cyto_transform_logicle}}
+\code{\link{cyto_transformer_logicle}}
 
-\code{\link{cyto_transform_combine}}
+\code{\link{cyto_transformer_combine}}
 
 \code{\link{cyto_transform}}
 }
