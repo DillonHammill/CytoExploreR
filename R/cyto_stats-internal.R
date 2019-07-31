@@ -187,7 +187,7 @@
   
   # Get raw data
   if(!is.null(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   
   # Extract raw data and calculate mean directly - colMeans for speed
@@ -385,7 +385,7 @@
   
   # Get raw data
   if(!is.null(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   
   # Extract raw data and calculate median directly - colMedians for speed
@@ -473,7 +473,7 @@
   
   # Get raw data
   if(!is.null(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   
   # Extract raw data and calculate mode directly
@@ -565,7 +565,7 @@
   
   # Get raw data
   if(!is.null(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   
   # Extract raw data and calculate CV directly
