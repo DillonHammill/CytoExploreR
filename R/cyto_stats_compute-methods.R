@@ -127,6 +127,12 @@ cyto_stats_compute.flowFrame <- function(x,
       )
     )
     trans <- NULL
+  # Check transformerList is supplied
+  }else if(!is.null(trans)){
+    # transformerLists only
+    if(!inherits(trans, "transformerList")){
+      stop("'trans' must be an object of class transformerList!")
+    }
   }
 
   # Statistics
@@ -421,10 +427,13 @@ cyto_stats_compute.GatingHierarchy <- function(x,
 
   # Get trans if not supplied
   if (is.null(trans)) {
-    trans <- transformList(
-      names(getTransformations(gh)),
-      getTransformations(gh)
-    )
+    trans <- gh@transformation
+  # Check transformerList is supplied
+  }else if(!is.null(trans)){
+    # transformerLists only
+    if(!inherits(trans, "transformerList")){
+      stop("'trans' must be an object of class transformerList!")
+    }
   }
 
   # Alias must be supplied
@@ -668,10 +677,13 @@ cyto_stats_compute.GatingSet <- function(x,
 
   # Get trans if not supplied
   if (is.null(trans)) {
-    trans <- transformList(
-      names(getTransformations(gs[[1]])),
-      getTransformations(gs[[1]])
-    )
+    trans <- gs[[1]]@transformation
+  # Check transformerList is supplied
+  }else if(!is.null(trans)){
+    # transformerLists only
+    if(!inherits(trans, "transformerList")){
+      stop("'trans' must be an object of class transformerList!")
+    }
   }
 
   # Alias must be supplied
