@@ -287,7 +287,7 @@ cyto_check <- function(x) {
 #' @param inverse logical indicating whether the inverse transformations should
 #'   be applied. Currently only supported for \code{flowFrame} and
 #'   \code{flowSet} objects.
-#' @param plot logicla indicating whether the result of the transformations
+#' @param plot logical indicating whether the result of the transformations
 #'   should be plotted using \code{cyto_plot}.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   popup window, set to FALSE by default.
