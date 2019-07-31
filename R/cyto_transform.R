@@ -1,9 +1,62 @@
 # CytoRSuite Implementation of Transformations
 
-# Wrappers for flowCore transformation function which return transformerList
-# objects and use cyto_plot to visualise the transformations.
+# Wrappers for flowCore/flowWorkspace transformation functions which return
+# transformerList objects and use cyto_plot to visualise the transformations.
 
-# CYTO_TRANSFORM_ARCSINH ---------------------------------------------------------
+# CYTO_TRANSFORM_LOG -----------------------------------------------------------
+
+#' Definition(s) of Log Transformation(s)
+#' 
+#' CytoRSuite implementation of \code{flowWorkspace}
+#' \code{\link[flowWorkspace:flowjo_flog]{asinh_Gml2}} transformation which
+#' always returns a \code{transformerList} object and displays the result of the
+#' transformation(s) using \code{cyto_plot}. To combine different types of
+#' transformations have a look at \code{cyto_transform_combine}.
+#' \code{cyto_transform} should be used to apply the transformations to the
+#' data.
+#' 
+#' @seealso \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}
+#' @seealso \code{\link{cyto_transform_arcsinh}}
+#' @seealso \code{\link{cyto_transform_biex}}
+#' @seealso \code{\link{cyto_transform_logicle}}
+#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transform}}
+#' 
+#' @rdname cyto_transform_log
+#' @export
+cyto_transform_log <- function(x, ...){
+  UseMethod("cyto_transform_log")
+}
+
+#' @rdname cyto_transform_log
+#' @export
+cyto_transform_log.flowFrame <- function(x,
+                                         ...){
+  
+}
+
+#' @rdname cyto_transform_log
+#' @export
+cyto_transform_log.flowSet <- function(x,
+                                       ...){
+  
+}
+
+#' @rdname cyto_transform_log
+#' @export
+cyto_transform_log.GatingHierarchy <- function(x,
+                                               ...){
+    
+}
+
+#' @rdname cyto_transform_log
+#' @export
+cyto_transform_log.GatingSet <- function(x,
+                                         ...){
+  
+}
+
+# CYTO_TRANSFORM_ARCSINH -------------------------------------------------------
 
 #' Definition(s) of ArcSinh Transformation(s)
 #'

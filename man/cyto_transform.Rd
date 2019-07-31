@@ -46,7 +46,7 @@ select a subset of samples for visualising the transformations.}
 be applied. Currently only supported for \code{flowFrame} and
 \code{flowSet} objects.}
 
-\item{plot}{logicla indicating whether the result of the transformations
+\item{plot}{logical indicating whether the result of the transformations
 should be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
