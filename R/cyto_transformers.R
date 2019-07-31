@@ -3,7 +3,7 @@
 # Wrappers for flowCore/flowWorkspace transformation functions which return
 # transformerList objects and use cyto_plot to visualise the transformations.
 
-# CYTO_TRANSFORM_LOG -----------------------------------------------------------
+# CYTO_TRANSFORMER_LOG ---------------------------------------------------------
 
 #' Definition(s) of Log Transformation(s)
 #' 
@@ -11,52 +11,52 @@
 #' \code{\link[flowWorkspace:flowjo_flog]{asinh_Gml2}} transformation which
 #' always returns a \code{transformerList} object and displays the result of the
 #' transformation(s) using \code{cyto_plot}. To combine different types of
-#' transformations have a look at \code{cyto_transform_combine}.
+#' transformations have a look at \code{cyto_transformer_combine}.
 #' \code{cyto_transform} should be used to apply the transformations to the
 #' data.
 #' 
 #' @seealso \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}
-#' @seealso \code{\link{cyto_transform_arcsinh}}
-#' @seealso \code{\link{cyto_transform_biex}}
-#' @seealso \code{\link{cyto_transform_logicle}}
-#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transformer_arcsinh}}
+#' @seealso \code{\link{cyto_transformer_biex}}
+#' @seealso \code{\link{cyto_transformer_logicle}}
+#' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #' 
-#' @rdname cyto_transform_log
+#' @rdname cyto_transformer_log
 #' @export
-cyto_transform_log <- function(x, ...){
-  UseMethod("cyto_transform_log")
+cyto_transformer_log <- function(x, ...){
+  UseMethod("cyto_transformer_log")
 }
 
-#' @rdname cyto_transform_log
+#' @rdname cyto_transformer_log
 #' @export
-cyto_transform_log.flowFrame <- function(x,
+cyto_transformer_log.flowFrame <- function(x,
                                          ...){
   
 }
 
-#' @rdname cyto_transform_log
+#' @rdname cyto_transformer_log
 #' @export
-cyto_transform_log.flowSet <- function(x,
+cyto_transformer_log.flowSet <- function(x,
                                        ...){
   
 }
 
-#' @rdname cyto_transform_log
+#' @rdname cyto_transformer_log
 #' @export
-cyto_transform_log.GatingHierarchy <- function(x,
+cyto_transformer_log.GatingHierarchy <- function(x,
                                                ...){
     
 }
 
-#' @rdname cyto_transform_log
+#' @rdname cyto_transformer_log
 #' @export
-cyto_transform_log.GatingSet <- function(x,
+cyto_transformer_log.GatingSet <- function(x,
                                          ...){
   
 }
 
-# CYTO_TRANSFORM_ARCSINH -------------------------------------------------------
+# CYTO_TRANSFORMER_ARCSINH -------------------------------------------------------
 
 #' Definition(s) of ArcSinh Transformation(s)
 #'
@@ -64,7 +64,7 @@ cyto_transform_log.GatingSet <- function(x,
 #' \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}} transformation which
 #' always returns a \code{transformerList} object and displays the result of the
 #' transformation(s) using \code{cyto_plot}. To combine different types of
-#' transformations have a look at \code{cyto_transform_combine}.
+#' transformations have a look at \code{cyto_transformer_combine}.
 #' \code{cyto_transform} should be used to apply the transformations to the
 #' data.
 #'
@@ -96,20 +96,20 @@ cyto_transform_log.GatingSet <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @seealso \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}}
-#' @seealso \code{\link{cyto_transform_biex}}
-#' @seealso \code{\link{cyto_transform_logicle}}
-#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transformer_biex}}
+#' @seealso \code{\link{cyto_transformer_logicle}}
+#' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transform_arcsinh
+#' @rdname cyto_transformer_arcsinh
 #' @export
-cyto_transform_arcsinh <- function(x, ...) {
-  UseMethod("cyto_transform_arcsinh")
+cyto_transformer_arcsinh <- function(x, ...) {
+  UseMethod("cyto_transformer_arcsinh")
 }
 
-#' @rdname cyto_transform_arcsinh
+#' @rdname cyto_transformer_arcsinh
 #' @export
-cyto_transform_arcsinh.flowFrame <- function(x,
+cyto_transformer_arcsinh.flowFrame <- function(x,
                                              channels = NULL,
                                              raw_max = 262144,
                                              width = 4.5,
@@ -191,9 +191,9 @@ cyto_transform_arcsinh.flowFrame <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_arcsinh
+#' @rdname cyto_transformer_arcsinh
 #' @export
-cyto_transform_arcsinh.flowSet <- function(x,
+cyto_transformer_arcsinh.flowSet <- function(x,
                                            channels = NULL,
                                            select = NULL,
                                            raw_max = 262144,
@@ -211,7 +211,7 @@ cyto_transform_arcsinh.flowSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_arcsinh(x,
+  transformer_list <- cyto_transformer_arcsinh(x,
     channels = channels,
     raw_max = raw_max,
     width = width,
@@ -226,9 +226,9 @@ cyto_transform_arcsinh.flowSet <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_arcsinh
+#' @rdname cyto_transformer_arcsinh
 #' @export
-cyto_transform_arcsinh.GatingHierarchy <- function(x,
+cyto_transformer_arcsinh.GatingHierarchy <- function(x,
                                                    channels = NULL,
                                                    parent = "root",
                                                    raw_max = 262144,
@@ -243,7 +243,7 @@ cyto_transform_arcsinh.GatingHierarchy <- function(x,
   x <- cyto_extract(x, parent = parent)
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_arcsinh(x,
+  transformer_list <- cyto_transformer_arcsinh(x,
     channels = channels,
     raw_max = raw_max,
     width = width,
@@ -259,9 +259,9 @@ cyto_transform_arcsinh.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_arcsinh
+#' @rdname cyto_transformer_arcsinh
 #' @export
-cyto_transform_arcsinh.GatingSet <- function(x,
+cyto_transformer_arcsinh.GatingSet <- function(x,
                                              channels = NULL,
                                              parent = "root",
                                              select = NULL,
@@ -283,7 +283,7 @@ cyto_transform_arcsinh.GatingSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_arcsinh(x,
+  transformer_list <- cyto_transformer_arcsinh(x,
     channels = channels,
     raw_max = raw_max,
     width = width,
@@ -298,7 +298,7 @@ cyto_transform_arcsinh.GatingSet <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORM_BIEX ----------------------------------------------------------
+# CYTO_TRANSFORMER_BIEX ----------------------------------------------------------
 
 #' Definition(s) of Biexponential Transformation(s)
 #'
@@ -306,7 +306,7 @@ cyto_transform_arcsinh.GatingSet <- function(x,
 #' transformation which always returns a \code{transformerList}
 #' object and displays in the result of the transformation(s) using
 #' \code{cyto_plot}. To combine different types of transformations have a look
-#' at \code{cyto_transform_combine}. \code{cyto_transform} should be used to
+#' at \code{cyto_transformer_combine}. \code{cyto_transform} should be used to
 #' apply the transformations to the data.
 #'
 #' @param x an object of class \code{flowFrame}, \code{flowSet},
@@ -336,9 +336,9 @@ cyto_transform_arcsinh.GatingSet <- function(x,
 #'
 #' @seealso \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
 #' @seealso \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
-#' @seealso \code{\link{cyto_transform_arcsinh}}
-#' @seealso \code{\link{cyto_transform_logicle}}
-#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transformer_arcsinh}}
+#' @seealso \code{\link{cyto_transformer_logicle}}
+#' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
 #' @return transformerList object.
@@ -348,15 +348,15 @@ cyto_transform_arcsinh.GatingSet <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @rdname cyto_transform_biex
+#' @rdname cyto_transformer_biex
 #' @export
-cyto_transform_biex <- function(x, ...) {
-  UseMethod("cyto_transform_biex")
+cyto_transformer_biex <- function(x, ...) {
+  UseMethod("cyto_transformer_biex")
 }
 
-#' @rdname cyto_transform_biex
+#' @rdname cyto_transformer_biex
 #' @export
-cyto_transform_biex.flowFrame <- function(x,
+cyto_transformer_biex.flowFrame <- function(x,
                                           channels = NULL,
                                           trans_max = 4096,
                                           raw_max = 262144,
@@ -444,9 +444,9 @@ cyto_transform_biex.flowFrame <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_biex
+#' @rdname cyto_transformer_biex
 #' @export
-cyto_transform_biex.flowSet <- function(x,
+cyto_transformer_biex.flowSet <- function(x,
                                         channels = NULL,
                                         select = NULL,
                                         trans_max = 4096,
@@ -466,7 +466,7 @@ cyto_transform_biex.flowSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_biex(x,
+  transformer_list <- cyto_transformer_biex(x,
     channels = channels,
     trans_max = trans_max,
     raw_max = raw_max,
@@ -483,9 +483,9 @@ cyto_transform_biex.flowSet <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_biex
+#' @rdname cyto_transformer_biex
 #' @export
-cyto_transform_biex.GatingHierarchy <- function(x,
+cyto_transformer_biex.GatingHierarchy <- function(x,
                                                 channels = NULL,
                                                 parent = "root",
                                                 select = NULL,
@@ -503,7 +503,7 @@ cyto_transform_biex.GatingHierarchy <- function(x,
   x <- cyto_extract(x, parent = parent)
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_biex(x,
+  transformer_list <- cyto_transformer_biex(x,
     channels = channels,
     trans_max = trans_max,
     raw_max = raw_max,
@@ -520,9 +520,9 @@ cyto_transform_biex.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_biex
+#' @rdname cyto_transformer_biex
 #' @export
-cyto_transform_biex.GatingSet <- function(x,
+cyto_transformer_biex.GatingSet <- function(x,
                                           channels = NULL,
                                           parent = "root",
                                           select = NULL,
@@ -546,7 +546,7 @@ cyto_transform_biex.GatingSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_biex(x,
+  transformer_list <- cyto_transformer_biex(x,
     channels = channels,
     trans_max = trans_max,
     raw_max = raw_max,
@@ -563,7 +563,7 @@ cyto_transform_biex.GatingSet <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORM_LOGICLE -------------------------------------------------------
+# CYTO_TRANSFORMER_LOGICLE -----------------------------------------------------
 
 #' Definition(s) of Logicle Transformation(s)
 #'
@@ -571,7 +571,7 @@ cyto_transform_biex.GatingSet <- function(x,
 #' which allows the use of multiple samples to estimate transformation
 #' parameters, always returns a \code{transformerList} object and displays the
 #' result of the transformation(s) using \code{cyto_plot}. To combine different
-#' types of transformations have a look at \code{cyto_transform_combine}.
+#' types of transformations have a look at \code{cyto_transformer_combine}.
 #' \code{cyto_transform} should be used to apply the transformations to the
 #' data.
 #'
@@ -611,20 +611,20 @@ cyto_transform_biex.GatingSet <- function(x,
 #'
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 #' @seealso \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
-#' @seealso \code{\link{cyto_transform_arcsinh}}
-#' @seealso \code{\link{cyto_transform_biex}}
-#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transformer_arcsinh}}
+#' @seealso \code{\link{cyto_transformer_biex}}
+#' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transform_logicle
+#' @rdname cyto_transformer_logicle
 #' @export
-cyto_transform_logicle <- function(x, ...) {
-  UseMethod("cyto_transform_logicle")
+cyto_transformer_logicle <- function(x, ...) {
+  UseMethod("cyto_transformer_logicle")
 }
 
-#' @rdname cyto_transform_logicle
+#' @rdname cyto_transformer_logicle
 #' @export
-cyto_transform_logicle.flowFrame <- function(x,
+cyto_transformer_logicle.flowFrame <- function(x,
                                              channels = NULL,
                                              width = 4.5,
                                              raw_max = 262144,
@@ -703,9 +703,9 @@ cyto_transform_logicle.flowFrame <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_logicle
+#' @rdname cyto_transformer_logicle
 #' @export
-cyto_transform_logicle.flowSet <- function(x,
+cyto_transformer_logicle.flowSet <- function(x,
                                            channels = NULL,
                                            select = NULL,
                                            trans_max = 4.5,
@@ -725,7 +725,7 @@ cyto_transform_logicle.flowSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_logicle(x,
+  transformer_list <- cyto_transformer_logicle(x,
     channels = channels,
     trans_max = trans_max,
     raw_max = raw_max,
@@ -742,9 +742,9 @@ cyto_transform_logicle.flowSet <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_logicle
+#' @rdname cyto_transformer_logicle
 #' @export
-cyto_transform_logicle.GatingHierarchy <- function(x,
+cyto_transformer_logicle.GatingHierarchy <- function(x,
                                                    channels = NULL,
                                                    parent = "root",
                                                    trans_max = 4.5,
@@ -761,7 +761,7 @@ cyto_transform_logicle.GatingHierarchy <- function(x,
   x <- cyto_extract(x, parent = parent)
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_logicle(x,
+  transformer_list <- cyto_transformer_logicle(x,
     channels = channels,
     trans_max = trans_max,
     raw_max = raw_max,
@@ -778,9 +778,9 @@ cyto_transform_logicle.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
-#' @rdname cyto_transform_logicle
+#' @rdname cyto_transformer_logicle
 #' @export
-cyto_transform_logicle.GatingSet <- function(x,
+cyto_transformer_logicle.GatingSet <- function(x,
                                              channels = NULL,
                                              parent = "root",
                                              select = NULL,
@@ -804,7 +804,7 @@ cyto_transform_logicle.GatingSet <- function(x,
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
-  transformer_list <- cyto_transform_logicle(x,
+  transformer_list <- cyto_transformer_logicle(x,
     channels = channels,
     trans_max = trans_max,
     raw_max = raw_max,
@@ -821,13 +821,13 @@ cyto_transform_logicle.GatingSet <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORM_COMBINE -------------------------------------------------------
+# CYTO_TRANSFORMER_COMBINE -------------------------------------------------------
 
 #' Combine Transformation Definitions
 #'
-#' \code{cyto_transform_combine} makes it easy to combine transformation
-#' definitions obtained from \code{cyto_transform_arcsinh},
-#' \code{cyto_transform_biex} and/or \code{cyto_transform_logicle} prior to
+#' \code{cyto_transformer_combine} makes it easy to combine transformation
+#' definitions obtained from \code{cyto_transformer_arcsinh},
+#' \code{cyto_transformer_biex} and/or \code{cyto_transformer_logicle} prior to
 #' applying these transformations to the data using \code{cyto_transform}.
 #'
 #' @param ... objects of class \code{transformerList} to be combined into a
@@ -837,13 +837,13 @@ cyto_transform_logicle.GatingSet <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_transform_arcsinh}}
-#' @seealso \code{\link{cyto_transform_biex}}
-#' @seealso \code{\link{cyto_transform_logicle}}
+#' @seealso \code{\link{cyto_transformer_arcsinh}}
+#' @seealso \code{\link{cyto_transformer_biex}}
+#' @seealso \code{\link{cyto_transformer_logicle}}
 #' @seealso \code{\link{cyto_transform}}
 #'
 #' @export
-cyto_transform_combine <- function(...) {
+cyto_transformer_combine <- function(...) {
   
   # Combine transformerList objects
   transformer_list <- c(...)
