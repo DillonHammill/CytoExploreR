@@ -291,8 +291,8 @@ cyto_check <- function(x) {
 #'   should be plotted using \code{cyto_plot}.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   popup window, set to FALSE by default.
-#' @param ... additional arguments passed to \code{cyto_transform_arcsinh},
-#'   \code{cyto_transform_biex} or \code{cyto_transform_logicle} when no
+#' @param ... additional arguments passed to \code{cyto_transformer_arcsinh},
+#'   \code{cyto_transformer_biex} or \code{cyto_transformer_logicle} when no
 #'   \code{trans} object is supplied.
 #'
 #' @importFrom flowCore transform
@@ -310,7 +310,7 @@ cyto_check <- function(x) {
 #' fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
 #'
 #' # Manually construct & apply transformations
-#' trans <- cyto_transform_biex(fs)
+#' trans <- cyto_transformer_biex(fs)
 #' fs_trans <- cyto_transform(fs, trans)
 #'
 #' # Add fs to GatingSet
@@ -320,15 +320,15 @@ cyto_check <- function(x) {
 #' gs_trans <- cyto_transform(gs, trans_type = "logicle")
 #'
 #' # Manually construct & apply transformations
-#' trans <- cyto_transform_logicle(gs)
+#' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
-#' @seealso \code{\link{cyto_transform_arcsinh}}
-#' @seealso \code{\link{cyto_transform_biex}}
-#' @seealso \code{\link{cyto_transform_logicle}}
-#' @seealso \code{\link{cyto_transform_combine}}
+#' @seealso \code{\link{cyto_transformer_arcsinh}}
+#' @seealso \code{\link{cyto_transformer_biex}}
+#' @seealso \code{\link{cyto_transformer_logicle}}
+#' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
 #' @rdname cyto_transform
@@ -362,7 +362,7 @@ cyto_transform.default <- function(x,
     # Dispatch based on trans_type argument to get TransformerList
     if(trans_type == "arcsinh"){
       
-      transformer_list <- cyto_transform_arcsinh(x,
+      transformer_list <- cyto_transformer_arcsinh(x,
                                                  channels = channels,
                                                  parent = parent,
                                                  select = select,
@@ -370,7 +370,7 @@ cyto_transform.default <- function(x,
       
     }else if(trans_type == "biex"){
       
-      transformer_list <- cyto_transform_biex(x,
+      transformer_list <- cyto_transformer_biex(x,
                                               channels = channels,
                                               parent = parent,
                                               select = select,
@@ -378,7 +378,7 @@ cyto_transform.default <- function(x,
       
     }else if(trans_type == "logicle"){
       
-      transformer_list <- cyto_transform_logicle(x,
+      transformer_list <- cyto_transformer_logicle(x,
                                                  channels = channels,
                                                  parent = parent,
                                                  select = select,
