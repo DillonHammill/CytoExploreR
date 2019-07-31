@@ -9,8 +9,6 @@
 
 # Gates are applied to flowFrame prior to statistics computation.
 
-# NEED TO ADD .getRawData or .getTransformedData where necessary
-
 # COUNT ------------------------------------------------------------------------
 
 #' Calculate Number of Events
@@ -155,7 +153,7 @@
   if(is.null(trans)){
     message(
       paste(
-        "'trans' requires a transformList/transformerList to calculate",
+        "'trans' requires a transformerList to calculate",
         "statistics on a linear scale for transformed channels."
       )
     )
@@ -187,9 +185,9 @@
     x <- Subset(x, gate)
   }
   
-  # Get raw data using .cyto_raw
+  # Get raw data
   if(!is.null(trans)){
-    x <- .cyto_raw(x, trans)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE)
   }
   
   # Extract raw data and calculate mean directly - colMeans for speed
@@ -272,22 +270,22 @@
     if(any(is.nan(geo_mean))){
       stop(
         paste0(
-          "Supply transformList/transformerList to calculate geometric mean."
+          "Supply transformerList to calculate geometric mean."
         )
       )
     }
-    
+  
+  # transformerList supplied
   }else if(!is.null(trans)){
     
-    # Convert tranform object to transformList
-    trans <- cyto_transform_extract(trans, inverse = FALSE)
-    
+    # Calculate arithmetic mean on transformed scale
     fr_mean <- colMeans(exprs(x)[,channels, drop = FALSE])
     
+    # Inverse result to linear scale for geometric mean
     res <- LAPPLY(channels, function(z){
       
       # Channel has been transformed
-      if(z %in% BiocGenerics::colnames(trans)){
+      if(z %in% names(trans)){
         
         # Inverse transformations
         inv <- cyto_transform_extract(trans, inverse = TRUE)
@@ -349,11 +347,11 @@
     stop("'x' should be a flowFrame object.")
   }
   
-  # Reminder that transformList/transformerList needed for transformed chans
+  # Reminder that transformerList needed for transformed chans
   if(is.null(trans)){
     message(
       paste(
-        "'trans' requires a transformList/transformerList to calculate",
+        "'trans' requires a transformerList to calculate",
         "statistics on a linear scale for transformed channels."
       )
     )
@@ -385,9 +383,9 @@
     x <- Subset(x, gate)
   }
   
-  # Get raw data using .cyto_raw
+  # Get raw data
   if(!is.null(trans)){
-    x <- .cyto_raw(x, trans)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE)
   }
   
   # Extract raw data and calculate median directly - colMedians for speed
@@ -437,11 +435,11 @@
     stop("'x' should be a flowFrame object.")
   }
   
-  # Reminder that transformList/transformerList needed for transformed chans
+  # Reminder that transformerList needed for transformed chans
   if(is.null(trans)){
     message(
       paste(
-        "'trans' requires a transformList/transformerList to calculate",
+        "'trans' requires a transformerList to calculate",
         "statistics on a linear scale for transformed channels."
       )
     )
@@ -473,9 +471,9 @@
     x <- Subset(x, gate)
   }
   
-  # Get raw data using .cyto_raw
+  # Get raw data
   if(!is.null(trans)){
-    x <- .cyto_raw(x, trans)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE)
   }
   
   # Extract raw data and calculate mode directly
@@ -529,11 +527,11 @@
     stop("'x' should be a flowFrame object.")
   }
   
-  # Reminder that transformList/transformerList needed for transformed chans
+  # Reminder that transformerList needed for transformed chans
   if(is.null(trans)){
     message(
       paste(
-        "'trans' requires a transformList/transformerList to calculate",
+        "'trans' requires a transformerList to calculate",
         "statistics on a linear scale for transformed channels."
       )
     )
@@ -565,9 +563,9 @@
     x <- Subset(x, gate)
   }
   
-  # Get raw data using .cyto_raw
+  # Get raw data
   if(!is.null(trans)){
-    x <- .cyto_raw(x, trans)
+    x <- cyto_transform(x, trans = trans, inverse = TRUE)
   }
   
   # Extract raw data and calculate CV directly
