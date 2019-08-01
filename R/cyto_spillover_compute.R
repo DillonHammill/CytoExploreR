@@ -128,7 +128,7 @@ cyto_spillover_compute.GatingSet <- function(x,
   fs <- cyto_extract(x, parent)
 
   # Transformations are always extracted from GatingSet - ignore axes_trans
-  transformer_list <- x@transformation[[1]]
+  transformer_list <- x[[1]]@transformation
     
   # Compensation controls MUST be transformed for gating
   if (length(transformer_list) == 0) {
