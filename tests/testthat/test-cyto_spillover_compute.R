@@ -34,8 +34,6 @@ test_that("cyto_stats_compute", {
                             "y" = c(50,50)),
                        list("x" = c(2.7357,4.2116),
                             "y" = c(50,50)))
-    
-  mock_menu <- mock(4,10,11,9,1,2,12)
   
   spill <- read.csv("Universal-Spillover-Matrix.csv", 
                     header = TRUE,
@@ -45,11 +43,11 @@ test_that("cyto_stats_compute", {
   
   testthat::with_mock(
     locator = mock_locator,
-    menu = mock_menu,
     expect_equal(
       cyto_spillover_compute(gsct,
                              parent = "Single Cells",
-                             spillover = "Universal-Spillover-Matrix.csv"),
+                             spillover = "Universal-Spillover-Matrix.csv",
+                             channel_match = "Ref-Compensation-Channels.csv"),
       spill, tolerance = 0.01
     )  
   )
@@ -102,7 +100,7 @@ test_that("cyto_stats_compute", {
   )
   
   expect_true(file_wd_check("Internal-Spillover-Matrix.csv"))
-  
+
 })
 
 # Close plot windows
