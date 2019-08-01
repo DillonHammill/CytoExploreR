@@ -108,23 +108,6 @@ cyto_setup <- function(path = ".",
   message("Annotate samples with experiment details.")
   gs <- cyto_annotate(gs)
   
-  # Assign gatingTemplate
-  if(is.null(gatingTemplate)){
-    
-    if(interactive()){
-      # User prompt
-      gatingTemplate <- readline("Provide a name for the gatingTemplate:")
-    }
-    
-  }
-  
-  # No gatingTemplate specified in user prompt
-  if(!is.null(gatingTemplate)){
-    if(.empty(gatingTemplate)){
-       gatingTemplate <- NULL
-    }
-  }
-  
   # Check gatingTemplate
   if(!is.null(gatingTemplate)){
     
