@@ -225,8 +225,12 @@ cyto_spillover_compute.flowSet <- function(x,
                               stat = "median",
                               channels = channels,
                               format = "wide")
+    neg <- neg[, -which(names(neg) %in% colnames(pd))]
     colnames(neg) <- channels
     neg <- neg[, channels]
+    
+    # Repeat neg into matrix
+    neg <- do.call("rbind", rep(list(neg), length(nms)))
     
     # Calculate medFI for all channels in all stained controls
     pos <- cyto_stats_compute(pops,
@@ -234,14 +238,12 @@ cyto_spillover_compute.flowSet <- function(x,
                               stat = "median",
                               channels = channels,
                               format = "wide")
+    pos <- pos[, -which(names(pos) %in% colnames(pd))]
     colnames(pos) <- channels
     pos <- pos[, channels]
     pos <- data.matrix(pos)
     rownames(pos) <- nms
-
-    # Subtract background fluorescence
-    signal <- sweep(pos, 2, neg)
-
+    
     # Internal reference population
   } else if (!"Unstained" %in% pd$channel) {
 
@@ -307,7 +309,7 @@ cyto_spillover_compute.flowSet <- function(x,
     names(pos_pops) <- nms
     
     # Convert neg_pops and pos_pops to flowSets
-    neg_pops <- flowSet(pos_pops)
+    neg_pops <- flowSet(neg_pops)
     pos_pops <- flowSet(pos_pops)
     
     # Calculate medFI for negative populations
@@ -316,6 +318,7 @@ cyto_spillover_compute.flowSet <- function(x,
                               stat = "median",
                               channels = channels,
                               format = "wide")
+    neg <- neg[, -which(names(neg) %in% colnames(pd))]
     colnames(neg) <- channels
     neg <- neg[, channels]
     neg <- data.matrix(neg)
@@ -327,27 +330,29 @@ cyto_spillover_compute.flowSet <- function(x,
                               stat = "median",
                               channels = channels,
                               format = "wide")
+    pos <- pos[, -which(names(pos) %in% colnames(pd))]
     colnames(pos) <- channels
     pos <- pos[, channels]
     pos <- data.matrix(pos)
     rownames(pos) <- nms
     
-    # Subtract background fluorescence
-    signal <- pos - neg
-  
   }
+  
+  # Subtract background fluorescence
+  signal <- pos - neg
+  signal <- as.matrix(signal)
   
   # Construct spillover matrix - include values for which there is a control
   spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
   colnames(spill) <- channels
   rownames(spill) <- channels
-    
+  
   # Normalise each row to stained channel
-  lapply(seq(1, nrow(signal), 1), function(y) {
-    signal[y, ] <<- signal[y, ] /
-      signal[y, match(pd$channel[y], colnames(spill))]
+  lapply(seq(1, nrow(signal), 1), function(x) {
+    signal[x, ] <<- signal[x, ] /
+      signal[x, match(pd$channel[x], colnames(spill))]
   })
-    
+  
   # Insert values into appropriate rows
   rws <- match(pd$channel, rownames(spill))
   spill[rws, ] <- signal
