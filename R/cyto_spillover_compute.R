@@ -110,6 +110,42 @@ NULL
 cyto_spillover_compute <- function(x, ...) {
   UseMethod("cyto_spillover_compute")
 }
+#' @rdname cyto_spillover_compute
+#' @export
+cyto_spillover_compute.GatingSet <- function(x,
+                                             parent = NULL,
+                                             axes_trans = NULL,
+                                             channel_match = NULL,
+                                             spillover = "Spillover-Matrix.csv",
+                                             ...) {
+
+  # No parent supplied - use last node
+  if (is.null(parent)) {
+    parent <- cyto_nodes(x)[length(cyto_nodes(x))]
+  }
+
+  # Extract Population for Downstream Analyses
+  fs <- cyto_extract(x, parent)
+
+  # Transformations are always extracted from GatingSet - ignore axes_trans
+  transformer_list <- x@transformation[[1]]
+    
+  # Compensation controls MUST be transformed for gating
+  if (length(transformer_list) == 0) {
+    stop("Transform ALL fluorescent channels using cyto_transform().")
+  }
+
+  # Make call to flowSet method
+  spill <- cyto_spillover_compute(
+    x = fs,
+    axes_trans = transformer_list,
+    channel_match = channel_match,
+    spillover = spillover, ...
+  )
+
+  # Return spillover matrix
+  return(spill)
+}
 
 #' @rdname cyto_spillover_compute
 #' @export
@@ -204,7 +240,7 @@ cyto_spillover_compute.flowSet <- function(x,
         title = nms[z], ...
       )
 
-      # Call cyto_gate_draw on each flowFrame using interval gate on selected channel
+      # cyto_gate_draw on each flowFrame using interval gate on selected channel
       gt <- cyto_gate_draw(
         x = fr,
         alias = paste(chan, "+"),
@@ -367,42 +403,5 @@ cyto_spillover_compute.flowSet <- function(x,
     write.csv(spill, spillover)
   }
 
-  return(spill)
-}
-
-#' @rdname cyto_spillover_compute
-#' @export
-cyto_spillover_compute.GatingSet <- function(x,
-                                             parent = NULL,
-                                             axes_trans = NULL,
-                                             channel_match = NULL,
-                                             spillover = "Spillover-Matrix.csv",
-                                             ...) {
-
-  # No parent supplied - use last node
-  if (is.null(parent)) {
-    parent <- cyto_nodes(x)[length(cyto_nodes(x))]
-  }
-
-  # Extract Population for Downstream Analyses
-  fs <- cyto_extract(x, parent)
-
-  # Transformations are always extracted from GatingSet - ignore axes_trans
-  transformer_list <- x@transformation[[1]]
-    
-  # Compensation controls MUST be transformed for gating
-  if (length(transformer_list) == 0) {
-    stop("Transform ALL fluorescent channels using cyto_transform().")
-  }
-
-  # Make call to flowSet method
-  spill <- cyto_spillover_compute(
-    x = fs,
-    axes_trans = transformer_list,
-    channel_match = channel_match,
-    spillover = spillover, ...
-  )
-
-  # Return spillover matrix
   return(spill)
 }

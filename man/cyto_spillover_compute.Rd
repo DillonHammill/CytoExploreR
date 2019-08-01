@@ -2,21 +2,25 @@
 % Please edit documentation in R/cyto_spillover_compute.R
 \name{cyto_spillover_compute}
 \alias{cyto_spillover_compute}
-\alias{cyto_spillover_compute.flowSet}
 \alias{cyto_spillover_compute.GatingSet}
+\alias{cyto_spillover_compute.flowSet}
 \title{Compute Spillover Matrix}
 \usage{
-\method{cyto_spillover_compute}{flowSet}(x, axes_trans = NULL,
-  channel_match = NULL, spillover = "Spillover-Matrix.csv", ...)
-
 \method{cyto_spillover_compute}{GatingSet}(x, parent = NULL,
   axes_trans = NULL, channel_match = NULL,
   spillover = "Spillover-Matrix.csv", ...)
+
+\method{cyto_spillover_compute}{flowSet}(x, axes_trans = NULL,
+  channel_match = NULL, spillover = "Spillover-Matrix.csv", ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet} or \code{GatingSet} containing
 pre-gated compensation controls with all fluorescent channels appropriately
 transformed using \code{cyto_transform}.}
+
+\item{parent}{name of the population to use for the spillover calculation
+when a GatingSet object is supplied, set to the last node of the GatingSet
+by default (e.g. "Single Cells").}
 
 \item{axes_trans}{object of class
 \code{\link[flowWorkspace:transformerList-class]{transformerList}}
@@ -35,10 +39,6 @@ following the channel selection process.}
 \code{"Spillover-Matrix.csv"} by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
-
-\item{parent}{name of the population to use for the spillover calculation
-when a GatingSet object is supplied, set to the last node of the GatingSet
-by default (e.g. "Single Cells").}
 }
 \value{
 spillover matrix and write spillover matrix to csv file named in
