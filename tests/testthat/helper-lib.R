@@ -121,6 +121,9 @@ Comp <- fsApply(Compensation, function(fr) {
 # GatingSet -
 gsc <- GatingSet(Comp)
 
+# Transformed GatingSet -
+gsct <- cyto_transform(clone(gsc))
+
 # gatingTemplate -
 gtc <- gatingTemplate(paste0(datadir, "/Compensation-gatingTemplate.csv"))
 
@@ -132,11 +135,7 @@ gtcf <- read.csv(system.file("extdata",
 
 # Gating -
 gating(gtc, gsc)
-
-# Spillover Matrix -------------------------------------------------------------
-
-spill <- read.csv("Ref-Spillover-Matrix.csv", header = TRUE, row.names = 1)
-colnames(spill) <- rownames(spill)
+gating(gtc, gsct)
 
 # Construct gate objects -------------------------------------------------------
 
