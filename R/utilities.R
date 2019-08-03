@@ -117,7 +117,9 @@ file_wd_check <- function(name) {
 # ROUND ------------------------------------------------------------------------
 
 #' @noRd
-.round <- function(x, k) trimws(format(round(x, k), nsmall = k))
+.round <- function(x, k){
+  trimws(format(round(x, k), nsmall = k))
+} 
 
 # LAPPLY -----------------------------------------------------------------------
 

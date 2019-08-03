@@ -41,7 +41,8 @@ Imports:
   tibble,
   tidyr,
   dplyr,
-  robustbase
+  robustbase,
+  visNetwork
 Suggests: 
   CytoRSuiteData,
   RProtoBufLib,
