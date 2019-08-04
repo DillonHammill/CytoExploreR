@@ -2,17 +2,61 @@
 % Please edit documentation in R/cyto_plot_gating_tree.R
 \name{cyto_plot_gating_tree}
 \alias{cyto_plot_gating_tree}
-\alias{cyto_plot_gating_tree.GatingSet}
 \alias{cyto_plot_gating_tree.GatingHierarchy}
+\alias{cyto_plot_gating_tree.GatingSet}
 \alias{cyto_plot_gating_tree.gatingTemplate}
 \title{Plot Gating Trees}
 \usage{
-\method{cyto_plot_gating_tree}{GatingSet}(x, ...)
+\method{cyto_plot_gating_tree}{GatingHierarchy}(x, stat = NULL)
 
-\method{cyto_plot_gating_tree}{GatingHierarchy}(x, stat = NULL, ...)
+\method{cyto_plot_gating_tree}{GatingSet}(x)
 
-\method{cyto_plot_gating_tree}{gatingTemplate}(x, ...)
+\method{cyto_plot_gating_tree}{gatingTemplate}(x)
+}
+\arguments{
+\item{x}{object of class \code{GatingHierarchy}, \code{GatingSet} or
+\code{gatingTemplate}.}
+
+\item{stat}{used in \code{GatingHierachy} method to add either "percent" or
+"count" statistics onto the gating tree, set to NULL by default to exclude
+statistics.}
 }
 \description{
-Plot Gating Trees
+\code{cyto_plot_gating_tree} provides a simpler visualisation of the gating
+scheme for \code{GatingHierarchy}, \code{GatingSet} and \code{gatingTemplate}
+objects. The \code{GatingHierachy} method is also capable of displaying
+population statistics such as frequency of parent or count.
+}
+\examples{
+library(CytoRSuiteData)
+
+# Load in samples
+fs <- Activation
+
+# Add samples to GatingSet
+gs <- GatingSet(fs)
+
+# Apply compensation
+gs <- cyto_compensate(gs)
+
+# Transform fluorescent channels
+gs <- cyto_transform(gs, select = "Stim-D", trans_type = "logicle")
+
+# Gating
+gt <- Activation_gatingTemplate
+cyto_gatingTemplate_apply(gs, gt)
+
+# Visualise gating tree using gatingTemplate
+cyto_plot_gating_tree(gt)
+
+# Visualise gating tree for GatingSet (same output as gatingTemplate)
+cyto_plot_gating_tree(gs)
+
+# Visualise gating tree for GatingHierarchy
+cyto_plot_gating_tree(gs[[32]], stat = "percent")
+cyto_plot_gating_tree(gs[[32]], stat = "count")
+
+}
+\author{
+Dillon Hammill (Dillon.Hammill@anu.edu.au)
 }

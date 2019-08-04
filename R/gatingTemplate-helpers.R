@@ -199,7 +199,8 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #'
 #' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
 #' @param gatingTemplate name of the gatingTemplate csv file which contains the
-#'   gates to be applied to \code{x}.
+#'   gates to be applied to \code{x}. This can alos be an object of class
+#'   \code{gatingTemplate} if a \code{GatingSet} object is supplied.
 #' @param ... additional arguments passed to gating.
 #'
 #' @return NULL and update the GatingHierarchy/ GatingSet in the global
@@ -243,36 +244,75 @@ cyto_gatingTemplate_apply <- function(x,
     }
   }
 
-  # Missing gatingtemplate - check global option
-  if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active()
-  }
-
-  # gatingTemplate still missing
-  if (is.null(gatingTemplate)) {
-    stop("Supply the name of the gatingtemplate csv file to apply.")
-  }
-
-  # File extension if missing
-  if (.empty(file_ext(gatingTemplate))) {
-    gatingTemplate <- paste0(gatingTemplate, ".csv")
-  }
-
-  # Working directory check
-  if (getOption("CytoRSuite_wd_check") == TRUE) {
-    if (file_wd_check(gatingTemplate) == FALSE) {
-      stop(paste(gatingTemplate, "is not in this working directory."))
+  # gatingTemplate supplied
+  if(!is.null(gatingTemplate)){
+    
+    # gatingTemplate object
+    if(inherits(gatingTemplate, "gatingTemplate")){
+    
+      # Apply gatingTemplates to GatingSets only
+      if(!inherits(x, "GatingSet")){
+        stop("gatingTemplates can only be applied to GatingSet objects.")
+      }
+      
+    # name of gatingTemplate csv file  
+    }else{
+      
+      # File extension if missing
+      if (.empty(file_ext(gatingTemplate))) {
+        gatingTemplate <- paste0(gatingTemplate, ".csv")
+      }
+      
+      # Working directory check
+      if (getOption("CytoRSuite_wd_check") == TRUE) {
+        if (file_wd_check(gatingTemplate) == FALSE) {
+          stop(paste(gatingTemplate, "is not in this working directory."))
+        }
+      }
+      
+      # Message to indicate which gatingTemplate is being applied
+      message(paste("Applying", gatingTemplate, "to the GatingSet..."))
+      
+      # Read in gatingTemplate csv file to gatingTemplate object
+      gt <- suppressMessages(gatingTemplate(gatingTemplate))
+      
     }
+  # no gatingTemplate supplied
+  }else if(is.null(gatingTemplate)){
+    
+    # Missing gatingTemplate - check global option
+    if (is.null(gatingTemplate)) {
+      gatingTemplate <- cyto_gatingTemplate_active()
+    }
+    
+    # gatingTemplate still missing
+    if (is.null(gatingTemplate)) {
+      stop("Supply the name of the gatingtemplate csv file to apply.")
+    }
+    
+    # File extension if missing
+    if (.empty(file_ext(gatingTemplate))) {
+      gatingTemplate <- paste0(gatingTemplate, ".csv")
+    }
+    
+    # Working directory check
+    if (getOption("CytoRSuite_wd_check") == TRUE) {
+      if (file_wd_check(gatingTemplate) == FALSE) {
+        stop(paste(gatingTemplate, "is not in this working directory."))
+      }
+    }
+    
+    # Message to indicate which gatingTemplate is being applied
+    message(paste("Applying", gatingTemplate, "to the GatingSet..."))
+    
+    # Read in gatingTemplate csv file to gatingTemplate object
+    gt <- suppressMessages(gatingTemplate(gatingTemplate))
+    
   }
-
-  # Message to indicate which gatingTemplate is being applied
-  message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-
-  # Read in gatingTemplate csv file to gatingTemplate object
-  gt <- suppressMessages(gatingTemplate(gatingTemplate))
-
+  
   # Apply gatingTemplate to GatingHierarchy/GatingSet
   gating(gt, x, ...)
+  
 }
 
 # GATINGTEMPLATE CONVERT -------------------------------------------------------
