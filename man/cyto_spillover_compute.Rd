@@ -7,11 +7,10 @@
 \title{Compute Spillover Matrix}
 \usage{
 \method{cyto_spillover_compute}{GatingSet}(x, parent = NULL,
-  axes_trans = NULL, channel_match = NULL,
-  spillover = "Spillover-Matrix.csv", ...)
+  axes_trans = NULL, channel_match = NULL, spillover = NULL, ...)
 
 \method{cyto_spillover_compute}{flowSet}(x, axes_trans = NULL,
-  channel_match = NULL, spillover = "Spillover-Matrix.csv", ...)
+  channel_match = NULL, spillover = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet} or \code{GatingSet} containing

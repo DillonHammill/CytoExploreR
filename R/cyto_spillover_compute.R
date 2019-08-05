@@ -116,7 +116,7 @@ cyto_spillover_compute.GatingSet <- function(x,
                                              parent = NULL,
                                              axes_trans = NULL,
                                              channel_match = NULL,
-                                             spillover = "Spillover-Matrix.csv",
+                                             spillover = NULL,
                                              ...) {
 
   # No parent supplied - use last node
@@ -152,7 +152,7 @@ cyto_spillover_compute.GatingSet <- function(x,
 cyto_spillover_compute.flowSet <- function(x,
                                            axes_trans = NULL,
                                            channel_match = NULL,
-                                           spillover = "Spillover-Matrix.csv",
+                                           spillover = NULL,
                                            ...) {
 
   # Compensation controls MUST be pre-transformed
@@ -174,7 +174,8 @@ cyto_spillover_compute.flowSet <- function(x,
   # Select a fluorescent channel for each compensation control
   if (is.null(channel_match)) {
     pd$channel <- paste(cyto_channel_select(x))
-    write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
+    write.csv(pd, paste0(format(Sys.Date(), "%d%m%y"),
+                         "-", "Compensation-Channels.csv"), row.names = FALSE)
   } else {
     if (inherits(channel_match, "data.frame") |
       inherits(channel_match, "matrix") |
@@ -393,6 +394,11 @@ cyto_spillover_compute.flowSet <- function(x,
   rws <- match(pd$channel, rownames(spill))
   spill[rws, ] <- signal
     
+  # No name specified for spillover default to date-Spillover-Matrix.csv
+  if(is.null(spillover)){
+    spillover <- paste0(format(SysDate(), "%d%m%y"),"-","Spillover-Matrix.csv")
+  }
+  
   # write spillover matrix to csv file
   if (!inherits(spillover, "character")) {
     stop("'spillover' should be the name of a csv file.")
@@ -404,4 +410,5 @@ cyto_spillover_compute.flowSet <- function(x,
   }
 
   return(spill)
+  
 }
