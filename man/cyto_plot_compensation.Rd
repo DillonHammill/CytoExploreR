@@ -127,6 +127,13 @@ cyto_plot_compensation(fs,
   overlay = fs[[7]]
 )
 
+# Compensation plots - GatingHierarchy
+cyto_plot_compensation(gs[[1]],
+  parent = "Single Cells",
+  channel_match = "7-AAD-A",
+  overlay = fs[[7]]
+)
+
 # Compensation plots - GatingSet
 cyto_plot_compensation(gs,
   parent = "Single Cells",
