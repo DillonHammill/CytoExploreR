@@ -346,26 +346,26 @@ cyto_transform.default <- function(x,
     if(trans_type == "arcsinh"){
       
       transformer_list <- cyto_transformer_arcsinh(x,
-                                                 channels = channels,
-                                                 parent = parent,
-                                                 select = select,
-                                                 plot = FALSE, ...)
+                                                   channels = channels,
+                                                   parent = parent,
+                                                   select = select,
+                                                   plot = FALSE, ...)
       
     }else if(trans_type == "biex"){
       
       transformer_list <- cyto_transformer_biex(x,
-                                              channels = channels,
-                                              parent = parent,
-                                              select = select,
-                                              plot = FALSE, ...)
+                                                channels = channels,
+                                                parent = parent,
+                                                select = select,
+                                                plot = FALSE, ...)
       
     }else if(trans_type == "logicle"){
       
       transformer_list <- cyto_transformer_logicle(x,
-                                                 channels = channels,
-                                                 parent = parent,
-                                                 select = select,
-                                                 plot = FALSE, ...)
+                                                   channels = channels,
+                                                   parent = parent,
+                                                   select = select,
+                                                   plot = FALSE, ...)
       
     }
     
