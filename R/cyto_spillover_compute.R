@@ -114,7 +114,7 @@ cyto_spillover_compute <- function(x, ...) {
 #' @export
 cyto_spillover_compute.GatingSet <- function(x,
                                              parent = NULL,
-                                             axes_trans = NA,
+                                             axes_trans = NULL,
                                              channel_match = NULL,
                                              spillover = NULL,
                                              ...) {
@@ -158,7 +158,7 @@ cyto_spillover_compute.GatingSet <- function(x,
 #' @rdname cyto_spillover_compute
 #' @export
 cyto_spillover_compute.flowSet <- function(x,
-                                           axes_trans = NA,
+                                           axes_trans = NULL,
                                            channel_match = NULL,
                                            spillover = NULL,
                                            ...) {

@@ -872,6 +872,11 @@ cyto_transformer_combine <- function(...) {
   # Fluorescent channels
   channels <- cyto_fluor_channels(x)
   
+  # In case NULL axes_trans
+  if(is.null(axes_trans)){
+    axes_trans <- NA
+  }
+  
   # Transformations supplied
   if(!.all_na(axes_trans)){
     # Must be transformerList
@@ -911,6 +916,11 @@ cyto_transformer_combine <- function(...) {
   
   # Fluorescent channels
   channels <- cyto_fluor_channels(x)
+  
+  # In case NULL axes_trans
+  if(is.null(axes_trans)){
+    axes_trans <- NA
+  }
   
   # Transformations supplied
   if(!.all_na(axes_trans)){
@@ -953,6 +963,11 @@ cyto_transformer_combine <- function(...) {
   
   # Extract transformations from GatingHierarchy
   gh_trans <- x@transformation
+  
+  # In case NULL axes_trans
+  if(is.null(axes_trans)){
+    axes_trans <- NA
+  }
   
   # No transformations found in GatingHierarchy
   if(length(gh_trans) == 0){
