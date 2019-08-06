@@ -8,7 +8,8 @@
 #' refernce if supplied.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-#'   \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing gated
 #'   compensation controls and an unstained control.
 #' @param parent indicates the name of the population to plot for GatingSet
@@ -203,6 +204,106 @@ cyto_plot_compensation.GatingSet <- function(x,
       # Reset CytoRSuite_cyto_plot_save
       options("CytoRSuite_cyto_plot_save" = FALSE)
 
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
+}
+
+
+#' @rdname cyto_plot_compensation
+#' @export
+cyto_plot_compensation.GatingHierarchy <- function(x,
+                                                   parent = NULL,
+                                                   channel_match = NULL,
+                                                   compensate = FALSE,
+                                                   spillover = NULL,
+                                                   axes_trans = NA,
+                                                   overlay = TRUE,
+                                                   layout,
+                                                   popup = FALSE,
+                                                   title = NA,
+                                                   header,
+                                                   header_text_font = 2,
+                                                   header_text_size = 1,
+                                                   header_text_col = "black", ...) {
+  
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Comp/GatingHierarchy")
+  }
+  
+  # Graphics parameters
+  pars <- par(c("mfrow","oma"))
+  on.exit(par(pars))
+  
+  # Parent
+  if (is.null(parent)) {
+    parent <- cyto_nodes(x, path = "auto")[length(cyto_nodes(x))]
+    message(paste(
+      "No parent supplied -",
+      parent,
+      "population will be used for plots."
+    ))
+  }
+  
+  # Extract channels
+  channels <- cyto_fluor_channels(x)
+  
+  # Extract parent
+  fr <- cyto_extract(x, parent)
+  
+  # Get complete transformerList
+  axes_trans <- .cyto_transformer_complete(x, axes_trans)
+  
+  # Reverse any transformations in fluorescent channels
+  if(any(channels %in% names(x@transformation))){
+    fr <- cyto_transform(fr,
+                         axes_trans[names(axes_trans) %in% channels],
+                         inverse = TRUE,
+                         plot = FALSE)
+  }
+  
+  # Compensation
+  if (compensate == TRUE) {
+    # Data must be LINEAR, compensated and re-transformed
+    fr <- cyto_compensate(fr, 
+                          spillover = spillover)
+    # Apply transformations
+    fr <- cyto_transform(fr, 
+                         axes_trans, 
+                         plot = FALSE)
+  }else{
+    # Apply transformations
+    fr <- cyto_transform(fr,
+                         axes_trans,
+                         plot = FALSE)
+  }
+  
+  # Make call to cyto_plot_compensation
+  cyto_plot_compensation(
+    x = fr,
+    axes_trans = axes_trans,
+    channel_match = channel_match,
+    overlay = overlay,
+    popup = popup,
+    title = title,
+    header = header,
+    header_text_font = header_text_font,
+    header_text_size = header_text_size,
+    header_text_col = header_text_col, ...
+  )
+  
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+      
+      # Close graphics device
+      dev.off()
+      
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+      
       # Reset CytoRSuite_cyto_plot_method
       options("cytoRSuite_cyto_plot_method" = NULL)
     }

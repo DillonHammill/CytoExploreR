@@ -3,11 +3,18 @@
 \name{cyto_plot_compensation}
 \alias{cyto_plot_compensation}
 \alias{cyto_plot_compensation.GatingSet}
+\alias{cyto_plot_compensation.GatingHierarchy}
 \alias{cyto_plot_compensation.flowSet}
 \alias{cyto_plot_compensation.flowFrame}
 \title{Visualise Compensation of Fluorescent Spillover in All Fluorescent Channels}
 \usage{
 \method{cyto_plot_compensation}{GatingSet}(x, parent = NULL,
+  channel_match = NULL, compensate = FALSE, spillover = NULL,
+  axes_trans = NA, overlay = TRUE, layout, popup = FALSE,
+  title = NA, header, header_text_font = 2, header_text_size = 1,
+  header_text_col = "black", ...)
+
+\method{cyto_plot_compensation}{GatingHierarchy}(x, parent = NULL,
   channel_match = NULL, compensate = FALSE, spillover = NULL,
   axes_trans = NA, overlay = TRUE, layout, popup = FALSE,
   title = NA, header, header_text_font = 2, header_text_size = 1,
@@ -26,7 +33,8 @@
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-\code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing gated
 compensation controls and an unstained control.}
 
