@@ -14,8 +14,9 @@
 #' @param parent indicates the name of the population to plot for GatingSet
 #'   objects..
 #' @param channel_match name of the fluorescent channel associated with the
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}. If not supplied users
-#'   will need to select the channel from a dropdown menu.
+#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}. A \code{channel_match}
+#'   csv file may also be supplied. If not supplied users will need to select
+#'   the channel from a dropdown menu.
 #' @param compensate logical indicating whether the samples should be
 #'   compensated prior to plotting, set to FALSE by default. If no spillover
 #'   matrix is supplied to the spillover_file argument the spillover matrix will
@@ -44,17 +45,61 @@
 #' @param header_text_font font to use for header text, set to 2 by default.
 #' @param header_text_size text size for header, set to 1 by default.
 #' @param header_text_col colour for header text, set to "black" by default.
-#' @param ... additional arguments passed to
-#'   \code{\link{cyto_plot}}.
+#' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par mtext
+#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @examples
+#' library(CytoRSuiteData)
+#'
+#' # Don't run - bypass directory check for external files
+#' options("CytoRSuite_wd_check" = FALSE)
+#'
+#' # Load in compensation controls
+#' gs <- GatingSet(Compensation)
+#'
+#' # Gate single cells using cyto_gate_draw
+#' gt <- Compensation_gatingTemplate
+#' gating(gt, gs)
+#'
+#' # Extract flowSet for plotting
+#' fs <- cyto_extract(gs, "Single Cells")
+#'
+#' # Channel match file
+#' cmfile <- system.file("extdata",
+#'   "Compensation-Channels.csv",
+#'   package = "CytoRSuiteData"
+#' )
+#'
+#' # Compensation plots - flowFrame
+#' cyto_plot_compensation(fs[[1]],
+#'   channel_match = cmfile,
+#'   overlay = fs[[7]]
+#' )
+#'
+#' # Compensation plots - flowSet
+#' cyto_plot_compensation(fs,
+#'   channel_match = "7-AAD-A",
+#'   overlay = fs[[7]]
+#' )
+#'
+#' # Compensation plots - GatingSet
+#' cyto_plot_compensation(gs,
+#'   parent = "Single Cells",
+#'   channel_match = cmfile
+#' )
+#'
+#' # Don't run - return "CytoRSuite_wd_check" to default
+#' options("CytoRSuite_wd_check" = TRUE)
 #'
 #' @seealso \code{\link{cyto_spillover_compute}}
 #' @seealso \code{\link{cyto_spillover_edit}}
 #' @seealso \code{\link{cyto_spillover_spread}}
+#' @seealso \code{\link{cyto_plot}}
 #'
 #' @name cyto_plot_compensation
 NULL
@@ -415,10 +460,33 @@ cyto_plot_compensation.flowFrame <- function(x,
   }
 
   # Select channel associated with flowFrame
-  if (is.null(channel_match)) {
+  if(is.null(channel_match)){
     chan <- cyto_channel_select(x)
-  } else {
+  # channel_match is the name of the channel
+  }else if(grepl(channel_match, channels)){
     chan <- channel_match
+  # channel_match is the name of a csv file
+  }else{
+    # File extension missing
+    if(file_ext(channel_match) != "csv"){
+      channel_match <- paste0(channel_match,".csv")
+    }
+    # Working directory checks
+    if(getOption("CytoRSuite_wd_check") == TRUE){
+      # File not in working directory
+      if (file_wd_check(channel_match) == FALSE) {
+        message(paste(channel_match, "is not in this working directory."))
+        chan <- cyto_channel_select(x)
+      } else {
+        cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+        chan <- cm$channel[match(cyto_names(x), row.names(cm))]
+      }
+    # Bypass working directory checks  
+    }else if(getOption("CytoRSuite_wd_check") == FALSE){
+      # Read in file
+      cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+      chan <- cm$channel[match(cyto_names(x), row.names(cm))]
+    }
   }
 
   # Pop-up

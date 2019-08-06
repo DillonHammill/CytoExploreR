@@ -34,8 +34,9 @@ compensation controls and an unstained control.}
 objects..}
 
 \item{channel_match}{name of the fluorescent channel associated with the
-\code{\link[flowCore:flowFrame-class]{flowFrame}}. If not supplied users
-will need to select the channel from a dropdown menu.}
+\code{\link[flowCore:flowFrame-class]{flowFrame}}. A \code{channel_match}
+csv file may also be supplied. If not supplied users will need to select
+the channel from a dropdown menu.}
 
 \item{compensate}{logical indicating whether the samples should be
 compensated prior to plotting, set to FALSE by default. If no spillover
@@ -76,8 +77,7 @@ default. Turn off the header by setting this argument to NA.}
 
 \item{header_text_col}{colour for header text, set to "black" by default.}
 
-\item{...}{additional arguments passed to
-\code{\link{cyto_plot}}.}
+\item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
 \description{
 \code{cyto_plot_compensation} plots each compensation control in all
@@ -85,12 +85,58 @@ fluorescent channels to make it easy to identify any potential compensation
 issues. The unstained control is automatically overlaid onto the plot as a
 refernce if supplied.
 }
+\examples{
+library(CytoRSuiteData)
+
+# Don't run - bypass directory check for external files
+options("CytoRSuite_wd_check" = FALSE)
+
+# Load in compensation controls
+gs <- GatingSet(Compensation)
+
+# Gate single cells using cyto_gate_draw
+gt <- Compensation_gatingTemplate
+gating(gt, gs)
+
+# Extract flowSet for plotting
+fs <- cyto_extract(gs, "Single Cells")
+
+# Channel match file
+cmfile <- system.file("extdata",
+  "Compensation-Channels.csv",
+  package = "CytoRSuiteData"
+)
+
+# Compensation plots - flowFrame
+cyto_plot_compensation(fs[[1]],
+  channel_match = cmfile,
+  overlay = fs[[7]]
+)
+
+# Compensation plots - flowSet
+cyto_plot_compensation(fs,
+  channel_match = "7-AAD-A",
+  overlay = fs[[7]]
+)
+
+# Compensation plots - GatingSet
+cyto_plot_compensation(gs,
+  parent = "Single Cells",
+  channel_match = cmfile
+)
+
+# Don't run - return "CytoRSuite_wd_check" to default
+options("CytoRSuite_wd_check" = TRUE)
+
+}
 \seealso{
 \code{\link{cyto_spillover_compute}}
 
 \code{\link{cyto_spillover_edit}}
 
 \code{\link{cyto_spillover_spread}}
+
+\code{\link{cyto_plot}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)
