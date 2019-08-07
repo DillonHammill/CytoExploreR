@@ -1819,7 +1819,7 @@ cyto_compensate.GatingSet <- function(x,
 #' Extract Names of Gated Populations in GatingHierarchy or GatingSet
 #'
 #' \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
-#' \code{\link[flowWorkspace:getNodes]{getNodes}}
+#' \code{\link[flowWorkspace:getNodes]{getNodes}}.
 #'
 #' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
 #' @param ... additional arguments passed to

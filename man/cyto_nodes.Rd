@@ -17,5 +17,5 @@ character vector of gated node/population names.
 }
 \description{
 \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
-\code{\link[flowWorkspace:getNodes]{getNodes}}
+\code{\link[flowWorkspace:getNodes]{getNodes}}.
 }

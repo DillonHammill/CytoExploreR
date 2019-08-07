@@ -11,7 +11,7 @@
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing gated
-#'   compensation controls and an unstained control.
+#'   compensation controls.
 #' @param parent indicates the name of the population to plot for GatingSet
 #'   objects..
 #' @param channel_match name of the fluorescent channel associated with the
@@ -57,7 +57,7 @@
 #' @examples
 #' library(CytoRSuiteData)
 #'
-#' # Don't run - bypass directory check for external files
+#' # Bypass directory check for external files
 #' options("CytoRSuite_wd_check" = FALSE)
 #'
 #' # Load in compensation controls
@@ -79,29 +79,32 @@
 #' # Compensation plots - flowFrame
 #' cyto_plot_compensation(fs[[1]],
 #'   channel_match = cmfile,
-#'   overlay = fs[[7]]
+#'   display = 1000
 #' )
 #'
 #' # Compensation plots - flowSet
 #' cyto_plot_compensation(fs,
-#'   channel_match = "7-AAD-A",
-#'   overlay = fs[[7]]
+#'   channel_match = cmfile,
+#'   compensate = TRUE,
+#'   display = 1000
 #' )
 #'
 #' # Compensation plots - GatingHierarchy
 #' cyto_plot_compensation(gs[[1]],
 #'   parent = "Single Cells",
-#'   channel_match = "7-AAD-A",
-#'   overlay = fs[[7]]
+#'   channel_match = cmfile,
+#'   display = 1000,
+#'   contour_lines = 10
 #' )
 #'
 #' # Compensation plots - GatingSet
 #' cyto_plot_compensation(gs,
 #'   parent = "Single Cells",
-#'   channel_match = cmfile
+#'   channel_match = cmfile,
+#'   display = 1000
 #' )
 #'
-#' # Don't run - return "CytoRSuite_wd_check" to default
+#' # Return "CytoRSuite_wd_check" to default
 #' options("CytoRSuite_wd_check" = TRUE)
 #'
 #' @seealso \code{\link{cyto_spillover_compute}}
@@ -166,24 +169,9 @@ cyto_plot_compensation.GatingSet <- function(x,
   # Reverse any transformations in fluorescent channels
   if(any(channels %in% names(x[[1]]@transformation))){
     fs <- cyto_transform(fs,
-                         axes_trans[names(axes_trans) %in% channels],
+                         cyto_transformer_combine(axes_trans[names(axes_trans)
+                                                             %in% channels]),
                          inverse = TRUE,
-                         plot = FALSE)
-  }
-
-  # Compensation
-  if (compensate == TRUE) {
-    # Data must be LINEAR, compensated and re-transformed
-    fs <- cyto_compensate(fs, 
-                          spillover = spillover)
-    # Apply transformations
-    fs <- cyto_transform(fs, 
-                         axes_trans, 
-                         plot = FALSE)
-  }else{
-    # Apply transformations
-    fs <- cyto_transform(fs,
-                         axes_trans,
                          plot = FALSE)
   }
   
@@ -226,14 +214,14 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
                                                    compensate = FALSE,
                                                    spillover = NULL,
                                                    axes_trans = NA,
-                                                   overlay = TRUE,
                                                    layout,
                                                    popup = FALSE,
                                                    title = NA,
                                                    header,
                                                    header_text_font = 2,
                                                    header_text_size = 1,
-                                                   header_text_col = "black", ...) {
+                                                   header_text_col = "black", 
+                                                   ...) {
   
   # Set plot method
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
@@ -266,24 +254,9 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   # Reverse any transformations in fluorescent channels
   if(any(channels %in% names(x@transformation))){
     fr <- cyto_transform(fr,
-                         axes_trans[names(axes_trans) %in% channels],
+                         cyto_transformer_combine(axes_trans[names(axes_trans) 
+                                                             %in% channels]),
                          inverse = TRUE,
-                         plot = FALSE)
-  }
-  
-  # Compensation
-  if (compensate == TRUE) {
-    # Data must be LINEAR, compensated and re-transformed
-    fr <- cyto_compensate(fr, 
-                          spillover = spillover)
-    # Apply transformations
-    fr <- cyto_transform(fr, 
-                         axes_trans, 
-                         plot = FALSE)
-  }else{
-    # Apply transformations
-    fr <- cyto_transform(fr,
-                         axes_trans,
                          plot = FALSE)
   }
   
@@ -292,7 +265,6 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
     x = fr,
     axes_trans = axes_trans,
     channel_match = channel_match,
-    overlay = overlay,
     popup = popup,
     title = title,
     header = header,
@@ -361,10 +333,10 @@ cyto_plot_compensation.flowSet <- function(x,
                         trans = axes_trans,
                         plot = FALSE)
   }else{
-    # Apply transformations - data msut be LINEAR
-    fs <- cyto_transform(fs,
-                         axes_trans,
-                         plot = FALSE)
+    # Apply transformations - data must be LINEAR
+    x <- cyto_transform(x,
+                        axes_trans,
+                        plot = FALSE)
   }
 
   # Extract pData information
@@ -386,12 +358,18 @@ cyto_plot_compensation.flowSet <- function(x,
         message(paste(channel_match, "is not in this working directory."))
         pd$channel <- paste(cyto_channel_select(x))
       } else {
-        cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+        cm <- read.csv(channel_match, 
+                       header = TRUE, 
+                       row.names = 1,
+                       stringsAsFactors = FALSE)
         chans <- cm$channel[match(cyto_names(x), row.names(cm))]
         pd$channel <- paste(chans)
       }
     } else {
-      cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+      cm <- read.csv(channel_match, 
+                     header = TRUE, 
+                     row.names = 1,
+                     stringsAsFactors = FALSE)
       chans <- cm$channel[match(cyto_names(x), row.names(cm))]
       pd$channel <- paste(chans)
     }
@@ -566,12 +544,12 @@ cyto_plot_compensation.flowFrame <- function(x,
                         axes_trans,
                         plot = FALSE)
   }
-
+  
   # Select channel associated with flowFrame
   if(is.null(channel_match)){
     chan <- cyto_channel_select(x)
   # channel_match is the name of the channel
-  }else if(grepl(channel_match, channels)){
+  }else if(any(grepl(channel_match, channels))){
     chan <- channel_match
   # channel_match is the name of a csv file
   }else{
@@ -586,13 +564,19 @@ cyto_plot_compensation.flowFrame <- function(x,
         message(paste(channel_match, "is not in this working directory."))
         chan <- cyto_channel_select(x)
       } else {
-        cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+        cm <- read.csv(channel_match, 
+                       header = TRUE, 
+                       row.names = 1,
+                       stringsAsFactors = FALSE)
         chan <- cm$channel[match(cyto_names(x), row.names(cm))]
       }
     # Bypass working directory checks  
     }else if(getOption("CytoRSuite_wd_check") == FALSE){
       # Read in file
-      cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+      cm <- read.csv(channel_match, 
+                     header = TRUE, 
+                     row.names = 1,
+                     stringsAsFactors = FALSE)
       chan <- cm$channel[match(cyto_names(x), row.names(cm))]
     }
   }

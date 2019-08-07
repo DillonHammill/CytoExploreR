@@ -16,8 +16,8 @@
 
 \method{cyto_plot_compensation}{GatingHierarchy}(x, parent = NULL,
   channel_match = NULL, compensate = FALSE, spillover = NULL,
-  axes_trans = NA, overlay = TRUE, layout, popup = FALSE,
-  title = NA, header, header_text_font = 2, header_text_size = 1,
+  axes_trans = NA, layout, popup = FALSE, title = NA, header,
+  header_text_font = 2, header_text_size = 1,
   header_text_col = "black", ...)
 
 \method{cyto_plot_compensation}{flowSet}(x, channel_match = NULL,
@@ -36,7 +36,7 @@
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing gated
-compensation controls and an unstained control.}
+compensation controls.}
 
 \item{parent}{indicates the name of the population to plot for GatingSet
 objects..}
@@ -96,7 +96,7 @@ refernce if supplied.
 \examples{
 library(CytoRSuiteData)
 
-# Don't run - bypass directory check for external files
+# Bypass directory check for external files
 options("CytoRSuite_wd_check" = FALSE)
 
 # Load in compensation controls
@@ -118,29 +118,32 @@ cmfile <- system.file("extdata",
 # Compensation plots - flowFrame
 cyto_plot_compensation(fs[[1]],
   channel_match = cmfile,
-  overlay = fs[[7]]
+  display = 1000
 )
 
 # Compensation plots - flowSet
 cyto_plot_compensation(fs,
-  channel_match = "7-AAD-A",
-  overlay = fs[[7]]
+  channel_match = cmfile,
+  compensate = TRUE,
+  display = 1000
 )
 
 # Compensation plots - GatingHierarchy
 cyto_plot_compensation(gs[[1]],
   parent = "Single Cells",
-  channel_match = "7-AAD-A",
-  overlay = fs[[7]]
+  channel_match = cmfile,
+  display = 1000,
+  contour_lines = 10
 )
 
 # Compensation plots - GatingSet
 cyto_plot_compensation(gs,
   parent = "Single Cells",
-  channel_match = cmfile
+  channel_match = cmfile,
+  display = 1000
 )
 
-# Don't run - return "CytoRSuite_wd_check" to default
+# Return "CytoRSuite_wd_check" to default
 options("CytoRSuite_wd_check" = TRUE)
 
 }
