@@ -7,14 +7,15 @@
 \title{Interactively Edit Spillover Matrices in Real-Time}
 \usage{
 \method{cyto_spillover_edit2}{flowSet}(x, channel_match = NULL,
-  spillover = NULL, axes_trans = NULL, point_size = 3,
-  axes_text_size = 1.7, axes_label_text_size = 2,
+  spillover = NULL, axes_trans = NULL, display = 1000,
+  point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
   title_text_size = 2, header_text_size = 1.5, ...)
 
 \method{cyto_spillover_edit2}{GatingSet}(x, parent = NULL,
   channel_match = NULL, spillover = NULL, axes_trans = NULL,
-  point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
-  title_text_size = 2, header_text_size = 1.5, ...)
+  display = 1000, point_size = 3, axes_text_size = 1.7,
+  axes_label_text_size = 2, title_text_size = 2,
+  header_text_size = 1.5, ...)
 }
 \value{
 save edited spillover matrix to .csv file named
