@@ -16,9 +16,12 @@
   point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
   title_text_size = 2, header_text_size = 1.5, ...)
 }
-\description{
-#' @return save edited spillover matrix to .csv file named
+\value{
+save edited spillover matrix to .csv file named
   "Spillover-matrix.csv" or spillover.
+}
+\description{
+Interactively Edit Spillover Matrices in Real-Time
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

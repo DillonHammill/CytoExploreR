@@ -2,7 +2,7 @@
 
 #' Interactively Edit Spillover Matrices in Real-Time
 #' 
-#' #' @return save edited spillover matrix to .csv file named
+#' @return save edited spillover matrix to .csv file named
 #'   "Spillover-matrix.csv" or spillover.
 #' 
 #' @importFrom flowWorkspace sampleNames pData
@@ -93,7 +93,7 @@ cyto_spillover_edit2.flowSet <- function(x,
     pd$channel <- paste(chans)
     
   # No channel match file supplied  
-  }else if(!is.null(channel_match)){
+  }else if(is.null(channel_match)){
     # Add NA channel selections to pd
     pd$channel <- rep(NA, nrow(pd))
   }
@@ -149,23 +149,32 @@ cyto_spillover_edit2.flowSet <- function(x,
     unstained_initial <- NA
   }
   
-  # Transformations - data untransformed but transformers can be supplied
-  if(!is.null(axes_trans)){
-    if(!inherits(axes_trans, "transformerList")){
-      stop("'axes_trans' must be an object of class transformerList.")
-    }
-    message("cyto_spillover_edit expects untransformed samples.")
-  # Transformations missing resort to logicle transformation (flow cytometry)
+  # Get complete transformerList
+  axes_trans <- .cyto_transformer_complete(fs, axes_trans)
+  
+  # Selected sample - unstained control supplied
+  if(!.all_na(pd$channel)){
+    editor_initial_sample <- pd$name[!grepl("Unstained", 
+                                            pd$channel, 
+                                            ignore.case = TRUE)][1]
   }else{
-    message("Applying logicle transformations to visualise the data.")
-    axes_trans <- cyto_transformer_logicle(fs, plot = FALSE)
+    editor_initial_sample <- pd$name[1]
   }
+  
+  # X channel selection
+  if(!.all_na(pd$channel[pd$name == editor_initial_sample])){
+    editor_initial_xchannel <- pd$channel[pd$name == editor_initial_sample]
+  }else{
+    editor_initial_xchannel <- channels[1]
+  }
+  
+  print(pd)
   
   # Shiny application
   shinyApp(
     ui <- fluidPage(
       theme = shinytheme("yeti"),
-      titlePanel("CytoEXploreR Spillover Matrix Editor"),
+      titlePanel("CytoExploreR Spillover Matrix Editor"),
       tabsetPanel(
         tabPanel("Editor",
                  fluid = TRUE,
@@ -180,17 +189,20 @@ cyto_spillover_edit2.flowSet <- function(x,
                      selectInput(
                        inputId = "editor_sample",
                        label = "Select Sample:",
-                       choices = nms
+                       choices = nms,
+                       selected = editor_initial_sample
                      ),
                      selectInput(
                        inputId = "editor_xchannel",
                        label = "X Axis:",
-                       choices = channels
+                       choices = channels,
+                       selected = editor_initial_xchannel
                      ),
                      selectInput(
                        inputId = "editor_ychannel",
                        label = "Y Axis:",
-                       choices = channels
+                       choices = channels,
+                       selected = channels[2]
                      ),
                      checkboxInput(
                        inputId = "editor_unstained_overlay",
@@ -228,12 +240,14 @@ cyto_spillover_edit2.flowSet <- function(x,
                      selectInput(
                        inputId = "plots_sample",
                        label = "Select Sample:",
-                       choices = nms
+                       choices = nms,
+                       selected = editor_initial_sample
                      ),
                      selectInput(
                        inputId = "plots_xchannel",
                        label = "Channel",
-                       choices = channels
+                       choices = channels,
+                       selected = editor_initial_xchannel
                      ),
                      checkboxInput(
                        inputId = "plots_unstained_overlay",
@@ -311,7 +325,7 @@ cyto_spillover_edit2.flowSet <- function(x,
       # Update sample selection in plots tab & x channel selection (match)
       observe({
         fr <- input$editor_sample
-        xchan <- pd$channel[match(input$editor_sample, pd$name)]
+        xchan <- pd$channel[match(fr, pd$name)]
         # Only update x channel if not NA
         if(!.all_na(xchan)){
           updateSelectInput(session, editor_xchannel, selected = xchan)
@@ -325,7 +339,7 @@ cyto_spillover_edit2.flowSet <- function(x,
         # Data must be LINEAR at this step
         fs <- compensate(fs, values$spill / 100)
         
-        # Get trnsformed data
+        # Get transformed data
         fs <- cyto_transform(fs, axes_trans, plot = FALSE)
         
         return(fs)
@@ -334,8 +348,10 @@ cyto_spillover_edit2.flowSet <- function(x,
       # Turn off unstained aspects if no unstained control is supplied
       observe({
         unst <- input$editor_unstained
+        print("Unstained")
+        print(unst)
         # Turn off unstained components if unstained is NA
-        if(.all_na(unst)){
+        if(unst == "NA"){
           # remove unstained overlay in editor
           updateCheckboxInput(session,"editor_unstained_overlay",value = FALSE)
           updateCheckboxInput(session, "editor_unstained_median", value = FALSE)
@@ -353,7 +369,9 @@ cyto_spillover_edit2.flowSet <- function(x,
       # Update overlay unstained check box based on unstained selection (Plots)
       observe({
         unst <- input$plots_unstained
-        if(.all_na(unst)){
+        print("plots_unstained")
+        print(unst)
+        if(unst == "NA"){
           updateCheckboxInput(session, "plots_unstained_overlay", value = FALSE)
         }
       })
@@ -363,7 +381,7 @@ cyto_spillover_edit2.flowSet <- function(x,
         layout(rbind(1, 1, 2, 2), c(1, 1, 3, 3))
         
         # No unstained control - no unstained overlay or unstained median
-        if(.all_na(input$editor_unstained)) {
+        if(input$editor_unstained == "NA") {
           
           # Plots
           cyto_plot(fs.comp()[[input$editor_sample]],
@@ -400,7 +418,8 @@ cyto_spillover_edit2.flowSet <- function(x,
                                  })
             
             medians <- data.frame(unlist(xmedians), unlist(ymedians))
-            colnames(medians) <- c(input$editor_xchannel, input$editor_ychannel)
+            colnames(medians) <- c(input$editor_xchannel, 
+                                   input$editor_ychannel)
             
             vals.y <- medians[, input$editor_ychannel]
             vals.x <- medians[, input$editor_xchannel]
@@ -416,6 +435,8 @@ cyto_spillover_edit2.flowSet <- function(x,
             )
             
           }
+          
+          print("YASSS2")
           
           # Density distribution in associated channel
           cyto_plot(fs.comp()[[input$editor_sample]],
@@ -456,8 +477,10 @@ cyto_spillover_edit2.flowSet <- function(x,
                            label_text_size = 1.1
           )
           
+          print("YASSSS3")
+          
         # Unstained control supplied  
-        }else if(!.all_na(input$editor_unstained)){
+        }else if(input$editor_unstained != "NA"){
           
           # Unstained Overlay
           if(input$editor_unstained_overlay){
@@ -527,6 +550,8 @@ cyto_spillover_edit2.flowSet <- function(x,
               
             }
             
+            print("YASSS4")
+            
           # No unstained overlay  
           }else if(!input$editor_unstained_overlay){
             
@@ -592,6 +617,8 @@ cyto_spillover_edit2.flowSet <- function(x,
               )
             }
             
+            print("YASSS5")
+            
           }
           
           # Density distribution in associated channel - unstained overlay
@@ -649,6 +676,8 @@ cyto_spillover_edit2.flowSet <- function(x,
                            label_text_size = 1.1
           )
         }
+        
+        print("YASSS6")
         
       })
       
@@ -813,27 +842,35 @@ cyto_spillover_edit2.GatingSet <- function(x,
   # Extract channels
   channels <- cyto_fluor_channels(gs)
   
+  # Message channels should not be transformed
+  trans <- gs[[1]]@transformation
+  
   # Extract population for downstream plotting
   if (!is.null(parent)) {
     fs <- cyto_extract(gs, parent)
   } else if (is.null(parent)) {
     fs <- cyto_extract(gs, cyto_nodes(gs)[length(cyto_nodes(gs))])
+  }  
+
+  # Extract transformers from GatingSet
+  trans <- x[[1]]@transformation
+  
+  # Reverse any applied transformations to get LINEAR data
+  if(any(channels %in% names(trans))){
+    # Extract transformations that have been applied
+    trans <- cyto_transformer_combine(trans[names(trans %in% channels)])
+    # Inverse transformations
+    fs <- cyto_transform(fs, 
+                         trans,
+                         inverse = TRUE,
+                         plot = FALSE)
   }
   
-  # Transformations - data untransformed but transformers can be supplied
-  if(!is.null(axes_trans)){
-    if(!inherits(axes_trans, "transformerList")){
-      stop("'axes_trans' must be an object of class transformerList.")
-    }
-    message("cyto_spillover_edit expects untransformed samples.")
-    # Transformations missing resort to logicle transformation (flow cytometry)
-  }else{
-    message("Applying logicle transformations to visualise the data.")
-    axes_trans <- cyto_transformer_logicle(fs, plot = FALSE)
-  }
+  # Get complete transformerList
+  axes_trans <- .cyto_transformer_complete(x, axes_trans)
   
   # Make call to cyto_spillover_edit flowSet method
-  cyto_spillover_edit(
+  cyto_spillover_edit2(
     x = fs,
     channel_match = channel_match,
     spillover = spillover,
