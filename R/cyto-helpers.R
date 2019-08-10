@@ -1604,6 +1604,7 @@ cyto_annotate <- function(x, file = NULL) {
 #' 
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -1834,5 +1835,59 @@ cyto_nodes <- function(x, ...){
   
   # Make call to getNodes
   getNodes(x, ...)
+  
+}
+
+# CYTO_CHANNEL_MATCH -----------------------------------------------------------
+
+#' Table Editor for Channel Match File Construction
+#'
+#' @param x object of \code{flowSet} or \code{GatingSet}.
+#' @param channel_match name to use for the saved channel match csv file, set to
+#'   \code{"date-Channel-Match.csv"}.
+#'
+#' @return save constructed channel_match csv file.
+#'
+#' @importFrom utils write.csv edit
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_channel_match <- function(x,
+                               channel_match = NULL){
+  
+  # Set default name for channel_match file
+  if(is.null(channel_match)){
+    channel_match <- paste0(format(Sys.Date(), "%d%m%y"), 
+                            "-", "Channel-Match.csv")
+  # channel_match must contain csv file extension
+  }else{
+    # File extension missing
+    if(file.ext(channel_match) != "csv"){
+      channel_match <- paste0(channel_match,".csv")
+    }
+  }  
+  
+  # Extract sample names
+  nms <- cyto_names(x)
+  
+  # Construct data.frame for editing
+  cm <- data.frame("name" = nms, "channel" = rep("NA", length(nms)))
+  colnames(cm) <- c("name","channel")
+  rownames(cm) <- NULL
+  
+  # Edit cm
+  cm <- suppressWarnings(edit(cm))
+  
+  # Check that alll channels are valid or throw an error
+  if(!all(cm$channel) %in% cyto_fluor_channel(x)){
+    stop("Some input channels are not valid.")
+  }
+
+  # Write edited channel match file to csv file
+  write.csv(cm, channel_match, row.names = FALSE)
+  
+  # Return edited channel match file
+  return(cm)
   
 }
