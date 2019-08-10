@@ -1,17 +1,84 @@
 # CYTO_SPILLOVER_EDIT ----------------------------------------------------------
 
 #' Interactively Edit Spillover Matrices in Real-Time
-#' 
-#' @return save edited spillover matrix to .csv file named
-#'   "Spillover-matrix.csv" or spillover.
-#' 
-#' @importFrom flowWorkspace sampleNames pData
-#' @importFrom flowCore compensate fsApply sampleFilter exprs Subset each_col
+#'
+#' \code{cyto_spillover_edit} provides an interactive shiny interface for
+#' editing fluorescent spillover matrices.
+#'
+#' \code{cyto_spillover_edit} takes on either a
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+#' compensation controls and/or samples. It is recommended that samples be
+#' pre-gated based on FSC and SSC parameters to obtain a homogeneous population
+#' for calculation of fluorescent spillover. The data should not be transformed
+#' prior to using \code{cyto_spillover_edit} as transformations will be applied
+#' internally when required. Users can supply their own custom transformers to
+#' \code{axes_trans} or the default biexponential transformers will be used.
+#'
+#' Users begin by selecting the unstained control and a stained control from
+#' dropdown menus of sample names. \code{cyto_spillover_edit} leverages
+#' \code{cyto_plot} to plot the stained sample and overlay the unstained control
+#' in black. Users should then select the channel associated with the selected
+#' control on the \code{x axis} and go through all other channels on the \code{y
+#' axis}.
+#'
+#' The displayed spillover matrix is extracted directly from the
+#' \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} unless another
+#' spillover matrix is supplied through the spillover argument. To edit the
+#' spillover matrix simply modify the appropriate cell in the the table. The new
+#' spillover matrix will be re-applied to the samples with each edit and
+#' automatically re-plotted so you can track changes in real-time.
+#'
+#' To aid in selection of an appropriate spillover value, the median fluorescent
+#' intensity of the unstained control is indicated by a red line and median
+#' fluorescent intensity of the stained control is tracked with a purple line.
+#' These features can be turned off by de-selecting the check boxes. Changes to
+#' the spillover matrix are automatically saved to a csv file called
+#' \code{"date-Spillover-Matrix.csv"} in the case where the \code{spillover} is
+#' not specified or to the same name as the specified \code{spillover}.
+#'
+#' @param x an object of class \code{flowSet} or \code{GatingSet}.
+#' @param parent name of the parent population to plot when a \code{GatingSet}
+#'   object is supplied.
+#' @param channel_match name of csv file matching the name of each sample to a
+#'   fluorescent channel. The \code{channel_match} file must contain the columns
+#'   "name" and "channel". The \code{channel_match} file not required to use
+#'   \code{cyto_spillover_edit} but is used internally to automatically select
+#'   channels associated with the selcted samples.
+#' @param spillover name of a square spillover matrix csv file or spillover
+#'   matrix to edit. Setting \code{spillover} to NULL (the default) will result
+#'   in extraction of the spillover matrix directly from the supplied samples
+#'   (i.e. edit the spillover matrix constructed on the cytometer).
+#' @param axes_trans an object of class \code{transformerList} containing
+#'   transformers to used internally to transform the fluorescent channels of
+#'   the samples for visualisation. \code{cyto_spillover_edit} expects
+#'   un-transformed data and will automatically resort to using biexponential
+#'   transformers internally if no transformers are supplied to this argument.
+#' @param display numeric passed to \code{cyto_plot} to control the number of
+#'   events to be displayed in the plots, set to 1000 events by default.
+#' @param point_size integer passed to \code{cyto_plot} to control the size of
+#'   the points in all plots, set to 4 by default.
+#' @param axes_text_size numeric pasedd to \code{cyto_plot} to control the size
+#'   of axes text, set to 1.7 by default.
+#' @param axes_label_text_size numeric passed to \code{cyto_plot} to control the
+#'   text size of axes labels, set to 2 by default.
+#' @param title_text_size numeric passed to \code{cyto_plot} to control the text
+#'   size of titles above each plot, set to 2 by default.
+#' @param header_text_size numeric passed to \code{cyto_plot_compensation} to
+#'   control size of the header text, set to 1.5 by default.
+#' @param ... additional arguments passed to \code{cyto_plot}.
+#'
+#' @return edited spillover matrix and save to designated \code{spillover} csv
+#'   file. Saved filename defaults to \code{date-Spillover-Matrix.csv} is not
+#'   specified.
+#'
+#' @importFrom flowCore compensate fsApply exprs Subset each_col
 #' @importFrom utils read.csv write.csv
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
 #'   eventReactive renderPlot tabsetPanel tabPanel sidebarLayout fluidRow
-#'   updateSelectInput
+#'   updateSelectInput onStop stopApp runApp
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme
@@ -22,24 +89,96 @@
 #' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @name cyto_spillover_edit2
+#'
+#' @seealso \code{\link{cyto_spillover_compute}}
+#' @seealso \code{\link{cyto_plot_compensation}}
+#' @seealso \code{\link{cyto_plot}}
+#'
+#' @name cyto_spillover_edit
 NULL
 
 #' @noRd
 #' @export
-cyto_spillover_edit2 <- function(x, ...) {
-  UseMethod("cyto_spillover_edit2")
+cyto_spillover_edit <- function(x, ...) {
+  UseMethod("cyto_spillover_edit")
 }
 
-#' @rdname cyto_spillover_edit2
+
+#' @rdname cyto_spillover_edit
 #' @export
-cyto_spillover_edit2.flowSet <- function(x,
+cyto_spillover_edit.GatingSet <- function(x,
+                                           parent = NULL,
+                                           channel_match = NULL,
+                                           spillover = NULL,
+                                           axes_trans = NULL,
+                                           display = 1000,
+                                           point_size = 4,
+                                           axes_text_size = 1.7,
+                                           axes_label_text_size = 2,
+                                           title_text_size = 2,
+                                           header_text_size = 1.5, ...) {
+  
+  # Assign x to gs
+  gs <- x
+  
+  # Extract sample names
+  nms <- cyto_names(gs)
+  
+  # Extract channels
+  channels <- cyto_fluor_channels(gs)
+  
+  # Message channels should not be transformed
+  trans <- gs[[1]]@transformation
+  
+  # Extract population for downstream plotting
+  if (!is.null(parent)) {
+    fs <- cyto_extract(gs, parent)
+  } else if (is.null(parent)) {
+    fs <- cyto_extract(gs, cyto_nodes(gs)[length(cyto_nodes(gs))])
+  }  
+
+  # Extract transformers from GatingSet
+  trans <- x[[1]]@transformation
+  
+  # Reverse any applied transformations to get LINEAR data
+  if(any(channels %in% names(trans))){
+    # Extract transformations that have been applied
+    trans <- cyto_transformer_combine(trans[names(trans) %in% channels])
+    # Inverse transformations
+    fs <- cyto_transform(fs, 
+                         trans,
+                         inverse = TRUE,
+                         plot = FALSE)
+  }
+  
+  # Get complete transformerList
+  axes_trans <- .cyto_transformer_complete(x, axes_trans)
+  
+  # Make call to cyto_spillover_edit flowSet method
+  spill <- cyto_spillover_edit(
+    x = fs,
+    channel_match = channel_match,
+    spillover = spillover,
+    axes_trans = axes_trans,
+    display = display,
+    point_size = point_size,
+    axes_text_size = axes_text_size,
+    axes_label_text_size = axes_label_text_size,
+    title_text_size = title_text_size,
+    header_text_size = header_text_size, ...)
+  
+  return(spill)
+  
+}
+
+#' @rdname cyto_spillover_edit
+#' @export
+cyto_spillover_edit.flowSet <- function(x,
                                          channel_match = NULL,
                                          spillover = NULL,
                                          axes_trans = NULL,
                                          display = 1000,
-                                         point_size = 3,
+                                         point_size = 4,
                                          axes_text_size = 1.7,
                                          axes_label_text_size = 2,
                                          title_text_size = 2,
@@ -78,20 +217,39 @@ cyto_spillover_edit2.flowSet <- function(x,
       if(getOption("CytoRSuite_wd_check") == TRUE){
         # channel_match exists in working directory
         if(file_wd_check(channel_match)){
-          channel_match <- read.csv(channel_match, header = TRUE, row.names = 1)
+          channel_match <- read.csv(channel_match, 
+                                    header = TRUE, 
+                                    row.names = 1,
+                                    stringsAsFactors = FALSE)
         }else{
           stop(paste(channel_match, " is not in this working directory."))
         }
       # Bypass working directory checks
       }else{
-        channel_match <- read.csv(channel_match, header = TRUE, row.names = 1)
+        channel_match <- read.csv(channel_match, 
+                                  header = TRUE, 
+                                  row.names = 1,
+                                  stringsAsFactors = FALSE)
       }
     }
     
-    # Add channel selections to pd
-    ind <- match(cyto_names(fs),row.names(channel_match))
-    chans <- channel_match$channel[ind]
-    pd$channel <- paste(chans)
+    # Names of samples don't match any listed in channel_match
+    if(!any(nms %in% row.names(channel_match))){
+      # Add NA channel selections to pd
+      pd$channel <- rep(NA, nrow(pd))
+    # channel_match contains selections for supplied samples
+    }else{
+      # Add NA channel selections to pd
+      pd$channel <- rep(NA, nrow(pd))
+      # Replace with channel selections from channel_match
+      lapply(nms, function(z){
+        # Update channel selction if covered by channel_match file
+        if(z %in% row.names(channel_match)){
+          chn <- channel_match$channel[match(z, row.names(channel_match))]
+          pd[match(z, pd$name),"channel"] <<- chn
+        }
+      })
+    }
     
   # No channel match file supplied  
   }else if(is.null(channel_match)){
@@ -145,7 +303,7 @@ cyto_spillover_edit2.flowSet <- function(x,
   if(any(grepl("Unstained", pd$channel, ignore.case = TRUE))){
     unstained_initial <- pd$name[grepl("Unstained", 
                                        pd$channel, 
-                                       ignore.case = TRUE)[1]]
+                                       ignore.case = TRUE)][1]
   }else{
     unstained_initial <- NA
   }
@@ -155,9 +313,15 @@ cyto_spillover_edit2.flowSet <- function(x,
   
   # Selected sample - unstained control supplied
   if(!.all_na(pd$channel)){
+    # Unstained control included
+    if(any(grepl("Unstaied", pd$channel))){
     editor_initial_sample <- pd$name[!grepl("Unstained", 
                                             pd$channel, 
                                             ignore.case = TRUE)][1]
+    # No unstained control - use first sample
+    }else{
+      editor_initial_sample <- pd$name[1]
+    }
   }else{
     editor_initial_sample <- pd$name[1]
   }
@@ -169,10 +333,8 @@ cyto_spillover_edit2.flowSet <- function(x,
     editor_initial_xchannel <- channels[1]
   }
   
-  print(pd)
-  
   # Shiny application
-  shinyApp(
+  app <- shinyApp(
     ui <- fluidPage(
       theme = shinytheme("yeti"),
       titlePanel("CytoExploreR Spillover Matrix Editor"),
@@ -184,7 +346,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                      selectInput(
                        inputId = "editor_unstained",
                        label = "Select Unstained Control:",
-                       choices = c(nms, NA),
+                       choices = c("No Unstained Control", nms),
                        selected = unstained_initial
                      ),
                      selectInput(
@@ -235,7 +397,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                      selectInput(
                        inputId = "plots_unstained",
                        label = "Select Unstained Control:",
-                       choices = c(nms, NA),
+                       choices = c("No Unstained Control", nms),
                        selected = unstained_initial
                      ),
                      selectInput(
@@ -275,6 +437,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                 )
       )
     ),
+    # Shiny application server
     server <- function(input, output, session) {
       
       values <- reactiveValues()
@@ -326,13 +489,15 @@ cyto_spillover_edit2.flowSet <- function(x,
       # Update sample selection in plots tab & x channel selection (match)
       observe({
         fr <- input$editor_sample
+         # Update sample selection in Plots tab 
+        updateSelectInput(session, "plots_sample", selected = fr)
+        # Use channel_match to set xchannel
         xchan <- pd$channel[match(fr, pd$name)]
         # Only update x channel if not NA
         if(!.all_na(xchan)){
-          updateSelectInput(session, editor_xchannel, selected = xchan)
+          updateSelectInput(session, "editor_xchannel", selected = xchan)
+          updateSelectInput(session, "plots_xchannel", selected = xchan)
         }
-        # Update sample selection in Plots tab 
-        updateSelectInput(session, "plots_sample", selected = fr)
       })
       
       # Re-apply compensation and transformations
@@ -349,13 +514,14 @@ cyto_spillover_edit2.flowSet <- function(x,
       # Turn off unstained aspects if no unstained control is supplied
       observe({
         unst <- input$editor_unstained
-        print("Unstained")
-        print(unst)
         # Turn off unstained components if unstained is NA
-        if(unst == "NA"){
-          # remove unstained overlay in editor
+        if(unst == "No Unstained Control"){
           updateCheckboxInput(session,"editor_unstained_overlay",value = FALSE)
           updateCheckboxInput(session, "editor_unstained_median", value = FALSE)
+        # Turn on unstained components
+        }else{
+          updateCheckboxInput(session,"editor_unstained_overlay",value = TRUE)
+          updateCheckboxInput(session, "editor_unstained_median", value = TRUE)
         }
         # Update Plots tab unstained control based on editor selection
         updateSelectInput(session, "plots_unstained", selected = unst)
@@ -367,22 +533,35 @@ cyto_spillover_edit2.flowSet <- function(x,
         updateSelectInput(session, "plots_xchannel", selected = xchan)
       })
       
+      # Update sample & channel selection in editor based on Plots selection
+      observe({
+        smp <- input$plots_sample
+        updateSelectInput(session, "editor_sample", selected = smp)
+        xchan <- input$plots_xchannel
+        updateSelectInput(session, "editor_xchannel", selected = xchan)
+      })
+      
       # Update overlay unstained check box based on unstained selection (Plots)
       observe({
         unst <- input$plots_unstained
-        print("plots_unstained")
-        print(unst)
-        if(unst == "NA"){
+        # Remove unstained overlay
+        if(unst == "No Unstained Control"){
           updateCheckboxInput(session, "plots_unstained_overlay", value = FALSE)
+        # Turn on unstained overlay
+        }else{
+          updateCheckboxInput(session, "plots_unstained_overlay", value = TRUE)
         }
+        # Update unstained control selection in editor tab
+        updateSelectInput(session, "editor_unstained", selected = unst)
       })
       
       output$editor_plots <- renderPlot({
         
-        layout(rbind(1, 1, 2, 2), c(1, 1, 3, 3))
+        # Set up plot layout
+        layout(matrix(c(1,1,2,2,1,1,3,3), byrow = TRUE, ncol = 4))
         
         # No unstained control - no unstained overlay or unstained median
-        if(input$editor_unstained == "NA") {
+        if(input$editor_unstained == "No Unstained Control") {
           
           # Plots
           cyto_plot(fs.comp()[[input$editor_sample]],
@@ -394,7 +573,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                     point_size = point_size,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size)
+                    title_text_size = title_text_size, ...)
           
           # Median tracker
           if(input$editor_median_tracker == TRUE){
@@ -432,14 +611,12 @@ cyto_spillover_edit2.flowSet <- function(x,
             
             lines(medians[, input$editor_xchannel],
                   loessMod,
-                  col = "cyan3",
+                  col = "purple2",
                   lwd = 3
             )
             
           }
-          
-          print("YASSS2")
-          
+
           # Density distribution in associated channel
           cyto_plot(fs.comp()[[input$editor_sample]],
                     channels = input$editor_xchannel,
@@ -453,8 +630,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
                     title_text_size = title_text_size)
-          
-          
+
           # Density distribution in other channel
           cyto_plot(fs.comp()[[input$editor_sample]],
                     channels = input$editor_ychannel,
@@ -468,7 +644,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
                     title_text_size = title_text_size)
-          
+
           # Add MedFI label in other channel
           cyto_plot_label2(fs.comp()[[input$editor_sample]],
                            channels = input$editor_ychannel,
@@ -476,19 +652,17 @@ cyto_spillover_edit2.flowSet <- function(x,
                            display = display,
                            label_text = "MedFI",
                            label_stat = "median",
-                           label_text_x = 3.7,
+                           label_text_x = 0.75*par("usr")[2],
                            label_text_y = 30,
                            label_text_col = "red",
                            label_text_size = 1.1
           )
           
-          print("YASSSS3")
-          
         # Unstained control supplied  
-        }else if(input$editor_unstained != "NA"){
+        }else if(input$editor_unstained != "No Unstained Control"){
           
           # Unstained Overlay
-          if(input$editor_unstained_overlay){
+          if(input$editor_unstained_overlay == FALSE){
             
             # Plot
             cyto_plot(fs.comp()[[input$editor_sample]],
@@ -550,16 +724,14 @@ cyto_spillover_edit2.flowSet <- function(x,
               
               lines(medians[, input$editor_xchannel],
                     loessMod,
-                    col = "cyan3",
+                    col = "purple2",
                     lwd = 3
               )
               
             }
             
-            print("YASSS4")
-            
           # No unstained overlay  
-          }else if(!input$editor_unstained_overlay){
+          }else if(input$editor_unstained_overlay == TRUE){
             
             # Plot
             cyto_plot(fs.comp()[[input$editor_sample]],
@@ -619,12 +791,10 @@ cyto_spillover_edit2.flowSet <- function(x,
               
               lines(medians[, input$editor_xchannel],
                     loessMod,
-                    col = "cyan3",
+                    col = "purple2",
                     lwd = 3
               )
             }
-            
-            print("YASSS5")
             
           }
           
@@ -656,7 +826,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                     density_stack = 0,
                     density_fill = c("grey70", "white"),
                     density_fill_alpha = c(1, 0),
-                    density_line_col = c("black", "red"),
+                    density_line_col = c("black", "blue"),
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
@@ -670,27 +840,25 @@ cyto_spillover_edit2.flowSet <- function(x,
                            display = display,
                            label_text = "MedFI",
                            label_stat = "median",
-                           label_text_x = 3.7,
+                           label_text_x = 0.75*par("usr")[2],
                            label_text_y = 80,
                            label_text_col = "grey40",
                            label_text_size = 1.1
           )
           
           # Add label for Stained median
-          cyto_plot_label2(fs.comp()[[input$editor_unstained]],
+          cyto_plot_label2(fs.comp()[[input$editor_sample]],
                            channels = input$editor_ychannel,
                            trans = axes_trans,
                            display = display,
                            label_text = "MedFI",
                            label_stat = "median",
-                           label_text_x = 3.7,
+                           label_text_x = 0.75*par("usr")[2],
                            label_text_y = 30,
-                           label_text_col = "red",
+                           label_text_col = "blue",
                            label_text_size = 1.1
           )
         }
-        
-        print("YASSS6")
         
       })
       
@@ -728,7 +896,7 @@ cyto_spillover_edit2.flowSet <- function(x,
                                    display = display,
                                    point_col = c("blue", "red", "black"),
                                    point_alpha = 0.6,
-                                   header = input$plots_samples,
+                                   header = input$plots_sample,
                                    title = NA,
                                    point_size = point_size,
                                    axes_text_size = axes_text_size,
@@ -828,6 +996,7 @@ cyto_spillover_edit2.flowSet <- function(x,
         
       })
       
+      # Save edited spillover matrix to csv file
       observe({
         input$saveBtn
         class(values$spill) <- "numeric"
@@ -835,72 +1004,22 @@ cyto_spillover_edit2.flowSet <- function(x,
         write.csv(spill.mat, spillover)
       })
       
+      # Return edited matrix on application cloase
+      onStop(function(){
+        spill.mat <- read.csv(spillover, header = TRUE, row.names = 1)
+        colnames(spill.mat) <- rownames(spill.mat)
+        stopApp(spill.mat)
+      })
+      
     }
+    
   )
   
-}
-
-#' @rdname cyto_spillover_edit2
-#' @export
-cyto_spillover_edit2.GatingSet <- function(x,
-                                           parent = NULL,
-                                           channel_match = NULL,
-                                           spillover = NULL,
-                                           axes_trans = NULL,
-                                           display = 1000,
-                                           point_size = 3,
-                                           axes_text_size = 1.7,
-                                           axes_label_text_size = 2,
-                                           title_text_size = 2,
-                                           header_text_size = 1.5, ...) {
+  # Run the shiny application
+  sp <- runApp(app)
   
-  # Assign x to gs
-  gs <- x
-  
-  # Extract sample names
-  nms <- cyto_names(gs)
-  
-  # Extract channels
-  channels <- cyto_fluor_channels(gs)
-  
-  # Message channels should not be transformed
-  trans <- gs[[1]]@transformation
-  
-  # Extract population for downstream plotting
-  if (!is.null(parent)) {
-    fs <- cyto_extract(gs, parent)
-  } else if (is.null(parent)) {
-    fs <- cyto_extract(gs, cyto_nodes(gs)[length(cyto_nodes(gs))])
-  }  
-
-  # Extract transformers from GatingSet
-  trans <- x[[1]]@transformation
-  
-  # Reverse any applied transformations to get LINEAR data
-  if(any(channels %in% names(trans))){
-    # Extract transformations that have been applied
-    trans <- cyto_transformer_combine(trans[names(trans %in% channels)])
-    # Inverse transformations
-    fs <- cyto_transform(fs, 
-                         trans,
-                         inverse = TRUE,
-                         plot = FALSE)
-  }
-  
-  # Get complete transformerList
-  axes_trans <- .cyto_transformer_complete(x, axes_trans)
-  
-  # Make call to cyto_spillover_edit flowSet method
-  cyto_spillover_edit2(
-    x = fs,
-    channel_match = channel_match,
-    spillover = spillover,
-    axes_trans = axes_trans,
-    display = display,
-    point_size = point_size,
-    axes_text_size = axes_text_size,
-    axes_label_text_size = axes_label_text_size,
-    title_text_size = title_text_size,
-    header_text_size = header_text_size, ...)
+  # Return updated spillover matrix
+  return(sp)
   
 }
+  
