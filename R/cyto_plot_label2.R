@@ -212,14 +212,14 @@ cyto_plot_label2 <- function(x,
           format = "long",
           density_smooth = density_smooth
         )
-        sts <- .round(sts[, ncol(sts)], 2)
+        sts <- LAPPLY(sts[, ncol(sts)], function(x){.round(x, 2)})
       }
       return(sts)
     })
   } else {
     st <- NA
   }
-
+  
   # Add labels to plot
   invisible(mapply(
     function(label_text,

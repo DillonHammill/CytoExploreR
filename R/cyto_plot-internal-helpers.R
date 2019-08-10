@@ -1239,7 +1239,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
     # y axis label
     if (missing(ylab) | .empty(ylab)) {
       if (density_modal) {
-        ylab <- "Density Normalised to Mode (%)"
+        ylab <- "% of Mode"
       } else {
         ylab <- "Density"
       }

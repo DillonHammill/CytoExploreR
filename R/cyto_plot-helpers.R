@@ -548,7 +548,7 @@ cyto_plot_window <- function() {
 #'
 #' @export
 cyto_plot_new <- function(popup = FALSE, ...){
-  
+
   # Null graphics device -> RStudioGD
   if(dev.cur() == 1) {
     dev.new()
