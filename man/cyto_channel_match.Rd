@@ -18,6 +18,15 @@ save constructed channel_match csv file.
 \description{
 Table Editor for Channel Match File Construction
 }
+\examples{
+\dontrun{
+library(CytoRSuite)
+
+# Generate channel match file for compensation controls
+cyto_channel_match(Compensation)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

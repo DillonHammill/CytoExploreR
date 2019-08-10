@@ -1850,6 +1850,14 @@ cyto_nodes <- function(x, ...){
 #'
 #' @importFrom utils write.csv edit
 #'
+#' @examples
+#' \dontrun{
+#' library(CytoRSuite)
+#' 
+#' # Generate channel match file for compensation controls
+#' cyto_channel_match(Compensation)
+#' }
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1880,8 +1888,8 @@ cyto_channel_match <- function(x,
   cm <- suppressWarnings(edit(cm))
   
   # Check that alll channels are valid or throw an error
-  if(!all(cm$channel) %in% cyto_fluor_channel(x)){
-    stop("Some input channels are not valid.")
+  if(!all(cm$channel) %in% c("Unstained", cyto_fluor_channel(x))){
+    stop("Some inputs in the channel column are not valid.")
   }
 
   # Write edited channel match file to csv file
