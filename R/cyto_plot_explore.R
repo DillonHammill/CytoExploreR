@@ -9,7 +9,12 @@
 #' in all available channels.
 #'
 #' @param x an object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierachy} or \code{GatingSet}.
+#'   \code{GatingHierachy} or \code{GatingSet}. \code{flowSet} and
+#'   \code{GatingSet} objects will be coerced to a single \code{flowFrame} prior
+#'   to plotting.
+#' @param parent name of the parent population to plot when a
+#'   \code{GatingHierarchy} or \code{GatingSet} object is supplied, set to the
+#'   last gated population by default.
 #' @param channels_x vector of channels to explore, set to all fluorescent
 #'   channels by default. Each channel in \code{channels_x} will be plotted
 #'   against all \code{channels_y}, with each \code{channels_x} on a separate
@@ -47,6 +52,129 @@ cyto_plot_explore <- function(x, ...){
 
 #' @rdname cyto_plot_explore
 #' @export
+cyto_plot_explore.GatingSet <- function(x,
+                                        parent = NULL,
+                                        channels_x = NULL,
+                                        channels_y = NULL,
+                                        axes_trans = NA,
+                                        layout,
+                                        popup = FALSE,
+                                        title = NA,
+                                        header,
+                                        header_text_font = 2,
+                                        header_text_size = 1,
+                                        header_text_col = "black",
+                                        ...){
+  
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Explore/GatingSet")
+  }
+  
+  # Default parent population
+  if(is.null(parent)){
+    parent <- cyto_nodes(x)[length(cyto_nodes(x))]
+  }
+  
+  # Extract parent population
+  fs <- cyto_extract(x)
+  
+  # Convert fs to flowFrame
+  fr <- cyto_convert(fs)
+  
+  # Call to flowFrame method
+  cyto_plot_explore(x = fr,
+                    channels_x = channels_x,
+                    channels_y = channels_y,
+                    axes_trans = axes_trans,
+                    layout = layout,
+                    popup = popup,
+                    title = title,
+                    header = header,
+                    header_text_font = header_text_font,
+                    header_text_size = header_text_size,
+                    header_text_col = header_text_col,
+                    ...)
+  
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+      
+      # Close graphics device
+      dev.off()
+      
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+      
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
+  
+}
+
+#' @rdname cyto_plot_explore
+#' @export
+cyto_plot_explore.GatingHierarchy <- function(x,
+                                              parent = NULL,
+                                              channels_x = NULL,
+                                              channels_y = NULL,
+                                              axes_trans = NA,
+                                              layout,
+                                              popup = FALSE,
+                                              title = NA,
+                                              header,
+                                              header_text_font = 2,
+                                              header_text_size = 1,
+                                              header_text_col = "black",
+                                              ...){
+  
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Explore/GatingHierarchy")
+  }
+  
+  # Default parent population
+  if(is.null(parent)){
+    parent <- cyto_nodes(x)[length(cyto_nodes(x))]
+  }
+  
+  # Extract parent population
+  fr <- cyto_extract(x)
+  
+  # Call to flowFrame method
+  cyto_plot_explore(x = fr,
+                    channels_x = channels_x,
+                    channels_y = channels_y,
+                    axes_trans = axes_trans,
+                    layout = layout,
+                    popup = popup,
+                    title = title,
+                    header = header,
+                    header_text_font = header_text_font,
+                    header_text_size = header_text_size,
+                    header_text_col = header_text_col,
+                    ...)
+  
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+      
+      # Close graphics device
+      dev.off()
+      
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+      
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
+  
+}
+
+#' @rdname cyto_plot_explore
+#' @export
 cyto_plot_explore.flowSet <- function(x,
                                       channels_x = NULL,
                                       channels_y = NULL,
@@ -60,7 +188,42 @@ cyto_plot_explore.flowSet <- function(x,
                                       header_text_col = "black",
                                       ...){
   
+  # Set plot method
+  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
+    options("CytoRSuite_cyto_plot_method" = "Explore/flowSet")
+  }
   
+  # Merge flowSet to flowFrame
+  fr <- cyto_convert(x, "flowFrame")
+  
+  # Call to flowFrame method
+  cyto_plot_explore(x = fr,
+                    channels_x = channels_x,
+                    channels_y = channels_y,
+                    axes_trans = axes_trans,
+                    layout = layout,
+                    popup = popup,
+                    title = title,
+                    header = header,
+                    header_text_font = header_text_font,
+                    header_text_size = header_text_size,
+                    header_text_col = header_text_col,
+                    ...)
+  
+  # Turn off graphics device for saving
+  if (getOption("CytoRSuite_cyto_plot_save")) {
+    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+      
+      # Close graphics device
+      dev.off()
+      
+      # Reset CytoRSuite_cyto_plot_save
+      options("CytoRSuite_cyto_plot_save" = FALSE)
+      
+      # Reset CytoRSuite_cyto_plot_method
+      options("cytoRSuite_cyto_plot_method" = NULL)
+    }
+  }
   
 }
 
@@ -203,4 +366,3 @@ cyto_plot_explore.flowFrame <- function(x,
   }
   
 }
-

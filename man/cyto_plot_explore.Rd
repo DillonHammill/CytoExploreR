@@ -2,10 +2,22 @@
 % Please edit documentation in R/cyto_plot_explore.R
 \name{cyto_plot_explore}
 \alias{cyto_plot_explore}
+\alias{cyto_plot_explore.GatingSet}
+\alias{cyto_plot_explore.GatingHierarchy}
 \alias{cyto_plot_explore.flowSet}
 \alias{cyto_plot_explore.flowFrame}
 \title{Explore Cytometry Data in Bivariate Plots}
 \usage{
+\method{cyto_plot_explore}{GatingSet}(x, parent = NULL,
+  channels_x = NULL, channels_y = NULL, axes_trans = NA, layout,
+  popup = FALSE, title = NA, header, header_text_font = 2,
+  header_text_size = 1, header_text_col = "black", ...)
+
+\method{cyto_plot_explore}{GatingHierarchy}(x, parent = NULL,
+  channels_x = NULL, channels_y = NULL, axes_trans = NA, layout,
+  popup = FALSE, title = NA, header, header_text_font = 2,
+  header_text_size = 1, header_text_col = "black", ...)
+
 \method{cyto_plot_explore}{flowSet}(x, channels_x = NULL,
   channels_y = NULL, axes_trans = NA, layout, popup = FALSE,
   title = NA, header, header_text_font = 2, header_text_size = 1,
@@ -18,7 +30,13 @@
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierachy} or \code{GatingSet}.}
+\code{GatingHierachy} or \code{GatingSet}. \code{flowSet} and
+\code{GatingSet} objects will be coerced to a single \code{flowFrame} prior
+to plotting.}
+
+\item{parent}{name of the parent population to plot when a
+\code{GatingHierarchy} or \code{GatingSet} object is supplied, set to the
+last gated population by default.}
 
 \item{channels_x}{vector of channels to explore, set to all fluorescent
 channels by default. Each channel in \code{channels_x} will be plotted
