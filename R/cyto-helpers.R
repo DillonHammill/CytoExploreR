@@ -1888,7 +1888,7 @@ cyto_channel_match <- function(x,
   cm <- suppressWarnings(edit(cm))
   
   # Check that alll channels are valid or throw an error
-  if(!all(cm$channel) %in% c("Unstained", cyto_fluor_channel(x))){
+  if(!all(cm$channel %in% c("Unstained", cyto_fluor_channel(x)))){
     stop("Some inputs in the channel column are not valid.")
   }
 

@@ -12,24 +12,28 @@
   channel_match = NULL, compensate = FALSE, spillover = NULL,
   axes_trans = NA, overlay = TRUE, layout, popup = FALSE,
   title = NA, header, header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", ...)
+  header_text_col = "black", density_stack = 0,
+  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
 
 \method{cyto_plot_compensation}{GatingHierarchy}(x, parent = NULL,
   channel_match = NULL, compensate = FALSE, spillover = NULL,
   axes_trans = NA, layout, popup = FALSE, title = NA, header,
   header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", ...)
+  header_text_col = "black", density_stack = 0,
+  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
 
 \method{cyto_plot_compensation}{flowSet}(x, channel_match = NULL,
   compensate = FALSE, spillover = NULL, axes_trans = NA,
   overlay = TRUE, layout, popup = FALSE, title = NA, header,
   header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", ...)
+  header_text_col = "black", density_stack = 0,
+  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
 
 \method{cyto_plot_compensation}{flowFrame}(x, channel_match = NULL,
   compensate = FALSE, spillover = NULL, axes_trans = NA, layout,
   popup = FALSE, title = NA, header, header_text_font = 2,
-  header_text_size = 1, header_text_col = "black", ...)
+  header_text_size = 1, header_text_col = "black", density_stack = 0,
+  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
@@ -84,6 +88,16 @@ default. Turn off the header by setting this argument to NA.}
 \item{header_text_size}{text size for header, set to 1 by default.}
 
 \item{header_text_col}{colour for header text, set to "black" by default.}
+
+\item{density_stack}{numeric passsed to cyto_plot to control the degree of
+stacking for density distributions, set to 0 by default.}
+
+\item{density_fill}{vector of colours passed to cyto_plot to control the fill
+colours of density distributions, set to c("grey","blue") by
+default.}
+
+\item{density_fill_alpha}{numeric passed to cyto_plot to control the fill
+transparency of density distributions, set to 0.5 by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

@@ -46,6 +46,13 @@
 #' @param header_text_font font to use for header text, set to 2 by default.
 #' @param header_text_size text size for header, set to 1 by default.
 #' @param header_text_col colour for header text, set to "black" by default.
+#' @param density_stack numeric passsed to cyto_plot to control the degree of
+#'   stacking for density distributions, set to 0 by default.
+#' @param density_fill vector of colours passed to cyto_plot to control the fill
+#'   colours of density distributions, set to c("grey","blue") by
+#'   default.
+#' @param density_fill_alpha numeric passed to cyto_plot to control the fill
+#'   transparency of density distributions, set to 0.5 by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @importFrom grDevices n2mfrow
@@ -136,7 +143,11 @@ cyto_plot_compensation.GatingSet <- function(x,
                                              header,
                                              header_text_font = 2,
                                              header_text_size = 1,
-                                             header_text_col = "black", ...) {
+                                             header_text_col = "black",
+                                             density_stack = 0,
+                                             density_fill = c("grey", 
+                                                              "blue"),
+                                             density_fill_alpha = 0.5, ...) {
 
   # Set plot method
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
@@ -180,13 +191,19 @@ cyto_plot_compensation.GatingSet <- function(x,
     x = fs,
     axes_trans = axes_trans,
     channel_match = channel_match,
+    compensate = compensate,
+    spillover = spillover,
     overlay = overlay,
+    layout = layout,
     popup = popup,
     title = title,
     header = header,
     header_text_font = header_text_font,
     header_text_size = header_text_size,
-    header_text_col = header_text_col, ...
+    header_text_col = header_text_col,
+    density_stack = density_stack,
+    density_fill = density_fill,
+    density_fill_alpha = density_fill_alpha, ...
   )
 
   # Turn off graphics device for saving
@@ -220,7 +237,11 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
                                                    header,
                                                    header_text_font = 2,
                                                    header_text_size = 1,
-                                                   header_text_col = "black", 
+                                                   header_text_col = "black",
+                                                   density_stack = 0,
+                                                   density_fill = c("grey",
+                                                                    "blue"),
+                                                   density_fill_alpha = 0.5,
                                                    ...) {
   
   # Set plot method
@@ -264,13 +285,19 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   cyto_plot_compensation(
     x = fr,
     axes_trans = axes_trans,
+    compensate = compensate,
+    spillover = spillover,
     channel_match = channel_match,
+    layout = layout,
     popup = popup,
     title = title,
     header = header,
     header_text_font = header_text_font,
     header_text_size = header_text_size,
-    header_text_col = header_text_col, ...
+    header_text_col = header_text_col,
+    density_stack = density_stack,
+    density_fill = density_fill,
+    density_fill_alpha = density_fill_alpha, ...
   )
   
   # Turn off graphics device for saving
@@ -303,7 +330,11 @@ cyto_plot_compensation.flowSet <- function(x,
                                            header,
                                            header_text_font = 2,
                                            header_text_size = 1,
-                                           header_text_col = "black", ...) {
+                                           header_text_col = "black",
+                                           density_stack = 0,
+                                           density_fill = c("grey",
+                                                            "blue"),
+                                           density_fill_alpha = 0.5, ...) {
 
   # Set plot method
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
@@ -426,27 +457,69 @@ cyto_plot_compensation.flowSet <- function(x,
   }
   
   # Loop through fs_list
-  lapply(1:smp, function(z) {
+  lapply(seq_len(smp), function(z) {
     lapply(seq_len(length(channels)), function(y) {
+      # Overlay unstained control
       if (unst == TRUE & overlay == TRUE) {
-        cyto_plot(fs_list[[z]],
-          channels = c(pd$channel[z], channels[y]),
-          overlay = NIL,
-          axes_trans = axes_trans,
-          legend = FALSE,
-          title = title, ...
-        )
+        # Density distribution if channels match
+        if(pd$channel[z] == channels[y]){
+          cyto_plot(NIL,
+                    channels = pd$channel[z],
+                    overlay = fs_list[[z]],
+                    axes_trans = axes_trans,
+                    legend = FALSE,
+                    title = title,
+                    density_stack = density_stack,
+                    density_fill = density_fill,
+                    density_fill_alpha = density_fill_alpha, ...)
+        # Scatter plot if channels are different
+        }else{
+          cyto_plot(fs_list[[z]],
+            channels = c(pd$channel[z], channels[y]),
+            overlay = NIL,
+            axes_trans = axes_trans,
+            legend = FALSE,
+            title = title, ...
+          )
+        }
+      # No unstained control overlay
       } else {
-        cyto_plot(fs_list[[z]],
-          channels = c(pd$channel[z], channels[y]),
-          axes_trans = axes_trans,
-          legend = FALSE,
-          title = title, ...
-        )
+        # Density distribution if channels match
+        if(pd$channel[z] == channels[y]){
+          cyto_plot(fs_list[[z]],
+                    channels = pd$channel[z],
+                    axes_trans = axes_trans, 
+                    legend = FALSE,
+                    title = title,
+                    density_stack = density_stack,
+                    density_fill = rev(density_fill),
+                    density_fill_alpha = density_fill_alpha, ...)
+        # Scatterplots if channels don't match  
+        }else{
+          cyto_plot(fs_list[[z]],
+            channels = c(pd$channel[z], channels[y]),
+            axes_trans = axes_trans,
+            legend = FALSE,
+            title = title, ...
+          )
+        }
       }
 
+      # Custom layouts require headers
+      if(y == prod(layout)){
+        if (!.all_na(header)) {
+          mtext(header[z],
+                outer = TRUE,
+                cex = header_text_size,
+                font = header_text_font,
+                col = header_text_col
+          )
+        }
+      }
+      
       # Call new plot
-      if (z != smp & channels[y] == channels[length(channels)]) {
+      if (z != smp & 
+          channels[y] == channels[length(channels)]) {
         if (!.all_na(header)) {
           mtext(header[z],
             outer = TRUE,
@@ -465,7 +538,8 @@ cyto_plot_compensation.flowSet <- function(x,
           par(mfrow = layout)
           par(oma = c(0, 0, 3, 0))
         }
-      } else if (z == smp & channels[y] == channels[length(channels)]) {
+      } else if (z == smp & 
+                 channels[y] == channels[length(channels)]) {
         if (!.all_na(header)) {
           mtext(header[z],
             outer = TRUE,
@@ -507,7 +581,11 @@ cyto_plot_compensation.flowFrame <- function(x,
                                              header,
                                              header_text_font = 2,
                                              header_text_size = 1,
-                                             header_text_col = "black", ...) {
+                                             header_text_col = "black",
+                                             density_stack = 0,
+                                             density_fill = c("grey",
+                                                              "blue"),
+                                             density_fill_alpha = 0.5, ...) {
   
   # Set plot method
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
@@ -614,13 +692,27 @@ cyto_plot_compensation.flowFrame <- function(x,
 
   # Plots
   lapply(seq_len(length(channels)), function(y) {
-    cyto_plot(x,
-      channels = c(chan, channels[y]),
-      axes_trans = axes_trans,
-      legend = FALSE,
-      title = title, ...
-    )
+    # Density distribution if channels match
+    if(chan == channels[y]){
+      cyto_plot(x,
+                channels = chan,
+                axes_trans = axes_trans,
+                legend = FALSE,
+                title = title,
+                density_stack = density_stack, 
+                density_fill = rev(density_fill),
+                density_fill_alpha = density_fill_alpha, ...)
+    # Scatterplots if channels don't match  
+    }else{
+      cyto_plot(x,
+        channels = c(chan, channels[y]),
+        axes_trans = axes_trans,
+        legend = FALSE,
+        title = title, ...
+      )
+    }
 
+    # Add header when plot is complete
     if (channels[y] == channels[length(channels)]) {
       if (!.all_na(header)) {
         mtext(header,
@@ -631,6 +723,19 @@ cyto_plot_compensation.flowFrame <- function(x,
         )
       }
     }
+    
+    # Custom layouts require headers
+    if(y == prod(layout)){
+      if (!.all_na(header)) {
+        mtext(header,
+              outer = TRUE,
+              cex = header_text_size,
+              font = header_text_font,
+              col = header_text_col
+        )
+      }
+    }
+    
   })
 
   # Turn off graphics device for saving
