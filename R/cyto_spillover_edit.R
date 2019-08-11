@@ -58,7 +58,7 @@
 #' @param display numeric passed to \code{cyto_plot} to control the number of
 #'   events to be displayed in the plots, set to 1000 events by default.
 #' @param point_size integer passed to \code{cyto_plot} to control the size of
-#'   the points in all plots, set to 4 by default.
+#'   the points in all plots, set to 3 by default.
 #' @param axes_text_size numeric pasedd to \code{cyto_plot} to control the size
 #'   of axes text, set to 1.7 by default.
 #' @param axes_label_text_size numeric passed to \code{cyto_plot} to control the
@@ -112,7 +112,7 @@ cyto_spillover_edit.GatingSet <- function(x,
                                            spillover = NULL,
                                            axes_trans = NULL,
                                            display = 1000,
-                                           point_size = 4,
+                                           point_size = 3,
                                            axes_text_size = 1.7,
                                            axes_label_text_size = 2,
                                            title_text_size = 2,
@@ -178,7 +178,7 @@ cyto_spillover_edit.flowSet <- function(x,
                                          spillover = NULL,
                                          axes_trans = NULL,
                                          display = 1000,
-                                         point_size = 4,
+                                         point_size = 3,
                                          axes_text_size = 1.7,
                                          axes_label_text_size = 2,
                                          title_text_size = 2,
@@ -865,7 +865,7 @@ cyto_spillover_edit.flowSet <- function(x,
       # Plots tab uses cyto_plot_compensation
       output$plots <- renderPlot({
         
-        # Compensation plots
+        # Compensation plots - fill colours are reversed internally
         if (input$plots_uncompensated_underlay == TRUE) {
           if (input$plots_compensated_overlay == TRUE & 
               input$plots_unstained_overlay == FALSE) {
@@ -882,7 +882,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = c("blue","red")
             )
           } else if (input$plots_compensated_overlay == TRUE & 
                      input$plots_unstained_overlay == TRUE) {
@@ -902,7 +903,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "red","blue")
             )
           } else if (input$plots_compensated_overlay == FALSE & 
                      input$plots_unstained_overlay == TRUE) {
@@ -919,7 +921,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey","blue")
             )
           } else if (input$plots_compensated_overlay == FALSE & 
                      input$plots_unstained_overlay == FALSE) {
@@ -935,7 +938,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = "blue"
             )
           }
         } else if (input$plots_uncompensated_underlay == FALSE) {
@@ -946,7 +950,7 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_trans = axes_trans,
                                    overlay = fs.comp()[[input$plots_unstained]],
                                    display = display,
-                                   point_col = c("blue", "black"),
+                                   point_col = c("red", "black"),
                                    point_alpha = 0.6,
                                    header = input$plots_sample,
                                    title = NA,
@@ -954,7 +958,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "red")
             )
           } else if (input$plots_compensated_overlay == FALSE & 
                      input$plots_unstained_overlay == TRUE) {
@@ -970,7 +975,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = "grey"
             )
           } else if (input$plots_compensated_overlay == TRUE & 
                      input$plots_unstained_overlay == FALSE) {
@@ -986,7 +992,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_text_size = axes_text_size,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
-                                   header_text_size = header_text_size
+                                   header_text_size = header_text_size,
+                                   density_fill = "red"
             )
           } else if (input$plots_compensated_overlay == FALSE & 
                      input$plots_unstained_overlay == FALSE) {
