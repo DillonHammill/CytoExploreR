@@ -178,7 +178,8 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
     lapply(channels, function(chan) {
       cyto_plot(x,
         channels = chan,
-        axes_trans = transformer_list
+        axes_trans = transformer_list,
+        title = NA
       )
     })
     
@@ -431,7 +432,8 @@ cyto_transformer_biex.flowFrame <- function(x,
     lapply(channels, function(chan) {
       cyto_plot(x,
         channels = chan,
-        axes_trans = transformer_list
+        axes_trans = transformer_list,
+        title = NA
       )
     })
     
@@ -690,7 +692,8 @@ cyto_transformer_logicle.flowFrame <- function(x,
     lapply(channels, function(chan) {
       cyto_plot(x,
         channels = chan,
-        axes_trans = transformer_list
+        axes_trans = transformer_list,
+        title = NA
       )
     })
     

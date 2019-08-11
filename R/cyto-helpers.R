@@ -424,11 +424,13 @@ cyto_transform.default <- function(x,
       if(inverse == FALSE){
         cyto_plot(cyto_data,
                   channels = chan,
-                  axes_trans = transformer_list
+                  axes_trans = transformer_list, 
+                  title = NA
         )
       }else if(inverse == TRUE){
         cyto_plot(cyto_data,
-                  channels = chan
+                  channels = chan,
+                  title = NA
         )
       }
 
@@ -496,7 +498,8 @@ cyto_transform.transformList <- function(x,
     # Generate plot for each channel - axes will not be transformed correctly
     lapply(channels, function(chan) {
       cyto_plot(cyto_data,
-                channels = chan
+                channels = chan,
+                title = NA
       )
     })
     
@@ -573,11 +576,13 @@ cyto_transform.transformerList <- function(x,
       if(inverse == FALSE){
         cyto_plot(cyto_data,
                   channels = chan,
-                  axes_trans = trans
+                  axes_trans = trans,
+                  title = NA
         )
       }else if(inverse == TRUE){
         cyto_plot(cyto_data,
-                  channels = chan
+                  channels = chan,
+                  title = NA
         )
       }
       

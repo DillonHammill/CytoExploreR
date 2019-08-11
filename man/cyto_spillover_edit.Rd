@@ -8,13 +8,13 @@
 \usage{
 \method{cyto_spillover_edit}{GatingSet}(x, parent = NULL,
   channel_match = NULL, spillover = NULL, axes_trans = NULL,
-  display = 1000, point_size = 4, axes_text_size = 1.7,
+  display = 1000, point_size = 3, axes_text_size = 1.7,
   axes_label_text_size = 2, title_text_size = 2,
   header_text_size = 1.5, ...)
 
 \method{cyto_spillover_edit}{flowSet}(x, channel_match = NULL,
   spillover = NULL, axes_trans = NULL, display = 1000,
-  point_size = 4, axes_text_size = 1.7, axes_label_text_size = 2,
+  point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
   title_text_size = 2, header_text_size = 1.5, ...)
 }
 \arguments{
@@ -44,7 +44,7 @@ transformers internally if no transformers are supplied to this argument.}
 events to be displayed in the plots, set to 1000 events by default.}
 
 \item{point_size}{integer passed to \code{cyto_plot} to control the size of
-the points in all plots, set to 4 by default.}
+the points in all plots, set to 3 by default.}
 
 \item{axes_text_size}{numeric pasedd to \code{cyto_plot} to control the size
 of axes text, set to 1.7 by default.}
