@@ -82,6 +82,11 @@ cyto_plot_explore.GatingSet <- function(x,
   # Convert fs to flowFrame
   fr <- cyto_convert(fs)
   
+  # Combined events header
+  if(missing(header)){
+    header <- "Combined Events"
+  }
+  
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
                     channels_x = channels_x,
@@ -195,6 +200,11 @@ cyto_plot_explore.flowSet <- function(x,
   
   # Merge flowSet to flowFrame
   fr <- cyto_convert(x, "flowFrame")
+  
+  # Combined events header
+  if(missing(header)){
+    header <- "Combined Events"
+  }
   
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
