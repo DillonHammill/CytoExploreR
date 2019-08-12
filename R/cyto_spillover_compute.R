@@ -138,7 +138,7 @@ cyto_spillover_compute.GatingSet <- function(x,
   if(any(channels %in% names(x[[1]]@transformation))){
     chans <- channels[channels %in% names(x[[1]]@transformation)]
     fs <- cyto_transform(fs, 
-                         axes_trans,
+                         cyto_transformer_combine(axes_trans[chans]),
                          inverse = TRUE,
                          plot = FALSE)
   }
