@@ -42,6 +42,11 @@
 #'   performance and aiding in multicolor panel design. Cytometry A,
 #'   83(3):306-15.
 #'
+#' @importFrom flowWorkspace pData
+#' @importFrom flowCore Subset parameters exprs
+#' @importFrom stats quantile
+#' @importFrom grDevices graphics.off dev.new
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @name cyto_spillover_spread_compute
@@ -115,7 +120,7 @@ cyto_spillover_spread_compute.GatingSet <- function(x,
   }
   
   # Call to flowSet method - data is linear & compensated
-  spillover_spread_compute(
+  cyto_spillover_spread_compute(
     x = fs,
     axes_trans = axes_trans,
     channel_match = channel_match,
@@ -137,47 +142,16 @@ cyto_spillover_spread_compute.flowSet <- function(x,
                                                   spillover_spread = NULL,
                                                   ...){
   
-  # Assign x to fs
+  # Assign x to fs - assumed to be LINEAR
   fs <- x
   
-  # Compensate samples
+  # Data requires compensation
   if(compensated == FALSE){
-    # Extract spillover matrix
-    if(!is.null(spillover)){
-      if(getOption("CytoRSuite_wd_check")){
-        if(!file_wd_check(spillover)){
-          stop(paste(spillover, "does not exist in this working directory."))
-        }
-      }
-      spill <- read.csv(spillover, header = TRUE, row.names = 1)
-      colnames(spill) <- rownames(spill)
-    }else{
-      # Check if Spillover-Matrix.csv exists in wd
-      if(length(grep("Spillover-Matrix.csv", list.files())) != 0){
-        message("Using file 'Spillover-Matrix.csv' to compensate samples.")
-        spill <- read.csv(list.files()[grep("Spillover-Matrix.csv",
-                                            list.files())[1]],
-                          header = TRUE, row.names = 1)
-        colnames(spill) <- rownames(spill)
-      }else{
-        spill <- fs[[1]]@description$SPILL
-      }
-    }
-    
-    # Apply compensation
-    if (inherits(fs, "ncdfFlowSet")) {
-      fs <- suppressMessages(ncfsApply(fs, function(fr) {
-        compensate(fr, spill)
-      }))
-    } else if (inherits(fs, "flowSet")) {
-      fs <- suppressMessages(fsApply(fs, function(fr) {
-        compensate(fr, spill)
-      }))
-    }
+    fs <- cyto_compensate(fs, spillover)
   }
   
   # Extract pData information
-  pd <- pData(fs)
+  pd <- cyto_details(fs)
   
   # Extract fluorescent channels
   channels <- cyto_fluor_channels(fs)
@@ -185,7 +159,8 @@ cyto_spillover_spread_compute.flowSet <- function(x,
   # Select a fluorescent channel for each compensation control
   if (is.null(channel_match)) {
     pd$channel <- paste(cyto_channel_select(fs))
-    write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
+    write.csv(pd, paste0(format(Sys.Date(),"%d%m%y"), 
+                         "-", "Channel-Match.csv"), row.names = FALSE)
   } else {
     if (inherits(channel_match, "data.frame") |
         inherits(channel_match, "matrix") |
@@ -199,56 +174,63 @@ cyto_spillover_spread_compute.flowSet <- function(x,
     } else {
       if (getOption("CytoRSuite_wd_check") == TRUE) {
         if (file_wd_check(channel_match)) {
-          cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+          cm <- read.csv(channel_match, 
+                         header = TRUE, 
+                         row.names = 1,
+                         stringsAsFactors = FALSE)
           chans <- cm$channel[match(cyto_names(fs), row.names(cm))]
           pd$channel <- paste(chans)
         } else {
           stop(paste(channel_match, "is not in this working directory."))
         }
       } else {
-        cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+        cm <- read.csv(channel_match,
+                       header = TRUE, 
+                       row.names = 1,
+                       stringsAsFactors = FALSE)
         chans <- cm$channel[match(cyto_names(fs), row.names(cm))]
         pd$channel <- paste(chans)
       }
     }
   }
-  
-  # Merge files for use with estimateLogicle
-  fr <- as(fs, "flowFrame")
-  
+
   # Extract summary statistics
   sm <- pData(parameters(fs[[1]]))
   
-  # Get complete transformList object
-  axes_trans <- .getCompleteTransList(fr, axes_trans)
+  # Get complete transformerList
+  axes_trans <- .cyto_transformer_complete(fs, axes_trans)
   
-  # Get transformed data - all fluorescent channels transformed
-  fs <- .getTransformedData(fs, axes_trans)
+  # Get transformed data
+  fs <- cyto_transform(fs, 
+                       axes_trans,
+                       plot = FALSE)
   
-  # Extract unstained control based on selected channels in pData(fs)
-  NIL <- fs[[match("Unstained", pd$channel)]]
-  fs <- fs[-match("Unstained", pd$channel)]
-  
-  # Names
-  nms <- cyto_names(fs)
-  
-  # Samples
-  smp <- length(fs)
-  
-  # Remove NIL from pd
-  pd <- pd[!pd$channel == "Unstained", ]
-  
-  # Gate positive populations
-  pops <- lapply(seq(1, smp, 1), function(x) {
+  # Universal unstained reference
+  if("Unstained" %in% pd$channel){
     
-    # Extract flowFrame
-    fr <- fs[[x]]
+    # Extract unstained control based on selected channels in pData(fs)
+    NIL <- fs[[match("Unstained", pd$channel)]]
+    fs <- fs[-match("Unstained", pd$channel)]
     
-    # Channel
-    chan <- pd$channel[x]
+    # Names
+    nms <- cyto_names(fs)
     
-    # Plot
-    if (getOption("CytoRSuite_interact") == TRUE) {
+    # Samples
+    smp <- length(fs)
+    
+    # Remove NIL from pd
+    pd <- pd[!pd$channel == "Unstained", ]
+    
+    # Gate positive populations
+    pops <- lapply(seq(1, smp, 1), function(x) {
+      
+      # Extract flowFrame
+      fr <- fs[[x]]
+      
+      # Channel
+      chan <- pd$channel[x]
+      
+      # Plot
       cyto_plot(NIL,
                 channels = chan,
                 overlay = fr,
@@ -258,24 +240,10 @@ cyto_spillover_spread_compute.flowSet <- function(x,
                 density_fill = c("red", "dodgerblue"),
                 legend = FALSE,
                 density_fill_alpha = 0.6,
-                title = nms[x], ...
-      )
-    } else {
-      cyto_plot(NIL,
-                channels = chan,
-                overlay = fr,
-                density_stack = 0,
-                axes_trans = axes_trans,
-                density_fill = c("red", "dodgerblue"),
-                legend = FALSE,
-                density_fill_alpha = 0.6,
-                title = nms[x], ...
-      )
-    }
-    
-    # Call gate_draw on each flowFrame using interval gate on selected channel
-    if (getOption("CytoRSuite_interact") == TRUE) {
-      gt <- gate_draw(
+                title = nms[x], ...)
+      
+      # Call cyto_gate_draw on each flowFrame - gate +ve signal selected channel
+      gt <- cyto_gate_draw(
         x = fr,
         alias = paste(chan, "+"),
         channels = chan,
@@ -284,121 +252,226 @@ cyto_spillover_spread_compute.flowSet <- function(x,
         plot = FALSE
       )
       fr <- Subset(fr, gt[[1]])
+      
+      return(fr)
+    })
+    names(pops) <- nms
+    pops <- flowSet(pops)
+    
+    # Repeat NIL and convert to flowSet
+    NIL <- flowSet(rep(list(NIL), smp))
+  
+  # Internal reference populations    
+  }else{
+    
+    # Names
+    nms <- cyto_names(fs)
+    
+    # Samples 
+    smp <- length(fs)
+    
+    # List of negative populations
+    NIL <- list()
+    
+    # List of positive populations
+    pops <- list()
+    
+    # Gate positive and negative populations for each control
+    lapply(seq(1, smp, 1), function(z){
+      
+      # Extract flowFrame
+      fr <- fs[[z]]
+      
+      # Channel
+      chan <- pd$channel[z]
+      
+      # Plot
+      cyto_plot(fr,
+                channels = chan,
+                density_stack = 0,
+                axes_trans = axes_trans,
+                popup = TRUE,
+                density_fill = "dodgerblue",
+                legend = FALSE,
+                density_fill_alpha = 0.6,
+                title = nms[z], ...)
+      
+      # Gate negative population
+      gt <- cyto_gate_draw(x = fr,
+                           alias = paste(chan, "-"),
+                           channels = chan,
+                           type = "interval",
+                           plot = FALSE)
+      NIL[[z]] <<- Subset(fr, gt[[1]])
+      
+      # Gate positive population
+      gt <- cyto_gate_draw(
+        x = fr,
+        alias = paste(chan, "+"),
+        channels = chan,
+        type = "interval",
+        plot = FALSE
+      )
+      pops[[z]] <<- Subset(fr, gt[[1]])
+      
+    })
+    
+    # Add names to pop lists
+    names(NIL) <- nms
+    names(pops) <- nms
+    
+    # Convert NIL and pops to flowSets
+    NIL <- flowSet(NIL)
+    pops <- flowSet(pops)
+    
+  }
+    
+  # Inverse transformations - data should be LINEAR
+  pops <- cyto_transform(pops, 
+                         axes_trans,
+                         inverse = TRUE,
+                         plot = FALSE)
+  NIL <- cyto_transform(NIL,
+                        axes_trans, 
+                        inverse = TRUE,
+                        plot = FALSE)
+    
+  # Calculate spillover spread for each compensation control
+  SSM <- lapply(seq_len(smp), function(z){
+      
+    # Extract NIL and pop
+    NIL <- NIL[[z]]
+    pop <- pops[[z]]
+      
+    # Channel
+    chan <- pd$channel[pd$name == cyto_names(pop)]
+      
+    # Calculate 50th and 84th percentile for NIL
+    NIL_50 <- LAPPLY(channels, function(channel){
+      quantile(exprs(NIL)[,channel], 0.5)
+    })
+    names(NIL_50) <- channels
+      
+    NIL_84 <- LAPPLY(channels, function(channel){
+      quantile(exprs(NIL)[,channel], 0.84)
+    })
+    names(NIL_84) <- channels
+      
+    # Combine into a list - NIL_stats
+    NIL_stats <- list("50%" = NIL_50, "84%" = NIL_84)
+      
+    # Calculate 50th and 84th percentile for pop
+    pop_50 <- LAPPLY(channels, function(channel){
+      quantile(exprs(pop)[,channel], 0.5)
+    })
+    names(pop_50) <- channels
+      
+    pop_84 <- LAPPLY(channels, function(channel){
+      quantile(exprs(pop)[,channel], 0.84)
+    })
+    names(pop_84) <- channels
+      
+    # Combine into a list - pop_stats
+    pop_stats <- list("50%" = pop_50, "84%" = pop_84)
+    
+    # Calculate pop SD
+    pop_SD <- pop_stats[[2]] - pop_stats[[1]]
+    pop_VAR <- pop_SD^2
+    
+    # Calculate NIL SD
+    NIL_SD <- NIL_stats[[2]] - NIL_stats[[1]]
+    NIL_VAR <- NIL_SD^2
+
+    # Difference in VAR of NIL and pop in other detectors
+    VAR_diff <- pop_VAR - NIL_VAR
+    
+    # Replace negative numbers with 0 - stain has less spread than reference
+    if(any(VAR_diff < 0)){
+      VAR_diff[VAR_diff < 0] <- 0
     }
     
-    return(fr)
+    # Difference in SD of NIL and pop in other detectors
+    SD_diff <- sqrt(VAR_diff)
+
+    # Change in fluorescence in primary detector
+    signal <- pop_stats[[1]][match(chan, channels)] - 
+      NIL_stats[[1]][match(chan, channels)]
+
+    # Spillover spread values
+    return(SD_diff/sqrt(signal))
+      
   })
-  names(pops) <- nms
-  pops <- flowSet(pops)
-  
-  # Inverse logicle transformation
-  inv <- cyto_transform_extract(axes_trans, inverse = TRUE)
-  pops <- suppressMessages(transform(pops, inv))
-  NIL <- suppressMessages(transform(NIL, inv))
-  
-  # Calculate 50th & 80th percentile in all channels for NIL
-  NIL_50 <- LAPPLY(channels, function(channel){
-    quantile(exprs(NIL)[,channel], 0.5)
-  })
-  names(NIL_50) <- channels
-  
-  NIL_84 <- LAPPLY(channels, function(channel){
-    quantile(exprs(NIL)[,channel], 0.84)
-  })
-  names(NIL_84) <- channels
-  
-  # Combine into a list - NIL_stats
-  NIL_stats <- list("50%" = NIL_50, "84%" = NIL_84)
-  
-  # Calculate 50th and 84th percentile in all channels for each control
-  POS_stats <- lapply(seq_len(length(pops)), function(x){
     
-    # Calculate 50th & 80th percentile in all channels
-    POP_50 <- LAPPLY(channels, function(channel){
-      quantile(exprs(pops[[x]])[,channel], 0.5)
-    })
-    names(POP_50) <- channels
-    
-    POP_84 <- LAPPLY(channels, function(channel){
-      quantile(exprs(pops[[x]])[,channel], 0.84)
-    })
-    names(POP_84) <- channels
-    
-    # Combine into a list - NIL_stats
-    POP_stats <- list("50%" = POP_50, "84%" = POP_84)
-    
-    return(POP_stats)
-    
-  })
-  names(POS_stats) <- pd$channel
-  
-  # Calculate POS signal in other detectors
-  POS_signal <- lapply(seq_len(length(POS_stats)), function(x){
-    
-    POS_stats[[x]][[2]] - POS_stats[[x]][[1]]
-    
-  })
-  names(POS_signal) <- pd$channel
-  
-  # Calculate NIL signal in other detectors
-  NIL_signal <- NIL_stats[[2]] - NIL_stats[[1]] 
-  names(NIL_signal) <- pd$channel
-  
-  # Difference
-  DIFF <- lapply(seq_len(length(POS_signal)), function(x){
-    sqrt(POS_signal[[x]]^2) - sqrt(NIL_signal^2)
-  })
-  names(DIFF) <- pd$channel
-  
-  # Brightness
-  BRGHT <- lapply(seq_len(length(POS_signal)), function(x){
-    POS_signal[[x]][match(names(POS_signal[x]), channels)] - 
-      NIL_stats[[1]][match(names(POS_signal[x]),channels)]
-  })
-  names(BRGHT) <- pd$channel
-  
-  # SSM
-  SSM <- lapply(DIFF, function(x){
-    
-    x/(sqrt(BRGHT[[1]]))
-    
-  })
-  
   # Make matrix
   SSM <- do.call("rbind", SSM)
+    
+  # Add rownames (channel associated with each control)
+  rownames(SSM) <- pd$channel[match(cyto_names(pops), pd$name)]
   
   # Replace diagonal with NA
   lapply(seq(1, nrow(SSM), 1), function(x) {
     SSM[x, match(rownames(SSM)[x], colnames(SSM))] <<- NA
   })
-  
+    
   # Sort SSM by column names
   ind <- na.omit(match(colnames(SSM), rownames(SSM)))
   SSM <- SSM[ind, ]
-  
+    
   # Turn off pop-up graphics device
   graphics.off()
   dev.new()
-  
+    
   # Heatmap label size
   ylab_width <- max(nchar(rownames(SSM))) * 0.02
-  xlab_width <- max(nchar(colnames(SSM))) * 0.04               
+  xlab_width <- max(nchar(colnames(SSM))) * 0.04  
   
   # Plot heatmap
   superheat::superheat(SSM,
                        title = "Spillover Spreading Matrix \n",
                        title.size = 6,
                        title.alignment = "center",
-                       bottom.label.text.angle = 90,
                        left.label.size = ylab_width,
+                       left.label.col = "white",
+                       left.label.text.alignment = "right",
+                       bottom.label.text.angle = 90,
                        bottom.label.size = xlab_width,
-                       left.label.text.alignment = "center",
+                       bottom.label.col = "white",
+                       bottom.label.text.alignment = "right",
                        legend.height = 0.2,
-                       legend.vspace = 0.2,
+                       legend.vspace = 0,
                        row.title = "Fluorochrome \n",
                        row.title.size = 6,
-                       heat.na.col = "white",
-                       heat.pal =)
+                       heat.na.col = "grey",
+                       heat.pal = c("white",
+                                    "steelblue",
+                                    "steelblue2",
+                                    "steelblue3",
+                                    "steelblue4",
+                                    "purple",
+                                    "mediumorchid",
+                                    "orchid",
+                                    "magenta",
+                                    "deeppink2",
+                                    "deeppink4",
+                                    "red"),
+                       heat.pal.values = c(0,
+                                           1,
+                                           2,
+                                           3,
+                                           6,
+                                           10,
+                                           20,
+                                           30,
+                                           65,
+                                           100,
+                                           200,
+                                           300))
+  
+  # Default spillover spread file name
+  if(is.null(spillover_spread)){
+    spillover_spread <- paste0(format(Sys.Date(), "%d%m%y"),
+                               "-Spillover-Spread.csv")
+  }
   
   # Write to csv file
   if (!inherits(spillover_spread, "character")) {

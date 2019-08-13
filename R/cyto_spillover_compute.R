@@ -185,8 +185,8 @@ cyto_spillover_compute.flowSet <- function(x,
                          "-", "Compensation-Channels.csv"), row.names = FALSE)
   } else {
     if (inherits(channel_match, "data.frame") |
-      inherits(channel_match, "matrix") |
-      inherits(channel_match, "tibble")) {
+        inherits(channel_match, "matrix") |
+        inherits(channel_match, "tibble")) {
       if (!all(c("name", "channel") %in% colnames(channel_match))) {
         stop("channel_match should contains columns 'name' and 'channel'.")
       }
@@ -196,14 +196,20 @@ cyto_spillover_compute.flowSet <- function(x,
     } else {
       if (getOption("CytoRSuite_wd_check") == TRUE) {
         if (file_wd_check(channel_match)) {
-          cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+          cm <- read.csv(channel_match, 
+                         header = TRUE, 
+                         row.names = 1,
+                         stringsAsFactors = FALSE)
           chans <- cm$channel[match(cyto_names(x), row.names(cm))]
           pd$channel <- paste(chans)
         } else {
           stop(paste(channel_match, "is not in this working directory."))
         }
       } else {
-        cm <- read.csv(channel_match, header = TRUE, row.names = 1)
+        cm <- read.csv(channel_match, 
+                       header = TRUE, 
+                       row.names = 1,
+                       stringsAsFactors = FALSE)
         chans <- cm$channel[match(cyto_names(x), row.names(cm))]
         pd$channel <- paste(chans)
       }
