@@ -123,6 +123,59 @@
   return(axs)
 }
 
+#' Get Appropriate Axes Labels for Transformed Channels - Density Method
+#' @noRd
+.cyto_plot_axes_text.list <- function(x,
+                                      channels,
+                                      axes_trans = NA) {
+
+  # x must be a list of density objects
+  if (!all(LAPPLY(x, "class") == "density")) {
+    stop("'x' must be a list of density objects.")
+  }
+
+  # Only a single channel should be supplied
+  if (length(channels) != 1) {
+    stop("Only a single channel name should be supplied to 'channels'.")
+  }
+
+  # Return NA if axes_trans is missing
+  if (.all_na(axes_trans)) {
+    return(NA)
+  } else {
+    # axes_trans of incorrect class
+    if (!inherits(axes_trans, "transformerList")) {
+      stop("Supply a valid transformerList object to 'axes_trans'.")
+    }
+  }
+
+  # Channel not included in axes_trans
+  if (!channels %in% names(axes_trans)) {
+    return(NA)
+  }
+
+  # Range of values
+  r <- .cyto_density_range(x, axis = "x")
+
+  # Transformation Functions & Breaks
+  trans.func <- axes_trans[[channels]]$transform
+  inv.func <- axes_trans[[channels]]$inverse
+  raw <- inv.func(r)
+  brks <- axes_trans[[channels]]$breaks(raw)
+
+  # Get x axes breaks and labels
+  pos <- signif(trans.func(brks))
+  label <- .cyto_plot_axes_inverse(brks, drop.1 = TRUE)
+
+  # Add results to list
+  axs <- list(label = label, at = pos)
+
+  # Set breaks and labels to NA for y axis
+  axs <- list(axs, NA)
+
+  return(axs)
+}
+
 #' Generate the breaks that makes sense for flow data visualization -
 #' flowWorkspace
 #'
@@ -171,7 +224,8 @@
   mT <- signif(x / 10^eT, digits.fuzz)
   ss <- vector("list", length(x))
 
-  for (i in seq(along = x)) ss[[i]] <- if (is.na(x[i])) {
+  for (i in seq(along = x)) {
+    ss[[i]] <- if (is.na(x[i])) {
       quote(NA)
     } else if (x[i] == 0) {
       quote(0)
@@ -182,6 +236,7 @@
     } else {
       substitute(A %*% 10^E, list(A = mT[i], E = eT[i]))
     }
+  }
 
   do.call("expression", ss)
 }
@@ -275,8 +330,8 @@
     "point_size",
     "point_col",
     "point_col_alpha",
-    "gate_line_type", 
-    "gate_line_width", 
+    "gate_line_type",
+    "gate_line_width",
     "gate_line_col",
     "gate_fill",
     "gate_fill_alpha",
@@ -336,7 +391,6 @@
     "border_line_col",
     "border_fill",
     "border_fill_alpha",
-    "contour_lines",
     "contour_line_type",
     "contour_line_width",
     "contour_line_col"
@@ -349,13 +403,13 @@
       if (plots == 1) {
         res <- list(res)
       } else {
-        res <- split(res, rep(1:plots, length.out = plots))
+        res <- split(res, rep(seq_len(plots), length.out = plots))
       }
 
       x[[arg]] <<- res
     }
   })
-  
+
   # Arguments of length 2 per plot
   args <- c("axes_text")
 
@@ -366,7 +420,7 @@
       if (plots == 1) {
         res <- list(res)
       } else {
-        res <- split(res, rep(1:plots, length.out = plots * 2, each = 2))
+        res <- split(res, rep(seq_len(plots), length.out = plots * 2, each = 2))
       }
 
       x[[arg]] <<- res
@@ -389,7 +443,10 @@
     "point_shape",
     "point_size",
     "point_col",
-    "point_col_alpha"
+    "point_col_alpha",
+    "contour_line_type",
+    "contour_line_width",
+    "contour_line_col"
   )
 
   lapply(args, function(arg) {
@@ -399,19 +456,42 @@
       if (plots == 1) {
         res <- list(res)
       } else {
-        res <- split(res, rep(1:plots, length.out = n, each = layers))
+        res <- split(res, rep(seq_len(plots), length.out = n, each = layers))
       }
 
       x[[arg]] <<- res
     }
   })
 
+  # Arguments per layer - unique
+  args <- c("contour_lines")
+  
+  lapply(args, function(arg) {
+    if (arg %in% names(x)) {
+      
+      if(length(x[[arg]]) < layers){
+        res <- rep(c(x[[arg]], rep(0, layers)),length.out = layers)
+        res <- rep(res, plots)
+      }
+      
+      if (plots == 1) {
+        res <- list(res)
+      } else {
+        res <- split(res, rep(seq_len(plots), length.out = n, each = layers))
+      }
+      
+      x[[arg]] <<- res
+    }
+  })
+  
   # Arguments per gate
-  args <- c("gate_line_type", 
-            "gate_line_width", 
-            "gate_line_col",
-            "gate_fill",
-            "gate_fill_alpha")
+  args <- c(
+    "gate_line_type",
+    "gate_line_width",
+    "gate_line_col",
+    "gate_fill",
+    "gate_fill_alpha"
+  )
 
   if (gates != 0) {
     lapply(args, function(arg) {
@@ -421,7 +501,7 @@
         if (plots == 1) {
           res <- list(res)
         } else {
-          res <- split(res, rep(1:plots,
+          res <- split(res, rep(seq_len(plots),
             length.out = gates * plots,
             each = gates
           ))
@@ -430,6 +510,11 @@
         x[[arg]] <<- res
       }
     })
+  }
+
+  # Negated gates require an extra label
+  if (x[["negate"]]) {
+    gates <- gates + 1
   }
 
   # cyto_plot_1d
@@ -471,7 +556,7 @@
           if (plots == 1) {
             res <- list(res)
           } else {
-            res <- split(res, rep(1:plots,
+            res <- split(res, rep(seq_len(plots),
               length_out = n,
               each = layers
             ))
@@ -508,7 +593,7 @@
           if (plots == 1) {
             res <- list(res)
           } else {
-            res <- split(res, rep(1:plots,
+            res <- split(res, rep(seq_len(plots),
               length.out = gates * plots,
               each = gates
             ))
@@ -527,7 +612,7 @@
           if (plots == 1) {
             res <- list(res)
           } else {
-            res <- split(res, rep(1:plots,
+            res <- split(res, rep(seq_len(plots),
               length_out = n,
               each = layers
             ))
@@ -873,7 +958,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
 #' Set plot margins
 #'
-#' @param x list of flowFrames.
+#' @param x list of flowFrames or density objects to plot.
 #' @param legend logical indicating whether a legend should be included in the
 #'   plot.
 #' @param title if NULL remove excess space above plot.
@@ -939,6 +1024,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 #' \code{.cyto_plot_margins} will handle setting the plot margins to make space
 #' for the legend.
 #'
+#' @param x list of flowFrame objects to include in the plot.
 #' @param channels name of the channels or markers to be used to construct the
 #'   plot.
 #' @param legend logical indicating whether a legend should be included for
@@ -973,9 +1059,11 @@ cyto_plot_overlay_convert <- function(x, ...) {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom graphics legend strheight
+#' @importFrom grDevices adjustcolor
 #'
 #' @noRd
-.cyto_plot_legend <- function(channels,
+.cyto_plot_legend <- function(x,
+                              channels,
                               legend = "fill",
                               legend_text = NA,
                               legend_text_font = 1,
@@ -993,9 +1081,28 @@ cyto_plot_overlay_convert <- function(x, ...) {
                               density_line_col = "black",
                               point_shape = ".",
                               point_size = 2,
+                              point_cols = NA,
                               point_col = NA,
                               point_col_alpha = 1) {
 
+  # ARGUMENTS ------------------------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list()
+  
+  # CYTO_PLOT_THEME
+  args <- .cyto_plot_theme_inherit(args)
+  
+  # UPDATE ARGUMENTS
+  .args_update(args)
+  
+  # LEGEND_TEXT ----------------------------------------------------------------
+  if(legend != FALSE){
+    if(.all_na(legend_text)){
+      legend_text <- cyto_names(x)
+    }
+  }
+  
   # Estimate legend height using strheight
   lgnd <- paste(legend_text, collapse = " \n ")
   lgnd_height <- strheight(lgnd,
@@ -1003,12 +1110,14 @@ cyto_plot_overlay_convert <- function(x, ...) {
     font = legend_text_font
   )
 
+  # LEGEND POSITION ------------------------------------------------------------
+  
   # Calculate y center of plot
   cnt <- par("usr")[3] + (par("usr")[4] - par("usr")[3]) / 2
 
   # Legend for 1D density distributions
   if (length(channels) == 1) {
-
+    
     # Set default legend type to fill
     if (legend == TRUE) {
       legend <- "fill"
@@ -1026,15 +1135,15 @@ cyto_plot_overlay_convert <- function(x, ...) {
       }
 
       # Revert to density_line_type if not specified
-      if(.all_na(legend_line_type)){
+      if (.all_na(legend_line_type)) {
         legend_line_type <- density_line_type
       }
-      
+
       # Revert to density_line_width if not specified
-      if(.all_na(legend_line_width)){
+      if (.all_na(legend_line_width)) {
         legend_line_width <- density_line_width
       }
-      
+
       # Construct legend
       legend(
         x = 1.07 * par("usr")[2],
@@ -1052,12 +1161,18 @@ cyto_plot_overlay_convert <- function(x, ...) {
       )
     } else if (legend == "fill") {
 
+      # COLOURS
+      density_fill <- .cyto_plot_density_fill(x,
+                                              density_fill = density_fill,
+                                              density_cols = density_cols,
+                                              density_fill_alpha = 1)
+      
       # Revert to density_fill if no legend fill colours supplied
       if (.all_na(legend_box_fill)) {
         legend_box_fill <- density_fill
-
-        # Alpha adjust colours if suppplied directly to legend_box_fill
-      } else if (!.all_na(legend_box_fill) &
+      } 
+      # Alpha adjust colours if suppplied directly to legend_box_fill
+      if (!.all_na(legend_box_fill) &
         !all(density_fill_alpha == 1)) {
         legend_box_fill <- mapply(
           function(legend_box_fill,
@@ -1085,11 +1200,33 @@ cyto_plot_overlay_convert <- function(x, ...) {
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
 
+    # Prepare point_cols
+    point_cols <- .cyto_plot_point_cols(point_cols)
+    
+    # Prepare point_col - alpha adjust later
+    point_col <- .cyto_plot_point_col(x,
+                                      channels = channels,
+                                      point_col_scale = point_col_scale,
+                                      point_cols = point_cols,
+                                      point_col = point_col,
+                                      point_col_alpha = 1)
+    
+    # Prepare point col - use first density colour
+    point_col <- LAPPLY(point_col, function(z){
+      if(length(z) > 1){
+        return(point_cols[1])
+      }else{
+        return(z)
+      }
+    })
+    
     # Revert to point_col if no legend point cols supplied
     if (.all_na(legend_point_col)) {
       legend_point_col <- point_col
-      # Alpha adjust colours supplied directly to legend_point_col
-    } else if (!.all_na(legend_point_col) &
+    }
+    
+    # Alpha adjust colours supplied directly to legend_point_col
+    if (!.all_na(legend_point_col) &
       !all(point_col_alpha == 1)) {
       legend_point_col <- mapply(function(col, alpha) {
         adjustcolor(col, alpha)
@@ -1152,6 +1289,14 @@ cyto_plot_overlay_convert <- function(x, ...) {
                              overlay = NA,
                              title = "") {
 
+  # x can be a list
+  if(class(x) == "list"){
+    if(length(x) > 1){
+      overlay <- x[2:length(x)]
+      x <- x[[1]]
+    }
+  }
+  
   # Pull down arguments to named list
   args <- .args_list()
 
@@ -1303,7 +1448,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
                                     density_fill = NA,
                                     density_cols = NA,
                                     density_fill_alpha = 1) {
-  
+
   # Expected number of colours
   n <- length(x)
 
@@ -1368,15 +1513,14 @@ cyto_plot_overlay_convert <- function(x, ...) {
   }
 
   # Adjust colors by density_fill_alpha
-  if(any(args[["density_fill_alpha"]] != 1)){
-      args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha) {
-    if(density_fill_alpha != 1){
-          adjustcolor(density_fill, density_fill_alpha)
-    }else{
-      density_fill
-    }
-  }, args[["density_fill"]], args[["density_fill_alpha"]], USE.NAMES = FALSE)
-
+  if (any(args[["density_fill_alpha"]] != 1)) {
+    args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha) {
+      if (density_fill_alpha != 1) {
+        adjustcolor(density_fill, density_fill_alpha)
+      } else {
+        density_fill
+      }
+    }, args[["density_fill"]], args[["density_fill_alpha"]], USE.NAMES = FALSE)
   }
 
   return(args[["density_fill"]])
@@ -1411,7 +1555,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
   # Expected number of colours
   n <- length(x)
-  
+
   # Pull down arguments to named list
   args <- .args_list()
 
@@ -1433,7 +1577,7 @@ cyto_plot_overlay_convert <- function(x, ...) {
       "darkred"
     )
   }
-  
+
   # Make colorRampPalette
   if (class(point_col_scale) != "function") {
     col_scale <- colorRampPalette(point_col_scale)
@@ -1466,14 +1610,14 @@ cyto_plot_overlay_convert <- function(x, ...) {
   point_col <- rep(point_col,
     length.out = n
   )
-  
+
   # Convert point_col to list
-  if(!inherits(point_col, "list")){
+  if (!inherits(point_col, "list")) {
     point_col <- lapply(seq(1, n), function(z) {
       point_col[z]
     })
   }
-  
+
   # First layer contains density gradient in no other colour is designated
   if (.all_na(point_col)) {
 
@@ -1481,18 +1625,16 @@ cyto_plot_overlay_convert <- function(x, ...) {
     fr_exprs <- exprs(x[[1]])[, channels]
 
     # Too few events for density computation
-    if(!is.null(nrow(fr_exprs))){
+    if (!is.null(nrow(fr_exprs))) {
       if (nrow(fr_exprs) >= 2) {
         # Get density colour for each point
         point_col[[1]] <- densCols(fr_exprs,
           colramp = col_scale
         )
       }
-
     } else {
       point_col[[1]] <- point_col_scale[1]
     }
-    
   } else if (any(is.na(point_col))) {
 
     # Get position of NAs in point_col - replace with density scale
@@ -1505,14 +1647,13 @@ cyto_plot_overlay_convert <- function(x, ...) {
       fr_exprs <- exprs(x[[z]])[, channels]
 
       # Too few events for density computation
-      if(!is.null(nrow(fr_exprs))){
+      if (!is.null(nrow(fr_exprs))) {
         if (nrow(fr_exprs) >= 2) {
           # Get density colour for each point
           point_col[[z]] <<- densCols(fr_exprs,
             colramp = col_scale
           )
         }
-
       } else {
         point_col[[z]] <- point_col_scale[1]
       }
@@ -1531,17 +1672,18 @@ cyto_plot_overlay_convert <- function(x, ...) {
     # Replace NA values in point_col with selected colours
     point_col[is.na(point_col)] <- clrs
   }
-  
+
   # Adjust colors by point_fill_alpha
-  point_col <- mapply(function(point_col, 
-                               point_col_alpha) {
+  point_col <- mapply(function(point_col,
+                                 point_col_alpha) {
     adjustcolor(point_col, point_col_alpha)
-  }, 
-  point_col, 
-  point_col_alpha, 
-  USE.NAMES = FALSE, 
-  SIMPLIFY = FALSE)
-  
+  },
+  point_col,
+  point_col_alpha,
+  USE.NAMES = FALSE,
+  SIMPLIFY = FALSE
+  )
+
   return(point_col)
 }
 
@@ -1549,9 +1691,9 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
 #' Gate 1D with overlays
 #'
-#' @param x flowFrame (base).
+#' @param x list of flow Frame objects.
+#' @param y list of associated density objects.
 #' @param channels used in the plot.
-#' @param overlay list of flowFrames to overlay.
 #' @param gate gate object(s).
 #' @param trans transform object used by cyto_plot_label to calculate
 #'   statistics.
@@ -1578,14 +1720,10 @@ cyto_plot_overlay_convert <- function(x, ...) {
 #'
 #' @noRd
 .cyto_plot_overlay_gate <- function(x,
+                                    y,
                                     channels,
-                                    overlay = NA,
                                     gate = NA,
                                     trans = NA,
-                                    density_stack = 0.6,
-                                    density_modal = FALSE,
-                                    density_smooth = 0.6,
-                                    label_text = NA,
                                     label_stat = "median",
                                     gate_line_col = "red",
                                     gate_line_width = 2.5,
@@ -1598,25 +1736,42 @@ cyto_plot_overlay_convert <- function(x, ...) {
                                     label_box_y = NA,
                                     label_box_alpha = 0.6, ...) {
 
-  # Add support for adding labels without gates
+  # CHECKS ---------------------------------------------------------------------
 
-  # Check class of x
-  if (!inherits(x, "flowFrame")) {
-    stop("x should be a flowFrame object.")
+  # x is a list of flowFrames
+  if (!all(LAPPLY(x, "class") == "flowFrame")) {
+    stop("'x' must be a list of flowFrame objects.")
   }
 
-  # Samples
-  smp <- length(overlay) + 1
+  # y is the associated density objects (stacked and modal)
+  if (!all(LAPPLY(y, "class") == "density")) {
+    stop("'y' must be a list of density objects.")
+  }
 
-  # Check channels
+  # x and y must be of same length
+  if (length(x) != length(y)) {
+    stop("'x' and 'y' must have equal length.")
+  }
+
+  # GENERAL --------------------------------------------------------------------
+
+  # SAMPLES
+  N <- length(x)
+
+  # OVERLAYS
+  OVN <- N - 1
+
+  # CHANNELS
   channels <- cyto_channels_extract(
-    x = x,
+    x = x[[1]],
     channels = channels,
     plot = TRUE
   )
 
-  # List of flowFrames for cyto_plot_label
-  fr.lst <- c(list(x), overlay)
+  # MINIMUM DENSITY PER LAYER
+  stk <- LAPPLY(y, function(z) {
+
+  })
 
   # Gates supplied
   if (!.all_na(gate)) {
@@ -1925,33 +2080,38 @@ cyto_plot_overlay_convert <- function(x, ...) {
 
     # 2D gate supplied
   } else if (length(chans) == 2) {
-    if (!all(chans %in% channels)) {
+    if (!all(chans %in% c("y", channels))) {
       stop("Supplied channels do not match that of the supplied gate.")
-    } else if (all(chans %in% channels)) {
-      if (.all_na(text_x)) {
-        xmin <- x@min[channels[1]]
-        xmax <- x@max[channels[1]]
+    }
 
-        if (is.infinite(xmin)) {
-          xmin <- par("usr")[1]
-        }
+    if (.all_na(text_x)) {
+      xmin <- x@min[channels[1]]
+      xmax <- x@max[channels[1]]
 
-        if (is.infinite(xmax)) {
-          xmax <- par("usr")[2]
-        }
+      if (is.infinite(xmin)) {
+        xmin <- par("usr")[1]
       }
 
-      if (.all_na(text_y)) {
-        ymin <- x@min[channels[2]]
-        ymax <- x@max[channels[2]]
+      if (is.infinite(xmax)) {
+        xmax <- par("usr")[2]
+      }
+    }
 
-        if (is.infinite(ymin)) {
-          ymin <- par("usr")[3]
-        }
+    if (.all_na(text_y)) {
+      if ("y" %in% chans) {
+        ychan <- "y"
+      } else {
+        ychan <- channels[2]
+      }
+      ymin <- x@min[ychan]
+      ymax <- x@max[ychan]
 
-        if (is.infinite(ymax)) {
-          ymax <- par("usr")[4]
-        }
+      if (is.infinite(ymin)) {
+        ymin <- par("usr")[3]
+      }
+
+      if (is.infinite(ymax)) {
+        ymax <- par("usr")[4]
       }
     }
   }
@@ -2127,9 +2287,9 @@ cyto_plot_overlay_convert <- function(x, ...) {
   box.adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
 
   # Rectangle dimensions
-  if(.all_na(stat)){
+  if (.all_na(stat)) {
     lwidths <- strwidth(text)
-  }else{
+  } else {
     lwidths <- max(strwidth(text), strwidth("stats %")) # stat will take up space
   }
   rwidths <- lwidths * (1 - box.adj)
@@ -2267,12 +2427,12 @@ cyto_plot_overlay_convert <- function(x, ...) {
   yrange <- ymax - ymin
 
   # No co-ordinates supplied
-  if (.all_na(c(text_x,text_y))) {
+  if (.all_na(c(text_x, text_y))) {
 
     # Co-ordinates for gate centers
     coords <- mapply(function(gt,
-                              text_x,
-                              text_y) {
+                                  text_x,
+                                  text_y) {
 
       # Label co-ordinate
       .cyto_plot_label_center(gt,
@@ -2318,13 +2478,13 @@ cyto_plot_overlay_convert <- function(x, ...) {
     if (!.all_na(stat)) {
       text <- paste(text, "\n")
     }
-    
+
     # Use spread.labs TeachingDemos to offset y values
     label_height <- max(label_dims[[1]][, "y"]) -
       min(label_dims[[1]][, "y"])
     label_height <- label_height + 0.18 * label_height
     # not perfect but users can manually "select" locations now
-    coords["y", ] <- .spread.labels(coords["y",],
+    coords["y", ] <- .spread.labels(coords["y", ],
       mindiff = label_height,
       min = ymin + 0.05 * yrange,
       max = ymax - 0.05 * yrange

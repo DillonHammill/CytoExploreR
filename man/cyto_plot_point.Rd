@@ -4,17 +4,21 @@
 \alias{cyto_plot_point}
 \alias{cyto_plot_point.flowFrame}
 \alias{cyto_plot_point.list}
-\title{Add points to empty plots}
+\title{Add points and contour lines to empty cyto_plot}
 \usage{
 cyto_plot_point(x, ...)
 
 \method{cyto_plot_point}{flowFrame}(x, channels, overlay = NA,
   point_shape = ".", point_size = 2, point_col_scale = NA,
-  point_cols = NA, point_col = NA, point_col_alpha = 1, ...)
+  point_cols = NA, point_col = NA, point_col_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", ...)
 
 \method{cyto_plot_point}{list}(x, channels, point_shape = ".",
   point_size = 2, point_col_scale = NA, point_cols = NA,
-  point_col = NA, point_col_alpha = 1, ...)
+  point_col = NA, point_col_alpha = 1, contour_lines = 0,
+  contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or a list of \code{flowFrame}
@@ -43,9 +47,20 @@ by default to use a blue-red density colour scale.}
 
 \item{point_col_alpha}{numeric [0,1] to control point colour transparency in
 2-D scatter plots, set to 1 by default to use solid colours.}
+
+\item{contour_lines}{numeric indicating the number of levels to use for
+contour lines, set to 0 by default to exclude contour lines.}
+
+\item{contour_line_type}{type of line to use for contour lines, set to 1 by
+default.}
+
+\item{contour_line_width}{line width for contour lines, set to 2 by default.}
+
+\item{contour_line_col}{colour to use for contour lines, set to "black" by
+default.}
 }
 \description{
-Add points to empty plots
+Add points and contour lines to empty cyto_plot
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
