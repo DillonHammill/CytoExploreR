@@ -191,7 +191,11 @@ cyto_names <- function(x) {
 #' @rdname cyto_names
 #' @export
 cyto_names.flowFrame <- function(x){
-  identifier(x)
+  nm <- identifier(x)
+  if(nm == "anonymous"){
+    nm <- "Combined Events"
+  }
+  return(nm)
 }
 
 #' @rdname cyto_names
@@ -380,7 +384,7 @@ cyto_transform.default <- function(x,
                                              inverse = inverse)
     
     # Apply transformations
-    x <- transform(x, transform_list)
+    x <- suppressMessages(transform(x, transform_list))
     
   }else if(inherits(x, "GatingHierarchy") |
            inherits(x, "GatingSet")){
@@ -392,7 +396,7 @@ cyto_transform.default <- function(x,
     }
     
     # Apply transformations
-    x <- transform(x, transformer_list)
+    x <- suppressMessages(transform(x, transformer_list))
     
   }
   
@@ -468,7 +472,7 @@ cyto_transform.transformList <- function(x,
      inherits(x, "flowSet")){
     
     # Transformations applied as is - allow for inverse transformList
-    x <- transform(x, trans)
+    x <- suppressMessages(transform(x, trans))
     
   }
   
@@ -530,7 +534,7 @@ cyto_transform.transformerList <- function(x,
     transform_list <- cyto_transform_extract(trans, inverse = inverse)
     
     # Apply transformations
-    x <- transform(x, transform_list)
+    x <- suppressMessages(transform(x, transform_list))
     
     
   # Apply transformations to GatingHierarchy/GatingSet
@@ -544,7 +548,7 @@ cyto_transform.transformerList <- function(x,
     }
     
     # Apply transformations
-    x <- transform(x, trans)
+    x <- suppressMessages(transform(x, trans))
     
   }
   
