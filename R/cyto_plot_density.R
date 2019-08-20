@@ -47,29 +47,33 @@ cyto_plot_density.flowFrame <- function(x,
                                         density_line_width = 1,
                                         density_line_col = "black") {
 
-  # Combine x and overlay into a list - fr_list
+  # PREPARE DATA ---------------------------------------------------------------
+  
+  # LIST OF FLOWFRAMES
   if (!.all_na(overlay)) {
     fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
   } else {
     fr_list <- list(x)
   }
 
-  # Pull down arguments to named list
+  # ARGUMENTS ------------------------------------------------------------------
+  
+  # ARGUMENTS
   args <- .args_list()
 
-  # Inherit cyto_plot_theme arguments
+  # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
 
-  # Update arguments
+  # UPDATE ARGUMENTS
   .args_update(args)
   
-  # Number of overlays
+  # DENSITY --------------------------------------------------------------------
+  
+  # OVERLAYS
   ovn <- length(fr_list) - 1
   
-  # Get a list of kernel densities
+  # KERNEL DENSITY
   fr_dens <- lapply(fr_list, function(fr){
-    
-    # Calculate kernel density
     suppressWarnings(.cyto_density(fr,
                                    channel,
                                    density_smooth,
@@ -128,7 +132,7 @@ cyto_plot_density.flowFrame <- function(x,
     
   }
 
-  # Get density_fill
+  # DENSITY_FILL
   density_fill <- .cyto_plot_density_fill(fr_dens,
                                           density_fill = density_fill,
                                           density_cols = density_cols,
@@ -141,6 +145,31 @@ cyto_plot_density.flowFrame <- function(x,
     lwd = density_line_width,
     lty = density_line_type
   )
+  
+  # SPLIT ARGUMENTS ------------------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list()
+  
+  # SPLIT ARGUMENTS
+  args <- .cyto_plot_args_split(args[c("density_fill",
+                                       "density_fill_alpha",
+                                       "density_line_type",
+                                       "density_line_width",
+                                       "density_line_col")],
+                                channels = channels,
+                                n = length(fr_list),
+                                plots = 1,
+                                layers = length(fr_list),
+                                gates = 0)
+  
+  # UNLIST ARGUMENTS - SINGLE PLOT
+  args <- lapply(args, function(z){z[[1]]})
+  
+  # UPDATE ARGUMENTS
+  .args_update(args)
+  
+  # PLOT DENSITY ---------------------------------------------------------------
   
   # Add density distributions - reverse plot order and colours
   if (!.all_na(overlay) & 
@@ -202,13 +231,15 @@ cyto_plot_density.list <- function(x,
                                    density_line_width = 1,
                                    density_line_col = "black", ...){
   
-  # Pull down arguments to named list
+  # ARGUMENTS ------------------------------------------------------------------
+  
+  # ARGUMENTS
   args <- .args_list()
   
-  # Inherit theme arguments
+  # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
   
-  # Update arguments
+  # UPDATE ARGUMENTS
   .args_update(args)
   
   # Get density_fill colours (inherits from theme internally)
@@ -258,6 +289,24 @@ cyto_plot_density.list <- function(x,
       0
     }
   })
+  
+  # SPLIT ARGUMENTS ------------------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list()
+  
+  # SPLIT ARGUMENTS
+  args <- .cyto_plot_args_split(args,
+                                channels = channels,
+                                n = length(x),
+                                plots = 1,
+                                layers = length(x),
+                                gates = 0)
+  
+  # UNLIST ARGUMENTS
+  args <- lapply(args, function(z){z[[1]]})
+  
+  # PLOT DENSITY ---------------------------------------------------------------
   
   # Add density distributions - reverse plot order and colours
   if (length(x) > 1 & 
