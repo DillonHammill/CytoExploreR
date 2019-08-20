@@ -3,36 +3,28 @@
 \name{cyto_plot_empty}
 \alias{cyto_plot_empty}
 \alias{cyto_plot_empty.flowFrame}
-\alias{cyto_plot_empty.list}
 \title{Create an empty cyto_plot}
 \usage{
 cyto_plot_empty(x, ...)
 
-\method{cyto_plot_empty}{flowFrame}(x, channels, axes_trans = NA,
-  overlay = NA, xlim = NA, ylim = NA, limits = "machine",
-  title = NA, xlab = NA, ylab = NA, density_modal = TRUE,
-  density_smooth = 1.5, density_stack = 0.5, axes_text = c(TRUE,
-  TRUE), axes_text_font = 1, axes_text_size = 1,
-  axes_text_col = "black", axes_label_text_font = 1,
-  axes_label_text_size = 1.1, axes_label_text_col = "black",
-  title_text_font = 2, title_text_size = 1.1,
-  title_text_col = "black", border_line_type = 1,
-  border_line_width = 1, border_line_col = "black",
-  border_fill = "white", border_fill_alpha = 1, legend = FALSE,
-  legend_text, legend_text_size = 1)
-
-\method{cyto_plot_empty}{list}(x, channels, axes_trans = NA, xlim = NA,
-  ylim = NA, limits = "machine", title = NA, xlab = NA,
-  ylab = NA, density_modal = TRUE, density_smooth = 1.5,
-  density_stack = 0.5, axes_text = c(TRUE, TRUE), axes_text_font = 1,
-  axes_text_size = 1, axes_text_col = "black",
+\method{cyto_plot_empty}{flowFrame}(x, y, channels, axes_trans = NA,
+  overlay = NA, xlim = NA, ylim = NA, limits = "machine", title,
+  xlab, ylab, density_modal = TRUE, density_smooth = 1.5,
+  density_stack = 0.5, density_fill = NA, density_fill_alpha = 1,
+  density_line_type = 1, density_line_width = 1,
+  density_line_col = "black", point_shape = ".", point_size = 2,
+  point_col = NA, point_col_alpha = 1, axes_text = c(TRUE, TRUE),
+  axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
   axes_label_text_font = 1, axes_label_text_size = 1.1,
   axes_label_text_col = "black", title_text_font = 2,
   title_text_size = 1.1, title_text_col = "black",
   border_line_type = 1, border_line_width = 1,
   border_line_col = "black", border_fill = "white",
   border_fill_alpha = 1, legend = FALSE, legend_text,
-  legend_text_size = 1)
+  legend_text_font = 1, legend_text_size = 1,
+  legend_text_col = "black", legend_line_type = NA,
+  legend_line_width = NA, legend_line_col = NA, legend_box_fill = NA,
+  legend_point_col = NA)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
@@ -127,11 +119,11 @@ library(CytoRSuiteData)
 # Construct an empty 2D plot with black background
 cyto_plot_empty(Activation[1],
                 channels = c("FSC-A","SSC-A"),
-                border_fill = "black)
+                border_fill = "black")
 
 # Construct an empty 1D plot
 cyto_plot_empty(Activation[1],
-                channels = c("FSC-A),
+                channels = c("FSC-A"),
                 overlay = Activation[2:4])
 
 }
