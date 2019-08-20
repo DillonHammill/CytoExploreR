@@ -232,8 +232,6 @@ cyto_stats_compute.flowFrame <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom flowCore exprs inverseLogicleTransform transform
-#' @importFrom flowWorkspace pData
 #' @importFrom tibble as_tibble remove_rownames
 #' @importFrom dplyr bind_rows bind_cols %>%
 #'
@@ -294,7 +292,7 @@ cyto_stats_compute.flowSet <- function(x,
   res <- do.call("bind_rows", res)
 
   # Extract pData -> tibble
-  pd <- pData(fs)
+  pd <- cyto_details(fs)
   name_class <- class(pd$name)
   pd <- as_tibble(remove_rownames(pd))
   class(pd$name) <- name_class
@@ -359,7 +357,6 @@ cyto_stats_compute.flowSet <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom flowWorkspace getData getTransformations
 #' @importFrom utils write.csv
 #' @importFrom dplyr bind_rows bind_cols select %>%
 #' @importFrom tidyr spread
@@ -442,7 +439,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   }
 
   # Extract population(s) - list of flowFrames
-  alias_frames <- lapply(alias, function(x) getData(gh, x))
+  alias_frames <- lapply(alias, function(x) cyto_extract(gh, x))
 
   # Extract parent population(s) - list of flowFrames
   if (stat == "freq") {
@@ -455,11 +452,11 @@ cyto_stats_compute.GatingHierarchy <- function(x,
       )
       parent <- "root"
     }
-    parent_frames <- lapply(parent, function(x) getData(gh, x))
+    parent_frames <- lapply(parent, function(x) cyto_extract(gh, x))
   }
 
   # Extract pData
-  pd <- pData(gh)
+  pd <- cyto_details(gh)
   name_class <- class(pd$name)
   pd <- as_tibble(remove_rownames(pData(gh)))
   class(pd$name) <- name_class # remove weird <I(chr)> class
