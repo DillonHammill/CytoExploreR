@@ -212,10 +212,10 @@ cyto_plot_density.list <- function(x,
   .args_update(args)
   
   # Get density_fill colours (inherits from theme internally)
-    density_fill <- .cyto_plot_density_fill(x,
-                                            density_fill = density_fill,
-                                            density_cols = density_cols,
-                                            density_fill_alpha = density_fill_alpha)
+  density_fill <- .cyto_plot_density_fill(x,
+                                          density_fill = density_fill,
+                                          density_cols = density_cols,
+                                          density_fill_alpha = density_fill_alpha)
 
   # Number of overlays
   ovn <- length(x) - 1
