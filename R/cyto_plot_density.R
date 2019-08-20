@@ -296,7 +296,11 @@ cyto_plot_density.list <- function(x,
   args <- .args_list()
   
   # SPLIT ARGUMENTS
-  args <- .cyto_plot_args_split(args,
+  args <- .cyto_plot_args_split(args[c("density_fill",
+                                       "density_fill_alpha",
+                                       "density_line_type",
+                                       "density_line_width",
+                                       "density_line_col")],
                                 channels = channels,
                                 n = length(x),
                                 plots = 1,
