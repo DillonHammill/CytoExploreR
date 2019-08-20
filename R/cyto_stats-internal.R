@@ -657,7 +657,7 @@
   }
   
   # Range
-  rng <- lapply(rng, function(d){
+  rng <- lapply(x, function(d){
     if(axis == "x"){
       range(d$x)
     }else if(axis == "y"){
