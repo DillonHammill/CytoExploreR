@@ -132,24 +132,6 @@ cyto_plot_label2 <- function(x,
   # Check for statistics
   if (!.all_na(label_stat)) {
 
-    # Transformations are required for certain statistics
-    if (label_stat %in% c(
-      "median",
-      "mode",
-      "mean",
-      "geo mean",
-      "CV"
-    )) {
-      if (.all_na(trans)) {
-        stop(
-          paste(
-            "Supply transformerList to calculate",
-            label_stat, "."
-          )
-        )
-      }
-    }
-
     # Only 'count' valid for 2D plots without gates
     if (length(channels) == 2 & .all_na(gate) & !all(label_stat == "count")) {
       stop("Only 'count' is supported for 2D plots without gates.")
@@ -220,8 +202,8 @@ cyto_plot_label2 <- function(x,
     st <- NA
   }
   
-  # Add labels to plot
-  invisible(mapply(
+  # PLOT LABELS ----------------------------------------------------------------
+  label_text_xy <- mapply(
     function(label_text,
                  st,
                  label_text_x,
@@ -278,6 +260,10 @@ cyto_plot_label2 <- function(x,
           alpha.bg = box_alpha
         )
       }
+      
+      # RETURN LABEL CO-ORDINATES
+      return(c(label_text_X, label_text_y))
+      
     },
     label_text,
     st,
@@ -287,6 +273,18 @@ cyto_plot_label2 <- function(x,
     label_text_size,
     label_text_col,
     label_fill,
-    label_fill_alpha
-  ))
+    label_fill_alpha,
+    SIMPLIFY = FALSE
+  )
+  
+  # RETURN LABEL CO-ORDINATES --------------------------------------------------
+  
+  # LABEL CO-ORDINATES IN MATRIX
+  label_text_xy <- do.call("rbind", label_text_xy)
+  colnames(label_text_xy) <- c("x","y")
+  label_text_xy <- as.matrix(label_text_xy)
+  
+  # RETURN LABEL CO-ORDINATES
+  invisible(label_text_xy)
+  
 }

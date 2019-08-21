@@ -2,69 +2,21 @@
 % Please edit documentation in R/cyto_plot_gate2.R
 \name{cyto_plot_gate2}
 \alias{cyto_plot_gate2}
-\alias{cyto_plot_gate2.default}
-\alias{cyto_plot_gate2.rectangleGate}
-\alias{cyto_plot_gate2.polygonGate}
-\alias{cyto_plot_gate2.ellipsoidGate}
-\alias{cyto_plot_gate2.list}
-\alias{cyto_plot_gate2.filters}
-\title{Plot gates}
+\title{cyto_plot_gate2}
 \usage{
-cyto_plot_gate2(x, channels, gate = NA, ...)
-
-\method{cyto_plot_gate2}{default}(x, channels, gate = NA, label = TRUE,
-  label_text = NA, label_stat = "freq", label_text_x, label_text_y,
-  label_position = "auto", trans = NA, negate = FALSE, display = 1,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0, label_text_font,
-  label_text_size, label_text_col, label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6)
-
-\method{cyto_plot_gate2}{rectangleGate}(x, channels, gate = NA,
-  label = TRUE, label_text = NA, label_stat = "freq",
-  label_text_x = NA, label_text_y = NA, label_position = "auto",
-  trans = NA, negate = FALSE, display = 1, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6)
-
-\method{cyto_plot_gate2}{polygonGate}(x, channels, gate = NA,
-  label = TRUE, label_text = NA, label_stat = "freq",
-  label_text_x = NA, label_text_y = NA, label_position = "auto",
-  trans = NA, negate = FALSE, display = 1, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6)
-
-\method{cyto_plot_gate2}{ellipsoidGate}(x, channels, gate = NA,
-  label = TRUE, label_text = NA, label_stat = "freq",
-  label_text_x = NA, label_text_y = NA, label_position = "auto",
-  trans = NA, negate = FALSE, display = 1, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6)
-
-\method{cyto_plot_gate2}{list}(x, channels, gate = NA, label = TRUE,
+cyto_plot_gate2(x, channels, overlay = NA, gate = NA, label = TRUE,
   label_text = NA, label_stat = "freq", label_text_x = NA,
   label_text_y = NA, label_position = "auto", trans = NA,
   negate = FALSE, display = 1, gate_line_type = 1,
   gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
   gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
   label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6)
-
-\method{cyto_plot_gate2}{filters}(x, channels, gate = NA, label = TRUE,
-  label_text = NA, label_stat = "freq", label_text_x = NA,
-  label_text_y = NA, label_position = "auto", trans = NA,
-  negate = FALSE, display = 1, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0, label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6)
+  label_fill_alpha = 0.6, density_smooth = 0.6, density_stack = 0)
+}
+\value{
+add gates and labels to \code{cyto_plot} and invisibly return label
+  co-ordinates.
 }
 \description{
-Plot gates
+cyto_plot_gate2
 }
