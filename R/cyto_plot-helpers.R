@@ -294,9 +294,12 @@ cyto_plot_empty.flowFrame <- function(x,
     if(.all_na(axes_text[[1]])){
       # NA == TRUE returns NA not T/F
     }else if(axes_text[[1]] == TRUE){
+      lims <- list(xlim, ylim)
+      names(lims) <- rep(c(channels,NA), length.out = 2)
       axes_text[[1]] <- .cyto_plot_axes_text(x,
                                              channels = channels[1],
-                                             axes_trans = axes_trans)[[1]]
+                                             axes_trans = axes_trans,
+                                             axes_range = lims)[[1]]
     }
   }
   
@@ -307,9 +310,12 @@ cyto_plot_empty.flowFrame <- function(x,
       # NA == TRUE returns NA not T/F
     }else if(axes_text[[2]] == TRUE){
       if(length(channels) == 2){
+        lims <- list(xlim, ylim)
+        names(lims) <- rep(c(channels,NA), length.out = 2)
         axes_text[[2]] <- .cyto_plot_axes_text(x,
                                                channels = channels[2],
-                                               axes_trans = axes_trans)[[1]]
+                                               axes_trans = axes_trans,
+                                               axes_range = lims)[[1]]
       }else{
         axes_text[[2]] <- NA
       }
@@ -357,6 +363,8 @@ cyto_plot_empty.flowFrame <- function(x,
   
   # PLOT CONSTRUCTION ----------------------------------------------------------
   
+  print(axes_text)
+  
   # Plot
   graphics::plot(1,
                  type = "n",
@@ -367,34 +375,75 @@ cyto_plot_empty.flowFrame <- function(x,
                  ylab = "",
                  bty = "n")
   
-  # X AXIS
+  # X AXIS - TRANSFORMED
   if(inherits(axes_text[[1]], "list")){
+    # MINOR TICKS
+    mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
     axis(1,
-         at = axes_text[[1]]$at,
-         labels = axes_text[[1]]$label,
+         at = axes_text[[1]]$at[mnr_ind],
+         labels = axes_text[[1]]$label[mnr_ind],
+         tck = -0.01)
+      
+    # MAJOR TICKS - MUST BE >5% XRANGE FROM ZERO
+    mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
+    mjr <- list("at" = axes_text[[1]]$at[mjr_ind],
+                "label" = axes_text[[1]]$label[mjr_ind])
+    zero <- which(as.character(mjr$label) == "0")
+    zero_break <- mjr$at[zero]
+    zero_buffer <- c(zero_break - 0.02*(xlim[2] - xlim[1]),
+                     zero_break + 0.02*(xlim[2] - xlim[1]))
+    mjr_ind <- c(zero,
+                 which(mjr$at < zero_buffer[1] |
+                         mjr$at > zero_buffer[2]))
+    axis(1,
+         at = mjr$at[mjr_ind],
+         labels = mjr$label[mjr_ind],
          font.axis = axes_text_font,
          col.axis = axes_text_col,
-         cex.axis = axes_text_size)
+         cex.axis = axes_text_size,
+         tck = -0.02)
+  # X AXIS - UNTRANSFORMED
   }else if(.all_na(axes_text[[1]])){
     axis(1,
          font.axis = axes_text_font,
          col.axis = axes_text_col,
-         cex.axis = axes_text_size)
+         cex.axis = axes_text_size,
+         tck = -0.02)
   }
   
-  # Y AXIS
+  # Y AXIS - TRANSFORMED
   if(inherits(axes_text[[2]], "list")){
+    # MINOR TICKS
+    mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
     axis(2,
-         at = axes_text[[2]]$at,
-         labels = axes_text[[2]]$label,
+         at = axes_text[[2]]$at[mnr_ind],
+         labels = axes_text[[2]]$label[mnr_ind],
+         tck = -0.01)
+    # MAJOR TICKS - MUST BE >2% yrange FROM ZERO
+    mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
+    mjr <- list("at" = axes_text[[2]]$at[mjr_ind],
+                "label" = axes_text[[2]]$label[mjr_ind])
+    zero <- which(as.character(mjr$label) == "0")
+    zero_break <- mjr$at[zero]
+    zero_buffer <- c(zero_break - 0.02*(ylim[2] - ylim[1]),
+                           zero_break + 0.02*(ylim[2] - ylim[1]))
+    mjr_ind <- c(zero,
+                 which(mjr$at < zero_buffer[1] |
+                         mjr$at > zero_buffer[2]))
+    axis(2,
+         at = mjr$at[mjr_ind],
+         labels = mjr$label[mjr_ind],
          font.axis = axes_text_font,
          col.axis = axes_text_col,
-         cex.axis = axes_text_size)
+         cex.axis = axes_text_size,
+         tck = -0.02)
+  # Y AXIS - LINEAR
   }else if(.all_na(axes_text[[2]])){
     axis(2,
          font.axis = axes_text_font,
          col.axis = axes_text_col,
-         cex.axis = axes_text_size)
+         cex.axis = axes_text_size,
+         tck = -0.02)
   }
   
   # BORDER
