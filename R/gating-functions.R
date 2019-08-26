@@ -1013,24 +1013,28 @@
     return(gate)
   })
 
+  # RETURN FILTERS OBJECT
   gates <- filters(gates)
+  return(gates)
 }
 
 #' Draw Quadrant Gates Around Populations.
 #'
-#' \code{.cyto_gate_quadrant_draw} constructs an interactive plotting window for user
-#' to select the crosshair center of 4 populations which is used to construct 4
-#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects which are
-#' stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
-#' are assigned in the following order: bottom left, bottom right, top right and
-#' top left.
+#' \code{.cyto_gate_quadrant_draw} constructs an interactive plotting window for
+#' user to select the crosshair center of 4 populations which is used to
+#' construct 4 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects
+#' which are stored in a\code{\link[flowCore:filters-class]{filters}}  list.
+#' Populations are assigned in the following order: bottom left, bottom right,
+#' top right and top left.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for plotting and gating.
 #' @param channels vector of channel names to use for plotting, can be of length
 #'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
 #' @param alias the name(s) of the 4 populations to be gated. \code{alias} is
-#'   \code{NULL} by default which will halt the gating routine.
+#'   \code{NULL} by default which will halt the gating routine. \code{alias}
+#'   must be supplied right to left and top to bottom (i.e. top right, top left,
+#'   bottom right and bottom left).
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
@@ -1039,13 +1043,12 @@
 #'   default.
 #' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the 4
-#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
-#'   objects.
+#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
+#'   constructed \code{\link[flowCore:quadGate]{quadGate}}.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, quadrants
 #'
-#' @importFrom flowCore rectangleGate filters
+#' @importFrom flowCore quadGate filters
 #' @importFrom graphics locator lines abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -1134,91 +1137,19 @@
     lwd = 2.5, col = "red"
   )
 
-  pts <- as.data.frame(pts)
+  # CO-ORDINATES matrix
+  pts <- matrix(pts, ncol = 2)
   colnames(pts) <- channels
 
-  # Construct quadrant gates
-
-  # Q1 <- Bottom Left
-  q1.gate <- data.frame(x = c(-Inf, pts[1, 1]), y = c(-Inf, pts[1, 2]))
-  q1.gate <- as.matrix(q1.gate)
-  colnames(q1.gate) <- channels
-  q1 <- rectangleGate(.gate = q1.gate, filterId = alias[1])
-
-  if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = q1,
-      channels = channels,
-      text = alias[1],
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
-    )
-  }
-
-  # Q2 <- Bottom Right
-  q2.gate <- data.frame(x = c(pts[1, 1], Inf), y = c(-Inf, pts[1, 2]))
-  q2.gate <- as.matrix(q2.gate)
-  colnames(q2.gate) <- channels
-  q2 <- rectangleGate(.gate = q2.gate, filterId = alias[2])
-
-  if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = q2,
-      channels = channels,
-      text = alias[2],
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
-    )
-  }
-
-  # Q3 <- Top Right
-  q3.gate <- data.frame(
-    x = c(pts[1, 1], Inf),
-    y = c(pts[1, 2], Inf)
-  )
-  q3.gate <- as.matrix(q3.gate)
-  colnames(q3.gate) <- channels
-  q3 <- rectangleGate(.gate = q3.gate, filterId = alias[3])
-
-  if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = q3,
-      channels = channels,
-      text = alias[3],
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
-    )
-  }
-
-  # Q4 <- Top Left
-  q4.gate <- data.frame(x = c(-Inf, pts[1, 1]), y = c(pts[1, 2], Inf))
-  q4.gate <- as.matrix(q4.gate)
-  colnames(q4.gate) <- channels
-  q4 <- rectangleGate(.gate = q4.gate, filterId = alias[4])
-
-  if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = q4,
-      channels = channels,
-      text = alias[4],
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
-    )
-  }
-
-  gates <- filters(list(q1, q2, q3, q4))
-  return(gates)
+  # QUADGATE CONSTRUCTION
+  gate <- quadGate(.gate = pts, filterId = paste0(alias, collapse = "|"))
+  
+  # RETURN FILTERS OBJECT
+  gate <- filters(list(gate))
+  return(gate)
 }
 
-#' Draw Web Gates Around Populations.
+#' Draw Web Gates Around Populations (EXPERIMENTAL)
 #'
 #' \code{.cyto_gate_web_draw} is a variation of drawQuadrant which allows more
 #' flexibility with gate co-ordinates (angled lines) and supports any number of
