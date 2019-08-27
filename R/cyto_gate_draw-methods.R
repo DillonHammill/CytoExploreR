@@ -1352,10 +1352,6 @@ cyto_gate_draw.GatingSet <- function(x,
 #' .cyto_gate_type(type = "r", alias = c("A", "B", "C"))
 #' @noRd
 .cyto_gate_type_check <- function(type, alias) {
-  if (all(type %in% c("q", "Q", "quadrant", "Quadrant")) & 
-      length(alias) != 4) {
-    stop("Supply the names of 4 poulations to alias for quadrant gates.")
-  }
   
   gts <- c(
     "polygon",
@@ -1425,10 +1421,13 @@ cyto_gate_draw.GatingSet <- function(x,
   type[type %in% c("web", "Web", "w", "W")] <- "web"
   
   # Repeat type to equal length of alias
-  if (length(type) != length(alias) &
-      type[1] != "quadrant" &
-      type[1] != "web") {
-    type <- rep(type, length(alias))
+  if(length(type) != length(alias) & type[1] == "quadrant"){
+    if(type[1] == "quadrant"){
+      type <- rep(type, length.out = 4)
+    }else if(type[1] == "web"){
+      type <- rep(type, length.out = length(alias))
+    }
+    
   }
   
   return(type)
@@ -1448,11 +1447,11 @@ cyto_gate_draw.GatingSet <- function(x,
 #' .cyto_alias_check(alias = c("A", "B", "C", "D"), type = "q")
 #' @noRd
 .cyto_alias_check <- function(alias = NULL, type) {
-  if (is.null(alias)) {
+  if (is.null(alias) & type[1] != "quadrant") {
     stop("Supply names of populations to 'alias' for checking.")
   }
   
-  if (type[1] == "quadrant" & length(alias) != 4) {
+  if (!is.null(alias) & type[1] == "quadrant" & length(alias) != 4) {
     stop("Supply 4 population names to 'alias' to construct quadrant gates.")
   }
   

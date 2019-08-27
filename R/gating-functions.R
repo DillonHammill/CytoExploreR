@@ -1092,9 +1092,12 @@
     plot = TRUE
   )
 
-  # Check alias
+  # Check alias - default to +/- channel names
   if (is.null(alias)) {
-    stop("Supply a name for the gated population(s) to the 'alias' argument.")
+    alias <- c(paste0(channels[1],"+",channels[2],"+"),
+               paste0(channels[1],"-",channels[2],"+"),
+               paste0(channels[1],"+",channels[2],"-"),
+               paste0(channels[1],"-",channels[2],"-"))
   }
 
   # Call new plot?
@@ -1143,6 +1146,19 @@
 
   # QUADGATE CONSTRUCTION
   gate <- quadGate(.gate = pts, filterId = paste0(alias, collapse = "|"))
+  
+  # LABELS
+  if (label == TRUE) {
+    cyto_plot_label(
+      x = fr,
+      gate = gate,
+      channels = channels,
+      text = alias,
+      text_size = 1,
+      stat = "percent",
+      box_alpha = 0.7
+    )
+  }
   
   # RETURN FILTERS OBJECT
   gate <- filters(list(gate))
