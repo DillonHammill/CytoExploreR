@@ -9,10 +9,10 @@
 cyto_plot_density(x, ...)
 
 \method{cyto_plot_density}{flowFrame}(x, channel, overlay = NA,
-  density_modal = TRUE, density_smooth = 1.5, density_stack = 0.5,
-  density_cols = NA, density_fill = NA, density_fill_alpha = 1,
-  density_line_type = 1, density_line_width = 1,
-  density_line_col = "black")
+  display = 1, density_modal = TRUE, density_smooth = 1.5,
+  density_stack = 0.5, density_cols = NA, density_fill = NA,
+  density_fill_alpha = 1, density_line_type = 1,
+  density_line_width = 1, density_line_col = "black")
 
 \method{cyto_plot_density}{list}(x, density_modal = TRUE,
   density_stack = 0.5, density_cols = NA, density_fill = NA,
@@ -25,6 +25,9 @@ cyto_plot_density(x, ...)
 \item{channel}{name of the channels to be used to construct the plot.}
 
 \item{overlay}{list of flowFRame objects to overlay.}
+
+\item{display}{controls the number or percentage of events to display, set to
+1 by default to display all events.}
 
 \item{density_modal}{logical indicating whether density should be normalised
 to mode and presented as a percentage. Set to \code{TRUE} by default.}

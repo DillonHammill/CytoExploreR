@@ -5,6 +5,8 @@
 #' @param x object of class flowFrame or a list of density objects.
 #' @param channel name of the channels to be used to construct the plot.
 #' @param overlay list of flowFRame objects to overlay.
+#' @param display controls the number or percentage of events to display, set to
+#'   1 by default to display all events.
 #' @param density_modal logical indicating whether density should be normalised
 #'   to mode and presented as a percentage. Set to \code{TRUE} by default.
 #' @param density_smooth smoothing parameter passed to
@@ -37,6 +39,7 @@ cyto_plot_density <- function(x, ...) {
 cyto_plot_density.flowFrame <- function(x,
                                         channel,
                                         overlay = NA,
+                                        display = 1,
                                         density_modal = TRUE,
                                         density_smooth = 1.5,
                                         density_stack = 0.5,
@@ -51,11 +54,20 @@ cyto_plot_density.flowFrame <- function(x,
   
   # LIST OF FLOWFRAMES
   if (!.all_na(overlay)) {
-    fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
+    fr_list <- c(list(x), cyto_convert(overlay, "list of flowFrames"))
   } else {
     fr_list <- list(x)
   }
 
+  # SAMPLE DATA ----------------------------------------------------------------
+  
+  # DISPLAY
+  if(display != 1){
+    fr_list <- cyto_sample(fr_list,
+                           display = display,
+                           seed = 56)
+  }
+  
   # ARGUMENTS ------------------------------------------------------------------
   
   # ARGUMENTS
@@ -132,42 +144,38 @@ cyto_plot_density.flowFrame <- function(x,
     
   }
 
-  # DENSITY_FILL
+  # DENSITY_FILL ---------------------------------------------------------------
+  
+  # DENSITY_FILL COLOURS
   density_fill <- .cyto_plot_density_fill(fr_dens,
                                           density_fill = density_fill,
                                           density_cols = density_cols,
                                           density_fill_alpha = density_fill_alpha)
 
-  # Add horizontal lines
+  # REPEAT ARGUMENTS ------------------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list()[c("density_line_type",
+                         "density_line_width",
+                         "density_line_col")]
+  
+  # REPEAT ARGUMENTS
+  args <- lapply(args, function(arg){
+    rep(arg, length.out = length(fr_list))
+  })
+  
+  # UPDATE ARGUMENTS
+  .args_update(args)
+  
+  # HORIZONTAL LINES -----------------------------------------------------------
+  
+  # LINES UNDER DENSITY
   abline(
     h = ofst,
     col = density_line_col,
     lwd = density_line_width,
     lty = density_line_type
   )
-  
-  # SPLIT ARGUMENTS ------------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list()
-  
-  # SPLIT ARGUMENTS
-  args <- .cyto_plot_args_split(args[c("density_fill",
-                                       "density_fill_alpha",
-                                       "density_line_type",
-                                       "density_line_width",
-                                       "density_line_col")],
-                                channels = channels,
-                                n = length(fr_list),
-                                plots = 1,
-                                layers = length(fr_list),
-                                gates = 0)
-  
-  # UNLIST ARGUMENTS - SINGLE PLOT
-  args <- lapply(args, function(z){z[[1]]})
-  
-  # UPDATE ARGUMENTS
-  .args_update(args)
   
   # PLOT DENSITY ---------------------------------------------------------------
   
@@ -188,7 +196,7 @@ cyto_plot_density.flowFrame <- function(x,
             lwd = density_line_width,
             lty = density_line_type)
         }
-      }, frs_dens,
+      }, fr_dens,
       density_fill,
       density_line_col,
       density_line_width,
@@ -210,7 +218,7 @@ cyto_plot_density.flowFrame <- function(x,
                   lty = density_line_type)
         }
 
-      }, rev(frs_dens),
+      }, rev(fr_dens),
       rev(density_fill),
       rev(density_line_col),
       rev(density_line_width),
@@ -242,11 +250,7 @@ cyto_plot_density.list <- function(x,
   # UPDATE ARGUMENTS
   .args_update(args)
   
-  # Get density_fill colours (inherits from theme internally)
-  density_fill <- .cyto_plot_density_fill(x,
-                                          density_fill = density_fill,
-                                          density_cols = density_cols,
-                                          density_fill_alpha = density_fill_alpha)
+  # DENSITY --------------------------------------------------------------------
 
   # Number of overlays
   ovn <- length(x) - 1
@@ -273,13 +277,7 @@ cyto_plot_density.list <- function(x,
               ovn * density_stack * y_max,
               density_stack * y_max)
   
-  abline(
-    h = ofst,
-    col = density_line_col,
-    lwd = density_line_width,
-    lty = density_line_type,
-    xpd = FALSE
-  )
+
   
   # Minimum for each distribution
   mn <- LAPPLY(x, function(z){
@@ -290,25 +288,39 @@ cyto_plot_density.list <- function(x,
     }
   })
   
-  # SPLIT ARGUMENTS ------------------------------------------------------------
+  # DENSITY_FILL ---------------------------------------------------------------
+  
+  # DENSITY_FILL COLOURS
+  density_fill <- .cyto_plot_density_fill(x,
+                                          density_fill = density_fill,
+                                          density_cols = density_cols,
+                                          density_fill_alpha = density_fill_alpha)
+  
+  # REPEAT ARGUMENTS -----------------------------------------------------------
   
   # ARGUMENTS
-  args <- .args_list()
+  args <- .args_list()[c("density_line_type",
+                         "density_line_width",
+                         "density_line_col")]
   
-  # SPLIT ARGUMENTS
-  args <- .cyto_plot_args_split(args[c("density_fill",
-                                       "density_fill_alpha",
-                                       "density_line_type",
-                                       "density_line_width",
-                                       "density_line_col")],
-                                channels = channels,
-                                n = length(x),
-                                plots = 1,
-                                layers = length(x),
-                                gates = 0)
+  # REPEAT ARGUMENTS
+  args <- lapply(args, function(arg){
+    rep(arg, length.out = length(fr_list))
+  })
+
+  # UPDATE ARGUMENTS
+  .args_update(args)
   
-  # UNLIST ARGUMENTS
-  args <- lapply(args, function(z){z[[1]]})
+  # HORIZONTAL LINES -----------------------------------------------------------
+  
+  # LINES UNDER DENSITY
+  abline(
+    h = ofst,
+    col = density_line_col,
+    lwd = density_line_width,
+    lty = density_line_type,
+    xpd = FALSE
+  )
   
   # PLOT DENSITY ---------------------------------------------------------------
   
