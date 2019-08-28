@@ -7,6 +7,8 @@
 #' @param channels names of the channels used to construct the plot.
 #' @param overlay optional argument if x is a flowFrame to overlay a list of
 #'   flowFrame objects.
+#' @param display controls the number or percentage of events to display, set to
+#'   1 by default to display all events.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
 #'   \code{"."} by default to maximise plotting speed.  See
 #'   \code{\link[graphics:par]{pch}} for alternatives.
@@ -45,6 +47,7 @@ cyto_plot_point <- function(x, ...){
 cyto_plot_point.flowFrame <- function(x,
                                       channels,
                                       overlay = NA,
+                                      display = 1,
                                       point_shape = ".",
                                       point_size = 2,
                                       point_col_scale = NA,
@@ -65,6 +68,15 @@ cyto_plot_point.flowFrame <- function(x,
     fr_list <- list(x)
   }
    
+  # SAMPLE DATA ----------------------------------------------------------------
+  
+  # DISPLAY
+  if(display != 1){
+    fr_list <- cyto_sample(fr_list, 
+                           display = display, 
+                           seed = 56)
+  }
+  
   # ARGUMENTS ------------------------------------------------------------------
   
   # ARGUMENTS
@@ -76,7 +88,7 @@ cyto_plot_point.flowFrame <- function(x,
   # UPDATE
   .args_update(args)
   
-  # POINT_COL
+  # POINT_COL ------------------------------------------------------------------
   point_col <- .cyto_plot_point_col(fr_list,
                                     channels = channels,
                                     point_col_scale = point_col_scale,
@@ -84,21 +96,20 @@ cyto_plot_point.flowFrame <- function(x,
                                     point_col = point_col,
                                     point_col_alpha = point_col_alpha)
   
-  # SPLIT ARGUMENTS ------------------------------------------------------------
+  # REPEAT ARGUMENTS -----------------------------------------------------------
   
-  # ARGUMENTS
-  args <- .args_list()
+  # ARGUMENTS TO REPEAT
+  args <- .args_list()[c("point_shape",
+                         "point_size",
+                         "contour_lines",
+                         "contour_line_type",
+                         "contour_line_width",
+                         "contour_line_col")]
   
-  # SPLIT ARGUMENTS
-  args <- .cyto_plot_args_split(args,
-                                channels = channels,
-                                n = length(fr_list),
-                                plots = 1,
-                                layers = length(fr_list),
-                                gates = 0)
-  
-  # UNLIST ARGUMENTS - SINGLE PLOT
-  args <- lapply(args, function(z){z[[1]]})
+  # REPEAT ARGUMENTS
+  args <- lapply(args, function(arg){
+    rep(arg, length.out = length(fr_list))
+  })
   
   # UPDATE ARGUMENTS
   .args_update(args)
@@ -120,7 +131,7 @@ cyto_plot_point.flowFrame <- function(x,
                y = fr_exprs[,channels[2]],
                pch = point_shape[z],
                cex = point_size[z],
-               col = point_col[z])
+               col = point_col[[z]])
       }
       
     }
@@ -138,6 +149,8 @@ cyto_plot_point.flowFrame <- function(x,
     
   })
   
+  # INVISIBLE NULL RETURN
+  invisible(NULL)
 }
 
 #' @rdname cyto_plot_point
@@ -155,6 +168,15 @@ cyto_plot_point.list <- function(x,
                                  contour_line_width = 1,
                                  contour_line_col = "black", ...){
   
+  # SAMPLE DATA ----------------------------------------------------------------
+  
+  # DISPLAY
+  if(display != 1){
+    x <- cyto_sample(x, 
+                     display = display, 
+                     seed = 56)
+  }
+  
   # ARGUMENTS ------------------------------------------------------------------
   
   # Pull down arguments to named list
@@ -166,7 +188,7 @@ cyto_plot_point.list <- function(x,
   # Update arguments
   .args_update(args)
   
-  # POINT_COL
+  # POINT_COL ------------------------------------------------------------------
   point_col <- .cyto_plot_point_col(x,
                                     channels = channels,
                                     point_col_scale = point_col_scale,
@@ -174,21 +196,20 @@ cyto_plot_point.list <- function(x,
                                     point_col = point_col,
                                     point_col_alpha = point_col_alpha)
 
-  # SPLIT ARGUMENTS ------------------------------------------------------------
+  # REPEAT ARGUMENTS -----------------------------------------------------------
   
   # ARGUMENTS
-  args <- .args_list()
+  args <- .args_list()[c("point_shape",
+                         "point_size",
+                         "contour_lines",
+                         "contour_line_type",
+                         "contour_line_width",
+                         "contour_line_col")]
   
-  # SPLIT ARGUMENTS
-  args <- .cyto_plot_args_split(args,
-                                channels = channels,
-                                n = length(x),
-                                plots = 1,
-                                layers = length(x),
-                                gates = 0)
-  
-  # UNLIST ARGUMENTS - SINGLE PLOT
-  args <- lapply(args, function(z){z[[1]]})
+  # REPEAT ARGUMENTS
+  args <- lapply(args, function(arg){
+    rep(arg, length.out = length(fr_list))
+  })
   
   # UPDATE ARGUMENTS
   .args_update(args)
@@ -210,7 +231,7 @@ cyto_plot_point.list <- function(x,
                y = fr_exprs[,channels[2]],
                pch = point_shape[z],
                cex = point_size[z],
-               col = point_col[z])
+               col = point_col[[z]])
       }
       
     }
@@ -227,5 +248,8 @@ cyto_plot_point.list <- function(x,
     }
     
   })
+  
+  # INVISIBLE NULL RETURN
+  invisible(NULL)
   
 }

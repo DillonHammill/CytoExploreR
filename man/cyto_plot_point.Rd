@@ -9,10 +9,10 @@
 cyto_plot_point(x, ...)
 
 \method{cyto_plot_point}{flowFrame}(x, channels, overlay = NA,
-  point_shape = ".", point_size = 2, point_col_scale = NA,
-  point_cols = NA, point_col = NA, point_col_alpha = 1,
-  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", ...)
+  display = 1, point_shape = ".", point_size = 2,
+  point_col_scale = NA, point_cols = NA, point_col = NA,
+  point_col_alpha = 1, contour_lines = 0, contour_line_type = 1,
+  contour_line_width = 1, contour_line_col = "black", ...)
 
 \method{cyto_plot_point}{list}(x, channels, point_shape = ".",
   point_size = 2, point_col_scale = NA, point_cols = NA,
@@ -28,6 +28,9 @@ onjects.}
 
 \item{overlay}{optional argument if x is a flowFrame to overlay a list of
 flowFrame objects.}
+
+\item{display}{controls the number or percentage of events to display, set to
+1 by default to display all events.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
 \code{"."} by default to maximise plotting speed.  See
