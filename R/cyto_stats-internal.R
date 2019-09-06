@@ -468,7 +468,6 @@
     }
   }
   
-  
   # Gate flowFrame
   if(!.all_na(gate)){
     x <- Subset(x, gate)
@@ -607,16 +606,16 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_density <- function(x,
-                          channel = NULL,
-                          smooth = 0.6,
-                          modal = TRUE) {
-  
-  # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
-    stop("'x' should be a flowFrame object.")
-  }
+.cyto_density <- function(x, ...){
+  UseMethod(".cyto_density")
+}
 
+#' @noRd
+.cyto_density.flowFrame <- function(x,
+                                    channel = NULL,
+                                    smooth = 0.6,
+                                    modal = TRUE){
+  
   # Check channels
   channel <- cyto_channels_extract(x, channel, FALSE)
   
@@ -627,19 +626,116 @@
   }else{
     if(length(exprs(x)[,channel]) > 2){
       dens <- suppressWarnings(density(exprs(x)[,channel],
-                    adjust = smooth))
+                                       adjust = smooth))
     }else{
       warning("Insufficient events to compute kernel density.")
       return(NA)
     }
   }
-
+  
   # Normalise to mode if required
   if(modal){
     dens$y <- (dens$y / max(dens$y)) * 100
   }
-    
+  
   return(dens)
+  
+}
+
+#' Save y range to each layer
+#' Easy to get ylim & label y co-ordinates
+#' @noRd
+.cyto_density.list <- function(x,
+                               channel = NULL,
+                               smooth = 0.6,
+                               modal = TRUE,
+                               stack = 0.5,
+                               layers = length(x)) {
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # LIST OF FLOWFRAMES
+  if(!all(LAPPLY(x, "class") == "flowFrame")){
+    stop("'x' must be a list of flowFrame objects.")
+  }
+  
+  # LAYERS - EQUAL
+  if(!length(x) %% layers == 0){
+    stop("Number of flowFrames must be divisible by 'layers'.")
+  }
+  
+  # GENERAL --------------------------------------------------------------------
+  
+  # SAMPLES
+  smp <- length(x)
+  
+  # KERNEL DENSITY -------------------------------------------------------------
+  
+  # CALL FLOWFRAME METHOD
+  fr_dens_list <- lapply(x, function(z){
+    .cyto_density(z,
+                  channel = channel,
+                  smooth = smooth,
+                  modal = modal,
+                  stack = stack)
+  })
+  
+  # STACKING -------------------------------------------------------------------
+  
+  # STACKING REQUIRED
+  if(stack != 0 & ovn != 0){
+    
+    # YRANGE PER LAYER
+    if(!.all_na(fr_dens_list)){
+      y_range <- mean(LAPPLY(fr_dens_list, function(d){
+        if(!.all_na(d)){
+          max(d$y)
+        }else{
+          NA
+        }
+      }), na.rm = TRUE)
+    }else{
+      y_range <- 100
+    }
+
+    # STACKING LEVELS
+    stk <- seq(0, 
+               smp * stack * y_range,
+               stack * y_range)
+    stk <- stk[seq_len(layers)]
+    
+    # LAYERS
+    stk <- rep(stk, smp/layers)
+    
+    # APPLY STACKING 
+    lapply(seq_len(smp), function(z){
+      if(!.all_na(fr_dens_list[[z]])){
+        fr_dens_list[[z]]$y <<- fr_dens_list[[z]]$y + stk[z]
+      }
+    })
+    
+    # YLIM PER LAYER
+    ymin <- stk[seq_len(smp)]
+    ymax <- ymin + y_range
+    
+    # SAVE YLIM - NAMES
+    names(fr_dens_list) <- paste(ymin, ymax, sep = "-")
+    
+  }
+  
+  # LAYERS ---------------------------------------------------------------------
+  
+  # RETURN LIST OF DENSITY LISTS
+  if(layers != smp){
+    ind <- rep(seq_len(smp/layers), each = layers)
+    fr_dens_list <- split(fr_dens_list, ind)
+  }
+  
+  # RETURN STACKED DENSITY -----------------------------------------------------
+  
+  # LIST OF DENSITY OR LIST OF DENSITY LISTS
+  return(fr_dens_list)
+  
 }
 
 # DENSITY RANGES ---------------------------------------------------------------
