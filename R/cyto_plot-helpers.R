@@ -89,7 +89,6 @@ cyto_plot_empty <- function(x, ...){
 #' @rdname cyto_plot_empty
 #' @export
 cyto_plot_empty.flowFrame <- function(x,
-                                      y,
                                       channels,
                                       axes_trans = NA,
                                       overlay = NA,
@@ -109,6 +108,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       density_line_col = "black",
                                       point_shape = ".",
                                       point_size = 2,
+                                      point_cols = NA,
                                       point_col = NA,
                                       point_col_alpha = 1,
                                       axes_text = c(TRUE,TRUE),
@@ -184,6 +184,9 @@ cyto_plot_empty.flowFrame <- function(x,
     fr_list <- list(x)
   }
   
+  # SAMPLES 
+  smp <- length(fr_list)
+  
   # AXES LIMITS ----------------------------------------------------------------
   
   # XLIM
@@ -197,82 +200,22 @@ cyto_plot_empty.flowFrame <- function(x,
   # YLIM
   if (.all_na(ylim)) {
     
-    # Density distributions have different y axis limits
+    # 1D PLOT
     if(length(channels) == 1){
       
-      # Number of overlays
-      ovn <- length(overlay)
+      # DENSITY
+      fr_dens <- .cyto_density(fr_list,
+                               channel = channels,
+                               smooth = density_smooth,
+                               stack = density_stack,
+                               modal = density_modal)
       
-      # Get kernel density for each list element
-      fr_dens <- lapply(fr_list, function(x){
-        
-        suppressWarnings(.cyto_density(x,
-                                       channel = channels,
-                                       smooth = density_smooth,
-                                       modal = density_modal))
-        
-      })
+      # YLIM 
+      ymin <- as.numeric(strsplit(names(fr_dens)[1], "-")[1])
+      ymax <- as.numeric(strsplit(names(fr_list)[smp], " -")[2])
+      ylim <- c(ymin, ymax)
       
-      # fr_dens does contain some valid density objects
-      if (!.all_na(fr_dens)) {
-        # Calculate the mean maximum y value for kernel densities
-        if (density_modal) {
-          y_max <- 100
-        } else {
-          y_max <- mean(LAPPLY(fr_dens, function(d) {
-            if (!.all_na(d)) {
-              max(d$y)
-            } else {
-              NA
-            }
-          }), na.rm = TRUE)
-        }
-        
-        # Stacked distributions require shifting of y values
-        shft <- seq(
-          0,
-          ovn * density_stack * y_max,
-          density_stack * y_max
-        )
-        
-        # Adjust y values if stacking is been applied
-        if (density_stack > 0 & length(x) > 1) {
-          # Shift distributions for stacking
-          lapply(seq_len(length(fr_dens)), function(z) {
-            if (!.all_na(fr_dens[[z]])) {
-              fr_dens[[z]]$y <<- fr_dens[[z]]$y + shft[z]
-            }
-          })
-        }
-        
-        # YLIM 
-        if(.all_na(ylim)){
-          if(!.all_na(overlay)){
-            ylim <- c(0, y_max + ovn * density_stack * y_max)
-          }else{
-            ylim <- c(0, y_max)
-          }
-        }
-        
-      }else if(.all_na(fr_dens)){
-        
-        # Turn off y axis text
-        axes_text[[2]] <- FALSE
-        
-        # Set y_max to 100
-        y_max <- 100
-        
-        # Set y axis limits to 0-100
-        ylim <- c(0, y_max + ovn * density_stack * y_max)
-        
-        # Stacked distributions require shifting of y values
-        shft <- seq(
-          0,
-          ovn * density_stack * y_max,
-          density_stack * y_max
-        )
-      }
-      
+    # 2D PLOT
     }else if(length(channels) == 2){
       ylim <- .cyto_range(fr_list,
                           channels = channels[2],
@@ -362,8 +305,6 @@ cyto_plot_empty.flowFrame <- function(x,
                      axes_text = axes_text)
   
   # PLOT CONSTRUCTION ----------------------------------------------------------
-  
-  print(axes_text)
   
   # Plot
   graphics::plot(1,
@@ -530,6 +471,7 @@ cyto_plot_empty.flowFrame <- function(x,
                       legend_line_col = legend_line_col,
                       legend_box_fill = legend_box_fill,
                       legend_point_col = legend_point_col,
+                      density_cols = density_cols,
                       density_fill = density_fill,
                       density_fill_alpha = density_fill_alpha,
                       density_line_type = density_line_type,
@@ -537,6 +479,7 @@ cyto_plot_empty.flowFrame <- function(x,
                       density_line_col = density_line_col,
                       point_shape = point_shape,
                       point_size = point_size,
+                      point_cols = point_cols,
                       point_col = point_col,
                       point_col_alpha = point_col_alpha)
   }
@@ -561,6 +504,7 @@ cyto_plot_empty.list <- function(x,
                                  density_modal = TRUE,
                                  density_smooth = 1.5,
                                  density_stack = 0.5,
+                                 density_cols = NA,
                                  density_fill = NA,
                                  density_fill_alpha = 1,
                                  density_line_type = 1,
@@ -568,6 +512,7 @@ cyto_plot_empty.list <- function(x,
                                  density_line_col = "black",
                                  point_shape = ".",
                                  point_size = 2,
+                                 point_cols = NA,
                                  point_col = NA,
                                  point_col_alpha = 1,
                                  axes_text = c(TRUE,TRUE),
@@ -650,6 +595,7 @@ cyto_plot_empty.list <- function(x,
                     density_modal = density_modal,
                     density_smooth = density_smooth,
                     density_stack = density_stack,
+                    density_cols = density_cols,
                     density_fill = density_fill,
                     density_fill_alpha = density_fill_alpha,
                     density_line_type = density_line_type,
@@ -657,6 +603,7 @@ cyto_plot_empty.list <- function(x,
                     density_line_col = density_line_col,
                     point_shape = point_shape,
                     point_size = point_size,
+                    point_cols = point_cols,
                     point_col = point_col,
                     point_col_alpha = point_col_alpha,
                     axes_text = axes_text,
@@ -701,6 +648,12 @@ cyto_plot_empty.list <- function(x,
     # Reset graphics parameters on exit
     on.exit(par(pars))
     
+    
+    # GENERAL ------------------------------------------------------------------
+    
+    # SAMPLES
+    smp <- length(fr_list)
+    
     # CHANNELS -----------------------------------------------------------------
     
     # Check channels
@@ -721,45 +674,10 @@ cyto_plot_empty.list <- function(x,
     # YLIM
     if (.all_na(ylim)) {
       
-        # OVERLAYS
-        ovn <- length(fr_list) - 1
-        
-        # fr_dens_list does contain some valid density objects
-        if (!.all_na(fr_dens_list)) {
-          # Calculate the mean maximum y value for kernel densities
-          if (density_modal) {
-            y_max <- 100
-          } else {
-            y_max <- mean(LAPPLY(fr_dens_list, function(d) {
-              if (!.all_na(d)) {
-                max(d$y)
-              } else {
-                NA
-              }
-            }), na.rm = TRUE)
-          }
-          
-          # YLIM 
-          if(.all_na(ylim)){
-            if(ovn > 1){
-              ylim <- c(0, y_max + ovn * density_stack * y_max)
-            }else{
-              ylim <- c(0, y_max)
-            }
-          }
-          
-        }else if(.all_na(fr_dens_list)){
-          
-          # Turn off y axis text
-          axes_text[[2]] <- FALSE
-          
-          # Set y_max to 100
-          y_max <- 100
-          
-          # Set y axis limits to 0-100
-          ylim <- c(0, y_max + ovn * density_stack * y_max)
-          
-        }
+      # EXTRACT YLIM - NAMES
+      ymin <- as.numeric(strsplit(names(fr_dens)[1], "-")[1])
+      ymax <- as.numeric(strsplit(names(fr_list)[smp], " -")[2])
+      ylim <- c(ymin, ymax)
       
     }
     
@@ -958,6 +876,7 @@ cyto_plot_empty.list <- function(x,
                         legend_line_col = legend_line_col,
                         legend_box_fill = legend_box_fill,
                         legend_point_col = legend_point_col,
+                        density_cols = density_cols,
                         density_fill = density_fill,
                         density_fill_alpha = density_fill_alpha,
                         density_line_type = density_line_type,
@@ -965,6 +884,7 @@ cyto_plot_empty.list <- function(x,
                         density_line_col = density_line_col,
                         point_shape = point_shape,
                         point_size = point_size,
+                        point_cols = point_cols,
                         point_col = point_col,
                         point_col_alpha = point_col_alpha)
     }
