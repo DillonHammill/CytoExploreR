@@ -81,68 +81,12 @@ cyto_plot_density.flowFrame <- function(x,
   
   # DENSITY --------------------------------------------------------------------
   
-  # OVERLAYS
-  ovn <- length(fr_list) - 1
-  
   # KERNEL DENSITY
-  fr_dens <- lapply(fr_list, function(fr){
-    suppressWarnings(.cyto_density(fr,
-                                   channel,
-                                   density_smooth,
-                                   density_modal))
-  })
-  
-  # fr_dens contains some density objects
-  if(!.all_na(fr_dens)){
-    # Get height of y axis for each density distribution
-    if(density_modal){
-      y_max <- 100
-    }else{
-      y_max <- mean(LAPPLY(fr_dens, function(z){
-    
-        if(!.all_na(z)){
-          max(z$y)
-        }else{
-          NA
-        }
-    
-      }), na.rm = TRUE)
-    
-    }
-  
-    # Get vector of density_stack values
-    ofst <- seq(
-      0,
-      ovn * density_stack * y_max,
-      density_stack * y_max
-    )
-
-    # Get a list of offset kernel densities
-    fr_dens <- mapply(function(fr_dens, ofst) {
-
-      # Adjust values for stacking
-      if (ofst != 0 & !.all_na(fr_dens)) {
-        fr_dens$y <- fr_dens$y + ofst
-      }
-
-      return(fr_dens)
-    
-    }, fr_dens, ofst, SIMPLIFY = FALSE)
-    
-  # fr_dens does not contain any density objects
-  } else if(.all_na(fr_dens)){
-    
-    # Set y_max to 100
-    y_max <- 100
-    
-    # Get positions for horizontal lines
-    ofst <- seq(
-      0,
-      ovn * density_stack * y_max,
-      density_stack * y_max
-    )
-    
-  }
+  fr_dens <- .cyto_density(fr_list,
+                           channel = channel,
+                           smooth = density_smooth,
+                           modal = density_modal,
+                           stack = density_stack)
 
   # DENSITY_FILL ---------------------------------------------------------------
   
@@ -169,9 +113,13 @@ cyto_plot_density.flowFrame <- function(x,
   
   # HORIZONTAL LINES -----------------------------------------------------------
   
+  # YMIN PER LAYER
+  ylim <- strsplit(names(fr_dens), "-")
+  ymin <- as.numeric(lapply(ylim, `[[`, 1))
+  
   # LINES UNDER DENSITY
   abline(
-    h = ofst,
+    h = ymin,
     col = density_line_col,
     lwd = density_line_width,
     lty = density_line_type
@@ -227,11 +175,11 @@ cyto_plot_density.flowFrame <- function(x,
   }
 }
 
+
+#' @param x list of density objects for plotting
 #' @rdname cyto_plot_density
 #' @export
 cyto_plot_density.list <- function(x,
-                                   density_modal = TRUE,
-                                   density_stack = 0.5,
                                    density_cols = NA,
                                    density_fill = NA,
                                    density_fill_alpha = 1,
@@ -249,44 +197,6 @@ cyto_plot_density.list <- function(x,
   
   # UPDATE ARGUMENTS
   .args_update(args)
-  
-  # DENSITY --------------------------------------------------------------------
-
-  # Number of overlays
-  ovn <- length(x) - 1
-  
-  # Calculate the mean maximum y value for kernel densities
-  if(density_modal){
-    y_max <- 100
-  }else{
-    y_max<- mean(LAPPLY(x, function(d){
-      if(!.all_na(d)){
-        max(d$y) - min(d$y)
-      }else{
-        NA
-      }
-    }), na.rm = TRUE)
-  }
-  
-  # Empty list - all NA without density objects
-  if(is.nan(y_max)){
-    y_max <- 100
-  }
-  
-  ofst <- seq(0,
-              ovn * density_stack * y_max,
-              density_stack * y_max)
-  
-
-  
-  # Minimum for each distribution
-  mn <- LAPPLY(x, function(z){
-    if(!.all_na(z)){
-      min(z$y)
-    }else{
-      0
-    }
-  })
   
   # DENSITY_FILL ---------------------------------------------------------------
   
@@ -313,9 +223,13 @@ cyto_plot_density.list <- function(x,
   
   # HORIZONTAL LINES -----------------------------------------------------------
   
+  # YMIN PER LAYER
+  ylim <- strsplit(names(fr_dens), "-")
+  ymin <- as.numeric(lapply(ylim, `[[`, 1))
+  
   # LINES UNDER DENSITY
   abline(
-    h = ofst,
+    h = ymin,
     col = density_line_col,
     lwd = density_line_width,
     lty = density_line_type,
@@ -326,7 +240,7 @@ cyto_plot_density.list <- function(x,
   
   # Add density distributions - reverse plot order and colours
   if (length(x) > 1 & 
-      all(floor(mn) == 0)) {
+      all(floor(ymin) == 0)) {
     
     mapply(
       function(x,
