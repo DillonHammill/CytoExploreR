@@ -54,11 +54,11 @@
 #' }
 #' @export
 cyto_gate_remove <- function(gs,
-                        parent = NULL,
-                        alias = NULL,
-                        channels = NULL,
-                        type = NULL,
-                        gatingTemplate = NULL, ...) {
+                             parent = NULL,
+                             alias = NULL,
+                             channels = NULL,
+                             type = NULL,
+                             gatingTemplate = NULL, ...) {
   
   # Supply alias
   if (is.null(alias)) {
@@ -77,7 +77,7 @@ cyto_gate_remove <- function(gs,
   
   # gatingTemplate still missing
   if(is.null(gatingTemplate)){
-    stop("Suppply the name of the gatingTemplate to remove gate(s).")
+    stop("Supply the name of the gatingTemplate to remove gate(s).")
   }
   
   # File extension
@@ -1112,18 +1112,20 @@ cyto_gate_type <- function(gates) {
 
 # CYTO_GATE_CONVERT ------------------------------------------------------------
 
+# CYTO_GATE_CONVERT is designed to convert constrcted gate objects to the number
+# of dimensions specified by channels. Primary use is to easily convert between
+# 1D and 2D gate objects.
+
 #' Convert Between 1D and 2D Gate Objects
 #'
-#' Useful function to convert between 1D and 2D gates once a new plot has been
-#' called.
+#' Useful function to convert between 1D and 2D gate objects.
 #'
 #' @param x gate object(s) to be converted.
-#' @param channels indicates the required dimensions of the gate.
+#' @param channels indicates the required dimensions of the gate for plotting.
 #'
-#' @return modified gate object.
+#' @return modified gate object with appropriate dimensions.
 #'
 #' @importFrom flowCore parameters rectangleGate
-#' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1146,10 +1148,11 @@ cyto_gate_convert.default <- function(x,
                       "filters",
                       "rectangleGate",
                       "polygonGate",
-                      "ellipsoidGate")){
+                      "ellipsoidGate",
+                      "quadGate")){
     stop(paste(
-      "'x' should contain either a filters, rectangleGate, polygonGate,",
-      "or ellipsoidGate objects."))
+      "'x' should contain either filters, rectangleGate, polygonGate,",
+      "ellipsoidGate or quadGate objects."))
   }
   
 }
@@ -1159,99 +1162,76 @@ cyto_gate_convert.default <- function(x,
 cyto_gate_convert.rectangleGate <- function(x, 
                                             channels = NULL){
   
-  # Channels missing
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   if(is.null(channels)){
     stop("Supply the channels in which the gate will be plotted.")
   }
   
+  # GATE CHANNELS
+  chans <- parameters(x)
 
+  # PREPARE GATE ---------------------------------------------------------------
   
-  # Extract channels of gate
-  gate_channels <- parameters(x)
-  gate_channels_length <- length(gate_channels)
-  
-  # Dimensions required
-  channels_length <- length(channels)
-  
-  # Gate must contain at least one channel matching channels
-  if(!any(gate_channels %in% channels)){
-    stop("Cannot plot gates not constructed in the supplied channels.")
-  }  
-    
-  # Plot dimensions
-  limits <- par("usr")
-  
-  # Extract limits
-  xmin <- limits[1]
-  xmax <- limits[2]
-  ymin <- limits[3]
-  ymax <- limits[4]
-  
-  # 1D gate
-  if(gate_channels_length == 1){
-   # 1D gate -> 2D
-   if(channels_length == 2){
-     # Gate has x channel
-     if(gate_channels == channels[1]){
-       # Make a rectangleGate with y coords
-       coords <- matrix(c(ymin, ymax), ncol = 1, nrow = 2)
-       colnames(coords) <- channels[2]
-       rownames(coords) <- c("min", "max")
-       rg <- rectangleGate(filterId = x@filterId, .gate = coords)
-       # Update x to be 2D gate
-       x <- x * rg
-     # Gate has y channel  
-     }else if(gate_channels == channels[2]){
-       # Make a rectangleGate with x coords
-       coords <- matrix(c(xmin, xmax), ncol = 1, nrow = 2)
-       colnames(coords) <- channels[1]
-       rownames(coords) <- c("min", "max")
-       rg <- rectangleGate(filterId = x@filterId, .gate = coords)
-       # Update x to be 2D gate
-       x <- rg * x
-     }
-   }
-  # 2D gate 
-  }else if(gate_channels_length == 2){
-    # 2D gate -> 1D
-    if(channels_length == 1){
-      # Restrict gate to channels
-      x <- x[channels]
-    }else if(channels_length == 2){
-      # channels don't match - return 2D rectangleGate
-      if(!all(gate_channels %in% channels)){
-        match_channel <- gate_channels[gate_channels %in% channels]
-        # Ned to replace y coords
-        if(match_channel == channels[1]){
-          coords <- matrix(c(min(as.numeric(x@min[match_channel])), 
-                             max(as.numeric(x@max[match_channel])),
-                             ymin,
-                             ymax), 
-                           ncol = 2, 
-                           nrow = 2,
-                           byrow = FALSE)
-          colnames(coords) <- channels
-          rownames(coords) <- c("min", "max")
-          x <- rectangleGate(filterId = x@filterId, .gate = coords)
-        }else if(match_channel == channels[2]){
-          coords <- matrix(c(xmin,
-                             xmax,
-                             min(as.numeric(x@min[match_channel])), 
-                             max(as.numeric(x@max[match_channel]))), 
-                           ncol = 2, 
-                           nrow = 2,
-                           byrow = FALSE)
-          colnames(coords) <- channels
-          rownames(coords) <- c("min", "max")
-          x <- rectangleGate(filterId = x@filterId, .gate = coords)
-        }
-      }
+  # 1D PLOT
+  if(length(channels) == 1){
+    # 1D GATE IN 1D PLOT - CORRECT CHANNEL
+    if(length(chans) == 1 & chans == channels){
+      return(x)
+    # 1D GATE IN 1D PLOT - INCORRECT CHANNEL
+    }else if(length(chans) == 1 & chans != channels){
+      stop("Supplied gate must contain co-ordinates in the supplied channel.")
+    # 2D GATE IN 1D PLOT - CORRECT CHANNEL
+    }else if(length(chans) == 2 & any(chans == channels)){
+      return(x[channels])
+    # 2D GATE IN 1D PLOT - INCORRECT CHANNEL
+    }else if(length(chans) == 2 & !any(chans == channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channel.")
+    }
+  # 2D PLOT
+  }else if(length(channels) == 2){
+    # 2D GATE IN 2D PLOT - CORRECT CHANNELS
+    if(length(chans) == 2 & all(chans %in% channels)){
+      return(x)
+    # 2D GATE in 2D PLOT - ONE CHANNEL MATCH
+    }else if(length(chans) == 2 & any(chans %in% channels)){
+      # FITERID
+      ID <- x@filterId
+      # COORDS - MISSING CHANNEL
+      coords <- matrix(c(-Inf, Inf),
+                       ncol = 1,
+                       nrow = 2)
+      colnames(coords) <- channels[!channels %in% chans]
+      rg <- rectangleGate(.gate = coords)
+      # COMBINE CO-ORDINATES - RETAIN FILTERID
+      x <- x[channels[chans %in% channels]] * rg
+      x@filterId <- ID
+      # RETURN CONVERTED GATE
+      return(x)
+    # 2D GATE IN 2D PLOT - NO CHANNELS MATCH
+    }else if(length(chans) == 2 & ! any(chans %in% channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
+    # 1D GATE IN 2D PLOT - CORRECT CHANNEL
+    }if(length(chans) == 1 & chans %in% channels){
+      # FITERID
+      ID <- x@filterId
+      # COORDS - MISSING CHANNEL
+      coords <- matrix(c(-Inf, Inf),
+                       ncol = 1,
+                       nrow = 2)
+      colnames(coords) <- channels[!channels %in% chans]
+      rg <- rectangleGate(.gate = coords)
+      # COMBINE CO-ORDINATES - RETAIN FILTERID
+      x <- x * rg
+      x@filterId <- ID
+      # RETURN CONVERTED GATE
+      return(x)
+    # 1D GATE IN 2D PLOT - INCORRECT CHANNEL  
+    }else if(length(chans) == 1 & !chans %in% channels){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
     }
   }
-  
-  # Return modified gates
-  return(x)
-  
 }
 
 #' @rdname cyto_gate_convert
@@ -1259,76 +1239,68 @@ cyto_gate_convert.rectangleGate <- function(x,
 cyto_gate_convert.polygonGate <- function(x, 
                                           channels = NULL){
   
-  # Channels missing
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   if(is.null(channels)){
     stop("Supply the channels in which the gate will be plotted.")
   }
   
-  # Extract channels of gate
-  gate_channels <- parameters(x)
-  gate_channels_length <- length(gate_channels)
+  # GATE CHANNELS
+  chans <- parameters(x)
+
+  # PREPARE GATE ---------------------------------------------------------------
   
-  # Dimensions required
-  channels_length <- length(channels)
-  
-  # Gate must contain at least one channel matching channels
-  if(!any(gate_channels %in% channels)){
-    stop("Cannot plot gates not constructed in the supplied channels.")
-  }  
-  
-  # Plot dimensions
-  limits <- par("usr")
-  
-  # Extract limits
-  xmin <- limits[1]
-  xmax <- limits[2]
-  ymin <- limits[3]
-  ymax <- limits[4]
-  
-  # Must be 2D gate
-  if(channels_length == 1){
-    # Use min and max values of matching channel - > 1D rectangleGate
-    coords <- matrix(c(min(x@boundaries[,channels]), 
-                       max(x@boundaries[,channels])), 
-                     ncol = 1, 
-                     nrow = 2)
-    colnames(coords) <- channels
-    rownames(coords) <- c("min", "max")
-    x <- rectangleGate(filterId = x@filterId, .gate = coords)
-  # Return 2D rectangleGate if one channel does not match
-  }else if(channels_length == 2){
-    if(!all(gate_channels %in% channels)){
-      match_channel <- gate_channels[gate_channels %in% channels]
-      # Ned to replace y coords
-      if(match_channel == channels[1]){
-        coords <- matrix(c(min(x@boundaries[,match_channel]), 
-                           max(x@boundaries[,match_channel]),
-                           ymin,
-                           ymax), 
-                         ncol = 2, 
-                         nrow = 2,
-                         byrow = FALSE)
-        colnames(coords) <- channels
-        rownames(coords) <- c("min", "max")
-        x <- rectangleGate(filterId = x@filterId, .gate = coords)
-      }else if(match_channel == channels[2]){
-        coords <- matrix(c(xmin,
-                           xmax,
-                           min(x@boundaries[,match_channel]), 
-                           max(x@boundaries[,match_channel])), 
-                         ncol = 2, 
-                         nrow = 2,
-                         byrow = FALSE)
-        colnames(coords) <- channels
-        rownames(coords) <- c("min", "max")
-        x <- rectangleGate(filterId = x@filterId, .gate = coords)
-      }
+  # 1D PLOT - CONVERT TO RECTANGLEGATE
+  if(length(channels) == 1){
+    # 2D GATE IN 1D PLOT - CORERCT CHANNEL
+    if(any(chans %in% channels)){
+      # FILTERID
+      ID <- x@filterId
+      # COORDS IN CHANNEL
+      coords <- x@boundaries[, channels[channels %in% chans]]
+      coords <- c(min(coords), max(coords))
+      # RECTANGLEGATE
+      coords <- matrix(coords,
+                       ncol = 1,
+                       nrow = 2)
+      colnames(coords) <- channels[channels %in% chans]
+      x <- rectangleGate(.gate = coords, filterId = ID)
+      # RETURN 1D RECTANGLEGATE
+      return(x)
+    # 2D GATE IN 1D PLOT - INCORRECT CHANNELS
+    }else if(!any(chans %in% channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
+    }
+  # 2D PLOT
+  }else if(length(channels) == 2){
+    # 2D GATE IN 2D PLOT - CORRECT CHANNELS
+    if(all(chans %in% channels)){
+      return(x)
+    # 2D GATE IN 2D PLOT - SINGLE CHANNEL 
+    }else if(any(chans %in% channels)){
+      # FILTERID
+      ID <- x@filterId
+      # COORDS IN CHANNEL
+      coords <- x@boundaries[, channels[channels %in% chans]]
+      coords <- c(min(coords), max(coords))
+      # COORDS in MISSING CHANNEL
+      coords <- c(coords, -Inf, Inf)
+      # RECTANGLEGATE
+      coords <- matrix(coords,
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE)
+      colnames(coords) <- c(channels[channels %in% chans],
+                            !channels[channels %in% chans])
+      x <- rectangleGate(.gate = coords, filterId = ID)
+      # RETURN 2D RECTANGLEGATE
+      return(x)
+    # 2D GATE IN 2D PLOT - INCORRECT CHANNELS
+    }else if(!any(chans %in% channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
     }
   }
-  
-  # Return modified gates
-  return(x)
-  
 }
 
 #' @rdname cyto_gate_convert
@@ -1336,82 +1308,105 @@ cyto_gate_convert.polygonGate <- function(x,
 cyto_gate_convert.ellipsoidGate <- function(x, 
                                             channels = NULL){
   
-  # Channels missing
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   if(is.null(channels)){
     stop("Supply the channels in which the gate will be plotted.")
   }
   
-  # Extract channels of gate
-  gate_channels <- parameters(x)
-  gate_channels_length <- length(gate_channels)
+  # GATE CHANNELS
+  chans <- parameters(x)
+
+  # PREPARE GATE ---------------------------------------------------------------
   
-  # Dimensions required
-  channels_length <- length(channels)
-  
-  # Gate must contain at least one channel matching channels
-  if(!any(gate_channels %in% channels)){
-    stop("Cannot plot gates not constructed in the supplied channels.")
-  }  
-  
-  # Plot dimensions
-  limits <- par("usr")
-  
-  # Extract limits
-  xmin <- limits[1]
-  xmax <- limits[2]
-  ymin <- limits[3]
-  ymax <- limits[4]
-  
-  # Must be 2D gate
-  if(channels_length == 1){
-    
-    # Coerce x to polygonGate
-    x <- as(x, "polygonGate")
-    
-    # Use min and max values of matching channel - > 1D rectangleGate
-    coords <- matrix(c(min(x@boundaries[,channels]), 
-                       max(x@boundaries[,channels])), 
-                     ncol = 1, 
-                     nrow = 2)
-    colnames(coords) <- channels
-    rownames(coords) <- c("min", "max")
-    x <- rectangleGate(filterId = x@filterId, .gate = coords)
-  # Return 2D rectangleGate with correct channels
-  }else if(channels_length == 2){
-    if(!all(gate_channels %in% channels)){
-      # convert ellipsoidgate to polygonGate
+  # 1D PLOT
+  if(length(channels) == 1){
+    # 2D GATE IN 1D PLOT - CHANNEL MATCH
+    if(any(chans %in% channels)){
+      # FILTERID
+      ID <- x@filterId
+      # POLYGONGATE
       x <- as(x, "polygonGate")
-      match_channel <- gate_channels[gate_channels %in% channels]
-      # Ned to replace y coords
-      if(match_channel == channels[1]){
-        coords <- matrix(c(min(x@boundaries[,match_channel]), 
-                           max(x@boundaries[,match_channel]),
-                           ymin,
-                           ymax), 
-                         ncol = 2, 
-                         nrow = 2,
-                         byrow = FALSE)
-        colnames(coords) <- channels
-        rownames(coords) <- c("min", "max")
-        x <- rectangleGate(filterId = x@filterId, .gate = coords)
-      }else if(match_channel == channels[2]){
-        coords <- matrix(c(xmin,
-                           xmax,
-                           min(x@boundaries[,match_channel]), 
-                           max(x@boundaries[,match_channel])), 
-                         ncol = 2, 
-                         nrow = 2,
-                         byrow = FALSE)
-        colnames(coords) <- channels
-        rownames(coords) <- c("min", "max")
-        x <- rectangleGate(filterId = x@filterId, .gate = coords)
-      }
+      # COORDS IN CHANNEL
+      coords <- x@boundaries[, channels[channels %in% chans]]
+      coords <- c(min(coords), max(coords))
+      # RECTANGLEGATE
+      coords <- matrix(coords,
+                       ncol = 1,
+                       nrow = 2)
+      colnames(coords) <- channels[channels %in% chans]
+      x <- rectangleGate(.gate = x, filterId = ID)
+      # RETURN 1D RECTANGLEGATE
+      return(x)
+    # 2D GATE IN 1D PLOT - NO CHANNEL MATCH
+    }else if(!any(chans %in% channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
+    }
+  # 2D PLOT
+  }else if(length(channels) == 2){
+    # 2D GATE IN 2D PLOT - CORRECT CHANNELS
+    if(all(chans %in% channels)){
+      return(x)
+    # 2D GATE IN 2D PLOT - SINGLE CHANNEL MATCH
+    }else if(any(chans %in% channels)){
+      # FILTERID
+      ID <- x@filterId
+      # POLYGONGATE
+      x <- as(x, "polygonGate")
+      # COORDS IN CHANNEL
+      coords <- x@boundaries[, channels[channels %in% chans]]
+      coords <- c(min(coords), max(coords))
+      # COORDS IN MISSING CHANNEL
+      coords <- c(coords, -Inf, Inf)
+      # RECTANGLEGATE
+      coords <- matrix(coords,
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE)
+      colnames(coords) <- c(channels[channels %in% chans],
+                            channels[!channels %in% chans])
+      x <- rectangleGate(.gate = x, filterId = ID)
+      # RETURN 2D RECTANGLEGATE
+      return(x)
+    # 2D GATE IN 2D PLOT - NO CHANNEL MATCH 
+    }else if(!any(chans %in% channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
     }
   }
+}
+
+#' @rdname cyto_gate_convert
+#' @export
+cyto_gate_convert.quadGate <- function(x, 
+                                       channels = NULL){
   
-  # Return modified gates
-  return(x)
+  # CHECKS ---------------------------------------------------------------------
   
+  # CHANNELS
+  if(is.null(channels)){
+    stop("Supply the channels in which the gate will be plotted.")
+  }
+  
+  # GATE CHANNELS
+  chans <- parameters(x)
+  
+  # PREPARE GATES --------------------------------------------------------------
+  
+  # 1D PLOT
+  if(length(channels) == 1){
+    stop("Quadrant gates cannot be converted into 1D gate objects.")
+  # 2D PLOT
+  }else if(length(channels) == 2){
+    # 2D GATES IN 2D PLOT - CORRECT CHANNELS
+    if(all(chans %in% channels)){
+      return(x)
+    # 2D GATES IN 2D PLOT - INCORRECT CHANNELS
+    }else if(!any(chans %in% channels)){
+      stop("Supplied gate must contain co-ordinates in the supplied channels.")
+    }
+    
+  }
 }
 
 #' @rdname cyto_gate_convert
@@ -1419,14 +1414,14 @@ cyto_gate_convert.ellipsoidGate <- function(x,
 cyto_gate_convert.filters <- function(x, 
                                       channels = NULL){
   
-  # Extract list of gates from filters object
+  # GATE OBJECT LIST -----------------------------------------------------------
   x <- unlist(x)
   
-  # Call to list method
+  # LIST METHOD CALL -----------------------------------------------------------
   x <- cyto_gate_convert(x,
                          channels)
   
-  # Return modified gates
+  # RETURN CONVERTED GATES -----------------------------------------------------
   return(x)
   
 }
@@ -1436,15 +1431,15 @@ cyto_gate_convert.filters <- function(x,
 cyto_gate_convert.list <- function(x, 
                                    channels = NULL){
   
-  # Extract gate objects into list
+  # GATE OBJECT LIST -----------------------------------------------------------
   x <- unlist(x)
   
-  # Run through each gate
+  # CONVERT GATES --------------------------------------------------------------
   x <- lapply(x, function(z){
     cyto_gate_convert(z, channels)
   })
   
-  # Return list of modified gates
+  # RETURN CONVERTED GATES -----------------------------------------------------
   return(x)
   
 }

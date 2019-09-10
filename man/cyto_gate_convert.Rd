@@ -5,6 +5,7 @@
 \alias{cyto_gate_convert.rectangleGate}
 \alias{cyto_gate_convert.polygonGate}
 \alias{cyto_gate_convert.ellipsoidGate}
+\alias{cyto_gate_convert.quadGate}
 \alias{cyto_gate_convert.filters}
 \alias{cyto_gate_convert.list}
 \title{Convert Between 1D and 2D Gate Objects}
@@ -15,6 +16,8 @@
 
 \method{cyto_gate_convert}{ellipsoidGate}(x, channels = NULL)
 
+\method{cyto_gate_convert}{quadGate}(x, channels = NULL)
+
 \method{cyto_gate_convert}{filters}(x, channels = NULL)
 
 \method{cyto_gate_convert}{list}(x, channels = NULL)
@@ -22,10 +25,10 @@
 \arguments{
 \item{x}{gate object(s) to be converted.}
 
-\item{channels}{indicates the required dimensions of the gate.}
+\item{channels}{indicates the required dimensions of the gate for plotting.}
 }
 \value{
-modified gate object.
+modified gate object with appropriate dimensions.
 }
 \description{
 Useful function to convert between 1D and 2D gates once a new plot has been
