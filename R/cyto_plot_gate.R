@@ -29,24 +29,24 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @name cyto_plot_gate3
+#' @name cyto_plot_gate
 NULL
 
 #' @noRd
 #' @export
-cyto_plot_gate3 <- function(x, ...){
-  UseMethod("cyto_plot_gate3")
+cyto_plot_gate <- function(x, ...){
+  UseMethod("cyto_plot_gate")
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.default <- function(x, ...){
+cyto_plot_gate.default <- function(x, ...){
   stop(paste("cyto_plot does not support objects of class", class(x),"."))
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.rectangleGate <- function(gate,
+cyto_plot_gate.rectangleGate <- function(gate,
                                           channels,
                                           gate_line_type = 1,
                                           gate_line_width = 2.5,
@@ -60,7 +60,10 @@ cyto_plot_gate3.rectangleGate <- function(gate,
   lims <- par("usr")
   ymin <- lims[3]
   ymax <- lims[4]
-  ypad <- abs(ymin)/2
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng / 1.04) / 2
+  ymin <- ymin + 0.5 * ypad # 1% BUFFER
+  ymax <- ymax - 0.5 * ypad # 1% BUFFER
   yrng <- ymax - ymin
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
@@ -87,16 +90,39 @@ cyto_plot_gate3.rectangleGate <- function(gate,
   
   # 1D PLOT
   if(length(channels) == 1){
+    # REPLACE INFINITE X COORDS
+    if(is.infinite(gate@min[channels[1]])){
+      gate@min[channels[1]] <- xmin
+    }
+    if(is.infinite(gate@max[channels[1]])){
+      gate@max[channels[1]] <- xmax
+    }
+    # PLOT GATE
     rect(xleft = gate@min[channels[1]],
          xright = gate@max[channels[1]],
-         ybottom = ymin + ypad,
-         ytop = ymax - ypad,
+         ybottom = ymin,
+         ytop = ymax,
          lty = gate_line_type,
          lwd = gate_line_width,
          border = gate_line_col,
          col = adjustcolor(gate_fill, gate_fill_alpha))
   # 2D PLOT  
   }else if(length(channels) == 2){
+    # REPLACE INFINITE X COORDS
+    if(is.infinite(gate@min[channels[1]])){
+      gate@min[channels[1]] <- xmin
+    }
+    if(is.infinite(gate@max[channels[1]])){
+      gate@max[channels[1]] <- xmax
+    }
+    # REPLACE INFINITE Y COORDS
+    if(is.infinite(gate@min[channels[2]])){
+      gate@min[channels[2]] <- ymin
+    }
+    if(is.infinite(gate@max[channels[2]])){
+      gate@max[channels[2]] <- ymax
+    }
+    # PLOT GATE
     rect(xleft = gate@min[channels[1]],
          xright = gate@max[channels[1]],
          ybottom = gate@min[channels[2]],
@@ -114,9 +140,9 @@ cyto_plot_gate3.rectangleGate <- function(gate,
   
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.polygonGate <- function(gate,
+cyto_plot_gate.polygonGate <- function(gate,
                                         channels,
                                         gate_line_type = 1,
                                         gate_line_width = 2.5,
@@ -124,6 +150,18 @@ cyto_plot_gate3.polygonGate <- function(gate,
                                         gate_fill = "white",
                                         gate_fill_alpha = 0){
   
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # LIMITS
+  lims <- par("usr")
+  ymin <- lims[3]
+  ymax <- lims[4]
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng / 1.04) / 2
+  ymin <- ymin + 0.5 * ypad # 1% BUFFER
+  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  yrng <- ymax - ymin
+  
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
   # ARGUMENTS
@@ -146,25 +184,88 @@ cyto_plot_gate3.polygonGate <- function(gate,
 
   # PLOT GATE ------------------------------------------------------------------
   
-  # 1D PLOT - rectangle
+  # 1D PLOT - RECTANGLE
   if( length(channels) == 1){
+    # REPLACE INFINITE X COORDS
+    if(is.infinite(gate@min[channels[1]])){
+      gate@min[channels[1]] <- xmin
+    }
+    if(is.infinite(gate@max[channels[1]])){
+      gate@max[channels[1]] <- xmax
+    }
+    # PLOT GATE
     rect(xleft = gate@min[channels[1]],
          xright = gate@max[channels[1]],
-         ybottom = ymin + ypad,
-         ytop = ymax - ypad,
+         ybottom = ymin,
+         ytop = ymax,
          lty = gate_line_type,
          lwd = gate_line_width,
          border = gate_line_col,
          col = adjustcolor(gate_fill, gate_fill_alpha))
-  # 2D PLOT - polygon
+  # 2D PLOT - POLYGON OR RECTANGLE
   }else if(length(channels) == 2){
-    polygon(gate@boundaries[, channels[1]],
-            gate@boundaries[, channels[2]],
-            lty = gate_line_type,
-            lwd = gate_line_width,
-            border = gate_line_col,
-            col = adjustcolor(gate_fill, gate_fill_alpha)
-    )
+    # 2D RECTANGLE GATE
+    if(is(gate, "rectangleGate")){
+      # REPLACE INFINITE X COORDS
+      if(is.infinite(gate@min[channels[1]])){
+        gate@min[channels[1]] <- xmin
+      }
+      if(is.infinite(gate@max[channels[1]])){
+        gate@max[channels[1]] <- xmax
+      }
+      # REPLACE INFINITE Y COORDS
+      if(is.infinite(gate@min[channels[2]])){
+        gate@min[channels[2]] <- ymin
+      }
+      if(is.infinite(gate@max[channels[2]])){
+        gate@max[channels[2]] <- ymax
+      }
+      # PLOT GATE
+      rect(xleft = gate@min[channels[1]],
+           xright = gate@max[channels[1]],
+           ybottom = gate@min[channels[2]],
+           ytop = gate@max[channels[2]],
+           lty = gate_line_type,
+           lwd = gate_line_width,
+           border = gate_line_col,
+           col = adjustcolor(gate_fill, gate_fill_alpha))
+    # 2D POLYGONGATE  
+    }else if(is(gate, "polygonGate")){
+      # CO-ORDINATES
+      x_coords <- gate@boundaries[, channels[1]]
+      y_coords <- gate@boundaries[, channels[2]]
+      # REPLACE INFINITE X COORDS
+      if(any(is.infinite(x_coords))){
+        ind <- which(is.infinite(x_coords))
+        lapply(ind, function(z){
+          if(x_coords[ind] < 0){
+            x_coords[z] <<- xmin
+          }else if(x_coords[ind] > 0){
+            x_coords[z] <<- xmax
+          }
+        })
+      }
+      # REPLACE INFINITE Y COORDS
+      if(any(is.infinite(y_coords))){
+        ind <- which(is.infinite(y_coords))
+        lapply(ind, function(z){
+          if(y_coords[ind] < 0){
+            y_coords[z] <<- ymin
+          }else if(y_coords[ind] > 0){
+            y_coords[z] <<- ymax
+          }
+        })
+      }
+      # PLOT GATE
+      polygon(x_coords,
+              y_coords,
+              lty = gate_line_type,
+              lwd = gate_line_width,
+              border = gate_line_col,
+              col = adjustcolor(gate_fill, gate_fill_alpha)
+      )
+    }
+
   }
 
   # RETURN GATE ----------------------------------------------------------------
@@ -174,9 +275,9 @@ cyto_plot_gate3.polygonGate <- function(gate,
   
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.ellipsoidGate <- function(gate,
+cyto_plot_gate.ellipsoidGate <- function(gate,
                                           channels,
                                           gate_line_type = 1,
                                           gate_line_width = 2.5,
@@ -184,6 +285,18 @@ cyto_plot_gate3.ellipsoidGate <- function(gate,
                                           gate_fill = "white",
                                           gate_fill_alpha = 0){
   
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # LIMITS
+  lims <- par("usr")
+  ymin <- lims[3]
+  ymax <- lims[4]
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng / 1.04) / 2
+  ymin <- ymin + 0.5 * ypad # 1% BUFFER
+  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  yrng <- ymax - ymin
+  
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
   # ARGUMENTS
@@ -204,30 +317,92 @@ cyto_plot_gate3.ellipsoidGate <- function(gate,
     channels <- parameters(gate)
   }
   
-  # POLYGONGATE
-  gate <- as(gate, "polygonGate")
-  
   # PLOT GATE ------------------------------------------------------------------
   
   # 1D PLOT
   if(length(channels) == 1){
+    # REPLACE INFINITE X COORDS
+    if(is.infinite(gate@min[channels[1]])){
+      gate@min[channels[1]] <- xmin
+    }
+    if(is.infinite(gate@max[channels[1]])){
+      gate@max[channels[2]] <- xmax
+    }
+    # PLOT GATE
     rect(xleft = gate@min[channels[1]],
          xright = gate@max[channels[1]],
-         ybottom = ymin + ypad,
-         ytop = ymax - ypad,
+         ybottom = ymin,
+         ytop = ymax,
          lty = gate_line_type,
          lwd = gate_line_width,
          border = gate_line_col,
          col = adjustcolor(gate_fill, gate_fill_alpha))
   # 2D PLOT
   }else if(length(channels) == 2){
-    polygon(gate@boundaries[, channels[1]],
-            gate@boundaries[, channels[2]],
-            lty = gate_line_type,
-            lwd = gate_line_width,
-            border = gate_line_col,
-            col = adjustcolor(gate_fill, gate_fill_alpha)
-    )
+    # 2D RECTANGLEGATE
+    if(is(gate, "rectangleGate")){
+      # REPLACE INFINITE X COORDS
+      if(is.infinite(gate@min[channels[1]])){
+        gate@min[channels[1]] <- xmin
+      }
+      if(is.infinite(gate@max[channels[1]])){
+        gate@max[channels[1]] <- xmax
+      }
+      # REPLACE INFINITE Y COORDS
+      if(is.infinite(gate@min[channels[2]])){
+        gate@min[channels[2]] <- ymin
+      }
+      if(is.infinite(gate@max[channels[2]])){
+        gate@max[channels[2]] <- ymax
+      }
+      # PLOT GATE
+      rect(xleft = gate@min[channels[1]],
+           xright = gate@max[channels[1]],
+           ybottom = gate@min[channels[2]],
+           ytop = gate@max[channels[2]],
+           lty = gate_line_type,
+           lwd = gate_line_width,
+           border = gate_line_col,
+           col = adjustcolor(gate_fill, gate_fill_alpha))
+    # 2D ELLIPSOIDGATE  
+    }else if(is(gate, "ellipsoidGate")){
+      # COERCE TO POLYGONGATE
+      gate <- as(gate, "polygonGate")
+      # CO-ORDINATES
+      x_coords <- gate@boundaries[,channels[1]]
+      y_coords <- gate@boundaries[,channels[2]]
+      # REPLACE INFINITE X COORDS
+      if(any(is.infinite(x_coords))){
+        ind <- which(is.infinite(x_coords))
+        lapply(ind, function(z){
+          if(x_coords[z] < 0){
+            x_coords[z] <<- xmin
+          }else if(x_coords[z] > 0){
+            x_coords[z] <<- xmax
+          }
+        })
+      }
+      # REPLACE INFINITE Y COORDS
+      if(any(is.infinite(y_coords))){
+        ind <- which(is.infinite(y_coords))
+        lapply(ind, function(z){
+          if(y_coords[z] < 0){
+            y_coords[z] <<- ymin
+          }else if(y_coords[z] > 0){
+            y_coords[z] <<- ymax
+          }
+        })
+      }
+      # PLOT GATE
+      polygon(x_coords,
+              y_coords,
+              lty = gate_line_type,
+              lwd = gate_line_width,
+              border = gate_line_col,
+              col = adjustcolor(gate_fill, gate_fill_alpha)
+      )
+    }
+
   }
 
   
@@ -238,9 +413,9 @@ cyto_plot_gate3.ellipsoidGate <- function(gate,
   
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.quadGate <- function(gate,
+cyto_plot_gate.quadGate <- function(gate,
                                      channels,
                                      gate_line_type = 1,
                                      gate_line_width = 2.5,
@@ -250,11 +425,26 @@ cyto_plot_gate3.quadGate <- function(gate,
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
+  # PLOT LIMITS
   lims <- par("usr")
+  
+  # X LIMITS
   xmin <- lims[1]
   xmax <- lims[2]
+  xrng <- xmax - xmin
+  xpad <- (xrng - xrng/1.04)/2
+  xmin <- xmin + 0.5 * xpad # 1% BUFFER
+  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xrng <- xmax - xmin
+  
+  # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng / 1.04) / 2
+  ymin <- ymin + 0.5 * ypad # 1% BUFFER
+  ymax <- ymax - 0.5 * ypad # 1% BUFFER
+  yrng <- ymax - ymin
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
@@ -312,12 +502,14 @@ cyto_plot_gate3.quadGate <- function(gate,
         ybottom <- ymin
         ytop <- gate@boundary[channels[2]]
       }
+      # PLOT GATE FILL
       rect(
         xleft = xleft,
         xright = xright,
         ybottom = ybottom,
         ytop = ytop,
-        col = adjustcolor(gate_fill[z], gate_fill_alpha[z])
+        col = adjustcolor(gate_fill[z], gate_fill_alpha[z]),
+        border = NA
       )
     })
   }
@@ -338,9 +530,9 @@ cyto_plot_gate3.quadGate <- function(gate,
   
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.filters <- function(gate,
+cyto_plot_gate.filters <- function(gate,
                                     channels,
                                     gate_line_type = 1,
                                     gate_line_width = 2.5,
@@ -356,7 +548,7 @@ cyto_plot_gate3.filters <- function(gate,
   # LIST GATE METHOD -----------------------------------------------------------
   
   # PLOT GATES
-  gate <- cyto_plot_gate3(gate = gate,
+  gate <- cyto_plot_gate(gate = gate,
                           channels = channels,
                           gate_line_type = gate_line_type,
                           gate_line_width = gate_line_width,
@@ -371,9 +563,9 @@ cyto_plot_gate3.filters <- function(gate,
   
 }
 
-#' @rdname cyto_plot_gate3
+#' @rdname cyto_plot_gate
 #' @export
-cyto_plot_gate3.list <- function(gate,
+cyto_plot_gate.list <- function(gate,
                                  channels,
                                  gate_line_type = 1,
                                  gate_line_width = 2.5,
@@ -390,17 +582,19 @@ cyto_plot_gate3.list <- function(gate,
   
   # REPLICATE GATES - FIRST GATE ONLY
   if(length(unique(gate)) != 1){
-    gate <- gate[1]
+    gt <- gate[1]
+  }else{
+    gt <- gate
   }
   
   # GATE & POPULATION COUNTS ---------------------------------------------------
   
   # GATE COUNT
-  gate_count <- length(gate)
+  gate_count <- length(gt)
   
   # POPULATION COUNT - GATE_FILL ARGUMENTS
   pop_count <- c()
-  pop_count <- LAPPLY(gate, function(z){
+  pop_count <- LAPPLY(gt, function(z){
     if(class(z) == "quadGate"){
       P <<- c(P, 4)
     }else{
@@ -426,14 +620,14 @@ cyto_plot_gate3.list <- function(gate,
   # CALL METHOD ----------------------------------------------------------------
   
   # LOOP THROUGH GATE
-  gate <- mapply(function(gate,
+  gate <- mapply(function(gt,
                           gate_line_type,
                           gate_line_width,
                           gate_line_col,
                           gate_fill,
                           gate_fill_alpha){
     
-    cyto_plot_gate3(gate,
+    cyto_plot_gate(gt,
                     channels = channels,
                     gate_line_type = gate_line_type,
                     gate_line_width = gate_line_width,
@@ -441,7 +635,7 @@ cyto_plot_gate3.list <- function(gate,
                     gate_fill = gate_fill,
                     gate_fill_alpha = gate_fill_alpha)
     
-  }, gate,
+  }, gt,
   gate_line_type,
   gate_line_width,
   gate_line_col,
