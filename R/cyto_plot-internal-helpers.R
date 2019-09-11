@@ -1974,6 +1974,9 @@
 
 #' Get dimensions of labels for cyto_plot_label
 #'
+#' Labels should already contain statistic as well. Co-ordiante for each label
+#' must already be computed.
+#'
 #' @importFrom graphics strwidth strheight
 #'
 #' @return upper left and bottom right x and y co-ordinates of labels
@@ -1982,54 +1985,45 @@
 #'
 #' @noRd
 .cyto_plot_label_dims <- function(text,
-                                  stat = NA,
-                                  box_x,
-                                  box_y = NA,
+                                  text_x,
+                                  text_y = NA,
                                   text_size = 1,
-                                  bg = ifelse(match(par("bg"), "transparent", 0),
-                                    "white", par("bg")
-                                  ),
                                   xpad = 1.2,
                                   ypad = 1.2,
-                                  adj = 0.5,
-                                  alpha.bg = 0.5, ...) {
+                                  adj = 0.5, ...) {
 
-  # Get parameters for reset after calculation
-  cex_reset <- par("cex")
-  xpd_reset <- par("xpd")
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # RESET CEX & XPD
+  old_pars <- par(c("cex","xpd"))
+  on.exit(par(old_pars))
 
+  # SET CEX & XPD
   par(cex = text_size)
   par(xpd = TRUE)
 
-  if (all(is.na(box_y))) {
-    box_y <- box_x
-  }
-  box.adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
+  # LABEL DIMENSIONS -----------------------------------------------------------
 
-  # Rectangle dimensions
-  if (.all_na(stat)) {
-    lwidths <- strwidth(text)
-  } else {
-    lwidths <- max(strwidth(text), strwidth("stats %")) # stat will take up space
-  }
-  rwidths <- lwidths * (1 - box.adj)
-  lwidths <- lwidths * box.adj
+  # BOX ADJUSTMENT
+  box_adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
+
+  # BOX DIMENSIONS
+  lwidths <- strwidth(text)
+  rwidths <- lwidths * (1 - box_adj)
+  lwidths <- lwidths * box_adj
   bheights <- theights <- strheight(text) * 0.5
 
-  # Rectangle co-ordinates
-  xr <- box_x - lwidths * xpad
-  xl <- box_x + lwidths * xpad
+  # BOX X COORDS
+  xr <- text_x - lwidths * xpad
+  xl <- text_x + lwidths * xpad
 
-  # y co-ordinates must make space for stat
-  if (is.na(stat)) {
-    yb <- box_y - bheights * ypad
-    yt <- box_y + theights * ypad
-  } else {
-    yb <- box_y - bheights * ypad * 2
-    yt <- box_y + theights * ypad * 2
-  }
+  # BOX Y COORDS
+  yb <- text_y - bheights * ypad
+  yt <- text_y + theights * ypad
 
-  # Return top left then bottom right co-ordinates
+  # LABEL DIMENSIONS MATRIX ----------------------------------------------------
+  
+  # MATRIX - TOP LEFT THEN BOTTOM RIGHT
   coords <- matrix(c(
     min(c(xl, xr)),
     max(c(yb, yt)),
@@ -2041,22 +2035,19 @@
   )
   colnames(coords) <- c("x", "y")
 
-  # Reset par(cex)
-  par(cex = cex_reset)
-  par(xpd = xpd_reset)
-
+  # RETURN LABEL DIMENSIONS ----------------------------------------------------
   return(coords)
+  
 }
 
 # LABEL OVERLAP ----------------------------------------------------------------
 
 #' Check if any cyto_plot labels overlap
 #'
-#' @param x list containing the x and y coordinates defining rectangles of plot
-#' labels
+#' @param x list of label dimensions.
 #'
 #' @return list of length x. Each element compares the label to all others and
-#' returns TRUE is any overlap is detected. NA is returned when comparing the
+#' returns TRUE if any overlap is detected. NA is returned when comparing the
 #' same label co-ordinates.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -2104,106 +2095,97 @@
   return(overlaps)
 }
 
-# LABEL POSITIONS --------------------------------------------------------------
+# LABEL OFFSET --------------------------------------------------------------
 
-#' Compute non-overlapping label locations for cyto_plot
+#' Offset overlapping labels
 #'
-#' @param gate list of gate objects to be labelled.
-#' @param channels names of channel(s) used to construct the plot.
-#' @param text vector of character strings to use in labels.
-#' @param text_size vector of integers for character expansion.
+#' Label co-ordinates must be pre-calculated. This function checks for
+#' overlapping labels given co-ordinates and offsets these co-ordinates
+#' accordingly.
 #'
-#' @return list containing adjusted x and y coordinates for labels if any
-#'   overlap is detected.
-#'
-#' @importFrom stats na.omit
+#' @param text text to be included in the labels, must contain statistic if
+#'   desired.
+#' @param text_x vector of x co-ordinates for labels.
+#' @param text_y vector of y co-ordinates for labels.
+#' @param text_size vector of numerics to control the size of the text in each
+#'   label. \code{text_size} is required to compute the dimensions of each of
+#'   the labels.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.cyto_plot_label_position <- function(gate,
-                                      channels,
-                                      text,
-                                      text_x = NA,
-                                      text_y = NA,
-                                      stat,
-                                      text_size) {
-
-  # CHECKS ---------------------------------------------------------------------
+.cyto_plot_label_offset <- function(text,
+                                    text_x,
+                                    text_y,
+                                    text_size){
   
-  # Invalid gate objects
-  if (!inherits(x, "list")) {
-    stop("'x' should be a list of gate objects.")
-  }
-
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
-  xylim <- par("usr")
-  xmin <- xylim[1]
-  xmax <- xylim[2]
-  xrange <- xmax - xmin
-  ymin <- xylim[3]
-  ymax <- xylim[4]
-  yrange <- ymax- ymin
+  # PLOT LIMITS
+  lims <- par("usr")
+  ymin <- lims[3]
+  ymax <- lims[4]
+  yrng <- ymax - ymin
+  ypad <- (yrng - yrng / 1.04) / 2
+  ymin <- ymin + ypad
+  ymax <- ymax - ypad
+  yrng <- ymax - ymin
   
-  # ARGUMENTS ------------------------------------------------------------------
+  # LABEL CO-ORDINATE MATRIX ---------------------------------------------------
   
-  # TEXT_SIZE
-  text_size <- rep(text_size, length.out = length(gate))
+  # MATRIX
+  text_xy <- matrix(c(text_x, text_y),
+                    ncol = 2,
+                    byrow = FALSE)
+  colnames(text_xy) <- c("x", "y")
   
-  # STAT
-  stat <- rep(stat, length.out = length(gate))
+  # LABEL DIMENSIONS -----------------------------------------------------------
   
-  # GATE CENTERS ---------------------------------------------------------------
+  # COMPUTE LABEL DIMENSIONS
+  label_dims <- mapply(function(text,
+                                text_x,
+                                text_y,
+                                text_size){
+    
+    .cyto_plot_label_dims(text = text,
+                          text_x = text_x,
+                          text_y = text_y,
+                          text_size = text_size)
+    
+  },
+  text,
+  text_x,
+  text_y,
+  text_size,
+  SIMPLIFY = FALSE)
   
-  # SINGLE GATE - NO OFFSETTING REQUIRED
-  if(length(gate) == 1){
-    # CENTER
-    label_text_xy <- .cyto_plot_label_center(gate,
-                                             channels = channels,
-                                             text_x = text_x,
-                                             text_y = text_y)
-    return(label_text_xy)
-  # MULTIPLE GATES - OFFSETTING REQUIRED
-  }else if(length(gate) > 1){
-    # CENTERS
-    label_text_xy <- .cyto_plot_label_center(gate,
-                                             channels = channels,
-                                             text_x = text_x,
-                                             text_y = text_y)
-    # LABEL DIMENSIONS
-    label_dims <- lapply(seq_len(length(gate)), function(z) {
-      .cyto_plot_label_dims(
-        text = text[z],
-        stat = stat[z],
-        box_x = label_text_xy["x", ][z],
-        box_y = label_text_xy["y", ][z],
-        text_size = text_size[z]
-      )
+  # LABEL OVERLAP --------------------------------------------------------------
+  
+  # OVERLAPPING LABELS PRESENT?
+  label_overlap <- any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))
+  
+  # LABEL OFFSET ---------------------------------------------------------------
+  
+  # COMPUTE OFFSET LABEL Y CO-ORDINATES
+  if(label_overlap){
+    # LABEL HEIGHT
+    label_height <- LAPPLY(label_dims, function(z){
+      max(z[, "y"]) - min(z[, "y"])
     })
-    # LABEL OFFSETTING
-    if (any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))) {
-      if (!.all_na(stat)) {
-        text <- paste(text, "\n")
-      }
-      
-      # Use spread.labs TeachingDemos to offset y values
-      label_height <- max(label_dims[[1]][, "y"]) -
-        min(label_dims[[1]][, "y"])
-      label_height <- label_height + 0.18 * label_height
-      # not perfect but users can manually "select" locations now
-      label_text_xy["y", ] <- .spread.labels(label_text_xy["y", ],
-                                      mindiff = label_height,
-                                      min = ymin + 0.05 * yrange,
-                                      max = ymax - 0.05 * yrange
-      )
-    }
-    return(label_text_xy)
+    # USE MAX LABEL HEIGHT
+    label_height <- max(label_height)
+    # EXTRA BUFFERING
+    label_height <- 1.18 * label_height
+    # OFFSET Y COORDS
+    text_xy[, "y"] <- .spread.labels(text_xy[, "y"],
+                                     mindiff = label_height,
+                                     min = ymin,
+                                     max = ymax)
   }
 
+  # RETURN OFFSET LABEL CO-ORDINATES -------------------------------------------
+  
+  # RETURN LABEL CO-ORDINATE MATRIX
+  return(text_xy)
+  
 }
-
-
-
-
-
