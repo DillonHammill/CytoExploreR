@@ -7,7 +7,7 @@
 \usage{
 cyto_plot_empty(x, ...)
 
-\method{cyto_plot_empty}{flowFrame}(x, y, channels, axes_trans = NA,
+\method{cyto_plot_empty}{flowFrame}(x, channels, axes_trans = NA,
   overlay = NA, xlim = NA, ylim = NA, limits = "machine", title,
   xlab, ylab, density_modal = TRUE, density_smooth = 1.5,
   density_stack = 0.5, density_fill = NA, density_fill_alpha = 1,

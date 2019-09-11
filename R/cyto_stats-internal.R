@@ -431,7 +431,7 @@
                        channels = NULL,
                        trans = NULL,
                        gate = NA,
-                       density_smooth = 1.5){
+                       density_smooth = 0.6){
   
   # Throw error for invalid object
   if(!inherits(x, "flowFrame")){

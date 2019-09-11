@@ -2042,13 +2042,11 @@
 
 # LABEL OVERLAP ----------------------------------------------------------------
 
-#' Check if any cyto_plot labels overlap
+#' Check if any cyto_plot labels overlap.
 #'
 #' @param x list of label dimensions.
 #'
-#' @return list of length x. Each element compares the label to all others and
-#' returns TRUE if any overlap is detected. NA is returned when comparing the
-#' same label co-ordinates.
+#' @return TRUE or FALSE based on whether any overlapping labels are found.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -2056,10 +2054,10 @@
 .cyto_plot_label_overlap <- function(x) {
 
   # For each rectangle in x
-  overlaps <- lapply(seq_len(length(x)), function(y) {
+  overlaps <- LAPPLY(seq_len(length(x)), function(y) {
 
     # Check if other rectangles overlap
-    LAPPLY(seq_len(length(x)), function(z) {
+    LAPPLY(seq_len(length(x))[-y], function(z) {
 
       # Co-ordinates of reference label
       x1 <- x[[y]][, "x"]
@@ -2068,11 +2066,6 @@
       # Co-ordinates of comparison label
       x2 <- x[[z]][, "x"]
       y2 <- x[[z]][, "y"]
-
-      # Return NA for same label
-      if (z == y) {
-        return(NA)
-      }
 
       # X co-ordinates are overlapping
       if (min(x2) >= min(x1) & min(x2) <= max(x1) |
@@ -2092,7 +2085,8 @@
     })
   })
 
-  return(overlaps)
+  # RETURN TRUE OR FALSE
+  return(any(overlaps))
 }
 
 # LABEL OFFSET --------------------------------------------------------------
@@ -2158,16 +2152,11 @@
   text_y,
   text_size,
   SIMPLIFY = FALSE)
-  
-  # LABEL OVERLAP --------------------------------------------------------------
-  
-  # OVERLAPPING LABELS PRESENT?
-  label_overlap <- any(na.omit(unlist(.cyto_plot_label_overlap(label_dims))))
-  
+
   # LABEL OFFSET ---------------------------------------------------------------
   
   # COMPUTE OFFSET LABEL Y CO-ORDINATES
-  if(label_overlap){
+  if(.cyto_plot_label_overlap(label_dims)){
     # LABEL HEIGHT
     label_height <- LAPPLY(label_dims, function(z){
       max(z[, "y"]) - min(z[, "y"])

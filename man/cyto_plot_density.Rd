@@ -14,9 +14,8 @@ cyto_plot_density(x, ...)
   density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black")
 
-\method{cyto_plot_density}{list}(x, density_modal = TRUE,
-  density_stack = 0.5, density_cols = NA, density_fill = NA,
-  density_fill_alpha = 1, density_line_type = 1,
+\method{cyto_plot_density}{list}(x, density_cols = NA,
+  density_fill = NA, density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black", ...)
 }
 \arguments{
@@ -51,6 +50,8 @@ lines by default.}
 \item{density_line_width}{line width for border.}
 
 \item{density_line_col}{colour(s) for border line, set to "black" by default.}
+
+\item{x}{list of density objects for plotting}
 }
 \description{
 Add density distributions to empty plots

@@ -31,8 +31,7 @@
 modified gate object with appropriate dimensions.
 }
 \description{
-Useful function to convert between 1D and 2D gates once a new plot has been
-called.
+Useful function to convert between 1D and 2D gate objects.
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

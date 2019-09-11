@@ -1213,7 +1213,7 @@ cyto_gate_convert.rectangleGate <- function(x,
     }else if(length(chans) == 2 & ! any(chans %in% channels)){
       stop("Supplied gate must contain co-ordinates in the supplied channels.")
     # 1D GATE IN 2D PLOT - CORRECT CHANNEL
-    }if(length(chans) == 1 & chans %in% channels){
+    }else if(length(chans) == 1 & chans %in% channels){
       # FITERID
       ID <- x@filterId
       # COORDS - MISSING CHANNEL
