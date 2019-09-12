@@ -44,16 +44,11 @@
   fr <- x
 
   # TICKS - 10^-5 -> 10^5
-  tcks <- c(-seq(200000, 100000, -100000),
-            -seq(90000, 10000, -10000),
-            -seq(9000, 1000, -1000),
-            -seq(900, 100, -100),
-            -seq(90, 10, -10),
-            seq(0, 90, 10),
-            seq(100, 900, 100),
-            seq(1000, 9000, 1000),
-            seq(10000, 90000, 10000),
-            seq(100000, 200000, 100000))
+  tcks <- c(sort(LAPPLY(c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000), 
+                   function(z){-seq(90, 10, -10)*z})),
+            0,
+            LAPPLY(c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000),
+                   function(z){seq(10, 90, 10) * z}))
   
   # LABELS - 10^-5 -> 10^5
   lbls <- .cyto_plot_axes_labels(tcks)
@@ -634,59 +629,6 @@
   }
 
   return(args[["point_cols"]])
-}
-
-# GATES ------------------------------------------------------------------------
-
-#' Check gate object supplied to cyto_plot
-#'
-#' @param gate gate object(s) to add to plot.
-#' @param smp number of samples
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @noRd
-.cyto_gate_check <- function(gate, smp) {
-
-  # A single gate supplied
-  if (inherits(gate, "rectangleGate") |
-    inherits(gate, "polygonGate") |
-    inherits(gate, "ellipsoidGate")) {
-    gate <- rep(list(list(gate)), smp)
-
-    # A filters object supplied
-  } else if (inherits(gate, "filters")) {
-    gate <- rep(list(filters), smp)
-
-    # A list of gate objects
-  } else if (inherits(gate, "list")) {
-
-    # List of individual gates
-    if (all(LAPPLY(gate, class) %in%
-      c("rectangleGate", "polygonGate", "ellipsoidGate"))) {
-
-      # Assume 1 gate per sample
-      if (length(gate) == smp) {
-        gate <- lapply(gate, "list")
-
-        # Assume list contains gates for each sample
-      } else {
-        gate <- rep(list(gate), smp)
-      }
-
-      # List of filters objects
-    } else if (all(LAPPLY(gate, class) == "filters")) {
-
-      # Assume 1 filters object per sample
-      gate <- rep(gate, length.out = smp)
-    }
-
-    # filtersList
-  } else if (inherits(gate, "filtersList")) {
-    gate <- gate
-  }
-
-  return(gate)
 }
 
 # LAYOUT -----------------------------------------------------------------------
