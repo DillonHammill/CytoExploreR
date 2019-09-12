@@ -2105,6 +2105,8 @@
 #'   label. \code{text_size} is required to compute the dimensions of each of
 #'   the labels.
 #'
+#' @importFrom graphics par
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
