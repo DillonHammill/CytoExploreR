@@ -10,40 +10,37 @@
   options("locatorBell" = FALSE)
   
   # Select active gatingTemplate
-  options("CytoRSuite_gatingTemplate" = NULL)
+  options("CytoExploreR_gatingTemplate" = NULL)
   
   # Bypass working directory checks for external files
-  options("CytoRSuite_wd_check" = TRUE)
+  options("CytoExploreR_wd_check" = TRUE)
   
   # Signal when gate_draw has been called - turn off overlay sampling
-  options("CytoRSuite_cyto_gate_draw" = FALSE)
+  options("cyto_gate_draw" = FALSE)
   
   # Signals args called to cyto_plot - check if call is made twice
-  options("CytoRSuite_cyto_plot_call" = NULL)
+  options("cyto_plot_call" = NULL)
   
   # Create custom theme for cyto_plot
-  options("CytoRSuite_cyto_plot_theme" = NULL)
+  options("cyto_plot_theme" = NULL)
   
   # Signal cyto_plot_save method has been called
-  options("CytoRSuite_cyto_plot_save" = FALSE)
+  options("cyto_plot_save" = FALSE)
   
   # Signal which cyto_plot method has been called
-  options("CytoRSuite_cyto_plot_method" = NULL)
+  options("cyto_plot_method" = NULL)
   
   # Signal if a custom plot is being contructed - require cyto_plot_complete
-  options("CytoRSuite_cyto_plot_custom" = FALSE)
+  options("cyto_plot_custom" = FALSE)
   
   # Signal when cyto_plot_grid method is being called
-  options("CytoRSuite_cyto_plot_grid" = FALSE)
+  options("cyto_plot_grid" = FALSE)
   
   # Signal previous call to cyto_plot (same plot?)
-  options("CytoRSuite_cyto_plot_call" = NULL)
-  
-  # Save gates as list
-  options("CytoRSuite_cyto_plot_gates" = NULL)
+  options("cyto_plot_call" = NULL)
   
   # Save label co-ordinates as list
-  options("CytoRSuite_cyto_plot_labels" = NULL)
+  options("cyto_plot_label_coords" = NULL)
   
   # Register gating and preprocessing functions with openCyto
   openCyto::registerPlugins(fun = .gate_manual, 
