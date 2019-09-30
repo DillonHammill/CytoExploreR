@@ -2,18 +2,75 @@
 % Please edit documentation in R/cyto_plot_contour-methods.R
 \name{cyto_plot_contour}
 \alias{cyto_plot_contour}
-\title{Contour Lines for cyto_plot}
+\alias{cyto_plot_contour.flowFrame}
+\alias{cyto_plot_contour.flowSet}
+\alias{cyto_plot_contour.list}
+\title{Add contour lines to cyto_plot}
 \usage{
 cyto_plot_contour(x, ...)
+
+\method{cyto_plot_contour}{flowFrame}(x, channels, contour_lines = 15,
+  contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", contour_line_alpha = 1)
+
+\method{cyto_plot_contour}{flowSet}(x, channels, contour_lines = 15,
+  contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", contour_line_alpha = 1)
+
+\method{cyto_plot_contour}{list}(x, channels, contour_lines = 15,
+  contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", contour_line_alpha = 1)
 }
 \arguments{
-\item{x}{object to use for contour lines to overlay onto an existing
-cyto_plot.}
+\item{x}{either an object of class
+\code{\link[flowCore:flowFrame-class]{flowFrame}}, or
+\code{\link[flowCore:flowSet-class]{flowSet}} or a list of
+\code{\link[flowCore:flowFrame-class]{flowFrame}} objects.}
 
-\item{...}{additional method-specific arguments}
+\item{channels}{channels used to construct the existing cyto_plot.}
+
+\item{contour_lines}{numeric indicating the number of levels to use for
+contour lines, set to 15 by default.}
+
+\item{contour_line_type}{type of line to use for contour lines, set to 1 by
+default.}
+
+\item{contour_line_width}{line width for contour lines, set to 1 by default.}
+
+\item{contour_line_col}{colour to use for contour lines, set to "black" by
+default.}
+
+\item{contour_line_alpha}{numeric [0,1] to control transparency of contour
+lines, set to 1 by default to remove transparency.}
 }
 \description{
-Contour Lines for cyto_plot
+Add contour lines to cyto_plot
+}
+\examples{
+library(CytoRSuiteData)
+
+# Load in Samples
+fs <- Activation
+
+# Apply compensation
+fs <- compensate(fs, fs[[32]]@description$SPILL)
+
+# Transform fluorescent channels
+trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
+fs <- transform(fs, trans)
+
+# Plot
+cyto_plot(fs[[32]],
+  channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
+  axes_trans = trans
+)
+
+# Contour lines
+cyto_plot_contour(fs[[32]],
+  channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
+  contour_lines = 20
+)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
