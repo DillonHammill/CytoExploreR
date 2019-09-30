@@ -322,9 +322,9 @@
                   # UNIMODAL - 50% RANGE
                   if(abs(diff(rng)) <= 0.6*xrng){
                     text_x[ind] <<- quantile(rng, 0.5)
-                  # UMULTIMODAL - 57% RANGE
+                  # UMULTIMODAL - 56% RANGE
                   }else{
-                    text_x[ind] <<-quantile(rng, 0.57)
+                    text_x[ind] <<-quantile(rng, 0.56)
                   }
                 }
               }
@@ -353,9 +353,9 @@
                 # UNIMODAL - 50% RANGE
                 if(abs(diff(rng)) <= 0.6 * xrng){
                   text_x[ind] <<- quantile(rng, 0.5)
-                  # MULTIMODAL - 57% RANGE
+                  # MULTIMODAL - 56% RANGE
                 }else{
-                  text_x[ind] <<-quantile(rng, 0.57)
+                  text_x[ind] <<-quantile(rng, 0.56)
                 }
               }
             }
