@@ -3,11 +3,19 @@
 #' Add labels to cyto_plot
 #'
 #' Interactively label existing plots with boxed labels containing text and
-#' statistics.
+#' statistics. \code{cyto_plot_label} can only label the last plot and can only
+#' add labels on a per sample basis (i.e. single layer only). Locations for each
+#' label must be manually selected. More complex labelling can be acheived
+#' directly through \code{cyto_plot}.
 #'
-#' @param x object of class \code{"flowFrame"}.
+#' @param x object of class \code{flowFrame}.
+#' @param parent name of the parent population to extract when a
+#'   \code{GatingHierarchy} object is supplied.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
+#' @param alias name of teh gated populations to label when a GatingHierarchy
+#'   object is supplied. This is equivalent to the \code{gate} argument for
+#'   \code{flowFrame} objects.
 #' @param gate object of class
 #'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
 #'   \code{\link[flowCore:polygonGate-class]{polygonGate}},
@@ -26,9 +34,9 @@
 #' @param label_text_y vector containing the x co-ordinates for the plot labels.
 #'   Label positions can be interactively selected if no co-ordinates are
 #'   manually supplied.
-#' @param trans object of class
-#'   \code{\link[flowWorkspace]{transformerList}} which was used to
-#'   transform the fluorescent channels of the supplied flowFrame.
+#' @param trans object of class \code{\link[flowWorkspace]{transformerList}}
+#'   which was used to transform the fluorescent channels of the supplied
+#'   flowFrame.
 #' @param negate logical indicating whether a label should be included for the
 #'   neagted population (i.e. events outside the gate). Set to FALSE by default
 #'   to only calculate statistics for events within the gate.
@@ -93,26 +101,218 @@
 #'   label_text_y = 25,
 #'   label_fill = "red"
 #' )
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
+#' @name cyto_plot_label
+NULL
+
+#' @noRd
 #' @export
-cyto_plot_label <- function(x,
-                            channels = NULL,
-                            trans = NA,
-                            display = 1,
-                            gate = NA,
-                            negate = FALSE,
-                            label_text = NA,
-                            label_stat = NA,
-                            label_text_x = NA,
-                            label_text_y = NA,
-                            label_text_font = 2,
-                            label_text_size = 0.8,
-                            label_text_col = "black",
-                            label_fill = "white",
-                            label_fill_alpha = 0.6,
-                            density_smooth = 0.6){
+cyto_plot_label <- function(x, ...){
+  UseMethod("cyto_plot_label")
+}
+
+#' @rdname cyto_plot_label
+#' @export
+cyto_plot_label.GatingHierarchy <- function(x,
+                                            parent,
+                                            alias = NA,
+                                            channels = NULL,
+                                            display = 1,
+                                            gate = NA,
+                                            negate = NA,
+                                            label_text,
+                                            label_stat,
+                                            label_text_x = NA,
+                                            label_text_y = NA,
+                                            label_text_font = 2,
+                                            label_text_size = 0.8,
+                                            label_text_col = "black",
+                                            label_fill = "white",
+                                            label_fill_alpha = 0.6,
+                                            density_smooth = 0.6, ...){
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # PARENT
+  if(missing(parent)){
+    stop("Supply the name of the parental population to label.")
+  }
+  
+  # CHANNELS
+  if(is.null(channels)){
+    stop("Supply the names of the channel(s) used to construct the plot.")
+  }
+  
+  # EXTRACT DATA FROM GATINGHIERARCHY ------------------------------------------
+  
+  # PARENTAL FLOWFRAME
+  fr <- cyto_extract(x, parent)
+  
+  # TRANSFORMATIONS
+  if(length(x@transformation) != 0){
+    trans <- x@transformation
+  }else{
+    trans <- NA
+  }
+  
+  # EXTRACT GATE(S) ------------------------------------------------------------
+  
+  # EMPTY ALIAS - EXTRACT ALIAS IN SUPPLIED CHANNEL(S)
+  if (.empty(alias)) {
+    # Plot all appropriate gates if alias is an empty character string
+    if (all(alias == "")) {
+      gt <- templateGen(x)
+      gt <- gt[basename(gt$parent) == parent, ]
+      
+      # Match both channels for 2D plots
+      if (length(channels) == 2) {
+        alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+        
+      # At least 1 channel match
+      } else if (length(channels) == 1) {
+        ind <- lapply(gt$dims, function(z) {
+          grep(channels, z)
+        })
+        ind <- LAPPLY(ind, "length") != 0
+        alias <- gt$alias[ind]
+      }
+      
+      # No gates constructed in the supplied channels
+      if (length(alias) == 0) {
+        alias <- NA
+      }
+    }
+  }
+  
+  # ALIAS MULTIPLE POPULATIONS - QUADGATE
+  if(!.all_na(alias)){
+    alias <- LAPPLY(alias, function(z){
+      if(grepl(",", z)){
+        strsplit(z, ",")[[1]]
+      }
+    })
+  }
+  
+  # EXTRACT GATE(S)
+  if (!.all_na(alias)) {
+    # POPULATIONS
+    PNS <- length(alias)
+    # EXTRACT GATE
+    gate <- LAPPLY(seq_len(PNS), function(z) {
+      # GATE
+      gt <- getGate(x, paste(parent, alias[z], sep = "/"))
+      # BOOLEANFILTER - SUPPORT NEGATED & FILTERS
+      if(is(gt, "booleanFilter")){
+        # BOOLEAN LOGIC -  !ALIAS1&!ALIAS2&!ALIAS3
+        bool <- gt@deparse
+        # POPULATIONS SEPARATED BY & (!ALIAS 1 !ALIAS2 ...)
+        bool_split <- strsplit(bool, "&")[[1]]
+        # SUPPORTED BOOLEANFILTER
+        if(all(grepl("!", bool_split)) &
+           all(substring(bool_split, 2) %in% cyto_nodes(x, path  = "auto"))){
+          # UPDATE ALIAS - MUST CONTAIN REFERENCE POPULATIONS
+          alias <<- c(substring(bool_split, 2),
+                      alias[z])
+          # GATE
+          gt <- LAPPLY(alias[-length(alias)], function(z){
+            getGate(x, paste(parent, z, spe = "/"))
+          })
+          # SET NEGATE TO TRUE
+          negate <<- TRUE
+        }else{
+          message("Skipping unsupported booolean gates...")
+          gt <- NA
+        }
+      }
+      return(gt)
+    })
+    names(gate) <- alias
+  }
+
+  # LIST OF UNIQUE GATE OBJECTS
+  if(!.all_na(gate)){
+    cyto_gate_prepare(gate, channels)
+  }
+
+  # NEGATE
+  if(!.all_na(gate)){
+    # ALL NEGATED GATES - SET NEGATE TO TRUE
+    if(all(lapply(gate, function(z){flowWorkspace:::isNegated(z)})))
+      # NEGATE NOT SPECIFIED
+      if(missing(negate)){
+        negate <- TRUE
+      }
+  }
+  
+  # PREPARE LABEL ARGUMENTS ----------------------------------------------------
+  
+  # LABEL_TEXT
+  if(missing(label_text)){
+    # GATE FILTERID - ALIAS & FILTERID SHOULD MATCH
+    if(!.all_na(gate)){
+      label_text <- LAPPLY(gate, function(z){z@filterId})
+    # NO LABEL_TEXT
+    }else{
+      label_text <- NA
+    }
+  }
+  
+  # LABEL_STAT
+  if(missing(label_stat)){
+    # GATE
+    if(!.all_na(gate)){
+      label_stat <- rep("freq", length(alias))
+    # NO GATE
+    }else{
+      label_stat <- NA
+    }
+  }
+  
+  # CALL FLOWFRAME METHOD ------------------------------------------------------
+  
+  # RETAIN LABEL CO-ORDINATES
+  label_text_xy <- cyto_plot_label(x = fr,
+                                   channels = channels,
+                                   trans = trans,
+                                   display = display,
+                                   gate = gate,
+                                   negate = negate,
+                                   label_text = label_text,
+                                   label_stat = label_stat,
+                                   label_text_x = label_text_x,
+                                   label_text_y = label_text_y,
+                                   label_text_font = label_text_font,
+                                   label_text_size = label_text_size,
+                                   label_text_col = label_text_col,
+                                   label_fill = label_fill,
+                                   label_fill_alpha = label_fill_alpha,
+                                   density_smooth = density_smooth)
+  
+  # RETURN LABEL CO-ORDINATES
+  invisible(label_text_xy)
+  
+}
+
+#' @rdname cyto_plot_label
+#' @export
+cyto_plot_label.flowFrame <- function(x,
+                                      channels = NULL,
+                                      trans = NA,
+                                      display = 1,
+                                      gate = NA,
+                                      negate = FALSE,
+                                      label_text = NA,
+                                      label_stat = NA,
+                                      label_text_x = NA,
+                                      label_text_y = NA,
+                                      label_text_font = 2,
+                                      label_text_size = 0.8,
+                                      label_text_col = "black",
+                                      label_fill = "white",
+                                      label_fill_alpha = 0.6,
+                                      density_smooth = 0.6, ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -126,29 +326,16 @@ cyto_plot_label <- function(x,
     x <- cyto_sample(x, display = display, seed = 56)
   }
   
-  # STATISTIC- CHECK & SUPPORT
+  # STATISTIC
   if(!.all_na(label_stat)){
-    # CONVERT TO VALID STATISTIC
-    label_stat <- LAPPLY(label_stat, function(z){
-      .cyto_stat_check(z)
-    })
-    # STATISTICS 2D PLOT
-    if(length(channels == 2)){
-      # COUNT ONLY - 2D PLOT WITHOUT GATE
-      if(.all_na(gate)){
-        if(!.all(label_stat == "count")){
-          stop("Only 'count' is supported for 2D plots without gates.")
-        }
-      # COUNT & FREQ - 2D PLOT
-      }else{
-        if(!all(label_stat %in% c("count","freq"))){
-          stop("Only 'count' and 'freq' are supported in 2D plots.")
-        }
-      }
-    }
-    # FREQ - MUST HAVE GATE
-    if(any(label_stat == "freq") & .all_na(gate)){
-      stop("Supply gate objects to 'gate' to calculate frequency.")
+    # VALID STATISTICS
+    label_stat <- LAPPLY(label_stat, ".cyto_stat_check")
+    # SUPPORTED STATISTICS
+    if(length(channels) == 2 & 
+       !all(label_stat %in% c("count","freq"))){
+      message("Only frequency and count statistics are supported in 2D plots")
+      # REPLACE WITH NA
+      label_stat[!label_stat %in% c("count", "freq")] <- NA
     }
   }
 
@@ -167,56 +354,13 @@ cyto_plot_label <- function(x,
   
   # LIST OF GATE OBJECTS
   if(!.all_na(gate)){
-    if (!inherits(gate, "list")) {
-      if (inherits(gate, "rectangleGate") |
-          inherits(gate, "polygonGate") |
-          inherits(gate, "ellipsoidGate") |
-          inherits(gate, "quadGate")) {
-        gate <- list(gate)
-      } else if (inherits(gate, "filters")) {
-        gate <- unlist(gate)
-      }
-    } else {
-      gate <- unlist(gate)
-    }
-  }
-  
-  # CONVERT GATE - DIMENSIONS
-  if(!.all_na(gate)){
-    gate <- cyto_gate_convert(gate, channels = channels)
+    gate <- cyto_gate_prepare(gate, channels)
   }
   
   # POPULATIONS TO LABEL -------------------------------------------------------
   
-  # APPLY GATE
-  if(!.all_na(label_stat)){
-    # GATE SUPPLIED
-    if(!.all_na(gate)){
-      # QUADGATE - NEGATE NOT SUPPORTED
-      if(all(LAPPLY(gate, "class") == "quadGate")){
-        # GATED POPULATIONS X4
-        pops <- split(x, gate[[1]])
-      # LIST OF GATE OBJECTS - NEGATE SUPPORTED
-      }else{
-        # GATED POPULATIONS
-        pops <- lapply(gate, function(z){
-          Subset(x, z)
-        })
-        # NEGATED POPULATION
-        if(negate == TRUE){
-          gate_filter <- do.call("|", gate)
-          pops <- c(pops,
-                    list(split(x, gate_filter)[[2]]))
-        }
-      }
-    # NO GATE
-    }else{
-      pops <- list(x)
-    }
-  }
-  
   # POPULATIONS
-  PNS <- length(pops)
+  PNS <- .cyto_gate_count(gate)
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
@@ -254,41 +398,23 @@ cyto_plot_label <- function(x,
   
   # STATISTICS PER POPULATION --------------------------------------------------
   
-  # CALCULATE STATISTICS
-  if (!.all_na(label_stat)) {
-    st <- LAPPLY(pops, function(z) {
-      if (label_stat == "freq") {
-        sts <- .cyto_count(z) / .cyto_count(x) * 100
-        sts <- .round(sts, 2)
-        sts <- paste(sts, "%")
-      }else if(label_stat == "CV"){
-        sts <- .cyto_CV(z,
-                        channels = channels,
-                        trans = trans)
-        sts <- .round(sts, 2)
-        sts <- paste(sts, "%")
-      } else {
-        sts <- cyto_stats_compute(z,
-                                  channels = channels,
-                                  trans = trans,
-                                  stat = label_stat,
-                                  format = "long",
-                                  density_smooth = density_smooth
-        )
-        sts <- LAPPLY(sts[, ncol(sts)], function(x){.round(x, 2)})
-      }
-      return(sts)
-    })
-  } else {
-    st <- NA
-  }
+  # COMPUTE STATISTICS
+  label_stat <- .cyto_label_stat(x, 
+                                 gate = gate, 
+                                 negate = negate, 
+                                 label_stat = label_stat)
+  
+  # PREPARE LABEL_TEXT ---------------------------------------------------------
+  
+  # MERGE LABEL_TEXT & LABEL_STAT
+  label_text <- .cyto_label_text(label_text,
+                                 label_stat)
   
   # LABEL CONSTRUCTION ---------------------------------------------------------
   
   # MANUAL CO-ORDINATES - SUPPLIED OR SELECTED
   label_text_xy <- mapply(
     function(label_text,
-             st,
              label_text_x,
              label_text_y,
              label_text_font,
@@ -297,59 +423,38 @@ cyto_plot_label <- function(x,
              label_fill,
              label_fill_alpha) {
       
-      # Co-ordinates can be interactively selected
+      # SELECT MISSING CO-ORDINATES
       if (any(.all_na(c(label_text_x, label_text_y)))) {
-        message("Select a location on the plot the position the label.")
+        if(grepl("\n", label_text)){
+          txt <- paste(strsplit(label_text, "\n")[[1]], collapse = " ")
+        }else{
+          txt <- label_text
+        }
+        message(paste("Select a location on the plot the position the",
+                txt, "label."))
         label_text_xy <- locator(n = 1)
         label_text_x <- label_text_xy[[1]]
         label_text_y <- label_text_xy[[2]]
       }
       
-      # Add labels to plot
-      if (!.all_na(label_text) & !.all_na(label_stat)) {
-        .boxed.labels(
-          x = label_text_x,
-          y = label_text_y,
-          labels = paste(label_text, st, sep = "\n"),
-          border = FALSE,
-          font = label_text_font,
-          cex = label_text_size,
-          col = label_text_col,
-          bg = label_fill,
-          alpha.bg = label_fill_alpha
-        )
-      } else if (!.all_na(label_text) & .all_na(label_stat)) {
-        .boxed.labels(
-          x = label_text_x,
-          y = label_text_y,
-          labels = label_text,
-          border = FALSE,
-          font = label_text_font,
-          cex = label_text_size,
-          col = label_text_col,
-          bg = label_fill,
-          alpha.bg = label_fill_alpha
-        )
-      } else if (.all_na(label_text) & !.all_na(label_stat)) {
-        .boxed.labels(
-          x = label_text_x,
-          y = label_text_y,
-          labels = st,
-          border = FALSE,
-          font = label_text_font,
-          cex = label_text_size,
-          col = label_text_col,
-          bg = box_fill,
-          alpha.bg = box_alpha
-        )
-      }
+      # PLOT LABELS
+      .boxed.labels(
+        x = label_text_x,
+        y = label_text_y,
+        labels = label_text,
+        border = FALSE,
+        font = label_text_font,
+        cex = label_text_size,
+        col = label_text_col,
+        bg = label_fill,
+        alpha.bg = label_fill_alpha
+      )
       
       # RETURN LABEL CO-ORDINATES
-      return(c(label_text_X, label_text_y))
+      return(c(label_text_x, label_text_y))
       
     },
     label_text,
-    st,
     label_text_x,
     label_text_y,
     label_text_font,
@@ -372,379 +477,113 @@ cyto_plot_label <- function(x,
   
 }
 
-# .CYTO_PLOT_LABEL -------------------------------------------------------------
 
-# This internal function handles all the labelling within cyto_plot. It is
-# different to cyto_plot_label which labels by layer and expects user input to
-# position labels. The exported cyto_plot_label function is to be used to label
-# existing plots, and since it is impossible to know the y_max per layer for 1D
-# plots - automtic label locations cannot be computed. Here automatic label
-# positions can be calculated given internal access to all of cyto_plot
-# arguments.
+# CYTO_PLOT_LABEL2 -------------------------------------------------------------
 
-#' Internal cyto_plot_label function - used by cyto_plot
-#' @param x named list of cyto_plot arguments
-#' @importFrom graphics par
-#' @noRd
-.cyto_plot_label <- function(x){
-  
-  # INHERIT ARGUMENTS ----------------------------------------------------------
 
-  .args_update(x)
+#' Add labels to existing cyto_plot
+#'
+#' Convenient labelling function to add prepared text labels to an existing
+#' cyto_plot.
+#'
+#' @param label_text character string to include in the label.
+#' @param label_text_x vector containing the x co-ordinates for the plot labels.
+#'   Label positions can be interactively selected if no co-ordinates are
+#'   manually supplied.
+#' @param label_text_y vector containing the x co-ordinates for the plot labels.
+#'   Label positions can be interactively selected if no co-ordinates are
+#'   manually supplied.
+#' @param label_text_font integer [1,2,3,4] passed to \code{text} to alter the
+#'   font, set to \code{2} by default for a bold font.
+#' @param label_text_size numeric character expansion used to control the size
+#'   of the text in the labels, set to \code{0.8} by default. See \code{?text}
+#'   for details.
+#' @param label_text_col specify text colour in label for each gate, defaults to
+#'   \code{"black"} for all gates.
+#' @param label_fill fill colour to use for labels, set to "white" by default.
+#' @param label_fill_alpha numeric [0,1] controls the transparency of the fill
+#'   colour, set to \code{0.6} by default.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @export
+cyto_plot_labeller <- function(label_text = NA,
+                               label_text_x = NA,
+                               label_text_y = NA,
+                               label_text_font = 2,
+                               label_text_size = 0.8,
+                               label_text_col = "black",
+                               label_fill = "white",
+                               label_fill_alpha = 0.6){
   
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  # LABEL CONSTRUCTION ---------------------------------------------------------
   
-  # PLOT LIMITS
-  lims <- par("usr")
-  
-  # Y LIMITS
-  ymin <- lims[3]
-  ymax <- lims[4]
-  yrng <- ymax - ymin
-  ypad <- (yrng - yrng/1.04)/2   # DEFAULT 104% * ylim
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
-  yrng <- ymax - ymin
-  
-  # GENERAL --------------------------------------------------------------------
-  
-  # SAMPLES
-  SMP  <- length(fr_list)
-  
-  # GATES
-  if(!.all_na(gate)){
-    GTS <- length(gate)
-  }
-  
-  # NEGATE FILTER
-  if(negate == TRUE){
-    negate_filter <- do.call("|", gate)
-  }
-  
-  # LABEL_STAT
-  label_stat <- LAPPLY(label_stat, function(z){
-    if(.all_na(label_stat[z])){
-      return(NA)
-    }else{
-      .cyto_stat_check(stat[z])
-    }
-  })
-
-  # POPULATIONS TO LABEL -------------------------------------------------------
-  
-  # CYTO_PLOT ALWAYS WANTS TO LABEL EACH LAYER!
-  # 1D PLOT - UNSTACKED - UPPER LAYERS SWITCHED OFF (LABEL_TEXT & LABEL_STAT)
-  # 1D PLOT - STACKED - EACH LAYER IS LABELLED BY DEFAULT
-  # 2D PLOT - UPPER LAYERS ARE SWITCHED OFF (LABEL_TEXT = NA & LABEL_STAT = NA)
-  
-  # NUMBER OF LABELS PER LAYER
-  if(!.all_na(gate)){
-    L <- length(gate)
-    if(negate == TRUE){
-      L <- L + 1
-    }
-  }else if(.all_na(gate)){
-    L <- 1
-  }
-  
-  # TOTAL NUMBER OF LABELS
-  TL <- length(fr_list) * L
-  
-  # DEFAULT LABEL CO-ORDINATES - DENSITY ---------------------------------------
-  
-  # 1D PLOT
-  if(length(channels) == 1){
-    # Y_MAX PER LAYER
-    y_max <- strsplit(names(y)[1], "-")[2]
-    # NO STACKING
-    if(density_stack == 0){
-      y_coords <- rep(0.5 * yrng, SMP)
-    # CALCULATE Y STACKING
-    }else if(density_stack != 0){
-      # STACK LEVELS
-      stk <- lapply(seq(0, SMP, 1), function(z){
-        density_stack * y_max * z
-      })
-      # DEFAULT LABEL Y CO-ORDINATES
-      y_coords <- lapply(seq_len(SMP), function(z){
-        # HALFWAY BETWEEN HORIZONTAL LINES
-        0.5 * stk[(z + 1)]
-      })
-      # REPEAT LBLS TIMES (Y_COORDS/LAYER)
-      y_coords <- rep(y_coords, each = LBLS)
-    }
-  }  
-  
-  # SUPPORTED STATISTICS -------------------------------------------------------
-  
-  # 2D PLOTS - COUNT & FREQ ONLY
-  if(!.all_na(label_stat)){
-    if(length(channels) == 2 & !all(label_stat %in% c("count","freq"))){
-      message("Only frequency and count statistics are supported in 2D plots")
-      # REPLACE WITH NA
-      label_stat[!label_stat %in% c("count", "freq")] <- NA
-    }
-  }
-  
-  # LABEL_STAT & LABEL COORDS --------------------------------------------------
-  
-  # LABEL_STAT & LABEL_COORDS
-  lapply(seq_len(SMP), function(z){
-    # PARENTAL FLOWFRAME
-    fr <- fr_list[[z]]
-    # PER LABEL
-    lapply(seq_len(L), function(y){
-      # INDEX IN VECTOR
-      ind <- z * y
-      # GATING REQUIRED FOR LABEL_STAT
-      if(!.all_na(label_stat[ind])){
-        # GATED POPULATION
-        if(!.all_na(gate)){
-          # GATED POPULATION
-          if(L <= GTS){
-            pop <- Subset(fr, gate[[L]])
+  # MANUAL CO-ORDINATES - SUPPLIED OR SELECTED
+  label_text_xy <- mapply(
+    function(label_text,
+             label_text_x,
+             label_text_y,
+             label_text_font,
+             label_text_size,
+             label_text_col,
+             label_fill,
+             label_fill_alpha) {
+      
+      # MISSING LABEL
+      if(!.all_na(label_text)){
+        
+        # SELECT MISSING CO-ORDINATES
+        if (any(.all_na(c(label_text_x, label_text_y)))) {
+          if(grepl("\n", label_text)){
+            txt <- paste(strsplit(label_text, "\n")[[1]], collapse = " ")
           }else{
-            pop <- split(fr, negate_filter)[[2]]
+            txt <- label_text
           }
-        # NO GATE
-        }else{
-          pop <-fr
+          message(paste("Select a location on the plot the position the",
+                        txt, "label."))
+          label_text_xy <- locator(n = 1)
+          label_text_x <- label_text_xy[[1]]
+          label_text_y <- label_text_xy[[2]]
         }
-        # FREQUENCY STATISTIC
-        if(grepl("freq", label_stat[ind], ignore.case = TRUE)){
-          label_stat[ind] <<- .cyto_count(pop) / .cyto_count(fr) * 100
-          label_stat[ind] <<- paste(.round(label_stat[ind], 2), "%")
-        # CV STATISTIC
-        }else if(grepl("CV", label_stat[ind], ignore.case = TRUE)){
-          label_stat[ind] <<- .cyto_CV(pop,
-                                       channels = channels,
-                                       trans = axes_trans)
-          label_stat[ind] <<- paste(.round(label_stat[ind], 2), "%")
-        # OTHER STATISTIC
-        }else{
-          label_stat[ind] <<- cyto_stats_compute(pop,
-                                                 channels = channels,
-                                                 trans = axes_trans,
-                                                 stat = label_stat[ind],
-                                                 format = "long",
-                                                 density_smooth = density_smooth)
-        }
+        
+        # PLOT LABELS
+        .boxed.labels(
+          x = label_text_x,
+          y = label_text_y,
+          labels = label_text,
+          border = FALSE,
+          font = label_text_font,
+          cex = label_text_size,
+          col = label_text_col,
+          bg = label_fill,
+          alpha.bg = label_fill_alpha
+        )
+        
       }
-      # LABEL CO-ORDINATES
-      if(label_position == "auto"){
-        # 1D PLOT
-        if(length(channels) == 1){
-          # GATE
-          if(!.all_na(gate)){
-            # GATE CENTER - GATED POPULATION
-            if(L <= GTS){
-              # X COORD - GATE CENTER
-              label_coords <- .cyto_plot_label_center(
-                gate[[L]],
-                channels = channels,
-                text_X = label_text_x[ind],
-                text_y = label_text_y[ind]
-              )
-              label_text_x[ind] <<- label_coords[, "x"]
-              # Y COORD
-              if(.all_na(label_text_y[ind])){
-                label_text_y[ind] <<- y_coords[ind]
-              }
-            # MODE - NEGATED POPULATION
-            }else{
-              # X MODE
-              if(.all_na(label_text_x[ind])){
-                label_text_x[ind] <<- suppressMessages(
-                  .cyto_mode(pop,
-                             channels = channels,
-                             density_smooth = density_smooth)
-                )
-              }
-              # Y COORD
-              if(.all_na(label_text_y[ind])){
-                label_text_y[ind] <<- y_coords[ind]
-              }
-            }
-          # NO GATE
-          }else if(.all_na(gate)){
-            # X COORD - MODE
-            if(.all_na(label_text_x[ind])){
-              label_text_x[ind] <<- suppressMessages(
-                .cyto_mode(pop,
-                           channels = channels,
-                           density_smooth = density_smooth)
-              )
-            }
-            # Y COORD
-            if(.all_na(label_text_y[ind])){
-              label_text_y[ind] <<- y_coords[ind]
-            }
-          }
-        # 2D PLOT 
-        }else if(length(channels) == 2){
-          # GATE
-          if(!.all_na(gate)){
-            # GATED POPULATION - GATE CENTER
-            if(L <= GTS){
-              label_coords <- .cyto_plot_label_center(
-                gate[[L]],
-                channels = channels,
-                text_X = label_text_x[ind],
-                text_y = label_text_y[ind]
-              )
-              label_text_x[ind] <<- label_coords[, "x"]
-              label_text_y[ind] <<- label_coords[, "y"]
-            # NEGATED POPULATION - MODE
-            }else{
-              # X COORD - MODE
-              if(.all_na(label_text_x[ind])){
-                label_text_x[ind] <<- suppressMessages(
-                  .cyto_mode(pop,
-                             channels = channels[1],
-                             density_smooth = density_smooth)
-                )
-              }
-              # Y COORD - MODE
-              if(.all_na(label_text_y[ind])){
-                label_text_y[ind] <<- suppressMessages(
-                  .cyto_mode(pop,
-                             channels = channels[2],
-                             density_smooth = density_smooth)
-                )
-              }
-            }
-          # NO GATE
-          }else if(.all_na(gate)){
-            # X COORD - MODE
-            if(.all_na(label_text_x[ind])){
-              label_text_x[ind] <<- suppressMessages(
-                .cyto_mode(pop,
-                           channels = channels[1],
-                           density_smooth = density_smooth)
-              )
-            }
-            # Y COORD - MODE
-            if(.all_na(label_text_y[ind])){
-              label_text_y[ind] <<- suppressMessages(
-                .cyto_mode(pop,
-                           channels = channels[2],
-                           density_smooth = density_smooth)
-              )
-            }
-          }
-        }
-      }
-    })
-    # UPDATE LABEL_STAT
-    label_stat[seq_len(L) * z] <<- label_stat[seq_len(L) * z]
-    # UPDATE LABEL CO-ORDINATES
-    label_text_x[seq_len(L) * z] <<- label_text_x[seq_len(L) * z]
-    label_text_y[seq_len(L) * z] <<- label_text_y[seq_len(L) * z]
-  })
+      
+      # RETURN LABEL CO-ORDINATES
+      return(c(label_text_x, label_text_y))
+      
+    },
+    label_text,
+    label_text_x,
+    label_text_y,
+    label_text_font,
+    label_text_size,
+    label_text_col,
+    label_fill,
+    label_fill_alpha,
+    SIMPLIFY = FALSE
+  )
   
-  # PREPARE LABEL_TEXT ---------------------------------------------------------
+  # RETURN LABEL CO-ORDINATES --------------------------------------------------
   
-  # MERGE LABEL_TEXT & LABEL_STAT
-  lapply(seq_len(label_text), function(z){
-    # NO LABEL
-    if(.all_na(label_text[z]) & .all_na(label_stat[z])){
-      label_text[z] <<- NA
-    # NO LABEL_TEXT 
-    }else if(.all_na(label_text[z]) & !.all_na(label_stat[z])){
-      label_text[z] <<- paste(label_text[z], label_stat[z], sep = "\n")
-    # NO LABEL_STAT
-    }else if(!.all_na(label_text[z]) & .all_na(label_stat[z])){
-      label_text[z] <<- label_stat[z]
-    }
-  })
-    
-  # OFFSET LABEL CO-ORDINATES --------------------------------------------------
-  
-  # OFFSET LABELS IN EACH LAYER
-  # 2D OFFSET ALL
-  # 1D UNSTACKED OFFSET ALL
-  
-  # OFFSET - LABEL_POSITION == "auto" ONLY
-  if(label_position == "auto"){
-    # OFFSET EACH LAYER - STACKED 1D PLOTS
-    if(length(channels) == 1 & density_stack != 0){
-      # UPDATE COORDS PER LAYER
-      lapply(seq_len(SMP), function(z){
-        # CALCULATE OFFSET LABEL LOCATIONS- MULTIPLE LABELS ONLY
-        if(L > 1){
-          # INDICES
-          ind <- seq_len(L) * z
-          # OFFSET LABEL COORDS
-          label_text_xy <- .cyto_plot_label_offset(text = label_text[ind],
-                                                   text_x = label_text_x[ind],
-                                                   text_y = label_text_y[ind],
-                                                   text_size = label_text_size[ind])
-          # UPDATE LABEL CO-ORDINATES
-          label_text_x[ind] <<- label_text_xy[, "x"]
-          label_text_y[ind] <<- label_text_xy[, "y"]
-        }
-      })
-    # OFFSET ALL LABELS - UNSTACKED 1D & 2D PLOTS  
-    }else{
-      # CALCULATE OFFSET LABEL LOCATIONS - MULTIPLE LABELS ONLY
-      if(TL > 1){
-      label_text_xy <- .cyto_plot_label_offset(text = label_text,
-                                               text_x = label_text_x,
-                                               text_y = label_text_y,
-                                               text_size = label_text_size)
-      }
-    }
-  }
-  
-  # CYTO_PLOT_LABEL ------------------------------------------------------------
-  
-  # CALL TO CYTO_PLOT_LABEL - ADDS LABEL ONLY - NO CALCULATIONS
-  label_text_xy <- mapply(function(label_text,
-                                   label_text_x,
-                                   label_text_y,
-                                   label_text_font,
-                                   label_text_size,
-                                   label_text_col,
-                                   label_fill,
-                                   label_fill_alpha){
-    
-    # SELECT CO-ORDINATES FOR NA 
-    if(!.all_na(label_text)){
-      cyto_plot_label(fr_list[[1]], # IRRELEVANT - NO CALCULATIONS
-                      channels = channels,
-                      trans = axes_trans,
-                      gate = NA,
-                      negate = FALSE,
-                      label_text = label_text,
-                      label_stat = NA,
-                      label_text_x = label_text_x,
-                      label_text_y = label_text_y,
-                      label_text_font = label_text_font,
-                      label_text_size = label_text_size,
-                      label_text_col = label_text_col,
-                      label_fill = label_fill,
-                      label_fill_alpha = label_fill_alpha,
-                      density_smooth = density_smooth)
-    }
-
-    
-  },
-  label_text,
-  label_text_x,
-  label_text_y,
-  label_text_font,
-  label_text_size,
-  label_text_col,
-  label_fill,
-  label_fill_alpha,
-  SIMPLIFY = FALSE)
-  
-  # LABEL CO-ORDINATES MATRIX
+  # LABEL CO-ORDINATES IN MATRIX
   label_text_xy <- do.call("rbind", label_text_xy)
   colnames(label_text_xy) <- c("x","y")
   label_text_xy <- as.matrix(label_text_xy)
   
-  # RETURN LABEL CO-ORDINATES --------------------------------------------------
-  return(label_text_xy)
+  # RETURN LABEL CO-ORDINATES
+  invisible(label_text_xy)
   
 }

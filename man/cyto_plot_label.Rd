@@ -2,23 +2,36 @@
 % Please edit documentation in R/cyto_plot_label.R
 \name{cyto_plot_label}
 \alias{cyto_plot_label}
+\alias{cyto_plot_label.GatingHierarchy}
+\alias{cyto_plot_label.flowFrame}
 \title{Add labels to cyto_plot}
 \usage{
-cyto_plot_label(x, channels = NULL, trans = NA, display = 1,
-  gate = NA, negate = FALSE, label_text = NA, label_stat = NA,
-  label_text_x = NA, label_text_y = NA, label_text_font = 2,
-  label_text_size = 0.8, label_text_col = "black",
-  label_fill = "white", label_fill_alpha = 0.6, density_smooth = 0.6)
+\method{cyto_plot_label}{GatingHierarchy}(x, parent, alias = NA,
+  channels = NULL, display = 1, gate = NA, negate = NA, label_text,
+  label_stat, label_text_x = NA, label_text_y = NA,
+  label_text_font = 2, label_text_size = 0.8,
+  label_text_col = "black", label_fill = "white",
+  label_fill_alpha = 0.6, density_smooth = 0.6, ...)
+
+\method{cyto_plot_label}{flowFrame}(x, channels = NULL, trans = NA,
+  display = 1, gate = NA, negate = FALSE, label_text = NA,
+  label_stat = NA, label_text_x = NA, label_text_y = NA,
+  label_text_font = 2, label_text_size = 0.8,
+  label_text_col = "black", label_fill = "white",
+  label_fill_alpha = 0.6, density_smooth = 0.6, ...)
 }
 \arguments{
-\item{x}{object of class \code{"flowFrame"}.}
+\item{x}{object of class \code{flowFrame}.}
+
+\item{parent}{name of the parent population to extract when a
+\code{GatingHierarchy} object is supplied.}
+
+\item{alias}{name of teh gated populations to label when a GatingHierarchy
+object is supplied. This is equivalent to the \code{gate} argument for
+\code{flowFrame} objects.}
 
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for
 gating.}
-
-\item{trans}{object of class
-\code{\link[flowWorkspace]{transformerList}} which was used to
-transform the fluorescent channels of the supplied flowFrame.}
 
 \item{display}{numeric [0,1] to control the percentage of events to be
 plotted. Specifying a value for \code{display} can substantial improve
@@ -69,13 +82,20 @@ colour, set to \code{0.6} by default.}
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} to adjust kernel density for mode
 calculation.}
+
+\item{trans}{object of class \code{\link[flowWorkspace]{transformerList}}
+which was used to transform the fluorescent channels of the supplied
+flowFrame.}
 }
 \value{
 add a boxed text label to an existing cyto_plot.
 }
 \description{
 Interactively label existing plots with boxed labels containing text and
-statistics.
+statistics. \code{cyto_plot_label} can only label the last plot and can only
+add labels on a per sample basis (i.e. single layer only). Locations for each
+label must be manually selected. More complex labelling can be acheived
+directly through \code{cyto_plot}.
 }
 \examples{
 library(CytoRSuiteData)
