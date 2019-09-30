@@ -723,6 +723,10 @@ cyto_stats_compute.GatingSet <- function(x,
 #' @noRd
 .cyto_stat_check <- function(stat) {
 
+  if(.all_na(stat)){
+    return(NA)
+  }
+  
   if (!stat %in% c(
     "mean",
     "Mean",
