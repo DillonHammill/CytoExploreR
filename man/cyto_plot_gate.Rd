@@ -11,34 +11,34 @@
 \alias{cyto_plot_gate.list}
 \title{Plot Gate Objects onto an Existing cyto_plot}
 \usage{
-\method{cyto_plot_gate}{default}(x, ...)
+\method{cyto_plot_gate}{default}(gate, ...)
 
-\method{cyto_plot_gate}{rectangleGate}(gate, channels,
+\method{cyto_plot_gate}{rectangleGate}(gate, channels = NULL,
   gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
   gate_fill = "white", gate_fill_alpha = 0)
 
-\method{cyto_plot_gate}{polygonGate}(gate, channels, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0)
-
-\method{cyto_plot_gate}{ellipsoidGate}(gate, channels,
+\method{cyto_plot_gate}{polygonGate}(gate, channels = NULL,
   gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
   gate_fill = "white", gate_fill_alpha = 0)
 
-\method{cyto_plot_gate}{quadGate}(gate, channels, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0)
+\method{cyto_plot_gate}{ellipsoidGate}(gate, channels = NULL,
+  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
+  gate_fill = "white", gate_fill_alpha = 0)
 
-\method{cyto_plot_gate}{filters}(gate, channels, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0)
+\method{cyto_plot_gate}{quadGate}(gate, channels = NULL,
+  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
+  gate_fill = "white", gate_fill_alpha = 0)
 
-\method{cyto_plot_gate}{list}(gate, channels, gate_line_type = 1,
-  gate_line_width = 2.5, gate_line_col = "red", gate_fill = "white",
-  gate_fill_alpha = 0)
+\method{cyto_plot_gate}{filters}(gate, channels = NULL,
+  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
+  gate_fill = "white", gate_fill_alpha = 0)
+
+\method{cyto_plot_gate}{list}(gate, channels = NULL,
+  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
+  gate_fill = "white", gate_fill_alpha = 0)
 }
 \arguments{
-\item{x}{gate object of class
+\item{gate}{gate object of class
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
 \code{\link[flowCore:polygonGate-class]{polygonGate}},
 \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{list} or
