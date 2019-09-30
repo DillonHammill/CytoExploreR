@@ -47,7 +47,6 @@ cyto_fluor_channels(gs[[1]])
 
 # Fluorescent channels for GatingSet
 cyto_fluor_channels(gs)
-
 }
 \seealso{
 \code{\link{cyto_fluor_channels,flowFrame-method}}
