@@ -50,6 +50,11 @@ cyto_plot_density.flowFrame <- function(x,
                                         density_line_width = 1,
                                         density_line_col = "black") {
 
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
+  channels <- cyto_channels_extract(x, channels)
+  
   # PREPARE DATA ---------------------------------------------------------------
   
   # LIST OF FLOWFRAMES
@@ -215,7 +220,7 @@ cyto_plot_density.list <- function(x,
   
   # REPEAT ARGUMENTS
   args <- lapply(args, function(arg){
-    rep(arg, length.out = length(fr_list))
+    rep(arg, length.out = length(x))
   })
 
   # UPDATE ARGUMENTS
@@ -224,7 +229,7 @@ cyto_plot_density.list <- function(x,
   # HORIZONTAL LINES -----------------------------------------------------------
   
   # YMIN PER LAYER
-  ylim <- strsplit(names(fr_dens), "-")
+  ylim <- strsplit(names(x), "-")
   ymin <- as.numeric(lapply(ylim, `[[`, 1))
   
   # LINES UNDER DENSITY
