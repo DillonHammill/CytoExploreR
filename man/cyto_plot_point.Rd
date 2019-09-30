@@ -12,13 +12,14 @@ cyto_plot_point(x, ...)
   display = 1, point_shape = ".", point_size = 2,
   point_col_scale = NA, point_cols = NA, point_col = NA,
   point_col_alpha = 1, contour_lines = 0, contour_line_type = 1,
-  contour_line_width = 1, contour_line_col = "black", ...)
+  contour_line_width = 1, contour_line_col = "black",
+  contour_line_alpha = 1, ...)
 
-\method{cyto_plot_point}{list}(x, channels, point_shape = ".",
-  point_size = 2, point_col_scale = NA, point_cols = NA,
-  point_col = NA, point_col_alpha = 1, contour_lines = 0,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", ...)
+\method{cyto_plot_point}{list}(x, channels, display = 1,
+  point_shape = ".", point_size = 2, point_col_scale = NA,
+  point_cols = NA, point_col = NA, point_col_alpha = 1,
+  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
+  contour_line_col = "black", contour_line_alpha = 1, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or a list of \code{flowFrame}
@@ -61,6 +62,9 @@ default.}
 
 \item{contour_line_col}{colour to use for contour lines, set to "black" by
 default.}
+
+\item{contour_line_alpha}{numeric [0,1] to control transparency of contour
+lines, set to 1 by default to remove transparency.}
 }
 \description{
 Add points and contour lines to empty cyto_plot

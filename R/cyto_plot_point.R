@@ -29,6 +29,8 @@
 #' @param contour_line_width line width for contour lines, set to 2 by default.
 #' @param contour_line_col colour to use for contour lines, set to "black" by
 #'   default.
+#' @param contour_line_alpha numeric [0,1] to control transparency of contour
+#'   lines, set to 1 by default to remove transparency.
 #'
 #' @importFrom flowCore exprs
 #' @importFrom graphics points
@@ -57,8 +59,14 @@ cyto_plot_point.flowFrame <- function(x,
                                       contour_lines = 0,
                                       contour_line_type = 1,
                                       contour_line_width = 1,
-                                      contour_line_col = "black", ...){
+                                      contour_line_col = "black",
+                                      contour_line_alpha = 1, ...){
  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
+  channels <- cyto_channels_extract(x, channels)
+  
   # PREPARE DATA ---------------------------------------------------------------
   
   # Combine x and overlay into a list
@@ -104,7 +112,8 @@ cyto_plot_point.flowFrame <- function(x,
                          "contour_lines",
                          "contour_line_type",
                          "contour_line_width",
-                         "contour_line_col")]
+                         "contour_line_col",
+                         "contour_line_alpha")]
   
   # REPEAT ARGUMENTS
   args <- lapply(args, function(arg){
@@ -143,7 +152,8 @@ cyto_plot_point.flowFrame <- function(x,
                         contour_lines = contour_lines[z],
                         contour_line_type = contour_line_type[z],
                         contour_line_width = contour_line_width[z],
-                        contour_line_col = contour_line_col[z])
+                        contour_line_col = contour_line_col[z],
+                        contour_line_alpha = contour_line_alpha[z])
       
     }
     
@@ -157,6 +167,7 @@ cyto_plot_point.flowFrame <- function(x,
 #' @export
 cyto_plot_point.list <- function(x,
                                  channels,
+                                 display = 1,
                                  point_shape = ".",
                                  point_size = 2,
                                  point_col_scale = NA,
@@ -166,7 +177,8 @@ cyto_plot_point.list <- function(x,
                                  contour_lines = 0,
                                  contour_line_type = 1,
                                  contour_line_width = 1,
-                                 contour_line_col = "black", ...){
+                                 contour_line_col = "black", 
+                                 contour_line_alpha = 1, ...){
   
   # SAMPLE DATA ----------------------------------------------------------------
   
@@ -204,11 +216,12 @@ cyto_plot_point.list <- function(x,
                          "contour_lines",
                          "contour_line_type",
                          "contour_line_width",
-                         "contour_line_col")]
+                         "contour_line_col",
+                         "contour_line_alpha")]
   
   # REPEAT ARGUMENTS
   args <- lapply(args, function(arg){
-    rep(arg, length.out = length(fr_list))
+    rep(arg, length.out = length(x))
   })
   
   # UPDATE ARGUMENTS
@@ -243,7 +256,8 @@ cyto_plot_point.list <- function(x,
                         contour_lines = contour_lines[z],
                         contour_line_type = contour_line_type[z],
                         contour_line_width = contour_line_width[z],
-                        contour_line_col = contour_line_col[z])
+                        contour_line_col = contour_line_col[z],
+                        contour_line_alpha = contour_line_alpha[z])
       
     }
     
