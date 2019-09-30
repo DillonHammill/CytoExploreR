@@ -42,7 +42,9 @@ Imports:
   tidyr,
   dplyr,
   robustbase,
-  visNetwork
+  visNetwork,
+  Rtsne,
+  umap
 Suggests: 
   CytoRSuiteData,
   RProtoBufLib,
