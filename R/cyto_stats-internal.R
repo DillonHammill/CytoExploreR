@@ -597,6 +597,8 @@
 #'   \code{\link[stats:density]{density}}.
 #' @param modal logical indicating whether densities should be normalised to
 #'   mode.
+#' @param ... additional arguments passed to
+#'   \code{\link[stats:density]{density}}.
 #'
 #' @return calculated kernel density for supplied channel.
 #'
@@ -614,7 +616,7 @@
 .cyto_density.flowFrame <- function(x,
                                     channel = NULL,
                                     smooth = 0.6,
-                                    modal = TRUE){
+                                    modal = TRUE, ...){
   
   # Check channels
   channel <- cyto_channels_extract(x, channel, FALSE)
@@ -626,7 +628,8 @@
   }else{
     if(length(exprs(x)[,channel]) > 2){
       dens <- suppressWarnings(density(exprs(x)[,channel],
-                                       adjust = smooth))
+                                       adjust = smooth,
+                                       ...))
     }else{
       warning("Insufficient events to compute kernel density.")
       return(NA)
@@ -669,6 +672,22 @@
   # SAMPLES
   smp <- length(x)
   
+  # OVERLAY
+  ovn <- smp - 1
+  
+  # BANDWIDTH ------------------------------------------------------------------
+  
+  # POOL DATA
+  dt <- LAPPLY(x, function(z){exprs(z)[, channel]})
+  
+  # RESTRICT TO 100000 EVENTS
+  if(length(dt) > 100000){
+    dt <- sample(dt, 100000)
+  }
+  
+  # JOINT BANDWIDTH
+  bw <- bw.nrd0(dt)
+  
   # KERNEL DENSITY -------------------------------------------------------------
   
   # CALL FLOWFRAME METHOD
@@ -677,8 +696,12 @@
                   channel = channel,
                   smooth = smooth,
                   modal = modal,
-                  stack = stack)
+                  bw = bw)
   })
+  names(fr_dens_list) <- rep(paste(0, 
+                               max(fr_dens_list[[1]]$y),
+                               sep = "-"),
+                             length.out = length(fr_dens_list))
   
   # STACKING -------------------------------------------------------------------
   
@@ -782,8 +805,10 @@
 #' @param limits either "data" or "machine".
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
-#' @param buffer FALSE or fraction indcating the amount of buffering to be added
-#'   to the lower limit for transformed channels, set to 0.1 by default.
+#' @param buffer fraction indcating the amount of buffering to be added on top
+#'   of the upper and lower limit, set to 0.02 by default.
+#' @param anchor logical indicating if the lower limit should be anchored to
+#'   zero if the data range is above zero, set to TRUE by default.
 #'
 #' @return vector containing minimum and maximum values.
 #'
@@ -799,15 +824,12 @@
 
 #' @noRd
 .cyto_range.flowFrame <- function(x, 
-                                  channels,
+                                  channels = NA,
                                   limits = "machine",
                                   plot = FALSE,
-                                  buffer = 0.1, ...){
-  
-  # Time parameter always uses data limits
-  if("Time" %in% channels){
-    limits <- "data"
-  }
+                                  buffer = 0.02,
+                                  anchor = TRUE,
+                                  ...){
   
   # flowCore compatibility
   if(limits == "instrument"){
@@ -820,6 +842,11 @@
   }else{
     channels <- BiocGenerics::colnames(x)
   }
+  
+  # Time parameter always uses data limits
+  if("Time" %in% channels){
+    limits <- "data"
+  } 
   
   # Lower bound - use data limits
   rng <- suppressWarnings(
@@ -838,17 +865,22 @@
   }
   rng[2,] <- mx
   
-  # Replace lower data limit if > 0 & machine limits
-  if(any(rng[1,] > 0) & limits == "machine"){
-    rng[1, rng[1,] > 0] <- 0
+  # Replace lower data limit if > 0
+  if(anchor == TRUE){
+    if(any(rng[1,] > 0)){
+      rng[1, rng[1,] > 0] <- 0
+    }
   }
 
-  # Add buffer to lower limit if channel is transformed
-  if(buffer != FALSE){
-    lapply(channels, function(chan){
-      if(rng[,chan][2] < 6){
-        rng[,chan][1] <<- rng[,chan][1] - buffer*(rng[,chan][2] - rng[,chan][1])
-      }
+  # ADD 2% BUFFER EITHER SIDE - 4% TOTAL IN PLOT
+  if(buffer != 0){
+    # BUFFER
+    lapply(channels, function(z){
+      # RANGE
+      RNG <- rng[, z][2] - rng[, z][1]
+      # ADD BUFFER
+      rng[, z][1] <<- rng[, z][1] - buffer * RNG
+      rng[, z][2] <<- rng[, z][2] + buffer * RNG
     })
   }
   
@@ -857,10 +889,11 @@
  
 #' @noRd
 .cyto_range.flowSet <- function(x,
-                                channels,
+                                channels = NA,
                                 limits = "machine",
                                 plot = FALSE,
-                                buffer = 0.1, ...){
+                                buffer = 0.02,
+                                anchor = TRUE, ...){
   
   # Get ranges for each flowFrame as list
   rng <- fsApply(x, function(z){
@@ -868,7 +901,8 @@
                 channels = channels,
                 limits = limits,
                 plot = plot,
-                buffer = buffer)
+                buffer = buffer,
+                anchor = anchor)
   }, simplify = TRUE)
   
   # Combine results
@@ -890,10 +924,11 @@
 #' @noRd
 .cyto_range.GatingHierarchy <- function(x, 
                                         parent,
-                                        channels,
+                                        channels = NA,
                                         limits = "machine",
                                         plot = FALSE,
-                                        buffer = 0.1, ...){
+                                        buffer = 0.02,
+                                        anchor = TRUE, ...){
   
   # Extract data from GatingHierarchy
   x <- cyto_extract(x, parent)
@@ -903,7 +938,8 @@
                      channels = channels,
                      limits = limits,
                      plot = plot,
-                     buffer = buffer)
+                     buffer = buffer,
+                     anchor = anchor)
   
   return(rng)
   
@@ -912,10 +948,11 @@
 #' @noRd
 .cyto_range.GatingSet <- function(x,
                                   paraent,
-                                  channels,
+                                  channels = NA,
                                   limits = "machine",
                                   plot = FALSE,
-                                  buffer = 0.1, ...){
+                                  buffer = 0.02,
+                                  anchor = TRUE, ...){
   
   # Extract data from GatingSet
   x <- cyto_extract(x, parent)
@@ -925,7 +962,8 @@
                      channels = channels,
                      limits = limits,
                      plot = plot,
-                     buffer = buffer)
+                     buffer = buffer,
+                     anchor = anchor)
   
   return(rng)
   
@@ -934,10 +972,11 @@
 #' @noRd
 .cyto_range.list <- function(x,
                              parent,
-                             channels,
+                             channels = NA,
                              limits = "machine",
                              plot = FALSE,
-                             buffer = 0.1){
+                             buffer = 0.02,
+                             anchor = TRUE){
   
   # Calculate range for each list element
   rng <- lapply(x, function(z){
@@ -946,7 +985,8 @@
                 channels = channels,
                 limits = limits,
                 plot = plot,
-                buffer = 0.1)
+                buffer = buffer,
+                anchor = anchor)
   })
   
   # Combine results
