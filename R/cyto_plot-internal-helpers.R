@@ -21,6 +21,7 @@
 #'   flowFrame.
 #' @param axes_range named list of axes limits for each each axis (i.e.
 #'   list(xlim,ylim)).
+#' @param limits either "data" or "machine".
 #'
 #' @return list containing axis labels and breaks.
 #'
@@ -28,7 +29,8 @@
 .cyto_plot_axes_text.flowFrame <- function(x,
                                            channels,
                                            axes_trans = NA,
-                                           axes_range = list(NA,NA)) {
+                                           axes_range = list(NA,NA),
+                                           limits = "data") {
 
   # Return NA if axes_trans is missing
   if (.all_na(axes_trans)) {
@@ -66,7 +68,9 @@
     if(!.all_na(axes_range[[chan]])){
       rng <- inv_func(axes_range[[chan]])
     }else{
-      rng <- inv_func(as.vector(range(fr)[,chan]))
+      rng <- inv_func(1.02 * .cyto_range(fr, 
+                                         channels = chan, 
+                                         limits = limits)[,chan])
     }
     # RESTRICT tcks & lbls by rng
     tks <- tcks[tcks > rng[1] & tcks < rng[2]]
@@ -204,66 +208,88 @@
 #'
 #' @noRd
 .cyto_plot_args_split <- function(x) {
-
+  
   # NUMBER OF PLOTS - N --------------------------------------------------------
   if(all(LAPPLY(x[["fr_list"]], "class") == "flowFrame")){
     N <- 1
+    MTD <- "flowFrame"
   }else if(all(LAPPLY(x[["fr_list"]], function(z){class(z)}) == "flowFrame")){
     N <- length(x[["fr_list"]])
+    MTD <- "flowSet"
   }
   
   # LAYERS PER PLOT - L --------------------------------------------------------
   if(N == 1){
     L <- length(x[["fr_list"]])
   }else{
-    L <- LAPPLY(x[["fr_list"]], "length")
+    L <- length(x[["fr_list"]][[1]])
   }
   
-  # TOTAL LAYERS - TL ----------------------------------------------------------
+  # TOTAL LAYERS PER PLOT - TL -------------------------------------------------
   TL <- N * sum(L)
   
-  # GATES PER PLOT - G ---------------------------------------------------------
+  # GATE COUNT PER LAYER - GC --------------------------------------------------
   if(N == 1){
     if(all(LAPPLY(x[["gate"]], function(z){.all_na(z)}))){
-      G <- 0
+      GC <- 0
     }else{
-      G <- length(x[["gate"]])
+      GC <- length(x[["gate"]])
     }
   }else{
     if(all(LAPPLY(x[["gate"]][[1]], function(z){.all_na(z)}))){
-      G <- 0
+      GC <- 0
     }else{
-      G <- length(x[["gate"]][[1]])
+      GC <- length(x[["gate"]][[1]])
     }
   }
   
-  # POPULATIONS PER GATE -------------------------------------------------------
-  P <- c()
+  # GATED POPULATIONS PER LAYER - GP -------------------------------------------
+  GP <- c()
   if(N == 1){
-    if(G != 0) {
-      lappy(x[["gate"]], function(z){
+    if(GC != 0) {
+      lapply(x[["gate"]], function(z){
         if(class(z) == "quadGate"){
-          P <<- c(P, 4)
+          GP <<- c(GP, 4)
         }else{
-          P <<- c(P, 1)
+          GP <<- c(GP, 1)
         }
       })
+    }else{
+      GP <- 1
     }
   }else if(N > 1){
-    if(G != 0){
-      lappy(x[["gate"]][[1]], function(z){
+    if(GC != 0){
+      lapply(x[["gate"]][[1]], function(z){
         if(class(z) == "quadGate"){
-          P <<- c(P, 4)
+          GP <<- c(GP, 4)
         }else{
-          P <<- c(P, 1)
+          GP <<- c(GP, 1)
         }
       })
+    }else{
+      GP <- 1
     }
   }
   
-  # POPULATIONS PER PLOT -------------------------------------------------------
+  # TOTAL GATED POPULATIONS PER LAYER - TGP ------------------------------------
+  TGP <- sum(GP)
   
-  TP <- sum(P)
+  # TOTAL POPULATIONS PER LAYER - TP -------------------------------------------
+  if(GC != 0 & x[["negate"]] == TRUE){
+    if(N == 1){
+      # WATCH OUT FOR QUADGATES
+      if(!"quadGate" %in% LAPPLY(x[["gate"]], "is")){
+        TP <- TGP + 1
+      }
+    }else if(N > 1){
+      # WATCH OUT FOR QUADGATES
+      if(!"quadGate" %in% LAPPLY(x[["gate"]][[1]], "is")){
+        TP <- TGP + 1
+      }
+    }
+  }else{
+    TP <- TGP
+  }
   
   # ARGUMENTS NOT REPEATED -----------------------------------------------------
   
@@ -272,7 +298,7 @@
   #   density_stack, density_smooth
   # - arguments that MUST be the same in each plot - channels, limits, popup,
   #   xlim, ylim, negate, density_cols, point_col_scale, point_cols, legend
-  # - arguemnts already prepared - gate
+  # - arguments already prepared - gate
 
   # CYTO_PLOT ARGUMENTS --------------------------------------------------------
   
@@ -316,9 +342,9 @@
     if (arg %in% names(x)) {
       res <- rep_len(x[[arg]], N)
 
-      if (N == 1) {
+      if(N == 1 & MTD == "flowSet"){
         res <- list(res)
-      } else {
+      }else if (N > 1) {
         res <- split(res, rep_len(seq_len(N), N))
       }
 
@@ -336,9 +362,9 @@
     if (arg %in% names(x)) {
       res <- rep_len(x[[arg]], N * 2)
 
-      if (N == 1) {
+      if(N == 1 & MTD == "flowSet"){
         res <- list(res)
-      } else {
+      }else if (N > 1){
         res <- split(res, rep(seq_len(N), length.out = N * 2, each = 2))
       }
 
@@ -356,6 +382,7 @@
   
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
+      # FILL WITH ZEROS
       if (length(x[[arg]]) < L) {
         res <- rep(c(x[[arg]], rep(0, L)), length.out = L)
         res <- rep(res, N)
@@ -363,9 +390,9 @@
         res <- x[[arg]]
       }
 
-      if (N == 1) {
+      if(N == 1 & MTD == "flowSet"){
         res <- list(res)
-      } else {
+      }else if (N > 1){
         res <- split(res, rep(seq_len(N), length.out = TL, each = L))
       }
 
@@ -387,9 +414,9 @@
     if (arg %in% names(x)) {
       res <- rep(x[[arg]], length.out = TL)
 
-      if (N == 1) {
+      if(N == 1 & MTD == "flowSet"){
         res <- list(res)
-      } else {
+      }else if (N > 1){
         res <- split(res, rep(seq_len(N), length.out = TL, each = L))
       }
 
@@ -405,17 +432,17 @@
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
   
-  if (G != 0) {
+  if (GC != 0) {
     lapply(args, function(arg) {
       if (arg %in% names(x)) {
-        res <- rep(x[[arg]], length.out = G * N)
+        res <- rep(x[[arg]], length.out = GC * N)
         
-        if (N == 1) {
+        if(N == 1 & MTD == "flowSet"){
           res <- list(res)
-        } else {
+        }else if (N > 1){
           res <- split(res, rep(seq_len(N),
-                                length.out = G * N,
-                                each = G
+                                length.out = GC * N,
+                                each = GC
           ))
         }
         
@@ -427,22 +454,28 @@
   # ARGUMENTS PER POPULATION ---------------------------------------------------
   
   # GATE_FILL ARGUMENTS
-  args <- c(ARGS[grepl("gate_fill", ARGS)])
+  args <- ARGS[grepl("gate_fill", ARGS)]
   
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
 
-  if (G != 0) {
+  if (GC != 0) {
     lapply(args, function(arg) {
       if (arg %in% names(x)) {
-        res <- rep(x[[arg]], length.out = TP * N)
-
-        if (N == 1) {
+        # GATE_FILL - WHITE
+        if(arg == "gate_fill"){
+          res <- rep(c(x[[arg]], rep("white", TGP * N)), length.out = TGP * N)
+        # GATE_FILL_APLHA - ZERO
+        }else if(arg == "gate_fill_alpha"){
+          res <- rep(c(x[[arg]], rep(0, TGP * N)), length.out = TGP * N)
+        }
+        
+        if(N == 1 & MTD == "flowSet"){
           res <- list(res)
-        } else {
+        }else if (N > 1){
           res <- split(res, rep(seq_len(N),
-                                length.out = TP * N,
-                                each = TP))
+                                length.out = TGP * N,
+                                each = TGP))
         }
 
         x[[arg]] <<- res
@@ -450,145 +483,30 @@
     })
   }
 
-  # LABEL ARGUMENTS - NEGATE
+  # LABEL ARGUMENTS
   args <- ARGS[grepl("label_", ARGS)]
   
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
   
-  # NEGATED POPULATION
-  if("negate" %in% names(x)){
-    if(x[["negate"]]){
-      # WATCH OUT - QUADGATES
-      if(N == 1){
-        if(!"quadGate" %in% LAPPLY(x[["gate"]], "class")){
-          TP <- TP + 1
-        }
-      }else if(N == 2){
-        if(!"quadGate" %in% LAPPLY(x[["gate"]][[1]], "class")){
-          TP <- TP + 1
-        }
+  lapply(args, function(arg){
+    if(arg %in% names(x)){
+      if(arg %in% c("label_text_x", "label_text_y")){
+        res <- rep(c(x[[arg]], rep(NA, TL * TP)), length.out = TL * TP)
+      }else{
+        res <- rep(x[[arg]], length.out = TL * TP)
       }
-    }
-  }
-
-  # 1D PLOT
-  if (length(channels) == 1) {
-
-    lapply(args, function(arg) {
-      if (arg %in% names(x)) {
-        if (G != 0) {
-          if (arg %in% c(
-            "label_text",
-            "label_text_x",
-            "label_text_y"
-          )) {
-            if (length(x[[arg]]) < TP) {
-              x[[arg]] <- c(x[[arg]], rep(NA, TP - length(x[[arg]])))
-            }
-          }
-
-          res <- rep(x[[arg]], length.out = TP * N * L)
-
-          if (N == 1) {
-            res <- list(res)
-          } else {
-            res <- split(res, rep(seq_len(N),
-              length_out = TP * N * L,
-              each = TP * L
-            ))
-          }
-
-          x[[arg]] <<- res
-
-          # labels without gates
-        } else {
-          if (arg %in% c(
-            "label_text",
-            "label_text_x",
-            "label_text_y"
-          )) {
-            if (length(x[[arg]]) < L) {
-              x[[arg]] <- c(x[[arg]], rep(NA, L - length(x[[arg]])))
-            }
-          }
-          res <- rep(x[[arg]], length.out = TL)
-
-          if (N == 1) {
-            res <- list(res)
-          } else {
-            res <- split(res, rep(seq_len(N),
-              length_out = TL,
-              each = L
-            ))
-          }
-
-          x[[arg]] <<- res
-        }
+      
+      if(N == 1 & MTD == "flowSet"){
+        res <- list(res)
+      }else if(N > 1){
+        res <- split(res, rep(seq_len(N),
+                              length.out = TL * TP,
+                              each = L * TP))
       }
-    })
-
-  # 2D PLOT
-  } else if (length(channels) == 2) {
-
-    if (G != 0) {
-      lapply(args, function(arg) {
-        if (arg %in% names(x)) {
-          if (arg %in% c(
-            "label_text",
-            "label_text_x",
-            "label_text_y"
-          )) {
-            if (length(x[[arg]]) < TP) {
-              x[[arg]] <- c(x[[arg]], rep(NA, TP - length(x[[arg]])))
-            }
-          }
-
-          res <- rep(x[[arg]], length.out = TP * N)
-
-          if (N == 1) {
-            res <- list(res)
-          } else {
-            res <- split(res, rep(seq_len(N),
-              length.out = TP * N,
-              each = TP
-            ))
-          }
-
-          x[[arg]] <<- res
-        }
-      })
-
-      # No gates expect 1 label per layer
-    } else if (G == 0) {
-      lapply(args, function(arg) {
-        if (arg %in% names(x)) {
-          if (arg %in% c(
-            "label_text",
-            "label_text_x",
-            "label_text_y"
-          )) {
-            if (length(x[[arg]]) < L) {
-              x[[arg]] <- c(x[[arg]], rep(NA, L - length(x[[arg]])))
-            }
-          }
-
-          res <- rep(x[[arg]], length.out = TL)
-
-          if (N == 1) {
-            res <- list(res)
-          } else {
-            res <- split(res, rep(seq_len(N),
-              length_out = TL,
-              each = L
-            ))
-          }
-
-          x[[arg]] <<- res
-        }
-      })
+      x[[arg]] <<- res
     }
-  }
+  })
 
   return(x)
 }
@@ -690,7 +608,7 @@
                                axes_text = list(TRUE, TRUE)) {
 
   # Bypass setting margins on cyto_plot_grid
-  if (!getOption("CytoRSuite_cyto_plot_grid")) {
+  if (!getOption("cyto_plot_grid")) {
 
     # Pull down arguments to named lis
     args <- .args_list()
@@ -1420,705 +1338,4 @@
   )
 
   return(point_col)
-}
-
-# LABEL CENTERS -----------------------------------------------------------
-
-#' Get gate centers to use to position labels
-#'
-#' @param x gate object.
-#' @param channels channels used to construct the plot.
-#' @param text_x x co-ordinate for label.
-#' @param text_y y co-ordinate for label.
-#'
-#' @importFrom graphics par
-#' @importFrom flowCore rectangleGate
-#'
-#' @noRd
-.cyto_plot_label_center <- function(x, ...) {
-  UseMethod(".cyto_plot_label_center")
-}
-
-#' @noRd
-.cyto_plot_label_center.rectangleGate <- function(x,
-                                                  channels,
-                                                  text_x = NA,
-                                                  text_y = NA) {
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # PLOT LIMITS
-  lims <- par("usr")
-  
-  # X LIMITS
-  xmin <- lims[1]
-  xmax <- lims[2]
-  xpad <- ((xmax - xmin) - (xmax - xmin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
-  
-  # Y LIMITS
-  ymin <- lims[3]
-  ymax <- lims[4]
-  ypad <- ((ymax - ymin) - (ymax - ymin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
-  
-  # PREPARE GATE ---------------------------------------------------------------
-  
-  # CORRECT DIMENSIONS
-  x <- cyto_gate_convert(x, channels = channels)
-  
-  # GATE CENTER ----------------------------------------------------------------
-
-  # 1D GATE - 1D PLOT
-  if(length(channels) == 1){
-    # X COORD
-    if(.all_na(text_x)){
-      gate_xmin <- x@min
-      gate_xmax <- x@max
-      # REPLACE INFINITE COORDS
-      if(is.infinite(gate_xmin)){
-        gate_xmin <- xmin
-      }
-      if(is.infinite(gate_xmax)){
-        gate_xmax <- xmax
-      }
-    }
-    # Y COORD
-    if(.all_na(text_y)){
-      gate_ymin <- ymin
-      gate_ymax <- ymax
-    }
-    
-  # 2D GATE - 2D PLOT
-  }else if(length(channels) == 2){
-    # X COORD
-    if(.all_na(text_x)){
-      gate_xmin <- x@min[channels[1]]
-      gate_xmax <- x@max[channels[1]]
-      # REPLACE INFINITE COORDS
-      if(is.infinite(gate_xmin)){
-        gate_xmin <- xmin
-      }
-      if(is.infinite(gate_xmax)){
-        gate_xmax <- xmax
-      }
-    }
-    # Y COORD
-    if(.all_na(text_y)){
-      gate_xmin <- x@min[channels[2]]
-      gate_xmax <- x@max[channels[2]]
-      # REPLACE INFINITE COORDS
-      if(is.infinite(gate_ymin)){
-        gate_ymin <- ymin
-      }
-      if(is.infinite(gate_ymax)){
-        gate_ymax <- ymax
-      }
-    }
-  }
-  
-  # GATE CENTER ----------------------------------------------------------------
-  
-  # GATE CENTER -  X COORD
-  if(.all_na(text_x)){
-    text_x <- (gate_xmin + gate_xmax) / 2
-  }
-  
-  # GATE CENTER - Y COORD
-  if(.all_na(text_y)){
-    text_y <- (gate_ymin + gate_ymax) / 2
-  }
-
-  # RETURN GATE CENTER ---------------------------------------------------------
-  
-  # GATE CENTER MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-                    ncol = 2,
-                    byrow = FALSE)
-  colnames(text_xy) <- c("x", "y")
-
-  # RETURN GATE CENTER MATRIX
-  return(text_xy)
-}
-
-#' @noRd
-.cyto_plot_label_center.polygonGate <- function(x,
-                                                channels,
-                                                text_x = NA,
-                                                text_y = NA) {
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # PLOT LIMITS
-  lims <- par("usr")
-  
-  # X LIMITS
-  xmin <- lims[1]
-  xmax <- lims[2]
-  xpad <- ((xmax - xmin) - (xmax - xmin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
-  
-  # Y LIMITS
-  ymin <- lims[3]
-  ymax <- lims[4]
-  ypad <- ((ymax - ymin) - (ymax - ymin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
-  
-  # PREPARE GATE ---------------------------------------------------------------
-  
-  # CORRECT DIMENSIONS
-  x <- cyto_gate_convert(x, channels = channels)
-
-  # GATE CENTER ----------------------------------------------------------------
-  
-  # GATE CENTER X COORD
-  if (.all_na(text_x)) {
-    # 2D RECTANGLEGATE
-    if(is(x, "rectangleGate")){
-      gate_xmin <- x@min[channels[1]]
-      gate_xmax <- x@max[channels[1]]
-      # REPLACE INFINITE COORDS
-      if(is.infinte(gate_xmin)){
-        gate_xmin <- xmin
-      }
-      if(is.infinite(gate_xmax)){
-        gate_xmax <- xmax
-      }
-      text_x <- (gate_xmin + gate_xmax)/2
-    # 2D POLYGONGATE  
-    }else{
-      # COORDS
-      coords <- x@boundaries[, channels[1]]
-      # REPLACE INFINITE COORDS
-      if(any(is.infinite(coords))){
-        # -Inf
-        if(coords[is.infinite(coords)] < 0){
-          coords[is.infinite(coords)] <- xmin
-        }
-        # Inf
-        if(coords[is.infinite(coords)] > 0){
-          coords[is.inifinte(coords)] <- xmax
-        }
-      }
-      text_x <- sum(coords) / length(coords)
-    }
-  }
-
-  # GATE CENTER Y COORD
-  if (.all_na(text_y)) {
-    # 2D RECTANGLEGATE
-    if(is(x, "rectangleGate")){
-      gate_ymin <- x@min[channels[2]]
-      gate_ymax <- x@max[channels[2]]
-      # REPLACE INFINITE COORDS
-      if(is.infinte(gate_ymin)){
-        gate_ymin <- ymin
-      }
-      if(is.infinite(gate_ymax)){
-        gate_ymax <- ymax
-      }
-      text_y <- (gate_ymin + gate_ymax)/2
-      # 2D POLYGONGATE  
-    }else{
-      # COORDS
-      coords <- x@boundaries[, channels[2]]
-      # REPLACE INFINITE COORDS
-      if(any(is.infinite(coords))){
-        # -Inf
-        if(coords[is.infinite(coords)] < 0){
-          coords[is.infinite(coords)] <- ymin
-        }
-        # Inf
-        if(coords[is.infinite(coords)] > 0){
-          coords[is.inifinte(coords)] <- ymax
-        }
-      }
-      text_y <- sum(coords) / length(coords)
-    }
-  }
-
-  # RETURN GATE CENTER ---------------------------------------------------------
-
-  # GATE CENTER MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-    ncol = 2,
-    byrow = FALSE
-  )
-  colnames(text_xy) <- c("x", "y")
-  
-  # RETUEN GATE CENTER MATRIX
-  return(text_xy)
-}
-
-#' @noRd
-.cyto_plot_label_center.ellipsoidGate <- function(x,
-                                                  channels,
-                                                  text_x = NA,
-                                                  text_y = NA) {
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # PLOT LIMITS
-  lims <- par("usr")
-  
-  # X LIMITS
-  xmin <- lims[1]
-  xmax <- lims[2]
-  xpad <- ((xmax - xmin) - (xmax - xmin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
-  
-  # Y LIMITS
-  ymin <- lims[3]
-  ymax <- lims[4]
-  ypad <- ((ymax - ymin) - (ymax - ymin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
-  
-  # PREPARE GATE ---------------------------------------------------------------
-  
-  # CORRECT DIMENSIONS
-  x <- cyto_gate_convert(x, channels = channels)
-  
-  # GATE CENTER ----------------------------------------------------------------
-  
-  # GATE CENTER X COORD
-  if(.all_na(text_x)){
-    # 2D RECTANGLEGATE
-    if(is(x, "rectangleGate")){
-      gate_xmin <- x@min[channels[1]]
-      gate_xmax <- x@max[channels[1]]
-      # REPLACE INFINITE COORDS
-      if(is.infinte(gate_xmin)){
-        gate_xmin <- xmin
-      }
-      if(is.infinite(gate_xmax)){
-        gate_xmax <- xmax
-      }
-      text_x <- (gate_xmin + gate_xmax)/2
-    # ELLIPSOIDGATE
-    }else{
-      text_x <- x@mean[channels[1]]
-    }
-  }
-  
-  # GATE CENTER Y COORD
-  if(.all_na(text_y)){
-    # 2D RECTANGLEGATE
-    if(is(x, "rectangleGate")){
-      gate_ymin <- x@min[channels[2]]
-      gate_ymax <- x@max[channels[2]]
-      # REPLACE INFINITE COORDS
-      if(is.infinte(gate_ymin)){
-        gate_ymin <- ymin
-      }
-      if(is.infinite(gate_ymax)){
-        gate_ymax <- ymax
-      }
-      text_y <- (gate_ymin + gate_ymax)/2
-      # ELLIPSOIDGATE
-    }else{
-      text_y <- x@mean[channels[2]]
-    }
-  }
-
-  # RETURN GATE CENTER ---------------------------------------------------------
-  
-  # GATE CENTER MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-    ncol = 2,
-    byrow = FALSE,
-  )
-  colnames(text_xy) <- c("x", "y")
-
-  # RETURN GATE CENTER MATRIX
-  return(text_xy)
-}
-
-#' @noRd
-.cyto_plot_label_center.quadGate <- function(x,
-                                             channels,
-                                             text_x = NA,
-                                             text_y = NA){
-  
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # PLOT LIMITS
-  lims <- par("usr")
-  
-  # X LIMITS
-  xmin <- lims[1]
-  xmax <- lims[2]
-  xpad <- ((xmax - xmin) - (xmax - xmin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  xmin <- xmin + 0.5 * xpad # 1% BUFFER
-  xmax <- xmax - 0.5 * xpad # 1% BUFFER
-  
-  # Y LIMITS
-  ymin <- lims[3]
-  ymax <- lims[4]
-  ypad <- ((ymax - ymin) - (ymax - ymin)/1.04)/2 # 2% BUFFER EITHER SIDE
-  ymin <- ymin + 0.5 * ypad # 1% BUFFER
-  ymax <- ymax - 0.5 * ypad # 1% BUFFER
-  
-  # PREPARE GATE ---------------------------------------------------------------
-  
-  # CORRECT DIMENSIONS
-  x <- cyto_gate_convert(x, channels = channels)
-  
-  # REPEAT ARGUMENTS -----------------------------------------------------------
-  
-  # QUADGATE - 4 CENTERS
-  text_x <- rep(text_x, length.out = 4)
-  text_y <- rep(text_y, length.out = 4)
-  
-  # QUADGATE CO-ORDINATES ------------------------------------------------------
-  
-  x_coord <- x@boundary[channels[1]]
-  y_coord <- x@boundary[channels[2]]
-  
-  # LABEL CENTERS --------------------------------------------------------------
-  
-  # UPDATE MISSING LABEL CO-ORDINATES
-  lapply(seq_len(4), function(z){
-    # QUADRANT 1 - TOP RIGHT
-    if(z == 1){
-      # X COORD 
-      if(.all_na(text_x[z])){
-        text_x[z] <<- mean(c(x_coord, xmax))
-      }
-      # Y COORD
-      if(.all_na(text_y[z])){
-        text_y[z] <<- mean(c(y_coord, ymax))
-      }
-    # QUADRANT 2 - TOP LEFT
-    }else if(z == 2){
-      # X COORD 
-      if(.all_na(text_x[z])){
-        text_x[z] <<- mean(c(x_coord, xmin))
-      }
-      # Y COORD
-      if(.all_na(text_y[z])){
-        text_y[z] <<- mean(c(y_coord, ymax))
-      }
-    # QUADRANT 3 - BOTTOM RIGHT
-    }else if(z == 3){
-      # X COORD 
-      if(.all_na(text_x[z])){
-        text_x[z] <<- mean(c(x_coord, xmax))
-      }
-      # Y COORD
-      if(.all_na(text_y[z])){
-        text_y[z] <<- mean(c(y_coord, ymin))
-      }
-    # QUADRANT 4 - BOTTOM LEFT
-    }else if(z == 4){
-      # X COORD 
-      if(.all_na(text_x[z])){
-        text_x[z] <<- mean(c(x_coord, xmin))
-      }
-      # Y COORD
-      if(.all_na(text_y[z])){
-        text_y[z] <<- mean(c(y_coord, ymin))
-      }
-    }
-  })
-  
-  # RETURN GATE CENTERS --------------------------------------------------------
-  
-  # GATE CENTERS MATRIX
-  text_xy <- as.matrix(cbind(text_x, text_y))
-  colnames(text_xy) <- c("x","y")
-  
-  # RETURN GATES CENTERS MATRIX
-  return(text_xy)
-  
-}
-
-#' @noRd
-.cyto_plot_label_center.filters <- function(x,
-                                            channels,
-                                            text_x = NA,
-                                            text_y = NA) {
-
-  # LIST GATE OBJECTS ----------------------------------------------------------
-  x <- unlist(x)
-
-  # CALL LIST METHOD -----------------------------------------------------------
-  text_xy <- .cyto_plot_label_center(x,
-    channels = channels,
-    text_x = text_x,
-    text_y = text_y
-  )
-
-  # RETURN GATE CENTER MATRIX --------------------------------------------------
-  return(text_xy)
-}
-
-#' @noRd
-.cyto_plot_label_center.list <- function(x,
-                                         channels,
-                                         text_x = NA,
-                                         text_y = NA) {
-
-  # LIST GATE OBJECTS ----------------------------------------------------------
-  
-  x <- unlist(gate)
-  
-  # REPEAT ARGUMENTS -----------------------------------------------------------
-  
-  # GATE COUNT
-  cnt <- c()
-  lapply(gate_count, function(z){
-    if(is(z, "quadGate")){
-      cnt <- c(cnt, 4)
-    }else{
-      cnt <- c(cnt, 1)
-    }
-  })
-  
-  # REPEAT ARGUMENTS
-  text_x <- rep_len(text_x, sum(cnt))
-  text_y <- rep_len(text_y, sum(cnt))
-  
-  # SPLIT ARGUMENTS
-  text_x <- split(text_x, rep(seq_len(length(x)), times = cnt))
-  text_y <- split(text_y, rep(seq_len(length(x)), times = cnt))
-  
-  # GATE CENTERS ---------------------------------------------------------------
-  
-  # LIST GATE CENTER MATRICES
-  text_xy <- mapply(function(x,
-                             text_x,
-                             text_y) {
-    .cyto_plot_label_center(x,
-      channels = channels,
-      text_x = text_x,
-      text_y = text_y
-    )
-  }, x,
-  text_x,
-  text_y,
-  SIMPLIFY = FALSE
-  )
-
-  # GATE CENTER MATRIX
-  text_xy <- do.call("rbind", text_xy)
-
-  # RETURN GATE CENTER MATRIX
-  return(text_xy)
-}
-
-# LABEL DIMENSIONS -------------------------------------------------------------
-
-#' Get dimensions of labels for cyto_plot_label
-#'
-#' Labels should already contain statistic as well. Co-ordiante for each label
-#' must already be computed.
-#'
-#' @importFrom graphics strwidth strheight
-#'
-#' @return upper left and bottom right x and y co-ordinates of labels
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @noRd
-.cyto_plot_label_dims <- function(text,
-                                  text_x,
-                                  text_y = NA,
-                                  text_size = 1,
-                                  xpad = 1.2,
-                                  ypad = 1.2,
-                                  adj = 0.5, ...) {
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # RESET CEX & XPD
-  old_pars <- par(c("cex","xpd"))
-  on.exit(par(old_pars))
-
-  # SET CEX & XPD
-  par(cex = text_size)
-  par(xpd = TRUE)
-
-  # LABEL DIMENSIONS -----------------------------------------------------------
-
-  # BOX ADJUSTMENT
-  box_adj <- adj + (xpad - 1) * text_size * (0.5 - adj)
-
-  # BOX DIMENSIONS
-  lwidths <- strwidth(text)
-  rwidths <- lwidths * (1 - box_adj)
-  lwidths <- lwidths * box_adj
-  bheights <- theights <- strheight(text) * 0.5
-
-  # BOX X COORDS
-  xr <- text_x - lwidths * xpad
-  xl <- text_x + lwidths * xpad
-
-  # BOX Y COORDS
-  yb <- text_y - bheights * ypad
-  yt <- text_y + theights * ypad
-
-  # LABEL DIMENSIONS MATRIX ----------------------------------------------------
-  
-  # MATRIX - TOP LEFT THEN BOTTOM RIGHT
-  coords <- matrix(c(
-    min(c(xl, xr)),
-    max(c(yb, yt)),
-    max(c(xl, xr)),
-    min(c(yb, yt))
-  ),
-  ncol = 2,
-  byrow = TRUE
-  )
-  colnames(coords) <- c("x", "y")
-
-  # RETURN LABEL DIMENSIONS ----------------------------------------------------
-  return(coords)
-  
-}
-
-# LABEL OVERLAP ----------------------------------------------------------------
-
-#' Check if any cyto_plot labels overlap.
-#'
-#' @param x list of label dimensions.
-#'
-#' @return TRUE or FALSE based on whether any overlapping labels are found.
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @noRd
-.cyto_plot_label_overlap <- function(x) {
-
-  # For each rectangle in x
-  overlaps <- LAPPLY(seq_len(length(x)), function(y) {
-
-    # Check if other rectangles overlap
-    LAPPLY(seq_len(length(x))[-y], function(z) {
-
-      # Co-ordinates of reference label
-      x1 <- x[[y]][, "x"]
-      y1 <- x[[y]][, "y"]
-
-      # Co-ordinates of comparison label
-      x2 <- x[[z]][, "x"]
-      y2 <- x[[z]][, "y"]
-
-      # X co-ordinates are overlapping
-      if (min(x2) >= min(x1) & min(x2) <= max(x1) |
-        max(x2) >= min(x1) & max(x2) <= max(x1)) {
-
-        # Y co-ordinates are also overlapping
-        if (min(y2) >= min(y1) & min(y2) <= max(y1) |
-          max(y2) >= min(y1) & max(y2) <= max(y1)) {
-          return(TRUE)
-        } else {
-          return(FALSE)
-        }
-      }
-
-      # Non-overlapping x and y co-ordinates
-      return(FALSE)
-    })
-  })
-
-  # RETURN TRUE OR FALSE
-  return(any(overlaps))
-}
-
-# LABEL OFFSET --------------------------------------------------------------
-
-#' Offset overlapping labels
-#'
-#' Label co-ordinates must be pre-calculated. This function checks for
-#' overlapping labels given co-ordinates and offsets these co-ordinates
-#' accordingly.
-#'
-#' @param text text to be included in the labels, must contain statistic if
-#'   desired.
-#' @param text_x vector of x co-ordinates for labels.
-#' @param text_y vector of y co-ordinates for labels.
-#' @param text_size vector of numerics to control the size of the text in each
-#'   label. \code{text_size} is required to compute the dimensions of each of
-#'   the labels.
-#'
-#' @importFrom graphics par
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @noRd
-.cyto_plot_label_offset <- function(text,
-                                    text_x,
-                                    text_y,
-                                    text_size){
-  
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # PLOT LIMITS
-  lims <- par("usr")
-  ymin <- lims[3]
-  ymax <- lims[4]
-  yrng <- ymax - ymin
-  ypad <- (yrng - yrng / 1.04) / 2
-  ymin <- ymin + ypad
-  ymax <- ymax - ypad
-  yrng <- ymax - ymin
-  
-  # LABEL CO-ORDINATE MATRIX ---------------------------------------------------
-  
-  # MATRIX
-  text_xy <- matrix(c(text_x, text_y),
-                    ncol = 2,
-                    byrow = FALSE)
-  colnames(text_xy) <- c("x", "y")
-  
-  # LABEL DIMENSIONS -----------------------------------------------------------
-  
-  # COMPUTE LABEL DIMENSIONS
-  label_dims <- mapply(function(text,
-                                text_x,
-                                text_y,
-                                text_size){
-    
-    .cyto_plot_label_dims(text = text,
-                          text_x = text_x,
-                          text_y = text_y,
-                          text_size = text_size)
-    
-  },
-  text,
-  text_x,
-  text_y,
-  text_size,
-  SIMPLIFY = FALSE)
-
-  # LABEL OFFSET ---------------------------------------------------------------
-  
-  # COMPUTE OFFSET LABEL Y CO-ORDINATES
-  if(.cyto_plot_label_overlap(label_dims)){
-    # LABEL HEIGHT
-    label_height <- LAPPLY(label_dims, function(z){
-      max(z[, "y"]) - min(z[, "y"])
-    })
-    # USE MAX LABEL HEIGHT
-    label_height <- max(label_height)
-    # EXTRA BUFFERING
-    label_height <- 1.18 * label_height
-    # OFFSET Y COORDS
-    text_xy[, "y"] <- .spread.labels(text_xy[, "y"],
-                                     mindiff = label_height,
-                                     min = ymin,
-                                     max = ymax)
-  }
-
-  # RETURN OFFSET LABEL CO-ORDINATES -------------------------------------------
-  
-  # RETURN LABEL CO-ORDINATE MATRIX
-  return(text_xy)
-  
 }
