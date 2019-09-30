@@ -1144,7 +1144,7 @@ cyto_gate_convert.default <- function(x,
                                       channels = NULL){
   
   # Invalid gate object
-  if(!class(x) %in% c("list", 
+  if(!is(x) %in% c("list", 
                       "filters",
                       "rectangleGate",
                       "polygonGate",
@@ -1177,10 +1177,10 @@ cyto_gate_convert.rectangleGate <- function(x,
   # 1D PLOT
   if(length(channels) == 1){
     # 1D GATE IN 1D PLOT - CORRECT CHANNEL
-    if(length(chans) == 1 & chans == channels){
+    if(length(chans) == 1 & all(chans %in% channels)){
       return(x)
     # 1D GATE IN 1D PLOT - INCORRECT CHANNEL
-    }else if(length(chans) == 1 & chans != channels){
+    }else if(length(chans) == 1 & all(!chans %in% channels)){
       stop("Supplied gate must contain co-ordinates in the supplied channel.")
     # 2D GATE IN 1D PLOT - CORRECT CHANNEL
     }else if(length(chans) == 2 & any(chans == channels)){
@@ -1213,7 +1213,7 @@ cyto_gate_convert.rectangleGate <- function(x,
     }else if(length(chans) == 2 & ! any(chans %in% channels)){
       stop("Supplied gate must contain co-ordinates in the supplied channels.")
     # 1D GATE IN 2D PLOT - CORRECT CHANNEL
-    }else if(length(chans) == 1 & chans %in% channels){
+    }else if(length(chans) == 1 & all(chans %in% channels)){
       # FITERID
       ID <- x@filterId
       # COORDS - MISSING CHANNEL
@@ -1228,7 +1228,7 @@ cyto_gate_convert.rectangleGate <- function(x,
       # RETURN CONVERTED GATE
       return(x)
     # 1D GATE IN 2D PLOT - INCORRECT CHANNEL  
-    }else if(length(chans) == 1 & !chans %in% channels){
+    }else if(length(chans) == 1 & !all(chans %in% channels)){
       stop("Supplied gate must contain co-ordinates in the supplied channels.")
     }
   }
@@ -1440,6 +1440,55 @@ cyto_gate_convert.list <- function(x,
   })
   
   # RETURN CONVERTED GATES -----------------------------------------------------
+  return(x)
+  
+}
+
+# CYTO_GATE_PREPARE ------------------------------------------------------------
+
+#' Prepare a list of gate objects
+#'
+#' Returns a list of modified gate objects with appropriate dimensions.
+#'
+#' @param x gate object(s) to be converted.
+#' @param channels indicates the required dimensions of the gate for plotting.
+#'
+#' @return a list of unique modified gate objects.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @name cyto_gate_convert
+cyto_gate_prepare <- function(x, 
+                              channels = NULL){
+  
+  # LIST OF GATES --------------------------------------------------------------
+  
+  # PREPARE GATE LIST
+  if(is(x)[1] == "list"){
+    if(all(LAPPLY(x, "is") %in% c("rectangleGate",
+                                  "polygonGate",
+                                  "ellipsoidGate",
+                                  "quadGate",
+                                  "filters"))){
+      x <- unlist(x)
+    }
+  }else if(is(x)[1] == "filters"){
+    x <- unlist(gate)
+  }else if(is(x)[1] %in% c("rectangleGate",
+                          "polygonGate",
+                          "ellipsoidGate",
+                          "quadGate",
+                          "filters")){
+    x <- list(x)
+  }
+  
+  # UNIQUE GATE LIST
+  x <- unique(x)
+  
+  # DIMENSIONS
+  x <- cyto_gate_convert(x, channels = channels)
+  
+  # RETURN PREPARED GATE LIST
   return(x)
   
 }

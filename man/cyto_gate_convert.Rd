@@ -8,6 +8,7 @@
 \alias{cyto_gate_convert.quadGate}
 \alias{cyto_gate_convert.filters}
 \alias{cyto_gate_convert.list}
+\alias{cyto_gate_prepare}
 \title{Convert Between 1D and 2D Gate Objects}
 \usage{
 \method{cyto_gate_convert}{rectangleGate}(x, channels = NULL)
@@ -21,18 +22,30 @@
 \method{cyto_gate_convert}{filters}(x, channels = NULL)
 
 \method{cyto_gate_convert}{list}(x, channels = NULL)
+
+cyto_gate_prepare(x, channels = NULL)
 }
 \arguments{
+\item{x}{gate object(s) to be converted.}
+
+\item{channels}{indicates the required dimensions of the gate for plotting.}
+
 \item{x}{gate object(s) to be converted.}
 
 \item{channels}{indicates the required dimensions of the gate for plotting.}
 }
 \value{
 modified gate object with appropriate dimensions.
+
+a list of unique modified gate objects.
 }
 \description{
 Useful function to convert between 1D and 2D gate objects.
+
+Returns a list of modified gate objects with appropriate dimensions.
 }
 \author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
