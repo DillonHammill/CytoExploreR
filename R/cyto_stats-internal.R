@@ -947,7 +947,7 @@
 
 #' @noRd
 .cyto_range.GatingSet <- function(x,
-                                  paraent,
+                                  parent,
                                   channels = NA,
                                   limits = "machine",
                                   plot = FALSE,
