@@ -65,9 +65,9 @@ to mode and presented as a percentage. Set to \code{TRUE} by default.}
 \code{\link[stats:density]{density}} to adjust kernel density.}
 
 \item{density_stack}{numeric [0,1] indicating the degree of offset for
-overlaid populations, set to 0.5 by default.
-#' @param density_cols vector colours to draw from when selecting density fill
-colours if none are supplied to density_fill.}
+overlaid populations, set to 0.5 by default. #' @param density_cols vector
+colours to draw from when selecting density fill colours if none are
+supplied to density_fill.}
 
 \item{density_fill}{colour(s) used to fill polygons.}
 

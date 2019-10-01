@@ -5,7 +5,7 @@
 \title{Compute Statistics - GatingHierarchy Method}
 \usage{
 \method{cyto_stats_compute}{GatingHierarchy}(x, alias = NULL,
-  parent = NULL, channels = NULL, trans = NULL, stat = "median",
+  parent = NULL, channels = NULL, trans = NA, stat = "median",
   format = "long", save_as = NULL, density_smooth = 0.6, ...)
 }
 \arguments{

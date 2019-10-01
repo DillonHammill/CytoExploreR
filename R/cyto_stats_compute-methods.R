@@ -94,7 +94,7 @@ cyto_stats_compute <- function(x, ...) {
 #' @export
 cyto_stats_compute.flowFrame <- function(x,
                                          channels = NULL,
-                                         trans = NULL,
+                                         trans = NA,
                                          stat = "median",
                                          gate = NA,
                                          format = "long",
@@ -118,7 +118,7 @@ cyto_stats_compute.flowFrame <- function(x,
   }
 
   # Transformations
-  if (is.null(trans) & stat %in%
+  if (.all_na(trans) & stat %in%
     c("mean", "median", "mode", "geo mean", "CV")) {
     message(
       paste(
@@ -128,7 +128,7 @@ cyto_stats_compute.flowFrame <- function(x,
     )
     trans <- NULL
   # Check transformerList is supplied
-  }else if(!is.null(trans)){
+  }else if(!.all_na(trans)){
     # transformerLists only
     if(!inherits(trans, "transformerList")){
       stop("'trans' must be an object of class transformerList!")
@@ -266,7 +266,7 @@ cyto_stats_compute.flowFrame <- function(x,
 #' @export
 cyto_stats_compute.flowSet <- function(x,
                                        channels = NULL,
-                                       trans = NULL,
+                                       trans = NA,
                                        stat = "median",
                                        gate = NA,
                                        format = "long",
@@ -410,7 +410,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
                                                alias = NULL,
                                                parent = NULL,
                                                channels = NULL,
-                                               trans = NULL,
+                                               trans = NA,
                                                stat = "median",
                                                format = "long",
                                                save_as = NULL,
@@ -423,10 +423,10 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   gh <- x
 
   # Get trans if not supplied
-  if (is.null(trans)) {
+  if (.all_na(trans)) {
     trans <- gh@transformation
   # Check transformerList is supplied
-  }else if(!is.null(trans)){
+  }else if(!.all_na(trans)){
     # transformerLists only
     if(!inherits(trans, "transformerList")){
       stop("'trans' must be an object of class transformerList!")
@@ -660,7 +660,7 @@ cyto_stats_compute.GatingSet <- function(x,
                                          alias = NULL,
                                          parent = NULL,
                                          channels = NULL,
-                                         trans = NULL,
+                                         trans = NA,
                                          stat = "median",
                                          format = "long",
                                          save_as = NULL,
@@ -673,10 +673,10 @@ cyto_stats_compute.GatingSet <- function(x,
   gs <- x
 
   # Get trans if not supplied
-  if (is.null(trans)) {
+  if (.all_na(trans)) {
     trans <- gs[[1]]@transformation
   # Check transformerList is supplied
-  }else if(!is.null(trans)){
+  }else if(!.all_na(trans)){
     # transformerLists only
     if(!inherits(trans, "transformerList")){
       stop("'trans' must be an object of class transformerList!")

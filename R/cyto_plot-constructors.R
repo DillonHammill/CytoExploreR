@@ -80,6 +80,7 @@
                           limits = limits,
                           plot = TRUE)[,1]
     }
+    
     # YLIM
     if (.all_na(ylim)) {
       # EXTRACT YLIM - NAMES
@@ -315,7 +316,8 @@
     
     # LEGEND
     if(legend != FALSE){
-      .cyto_plot_legend(channels = channels,
+      .cyto_plot_legend(x,
+                        channels = channels,
                         legend = legend,
                         legend_text = legend_text,
                         legend_text_font = legend_text_font,
@@ -511,12 +513,14 @@
   label_text_y <- label_text_xy[, "y"]
   
   # REVERT LABEL_TEXT_X & LABEL_TEXT_Y TO ORIGINAL FORMAT
-  label_text_x <- LAPPLY(seq_len(SMP), function(z){
-    label_text_x[names(label_text_x) == z]
-  })
-  label_text_y <- LAPPLY(seq_len(SMP), function(z){
-    label_text_y[names(label_text_y) == z]
-  })
+  if(SMP > 1){
+    label_text_x <- LAPPLY(seq_len(SMP), function(z){
+      label_text_x[names(label_text_x) == z]
+    })
+    label_text_y <- LAPPLY(seq_len(SMP), function(z){
+      label_text_y[names(label_text_y) == z]
+    })
+  }
   
   # RETURN LABEL CO-ORDINATES --------------------------------------------------
   

@@ -32,9 +32,9 @@
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density.
 #' @param density_stack numeric [0,1] indicating the degree of offset for
-#'   overlaid populations, set to 0.5 by default.
-#'   #' @param density_cols vector colours to draw from when selecting density fill
-#'   colours if none are supplied to density_fill.
+#'   overlaid populations, set to 0.5 by default. #' @param density_cols vector
+#'   colours to draw from when selecting density fill colours if none are
+#'   supplied to density_fill.
 #' @param density_fill colour(s) used to fill polygons.
 #' @param density_fill_alpha numeric [0,1] used to control fill transparency,
 #'   set to 1 by default to remove transparency.

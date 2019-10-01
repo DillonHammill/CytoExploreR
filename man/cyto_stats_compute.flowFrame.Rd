@@ -4,8 +4,8 @@
 \alias{cyto_stats_compute.flowFrame}
 \title{Compute Statistics - flowFrame Method}
 \usage{
-\method{cyto_stats_compute}{flowFrame}(x, channels = NULL,
-  trans = NULL, stat = "median", gate = NA, format = "long",
+\method{cyto_stats_compute}{flowFrame}(x, channels = NULL, trans = NA,
+  stat = "median", gate = NA, format = "long",
   density_smooth = 0.6, ...)
 }
 \arguments{

@@ -5,7 +5,7 @@
 \title{Compute Statistics - GatingSet Method}
 \usage{
 \method{cyto_stats_compute}{GatingSet}(x, alias = NULL, parent = NULL,
-  channels = NULL, trans = NULL, stat = "median", format = "long",
+  channels = NULL, trans = NA, stat = "median", format = "long",
   save_as = NULL, density_smooth = 0.6, ...)
 }
 \arguments{

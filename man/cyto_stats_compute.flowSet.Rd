@@ -4,7 +4,7 @@
 \alias{cyto_stats_compute.flowSet}
 \title{Compute Statistics - flowSet Method}
 \usage{
-\method{cyto_stats_compute}{flowSet}(x, channels = NULL, trans = NULL,
+\method{cyto_stats_compute}{flowSet}(x, channels = NULL, trans = NA,
   stat = "median", gate = NA, format = "long",
   density_smooth = 0.6, ...)
 }

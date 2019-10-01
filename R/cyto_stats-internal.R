@@ -141,7 +141,7 @@
 #' @noRd
 .cyto_mean <- function(x, 
                        channels = NULL,
-                       trans = NULL,
+                       trans = NA,
                        gate = NA){
   
   # Throw error for invalid object
@@ -150,7 +150,7 @@
   }
   
   # Reminder that transformList/transformerList needed for transformed chans
-  if(is.null(trans)){
+  if(.all_na(trans)){
     message(
       paste(
         "'trans' requires a transformerList to calculate",
@@ -186,7 +186,7 @@
   }
   
   # Get raw data
-  if(!is.null(trans)){
+  if(!.all_na(trans)){
     x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   
@@ -226,7 +226,7 @@
 #' @noRd
 .cyto_geometric_mean <- function(x, 
                                  channels = NULL,
-                                 trans = NULL,
+                                 trans = NA,
                                  gate = NA){
   
   # Throw error for invalid object
@@ -261,7 +261,7 @@
   }
   
   # Geometric mean calculate as inverse of arithmetic mean of transformed data
-  if(is.null(trans)){
+  if(.all_na(trans)){
     
     log_exprs <- suppressWarnings(log(exprs(x)[,channels,drop = FALSE]))
     geo_mean <- suppressWarnings(exp(colMeans(log_exprs)))
@@ -276,7 +276,7 @@
     }
   
   # transformerList supplied
-  }else if(!is.null(trans)){
+  }else if(!.all_na(trans)){
     
     # Calculate arithmetic mean on transformed scale
     fr_mean <- colMeans(exprs(x)[,channels, drop = FALSE])
@@ -339,7 +339,7 @@
 #' @noRd
 .cyto_median <- function(x, 
                         channels = NULL,
-                        trans = NULL,
+                        trans = NA,
                         gate = NA){
   
   # Throw error for invalid object
@@ -348,7 +348,7 @@
   }
   
   # Reminder that transformerList needed for transformed chans
-  if(is.null(trans)){
+  if(.all_na(trans)){
     message(
       paste(
         "'trans' requires a transformerList to calculate",
@@ -384,7 +384,7 @@
   }
   
   # Get raw data
-  if(!is.null(trans)){
+  if(!.all_na(trans)){
     x <- cyto_transform(x,
                         trans = trans,
                         inverse = TRUE, 
@@ -429,7 +429,7 @@
 #' @noRd
 .cyto_mode <- function(x, 
                        channels = NULL,
-                       trans = NULL,
+                       trans = NA,
                        gate = NA,
                        density_smooth = 0.6){
   
@@ -439,7 +439,7 @@
   }
   
   # Reminder that transformerList needed for transformed chans
-  if(is.null(trans)){
+  if(.all_na(trans)){
     message(
       paste(
         "'trans' requires a transformerList to calculate",
@@ -474,7 +474,7 @@
   }
   
   # Get raw data
-  if(!is.null(trans)){
+  if(!.all_na(trans)){
     x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   
@@ -521,7 +521,7 @@
 #' @noRd
 .cyto_CV <- function(x, 
                     channels = NULL,
-                    trans = NULL,
+                    trans = NA,
                     gate = NA){
   
   # Throw error for invalid object
@@ -530,7 +530,7 @@
   }
   
   # Reminder that transformerList needed for transformed chans
-  if(is.null(trans)){
+  if(.all_na(trans)){
     message(
       paste(
         "'trans' requires a transformerList to calculate",
@@ -566,7 +566,7 @@
   }
   
   # Get raw data
-  if(!is.null(trans)){
+  if(!.all_na(trans)){
     x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
   }
   

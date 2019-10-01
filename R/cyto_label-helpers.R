@@ -130,18 +130,22 @@
           st <- paste(.round(st, 2), "%")
           # CV STATISTIC
         }else if(grepl("CV", label_stat[y], ignore.case = TRUE)){
-          st <- .cyto_CV(pops[[y]],
+          st <- suppressMessages(
+            .cyto_CV(pops[[y]],
                          channels = channels,
                          trans = axes_trans)
+          )
           st <- paste(.round(st, 2), "%")
           # OTHER STATISTIC
         }else{
-          st <- cyto_stats_compute(pops[[y]],
+          st <- suppressMessages(
+            cyto_stats_compute(pops[[y]],
                                    channels = channels,
                                    trans = axes_trans,
                                    stat = label_stat[y],
                                    format = "long",
                                    density_smooth = density_smooth)
+          )
           st <- as.numeric(st[,ncol(st)])
           if(!grepl("count", label_stat[y], ignore.case = TRUE)){
             st <- .round(st, 2)

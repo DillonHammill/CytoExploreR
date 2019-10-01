@@ -333,6 +333,7 @@
             ARGS[grepl("axes_text_", ARGS)],
             ARGS[grepl("axes_label_", ARGS)],
             "label",
+            "label_position",
             "legend",
             ARGS[grepl("border_", ARGS)])
   
@@ -724,7 +725,7 @@
                               point_cols = NA,
                               point_col = NA,
                               point_col_alpha = 1) {
-
+  
   # ARGUMENTS ------------------------------------------------------------------
 
   # ARGUMENTS
@@ -799,6 +800,7 @@
         bty = "n",
         x.intersp = 0.5
       )
+    # Fill legend
     } else if (legend == "fill") {
 
       # COLOURS
@@ -807,7 +809,7 @@
         density_cols = density_cols,
         density_fill_alpha = 1
       )
-
+      
       # Revert to density_fill if no legend fill colours supplied
       if (.all_na(legend_box_fill)) {
         legend_box_fill <- density_fill
@@ -906,7 +908,7 @@
 .cyto_plot_theme_inherit <- function(x) {
 
   # extract cyto_plot_theme arguments
-  args <- getOption("CytoRSuite_cyto_plot_theme")
+  args <- getOption("cyto_plot_theme")
 
   if (!is.null(args)) {
     lapply(names(args), function(y) {
@@ -1107,18 +1109,27 @@
                                     density_cols = NA,
                                     density_fill_alpha = 1) {
 
-  # Expected number of colours
-  n <- length(x)
+  # INHERIT CYTO_PLOT_THEME ----------------------------------------------------
 
   # Pull down arguments to named list
-  args <- as.list(environment())
+  args <- .args_list()
 
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-
+  
+  # Update arguments
+  .args_update(args)
+  
+  # GENERAL --------------------------------------------------------------------
+  
+  # Expected number of colours
+  SMP <- length(x)
+  
+  # DENSITY_FILL ---------------------------------------------------------------
+  
   # No density_cols supplied
-  if (.all_na(args[["density_cols"]])) {
-    args[["density_cols"]] <- c(
+  if (.all_na(density_cols)) {
+    density_cols <- c(
       "grey",
       "bisque4",
       "brown1",
@@ -1140,48 +1151,45 @@
     )
   }
 
-
   # Make colorRampPalette
-  if (class(args[["density_cols"]]) != "function") {
-    cols <- colorRampPalette(args[["density_cols"]])
+  if (class(density_cols) != "function") {
+    cols <- colorRampPalette(density_cols)
   } else {
-    cols <- args[["density_cols"]]
+    cols <- density_cols
   }
 
   # No colours supplied to density_fill either
-  if (.all_na(args[["density_fill"]]) | .empty(args[["density_fill"]])) {
-
+  if (.all_na(density_fill)) {
+    
     # Pull out a single colour per layer
-    args[["density_fill"]] <- cols(n)
+    density_fill <- cols(SMP)
 
     # Colours supplied manually to density_fill
   } else {
 
     # Too few colours supplied - pull others from cols
-    if (length(args[["density_fill"]]) < n) {
-      args[["density_fill"]] <- c(
-        args[["density_fill"]],
-        cols(n - length(args[["density_fill"]]))
+    if (length(density_fill) < SMP) {
+      density_fill <- c(
+        density_fill,
+        cols(SMP - length(density_fill))
       )
 
       # Too many colours supplied
-    } else if (length(args[["density_fill"]]) > n) {
-      args[["density_fill"]] <- args[["density_fill"]][seq(1, n)]
+    } else if (length(density_fill) > SMP) {
+      density_fill <- density_fill[seq_len(SMP)]
     }
   }
 
   # Adjust colors by density_fill_alpha
-  if (any(args[["density_fill_alpha"]] != 1)) {
-    args[["density_fill"]] <- mapply(function(density_fill, density_fill_alpha) {
-      if (density_fill_alpha != 1) {
-        adjustcolor(density_fill, density_fill_alpha)
-      } else {
-        density_fill
-      }
-    }, args[["density_fill"]], args[["density_fill_alpha"]], USE.NAMES = FALSE)
-  }
+  density_fill <- mapply(function(density_fill, density_fill_alpha) {
+    if (density_fill_alpha != 1) {
+      adjustcolor(density_fill, density_fill_alpha)
+    } else {
+      density_fill
+    }
+  }, density_fill, density_fill_alpha, USE.NAMES = FALSE)
 
-  return(args[["density_fill"]])
+  return(density_fill)
 }
 
 # POINT COLOUR -----------------------------------------------------------------
