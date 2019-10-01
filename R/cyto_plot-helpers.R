@@ -33,6 +33,27 @@
 #'   \code{\link[stats:density]{density}} to adjust kernel density.
 #' @param density_stack numeric [0,1] indicating the degree of offset for
 #'   overlaid populations, set to 0.5 by default.
+#'   #' @param density_cols vector colours to draw from when selecting density fill
+#'   colours if none are supplied to density_fill.
+#' @param density_fill colour(s) used to fill polygons.
+#' @param density_fill_alpha numeric [0,1] used to control fill transparency,
+#'   set to 1 by default to remove transparency.
+#' @param density_line_type line type(s) to use for border(s), set to solid
+#'   lines by default.
+#' @param density_line_width line width for border.
+#' @param density_line_col colour(s) for border line, set to "black" by default.
+#' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
+#'   \code{"."} by default to maximise plotting speed.  See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param point_size numeric to control the size of points in 2-D scatter plots
+#'   set to 2 by default.
+#' @param point_col_scale vector of colours to use for density gradient.
+#' @param point_cols vector colours to draw from when selecting colours for
+#'   points if none are supplied to point_col.
+#' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
+#'   by default to use a blue-red density colour scale.
+#' @param point_col_alpha numeric [0,1] to control point colour transparency in
+#'   2-D scatter plots, set to 1 by default to use solid colours.
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
@@ -101,6 +122,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       density_modal = TRUE,
                                       density_smooth = 1.5,
                                       density_stack = 0.5,
+                                      density_cols = NA,
                                       density_fill = NA,
                                       density_fill_alpha = 1,
                                       density_line_type = 1,
@@ -108,6 +130,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       density_line_col = "black",
                                       point_shape = ".",
                                       point_size = 2,
+                                      point_col_scale = NA,
                                       point_cols = NA,
                                       point_col = NA,
                                       point_col_alpha = 1,
@@ -477,6 +500,7 @@ cyto_plot_empty.flowFrame <- function(x,
                       density_line_col = density_line_col,
                       point_shape = point_shape,
                       point_size = point_size,
+                      point_col_scale = point_col_scale,
                       point_cols = point_cols,
                       point_col = point_col,
                       point_col_alpha = point_col_alpha)
@@ -497,6 +521,7 @@ cyto_plot_empty.list <- function(x,
                                         density_modal = TRUE,
                                         density_smooth = 1.5,
                                         density_stack = 0.5,
+                                        density_cols = NA,
                                         density_fill = NA,
                                         density_fill_alpha = 1,
                                         density_line_type = 1,
@@ -504,6 +529,7 @@ cyto_plot_empty.list <- function(x,
                                         density_line_col = "black",
                                         point_shape = ".",
                                         point_size = 2,
+                                        point_col_scale = NA,
                                         point_cols = NA,
                                         point_col = NA,
                                         point_col_alpha = 1,
@@ -565,45 +591,14 @@ cyto_plot_empty.list <- function(x,
   
 }
 
-# CYTO_PLOT_WINDOW -------------------------------------------------------------
+# CYTO_PLOT_NEW ----------------------------------------------------------------
 
-#' Check Operating System & Open New Graphics Device
+#' Open new graphics device for cyto_plot
 #'
-#' \code{cyto_plot_window} is used internally by cyto_plot to open an
+#' \code{cyto_plot_new} is used internally by cyto_plot to open an
 #' OS-specific interactive garphics device to facilitate gate drawing. Mac users
 #' will need to install \href{https://www.xquartz.org/}{XQuartz} for this
 #' functionality.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @import grDevices
-#'
-#' @examples
-#' \dontrun{
-#' # Open platform-specific graphics device
-#' cyto_plot_window()
-#' }
-#' 
-#' @export
-cyto_plot_window <- function() {
-  if (.Platform$OS.type == "windows") {
-
-    # open windows graphics device
-    grDevices::windows()
-  } else if (.Platform$OS.type == "unix") {
-    if (Sys.info()["sysname"] == "Linux") {
-
-      # Cairo needed for semi-transparency
-      X11(type = "cairo")
-    } else if (Sys.info()["sysname"] == "Darwin") {
-
-      # open XQuartz graphics device
-      quartz()
-    }
-  }
-}
-
-#' Open new graphics device for cyto_plot
 #'
 #' @param popup logical indicating whether a popup graphics device should be
 #'   opened.

@@ -14,7 +14,10 @@ opened.}
 \code{\link[grDevices:dev.new]{dev.new}}:}
 }
 \description{
-Open new graphics device for cyto_plot
+\code{cyto_plot_new} is used internally by cyto_plot to open an
+OS-specific interactive garphics device to facilitate gate drawing. Mac users
+will need to install \href{https://www.xquartz.org/}{XQuartz} for this
+functionality.
 }
 \examples{
 \dontrun{

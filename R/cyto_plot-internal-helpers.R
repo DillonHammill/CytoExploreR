@@ -66,7 +66,7 @@
     inv_func <- axes_trans[[chan]]$inverse
     # AXIS RANGE - LINEAR SCALE
     if(!.all_na(axes_range[[chan]])){
-      rng <- inv_func(axes_range[[chan]])
+      rng <- inv_func(1.02 * axes_range[[chan]])
     }else{
       rng <- inv_func(1.02 * .cyto_range(fr, 
                                          channels = chan, 
@@ -213,7 +213,8 @@
   if(all(LAPPLY(x[["fr_list"]], "class") == "flowFrame")){
     N <- 1
     MTD <- "flowFrame"
-  }else if(all(LAPPLY(x[["fr_list"]], function(z){class(z)}) == "flowFrame")){
+  }else if(all(LAPPLY(x[["fr_list"]], function(z){
+    LAPPLY(z, function(y){is(y, "flowFrame")})}))){
     N <- length(x[["fr_list"]])
     MTD <- "flowSet"
   }
@@ -226,7 +227,7 @@
   }
   
   # TOTAL LAYERS PER PLOT - TL -------------------------------------------------
-  TL <- N * sum(L)
+  TL <- N * L
   
   # GATE COUNT PER LAYER - GC --------------------------------------------------
   if(N == 1){
@@ -387,7 +388,7 @@
         res <- rep(c(x[[arg]], rep(0, L)), length.out = L)
         res <- rep(res, N)
       }else{
-        res <- x[[arg]]
+        res <- rep(x[[arg]], length.out = TL)
       }
 
       if(N == 1 & MTD == "flowSet"){
@@ -513,19 +514,17 @@
 
 # POINT DENSITY COLOURS --------------------------------------------------------
 
-#' Get density gradient colours for cyto_plot_2d
+#' Get density gradient colours for cyto_plot
 #'
-#' @param point_cols vector of ordered colours to use for point density colour
-#'   scale.
+#' @param point_col_scale vector of ordered colours to use for point density
+#'   colour scale.
 #'
 #' @return a list of colorRampPalette functions to be used in densCols.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @importFrom grDevices colorRampPalette
-#'
 #' @noRd
-.cyto_plot_point_cols <- function(point_cols = NA) {
+.cyto_plot_point_col_scale <- function(point_col_scale = NA) {
 
   # Pull down arguments to named list
   args <- .args_list()
@@ -534,8 +533,8 @@
   args <- .cyto_plot_theme_inherit(args)
 
   # Use default colour scale
-  if (.all_na(args[["point_cols"]])) {
-    args[["point_cols"]] <- c(
+  if (.all_na(args[["point_col_scale"]])) {
+    args[["point_col_scale"]] <- c(
       "blue",
       "turquoise",
       "green",
@@ -546,7 +545,7 @@
     )
   }
 
-  return(args[["point_cols"]])
+  return(args[["point_col_scale"]])
 }
 
 # LAYOUT -----------------------------------------------------------------------
@@ -620,7 +619,7 @@
     if (length(x) > 1 &
       legend != FALSE &
       !.all_na(legend_text)) {
-      mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * legend_text_size
+      mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * mean(legend_text_size)
     }
 
     # Remove space above plot if no title
@@ -674,6 +673,8 @@
 #' @param legend_line_col vector of line colours to use for legend.
 #' @param legend_box_fill vector of fill colours to use for legend.
 #' @param legend_point_col vector of colours to use for points in legend.
+#' @param density_cols vector colours to draw from when selecting density fill
+#'   colours if none are supplied to density_fill.
 #' @param density_fill colour(s) used to fill polygons.
 #' @param density_fill_alpha numeric [0,1] used to control fill transparency,
 #'   set to 1 by default to remove transparency.
@@ -685,6 +686,9 @@
 #'   to maximise plotting speed.
 #' @param point_size numeric specifying the degree of character expansion for
 #'   points, set to 2 by default.
+#' @param point_col_scale vector of colours to use for density gradient.
+#' @param point_cols vector colours to draw from when selecting colours for
+#'   points if none are supplied to point_col.
 #' @param point_col colours to use for points, set to NA by default to blue-red
 #'   density colour scale.
 #' @param point_alpha numeric [0,1] used to control colour transparency, set to
@@ -716,6 +720,7 @@
                               density_line_col = "black",
                               point_shape = ".",
                               point_size = 2,
+                              point_col_scale = NA,
                               point_cols = NA,
                               point_col = NA,
                               point_col_alpha = 1) {
@@ -835,10 +840,10 @@
 
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
-
-    # Prepare point_cols
-    point_cols <- .cyto_plot_point_cols(point_cols)
-
+    
+    # CYTO_PLOT_POINT_COL_SCALE
+    point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
+    
     # Prepare point_col - alpha adjust later
     point_col <- .cyto_plot_point_col(x,
       channels = channels,
@@ -847,16 +852,16 @@
       point_col = point_col,
       point_col_alpha = 1
     )
-
+    
     # Prepare point col - use first density colour
     point_col <- LAPPLY(point_col, function(z) {
       if (length(z) > 1) {
-        return(point_cols[1])
+        return(point_col_scale[1])
       } else {
         return(z)
       }
     })
-
+    
     # Revert to point_col if no legend point cols supplied
     if (.all_na(legend_point_col)) {
       legend_point_col <- point_col
@@ -1207,7 +1212,7 @@
                                  point_col_alpha = 1) {
 
   # Expected number of colours
-  n <- length(x)
+  SMP <- length(x)
 
   # Pull down arguments to named list
   args <- .args_list()
@@ -1217,7 +1222,7 @@
 
   # Update arguments
   .args_update(args)
-
+  
   # No colours supplied for density gradient
   if (.all_na(point_col_scale)) {
     point_col_scale <- c(
@@ -1251,7 +1256,7 @@
       "springgreen4"
     )
   }
-
+  
   # Make colorRampPalette
   if (class(point_cols) != "function") {
     cols <- colorRampPalette(point_cols)
@@ -1259,20 +1264,19 @@
     cols <- point_cols
   }
 
-  # Repeat point_col n times
-  point_col <- rep(point_col,
-    length.out = n
-  )
+  # Repeat point_col arguments SMP times
+  point_col <- rep(point_col, length.out = SMP)
+  point_col_alpha <- rep(point_col_alpha, length.out = SMP)
 
   # Convert point_col to list
   if (!inherits(point_col, "list")) {
-    point_col <- lapply(seq(1, n), function(z) {
+    point_col <- lapply(seq(1, SMP), function(z) {
       point_col[z]
     })
   }
-
-  # First layer contains density gradient in no other colour is designated
-  if (.all_na(point_col)) {
+  
+  # First layer contains density gradient if no other colour is designated
+  if (all(LAPPLY(point_col, ".all_na"))) {
 
     # Extract data
     fr_exprs <- exprs(x[[1]])[, channels]
@@ -1288,10 +1292,10 @@
     } else {
       point_col[[1]] <- point_col_scale[1]
     }
-  } else if (any(is.na(point_col))) {
+  } else if (any(LAPPLY(point_col, ".all_na"))) {
 
     # Get position of NAs in point_col - replace with density scale
-    ind <- which(is.na(point_col))
+    ind <- which(LAPPLY(point_col, ".all_na"))
 
     # Run through each ind and get density gradient colours
     lapply(ind, function(z) {
@@ -1312,30 +1316,27 @@
       }
     })
   }
-
+  
   # Remaining colours are selected one per layer from point_cols
-  if (any(is.na(point_col))) {
+  if (any(LAPPLY(point_col, ".all_na"))) {
 
     # Number of layers missing colours
-    n <- length(point_col[is.na(point_col)])
-
+    n <- length(point_col[LAPPLY(point_col, ".all_na")])
+    
     # Pull colours out of point_cols
     clrs <- cols(n)
-
+    
     # Replace NA values in point_col with selected colours
-    point_col[is.na(point_col)] <- clrs
+    point_col[LAPPLY(point_col, ".all_na")] <- clrs
+    
   }
-
+  
   # Adjust colors by point_fill_alpha
-  point_col <- mapply(function(point_col,
-                                 point_col_alpha) {
-    adjustcolor(point_col, point_col_alpha)
-  },
-  point_col,
-  point_col_alpha,
-  USE.NAMES = FALSE,
-  SIMPLIFY = FALSE
-  )
-
+  lapply(seq_len(SMP), function(z){
+    if(point_col_alpha[z] != 1){
+      point_col[[z]] <<- adjustcolor(point_col[[z]], point_col_alpha[z])
+    }
+  })
+  
   return(point_col)
 }

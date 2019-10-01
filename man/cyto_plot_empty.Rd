@@ -10,9 +10,10 @@ cyto_plot_empty(x, ...)
 \method{cyto_plot_empty}{flowFrame}(x, channels, axes_trans = NA,
   overlay = NA, xlim = NA, ylim = NA, limits = "machine", title,
   xlab, ylab, density_modal = TRUE, density_smooth = 1.5,
-  density_stack = 0.5, density_fill = NA, density_fill_alpha = 1,
-  density_line_type = 1, density_line_width = 1,
-  density_line_col = "black", point_shape = ".", point_size = 2,
+  density_stack = 0.5, density_cols = NA, density_fill = NA,
+  density_fill_alpha = 1, density_line_type = 1,
+  density_line_width = 1, density_line_col = "black",
+  point_shape = ".", point_size = 2, point_col_scale = NA,
   point_cols = NA, point_col = NA, point_col_alpha = 1,
   axes_text = c(TRUE, TRUE), axes_text_font = 1, axes_text_size = 1,
   axes_text_col = "black", axes_label_text_font = 1,
@@ -64,7 +65,39 @@ to mode and presented as a percentage. Set to \code{TRUE} by default.}
 \code{\link[stats:density]{density}} to adjust kernel density.}
 
 \item{density_stack}{numeric [0,1] indicating the degree of offset for
-overlaid populations, set to 0.5 by default.}
+overlaid populations, set to 0.5 by default.
+#' @param density_cols vector colours to draw from when selecting density fill
+colours if none are supplied to density_fill.}
+
+\item{density_fill}{colour(s) used to fill polygons.}
+
+\item{density_fill_alpha}{numeric [0,1] used to control fill transparency,
+set to 1 by default to remove transparency.}
+
+\item{density_line_type}{line type(s) to use for border(s), set to solid
+lines by default.}
+
+\item{density_line_width}{line width for border.}
+
+\item{density_line_col}{colour(s) for border line, set to "black" by default.}
+
+\item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
+\code{"."} by default to maximise plotting speed.  See
+\code{\link[graphics:par]{pch}} for alternatives.}
+
+\item{point_size}{numeric to control the size of points in 2-D scatter plots
+set to 2 by default.}
+
+\item{point_col_scale}{vector of colours to use for density gradient.}
+
+\item{point_cols}{vector colours to draw from when selecting colours for
+points if none are supplied to point_col.}
+
+\item{point_col}{colour(s) to use for points in 2-D scatter plots, set to NA
+by default to use a blue-red density colour scale.}
+
+\item{point_col_alpha}{numeric [0,1] to control point colour transparency in
+2-D scatter plots, set to 1 by default to use solid colours.}
 
 \item{axes_text}{logical vector of length 2 indicating whether axis text
 should be included for the x and y axes respectively, set to
