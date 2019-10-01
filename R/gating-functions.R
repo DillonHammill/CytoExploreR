@@ -1,8 +1,10 @@
+# INTERNAL GATING FUNCTIONS ----------------------------------------------------
+
 #' Draw Polygon Gate(s) Around Populations.
 #'
-#' \code{.cyto_gate_polygon_draw} constructs an interactive plotting window to allow
-#' manual selection of the co-ordinates of a polygon gate(s) (through mouse
-#' click) which are constructed into
+#' \code{.cyto_gate_polygon_draw} constructs an interactive plotting window to
+#' allow manual selection of the co-ordinates of a polygon gate(s) (through
+#' mouse click) which are constructed into
 #' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
 #' \code{\link[flowCore:filters-class]{filters}} list.
 #'
@@ -148,9 +150,9 @@
 
 #' Draw Rectangle Gate(s) Around Populations.
 #'
-#' \code{.cyto_gate_rectangle_draw} constructs an interactive plotting window to allow
-#' manual selection of the co-ordinates of a rectangle gate(s) (through mouse
-#' click) which are constructed into
+#' \code{.cyto_gate_rectangle_draw} constructs an interactive plotting window to
+#' allow manual selection of the co-ordinates of a rectangle gate(s) (through
+#' mouse click) which are constructed into
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Simply select 2
 #' diagonal co-ordinates to construct the rectangleGate(s).
@@ -294,9 +296,9 @@
 
 #' Draw Interval Gate(s) Around Populations.
 #'
-#' \code{.cyto_gate_interval_draw} constructs an interactive plotting window for user
-#' to select the lower and upper bounds of a population (through mouse click)
-#' which is constructed into a
+#' \code{.cyto_gate_interval_draw} constructs an interactive plotting window for
+#' user to select the lower and upper bounds of a population (through mouse
+#' click) which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' interval gates are supported, for 2-D interval gates an additional argument
@@ -498,9 +500,9 @@
 
 #' Draw Threshold Gate(s) Around Populations.
 #'
-#' \code{.cyto_gate_threshold_draw} constructs an interactive plotting window for user
-#' to select the lower bound of a population which is constructed into a
-#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
+#' \code{.cyto_gate_threshold_draw} constructs an interactive plotting window
+#' for user to select the lower bound of a population which is constructed into
+#' a \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' threshold gates are supported, for 2-D threshold gates all events above the
 #' select x and y coordinates are included in the gate. Multiple threshold gates
@@ -659,8 +661,8 @@
 
 #' Draw Boundary Gate(s) Around Populations.
 #'
-#' \code{.cyto_gate_boundary_draw} constructs an interactive plotting window for user
-#' to select the upper bound of a population which is constructed into a
+#' \code{.cyto_gate_boundary_draw} constructs an interactive plotting window for
+#' user to select the upper bound of a population which is constructed into a
 #' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' boundary gates are supported, for 2-D boundary gates all events below the
@@ -818,8 +820,8 @@
 
 #' Draw Ellipsoid Gate(s) Around Populations.
 #'
-#' \code{.cyto_gate_ellipse_draw} constructs an interactive plotting window for user
-#' to select the limits of a population in 2 dimensions (4 points) which is
+#' \code{.cyto_gate_ellipse_draw} constructs an interactive plotting window for
+#' user to select the limits of a population in 2 dimensions (4 points) which is
 #' constructed into \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 #' object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
@@ -1231,6 +1233,9 @@
                                 plot = TRUE,
                                 label = TRUE, ...) {
 
+  # WARNING
+  message("Web gates are an experimental feature - use at your own risk!")
+  
   # Check channels
   channels <- cyto_channels_extract(fr,
     channels = channels,
