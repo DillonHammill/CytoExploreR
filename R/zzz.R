@@ -21,6 +21,9 @@
   # Signals args called to cyto_plot - check if call is made twice
   options("cyto_plot_call" = NULL)
   
+  # Signals if plots match in flowSet method
+  options("cyto_plot_match" = NULL)
+  
   # Create custom theme for cyto_plot
   options("cyto_plot_theme" = NULL)
   

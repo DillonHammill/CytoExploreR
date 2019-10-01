@@ -79,6 +79,15 @@
                           channels = channels[1],
                           limits = limits,
                           plot = TRUE)[,1]
+    # XLIM SUPPLIED MANUALLY
+    }else{
+      if(getOption("cyto_plot_method") == "flowFrame"){
+        if(!.all_na(axes_trans)){
+          if(channels[1] %in% names(axes_trans)){
+            xlim <- axes_trans[[channels[1]]]$transform(xlim)
+          }
+        }
+      }
     }
     
     # YLIM

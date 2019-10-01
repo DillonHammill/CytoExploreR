@@ -554,9 +554,6 @@
                              ypad = 1.2,
                              adj = 0.5, ...) {
   
-  print(label_text_x)
-  print(label_text_y)
-  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
   # RESET CEX & XPD
