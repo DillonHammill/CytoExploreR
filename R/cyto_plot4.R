@@ -23,7 +23,260 @@ cyto_plot4.GatingSet <- function(){
 
 #' @rdname cyto_plot4
 #' @export
-cyto_plot4.GatingHierarchy <- function(){
+cyto_plot4.GatingHierarchy <- function(x,
+                                       parent,
+                                       alias = NA,
+                                       channels,
+                                       axes_trans = NA,
+                                       overlay = NA,
+                                       gate = NA,
+                                       limits = "data",
+                                       display = 25000,
+                                       popup = FALSE,
+                                       xlim = NA,
+                                       ylim = NA,
+                                       xlab,
+                                       ylab,
+                                       title,
+                                       negate,
+                                       density_modal = TRUE,
+                                       density_smooth = 0.6,
+                                       density_stack = 0,
+                                       density_cols = NA,
+                                       density_fill = NA,
+                                       density_fill_alpha = 1,
+                                       density_line_type = 1,
+                                       density_line_width = 1,
+                                       density_line_col = "black",
+                                       point_shape = ".",
+                                       point_size = 2,
+                                       point_col_scale = NA,
+                                       point_cols = NA,
+                                       point_col = NA,
+                                       point_col_alpha = 1,
+                                       contour_lines = 0,
+                                       contour_line_type = 1,
+                                       contour_line_width = 1,
+                                       contour_line_col = "black",
+                                       contour_line_alpha = 1,
+                                       axes_text = c(TRUE, TRUE),
+                                       axes_text_font = 1,
+                                       axes_text_size = 1,
+                                       axes_text_col = "black",
+                                       axes_label_text_font = 1,
+                                       axes_label_text_size = 1.1,
+                                       axes_label_text_col = "black",
+                                       title_text_font = 2,
+                                       title_text_size = 1.1,
+                                       title_text_col = "black",
+                                       legend = FALSE,
+                                       legend_text = NA,
+                                       legend_text_font = 1,
+                                       legend_text_size = 1,
+                                       legend_text_col = "black",
+                                       legend_line_type = NA,
+                                       legend_line_width = NA,
+                                       legend_line_col = NA,
+                                       legend_box_fill = NA,
+                                       legend_point_col = NA,
+                                       gate_line_type = 1,
+                                       gate_line_width = 2.5,
+                                       gate_line_col = "red",
+                                       gate_fill = "white",
+                                       gate_fill_alpha = 0,
+                                       label,
+                                       label_text,
+                                       label_stat,
+                                       label_position = "auto",
+                                       label_text_x = NA,
+                                       label_text_y = NA,
+                                       label_text_font = 2,
+                                       label_text_size = 1,
+                                       label_text_col = "black",
+                                       label_fill = "white",
+                                       label_fill_alpha = 0.6,
+                                       border_line_type = 1,
+                                       border_line_width = 1,
+                                       border_line_col = "black",
+                                       border_fill = "white",
+                                       border_fill_alpha = 1, ...){
+  
+  # GATINGHIERARCHY METHOD - CALLS FLOWFRAME METHOD
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # PARENT
+  if(missing(parent)){
+    stop("Supply the name of the 'parent' population to plot.")
+  }
+  
+  # CHANNELS
+  if(missing(channels)){
+    stop("Supply the channel/marker(s) to construct the plot.")
+  }
+  
+  # GATINGHIERACHY - gh (x available for flowframe method call)
+  gh <- x
+  
+  # TRANSFORMATIONS
+  if(.all_na(axes_trans)){
+    # TRANSFORMERLIST FROM GATINGHIERARCHY
+    axes_trans <- gh@transformation
+    if(length(axes_trans) == 0){
+      axes_trans <- NA
+    }
+  }
+  
+  # PREPARE DATA & ARGUMENTS ---------------------------------------------------
+  
+  # EXTRACT PARENT POPULATION
+  x <- cyto_extract(gh, parent)
+  
+  # OVERLAY - POPULATION NAMES
+  if(!.all_na(overlay)){
+    # POPULATION NAMES TO OVERLAY
+    if(is.character(overlay)){
+      if(all(overlay %in% basename(cyto_nodes(gh)))){
+        # ADD OVERLAY TO LABEL_TEXT
+        if(missing(label_text)){
+          if(!.all_na(alias)){
+            if(length(channels) == 1){
+              label_text <- c(alias, overlay)
+            }else if(length(channels) == 2){
+              label_text <- alias
+            }
+          }
+        }
+        # EXTRACT POPULATIONS
+        nms <- overlay
+        overlay <- lapply(overlay, function(z){
+          cyto_extract(gh, z)
+        })
+        names(overlay) <- nms
+      }
+    # OVERLAY - POPULATIONS
+    }else{
+      # ADD OVERLAY TO LABEL_TEXT
+      if(missing(label_text)){
+        if(!.all_na(alias)){
+          label_text <- rep(alias, length.out = length(overlay) + 1)
+        }
+      }
+    }
+  # NO OVERLAY
+  }else if(.all_na(overlay)){
+    # LABEL TEXT
+    if(missing(label_text)){
+      if(!.all_na(alias)){
+        label_text <- NA
+      }else{
+        label_text <- alias
+      }
+    }
+  }
+  
+  # PREPARE GATES --------------------------------------------------------------
+  
+  # EMPTY ALIAS
+  if(.empty(alias)){
+    # ALL GATES IN SUPPLIED CHANNELS
+    if(all(alias == "")){
+      gt <- templateGen(gh)
+      gt <- gt[basename(gt$parent) == parent, ]
+      # 2D PLOT - BOTH CHANNELS MATCH
+      if(length(channels) == 2){
+        alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+      # 1D PLOT - ONE CHANNEL MATCH
+      }else if(length(channels) == 1){
+        ind <- lapply(gt$dims, function(z){
+          grep(channels, z)
+        })
+        ind <- LAPPLY(ind, "length") != 0
+        alias <- gt$alias[ind]
+      }
+      # NO ALIAS IN SUPPLIED CHANNELS
+      if(length(alias) == 0){
+        alias <- NA
+      }
+    }
+  }
+  
+  # EXTRACT GATE OBJECTS
+  if(!.all_na(alias)){
+    # LIST OF GATE OBJECTS
+    gate <- lapply(alias, function(z){
+      getGate(gh, paste(parent, z, sep = "/"))
+    })
+    # WATCH OUT FOR POPULATIONS SHARING THE SAME GATE
+    gate <- unique(gate)
+  }
+  
+  # SUPPORT NEGATED BOOLEAN FILTERS
+  
+  # SUPPORT NEGATED GATES
+  
+  # PREPARE ARGUMENTS ----------------------------------------------------------
+  
+  # TITLE
+  if(missing(title)){
+    # SAMPLENAME
+    title <- cyto_names(x)
+    # PARENT
+    title <- LAPPLY(title, function(z){
+      if(parent == "root"){
+        pt <- "All Events"
+      }else{
+        pt <- parent
+      }
+      # 1D PLOT - STACKED NO OVERLAY - LACK SAMPLENAMES
+      if(length(channels) == 1 &
+         .all_na(overlay) &
+         density_stack != 0){
+        pt
+      # 1D PLOT - STACKED OVERLAY - SAMPLENAMES ONLY
+      }else if(length(channels) == 1 &
+               !.all_na(overlay) &
+               density_stack != 0){
+        z
+      # PASTE SAMPLNAME & PARENT  
+      }else{
+        paste(z, pt, sep = "\n")
+      }
+      # Stacked 1D plots lack sampleNames in titles if no overlay
+      if (length(channels) == 1 &
+          .all_na(overlay) &
+          density_stack != 0) {
+        pt
+        # Stacked with overlay display sampleNames only
+      } else if (length(channels) == 1 &
+                 !.all_na(overlay) &
+                 density_stack != 0) {
+        z
+        # Paste together sampleName and parent name
+      } else {
+        paste(z, "\n", pt, sep = " ")
+      }
+    })
+  }
+  
+  # NEGATE
+  if(missing(negate)){
+    negate <- FALSE
+  }
+  
+  # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
+  
+  # PULL DOWN ARGUMENTS
+  args <- .args_list()
+  
+  # CYTO_PLOT FLOWFRAME ARGUMENTS
+  ARGS <- formalArgs("cyto_plot4.flowFrame")
+  
+  # RESTRCT ARGUMENTS
+  args <- args[ARGS]
+  
+  # CALL FLOWFRAME METHOD
+  do.call("cyto_plot4.flowFrame", args)
   
 }
 
@@ -406,6 +659,7 @@ cyto_plot4.flowSet <- function(x,
   # PREVIOUS CALL
   previous_call <- getOption("cyto_plot_call")
   
+  
   # CURRENT ARGUMENTS
   args <- .args_list()
   
@@ -431,7 +685,7 @@ cyto_plot4.flowSet <- function(x,
   options("cyto_plot_call" = current_call)
   
   # RESET SAVED LABEL CO-ORDINATES - MATCHING CALLS / NO CYTO_PLOT_SAVE
-  if(!identical(previous_call, current_call) |
+  if(!isTRUE(all.equal(previous_call, current_call)) |
      getOption("cyto_plot_save") == FALSE){
     # RESET SAVED LABEL CO-ORDINATES
     options("cyto_plot_label_coords" = NULL)
@@ -1172,7 +1426,7 @@ cyto_plot4.flowFrame <- function(x,
   # RESET SAVED LABEL CO-ORDINATES - FLOWFRAME METHOD ONLY
   if (getOption("cyto_plot_method") == "flowFrame"){
     # RESET SAVED COORDS - NEW CALL OR NO CYTO_PLOT_SAVE
-    if(!identical(previous_call, current_call) |
+    if(isTRUE(all.equal(previous_call, current_call)) |
       getOption("cyto_plot_save") == FALSE) {
     options("cyto_plot_label_coords" = NULL)
     }
@@ -1207,7 +1461,7 @@ cyto_plot4.flowFrame <- function(x,
     if(getOption("cyto_plot_method") == "flowFrame"){
       # CYTO_PLOT_SAVE & SAME CALL
       if (getOption("cyto_plot_save") &
-        identical(previous_call, current_call)) {
+        isTRUE(all.equal(previous_call, current_call))) {
         # SAVED LABEL CO-ORDINATES
         saved_label_coords <- getOption("cyto_plot_label_coords")
         if (!is.null(saved_label_coords)) {
@@ -1225,15 +1479,12 @@ cyto_plot4.flowFrame <- function(x,
      }
     # FLOWSET METHOD
     }else{
-      print("CYTO PLOT MATCH")
-      print(getOption("cyto_plot_match"))
       # SAME CALL - INHERIT CO-ORDINATES
       if(!is.null(getOption("cyto_plot_match")) &
          any(LAPPLY(getOption("cyto_plot_match"), function(z){
         identical(z, current_call)
       }))){
         # INHERIT SAVED CO-ORDINATES
-        print("YEBO YES!")
         ind <- which(LAPPLY(getOption("cyto_plot_match"), function(z){
           identical(z, current_call)
         }))[1]
@@ -1271,18 +1522,22 @@ cyto_plot4.flowFrame <- function(x,
 
   # SAVE LABEL CO-ORDINATES ----------------------------------------------------
 
-  # SAVE TO CYTO_PLOT_LABEL_COORDS 
+  # SAVE TO CYTO_PLOT_LABEL_COORDS - INACTIVE CYTO_PLOT_SAVE
   if(label == TRUE){
     # FLOWFRAME METHOD
-    if(getOption("cyto_plot_method") == "flowFrame"){
+    if(getOption("cyto_plot_method") == "flowFrame" &
+       getOption("cyto_plot_save") == FALSE){
       options("cyto_plot_label_coords" = label_text_xy)
     # FLOWSET METHOD
     }else{
-      if(is.null(getOption("cyto_plot_label_coords"))){
-        options("cyto_plot_label_coords" = list(label_text_xy))
-      }else{
-        options("cyto_plot_label_coords" = c(getOption("cyto_plot_label_coords"),
+      # SAVE CO-ORDINATES - CYTO_PLOT_SAVE INACTIVE
+      if(getOption("cyto_plot_save") == FALSE){
+        if(is.null(getOption("cyto_plot_label_coords"))){
+          options("cyto_plot_label_coords" = list(label_text_xy))
+        }else{
+          options("cyto_plot_label_coords" = c(getOption("cyto_plot_label_coords"),
                                              list(label_text_xy)))
+        }
       }
     }
   }
@@ -1290,16 +1545,19 @@ cyto_plot4.flowFrame <- function(x,
   # SAVE PLOT CALL -------------------------------------------------------------
   
   # FLOWFRAME METHOD
-  if(getOption("cyto_plot_method") == "flowFrame"){
+  if(getOption("cyto_plot_method") == "flowFrame" &
+     getOption("cyto_plot_save") == FALSE){
     # UPDATE CYTO_PLOT_CALL
     options("cyto_plot_call" = current_call)
   # FLOWSET METHOD
   }else{
-    # UPDATE CYTO_PLOT_CALL
-    if(is.null(previous_call)){
-      options("cyto_plot_match" = list(current_call))
-    }else{
-      options("cyto_plot_match" = c(previous_call, list(current_call)))
+    # UPDATE CYTO_PLOT_MATCH - CYTO_PLOT_SAVE INACTIVE
+    if(getOption("cyto_plot_save") == FALSE){
+      if(is.null(previous_call)){
+        options("cyto_plot_match" = list(current_call))
+      }else{
+        options("cyto_plot_match" = c(previous_call, list(current_call)))
+      }
     }
   }
 
