@@ -11,7 +11,9 @@
 #' @noRd
 .empty <- function(x){
 
-  if(is.character(x)){
+  if(is.na(x)){
+    return(FALSE)
+  }else if(is.character(x)){
     if(all(nchar(trimws(x)) == 0)){
       return(TRUE)
     }else{
