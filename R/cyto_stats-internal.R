@@ -806,7 +806,7 @@
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
 #' @param buffer fraction indcating the amount of buffering to be added on top
-#'   of the upper and lower limit, set to 0.02 by default.
+#'   of the upper and lower limit, set to 0.04 by default.
 #' @param anchor logical indicating if the lower limit should be anchored to
 #'   zero if the data range is above zero, set to TRUE by default.
 #'
@@ -827,7 +827,7 @@
                                   channels = NA,
                                   limits = "machine",
                                   plot = FALSE,
-                                  buffer = 0.02,
+                                  buffer = 0.04,
                                   anchor = TRUE,
                                   ...){
   
@@ -892,7 +892,7 @@
                                 channels = NA,
                                 limits = "machine",
                                 plot = FALSE,
-                                buffer = 0.02,
+                                buffer = 0.04,
                                 anchor = TRUE, ...){
   
   # Get ranges for each flowFrame as list
@@ -927,7 +927,7 @@
                                         channels = NA,
                                         limits = "machine",
                                         plot = FALSE,
-                                        buffer = 0.02,
+                                        buffer = 0.04,
                                         anchor = TRUE, ...){
   
   # Extract data from GatingHierarchy
@@ -951,7 +951,7 @@
                                   channels = NA,
                                   limits = "machine",
                                   plot = FALSE,
-                                  buffer = 0.02,
+                                  buffer = 0.04,
                                   anchor = TRUE, ...){
   
   # Extract data from GatingSet
@@ -975,7 +975,7 @@
                              channels = NA,
                              limits = "machine",
                              plot = FALSE,
-                             buffer = 0.02,
+                             buffer = 0.04,
                              anchor = TRUE){
   
   # Calculate range for each list element
