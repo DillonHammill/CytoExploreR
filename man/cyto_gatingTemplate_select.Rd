@@ -15,12 +15,13 @@ select a gatingTemplate as the active gatingTemplate for downstream
   analyses.
 }
 \description{
-\code{cyto_gatingTemplate_select} will designate which gatingTemplate should be
-used for storing downstream gating results. \code{cyto_gatingTemplate_select}
-should therefore be called prior to gating or \code{gate_draw} will resort to
-using \code{"gatingTemplate.csv"} to save the constructed gates.
-\code{cyto_gatingTemplate_select} also provides an easy way to switch between
-gatingTemplates when multiple templates are required.
+\code{cyto_gatingTemplate_select} will designate which gatingTemplate should
+be used for storing downstream gating results.
+\code{cyto_gatingTemplate_select} should therefore be called prior to gating
+or \code{gate_draw} will resort to using \code{"gatingTemplate.csv"} to save
+the constructed gates. \code{cyto_gatingTemplate_select} also provides an
+easy way to switch between gatingTemplates when multiple templates are
+required.
 }
 \examples{
 cyto_gatingTemplate_select("Activation_gatingTemplate")

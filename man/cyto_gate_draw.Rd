@@ -18,7 +18,7 @@ Manually draw gates around populations for analysis of flow cytometry data.
 }
 \details{
 \code{cyto_gate_draw} is a convenient wrapper for the gating functions
-shipped with \code{CytoRSuite} to facilitate analysis of flow cytometry by
+shipped with \code{CytoExploreR} to facilitate analysis of flow cytometry by
 gate drawing. Using \code{cyto_gate_draw} users can specify the type of
 gate(s) to be constructed through the \code{type} argument and
 \code{cyto_gate_draw} will automatically handle plotting the data and make

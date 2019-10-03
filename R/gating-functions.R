@@ -134,10 +134,9 @@
         x = fr,
         gate = gate,
         channels = channels,
-        text = alias,
-        text_size = 1,
-        stat = "percent",
-        box_alpha = 0.7
+        label_text = alias,
+        label_text_size = 1,
+        label_stat = "percent"
       )
     }
 
@@ -264,26 +263,21 @@
     coords <- as.matrix(coords)
     colnames(coords) <- channels
 
-    rect(
-      xleft = min(coords[, 1]),
-      ybottom = min(coords[, 2]),
-      xright = max(coords[, 1]),
-      ytop = max(coords[, 2]),
-      border = "red",
-      lwd = 2.5
-    )
-
+    # Construct gate
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
+    
+    # Plot gate
+    cyto_plot_gate(gate,
+                   channels = channels)
 
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
         gate = gate,
         channels = channels,
-        text = alias,
-        text_size = 1,
-        stat = "percent",
-        box_alpha = 0.7
+        label_text = alias,
+        label_text_size = 1,
+        label_stat = "percent"
       )
     }
 
@@ -461,10 +455,9 @@
           x = fr,
           gate = gate,
           channels = channels,
-          text = alias,
-          text_size = 1,
-          stat = "percent",
-          box_alpha = 0.7
+          label_text = alias,
+          label_text_size = 1,
+          label_stat = "percent"
         )
       }
     } else if (axis == "y") {
@@ -483,10 +476,9 @@
           x = fr,
           gate = gate,
           channels = channels,
-          text = alias,
-          text_size = 1,
-          stat = "percent",
-          box_alpha = 0.7
+          label_text = alias,
+          label_text_size = 1,
+          label_stat = "percent"
         )
       }
     }
@@ -649,10 +641,9 @@
       x = fr,
       gate = gate,
       channels = channels,
-      text = alias,
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
+      label_text = alias,
+      label_text_size = 1,
+      label_stat = "percent"
     )
   }
 
@@ -808,10 +799,9 @@
       x = fr,
       gate = gate,
       channels = channels,
-      text = alias,
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
+      label_text = alias,
+      label_text_size = 1,
+      label_stat = "percent"
     )
   }
 
@@ -994,21 +984,17 @@
       filterId = alias
     )
     
-    polygon(as(gate, "polygonGate")@boundaries[, 1],
-      as(gate, "polygonGate")@boundaries[, 2],
-      border = "red",
-      lwd = 2.5
-    )
+    cyto_gate_plot(gate,
+                   channels = channels)
 
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
         gate = gate,
         channels = channels,
-        text = alias,
-        text_size = 1,
-        stat = "percent",
-        box_alpha = 0.7
+        label_text = alias,
+        label_text_size = 1,
+        label_stat = "percent"
       )
     }
 
@@ -1131,12 +1117,6 @@
     pch = 16
   )
 
-  abline(
-    v = pts$x,
-    h = pts$y,
-    lwd = 2.5, col = "red"
-  )
-
   # CO-ORDINATES matrix
   pts <- matrix(pts, ncol = 2)
   colnames(pts) <- channels
@@ -1144,16 +1124,17 @@
   # QUADGATE CONSTRUCTION
   gate <- quadGate(.gate = pts, filterId = paste0(alias, collapse = "|"))
   
+  cyto_plot_gate(gate, channels = channels)
+  
   # LABELS
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
       gate = gate,
       channels = channels,
-      text = alias,
-      text_size = 1,
-      stat = "percent",
-      box_alpha = 0.7
+      label_text = alias,
+      label_text_size = 1,
+      label_stat = "percent"
     )
   }
   
@@ -1797,10 +1778,9 @@
         x = fr,
         gate = gate,
         channels = channels,
-        text = alias[x],
-        text_size = 1,
-        stat = "percent",
-        box_alpha = 0.7
+        label_text = alias[x],
+        label_text_size = 1,
+        label_stat = "percent"
       )
     }
 
@@ -1809,7 +1789,7 @@
 
   gates <- filters(gates)
 
-  cyto_plot_gate(x = gates, channels = channels)
+  cyto_plot_gate(gates, channels = channels)
 
   return(gates)
 }

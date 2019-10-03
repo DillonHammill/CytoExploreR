@@ -6,6 +6,8 @@
 #'   \code{gate_draw}.
 #' @param channels names of channels used to construct the plot.
 #' @param alias names of the populations to be gated.
+#' @param negate logical flag indicating whether the negated population should
+#'   be included in the gatingTemplate entry.
 #'
 #' @return Stop gating process if type is incorrect or returns \code{type} as
 #'   full lower case name(s). If a single type is supplied for multiple
@@ -14,7 +16,7 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_gate_type <- function(type, channels, alias) {
+.cyto_gate_type <- function(type, channels, alias, negate = FALSE) {
   
   # DEFAULT GATE TYPES ---------------------------------------------------------
   
@@ -108,6 +110,11 @@
     }
   }
   
+  # REMOVE NEGATED GATE TYPE
+  if(negate == TRUE){
+    type <- type[-length(type)]
+  }
+  
   # RETURN VALID GATE TYPES ----------------------------------------------------
   
   return(type)
@@ -116,15 +123,16 @@
 # .CYTO_ALIAS ------------------------------------------------------------------
 
 #' Check supplied alias
-#' 
+#'
 #' @param alias vector of population names.
 #' @param type vector gate types to be used to gate the populations.
-#' @param negate logical indicating whether the negated population 
-#' 
-#' @return stop gating process if alias is missing or of an incorrect length.
-#' 
+#' @param negate logical indicating whether the negated population
+#'
+#' @return stop gating process if alias is missing or of an incorrect length,
+#'   and return alias.
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @noRd
 .cyto_alias <- function(alias, 
                         type,
@@ -163,5 +171,7 @@
       stop("Have you forgotten to include a name for the negated population?")
     }
   }
+  
+  return(alias)
   
 }

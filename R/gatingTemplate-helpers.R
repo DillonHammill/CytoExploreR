@@ -2,12 +2,13 @@
 
 #' Select a gatingTemplate for downstream analyses
 #'
-#' \code{cyto_gatingTemplate_select} will designate which gatingTemplate should be
-#' used for storing downstream gating results. \code{cyto_gatingTemplate_select}
-#' should therefore be called prior to gating or \code{gate_draw} will resort to
-#' using \code{"gatingTemplate.csv"} to save the constructed gates.
-#' \code{cyto_gatingTemplate_select} also provides an easy way to switch between
-#' gatingTemplates when multiple templates are required.
+#' \code{cyto_gatingTemplate_select} will designate which gatingTemplate should
+#' be used for storing downstream gating results.
+#' \code{cyto_gatingTemplate_select} should therefore be called prior to gating
+#' or \code{gate_draw} will resort to using \code{"gatingTemplate.csv"} to save
+#' the constructed gates. \code{cyto_gatingTemplate_select} also provides an
+#' easy way to switch between gatingTemplates when multiple templates are
+#' required.
 #'
 #' @param x name of the gatingTemplate csv file to assign as the active
 #'   gatingTemplate for downstream analyses.
@@ -37,7 +38,7 @@ cyto_gatingTemplate_select <- function(x) {
   }
 
   # Set new gatingTemplate as active
-  options("CytoRSuite_gatingTemplate" = x)
+  options("CytoExploreR_gatingTemplate" = x)
 }
 
 # GATINGTEMPLATE ACTIVE --------------------------------------------------------
@@ -53,7 +54,7 @@ cyto_gatingTemplate_select <- function(x) {
 #'
 #' @export
 cyto_gatingTemplate_active <- function() {
-  getOption("CytoRSuite_gatingTemplate")
+  getOption("CytoExploreR_gatingTemplate")
 }
 
 # GATINGTEMPLATE CREATE --------------------------------------------------------
@@ -155,7 +156,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
   }
 
   # Working directory check
-  if (getOption("CytoRSuite_wd_check") == TRUE) {
+  if (getOption("CytoExploreR_wd_check") == TRUE) {
     if (file_wd_check(gatingTemplate) == FALSE) {
       stop(paste(gatingTemplate, "is not in this working directory."))
     }
@@ -264,7 +265,7 @@ cyto_gatingTemplate_apply <- function(x,
       }
       
       # Working directory check
-      if (getOption("CytoRSuite_wd_check") == TRUE) {
+      if (getOption("CytoExploreR_wd_check") == TRUE) {
         if (file_wd_check(gatingTemplate) == FALSE) {
           stop(paste(gatingTemplate, "is not in this working directory."))
         }
@@ -296,7 +297,7 @@ cyto_gatingTemplate_apply <- function(x,
     }
     
     # Working directory check
-    if (getOption("CytoRSuite_wd_check") == TRUE) {
+    if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (file_wd_check(gatingTemplate) == FALSE) {
         stop(paste(gatingTemplate, "is not in this working directory."))
       }
@@ -387,7 +388,7 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
   }
 
   # Working directory check
-  if (getOption("CytoRSuite_wd_check") == TRUE) {
+  if (getOption("CytoExploreR_wd_check") == TRUE) {
     if (file_wd_check(gatingTemplate) == FALSE) {
       stop(paste(gatingTemplate, "is not in this working directory."))
     }

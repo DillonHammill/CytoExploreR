@@ -146,7 +146,7 @@ cyto_map.flowSet <- function(x,
                  save = FALSE,
                  ...)
 
-  # MATCH MAPPING TO INDIVIDUAL FLOWFRAMES
+  # MATCH MAPPING TO INDIVIDUAL FLOWFRAMES -------------------------------------
   
   
   # SAVE MAPPED FLOWSET --------------------------------------------------------

@@ -5,8 +5,8 @@
 \title{cyto_gate_draw flowSet Method}
 \usage{
 \method{cyto_gate_draw}{flowSet}(x, alias = NULL, channels = NULL,
-  type = NULL, display = NULL, overlay = NA, group_by = "all",
-  select = NULL, axis = "x", label = TRUE, plot = TRUE, ...)
+  type = NULL, overlay = NA, group_by = "all", select = NULL,
+  axis = "x", label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -26,10 +26,6 @@ Supported gate types are \code{polygon, rectangle, ellipse, threshold,
 boundary, interval, quadrant and web} which can be abbreviated as upper or
 lower case first letters as well. Default \code{type} is \code{"interval"}
 for 1D gates and \code{"polygon"} for 2D gates.}
-
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames}
 or \code{list of flowSets} containing populations to be overlaid onto the

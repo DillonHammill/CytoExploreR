@@ -5,8 +5,8 @@
 \title{cyto_gate_draw flowFrame Method.}
 \usage{
 \method{cyto_gate_draw}{flowFrame}(x, alias = NULL, channels = NULL,
-  type = NULL, display = NULL, overlay = NA, axis = "x",
-  label = TRUE, plot = TRUE, ...)
+  type = NULL, overlay = NA, axis = "x", label = TRUE,
+  plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
@@ -26,10 +26,6 @@ Supported gate types include \code{polygon, rectangle, ellipse, threshold,
 boundary, interval, quadrant and web} which can be abbreviated as upper or
 lower case first letters as well. Default \code{type} is \code{"interval"}
 for 1D gates and \code{"polygon"} for 2D gates.}
-
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet} or list of flowFrames to
 overlay. To improve plotting speed, overlays are subjected to the same
