@@ -31,6 +31,12 @@
     }
   }
   
+  # SPLIT GATE TYPES
+  split_gate_types <- .split_gate_types()
+  
+  # MULTI GATE TYPES
+  multi_gate_types <- c(split_gate_types, "quadrant")
+  
   # SUPPORTED GATE TYPES -------------------------------------------------------
   
   # GATE TYPES
@@ -82,19 +88,30 @@
     }
   }
   
+  # CANNOT USED MIXED GATES FOR SPLIT GATE METHODS
+  if(any(type %in% split_gate_types) & !all(type %in% split_gate_types)){
+    stop(paste("Mixed gates are not supported for",
+         paste(split_gate_types, sep = " & "), "gate types."))
+  }
+  
+  # CANNOT NEGATE MULTI GATE METHODS
+  if(negate == TRUE & any(type %in% multi_gate_types)){
+    stop(paste("Cannot negate", 
+               paste(multi_gate_types, sep = " & "),
+               "gate_types."))
+  }
+  
   # PREPARE GATE TYPE ----------------------------------------------------------
   
   # REPEAT GATE TYPE ALIAS TIMES
   if(length(type) < length(alias)){
     type <- rep(type, length.out = length(alias))
-    # ONLY SINGLE QUADRANT CALL
-    if(length(grep("quadrant", type)) > 1){
-      type <- type[-grep("quadrant", type)[-1]]
-    } 
-    # ONLY SINGLE WEB CALL
-    if(length(grep("web", type)) > 1){
-      type <- type[-grep("quadrant", type)[-1]]
-    }
+    # ONLY SINGLE MULTI GATE TYPE CALL
+    lapply(multi_gate_types, function(z){
+      if(length(grep(z, type)) > 1){
+        type <<- type[-grep(z, type)[-1]]
+      }
+    })
   }
 
   # UNSUPPORTED GATE TYPES 1D PLOTS --------------------------------------------
@@ -112,7 +129,7 @@
   
   # REMOVE NEGATED GATE TYPE
   if(negate == TRUE){
-    type <- type[-length(type)]
+    type[length(type)] <- NA
   }
   
   # RETURN VALID GATE TYPES ----------------------------------------------------
@@ -129,14 +146,15 @@
 #' @param negate logical indicating whether the negated population
 #'
 #' @return stop gating process if alias is missing or of an incorrect length,
-#'   and return alias.
+#'   and return alias split by gate type.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
 .cyto_alias <- function(alias, 
                         type,
-                        negate = FALSE){
+                        negate = FALSE,
+                        split = FALSE){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -145,33 +163,44 @@
     stop("Supply the name(s) of the population(s) to 'alias'.")
   }
   
-  # GATES ----------------------------------------------------------------------
+  # ALIAS PER GATE TYPE --------------------------------------------------------
   
-  # GATED POPULATIONS
-  N <- sum(LAPPLY(type, function(z){
-    if(grepl("quadrant", z, ignore.case = TRUE) | 
-       grepl("q", z, ignore.case = TRUE)){
+  # EXPECTED ALIAS LENGTH PER GATE TYPE
+  N <- LAPPLY(type, function(z){
+    if(z == "quadrant"){
       n <- 4 
+    }else if(z %in% .split_gate_types()){  
+      n <- length(alias)
     }else{
       n <- 1
     }
-  }))
+    return(n)
+  })
   
-  # NEGATE
+  # INCLUDE NEGATED POPULATION
   if(negate == TRUE){
-    N <- N + 1
+    N <- c(N, 1)
   }
   
   # CHECK ALIAS ----------------------------------------------------------------
   
   # ALIAS LENGTH == N
-  if(!length(alias) == N){
+  if(!length(alias) == sum(N)){
     stop("Supply a name for each of the population(s) to 'alias'.")
     if(negate == TRUE){
       stop("Have you forgotten to include a name for the negated population?")
     }
-  }
+  }  
   
+  # SPLIT ALIAS ----------------------------------------------------------------
+  
+  # PREPARE ALIAS
+  alias <- split(alias, rep(seq_len(length(type)), times = N))
   return(alias)
   
+}
+
+#' @noRd
+.split_gate_types <- function(){
+  c("web")
 }

@@ -144,6 +144,11 @@ cyto_gate_draw.GatingSet <- function(x,
 
   # CHECKS ---------------------------------------------------------------------
   
+  # ALIAS MISSING
+  if(is.null(alias)){
+    stop("Supply the name(s) for the gated population(s) to 'alias'.")
+  }
+  
   # ACTIVE GATINGTEMPLATE
   if(is.null(gatingTemplate)){
     gatingTemplate <- cyto_gatingTemplate_active()
@@ -162,19 +167,12 @@ cyto_gate_draw.GatingSet <- function(x,
   # EXISTING ENTRIES IN GATINGTEMPLATE
   .cyto_gatingTemplate_check(parent, alias, gatingTemplate)
   
-  # ALIAS
+  # GATE TYPES (REPEAT BASED ON INPUT ALIAS)
+  type <- .cyto_gate_type(type, channels, alias, negate) 
+  
+  # ALIAS (LENGTH AS EXPECTED BASED ON GATE TYPES)
   alias <- .cyto_alias(alias, type, negate)
-  
-  # GATE TYPES
-  type <- .cyto_gate_type_check(type, channels, alias, negate)
-  
-  # NEGATED ALIAS
-  if(negate == TRUE){
-    ALIAS <- alias[-length(alias)]
-  }else{
-    ALIAS <- alias
-  }
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fs,
                                     channels = channels,
@@ -368,15 +366,7 @@ cyto_gate_draw.GatingSet <- function(x,
       }
     }
     # CONSTRUCT GATES
-    if (length(type) == 1 & type[1] == "quadrant") {
-      gates <- .cyto_gate_quadrant_draw(
-        fr = fr_list[[z]],
-        channels = channels,
-        alias = alias,
-        plot = FALSE,
-        label = label, ...
-      )
-    } else if (length(type) == 1 & type[1] == "web") {
+    if (type == "web") {
       gates <- .cyto_gate_web_draw(
         fr = fr_list[[z]],
         channels = channels,
@@ -385,12 +375,12 @@ cyto_gate_draw.GatingSet <- function(x,
         label = label, ...
       )
     } else {
-      gates <- mapply(function(type, ALIAS) {
+      gates <- mapply(function(type, alias) {
         if (type == "polygon") {
           .cyto_gate_polygon_draw(
             fr = fr_list[[z]],
             channels = channels,
-            alias = ALIAS,
+            alias = alias,
             plot = FALSE,
             label = label, ...
           )
@@ -398,7 +388,7 @@ cyto_gate_draw.GatingSet <- function(x,
           .cyto_gate_rectangle_draw(
             fr = fr_list[[z]],
             channels = channels,
-            alias = ALIAS,
+            alias = alias,
             plot = FALSE,
             label = label, ...
           )
@@ -406,7 +396,7 @@ cyto_gate_draw.GatingSet <- function(x,
           .cyto_gate_interval_draw(
             fr = fr_list[[z]],
             channels = channels,
-            alias = ALIAS,
+            alias = alias,
             plot = FALSE,
             axis = axis,
             label = label, ...
@@ -415,7 +405,7 @@ cyto_gate_draw.GatingSet <- function(x,
           .cyto_gate_threshold_draw(
             fr = fr_list[[z]],
             channels = channels,
-            alias = ALIAS,
+            alias = alias,
             plot = FALSE,
             label = label, ...
           )
@@ -423,7 +413,7 @@ cyto_gate_draw.GatingSet <- function(x,
           .cyto_gate_boundary_draw(
             fr = fr_list[[z]],
             channels = channels,
-            alias = ALIAS,
+            alias = alias,
             plot = FALSE,
             label = label, ...
           )
@@ -431,12 +421,21 @@ cyto_gate_draw.GatingSet <- function(x,
           .cyto_gate_ellipse_draw(
             fr = fr_list[[z]],
             channels = channels,
-            alias = ALIAS,
+            alias = alias,
+            plot = FALSE,
+            label = label, ...
+          )
+        }else if(type == "quadrant"){
+          .cyto_gate_quadrant_draw(
+            fr = fr_list[[z]],
+            channels = channels,
+            alias = alias,
             plot = FALSE,
             label = label, ...
           )
         }
-      }, type, ALIAS)
+      }, type, alias)
+      
       # NEGATED POPULATION
       negate_filter <- do.call("|", unlist(gates))
       NP <- split(fr_list[[z]], negate_filter)[[2]]
@@ -446,7 +445,7 @@ cyto_gate_draw.GatingSet <- function(x,
       )
       # NEGATED LABEL YCOORD
       if(length(channels) == 1){
-        negate_text_x <- mean(par("usr")[c(3,4)])
+        negate_text_y <- mean(par("usr")[c(3,4)])
       }else if(length(channels) == 2){
         negate_text_y <- suppressMessages(
           .cyto_mode(NP, channels = channels[2])
@@ -463,7 +462,6 @@ cyto_gate_draw.GatingSet <- function(x,
                          label_text_y = negate_text_y,
                          label_text_size = 1)
     }
-    
   })
   names(filters_list) <- names(fr_list)
   
