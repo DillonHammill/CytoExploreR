@@ -1350,6 +1350,71 @@ cyto_plot.flowSet <- function(x,
     }
   }
   
+  # Convert to list of density distributions for 1D plots ----------------------
+  
+  # Convert each flowFrame to density distribution - each list in separate plot
+  if(length(channels == 1)){
+    fr_list <- lapply(fr_list, function(z){
+      lapply(z, function(y){
+        suppressWarnings(.cyto_density(y,
+                                       channel = channels,
+                                       smooth = density_smooth,
+                                       modal = density_modal))
+      })
+    })
+  }
+  
+  # Number of overlays
+  ovn <- length(fr_list) - 1
+  
+  # shift distributions by density_stack
+  if(!.all_na(fr_list)){
+    # Calculate mean maximum y value for kernel densities
+    if(density_modal){
+      y_max <- 100
+    }else{
+      y_max <- mean(LAPPLY(fr_list, function(d){
+        if(!.all_na(d)){
+          max(d$y)
+        }else{
+          NA
+        }
+      }), na.rm = TRUE)
+    }
+    
+    # Degree of y shifting
+    shft <- seq(0,
+                ovn * density_stack * y_max,
+                density_stack * y_max)
+    
+    # Adjust y values if density_stack != 0
+    if(density_stack > 0 & length(fr_list) > 1){
+      # Shift distributions for stacking
+      lapply(seq_len(length(fr_list)), function(z){
+        if(!.all_na(fr_list[[z]])){
+          fr_list[[z]]$y <<- fr_list[[z]]$y + shft[z]
+        }
+      })
+    }
+  # No events in any fr_list  
+  }else if(.all_na(fr_list)){
+    
+    # Turn off y axis text
+    axes_text[[2]] <- FALSE
+    
+    # Set y_max to 100
+    y_max <- 100
+    
+    # Set y limits to 0-100
+    ylim <- c(0, y_max + ovn * density_stack * y_max)
+    
+    # Stacked distributions require shifting of y values
+    shft <- seq(0,
+                ovn * density_stack * y_max,
+                density_stack * y_max)
+    
+  }
+  
   # Extract gate objects -------------------------------------------------------
   
   # Add gate objects to list and repeat once pr plot
@@ -1459,7 +1524,6 @@ cyto_plot.flowSet <- function(x,
     
     # Layout dimensions
     layout <- .cyto_plot_layout(fr_list,
-                                channels = channels,
                                 layout = layout,
                                 density_stack = density_stack,
                                 density_layers = density_layers
@@ -2815,14 +2879,7 @@ cyto_plot.GatingSet <- function(x,
   if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
     options("CytoRSuite_cyto_plot_method" = "GatingSet")
   }
-  
-  # Signal a custom plot if layout is FALSE
-  if (!missing(layout)) {
-    if (all(layout == FALSE)) {
-      options("CytoRSuite_cyto_plot_custom" = TRUE)
-    }
-  }
-  
+
   # Reset saved label co-ordinates
   options("CytoRSuite_cyto_plot_label_coords" = NULL)
   
@@ -3259,7 +3316,6 @@ cyto_plot.GatingSet <- function(x,
     
     # Layout dimensions
     layout <- .cyto_plot_layout(fr_list,
-                                channels = channels,
                                 layout = layout,
                                 density_stack = density_stack,
                                 density_layers = density_layers
