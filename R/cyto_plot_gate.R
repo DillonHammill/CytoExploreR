@@ -56,8 +56,19 @@ cyto_plot_gate.rectangleGate <- function(gate,
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
-  # LIMITS
+  # PLOT LIMITS
   lims <- par("usr")
+  
+  # X LIMITS
+  xmin <- lims[3]
+  xmax <- lims[4]
+  xrng <- xmax - xmin
+  xpad <- (xrng - xrng / 1.04) / 2
+  xmin <- xmin + 0.5 * xpad # 1% BUFFER
+  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xrng <- xmax - xmin
+  
+  # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
@@ -152,8 +163,20 @@ cyto_plot_gate.polygonGate <- function(gate,
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
-  # LIMITS
+  
+  # PLOT LIMITS
   lims <- par("usr")
+  
+  # X LIMITS
+  xmin <- lims[3]
+  xmax <- lims[4]
+  xrng <- xmax - xmin
+  xpad <- (xrng - xrng / 1.04) / 2
+  xmin <- xmin + 0.5 * xpad # 1% BUFFER
+  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xrng <- xmax - xmin
+  
+  # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
@@ -161,6 +184,7 @@ cyto_plot_gate.polygonGate <- function(gate,
   ymin <- ymin + 0.5 * ypad # 1% BUFFER
   ymax <- ymax - 0.5 * ypad # 1% BUFFER
   yrng <- ymax - ymin
+  
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
@@ -287,8 +311,20 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
-  # LIMITS
+  
+  # PLOT LIMITS
   lims <- par("usr")
+  
+  # X LIMITS
+  xmin <- lims[3]
+  xmax <- lims[4]
+  xrng <- xmax - xmin
+  xpad <- (xrng - xrng / 1.04) / 2
+  xmin <- xmin + 0.5 * xpad # 1% BUFFER
+  xmax <- xmax - 0.5 * xpad # 1% BUFFER
+  xrng <- xmax - xmin
+  
+  # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
@@ -296,6 +332,7 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
   ymin <- ymin + 0.5 * ypad # 1% BUFFER
   ymax <- ymax - 0.5 * ypad # 1% BUFFER
   yrng <- ymax - ymin
+  
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
