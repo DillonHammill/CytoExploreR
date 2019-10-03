@@ -493,7 +493,8 @@
   
   lapply(args, function(arg){
     if(arg %in% names(x)){
-      if(arg %in% c("label_text_x", "label_text_y")){
+      if(arg %in% c("label_text_x", 
+                    "label_text_y")){
         res <- rep(c(x[[arg]], rep(NA, TL * TP)), length.out = TL * TP)
       }else{
         res <- rep(x[[arg]], length.out = TL * TP)
@@ -955,10 +956,7 @@
 
       # stacked/overlays lack a title
       if (.all_na(overlay)) {
-        title <- identifier(x)
-        if (title == "anonymous") {
-          title <- "Combined Events"
-        }
+        title <- cyto_names(x)
       } else {
         title <- NA
       }
@@ -973,11 +971,7 @@
 
     # missing title replaced with sample name
     if (.empty(title)) {
-      title <- identifier(x)
-      if (title == "anonymous") {
-        title <- "Combined Events"
-      }
-
+      title <- cyto_names(x)
       # NA will remove title in cyto_plot_empty
     } else if (.all_na(title)) {
       title <- NA
