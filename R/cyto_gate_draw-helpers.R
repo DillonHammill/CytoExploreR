@@ -35,7 +35,7 @@
   split_gate_types <- .split_gate_types()
   
   # MULTI GATE TYPES
-  multi_gate_types <- c(split_gate_types, "quadrant")
+  multi_gate_types <- .multi_gate_types()
   
   # SUPPORTED GATE TYPES -------------------------------------------------------
   
@@ -153,8 +153,7 @@
 #' @noRd
 .cyto_alias <- function(alias, 
                         type,
-                        negate = FALSE,
-                        split = FALSE){
+                        negate = FALSE){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -203,4 +202,9 @@
 #' @noRd
 .split_gate_types <- function(){
   c("web")
+}
+
+# @noRd
+.multi_gate_types <- function(){
+  c(.split_gate_types(), "quadrant")
 }

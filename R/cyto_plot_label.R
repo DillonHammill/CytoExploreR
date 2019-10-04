@@ -338,7 +338,7 @@ cyto_plot_label.flowFrame <- function(x,
       label_stat[!label_stat %in% c("count", "freq")] <- NA
     }
   }
-
+  
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
   # ARGUMENTS
@@ -373,7 +373,7 @@ cyto_plot_label.flowFrame <- function(x,
     # REPEAT LABEL ARGS PER POPULATION
     args[["label_text"]] <- rep(c(label_text, rep(NA, PNS)), 
                               length.out = PNS)
-    label_args <- formalArgs(cyto_plot_label)
+    label_args <- formalArgs(cyto_plot_labeller)
     label_args <- label_args[grepl("label_", label_args)]
     label_args <- label_args[-match("label_text", label_args)]
     lapply(label_args, function(z){
@@ -384,7 +384,7 @@ cyto_plot_label.flowFrame <- function(x,
   }else{
     
     # REPEAT LABEL ARGS PER LABEL_TEXT
-    label_args <- formalArgs(cyto_plot_label)
+    label_args <- formalArgs(cyto_plot_labeller)
     label_args <- label_args[grepl("label_", label_args)]
     label_args <- label_args[-match("label_text", label_args)]
     lapply(label_args, function(z){
@@ -392,16 +392,21 @@ cyto_plot_label.flowFrame <- function(x,
     })
     
   }
-
+  
   # UPDATE ARGUMENTS
   .args_update(args)
   
   # STATISTICS PER POPULATION --------------------------------------------------
   
+  # POPULATIONS
+  pops <- .cyto_label_pops(x,
+                           gate = gate,
+                           negate = negate)
+  
   # COMPUTE STATISTICS
-  label_stat <- .cyto_label_stat(x, 
-                                 gate = gate, 
-                                 negate = negate, 
+  label_stat <- .cyto_label_stat(list(x), 
+                                 pops = pops,
+                                 channels = channels,
                                  label_stat = label_stat)
   
   # PREPARE LABEL_TEXT ---------------------------------------------------------

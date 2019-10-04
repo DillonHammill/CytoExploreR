@@ -304,7 +304,7 @@
   # CYTO_PLOT ARGUMENTS --------------------------------------------------------
   
   # AVAILABLE ARGUMENTS
-  ARGS <- formalArgs(cyto_plot4.flowSet)
+  ARGS <- formalArgs(cyto_plot.flowSet)
   
   # REMOVE ARGUMENTS (SAME PER PLOT)
   ARGS <- ARGS[-match(c("x",

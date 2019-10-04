@@ -21,7 +21,7 @@
 #' @noRd
 .cyto_label_pops <- function(x,
                              gate,
-                             negate){
+                             negate = FALSE){
   
   # NO GATES -------------------------------------------------------------------
   
@@ -83,7 +83,7 @@
 .cyto_label_stat <- function(x,
                              pops,
                              channels,
-                             axes_trans,
+                             axes_trans = NA,
                              label_stat,
                              density_smooth){
   

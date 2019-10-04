@@ -437,30 +437,40 @@ cyto_gate_draw.GatingSet <- function(x,
       }, type, alias)
       
       # NEGATED POPULATION
-      negate_filter <- do.call("|", unlist(gates))
-      NP <- split(fr_list[[z]], negate_filter)[[2]]
-      # NEGATED LABEL XCOORD
-      negate_text_x <- suppressMessages(
-        .cyto_mode(NP, channels = channels[1])
-      )
-      # NEGATED LABEL YCOORD
-      if(length(channels) == 1){
-        negate_text_y <- mean(par("usr")[c(3,4)])
-      }else if(length(channels) == 2){
-        negate_text_y <- suppressMessages(
-          .cyto_mode(NP, channels = channels[2])
+      if(negate == TRUE){
+        # GATE
+        if(length(unlist(gates)) == 1){
+          NP <- split(fr_list[[z]], unlist(gates))[[2]]
+        }else{
+          negate_filter <- do.call("|", unlist(gates))
+          NP <- split(fr_list[[z]], negate_filter)[[2]]
+        }
+        # NEGATED LABEL XCOORD
+        negate_text_x <- suppressMessages(
+          .cyto_mode(NP, channels = channels[1])
         )
+        # NEGATED LABEL YCOORD
+        if(length(channels) == 1){
+          negate_text_y <- mean(par("usr")[c(3,4)])
+        }else if(length(channels) == 2){
+          negate_text_y <- suppressMessages(
+            .cyto_mode(NP, channels = channels[2])
+         )
+        }
+        # NEGATED STATISTIC
+        negate_stat <- .cyto_count(NP)/.cyto_count(fr_list[[z]]) * 100
+        negate_stat <- paste(.round(negate_stat, 2), "%")
+        # NEGATED LABEL
+        cyto_plot_labeller(label_text = paste(alias[length(alias)],
+                                              negate_stat,
+                                              sep = "\n"),
+                           label_text_x = negate_text_x,
+                           label_text_y = negate_text_y,
+                           label_text_size = 1)
       }
-      # NEGATED STATISTIC
-      negate_stat <- .cyto_count(NP)/.cyto_count(fr_list[[z]]) * 100
-      negate_stat <- paste(.round(negate_stat, 2), "%")
-      # NEGATED LABEL
-      cyto_plot_labeller(label_text = paste(alias[length(alias)],
-                                            negate_stat,
-                                            sep = "\n"),
-                         label_text_x = negate_text_x,
-                         label_text_y = negate_text_y,
-                         label_text_size = 1)
+      
+      # RETURN CONSTRUCTED GATES
+      return(gates)
     }
   })
   names(filters_list) <- names(fr_list)
@@ -509,61 +519,42 @@ cyto_gate_draw.GatingSet <- function(x,
   # READ IN GATINGTEMPLATE
   gt <- read.csv(gatingTemplate, header = TRUE)
   
-  # NO NEGATED POPULATIONS
-  if(negate == FALSE){
-    # GATED POPULATIONS
-    pops <- list()
-    for (i in seq_len(length(alias))) {
-      pops[[i]] <- suppressWarnings(add_pop(
-        gs = x,
-        alias = alias[i],
-        parent = parent,
-        pop = pop,
-        dims = paste(channels, collapse = ","),
-        gating_method = "cyto_gate_draw",
-        gating_args = list(gate = gates[[i]]),
-        groupBy = group_by,
-        collapseDataForGating = TRUE,
-        preprocessing_method = "pp_cyto_gate_draw"
-      ))
-    }
-    pops <- do.call("rbind", pops)
-  # NEGATED POPULATIONS
-  }else if(negate == TRUE){
-    # GATED POPULATIONS
-    pops <- list()
-    for (i in seq_len(length(ALIAS))) {
-      pops[[i]] <- suppressWarnings(add_pop(
-        gs = x,
-        alias = ALIAS[i],
-        parent = parent,
-        pop = pop,
-        dims = paste(channels, collapse = ","),
-        gating_method = "cyto_gate_draw",
-        gating_args = list(gate = gates[[i]]),
-        groupBy = group_by,
-        collapseDataForGating = TRUE,
-        preprocessing_method = "pp_cyto_gate_draw"
-      ))
-    }
-    # NEGATED POPULATION
-    pops[[length(pops) + 1]] <- suppressWarnings(
-      add_pop(
-        gs =x,
-        alias = alias[length(alias)],
-        parent = parent,
-        pop = pop,
-        dims = paste(channels, collapse = ","),
-        gating_method = "boolGate",
-        gating_args = paste(paste0("!", ALIAS), collapse = "&"),
-        groupBy = group_by,
-        collapseDataForGating = TRUE,
-        preprocessing_method = NA
-      )
+  # GATED POPULATIONS
+  pops <- lapply(seq_len(length(alias[!is.na(type)])), function(z){
+    suppressWarnings(
+      add_pop(gs = x,
+              alias = paste(alias[i], collapse = ","),
+              parent = parent,
+              pop = pop,
+              dims = paste(channels, collapse = ","),
+              gating_method = "cyto_gate_draw",
+              gating_args = list(gate = gates[[i]]),
+              groupBy = group_by,
+              collapseDataForGating = TRUE,
+              preprocessing_method = "pp_cyto_gate_draw")
     )
-    pops <- do.call("rbind", pops)
+  })
+  
+  # NEGATED POPULATIONS
+  if(negate == TRUE){
+    pops[[length(pops) + 1]] <- suppressMessages(
+      add_pop(gs = x,
+              alias = alias[is.na(type)],
+              parent = parent,
+              pop = pop,
+              dims = paste(channels, collapse = ","),
+              gating_method = "boolGate",
+              gating_args = paste(paste0("!", alias[IS.NA(TYPE)]), collapse = "&"),
+              groupBy = group_by,
+              collapseDataForGating = TRUE,
+              preprocessing_method = NA)
+    )
   }
-  # COMBINE ROWS
+  
+  # RBIND GATINGTEMPLATE ENTRIES
+  pops <- do.call("rbind", pops)
+  
+  # COMBINE NEW ENTRIES WITH EXISTING ONES
   gt <- rbind(gt, pops)
   
   # SAVE UPDATED GATINGTEMPLATE
@@ -588,14 +579,19 @@ cyto_gate_draw.flowSet <- function(x,
 
   # CHECKS ---------------------------------------------------------------------
   
+  # ALIAS MISSING
+  if(is.null(alias)){
+    stop("Supply the name(s) for the gated population(s) to 'alias'.")
+  }
+  
   # ASSIGN X TO FS
   fs <- x  
   
+  # GATE TYPES
+  type <- .cyto_gate_type(type, channels, alias)  
+  
   # ALIAS
   alias <- .cyto_alias(alias, type) 
-  
-  # GATE TYPES
-  type <- .cyto_gate_type(type, channels, alias)
   
   # Check supplied channel(s) are valid - for gating functions
   channels <- cyto_channels_extract(fs,
@@ -772,15 +768,7 @@ cyto_gate_draw.flowSet <- function(x,
     }
     
     # CONSTRUCT GATES
-    if (length(type) == 1 & type[1] == "quadrant") {
-      gates <- .cyto_gate_quadrant_draw(
-        fr = fr_list[[z]],
-        channels = channels,
-        alias = alias,
-        plot = FALSE,
-        label = label, ...
-      )
-    } else if (length(type) == 1 & type[1] == "web") {
+    if (type == "web") {
       gates <- .cyto_gate_web_draw(
         fr = fr_list[[z]],
         channels = channels,
@@ -839,6 +827,14 @@ cyto_gate_draw.flowSet <- function(x,
             plot = FALSE,
             label = label, ...
           )
+        }else if(type == "quadrant"){
+          .cyto_gate_quadrant_draw(
+            fr = fr_list[[z]],
+            channels = channels,
+            alias = alias,
+            plot = FALSE,
+            label = label, ...
+          )
         }
       }, type, alias)
     }
@@ -873,11 +869,16 @@ cyto_gate_draw.flowFrame <- function(x,
 
   # CHECKS ---------------------------------------------------------------------
   
-  # ALIAS
-  alias <- .cyto_alias(alias, type)  
+  # ALIAS MISSING
+  if(is.null(alias)){
+    stop("Supply the name(s) for the gated population(s) to 'alias'.")
+  }
   
   # GATE TYPE
-  type <- .cyto_gate_type(type, channels, alias)
+  type <- .cyto_gate_type(type, channels, alias)  
+  
+  # ALIAS
+  alias <- .cyto_alias(alias, type)  
 
   # CHANNELS
   channels <- cyto_channels_extract(x,
@@ -900,15 +901,7 @@ cyto_gate_draw.flowFrame <- function(x,
   # GATING ---------------------------------------------------------------------
   
   # CONSTRUCT GATE OBJECTS
-  if (length(type) == 1 & type[1] == "quadrant") {
-    gates <- .cyto_gate_quadrant_draw(
-      x,
-      channels = channels,
-      alias = alias,
-      plot = FALSE,
-      label = label, ...
-    )
-  } else if (length(type) == 1 & type[1] == "web") {
+  if (type == "web") {
     gates <- .cyto_gate_web_draw(
       x,
       channels = channels,
@@ -961,6 +954,14 @@ cyto_gate_draw.flowFrame <- function(x,
         )
       } else if (type == "ellipse") {
         .cyto_gate_ellipse_draw(
+          x,
+          channels = channels,
+          alias = alias,
+          plot = FALSE,
+          label = label, ...
+        )
+      }else if(type == "quadrant"){
+        .cyto_gate_quadrant_draw(
           x,
           channels = channels,
           alias = alias,

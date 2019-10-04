@@ -510,7 +510,7 @@
 #'
 #' @noRd
 .cyto_gate_count <- function(gate,
-                             negate,
+                             negate = FALSE,
                              total = TRUE){
   
   # NO GATE - SINGLE POPULATION

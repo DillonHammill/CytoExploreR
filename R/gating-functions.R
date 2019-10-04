@@ -68,18 +68,22 @@
                                     plot = TRUE,
                                     label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -89,7 +93,9 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES ------------------------------------------------------------
+  
+  # GATES
   gates <- lapply(alias, function(alias) {
     message(
       paste(
@@ -98,7 +104,7 @@
       )
     )
 
-    # Extract gate coordinates - close without error if not gate drawn
+    # GATE CO-ORDINATES
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
@@ -108,12 +114,12 @@
       col = "red"
     )
 
-    # Too few points selected to construct polygon
+    # TOO FEW SELECTED POINTS
     if (length(coords$x) < 3) {
       stop("A minimum of 3 points is required to construct a polygon gate.")
     }
 
-    # Draw gate on the plot
+    # ADD GATE TO PLOT
     lines(
       x = coords$x[c(1, length(coords$x))],
       y = coords$y[c(1, length(coords$x))],
@@ -121,14 +127,15 @@
       col = "red"
     )
 
-    # Tidy up input coords
+    # TIDY COORDS
     coords <- as.data.frame(coords)
     coords <- as.matrix(coords)
     colnames(coords) <- channels
 
-    # Construct gate object
+    # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias)
 
+    # LABEL GATED POPULATION
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
@@ -143,6 +150,7 @@
     return(gate)
   })
 
+  # RETURN CONSTRUCTED GATES
   gates <- filters(gates)
   return(gates)
 }
@@ -218,18 +226,22 @@
                                       plot = TRUE,
                                       label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -239,7 +251,9 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES ------------------------------------------------------------
+  
+  # GATES
   gates <- lapply(alias, function(alias) {
     message(
       paste(
@@ -248,7 +262,7 @@
       )
     )
 
-    # Extract gate coordinates
+    # GATE COORDS
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
@@ -259,17 +273,19 @@
       col = "red"
     )
 
+    # TIDY GATE COORDS
     coords <- data.frame(coords)
     coords <- as.matrix(coords)
     colnames(coords) <- channels
 
-    # Construct gate
+    # CONSTRUCT GATE
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
     
-    # Plot gate
+    # PLOT GATE
     cyto_plot_gate(gate,
                    channels = channels)
 
+    # LABEL GATED POPULATION
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
@@ -284,6 +300,7 @@
     return(gate)
   })
 
+  # RETURN CONSTRUCTED GATES
   gates <- filters(gates)
   return(gates)
 }
@@ -373,18 +390,22 @@
                                      axis = "x",
                                      label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -394,7 +415,7 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES
   gates <- lapply(alias, function(alias) {
     message(
       paste(
@@ -403,7 +424,7 @@
       )
     )
 
-    # Extract gate coordinates
+    # GATE COORDS
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
@@ -471,6 +492,7 @@
 
       gate <- rectangleGate(.gate = coords, filterId = alias)
 
+      # LABEL GATED POPULATION
       if (label == TRUE) {
         cyto_plot_label(
           x = fr,
@@ -486,6 +508,7 @@
     return(gate)
   })
 
+  # RETURN CONSTRUCTED GATES
   gates <- filters(gates)
   return(gates)
 }
@@ -569,18 +592,22 @@
                                       plot = TRUE,
                                       label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -590,7 +617,9 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES ------------------------------------------------------------
+  
+  # INSTRUCTIONS
   message(
     paste(
       "Select the lower bound of the",
@@ -602,7 +631,7 @@
     stop("Multiple threshold gates are not supported.")
   }
 
-  # Extract gate coordinates
+  # GATE COORDS
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
   coords <- locator(
@@ -613,6 +642,7 @@
     col = "red"
   )
 
+  # TIDY GATE COORDS
   if (length(channels) == 1) {
     pts <- data.frame(x = c(coords$x, Inf))
     pts <- as.matrix(pts)
@@ -634,8 +664,11 @@
     )
   }
 
+  # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
+  
+  # LABEL GATED POPULATION
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
@@ -647,7 +680,9 @@
     )
   }
 
+  # REURN CONSTRUCTED GATES
   gates <- filters(list(gate))
+  return(gates)
 }
 
 #' Draw Boundary Gate(s) Around Populations.
@@ -728,18 +763,22 @@
                                      plot = TRUE,
                                      label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -749,7 +788,9 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES ------------------------------------------------------------
+  
+  # INSTRUCTIONS
   message(
     paste(
       "Select the upper bound of the",
@@ -761,7 +802,7 @@
     stop("Multiple boundary gates are not supported.")
   }
 
-  # Extract gate coordinates
+  # GATE COORDS
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
   coords <- locator(
@@ -772,6 +813,7 @@
     col = "red"
   )
 
+  # TIDY GATE COORDS
   if (length(channels) == 1) {
     pts <- data.frame(x = c(-Inf, coords$x))
     pts <- as.matrix(pts)
@@ -792,8 +834,10 @@
     )
   }
 
+  # CONSTRUCT GATES
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
+  # LABEL GATED POPULATION
   if (label == TRUE) {
     cyto_plot_label(
       x = fr,
@@ -805,7 +849,9 @@
     )
   }
 
+  # RETURN CONSTRUCTED GATES
   gates <- filters(list(gate))
+  return(gates)
 }
 
 #' Draw Ellipsoid Gate(s) Around Populations.
@@ -877,18 +923,22 @@
                                     plot = TRUE,
                                     label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -898,7 +948,9 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES ------------------------------------------------------------
+  
+  # INSTRUCTIONS
   gates <- lapply(alias, function(alias) {
     message(
       paste(
@@ -907,7 +959,7 @@
       )
     )
 
-    # Extract gate coordinates
+    # GATE COORDS
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
     coords <- locator(
@@ -984,9 +1036,11 @@
       filterId = alias
     )
     
+    # PLOT GATE
     cyto_gate_plot(gate,
                    channels = channels)
 
+    # LABEL GATED POPULATION
     if (label == TRUE) {
       cyto_plot_label(
         x = fr,
@@ -1074,13 +1128,15 @@
                                      plot = TRUE,
                                      label = TRUE, ...) {
 
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias - default to +/- channel names
+  # ALIAS
   if (is.null(alias)) {
     alias <- c(paste0(channels[1],"+",channels[2],"+"),
                paste0(channels[1],"-",channels[2],"+"),
@@ -1088,7 +1144,9 @@
                paste0(channels[1],"-",channels[2],"-"))
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -1102,12 +1160,12 @@
     stop("'alias' must contain 4 population names for quadrant gates.")
   }
 
-  # Construct gates
+  # INSTRUCTIONS
   message(
     paste("Select the center point to construct quadrant gates. \n")
   )
 
-  # Extract points of drawn gate
+  # GATE COORDS
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
   pts <- locator(
@@ -1117,13 +1175,14 @@
     pch = 16
   )
 
-  # CO-ORDINATES matrix
+  # CO-ORDINATES MATRIX
   pts <- matrix(pts, ncol = 2)
   colnames(pts) <- channels
 
   # QUADGATE CONSTRUCTION
   gate <- quadGate(.gate = pts, filterId = paste0(alias, collapse = "|"))
   
+  # PLOT GATE
   cyto_plot_gate(gate, channels = channels)
   
   # LABELS
@@ -1217,18 +1276,22 @@
   # WARNING
   message("Web gates are an experimental feature - use at your own risk!")
   
-  # Check channels
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
     plot = TRUE
   )
 
-  # Check alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
 
-  # Call new plot?
+  # CONSTRUCT PLOT -------------------------------------------------------------
+  
+  # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
@@ -1238,7 +1301,8 @@
     )
   }
 
-  # Construct gates
+  # CONSTRUCT GATES ------------------------------------------------------------
+  
   # Select center of the web gate
   message("Select the center of the web gate.")
 
@@ -1765,7 +1829,7 @@
   }
 
 
-  # Construct the gates
+  # CONSTRUCT GATES
   gates <- lapply(seq(1, length(gates), 1), function(x) {
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
@@ -1786,10 +1850,11 @@
 
     return(gate)
   })
-
-  gates <- filters(gates)
-
+  
+  # PLOT GATES
   cyto_plot_gate(gates, channels = channels)
-
+  
+  # RETURN CONSTRUCTED GATES
+  gates <- filters(gates)
   return(gates)
 }
