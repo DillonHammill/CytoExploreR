@@ -30,7 +30,7 @@
 #'
 #' @keywords manual, gating, draw, polygonGate, openCyto
 #'
-#' @importFrom flowCore polygonGate filters
+#' @importFrom flowCore polygonGate filters Subset
 #' @importFrom graphics locator lines
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -135,15 +135,20 @@
     # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias)
 
-    # LABEL GATED POPULATION
+    # LABEL GATED POPULATION - MANUAL FOR SPEED
     if (label == TRUE) {
-      cyto_plot_label(
-        x = fr,
-        gate = gate,
-        channels = channels,
-        label_text = alias,
+      # GATE CENTER - LABEL POSITION
+      gate_center <- .cyto_gate_center(gate,
+                                       channels = channels)
+      # GATE STAT
+      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- paste(.round(gate_stat), "%")
+      # PLOT LABEL
+      cyto_plot_labeller(
+        label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_stat = "percent"
+        label_text_x = gate_center[,"x"],
+        label_text_y = gate_center[,"y"]
       )
     }
 
@@ -188,7 +193,7 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @importFrom flowCore rectangleGate filters
+#' @importFrom flowCore rectangleGate filters Subset
 #' @importFrom flowCore exprs
 #' @importFrom graphics locator rect
 #'
@@ -287,13 +292,19 @@
 
     # LABEL GATED POPULATION
     if (label == TRUE) {
-      cyto_plot_label(
-        x = fr,
-        gate = gate,
-        channels = channels,
-        label_text = alias,
+      # GATE CENTER - LABEL POSITION
+      gate_center <- .cyto_gate_center(gate,
+                                       channels = channels)
+      # GATE STAT
+      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- paste(.round(gate_stat), "%")
+      print(gate_stat)
+      # PLOT LABEL
+      cyto_plot_labeller(
+        label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_stat = "percent"
+        label_text_x = gate_center[,"x"],
+        label_text_y = gate_center[,"y"]
       )
     }
 
@@ -339,7 +350,7 @@
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, interval
 #'
-#' @importFrom flowCore rectangleGate filters
+#' @importFrom flowCore rectangleGate filters Subset
 #' @importFrom graphics locator abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -494,13 +505,18 @@
 
       # LABEL GATED POPULATION
       if (label == TRUE) {
-        cyto_plot_label(
-          x = fr,
-          gate = gate,
-          channels = channels,
-          label_text = alias,
+        # GATE CENTER - LABEL POSITION
+        gate_center <- .cyto_gate_center(gate,
+                                         channels = channels)
+        # GATE STAT
+        gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+        gate_stat <- paste(.round(gate_stat), "%")
+        # PLOT LABEL
+        cyto_plot_labeller(
+          label_text = paste(alias, gate_stat, sep = "\n"),
           label_text_size = 1,
-          label_stat = "percent"
+          label_text_x = gate_center[,"x"],
+          label_text_y = gate_center[,"y"]
         )
       }
     }
@@ -544,7 +560,7 @@
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, threshold
 #'
-#' @importFrom flowCore rectangleGate filters
+#' @importFrom flowCore rectangleGate filters Subset
 #' @importFrom graphics locator rect abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -667,16 +683,20 @@
   # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
-  
   # LABEL GATED POPULATION
   if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = gate,
-      channels = channels,
-      label_text = alias,
+    # GATE CENTER - LABEL POSITION
+    gate_center <- .cyto_gate_center(gate,
+                                     channels = channels)
+    # GATE STAT
+    gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+    gate_stat <- paste(.round(gate_stat), "%")
+    # PLOT LABEL
+    cyto_plot_labeller(
+      label_text = paste(alias, gate_stat, sep = "\n"),
       label_text_size = 1,
-      label_stat = "percent"
+      label_text_x = gate_center[,"x"],
+      label_text_y = gate_center[,"y"]
     )
   }
 
@@ -716,7 +736,7 @@
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, boundary
 #'
-#' @importFrom flowCore rectangleGate filters
+#' @importFrom flowCore rectangleGate filters Subset
 #' @importFrom graphics locator rect abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -839,13 +859,18 @@
 
   # LABEL GATED POPULATION
   if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = gate,
-      channels = channels,
-      label_text = alias,
+    # GATE CENTER - LABEL POSITION
+    gate_center <- .cyto_gate_center(gate,
+                                     channels = channels)
+    # GATE STAT
+    gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+    gate_stat <- paste(.round(gate_stat), "%")
+    # PLOT LABEL
+    cyto_plot_labeller(
+      label_text = paste(alias, gate_stat, sep = "\n"),
       label_text_size = 1,
-      label_stat = "percent"
+      label_text_x = gate_center[,"x"],
+      label_text_y = gate_center[,"y"]
     )
   }
 
@@ -883,7 +908,7 @@
 #'
 #' @keywords manual, gating, draw, ellipsoidGate, openCyto, ellipse
 #'
-#' @importFrom flowCore ellipsoidGate filters
+#' @importFrom flowCore ellipsoidGate filters Subset
 #' @importFrom graphics locator polygon
 #' @importFrom methods as
 #'
@@ -1037,18 +1062,23 @@
     )
     
     # PLOT GATE
-    cyto_gate_plot(gate,
+    cyto_plot_gate(gate,
                    channels = channels)
 
     # LABEL GATED POPULATION
     if (label == TRUE) {
-      cyto_plot_label(
-        x = fr,
-        gate = gate,
-        channels = channels,
-        label_text = alias,
+      # GATE CENTER - LABEL POSITION
+      gate_center <- .cyto_gate_center(gate,
+                                       channels = channels)
+      # GATE STAT
+      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- paste(.round(gate_stat), "%")
+      # PLOT LABEL
+      cyto_plot_labeller(
+        label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_stat = "percent"
+        label_text_x = gate_center[,"x"],
+        label_text_y = gate_center[,"y"]
       )
     }
 
@@ -1090,7 +1120,7 @@
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, quadrants
 #'
-#' @importFrom flowCore quadGate filters
+#' @importFrom flowCore quadGate filters split
 #' @importFrom graphics locator lines abline
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -1172,33 +1202,43 @@
     n = 1,
     type = "o",
     lwd = 2,
-    pch = 16
+    pch = 16,
+    col = "red"
   )
 
   # CO-ORDINATES MATRIX
-  pts <- matrix(pts, ncol = 2)
+  pts <- matrix(unlist(pts), ncol = 2)
   colnames(pts) <- channels
-
+  
   # QUADGATE CONSTRUCTION
-  gate <- quadGate(.gate = pts, filterId = paste0(alias, collapse = "|"))
+  gate <- quadGate(.gate = pts, filterId = paste(alias, collapse = "|"))
   
   # PLOT GATE
   cyto_plot_gate(gate, channels = channels)
   
-  # LABELS
+  # LABEL GATED POPULATION
   if (label == TRUE) {
-    cyto_plot_label(
-      x = fr,
-      gate = gate,
-      channels = channels,
-      label_text = alias,
+    print("YASS")
+    # GATE CENTER - LABEL POSITION
+    gate_center <- .cyto_gate_center(gate,
+                                     channels = channels)
+    # GATE STAT
+    gate_pops <- split(fr, gate)
+    gate_stat <- LAPPLY(gate_pops, function(pop){
+      .cyto_count(pop) / .cyto_count(fr) * 100
+    })
+    gate_stat <- LAPPLY(gate_stat, function(z){paste(.round(z), "%")})
+    # PLOT LABEL
+    cyto_plot_labeller(
+      label_text = paste(alias, gate_stat, sep = "\n"),
       label_text_size = 1,
-      label_stat = "percent"
+      label_text_x = gate_center[,"x"],
+      label_text_y = gate_center[,"y"]
     )
   }
   
   # RETURN FILTERS OBJECT
-  gate <- filters(list(gate))
+  gate <- list(gate)
   return(gate)
 }
 
@@ -1234,7 +1274,7 @@
 #'
 #' @keywords manual, gating, draw, polygonGate, openCyto, .cyto_gate_web_draw
 #'
-#' @importFrom flowCore polygonGate filters
+#' @importFrom flowCore polygonGate filters Subset
 #' @importFrom flowCore exprs
 #' @importFrom graphics locator lines par
 #'
@@ -1837,14 +1877,20 @@
     
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
+    # LABEL GATED POPULATION
     if (label == TRUE) {
-      cyto_plot_label(
-        x = fr,
-        gate = gate,
-        channels = channels,
-        label_text = alias[x],
+      # GATE CENTER - LABEL POSITION
+      gate_center <- .cyto_gate_center(gate,
+                                       channels = channels)
+      # GATE STAT
+      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- paste(.round(gate_stat), "%")
+      # PLOT LABEL
+      cyto_plot_labeller(
+        label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_stat = "percent"
+        label_text_x = gate_center[,"x"],
+        label_text_y = gate_center[,"y"]
       )
     }
 
