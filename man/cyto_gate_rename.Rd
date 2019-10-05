@@ -4,15 +4,15 @@
 \alias{cyto_gate_rename}
 \title{Rename Gates}
 \usage{
-cyto_gate_rename(x, gates = NULL, names = NULL,
+cyto_gate_rename(x, alias = NULL, names = NULL,
   gatingTemplate = NULL)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{gates}{current names of the gates to be changed.}
+\item{alias}{current names of the gates to be changed.}
 
-\item{names}{new names to use for \code{gates}.}
+\item{names}{new names to use for \code{alias}.}
 
 \item{gatingTemplate}{name of the gatingTemplate csv file to be edited.}
 }

@@ -114,6 +114,8 @@
   
   # TOTAL POPULATIONS - SPLIT INDICES
   TNP <- seq_len(NP * SMP)
+  
+  # SPLIT TNP
   TNP <- split(TNP, rep(seq_len(SMP), each = NP))
   
   # COMPUTE LABEL_STAT ---------------------------------------------------------

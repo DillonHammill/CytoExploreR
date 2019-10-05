@@ -11,7 +11,7 @@
 #' @noRd
 .empty <- function(x){
 
-  if(is.na(x)){
+  if(.all_na(x)){
     return(FALSE)
   }else if(is.character(x)){
     if(all(nchar(trimws(x)) == 0)){
@@ -119,7 +119,7 @@ file_wd_check <- function(name) {
 # ROUND ------------------------------------------------------------------------
 
 #' @noRd
-.round <- function(x, k){
+.round <- function(x, k = 2){
   trimws(format(round(x, k), nsmall = k))
 } 
 

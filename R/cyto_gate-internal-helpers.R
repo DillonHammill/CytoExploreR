@@ -375,21 +375,21 @@
   
   # UPDATE MISSING LABEL CO-ORDINATES
   lapply(seq_len(4), function(z){
-    # QUADRANT 1 - TOP RIGHT
+    # QUADRANT 1 - TOP LEFT
     if(z == 1){
       # X COORD 
       if(.all_na(text_x[z])){
-        text_x[z] <<- mean(c(x_coord, xmax))
+        text_x[z] <<- mean(c(x_coord, xmin))
       }
       # Y COORD
       if(.all_na(text_y[z])){
         text_y[z] <<- mean(c(y_coord, ymax))
       }
-    # QUADRANT 2 - TOP LEFT
+    # QUADRANT 2 - TOP RIGHT
     }else if(z == 2){
       # X COORD 
       if(.all_na(text_x[z])){
-        text_x[z] <<- mean(c(x_coord, xmin))
+        text_x[z] <<- mean(c(x_coord, xmax))
       }
       # Y COORD
       if(.all_na(text_y[z])){

@@ -10,15 +10,15 @@
 \method{cyto_gate_draw}{GatingSet}(x, parent = "root", alias = NULL,
   channels = NULL, type = NULL, gatingTemplate = NULL,
   overlay = NA, group_by = "all", select = NULL, negate = FALSE,
-  axis = "x", label = TRUE, plot = TRUE, ...)
+  display = 25000, axis = "x", label = TRUE, plot = TRUE, ...)
 
 \method{cyto_gate_draw}{flowSet}(x, alias = NULL, channels = NULL,
   type = NULL, overlay = NA, group_by = "all", select = NULL,
-  axis = "x", label = TRUE, plot = TRUE, ...)
+  display = 25000, axis = "x", label = TRUE, plot = TRUE, ...)
 
 \method{cyto_gate_draw}{flowFrame}(x, alias = NULL, channels = NULL,
-  type = NULL, overlay = NA, axis = "x", label = TRUE,
-  plot = TRUE, ...)
+  type = NULL, overlay = NA, display = 25000, axis = "x",
+  label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -68,6 +68,9 @@ should be comma separated and wrapped in a list (e.g. list(Treatment ==
 made for the negated population (i.e. all events outside the constructed
 gates), set to FALSE by default. If negate is set to TRUE, a name for the
 negated population MUST be supplied at the end of the alias argument.}
+
+\item{display}{fraction or number of events to display in the plot during the
+gating process, set to 25 000 events by default.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

@@ -60,57 +60,157 @@ cyto_gate_remove <- function(gs,
                              type = NULL,
                              gatingTemplate = NULL, ...) {
   
-  # Supply alias
+  # ALIAS MISSING
   if (is.null(alias)) {
     stop("Please supply the name of the population to be removed.")
   }
   
-  # Check Alias
+  # ALIAS
   if (!all(alias %in% basename(getNodes(gs)))) {
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
-  # Missing gatingTemplate
+  # GATINGTEMPLATE MISSING
   if(is.null(gatingTemplate)){
     gatingTemplate <- cyto_gatingTemplate_active()
   }
   
-  # gatingTemplate still missing
+  # GATINGTEMPLATE STILL MISSING
   if(is.null(gatingTemplate)){
     stop("Supply the name of the gatingTemplate to remove gate(s).")
   }
   
-  # File extension
+  # GATINGTEMPLATE FILE EXTENSION
   if(.empty(file_ext(gatingTemplate))){
     gatingTemplate <- paste0(gatingTemplate, ".csv")
   }
   
-  # Get children from GatingSet
-  chldrn <-LAPPLY(
+  # READ IN GATINGTEMPLATE
+  gt <- read.csv(gatingTemplate, header = TRUE) 
+  
+  # PREPARE GATINGTEMPLATE ALIAS
+  gt_alias <- lapply(gt$alias, function(z){
+    unlist(strsplit(as.character(z), ","))
+  })
+  
+  # QUADGATES - REMOVE ALL NODES
+  alias <- unique(LAPPLY(seq_len(length(alias)), function(z){
+    LAPPLY(gt_alias, function(y){
+      if(any(grepl(alias[z], y, fixed = TRUE))){
+        y
+      }
+    })
+  }))
+  
+  # CHILDREN
+  chldrn <- LAPPLY(
     alias,
     function(x) basename(getDescendants(gs[[1]], paste0(parent,"/",x)))
   )
   chldrn <- unlist(chldrn, use.names = FALSE)
-  chldrn <- c(alias, unique(chldrn))
+  chldrn <- unique(c(alias, chldrn))
   
-  # Read in gatingTemplate
-  gt <- read.csv(gatingTemplate, header = TRUE)
+  # REMOVE ROWS ALIAS == CHILDREN
+  ind <- LAPPLY(gt_alias, function(z){
+    LAPPLY(chldrn, function(y){
+      any(grepl(y, z), fixed = TRUE)
+    })
+  })
+  gt <- gt[!ind, ]
   
-  # Remove all rows with alias = chldrn
-  gt <- gt[!gt$alias %in% chldrn, ]
-  
-  # Message
+  # MESSAGE
   message(paste0("Removing gate(s) from the GatingSet and ",
                 gatingTemplate,"."))
   
-  # Remove nodes from GatingSet
+  # REMOVE NODES FROM GATINGSET
   for (i in seq_len(length(alias))) {
     if (alias[i] %in% basename(getNodes(gs))) {
       suppressMessages(Rm(paste0(parent,"/", alias[i]), gs))
     }
   }
   
+  # UPDATE GATINGTEMPLATE
   write.csv(gt, gatingTemplate, row.names = FALSE)
+}
+
+# cYTO_GATE_RENAME -------------------------------------------------------------
+
+#' Rename Gates
+#'
+#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param alias current names of the gates to be changed.
+#' @param names new names to use for \code{alias}.
+#' @param gatingTemplate name of the gatingTemplate csv file to be edited.
+#'
+#' @return update gate names in \code{GatingSet} or \code{GatingHierarchy} and
+#'   update the gatingTemplate accordingly.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom flowWorkspace getNodes setNode
+#' @importFrom utils read.csv write.csv
+#' @importFrom tools file_ext
+#'
+#' @export
+cyto_gate_rename <- function(x,
+                             alias = NULL,
+                             names = NULL,
+                             gatingTemplate = NULL){
+  
+  # MMISSING GATINGTEMPLATE
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # GATINGTEMPLATE STILL MISSING
+  if(is.null(gatingTemplate)){
+    stop("Supply the name of the gatingTemplate to rename gate(s).")
+  }
+  
+  # GATINGTEMPLATE FILE EXTENSION
+  if(.empty(file_ext(gatingTemplate))){
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
+  # ALIAS INVALID
+  if(!all(alias %in% basename(getNodes(x)))){
+    stop(paste0("Supplied gate(s) do not exist in this ", class(x), "."))
+  }
+  
+  # RENAME GATES IN GATINGHIERARCHY/GATINGSET
+  mapply(function(alias, name){
+    setNode(x, alias, name)
+  }, alias, names)
+  
+  # READ IN GATINGTEMPLATE
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE, 
+                 stringsAsFactors = FALSE)
+  
+  # UPDATE PARENTAL NAMES
+  if(any(alias %in% gt$parent)){
+    gt[gt$parent %in% alias,"parent"] <- names
+  }
+  
+  # UPDATE ALIAS NAMES
+  gt_alias <- lapply(gt$alias, function(z){
+    unlist(strsplit(as.character(z), ","))
+  })
+  gt_alias <- LAPPLY(gt_alias, function(z){
+    lapply(seq_len(length(alias)), function(y){
+      if(alias[y] %in% z){
+        z[z == alias[y]] <<- names[y]
+      }
+    })
+    # RE-COLLAPSE ALIAS
+    z <- paste(z, collapse = ",")
+    return(z)
+  })
+  gt[, "alias"] <- gt_alias
+  
+  # SAVE UPDATED GATINGTEMPLATE
+  write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
+  
 }
 
 # CYTO_GATE_EXTRACT ------------------------------------------------------------
@@ -167,41 +267,41 @@ cyto_gate_extract <- function(parent,
                               alias,
                               gatingTemplate = NULL, ...) {
   
-  # Parent
+  # MISSING PARENT
   if (missing(parent)) {
     stop("Please supply the name of the parent population.")
   }
   
-  # Alias
+  # MISSING ALIAS
   if (missing(alias)) {
     stop("Please supply the name(s) of the alias to extract.")
   }
   
-  # Missing gatingTemplate
+  # MISSING GATINGTEMPLATE
   if(is.null(gatingTemplate)){
     gatingTemplate <- cyto_gatingTemplate_active()
   }
   
-  # gatingTemplate still missing
+  # GATINGTEMPLATE STILL MISSING
   if(is.null(gatingTemplate)){
     stop("Supply the name of the gatingTemplate to extract gate(s).")
   }
   
-  # File extension
+  # GATINGTEMPLATE FILE EXTENSION
   if(.empty(file_ext(gatingTemplate))){
     gatingTemplate <- paste0(gatingTemplate, ".csv")
   }
 
-  # Load gatingTemplate into gatingTemplate
+  # READ IN GATINGTEMPLATE
   gt <- suppressMessages(gatingTemplate(gatingTemplate))
   
-  # Extract population nodes from gt
+  # EXTRACT NODES - GATINGTEMPLATE
   nds <- getNodes(gt, only.names = TRUE)
   
-  # Parent Node
+  # PARENTAL NODE
   parent <- names(nds[match(parent, nds)])
   
-  # Extract gates given parent and child node(s)
+  # EXTRACT GATES GIVEN PARENTAL & CHILD NODES
   gates <- lapply(alias, function(x) {
     
     # Alias node
@@ -798,77 +898,6 @@ cyto_gate_edit <- function(x,
   })
   
   assign(deparse(substitute(x)), gs, envir = globalenv())
-}
-
-# cYTO_GATE_RENAME -------------------------------------------------------------
-
-#' Rename Gates
-#'
-#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
-#' @param gates current names of the gates to be changed.
-#' @param names new names to use for \code{gates}.
-#' @param gatingTemplate name of the gatingTemplate csv file to be edited.
-#'
-#' @return update gate names in \code{GatingSet} or \code{GatingHierarchy} and
-#'   update the gatingTemplate accordingly.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @importFrom flowWorkspace getNodes setNode
-#' @importFrom utils read.csv write.csv
-#' @importFrom tools file_ext
-#'
-#' @export
-cyto_gate_rename <- function(x,
-                             gates = NULL,
-                             names = NULL,
-                             gatingTemplate = NULL){
-  
-  # Missing gatingTemplate
-  if(is.null(gatingTemplate)){
-    gatingTemplate <- cyto_gatingTemplate_active()
-  }
-  
-  # gatingTemplate still missing
-  if(is.null(gatingTemplate)){
-    stop("Supply the name of the gatingTemplate to rename gate(s).")
-  }
-  
-  # File extension
-  if(.empty(file_ext(gatingTemplate))){
-    gatingTemplate <- paste0(gatingTemplate, ".csv")
-  }
-  
-  # Gates do not exist
-  if(!all(gates %in% basename(getNodes(x)))){
-    stop(paste0("Supplied gate(s) do not exist in this ", class(x), "."))
-  }
-  
-  # Rename gates in GatingHierarchy/GatingSet
-  mapply(function(gate, name){
-    
-    setNode(x, gate, name)
-    
-  }, gates, names)
-  
-  # Modify names in gatingTemplate
-  gt <- read.csv(gatingTemplate, 
-                 header = TRUE, 
-                 stringsAsFactors = FALSE)
-  
-  # Update parental names
-  if(any(gates %in% gt$parent)){
-    
-    gt[gt$parent %in% gates,"parent"] <- names
-  
-  }
-  
-  # Update alias names
-  gt[gt$alias %in% gates,"alias"] <- names
-  
-  # Re-write updated gatingTemplate
-  write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
-  
 }
 
 # CYTO_GATE_TYPE ---------------------------------------------------------------
