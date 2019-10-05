@@ -443,6 +443,29 @@ cyto_plot.GatingSet <- function(x,
     }
   }  
 
+  # GATE - LIST OF GATE OBJECT LISTS
+  if(!.all_na(gate)){
+    # GATE OBJECT LIST
+    if(is(x)[1] == "list"){
+      if(all(LAPPLY(x, "is") %in% c("rectangleGate",
+                                    "polygonGate",
+                                    "ellipsoidGate",
+                                    "quadGate",
+                                    "filters"))){
+        x <- unlist(x)
+      }
+    # FILTERS OBJECT
+    }else if(is(x)[1] == "filters"){
+      x <- unlist(gate)
+    # GATE OBJECT
+    }else if(is(x)[1] %in% c("rectangleGate",
+                             "polygonGate",
+                             "ellipsoidGate",
+                             "quadGate")){
+      x <- list(x)
+    }
+  }
+  
   # OVERLAY - POPULATION NAMES
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
@@ -853,10 +876,33 @@ cyto_plot.GatingHierarchy <- function(x,
       getGate(gh, paste(parent, z, sep = "/"))
     })
   }
-
+  
   # PREPARE GATES --------------------------------------------------------------
 
   # SUPPORT NEGATED BOOLEAN FILTERS (|)
+  
+  # GATE - LIST OF GATE OBJECTS
+  if(!.all_na(gate)){
+    # GATE OBJECT LIST
+    if(is(x)[1] == "list"){
+      if(all(LAPPLY(x, "is") %in% c("rectangleGate",
+                                    "polygonGate",
+                                    "ellipsoidGate",
+                                    "quadGate",
+                                    "filters"))){
+        x <- unlist(x)
+      }
+      # FILTERS OBJECT
+    }else if(is(x)[1] == "filters"){
+      x <- unlist(gate)
+      # GATE OBJECT
+    }else if(is(x)[1] %in% c("rectangleGate",
+                             "polygonGate",
+                             "ellipsoidGate",
+                             "quadGate")){
+      x <- list(x)
+    }
+  }
 
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
@@ -1775,7 +1821,7 @@ cyto_plot.flowFrame <- function(x,
   fr_list <- list(x)
   names(fr_list) <- cyto_names(x)
 
-  # Add overlay to list and group if necessary
+  # Add overlay to list
   if (!.all_na(overlay)) {
     # overlay must be list of flowFrames
     # flowFrame overlay added to list
