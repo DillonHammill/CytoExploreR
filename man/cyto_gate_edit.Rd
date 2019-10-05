@@ -68,7 +68,7 @@ Edit Existing Gate(s).
 }
 \examples{
 \dontrun{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

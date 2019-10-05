@@ -42,7 +42,7 @@ Remove Gate(s) and Edit gatingTemplate csv File
 }
 \examples{
 \dontrun{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

@@ -32,7 +32,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -231,10 +231,10 @@ cyto_gate_rename <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' 
 #' # Bypass working directory check for external files
-#' options("CytoRSuite_wd_check" = FALSE)
+#' options("CytoExploreR_wd_check" = FALSE)
 #' 
 #' # Load in samples
 #' fs <- Activation
@@ -254,14 +254,14 @@ cyto_gate_rename <- function(x,
 #' # gatingTemplate
 #' gtfile <- system.file("extdata",
 #'   "Activation-gatingTemplate.csv",
-#'   package = "CytoRSuiteData"
+#'   package = "CytoExploreRData"
 #' )
 #' 
 #' # Extract T Cells gate
 #' gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
 #' 
-#' # Reset CytoRSuite_wd_check to default
-#' options("CytoRSuite_wd_check" = TRUE)
+#' # Reset CytoExploreR_wd_check to default
+#' options("CytoExploreR_wd_check" = TRUE)
 #' @export
 cyto_gate_extract <- function(parent,
                               alias,
@@ -303,13 +303,18 @@ cyto_gate_extract <- function(parent,
   
   # EXTRACT GATES GIVEN PARENTAL & CHILD NODES
   gates <- lapply(alias, function(x) {
-    
-    # Alias node
-    alias <- names(nds[match(x, nds)])
-    
+    # ALIAS NODE
+    ind <- LAPPLY(seq_len(length(nds)), function(z){
+      if(x %in% nds[[z]]){
+        z
+      }else{
+        NA
+      }
+    })
+    ind <- ind[!is.na(ind)][1]
+    alias <- names(nds[ind])
     gm <- getGate(gt, parent, alias)
     gate <- eval(parameters(gm)$gate)
-    names(parameters(gate[[1]][[1]])) <- parameters(gate[[1]][[1]])
     return(gate)
   })
   
@@ -373,7 +378,7 @@ cyto_gate_extract <- function(parent,
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -912,7 +917,7 @@ cyto_gate_edit <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' 
 #' # Load in samples
 #' fs <- Activation

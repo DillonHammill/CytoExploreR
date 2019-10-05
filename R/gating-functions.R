@@ -298,7 +298,6 @@
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
-      print(gate_stat)
       # PLOT LABEL
       cyto_plot_labeller(
         label_text = paste(alias, gate_stat, sep = "\n"),
@@ -1218,12 +1217,11 @@
   
   # LABEL GATED POPULATION
   if (label == TRUE) {
-    print("YASS")
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
                                      channels = channels)
     # GATE STAT
-    gate_pops <- split(fr, gate)
+    gate_pops <- .cyto_label_pops(fr, gate)
     gate_stat <- LAPPLY(gate_pops, function(pop){
       .cyto_count(pop) / .cyto_count(fr) * 100
     })

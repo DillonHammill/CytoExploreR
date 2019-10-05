@@ -29,11 +29,32 @@
   if(.all_na(gate)){
     return(list(x))
   }
-
+  
+  # PREPARE GATES --------------------------------------------------------------
+  
+  # LIST OF GATE OBJECTS
+  if(is(gate)[1] == "list"){
+    if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
+                                  "polygonGate",
+                                  "ellipsoidGate",
+                                  "quadGate",
+                                  "filters"))){
+      gate <- unlist(gate)
+    }
+  }else if(is(gate)[1] == "filters"){
+    gate <- unlist(gate)
+  }else if(is(gate)[1] %in% c("rectangleGate",
+                           "polygonGate",
+                           "ellipsoidGate",
+                           "quadGate",
+                           "filters")){
+    gate <- list(gate)
+  }
+  
   # GATES ----------------------------------------------------------------------
 
   # NEGATED GATE - QUADGATES EXCLUDED
-  if(negate == TRUE & !any(LAPPLY(gate, "is") == "quadGate")){
+  if(negate == TRUE & !any(LAPPLY(gate, function(z){is(z, "quadGate")}))){
     if(length(gate) > 1){
       gate <- c(gate, list(do.call("|", gate)))
     }else{
@@ -52,7 +73,7 @@
     }else{
       # QUADGATES RETURN MULTIPLE POPULATIONS
       if(is(gate[[z]], "quadGate")){
-        split(x, gate[[z]])
+        split(x, gate[[z]])[c(2,1,3,4)] # FIX ORDER
       # SINGLE POPULATIONS  
       }else{
         Subset(x, gate[[z]])

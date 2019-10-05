@@ -17,7 +17,7 @@ vector of gate type names for supplied gates.
 Get Gate Type from Saved Gate.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

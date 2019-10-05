@@ -20,10 +20,10 @@ cyto_gate_extract(parent, alias, gatingTemplate = NULL, ...)
 Extract Saved Gate(s) from gatingTemplate.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Bypass working directory check for external files
-options("CytoRSuite_wd_check" = FALSE)
+options("CytoExploreR_wd_check" = FALSE)
 
 # Load in samples
 fs <- Activation
@@ -43,14 +43,14 @@ gating(gt, gs)
 # gatingTemplate
 gtfile <- system.file("extdata",
   "Activation-gatingTemplate.csv",
-  package = "CytoRSuiteData"
+  package = "CytoExploreRData"
 )
 
 # Extract T Cells gate
 gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
 
-# Reset CytoRSuite_wd_check to default
-options("CytoRSuite_wd_check" = TRUE)
+# Reset CytoExploreR_wd_check to default
+options("CytoExploreR_wd_check" = TRUE)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

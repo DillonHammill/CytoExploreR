@@ -784,7 +784,7 @@ cyto_gate_draw.flowSet <- function(x,
   # GATE EACH GROUP - NAMED LIST OF FILTERS
   filters_list <- lapply(seq_len(length(fr_list)), function(z) {
     # COMBINE BASE & OVERLAY - SAMPLING
-    FR_LIST <- c(list(fr_list[[z]]), overlay[[z]])
+    FR_LIST <- c(fr_list[z], overlay[[z]])
     FR_LIST <- cyto_sample(FR_LIST, display = display, seed = 56)
     # Title
     if (group_by[1] == "all") {

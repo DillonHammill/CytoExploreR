@@ -455,30 +455,38 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
 #' @importFrom utils read.csv
 #'
 #' @noRd
-.cyto_gatingTemplate_check <- function(parent, alias, gatingTemplate = NULL) {
+.cyto_gatingTemplate_check <- function(parent, 
+                                       alias, 
+                                       gatingTemplate = NULL) {
+  
+  # GATINGTEMPLATE CSV FILE
   if (inherits(gatingTemplate, "gatingTemplate")) {
     stop("'gatingTemplate' should be the name of the gatingTemplate csv file.")
   } else {
-    # Bypass checks if gatingTemplate does not yet exist
+    # BYPASS CHECKS - GATINGTEMPLATE DOES NOT EXIST
     gt <- tryCatch(suppressWarnings(read.csv(gatingTemplate, header = TRUE)),
       error = function(e) {
         NULL
       }
     )
-
-    # Parent and alias entries match file
+    # MATCHING PARENT & ALIAS
     if (!is.null(gt)) {
-      if (any(gt$parent %in% parent & gt$alias %in% alias)) {
-        message(
-          paste(
-            paste(gt$alias, collapse = " & "),
-            "already exists in", gatingTemplate, "."
-          )
-        )
-        stop(paste(
-          "Supply another gatingTemplate",
-          "or edit gate(s) using cyto_gate_edit."
-        ))
+      if(parent %in% gt$parent){
+        gt <- gt[gt$parent == parent, ]
+        gt_alias <- lapply(gt$alias, function(z){
+          unlist(strsplit(as.character(z), ","))
+        })
+        lapply(gt_alias, function(z){
+          if(any(alias %in% z)){
+            message(paste(alias[alias %in% z], collapse = " & "),
+                    " already exists in ",
+                    gatingTemplate, ".")
+            stop(paste(
+              "Supply another gatingTemplate",
+              "or edit gate(s) using cyto_gate_edit."
+            ))
+          }
+        })
       }
     }
   }
