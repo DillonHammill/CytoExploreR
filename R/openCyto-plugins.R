@@ -79,9 +79,9 @@
 #'
 #' @noRd
 .cyto_gate_draw <- function(fr,
-                       pp_res,
-                       channels,
-                       gate) {
+                            pp_res,
+                            channels,
+                            gate) {
 
   # pp_res is NULL - no grouping
   if (is.null(pp_res)) {
@@ -126,11 +126,11 @@
 #'
 #' @noRd
 .pp_cyto_gate_draw <- function(fs,
-                          gs,
-                          gm,
-                          channels = NA,
-                          groupBy = NA,
-                          isCollapse = NA, ...) {
+                               gs,
+                               gm,
+                               channels = NA,
+                               groupBy = NA,
+                               isCollapse = NA, ...) {
 
   # Samples
   smp <- length(gs)
