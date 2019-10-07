@@ -312,7 +312,7 @@ cyto_gatingTemplate_apply <- function(x,
   }
   
   # Apply gatingTemplate to GatingHierarchy/GatingSet
-  gating(gt, x, ...)
+  suppressWarnings(gating(gt, x, ...))
   
 }
 

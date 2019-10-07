@@ -78,6 +78,7 @@
 #' @importFrom tools file_ext
 #' @importFrom graphics par
 #' @importFrom purrr transpose
+#' @importFrom magrittr %>%
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -454,7 +455,7 @@ cyto_gate_draw.GatingSet <- function(x,
           label = label, ...
         )
       }
-    }, type, alias)
+    }, type[!is.na(type)], alias[!is.na(type)])
 
     # NEGATED POPULATION
     if (negate == TRUE) {
@@ -497,18 +498,18 @@ cyto_gate_draw.GatingSet <- function(x,
   })
   names(filters_list) <- names(fr_list)
 
-  # COMBINE GATES IN EACH LIST ELEMENT
-  filters_list <- lapply(filters_list, function(z) {
-    filters(z)
-  })
-
-  # FORMAT GATES - LIST OF ALIAS LISTS - EACH LENGTH GROUP & NAMED
-  gates <- lapply(seq_len(length(alias)), function(y) {
-    gates <- lapply(filters_list, function(x) {
-      gts <- filters(list(x[[y]]))
-    })
-    names(gates) <- names(filters_list)
-    return(gates)
+  # EXTRACT GATES FROM FILTERS
+  filters_list <- lapply(filters_list, "unlist")
+  
+  # TRANSPOSE FILTERS_LIST - LIST LENGTH ALIAS - EACH LENGTH GROUP
+  gates <- filters_list %>% transpose()
+  
+  # LIST OF FILTERS OF LENGTH ALIAS
+  gates <- lapply(gates, function(z){
+    if(!any(LAPPLY(z, function(y) {is(y, "quadGate")}))){
+      z <- filters(z)
+    }
+    return(z)
   })
 
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
@@ -607,6 +608,7 @@ cyto_gate_draw.flowSet <- function(x,
                                    overlay = NA,
                                    group_by = "all",
                                    select = NULL,
+                                   negate = FALSE,
                                    display = 25000,
                                    axis = "x",
                                    label = TRUE,
@@ -784,7 +786,11 @@ cyto_gate_draw.flowSet <- function(x,
   # GATE EACH GROUP - NAMED LIST OF FILTERS
   filters_list <- lapply(seq_len(length(fr_list)), function(z) {
     # COMBINE BASE & OVERLAY - SAMPLING
-    FR_LIST <- c(fr_list[z], overlay[[z]])
+    if(!.all_na(overlay)){
+      FR_LIST <- c(fr_list[z], overlay[[z]])
+    }else{
+      FR_LIST <- fr_list[z]
+    }
     FR_LIST <- cyto_sample(FR_LIST, display = display, seed = 56)
     # Title
     if (group_by[1] == "all") {
@@ -883,15 +889,57 @@ cyto_gate_draw.flowSet <- function(x,
           label = label, ...
         )
       }
-    }, type, alias)
+    }, type[!is.na(type)], alias[!is.na(type)])
+    
+    # NEGATED POPULATION
+    if (negate == TRUE) {
+      # GATE
+      if (length(unlist(gates)) == 1) {
+        NP <- split(FR_LIST[[1]], unlist(gates))[[2]]
+      } else {
+        negate_filter <- do.call("|", unlist(gates))
+        NP <- split(FR_LIST[[1]], negate_filter)[[2]]
+      }
+      # NEGATED LABEL XCOORD
+      negate_text_x <- suppressMessages(
+        .cyto_mode(NP, channels = channels[1])
+      )
+      # NEGATED LABEL YCOORD
+      if (length(channels) == 1) {
+        negate_text_y <- mean(par("usr")[c(3, 4)])
+      } else if (length(channels) == 2) {
+        negate_text_y <- suppressMessages(
+          .cyto_mode(NP, channels = channels[2])
+        )
+      }
+      # NEGATED STATISTIC
+      negate_stat <- .cyto_count(NP) / .cyto_count(FR_LIST[[1]]) * 100
+      negate_stat <- paste(.round(negate_stat, 2), "%")
+      # NEGATED LABEL
+      cyto_plot_labeller(
+        label_text = paste(alias[length(alias)],
+                           negate_stat,
+                           sep = "\n"
+        ),
+        label_text_x = negate_text_x,
+        label_text_y = negate_text_y,
+        label_text_size = 1
+      )
+    }
+    
+    print(gates)
+    
+    # RETURN CONSTRUCTED GATES
+    return(gates)
+    
   })
   names(filters_list) <- names(fr_list)
-
+  
   # COMBINE GATES IN EACH LIST ELEMENT
   filters_list <- lapply(filters_list, function(z) {
     filters(z)
   })
-
+  
   # ALL GROUPED RETURN FILTERS OBJECT
   if (group_by[1] == "all") {
     filters_list <- filters_list[[1]]
@@ -908,6 +956,7 @@ cyto_gate_draw.flowFrame <- function(x,
                                      channels = NULL,
                                      type = NULL,
                                      overlay = NA,
+                                     negate = FALSE,
                                      display = 25000,
                                      axis = "x",
                                      label = TRUE,
@@ -1069,8 +1118,44 @@ cyto_gate_draw.flowFrame <- function(x,
         label = label, ...
       )
     }
-  }, type, alias)
+  }, type[!is.na(type)], alias[!is.na(type)])
 
+  # LABEL NEGATED POPULATION
+  if (negate == TRUE) {
+    # GATE
+    if (length(unlist(gates)) == 1) {
+      NP <- split(fr_list[[1]], unlist(gates))[[2]]
+    } else {
+      negate_filter <- do.call("|", unlist(gates))
+      NP <- split(fr_list[[1]], negate_filter)[[2]]
+    }
+    # NEGATED LABEL XCOORD
+    negate_text_x <- suppressMessages(
+      .cyto_mode(NP, channels = channels[1])
+    )
+    # NEGATED LABEL YCOORD
+    if (length(channels) == 1) {
+      negate_text_y <- mean(par("usr")[c(3, 4)])
+    } else if (length(channels) == 2) {
+      negate_text_y <- suppressMessages(
+        .cyto_mode(NP, channels = channels[2])
+      )
+    }
+    # NEGATED STATISTIC
+    negate_stat <- .cyto_count(NP) / .cyto_count(fr_list[[1]]) * 100
+    negate_stat <- paste(.round(negate_stat, 2), "%")
+    # NEGATED LABEL
+    cyto_plot_labeller(
+      label_text = paste(alias[length(alias)],
+                         negate_stat,
+                         sep = "\n"
+      ),
+      label_text_x = negate_text_x,
+      label_text_y = negate_text_y,
+      label_text_size = 1
+    )
+  }
+  
   # RETURN GATE OBJECTS --------------------------------------------------------
 
   # GATES AS FILTERS OBJECTS

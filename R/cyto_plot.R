@@ -1237,6 +1237,28 @@ cyto_plot.flowSet <- function(x,
     names(fr_list) <- NMS
   }
 
+  # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE
+  lapply(seq_len(length(channels)), function(z) {
+    if (grepl("FSC", channels[z], ignore.case = TRUE) |
+        grepl("SSC", channels[z], ignore.case = TRUE)) {
+      fr_list <<- lapply(fr_list, function(y) {
+        # LIST OF FLOWFRAMES
+        lapply(y, function(w){
+          if (min(range(w, type = "data")[, channels[z]]) < 0) {
+            coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
+            rownames(coords) <- c("min", "max")
+            colnames(coords) <- channels[z]
+            nonDebris <- rectangleGate(.gate = coords)
+            Subset(w, nonDebris)
+          } else {
+            return(w)
+          }
+        })
+
+      })
+    }
+  })
+  
   # DENSITY_LAYERS -------------------------------------------------------------
 
   # SUPPORT SPLIT STACKED SAMPLES (NO OVERLAY)
@@ -1396,7 +1418,6 @@ cyto_plot.flowSet <- function(x,
   # PREVIOUS CALL
   previous_call <- getOption("cyto_plot_call")
 
-
   # CURRENT ARGUMENTS
   args <- .args_list()
 
@@ -1419,10 +1440,15 @@ cyto_plot.flowSet <- function(x,
     "density_stack",
     "density_layers"
   )]
-
+  
+  # PREVIOUS CALL BELONGS TO FLOWFRAME METHOD
+  if(!all(names(previous_call) %in% names(current_call))){
+    previous_call <- NULL
+  }
+    
   # UPDATE CYTO_PLOT_CALL
   options("cyto_plot_call" = current_call)
-
+  
   # RESET SAVED LABEL CO-ORDINATES - MATCHING CALLS / NO CYTO_PLOT_SAVE
   if (!isTRUE(all.equal(previous_call, current_call)) |
     getOption("cyto_plot_save") == FALSE) {
@@ -2088,20 +2114,22 @@ cyto_plot.flowFrame <- function(x,
   # COMPUTE LABEL STATISTICS ---------------------------------------------------
 
   # STATISTICS
-  label_stat <- .cyto_label_stat(fr_list,
-    pops = pops,
-    channels = channels,
-    axes_trans = axes_trans,
-    label_stat = label_stat,
-    density_smooth = density_smooth
-  )
+  if(label == TRUE){
+    label_stat <- .cyto_label_stat(fr_list,
+      pops = pops,
+      channels = channels,
+      axes_trans = axes_trans,
+      label_stat = label_stat,
+      density_smooth = density_smooth
+    )
 
-  # COMBINE LABEL_TEXT & LABEL_STAT
-  label_text <- .cyto_label_text(
-    label_text,
-    label_stat
-  )
-
+    # COMBINE LABEL_TEXT & LABEL_STAT
+    label_text <- .cyto_label_text(
+      label_text,
+      label_stat
+    )
+  }
+  
   # ARGUMENT SPLITTING ---------------------------------------------------------
 
   # ARGUMENTS
@@ -2113,6 +2141,9 @@ cyto_plot.flowFrame <- function(x,
   # UPDATE ARGUMENTS
   .args_update(args)
 
+  # PULL DOWN ARGUMENTS
+  args <- .args_list()
+  
   # CYTO_PLOT_CALL & LABEL RESET -----------------------------------------------
 
   # PREVIOUS CALL
@@ -2185,9 +2216,6 @@ cyto_plot.flowFrame <- function(x,
   cyto_plot_new(popup)
 
   # PLOT CONSTRUCTION ----------------------------------------------------------
-
-  # PULL DOWN ARGUMENTS
-  args <- .args_list()
 
   # CYTO_PLOT_EMPTY
   .cyto_plot_empty(args)

@@ -346,15 +346,19 @@ cyto_gate_extract <- function(parent,
 #'   prior to gating, set to the length of x by default to construct a single
 #'   gate for all samples. If group_by is supplied a different gate will be
 #'   constructed for each group.
-#' @param display numeric [0,1] to control the percentage of events to be
-#'   plotted. Specifying a value for \code{display} can substantial improve
-#'   plotting speed for less powerful machines.
+
 #' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
 #'   \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
 #'   containing populations to be overlaid onto the plot(s). Only overlaid
 #'   flowSet objects are subjected to sampling by \code{display}.
 #' @param select vector containing the indicies of samples within gs to use for
 #'   plotting.
+#' @param display fraction or number of events to display in the plot during the
+#'   gating process, set to 25 000 events by default.
+#' @param negate logical indicating whether a gatingTemplate entry should be
+#'   made for the negated population (i.e. all events outside the constructed
+#'   gates), set to FALSE by default. If negate is set to TRUE, a name for the
+#'   negated population MUST be supplied at the end of the alias argument.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
 #' @param label logical indicating whether to include
@@ -373,6 +377,8 @@ cyto_gate_extract <- function(parent,
 #' @importFrom methods as
 #' @importFrom utils select.list write.csv
 #' @importFrom tools file_ext
+#' @importFrom magrittr %>%
+#' @importFrom purrr transpose
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -409,113 +415,190 @@ cyto_gate_edit <- function(x,
                            alias = NULL,
                            channels = NULL,
                            type = NULL,
-                           display = NULL,
+                           gatingTemplate = NULL,
                            overlay = NA,
                            group_by = "all",
                            select = NULL,
-                           gatingTemplate = NULL,
+                           negate = FALSE,
+                           display = 25000,
                            axis = "x",
-                           label = TRUE, ...) {
+                           label = TRUE, ...){
   
-  # Parent
+  # CHECKS ---------------------------------------------------------------------
+  
+  # PARENT
   if (is.null(parent)) {
     stop("Please supply the name of the parent population.")
-  } else if (!parent %in% basename(getNodes(x))) {
+  } else if (!parent %in% cyto_nodes(x, path = "auto")) {
     stop("Supplied parent does not exist in the GatingSet.")
   }
   
-  # Alias
+  # ALIAS
   if (is.null(alias)) {
     stop("Please supply the name(s) of the gates to edit to 'alias'.")
-  } else if (!all(alias %in% basename(getNodes(x)))) {
+  } else if (!all(alias %in% cyto_nodes(x, path = "auto"))) {
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
-  # Missing gatingTemplate
+  # MISSING GATINGTEMPLATE
   if(is.null(gatingTemplate)){
     gatingTemplate <- cyto_gatingTemplate_active()
   }
   
-  # gatingTemplate still missing
+  # GATINGTEMPLATE STILL MISSING
   if(is.null(gatingTemplate)){
     stop("Supply the name of the gatingTemplate to edit gate(s).")
   }
   
-  # File extension
+  # GATINGTEMPLATE FILE EXTENSION
   if(.empty(file_ext(gatingTemplate))){
     gatingTemplate <- paste0(gatingTemplate, ".csv")
   }
   
-  # Extract transformations from gs
-  axes_trans <- cyto_transform_extract(x[[1]]@transformation, inverse = FALSE)
+  # ASSIGN X TO GS
+  gs <- x
   
-  # Extract gates from gT
-  gT <- suppressMessages(gatingTemplate(gatingTemplate))
+  # TRANSFORMATIONS
+  axes_trans <- gs[[1]]@transformation
+  if(length(axes_trans) == 0){
+    axes_trans <- NA
+  }  
   
-  # Extract population nodes from gT
-  nds <- getNodes(gT, only.names = TRUE)
+  # EXTRACT INFORMATION FROM GATINGTEMPLATE FILE -------------------------------
   
-  # Parent Node
-  prnt <- names(nds)[match(parent, nds)]
+  # READ IN GATINGTEMPLATE
+  gtf <- read.csv(gatingTemplate, header = TRUE, stringsAsFactors = FALSE)
   
-  # Read in gatingTemplate
-  gt <- read.csv(gatingTemplate, header = TRUE)
+  # RESTRICT BY PARENT
+  gtf_parent <- gtf[gtf$parent == parent, ]
   
-  # Get channels from gatingTemplate
-  channels <- unique(
-    unlist(
-      strsplit(
-        as.character(gt[gt$parent == parent &
-                          gt$alias %in% alias, "dims"]), ",",
-        fixed = TRUE
-      )
-    )
-  )  
-  
-  # Get groupBy from gatingTemplate
-  grpby <- as.character(gt[gt$parent == parent &
-                             gt$alias == alias[1], "groupBy"])
-  
-  # groupBy is not NA
-  if (!.all_na(grpby)) {
-    grpby <- unlist(strsplit(grpby, ":"))
-  }else{
-    grpby <- "all"
-  } 
-  
-  # groupBy is numeric
-  if (!all(grepl("^[A-Za-z]+$", grpby))) {
-    stop("Numeric groupBy is not supported. Collapsing all samples.")
-    grpby <- "all"
-  }
-  
-  # Grouping being applied (NA stored)
-  if(grpby[1] == "all"){
-    
-    # Grouping variables added through cyto_gate_edit
-    if(group_by[1] != "all"){
-      grouping_added <- TRUE
-      grpby <- group_by
-    }else if(group_by[1] == "all"){
-      grouping_added <- FALSE
+  # RESTRICT BY PARENT & ALIAS
+  gtf_alias <- lapply(gtf_parent$alias, function(z){
+    unlist(strsplit(as.character(z), ","))
+  })
+  ind <- LAPPLY(gtf_alias, function(z){
+    if(any(alias %in% z)){
+      TRUE
+    }else{
+      FALSE
     }
-    
-  }else{
-    grouping_added <- FALSE
+  })
+  # UPDATE gtf_alias
+  gtf_alias <- gtf_alias[ind]
+
+  # PULL OUT RELEVENT GATINTEMPLATE ENTRIES
+  gtf_chunk <- gtf_parent[ind, ]
+
+  # EXTRACT CHANNELS
+  if(is.null(channels)){
+    channels <- unique(
+      unlist(
+        strsplit(
+          as.character(gtf_chunk[gtf_chunk$alias %in% alias, "dims"]), ",",
+          fixed = TRUE
+        )
+      )
+    )  
   }
   
-  # Split GatingSet by group_ by variables - named gs_list
-  gs_list <- cyto_group_by(gs, grpby)
-  N <- length(gs_list)
+  # EXTRACT GROUPBY
+  gtf_groupBy <- unique(gtf_chunk[, "groupBy"])
   
-  # Prepare overlays - list of flowFrame lists
-  if(!.all_na(overlay)){
-    
-    # Overlay is the names of populations
+  # EXTRACT GATING METHOD
+  gtf_gating_method <- unique(as.character(gtf_chunk[, "gating_method"]))
+  
+  # UNSUPPORTED GATING METHOD
+  if(any(gtf_gating_method %in% c("refGate", "boolGate"))){
+    stop("Use cyto_gatingTemplate_edit to modify refGate and boolGate entries.")
+  }
+  
+  # EXTRACT EXISTING GATES FROM GATINGSET DIRECTLY -----------------------------
+  
+  # GATINGSET LIST - NEW GROUPING - EXTRACT EXISTING GATES FROM EACH GROUP
+  gs_list <- cyto_group_by(gs, group_by = group_by)
+  
+  # GROUPS
+  N <- length(gs_list)  
+  
+  # GATES FORMATTED FOR GATINGSET (NO QUADGATES) - EXISTING GATES
+  gates_gs <- lapply(gs_list, function(gs){
+    gates <- lapply(alias, function(z){
+      getGate(gs[[1]], paste(parent, z, sep = "/"))
+    })
+    names(gates) <- alias
+    return(gates)
+  })
+  names(gates_gs) <- names(gs_list)
+  
+  # GATES FORMATTED FOR GATINGTEMPLATE (QUADGATES) - EXISTING GATES
+  gates_gT <- lapply(gates_gs, function(z){
+    if(cyto_gate_type(z) == "quadrant"){
+      z <- list(.cyto_gate_quad_convert(z, channels))
+    }
+    return(z)
+  })
+  
+  # PREPARE TYPE & ALIAS -------------------------------------------------------
+  
+  # GET GATE TYPE FROM EXISTING GATES
+  if (is.null(type)) {
+    type <- cyto_gate_type(gates_gs[[1]])
+  }
+  
+  # TYPE
+  type <- .cyto_gate_type(type, channels, alias, negate)
+  
+  # ALIAS - LIST PER GATE TYPE
+  alias <- .cyto_alias(alias, type, negate)
+  
+  # PREPARE SAMPLES & OVERLAYS -------------------------------------------------
+  
+  # EXTRACT PARENT POPULATION
+  fs <- cyto_extract(x, parent)
+  
+  # GROUP ALL
+  if (group_by[1] == "all") {
+    # SELECT
+    if (!is.null(select)) {
+      fs <- cyto_select(fs, select)
+    }
+    # MERGED FLOWFRAME
+    fr <- cyto_convert(fs, "flowFrame")
+    # FLOWFRAME METHOD
+    fr_list <- list(fr)
+    # GROUP variables
+  } else {
+    # GROUPING
+    fs_list <- cyto_group_by(fs, group_by)
+    # SELECT PER GROUP
+    if (!is.null(select)) {
+      fs_list <- lapply(fs_list, function(z) {
+        # Select or return all samples if criteria not met
+        tryCatch(cyto_select(z, select), error = function(e) {
+          z
+        })
+      })
+    }
+    # MERGE EACH FLOWSET
+    fr_list <- lapply(fs_list, function(z) {
+      # Number of samples per group
+      n <- length(z)
+      # Convert fs to flowFrame
+      z <- cyto_convert(z, "flowFrame")
+      return(z)
+    })
+  }
+  names(fr_list) <- names(gs_list)
+
+  # PREPARE OVERLAY ------------------------------------------------------------
+  
+  # Organise overlays - list of flowFrame lists of length(fr_list)
+  if (!.all_na(overlay)) {
+    # OVERLAY - POPUALTION NAMES
     if (is.character(overlay)) {
-      if (all(overlay %in% basename(getNodes(x)))) {
-        
-        # Pull out list of flowSets
+      # VALID OVERLAY
+      if (all(overlay %in% basename(cyto_nodes(x)))) {
+        # EXTRACT POPULATIONS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
           cyto_extract(x, z)
@@ -523,81 +606,54 @@ cyto_gate_edit <- function(x,
         names(overlay) <- nms
       }
     }
-    
-    # flowFrame repeated in list - no sampling
-    if(inherits(overlay, "flowFrame")){
+    # OVERLAY - FLOWFRAME
+    if (inherits(overlay, "flowFrame")) {
       # Always show all events
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
-    }else if(inherits(overlay, "flowSet")){
-      # Group by variables
-      if(group_by[1] != "all"){
-        # Grouping
+    } else if (inherits(overlay, "flowSet")) {
+      # GROUP VARIABLES
+      if (group_by[1] != "all") {
+        # GROUPING
         overlay <- cyto_group_by(overlay, group_by)
-        # Coercion to list of flowFrames & sampling
-        overlay <- lapply(overlay, function(z){
-          # Select
-          if(!is.null(select)){
-            z <- tryCatch(cyto_select(z, select), error = function(e){z})
+        # LIST OF FLOWFRAMES
+        overlay <- lapply(overlay, function(z) {
+          # SELECT
+          if (!is.null(select)) {
+            z <- tryCatch(cyto_select(z, select), error = function(e) {
+              z
+            })
           }
-          # Restrict
-          if(length(z) > 20){
-            z <- z[sample(seq_len(length(z)), 20)]
-          }
-          n <- length(z)
-          y <- cyto_convert(z, "flowFrame")
-          if(is.null(display)){
-            return(cyto_sample(z, 1/n))
-          }else{
-            return(cyto_sample(y, display))
-          }
+          # CONVERT
+          z <- cyto_convert(z, "flowFrame")
+          return(z)
         })
-        # Group all samples togther
-      }else{
-        
-        # Number of samples
-        n <- length(overlay)
-        
-        # Select
-        if(!is.null(select)){
+        # GROUP ALL
+      } else {
+        # SELECT
+        if (!is.null(select)) {
           overlay <- cyto_select(overlay, select)
         }
-        
-        # Restrict
-        if(length(overlay) > 20){
-          overlay <- overlay[sample(seq_len(length(overlay)), 20)]
-        }
-        
-        # Convert overlay to flowFrame
+        # FLOWFRAME
         overlay <- cyto_convert(overlay, "flowFrame")
-        
-        # Apply sampling
-        if(is.null(display)){
-          overlay <- cyto_sample(overlay, 1/n)
-        }else{
-          overlay <- cyto_sample(overlay, display)
-        }
+        # FLOWFRAME LIST
         overlay <- list(overlay)
       }
-      # Convert list of flowFrames to list of flowFrame lists
-      overlay <- lapply(overlay, function(z){
+      # FLOWFRAME LIST TO LIST OF FLOWFRAME LISTS
+      overlay <- lapply(overlay, function(z) {
         list(z)
       })
-      # Overlay is list of flowFrames or flowSets
-    }else if(inherits(overlay, "list")){
-      
-      # List of flowFrames repeat fr_list times - no sampling or grouping
-      if(all(LAPPLY(overlay, function(z){
-        inherits(z, "flowFrame")
-      }))){
-        
-        overlay <- rep(list(overlay), N)
-        
-        # Allow list of flowFrame lists of length(fr_list)
-      }else if (all(LAPPLY(unlist(overlay), function(z) {
+      # OVERLAY - LIST OF FLOWFRAMES OR FLOWSETS
+    } else if (inherits(overlay, "list")) {
+      # LIST OF FLOWFRAMES - REPEAT FR_LIST TIMES
+      if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowFrame")
       }))) {
-        
+        overlay <- rep(list(overlay), N)
+        # LIST FLOWFRAME LISTS OF LENGTH FR_LIST
+      } else if (all(LAPPLY(unlist(overlay), function(z) {
+        inherits(z, "flowFrame")
+      }))) {
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
         if (length(overlay) != N) {
@@ -606,170 +662,111 @@ cyto_gate_edit <- function(x,
             "one flowFrame list per group."
           ))
         }
-        
-        # list of flowSets
-      }else if(all(LAPPLY(overlay, function(z){
+        # LIST OF FLOWSETS
+      } else if (all(LAPPLY(overlay, function(z) {
         inherits(z, "flowSet")
-      }))){
-        
-        # Group each flowSet, merge and sample
-        overlay <- lapply(overlay, function(z){
-          
-          # Group by variables
-          if(group_by[1] != "all"){
-            # Grouping
+      }))) {
+        # GROUP & MERGE EACH FLOWSET
+        overlay <- lapply(overlay, function(z) {
+          # GROUP VARIABLES
+          if (group_by[1] != "all") {
+            # GROUPING
             x <- cyto_group_by(z, group_by)
             # Coercion and sampling
-            x <- lapply(x, function(y){
-              # Selection
-              if(!is.null(select)){
-                y <- tryCatch(cyto_select(y, select), error = function(e){y})
+            x <- lapply(x, function(y) {
+              # SELECT
+              if (!is.null(select)) {
+                y <- tryCatch(cyto_select(y, select), error = function(e) {
+                  y
+                })
               }
-              # Restriction
-              if(length(y) > 20){
-                y <- y[sample(seq_len(length(y)), 20)]
-              }
-              n <- length(y)
+              # CONVERT
               y <- cyto_convert(y, "flowFrame")
-              if(is.null(display)){
-                return(cyto_sample(y, 1/n))
-              }else{
-                return(cyto_sample(y, display))
-              }
+              return(y)
             })
-            # Group all samples together
-          }else{
-            # Select
-            if(!is.null(select)){
-              z <- tryCatch(cyto_select(z, select), error = function(e){z})
+            # GROUP ALL
+          } else {
+            # SELECT
+            if (!is.null(select)) {
+              z <- tryCatch(cyto_select(z, select), error = function(e) {
+                z
+              })
             }
-            # Restrict
-            if(length(z) > 20){
-              z <- z[sample(seq_len(length(z)), 20)]
-            }
-            # Coerce and sample
-            n <- length(z)
+            # CONVERT
             z <- cyto_convert(z, "flowFrame")
-            if(is.null(display)){
-              z <- cyto_sample(z, 1/n)
-            }else{
-              z <- cyto_sample(z, display)
-            }
-            z <- list(z)
             return(z)
           }
-          
-        })   
-        
-        # Overlay is a list of 
+        })
+        # OVERLAY TRANSPOSE
         overlay <- overlay %>% transpose()
-        
-        # Overlay is not supported   
-      }else{
+        # OVERLAY NOT SUPPORTED
+      } else {
         stop(paste(
           "'overlay' should be either a flowFrame, a flowSet,",
           "list of flowFrames or a list of flowSets."
         ))
       }
     }
-    
   }
   
-  # Extract gates given parent and child node(s)
-  gt_gates <- lapply(seq_along(alias), function(x) {
-    
-    # Alias node
-    als <- names(nds[match(alias[x], nds)])
-    gm <- getGate(gT, prnt, als)
-    gate <- eval(parameters(gm)$gate)
-    if(grouping_added == TRUE){
-      print(gate)
-      gate <- rep(gate, length(gs_list))
-      print(gate)
-    }
-    names(gate) <- names(gs_list)
-    return(gate)
-  })
-  names(gt_gates) <- alias
-  # gt_gates is list (length(alias)) of list of filters (1x filters per group) 
+  # COMBINE FR_LIST & OVERLAY
+  if(!.all_na(overlay)){
+    fr_list <- lapply(N, function(z){
+      c(fr_list[z], overlay[[z]])
+    })
+    names(fr_list) <- names(gs_list)
+  }
   
-  # Menu to select which groups require editing
-  if(grpby[1] == "all"){
-    # All samples in same group
+  # SELECT GROUP(S) TO EDIT ----------------------------------------------------
+  
+  # MENU - SELECT GROUPS TO EDIT
+  if(group_by[1] == "all"){
     grps <- "all"
   }else{
-    # Grouped samples
-    if(grouping_added == FALSE){
-      grps <- select.list(names(gs_list),
+    # GROUPED SAMPLES
+    grps <- select.list(names(fr_list),
                         multiple = TRUE,
                         graphics = TRUE,
                         title = "Select the group(s) to edit:")
-    }else if(grouping_added == TRUE){
-      grps <- names(gs_list)
-    }
-    
   }
   
-  print(grps)
-  
-  # pData
+  # EXPERIMENT DETAILS
   pd <- cyto_details(x)
   
-  # Grouping Information
-  if(grpby[1] == "all"){
+  # GROUPING
+  if(group_by[1] == "all"){
     pd$groupby <- rep("all", nrow(pd))
   }else{
-    pd$groupby <- do.call(paste, pd[, grpby, drop = FALSE])
+    pd$groupby <- do.call(paste, pd[, group_by, drop = FALSE])
   }
   
-  # plot, edit and save gate for each group
-  new_gates <- lapply(match(grps, names(gs_list)), function(y) {
+  # GATE EDITING ---------------------------------------------------------------
+  
+  # PLOT/EDIT/SAVE EACH GROUP - COORGANISE FOR GS & GT
+  lapply(match(grps, names(fr_list)), function(y) {
     
-    # Group
-    grp <- gs_list[[y]]
+    # SAMPLING
+    FR_LIST <- cyto_sample(fr_list[y], display = display, seed = 56)
     
-    # Extract parent population for plotting
-    fs <- cyto_extract(grp, parent)
-    
-    # Number of samples
-    n <- length(fs)
-    
-    # Select 
-    if(!is.null(select)){
-      fs <- tryCatch(cyto_select(fs, select),
-                     error = function(e){fs})
-    }
-    
-    # Coercion
-    fr <- cyto_convert(fs, "flowFrame")
-    
-    # Sampling
-    if(is.null(display)){
-      fr <- cyto_sample(fr, 1/n)
-    }else{
-      fr <- cyto_sample(fr, display)
-    }
-    
-    # Extract gate(s) for plotting
-    gates <- filters(lapply(alias, function(x) {
-      getGate(grp[[1]], paste0(parent,"/",x))
-    }))
+    # EXISTING GATES TO PLOT
+    gate <- gates_gT[[y]]
     
     # Title
     if(group_by[1] == "all"){
       title <- paste("Combined Events" ,"\n", parent)
     }else{
-      title <- paste(names(gs_list)[y], "\n", parent)
+      title <- paste(names(fr_list)[y], "\n", parent)
     }
     
     # Call to cyto_plot - careful about overlay
-    if(!.all_na(overlay)){
-      cyto_plot(fr,
+    if(!length(FR_LIST) == 1){
+      cyto_plot(FR_LIST[[1]],
                 channels = channels,
-                overlay = overlay[[y]],
+                overlay = FR_LIST[seq(2, length(FR_LIST))],
                 legend = FALSE,
-                gate = gates,
+                gate = gate,
                 gate_line_col = "magenta",
+                gate_line_alpha = 0.8,
                 axes_trans = axes_trans,
                 label = FALSE,
                 title = title,
@@ -777,12 +774,13 @@ cyto_gate_edit <- function(x,
                 popup = TRUE, ...
       )
     }else{
-      cyto_plot(fr,
+      cyto_plot(FR_LIST[[1]],
                 channels = channels,
                 overlay = NA,
                 legend = FALSE,
-                gate = gates,
+                gate = gate,
                 gate_line_col = "magenta",
+                gate_line_alpha = 0.8,
                 axes_trans = axes_trans,
                 label = FALSE,
                 title = title,
@@ -790,20 +788,6 @@ cyto_gate_edit <- function(x,
                 popup = TRUE, ...
       )
     }
-    
-    # If no type supplied determine using cyto_gate_type
-    if (is.null(type)) {
-      type <- cyto_gate_type(gates)
-    }
-    
-    # Check type argument is valid
-    type <- .cyto_gate_type_check(type = type, alias = alias)
-    
-    # Check alias is supplied correctly
-    .cyto_alias_check(alias = alias, type = type)
-    
-    # Extract channels from gates
-    channels <- unique(LAPPLY(gates, parameters))
     
     # 2D Interval gates require axis argument
     if ("interval" %in% type) {
@@ -811,7 +795,6 @@ cyto_gate_edit <- function(x,
         gates[[match("interval", type)[1]]]@min,
         gates[[match("interval", type)[1]]]@max
       )
-      
       if (all(is.finite(intvl[, 1]))) {
         axis <- "x"
       } else if (all(is.finite(intvl[, 2]))) {
@@ -819,44 +802,69 @@ cyto_gate_edit <- function(x,
       }
     }
     
-    # Draw new gates - set plot to FALSE (filters object of length alias)
-    new_gates <- cyto_gate_draw(fr,
-                                alias = alias,
+    # DRAW NEW GATES - FILTERS OBJECT OF LENGTH ALIAS (NEGATE LABEL)
+    gate_new <- cyto_gate_draw(FR_LIST[[1]],
+                                alias = unlist(alias),
                                 channels = channels,
                                 type = type,
+                                negate = negate,
                                 axis = axis,
                                 plot = FALSE
     )
-    names(new_gates) <- alias
     
-    print(gt_gates)
-    print(new_gates)
-    print(pd)
-    print(alias)
-    print(names(gt_gates))
-    print(names(gt_gates[[1]]))
+    # REMOVE FILTERS LAYER
+    gate_new <- unlist(gate_new)
+    names(gate_new) <- LAPPLY(alias, function(z){paste(z, collapse = ",")})
     
-    # Modify existing gate(s)
-    lapply(seq_along(alias), function(pop) {
-      gt_gates[[alias[pop]]][[match(
-        pd[pd$name %in% sampleNames(grp), "groupby"][1], names(gt_gates[[pop]])
-      )]] <<- filters(list(new_gates[[alias[pop]]]))
+    # PREPARE GATES FOR GATINGSET (QUADGATE -> REACTANGLES)
+    gate_prep <- lapply(gate_new, function(z){
+      if(is(z, "quadGate")){
+        z <- .cyto_gate_quad_convert(z, channels)
+      }
+      return(z)
     })
+    gate_prep <- unlist(gate_prep)
+    names(gate_prep) <- unlist(alias)
     
-    return(new_gates)
+    # MODIFY EXISTING GATES - GATINGSET
+    gates_gs[[y]] <<- gate_prep
+    
+    # MODIFY EXISTING GATES - GATINGTEMPLATE
+    gates_gT[[y]] <<- gate_new
+    
   })
   
+  # PREPARE GATES FOR GATINGTEMPLATE - LIST OF FILTERS OF LENGTH ALIAS
+  gates_gT_transposed <- gates_gT %>% transpose()
   
-  # Re-name parent and pop to be data.table friendly
+  # ADD GATES TO FILTERS LISTS
+  gates_gT_transposed <- lapply(gates_gT_transposed, function(z){
+    if(!any(LAPPLY(z, function(y){is(y, "quadGate")}))){
+      z <- filters(z)
+    }
+    return(z)
+  })
+  
+  # DATA.TABLE FRIENDLY NAMES
   prnt <- parent
   als <- alias
   gtmd <- "cyto_gate_draw"
   ppmd <- "pp_cyto_gate_draw"
   
-  # Find and Edit gatingTemplate entries - each alias and gate separate
+  # REMOVE NEGATED POPULATIONS FROM ALS (NEGATED ENTRY CANNOT BE MODIFIED)
+  als <- lapply(als, function(z){
+      paste(z, collapse = ",")
+  })
+  
+  # REMOVE NEGATED REFERENCE
+  if(negate == TRUE){
+    als <- als[-length(als)]
+  }
+  
+  # FIND & EDIT GATINGTEMPLATE ENTRIES
   gt <- data.table::fread(gatingTemplate)
   
-  # data.table R CMD Check NOTE
+  # DATA.TABLE R CMD CHECK NOTE
   gating_method <- NULL
   gating_args <- NULL
   collapseDataForGating <- NULL
@@ -864,44 +872,53 @@ cyto_gate_edit <- function(x,
   preprocessing_method <- NULL
   preprocessing_args <- NULL
   
-  # Prepare grpby
-  if(grpby[1] == "all"){
-    grpby <- NA
+  # GROUP_BY
+  if(group_by[1] == "all"){
+    group_by <- NA
   }else{
-    grpby <- paste(grpby, collapse = ":")
+    group_by <- paste(group_by, collapse = ":")
   }
   
-  print(grpby)
-  
-  # Modify template
-  for (i in seq_len(length(alias))) {
+  # MODIFY GATINGTEMPLATE - GATED POPULATIONS ONLY (IGNORE NEGATED ENTRIES)
+  for (i in seq_len(length(als))) {
     gt[parent == prnt & alias == als[i], gating_method := gtmd]
     gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(
-      gate = gt_gates[[i]]
+      gate = gates_gT_transposed[[i]]
     ))]
     gt[parent == prnt & alias == als[i], collapseDataForGating := TRUE]
-    gt[parent == prnt & alias == als[i], groupBy := grpby]
+    gt[parent == prnt & alias == als[i], groupBy := group_by]
     gt[parent == prnt & alias == als[i], preprocessing_method := ppmd]
     gt[parent == prnt & alias == als[i], preprocessing_args := as.logical(NA)]
   }
-  
-  # Save updated gatingTemplate
+
+  # SAVE UPDATED GATINGTEMPLATE
   write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
   
-  # Apply new gates to GatingSet by group
-  lapply(grps, function(grp) {
-    lapply(seq_along(alias), function(pop) {
-      fltrs <- rep(
-        list(gt_gates[[alias[pop]]][[grp]][[1]]),
-        length(gs[which(pd$groupby == grp)])
-      )
-      names(fltrs) <- as.character(sampleNames(gs[which(pd$groupby == grp)]))
-      
-      suppressMessages(setGate(gs[which(pd$groupby == grp)], alias[pop], fltrs))
-      suppressMessages(recompute(gs[which(pd$groupby == grp)], alias[pop]))
+  # CONVERT ALIAS BACK TO VECTOR
+  alias <- as.character(unlist(alias))
+
+  # APPLY NEW GATES TO GATINGSET (INCLUDES NEGATED ALIAS)
+  lapply(grps, function(z){
+    # MATCHING GROUPS
+    ind <- which(pd$groupby == z)
+    lapply(seq_along(alias), function(y){
+      # SET GATES - GATED POPULATIONS ONLY
+      if(y < length(alias) | (negate == FALSE & y == length(alias))){
+        # SET UPDATED GATES- IGNORE NEGATED GATE
+        # REPEAT GATES FOR EACH SAMPLE IN GROUP
+        gates_update <- rep(list(gates_gs[[z]][[alias[y]]]), 
+                            length(gs[ind]))
+        names(gates_update) <- cyto_names(gs[ind])
+        suppressMessages(setGate(gs[ind], 
+                                 paste(parent, alias[y], sep = "/"),
+                                 gates_update))
+      }
+      # RECOMPUTE STATISTICS (INCLUDE NEGATED POPULATION)
+      suppressMessages(recompute(gs[ind], paste(parent, alias[y], sep = "/")))
     })
   })
   
+  # UPDATE GATINGSET GLOBALLY
   assign(deparse(substitute(x)), gs, envir = globalenv())
 }
 
@@ -946,13 +963,11 @@ cyto_gate_type <- function(gates) {
     if (class(gates) %in% c("filters", "list")) {
       gates <- gates[[1]]
     }
-    
+    # ELLIPSE
     if (class(gates) == "ellipsoidGate") {
-      
-      # type == "ellipse"
       types <- "ellipse"
+    # RECTANGLE/BOUNDARY/INTERVAL/THRESHOLD
     } else if (class(gates) == "rectangleGate") {
-      
       # Includes rectangle, interval, threshold and boundary gate_types
       if (length(parameters(gates)) == 1) {
         
@@ -965,7 +980,6 @@ cyto_gate_type <- function(gates) {
           types <- "interval"
         }
       } else if (length(parameters(gates)) == 2) {
-        
         # Gate in 2 Dimensions
         if (is.infinite(gates@min[1]) & is.infinite(gates@min[2])) {
           types <- "boundary"
@@ -978,12 +992,13 @@ cyto_gate_type <- function(gates) {
           types <- "rectangle"
         }
       }
+    # POLYGON
     } else if (class(gates) == "polygonGate") {
-      
-      # type == "polygon"
       types <- "polygon"
+    # QUADRANT
+    }else if(class(gates) == "quadGate"){
+      types <- "quadrant"
     }
-    
     # Multiple gates supplied
   } else if (length(gates) > 1) {
     
@@ -998,33 +1013,26 @@ cyto_gate_type <- function(gates) {
       # Gates are all ellipses
       if (classes[1] == "ellipsoidGate") {
         types <- rep("ellipse", length(gates))
-        
         # Gates are all rectangles
       } else if (classes[1] == "rectangleGate") {
-        
         # Combine gate co-ordinates
         pts <- lapply(gates, function(x) {
           rbind(x@min, x@max)
         })
         pts <- do.call(rbind, pts)
-        
         # if 4 gates are supplied - type may be "quadrant"
         if (length(gates) == 4) {
-          
           # Quadrant gates should have finite and infinite values in all gates
           # and all finite co-ordinates should be the same
           if (sum(is.finite(pts[, 1])) == 4 &
               sum(is.infinite(pts[, 1])) == 4 &
               sum(duplicated(pts[, 1][is.finite(pts[, 1])])) == 3) {
             types <- "quadrant"
-            
             # Each gate could be either rectangle, interval, threshold, boundary
           } else {
             types <- LAPPLY(gates, function(x) {
-              
               # Includes rectangle, interval, threshold and boundary gate_types
               if (length(parameters(x)) == 1) {
-                
                 # Gate in One Dimension
                 if (is.infinite(x@min)) {
                   types <- "boundary"
@@ -1034,7 +1042,6 @@ cyto_gate_type <- function(gates) {
                   types <- "interval"
                 }
               } else if (length(parameters(x)) == 2) {
-                
                 # Gate in 2 Dimensions
                 if (is.infinite(x@min[1]) & is.infinite(x@min[2])) {
                   types <- "boundary"
@@ -1051,10 +1058,8 @@ cyto_gate_type <- function(gates) {
           }
         } else {
           types <- LAPPLY(gates, function(x) {
-            
             # Includes rectangle, interval, threshold and boundary gate_types
             if (length(parameters(x)) == 1) {
-              
               # Gate in One Dimension
               if (is.infinite(x@min)) {
                 types <- "boundary"
@@ -1064,7 +1069,6 @@ cyto_gate_type <- function(gates) {
                 types <- "interval"
               }
             } else if (length(parameters(x)) == 2) {
-              
               # Gate in 2 Dimensions
               if (is.infinite(x@min[1]) & is.infinite(x@min[2])) {
                 types <- "boundary"
@@ -1101,15 +1105,13 @@ cyto_gate_type <- function(gates) {
       # Not all supplied gates are of the same class - treat separately
     } else {
       types <- LAPPLY(gates, function(x) {
+        # ELLIPSE
         if (class(x) == "ellipsoidGate") {
-          
-          # type == "ellipse"
           types <- "ellipse"
+        # RECTANGLE/BOUNDARY/THRESHOLD/INTERVAL
         } else if (class(x) == "rectangleGate") {
-          
           # Includes rectangle, interval, threshold and boundary gate_types
           if (length(parameters(x)) == 1) {
-            
             # Gate in One Dimension
             if (is.infinite(x@min)) {
               types <- "boundary"
@@ -1119,7 +1121,6 @@ cyto_gate_type <- function(gates) {
               types <- "interval"
             }
           } else if (length(parameters(x)) == 2) {
-            
             # Gate in 2 Dimensions
             if (is.infinite(x@min[1]) & is.infinite(x@min[2])) {
               types <- "boundary"
@@ -1132,10 +1133,12 @@ cyto_gate_type <- function(gates) {
               types <- "rectangle"
             }
           }
+        # POLYGON
         } else if (class(x) == "polygonGate") {
-          
-          # type == "polygon"
           types <- "polygon"
+        # QUADRANT
+        } else if(class(x) == "quadGate"){
+          types <- "quadrant"
         }
       })
     }

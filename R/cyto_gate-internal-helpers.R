@@ -541,3 +541,70 @@
   }
   
 }
+
+# .CYTO_GATE_QUAD_CONVERT ------------------------------------------------------
+
+
+#' Convert between quadGate to rectangleGates 
+#' @return list of rectangleGates or a quadGate.
+#' @importFrom flowCore rectangleGate quadGate
+#' @noRd
+.cyto_gate_quad_convert <- function(gate,
+                                    channels) {
+  
+  # RECTANGLEGATES SUPPLIED
+  if(class(gate) == "list") {
+    # LIST OF RECTANGLEGATES
+    if(all(LAPPLY(gate, function(z){is(z, "rectangleGate")}))){
+    # FILTERID
+    FILTERID <- lapply(gate, function(z){z@filterId})
+    FILTERID <- paste(FILTERID, collapse = "|")
+    # EXTRACT SELECTED CO-ORDINATE
+    xcoords <- c(gate[[1]][channels[1]]@min, gate[[1]][channels[1]]@max)
+    xcoord <- xcoords[is.finite(xcoords)]
+    ycoords <- c(gate[[1]][channels[2]]@min, gate[[1]][channels[2]]@max)
+    ycoord <- ycoords[is.finite(ycoords)]
+    coords <- c(xcoord, ycoord)
+    # CONSTRUCT QUADGATE COORDS
+    coords <- matrix(coords, nrow = 1, ncol = 2)
+    colnames(coords) <- channels
+    # QUADGATE
+    return(quadGate(.gate = coords, filterId = FILTERID))
+    }
+    
+  }else{
+    # INPUT CO-ORDINATE
+    xcoord <- gate@boundary[1]
+    ycoord <- gate@boundary[2]
+  
+    # ALIAS
+    if(length(unlist(strsplit(gate@filterId, "|"))) == 4){
+      alias <- unlist(strsplit(gate@filterId, "|"))
+    }else{
+      alias <- c("Q1", "Q2", "Q3","Q4")
+    }
+  
+    # TOP LEFT
+    coords <- list(c(-Inf, xcoord), c(ycoord, Inf))
+    names(coords) <- channels
+    Q1 <- rectangleGate(coords, filterId = alias[1])
+  
+    # TOP RIGHT
+    coords <- list(c(xcoord, Inf), c(ycoord, Inf))
+    names(coords) <- channels
+    Q2 <- rectangleGate(coords, filterId = alias[2])
+  
+    # BOTTOM RIGHT
+    coords <- list(c(xcoord, Inf), c(-Inf, ycoord))
+    names(coords) <- channels
+    Q3 <- rectangleGate(coords, filterId = alias[3])
+  
+    # BOTTOM LEFT
+    coords <- list(c(-Inf, xcoord), c(-Inf, ycoord))
+    names(coords) <- channels
+    Q4 <- rectangleGate(coords, filterId = alias[4])
+    
+    return(list(Q1, Q2, Q3, Q4))
+  }
+  
+}

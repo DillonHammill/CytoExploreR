@@ -5,9 +5,9 @@
 \title{Edit Existing Gate(s).}
 \usage{
 cyto_gate_edit(x, parent = NULL, alias = NULL, channels = NULL,
-  type = NULL, display = NULL, overlay = NA, group_by = "all",
-  select = NULL, gatingTemplate = NULL, axis = "x", label = TRUE,
-  ...)
+  type = NULL, gatingTemplate = NULL, overlay = NA,
+  group_by = "all", select = NULL, negate = FALSE, display = 25000,
+  axis = "x", label = TRUE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{GatingSet}.}
@@ -29,9 +29,8 @@ threshold, boundary, interval, quadrant and web} which can be abbreviated
 as upper or lower case first letters as well. Default \code{type} is
 \code{"polygon"}.}
 
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
-plotting speed for less powerful machines.}
+\item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
+"gatingTemplate.csv") where the gate is saved.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
 \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
@@ -47,8 +46,13 @@ constructed for each group.}
 \item{select}{vector containing the indicies of samples within gs to use for
 plotting.}
 
-\item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
-"gatingTemplate.csv") where the gate is saved.}
+\item{negate}{logical indicating whether a gatingTemplate entry should be
+made for the negated population (i.e. all events outside the constructed
+gates), set to FALSE by default. If negate is set to TRUE, a name for the
+negated population MUST be supplied at the end of the alias argument.}
+
+\item{display}{fraction or number of events to display in the plot during the
+gating process, set to 25 000 events by default.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

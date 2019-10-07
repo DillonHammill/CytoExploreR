@@ -14,11 +14,12 @@
 
 \method{cyto_gate_draw}{flowSet}(x, alias = NULL, channels = NULL,
   type = NULL, overlay = NA, group_by = "all", select = NULL,
-  display = 25000, axis = "x", label = TRUE, plot = TRUE, ...)
+  negate = FALSE, display = 25000, axis = "x", label = TRUE,
+  plot = TRUE, ...)
 
 \method{cyto_gate_draw}{flowFrame}(x, alias = NULL, channels = NULL,
-  type = NULL, overlay = NA, display = 25000, axis = "x",
-  label = TRUE, plot = TRUE, ...)
+  type = NULL, overlay = NA, negate = FALSE, display = 25000,
+  axis = "x", label = TRUE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
