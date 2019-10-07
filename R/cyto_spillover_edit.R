@@ -214,7 +214,7 @@ cyto_spillover_edit.flowSet <- function(x,
         channel_match <- paste0(channel_match, ".csv")
       }
       # Working directory check
-      if(getOption("CytoRSuite_wd_check") == TRUE){
+      if(getOption("CytoExploreR_wd_check") == TRUE){
         # channel_match exists in working directory
         if(file_wd_check(channel_match)){
           channel_match <- read.csv(channel_match, 
@@ -275,7 +275,7 @@ cyto_spillover_edit.flowSet <- function(x,
         spillover <- paste0(spillover, ".csv")
       }
       # Working directory checks
-      if (getOption("CytoRSuite_wd_check") == TRUE) {
+      if (getOption("CytoExploreR_wd_check") == TRUE) {
         if (file_wd_check(spillover)) {
           spill <- read.csv(spillover, header = TRUE, row.names = 1)
           spill <- as.matrix(spill)

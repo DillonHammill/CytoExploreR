@@ -61,7 +61,7 @@
 #' library(CytoRSuiteData)
 #'
 #' # Bypass directory check for external files
-#' options("CytoRSuite_wd_check" = FALSE)
+#' options("CytoExploreR_wd_check" = FALSE)
 #'
 #' # Load in compensation controls
 #' fs <- Compensation
@@ -86,8 +86,8 @@
 #' # Compensate samples
 #' gs <- compensate(gs, spill)
 #'
-#' # Return CytoRSuite_wd_check to default
-#' options("CytoRSuite_wd_check" = TRUE)
+#' # Return CytoExploreR_wd_check to default
+#' options("CytoExploreR_wd_check" = TRUE)
 #' @importFrom flowCore each_col fsApply sampleNames flowSet Subset
 #' @importFrom flowWorkspace pData GatingSet
 #' @importFrom methods as
@@ -194,7 +194,7 @@ cyto_spillover_compute.flowSet <- function(x,
       chans <- cm$channel[match(cyto_names(x), rownames(cm))]
       pd$channel <- paste(chans)
     } else {
-      if (getOption("CytoRSuite_wd_check") == TRUE) {
+      if (getOption("CytoExploreR_wd_check") == TRUE) {
         if (file_wd_check(channel_match)) {
           cm <- read.csv(channel_match, 
                          header = TRUE, 
@@ -409,7 +409,7 @@ cyto_spillover_compute.flowSet <- function(x,
     
   # No name specified for spillover default to date-Spillover-Matrix.csv
   if(is.null(spillover)){
-    spillover <- paste0(format(SysDate(), "%d%m%y"),"-","Spillover-Matrix.csv")
+    spillover <- paste0(format(Sys.Date(), "%d%m%y"),"-","Spillover-Matrix.csv")
   }
   
   # write spillover matrix to csv file

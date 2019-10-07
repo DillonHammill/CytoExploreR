@@ -80,7 +80,7 @@ and written to a named csv file for future use.
 library(CytoRSuiteData)
 
 # Bypass directory check for external files
-options("CytoRSuite_wd_check" = FALSE)
+options("CytoExploreR_wd_check" = FALSE)
 
 # Load in compensation controls
 fs <- Compensation
@@ -105,8 +105,8 @@ spill <- spillover_compute(getData(gs, "Single Cells"),
 # Compensate samples
 gs <- compensate(gs, spill)
 
-# Return CytoRSuite_wd_check to default
-options("CytoRSuite_wd_check" = TRUE)
+# Return CytoExploreR_wd_check to default
+options("CytoExploreR_wd_check" = TRUE)
 }
 \references{
 C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral

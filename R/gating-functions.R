@@ -501,7 +501,9 @@
       rownames(coords) <- c("min", "max")
 
       gate <- rectangleGate(.gate = coords, filterId = alias)
-
+      
+    }
+    
       # LABEL GATED POPULATION
       if (label == TRUE) {
         # GATE CENTER - LABEL POSITION
@@ -518,8 +520,7 @@
           label_text_y = gate_center[,"y"]
         )
       }
-    }
-
+    
     return(gate)
   })
 
