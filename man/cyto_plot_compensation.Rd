@@ -111,7 +111,7 @@ refernce if supplied.
 library(CytoRSuiteData)
 
 # Bypass directory check for external files
-options("CytoRSuite_wd_check" = FALSE)
+options("CytoExploreR_wd_check" = FALSE)
 
 # Load in compensation controls
 gs <- GatingSet(Compensation)
@@ -157,8 +157,8 @@ cyto_plot_compensation(gs,
   display = 1000
 )
 
-# Return "CytoRSuite_wd_check" to default
-options("CytoRSuite_wd_check" = TRUE)
+# Return "CytoExploreR_wd_check" to default
+options("CytoExploreR_wd_check" = TRUE)
 
 }
 \seealso{

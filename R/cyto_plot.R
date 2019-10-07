@@ -552,7 +552,7 @@ cyto_plot.GatingSet <- function(x,
       }
     }
   }
-
+  
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
   # NEGATE
@@ -2110,7 +2110,7 @@ cyto_plot.flowFrame <- function(x,
       return(POPS)
     })
   }
-
+  
   # COMPUTE LABEL STATISTICS ---------------------------------------------------
 
   # STATISTICS
@@ -2209,7 +2209,7 @@ cyto_plot.flowFrame <- function(x,
       options("cyto_plot_label_coords" = NULL)
     }
   }
-
+  
   # GRAPHICS DEVICE ------------------------------------------------------------
 
   # PREPARE GRAPHICS DEVICE

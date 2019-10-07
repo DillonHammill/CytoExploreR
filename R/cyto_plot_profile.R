@@ -83,8 +83,8 @@ setMethod(cyto_plot_profile,
                           title = NA, ...) {
 
     # Set plot method 
-    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-      options("CytoRSuite_cyto_plot_method" = "profile/flowFrame")
+    if(is.null(getOption("cyto_plot_method"))){
+      options("cyto_plot_method" = "profile/flowFrame")
     }
     
     # Assign x to fr
@@ -152,18 +152,18 @@ setMethod(cyto_plot_profile,
     par(oma = c(0, 0, 0, 0))
     
     # Turn off graphics device for saving
-    if(getOption("CytoRSuite_cyto_plot_save")){
+    if(getOption("cyto_plot_save")){
       
-      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+      if(inherits(x, basename(getOption("cyto_plot_method")))){
         
         # Close graphics device
         dev.off()
         
-        # Reset CytoRSuite_cyto_plot_save
-        options("CytoRSuite_cyto_plot_save" = FALSE)
+        # Reset cyto_plot_save
+        options("cyto_plot_save" = FALSE)
         
-        # Reset CytoRSuite_cyto_plot_method
-        options("cytoRSuite_cyto_plot_method" = NULL)
+        # Reset cyto_plot_method
+        options("cyto_plot_method" = NULL)
         
       }
       
@@ -237,8 +237,8 @@ setMethod(cyto_plot_profile,
                           density_stack = 0.5, ...) {
 
     # Set plot method 
-    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-      options("CytoRSuite_cyto_plot_method" = "profile/flowSet")
+    if(is.null(getOption("cyto_plot_method"))){
+      options("cyto_plot_method" = "profile/flowSet")
     }
     
     # Assign x to fs
@@ -282,18 +282,18 @@ setMethod(cyto_plot_profile,
     }
     
     # Turn off graphics device for saving
-    if(getOption("CytoRSuite_cyto_plot_save")){
+    if(getOption("cyto_plot_save")){
       
-      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+      if(inherits(x, basename(getOption("cyto_plot_method")))){
         
         # Close graphics device
         dev.off()
         
-        # Reset CytoRSuite_cyto_plot_save
-        options("CytoRSuite_cyto_plot_save" = FALSE)
+        # Reset cyto_plot_save
+        options("cyto_plot_save" = FALSE)
         
-        # Reset CytoRSuite_cyto_plot_method
-        options("cytoRSuite_cyto_plot_method" = NULL)
+        # Reset cyto_plot_method
+        options("cyto_plot_method" = NULL)
         
       }
       
@@ -365,8 +365,8 @@ setMethod(cyto_plot_profile,
                           axes_trans = NULL, ...) {
 
     # Set plot method 
-    if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-      options("CytoRSuite_cyto_plot_method" = "profile/GatingSet")
+    if(is.null(getOption("cyto_plot_method"))){
+      options("cyto_plot_method" = "profile/GatingSet")
     }
     
     # Parent missing
@@ -408,18 +408,18 @@ setMethod(cyto_plot_profile,
     )
     
     # Turn off graphics device for saving
-    if(getOption("CytoRSuite_cyto_plot_save")){
+    if(getOption("cyto_plot_save")){
       
-      if(inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))){
+      if(inherits(x, basename(getOption("cyto_plot_method")))){
         
         # Close graphics device
         dev.off()
         
-        # Reset CytoRSuite_cyto_plot_save
-        options("CytoRSuite_cyto_plot_save" = FALSE)
+        # Reset cyto_plot_save
+        options("cyto_plot_save" = FALSE)
         
-        # Reset CytoRSuite_cyto_plot_method
-        options("cytoRSuite_cyto_plot_method" = NULL)
+        # Reset cyto_plot_method
+        options("cyto_plot_method" = NULL)
         
       }
       

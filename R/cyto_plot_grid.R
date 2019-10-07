@@ -61,11 +61,11 @@ cyto_plot_grid.flowSet <- function(x,
   }
   
   # Signal cyto_plot_grid is being used
-  options("CytoRSuite_cyto_plot_grid" = TRUE)
+  options("cyto_plot_grid" = TRUE)
   
   # Set plot method
-  if(is.null(getOption("CytoRSuite_cyto_plot_method"))){
-    options("CytoRSuite_cyto_plot_method" = "grid/flowSet")
+  if(is.null(getOption("cyto_plot_method"))){
+    options("cyto_plot_method" = "grid/flowSet")
   }
   
   # Channels missing
@@ -575,26 +575,26 @@ cyto_plot_grid.flowSet <- function(x,
   )
   
   # Reset cyto_plot_grid option
-  options("CytoRSuite_cyto_plot_grid" = FALSE)
+  options("cyto_plot_grid" = FALSE)
   
   # Reset parameters to default
   par(mar = c(5.1,4.1,4.1,2.1))
   par(oma = c(0,0,0,0))
   
   # Turn off graphics device for saving
-  if(getOption("CytoRSuite_cyto_plot_save")){
+  if(getOption("cyto_plot_save")){
     
     if(inherits(x, 
-                basename(getOption("CytoRSuite_cyto_plot_method")))){
+                basename(getOption("cyto_plot_method")))){
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
       
     }
     
@@ -614,9 +614,9 @@ cyto_plot_grid.GatingSet <- function(x,
                                      title_text_y, ...) {
   
   # Signal cyto_plot _grid is being used
-  options("CytoRSuite_cyto_plot_grid" = TRUE)
+  options("cyto_plot_grid" = TRUE)
   
   # Reset cyto_plot_grid option
-  options("CytoRSuite_cyto_plot_grid" = FALSE)
+  options("cyto_plot_grid" = FALSE)
   
 }

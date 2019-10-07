@@ -65,7 +65,7 @@
 #' library(CytoRSuiteData)
 #'
 #' # Bypass directory check for external files
-#' options("CytoRSuite_wd_check" = FALSE)
+#' options("CytoExploreR_wd_check" = FALSE)
 #'
 #' # Load in compensation controls
 #' gs <- GatingSet(Compensation)
@@ -111,8 +111,8 @@
 #'   display = 1000
 #' )
 #'
-#' # Return "CytoRSuite_wd_check" to default
-#' options("CytoRSuite_wd_check" = TRUE)
+#' # Return "CytoExploreR_wd_check" to default
+#' options("CytoExploreR_wd_check" = TRUE)
 #'
 #' @seealso \code{\link{cyto_spillover_compute}}
 #' @seealso \code{\link{cyto_spillover_edit}}
@@ -150,8 +150,8 @@ cyto_plot_compensation.GatingSet <- function(x,
                                              density_fill_alpha = 0.5, ...) {
 
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Comp/GatingSet")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Comp/GatingSet")
   }
 
   # Graphics parameters
@@ -207,17 +207,17 @@ cyto_plot_compensation.GatingSet <- function(x,
   )
 
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
 
       # Close graphics device
       dev.off()
 
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
 
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
 }
@@ -245,8 +245,8 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
                                                    ...) {
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Comp/GatingHierarchy")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Comp/GatingHierarchy")
   }
   
   # Graphics parameters
@@ -301,17 +301,17 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   )
   
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
 }
@@ -337,8 +337,8 @@ cyto_plot_compensation.flowSet <- function(x,
                                            density_fill_alpha = 0.5, ...) {
 
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Comp/flowSet")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Comp/flowSet")
   }
 
   # Graphics parameters
@@ -384,7 +384,7 @@ cyto_plot_compensation.flowSet <- function(x,
     message("Saving channel selections to 'Compensation-Channels.csv'.")
     write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
   } else if (!is.null(channel_match)) {
-    if (getOption("CytoRSuite_wd_check") == TRUE) {
+    if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (file_wd_check(channel_match) == FALSE) {
         message(paste(channel_match, "is not in this working directory."))
         pd$channel <- paste(cyto_channel_select(x))
@@ -553,17 +553,17 @@ cyto_plot_compensation.flowSet <- function(x,
   })
 
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
 
       # Close graphics device
       dev.off()
 
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
 
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
 }
@@ -588,8 +588,8 @@ cyto_plot_compensation.flowFrame <- function(x,
                                              density_fill_alpha = 0.5, ...) {
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Comp/flowFrame")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Comp/flowFrame")
   }
 
   # Graphics parameters
@@ -636,7 +636,7 @@ cyto_plot_compensation.flowFrame <- function(x,
       channel_match <- paste0(channel_match,".csv")
     }
     # Working directory checks
-    if(getOption("CytoRSuite_wd_check") == TRUE){
+    if(getOption("CytoExploreR_wd_check") == TRUE){
       # File not in working directory
       if (file_wd_check(channel_match) == FALSE) {
         message(paste(channel_match, "is not in this working directory."))
@@ -649,7 +649,7 @@ cyto_plot_compensation.flowFrame <- function(x,
         chan <- cm$channel[match(cyto_names(x), row.names(cm))]
       }
     # Bypass working directory checks  
-    }else if(getOption("CytoRSuite_wd_check") == FALSE){
+    }else if(getOption("CytoExploreR_wd_check") == FALSE){
       # Read in file
       cm <- read.csv(channel_match, 
                      header = TRUE, 
@@ -739,17 +739,17 @@ cyto_plot_compensation.flowFrame <- function(x,
   })
 
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
 
       # Close graphics device
       dev.off()
 
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
 
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
 }

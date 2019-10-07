@@ -1640,7 +1640,7 @@ cyto_compensate.flowFrame <- function(x,
       }
       
       # Check working directory for csv file
-      if(getOption("CytoRSuite_wd_check")){
+      if(getOption("CytoExploreR_wd_check")){
         if(!file_wd_check(spillover)){
           stop(paste(spillover, "does not exist in this working directory."))
         }
@@ -1696,7 +1696,7 @@ cyto_compensate.flowSet <- function(x,
       }
       
       # Check working directory for csv file
-      if(getOption("CytoRSuite_wd_check")){
+      if(getOption("CytoExploreR_wd_check")){
         if(!file_wd_check(spillover)){
           stop(paste(spillover, "does not exist in this working directory."))
         }
@@ -1770,7 +1770,7 @@ cyto_compensate.GatingSet <- function(x,
       }
       
       # Check working directory for csv file
-      if(getOption("CytoRSuite_wd_check")){
+      if(getOption("CytoExploreR_wd_check")){
         if(!file_wd_check(spillover)){
           stop(paste(spillover, "does not exist in this working directory."))
         }

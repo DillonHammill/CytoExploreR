@@ -56,7 +56,7 @@
 #'   un-transformed data and will automatically resort to using biexponential
 #'   transformers internally if no transformers are supplied to this argument.
 #' @param display numeric passed to \code{cyto_plot} to control the number of
-#'   events to be displayed in the plots, set to 1000 events by default.
+#'   events to be displayed in the plots, set to 2000 events by default.
 #' @param point_size integer passed to \code{cyto_plot} to control the size of
 #'   the points in all plots, set to 3 by default.
 #' @param axes_text_size numeric pasedd to \code{cyto_plot} to control the size
@@ -111,7 +111,7 @@ cyto_spillover_edit.GatingSet <- function(x,
                                            channel_match = NULL,
                                            spillover = NULL,
                                            axes_trans = NULL,
-                                           display = 1000,
+                                           display = 2000,
                                            point_size = 3,
                                            axes_text_size = 1.7,
                                            axes_label_text_size = 2,
@@ -177,7 +177,7 @@ cyto_spillover_edit.flowSet <- function(x,
                                          channel_match = NULL,
                                          spillover = NULL,
                                          axes_trans = NULL,
-                                         display = 1000,
+                                         display = 2000,
                                          point_size = 3,
                                          axes_text_size = 1.7,
                                          axes_label_text_size = 2,
@@ -646,7 +646,7 @@ cyto_spillover_edit.flowSet <- function(x,
                     title_text_size = title_text_size)
 
           # Add MedFI label in other channel
-          cyto_plot_label2(fs.comp()[[input$editor_sample]],
+          cyto_plot_label(fs.comp()[[input$editor_sample]],
                            channels = input$editor_ychannel,
                            trans = axes_trans,
                            display = display,
@@ -834,7 +834,7 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Add label for unstained median
-          cyto_plot_label2(fs.comp()[[input$editor_unstained]],
+          cyto_plot_label(fs.comp()[[input$editor_unstained]],
                            channels = input$editor_ychannel,
                            trans = axes_trans,
                            display = display,
@@ -847,7 +847,7 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Add label for Stained median
-          cyto_plot_label2(fs.comp()[[input$editor_sample]],
+          cyto_plot_label(fs.comp()[[input$editor_sample]],
                            channels = input$editor_ychannel,
                            trans = axes_trans,
                            display = display,

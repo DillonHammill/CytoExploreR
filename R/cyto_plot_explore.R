@@ -67,8 +67,8 @@ cyto_plot_explore.GatingSet <- function(x,
                                         ...){
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Explore/GatingSet")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Explore/GatingSet")
   }
   
   # Default parent population
@@ -102,17 +102,17 @@ cyto_plot_explore.GatingSet <- function(x,
                     ...)
   
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
   
@@ -135,8 +135,8 @@ cyto_plot_explore.GatingHierarchy <- function(x,
                                               ...){
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Explore/GatingHierarchy")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Explore/GatingHierarchy")
   }
   
   # Default parent population
@@ -162,17 +162,17 @@ cyto_plot_explore.GatingHierarchy <- function(x,
                     ...)
   
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
   
@@ -194,8 +194,8 @@ cyto_plot_explore.flowSet <- function(x,
                                       ...){
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Explore/flowSet")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Explore/flowSet")
   }
   
   # Merge flowSet to flowFrame
@@ -221,17 +221,17 @@ cyto_plot_explore.flowSet <- function(x,
                     ...)
   
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
   
@@ -253,8 +253,8 @@ cyto_plot_explore.flowFrame <- function(x,
                                         ...){
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Explore/flowFrame")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Explore/flowFrame")
   }
   
   # Graphics parameters
@@ -361,17 +361,17 @@ cyto_plot_explore.flowFrame <- function(x,
   })
   
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
-    if (inherits(x, basename(getOption("CytoRSuite_cyto_plot_method")))) {
+  if (getOption("cyto_plot_save")) {
+    if (inherits(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset Ccyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
   

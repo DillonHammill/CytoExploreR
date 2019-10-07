@@ -117,8 +117,8 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
 
 
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Gating/GatingHierarchy")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Gating/GatingHierarchy")
   }
 
   # Assign x to gh
@@ -126,7 +126,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
 
   # Gating template supplied - apply to GatingHierarchy
   if (!is.null(gatingTemplate)) {
-    if (getOption("CytoRSuite_wd_check") == TRUE) {
+    if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (.file_wd_check(gatingTemplate)) {
         gt <- gatingTemplate(gatingTemplate)
         gating(gt, gh)
@@ -551,20 +551,20 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   par(oma = c(0, 0, 0, 0))
 
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
+  if (getOption("cyto_plot_save")) {
     if (inherits(
       x,
-      basename(getOption("CytoRSuite_cyto_plot_method"))
+      basename(getOption("cyto_plot_method"))
     )) {
 
       # Close graphics device
       dev.off()
 
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
 
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
 }
@@ -595,13 +595,13 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
                                               label_text_size = 0.8, ...){
   
   # Set plot method
-  if (is.null(getOption("CytoRSuite_cyto_plot_method"))) {
-    options("CytoRSuite_cyto_plot_method" = "Gating/GatingSet")
+  if (is.null(getOption("cyto_plot_method"))) {
+    options("cyto_plot_method" = "Gating/GatingSet")
   }
   
   # gatingTemplate supplied - apply to GatingSet
   if (!is.null(gatingTemplate)) {
-    if (getOption("CytoRSuite_wd_check") == TRUE) {
+    if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (.file_wd_check(gatingTemplate)) {
         gt <- gatingTemplate(gatingTemplate)
         gating(gt, x)
@@ -1095,20 +1095,20 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   par(oma = c(0, 0, 0, 0))
   
   # Turn off graphics device for saving
-  if (getOption("CytoRSuite_cyto_plot_save")) {
+  if (getOption("cyto_plot_save")) {
     if (inherits(
       x,
-      basename(getOption("CytoRSuite_cyto_plot_method"))
+      basename(getOption("cyto_plot_method"))
     )) {
       
       # Close graphics device
       dev.off()
       
-      # Reset CytoRSuite_cyto_plot_save
-      options("CytoRSuite_cyto_plot_save" = FALSE)
+      # Reset cyto_plot_save
+      options("cyto_plot_save" = FALSE)
       
-      # Reset CytoRSuite_cyto_plot_method
-      options("cytoRSuite_cyto_plot_method" = NULL)
+      # Reset cyto_plot_method
+      options("cyto_plot_method" = NULL)
     }
   }
 }

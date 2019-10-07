@@ -8,12 +8,12 @@
 \usage{
 \method{cyto_spillover_edit}{GatingSet}(x, parent = NULL,
   channel_match = NULL, spillover = NULL, axes_trans = NULL,
-  display = 1000, point_size = 3, axes_text_size = 1.7,
+  display = 2000, point_size = 3, axes_text_size = 1.7,
   axes_label_text_size = 2, title_text_size = 2,
   header_text_size = 1.5, ...)
 
 \method{cyto_spillover_edit}{flowSet}(x, channel_match = NULL,
-  spillover = NULL, axes_trans = NULL, display = 1000,
+  spillover = NULL, axes_trans = NULL, display = 2000,
   point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
   title_text_size = 2, header_text_size = 1.5, ...)
 }
@@ -41,7 +41,7 @@ un-transformed data and will automatically resort to using biexponential
 transformers internally if no transformers are supplied to this argument.}
 
 \item{display}{numeric passed to \code{cyto_plot} to control the number of
-events to be displayed in the plots, set to 1000 events by default.}
+events to be displayed in the plots, set to 2000 events by default.}
 
 \item{point_size}{integer passed to \code{cyto_plot} to control the size of
 the points in all plots, set to 3 by default.}
