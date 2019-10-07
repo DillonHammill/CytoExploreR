@@ -178,10 +178,7 @@ cyto_gate_draw.GatingSet <- function(x,
   alias <- .cyto_alias(alias, type, negate)
 
   # CHANNELS
-  channels <- cyto_channels_extract(fs,
-    channels = channels,
-    plot = TRUE
-  )
+  channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
 
   # TRANSFORMATIONS
   axes_trans <- x[[1]]@transformation
@@ -503,7 +500,7 @@ cyto_gate_draw.GatingSet <- function(x,
   
   # EXTRACT GATES FROM FILTERS
   filters_list <- lapply(filters_list, "unlist")
-  
+
   # TRANSPOSE FILTERS_LIST - LIST LENGTH ALIAS - EACH LENGTH GROUP
   gates <- filters_list %>% transpose()
   
@@ -514,7 +511,7 @@ cyto_gate_draw.GatingSet <- function(x,
     }
     return(z)
   })
-
+  
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
 
   # GROUP_BY
@@ -634,10 +631,7 @@ cyto_gate_draw.flowSet <- function(x,
   alias <- .cyto_alias(alias, type)
 
   # Check supplied channel(s) are valid - for gating functions
-  channels <- cyto_channels_extract(fs,
-    channels = channels,
-    plot = TRUE
-  )
+  channels <- cyto_channels_extract(fs, channels = channels, plot = TRUE)
 
   # PREPARE SAMPLES ------------------------------------------------------------
 
@@ -979,10 +973,7 @@ cyto_gate_draw.flowFrame <- function(x,
   alias <- .cyto_alias(alias, type)
 
   # CHANNELS
-  channels <- cyto_channels_extract(x,
-    channels = channels,
-    plot = TRUE
-  )
+  channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
 
   # PREPARE SAMPLES & OVERLAY --------------------------------------------------
   
