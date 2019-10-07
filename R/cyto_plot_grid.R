@@ -41,15 +41,15 @@ cyto_plot_grid.flowSet <- function(x,
                                    panel_x_label = NULL,
                                    panel_y_label = NULL,
                                    axes_label_text_font = 2,
-                                   axes_label_text_size = 2,
+                                   axes_label_text_size = 1,
                                    axes_label_text_col = "black",
-                                   title_text_font = c(1,1),
+                                   title_text_font = c(2,2),
                                    title_text_size = c(1,1),
                                    title_text_col = c("black","black"),
                                    header_text_font = 2,
                                    header_text_size = 1.5,
                                    header_text_col = "black",
-                                   panel_label_font = c(2,2),
+                                   panel_label_font = c(1,1),
                                    panel_label_size = c(1,1),
                                    panel_label_col = c("black","black"), ...) {
   
@@ -392,8 +392,9 @@ cyto_plot_grid.flowSet <- function(x,
     
   }
   
-  # cyto_plot arguments - rep length(grp_exp)
-  ovn <- length(overlay) + 1
+  # cyto_plot arguments - rep length(grp_exp) - SKIP
+  if(1 == 2){
+      ovn <- length(overlay) + 1
   args <- .args_list()
   args <- .cyto_plot_args_split(args,
     channels = channels,
@@ -401,6 +402,7 @@ cyto_plot_grid.flowSet <- function(x,
     plots = np,
     layers = ovn,
     gates = length(gate))
+  }
   
   # run through each element of grp_exp - empty plot if NA
   cnt <- 0
@@ -416,11 +418,6 @@ cyto_plot_grid.flowSet <- function(x,
     # Update sheet number
     if(x %in% seq_len(ns)*np){
       sht <<- sht + 1
-    }
-    
-    # Overlay
-    if(is.na(overlay)){
-      overlay <- NULL
     }
     
     # Replace NA with grp_exp with empty flowFrame
@@ -452,7 +449,7 @@ cyto_plot_grid.flowSet <- function(x,
                        channels = channels,
                        axes_trans = axes_trans,
                        axes_text = axes_text,
-                       overlay = NULL,
+                       overlay = NA,
                        xlim = xlim,
                        ylim = ylim,
                        ...)
@@ -464,7 +461,7 @@ cyto_plot_grid.flowSet <- function(x,
                 axes_trans = axes_trans,
                 overlay = overlay,
                 gate = gate,
-                title = NULL,
+                title = NA,
                 axes_text = axes_text, ...)
     }
     
@@ -489,7 +486,7 @@ cyto_plot_grid.flowSet <- function(x,
            y = mean(par("usr")[3:4]),
            labels = panel_y_label[x/(ncol*sht)],
            font = panel_label_font[2],
-           cex = 1.25*panel_label_size[2],
+           cex = 1.5*panel_label_size[2],
            col = panel_label_col[2],
            srt = 270,
            xpd = NA)
@@ -540,11 +537,11 @@ cyto_plot_grid.flowSet <- function(x,
       if(!is.na(title[2])){
         
         # mtext does not support text rotation - need to use text for y labels
-        text(x = par("usr")[2] + 0.18*(par("usr")[2] - par("usr")[1]),
-             y = par("usr")[4],
+        text(x = par("usr")[2] + 0.2*(par("usr")[2] - par("usr")[1]),
+             y = 2*par("usr")[4], # HALF GRID SIZE
              labels = title[2],
              font = title_text_font[2],
-             cex = 1.25*title_text_size[2],
+             cex = 1.8*title_text_size[2],
              col = title_text_col[2],
              srt = 270,
              xpd = NA)

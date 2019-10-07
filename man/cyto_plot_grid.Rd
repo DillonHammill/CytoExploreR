@@ -11,11 +11,11 @@
   layout = NULL, popup = FALSE, xlab, ylab, title = c(NA, NA),
   format = "row", header = NULL, panel_x_label = NULL,
   panel_y_label = NULL, axes_label_text_font = 2,
-  axes_label_text_size = 2, axes_label_text_col = "black",
-  title_text_font = c(1, 1), title_text_size = c(1, 1),
+  axes_label_text_size = 1, axes_label_text_col = "black",
+  title_text_font = c(2, 2), title_text_size = c(1, 1),
   title_text_col = c("black", "black"), header_text_font = 2,
   header_text_size = 1.5, header_text_col = "black",
-  panel_label_font = c(2, 2), panel_label_size = c(1, 1),
+  panel_label_font = c(1, 1), panel_label_size = c(1, 1),
   panel_label_col = c("black", "black"), ...)
 
 \method{cyto_plot_grid}{GatingSet}(x, parent, alias, channels, group_by,
