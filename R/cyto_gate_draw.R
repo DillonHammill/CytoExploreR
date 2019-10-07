@@ -201,6 +201,7 @@ cyto_gate_draw.GatingSet <- function(x,
     fr <- cyto_convert(fs, "flowFrame")
     # FLOWFRAME METHOD
     fr_list <- list(fr)
+    names(fr_list) <- "all"
     # GROUP variables
   } else {
     # GROUPING
@@ -222,6 +223,7 @@ cyto_gate_draw.GatingSet <- function(x,
       z <- cyto_convert(z, "flowFrame")
       return(z)
     })
+    names(fr_list) <- names(fs_list)
   }
   
   # GROUPS
@@ -456,6 +458,7 @@ cyto_gate_draw.GatingSet <- function(x,
         )
       }
     }, type[!is.na(type)], alias[!is.na(type)])
+    names(gates) <- LAPPLY(alias, function(z){paste(z, collapse = ",")})
 
     # NEGATED POPULATION
     if (negate == TRUE) {
@@ -497,7 +500,7 @@ cyto_gate_draw.GatingSet <- function(x,
     return(gates)
   })
   names(filters_list) <- names(fr_list)
-
+  
   # EXTRACT GATES FROM FILTERS
   filters_list <- lapply(filters_list, "unlist")
   
