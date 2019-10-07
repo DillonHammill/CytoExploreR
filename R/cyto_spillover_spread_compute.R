@@ -172,7 +172,7 @@ cyto_spillover_spread_compute.flowSet <- function(x,
       chans <- cm$channel[match(cyto_names(fs), rownames(cm))]
       pd$channel <- paste(chans)
     } else {
-      if (getOption("CytoRSuite_wd_check") == TRUE) {
+      if (getOption("CytoExploreR_wd_check") == TRUE) {
         if (file_wd_check(channel_match)) {
           cm <- read.csv(channel_match, 
                          header = TRUE, 
