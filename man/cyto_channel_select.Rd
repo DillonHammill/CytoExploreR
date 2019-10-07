@@ -8,13 +8,13 @@
 \alias{cyto_channel_select.GatingSet}
 \title{Select Fluorescent Channel for Compensation Controls}
 \usage{
-cyto_channel_select.flowFrame(x)
+\method{cyto_channel_select}{flowFrame}(x)
 
-cyto_channel_select.flowSet(x)
+\method{cyto_channel_select}{flowSet}(x)
 
-cyto_channel_select.GatingHierarchy(x)
+\method{cyto_channel_select}{GatingHierarchy}(x)
 
-cyto_channel_select.GatingSet(x)
+\method{cyto_channel_select}{GatingSet}(x)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

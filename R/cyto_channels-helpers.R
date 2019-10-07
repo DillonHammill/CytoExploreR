@@ -320,6 +320,11 @@ cyto_fluor_channels.GatingSet <- function(x) {
 #' @name cyto_channel_select
 NULL
 
+#' @noRd
+#' @export
+cyto_channel_select <- function(x){
+  UseMethod("cyto_channel_select")
+}
 
 #' @rdname cyto_channel_select
 #' @export
