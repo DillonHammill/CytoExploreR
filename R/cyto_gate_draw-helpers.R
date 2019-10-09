@@ -21,7 +21,7 @@
   # DEFAULT GATE TYPES ---------------------------------------------------------
   
   # NO GATE TYPE SUPPLIED
-  if(is.null(type)){
+  if(missing(type)){
     # 1D PLOT - INTERVAL
     if(length(channels) == 1){
       type <- "interval"
@@ -80,11 +80,11 @@
   
   # UNSUPPORTED GATE TYPES
   if(!all(ind == TRUE)){
-    if(length(!ind) == 1){
-      stop(paste(type[!ind], "is not a valid gate type for cyto_gate_draw."))
+    if(length(ind[ind == FALSE]) == 1){
+      stop(paste(type[!is.na(match(ind, FALSE))], "is not a valid gate type for cyto_gate_draw."))
     }else{
-      stop(paste(type[ind], sep = " & ",
-                 "are not valid gate types for cyto_gate_draw"))
+      stop(paste(paste(type[!is.na(match(ind, FALSE))], collapse = " & "),
+                 "are not valid gate types for cyto_gate_draw."))
     }
   }
   
@@ -98,7 +98,7 @@
   if(negate == TRUE & any(type %in% multi_gate_types)){
     stop(paste("Cannot negate", 
                paste(multi_gate_types, sep = " & "),
-               "gate_types."))
+               "gate types."))
   }
   
   # PREPARE GATE TYPE ----------------------------------------------------------
@@ -143,8 +143,7 @@
 #'
 #' @param alias vector of population names.
 #' @param type vector gate types to be used to gate the populations.
-#' @param negate logical indicating whether the negated population
-#'
+#' 
 #' @return stop gating process if alias is missing or of an incorrect length,
 #'   and return alias split by gate type.
 #'
@@ -152,21 +151,16 @@
 #'
 #' @noRd
 .cyto_alias <- function(alias, 
-                        type,
-                        negate = FALSE){
-  
-  # CHECKS ---------------------------------------------------------------------
-  
-  # MISSING ALIAS
-  if(is.null(alias)){
-    stop("Supply the name(s) of the population(s) to 'alias'.")
-  }
+                        type){
   
   # ALIAS PER GATE TYPE --------------------------------------------------------
   
   # EXPECTED ALIAS LENGTH PER GATE TYPE
   N <- LAPPLY(type, function(z){
-    if(z == "quadrant"){
+    # Negate already handled above (type set to NA)
+    if(.all_na(z)){
+      n <- 1
+    }else if(z == "quadrant"){
       n <- 4 
     }else if(z %in% .split_gate_types()){  
       n <- length(alias)
@@ -176,25 +170,17 @@
     return(n)
   })
   
-  # INCLUDE NEGATED POPULATION
-  if(negate == TRUE){
-    N <- c(N, 1)
-  }
-  
   # CHECK ALIAS ----------------------------------------------------------------
   
   # ALIAS LENGTH == N
-  if(!length(alias) == sum(N)){
+  if(length(alias) != sum(N)){
     stop("Supply a name for each of the population(s) to 'alias'.")
-    if(negate == TRUE){
-      stop("Have you forgotten to include a name for the negated population?")
-    }
   }  
   
   # SPLIT ALIAS ----------------------------------------------------------------
   
   # PREPARE ALIAS
-  alias <- split(alias, rep(seq_len(length(type)), times = N))
+  alias <- unname(split(alias, rep(seq_len(length(type)), times = N)))
   return(alias)
   
 }
