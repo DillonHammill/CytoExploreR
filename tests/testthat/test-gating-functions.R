@@ -517,12 +517,6 @@ test_that(".cyto_gate_ellipse_draw", {
 
 test_that(".cyto_gate_quadrant_draw", {
   
-  # Alias error
-  expect_error(.cyto_gate_quadrant_draw(Va2[[1]],
-                                       channels = c("FSC-A","SSC-A")),
-          "Supply a name for the gated population(s) to the 'alias' argument.",
-          fixed = TRUE)
-  
   # length(alias) != 4
   expect_error(.cyto_gate_quadrant_draw(Va2[[1]],
                                         alias = c("A","B"),
@@ -532,68 +526,12 @@ test_that(".cyto_gate_quadrant_draw", {
                fixed = TRUE)
   
   # 2D -------------------------------------------------------------------------
-  # Q1 - bottom left
-  q1 <- matrix(c(
-    -Inf,
-    75000,
-    -Inf,
-    75000
-  ),
-  ncol = 2,
-  nrow = 2,
-  byrow = FALSE
-  )
-  colnames(q1) <- c("FSC-A", "SSC-A")
-  rownames(q1) <- c("min","max")
-  q1 <- rectangleGate(filterId = "A", .gate = q1)
-  
-  # Q2
-  q2 <- matrix(c(
-    75000,
-    Inf,
-    75000,
-    -Inf
-  ),
-  ncol = 2,
-  nrow = 2,
-  byrow = FALSE
-  )
-  colnames(q2) <- c("FSC-A", "SSC-A")
-  rownames(q2) <- c("min","max")
-  q2 <- rectangleGate(filterId = "B", .gate = q2)
-  
-  # Q3
-  q3 <- matrix(c(
-    75000,
-    Inf,
-    75000,
-    Inf
-  ),
-  ncol = 2,
-  nrow = 2,
-  byrow = FALSE
-  )
-  colnames(q3) <- c("FSC-A", "SSC-A")
-  rownames(q3) <- c("min","max")
-  q3 <- rectangleGate(filterId = "C", .gate = q3)
-  
-  # Q4
-  q4 <- matrix(c(
-    75000,
-    -Inf,
-    75000,
-    Inf
-  ),
-  ncol = 2,
-  nrow = 2,
-  byrow = FALSE
-  )
-  colnames(q4) <- c("FSC-A", "SSC-A")
-  rownames(q4) <- c("min","max")
-  q4 <- rectangleGate(filterId = "D", .gate = q4)
   
   # combined quadrants
-  q <- filters(list(q1,q2,q3,q4))
+  pts <- matrix(c(75000,75000), ncol = 2)
+  colnames(pts) <- c("FSC-A", "SSC-A")
+  q <- list(quadGate(.gate = pts,
+            filterId = "A|B|C|D"))
   
   mock_locator <- mock(list(
     "x" = c(
@@ -714,13 +652,13 @@ test_that(".cyto_gate_web_draw", {
   
   testthat::with_mock(
     locator = mock_locator,
-    expect_equal(
+    expect_equivalent(
       .cyto_gate_web_draw(Va2[[1]],
                                alias = c("A","B","C","D"),
                                channels = c("FSC-A","SSC-A"),
                                plot = FALSE
       ),
-      w, tolerance = 0.2
+      w, tolerance = 0.5
     )
   )
   

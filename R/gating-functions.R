@@ -1876,6 +1876,7 @@
     colnames(coords) <- channels
     rownames(coords) <- NULL
 
+    # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
     # PLOT GATE
