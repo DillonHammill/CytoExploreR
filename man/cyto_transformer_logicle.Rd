@@ -11,16 +11,16 @@
 cyto_transformer_logicle(x, ...)
 
 \method{cyto_transformer_logicle}{GatingSet}(x, channels = NULL,
-  parent = "root", plot = TRUE, popup = FALSE, ...)
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_logicle}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", plot = TRUE, popup = FALSE, ...)
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_logicle}{flowSet}(x, channels = NULL,
   select = NULL, plot = FALSE, popup = FALSE, ...)
 
 \method{cyto_transformer_logicle}{flowFrame}(x, channels = NULL,
-  plot = TRUE, popup = FALSE, ...)
+  select = NULL, plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
@@ -36,14 +36,14 @@ if no channels/markers are supplied.}
 \item{parent}{name of the parent population to use for generating the
 transformation(s).}
 
+\item{select}{list of selection criteria passed to \code{cyto_select} to
+select a subset of samples for \code{cyto_plot}.}
+
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether the plots should be constructed in a
 pop-up window.}
-
-\item{select}{list of selection criteria passed to \code{cyto_select} to
-select a subset of samples for \code{cyto_plot}.}
 }
 \value{
 a \code{transformerList} object.

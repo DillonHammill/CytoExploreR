@@ -3,6 +3,9 @@
 # Wrappers for flowCore/flowWorkspace transformation functions which return
 # transformerList objects and use cyto_plot to visualise the transformations.
 
+# All methods must have select as an argument to allowing passing of arguments
+# from cyto_transform.
+
 # CYTO_TRANSFORMER_LOG ---------------------------------------------------------
 
 #' Definition(s) of Log Transformation(s)
@@ -88,6 +91,7 @@ cyto_transformer_log.GatingSet <- function(x,
 cyto_transformer_log.GatingHierarchy <- function(x,
                                                  channels = NULL,
                                                  parent = "root",
+                                                 select = NULL,
                                                  plot = TRUE,
                                                  popup = FALSE, ...){
     
@@ -139,6 +143,7 @@ cyto_transformer_log.flowSet <- function(x,
 #' @export
 cyto_transformer_log.flowFrame <- function(x,
                                            channels = NULL,
+                                           select = NULL,
                                            plot = TRUE,
                                            popup = FALSE, ...){
   
@@ -296,6 +301,7 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
 cyto_transformer_arcsinh.GatingHierarchy <- function(x,
                                                    channels = NULL,
                                                    parent = "root",
+                                                   select = NULL,
                                                    plot = TRUE,
                                                    popup = FALSE, ...) {
 
@@ -345,6 +351,7 @@ cyto_transformer_arcsinh.flowSet <- function(x,
 #' @export
 cyto_transformer_arcsinh.flowFrame <- function(x,
                                                channels = NULL,
+                                               select = NULL,
                                                plot = TRUE,
                                                popup = FALSE, ...) {
 
@@ -551,6 +558,7 @@ cyto_transformer_biex.flowSet <- function(x,
 #' @export
 cyto_transformer_biex.flowFrame <- function(x,
                                           channels = NULL,
+                                          select = NULL,
                                           plot = TRUE,
                                           popup = FALSE, ...) {
   
@@ -678,6 +686,7 @@ cyto_transformer_logicle <- function(x, ...) {
 cyto_transformer_logicle.GatingSet <- function(x,
                                              channels = NULL,
                                              parent = "root",
+                                             select = NULL,
                                              plot = TRUE,
                                              popup = FALSE, ...) {
 
@@ -708,6 +717,7 @@ cyto_transformer_logicle.GatingSet <- function(x,
 cyto_transformer_logicle.GatingHierarchy <- function(x,
                                                    channels = NULL,
                                                    parent = "root",
+                                                   select = NULL,
                                                    plot = TRUE,
                                                    popup = FALSE, ...) {
 
@@ -758,6 +768,7 @@ cyto_transformer_logicle.flowSet <- function(x,
 #' @export
 cyto_transformer_logicle.flowFrame <- function(x,
                                              channels = NULL,
+                                             select = NULL,
                                              plot = TRUE,
                                              popup = FALSE, ...) {
 

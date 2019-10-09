@@ -14,13 +14,13 @@ cyto_transformer_log(x, ...)
   parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_log}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", plot = TRUE, popup = FALSE, ...)
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_log}{flowSet}(x, channels = NULL,
   select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_log}{flowFrame}(x, channels = NULL,
-  plot = TRUE, popup = FALSE, ...)
+  select = NULL, plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},

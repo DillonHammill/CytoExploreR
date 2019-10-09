@@ -111,11 +111,12 @@ cyto_plot_profile.GatingSet <- function(x,
   }
 
   # TRANSFORMATIONS
-  axes_trans <- x[[1]]@transformation
-  if (length(axes_trans) == 0) {
+  if(length(x@transformation) == 0){
     axes_trans <- NA
+  }else{
+    axes_trans <- x@transformation[[1]]
   }
-
+  
   # PREPARE DATA ---------------------------------------------------------------
 
   # EXTRACT PARENT
@@ -176,9 +177,10 @@ cyto_plot_profile.GatingHierarchy <- function(x,
   }
 
   # TRANSFORMATIONS
-  axes_trans <- x@transformation
-  if (length(axes_trans) == 0) {
+  if(length(x@transformation) == 0){
     axes_trans <- NA
+  }else{
+    axes_trans <- x@transformation[[1]]
   }
   
   # PREPARE DATA ---------------------------------------------------------------

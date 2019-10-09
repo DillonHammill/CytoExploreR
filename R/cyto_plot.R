@@ -1900,15 +1900,16 @@ cyto_plot.flowFrame <- function(x,
     if (grepl("FSC", channels[z], ignore.case = TRUE) |
       grepl("SSC", channels[z], ignore.case = TRUE)) {
       fr_list <<- lapply(fr_list, function(y) {
-        if (min(range(y, type = "data")[, channels[z]]) < 0) {
+        if (nrow(y)){
+          if(min(range(y, type = "data")[, channels[z]]) < 0) {
           coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
           rownames(coords) <- c("min", "max")
           colnames(coords) <- channels[z]
           nonDebris <- rectangleGate(.gate = coords)
-          Subset(y, nonDebris)
-        } else {
-          return(y)
+          y <- Subset(y, nonDebris)
+          }
         }
+        return(y)
       })
     }
   })

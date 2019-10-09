@@ -14,13 +14,13 @@ cyto_transformer_arcsinh(x, ...)
   parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_arcsinh}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", plot = TRUE, popup = FALSE, ...)
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_arcsinh}{flowSet}(x, channels = NULL,
   select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_arcsinh}{flowFrame}(x, channels = NULL,
-  plot = TRUE, popup = FALSE, ...)
+  select = NULL, plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},

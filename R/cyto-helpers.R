@@ -375,7 +375,15 @@ cyto_transform.default <- function(x,
     }
     
     # Dispatch based on trans_type argument to get TransformerList
-    if(trans_type == "arcsinh"){
+    if(trans_type == "log"){
+      
+      transformer_list <- cyto_transformer_log(x,
+                                               channels = channels,
+                                               parent = parent,
+                                               select = select,
+                                               plot = FALSE, ...)
+      
+    }else if(trans_type == "arcsinh"){
       
       transformer_list <- cyto_transformer_arcsinh(x,
                                                    channels = channels,

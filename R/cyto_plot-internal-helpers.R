@@ -55,6 +55,9 @@
   # LABELS - 10^-5 -> 10^5
   lbls <- .cyto_plot_axes_labels(tcks)
   
+  # AXES RANGE 
+  names(axes_range) <- channels
+  
   # PER CHANNEL
   axs <- lapply(channels, function(chan){
     # LINEAR CHANNEL - NA

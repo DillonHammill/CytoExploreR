@@ -20,7 +20,7 @@ cyto_transformer_biex(x, ...)
   select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_biex}{flowFrame}(x, channels = NULL,
-  plot = TRUE, popup = FALSE, ...)
+  select = NULL, plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},

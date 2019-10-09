@@ -692,11 +692,11 @@
   
   # CALL FLOWFRAME METHOD
   fr_dens_list <- lapply(x, function(z){
-    .cyto_density(z,
+    suppressWarnings(.cyto_density(z,
                   channel = channel,
                   smooth = smooth,
                   modal = modal,
-                  bw = bw)
+                  bw = bw))
   })
   names(fr_dens_list) <- rep(paste(0, 
                                max(fr_dens_list[[1]]$y),
