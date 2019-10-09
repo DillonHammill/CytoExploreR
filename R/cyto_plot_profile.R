@@ -11,7 +11,7 @@
 #' @param parent name of the population to plot when a \code{GatingHierarchy} or
 #'   \code{GatingSet} object is supplied.
 #' @param axes_trans object of class
-#'   \code{\link[flowWorkspace:transformerList-class]{transformerList}} which
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}} which
 #'   was used to transform the channels of the supplied flowFrame.
 #'   \code{cyto_plot} does not support in-line transformations and as such the
 #'   transformations should be applied to the data prior to plotting. The

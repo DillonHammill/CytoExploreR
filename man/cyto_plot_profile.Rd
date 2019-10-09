@@ -48,7 +48,7 @@ should be comma separated and wrapped in a list. Refer to
 \code{\link{cyto_select}}.}
 
 \item{axes_trans}{object of class
-\code{\link[flowWorkspace:transformerList-class]{transformerList}} which
+\code{\link[flowWorkspace:transformerList]{transformerList}} which
 was used to transform the channels of the supplied flowFrame.
 \code{cyto_plot} does not support in-line transformations and as such the
 transformations should be applied to the data prior to plotting. The

@@ -8,7 +8,7 @@ cyto_transformer_combine(...)
 }
 \arguments{
 \item{...}{objects of class
-\code{\link[flowWorkspace:transformerList-class]{transformerList}} to be
+\code{\link[flowWorkspace:transformerList]{transformerList}} to be
 combined into a single \code{transformerList} object.}
 }
 \description{

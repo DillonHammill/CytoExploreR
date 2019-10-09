@@ -17,11 +17,11 @@ cyto_stats_compute(x, ...)
 Calculate and export flow cytometry statistics.
 }
 \seealso{
-\code{\link{cyto_stats_compute,flowFrame-method}}
+\code{\link{cyto_stats_compute.flowFrame}}
 
-\code{\link{cyto_stats_compute,flowSet-method}}
+\code{\link{cyto_stats_compute.flowSet}}
 
-\code{\link{cyto_stats_compute,GatingSet-method}}
+\code{\link{cyto_stats_compute.GatingSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

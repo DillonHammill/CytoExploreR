@@ -648,7 +648,7 @@ cyto_transform.transformerList <- function(x,
 #' Extract Transformations from TransformerList
 #'
 #' @param x object of class
-#'   \code{\link[flowWorkspace:transformerList-class]{transformerList}}.
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}}.
 #' @param inverse logical indicating whether the returned
 #'   \code{\link[flowCore:transformList-class]{transformList}} should contain
 #'   the inverse transformations.

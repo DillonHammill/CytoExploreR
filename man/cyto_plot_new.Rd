@@ -11,7 +11,7 @@ cyto_plot_new(popup = FALSE, ...)
 opened.}
 
 \item{...}{additional arguments passed to
-\code{\link[grDevices:dev.new]{dev.new}}:}
+\code{\link[grDevices:dev]{dev.new}}:}
 }
 \description{
 \code{cyto_plot_new} is used internally by cyto_plot to open an

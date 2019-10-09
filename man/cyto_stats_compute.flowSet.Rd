@@ -75,9 +75,9 @@ cyto_stats_compute(fs,
 )
 }
 \seealso{
-\code{\link{cyto_stats_compute,flowFrame-method}}
+\code{\link{cyto_stats_compute.flowFrame}}
 
-\code{\link{cyto_stats_compute,GatingSet-method}}
+\code{\link{cyto_stats_compute.GatingSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -9,9 +9,9 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
-#' @seealso \code{\link{cyto_stats_compute,flowSet-method}}
-#' @seealso \code{\link{cyto_stats_compute,GatingSet-method}}
+#' @seealso \code{\link{cyto_stats_compute.flowFrame}}
+#' @seealso \code{\link{cyto_stats_compute.flowSet}}
+#' @seealso \code{\link{cyto_stats_compute.GatingSet}}
 #'
 #' @export
 cyto_stats_compute <- function(x, ...) {
@@ -58,7 +58,7 @@ cyto_stats_compute <- function(x, ...) {
 #' @importFrom dplyr bind_cols %>%
 #' @importFrom tidyr gather
 #'
-#' @seealso \code{\link{cyto_stats_compute,flowSet-method}}
+#' @seealso \code{\link{cyto_stats_compute.flowSet}}
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -235,8 +235,8 @@ cyto_stats_compute.flowFrame <- function(x,
 #' @importFrom tibble as_tibble remove_rownames
 #' @importFrom dplyr bind_rows bind_cols %>%
 #'
-#' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
-#' @seealso \code{\link{cyto_stats_compute,GatingSet-method}}
+#' @seealso \code{\link{cyto_stats_compute.flowFrame}}
+#' @seealso \code{\link{cyto_stats_compute.GatingSet}}
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -363,8 +363,8 @@ cyto_stats_compute.flowSet <- function(x,
 #' @importFrom tibble as_tibble add_column
 #' @importFrom tools file_ext
 #'
-#' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
-#' @seealso \code{\link{cyto_stats_compute,flowSet-method}}
+#' @seealso \code{\link{cyto_stats_compute.flowFrame}}
+#' @seealso \code{\link{cyto_stats_compute.flowSet}}
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -619,8 +619,8 @@ cyto_stats_compute.GatingHierarchy <- function(x,
 #' @importFrom dplyr bind_rows
 #' @importFrom utils write.csv
 #'
-#' @seealso \code{\link{cyto_stats_compute,flowFrame-method}}
-#' @seealso \code{\link{cyto_stats_compute,flowSet-method}}
+#' @seealso \code{\link{cyto_stats_compute.flowFrame}}
+#' @seealso \code{\link{cyto_stats_compute.flowSet}}
 #'
 #' @examples
 #' library(CytoRSuiteData)

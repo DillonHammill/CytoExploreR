@@ -18,9 +18,9 @@ cyto_channels(x, exclude = NULL)
 vector of channel names.
 }
 \description{
-Simply a wrapper around \code{\link[BiocGenerics:row+colnames]{colnames}} to
-extract the channels associated with a \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}.
+Simply a wrapper around \code{colnames} to extract the channels associated
+with a \code{flowFrame}, \code{flowSet}, \code{GatingHierarchy} or
+\code{GatingSet}.
 }
 \examples{
 

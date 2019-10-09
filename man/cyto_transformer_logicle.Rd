@@ -27,7 +27,7 @@ cyto_transformer_logicle(x, ...)
 \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}.}
+\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
@@ -60,7 +60,7 @@ data.
 \seealso{
 \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 
-\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
 
 \code{\link{cyto_transformer_arcsinh}}
 

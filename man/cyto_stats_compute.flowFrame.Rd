@@ -80,7 +80,7 @@ cyto_stats_compute(fs[[32]],
 cyto_stats_compute(fs[[1]], stat = "count")
 }
 \seealso{
-\code{\link{cyto_stats_compute,flowSet-method}}
+\code{\link{cyto_stats_compute.flowSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

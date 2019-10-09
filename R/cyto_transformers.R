@@ -13,7 +13,7 @@
 #' CytoExploreR implementation of \code{flowWorkspace}
 #' \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
 #' always returns a
-#' \code{\link[flowWorkspace:transformerList-class]{transformerList}} object and
+#' \code{\link[flowWorkspace:transformerList]{transformerList}} object and
 #' displays the result of the transformation(s) using \code{\link{cyto_plot}}.
 #' To combine different types of transformations have a look at
 #' \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}} should
@@ -658,7 +658,7 @@ cyto_transformer_biex.flowFrame <- function(x,
 #' @param popup logical indicating whether the plots should be constructed in a
 #'   pop-up window.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}.
+#'   \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}.
 #'
 #' @return a \code{transformerList} object.
 #'
@@ -669,7 +669,7 @@ cyto_transformer_biex.flowFrame <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
-#' @seealso \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+#' @seealso \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_combine}}
@@ -849,7 +849,7 @@ cyto_transformer_logicle.flowFrame <- function(x,
 #' transformations to the data using \code{\link{cyto_transform}}.
 #'
 #' @param ... objects of class
-#'   \code{\link[flowWorkspace:transformerList-class]{transformerList}} to be
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}} to be
 #'   combined into a single \code{transformerList} object.
 #'
 #' @importFrom flowWorkspace transformerList

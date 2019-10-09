@@ -95,9 +95,9 @@ cyto_stats_compute(gs[[32]],
 )
 }
 \seealso{
-\code{\link{cyto_stats_compute,flowFrame-method}}
+\code{\link{cyto_stats_compute.flowFrame}}
 
-\code{\link{cyto_stats_compute,flowSet-method}}
+\code{\link{cyto_stats_compute.flowSet}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

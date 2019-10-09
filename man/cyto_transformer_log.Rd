@@ -52,7 +52,7 @@ a \code{transformerList} object.
 CytoExploreR implementation of \code{flowWorkspace}
 \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
 always returns a
-\code{\link[flowWorkspace:transformerList-class]{transformerList}} object and
+\code{\link[flowWorkspace:transformerList]{transformerList}} object and
 displays the result of the transformation(s) using \code{\link{cyto_plot}}.
 To combine different types of transformations have a look at
 \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}} should

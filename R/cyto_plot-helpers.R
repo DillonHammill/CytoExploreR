@@ -676,7 +676,7 @@ cyto_plot_empty.list <- function(x,
 #' @param popup logical indicating whether a popup graphics device should be
 #'   opened.
 #' @param ... additional arguments passed to
-#'   \code{\link[grDevices:dev.new]{dev.new}}:
+#'   \code{\link[grDevices:dev]{dev.new}}:
 #'
 #' @importFrom grDevices dev.cur dev.new
 #'
