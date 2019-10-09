@@ -20,18 +20,23 @@ cyto_transform(x, trans = NULL, ...)
   inverse = FALSE, plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet]{GatingSet}}.}
 
-\item{trans}{object of class \code{transformerList} containing the
+\item{trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} containing the
 transformation definitions to apply to \code{x}.}
 
-\item{...}{additional arguments passed to \code{cyto_transformer_arcsinh},
-\code{cyto_transformer_biex} or \code{cyto_transformer_logicle} when no
-\code{trans} object is supplied.}
+\item{...}{additional arguments passed to \code{\link{cyto_transformer_log}},
+\code{\link{cyto_transformer_arcsinh}}, \code{\link{cyto_transformer_biex}}
+or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
+supplied.}
 
 \item{trans_type}{type of transformation to apply when no trans object is
-supplied, options include "arcsinh", "biex" and "logicle".}
+supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
+\code{"logicle"}.}
 
 \item{channels}{names of the channels to transform. Only required when no
 \code{trans} object is supplied.}
@@ -39,15 +44,15 @@ supplied, options include "arcsinh", "biex" and "logicle".}
 \item{parent}{name of the parent population of \code{GatingHierarchy} or
 \code{GatingSet} objects used to visualise the transformations.}
 
-\item{select}{list of selection criteria passed to \code{cyto_select} to
-select a subset of samples for visualising the transformations.}
+\item{select}{list of selection criteria passed to \code{\link{cyto_select}}
+to select a subset of samples for visualising the transformations.}
 
 \item{inverse}{logical indicating whether the inverse transformations should
 be applied. Currently only supported for \code{flowFrame} and
 \code{flowSet} objects.}
 
 \item{plot}{logical indicating whether the result of the transformations
-should be plotted using \code{cyto_plot}.}
+should be plotted using \code{\link{cyto_plot}}.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 popup window, set to FALSE by default.}
@@ -56,8 +61,8 @@ popup window, set to FALSE by default.}
 Apply Transformations to Cytometry Data
 }
 \examples{
-
-library(CytoRSuite)
+# Load in CytoExploreRData to access data
+library(CytoExploreR)
 
 # Use Activation flowSet
 fs <- Activation
@@ -81,6 +86,8 @@ gs_trans <- cyto_transform(gs, trans)
 
 }
 \seealso{
+\code{\link{cyto_transformer_log}}
+
 \code{\link{cyto_transformer_arcsinh}}
 
 \code{\link{cyto_transformer_biex}}
@@ -88,8 +95,6 @@ gs_trans <- cyto_transform(gs, trans)
 \code{\link{cyto_transformer_logicle}}
 
 \code{\link{cyto_transformer_combine}}
-
-\code{\link{cyto_transform}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

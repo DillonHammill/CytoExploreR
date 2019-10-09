@@ -2,62 +2,39 @@
 % Please edit documentation in R/cyto_transformers.R
 \name{cyto_transformer_logicle}
 \alias{cyto_transformer_logicle}
-\alias{cyto_transformer_logicle.flowFrame}
-\alias{cyto_transformer_logicle.flowSet}
-\alias{cyto_transformer_logicle.GatingHierarchy}
 \alias{cyto_transformer_logicle.GatingSet}
-\title{Definition(s) of Logicle Transformation(s)}
+\alias{cyto_transformer_logicle.GatingHierarchy}
+\alias{cyto_transformer_logicle.flowSet}
+\alias{cyto_transformer_logicle.flowFrame}
+\title{Definition(s) of logicle transformation(s)}
 \usage{
 cyto_transformer_logicle(x, ...)
 
-\method{cyto_transformer_logicle}{flowFrame}(x, channels = NULL,
-  width = 4.5, raw_max = 262144, trans_min = 0, quantile = 0.05,
-  type = "instrument", equal_space = FALSE, breaks = 5,
-  plot = TRUE, popup = FALSE, ...)
-
-\method{cyto_transformer_logicle}{flowSet}(x, channels = NULL,
-  select = NULL, trans_max = 4.5, raw_max = 262144, trans_min = 0,
-  quantile = 0.05, type = "instrument", equal_space = FALSE,
-  breaks = 5, plot = FALSE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{GatingSet}(x, channels = NULL,
+  parent = "root", plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_logicle}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", trans_max = 4.5, raw_max = 262144,
-  trans_min = 0, quantile = 0.05, type = "instrument",
-  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
+  parent = "root", plot = TRUE, popup = FALSE, ...)
 
-\method{cyto_transformer_logicle}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, trans_max = 4.5,
-  raw_max = 262144, trans_min = 0, quantile = 0.05,
-  type = "instrument", equal_space = FALSE, breaks = 5,
-  plot = TRUE, popup = FALSE)
+\method{cyto_transformer_logicle}{flowSet}(x, channels = NULL,
+  select = NULL, plot = FALSE, popup = FALSE, ...)
+
+\method{cyto_transformer_logicle}{flowFrame}(x, channels = NULL,
+  plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet},
+\item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{not in use.}
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
 if no channels/markers are supplied.}
 
-\item{width}{width of transformed display in asymptotic decades.}
-
-\item{raw_max}{maximum value of the raw data.}
-
-\item{trans_min}{minimum of the transformed data in symptotic decades, set to
-0 by default.}
-
-\item{quantile}{quantile of the negative data value (used to calculate
-linearisation width (w)).}
-
-\item{type}{indicates whether the "instrument" or "data" limits should be
-used as the range for the data.}
-
-\item{equal_space}{logical indicating whether breaks should be equally
-spaced, set to FALSE by default.}
-
-\item{breaks}{number of required breaks.}
+\item{parent}{name of the parent population to use for generating the
+transformation(s).}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}
@@ -67,15 +44,12 @@ pop-up window.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select} to
 select a subset of samples for \code{cyto_plot}.}
-
-\item{parent}{name of the parent population to use for generating the
-transformation(s).}
 }
 \value{
-transformerList object.
+a \code{transformerList} object.
 }
 \description{
-\code{CytoRSuite} implementation of \code{flowCore} logicle transformation
+\code{CytoExploreR} implementation of \code{flowCore} logicle transformation
 which allows the use of multiple samples to estimate transformation
 parameters, always returns a \code{transformerList} object and displays the
 result of the transformation(s) using \code{cyto_plot}. To combine different

@@ -13,22 +13,26 @@ cyto_extract(x, parent = "root", ...)
 GatingSet objects.}
 }
 \value{
-either a flowFrame or flowSet object
+either a \code{flowFrame} or a \code{flowSet}.
 }
 \description{
 \code{cyto_extract} is essentially a wrapper for
-\code{flowWorkspace::getData()} which also accepts flowFrame or flowSet
-objects. The \code{parent} population is extracted from GatingHierarchy or
-GatingSet objects whilst flowFrame or flowSet objects are returned as is.
+\code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}} which also
+accepts flowFrame or flowSet objects. The \code{parent} population is
+extracted from GatingHierarchy or GatingSet objects whilst flowFrame or
+flowSet objects are returned as is.
 }
 \examples{
-library(CytoRSuiteData)
+
+# Load in CytoExploreRData to access data
+library(CytoExploreRData)
 
 # GatingSet
 gs <- GatingSet(Activation)
 
 # Extract root population
 cyto_extract(gs, "root")
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

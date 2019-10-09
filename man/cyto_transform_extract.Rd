@@ -20,7 +20,9 @@ A \code{\link[flowCore:transformList-class]{transformList}}
 Extract Transformations from TransformerList
 }
 \examples{
-library(CytoRSuiteData)
+
+# Load CytoExploreRData to acess data
+library(CytoExploreRData)
 
 # Load in samples to flowSet
 fs <- Activation

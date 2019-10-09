@@ -37,7 +37,11 @@
 #' 
 #' @noRd
 .all_na <- function(x){
-  all(suppressWarnings(is.na(x)))
+  if(is.null(x)){
+    return(FALSE)
+  }else{
+    return(all(suppressWarnings(is.na(x))))
+  }
 }
 
 # ARGUMENT LIST ----------------------------------------------------------------
@@ -129,4 +133,19 @@ file_wd_check <- function(name) {
 #' @noRd
 LAPPLY <- function(...){
   unlist(lapply(...))
+}
+
+# PAR --------------------------------------------------------------------------
+
+#' Extract graphical parameters as list
+#' @importFrom graphics par
+#' @noRd
+.par <- function(x){
+  if(length(x) == 1){
+    pars <- list(par(x))
+    names(pars) <- x
+  }else{
+    pars <- par(x)
+  }
+  return(pars)
 }

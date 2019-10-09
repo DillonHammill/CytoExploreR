@@ -7,43 +7,48 @@
 #' \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
 #' to load .fcs files into a ncdfFlowSet.
 #'
-#' @param path points to the location of the .fcs files to read in.
+#' @param path points to the location of the .fcs files to read in (e.g. name of
+#'   folder in current working directory).
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
-#' @return \code{ncdfFlowSet}
+#' @return object of class
+#'   \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
 #'
 #' @importFrom ncdfFlow read.ncdfFlowSet
+#' @importFrom gtools mixedsort
 #'
 #' @examples
-#' library(CytoRSuiteData)
-#' 
-#' # Get path to Activation .fcs files in CytoRSuiteData
-#' datadir <- system.file("extdata", package = "CytoRSuiteData")
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#'
+#' # Get path to Activation .fcs files in CytoExploreRData
+#' datadir <- system.file("extdata", package = "CytoExploreRData")
 #' path <- paste0(datadir, "/Activation")
-#' 
+#'
 #' # Load in .fcs files into ncdfFlowSet
 #' fs <- cyto_load(path)
-#' 
+#'
 #' # fs is a ncdfFlowSet
 #' class(fs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_load <- function(path = ".", ...) {
 
-  # Get paths to files
-  files <- list.files(path, full.names = TRUE, pattern = ".fcs")
+  # PATHS - SORTED
+  files <- mixedsort(list.files(path, full.names = TRUE, pattern = ".fcs"))
 
-  # Read into a ncdfFlowSet
+  # NCDFFLOWSET
   fs <- read.ncdfFlowSet(files = files, ...)
   
-  # Correct GUID slots
+  # CORRECT GUID SLOTS
   nms <- cyto_names(fs)
   lapply(seq_len(length(nms)), function(z){
     suppressMessages(identifier(fs[[z]]) <<- nms[z])
   })
   
-  # Return ncdfFlowSet
+  # RETURN NCDFFLOWSET
   return(fs)
   
 }
@@ -54,29 +59,34 @@ cyto_load <- function(path = ".", ...) {
 #'
 #' \code{cyto_setup} takes care of all the data loading and annotation steps to
 #' prepare your cytometry data for downstream analyses. The .fcs files are first
-#' read into a \code{ncdfFlowSet} using \code{cyto_load} which is then added to
-#' a \code{GatingSet}. Calls are then made to \code{cyto_markers} and
-#' \code{cyto_annotate} to update the GtaingSet with the details of the
-#' experiment. These details can be modified later with additional calls to
-#' \code{cyto_markers} and/or \code{cyto_annotate}. Users are also asked to
-#' provide a name for a gatingTemplate csv file which will be created if
-#' necessary and assigned as the active gatingTemplate.
+#' read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
+#' \code{\link{cyto_load}} which is then added to a \code{GatingSet}. Calls are
+#' then made to \code{\link{{cyto_markers}} and \code{\link{cyto_annotate}} to
+#' update the GatingSet with the details of the experiment. These details can be
+#' modified later with additional calls to \code{\link{cyto_markers}} and/or
+#' \code{\link{cyto_annotate}}. Users are also asked to provide a name for a
+#' gatingTemplate csv file which will be created if necessary and assigned as
+#' the active gatingTemplate.
 #'
-#' @param path points to the location of the .fcs files to read in.
+#' @param path points to the location of the .fcs files to read in (e.g. name of
+#'   a folder in current working directory).
 #' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
 #'   saving.
-#' @param ... additional arguments passed to read.ncdfFlowSet.
+#' @param ... additional arguments passed to
+#'   \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}}}.
 #'
-#' @return \code{GatingSet}
+#' @return object of class
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @importFrom flowWorkspace GatingSet
 #' @importFrom tools file_ext
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' # Load in CytoExploreRData to acces data
+#' library(CytoExploreRData)
 #'
-#' # Get path to Activation .fcs files in CytoRSuiteData
-#' datadir <- system.file("extdata", package = "CytoRSuiteData")
+#' # Get path to Activation .fcs files in CytoExploreRData
+#' datadir <- system.file("extdata", package = "CytoExploreRData")
 #' path <- paste0(datadir, "/Activation")
 #'
 #' # Load in .fcs files into an annotated GatingSet
@@ -87,6 +97,7 @@ cyto_load <- function(path = ".", ...) {
 #'
 #' # Experiment details have been updated
 #' cyto_details(gs)
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -133,10 +144,12 @@ cyto_setup <- function(path = ".",
 
 # CYTO_DETAILS -----------------------------------------------------------------
 
-#' Extract Experiment Details
+#' Extract experiment details
 #'
 #' Simply an autocomplete-friendly wrapper around
-#' \code{\link[flowWorkspace:pData]{pData}}.
+#' \code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
+#' \code{\link{cyto_names}} if a
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 #'
 #' @param object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
@@ -169,9 +182,11 @@ cyto_details <- function(x) {
 #' Extract sample names
 #'
 #' Simply a convenient and autocomplete-friendly wrapper around
-#' \code{\link[flowCore:identifier]{identifier}}
+#' \code{\link[flowCore:identifier-methods]{identifier}}
 #' \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
-#' names from flowFrame, flowSet GatingHierarchy or GatingSet.
+#' names from flowFrame, flowSet GatingHierarchy or GatingSet. Anynonymous
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be converted to
+#' \code{"Combined Events"}.
 #'
 #' @param object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
@@ -226,19 +241,23 @@ cyto_names.list <- function(x){
 
 #' Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
 #'
-#' @param x object of class flowFrame, flowSet, GatingHierarchy or GatingSet to
-#'   be checked.
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be checked.
 #'
 #' @return TRUE or FALSE if object meets this class criteria.
 #'
 #' @examples
-#' library(CytoRSuiteData)
-#' 
+#' # Load in CytoExploreRData to acess data
+#' library(CytoExploreRData)
+#'
 #' # Valid object
 #' cyto_check(Activation)
-#' 
+#'
 #' # Invalid list object
 #' cyto_check(list(Activation))
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -259,36 +278,44 @@ cyto_check <- function(x) {
 
 #' Apply Transformations to Cytometry Data
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierarchy} or \code{GatingSet}.
-#' @param trans object of class \code{transformerList} containing the
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet]{GatingSet}}.
+#' @param trans object of class
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}} containing the
 #'   transformation definitions to apply to \code{x}.
 #' @param trans_type type of transformation to apply when no trans object is
-#'   supplied, options include "arcsinh", "biex" and "logicle".
+#'   supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
+#'   \code{"logicle"}.
 #' @param channels names of the channels to transform. Only required when no
 #'   \code{trans} object is supplied.
 #' @param parent name of the parent population of \code{GatingHierarchy} or
 #'   \code{GatingSet} objects used to visualise the transformations.
-#' @param select list of selection criteria passed to \code{cyto_select} to
-#'   select a subset of samples for visualising the transformations.
+#' @param select list of selection criteria passed to \code{\link{cyto_select}}
+#'   to select a subset of samples for visualising the transformations.
 #' @param inverse logical indicating whether the inverse transformations should
 #'   be applied. Currently only supported for \code{flowFrame} and
 #'   \code{flowSet} objects.
 #' @param plot logical indicating whether the result of the transformations
-#'   should be plotted using \code{cyto_plot}.
+#'   should be plotted using \code{\link{cyto_plot}}.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   popup window, set to FALSE by default.
-#' @param ... additional arguments passed to \code{cyto_transformer_arcsinh},
-#'   \code{cyto_transformer_biex} or \code{cyto_transformer_logicle} when no
-#'   \code{trans} object is supplied.
+#' @param ... additional arguments passed to \code{\link{cyto_transformer_log}},
+#'   \code{\link{cyto_transformer_arcsinh}}, \code{\link{cyto_transformer_biex}}
+#'   or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
+#'   supplied.
+#'
+#' @retrun object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet} with transformations applied.
 #'
 #' @importFrom flowCore transform
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par
 #'
 #' @examples
-#'
-#' library(CytoRSuite)
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreR)
 #'
 #' # Use Activation flowSet
 #' fs <- Activation
@@ -311,14 +338,15 @@ cyto_check <- function(x) {
 #' gs_trans <- cyto_transform(gs, trans)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
+#' @seealso \code{\link{cyto_transformer_log}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_logicle}}
 #' @seealso \code{\link{cyto_transformer_combine}}
-#' @seealso \code{\link{cyto_transform}}
 #'
 #' @rdname cyto_transform
+#' 
 #' @export
 cyto_transform <- function(x, trans = NULL, ...){
   UseMethod("cyto_transform", trans)
@@ -617,7 +645,9 @@ cyto_transform.transformerList <- function(x,
 #' @importFrom flowCore transformList
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' 
+#' # Load CytoExploreRData to acess data
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -660,26 +690,30 @@ cyto_transform_extract <- function(x,
 #' Extract a valid flowFrame or flowSet
 #'
 #' \code{cyto_extract} is essentially a wrapper for
-#' \code{flowWorkspace::getData()} which also accepts flowFrame or flowSet
-#' objects. The \code{parent} population is extracted from GatingHierarchy or
-#' GatingSet objects whilst flowFrame or flowSet objects are returned as is.
+#' \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}} which also
+#' accepts flowFrame or flowSet objects. The \code{parent} population is
+#' extracted from GatingHierarchy or GatingSet objects whilst flowFrame or
+#' flowSet objects are returned as is.
 #'
 #' @param x object of class flowFrame, flowSet, GatingHierarchy or GatingSet.
 #' @param parent name of the parent population to extract from GatingHierachy or
 #'   GatingSet objects.
 #'
-#' @return either a flowFrame or flowSet object
+#' @return either a \code{flowFrame} or a \code{flowSet}.
 #'
-#' @importFrom flowWorkspace getData
+#' @importFrom flowWorkspace gs_pop_get_data
 #'
 #' @examples
-#' library(CytoRSuiteData)
-#' 
+#'
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#'
 #' # GatingSet
 #' gs <- GatingSet(Activation)
-#' 
+#'
 #' # Extract root population
 #' cyto_extract(gs, "root")
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -698,7 +732,7 @@ cyto_extract <- function(x, parent = "root", ...) {
   # Extract data from GatingHierarchy or GatingSet
   if (any(inherits(x, "GatingHierarchy") |
     inherits(x, "GatingSet"))) {
-    x <- getData(x, parent, ...)
+    x <- gs_pop_get_data(x, parent, ...)
   }
 
   return(x)
@@ -725,7 +759,9 @@ cyto_extract <- function(x, parent = "root", ...) {
 #' @importFrom methods as
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' 
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
 #' 
 #' # Convert flowSet to 'list of flowFrames'
 #' cyto_convert(Activation, "list of flowFrames")
@@ -735,6 +771,7 @@ cyto_extract <- function(x, parent = "root", ...) {
 #' 
 #' # Convert GatingSet to flowFrame
 #' cyto_convert(GatingSet(Activation), "flowFrame", parent = "T Cells")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_convert
@@ -880,7 +917,7 @@ cyto_convert.GatingSet <- function(x,
 #' @importFrom tibble as_tibble
 #'
 #' @examples
-#' library(CytoRSuite)
+#' library(CytoExploreR)
 #' 
 #' # Look at experiment details
 #' cyto_details(Activation)
@@ -940,7 +977,7 @@ cyto_filter <- function(x, ...) {
 #'   the selection criteria.
 #'
 #' @examples
-#' library(CytoRSuite)
+#' library(CytoExploreR)
 #' 
 #' # Look at experiment details
 #' cyto_details(Activation)
@@ -1030,7 +1067,7 @@ cyto_select <- function(x, ...) {
 #'   respectively.
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' 
 #' # Group flowSet by Treatment
 #' cyto_group_by(Activation, "Treatment")
@@ -1118,7 +1155,7 @@ cyto_group_by <- function(x,
 #' @importFrom flowCore sampleFilter Subset fsApply identifier
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -1273,7 +1310,7 @@ cyto_sample.list <- function(x,
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -1449,7 +1486,7 @@ cyto_markers <- function(x, file = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -1591,7 +1628,7 @@ cyto_annotate <- function(x, file = NULL) {
 #' @importFrom tools file_ext
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' 
 #' # Apply stored spillover matrix to flowSet
 #' cyto_compensate(Activation)
@@ -1829,21 +1866,21 @@ cyto_compensate.GatingSet <- function(x,
 #' Extract Names of Gated Populations in GatingHierarchy or GatingSet
 #'
 #' \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
-#' \code{\link[flowWorkspace:getNodes]{getNodes}}.
+#' \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
 #'
 #' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:getNodes]{getNodes}}.
+#'   \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
 #'  
 #' @return character vector of gated node/population names.
 #'
-#' @importFrom flowWorkspace getNodes
+#' @importFrom flowWorkspace gs_get_pop_paths
 #'
 #' @export
 cyto_nodes <- function(x, ...){
   
-  # Make call to getNodes
-  getNodes(x, ...)
+  # Make call to gs_get_pop_paths
+  gs_get_pop_paths(x, ...)
   
 }
 
@@ -1861,7 +1898,7 @@ cyto_nodes <- function(x, ...){
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuite)
+#' library(CytoExploreR)
 #' 
 #' # Generate channel match file for compensation controls
 #' cyto_channel_match(Compensation)

@@ -45,8 +45,8 @@
 #'   containing populations to be overlaid onto the plot(s).
 #' @param select designates which samples will be plotted and used for
 #'   determining the best location to set the drawn gate(s). Filtering steps
-#'   should be comma separated and wrapped in a list (e.g. list(Treatment ==
-#'   "Stim-A", OVAConc %in% c(0,0.5))). Refer to \code{\link{cyto_select}}.
+#'   should be comma separated and wrapped in a list. Refer to
+#'   \code{\link{cyto_select}}.
 #' @param negate logical indicating whether a gatingTemplate entry should be
 #'   made for the negated population (i.e. all events outside the constructed
 #'   gates), set to FALSE by default. If negate is set to TRUE, a name for the
@@ -90,7 +90,7 @@
 #' @examples
 #' \dontrun{
 #' # Gate drawing requires an interactive R session
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation

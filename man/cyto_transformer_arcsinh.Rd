@@ -2,67 +2,54 @@
 % Please edit documentation in R/cyto_transformers.R
 \name{cyto_transformer_arcsinh}
 \alias{cyto_transformer_arcsinh}
-\alias{cyto_transformer_arcsinh.flowFrame}
-\alias{cyto_transformer_arcsinh.flowSet}
-\alias{cyto_transformer_arcsinh.GatingHierarchy}
 \alias{cyto_transformer_arcsinh.GatingSet}
-\title{Definition(s) of ArcSinh Transformation(s)}
+\alias{cyto_transformer_arcsinh.GatingHierarchy}
+\alias{cyto_transformer_arcsinh.flowSet}
+\alias{cyto_transformer_arcsinh.flowFrame}
+\title{Definition(s) of arcsinh transformation(s)}
 \usage{
 cyto_transformer_arcsinh(x, ...)
 
-\method{cyto_transformer_arcsinh}{flowFrame}(x, channels = NULL,
-  raw_max = 262144, width = 4.5, trans_min = 0,
-  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE, ...)
-
-\method{cyto_transformer_arcsinh}{flowSet}(x, channels = NULL,
-  select = NULL, raw_max = 262144, width = 4.5, trans_min = 0,
-  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_arcsinh}{GatingSet}(x, channels = NULL,
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_arcsinh}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", raw_max = 262144, width = 4.5, trans_min = 0,
-  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
+  parent = "root", plot = TRUE, popup = FALSE, ...)
 
-\method{cyto_transformer_arcsinh}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, raw_max = 262144, width = 4.5,
-  trans_min = 0, equal_space = FALSE, breaks = 5, plot = TRUE,
-  popup = FALSE)
+\method{cyto_transformer_arcsinh}{flowSet}(x, channels = NULL,
+  select = NULL, plot = TRUE, popup = FALSE, ...)
+
+\method{cyto_transformer_arcsinh}{flowFrame}(x, channels = NULL,
+  plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{not in use.}
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
 if no channels/markers are supplied.}
 
-\item{raw_max}{maximum value of the raw data.}
+\item{parent}{name of the parent population to use for generating the
+transformation(s).}
 
-\item{width}{width of the transformed display in asymptotic decades.}
-
-\item{trans_min}{minimum of transformed data in the display in asymptotic
-decades, set to 0 by default.}
-
-\item{equal_space}{logical indicating whether breaks should be equally
-spaced, set to FALSE by default.}
-
-\item{breaks}{number of required breaks.}
+\item{select}{list of selection criteria passed to \code{cyto_select} to
+select a subset of samples for \code{cyto_plot}.}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether the plots should be constructed in a
 pop-up window.}
-
-\item{select}{list of selection criteria passed to \code{cyto_select} to
-select a subset of samples for \code{cyto_plot}.}
-
-\item{parent}{name of the parent population to use for generating the
-transformation(s).}
+}
+\value{
+a \code{transformerList} object.
 }
 \description{
-CytoRSuite implementation of \code{flowWorkspace}
+CytoExploreR implementation of \code{flowWorkspace}
 \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}} transformation which
 always returns a \code{transformerList} object and displays the result of the
 transformation(s) using \code{cyto_plot}. To combine different types of
@@ -72,6 +59,8 @@ data.
 }
 \seealso{
 \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}}
+
+\code{\link{cyto_transformer_log}}
 
 \code{\link{cyto_transformer_biex}}
 

@@ -29,7 +29,7 @@ vector of channels in order of compensation Control samples.
 Select Fluorescent Channel for Compensation Controls
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Compensation

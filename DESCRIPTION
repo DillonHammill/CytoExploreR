@@ -1,25 +1,25 @@
-Package: CytoRSuite
+Package: CytoExploreR
 Type: Package
-Title: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data
+Title: Interactive Analysis of Cytometry Data
 Version: 1.0.0
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
   person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),
   person("Mike", "Jiang", role = "ctb", email = "wjiang2@fhcrc.org"))
-Description: An intuitive and interactive approach to flow cytometry analysis in R. 
-  CytoRSuite contains tools for every stage of the analysis pipeline including 
+Description: An intuitive and interactive approach to cytometry analysis in R. 
+  CytoExploreR contains tools for every stage of the analysis pipeline including 
   user-guided automatic compensation, realtime editing of spillover matrices, 
-  manual gate drawing, gate editing, visualisation of all existing flow cytometry 
+  manual gate drawing, gate editing, visualisation of all existing cytometry 
   objects and export of population level statistics for further analysis. Furthermore,
-  through linking to openCyto, CytoRSuite provides the tools necessary to easily combine 
+  through linking to openCyto, CytoExploreR provides the tools necessary to easily combine 
   manual and automated gating approaches in R.
-URL: https://github.com/DillonHammill/CytoRSuite
-BugReports: https://github.com/DillonHammill/CytoRSuite/issues
+URL: https://github.com/DillonHammill/CytoExploreR
+BugReports: https://github.com/DillonHammill/CytoExploreR/issues
 Depends: 
   R (>= 2.10),
-  flowCore (>= 1.31.17),
-  flowWorkspace (>= 3.17.43),
-  openCyto (>= 1.19.0)
+  flowCore (>= 1.51.7),
+  flowWorkspace (>= 3.33.9),
+  openCyto (>= 1.23.5)
 Imports: 
   ncdfFlow,
   data.table,
@@ -44,9 +44,10 @@ Imports:
   robustbase,
   visNetwork,
   Rtsne,
-  umap
+  umap,
+  gtools
 Suggests: 
-  CytoRSuiteData,
+  CytoExploreRData,
   RProtoBufLib,
   cytolib,
   knitr,
@@ -59,7 +60,7 @@ Suggests:
   mockr,
   mockery
 Remotes: 
-  DillonHammill/CytoRSuiteData
+  DillonHammill/CytoExploreRData
 biocViews:
 License: GPL-2
 Encoding: UTF-8

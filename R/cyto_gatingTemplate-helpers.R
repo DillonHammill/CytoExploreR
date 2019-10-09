@@ -103,20 +103,20 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 
 #' Interactively Edit a gatingTemplate
 #'
-#' \code{cyto_gatingTemplate_edit} provides an interactive interface to editing the
-#' openCyto gatingTemplate. This function is intended to aid in adding boolean
-#' and reference gates to the gatingTemplate. Users should NOT modify existing
-#' entries in the gatingTemplate.
+#' \code{cyto_gatingTemplate_edit} provides an interactive interface to editing
+#' the openCyto gatingTemplate. This function is intended to aid in adding
+#' boolean and reference gates to the gatingTemplate. Users should NOT modify
+#' existing entries in the gatingTemplate.
 #'
 #' @param x object of class \code{GatingSet} which has been gated with the
-#' supplied gatingTemplate.
+#'   supplied gatingTemplate.
 #' @param gatingTemplate name of the gatingTemplate csv file to be edited.
 #'
 #' @return update gatingTemplate csv file and update the GatingSet accordingly.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom openCyto gatingTemplate gating
+#' @importFrom openCyto gatingTemplate gt_gating
 #' @importFrom flowWorkspace recompute
 #' @importFrom utils edit read.csv write.csv
 #' @importFrom tools file_ext
@@ -177,7 +177,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
   gt <- gatingTemplate(gatingTemplate)
 
   # Re-apply template to GatingSet
-  suppressMessages(gating(gt, gs))
+  suppressMessages(gt_gating(gt, gs))
 
   # Recompute statistics
   suppressMessages(recompute(gs))
@@ -194,9 +194,9 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #' Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet
 #'
 #' A convenient wrapper for
-#' \code{\link[openCyto:gatingTemplate]{gatingTemplate}} and
-#' \code{\link[openCyto:gating]{gating}} to apply a gatingTemplate csv file to a
-#' GatingSet.
+#' \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}} and
+#' \code{\link[openCyto:gt_gating]{gt_gating}} to apply a gatingTemplate csv
+#' file to a GatingSet.
 #'
 #' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
 #' @param gatingTemplate name of the gatingTemplate csv file which contains the
@@ -207,7 +207,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #' @return NULL and update the GatingHierarchy/ GatingSet in the global
 #'   environment with the gates in the gatingTemplate.
 #'
-#' @importFrom openCyto gatingTemplate gating
+#' @importFrom openCyto gatingTemplate gt_gating
 #' @importFrom tools file_ext
 #'
 #' @examples
@@ -312,7 +312,7 @@ cyto_gatingTemplate_apply <- function(x,
   }
   
   # Apply gatingTemplate to GatingHierarchy/GatingSet
-  suppressWarnings(gating(gt, x, ...))
+  suppressWarnings(gt_gating(gt, x, ...))
   
 }
 
@@ -354,7 +354,7 @@ cyto_gatingTemplate_apply <- function(x,
 #'
 #' # Updated gatingTemplate will work as expected
 #' gt <- gatingTemplate("gatingTemplate.csv")
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #' }
 #'
 #' @export

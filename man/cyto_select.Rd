@@ -21,7 +21,7 @@ select. See below examples for use cases.}
 Select samples based on experiment variables
 }
 \examples{
-library(CytoRSuite)
+library(CytoExploreR)
 
 # Look at experiment details
 cyto_details(Activation)

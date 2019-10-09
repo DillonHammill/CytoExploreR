@@ -41,7 +41,7 @@ spillover matrix extraction supply the index or name of the sample to the
 \code{select} argument.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Apply stored spillover matrix to flowSet
 cyto_compensate(Activation)

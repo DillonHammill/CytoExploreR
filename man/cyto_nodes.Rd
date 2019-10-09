@@ -10,12 +10,12 @@ cyto_nodes(x, ...)
 \item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:getNodes]{getNodes}}.}
+\code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.}
 }
 \value{
 character vector of gated node/population names.
 }
 \description{
 \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
-\code{\link[flowWorkspace:getNodes]{getNodes}}.
+\code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
 }

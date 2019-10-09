@@ -21,9 +21,9 @@ NULL and update the GatingHierarchy/ GatingSet in the global
 }
 \description{
 A convenient wrapper for
-\code{\link[openCyto:gatingTemplate]{gatingTemplate}} and
-\code{\link[openCyto:gating]{gating}} to apply a gatingTemplate csv file to a
-GatingSet.
+\code{\link[openCyto:gatingTemplate-class]{gatingTemplate}} and
+\code{\link[openCyto:gt_gating]{gt_gating}} to apply a gatingTemplate csv
+file to a GatingSet.
 }
 \examples{
 \dontrun{

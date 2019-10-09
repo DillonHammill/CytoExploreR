@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_details}
 \alias{cyto_details}
-\title{Extract Experiment Details}
+\title{Extract experiment details}
 \usage{
 cyto_details(x)
 }
@@ -15,5 +15,7 @@ experiment details as data.frame.
 }
 \description{
 Simply an autocomplete-friendly wrapper around
-\code{\link[flowWorkspace:pData]{pData}}.
+\code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
+\code{\link{cyto_names}} if a
+\code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 }

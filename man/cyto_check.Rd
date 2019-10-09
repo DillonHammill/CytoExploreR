@@ -7,8 +7,10 @@
 cyto_check(x)
 }
 \arguments{
-\item{x}{object of class flowFrame, flowSet, GatingHierarchy or GatingSet to
-be checked.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be checked.}
 }
 \value{
 TRUE or FALSE if object meets this class criteria.
@@ -17,13 +19,15 @@ TRUE or FALSE if object meets this class criteria.
 Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
 }
 \examples{
-library(CytoRSuiteData)
+# Load in CytoExploreRData to acess data
+library(CytoExploreRData)
 
 # Valid object
 cyto_check(Activation)
 
 # Invalid list object
 cyto_check(list(Activation))
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

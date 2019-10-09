@@ -16,10 +16,10 @@ supplied gatingTemplate.}
 update gatingTemplate csv file and update the GatingSet accordingly.
 }
 \description{
-\code{cyto_gatingTemplate_edit} provides an interactive interface to editing the
-openCyto gatingTemplate. This function is intended to aid in adding boolean
-and reference gates to the gatingTemplate. Users should NOT modify existing
-entries in the gatingTemplate.
+\code{cyto_gatingTemplate_edit} provides an interactive interface to editing
+the openCyto gatingTemplate. This function is intended to aid in adding
+boolean and reference gates to the gatingTemplate. Users should NOT modify
+existing entries in the gatingTemplate.
 }
 \examples{
 \dontrun{

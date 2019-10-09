@@ -20,7 +20,7 @@
 single stain compensation controls.}
 
 \item{parent}{name of the population to use for downstream calculations when
-a \CODE{GatingSet} object is supplied, set to the last gated population by
+a \code{GatingSet} object is supplied, set to the last gated population by
 default (e.g. "Single Cells").}
 
 \item{axes_trans}{object of class

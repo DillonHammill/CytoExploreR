@@ -1,3 +1,66 @@
+# CYTO_CHANNELS ----------------------------------------------------------------
+
+#' Extract channel names
+#'
+#' Simply a wrapper around \code{\link[BiocGenerics:row+colnames]{colnames}} to
+#' extract the channels associated with a \code{flowFrame}, \code{flowSet},
+#' \code{GatingHierarchy} or \code{GatingSet}.
+#'
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param exclude vector of channel names to exclude.
+#'   
+#' @return vector of channel names.
+#'
+#' @importFrom BiocGenerics colnames
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_fluor_channels}}
+#' 
+#' @examples 
+#' 
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#' 
+#' # flowFrame
+#' cyto_channels(fs[[1]])
+#' 
+#' # flowset
+#' cyto_channels(fs)
+#' 
+#' # GatingHierachy
+#' cyto_channels(gs[[1]])
+#' 
+#' # GatingSet - exclude FSC & SSC channels
+#' cyto_channels(gs, exclude = c("FSC","SSC"))
+#'
+#' @name cyto_channels
+cyto_channels <- function(x, exclude = NULL){
+  
+  # CHANNELS
+  channels <- colnames(x)
+  
+  # EXCLUDE
+  if(!is.null(exclude)){
+    lapply(exclude, function(z){
+      channels <<- channels[!grepl(z, channels, ignore.case = TRUE)]
+    })
+  }
+  
+  # RETURN CHANNELS
+  return(channels)
+  
+}
+
 # CYTO_CHANNELS_EXTRACT --------------------------------------------------------
 
 #' Extract channels associated with certain markers
@@ -230,12 +293,8 @@ cyto_markers_extract.GatingSet <- function(x, channels, plot = FALSE) {
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_fluor_channels,flowFrame-method}}
-#' @seealso \code{\link{cyto_fluor_channels,flowSet-method}}
-#' @seealso \code{\link{cyto_fluor_channels,GatingSet-method}}
-#'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -310,7 +369,7 @@ cyto_fluor_channels.GatingSet <- function(x) {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Compensation

@@ -7,32 +7,25 @@
 cyto_setup(path = ".", gatingTemplate = NULL, ...)
 }
 \arguments{
-\item{path}{points to the location of the .fcs files to read in.}
+\item{path}{points to the location of the .fcs files to read in (e.g. name of
+a folder in current working directory).}
 
 \item{gatingTemplate}{name of a gatingTemplate csv file to be used for gate
 saving.}
-
-\item{...}{additional arguments passed to read.ncdfFlowSet.}
 }
 \value{
-\code{GatingSet}
+object of class
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \description{
-\code{cyto_setup} takes care of all the data loading and annotation steps to
-prepare your cytometry data for downstream analyses. The .fcs files are first
-read into a \code{ncdfFlowSet} using \code{cyto_load} which is then added to
-a \code{GatingSet}. Calls are then made to \code{cyto_markers} and
-\code{cyto_annotate} to update the GtaingSet with the details of the
-experiment. These details can be modified later with additional calls to
-\code{cyto_markers} and/or \code{cyto_annotate}. Users are also asked to
-provide a name for a gatingTemplate csv file which will be created if
-necessary and assigned as the active gatingTemplate.
+Load.fcs files into GatingSet and annotate with experiment details
 }
 \examples{
-library(CytoRSuiteData)
+# Load in CytoExploreRData to acces data
+library(CytoExploreRData)
 
-# Get path to Activation .fcs files in CytoRSuiteData
-datadir <- system.file("extdata", package = "CytoRSuiteData")
+# Get path to Activation .fcs files in CytoExploreRData
+datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
 # Load in .fcs files into an annotated GatingSet
@@ -43,6 +36,7 @@ cyto_extract(gs, "root")[[1]]
 
 # Experiment details have been updated
 cyto_details(gs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

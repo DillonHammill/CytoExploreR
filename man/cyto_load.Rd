@@ -7,12 +7,14 @@
 cyto_load(path = ".", ...)
 }
 \arguments{
-\item{path}{points to the location of the .fcs files to read in.}
+\item{path}{points to the location of the .fcs files to read in (e.g. name of
+folder in current working directory).}
 
 \item{...}{additional arguments passed to read.ncdfFlowSet.}
 }
 \value{
-\code{ncdfFlowSet}
+object of class
+  \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
 }
 \description{
 \code{cyto_load} is a convenient wrapper around
@@ -21,10 +23,11 @@ cyto_load(path = ".", ...)
 to load .fcs files into a ncdfFlowSet.
 }
 \examples{
-library(CytoRSuiteData)
+# Load in CytoExploreRData to access data
+library(CytoExploreRData)
 
-# Get path to Activation .fcs files in CytoRSuiteData
-datadir <- system.file("extdata", package = "CytoRSuiteData")
+# Get path to Activation .fcs files in CytoExploreRData
+datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
 # Load in .fcs files into ncdfFlowSet
@@ -32,6 +35,7 @@ fs <- cyto_load(path)
 
 # fs is a ncdfFlowSet
 class(fs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

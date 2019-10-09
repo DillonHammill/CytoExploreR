@@ -38,7 +38,9 @@ object specified by 'return' argument.
 Automatically removes 'Original' column for coerced objects.
 }
 \examples{
-library(CytoRSuiteData)
+
+# Load in CytoExploreRData to access data
+library(CytoExploreRData)
 
 # Convert flowSet to 'list of flowFrames'
 cyto_convert(Activation, "list of flowFrames")
@@ -48,6 +50,7 @@ cyto_convert(Activation, "flowFrame")
 
 # Convert GatingSet to flowFrame
 cyto_convert(GatingSet(Activation), "flowFrame", parent = "T Cells")
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

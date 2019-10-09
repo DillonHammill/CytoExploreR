@@ -20,7 +20,7 @@ Interactively edit cyto_details for a flowSet or GatingSet
 }
 \examples{
 \dontrun{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

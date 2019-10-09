@@ -22,7 +22,7 @@ a named list of \code{flowSet} or \code{GatingSet} objects
 Group a flowSet or GatingSet by experiment variables
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Group flowSet by Treatment
 cyto_group_by(Activation, "Treatment")

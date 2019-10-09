@@ -28,7 +28,7 @@ cyto_fluor_channels(x)
 Extract Fluorescent Channels
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation
@@ -47,13 +47,6 @@ cyto_fluor_channels(gs[[1]])
 
 # Fluorescent channels for GatingSet
 cyto_fluor_channels(gs)
-}
-\seealso{
-\code{\link{cyto_fluor_channels,flowFrame-method}}
-
-\code{\link{cyto_fluor_channels,flowSet-method}}
-
-\code{\link{cyto_fluor_channels,GatingSet-method}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

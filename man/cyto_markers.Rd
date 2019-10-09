@@ -25,7 +25,7 @@ updated in the \code{x} upon closing the window and saved to a
 }
 \examples{
 \dontrun{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

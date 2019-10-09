@@ -20,7 +20,7 @@ Table Editor for Channel Match File Construction
 }
 \examples{
 \dontrun{
-library(CytoRSuite)
+library(CytoExploreR)
 
 # Generate channel match file for compensation controls
 cyto_channel_match(Compensation)

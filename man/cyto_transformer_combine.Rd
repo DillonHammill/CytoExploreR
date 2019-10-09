@@ -2,21 +2,25 @@
 % Please edit documentation in R/cyto_transformers.R
 \name{cyto_transformer_combine}
 \alias{cyto_transformer_combine}
-\title{Combine Transformation Definitions}
+\title{Combine cyto_transformer definitions}
 \usage{
 cyto_transformer_combine(...)
 }
 \arguments{
-\item{...}{objects of class \code{transformerList} to be combined into a
-single \code{transformerList} object.}
+\item{...}{objects of class
+\code{\link[flowWorkspace:transformerList-class]{transformerList}} to be
+combined into a single \code{transformerList} object.}
 }
 \description{
 \code{cyto_transformer_combine} makes it easy to combine transformation
-definitions obtained from \code{cyto_transformer_arcsinh},
-\code{cyto_transformer_biex} and/or \code{cyto_transformer_logicle} prior to
-applying these transformations to the data using \code{cyto_transform}.
+definitions obtained from \code{\link{cyto_transformer_log}},
+\code{\link{cyto_transformer_arcsinh}}, \code{\link{cyto_transformer_biex}}
+and/or \code{\link{cyto_transformer_logicle}} prior to applying these
+transformations to the data using \code{\link{cyto_transform}}.
 }
 \seealso{
+\code{\link{cyto_transformer_log}}
+
 \code{\link{cyto_transformer_arcsinh}}
 
 \code{\link{cyto_transformer_biex}}

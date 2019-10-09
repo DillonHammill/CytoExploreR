@@ -30,7 +30,9 @@ names associated with the supplied object.
 }
 \description{
 Simply a convenient and autocomplete-friendly wrapper around
-\code{\link[flowCore:identifier]{identifier}}
+\code{\link[flowCore:identifier-methods]{identifier}}
 \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
-names from flowFrame, flowSet GatingHierarchy or GatingSet.
+names from flowFrame, flowSet GatingHierarchy or GatingSet. Anynonymous
+\code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be converted to
+\code{"Combined Events"}.
 }

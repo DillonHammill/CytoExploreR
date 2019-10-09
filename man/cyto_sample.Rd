@@ -40,7 +40,7 @@ The list method expects a list of flowFrame objects and is used internally by
 to the base layer.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

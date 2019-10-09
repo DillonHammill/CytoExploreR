@@ -37,7 +37,7 @@ cyto_gatingTemplate_convert(gs, "gatingTemplate.csv")
 
 # Updated gatingTemplate will work as expected
 gt <- gatingTemplate("gatingTemplate.csv")
-gating(gt, gs)
+gt_gating(gt, gs)
 }
 
 }

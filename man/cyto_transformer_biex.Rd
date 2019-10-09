@@ -2,88 +2,61 @@
 % Please edit documentation in R/cyto_transformers.R
 \name{cyto_transformer_biex}
 \alias{cyto_transformer_biex}
-\alias{cyto_transformer_biex.flowFrame}
-\alias{cyto_transformer_biex.flowSet}
-\alias{cyto_transformer_biex.GatingHierarchy}
 \alias{cyto_transformer_biex.GatingSet}
-\title{Definition(s) of Biexponential Transformation(s)}
+\alias{cyto_transformer_biex.GatingHierarchy}
+\alias{cyto_transformer_biex.flowSet}
+\alias{cyto_transformer_biex.flowFrame}
+\title{Definition(s) of biexponential transformation(s)}
 \usage{
 cyto_transformer_biex(x, ...)
 
-\method{cyto_transformer_biex}{flowFrame}(x, channels = NULL,
-  trans_max = 4096, raw_max = 262144, width = 4.5, trans_min = 0,
-  width_basis = -10, equal_space = FALSE, breaks = 5, plot = TRUE,
-  popup = FALSE, ...)
-
-\method{cyto_transformer_biex}{flowSet}(x, channels = NULL,
-  select = NULL, trans_max = 4096, raw_max = 262144, width = 4.5,
-  trans_min = 0, width_basis = -10, equal_space = FALSE,
-  breaks = 5, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_biex}{GatingSet}(x, channels = NULL,
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
 
 \method{cyto_transformer_biex}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, trans_max = 4096,
-  raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
-  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
+  parent = "root", select = NULL, plot = TRUE, popup = FALSE)
 
-\method{cyto_transformer_biex}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, trans_max = 4096,
-  raw_max = 262144, width = 4.5, trans_min = 0, width_basis = -10,
-  equal_space = FALSE, breaks = 5, plot = TRUE, popup = FALSE)
+\method{cyto_transformer_biex}{flowSet}(x, channels = NULL,
+  select = NULL, plot = TRUE, popup = FALSE, ...)
+
+\method{cyto_transformer_biex}{flowFrame}(x, channels = NULL,
+  plot = TRUE, popup = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{not in use.}
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
 if no channels/markers are supplied.}
 
-\item{trans_max}{maximum value of the transformed data.}
+\item{parent}{name of the parent population to use for generating the
+transformation(s).}
 
-\item{raw_max}{maximum value of the raw data.}
-
-\item{width}{width of the transformed display in asymptotic decades.}
-
-\item{trans_min}{minimum of transformed data in the display in asymptotic
-decades, set to 0 by default.}
-
-\item{width_basis}{numeric to optimally position transformed data within
-display, set to -10 by default.}
-
-\item{equal_space}{logical indicating whether breaks should be equally
-spaced, set to FALSE by default.}
-
-\item{breaks}{number of required breaks.}
+\item{select}{list of selection criteria passed to \code{cyto_select} to
+select a subset of samples for \code{cyto_plot}.}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether the plots should be constructed in a
 pop-up window.}
-
-\item{select}{list of selection criteria passed to \code{cyto_select} to
-select a subset of samples for \code{cyto_plot}.}
-
-\item{parent}{name of the parent population to use for generating the
-transformation(s).}
 }
 \value{
-transformerList object.
+a \code{transformerList} object.
 }
 \description{
-CytoRSuite implementation of \code{flowWorkspace} flowJo biexponential
-transformation which always returns a \code{transformerList}
-object and displays in the result of the transformation(s) using
-\code{cyto_plot}. To combine different types of transformations have a look
-at \code{cyto_transformer_combine}. \code{cyto_transform} should be used to
-apply the transformations to the data.
+Definition(s) of biexponential transformation(s)
 }
 \seealso{
 \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
 
 \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
+
+\code{\link{cyto_transformer_log}}
 
 \code{\link{cyto_transformer_arcsinh}}
 

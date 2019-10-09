@@ -9,7 +9,7 @@
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing pre-gated
 #'   single stain compensation controls.
 #' @param parent name of the population to use for downstream calculations when
-#'   a \CODE{GatingSet} object is supplied, set to the last gated population by
+#'   a \code{GatingSet} object is supplied, set to the last gated population by
 #'   default (e.g. "Single Cells").
 #' @param axes_trans object of class
 #'   \code{\link[flowWorkspace:transformerList-class]{transformerList}}
