@@ -61,227 +61,6 @@ cyto_channels <- function(x, exclude = NULL){
   
 }
 
-# CYTO_CHANNELS_EXTRACT --------------------------------------------------------
-
-#' Extract channels associated with certain markers
-#'
-#' \code{cyto_channels_extract} will check whether the supplied channels or
-#' marker names are valid for the
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowset}},
-#' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
-#' valid channel names. \code{cyto_channels_extract} is particularly useful for
-#' determining which channel(s) are associated with particular marker(s).
-#'
-#' @param x an object of class
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowset}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
-#'   700-A","CD8")).
-#' @param plot logical indicating whether the channels will be used to construct
-#'   a plot, set to FALSE by default. If set to TRUE an additional check will be
-#'   performed to ensure that only 1 or 2 \code{channels} are supplied.
-#'
-#' @return  A vector of valid channel names.
-#'
-#' @importFrom flowWorkspace pData getData
-#' @importFrom flowCore parameters
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @rdname cyto_channels_extract
-#'
-#' @export
-cyto_channels_extract <- function(x, channels, plot = FALSE) {
-  UseMethod("cyto_channels_extract")
-}
-
-#' @rdname cyto_channels_extract
-#' @export
-cyto_channels_extract.default <- function(x, channels, plot = FALSE) {
-  warning(
-    paste("cyto_channels_extract expects objects of class flowFrame,",
-          "flowSet, GatingHierarchy or GatingSet.")
-  )
-}
-
-#' @rdname cyto_channels_extract
-#' @export
-cyto_channels_extract.flowFrame <- function(x, channels, plot = FALSE) {
-  
-  # Incorrect channels length
-  if (plot == TRUE) {
-    if (!length(channels) %in% c(1, 2)) {
-      stop("Invalid number of supplied channels.")
-    }
-  }
-  
-  # Available channels
-  chans <- BiocGenerics::colnames(x)
-  fr.data <- pData(parameters(x))
-  
-  # Channel Indices supplied
-  if (is.numeric(channels)) {
-    channels <- chans[channels]
-  }
-  
-  # Check if channels match colnames of flowFrame
-  if (all(channels %in% chans)) {
-    
-    # Supplied channels are valid
-  } else if (!all(channels %in% chans)) {
-    lapply(channels, function(channel) {
-      if (channel %in% chans) {
-        
-        
-      } else if (channel %in% fr.data$desc) {
-        channels[channels %in% channel] <<- as.character(
-          fr.data$name[match(channel, fr.data$desc)]
-        )
-      } else if (!channel %in% chans & !channel %in% fr.data$desc) {
-        stop(paste(channel, "is not a valid channel/marker."))
-      }
-    })
-  }
-  
-  return(channels)
-  
-}
-
-#' @rdname cyto_channels_extract
-#' @export
-cyto_channels_extract.flowSet <- function(x, channels, plot = FALSE) {
-  
-  cyto_channels_extract.flowFrame(x[[1]], channels, plot)
-  
-}
-
-#' @rdname cyto_channels_extract
-#' @export
-cyto_channels_extract.GatingHierarchy <- function(x, channels, plot = FALSE) {
-  
-  cyto_channels_extract.flowFrame(getData(x, "root"), channels, plot)
-  
-}
-
-#' @rdname cyto_channels_extract
-#' @export
-cyto_channels_extract.GatingSet <- function(x, channels, plot = FALSE) {
-  
-  cyto_channels_extract.flowFrame(getData(x, "root")[[1]], channels, plot)
-  
-}
-
-# CYTO_MARKERS_EXTRACT ---------------------------------------------------------
-
-#' Extract marker names for certain channels
-#'
-#' \code{cyto_markers_extract} will check whether the supplied channels or
-#' marker names are valid for the
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowset}},
-#' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
-#' marker names. The name of the channel will be returned if there is no
-#' associated marker found.
-#'
-#' @param x an object of class
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowset}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
-#'   700-A","CD8")).
-#' @param plot logical indicating whether the channels will be used to construct
-#'   a plot, set to FALSE by default. If set to TRUE an additional check will be
-#'   performed to ensure that only 1 or 2 \code{channels} are supplied.
-#'
-#' @return  A vector of marker names.
-#'
-#' @importFrom flowWorkspace pData getData
-#' @importFrom flowCore parameters
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @rdname cyto_markers_extract
-#'
-#' @export
-cyto_markers_extract <- function(x, markers, plot = FALSE) {
-  UseMethod("cyto_markers_extract")
-}
-
-#' @rdname cyto_markers_extract
-#' @export
-cyto_markers_extract.flowFrame <- function(x, channels, plot = FALSE){
-  
-  # Incorrect channels length
-  if (plot == TRUE) {
-    if (!length(channels) %in% c(1, 2)) {
-      stop("Invalid number of supplied channels.")
-    }
-  }
-  
-  # Available channels
-  chans <- BiocGenerics::colnames(x)
-  fr.data <- pData(parameters(x))
-  
-  # Channel Indices supplied
-  if (is.numeric(channels)) {
-    channels <- chans[channels]
-  }
-  
-  # Check if any channels match colnames of flowFrame
-  if(any(channels %in% chans)){
-    
-    # Find indices for valid channels
-    ind <- which(channels %in% chans)
-    
-    # Check if channel has an associated marker
-    mrks <- as.vector(fr.data[,"desc"][match(channels[ind], fr.data$name)])
-    
-    # Update channels with markers
-    channels[ind[!is.na(mrks)]] <- mrks[!is.na(mrks)]
-    
-  # channels probably already includes markers
-  }else{
-    
-    if(!all(channels %in% fr.data$name)) {
-      warning("'channels' contains invalid channel or marker names.")
-    }
-    
-  }
-  
-  return(channels)
-
-}
-
-#' @rdname cyto_markers_extract
-#' @export
-cyto_markers_extract.flowSet <- function(x, channels, plot = FALSE) {
-  
-  cyto_markers_extract.flowFrame(x[[1]], channels, plot)
-  
-}
-
-#' @rdname cyto_markers_extract
-#' @export
-cyto_markers_extract.GatingHierarchy <- function(x, channels, plot = FALSE) {
-  
-  cyto_markers_extract(getData(x, "root"), channels, plot)
-  
-}
-
-#' @rdname cyto_markers_extract
-#' @export
-cyto_markers_extract.GatingSet <- function(x, channels, plot = FALSE) {
-  
-  cyto_markers_extract(getData(x, "root")[[1]], channels, plot)
-  
-}
-
 # CYTO_FLUOR_CHANNELS ----------------------------------------------------------
 
 #' Extract Fluorescent Channels
@@ -316,43 +95,177 @@ cyto_markers_extract.GatingSet <- function(x, channels, plot = FALSE) {
 #' @rdname cyto_fluor_channels
 #'
 #' @export
-cyto_fluor_channels <- function(x) {
-  UseMethod("cyto_fluor_channels")
+cyto_fluor_channels <- function(x){
+  cyto_channels(x, exclude = c("FSC","SSC","Time","Original"))
 }
 
-#' @rdname cyto_fluor_channels
+# CYTO_CHANNELS_EXTRACT --------------------------------------------------------
+
+#' Extract channels associated with certain markers
+#'
+#' \code{cyto_channels_extract} will check whether the supplied channels or
+#' marker names are valid for the
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{\link[flowCore:flowSet-class]{flowset}},
+#' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
+#' valid channel names. \code{cyto_channels_extract} is particularly useful for
+#' determining which channel(s) are associated with particular marker(s).
+#'
+#' @param x an object of class
+#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
+#'   700-A","CD8")).
+#' @param plot logical indicating whether the channels will be used to construct
+#'   a plot, set to FALSE by default. If set to TRUE an additional check will be
+#'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#'
+#' @return  A vector of valid channel names.
+#'
+#' @importFrom flowWorkspace pData getData
+#' @importFrom flowCore parameters
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @rdname cyto_channels_extract
+#'
 #' @export
-cyto_fluor_channels.flowFrame <- function(x) {
-  channels <- unname(BiocGenerics::colnames(x))
+cyto_channels_extract <- function(x,
+                                  channels, 
+                                  plot = FALSE) {
+
+  # Incorrect channels length
+  if (plot == TRUE) {
+    if (!length(channels) %in% c(1, 2)) {
+      stop("Invalid number of supplied channels.")
+    }
+  }
   
-  # Remove FSC channels
-  channels <- channels[!grepl("FSC", channels, ignore.case = TRUE)]
-  # Remove SSC channels
-  channels <- channels[!grepl("SSC", channels, ignore.case = TRUE)]
-  # Remove Original channel
-  channels <- channels[!grepl("Original", channels)]
-  # Remove Time channel
-  channels <- channels[!grepl("Time", channels, ignore.case = TRUE)]
+  # Extract data
+  x <- cyto_extract(x)
+  
+  # Convert to flowFrame
+  if(is(x, "flowSet")){
+    x <- x[[1]]
+  }
+  
+  # Available channels
+  chans <- cyto_channels(x)
+  fr_data <- pData(parameters(x))
+  
+  # Channel Indices supplied
+  if (is.numeric(channels)) {
+    channels <- chans[channels]
+  }
+  
+  # Check if channels match colnames of flowFrame
+  if (all(channels %in% chans)) {
+    
+    # Supplied channels are valid
+  } else if (!all(channels %in% chans)) {
+    lapply(channels, function(channel) {
+      if (channel %in% chans) {
+        
+        
+      } else if (channel %in% fr_data$desc) {
+        channels[channels %in% channel] <<- as.character(
+          fr_data$name[match(channel, fr_data$desc)]
+        )
+      } else if (!channel %in% chans & !channel %in% fr_data$desc) {
+        stop(paste(channel, "is not a valid channel/marker."))
+      }
+    })
+  }
   
   return(channels)
+  
 }
 
-#' @rdname cyto_fluor_channels
-#' @export
-cyto_fluor_channels.flowSet <- function(x) {
-  cyto_fluor_channels.flowFrame(x[[1]])
-}
+# CYTO_MARKERS_EXTRACT ---------------------------------------------------------
 
-#' @rdname cyto_fluor_channels
+#' Extract marker names for certain channels
+#'
+#' \code{cyto_markers_extract} will check whether the supplied channels or
+#' marker names are valid for the
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{\link[flowCore:flowSet-class]{flowset}},
+#' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
+#' marker names. The name of the channel will be returned if there is no
+#' associated marker found.
+#'
+#' @param x an object of class
+#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
+#'   700-A","CD8")).
+#' @param plot logical indicating whether the channels will be used to construct
+#'   a plot, set to FALSE by default. If set to TRUE an additional check will be
+#'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#'
+#' @return  A vector of marker names.
+#'
+#' @importFrom flowWorkspace pData
+#' @importFrom flowCore parameters
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @rdname cyto_markers_extract
+#'
 #' @export
-cyto_fluor_channels.GatingHierarchy <- function(x) {
-  cyto_fluor_channels(cyto_extract(x, "root"))
-}
+cyto_markers_extract <- function(x, 
+                                 channels,
+                                 plot = FALSE) {
+  
+   # Incorrect channels length
+  if (plot == TRUE) {
+    if (!length(channels) %in% c(1, 2)) {
+      stop("Invalid number of supplied channels.")
+    }
+  }
 
-#' @rdname cyto_fluor_channels
-#' @export
-cyto_fluor_channels.GatingSet <- function(x) {
-  cyto_fluor_channels.flowFrame(cyto_extract(x, "root")[[1]])
+  # Extract data 
+  x <- cyto_extract(x)
+  
+  # Extract flowFrame
+  if(is(x, "flowSet")){
+    x <- x[[1]]
+  }
+  
+  # Available channels
+  chans <- cyto_channels(x)
+  fr_data <- pData(parameters(x))
+  
+  # Channel Indices supplied
+  if (is.numeric(channels)) {
+    channels <- chans[channels]
+  }
+      
+  # Invalid channels or markers
+  if(!all(channels %in% c(fr_data$name, fr_data$desc))) {
+    stop("'channels' contains invalid channel or marker names.")
+  }
+  
+  # Check if any channels match colnames of flowFrame
+  if(any(channels %in% chans)){
+    
+    # Find indices for valid channels
+    ind <- which(channels %in% chans)
+    
+    # Check if channel has an associated marker
+    mrks <- as.vector(fr_data[,"desc"][match(channels[ind], fr_data$name)])
+    
+    # Update channels with markers
+    channels[ind[!is.na(mrks)]] <- mrks[!is.na(mrks)]
+    
+  }
+  
+  return(channels)
 }
 
 # CYTO_CHANNEL_SELECT ----------------------------------------------------------
@@ -377,105 +290,25 @@ cyto_fluor_channels.GatingSet <- function(x) {
 #' # Select a channel for each control from dropdown menu
 #' cyto_channel_select(fs)
 #' @name cyto_channel_select
-NULL
-
-#' @noRd
-#' @export
 cyto_channel_select <- function(x){
-  UseMethod("cyto_channel_select")
-}
 
-#' @rdname cyto_channel_select
-#' @export
-cyto_channel_select.flowFrame <- function(x) {
+  # Extract data
+  x <- cyto_extract(x)
+  
+  # Convert to list of flowFrames
+  x <- cyto_convert(x, "list of flowFrames")
   
   # Channels
-  opts <- cyto_fluor_channels(x)
+  opts <- c(cyto_fluor_channels(x[[1]]), "Unstained")
   
-  # Print sample name and select channel
-  message(
-    paste(
-      "Select a fluorescent channel for the following sample:",
-      cyto_names(x)
-    )
-  )
-  
-  chan <- opts[menu(choices = opts, graphics = TRUE)]
-  
-  return(chan)
-}
-
-#' @rdname cyto_channel_select
-#' @export
-cyto_channel_select.flowSet <- function(x) {
-  
-  # Assign x to fs
-  fs <- x
-  
-  opts <- c(cyto_fluor_channels(fs), "Unstained")
-  
-  # Messgae to select sample
+  # Message
   message("Select a fluorescent channel for the following sample:")
   
-  # Print sample name and select channel
-  chans <- opts[LAPPLY(cyto_names(fs), function(z) {
-    message(z)
-    
-    menu(choices = opts, graphics = TRUE)
-  })]
-  
-  return(chans)
-}
-
-#' @rdname cyto_channel_select
-#' @export
-cyto_channel_select.GatingHierarchy <- function(x) {
-  
-  # Assign x to gs
-  gh <- x
-  
-  # Extract flowFrame
-  fr <- cyto_extract(gh, "root")
-  
-  opts <- cyto_fluor_channels(fr)
-  
-  # Print sample name and select channel
-  message(
-    paste(
-      "Select a fluorescent channel for the following sample:",
-      cyto_names(fr)
-    )
-  )
-  
-  chan <- opts[menu(choices = opts, graphics = TRUE)]
-  
-  return(chan)
-}
-
-#' @rdname cyto_channel_select
-#' @export
-cyto_channel_select.GatingSet <- function(x) {
-  
-  # Assign x to gs
-  gs <- x
-  
-  # Extract flowSet
-  fs <- cyto_extract(gs, "root")
-  
-  # Channel options
-  opts <- c(cyto_fluor_channels(fs), "Unstained")
-  
-  # Print sample name and select channel
-  chans <- opts[LAPPLY(cyto_names(fs), function(x) {
-    message(
-      paste(
-        "Select a fluorescent channel for the following sample:",
-        x
-      )
-    )
-    
-    menu(choices = opts, graphics = TRUE)
-  })]
+  # Run through list of flowFrames
+  chans <- LAPPLY(seq_len(length(x)), function(z){
+    message(cyto_names(x))
+    opts[menu(choices = opts, graphics = TRUE)]
+  })
   
   return(chans)
 }

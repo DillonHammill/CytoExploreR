@@ -2,21 +2,9 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_fluor_channels}
 \alias{cyto_fluor_channels}
-\alias{cyto_fluor_channels.flowFrame}
-\alias{cyto_fluor_channels.flowSet}
-\alias{cyto_fluor_channels.GatingHierarchy}
-\alias{cyto_fluor_channels.GatingSet}
 \title{Extract Fluorescent Channels}
 \usage{
 cyto_fluor_channels(x)
-
-\method{cyto_fluor_channels}{flowFrame}(x)
-
-\method{cyto_fluor_channels}{flowSet}(x)
-
-\method{cyto_fluor_channels}{GatingHierarchy}(x)
-
-\method{cyto_fluor_channels}{GatingSet}(x)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

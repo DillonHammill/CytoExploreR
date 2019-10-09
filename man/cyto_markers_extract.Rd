@@ -2,21 +2,9 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_markers_extract}
 \alias{cyto_markers_extract}
-\alias{cyto_markers_extract.flowFrame}
-\alias{cyto_markers_extract.flowSet}
-\alias{cyto_markers_extract.GatingHierarchy}
-\alias{cyto_markers_extract.GatingSet}
 \title{Extract marker names for certain channels}
 \usage{
-cyto_markers_extract(x, markers, plot = FALSE)
-
-\method{cyto_markers_extract}{flowFrame}(x, channels, plot = FALSE)
-
-\method{cyto_markers_extract}{flowSet}(x, channels, plot = FALSE)
-
-\method{cyto_markers_extract}{GatingHierarchy}(x, channels, plot = FALSE)
-
-\method{cyto_markers_extract}{GatingSet}(x, channels, plot = FALSE)
+cyto_markers_extract(x, channels, plot = FALSE)
 }
 \arguments{
 \item{x}{an object of class
@@ -25,12 +13,12 @@ cyto_markers_extract(x, markers, plot = FALSE)
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
+\item{channels}{vector of channel and/or marker names (e.g. c("Alexa Fluor
+700-A","CD8")).}
+
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
-
-\item{channels}{vector of channel and/or marker names (e.g. c("Alexa Fluor
-700-A","CD8")).}
 }
 \value{
 A vector of marker names.

@@ -811,7 +811,7 @@ cyto_convert.flowFrame <- function(x,
 
   if (return == "flowFrame") {
 
-  } else if (return == "flowFrame list") {
+  } else if (return %in% c("flowFrame list", "list of flowFrames")) {
     x <- list(x)
   } else if (return == "flowSet") {
     x <- flowSet(x)
@@ -881,7 +881,7 @@ cyto_convert.GatingHierarchy <- function(x,
 
   } else if (return == "flowFrame") {
     x <- cyto_extract(x, parent)
-  } else if (return == "flowFrame list") {
+  } else if (return %in% c("flowFrame list", "list of flowFrames")) {
     x <- list(cyto_extract(x, parent))
   } else if (return == "flowSet") {
     x <- flowSet(cyto_extract(x, parent))

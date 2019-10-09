@@ -2,19 +2,9 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channel_select}
 \alias{cyto_channel_select}
-\alias{cyto_channel_select.flowFrame}
-\alias{cyto_channel_select.flowSet}
-\alias{cyto_channel_select.GatingHierarchy}
-\alias{cyto_channel_select.GatingSet}
 \title{Select Fluorescent Channel for Compensation Controls}
 \usage{
-\method{cyto_channel_select}{flowFrame}(x)
-
-\method{cyto_channel_select}{flowSet}(x)
-
-\method{cyto_channel_select}{GatingHierarchy}(x)
-
-\method{cyto_channel_select}{GatingSet}(x)
+cyto_channel_select(x)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

@@ -2,25 +2,9 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channels_extract}
 \alias{cyto_channels_extract}
-\alias{cyto_channels_extract.default}
-\alias{cyto_channels_extract.flowFrame}
-\alias{cyto_channels_extract.flowSet}
-\alias{cyto_channels_extract.GatingHierarchy}
-\alias{cyto_channels_extract.GatingSet}
 \title{Extract channels associated with certain markers}
 \usage{
 cyto_channels_extract(x, channels, plot = FALSE)
-
-\method{cyto_channels_extract}{default}(x, channels, plot = FALSE)
-
-\method{cyto_channels_extract}{flowFrame}(x, channels, plot = FALSE)
-
-\method{cyto_channels_extract}{flowSet}(x, channels, plot = FALSE)
-
-\method{cyto_channels_extract}{GatingHierarchy}(x, channels,
-  plot = FALSE)
-
-\method{cyto_channels_extract}{GatingSet}(x, channels, plot = FALSE)
 }
 \arguments{
 \item{x}{an object of class
