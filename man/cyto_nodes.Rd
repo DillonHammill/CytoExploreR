@@ -7,7 +7,9 @@
 cyto_nodes(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.}

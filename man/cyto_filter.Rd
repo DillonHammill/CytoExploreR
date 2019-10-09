@@ -7,11 +7,12 @@
 cyto_filter(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{...}{tidyverse-style subsetting using comma separated logical
-predicates based on experimental variables stored in \code{cyto_details(x)}. See
-examples below for demonstration.}
+predicates based on experimental variables stored in
+\code{cyto_details(x)}. See examples below for demonstration.}
 }
 \value{
 \code{flowSet} or \code{GatingSet} restricted to samples which meet
@@ -21,6 +22,8 @@ examples below for demonstration.}
 Filter samples based on experiment variables
 }
 \examples{
+
+# Load in CytoExploreRData to access data
 library(CytoExploreR)
 
 # Look at experiment details

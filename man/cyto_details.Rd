@@ -7,8 +7,10 @@
 cyto_details(x)
 }
 \arguments{
-\item{object}{of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}.}
+\item{object}{of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 }
 \value{
 experiment details as data.frame.

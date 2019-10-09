@@ -16,8 +16,9 @@ cyto_compensate(x, ...)
 \method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet} or
-\code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{spillover}{name of the spillover matrix csv file (e.g.
 "Spillover-Matrix.csv") saved in the current working directory.}
@@ -41,6 +42,8 @@ spillover matrix extraction supply the index or name of the sample to the
 \code{select} argument.
 }
 \examples{
+
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Apply stored spillover matrix to flowSet

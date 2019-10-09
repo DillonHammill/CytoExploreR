@@ -451,16 +451,16 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 #' @param popup logical indicating whether the plots should be constructed in a
 #'   pop-up window.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}.
+#'   \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}.
 #'
 #' @return a \code{transformerList} object.
 #'
-#' @importFrom flowWorkspace flowJoTrans flow_trans transformerList
+#' @importFrom flowWorkspace flowjo_biexp flow_trans transformerList
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
-#' @seealso \code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
+#' @seealso \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}
 #' @seealso \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
 #' @seealso \code{\link{cyto_transformer_log}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
@@ -571,13 +571,13 @@ cyto_transformer_biex.flowFrame <- function(x,
 
   # Sort out transformations
   transform_list <- lapply(channels, function(z) {
-    flowJoTrans(
+    flowjo_biexp(
       inverse = FALSE,
       ...
     )
   })
   transformer_list <- lapply(transform_list, function(z) {
-    inv <- flowJoTrans(
+    inv <- flowjo_biexp(
       inverse = TRUE,
       ...
     )

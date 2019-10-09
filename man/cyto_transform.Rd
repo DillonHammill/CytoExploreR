@@ -21,9 +21,9 @@ cyto_transform(x, trans = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet]{flowSet}},
-\code{\link[flowWorkspace:GatingHierarchy]{GatingHierarchy}} or
-\code{\link[flowWorkspace:GatingSet]{GatingSet}}.}
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{trans}{object of class
 \code{\link[flowWorkspace:transformerList]{transformerList}} containing the

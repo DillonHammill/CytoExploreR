@@ -7,10 +7,11 @@
 cyto_extract(x, parent = "root", ...)
 }
 \arguments{
-\item{x}{object of class flowFrame, flowSet, GatingHierarchy or GatingSet.}
+\item{x}{object of class \code{flowFrame}, \code{flowSet},
+\code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{parent}{name of the parent population to extract from GatingHierachy or
-GatingSet objects.}
+\item{parent}{name of the parent population to extract from
+\code{GatingHierachy} or \code{GatingSet} objects.}
 }
 \value{
 either a \code{flowFrame} or a \code{flowSet}.
@@ -18,9 +19,12 @@ either a \code{flowFrame} or a \code{flowSet}.
 \description{
 \code{cyto_extract} is essentially a wrapper for
 \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}} which also
-accepts flowFrame or flowSet objects. The \code{parent} population is
-extracted from GatingHierarchy or GatingSet objects whilst flowFrame or
-flowSet objects are returned as is.
+accepts \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+\code{\link[flowCore:flowSet-class]{flowSet}} objects. The \code{parent}
+population is extracted from
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects whilst
+\code{flowFrame} or \code{flowSet} objects are returned as is.
 }
 \examples{
 

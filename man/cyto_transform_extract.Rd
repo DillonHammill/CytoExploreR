@@ -7,10 +7,12 @@
 cyto_transform_extract(x, inverse = FALSE)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace]{transformerList}}.}
+\item{x}{object of class
+\code{\link[flowWorkspace:transformerList-class]{transformerList}}.}
 
-\item{inverse}{logical indicating whether the returned transformList should
-contain the inverse transformations.}
+\item{inverse}{logical indicating whether the returned
+\code{\link[flowCore:transformList-class]{transformList}} should contain
+the inverse transformations.}
 }
 \value{
 A \code{\link[flowCore:transformList-class]{transformList}}
@@ -32,7 +34,7 @@ gs <- GatingSet(fs)
 
 # Convert transformerList into transformList
 trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
-trans_list <- cyto_transfrm_extract(trans)
+trans_list <- cyto_transform_extract(trans)
 
 # Convert transformerList into inverse transformList
 inv <- cyto_transform_extract(trans, inverse = TRUE)

@@ -7,7 +7,8 @@
 cyto_annotate(x, file = NULL)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{file}{name of csv file containing experimental information.}
 }

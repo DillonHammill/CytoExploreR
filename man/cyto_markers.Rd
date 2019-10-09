@@ -7,8 +7,10 @@
 cyto_markers(x, file = NULL)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{flowSet},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+\code{GatingSet}.}
 
 \item{file}{name of csv file containing columns 'Channel' and 'Marker'.}
 }
@@ -17,11 +19,13 @@ save inputs to "Experiment-Markers.csv" and returns updated samples.
 }
 \description{
 \code{cyto_markers} opens an editable table containing a list of channels and
-markers for a \code{flowFrame}, \code{flowSet}, \code{GatingHierarchy} or
-\code{GatingSet}. Users can edit the \code{name} or \code{desc} columns with
-updated channel names or marker names respectively. These entries will be
-updated in the \code{x} upon closing the window and saved to a
-"Experiment-markers.csv" file for future use.
+markers for a \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Users can edit the
+\code{name} or \code{desc} columns with updated channel names or marker names
+respectively. These entries will be updated in the \code{x} upon closing the
+window and saved to a "Experiment-markers.csv" file for future use.
 }
 \examples{
 \dontrun{

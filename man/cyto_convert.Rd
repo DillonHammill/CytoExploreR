@@ -21,15 +21,17 @@ cyto_convert(x, ...)
   return = "GatingSet")
 }
 \arguments{
-\item{x}{\code{flowFrame}, \code{flowSet}, \code{GatingHierarchy},
-\code{GatingSet}.}
+\item{x}{\code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{return}{either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
 coerced 'flowFrame list' or coreced 'flowSet list'. GatingSet and flowSet
 objects can also be converted to a 'list of flowFrames'.}
 
-\item{parent}{name of parent population to extract from GatingHierarchy and
-GatingSet objects.}
+\item{parent}{name of parent population to extract from
+\code{GatingHierarchy} and \code{GatingSet} objects.}
 }
 \value{
 object specified by 'return' argument.

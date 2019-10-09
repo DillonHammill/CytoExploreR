@@ -27,7 +27,7 @@ cyto_transformer_biex(x, ...)
 \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}.}
+\code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
@@ -52,7 +52,7 @@ a \code{transformerList} object.
 Definition(s) of biexponential transformation(s)
 }
 \seealso{
-\code{\link[flowWorkspace:flowJoTrans]{flowJoTrans}}
+\code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}
 
 \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
 

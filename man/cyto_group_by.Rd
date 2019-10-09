@@ -7,10 +7,11 @@
 cyto_group_by(x, group_by = "all")
 }
 \arguments{
-\item{x}{an object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{group_by}{names of cyto_details variables to use for merging. Set to "all" to
-merge all samples in \code{x}.}
+\item{group_by}{names of cyto_details variables to use for merging. Set to
+"all" to merge all samples in \code{x}.}
 
 \item{parent}{name of the parent population to extract from GatingSet object.}
 }

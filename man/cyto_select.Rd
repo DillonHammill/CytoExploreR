@@ -7,7 +7,8 @@
 cyto_select(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{...}{named list containing experimental variables to be used to select
 samples or named arguments containing the levels of the variables to

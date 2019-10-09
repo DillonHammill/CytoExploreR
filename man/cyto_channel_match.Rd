@@ -7,7 +7,8 @@
 cyto_channel_match(x, channel_match = NULL)
 }
 \arguments{
-\item{x}{object of \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{channel_match}{name to use for the saved channel match csv file, set to
 \code{"date-Channel-Match.csv"}.}
@@ -20,6 +21,7 @@ Table Editor for Channel Match File Construction
 }
 \examples{
 \dontrun{
+# Load in CytoExploreRData to access data
 library(CytoExploreR)
 
 # Generate channel match file for compensation controls

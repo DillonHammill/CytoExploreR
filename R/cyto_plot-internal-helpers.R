@@ -75,11 +75,16 @@
                                          channels = chan, 
                                          limits = limits)[,chan])
     }
+    print(rng)
     # RESTRICT tcks & lbls by rng
     tks <- tcks[tcks > rng[1] & tcks < rng[2]]
     lbs <- lbls[tcks %in% tks]
+    print(tks)
+    print(lbs)
     # BREAKS - TRANSFORMED SCALE
     brks <- signif(trans_func(tks))
+    print(brks)
+    print(par("usr"))
     # BREAKS & LABELS
     return(list("label" = lbs, "at" = brks))
   })
