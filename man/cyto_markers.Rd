@@ -29,6 +29,7 @@ window and saved to a "Experiment-markers.csv" file for future use.
 }
 \examples{
 \dontrun{
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Load in samples

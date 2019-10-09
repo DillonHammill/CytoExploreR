@@ -1,8 +1,16 @@
 # CYTO_MAP ---------------------------------------------------------------------
 
+# UMAP projections can be applied to new datasets but computation is slow. Keep
+# implementation to flowFrame method for now.
+
 #' Create dimension-reduced maps of cytometry data
 #'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
+#' @param channels vector of channels names indicating the channels that should
+#'   be used by the dimension reduction algorithm to compute the 2-dimensional
+#'   map, set to all channels by default. Restricting the number of channels can
+#'   greatly improved processing speed but may result in poorer resolution.
+#' @param sample number of events to map, set to 50 000 events by default.
 #' @param method direction reduction method to use to generate the map,
 #'   supported options include "PCA", "tSNE" and "UMAP".
 #' @param save logical indicating whether the mapped \code{flowFrame} or
@@ -42,6 +50,8 @@ cyto_map <- function(x, ...){
 #' @rdname cyto_map
 #' @export
 cyto_map.flowFrame <- function(x,
+                               channels,
+                               sample = 50000,
                                method = "tSNE",
                                save = FALSE,
                                save_as = "cyto_map",
@@ -49,54 +59,67 @@ cyto_map.flowFrame <- function(x,
                                seed,
                                ...){
   
-  # EXTRACT DATA ---------------------------------------------------------------
   
-  # MATRIX
-  fr_exprs <- exprs(x)
+  # CHANNELS -------------------------------------------------------------------
   
-  # SET SEED
-  if(!missing(seed)){
-    set.seed(seed)
+  # PREPARE CHANNELS
+  if(missing(channels)){
+    channels <- cyto_channels(x, exclude = "Time")
   }
   
+  # CONVERT CHANNELS
+  channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
+
+  # PREPARE DATA ---------------------------------------------------------------
+  
+    # PREPARE DATA - SAMPLING
+    x <- cyto_sample(x, display = sample, seed = 56)
+  
+    # EXTRACT RAW DATA MATRIX
+    fr_exprs <- exprs(x)
+    
+    # RESTRICT MATRIX BY CHANNELS
+    fr_exprs <- fr_exprs[, channels]
+  
   # MAPPING --------------------------------------------------------------------
+  
+  # SET SEED - RETURN SAME MAP WITH EACH RUN
+    if(!missing(seed)){
+    set.seed(seed)
+  }
   
   # PCA
   if(grepl(method, "PCA", ignore.case = TRUE)){
     # MAPPING
     mp <- prcomp(fr_exprs, ...)
     # MAPPING CO-ORDINATES
-    coords <- mp$x[, 1:2]
+    coords <- mp$x[, 1:2, drop = FALSE]
+    colnames(coords) <- c("PCA-1","PCA-2")
+    # ADD MAPPING COORDS TO FLOWFRAME
+    x <- cbind(x, coords)
   # tSNE
   }else if(grepl(method, "tSNE", ignore.case = TRUE)){
     # MAPPING 
     mp <- Rtsne(fr_exprs, ...)
     # MAPPING CO-ORDINATES
     coords <- mp$Y
+    colnames(coords) <- c("tSNE-1","tSNE-2")
+
   # UMAP 
   }else if(grepl(method, "UMAP", ignore.case = TRUE)){
     # MAPPING
     mp <- umap(fr_exprs, ...)
     # MAPPING CO-ORDINATES
     coords <- mp$layout
+    colnames(coords) <- c("UMAP-1","UMAP-2")
   # UNSUPPORTED METHOD  
   }else{
     stop(paste(method, "is not a supported mapping method."))
   }
   
-  # CHANNELS -------------------------------------------------------------------
-  
-  # APPROPRIATE DIMENSION NAMES
-  channels <- paste(method, c(1,2), sep = "-")
-  
-  # APPEND MAPPING TO FLOWFRAME ------------------------------------------------
-  
-  # APPROPRIATELY NAME MAPPING PARAMETERS
-  colnames(coords) <- channels
-  
-  # CBIND FLOWFRAME & MAPPING
+  # ADD MAPPING COORDS TO FLOWFRAME
   x <- cbind(x, coords)
-  
+    
   # VISUALISATION --------------------------------------------------------------
   
   # CYTO_PLOT - MAP
@@ -118,54 +141,6 @@ cyto_map.flowFrame <- function(x,
   }
   
   # RETURN MAPPED FLOWFRAME ----------------------------------------------------
-  return(x)
-  
-}
-
-
-#' @rdname cyto_map
-#' @export
-cyto_map.flowSet <- function(x,
-                             method = "tSNE",
-                             save = FALSE,
-                             save_as = "cyto_map",
-                             plot = TRUE,
-                             ...){
-  
-  # MERGE DATA -----------------------------------------------------------------
-  
-  # MAPPING ON MERGED DATA
-  fr <- as(x, "flowFrame")
-  
-  # MAPPING --------------------------------------------------------------------
-  
-  # MAPPED FLOWFRAME
-  fr <- cyto_map(fr,
-                 method = method,
-                 plot = plot,
-                 save = FALSE,
-                 ...)
-
-  # MATCH MAPPING TO INDIVIDUAL FLOWFRAMES -------------------------------------
-  
-  
-  # SAVE MAPPED FLOWSET --------------------------------------------------------
-    
-  # CREATE NEW FOLDER
-  if(save == TRUE & !dir.exists(save_as)){
-    dir.create(save_as)
-  }
-  
-  # WRITE FCS FILES
-  if(save == TRUE){
-    lapply(x, function(z){
-      write.FCS(z, paste0(save_as, "/", keyword(z, "$FIL")))
-    })
-  }
-  
-  # RETURN MAPPED FLOWSET ------------------------------------------------------
-  
-  # MAPPING PERFORMED ON POOLED DATA
   return(x)
   
 }

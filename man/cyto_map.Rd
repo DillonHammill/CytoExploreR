@@ -3,16 +3,13 @@
 \name{cyto_map}
 \alias{cyto_map}
 \alias{cyto_map.flowFrame}
-\alias{cyto_map.flowSet}
 \title{Create dimension-reduced maps of cytometry data}
 \usage{
 cyto_map(x, ...)
 
-\method{cyto_map}{flowFrame}(x, method = "tSNE", save = FALSE,
-  save_as = "cyto_map", plot = TRUE, seed, ...)
-
-\method{cyto_map}{flowSet}(x, method = "tSNE", save = FALSE,
-  save_as = "cyto_map", plot = TRUE, ...)
+\method{cyto_map}{flowFrame}(x, channels, sample = 50000,
+  method = "tSNE", save = FALSE, save_as = "cyto_map", plot = TRUE,
+  seed, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or \code{flowSet}.}
@@ -20,6 +17,13 @@ cyto_map(x, ...)
 \item{...}{additional arguments passed to the called dimension reduction
 function. Links to the documentation for these functions can be found
 below.}
+
+\item{channels}{vector of channels names indicating the channels that should
+be used by the dimension reduction algorithm to compute the 2-dimensional
+map, set to all channels by default. Restricting the number of channels can
+greatly improved processing speed but may result in poorer resolution.}
+
+\item{sample}{number of events to map, set to 50 000 events by default.}
 
 \item{method}{direction reduction method to use to generate the map,
 supported options include "PCA", "tSNE" and "UMAP".}

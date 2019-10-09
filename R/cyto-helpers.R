@@ -19,6 +19,7 @@
 #' @importFrom gtools mixedsort
 #'
 #' @examples
+#' 
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -84,6 +85,7 @@ cyto_load <- function(path = ".", ...) {
 #' @importFrom tools file_ext
 #'
 #' @examples
+#' 
 #' # Load in CytoExploreRData to acces data
 #' library(CytoExploreRData)
 #'
@@ -255,6 +257,7 @@ cyto_names.list <- function(x){
 #' @return TRUE or FALSE if object meets this class criteria.
 #'
 #' @examples
+#' 
 #' # Load in CytoExploreRData to acess data
 #' library(CytoExploreRData)
 #'
@@ -320,6 +323,7 @@ cyto_check <- function(x) {
 #' @importFrom graphics par
 #'
 #' @examples
+#' 
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreR)
 #'
@@ -995,6 +999,8 @@ cyto_filter <- function(x, ...) {
 #'   the selection criteria.
 #'
 #' @examples
+#' 
+#' 3 Load in CytoExploreRData to access data
 #' library(CytoExploreR)
 #'
 #' # Look at experiment details
@@ -1011,6 +1017,7 @@ cyto_filter <- function(x, ...) {
 #'   Activation,
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
 #' )
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1086,6 +1093,8 @@ cyto_select <- function(x, ...) {
 #'   respectively.
 #'
 #' @examples
+#' 
+#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
 #' # Group flowSet by Treatment
@@ -1094,6 +1103,7 @@ cyto_select <- function(x, ...) {
 #' # Group GatingSet by Treatment and OVAConc
 #' gs <- GatingSet(Activation)
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -1174,6 +1184,8 @@ cyto_group_by <- function(x,
 #' @importFrom flowCore sampleFilter Subset fsApply identifier
 #'
 #' @examples
+#' 
+#' # Load in CytoExploreRData to access files
 #' library(CytoExploreRData)
 #'
 #' # Load in samples
@@ -1333,6 +1345,7 @@ cyto_sample.list <- function(x,
 #'
 #' @examples
 #' \dontrun{
+#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
 #' # Load in samples
@@ -1510,6 +1523,7 @@ cyto_markers <- function(x, file = NULL) {
 #'
 #' @examples
 #' \dontrun{
+#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
 #' # Load in samples

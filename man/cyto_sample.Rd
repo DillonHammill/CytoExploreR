@@ -40,6 +40,8 @@ The list method expects a list of flowFrame objects and is used internally by
 to the base layer.
 }
 \examples{
+
+# Load in CytoExploreRData to access files
 library(CytoExploreRData)
 
 # Load in samples

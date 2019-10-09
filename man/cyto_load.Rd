@@ -23,6 +23,7 @@ object of class
 to load .fcs files into a ncdfFlowSet.
 }
 \examples{
+
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 

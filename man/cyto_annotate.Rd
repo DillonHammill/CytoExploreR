@@ -21,6 +21,7 @@ Interactively edit cyto_details for a flowSet or GatingSet
 }
 \examples{
 \dontrun{
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Load in samples

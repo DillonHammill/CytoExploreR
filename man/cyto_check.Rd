@@ -19,6 +19,7 @@ TRUE or FALSE if object meets this class criteria.
 Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
 }
 \examples{
+
 # Load in CytoExploreRData to acess data
 library(CytoExploreRData)
 

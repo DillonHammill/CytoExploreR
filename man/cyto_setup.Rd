@@ -21,6 +21,7 @@ object of class
 Load.fcs files into GatingSet and annotate with experiment details
 }
 \examples{
+
 # Load in CytoExploreRData to acces data
 library(CytoExploreRData)
 

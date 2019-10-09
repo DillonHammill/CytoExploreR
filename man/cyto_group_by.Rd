@@ -23,6 +23,8 @@ a named list of \code{flowSet} or \code{GatingSet} objects
 Group a flowSet or GatingSet by experiment variables
 }
 \examples{
+
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Group flowSet by Treatment
@@ -31,6 +33,7 @@ cyto_group_by(Activation, "Treatment")
 # Group GatingSet by Treatment and OVAConc
 gs <- GatingSet(Activation)
 cyto_group_by(gs, c("Treatment", "OVAConc"))
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -22,6 +22,8 @@ select. See below examples for use cases.}
 Select samples based on experiment variables
 }
 \examples{
+
+3 Load in CytoExploreRData to access data
 library(CytoExploreR)
 
 # Look at experiment details
@@ -38,6 +40,7 @@ fs <- cyto_select(
   Activation,
   list("Treatment" = c("Stim-A", "Stim-C"))
 )
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
