@@ -17,6 +17,8 @@
 #'   will NOT be applied to the flowFrame internally and should be applied to
 #'   the flowFrame prior to plotting.
 #' @param overlay a list of flowFrames to overlay onto the plot.
+#' @param gate list of gate objects to be plotted, used internlaly to ensure
+#'   gate co-ordinates are taken into account when computing axes limits.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
 #' @param limits indicates whether the axes limits should be based on the
@@ -114,6 +116,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       channels,
                                       axes_trans = NA,
                                       overlay = NA,
+                                      gate = NA,
                                       xlim = NA,
                                       ylim = NA,
                                       limits = "machine",
@@ -214,6 +217,11 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # AXES LIMITS ----------------------------------------------------------------
 
+  # GATE COORDS
+  if(!.all_na(gate)){
+    gate_coords <- .cyto_gate_coords(gate)
+  }
+  
   # XLIM
   if (.all_na(xlim)) {
     # XLIM
@@ -222,6 +230,20 @@ cyto_plot_empty.flowFrame <- function(x,
       limits = limits,
       plot = TRUE
     )[, 1]
+    # GATE coords
+    if(!.all_na(gate)){
+      # MIN & MAX GATE COORDS
+      gate_xcoords <- gate_coords[, channels[1]]
+      gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
+      # GATE COORDS BELOW XMIN
+      if(is.finite(gate_xccords[1]) & gate_xcoords[1] < xlim[1]){
+        xlim[1] <- gate_xcoords[1]
+      }
+      # GATE COORDS ABOVE XMAX
+      if(is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]){
+        xlim[2] <- gate_xcoords[2]
+      }
+    }
     # XLIM MANUALLY SUPPLIED
   } else {
     if (getOption("cyto_plot_method") == "flowFrame") {
@@ -256,6 +278,20 @@ cyto_plot_empty.flowFrame <- function(x,
         limits = limits,
         plot = TRUE
       )[, 1]
+      # GATE coords
+      if(!.all_na(gate)){
+        # MIN & MAX GATE COORDS
+        gate_ycoords <- gate_coords[, channels[1]]
+        gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
+        # GATE COORDS BELOW YMIN
+        if(is.finite(gate_yccords[1]) & gate_ycoords[1] < ylim[1]){
+          ylim[1] <- gate_ycoords[1]
+        }
+        # GATE COORDS ABOVE YMAX
+        if(is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]){
+          ylim[2] <- gate_ycoords[2]
+        }
+      }
     }
     # YLIM MANUALLY SUPPLIED
   } else {
@@ -586,6 +622,7 @@ cyto_plot_empty.flowFrame <- function(x,
 cyto_plot_empty.list <- function(x,
                                  channels,
                                  axes_trans = NA,
+                                 gate = NA,
                                  xlim = NA,
                                  ylim = NA,
                                  limits = "machine",

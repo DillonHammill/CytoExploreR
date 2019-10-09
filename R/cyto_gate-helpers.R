@@ -1235,16 +1235,15 @@ cyto_gate_convert.rectangleGate <- function(x,
     }else if(length(chans) == 2 & any(chans %in% channels)){
       # FITERID
       ID <- x@filterId
+      # CHANNEL INDEX
+      ind <- which(chans %in% channels)
       # COORDS - MISSING CHANNEL
-      coords <- matrix(c(-Inf, Inf),
-                       ncol = 1,
-                       nrow = 2)
-      colnames(coords) <- channels[!channels %in% chans]
-      rg <- rectangleGate(.gate = coords)
-      # COMBINE CO-ORDINATES - RETAIN FILTERID
-      x <- x[channels[chans %in% channels]] * rg
-      x@filterId <- ID
-      # RETURN CONVERTED GATE
+      coords <- matrix(c(x@min[channels[ind]], x@max[channels[ind]], -Inf, Inf),
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE)
+      colnames(coords) <- c(channels[ind], channels[-ind])
+      x <- rectangleGate(.gate = coords)
       return(x)
     # 2D GATE IN 2D PLOT - NO CHANNELS MATCH
     }else if(length(chans) == 2 & ! any(chans %in% channels)){
@@ -1253,16 +1252,15 @@ cyto_gate_convert.rectangleGate <- function(x,
     }else if(length(chans) == 1 & all(chans %in% channels)){
       # FITERID
       ID <- x@filterId
+      # CHANNEL INDEX
+      ind <- which(chans %in% channels)
       # COORDS - MISSING CHANNEL
-      coords <- matrix(c(-Inf, Inf),
-                       ncol = 1,
-                       nrow = 2)
-      colnames(coords) <- channels[!channels %in% chans]
-      rg <- rectangleGate(.gate = coords)
-      # COMBINE CO-ORDINATES - RETAIN FILTERID
-      x <- x * rg
-      x@filterId <- ID
-      # RETURN CONVERTED GATE
+      coords <- matrix(c(x@min, x@max, -Inf, Inf),
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE)
+      colnames(coords) <- c(channels[ind], channels[-ind])
+      x <- rectangleGate(.gate = coords)
       return(x)
     # 1D GATE IN 2D PLOT - INCORRECT CHANNEL  
     }else if(length(chans) == 1 & !all(chans %in% channels)){
@@ -1368,12 +1366,13 @@ cyto_gate_convert.ellipsoidGate <- function(x,
       # COORDS IN CHANNEL
       coords <- x@boundaries[, channels[channels %in% chans]]
       coords <- c(min(coords), max(coords))
+      print(coords)
       # RECTANGLEGATE
       coords <- matrix(coords,
                        ncol = 1,
                        nrow = 2)
       colnames(coords) <- channels[channels %in% chans]
-      x <- rectangleGate(.gate = x, filterId = ID)
+      x <- rectangleGate(.gate = coords, filterId = ID)
       # RETURN 1D RECTANGLEGATE
       return(x)
     # 2D GATE IN 1D PLOT - NO CHANNEL MATCH
@@ -1403,7 +1402,7 @@ cyto_gate_convert.ellipsoidGate <- function(x,
                        byrow = FALSE)
       colnames(coords) <- c(channels[channels %in% chans],
                             channels[!channels %in% chans])
-      x <- rectangleGate(.gate = x, filterId = ID)
+      x <- rectangleGate(.gate = coords, filterId = ID)
       # RETURN 2D RECTANGLEGATE
       return(x)
     # 2D GATE IN 2D PLOT - NO CHANNEL MATCH 

@@ -75,6 +75,10 @@
 
     # AXES LIMITS --------------------------------------------------------------
 
+    # GATE COORDS
+    if(!.all_na(gate)){
+      gate_coords <- .cyto_gate_coords(gate)
+    }
     # XLIM
     if (.all_na(xlim)) {
       xlim <- .cyto_range(x,
@@ -82,6 +86,20 @@
         limits = limits,
         plot = TRUE
       )[, 1]
+    # GATE coords
+    if(!.all_na(gate)){
+      # MIN & MAX GATE COORDS
+      gate_xcoords <- gate_coords[, channels[1]]
+      gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
+      # GATE COORDS BELOW XMIN
+      if(is.finite(gate_xccords[1]) & gate_xcoords[1] < xlim[1]){
+        xlim[1] <- gate_xcoords[1]
+      }
+      # GATE COORDS ABOVE XMAX
+      if(is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]){
+        xlim[2] <- gate_xcoords[2]
+      }
+    }      
       # XLIM SUPPLIED MANUALLY
     } else {
       if (getOption("cyto_plot_method") == "flowFrame") {

@@ -20,12 +20,12 @@
 #'   constructed, either a 1-D density distribution for a single channel or a
 #'   2-D scatterplot with blue-red colour scale for two channels.
 #' @param axes_trans object of class
-#'   \code{\link[flowWorkspace:transformerList]{transformerList}} which
-#'   was used to transform the channels of the supplied flowFrame.
-#'   \code{cyto_plot} does not support in-line transformations and as such the
-#'   transformations should be applied to the data prior to plotting. The
-#'   transformerList is used internally to ensure that the axes on the
-#'   constructed plots are appropriately labelled.
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+#'   to transform the channels of the supplied flowFrame. \code{cyto_plot} does
+#'   not support in-line transformations and as such the transformations should
+#'   be applied to the data prior to plotting. The transformerList is used
+#'   internally to ensure that the axes on the constructed plots are
+#'   appropriately labelled.
 #' @param group_by a vector of pData variables to sort and merge samples into
 #'   groups prior to plotting, set to NULL by default to prevent merging. To
 #'   merge all samples set this argument to \code{TRUE} or \code{"all"}.

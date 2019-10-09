@@ -169,7 +169,7 @@
       gate_xmin <- x@min[channels[1]]
       gate_xmax <- x@max[channels[1]]
       # REPLACE INFINITE COORDS
-      if(is.infinte(gate_xmin)){
+      if(is.infinite(gate_xmin)){
         gate_xmin <- xmin
       }
       if(is.infinite(gate_xmax)){
@@ -199,10 +199,16 @@
   if (.all_na(text_y)) {
     # 2D RECTANGLEGATE
     if(is(x, "rectangleGate")){
-      gate_ymin <- x@min[channels[2]]
-      gate_ymax <- x@max[channels[2]]
+      # 1D PLOT 
+      if(length(channels) == 1){
+        gate_ymin <- ymin
+        gate_ymax <- ymax
+      }else{
+        gate_ymin <- x@min[channels[2]]
+        gate_ymax <- x@max[channels[2]]
+      }
       # REPLACE INFINITE COORDS
-      if(is.infinte(gate_ymin)){
+      if(is.infinite(gate_ymin)){
         gate_ymin <- ymin
       }
       if(is.infinite(gate_ymax)){
@@ -282,7 +288,7 @@
       gate_xmin <- x@min[channels[1]]
       gate_xmax <- x@max[channels[1]]
       # REPLACE INFINITE COORDS
-      if(is.infinte(gate_xmin)){
+      if(is.infinite(gate_xmin)){
         gate_xmin <- xmin
       }
       if(is.infinite(gate_xmax)){
@@ -299,10 +305,16 @@
   if(.all_na(text_y)){
     # 2D RECTANGLEGATE
     if(is(x, "rectangleGate")){
-      gate_ymin <- x@min[channels[2]]
-      gate_ymax <- x@max[channels[2]]
+      # 1D PLOT
+      if(length(channels) == 1){
+        gate_ymin <- ymin
+        gate_ymax <- ymax
+      }else{
+        gate_ymin <- x@min[channels[2]]
+        gate_ymax <- x@max[channels[2]]
+      }
       # REPLACE INFINITE COORDS
-      if(is.infinte(gate_ymin)){
+      if(is.infinite(gate_ymin)){
         gate_ymin <- ymin
       }
       if(is.infinite(gate_ymax)){
@@ -548,6 +560,7 @@
 #' Convert between quadGate to rectangleGates 
 #' @return list of rectangleGates or a quadGate.
 #' @importFrom flowCore rectangleGate quadGate
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
 .cyto_gate_quad_convert <- function(gate,
                                     channels) {
@@ -576,11 +589,11 @@
     # INPUT CO-ORDINATE
     xcoord <- gate@boundary[1]
     ycoord <- gate@boundary[2]
-  
+    
     # ALIAS
-    if(length(unlist(strsplit(gate@filterId, "|"))) == 4){
-      alias <- unlist(strsplit(gate@filterId, "|"))
-    }else{
+    alias <- unlist(strsplit(gate@filterId, "|"))
+    alias <- alias[alias != "|"]
+    if(length(alias) != 4){
       alias <- c("Q1", "Q2", "Q3","Q4")
     }
   
@@ -606,5 +619,55 @@
     
     return(list(Q1, Q2, Q3, Q4))
   }
+  
+}
+
+# .CYTO_GATE_COORDS ------------------------------------------------------------
+
+#' Extract gate co-ordinates from a list of gate objects
+#' 
+#' @param x list of gate objects
+#' @param channels vector of channel names used to construct the plot.
+#' 
+#' @importFrom flowCore parameters
+#' 2importFrom methods as
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.cyto_gate_coords <- function(x, channels){
+  
+  # LIST OF GATES
+  coords <- lapply(channels, function(z){
+    LAPPLY(x, function(y){
+      # RECTANGLEGATE
+      if(is(y, "rectangleGate")){
+        if(length(y@min) == 2){
+          coords <- as.numeric(c(y@min[z], y@max[z]))
+        }else{
+          coords <- as.numeric(c(y@min, y@max))
+        }
+      }else if(is(y, "polygonGate")){
+        coords <- as.numeric(y@boundaries[, z])
+      }else if(is(y, "ellipsoidGate")){
+        y <- as(y, "polygonGate")
+        coords <- as.numeric(y@boundaries[, z])
+      }else if(is(y, "quadGate")){
+        coords <- as.numeric(y@boundary)
+      }
+    })
+  })
+
+  # COORD MATRIX
+  if(length(channels) == 1){
+    coords <- matrix(coords[[1]], ncol = 1)
+    colnames(coords) <- channels
+  }else if(length(channels) == 2){
+    coords <- as.matrix(do.call("cbind", coords))
+    colnames(coords) <- channels
+  }
+  
+  # GATE COORDS
+  return(coords)
   
 }
