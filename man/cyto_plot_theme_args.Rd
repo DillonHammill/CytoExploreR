@@ -14,7 +14,6 @@ Get supported cyto_plot_theme arguments
 }
 \examples{
 cyto_plot_theme_args()
-
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

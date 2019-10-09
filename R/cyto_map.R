@@ -1,6 +1,6 @@
 # CYTO_MAP ---------------------------------------------------------------------
 
-#' Create reduced dimension maps of cytometry data
+#' Create dimension-reduced maps of cytometry data
 #'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
 #' @param method direction reduction method to use to generate the map,

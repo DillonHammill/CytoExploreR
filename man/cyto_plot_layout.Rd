@@ -20,7 +20,7 @@ different types of cyto_plot plots. Make a call to \code{cyto_plot_layout()}
 prior to making multiple calls to \code{cyto_plot()}.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load samples into GatingSet
 fs <- Activation

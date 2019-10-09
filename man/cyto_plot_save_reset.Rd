@@ -16,7 +16,6 @@ cyto_plot_save()
 
 # Revert unwanted cyto_plot_save call
 cyto_plot_save_reset()
-
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

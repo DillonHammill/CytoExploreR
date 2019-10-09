@@ -21,18 +21,21 @@ them manually each time. For a complete list of supported arguments see
 cyto_plot_theme(border_fill = "black")
 
 # Black ground with custom colour scale for points and purple gates
-cyto_plot_theme(border_fill = "black",
-                point_col_scale = c("cyan",
-                                    "green",
-                                    "yellow",
-                                    "orange",
-                                    "red",
-                                    "darkred"),
-                gate_line_col = "magenta")
+cyto_plot_theme(
+  border_fill = "black",
+  point_col_scale = c(
+    "cyan",
+    "green",
+    "yellow",
+    "orange",
+    "red",
+    "darkred"
+  ),
+  gate_line_col = "magenta"
+)
 
 # Reset to default setting
 cyto_plot_theme_reset()
-
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

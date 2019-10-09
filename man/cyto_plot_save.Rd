@@ -33,7 +33,7 @@ separate numbered files, set to \code{TRUE} by default.}
 Save High Resolution cyto_plot Images
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load samples into GatingSet
 fs <- Activation

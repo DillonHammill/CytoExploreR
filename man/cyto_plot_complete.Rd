@@ -10,7 +10,7 @@ cyto_plot_complete()
 Indicate Completion of Custom cyto_plot Layout for Saving
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load samples into GatingSet
 fs <- Activation

@@ -147,18 +147,19 @@ plot with border, axes, axes_text and titles. Data is subsequently added to
 this base layer with \code{cyto_plot_point} or \code{cyto_plot_density}.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Construct an empty 2D plot with black background
 cyto_plot_empty(Activation[1],
-                channels = c("FSC-A","SSC-A"),
-                border_fill = "black")
+  channels = c("FSC-A", "SSC-A"),
+  border_fill = "black"
+)
 
 # Construct an empty 1D plot
 cyto_plot_empty(Activation[1],
-                channels = c("FSC-A"),
-                overlay = Activation[2:4])
-
+  channels = c("FSC-A"),
+  overlay = Activation[2:4]
+)
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

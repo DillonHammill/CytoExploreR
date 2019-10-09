@@ -14,6 +14,7 @@
 #' @return object of class
 #'   \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
 #'
+#' @importFrom flowCore identifier
 #' @importFrom ncdfFlow read.ncdfFlowSet
 #' @importFrom gtools mixedsort
 #'
@@ -445,7 +446,7 @@ cyto_transform.default <- function(x,
   if(plot ==  TRUE){
     
     # Pull out flowFrame/flowSet to plot
-    cyto_data <- cyto_extract(x)
+    cyto_data <- cyto_extract(x, parent)
     
     # Convert to flowFrame for plotting
     cyto_data <- cyto_convert(cyto_data, "flowFrame")

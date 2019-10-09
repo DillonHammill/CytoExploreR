@@ -4,7 +4,7 @@
 \alias{cyto_map}
 \alias{cyto_map.flowFrame}
 \alias{cyto_map.flowSet}
-\title{Create reduced dimension maps of cytometry data}
+\title{Create dimension-reduced maps of cytometry data}
 \usage{
 cyto_map(x, ...)
 
@@ -38,7 +38,7 @@ using \code{cyto_plot}.}
 between runs.}
 }
 \description{
-Create reduced dimension maps of cytometry data
+Create dimension-reduced maps of cytometry data
 }
 \seealso{
 \code{\link[stats:prcomp]{PCA}}
