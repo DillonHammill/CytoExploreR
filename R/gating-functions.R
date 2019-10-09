@@ -69,7 +69,7 @@
                                     label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -82,7 +82,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -94,7 +94,7 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-  
+
   # GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -139,7 +139,8 @@
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-                                       channels = channels)
+        channels = channels
+      )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
@@ -147,8 +148,8 @@
       cyto_plot_labeller(
         label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_text_x = gate_center[,"x"],
-        label_text_y = gate_center[,"y"]
+        label_text_x = gate_center[, "x"],
+        label_text_y = gate_center[, "y"]
       )
     }
 
@@ -232,7 +233,7 @@
                                       label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -245,7 +246,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -257,7 +258,7 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-  
+
   # GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -285,16 +286,18 @@
 
     # CONSTRUCT GATE
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
-    
+
     # PLOT GATE
     cyto_plot_gate(gate,
-                   channels = channels)
+      channels = channels
+    )
 
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-                                       channels = channels)
+        channels = channels
+      )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
@@ -302,8 +305,8 @@
       cyto_plot_labeller(
         label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_text_x = gate_center[,"x"],
-        label_text_y = gate_center[,"y"]
+        label_text_x = gate_center[, "x"],
+        label_text_y = gate_center[, "y"]
       )
     }
 
@@ -401,7 +404,7 @@
                                      label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -414,7 +417,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -481,16 +484,6 @@
       }
       gate <- rectangleGate(.gate = coords, filterId = alias)
 
-      if (label == TRUE) {
-        cyto_plot_label(
-          x = fr,
-          gate = gate,
-          channels = channels,
-          label_text = alias,
-          label_text_size = 1,
-          label_stat = "percent"
-        )
-      }
     } else if (axis == "y") {
       if (length(channels) == 1) {
         stop("Cannot gate y axis if a single channel is supplied.")
@@ -501,26 +494,26 @@
       rownames(coords) <- c("min", "max")
 
       gate <- rectangleGate(.gate = coords, filterId = alias)
-      
     }
-    
-      # LABEL GATED POPULATION
-      if (label == TRUE) {
-        # GATE CENTER - LABEL POSITION
-        gate_center <- .cyto_gate_center(gate,
-                                         channels = channels)
-        # GATE STAT
-        gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
-        gate_stat <- paste(.round(gate_stat), "%")
-        # PLOT LABEL
-        cyto_plot_labeller(
-          label_text = paste(alias, gate_stat, sep = "\n"),
-          label_text_size = 1,
-          label_text_x = gate_center[,"x"],
-          label_text_y = gate_center[,"y"]
-        )
-      }
-    
+
+    # LABEL GATED POPULATION
+    if (label == TRUE) {
+      # GATE CENTER - LABEL POSITION
+      gate_center <- .cyto_gate_center(gate,
+        channels = channels
+      )
+      # GATE STAT
+      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- paste(.round(gate_stat), "%")
+      # PLOT LABEL
+      cyto_plot_labeller(
+        label_text = paste(alias, gate_stat, sep = "\n"),
+        label_text_size = 1,
+        label_text_x = gate_center[, "x"],
+        label_text_y = gate_center[, "y"]
+      )
+    }
+
     return(gate)
   })
 
@@ -609,7 +602,7 @@
                                       label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -622,7 +615,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -634,7 +627,7 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-  
+
   # INSTRUCTIONS
   message(
     paste(
@@ -687,7 +680,8 @@
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
-                                     channels = channels)
+      channels = channels
+    )
     # GATE STAT
     gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
     gate_stat <- paste(.round(gate_stat), "%")
@@ -695,8 +689,8 @@
     cyto_plot_labeller(
       label_text = paste(alias, gate_stat, sep = "\n"),
       label_text_size = 1,
-      label_text_x = gate_center[,"x"],
-      label_text_y = gate_center[,"y"]
+      label_text_x = gate_center[, "x"],
+      label_text_y = gate_center[, "y"]
     )
   }
 
@@ -784,7 +778,7 @@
                                      label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -797,7 +791,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -809,7 +803,7 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-  
+
   # INSTRUCTIONS
   message(
     paste(
@@ -861,7 +855,8 @@
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
-                                     channels = channels)
+      channels = channels
+    )
     # GATE STAT
     gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
     gate_stat <- paste(.round(gate_stat), "%")
@@ -869,8 +864,8 @@
     cyto_plot_labeller(
       label_text = paste(alias, gate_stat, sep = "\n"),
       label_text_size = 1,
-      label_text_x = gate_center[,"x"],
-      label_text_y = gate_center[,"y"]
+      label_text_x = gate_center[, "x"],
+      label_text_y = gate_center[, "y"]
     )
   }
 
@@ -949,7 +944,7 @@
                                     label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -962,7 +957,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -974,7 +969,7 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-  
+
   # INSTRUCTIONS
   gates <- lapply(alias, function(alias) {
     message(
@@ -1060,16 +1055,18 @@
       mean = center,
       filterId = alias
     )
-    
+
     # PLOT GATE
     cyto_plot_gate(gate,
-                   channels = channels)
+      channels = channels
+    )
 
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-                                       channels = channels)
+        channels = channels
+      )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
@@ -1077,8 +1074,8 @@
       cyto_plot_labeller(
         label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_text_x = gate_center[,"x"],
-        label_text_y = gate_center[,"y"]
+        label_text_x = gate_center[, "x"],
+        label_text_y = gate_center[, "y"]
       )
     }
 
@@ -1159,7 +1156,7 @@
                                      label = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -1168,14 +1165,16 @@
 
   # ALIAS
   if (is.null(alias)) {
-    alias <- c(paste0(channels[1],"+",channels[2],"+"),
-               paste0(channels[1],"-",channels[2],"+"),
-               paste0(channels[1],"+",channels[2],"-"),
-               paste0(channels[1],"-",channels[2],"-"))
+    alias <- c(
+      paste0(channels[1], "+", channels[2], "+"),
+      paste0(channels[1], "-", channels[2], "+"),
+      paste0(channels[1], "+", channels[2], "-"),
+      paste0(channels[1], "-", channels[2], "-")
+    )
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -1209,33 +1208,36 @@
   # CO-ORDINATES MATRIX
   pts <- matrix(unlist(pts), ncol = 2)
   colnames(pts) <- channels
-  
+
   # QUADGATE CONSTRUCTION
   gate <- quadGate(.gate = pts, filterId = paste(alias, collapse = "|"))
-  
+
   # PLOT GATE
   cyto_plot_gate(gate, channels = channels)
-  
+
   # LABEL GATED POPULATION
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
-                                     channels = channels)
+      channels = channels
+    )
     # GATE STAT
     gate_pops <- .cyto_label_pops(fr, gate)
-    gate_stat <- LAPPLY(gate_pops, function(pop){
+    gate_stat <- LAPPLY(gate_pops, function(pop) {
       .cyto_count(pop) / .cyto_count(fr) * 100
     })
-    gate_stat <- LAPPLY(gate_stat, function(z){paste(.round(z), "%")})
+    gate_stat <- LAPPLY(gate_stat, function(z) {
+      paste(.round(z), "%")
+    })
     # PLOT LABEL
     cyto_plot_labeller(
       label_text = paste(alias, gate_stat, sep = "\n"),
       label_text_size = 1,
-      label_text_x = gate_center[,"x"],
-      label_text_y = gate_center[,"y"]
+      label_text_x = gate_center[, "x"],
+      label_text_y = gate_center[, "y"]
     )
   }
-  
+
   # RETURN FILTERS OBJECT
   gate <- list(gate)
   return(gate)
@@ -1314,9 +1316,9 @@
 
   # WARNING
   message("Web gates are an experimental feature - use at your own risk!")
-  
+
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(fr,
     channels = channels,
@@ -1329,7 +1331,7 @@
   }
 
   # CONSTRUCT PLOT -------------------------------------------------------------
-  
+
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
@@ -1341,7 +1343,7 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-  
+
   # Select center of the web gate
   message("Select the center of the web gate.")
 
@@ -1354,7 +1356,7 @@
     pch = 16,
     col = "red"
   )
-  
+
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
 
@@ -1363,7 +1365,7 @@
   xmax <- par("usr")[2]
   ymin <- par("usr")[3]
   ymax <- par("usr")[4]
-  
+
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
     options("show.error.messages" = FALSE)
@@ -1873,14 +1875,18 @@
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
     rownames(coords) <- NULL
-    
+
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
+
+    # PLOT GATE
+    cyto_plot_gate(gate, channels = channels)
 
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-                                       channels = channels)
+        channels = channels
+      )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
@@ -1888,17 +1894,14 @@
       cyto_plot_labeller(
         label_text = paste(alias, gate_stat, sep = "\n"),
         label_text_size = 1,
-        label_text_x = gate_center[,"x"],
-        label_text_y = gate_center[,"y"]
+        label_text_x = gate_center[, "x"],
+        label_text_y = gate_center[, "y"]
       )
     }
 
     return(gate)
   })
-  
-  # PLOT GATES
-  cyto_plot_gate(gates, channels = channels)
-  
+
   # RETURN CONSTRUCTED GATES
   gates <- filters(gates)
   return(gates)
