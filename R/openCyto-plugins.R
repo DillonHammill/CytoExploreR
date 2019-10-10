@@ -49,7 +49,7 @@
 #' }
 #' 
 #' @noRd
-.gate_manual <- function(fr,
+.cyto_gate_manual <- function(fr,
                          pp_res,
                          channels,
                          alias, ...) {

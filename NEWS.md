@@ -14,6 +14,9 @@
 * `gate_rename` provides an easy way to update gate names in the GatingHierarchy/GatingSet and associated gatingTemplate.
 * `cyto_stats_compute` has been completely revamped to improve speed and to return tidyverse-friendly tibbles in either wide or long formats.
 
+* cyto_plot 1D - center legend, return smoothing functionality, no longer require modal normalisation for overlays, now adds empty space for samples with missing data (NaN%), fix behavior of titles when overlays are present.
+* interactively position labels :)
+
 # CytoRSuite 0.9.9
 
 * `cyto_plot_label` now accepts stat `freq` instead of `percent` for consistency with `cyto_stats_compute`.
