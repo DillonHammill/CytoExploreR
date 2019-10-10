@@ -1,4 +1,4 @@
-# GATINGTEMPLATE SELECT ---------------------------------------------------------
+## GATINGTEMPLATE SELECT -------------------------------------------------------
 
 #' Select a gatingTemplate for downstream analyses
 #'
@@ -41,7 +41,7 @@ cyto_gatingTemplate_select <- function(x) {
   options("CytoExploreR_gatingTemplate" = x)
 }
 
-# GATINGTEMPLATE ACTIVE --------------------------------------------------------
+## GATINGTEMPLATE ACTIVE -------------------------------------------------------
 
 #' Active gatingTemplate
 #'
@@ -57,7 +57,7 @@ cyto_gatingTemplate_active <- function() {
   getOption("CytoExploreR_gatingTemplate")
 }
 
-# GATINGTEMPLATE CREATE --------------------------------------------------------
+## GATINGTEMPLATE CREATE -------------------------------------------------------
 
 #' Create an empty gatingTemplate csv file
 #'
@@ -99,7 +99,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
   }
 }
 
-# GATINGTEMPLATE EDIT ----------------------------------------------------------
+## GATINGTEMPLATE EDIT ---------------------------------------------------------
 
 #' Interactively Edit a gatingTemplate
 #'
@@ -189,7 +189,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
   invisible(return(gt))
 }
 
-# GATINGTEMPLATE APPLY ---------------------------------------------------------
+## GATINGTEMPLATE APPLY --------------------------------------------------------
 
 #' Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet
 #'
@@ -313,7 +313,7 @@ cyto_gatingTemplate_apply <- function(x,
   suppressWarnings(gt_gating(gt, x, ...))
 }
 
-# GATINGTEMPLATE UPDATE -------------------------------------------------------
+## GATINGTEMPLATE UPDATE ------------------------------------------------------
 
 #' Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR
 #'
@@ -345,7 +345,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
   write.csv(gt, save_as, row.names = FALSE)
 }
 
-# GATINGTEMPLATE CHECK ---------------------------------------------------------
+## GATINGTEMPLATE CHECK --------------------------------------------------------
 
 #' Check gatingTemplate for Existing Entry
 #'

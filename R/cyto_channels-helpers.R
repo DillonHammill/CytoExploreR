@@ -1,4 +1,4 @@
-# CYTO_CHANNELS ----------------------------------------------------------------
+## CYTO_CHANNELS ---------------------------------------------------------------
 
 #' Extract channel names
 #'
@@ -61,7 +61,7 @@ cyto_channels <- function(x, exclude = NULL){
   
 }
 
-# CYTO_FLUOR_CHANNELS ----------------------------------------------------------
+## CYTO_FLUOR_CHANNELS ---------------------------------------------------------
 
 #' Extract Fluorescent Channels
 #'
@@ -99,7 +99,7 @@ cyto_fluor_channels <- function(x){
   cyto_channels(x, exclude = c("FSC","SSC","Time","Original"))
 }
 
-# CYTO_CHANNELS_EXTRACT --------------------------------------------------------
+## CYTO_CHANNELS_EXTRACT -------------------------------------------------------
 
 #' Extract channels associated with certain markers
 #'
@@ -184,7 +184,7 @@ cyto_channels_extract <- function(x,
   
 }
 
-# CYTO_MARKERS_EXTRACT ---------------------------------------------------------
+## CYTO_MARKERS_EXTRACT --------------------------------------------------------
 
 #' Extract marker names for certain channels
 #'
@@ -268,7 +268,7 @@ cyto_markers_extract <- function(x,
   return(channels)
 }
 
-# CYTO_CHANNEL_SELECT ----------------------------------------------------------
+## CYTO_CHANNEL_SELECT ---------------------------------------------------------
 
 #' Select Fluorescent Channel for Compensation Controls
 #'

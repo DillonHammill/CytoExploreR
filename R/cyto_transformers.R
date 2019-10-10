@@ -1,4 +1,4 @@
-# CytoExploreR Implementation of Transformations
+## CytoExploreR Implementation of Transformations ------------------------------
 
 # Wrappers for flowCore/flowWorkspace transformation functions which return
 # transformerList objects and use cyto_plot to visualise the transformations.
@@ -6,18 +6,17 @@
 # All methods must have select as an argument to allowing passing of arguments
 # from cyto_transform.
 
-# CYTO_TRANSFORMER_LOG ---------------------------------------------------------
+## CYTO_TRANSFORMER_LOG --------------------------------------------------------
 
 #' Definition(s) of Log Transformation(s)
 #'
 #' CytoExploreR implementation of \code{flowWorkspace}
 #' \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
-#' always returns a
-#' \code{\link[flowWorkspace:transformerList]{transformerList}} object and
-#' displays the result of the transformation(s) using \code{\link{cyto_plot}}.
-#' To combine different types of transformations have a look at
-#' \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}} should
-#' be used to apply the transformations to the data.
+#' always returns a \code{\link[flowWorkspace:transformerList]{transformerList}}
+#' object and displays the result of the transformation(s) using
+#' \code{\link{cyto_plot}}. To combine different types of transformations have a
+#' look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
+#' should be used to apply the transformations to the data.
 #'
 #' @param x an object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
@@ -41,14 +40,14 @@
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_logicle}}
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
-#' 
+#'
 #' @rdname cyto_transformer_log
 #' @export
 cyto_transformer_log <- function(x, ...){
@@ -218,7 +217,7 @@ cyto_transformer_log.flowFrame <- function(x,
   
 }
 
-# CYTO_TRANSFORMER_ARCSINH -------------------------------------------------------
+## CYTO_TRANSFORMER_ARCSINH ------------------------------------------------------
 
 #' Definition(s) of arcsinh transformation(s)
 #'
@@ -425,13 +424,13 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORMER_BIEX ----------------------------------------------------------
+## CYTO_TRANSFORMER_BIEX ---------------------------------------------------------
 
 #' Definition(s) of biexponential transformation(s)
 #'
 #' CytoExploreR implementation of \code{flowWorkspace} flowJo biexponential
 #' transformation which always returns a
-#' \code{\code{\link[flowWorkspace:transformerList]{transformerList}} object and
+#' \code{\link[flowWorkspace:transformerList]{transformerList}} object and
 #' displays in the result of the transformation(s) using
 #' \code{\link{cyto_plot}}. To combine different types of transformations have a
 #' look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
@@ -632,7 +631,7 @@ cyto_transformer_biex.flowFrame <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORMER_LOGICLE -----------------------------------------------------
+## CYTO_TRANSFORMER_LOGICLE ----------------------------------------------------
 
 #' Definition(s) of logicle transformation(s)
 #'
@@ -838,7 +837,7 @@ cyto_transformer_logicle.flowFrame <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORMER_COMBINE -------------------------------------------------------
+## CYTO_TRANSFORMER_COMBINE ------------------------------------------------------
 
 #' Combine cyto_transformer definitions
 #'
@@ -877,7 +876,7 @@ cyto_transformer_combine <- function(...) {
   
 }
 
-# .CYTO_TRANSFORMER_COMPLETE ---------------------------------------------------
+## .CYTO_TRANSFORMER_COMPLETE --------------------------------------------------
 
 #' Get complete transformerList for compensation functions
 #' @noRd

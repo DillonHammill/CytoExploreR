@@ -8,23 +8,55 @@
 \alias{cyto_plot_profile.flowFrame}
 \title{Plot expression profile in all channels}
 \usage{
-\method{cyto_plot_profile}{GatingSet}(x, parent = NULL,
-  channels = NULL, group_by = NA, select = NULL, axes_trans = NA,
-  layout = NULL, header = NULL, header_text_font = 2,
-  header_text_size = 1, ...)
+\method{cyto_plot_profile}{GatingSet}(
+  x,
+  parent = NULL,
+  channels = NULL,
+  group_by = NA,
+  select = NULL,
+  axes_trans = NA,
+  layout = NULL,
+  header = NULL,
+  header_text_font = 2,
+  header_text_size = 1,
+  ...
+)
 
-\method{cyto_plot_profile}{GatingHierarchy}(x, parent = NULL,
-  channels = NULL, axes_trans = NA, header = NULL,
-  header_text_font = 2, header_text_size = 1, ...)
+\method{cyto_plot_profile}{GatingHierarchy}(
+  x,
+  parent = NULL,
+  channels = NULL,
+  axes_trans = NA,
+  header = NULL,
+  header_text_font = 2,
+  header_text_size = 1,
+  ...
+)
 
-\method{cyto_plot_profile}{flowSet}(x, channels = NULL, group_by = NA,
-  select = NA, axes_trans = NULL, layout = NULL, header = NULL,
-  header_text_font = 2, header_text_size = 1, density_stack = 0.5,
-  ...)
+\method{cyto_plot_profile}{flowSet}(
+  x,
+  channels = NULL,
+  group_by = NA,
+  select = NA,
+  axes_trans = NULL,
+  layout = NULL,
+  header = NULL,
+  header_text_font = 2,
+  header_text_size = 1,
+  density_stack = 0.5,
+  ...
+)
 
-\method{cyto_plot_profile}{flowFrame}(x, channels = NULL,
-  axes_trans = NA, layout = NULL, header = NULL,
-  header_text_font = 2, header_text_size = 1, ...)
+\method{cyto_plot_profile}{flowFrame}(
+  x,
+  channels = NULL,
+  axes_trans = NA,
+  layout = NULL,
+  header = NULL,
+  header_text_font = 2,
+  header_text_size = 1,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

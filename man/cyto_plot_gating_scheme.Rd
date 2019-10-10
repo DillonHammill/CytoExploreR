@@ -6,22 +6,55 @@
 \alias{cyto_plot_gating_scheme.GatingSet}
 \title{Plot Cytometry Gating Strategies}
 \usage{
-\method{cyto_plot_gating_scheme}{GatingHierarchy}(x,
-  gatingTemplate = NULL, back_gate = FALSE, gate_track = FALSE,
-  show_all = FALSE, header, title, popup = FALSE, layout, point_col,
-  density_stack = 0.5, density_fill, gate_line_col,
-  border_line_col = NA, border_line_width, legend = TRUE, legend_text,
-  legend_text_size = 1.2, title_text_col = NA, label_text_size = 0.8,
-  ...)
+\method{cyto_plot_gating_scheme}{GatingHierarchy}(
+  x,
+  gatingTemplate = NULL,
+  back_gate = FALSE,
+  gate_track = FALSE,
+  show_all = FALSE,
+  header,
+  title,
+  popup = FALSE,
+  layout,
+  point_col,
+  density_stack = 0.5,
+  density_fill,
+  gate_line_col,
+  border_line_col = NA,
+  border_line_width,
+  legend = TRUE,
+  legend_text,
+  legend_text_size = 1.2,
+  title_text_col = NA,
+  label_text_size = 0.8,
+  ...
+)
 
-\method{cyto_plot_gating_scheme}{GatingSet}(x, gatingTemplate = NULL,
-  group_by, back_gate = FALSE, gate_track = FALSE, show_all = FALSE,
-  display = NULL, header = NA, title = NULL, popup = FALSE,
-  layout = NULL, point_col = NULL, density_stack = 0.5,
-  density_fill = NULL, gate_line_col = NULL, border_line_col = NULL,
-  border_line_width = NULL, legend = TRUE, legend_text = NULL,
-  legend_text_size = 1.2, title_text_col = NULL,
-  label_text_size = 0.8, ...)
+\method{cyto_plot_gating_scheme}{GatingSet}(
+  x,
+  gatingTemplate = NULL,
+  group_by,
+  back_gate = FALSE,
+  gate_track = FALSE,
+  show_all = FALSE,
+  display = NULL,
+  header = NA,
+  title = NULL,
+  popup = FALSE,
+  layout = NULL,
+  point_col = NULL,
+  density_stack = 0.5,
+  density_fill = NULL,
+  gate_line_col = NULL,
+  border_line_col = NULL,
+  border_line_width = NULL,
+  legend = TRUE,
+  legend_text = NULL,
+  legend_text_size = 1.2,
+  title_text_col = NULL,
+  label_text_size = 0.8,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class

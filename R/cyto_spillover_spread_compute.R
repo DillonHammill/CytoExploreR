@@ -1,4 +1,4 @@
-# CYTO_SPILLOVER_SPREAD_COMPUTE ------------------------------------------------
+## CYTO_SPILLOVER_SPREAD_COMPUTE -----------------------------------------------
 
 #' Compute Spillover Spreading Matrix
 #'

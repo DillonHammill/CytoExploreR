@@ -10,17 +10,43 @@
 \usage{
 cyto_transformer_logicle(x, ...)
 
-\method{cyto_transformer_logicle}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{GatingSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_logicle}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{GatingHierarchy}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_logicle}{flowSet}(x, channels = NULL,
-  select = NULL, plot = FALSE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{flowSet}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = FALSE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_logicle}{flowFrame}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{flowFrame}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},

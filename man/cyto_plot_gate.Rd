@@ -13,29 +13,65 @@
 \usage{
 \method{cyto_plot_gate}{default}(gate, ...)
 
-\method{cyto_plot_gate}{rectangleGate}(gate, channels = NULL,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0)
+\method{cyto_plot_gate}{rectangleGate}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
 
-\method{cyto_plot_gate}{polygonGate}(gate, channels = NULL,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0)
+\method{cyto_plot_gate}{polygonGate}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
 
-\method{cyto_plot_gate}{ellipsoidGate}(gate, channels = NULL,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0)
+\method{cyto_plot_gate}{ellipsoidGate}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
 
-\method{cyto_plot_gate}{quadGate}(gate, channels = NULL,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0)
+\method{cyto_plot_gate}{quadGate}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
 
-\method{cyto_plot_gate}{filters}(gate, channels = NULL,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0)
+\method{cyto_plot_gate}{filters}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
 
-\method{cyto_plot_gate}{list}(gate, channels = NULL,
-  gate_line_type = 1, gate_line_width = 2.5, gate_line_col = "red",
-  gate_fill = "white", gate_fill_alpha = 0)
+\method{cyto_plot_gate}{list}(
+  gate,
+  channels = NULL,
+  gate_line_type = 1,
+  gate_line_width = 2.5,
+  gate_line_col = "red",
+  gate_fill = "white",
+  gate_fill_alpha = 0
+)
 }
 \arguments{
 \item{gate}{gate object of class

@@ -1,4 +1,4 @@
-# CYTO_PLOT_POINT --------------------------------------------------------------
+## CYTO_PLOT_POINT -------------------------------------------------------------
 
 #' Add points and contour lines to empty cyto_plot
 #'

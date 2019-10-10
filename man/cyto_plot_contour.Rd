@@ -9,17 +9,35 @@
 \usage{
 cyto_plot_contour(x, ...)
 
-\method{cyto_plot_contour}{flowFrame}(x, channels, contour_lines = 15,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1)
+\method{cyto_plot_contour}{flowFrame}(
+  x,
+  channels,
+  contour_lines = 15,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1
+)
 
-\method{cyto_plot_contour}{flowSet}(x, channels, contour_lines = 15,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1)
+\method{cyto_plot_contour}{flowSet}(
+  x,
+  channels,
+  contour_lines = 15,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1
+)
 
-\method{cyto_plot_contour}{list}(x, channels, contour_lines = 15,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1)
+\method{cyto_plot_contour}{list}(
+  x,
+  channels,
+  contour_lines = 15,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1
+)
 }
 \arguments{
 \item{x}{either an object of class

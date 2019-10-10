@@ -1,4 +1,4 @@
-# CYTO_PLOT_LABEL --------------------------------------------------------------
+## CYTO_PLOT_LABEL -------------------------------------------------------------
 
 #' Add labels to cyto_plot
 #'
@@ -483,8 +483,7 @@ cyto_plot_label.flowFrame <- function(x,
 }
 
 
-# CYTO_PLOT_LABELLER -----------------------------------------------------------
-
+## CYTO_PLOT_LABELLER ----------------------------------------------------------
 
 #' Add labels to existing cyto_plot
 #'

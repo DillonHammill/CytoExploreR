@@ -4,8 +4,7 @@
 \alias{cyto_gate_rename}
 \title{Rename Gates}
 \usage{
-cyto_gate_rename(x, alias = NULL, names = NULL,
-  gatingTemplate = NULL)
+cyto_gate_rename(x, alias = NULL, names = NULL, gatingTemplate = NULL)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}

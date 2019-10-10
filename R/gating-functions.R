@@ -1,4 +1,4 @@
-# INTERNAL GATING FUNCTIONS ----------------------------------------------------
+## INTERNAL GATING FUNCTIONS ---------------------------------------------------
 
 #' Draw Polygon Gate(s) Around Populations.
 #'

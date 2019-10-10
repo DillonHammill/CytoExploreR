@@ -10,17 +10,43 @@
 \usage{
 cyto_transformer_arcsinh(x, ...)
 
-\method{cyto_transformer_arcsinh}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_arcsinh}{GatingSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_arcsinh}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_arcsinh}{GatingHierarchy}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_arcsinh}{flowSet}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_arcsinh}{flowSet}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_arcsinh}{flowFrame}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_arcsinh}{flowFrame}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},

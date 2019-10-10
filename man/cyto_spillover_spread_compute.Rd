@@ -6,13 +6,26 @@
 \alias{cyto_spillover_spread_compute.flowSet}
 \title{Compute Spillover Spreading Matrix}
 \usage{
-\method{cyto_spillover_spread_compute}{GatingSet}(x, parent = NULL,
-  axes_trans = NULL, channel_match = NULL, compensated = FALSE,
-  spillover = NULL, spillover_spread = NULL, ...)
+\method{cyto_spillover_spread_compute}{GatingSet}(
+  x,
+  parent = NULL,
+  axes_trans = NULL,
+  channel_match = NULL,
+  compensated = FALSE,
+  spillover = NULL,
+  spillover_spread = NULL,
+  ...
+)
 
-\method{cyto_spillover_spread_compute}{flowSet}(x, axes_trans = NULL,
-  channel_match = NULL, compensated = FALSE, spillover = NULL,
-  spillover_spread = NULL, ...)
+\method{cyto_spillover_spread_compute}{flowSet}(
+  x,
+  axes_trans = NULL,
+  channel_match = NULL,
+  compensated = FALSE,
+  spillover = NULL,
+  spillover_spread = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or

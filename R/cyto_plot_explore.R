@@ -1,4 +1,4 @@
-# CYTO_PLOT_EXPLORE ------------------------------------------------------------
+## CYTO_PLOT_EXPLORE -----------------------------------------------------------
 
 #' Explore Cytometry Data in Bivariate Plots
 #'

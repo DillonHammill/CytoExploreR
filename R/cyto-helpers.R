@@ -1,4 +1,4 @@
-# CYTO_LOAD --------------------------------------------------------------------
+## CYTO_LOAD -------------------------------------------------------------------
 
 #' Load .fcs files into ncdfFlowSet
 #'
@@ -55,7 +55,7 @@ cyto_load <- function(path = ".", ...) {
   
 }
 
-# CYTO_SETUP -------------------------------------------------------------------
+## CYTO_SETUP ------------------------------------------------------------------
 
 #' Load.fcs files into GatingSet and annotate with experiment details
 #'
@@ -64,7 +64,7 @@ cyto_load <- function(path = ".", ...) {
 #' read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
 #' \code{\link{cyto_load}} which is then added to a
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
-#' to \code{\link{{cyto_markers}} and \code{\link{cyto_annotate}} to update the
+#' to \code{\link{cyto_markers}} and \code{\link{cyto_annotate}} to update the
 #' GatingSet with the details of the experiment. These details can be modified
 #' later with additional calls to \code{\link{cyto_markers}} and/or
 #' \code{\link{cyto_annotate}}. Users are also asked to provide a name for a
@@ -76,7 +76,7 @@ cyto_load <- function(path = ".", ...) {
 #' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
 #'   saving.
 #' @param ... additional arguments passed to
-#'   \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}}}.
+#'   \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}}.
 #'
 #' @return object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -146,7 +146,7 @@ cyto_setup <- function(path = ".",
   return(gs)
 }
 
-# CYTO_DETAILS -----------------------------------------------------------------
+## CYTO_DETAILS ----------------------------------------------------------------
 
 #' Extract experiment details
 #'
@@ -170,7 +170,7 @@ cyto_details <- function(x) {
   # Return identifier for flowFrame
   if(inherits(x, "flowFrame")){
     return(cyto_names(x))
- # Retrun experiment details for other objects  
+ # Return experiment details for other objects  
   }else{
     return(pData(x))
   }
@@ -183,7 +183,7 @@ cyto_details <- function(x) {
 #' @export
 `cyto_details<-` <- `pData<-`
 
-# CYTO_NAMES -------------------------------------------------------------------
+## CYTO_NAMES ------------------------------------------------------------------
 
 #' Extract sample names
 #'
@@ -245,7 +245,7 @@ cyto_names.list <- function(x){
   LAPPLY(x,"cyto_names")
 }
 
-# CYTO_CHECK -------------------------------------------------------------------
+## CYTO_CHECK ------------------------------------------------------------------
 
 #' Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
 #'
@@ -283,7 +283,7 @@ cyto_check <- function(x) {
   return(TRUE)
 }
 
-# CYTO_TRANSFORM ---------------------------------------------------------------
+## CYTO_TRANSFORM --------------------------------------------------------------
 
 #' Apply Transformations to Cytometry Data
 #'
@@ -315,7 +315,7 @@ cyto_check <- function(x) {
 #'   or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
 #'   supplied.
 #'
-#' @retrun object of class \code{flowFrame}, \code{flowSet},
+#' @return object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet} with transformations applied.
 #'
 #' @importFrom flowCore transform
@@ -643,7 +643,7 @@ cyto_transform.transformerList <- function(x,
 }
 
 
-# CYTO_TRANSFORM_EXTRACT -------------------------------------------------------
+## CYTO_TRANSFORM_EXTRACT ------------------------------------------------------
 
 #' Extract Transformations from TransformerList
 #'
@@ -699,7 +699,7 @@ cyto_transform_extract <- function(x,
   
 }
 
-# CYTO_EXTRACT -----------------------------------------------------------------
+## CYTO_EXTRACT ----------------------------------------------------------------
 
 #' Extract a valid flowFrame or flowSet
 #'
@@ -757,7 +757,7 @@ cyto_extract <- function(x, parent = "root", ...) {
   return(x)
 }
 
-# CYTO_CONVERT -----------------------------------------------------------------
+## CYTO_CONVERT ----------------------------------------------------------------
 
 #' Convert between cytometry objects
 #'
@@ -921,7 +921,7 @@ cyto_convert.GatingSet <- function(x,
   return(x)
 }
 
-# CYTO_FILTER ------------------------------------------------------------------
+## CYTO_FILTER -----------------------------------------------------------------
 
 #' Filter samples based on experiment variables
 #'
@@ -984,7 +984,7 @@ cyto_filter <- function(x, ...) {
   return(x[ind])
 }
 
-# CYTO_SELECT ------------------------------------------------------------------
+## CYTO_SELECT -----------------------------------------------------------------
 
 # Similar to cyto_filter but acts in a non-tidyverse way.
 
@@ -1080,7 +1080,7 @@ cyto_select <- function(x, ...) {
   return(x[ind])
 }
 
-# CYTO_GROUP_BY ----------------------------------------------------------------
+## CYTO_GROUP_BY ---------------------------------------------------------------
 
 #' Group a flowSet or GatingSet by experiment variables
 #'
@@ -1159,7 +1159,7 @@ cyto_group_by <- function(x,
   return(x_list)
 }
 
-# CYTO_SAMPLE ------------------------------------------------------------------
+## CYTO_SAMPLE -----------------------------------------------------------------
 
 #' Sample a flowFrame or flowSet
 #'
@@ -1318,7 +1318,7 @@ cyto_sample.list <- function(x,
   return(x)
 }
 
-# CYTO_MARKERS -----------------------------------------------------------------
+## CYTO_MARKERS ----------------------------------------------------------------
 
 #' Assign marker names to flowFrame or flowSet
 #'
@@ -1504,7 +1504,7 @@ cyto_markers <- function(x, file = NULL) {
   
 }
 
-# CYTO_ANNOTATE ----------------------------------------------------------------
+## CYTO_ANNOTATE ---------------------------------------------------------------
 
 #' Interactively edit cyto_details for a flowSet or GatingSet
 #'
@@ -1639,7 +1639,7 @@ cyto_annotate <- function(x, file = NULL) {
   return(x)
 }
 
-# CYTO_COMPENSATE --------------------------------------------------------------
+## CYTO_COMPENSATE -------------------------------------------------------------
 
 #' Apply fluorescence compensation to samples
 #'
@@ -1903,7 +1903,7 @@ cyto_compensate.GatingSet <- function(x,
   flowWorkspace::compensate(x, spill)
 }
 
-# CYTO_NODES ---------------------------------------------------------------
+## CYTO_NODES ------------------------------------------------------------------
 
 #' Extract Names of Gated Populations in GatingHierarchy or GatingSet
 #'
@@ -1928,7 +1928,7 @@ cyto_nodes <- function(x, ...){
   
 }
 
-# CYTO_CHANNEL_MATCH -----------------------------------------------------------
+## CYTO_CHANNEL_MATCH ----------------------------------------------------------
 
 #' Table Editor for Channel Match File Construction
 #'

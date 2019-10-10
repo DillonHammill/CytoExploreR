@@ -4,10 +4,16 @@
 \alias{cyto_plot_labeller}
 \title{Add labels to existing cyto_plot}
 \usage{
-cyto_plot_labeller(label_text = NA, label_text_x = NA,
-  label_text_y = NA, label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6)
+cyto_plot_labeller(
+  label_text = NA,
+  label_text_x = NA,
+  label_text_y = NA,
+  label_text_font = 2,
+  label_text_size = 0.8,
+  label_text_col = "black",
+  label_fill = "white",
+  label_fill_alpha = 0.6
+)
 }
 \arguments{
 \item{label_text}{character string to include in the label.}

@@ -4,10 +4,22 @@
 \alias{cyto_gate_edit}
 \title{Edit Existing Gate(s).}
 \usage{
-cyto_gate_edit(x, parent = NULL, alias = NULL, channels = NULL,
-  type = NULL, gatingTemplate = NULL, overlay = NA,
-  group_by = "all", select = NULL, negate = FALSE, display = 25000,
-  axis = "x", label = TRUE, ...)
+cyto_gate_edit(
+  x,
+  parent = NULL,
+  alias = NULL,
+  channels = NULL,
+  type = NULL,
+  gatingTemplate = NULL,
+  overlay = NA,
+  group_by = "all",
+  select = NULL,
+  negate = FALSE,
+  display = 25000,
+  axis = "x",
+  label = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{GatingSet}.}

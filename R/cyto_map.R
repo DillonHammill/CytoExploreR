@@ -1,4 +1,4 @@
-# CYTO_MAP ---------------------------------------------------------------------
+## CYTO_MAP --------------------------------------------------------------------
 
 # UMAP projections can be applied to new datasets but computation is slow. Keep
 # implementation to flowFrame method for now.

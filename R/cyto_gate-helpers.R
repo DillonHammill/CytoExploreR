@@ -1,4 +1,4 @@
-# CYTO_GATE_REMOVE -------------------------------------------------------------
+## CYTO_GATE_REMOVE ------------------------------------------------------------
 
 #' Remove Gate(s) and Edit gatingTemplate csv File
 #'
@@ -133,7 +133,7 @@ cyto_gate_remove <- function(gs,
   write.csv(gt, gatingTemplate, row.names = FALSE)
 }
 
-# cYTO_GATE_RENAME -------------------------------------------------------------
+## CYTO_GATE_RENAME ------------------------------------------------------------
 
 #' Rename Gates
 #'
@@ -213,7 +213,7 @@ cyto_gate_rename <- function(x,
   
 }
 
-# CYTO_GATE_EXTRACT ------------------------------------------------------------
+## CYTO_GATE_EXTRACT -----------------------------------------------------------
 
 #' Extract Saved Gate(s) from gatingTemplate.
 #'
@@ -321,7 +321,7 @@ cyto_gate_extract <- function(parent,
   return(gates)
 }
 
-# CYTO_GATE_EDIT ---------------------------------------------------------------
+## CYTO_GATE_EDIT --------------------------------------------------------------
 
 #' Edit Existing Gate(s).
 #'
@@ -922,7 +922,7 @@ cyto_gate_edit <- function(x,
   assign(deparse(substitute(x)), gs, envir = globalenv())
 }
 
-# CYTO_GATE_TYPE ---------------------------------------------------------------
+## CYTO_GATE_TYPE --------------------------------------------------------------
 
 #' Get Gate Type from Saved Gate.
 #'
@@ -1147,7 +1147,7 @@ cyto_gate_type <- function(gates) {
   return(types)
 }
 
-# CYTO_GATE_CONVERT ------------------------------------------------------------
+## CYTO_GATE_CONVERT -----------------------------------------------------------
 
 # CYTO_GATE_CONVERT is designed to convert constrcted gate objects to the number
 # of dimensions specified by channels. Primary use is to easily convert between
@@ -1480,7 +1480,7 @@ cyto_gate_convert.list <- function(x,
   
 }
 
-# CYTO_GATE_PREPARE ------------------------------------------------------------
+## CYTO_GATE_PREPARE -----------------------------------------------------------
 
 #' Prepare a list of gate objects
 #'

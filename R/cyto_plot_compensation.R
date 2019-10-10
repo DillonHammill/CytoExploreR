@@ -1,4 +1,4 @@
-# CYTO_PLOT_COMPENSATION -------------------------------------------------------
+## CYTO_PLOT_COMPENSATION ------------------------------------------------------
 
 #' Visualise Compensation of Fluorescent Spillover in All Fluorescent Channels
 #'

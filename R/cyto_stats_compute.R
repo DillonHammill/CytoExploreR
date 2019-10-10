@@ -1,4 +1,4 @@
-# CYTO_STATS_COMPUTE -----------------------------------------------------------
+## CYTO_STATS_COMPUTE ----------------------------------------------------------
 
 #' Compute, export and save statistics
 #'
@@ -58,7 +58,7 @@
 #' trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 #' gs <- transform(gs, trans)
 #'
-#' # Gate using gate_draw
+#' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
 #' gating(gt, gs)
 #'
@@ -497,7 +497,7 @@ cyto_stats_compute.flowFrame <- function(x,
   return(res)
 }
 
-# .CYTO_STAT_CHECK -------------------------------------------------------------
+## .CYTO_STAT_CHECK ------------------------------------------------------------
 
 #' Check Statistic for cyto_stats_compute
 #'
@@ -555,7 +555,7 @@ cyto_stats_compute.flowFrame <- function(x,
   return(stat)
 }
 
-#. CYTO_STAT_NAME --------------------------------------------------------------
+## .CYTO_STAT_NAME -------------------------------------------------------------
 
 #' Get column name for statistic
 #'

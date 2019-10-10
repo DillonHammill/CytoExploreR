@@ -1,4 +1,4 @@
-# CYTO_PLOT_EMPTY --------------------------------------------------------------
+## CYTO_PLOT_EMPTY -------------------------------------------------------------
 
 #' Create an empty cyto_plot
 #'
@@ -701,7 +701,7 @@ cyto_plot_empty.list <- function(x,
   do.call("cyto_plot_empty.flowFrame", args[names(args) %in% ARGS])
 }
 
-# CYTO_PLOT_NEW ----------------------------------------------------------------
+## CYTO_PLOT_NEW ---------------------------------------------------------------
 
 #' Open new graphics device for cyto_plot
 #'
@@ -746,7 +746,7 @@ cyto_plot_new <- function(popup = FALSE, ...) {
   }
 }
 
-# CYTO_PLOT_RESET --------------------------------------------------------------
+## CYTO_PLOT_RESET -------------------------------------------------------------
 
 #' Reset all cyto_plot related settings
 #'
@@ -783,7 +783,7 @@ cyto_plot_reset <- function() {
   options("cyto_plot_label_coords" = NULL)
 }
 
-# CYTO_PLOT_SAVE ---------------------------------------------------------------
+## CYTO_PLOT_SAVE --------------------------------------------------------------
 
 #' Save High Resolution cyto_plot Images
 #'
@@ -913,7 +913,7 @@ cyto_plot_save <- function(file,
   options("cyto_plot_save" = TRUE)
 }
 
-# CYTO_PLOT_SAVE_RESET ---------------------------------------------------------
+## CYTO_PLOT_SAVE_RESET --------------------------------------------------------
 
 #' Revert unwanted cyto_plot_save call
 #'
@@ -937,7 +937,7 @@ cyto_plot_save_reset <- function() {
 }
 
 
-# CYTO_PLOT_LAYOUT -------------------------------------------------------------
+## CYTO_PLOT_LAYOUT ------------------------------------------------------------
 
 #' Set Panel Layout for cyto_plot
 #'
@@ -1004,7 +1004,7 @@ cyto_plot_layout <- function(nrow,
   }
 }
 
-# CYTO_PLOT_COMPLETE -----------------------------------------------------------
+## CYTO_PLOT_COMPLETE ----------------------------------------------------------
 
 #' Indicate Completion of Custom cyto_plot Layout for Saving
 #'
@@ -1066,7 +1066,7 @@ cyto_plot_complete <- function() {
   options("cyto_plot_custom" = FALSE)
 }
 
-# CYTO_PLOT_THEME --------------------------------------------------------------
+## CYTO_PLOT_THEME -------------------------------------------------------------
 
 #' Create custom themes for cyto_plot
 #'
@@ -1129,6 +1129,8 @@ cyto_plot_theme <- function(...) {
   options("cyto_plot_theme" = args)
 }
 
+## CYTO_PLOT_THEME_RESET -------------------------------------------------------
+
 #' Reset cyto_plot_theme to default settings
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -1139,6 +1141,8 @@ cyto_plot_theme_reset <- function() {
   # Set cyto_plot_theme option to NULL
   options("cyto_plot_theme" = NULL)
 }
+
+## .CYTO_PLOT_THEME_ARGS -------------------------------------------------------
 
 #' Get supported cyto_plot_theme arguments
 #'

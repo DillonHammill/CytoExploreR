@@ -1,4 +1,4 @@
-# CYTO_PLOT_PROFILE ------------------------------------------------------------
+## CYTO_PLOT_PROFILE -----------------------------------------------------------
 
 #' Plot expression profile in all channels
 #'

@@ -4,8 +4,15 @@
 \alias{cyto_plot_save}
 \title{Save High Resolution cyto_plot Images}
 \usage{
-cyto_plot_save(file, width = 7, height = 7, units = "in",
-  res = 300, multiple = FALSE, ...)
+cyto_plot_save(
+  file,
+  width = 7,
+  height = 7,
+  units = "in",
+  res = 300,
+  multiple = FALSE,
+  ...
+)
 }
 \arguments{
 \item{file}{name of the file to which the plot should be saved (including the

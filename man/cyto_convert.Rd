@@ -14,11 +14,9 @@ cyto_convert(x, ...)
 
 \method{cyto_convert}{flowSet}(x, return = "flowSet")
 
-\method{cyto_convert}{GatingHierarchy}(x, parent = "root",
-  return = "GatingHierarchy")
+\method{cyto_convert}{GatingHierarchy}(x, parent = "root", return = "GatingHierarchy")
 
-\method{cyto_convert}{GatingSet}(x, parent = "root",
-  return = "GatingSet")
+\method{cyto_convert}{GatingSet}(x, parent = "root", return = "GatingSet")
 }
 \arguments{
 \item{x}{\code{\link[flowCore:flowFrame-class]{flowFrame}},

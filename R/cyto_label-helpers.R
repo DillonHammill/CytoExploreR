@@ -1,9 +1,9 @@
-# CYTO_PLOT_LABEL HELPERS ------------------------------------------------------
+## CYTO_PLOT_LABEL HELPERS -----------------------------------------------------
 
 # A collection of functions to calculate statistics and offset locations for
 # labels.
 
-# .CYTO_LABEL_POPS -------------------------------------------------------------
+## .CYTO_LABEL_POPS ------------------------------------------------------------
 
 #' Get a list of gated populations to label
 #'
@@ -86,7 +86,7 @@
 }
 
 
-# .CYTO_LABEL_STAT -------------------------------------------------------------
+## .CYTO_LABEL_STAT ------------------------------------------------------------
 
 #' Compute and prepare statistics for labels
 #'
@@ -188,7 +188,7 @@
   
 }
 
-# .CYTO_LABEL_TEXT -------------------------------------------------------------
+## .CYTO_LABEL_TEXT ------------------------------------------------------------
 
 #' Prepare text for labels to include statistics
 #'
@@ -226,7 +226,7 @@
   
 }
 
-# .CYTO_LABEL_COORDS -----------------------------------------------------------
+## .CYTO_LABEL_COORDS ----------------------------------------------------------
 
 #' Compute offset label co-ordinates
 #'
@@ -555,7 +555,7 @@
   
 }
 
-# .CYTO_LABEL_DIMS -------------------------------------------------------------
+## .CYTO_LABEL_DIMS ------------------------------------------------------------
 
 #' Compute label dimensions
 #'
@@ -625,7 +625,7 @@
   
 }
 
-# .CYTO_LABEL_OVERLAP ----------------------------------------------------------
+## .CYTO_LABEL_OVERLAP ---------------------------------------------------------
 
 #' Check if any labels are overlapping.
 #'

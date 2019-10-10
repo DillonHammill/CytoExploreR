@@ -1,4 +1,4 @@
-# CYTO_SPILLOVER_EDIT ----------------------------------------------------------
+## CYTO_SPILLOVER_EDIT ---------------------------------------------------------
 
 #' Interactively Edit Spillover Matrices in Real-Time
 #'

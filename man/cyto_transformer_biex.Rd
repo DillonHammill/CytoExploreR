@@ -10,17 +10,42 @@
 \usage{
 cyto_transformer_biex(x, ...)
 
-\method{cyto_transformer_biex}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_biex}{GatingSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_biex}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE)
+\method{cyto_transformer_biex}{GatingHierarchy}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE
+)
 
-\method{cyto_transformer_biex}{flowSet}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_biex}{flowSet}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_biex}{flowFrame}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_biex}{flowFrame}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
@@ -49,7 +74,13 @@ pop-up window.}
 a \code{transformerList} object.
 }
 \description{
-Definition(s) of biexponential transformation(s)
+CytoExploreR implementation of \code{flowWorkspace} flowJo biexponential
+transformation which always returns a
+\code{\link[flowWorkspace:transformerList]{transformerList}} object and
+displays in the result of the transformation(s) using
+\code{\link{cyto_plot}}. To combine different types of transformations have a
+look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
+should be used to apply the transformations to the data.
 }
 \seealso{
 \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}

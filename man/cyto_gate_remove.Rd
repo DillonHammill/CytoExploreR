@@ -4,8 +4,15 @@
 \alias{cyto_gate_remove}
 \title{Remove Gate(s) and Edit gatingTemplate csv File}
 \usage{
-cyto_gate_remove(gs, parent = NULL, alias = NULL, channels = NULL,
-  type = NULL, gatingTemplate = NULL, ...)
+cyto_gate_remove(
+  gs,
+  parent = NULL,
+  alias = NULL,
+  channels = NULL,
+  type = NULL,
+  gatingTemplate = NULL,
+  ...
+)
 }
 \arguments{
 \item{gs}{an object of class \code{GatingSet}.}

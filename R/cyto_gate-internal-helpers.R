@@ -1,8 +1,8 @@
-# CYTO_GATE INTERNAL HELPERS
+## CYTO_GATE INTERNAL HELPERS --------------------------------------------------
 
 # A coolection of internal functions to compute gate centers and counts.
 
-# .CYTO_GATE_CENTER -------------------------------------------------------
+## .CYTO_GATE_CENTER -----------------------------------------------------------
 
 #' Compute gate centers
 #'
@@ -510,7 +510,7 @@
   return(text_xy)
 }
 
-# .CYTO_GATE_COUNT -------------------------------------------------------------
+## .CYTO_GATE_COUNT ------------------------------------------------------------
 
 #' Compute number of gated populations
 #'
@@ -554,7 +554,7 @@
   
 }
 
-# .CYTO_GATE_QUAD_CONVERT ------------------------------------------------------
+## .CYTO_GATE_QUAD_CONVERT -----------------------------------------------------
 
 
 #' Convert between quadGate to rectangleGates 
@@ -622,7 +622,7 @@
   
 }
 
-# .CYTO_GATE_COORDS ------------------------------------------------------------
+## .CYTO_GATE_COORDS -----------------------------------------------------------
 
 #' Extract gate co-ordinates from a list of gate objects
 #' 

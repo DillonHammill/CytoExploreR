@@ -1,3 +1,5 @@
+## CYTO_PLOT_GATING_SCHEME -----------------------------------------------------
+
 #' Plot Cytometry Gating Strategies
 #' 
 #' \code{cyto_plot_gating_scheme} automatically plots the entire gating scheme

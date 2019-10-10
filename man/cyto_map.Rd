@@ -7,9 +7,17 @@
 \usage{
 cyto_map(x, ...)
 
-\method{cyto_map}{flowFrame}(x, channels, sample = 50000,
-  method = "tSNE", save = FALSE, save_as = "cyto_map", plot = TRUE,
-  seed, ...)
+\method{cyto_map}{flowFrame}(
+  x,
+  channels,
+  sample = 50000,
+  method = "tSNE",
+  save = FALSE,
+  save_as = "cyto_map",
+  plot = TRUE,
+  seed,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or \code{flowSet}.}

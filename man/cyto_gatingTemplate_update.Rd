@@ -4,8 +4,10 @@
 \alias{cyto_gatingTemplate_update}
 \title{Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR}
 \usage{
-cyto_gatingTemplate_update(gatingTemplate = NULL,
-  save_as = "Updated-gatingTemplate.csv")
+cyto_gatingTemplate_update(
+  gatingTemplate = NULL,
+  save_as = "Updated-gatingTemplate.csv"
+)
 }
 \arguments{
 \item{gatingTemplate}{name of the gatingTemplate csv file to convert.}

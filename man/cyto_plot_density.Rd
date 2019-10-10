@@ -8,18 +8,35 @@
 \usage{
 cyto_plot_density(x, ...)
 
-\method{cyto_plot_density}{flowFrame}(x, channel, overlay = NA,
-  display = 1, density_modal = TRUE, density_smooth = 1.5,
-  density_stack = 0.5, density_cols = NA, density_fill = NA,
-  density_fill_alpha = 1, density_line_type = 1,
-  density_line_width = 1, density_line_col = "black")
+\method{cyto_plot_density}{flowFrame}(
+  x,
+  channel,
+  overlay = NA,
+  display = 1,
+  density_modal = TRUE,
+  density_smooth = 1.5,
+  density_stack = 0.5,
+  density_cols = NA,
+  density_fill = NA,
+  density_fill_alpha = 1,
+  density_line_type = 1,
+  density_line_width = 1,
+  density_line_col = "black"
+)
 
-\method{cyto_plot_density}{list}(x, density_cols = NA,
-  density_fill = NA, density_fill_alpha = 1, density_line_type = 1,
-  density_line_width = 1, density_line_col = "black", ...)
+\method{cyto_plot_density}{list}(
+  x,
+  density_cols = NA,
+  density_fill = NA,
+  density_fill_alpha = 1,
+  density_line_type = 1,
+  density_line_width = 1,
+  density_line_col = "black",
+  ...
+)
 }
 \arguments{
-\item{x}{object of class flowFrame or a list of density objects.}
+\item{x}{list of density objects for plotting}
 
 \item{channel}{name of the channels to be used to construct the plot.}
 
@@ -50,8 +67,6 @@ lines by default.}
 \item{density_line_width}{line width for border.}
 
 \item{density_line_col}{colour(s) for border line, set to "black" by default.}
-
-\item{x}{list of density objects for plotting}
 }
 \description{
 Add density distributions to empty plots

@@ -6,19 +6,46 @@
 \alias{cyto_plot_label.flowFrame}
 \title{Add labels to cyto_plot}
 \usage{
-\method{cyto_plot_label}{GatingHierarchy}(x, parent, alias = NA,
-  channels = NULL, display = 1, gate = NA, negate = NA, label_text,
-  label_stat, label_text_x = NA, label_text_y = NA,
-  label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6, ...)
+\method{cyto_plot_label}{GatingHierarchy}(
+  x,
+  parent,
+  alias = NA,
+  channels = NULL,
+  display = 1,
+  gate = NA,
+  negate = NA,
+  label_text,
+  label_stat,
+  label_text_x = NA,
+  label_text_y = NA,
+  label_text_font = 2,
+  label_text_size = 0.8,
+  label_text_col = "black",
+  label_fill = "white",
+  label_fill_alpha = 0.6,
+  density_smooth = 0.6,
+  ...
+)
 
-\method{cyto_plot_label}{flowFrame}(x, channels = NULL, trans = NA,
-  display = 1, gate = NA, negate = FALSE, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6, ...)
+\method{cyto_plot_label}{flowFrame}(
+  x,
+  channels = NULL,
+  trans = NA,
+  display = 1,
+  gate = NA,
+  negate = FALSE,
+  label_text = NA,
+  label_stat = NA,
+  label_text_x = NA,
+  label_text_y = NA,
+  label_text_font = 2,
+  label_text_size = 0.8,
+  label_text_col = "black",
+  label_fill = "white",
+  label_fill_alpha = 0.6,
+  density_smooth = 0.6,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}.}

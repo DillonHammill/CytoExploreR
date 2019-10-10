@@ -8,21 +8,53 @@
 \alias{cyto_stats_compute.flowFrame}
 \title{Compute, export and save statistics}
 \usage{
-\method{cyto_stats_compute}{GatingSet}(x, alias = NULL, parent = NULL,
-  channels = NULL, trans = NA, stat = "median", format = "long",
-  save_as = NULL, density_smooth = 0.6, ...)
+\method{cyto_stats_compute}{GatingSet}(
+  x,
+  alias = NULL,
+  parent = NULL,
+  channels = NULL,
+  trans = NA,
+  stat = "median",
+  format = "long",
+  save_as = NULL,
+  density_smooth = 0.6,
+  ...
+)
 
-\method{cyto_stats_compute}{GatingHierarchy}(x, alias = NULL,
-  parent = NULL, channels = NULL, trans = NA, stat = "median",
-  format = "long", save_as = NULL, density_smooth = 0.6, ...)
+\method{cyto_stats_compute}{GatingHierarchy}(
+  x,
+  alias = NULL,
+  parent = NULL,
+  channels = NULL,
+  trans = NA,
+  stat = "median",
+  format = "long",
+  save_as = NULL,
+  density_smooth = 0.6,
+  ...
+)
 
-\method{cyto_stats_compute}{flowSet}(x, channels = NULL, trans = NA,
-  stat = "median", gate = NA, format = "long",
-  density_smooth = 0.6, ...)
+\method{cyto_stats_compute}{flowSet}(
+  x,
+  channels = NULL,
+  trans = NA,
+  stat = "median",
+  gate = NA,
+  format = "long",
+  density_smooth = 0.6,
+  ...
+)
 
-\method{cyto_stats_compute}{flowFrame}(x, channels = NULL, trans = NA,
-  stat = "median", gate = NA, format = "long",
-  density_smooth = 0.6, ...)
+\method{cyto_stats_compute}{flowFrame}(
+  x,
+  channels = NULL,
+  trans = NA,
+  stat = "median",
+  gate = NA,
+  format = "long",
+  density_smooth = 0.6,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -85,7 +117,7 @@ gs <- compensate(gs, fs[[1]]@description$SPILL)
 trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
 gs <- transform(gs, trans)
 
-# Gate using gate_draw
+# Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
 gating(gt, gs)
 

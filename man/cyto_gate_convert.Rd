@@ -29,10 +29,6 @@ cyto_gate_prepare(x, channels = NULL)
 \item{x}{gate object(s) to be converted.}
 
 \item{channels}{indicates the required dimensions of the gate for plotting.}
-
-\item{x}{gate object(s) to be converted.}
-
-\item{channels}{indicates the required dimensions of the gate for plotting.}
 }
 \value{
 modified gate object with appropriate dimensions.

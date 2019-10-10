@@ -1,3 +1,5 @@
+## CYTO_PLOT_GRID --------------------------------------------------------------
+
 #' Grid Layout for cyto_plot
 #'
 #' \code{cyto_plot_grid} is wrapper for cyto_plot which provides a grid layout

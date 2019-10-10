@@ -1,4 +1,4 @@
-# CYTO_PLOT CONSTRUCTORS -------------------------------------------------------
+## CYTO_PLOT CONSTRUCTORS ------------------------------------------------------
 
 # Collection of internal wrappers used within cyto_plot to construct aspects of
 # the plot. This includes wrappers for cyto_plot_empty, cyto_plot_density,
@@ -7,7 +7,7 @@
 # already performed internally within cyto_plot. All of these functions inherit
 # a named list of arguments from cyto_plot.
 
-# .CYTO_PLOT_EMPTY -------------------------------------------------------------
+## .CYTO_PLOT_EMPTY ------------------------------------------------------------
 
 #' Construct empty cyto_plot
 #'
@@ -420,7 +420,7 @@
   }
 }
 
-# .CYTO_PLOT_DENSITY -----------------------------------------------------------
+## .CYTO_PLOT_DENSITY ----------------------------------------------------------
 
 #' Add density distributions to an existing cyto_plot
 #'
@@ -449,7 +449,7 @@
   do.call("cyto_plot_density.list", args)
 }
 
-# .CYTO_PLOT_POINT -------------------------------------------------------------
+## .CYTO_PLOT_POINT ------------------------------------------------------------
 
 #' Add points to an existing cyto_plot
 #'
@@ -481,7 +481,7 @@
   do.call("cyto_plot_point.list", args)
 }
 
-# .CYTO_PLOT_GATE --------------------------------------------------------------
+## .CYTO_PLOT_GATE -------------------------------------------------------------
 
 #' Add gates and labels to an existing cyto_plot
 #'
@@ -616,7 +616,7 @@
   return(label_text_xy)
 }
 
-# .CYTO_PLOT_LABEL -------------------------------------------------------------
+## .CYTO_PLOT_LABEL ------------------------------------------------------------
 
 #' Add labels to an existing cyto_plot
 #'

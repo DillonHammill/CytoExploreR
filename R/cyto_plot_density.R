@@ -1,4 +1,4 @@
-# CYTO_PLOT_DENSITY ------------------------------------------------------------
+## CYTO_PLOT_DENSITY -----------------------------------------------------------
 
 #' Add density distributions to empty plots
 #'

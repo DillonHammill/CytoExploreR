@@ -12,13 +12,26 @@ a folder in current working directory).}
 
 \item{gatingTemplate}{name of a gatingTemplate csv file to be used for gate
 saving.}
+
+\item{...}{additional arguments passed to
+\code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}}.}
 }
 \value{
 object of class
   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \description{
-Load.fcs files into GatingSet and annotate with experiment details
+\code{cyto_setup} takes care of all the data loading and annotation steps to
+prepare your cytometry data for downstream analyses. The .fcs files are first
+read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
+\code{\link{cyto_load}} which is then added to a
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
+to \code{\link{cyto_markers}} and \code{\link{cyto_annotate}} to update the
+GatingSet with the details of the experiment. These details can be modified
+later with additional calls to \code{\link{cyto_markers}} and/or
+\code{\link{cyto_annotate}}. Users are also asked to provide a name for a
+gatingTemplate csv file which will be created if necessary and assigned as
+the active gatingTemplate.
 }
 \examples{
 

@@ -8,32 +8,85 @@
 \alias{cyto_plot_compensation.flowFrame}
 \title{Visualise Compensation of Fluorescent Spillover in All Fluorescent Channels}
 \usage{
-\method{cyto_plot_compensation}{GatingSet}(x, parent = NULL,
-  channel_match = NULL, compensate = FALSE, spillover = NULL,
-  axes_trans = NA, overlay = TRUE, layout, popup = FALSE,
-  title = NA, header, header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", density_stack = 0,
-  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
+\method{cyto_plot_compensation}{GatingSet}(
+  x,
+  parent = NULL,
+  channel_match = NULL,
+  compensate = FALSE,
+  spillover = NULL,
+  axes_trans = NA,
+  overlay = TRUE,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  density_stack = 0,
+  density_fill = c("grey", "blue"),
+  density_fill_alpha = 0.5,
+  ...
+)
 
-\method{cyto_plot_compensation}{GatingHierarchy}(x, parent = NULL,
-  channel_match = NULL, compensate = FALSE, spillover = NULL,
-  axes_trans = NA, layout, popup = FALSE, title = NA, header,
-  header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", density_stack = 0,
-  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
+\method{cyto_plot_compensation}{GatingHierarchy}(
+  x,
+  parent = NULL,
+  channel_match = NULL,
+  compensate = FALSE,
+  spillover = NULL,
+  axes_trans = NA,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  density_stack = 0,
+  density_fill = c("grey", "blue"),
+  density_fill_alpha = 0.5,
+  ...
+)
 
-\method{cyto_plot_compensation}{flowSet}(x, channel_match = NULL,
-  compensate = FALSE, spillover = NULL, axes_trans = NA,
-  overlay = TRUE, layout, popup = FALSE, title = NA, header,
-  header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", density_stack = 0,
-  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
+\method{cyto_plot_compensation}{flowSet}(
+  x,
+  channel_match = NULL,
+  compensate = FALSE,
+  spillover = NULL,
+  axes_trans = NA,
+  overlay = TRUE,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  density_stack = 0,
+  density_fill = c("grey", "blue"),
+  density_fill_alpha = 0.5,
+  ...
+)
 
-\method{cyto_plot_compensation}{flowFrame}(x, channel_match = NULL,
-  compensate = FALSE, spillover = NULL, axes_trans = NA, layout,
-  popup = FALSE, title = NA, header, header_text_font = 2,
-  header_text_size = 1, header_text_col = "black", density_stack = 0,
-  density_fill = c("grey", "blue"), density_fill_alpha = 0.5, ...)
+\method{cyto_plot_compensation}{flowFrame}(
+  x,
+  channel_match = NULL,
+  compensate = FALSE,
+  spillover = NULL,
+  axes_trans = NA,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  density_stack = 0,
+  density_fill = c("grey", "blue"),
+  density_fill_alpha = 0.5,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or

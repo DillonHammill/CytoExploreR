@@ -10,17 +10,43 @@
 \usage{
 cyto_transformer_log(x, ...)
 
-\method{cyto_transformer_log}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{GatingSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_log}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{GatingHierarchy}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_log}{flowSet}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{flowSet}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transformer_log}{flowFrame}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{flowFrame}(
+  x,
+  channels = NULL,
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
@@ -51,12 +77,11 @@ a \code{transformerList} object.
 \description{
 CytoExploreR implementation of \code{flowWorkspace}
 \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
-always returns a
-\code{\link[flowWorkspace:transformerList]{transformerList}} object and
-displays the result of the transformation(s) using \code{\link{cyto_plot}}.
-To combine different types of transformations have a look at
-\code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}} should
-be used to apply the transformations to the data.
+always returns a \code{\link[flowWorkspace:transformerList]{transformerList}}
+object and displays the result of the transformation(s) using
+\code{\link{cyto_plot}}. To combine different types of transformations have a
+look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
+should be used to apply the transformations to the data.
 }
 \seealso{
 \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}

@@ -9,15 +9,29 @@
 \usage{
 cyto_transform(x, trans = NULL, ...)
 
-\method{cyto_transform}{default}(x, trans = NULL,
-  trans_type = "logicle", channels = NULL, parent = "root",
-  select = NULL, inverse = FALSE, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transform}{default}(
+  x,
+  trans = NULL,
+  trans_type = "logicle",
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  inverse = FALSE,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 
-\method{cyto_transform}{transformList}(x, trans = NULL, plot = TRUE,
-  popup = FALSE, ...)
+\method{cyto_transform}{transformList}(x, trans = NULL, plot = TRUE, popup = FALSE, ...)
 
-\method{cyto_transform}{transformerList}(x, trans = NULL,
-  inverse = FALSE, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transform}{transformerList}(
+  x,
+  trans = NULL,
+  inverse = FALSE,
+  plot = TRUE,
+  popup = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -56,6 +70,10 @@ should be plotted using \code{\link{cyto_plot}}.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 popup window, set to FALSE by default.}
+}
+\value{
+object of class \code{flowFrame}, \code{flowSet},
+  \code{GatingHierarchy} or \code{GatingSet} with transformations applied.
 }
 \description{
 Apply Transformations to Cytometry Data
