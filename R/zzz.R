@@ -15,9 +15,6 @@
   # Bypass working directory checks for external files
   options("CytoExploreR_wd_check" = TRUE)
   
-  # Signal when gate_draw has been called - turn off overlay sampling
-  options("cyto_gate_draw" = FALSE)
-  
   # Signals args called to cyto_plot - check if call is made twice
   options("cyto_plot_call" = NULL)
   
@@ -39,15 +36,12 @@
   # Signal when cyto_plot_grid method is being called
   options("cyto_plot_grid" = FALSE)
   
-  # Signal previous call to cyto_plot (same plot?)
-  options("cyto_plot_call" = NULL)
-  
   # Save label co-ordinates as list
   options("cyto_plot_label_coords" = NULL)
   
   # Register gating and preprocessing functions with openCyto
   openCyto::register_plugins(fun = .gate_manual, 
-                             methodName = "gate_manual")
+                             methodName = "cyto_gate_manual")
   openCyto::register_plugins(fun = .cyto_gate_draw, 
                              methodName = "cyto_gate_draw")
   openCyto::register_plugins(fun = .pp_cyto_gate_draw, 
