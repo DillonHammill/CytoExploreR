@@ -246,197 +246,103 @@ cyto_gatingTemplate_apply <- function(x,
   }
 
   # gatingTemplate supplied
-  if(!is.null(gatingTemplate)){
-    
+  if (!is.null(gatingTemplate)) {
+
     # gatingTemplate object
-    if(inherits(gatingTemplate, "gatingTemplate")){
-    
+    if (inherits(gatingTemplate, "gatingTemplate")) {
+
       # Apply gatingTemplates to GatingSets only
-      if(!inherits(x, "GatingSet")){
+      if (!inherits(x, "GatingSet")) {
         stop("gatingTemplates can only be applied to GatingSet objects.")
       }
-      
-    # name of gatingTemplate csv file  
-    }else{
-      
+
+      # name of gatingTemplate csv file
+    } else {
+
       # File extension if missing
       if (.empty(file_ext(gatingTemplate))) {
         gatingTemplate <- paste0(gatingTemplate, ".csv")
       }
-      
+
       # Working directory check
       if (getOption("CytoExploreR_wd_check") == TRUE) {
         if (file_wd_check(gatingTemplate) == FALSE) {
           stop(paste(gatingTemplate, "is not in this working directory."))
         }
       }
-      
+
       # Message to indicate which gatingTemplate is being applied
       message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-      
+
       # Read in gatingTemplate csv file to gatingTemplate object
       gt <- suppressMessages(gatingTemplate(gatingTemplate))
-      
     }
-  # no gatingTemplate supplied
-  }else if(is.null(gatingTemplate)){
-    
+    # no gatingTemplate supplied
+  } else if (is.null(gatingTemplate)) {
+
     # Missing gatingTemplate - check global option
     if (is.null(gatingTemplate)) {
       gatingTemplate <- cyto_gatingTemplate_active()
     }
-    
+
     # gatingTemplate still missing
     if (is.null(gatingTemplate)) {
-      stop("Supply the name of the gatingtemplate csv file to apply.")
+      stop("Supply the name of the gatingTemplate csv file to apply.")
     }
-    
+
     # File extension if missing
     if (.empty(file_ext(gatingTemplate))) {
       gatingTemplate <- paste0(gatingTemplate, ".csv")
     }
-    
+
     # Working directory check
     if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (file_wd_check(gatingTemplate) == FALSE) {
         stop(paste(gatingTemplate, "is not in this working directory."))
       }
     }
-    
+
     # Message to indicate which gatingTemplate is being applied
     message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-    
+
     # Read in gatingTemplate csv file to gatingTemplate object
     gt <- suppressMessages(gatingTemplate(gatingTemplate))
-    
   }
-  
+
   # Apply gatingTemplate to GatingHierarchy/GatingSet
   suppressWarnings(gt_gating(gt, x, ...))
-  
 }
 
-# GATINGTEMPLATE CONVERT -------------------------------------------------------
+# GATINGTEMPLATE UPDATE -------------------------------------------------------
 
-#' Convert Old gatingTemplates to New Format
+#' Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR
 #'
-#' @param gs object of class GatingSet.
 #' @param gatingTemplate name of the gatingTemplate csv file to convert.
+#' @param save_as name for the updated gatingTemplate csv file, set to "Updated
+#'   gatingTemplate.csv" by default.
 #'
 #' @return converted gatingTemplate saved to .csv file.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom data.table fread fwrite
-#' @importFrom openCyto gatingTemplate
-#' @importFrom flowWorkspace getGate getNodes
-#' @importFrom flowCore parameters filters
 #' @importFrom utils read.csv write.csv
-#' @importFrom tools file_ext
-#'
-#' @examples
-#' \dontrun{
-#' library(CytoRSuiteData)
-#'
-#' # Load in samples
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#'
-#' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#'
-#' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
-#' gs <- transform(gs, trans)
-#'
-#' # Convert gatingTemplate CytoRSuite <= 0.9.5 to new format
-#' cyto_gatingTemplate_convert(gs, "gatingTemplate.csv")
-#'
-#' # Updated gatingTemplate will work as expected
-#' gt <- gatingTemplate("gatingTemplate.csv")
-#' gt_gating(gt, gs)
-#' }
 #'
 #' @export
-cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
+cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
+                                       save_as = "Updated-gatingTemplate.csv") {
 
-  # data.table R CMD Check NOTE
-  alias <- NULL
-  gating_method <- NULL
-  gating_args <- NULL
-  collapseDataForGating <- NULL
-  groupBy <- NULL
-  preprocessing_method <- NULL
-  preprocessing_args <- NULL
-
-  # Number of samples
-  smp <- length(gs)
-
-  # Missing gatingTemplate - check global option
-  if (is.null(gatingtemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active()
-  }
-
-  # gatingtemplate sill missing
-  if (is.null(gatingTemplate)) {
-    stop("Supply the name of the gatingTemplate csv file to convert.")
-  }
-
-  # File extension
-  if (.empty(file_ext(gatingTemplate))) {
-    gatingTemplate <- paste0(gatingTemplate, ".csv")
-  }
-
-  # Working directory check
-  if (getOption("CytoExploreR_wd_check") == TRUE) {
-    if (file_wd_check(gatingTemplate) == FALSE) {
-      stop(paste(gatingTemplate, "is not in this working directory."))
-    }
-  }
-
-  # Read in gatingTemplate
-  gt <- data.table::fread(gatingTemplate)
-
-  # Modify template
-  for (i in seq_len(nrow(gt))) {
-
-    # Load gatingTemplate into gatingTemplate
-    gT <- suppressMessages(gatingTemplate(gatingTemplate))
-    pops <- basename(gT@nodes)[-1]
-
-    # Extract population nodes from gT
-    nds <- getNodes(gT, only.names = TRUE)
-
-    als <- names(nds[match(pops[i], nds)])
-
-    # Parent Node
-    parent <- gt[alias == pops[i], "parent"]
-    parent <- as.character(parent)
-
-    prnt <- names(nds[match(parent, nds)])
-    gm <- getGate(gT, prnt, als)
-    gate <- eval(parameters(gm)$gate)
-    gts <- list(filters(list(gate)))
-
-    gtmd <- "gate_draw"
-    ppmd <- "pp_gate_draw"
-    als <- pops[i]
-
-    gt[alias == als, gating_method := gtmd]
-    gt[alias == als, gating_args := .argDeparser(list(gate = gts))]
-    gt[alias == als, collapseDataForGating := TRUE]
-  }
-
-  # Save updated gatingTemplate
-  data.table::fwrite(gt, gatingTemplate)
-
+  # READ IN GATINGTEMPLATE
   gt <- read.csv(gatingTemplate, header = TRUE)
-  gt$collapseDataForGating <- rep(TRUE, nrow(gt))
-  gt$groupBy <- rep(smp, nrow(gt))
-  gt$preprocessing_method <- rep("pp_gate_draw", nrow(gt))
-  gt$preprocessing_args <- rep(NA, nrow(gt))
+  
+  # CONVERT OLD GATING METHOD
+  gt[gt$gating_method == "gate_draw", "gating_method"] <- "cyto_gate_draw" 
+  
+  # CONVERT OLD PREPROCESSING  METHOD
+  gt[gt$preprocessing_method == "gate_draw",
+     "preprocessing_method"] <- "pp_cyto_gate_draw" 
 
-  write.csv(gt, gatingTemplate, row.names = FALSE)
+  # SAVE UPDATED GATINGTEMPLATE
+  write.csv(gt, save_as, row.names = FALSE)
 }
 
 # GATINGTEMPLATE CHECK ---------------------------------------------------------
@@ -455,39 +361,36 @@ cyto_gatingTemplate_convert <- function(gs, gatingTemplate = NULL) {
 #' @importFrom utils read.csv
 #'
 #' @noRd
-.cyto_gatingTemplate_check <- function(parent, 
-                                       alias, 
+.cyto_gatingTemplate_check <- function(parent,
+                                       alias,
                                        gatingTemplate = NULL) {
-  
-  # GATINGTEMPLATE CSV FILE
-  if (inherits(gatingTemplate, "gatingTemplate")) {
-    stop("'gatingTemplate' should be the name of the gatingTemplate csv file.")
-  } else {
-    # BYPASS CHECKS - GATINGTEMPLATE DOES NOT EXIST
-    gt <- tryCatch(suppressWarnings(read.csv(gatingTemplate, header = TRUE)),
-      error = function(e) {
-        NULL
-      }
-    )
-    # MATCHING PARENT & ALIAS
-    if (!is.null(gt)) {
-      if(parent %in% gt$parent){
-        gt <- gt[gt$parent == parent, ]
-        gt_alias <- lapply(gt$alias, function(z){
-          unlist(strsplit(as.character(z), ","))
-        })
-        lapply(gt_alias, function(z){
-          if(any(alias %in% z)){
-            message(paste(alias[alias %in% z], collapse = " & "),
-                    " already exists in ",
-                    gatingTemplate, ".")
-            stop(paste(
-              "Supply another gatingTemplate",
-              "or edit gate(s) using cyto_gate_edit."
-            ))
-          }
-        })
-      }
+
+  # BYPASS CHECKS - GATINGTEMPLATE DOES NOT EXIST
+  gt <- tryCatch(suppressWarnings(read.csv(gatingTemplate, header = TRUE)),
+    error = function(e) {
+      NULL
+    }
+  )
+  # MATCHING PARENT & ALIAS
+  if (!is.null(gt)) {
+    if (parent %in% gt$parent) {
+      gt <- gt[gt$parent == parent, ]
+      gt_alias <- lapply(gt$alias, function(z) {
+        unlist(strsplit(as.character(z), ","))
+      })
+      lapply(gt_alias, function(z) {
+        if (any(alias %in% z)) {
+          message(
+            paste(alias[alias %in% z], collapse = " & "),
+            " already exists in ",
+            gatingTemplate, "."
+          )
+          stop(paste(
+            "Supply another gatingTemplate",
+            "or edit gate(s) using cyto_gate_edit."
+          ))
+        }
+      })
     }
   }
 }

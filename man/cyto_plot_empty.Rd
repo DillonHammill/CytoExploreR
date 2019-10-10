@@ -8,10 +8,10 @@
 cyto_plot_empty(x, ...)
 
 \method{cyto_plot_empty}{flowFrame}(x, channels, axes_trans = NA,
-  overlay = NA, xlim = NA, ylim = NA, limits = "machine", title,
-  xlab, ylab, density_modal = TRUE, density_smooth = 1.5,
-  density_stack = 0.5, density_cols = NA, density_fill = NA,
-  density_fill_alpha = 1, density_line_type = 1,
+  overlay = NA, gate = NA, xlim = NA, ylim = NA,
+  limits = "machine", title, xlab, ylab, density_modal = TRUE,
+  density_smooth = 1.5, density_stack = 0.5, density_cols = NA,
+  density_fill = NA, density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black",
   point_shape = ".", point_size = 2, point_col_scale = NA,
   point_cols = NA, point_col = NA, point_col_alpha = 1,
@@ -41,6 +41,9 @@ will NOT be applied to the flowFrame internally and should be applied to
 the flowFrame prior to plotting.}
 
 \item{overlay}{a list of flowFrames to overlay onto the plot.}
+
+\item{gate}{list of gate objects to be plotted, used internlaly to ensure
+gate co-ordinates are taken into account when computing axes limits.}
 
 \item{xlim}{lower and upper limits of x axis (e.g. c(0,5)).}
 
