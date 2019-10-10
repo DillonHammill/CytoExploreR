@@ -362,8 +362,10 @@ cyto_plot.GatingSet <- function(x,
   # TRANSFORMATIONS
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGSET
-    axes_trans <- gs@transformation[[1]]
-    if (length(axes_trans) == 0) {
+    axes_trans <- gs@transformation
+    if(length(axes_trans) != 0){
+      axes_trans <- axes_trans[[1]]
+    }else{
       axes_trans <- NA
     }
   }
@@ -372,7 +374,7 @@ cyto_plot.GatingSet <- function(x,
 
   # EXTRACT PARENT POPULATIONS
   x <- cyto_extract(gs, parent)
-
+  
   # EXPERIMENT DETAILS
   pd <- cyto_details(gs)
 
@@ -444,23 +446,23 @@ cyto_plot.GatingSet <- function(x,
   # GATE - LIST OF GATE OBJECT LISTS
   if(!.all_na(gate)){
     # GATE OBJECT LIST
-    if(is(x)[1] == "list"){
-      if(all(LAPPLY(x, "is") %in% c("rectangleGate",
+    if(is(gate)[1] == "list"){
+      if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
                                     "polygonGate",
                                     "ellipsoidGate",
                                     "quadGate",
                                     "filters"))){
-        x <- unlist(x)
+        gate <- unlist(gate)
       }
     # FILTERS OBJECT
-    }else if(is(x)[1] == "filters"){
-      x <- unlist(gate)
+    }else if(is(gate)[1] == "filters"){
+      gate <- unlist(gate)
     # GATE OBJECT
-    }else if(is(x)[1] %in% c("rectangleGate",
+    }else if(is(gate)[1] %in% c("rectangleGate",
                              "polygonGate",
                              "ellipsoidGate",
                              "quadGate")){
-      x <- list(x)
+      gate <- list(gate)
     }
   }
   
@@ -771,8 +773,10 @@ cyto_plot.GatingHierarchy <- function(x,
   # TRANSFORMATIONS
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGHIERARCHY
-    axes_trans <- gh@transformation[[1]]
-    if (length(axes_trans) == 0) {
+    axes_trans <- gh@transformation
+    if(length(axes_trans) != 0){
+      axes_trans <- axes_trans[[1]]
+    }else{
       axes_trans <- NA
     }
   }
@@ -882,23 +886,23 @@ cyto_plot.GatingHierarchy <- function(x,
   # GATE - LIST OF GATE OBJECTS
   if(!.all_na(gate)){
     # GATE OBJECT LIST
-    if(is(x)[1] == "list"){
-      if(all(LAPPLY(x, "is") %in% c("rectangleGate",
+    if(is(gate)[1] == "list"){
+      if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
                                     "polygonGate",
                                     "ellipsoidGate",
                                     "quadGate",
                                     "filters"))){
-        x <- unlist(x)
+        gate <- unlist(gate)
       }
       # FILTERS OBJECT
-    }else if(is(x)[1] == "filters"){
-      x <- unlist(gate)
+    }else if(is(gate)[1] == "filters"){
+      gate <- unlist(gate)
       # GATE OBJECT
-    }else if(is(x)[1] %in% c("rectangleGate",
+    }else if(is(gate)[1] %in% c("rectangleGate",
                              "polygonGate",
                              "ellipsoidGate",
                              "quadGate")){
-      x <- list(x)
+      gate <- list(gate)
     }
   }
 
@@ -997,7 +1001,7 @@ cyto_plot.GatingHierarchy <- function(x,
 
   # RESTRICT ARGUMENTS
   args <- args[names(args) %in% ARGS]
-
+  
   # CALL FLOWFRAME METHOD
   do.call("cyto_plot.flowFrame", args)
 }
@@ -1234,7 +1238,7 @@ cyto_plot.flowSet <- function(x,
     })
     names(fr_list) <- NMS
   }
-
+  
   # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE
   lapply(seq_len(length(channels)), function(z) {
     if (grepl("FSC", channels[z], ignore.case = TRUE) |
@@ -1900,7 +1904,7 @@ cyto_plot.flowFrame <- function(x,
     if (grepl("FSC", channels[z], ignore.case = TRUE) |
       grepl("SSC", channels[z], ignore.case = TRUE)) {
       fr_list <<- lapply(fr_list, function(y) {
-        if (nrow(y)){
+        if (BiocGenerics::nrow(y) != 0){
           if(min(range(y, type = "data")[, channels[z]]) < 0) {
           coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
           rownames(coords) <- c("min", "max")

@@ -747,9 +747,10 @@ cyto_extract <- function(x, parent = "root", ...) {
     )
   }
 
-  # Extract data from GatingHierarchy or GatingSet
-  if (any(inherits(x, "GatingHierarchy") |
-    inherits(x, "GatingSet"))) {
+  # Extract data from GatingHierarchy
+  if(inherits(x, "GatingHierarchy")){
+    x <- gh_pop_get_data(x, parent, ...)
+  }else if(inherits(x, "GatingSet")){
     x <- gs_pop_get_data(x, parent, ...)
   }
 

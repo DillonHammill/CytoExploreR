@@ -175,7 +175,7 @@ cyto_gate_draw.GatingSet <- function(x,
   type <- .cyto_gate_type(type, channels, alias, negate)
 
   # ALIAS (LENGTH AS EXPECTED BASED ON GATE TYPES)
-  alias <- .cyto_alias(alias, type, negate)
+  alias <- .cyto_alias(alias, type)
 
   # CHANNELS
   channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)

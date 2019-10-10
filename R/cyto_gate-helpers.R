@@ -549,7 +549,7 @@ cyto_gate_edit <- function(x,
   type <- .cyto_gate_type(type, channels, alias, negate)
   
   # ALIAS - LIST PER GATE TYPE
-  alias <- .cyto_alias(alias, type, negate)
+  alias <- .cyto_alias(alias, type)
   
   # PREPARE SAMPLES & OVERLAYS -------------------------------------------------
   
