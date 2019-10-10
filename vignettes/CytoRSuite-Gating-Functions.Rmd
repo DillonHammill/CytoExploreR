@@ -56,7 +56,7 @@ library(CytoRSuiteData)
 # Load in Activation dataset
 fs <- Activation
 
-# Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover
+# Extract spillover matrix from flowFrame description slot - see ?spillover_compute ?spillover_edit
 spill <- fs[[1]]@description$SPILL
 
 # Apply compensation to samples & save to object fs

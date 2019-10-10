@@ -1,26 +1,32 @@
 context("openCyto Plugins")
 
-# .gate_manual -----------------------------------------------------------------
+# .cyto_gate_manual -----------------------------------------------------------------
 
-test_that("gate_manual", {
+test_that("cyto_gate_manual", {
   
-  expect_equal(unname(.gate_manual(fs[[1]], 
+  mock_locator <- mock(list("x" = c(0, 50000),
+                            "y" = c(0, 50000)))
+  testthat::with_mock(
+    locator = mock_locator,
+      expect_equal(unname(.cyto_gate_manual(fs[[1]], 
                                    channels = c("FSC-A","SSC-A"), 
                                    alias = "Cells", 
-                                   type = "r")), 
-               filters(list(rg)))
-  
+                                   type = "r",
+                                   plot = FALSE)), 
+               filters(list(rg2)))
+  )
+
 })
 
-# .pp_gate_draw ----------------------------------------------------------------
+# .pp_cyto_gate_draw ----------------------------------------------------------------
 
-test_that("pp_gate_draw", {
+test_that("pp_cyto_gate_draw", {
   
-  expect_message(.pp_gate_draw(fs = fs, 
+  expect_message(.pp_cyto_gate_draw(fs = fs, 
                                gs = gs,
                                groupBy = 1), 
                  "Numeric groupBy is not supported.")
-  expect_equal(.pp_gate_draw(fs = fs, 
+  expect_equal(.pp_cyto_gate_draw(fs = fs, 
                              gs = gs, 
                              groupBy = NA), 1)
   

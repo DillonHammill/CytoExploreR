@@ -24,7 +24,6 @@ knitr::opts_chunk$set(
 **CytoRSuite** is designed to provide an interactive interface for the analysis of flow cytometry data in R. If you are new to **CytoRSuite** visit https://dillonhammill.github.io/CytoRSuite/ to get started.
 
 # Installation
-
 **CytoRSuite** is built on the existing flow cytometry infrastructure for R developed by the [RGLab](https://github.com/RGLab). In order to properly install **CytoRSuite** and its dependencies the following platform-specific tools are required:
 
 ## Windows and Linux
@@ -34,12 +33,10 @@ flowWorkspace requires additional C++ libraries to build from source using Rtool
 Mac users will need to ensure that **XQuartz** is in their list of installed Applications. **XQuartz** is commonly found in the utilities folder. If **XQuartz** is missing from your list of applications it can be installed from this [link](https://www.xquartz.org/). Restart your computer following installation. 
 
 ## flowCore, flowWorkspace & openCyto
-Once these tools are installed, users can proceed to installing the release versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
-
+Once these tools are installed, users can proceed to installing the latest versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
 ```{r, eval = FALSE}
 # Bioconductor
 install.packages("BiocManager")
-
 # Install flowCore, flowWorkspace and openCyto
 library(BiocManager)
 install(c("flowCore", "flowWorkspace", "openCyto"))
@@ -52,7 +49,6 @@ Once these packages are successfully installed, users will need to install **Cyt
 ```{r, eval = FALSE}
 # CytoRSuiteData development version on GitHub
 devtools::install_github("DillonHammill/CytoRSuiteData")
-
 # CytoRSuite development version on GitHub
 devtools::install_github("DillonHammill/CytoRSuite", build_vignettes = TRUE)
 ```
@@ -125,11 +121,10 @@ The full details of how **CytoRSuite** works will be tackled individually in the
     
     gs <- GatingSet(Compensation)
     gating(Compensation_gatingTemplate, gs)
+    ```
     
-    par(mfrow = c(1,2))
-    cyto_plot(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), group_by = "all", layout = FALSE)
-    cyto_plot(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"), group_by = "all", layout = FALSE)
-    par(mfrow = c(1,1))
+    ```{r echo=FALSE, out.width='100%', out.height='100%',fig.align="center"}
+    knitr::include_graphics('man/figures/README-Compensation-gates.png')
     ```
     
     1.4 Compute fluorescent spillover matrix using `spillover_compute`
@@ -245,23 +240,17 @@ knitr::include_graphics('man/figures/README-cyto_plot_gating_scheme.png')
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 library(CytoRSuite)
 library(CytoRSuiteData)
-
 fs <- Activation
-
 fluor <- cyto_fluor_channels(fs)
 chnls <- c("Alexa Fluor 405-A","Alexa Fluor 430-A","APC-Cy7-A", "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
 markers <- c("Hoechst-405", "Hoechst-430", "CD11c", "Va2", "CD8", "CD4", "CD44", "CD69")
 names(markers) <- chnls
 markernames(fs) <- markers
-
 pData(fs)$OVAConc <- c(0,0.005,0.05,0.5)
-
 gs <- GatingSet(fs)
 gs <- compensate(gs, fs[[1]]@description$SPILL)
-
 trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
 gs <- transform(gs, trans)
-
 gt <- gatingTemplate(system.file("extdata", "Activation-gatingTemplate.csv", package = "CytoRSuiteData"))
 gating(gt,gs)
 ```

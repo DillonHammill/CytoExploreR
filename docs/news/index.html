@@ -70,7 +70,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -140,6 +140,22 @@
       <small>Source: <a href='https://github.com/DillonHammill/CytoRSuite/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="cytorsuite-100" class="section level1">
+<h1 class="page-header">
+<a href="#cytorsuite-100" class="anchor"></a>CytoRSuite 1.0.0</h1>
+<ul>
+<li>Improved handling of lower axes limits to display negative values.</li>
+<li>Updated <code>gate_draw</code>, <code>gate_edit</code> and <code>gate_remove</code> to allow easier switching between these functions. Users can now replace <code>draw</code> in their <code>gate_draw</code> code with <code>edit</code> or <code>remove</code> to modify drawn gates without any additional code.</li>
+<li>Supplying an empty character string to the <code>alias</code> argument of <code>cyto_plot</code> (e.g. alias = "") will automatically plot all gates constructed in the supplied channels. This way users don’t have to specify each gate by name.</li>
+<li>Added Support for spillover matrices has been added through <code>spillover_spread_compute</code> which utilises a similar API to <code>spillover_compute</code>.</li>
+<li>Modified colour scheme in <code>spillover_edit</code> to improve visibility.</li>
+<li>Improved layout for <code>cyto_plot_gating_scheme</code> when there isn’t a <code>legend</code>.</li>
+<li>Updated <code>cyto_plot</code> to allow plotting of all 2-D gate objects in a single dimension. The minimum and maximum gate co-ordinates in the supplied channel will be used to construct a 1-D rectangleGate for plotting.</li>
+<li>Labels are now adjusted to prevent overlap in <code>cyto_plot_label</code> and <code>cyto_plot</code> when multiple gates are supplied.</li>
+<li>
+<code>gate_draw</code> now restricts large flowSet or GatingSet objects to 20 random samples to improve processing speed.</li>
+</ul>
+</div>
     <div id="cytorsuite-099" class="section level1">
 <h1 class="page-header">
 <a href="#cytorsuite-099" class="anchor"></a>CytoRSuite 0.9.9</h1>
@@ -197,6 +213,7 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
+        <li><a href="#cytorsuite-100">1.0.0</a></li>
         <li><a href="#cytorsuite-099">0.9.9</a></li>
         <li><a href="#cytorsuite-098">0.9.8</a></li>
         <li><a href="#cytorsuite-095">0.9.5</a></li>

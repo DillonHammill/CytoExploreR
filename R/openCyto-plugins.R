@@ -49,27 +49,27 @@
 #' }
 #' 
 #' @noRd
-.gate_manual <- function(fr,
+.cyto_gate_manual <- function(fr,
                          pp_res,
                          channels,
                          alias, ...) {
 
   # Determine vertices of polygon using gate_draw
-  gates <- gate_draw(x = fr, channels = channels, alias = alias, ...)
+  gates <- cyto_gate_draw(x = fr, channels = channels, alias = alias, ...)
 
   return(gates)
 }
 
 #' Apply Manually Drawn Gates to GatingSet
 #'
-#' This \code{openCyto} plugin for \code{gate_draw} is required to extract gates
+#' This \code{openCyto} plugin for \code{cyto_gate_draw} is required to extract gates
 #' stored in the gatingTemplate and appropraitely apply them to the GatingSet.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for gating.
 #' @param pp_res output of preprocessing function.
 #' @param channels fluorescent channel(s) to use for gating.
-#' @param gate stored \code{gate_draw} gate in csv file for passing to openCyto.
+#' @param gate stored \code{cyto_gate_draw} gate in csv file for passing to openCyto.
 #'
 #' @return pass saved gate to openCyto to apply to all samples.
 #'
@@ -78,10 +78,10 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.gate_draw <- function(fr,
-                       pp_res,
-                       channels,
-                       gate) {
+.cyto_gate_draw <- function(fr,
+                            pp_res,
+                            channels,
+                            gate) {
 
   # pp_res is NULL - no grouping
   if (is.null(pp_res)) {
@@ -100,7 +100,7 @@
   return(gate[[gt]])
 }
 
-#' gate_draw Preprocessing Function
+#' cyto_gate_draw Preprocessing Function
 #'
 #' This preprocessing function passes on the index of the gate to apply to the
 #' samples.
@@ -125,12 +125,12 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.pp_gate_draw <- function(fs,
-                          gs,
-                          gm,
-                          channels = NA,
-                          groupBy = NA,
-                          isCollapse = NA, ...) {
+.pp_cyto_gate_draw <- function(fs,
+                               gs,
+                               gm,
+                               channels = NA,
+                               groupBy = NA,
+                               isCollapse = NA, ...) {
 
   # Samples
   smp <- length(gs)

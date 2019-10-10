@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -150,7 +150,7 @@
     </div>
 
     <pre class="usage"><span class='co'># S4 method for flowFrame</span>
-<span class='fu'><a href='gate_draw.html'>gate_draw</a></span>(<span class='no'>x</span>, <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+<span class='fu'><a href='gate_draw.html'>gate_draw</a></span>(<span class='no'>x</span>, <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"polygon"</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>/<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>(<span class='no'>x</span>), <span class='kw'>axis</span> <span class='kw'>=</span> <span class='st'>"x"</span>,
   <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>1.5</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
     
@@ -162,16 +162,16 @@
       <td><p>object of class <code><a href='https://www.rdocumentation.org/packages/flowCore/topics/flowFrame-class'>flowFrame</a></code>.</p></td>
     </tr>
     <tr>
-      <th>channels</th>
-      <td><p>vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.</p></td>
-    </tr>
-    <tr>
       <th>alias</th>
       <td><p>the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. <code>c("CD3,"CD4)</code>) multiple gates
 will be returned. <code>alias</code> is <code>NULL</code> by default which will halt
 the gating routine.</p></td>
+    </tr>
+    <tr>
+      <th>channels</th>
+      <td><p>vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.</p></td>
     </tr>
     <tr>
       <th>type</th>

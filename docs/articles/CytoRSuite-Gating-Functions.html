@@ -37,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoRSuite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -105,7 +105,7 @@
       <h1>CytoRSuite: Gating Functions</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2019-03-07</h4>
+            <h4 class="date">2019-03-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoRSuite/blob/master/vignettes/CytoRSuite-Gating-Functions.Rmd"><code>vignettes/CytoRSuite-Gating-Functions.Rmd</code></a></small>
       <div class="hidden name"><code>CytoRSuite-Gating-Functions.Rmd</code></div>
@@ -179,7 +179,7 @@
 <a class="sourceLine" id="cb1-5" title="5"><span class="co"># Load in Activation dataset</span></a>
 <a class="sourceLine" id="cb1-6" title="6">fs &lt;-<span class="st"> </span>Activation</a>
 <a class="sourceLine" id="cb1-7" title="7"></a>
-<a class="sourceLine" id="cb1-8" title="8"><span class="co"># Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover</span></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="co"># Extract spillover matrix from flowFrame description slot - see ?spillover_compute ?spillover_edit</span></a>
 <a class="sourceLine" id="cb1-9" title="9">spill &lt;-<span class="st"> </span>fs[[<span class="dv">1</span>]]<span class="op">@</span>description<span class="op">$</span>SPILL</a>
 <a class="sourceLine" id="cb1-10" title="10"></a>
 <a class="sourceLine" id="cb1-11" title="11"><span class="co"># Apply compensation to samples &amp; save to object fs</span></a>
