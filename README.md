@@ -1,28 +1,28 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# CytoRSuite <img src="man/figures/logo.png" align="right" alt="" width="130"/>
+# CytoExploreR <img src="man/figures/logo.png" align="right" alt="" width="130"/>
 
-[![Project Status: Active â€“ The project has reached a stable, usable
+[![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Travis build
-status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite)
+status](https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoExploreR)
 [![Coverage
-status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
+status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--03--30-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--10--10-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
-**CytoRSuite** is designed to provide an interactive interface for the
-analysis of flow cytometry data in R. If you are new to **CytoRSuite**
-visit <https://dillonhammill.github.io/CytoRSuite/> to get started.
+**CytoExploreR** is designed to provide an interactive interface for the
+analysis of cytometry data in R. If you are new to **CytoExploreR**
+visit <https://dillonhammill.github.io/CytoExploreR/> to get started.
 
 # Installation
 
-**CytoRSuite** is built on the existing flow cytometry infrastructure
+**CytoExploreR** is built on the existing flow cytometry infrastructure
 for R developed by the [RGLab](https://github.com/RGLab). In order to
-properly install **CytoRSuite** and its dependencies the following
+properly install **CytoExploreR** and its dependencies the following
 platform-specific tools are required:
 
 ## Windows and Linux
@@ -56,34 +56,40 @@ library(BiocManager)
 install(c("flowCore", "flowWorkspace", "openCyto"))
 ```
 
-## CytoRSuite
+## CytoExploreR
 
 Once these packages are successfully installed, users will need to
-install **CytoRSuiteData** which contains example datasets which will be
-used to demonstrate the features of **CytoRSuite**. **CytoRSuite** can
-then be installed from GitHub.
+install **CytoExploreRData** which contains example datasets which will
+be used to demonstrate the features of **CytoExploreR**.
+**CytoExploreR** can then be installed from GitHub.
 
 ``` r
-# CytoRSuiteData development version on GitHub
-devtools::install_github("DillonHammill/CytoRSuiteData")
-# CytoRSuite development version on GitHub
-devtools::install_github("DillonHammill/CytoRSuite", build_vignettes = TRUE)
+# CytoExploreRData development version on GitHub
+devtools::install_github("DillonHammill/CytoExploreRData")
+# CytoExploreR development version on GitHub
+devtools::install_github("DillonHammill/CytoExploreR", build_vignettes = TRUE)
 ```
 
 # Overview
 
-**CytoRSuite** provides an interactive interface for analysis of flow
+**CytoExploreR** provides an interactive interface for analysis of flow
 cytometry data. Some key features include:
 
-  - user guided automatic compensation using `spillover_compute`
-  - interactively modify spillover matrices using `spillover_edit`
+  - user guided automatic compensation using `cyto_spillover_compute`
+  - interactively modify spillover matrices using `cyto_spillover_edit`
+  - compute spillover spreading matrices with
+    `cyto_spillover_spread_compute`
   - visualise compensation in all channels using
     `cyto_plot_compensation`
   - easily associate experimental details with each file using
     `cyto_annotate`
-  - manual gate drawing using `gate_draw`
-  - ability to edit drawn gates using `gate_edit`
-  - remove gates using `gate_remove`
+  - customisable data transformations using `cyto_transform` which
+    includes support for log, arcsinh, logical and biexponential
+    transformations
+  - manual gate drawing using `cyto_gate_draw`
+  - ability to edit drawn gates using `cyto_gate_edit`
+  - remove gates using `cyto_gate_remove`
+  - rename gates using `cyto_gate_rename`
   - gate saving directly to an openCyto `gatingTemplate` for future use
   - support for using both manual and automated gating approaches
     through linking to `openCyto`
@@ -91,13 +97,17 @@ cytometry data. Some key features include:
     GatingSets using `cyto_plot`
   - visualisation of complete gating strategies with back-gating and/or
     gate tracking using `cyto_plot_gating_scheme`
+  - visualisation of gating trees using `cyto_plot_gating_tree`
   - visualisation of marker expression profiles in all channels using
     `cyto_plot_profile`
-  - export population level statistics using `cyto_stats_compute`
+  - visualisation of populations in all possible bivariate plots using
+    `cyto_plot_explore`
+  - export population level statistics tidyverse style using
+    `cyto_stats_compute`
 
 # Usage
 
-The full details of how **CytoRSuite** works will be tackled
+The full details of how **CytoExploreR** works will be tackled
 individually in the package vignettes, but a succinct usage outline is
 described below:
 
@@ -106,8 +116,8 @@ described below:
     1.1 Load compensation controls into a `ncdfFlowSet`
     
     ``` r
-    library(CytoRSuite)
-    library(CytoRSuiteData)
+    library(CytoExploreR)
+    library(CytoExploreRData)
     
     # Save .fcs files to folder "Compensation Controls" in working directory
     files <- list.files(path = "Compensation Controls", full.names = TRUE)
@@ -121,11 +131,11 @@ described below:
     gs <- GatingSet(fs)
     ```
     
-    1.3 Gate Single Cells using `gate_draw`
+    1.3 Gate Single Cells using `cyto_gate_draw`
     
     ``` r
     # Gate Cells
-    gate_draw(gs, 
+    cyto_gate_draw(gs, 
               parent = "root",
               alias = "Cells",
               channels = c("FSC-A","SSC-A"),
@@ -133,7 +143,7 @@ described below:
               gatingTemplate = "Compensation-gatingTemplate.csv")
     
     # Gate Single Cells
-        gate_draw(gs, 
+        cyto_gate_draw(gs, 
               parent = "Cells",
               alias = "Single Cells",
               channels = c("FSC-A","FSC-H"),
@@ -143,18 +153,19 @@ described below:
     
     <img src="man/figures/README-Compensation-gates.png" width="100%" height="100%" style="display: block; margin: auto;" />
     
-    1.4 Compute fluorescent spillover matrix using `spillover_compute`
+    1.4 Compute fluorescent spillover matrix using
+    `cyto_spillover_compute`
     
     ``` r
-    spillover_compute(gs, 
+    cyto_spillover_compute(gs, 
                       parent = "Single Cells")
     ```
     
     1.5 Interactively edit computed spillover matrix using
-    `spillover_edit`
+    `cyto_spillover_edit`
     
     ``` r
-    spillover_edit(gs, 
+    cyto_spillover_edit(gs, 
                    parent = "Single Cells", 
                    channel_match = "Compensation-Channels.csv", 
                    spillover = "Spillover-Matrix.csv")
@@ -220,11 +231,11 @@ described below:
     gs <- transform(gs, trans)
     ```
     
-    2.6 Build gating scheme using `gate_draw`
+    2.6 Build gating scheme using `cyto_gate_draw`
     
     ``` r
     # Cells
-    gate_draw(gs,
+    cyto_gate_draw(gs,
               parent = "Cells",
               alias = "Cells",
               channels = c("FSC-A","SSC-A"),
@@ -258,63 +269,49 @@ cyto_stats_compute(gs,
                    stat = "median")
 ```
 
-    #> $`CD4 T Cells`
-    #>                 OVAConc Alexa Fluor 647-A   7-AAD-A
-    #> Activation1.fcs   0.000          675.1999  606.7077
-    #> Activation2.fcs   0.005          720.3611  656.8873
-    #> Activation3.fcs   0.050          971.4868  744.3725
-    #> Activation4.fcs   0.500         1503.4010 1233.6546
-    #> 
-    #> $`CD8 T Cells`
-    #>                 OVAConc Alexa Fluor 647-A  7-AAD-A
-    #> Activation1.fcs   0.000          414.2267 260.0531
-    #> Activation2.fcs   0.005          410.1949 248.5102
-    #> Activation3.fcs   0.050          454.0508 312.6521
-    #> Activation4.fcs   0.500          552.0260 382.5721
-
 # News
 
 There is a Changelog for the GitHub `master` branch which will reflect
 any updates made to improve the stability, usability or plenitude of the
 package. Users should refer to the
-[Changelog](https://dillonhammill.github.io/CytoRSuite/news/index.html)
+[Changelog](https://dillonhammill.github.io/CytoExploreR/news/index.html)
 before installing new versions of the package.
 
 # Credits
 
-**CytoRSuite** would not be possible without the existing flow cytometry
-infrastructure developed by the RGLab. **CytoRSuite** started out as
-simple plugin for openCyto to facilitate gate drawing but has evolved
-into a fully-fledged flow cytometry analysis package thanks to the
-support and guidance of members of the RGLab. Please take the time to
-check out their work on [GitHub](https://github.com/RGLab).
+**CytoExploreR** would not be possible without the existing flow
+cytometry infrastructure developed by the RGLab. **CytoExploreR**
+started out as simple plugin for openCyto to facilitate gate drawing but
+has evolved into a fully-fledged flow cytometry analysis package thanks
+to the support and guidance of members of the RGLab. Please take the
+time to check out their work on [GitHub](https://github.com/RGLab).
 
 # Development
 
-**CytoRSuite** is a maturing package which will continue to be sculpted
-by the feedback and feature requests of users. The GitHub `master`
-branch will always contain the most stable build of the package. New
-features and updates will be made to a separate branch and merged to the
-`master` branch when stable and tested. The
-[Changelog](https://dillonhammill.github.io/CytoRSuite/news/index.html)
+**CytoExploreR** is a maturing package which will continue to be
+sculpted by the feedback and feature requests of users. The GitHub
+`master` branch will always contain the most stable build of the
+package. New features and updates will be made to a separate branch and
+merged to the `master` branch when stable and tested. The
+[Changelog](https://dillonhammill.github.io/CytoExploreR/news/index.html)
 will reflect any changes made to the `master` branch.
 
 # Getting help
 
 The [Get
-Started](https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite.html)
+Started](https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR.html)
 and
-[Reference](https://dillonhammill.github.io/CytoRSuite/reference/index.html)
-sections on the **CytoRSuite** website are your first port of call if
+[Reference](https://dillonhammill.github.io/CytoExploreR/reference/index.html)
+sections on the **CytoExploreR** website are your first port of call if
 you require any help. For more detailed workflows refer the **Articles**
 tab. If you encounter any issues with the functioning of the package
 refer to these
-[issues](https://github.com/DillonHammill/CytoRSuite/issues) to see if
+[issues](https://github.com/DillonHammill/CytoExploreR/issues) to see if
 the problem has been identified and resolved. Feel free to post new
 issues on the GitHub page if they have not already been addressed.
 
 # Code of conduct
 
-Please note that the **CytoRSuite** project is released with a
+Please note that the **CytoExploreR** project is released with a
 [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to
 this project, you agree to abide by its terms.

@@ -362,7 +362,7 @@ cyto_plot.GatingSet <- function(x,
   # TRANSFORMATIONS
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGSET
-    axes_trans <- gs[[1]]@transformation
+    axes_trans <- gs@transformation[[1]]
     if (length(axes_trans) == 0) {
       axes_trans <- NA
     }
@@ -771,7 +771,7 @@ cyto_plot.GatingHierarchy <- function(x,
   # TRANSFORMATIONS
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGHIERARCHY
-    axes_trans <- gh@transformation
+    axes_trans <- gh@transformation[[1]]
     if (length(axes_trans) == 0) {
       axes_trans <- NA
     }

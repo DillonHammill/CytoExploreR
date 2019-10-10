@@ -630,7 +630,7 @@
 #' @param channels vector of channel names used to construct the plot.
 #' 
 #' @importFrom flowCore parameters
-#' 2importFrom methods as
+#' @importFrom methods as
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 

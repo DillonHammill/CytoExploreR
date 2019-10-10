@@ -424,7 +424,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
 
   # Get trans if not supplied
   if (.all_na(trans)) {
-    trans <- gh@transformation
+    trans <- gh@transformation[[1]]
   # Check transformerList is supplied
   }else if(!.all_na(trans)){
     # transformerLists only
@@ -674,7 +674,7 @@ cyto_stats_compute.GatingSet <- function(x,
 
   # Get trans if not supplied
   if (.all_na(trans)) {
-    trans <- gs[[1]]@transformation
+    trans <- gs@transformation[[1]]
   # Check transformerList is supplied
   }else if(!.all_na(trans)){
     # transformerLists only
