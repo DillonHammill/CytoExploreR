@@ -127,6 +127,7 @@ cyto_fluor_channels <- function(x){
 #'
 #' @importFrom flowWorkspace pData getData
 #' @importFrom flowCore parameters
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -212,6 +213,7 @@ cyto_channels_extract <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -278,6 +280,8 @@ cyto_markers_extract <- function(x,
 #'   compensation controls.
 #'
 #' @return vector of channels in order of compensation Control samples.
+#'
+#' @importFrom utils menu
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'

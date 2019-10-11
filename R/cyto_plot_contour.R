@@ -23,7 +23,7 @@
 #' @importFrom grDevices adjustcolor
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in Samples
 #' fs <- Activation

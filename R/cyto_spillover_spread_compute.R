@@ -44,7 +44,7 @@
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore Subset parameters exprs
-#' @importFrom stats quantile
+#' @importFrom stats quantile na.omit
 #' @importFrom grDevices graphics.off dev.new
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

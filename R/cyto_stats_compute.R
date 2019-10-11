@@ -40,8 +40,8 @@
 #'
 #' @importFrom utils write.csv
 #' @importFrom dplyr bind_rows bind_cols select %>%
-#' @importFrom tidyr spread
-#' @importFrom tibble as_tibble add_column
+#' @importFrom tidyr spread gather
+#' @importFrom tibble as_tibble add_column remove_rownames
 #' @importFrom tools file_ext
 #'
 #' @examples

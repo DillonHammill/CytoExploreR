@@ -65,7 +65,7 @@ lines, set to 1 by default to remove transparency.}
 Add contour lines to cyto_plot
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in Samples
 fs <- Activation

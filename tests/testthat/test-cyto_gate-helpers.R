@@ -1,7 +1,7 @@
 context("cyto_gate-helpers")
 
 # Turn off graphics device - missing coords are inherited from par("usr)
-dev.off()
+graphics.off()
 
 # CYTO_GATE_CONVERT ------------------------------------------------------------
 

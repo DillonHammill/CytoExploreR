@@ -15,6 +15,7 @@
 #' @return list of flowFrames
 #'
 #' @importFrom flowCore Subset split
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -575,7 +576,7 @@
                              label_text_size = 1,
                              xpad = 1.2,
                              ypad = 1.2,
-                             adj = 0.5, ...) {
+                             adj = 0.5) {
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   

@@ -7,27 +7,28 @@
 #' @return a data.table
 #' @importFrom data.table data.table rbindlist
 #' @importFrom methods extends
+#' @importFrom openCyto gt_get_gate gt_get_parent
 #' @noRd
 as.data.table.gatingTemplate <- function(x, keep.rownames = FALSE){
   
   # gate each node 
-  gt_nodes <- getNodes(x, order = "tsort")[-1]
+  gt_nodes <- gt_get_nodes(x, order = "tsort")[-1]
   
   res <- lapply(gt_nodes, function(node){
     
     # get parent node to gate
     nodePath <- node@id
-    parent <- getParent(x, nodePath)
+    parent <- gt_get_parent(x, nodePath)
     # extract gate method from one edge(since multiple edge to the same node is
     # redudant)
-    this_gate <- getGate(x, parent, nodePath)
+    this_gate <- gt_get_gate(x, parent, nodePath)
     gating_args <- parameters(this_gate)
     #collapse into string when neccessary
     split <- !extends(class(this_gate), "refGate")
     gating_args <- .argDeparser(gating_args, split)
     
     #get preprocessing method
-    this_ppm <- openCyto:::ppMethod(x, parent, nodePath)
+    this_ppm <- ppMethod(x, parent, nodePath)
     
     #preprocessing
     if(class(this_ppm) == "ppMethod")
@@ -39,14 +40,14 @@ as.data.table.gatingTemplate <- function(x, keep.rownames = FALSE){
       preprocessing_args <- preprocessing_method <- ""
     }
     
-    data.table(alias = openCyto:::alias(node)
+    data.table(alias = .alias(node)
                , pop = names(node)
                , parent = parent
                , dims = this_gate@dims
                , gating_method = names(this_gate)
                , gating_args =  gating_args
-               , collapseDataForGating = openCyto:::isCollapse(this_gate)
-               , groupBy = openCyto:::groupBy(this_gate)
+               , collapseDataForGating = .isCollapse(this_gate)
+               , groupBy = .groupBy(this_gate)
                , preprocessing_method = preprocessing_method
                , preprocessing_args = preprocessing_args
     )    

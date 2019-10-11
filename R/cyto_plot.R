@@ -244,7 +244,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom purrr transpose
 #' @importFrom openCyto templateGen
-#' @importFrom methods formalArgs
+#' @importFrom methods formalArgs is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -862,7 +862,7 @@ cyto_plot.GatingHierarchy <- function(x,
     # SUPPORT NEGATED GATES
     if (!.all_na(paste(parent, alias, sep = "/"))) {
       if (all(LAPPLY(alias, function(z) {
-        isNegated(gh, z)
+        .isNegated(gh, z)
       }))) {
         # NEGATE
         if (missing(negate)) {

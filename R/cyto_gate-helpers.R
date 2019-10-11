@@ -379,6 +379,7 @@ cyto_gate_extract <- function(parent,
 #' @importFrom tools file_ext
 #' @importFrom magrittr %>%
 #' @importFrom purrr transpose
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -792,8 +793,8 @@ cyto_gate_edit <- function(x,
     # 2D Interval gates require axis argument
     if ("interval" %in% type) {
       intvl <- rbind(
-        gates[[match("interval", type)[1]]]@min,
-        gates[[match("interval", type)[1]]]@max
+        gate[[match("interval", type)[1]]]@min,
+        gate[[match("interval", type)[1]]]@max
       )
       if (all(is.finite(intvl[, 1]))) {
         axis <- "x"
@@ -1163,6 +1164,7 @@ cyto_gate_type <- function(gates) {
 #' @return modified gate object with appropriate dimensions.
 #'
 #' @importFrom flowCore parameters rectangleGate
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1491,6 +1493,8 @@ cyto_gate_convert.list <- function(x,
 #'
 #' @return a list of unique modified gate objects.
 #'
+#' @importFrom methods is
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @name cyto_gate_convert
@@ -1509,7 +1513,7 @@ cyto_gate_prepare <- function(x,
       x <- unlist(x)
     }
   }else if(is(x)[1] == "filters"){
-    x <- unlist(gate)
+    x <- unlist(x)
   }else if(is(x)[1] %in% c("rectangleGate",
                           "polygonGate",
                           "ellipsoidGate",

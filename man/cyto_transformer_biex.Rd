@@ -26,7 +26,8 @@ cyto_transformer_biex(x, ...)
   parent = "root",
   select = NULL,
   plot = TRUE,
-  popup = FALSE
+  popup = FALSE,
+  ...
 )
 
 \method{cyto_transformer_biex}{flowSet}(

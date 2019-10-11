@@ -26,7 +26,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' fs <- Activation # load in .fcs files
 #' 
 #' gs <- GatingSet(fs) # add flowSet to GatingSet

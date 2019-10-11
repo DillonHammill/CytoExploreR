@@ -14,7 +14,7 @@
 #' @return object of class
 #'   \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
 #'
-#' @importFrom flowCore identifier
+#' @importFrom flowCore identifier identifier<-
 #' @importFrom ncdfFlow read.ncdfFlowSet
 #' @importFrom gtools mixedsort
 #'
@@ -719,7 +719,7 @@ cyto_transform_extract <- function(x,
 #'
 #' @return either a \code{flowFrame} or a \code{flowSet}.
 #'
-#' @importFrom flowWorkspace gs_pop_get_data
+#' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data
 #'
 #' @examples
 #'
@@ -1001,7 +1001,7 @@ cyto_filter <- function(x, ...) {
 #'
 #' @examples
 #' 
-#' 3 Load in CytoExploreRData to access data
+#' # Load in CytoExploreRData to access data
 #' library(CytoExploreR)
 #'
 #' # Look at experiment details
@@ -1940,6 +1940,7 @@ cyto_nodes <- function(x, ...){
 #' @return save constructed channel_match csv file.
 #'
 #' @importFrom utils write.csv edit
+#' @importFrom tools file_ext
 #'
 #' @examples
 #' \dontrun{
@@ -1963,7 +1964,7 @@ cyto_channel_match <- function(x,
   # channel_match must contain csv file extension
   }else{
     # File extension missing
-    if(file.ext(channel_match) != "csv"){
+    if(file_ext(channel_match) != "csv"){
       channel_match <- paste0(channel_match,".csv")
     }
   }  
@@ -1980,7 +1981,7 @@ cyto_channel_match <- function(x,
   cm <- suppressWarnings(edit(cm))
   
   # Check that alll channels are valid or throw an error
-  if(!all(cm$channel %in% c("Unstained", cyto_fluor_channel(x)))){
+  if(!all(cm$channel %in% c("Unstained", cyto_fluor_channels(x)))){
     stop("Some inputs in the channel column are not valid.")
   }
 

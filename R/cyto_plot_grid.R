@@ -447,14 +447,14 @@ cyto_plot_grid.flowSet <- function(x,
       empty_flowFrame <- flowCore::flowFrame(exprs = empty_flowFrame)
       
       # Call to .cyto_plot_empty
-      .cyto_plot_empty(empty_flowFrame,
-                       channels = channels,
-                       axes_trans = axes_trans,
-                       axes_text = axes_text,
-                       overlay = NA,
-                       xlim = xlim,
-                       ylim = ylim,
-                       ...)
+      cyto_plot_empty(empty_flowFrame,
+                      channels = channels,
+                      axes_trans = axes_trans,
+                      axes_text = axes_text,
+                      overlay = NA,
+                      xlim = xlim,
+                      ylim = ylim,
+                      ...)
       
     }else{
       # Call to cyto_plot flowFrame method

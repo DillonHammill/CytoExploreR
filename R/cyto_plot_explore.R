@@ -37,7 +37,7 @@
 #' @param ... additional arguments passed to \code{cyto_plot}.
 #'
 #' @importFrom grDevices n2mfrow
-#' @importFrom graphics mtext
+#' @importFrom graphics mtext plot.new
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'

@@ -26,7 +26,7 @@
 #'   function. Links to the documentation for these functions can be found
 #'   below.
 #'
-#' @importFrom flowCore exprs
+#' @importFrom flowCore exprs keyword
 #' @importFrom stats prcomp
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap

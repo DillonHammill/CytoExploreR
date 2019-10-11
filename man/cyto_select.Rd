@@ -23,7 +23,7 @@ Select samples based on experiment variables
 }
 \examples{
 
-3 Load in CytoExploreRData to access data
+# Load in CytoExploreRData to access data
 library(CytoExploreR)
 
 # Look at experiment details

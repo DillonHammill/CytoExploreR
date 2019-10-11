@@ -23,6 +23,7 @@
 #' @importFrom grDevices adjustcolor
 #' @importFrom flowCore parameters
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @return invisibly return modified gate objects with dimensions appropriate
 #'   for the constructed plot.

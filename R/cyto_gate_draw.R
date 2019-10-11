@@ -79,6 +79,7 @@
 #' @importFrom graphics par
 #' @importFrom purrr transpose
 #' @importFrom magrittr %>%
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -923,8 +924,6 @@ cyto_gate_draw.flowSet <- function(x,
         label_text_size = 1
       )
     }
-    
-    print(gates)
     
     # RETURN CONSTRUCTED GATES
     return(gates)

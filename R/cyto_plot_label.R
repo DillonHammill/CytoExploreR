@@ -60,6 +60,7 @@
 #' @return add a boxed text label to an existing cyto_plot.
 #'
 #' @importFrom flowCore Subset
+#' @importFrom methods is
 #'
 #' @examples
 #' library(CytoRSuiteData)

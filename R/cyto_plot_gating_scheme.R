@@ -54,6 +54,8 @@
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
+#' @importFrom graphics plot.new
+#' 
 #' @examples
 #' library(CytoRSuiteData)
 #'
@@ -129,7 +131,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   # Gating template supplied - apply to GatingHierarchy
   if (!is.null(gatingTemplate)) {
     if (getOption("CytoExploreR_wd_check") == TRUE) {
-      if (.file_wd_check(gatingTemplate)) {
+      if (file_wd_check(gatingTemplate)) {
         gt <- gatingTemplate(gatingTemplate)
         gating(gt, gh)
       } else {
@@ -604,7 +606,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   # gatingTemplate supplied - apply to GatingSet
   if (!is.null(gatingTemplate)) {
     if (getOption("CytoExploreR_wd_check") == TRUE) {
-      if (.file_wd_check(gatingTemplate)) {
+      if (file_wd_check(gatingTemplate)) {
         gt <- gatingTemplate(gatingTemplate)
         gating(gt, x)
       } else {
@@ -876,9 +878,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     parents <- unique(gts$parent)
     
     # Pop-up window?
-    if (popup == TRUE) {
-      .cyto_plot_window()
-    }
+    cyto_plot_new(popup = popup)
     
     # Number of plots
     np <- nrow(unique(gts[, c("parent", "xchannel", "ychannel")]))

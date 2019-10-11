@@ -78,7 +78,7 @@
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
 #'   eventReactive renderPlot tabsetPanel tabPanel sidebarLayout fluidRow
-#'   updateSelectInput onStop stopApp runApp
+#'   updateSelectInput onStop stopApp runApp updateCheckboxInput
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme

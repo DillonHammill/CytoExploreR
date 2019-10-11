@@ -510,7 +510,7 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
                                                 parent = "root",
                                                 select = NULL,
                                                 plot = TRUE,
-                                                popup = FALSE) {
+                                                popup = FALSE, ...) {
   
   # Extract data
   x <- cyto_extract(x, parent = parent)
@@ -779,7 +779,7 @@ cyto_transformer_logicle.flowFrame <- function(x,
   }
 
   # Sort out transformations
-  transform_list <- flowCore:::.estimateLogicle(
+  transform_list <- .estimateLogicle(
     x,
     channels = channels,
     ...

@@ -16,6 +16,7 @@
 #'
 #' @importFrom graphics par
 #' @importFrom flowCore rectangleGate
+#' @importFrom methods is
 #'
 #' @noRd
 .cyto_gate_center <- function(x, ...) {
@@ -188,7 +189,7 @@
         }
         # Inf
         if(coords[is.infinite(coords)] > 0){
-          coords[is.inifinte(coords)] <- xmax
+          coords[is.infinite(coords)] <- xmax
         }
       }
       text_x <- sum(coords) / length(coords)
@@ -227,7 +228,7 @@
         }
         # Inf
         if(coords[is.infinite(coords)] > 0){
-          coords[is.inifinte(coords)] <- ymax
+          coords[is.infinite(coords)] <- ymax
         }
       }
       text_y <- sum(coords) / length(coords)
@@ -518,6 +519,8 @@
 #' @param negate logical indicating if the negated population should be
 #'   included.
 #'
+#' @importFrom methods is
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
@@ -560,6 +563,7 @@
 #' Convert between quadGate to rectangleGates 
 #' @return list of rectangleGates or a quadGate.
 #' @importFrom flowCore rectangleGate quadGate
+#' @importFrom methods is
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
 .cyto_gate_quad_convert <- function(gate,
@@ -630,7 +634,7 @@
 #' @param channels vector of channel names used to construct the plot.
 #' 
 #' @importFrom flowCore parameters
-#' @importFrom methods as
+#' @importFrom methods as is
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 

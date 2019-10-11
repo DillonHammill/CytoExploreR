@@ -71,7 +71,7 @@ cyto_plot_point.flowFrame <- function(x,
   
   # Combine x and overlay into a list
   if(!.all_na(overlay)){
-    fr_list <- c(list(x), .cyto_convert(overlay, "flowFrame list"))
+    fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
   }else{
     fr_list <- list(x)
   }

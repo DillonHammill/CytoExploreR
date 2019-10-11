@@ -647,6 +647,7 @@
 
 #' Save y range to each layer
 #' Easy to get ylim & label y co-ordinates
+#' @importFrom stats bw.nrd0
 #' @noRd
 .cyto_density.list <- function(x,
                                channel = NULL,

@@ -207,6 +207,8 @@
 #'
 #' @param x named list of arguments
 #'
+#' @importFrom methods is
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
