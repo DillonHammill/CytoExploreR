@@ -377,7 +377,6 @@
     }
   }
   
-  
   # Gate flowFrame
   if(!.all_na(gate)){
     x <- Subset(x, gate)
@@ -388,7 +387,7 @@
     x <- cyto_transform(x,
                         trans = trans,
                         inverse = TRUE, 
-                         plot = FALSE)
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate median directly - colMedians for speed

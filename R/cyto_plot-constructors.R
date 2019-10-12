@@ -77,7 +77,7 @@
 
     # GATE COORDS
     if(!.all_na(gate)){
-      gate_coords <- .cyto_gate_coords(gate)
+      gate_coords <- .cyto_gate_coords(gate, channels)
     }
     # XLIM
     if (.all_na(xlim)) {
@@ -131,7 +131,7 @@
       if (.all_na(axes_text[[1]])) {
         # NA == TRUE returns NA not T/F
       } else if (axes_text[[1]] == TRUE) {
-        axes_text[[1]] <- .cyto_plot_axes_text(x[[1]],
+        axes_text[[1]] <- .cyto_plot_axes_text(x,
           channels = channels[1],
           axes_trans = axes_trans,
           limits = limits
@@ -145,7 +145,7 @@
         # NA == TRUE returns NA not T/F
       } else if (axes_text[[2]] == TRUE) {
         if (length(channels) == 2) {
-          axes_text[[2]] <- .cyto_plot_axes_text(x[[1]],
+          axes_text[[2]] <- .cyto_plot_axes_text(x,
             channels = channels[2],
             axes_trans = axes_trans,
             limits = limits

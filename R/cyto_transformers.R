@@ -110,10 +110,13 @@ cyto_transformer_log.GatingHierarchy <- function(x,
   
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_log
 #' @export
 cyto_transformer_log.flowSet <- function(x,
                                          channels = NULL,
+                                         parent = "root",
                                          select = NULL,
                                          plot = TRUE,
                                          popup = FALSE, ...){
@@ -138,10 +141,13 @@ cyto_transformer_log.flowSet <- function(x,
   
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_log
 #' @export
 cyto_transformer_log.flowFrame <- function(x,
                                            channels = NULL,
+                                           parent = "root",
                                            select = NULL,
                                            plot = TRUE,
                                            popup = FALSE, ...){
@@ -319,10 +325,13 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_arcsinh
 #' @export
 cyto_transformer_arcsinh.flowSet <- function(x,
                                            channels = NULL,
+                                           parent = "root",
                                            select = NULL,
                                            plot = TRUE,
                                            popup = FALSE,...) {
@@ -346,10 +355,13 @@ cyto_transformer_arcsinh.flowSet <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_arcsinh
 #' @export
 cyto_transformer_arcsinh.flowFrame <- function(x,
                                                channels = NULL,
+                                               parent = "root",
                                                select = NULL,
                                                plot = TRUE,
                                                popup = FALSE, ...) {
@@ -527,10 +539,13 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_biex
 #' @export
 cyto_transformer_biex.flowSet <- function(x,
                                         channels = NULL,
+                                        parent = "root",
                                         select = NULL,
                                         plot = TRUE,
                                         popup = FALSE, ...) {
@@ -553,10 +568,13 @@ cyto_transformer_biex.flowSet <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_biex
 #' @export
 cyto_transformer_biex.flowFrame <- function(x,
                                           channels = NULL,
+                                          parent = "root",
                                           select = NULL,
                                           plot = TRUE,
                                           popup = FALSE, ...) {
@@ -736,10 +754,13 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_logicle
 #' @export
 cyto_transformer_logicle.flowSet <- function(x,
                                            channels = NULL,
+                                           parent = "root",
                                            select = NULL,
                                            plot = FALSE,
                                            popup = FALSE, ...) {
@@ -763,10 +784,13 @@ cyto_transformer_logicle.flowSet <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_logicle
 #' @export
 cyto_transformer_logicle.flowFrame <- function(x,
                                              channels = NULL,
+                                             parent = "root",
                                              select = NULL,
                                              plot = TRUE,
                                              popup = FALSE, ...) {

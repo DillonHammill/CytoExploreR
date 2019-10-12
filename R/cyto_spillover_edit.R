@@ -127,9 +127,6 @@ cyto_spillover_edit.GatingSet <- function(x,
   # Extract channels
   channels <- cyto_fluor_channels(gs)
   
-  # Message channels should not be transformed
-  trans <- gs[[1]]@transformation
-  
   # Extract population for downstream plotting
   if (!is.null(parent)) {
     fs <- cyto_extract(gs, parent)
@@ -138,12 +135,15 @@ cyto_spillover_edit.GatingSet <- function(x,
   }  
 
   # Extract transformers from GatingSet
-  trans <- x[[1]]@transformation
+  axes_trans <- x@transformation
+  if(length(axes_trans) != 0){
+    axes_trans <- axes_trans[[1]]
+  }
   
   # Reverse any applied transformations to get LINEAR data
-  if(any(channels %in% names(trans))){
+  if(any(channels %in% names(axes_trans))){
     # Extract transformations that have been applied
-    trans <- cyto_transformer_combine(trans[names(trans) %in% channels])
+    trans <- cyto_transformer_combine(axes_trans[names(axes_trans) %in% channels])
     # Inverse transformations
     fs <- cyto_transform(fs, 
                          trans,
@@ -314,7 +314,7 @@ cyto_spillover_edit.flowSet <- function(x,
   # Selected sample - unstained control supplied
   if(!.all_na(pd$channel)){
     # Unstained control included
-    if(any(grepl("Unstaied", pd$channel))){
+    if(any(grepl("Unstained", pd$channel))){
     editor_initial_sample <- pd$name[!grepl("Unstained", 
                                             pd$channel, 
                                             ignore.case = TRUE)][1]
@@ -504,7 +504,6 @@ cyto_spillover_edit.flowSet <- function(x,
       fs.comp <- eventReactive(values$spill, {
         # Data must be LINEAR at this step
         fs <- compensate(fs, values$spill / 100)
-        
         # Get transformed data
         fs <- cyto_transform(fs, axes_trans, plot = FALSE)
         

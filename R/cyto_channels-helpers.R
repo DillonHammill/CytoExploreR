@@ -310,7 +310,7 @@ cyto_channel_select <- function(x){
   
   # Run through list of flowFrames
   chans <- LAPPLY(seq_len(length(x)), function(z){
-    message(cyto_names(x))
+    message(cyto_names(x[[z]]))
     opts[menu(choices = opts, graphics = TRUE)]
   })
   

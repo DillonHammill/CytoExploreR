@@ -425,7 +425,7 @@ cyto_stats_compute.flowFrame <- function(x,
         "current scale."
       )
     )
-    trans <- NULL
+    trans <- NA
   # Check transformerList is supplied
   }else if(!.all_na(trans)){
     # transformerLists only
@@ -433,7 +433,7 @@ cyto_stats_compute.flowFrame <- function(x,
       stop("'trans' must be an object of class transformerList!")
     }
   }
-
+  
   # Statistics
   if (stat == "count") {
     res <- .cyto_count(fr,

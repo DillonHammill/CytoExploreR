@@ -123,7 +123,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuite)
+#' library(CytoExploreR)
 #'
 #' # gs is a GatingSet object
 #' cyto_gatingTemplate_edit(gs, "gatingTemplate.csv")
@@ -212,7 +212,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -239,9 +239,9 @@ cyto_gatingTemplate_apply <- function(x,
   } else {
     if (!any(c(
       inherits(x, "GatingSet"),
-      inherits(x, "gatinghierarchy")
+      inherits(x, "GatingHierarchy")
     ))) {
-      stop("'x' must be an object of class GtaingHierarchy or GatingSet.")
+      stop("'x' must be an object of class GatingHierarchy or GatingSet.")
     }
   }
 
@@ -315,7 +315,7 @@ cyto_gatingTemplate_apply <- function(x,
 
 ## GATINGTEMPLATE UPDATE ------------------------------------------------------
 
-#' Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR
+#' Convert CytoExploreR gatingTemplate to be compatible with  CytoExoloreR
 #'
 #' @param gatingTemplate name of the gatingTemplate csv file to convert.
 #' @param save_as name for the updated gatingTemplate csv file, set to "Updated

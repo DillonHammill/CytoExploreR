@@ -61,6 +61,7 @@
 #'
 #' @importFrom flowCore Subset
 #' @importFrom methods is
+#' @importFrom flowWorkspace gh_pop_get_gate
 #'
 #' @examples
 #' library(CytoRSuiteData)
@@ -203,7 +204,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
     # EXTRACT GATE
     gate <- LAPPLY(seq_len(PNS), function(z) {
       # GATE
-      gt <- getGate(x, paste(parent, alias[z], sep = "/"))
+      gt <- gh_pop_get_gate(x, paste(parent, alias[z], sep = "/"))
       # BOOLEANFILTER - SUPPORT NEGATED & FILTERS
       if(is(gt, "booleanFilter")){
         # BOOLEAN LOGIC -  !ALIAS1&!ALIAS2&!ALIAS3
@@ -218,7 +219,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                       alias[z])
           # GATE
           gt <- LAPPLY(alias[-length(alias)], function(z){
-            getGate(x, paste(parent, z, spe = "/"))
+            gh_pop_get_gate(x, paste(parent, z, spe = "/"))
           })
           # SET NEGATE TO TRUE
           negate <<- TRUE
@@ -408,13 +409,15 @@ cyto_plot_label.flowFrame <- function(x,
   label_stat <- .cyto_label_stat(list(x), 
                                  pops = pops,
                                  channels = channels,
-                                 label_stat = label_stat)
+                                 label_stat = label_stat,
+                                 axes_trans = trans)
   
   # PREPARE LABEL_TEXT ---------------------------------------------------------
   
   # MERGE LABEL_TEXT & LABEL_STAT
   label_text <- .cyto_label_text(label_text,
                                  label_stat)
+  
   
   # LABEL CONSTRUCTION ---------------------------------------------------------
   
@@ -482,7 +485,6 @@ cyto_plot_label.flowFrame <- function(x,
   invisible(label_text_xy)
   
 }
-
 
 ## CYTO_PLOT_LABELLER ----------------------------------------------------------
 

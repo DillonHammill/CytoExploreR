@@ -16,12 +16,12 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_gate_type <- function(type, channels, alias, negate = FALSE) {
+.cyto_gate_type <- function(type = NULL, channels, alias, negate = FALSE) {
   
   # DEFAULT GATE TYPES ---------------------------------------------------------
   
   # NO GATE TYPE SUPPLIED
-  if(missing(type)){
+  if(is.null(type)){
     # 1D PLOT - INTERVAL
     if(length(channels) == 1){
       type <- "interval"
@@ -113,7 +113,7 @@
       }
     })
   }
-
+  
   # UNSUPPORTED GATE TYPES 1D PLOTS --------------------------------------------
   
   # INTERVAL - BOUNDARY - THRESHOLD 

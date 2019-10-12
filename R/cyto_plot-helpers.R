@@ -219,7 +219,7 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # GATE COORDS
   if(!.all_na(gate)){
-    gate_coords <- .cyto_gate_coords(gate)
+    gate_coords <- .cyto_gate_coords(gate, channels)
   }
   
   # XLIM
@@ -321,7 +321,7 @@ cyto_plot_empty.flowFrame <- function(x,
     } else if (axes_text[[1]] == TRUE) {
       lims <- list(xlim, ylim)
       names(lims) <- rep(c(channels, NA), length.out = 2)
-      axes_text[[1]] <- .cyto_plot_axes_text(x,
+      axes_text[[1]] <- .cyto_plot_axes_text(fr_list,
         channels = channels[1],
         axes_trans = axes_trans,
         axes_range = lims,
@@ -338,7 +338,7 @@ cyto_plot_empty.flowFrame <- function(x,
       if (length(channels) == 2) {
         lims <- list(xlim, ylim)
         names(lims) <- rep(c(channels, NA), length.out = 2)
-        axes_text[[2]] <- .cyto_plot_axes_text(x,
+        axes_text[[2]] <- .cyto_plot_axes_text(fr_list,
           channels = channels[2],
           axes_trans = axes_trans,
           axes_range = lims,

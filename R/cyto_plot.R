@@ -424,9 +424,9 @@ cyto_plot.GatingSet <- function(x,
         gt <- lapply(alias, function(z) {
           ind <- pd$name[match(nm, pd$group_by)[1]]
           ind <- which(pd$name == ind)
-          getGate(
+          gh_pop_get_gate(
             gs[[ind]],
-            paste(parent, z, sep = "/")
+            z
           )
         })
         names(gt) <- alias
@@ -435,7 +435,7 @@ cyto_plot.GatingSet <- function(x,
     } else {
       gate <- lapply(seq_len(length(gs)), function(z) {
         gt <- lapply(alias, function(y) {
-          getGate(gs[[z]], paste(parent, y, sep = "/"))
+          gh_pop_get_gate(gs[[z]], y)
         })
         names(gt) <- alias
         return(gt)
@@ -481,77 +481,6 @@ cyto_plot.GatingSet <- function(x,
       }
     }
   }
-
-  # PREPARE OVERLAY - LIST OF FLOWFRAME LISTS
-  if (!.all_na(overlay)) {
-    # REPEAT FLOWFRAME PER PLOT
-    if (inherits(overlay, "flowFrame")) {
-      overlay <- rep(list(list(overlay)), length(fr_list))
-      # FLOWSET TO LIST OF FLOWFRAMES
-    } else if (inherits(overlay, "flowSet")) {
-      # GROUPING
-      if (!.all_na(group_by)) {
-        overlay <- cyto_group_by(overlay, group_by)
-        overlay <- lapply(overlay, function(z) {
-          cyto_convert(z, "flowFrame")
-        })
-        # NO GROUPING
-      } else {
-        overlay <- cyto_convert(overlay, "list of flowFrames")
-      }
-      # LIST OF FLOWFRAME LISTS
-      overlay <- lapply(overlay, function(z) {
-        list(z)
-      })
-      # LIST OF FLOWSETS TO LIST OF FLOWFRAME LISTS
-    } else if (inherits(overlay, "list")) {
-      # ALLOW LIST OF FLOWFRAMES OF LENGTH FR_LIST
-      if (all(LAPPLY(unlist(overlay), function(z) {
-        inherits(z, "flowFrame")
-      }))) {
-        # SAME LENGTH AS FR_LIST
-        if (length(overlay) != length(fr_list)) {
-          stop(
-            paste(
-              "'overlay' must be a list of flowFrame lists -",
-              "one flowFrame list per plot."
-            )
-          )
-        }
-        # NO GROUPING APPLIED
-        overlay <- overlay
-        # LIST OF FLOWSETS
-      } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
-      }))) {
-        # GROUPING
-        if (!.all_na(group_by)) {
-          overlay <- lapply(overlay, function(z) {
-            cyto_group_by(z, group_by)
-          })
-          overlay <- lapply(overlay, function(z) {
-            lapply(z, function(y) {
-              cyto_convert(y, "flowFrame")
-            })
-          })
-          # NO GROUPING
-        } else {
-          overlay <- lapply(overlay, function(z) {
-            cyto_convert(z, "list of flowFrames")
-          })
-        }
-        overlay <- overlay %>% transpose()
-        # OVERLAY NOT SUPPORTED
-      } else {
-        stop(
-          paste(
-            "'overlay' should be either a flowFrame, flowSet, list of flowFrame",
-            "lists or list of flowSet lists."
-          )
-        )
-      }
-    }
-  }
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
@@ -560,26 +489,12 @@ cyto_plot.GatingSet <- function(x,
     negate <- FALSE
   }
   
-  # POPULATIONS PER PLOT
-  if(!.all_na(overlay)){
-    NP <- .cyto_gate_count(gate[[1]], negate, total = TRUE)
-    TNP <- NP * (length(overlay[[1]]) + 1)
-  }else{
-    NP <- .cyto_gate_count(gate[[1]], negate, total = TRUE)
-    TNP <- NP
-  }
-  
-  # LABEL_TEXT
+  # LABEL_TEXT - ALIAS
   if(missing(label_text)){
-    # ALIAS 
     if(!.all_na(alias)){
-      # REPEAT STACKED DENSITY
-      if(length(channels) == 1 & density_stack != 0){
-        label_text <- rep(alias, length.out = TNP)
-      # FILL WITH NA
-      }else{
-        label_text <- rep(c(alias, rep(NA, TNP)), length.out = TNP)
-      }
+      label_text <- alias
+    }else{
+      label_text <- NA
     }
   }
   
@@ -590,8 +505,8 @@ cyto_plot.GatingSet <- function(x,
       legend_text <- parent
     # PARENT & OVERLAY
     }else{
-      if(!is.null(names(overlay[[1]]))){
-        legend_text <- c(parent, names(overlay[[1]]))
+      if(!is.null(names(overlay))){
+        legend_text <- c(parent, names(overlay))
       }else{
         legend_text <- parent
       }
@@ -824,38 +739,6 @@ cyto_plot.GatingHierarchy <- function(x,
       }
     }
   }
-
-  # PREPARE OVERLAY - LIST OF FLOWFRAMES
-  if (!.all_na(overlay)) {
-    # overlay must be list of flowFrames
-    # flowFrame overlay added to list
-    if (inherits(overlay, "flowFrame")) {
-      overlay <- list(overlay)
-      # flowSet overlay convert to list of flowFrames
-    } else if (inherits(overlay, "flowSet")) {
-      overlay <- cyto_convert(overlay, "list of flowFrames")
-      # flowFrame list overlay as is - flowSet list overlay use overlay[[1]]
-    } else if (inherits(overlay, "list")) {
-      # overlay should be list of flowFrames
-      if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowFrame")
-      }))) {
-        overlay <- overlay
-        # overlay list of flowSets - use first fs convert to list of flowFrames
-      } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
-      }))) {
-        overlay <- overlay[[1]]
-        overlay <- cyto_convert(overlay, "list of flowFrames")
-        # overlay not supported
-      } else {
-        stop(paste(
-          "'overlay' should be either the names of the populations to",
-          "overlay, a flowFrame, a flowSet or a list of flowFrames."
-        ))
-      }
-    }
-  }
   
   # EXTRACT GATE OBJECTS
   if (!.all_na(alias)) {
@@ -875,7 +758,7 @@ cyto_plot.GatingHierarchy <- function(x,
     alias <- unique(alias)
     # LIST OF GATE OBJECTS
     gate <- lapply(alias, function(z) {
-      getGate(gh, paste(parent, z, sep = "/"))
+      gh_pop_get_gate(gh, z)
     })
   }
   
@@ -913,24 +796,13 @@ cyto_plot.GatingHierarchy <- function(x,
     negate <- FALSE
   }  
   
-  # POPULATIONS
-  if(!.all_na(overlay)){
-    TNP <- .cyto_gate_count(gate, negate, total = TRUE) * (length(overlay) + 1)
-  }else{
-    TNP <- .cyto_gate_count(gate, negate, total = TRUE)
-  }
-  
   # LABEL_TEXT
   if(missing(label_text)){
     # ALIAS 
     if(!.all_na(alias)){
-      # REPEAT STACKED DENSITY
-      if(length(channels) == 1 & density_stack != 0){
-        label_text <- rep(alias, length.out = TNP)
-        # FILL WITH NA
-      }else{
-        label_text <- rep(c(alias, rep(NA, TNP)), length.out = TNP)
-      }
+        label_text <- alias
+    }else{
+        label_text <- NA
     }
   }
   
@@ -941,8 +813,8 @@ cyto_plot.GatingHierarchy <- function(x,
       legend_text <- parent
       # PARENT & OVERLAY
     }else{
-      if(!is.null(names(overlay[[1]]))){
-        legend_text <- c(parent, names(overlay[[1]]))
+      if(!is.null(names(overlay))){
+        legend_text <- c(parent, names(overlay))
       }else{
         legend_text <- parent
       }
