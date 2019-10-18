@@ -33,6 +33,7 @@ cyto_transformer_biex(x, ...)
 \method{cyto_transformer_biex}{flowSet}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,
@@ -42,6 +43,7 @@ cyto_transformer_biex(x, ...)
 \method{cyto_transformer_biex}{flowFrame}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,

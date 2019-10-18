@@ -449,44 +449,50 @@ cyto_transform.default <- function(x,
   # Construct the plots
   if(plot ==  TRUE){
     
-    # Pull out flowFrame/flowSet to plot
-    cyto_data <- cyto_extract(x, parent)
+    # Plot if space sufficient space
+    tryCatch({
+      
+      # Pull out flowFrame/flowSet to plot
+      cyto_data <- cyto_extract(x, parent)
     
-    # Convert to flowFrame for plotting
-    cyto_data <- cyto_convert(cyto_data, "flowFrame")
+      # Convert to flowFrame for plotting
+      cyto_data <- cyto_convert(cyto_data, "flowFrame")
     
-    # Channels
-    channels <- names(transformer_list)
+      # Channels
+      channels <- names(transformer_list)
     
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
-    on.exit(par(old_pars))
+      # Old graphics parameters
+      old_pars <- .par("mfrow")
+      on.exit(par(old_pars))
     
-    # Set up plotting area
-    cyto_plot_new(popup = popup)
-    n <- length(channels)
-    cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
-    )
+      # Set up plotting area
+      cyto_plot_new(popup = popup)
+      n <- length(channels)
+      cyto_plot_layout(
+        n2mfrow(n)[1],
+        n2mfrow(n)[2]
+      )
     
-    # Generate plot for each channel
-    lapply(channels, function(chan) {
-      if(inverse == FALSE){
-        cyto_plot(cyto_data,
-                  channels = chan,
-                  axes_trans = transformer_list, 
-                  title = NA
-        )
-      }else if(inverse == TRUE){
-        cyto_plot(cyto_data,
-                  channels = chan,
-                  title = NA
-        )
-      }
+      # Generate plot for each channel
+      lapply(channels, function(chan) {
+        if(inverse == FALSE){
+          cyto_plot(cyto_data,
+                    channels = chan,
+                    axes_trans = transformer_list, 
+                    title = NA
+          )
+        }else if(inverse == TRUE){
+          cyto_plot(cyto_data,
+                    channels = chan,
+                    title = NA
+          )
+        }
 
+      })
+    }, error = function(e){
+      message("Insufficient plotting space, transformations have been applied.")
     })
-    
+
   }
   
   # Return transformed data
@@ -522,36 +528,40 @@ cyto_transform.transformList <- function(x,
   
   # Construct plots
   if(plot == TRUE){
+    # Plot if sufficient space
+    tryCatch({
+      
+      # Pull out flowFrame/flowSet to plot
+      cyto_data <- cyto_extract(x)
     
-    # Pull out flowFrame/flowSet to plot
-    cyto_data <- cyto_extract(x)
+      # Convert to flowFrame for plotting
+      cyto_data <- cyto_convert(cyto_data, "flowFrame")
     
-    # Convert to flowFrame for plotting
-    cyto_data <- cyto_convert(cyto_data, "flowFrame")
+      # Channels
+      channels <- names(trans@transforms)
     
-    # Channels
-    channels <- names(trans@transforms)
+      # Old graphics parameters
+      old_pars <- .par("mfrow")
+      on.exit(par(old_pars))
     
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
-    on.exit(par(old_pars))
-    
-    # Set up plotting area
-    cyto_plot_new(popup = popup)
-    n <- length(channels)
-    cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
-    )
-    
-    # Generate plot for each channel - axes will not be transformed correctly
-    lapply(channels, function(chan) {
-      cyto_plot(cyto_data,
-                channels = chan,
-                title = NA
+      # Set up plotting area
+      cyto_plot_new(popup = popup)
+      n <- length(channels)
+      cyto_plot_layout(
+        n2mfrow(n)[1],
+        n2mfrow(n)[2]
       )
+  
+      # Generate plot for each channel - axes will not be transformed correctly
+      lapply(channels, function(chan) {
+        cyto_plot(cyto_data,
+                  channels = chan,
+                  title = NA
+        )
+      })
+    }, error = function(e){
+      message("Insufficient plotting space, transformations have been applied.")
     })
-    
   }
   
   # Return transformed data
@@ -596,50 +606,52 @@ cyto_transform.transformerList <- function(x,
   
   # Construct plots
   if(plot == TRUE){
-    
-    # Extract flowFrame/flowSet for plottng
-    cyto_data <- cyto_extract(x)
-    
-    # Convert to flowFrame for plotting
-    cyto_data <- cyto_convert(cyto_data, "flowFrame")
-    
-    # Channels
-    channels <- names(trans)
-    
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
-    on.exit(par(old_pars))
-    
-    # Set up plotting area
-    cyto_plot_new(popup = popup)
-    n <- length(channels)
-    cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
-    )
-    
-    # Generate plot for each channel
-    lapply(channels, function(chan) {
-      if(inverse == FALSE){
-        cyto_plot(cyto_data,
-                  channels = chan,
-                  axes_trans = trans,
-                  title = NA
-        )
-      }else if(inverse == TRUE){
-        cyto_plot(cyto_data,
-                  channels = chan,
-                  title = NA
-        )
-      }
+    # Plot if sufficient space
+    tryCatch({    
       
-    })
+      # Extract flowFrame/flowSet for plottng
+      cyto_data <- cyto_extract(x)
     
+      # Convert to flowFrame for plotting
+      cyto_data <- cyto_convert(cyto_data, "flowFrame")
+    
+      # Channels
+      channels <- names(trans)
+    
+      # Old graphics parameters
+      old_pars <- .par("mfrow")
+      on.exit(par(old_pars))
+    
+      # Set up plotting area
+      cyto_plot_new(popup = popup)
+      n <- length(channels)
+      cyto_plot_layout(
+        n2mfrow(n)[1],
+        n2mfrow(n)[2]
+      )
+      
+      # Generate plot for each channel
+      lapply(channels, function(chan) {
+        if(inverse == FALSE){
+          cyto_plot(cyto_data,
+                    channels = chan,
+                    axes_trans = trans,
+                    title = NA
+          )
+        }else if(inverse == TRUE){
+          cyto_plot(cyto_data,
+                    channels = chan,
+                    title = NA
+          )
+        }
+      })
+    }, error = function(e){
+      message("Insufficient plotting space, transformations have been applied.")
+    })
   }
   
   # Return transformed data
   return(x)
-  
 }
 
 

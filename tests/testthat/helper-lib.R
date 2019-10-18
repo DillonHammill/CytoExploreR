@@ -97,7 +97,7 @@ gtf <- read.csv(system.file("extdata",
 gt_gating(gt, gs)
 
 # Extract T Cells Population -
-Va2 <- getData(gs, "T Cells")
+Va2 <- gs_pop_get_data(gs, "T Cells")
 
 # Extract a flowFrame/flowSet for testing -
 fr_test <- Va2[[32]]
@@ -122,7 +122,7 @@ Comp <- fsApply(Compensation, function(fr) {
 gsc <- GatingSet(Comp)
 
 # Transformed GatingSet -
-gsct <- cyto_transform(clone(gsc),
+gsct <- cyto_transform(gs_clone(gsc),
                        trans_type = "biex",
                        plot = FALSE)
 

@@ -13,7 +13,7 @@
 #'   "count" statistics onto the gating tree, set to NULL by default to exclude
 #'   statistics.
 #'
-#' @importFrom openCyto templateGen
+#' @importFrom openCyto gh_generate_template
 #' @importFrom magrittr %>%
 #' @importFrom visNetwork visNetwork visEdges
 #' 
@@ -63,7 +63,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
                                                   stat = NULL) {
   
   # Extract gatingTemplate from GatingHierarchy
-  gt <- templateGen(x)
+  gt <- gh_generate_template(x)
   
   # Extract nodes
   nodes <- rbind("root", gt[, c("alias","alias"), drop = FALSE])
@@ -129,7 +129,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
 cyto_plot_gating_tree.GatingSet <- function(x) {
   
   # Generate template based on first sample
-  gt <- templateGen(x[[1]])
+  gt <- gh_generate_template(x[[1]])
   
   # Extract nodes
   nodes <- rbind("root", gt[, c("alias","alias"), drop = FALSE])
@@ -161,7 +161,7 @@ cyto_plot_gating_tree.gatingTemplate <- function(x){
   gt <- as.data.table.gatingTemplate(x)
   
   # Preprocess gatingTemplate 
-  gt <- openCyto:::.preprocess_csv(gt)
+  gt <- .preprocess_csv(gt)
   
   # Convert preprocessed gt to data.frame
   gt <- as.data.frame(gt[, c("alias","parent"), with = FALSE])

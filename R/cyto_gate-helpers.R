@@ -460,8 +460,10 @@ cyto_gate_edit <- function(x,
   gs <- x
   
   # TRANSFORMATIONS
-  axes_trans <- gs[[1]]@transformation
-  if(length(axes_trans) == 0){
+  axes_trans <- gs@transformation
+  if(length(axes_trans) != 0){
+    axes_trans <- axes_trans[[1]]
+  }else{
     axes_trans <- NA
   }  
   

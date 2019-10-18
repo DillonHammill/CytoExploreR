@@ -33,6 +33,7 @@ cyto_transformer_arcsinh(x, ...)
 \method{cyto_transformer_arcsinh}{flowSet}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,
@@ -42,6 +43,7 @@ cyto_transformer_arcsinh(x, ...)
 \method{cyto_transformer_arcsinh}{flowFrame}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,

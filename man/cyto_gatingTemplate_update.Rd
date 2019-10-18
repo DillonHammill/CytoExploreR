@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_gatingTemplate-helpers.R
 \name{cyto_gatingTemplate_update}
 \alias{cyto_gatingTemplate_update}
-\title{Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR}
+\title{Convert CytoExploreR gatingTemplate to be compatible with  CytoExoloreR}
 \usage{
 cyto_gatingTemplate_update(
   gatingTemplate = NULL,
@@ -19,7 +19,7 @@ gatingTemplate.csv" by default.}
 converted gatingTemplate saved to .csv file.
 }
 \description{
-Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR
+Convert CytoExploreR gatingTemplate to be compatible with  CytoExoloreR
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

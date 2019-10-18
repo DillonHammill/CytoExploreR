@@ -33,6 +33,7 @@ cyto_transformer_logicle(x, ...)
 \method{cyto_transformer_logicle}{flowSet}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = FALSE,
   popup = FALSE,
@@ -42,6 +43,7 @@ cyto_transformer_logicle(x, ...)
 \method{cyto_transformer_logicle}{flowFrame}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,

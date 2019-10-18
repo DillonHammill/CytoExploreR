@@ -182,7 +182,12 @@ cyto_gate_draw.GatingSet <- function(x,
   channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
 
   # TRANSFORMATIONS
-  axes_trans <- x[[1]]@transformation
+  axes_trans <- x@transformation
+  if(length(axes_trans) != 0){
+    axes_trans <- axes_trans[[1]]
+  }else{
+    axes_trans <- NA
+  }
 
   # PREPARE SAMPLES ------------------------------------------------------------
 

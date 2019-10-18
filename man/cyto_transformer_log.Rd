@@ -33,6 +33,7 @@ cyto_transformer_log(x, ...)
 \method{cyto_transformer_log}{flowSet}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,
@@ -42,6 +43,7 @@ cyto_transformer_log(x, ...)
 \method{cyto_transformer_log}{flowFrame}(
   x,
   channels = NULL,
+  parent = "root",
   select = NULL,
   plot = TRUE,
   popup = FALSE,

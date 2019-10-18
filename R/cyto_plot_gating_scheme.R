@@ -55,6 +55,8 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @importFrom graphics plot.new
+#' @importFrom flowWorkspace gh_pop_get_descendants 
+#' @importFrom openCyto gt_gating
 #' 
 #' @examples
 #' library(CytoRSuiteData)
@@ -133,7 +135,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (file_wd_check(gatingTemplate)) {
         gt <- gatingTemplate(gatingTemplate)
-        gating(gt, gh)
+        gt_gating(gt, gh)
       } else {
         stop(paste(
           gatingTemplate,
@@ -142,7 +144,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
       }
     } else {
       gt <- gatingTemplate(gatingTemplate)
-      gating(gt, gh)
+      gt_gating(gt, gh)
     }
   }
 
@@ -165,7 +167,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
       overlay <- back_gate
     }
   } else {
-    overlay <- NULL
+    overlay <- NA
   }
 
   # Number of overlays
@@ -325,7 +327,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   }
 
   # Use GatingHierarchy directly to get gating scheme
-  gt <- templateGen(gh)
+  gt <- gh_generate_template(gh)
   gts <- data.frame(
     parent = basename(gt$parent),
     alias = gt$alias,
@@ -424,7 +426,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
               overlay <- c(alias, LAPPLY(
                 seq_along(alias),
                 function(x) {
-                  getDescendants(gh, alias[x], path = "auto")
+                  gh_pop_get_descendants(gh, alias[x], path = "auto")
                 }
               ))
             }
@@ -432,20 +434,20 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
             if (!show_all) {
               if (any(back_gate %in%
                 c(alias, LAPPLY(seq_along(alias), function(x) {
-                  getDescendants(gh, alias[x], path = "auto")
+                  gh_pop_get_descendants(gh, alias[x], path = "auto")
                 })))) {
                 ind <- c(
                   alias,
                   LAPPLY(
                     seq_along(alias),
                     function(x) {
-                      getDescendants(gh, alias[x], path = "auto")
+                      gh_pop_get_descendants(gh, alias[x], path = "auto")
                     }
                   )
                 )
                 overlay <- back_gate[back_gate %in% ind]
               } else {
-                overlay <- NULL
+                overlay <- NA
               }
             }
           }
@@ -482,7 +484,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
         # Skip boolean gates
         if (any(
           LAPPLY(alias, function(x) {
-            flowWorkspace:::isNegated(gh, x)
+            .isNegated(gh, x)
           })
         )) {
           message("Skipping boolean gates.")
@@ -490,12 +492,12 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
             lapply(
               alias,
               function(x) {
-                flowWorkspace:::isNegated(gh, x)
+                .isNegated(gh, x)
               }
             )
           )]
         }
-
+        
         # Call to cyto_plot
         cyto_plot(gh,
           parent = parent,
@@ -608,13 +610,13 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (file_wd_check(gatingTemplate)) {
         gt <- gatingTemplate(gatingTemplate)
-        gating(gt, x)
+        gt_gating(gt, x)
       } else {
         stop(paste(gatingTemplate, "is not in this working directory"))
       }
     } else {
       gt <- gatingTemplate(gatingTemplate)
-      gating(gt, x)
+      gt_gating(gt, x)
     }
   }
   
@@ -692,7 +694,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
         overlay <- back_gate
       }
     } else {
-      overlay <- NULL
+      overlay <- NA
     }
     
     # Number of overlays
@@ -855,7 +857,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     }
     
     # Use GatingSet directly to get gating scheme - template from first member
-    gt <- templateGen(gs[[1]])
+    gt <- gh_generate_template(gs[[1]])
     gts <- data.frame(
       parent = basename(gt$parent),
       alias = gt$alias,
@@ -950,7 +952,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
               overlay <- c(alias, LAPPLY(
                 seq_along(alias),
                 function(x) {
-                  getDescendants(gs[[1]], alias[x], path = "auto")
+                  gh_pop_get_descendants(gs[[1]], alias[x], path = "auto")
                 }
               ))
             }
@@ -958,7 +960,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
             if (!show_all) {
               if (any(back_gate %in%
                       c(alias, LAPPLY(seq_along(alias), function(x) {
-                        getDescendants(gs[[1]], alias[x], path = "auto")
+                        gh_pop_get_descendants(gs[[1]], alias[x], path = "auto")
                       })))) {
                 overlay <- back_gate[back_gate %in%
                                        c(
@@ -966,7 +968,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
                                          LAPPLY(
                                            seq_along(alias),
                                            function(x) {
-                                             getDescendants(
+                                             gh_pop_get_descendants(
                                                gs[[1]],
                                                alias[x],
                                                path = "auto"
@@ -975,7 +977,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
                                          )
                                        )]
               } else {
-                overlay <- NULL
+                overlay <- NA
               }
             }
           }
@@ -1021,7 +1023,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
         if (any(LAPPLY(
           alias,
           function(x) {
-            flowWorkspace:::isNegated(
+            .isNegated(
               gs[[1]],
               x
             )
@@ -1030,7 +1032,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
           message("skipping boolean gates.")
           alias <- alias[!unlist(
             lapply(alias, function(x) {
-              flowWorkspace:::isNegated(gs[[1]], x)
+               .isNegated(gs[[1]], x)
             })
           )]
         }

@@ -241,7 +241,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   # NEGATE
   if(!.all_na(gate)){
     # ALL NEGATED GATES - SET NEGATE TO TRUE
-    if(all(lapply(gate, function(z){flowWorkspace:::isNegated(z)})))
+    if(all(lapply(gate, function(z){.isNegated(z)})))
       # NEGATE NOT SPECIFIED
       if(missing(negate)){
         negate <- TRUE

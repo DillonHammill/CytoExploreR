@@ -245,6 +245,7 @@
 #' @importFrom purrr transpose
 #' @importFrom openCyto templateGen
 #' @importFrom methods formalArgs is
+#' @importFrom flowWorkspace gh_pop_is_negated
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -745,7 +746,7 @@ cyto_plot.GatingHierarchy <- function(x,
     # SUPPORT NEGATED GATES
     if (!.all_na(paste(parent, alias, sep = "/"))) {
       if (all(LAPPLY(alias, function(z) {
-        .isNegated(gh, z)
+        gh_pop_is_negated(gh, z)
       }))) {
         # NEGATE
         if (missing(negate)) {
