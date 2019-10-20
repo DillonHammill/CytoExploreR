@@ -248,7 +248,9 @@ cyto_plot_empty.flowFrame <- function(x,
   } else {
     if (getOption("cyto_plot_method") == "flowFrame") {
       if (!.all_na(axes_trans)) {
+        print("CMON")
         if (channels[1] %in% names(axes_trans)) {
+          print("IMPOSSIBLE")
           xlim <- axes_trans[[channels[1]]]$transform(xlim)
         }
       }
@@ -307,20 +309,29 @@ cyto_plot_empty.flowFrame <- function(x,
     }
   }
 
+  print("XLIM")
+  print(xlim)
+  print("YLIM")
+  print(ylim)
+  
   # AXES TEXT ------------------------------------------------------------------
 
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!inherits(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
+  
+  print("YASSS")
+  print(axes_text)
 
   # X axis breaks and labels -  can be inherited from cyto_plot
   if (!inherits(axes_text[[1]], "list")) {
     if (.all_na(axes_text[[1]])) {
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[1]] == TRUE) {
-      lims <- list(xlim, ylim)
-      names(lims) <- rep(c(channels, NA), length.out = 2)
+      lims <- list(xlim)
+      names(lims) <- channels[1]
+      print(lims)
       axes_text[[1]] <- .cyto_plot_axes_text(fr_list,
         channels = channels[1],
         axes_trans = axes_trans,
@@ -336,8 +347,9 @@ cyto_plot_empty.flowFrame <- function(x,
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[2]] == TRUE) {
       if (length(channels) == 2) {
-        lims <- list(xlim, ylim)
-        names(lims) <- rep(c(channels, NA), length.out = 2)
+        lims <- list(ylim)
+        names(lims) <- channels[2]
+        print(lims)
         axes_text[[2]] <- .cyto_plot_axes_text(fr_list,
           channels = channels[2],
           axes_trans = axes_trans,

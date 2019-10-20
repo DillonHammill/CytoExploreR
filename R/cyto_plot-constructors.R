@@ -5,7 +5,8 @@
 # cyto_plot_point, cyto_plot_gate and cyto_plot_label. These wrappers bypass
 # some of the calculations in the exported equivalents as these calculations are
 # already performed internally within cyto_plot. All of these functions inherit
-# a named list of arguments from cyto_plot.
+# a named list of arguments from cyto_plot. Arguments must be extracted directly
+# from the list to prevent R CMD CHECK global binding NOTEs.
 
 ## .CYTO_PLOT_EMPTY ------------------------------------------------------------
 
@@ -131,24 +132,30 @@
       if (.all_na(axes_text[[1]])) {
         # NA == TRUE returns NA not T/F
       } else if (axes_text[[1]] == TRUE) {
-        axes_text[[1]] <- .cyto_plot_axes_text(x,
-          channels = channels[1],
-          axes_trans = axes_trans,
-          limits = limits
+        lims <- list(xlim)
+        names(lims) <- channels[1]
+        axes_text[[1]] <- .cyto_plot_axes_text(fr_list,
+                                               channels = channels[1],
+                                               axes_trans = axes_trans,
+                                               axes_range = lims,
+                                               limits = limits
         )[[1]]
       }
     }
-
+    
     # Y axis breaks and labels - can be inherited from cyto_plot
     if (!inherits(axes_text[[2]], "list")) {
       if (.all_na(axes_text[[2]])) {
         # NA == TRUE returns NA not T/F
       } else if (axes_text[[2]] == TRUE) {
         if (length(channels) == 2) {
-          axes_text[[2]] <- .cyto_plot_axes_text(x,
-            channels = channels[2],
-            axes_trans = axes_trans,
-            limits = limits
+          lims <- list(ylim)
+          names(lims) <- channels[2]
+          axes_text[[2]] <- .cyto_plot_axes_text(fr_list,
+                                                 channels = channels[2],
+                                                 axes_trans = axes_trans,
+                                                 axes_range = lims,
+                                                 limits = limits
           )[[1]]
         } else {
           axes_text[[2]] <- NA

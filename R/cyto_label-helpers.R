@@ -308,9 +308,10 @@
   }
   
   # LABEL_TEXT_XY - MATRIX
-  label_text_xy <- lapply(seq_len(SMP), function(z){    text_x <- c()
+  label_text_xy <- lapply(seq_len(SMP), function(z){    
 
     # TEMPORARY STORAGE VECTORS
+    text_x <- c()
     text_y <- c()
     # COMPUTE LABEL CO-ORDINATES
     lapply(label_ind[[z]], function(y){
@@ -355,10 +356,16 @@
                     text_x[ind] <<-quantile(rng, 0.56)
                   }
                 }
+              # X COORD MANUALLY SUPPLIED
+              }else if(!.all_na(label_text_x[y])){
+                text_x[ind] <<- label_text_x[y]
               }
               # Y COORD - STACKS/LIMITS
               if(.all_na(label_text_y[y])){
                 text_y[ind] <<- y_coords[y]
+              # Y COORD MANUALLY SUPPLIED
+              }else if(!.all_na(label_text_y[y])){
+                text_y[ind] <<- label_text_y[y]
               }
             }
           # NO GATE
@@ -386,10 +393,16 @@
                   text_x[ind] <<-quantile(rng, 0.56)
                 }
               }
+            # X COORD MANUALLY SUPPLIED
+            }else if(!.all_na(label_text_x[y])){
+              text_x[ind] <<- label_text_x[y]
             }
             # Y COORD - STACKS/LIMITS
             if(.all_na(label_text_y[y])){
               text_y[ind] <<- y_coords[y]
+            # Y COORD MANUALLY SUPPLIED
+            }else if(!.all_na(label_text_y[y])){
+              text_y[ind] <<- label_text_y[y]
             }
           }
         # 2D PLOT - MODE
@@ -418,6 +431,9 @@
                                density_smooth = density_smooth)
                   )
                 }
+              # X COORD MANUALLY SUPPLIED
+              }else if(!.all_na(label_text_x[y])){
+                text_x[ind] <<- label_text_x[y]
               }
               # Y COORD - MODE/RANGE CENTER
               if(.all_na(label_text_y[y])){
@@ -433,6 +449,9 @@
                                density_smooth = density_smooth)
                   )
                 }
+              # Y COORD MANUALLY SUPPLIED
+              }else if(!.all_na(label_text_y[y])){
+                text_y[ind] <<- label_text_y[y]
               }
             }
           # NO GATE
@@ -451,6 +470,9 @@
                              density_smooth = density_smooth)
                 )
               }
+            # X COORD SUPPLIED MANUALLY
+            }else if(!.all_na(label_text_x[y])){
+              text_x[ind] <<- label_text_x[y]
             }
             # Y COORD - MODE
             if(.all_na(label_text_y[y])){
@@ -465,6 +487,9 @@
                              density_smooth = density_smooth)
                 )
               }
+            # Y COORD MANUALLY SUPPLIED
+            }else if(!.all_na(label_text_y[y])){
+              text_y[ind] <<- label_text_y[y]
             }
           }
         }

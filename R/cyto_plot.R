@@ -683,7 +683,7 @@ cyto_plot.GatingHierarchy <- function(x,
     channels <- cyto_channels_extract(x, channels)
   }
 
-  # GATINGHIERACHY - gh (x available for flowframe method call)
+  # GATINGHIERACHY - gh (x available for flowFrame method call)
   gh <- x
 
   # TRANSFORMATIONS
@@ -964,7 +964,10 @@ cyto_plot.flowSet <- function(x,
 
   # METHOD
   if (is.null(getOption("cyto_plot_method"))) {
+    # SET PLOT METHOD
     options("cyto_plot_method" = "flowSet")
+    # RESET PLOT METHOD ON EXIT
+    on.exit(options("cyto_plot_method" = NULL))
   }
 
   # CUSTOM PLOT - LAYOUT FALSE
@@ -1239,7 +1242,9 @@ cyto_plot.flowSet <- function(x,
     axes_text_x <- .cyto_plot_axes_text(x[[1]],
       channels = channels[1],
       axes_trans = axes_trans,
-      axes_range = list(xlim, ylim),
+      axes_range = structure(list(xlim, ylim), 
+                             names = rep(c(channels, NA),
+                                         length.out = 2)),
       limits = limits
     )[[1]]
   } else {
@@ -1252,7 +1257,9 @@ cyto_plot.flowSet <- function(x,
       axes_text_y <- .cyto_plot_axes_text(x[[1]],
         channels = channels[2],
         axes_trans = axes_trans,
-        axes_range = list(xlim, ylim),
+        axes_range = structure(list(xlim, ylim),
+                               names = rep(c(channels, NA),
+                                           length.out = 2)),
         limits = limits
       )[[1]]
     } else if (length(channels) == 1) {
@@ -1589,11 +1596,6 @@ cyto_plot.flowSet <- function(x,
     }
   }
 
-  # REST CYTO_PLOT_METHOD
-  if (getOption("cyto_plot_method") == "flowSet") {
-    options("cyto_plot_method" = NULL)
-  }
-
   # RETURN RECORDED PLOT
   invisible(recordPlot())
 }
@@ -1680,7 +1682,10 @@ cyto_plot.flowFrame <- function(x,
 
   # METHOD
   if (is.null(getOption("cyto_plot_method"))) {
+    # SET PLOT METHOD
     options("cyto_plot_method" = "flowFrame")
+    # RESET PLOT METHOD ON EXIT
+    options("cyto_plot_method" = NULL)
   }
 
   # CHANNELS
@@ -1958,13 +1963,13 @@ cyto_plot.flowFrame <- function(x,
         if (channels[2] %in% names(axes_trans)) {
           ind <- which(!is.na(label_text_y))
           lapply(ind, function(z) {
-            label_text_y[z] <- axes_trans[[channels[2]]]$transform(label_text_y[z])
+            label_text_y[z] <<- axes_trans[[channels[2]]]$transform(label_text_y[z])
           })
         }
       }
     }
   }
-
+  
   # POPULATIONS TO LABEL -------------------------------------------------------
 
   # LIST OF POPULATIONS - NEEDED FOR POSITION & STATISTICS
@@ -2227,12 +2232,7 @@ cyto_plot.flowFrame <- function(x,
       options("cyto_plot_save" = FALSE)
     }
   }
-
-  # RESET CYTO_PLOT_METHOD
-  if (getOption("cyto_plot_method") == "flowFrame") {
-    options("cyto_plot_method" = NULL)
-  }
-
+  
   # RETURN RECORDED PLOT
   invisible(recordPlot())
 }
