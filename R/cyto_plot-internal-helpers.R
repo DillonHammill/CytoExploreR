@@ -212,9 +212,9 @@
   }
   
   # LAYERS PER PLOT - L --------------------------------------------------------
-  if(N == 1){
+  if(MTD == "flowFrame"){
     L <- length(x[["fr_list"]])
-  }else{
+  }else if(MTD == "flowSet"){
     L <- length(x[["fr_list"]][[1]])
   }
   
@@ -222,13 +222,13 @@
   TL <- N * L
   
   # GATE COUNT PER LAYER - GC --------------------------------------------------
-  if(N == 1){
+  if(MTD == "flowFrame"){
     if(all(LAPPLY(x[["gate"]], function(z){.all_na(z)}))){
       GC <- 0
     }else{
       GC <- length(x[["gate"]])
     }
-  }else{
+  }else if(MTD == "flowSet"){
     if(all(LAPPLY(x[["gate"]][[1]], function(z){.all_na(z)}))){
       GC <- 0
     }else{
@@ -238,7 +238,7 @@
   
   # GATED POPULATIONS PER LAYER - GP -------------------------------------------
   GP <- c()
-  if(N == 1){
+  if(MTD == "flowFrame"){
     if(GC != 0) {
       lapply(x[["gate"]], function(z){
         if(class(z) == "quadGate"){
@@ -250,7 +250,7 @@
     }else{
       GP <- 1
     }
-  }else if(N > 1){
+  }else if(MTD =="flowSet"){
     if(GC != 0){
       lapply(x[["gate"]][[1]], function(z){
         if(class(z) == "quadGate"){
@@ -269,12 +269,12 @@
   
   # TOTAL POPULATIONS PER LAYER - TP -------------------------------------------
   if(GC != 0 & x[["negate"]] == TRUE){
-    if(N == 1){
+    if(MTD == "flowFrame"){
       # WATCH OUT FOR QUADGATES
       if(!"quadGate" %in% LAPPLY(x[["gate"]], "is")){
         TP <- TGP + 1
       }
-    }else if(N > 1){
+    }else if(MTD == "flowSet"){
       # WATCH OUT FOR QUADGATES
       if(!"quadGate" %in% LAPPLY(x[["gate"]][[1]], "is")){
         TP <- TGP + 1
@@ -487,7 +487,8 @@
     if(arg %in% names(x)){
       if(arg %in% c("label_text_x", 
                     "label_text_y")){
-        res <- rep(c(x[[arg]], rep(NA, TL * TP)), length.out = TL * TP)
+        res <- rep(c(x[[arg]], rep(NA, TL * TP)), 
+                   length.out = TL * TP)
       }else{
         res <- rep(x[[arg]], length.out = TL * TP)
       }
