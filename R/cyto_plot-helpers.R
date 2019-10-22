@@ -244,19 +244,8 @@ cyto_plot_empty.flowFrame <- function(x,
         xlim[2] <- gate_xcoords[2]
       }
     }
-    # XLIM MANUALLY SUPPLIED
-  } else {
-    if (getOption("cyto_plot_method") == "flowFrame") {
-      if (!.all_na(axes_trans)) {
-        print("CMON")
-        if (channels[1] %in% names(axes_trans)) {
-          print("IMPOSSIBLE")
-          xlim <- axes_trans[[channels[1]]]$transform(xlim)
-        }
-      }
-    }
   }
-
+  
   # YLIM
   if (.all_na(ylim)) {
     # 1D PLOT
@@ -295,34 +284,14 @@ cyto_plot_empty.flowFrame <- function(x,
         }
       }
     }
-    # YLIM MANUALLY SUPPLIED
-  } else {
-    # 2D PLOT
-    if (length(channels) == 2) {
-      if (getOption("cyto_plot_method") == "flowFrame") {
-        if (!.all_na(axes_trans)) {
-          if (channels[2] %in% names(axes_trans)) {
-            ylim <- axes_trans[[channels[2]]]$transform(ylim)
-          }
-        }
-      }
-    }
   }
 
-  print("XLIM")
-  print(xlim)
-  print("YLIM")
-  print(ylim)
-  
   # AXES TEXT ------------------------------------------------------------------
 
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!inherits(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
-  
-  print("YASSS")
-  print(axes_text)
 
   # X axis breaks and labels -  can be inherited from cyto_plot
   if (!inherits(axes_text[[1]], "list")) {
@@ -331,7 +300,6 @@ cyto_plot_empty.flowFrame <- function(x,
     } else if (axes_text[[1]] == TRUE) {
       lims <- list(xlim)
       names(lims) <- channels[1]
-      print(lims)
       axes_text[[1]] <- .cyto_plot_axes_text(fr_list,
         channels = channels[1],
         axes_trans = axes_trans,
@@ -349,7 +317,6 @@ cyto_plot_empty.flowFrame <- function(x,
       if (length(channels) == 2) {
         lims <- list(ylim)
         names(lims) <- channels[2]
-        print(lims)
         axes_text[[2]] <- .cyto_plot_axes_text(fr_list,
           channels = channels[2],
           axes_trans = axes_trans,
