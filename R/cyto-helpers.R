@@ -1569,7 +1569,7 @@ cyto_annotate <- function(x, file = NULL) {
                          header = TRUE, 
                          stringsAsFactors = FALSE)
         # SampleNames match those of x
-        if(identical(pdata$name, cyto_names(x))){
+        if(all(cyto_names(x) %in% as.vector(pdata$name))){
           return(pdata)
         }else{
           return(NULL)
@@ -1624,11 +1624,11 @@ cyto_annotate <- function(x, file = NULL) {
     }
     
   }
-
+  
   # Edit cyto_details
   pd <- suppressWarnings(edit(pd))
   rownames(pd) <- pd$name
-
+  
   # Update cyto_details
   cyto_details(x) <- pd
 
