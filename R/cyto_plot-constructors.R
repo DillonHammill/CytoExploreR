@@ -105,7 +105,7 @@
   # RENAME FR_LIST ARGUMENT TO X (DO.CALL() ON CYTO_PLOT_EMPTY)
   names(args)[match("fr_list", names(args))] <- "x"
 
-  # RESET DISPLAY ARGUMENT
+  # RESET DISPLAY ARGUMENT - DATA ALREADY SAMPLED
   args["display"] <- 1
 
   # CYTO_PLOT_DENSITY ARGUMENTS
@@ -131,6 +131,15 @@
 
   # GENERAL --------------------------------------------------------------------
 
+  # SAMPLES
+  SMP <- args[["SMP"]]
+  
+  # POPULATIONS PER LAYER
+  NP <- args[["NP"]]
+  
+  # TOTAL POPULATIONS
+  TNP <- args[["TNP"]]  
+  
   # GATES
   NG <- length(args[["gate"]])
 
@@ -158,7 +167,8 @@
     args[[z]] <<- rep(args[[z]], length.out = TNP)
   })
   lapply(label_args, function(z) {
-    args[[z]] <<- split(args[[z]], rep(seq_len(SMP), each = NP))
+    args[[z]] <<- split(args[[z]], rep(seq_len(SMP), 
+                                       each = NP))
   })
 
   # RE-ARRANGE LABEL COORDS PER GATE
