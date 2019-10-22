@@ -217,11 +217,6 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # AXES LIMITS ----------------------------------------------------------------
 
-  # GATE COORDS
-  if(!.all_na(gate)){
-    gate_coords <- .cyto_gate_coords(gate, channels)
-  }
-  
   # XLIM
   if (.all_na(xlim)) {
     # XLIM
@@ -230,20 +225,6 @@ cyto_plot_empty.flowFrame <- function(x,
       limits = limits,
       plot = TRUE
     )[, 1]
-    # GATE coords
-    if(!.all_na(gate)){
-      # MIN & MAX GATE COORDS
-      gate_xcoords <- gate_coords[, channels[1]]
-      gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
-      # GATE COORDS BELOW XMIN
-      if(is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]){
-        xlim[1] <- gate_xcoords[1]
-      }
-      # GATE COORDS ABOVE XMAX
-      if(is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]){
-        xlim[2] <- gate_xcoords[2]
-      }
-    }
   }
   
   # YLIM
@@ -269,23 +250,48 @@ cyto_plot_empty.flowFrame <- function(x,
         limits = limits,
         plot = TRUE
       )[, 1]
-      # GATE coords
-      if(!.all_na(gate)){
-        # MIN & MAX GATE COORDS
-        gate_ycoords <- gate_coords[, channels[1]]
-        gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
-        # GATE COORDS BELOW YMIN
-        if(is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]){
-          ylim[1] <- gate_ycoords[1]
-        }
-        # GATE COORDS ABOVE YMAX
-        if(is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]){
-          ylim[2] <- gate_ycoords[2]
-        }
+    }
+  }
+  
+  # GATE COORDS MUST BE WITHIN AXES LIMITS
+  if(!.all_na(gate)){
+    # GATE COORDS
+    gate_coords <- .cyto_gate_coords(gate, channels)
+  }
+  
+  # XLIM GATE COORD ADJUSTMENT
+  if(!.all_na(gate)){
+    # MIN & MAX GATE COORDS
+    gate_xcoords <- gate_coords[, channels[1]]
+    gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
+    # GATE COORDS BELOW XMIN
+    if(is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]){
+      xlim[1] <- gate_xcoords[1]
+    }
+    # GATE COORDS ABOVE XMAX
+    if(is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]){
+      xlim[2] <- gate_xcoords[2]
+    }
+  }
+  
+  # YLIM GATE COORD ADJUSTMENT
+  if(length(channels) == 2){
+    # GATE COORDS
+    if(!.all_na(gate)){
+      # MIN & MAX GATE COORDS
+      gate_ycoords <- gate_coords[, channels[1]]
+      gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
+      # GATE COORDS BELOW YMIN
+      if(is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]){
+        ylim[1] <- gate_ycoords[1]
+      }
+      # GATE COORDS ABOVE YMAX
+      if(is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]){
+        ylim[2] <- gate_ycoords[2]
       }
     }
   }
-
+  
   # AXES TEXT ------------------------------------------------------------------
 
   # Convert axes_text to list - allows inheritance from cyto_plot
