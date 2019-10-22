@@ -17,7 +17,7 @@ library(dplyr)
 # mixedsort
 library(gtools)
 
-# Data directory CytoExploreRData ------------------------------------------------
+# Data directory CytoExploreRData ----------------------------------------------
 datadir <- system.file("extdata", package = "CytoExploreRData")
 
 # Activation GatingSet ---------------------------------------------------------
