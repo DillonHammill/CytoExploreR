@@ -19,7 +19,7 @@
 #' @importFrom gtools mixedsort
 #'
 #' @examples
-#' 
+#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -39,8 +39,9 @@
 cyto_load <- function(path = ".", ...) {
 
   # PATHS - SORTED
-  files <- mixedsort(list.files(path, full.names = TRUE, pattern = ".fcs"))
-
+  files <- mixedsort(list.files(path, 
+                                full.names = TRUE))
+  
   # NCDFFLOWSET
   fs <- read.ncdfFlowSet(files = files, ...)
   
