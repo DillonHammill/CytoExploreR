@@ -55,7 +55,7 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @importFrom graphics plot.new
-#' @importFrom flowWorkspace gh_pop_get_descendants 
+#' @importFrom flowWorkspace gh_pop_get_descendants gh_pop_is_negated
 #' @importFrom openCyto gt_gating
 #' 
 #' @examples
@@ -484,7 +484,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
         # Skip boolean gates
         if (any(
           LAPPLY(alias, function(x) {
-            .isNegated(gh, x)
+            gh_pop_is_negated(gh, x)
           })
         )) {
           message("Skipping boolean gates.")
@@ -492,7 +492,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
             lapply(
               alias,
               function(x) {
-                .isNegated(gh, x)
+                gh_pop_is_negated(gh, x)
               }
             )
           )]
@@ -1023,7 +1023,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
         if (any(LAPPLY(
           alias,
           function(x) {
-            .isNegated(
+            gh_pop_is_negated(
               gs[[1]],
               x
             )
@@ -1032,7 +1032,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
           message("skipping boolean gates.")
           alias <- alias[!unlist(
             lapply(alias, function(x) {
-               .isNegated(gs[[1]], x)
+               gh_pop_is_negated(gs[[1]], x)
             })
           )]
         }
