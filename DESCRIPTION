@@ -19,9 +19,9 @@ Depends:
   R (>= 2.10),
   flowCore (>= 1.51.7),
   flowWorkspace (>= 3.33.9),
-  openCyto (>= 1.23.5)
+  openCyto (>= 1.23.5),
+  ncdfFlow
 Imports: 
-  ncdfFlow,
   data.table,
   BiocGenerics,
   shiny, 
