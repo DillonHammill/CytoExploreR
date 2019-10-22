@@ -36,7 +36,7 @@
   # TICKS - 10^-5 -> 10^5
   tcks <- c(sort(LAPPLY(c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000), 
                    function(z){-seq(90, 10, -10)*z})),
-            0,
+            seq(-9, 9, 1),
             LAPPLY(c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000),
                    function(z){seq(10, 90, 10) * z}))
   
@@ -85,6 +85,8 @@
     }
     if(z == 0){
       quote(0)
+    }else if(pwr == 0){
+      quote("")
     }else if(abs(pwr)%%1 == 0){
       substitute(10^pwr)
     }else{
