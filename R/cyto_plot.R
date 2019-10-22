@@ -243,7 +243,7 @@
 #' @importFrom grDevices recordPlot
 #' @importFrom magrittr %>%
 #' @importFrom purrr transpose
-#' @importFrom openCyto templateGen
+#' @importFrom openCyto gh_generate_template
 #' @importFrom methods formalArgs is
 #' @importFrom flowWorkspace gh_pop_is_negated
 #'
@@ -396,7 +396,7 @@ cyto_plot.GatingSet <- function(x,
   if (.empty(alias)) {
     # ALL GATES IN SUPPLIED CHANNELS
     if (all(alias == "")) {
-      gt <- templateGen(gs[[1]])
+      gt <- gh_generate_template(gs[[1]])
       gt <- gt[basename(gt$parent) == parent, ]
       # 2D PLOT - BOTH CHANNELS MATCH
       if (length(channels) == 2) {
@@ -569,8 +569,6 @@ cyto_plot.GatingSet <- function(x,
       }
     })
   }
-
-  # LABEL_TEXT
   
   # CALL CYTO_PLOT FLOWSET METHOD ----------------------------------------------
 
@@ -706,7 +704,7 @@ cyto_plot.GatingHierarchy <- function(x,
   if (.empty(alias)) {
     # ALL GATES IN SUPPLIED CHANNELS
     if (all(alias == "")) {
-      gt <- templateGen(gh)
+      gt <- gh_generate_template(gh)
       gt <- gt[basename(gt$parent) == parent, ]
       # 2D PLOT - BOTH CHANNELS MATCH
       if (length(channels) == 2) {
@@ -730,7 +728,7 @@ cyto_plot.GatingHierarchy <- function(x,
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
     if (is.character(overlay)) {
-      if (all(overlay %in% basename(cyto_nodes(gh)))) {
+      if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
         # EXTRACT POPULATIONS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
@@ -1348,6 +1346,9 @@ cyto_plot.flowSet <- function(x,
   # UPDATE ARGUMENTS
   .args_update(args)
 
+  print("FLOWSET")
+  print(label_text)
+  
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
 
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
