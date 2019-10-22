@@ -802,7 +802,8 @@
 #' @param x cytometry object(s) which require range calculation.
 #' @param parent name of parent population to extract for range calculation.
 #' @param channels name(s) of channel(s).
-#' @param limits either "data" or "machine".
+#' @param limits either "auto", "data" or "machine". "auto" use data limits but
+#'   always includes zero.
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
 #' @param buffer fraction indcating the amount of buffering to be added on top
@@ -825,7 +826,7 @@
 #' @noRd
 .cyto_range.flowFrame <- function(x, 
                                   channels = NA,
-                                  limits = "machine",
+                                  limits = "auto",
                                   plot = FALSE,
                                   buffer = 0.03,
                                   anchor = TRUE,
@@ -854,7 +855,7 @@
   )
   
   # Upper bound
-  if(limits == "data"){
+  if(limits %in% c("auto", "data")){
     mx <- suppressWarnings(
       range(x, type = "data")[, channels, drop = FALSE][2,]
     )
@@ -865,8 +866,8 @@
   }
   rng[2,] <- mx
   
-  # Replace lower data limit if > 0
-  if(anchor == TRUE){
+  # Replace lower data limit if > 0 - AUTO
+  if(limits != "data" & anchor == TRUE){
     if(any(rng[1,] > 0)){
       rng[1, rng[1,] > 0] <- 0
     }

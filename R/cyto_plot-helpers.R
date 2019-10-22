@@ -21,10 +21,11 @@
 #'   gate co-ordinates are taken into account when computing axes limits.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
-#' @param limits indicates whether the axes limits should be based on the
-#'   \code{"data"} or \code{"machine"}, set to "machine" by default to show
-#'   complete axes ranges. This argument will only alter the upper axis limits,
-#'   to modify the lower limits use \code{xlim} and \code{ylim}.
+#' @param limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param title title to use for the plot, set to the name of the sample by
 #'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
@@ -119,7 +120,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       gate = NA,
                                       xlim = NA,
                                       ylim = NA,
-                                      limits = "machine",
+                                      limits = "auto",
                                       title,
                                       xlab,
                                       ylab,
@@ -610,7 +611,7 @@ cyto_plot_empty.list <- function(x,
                                  gate = NA,
                                  xlim = NA,
                                  ylim = NA,
-                                 limits = "machine",
+                                 limits = "auto",
                                  title,
                                  xlab,
                                  ylab,

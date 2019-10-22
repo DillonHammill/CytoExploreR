@@ -37,11 +37,11 @@
 #'   \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},
 #'   \code{quadGate} or \code{filters}. Lists of these supported gate objects
 #'   are also supported.
-#' @param limits indicates whether the axes limits should be based on the
-#'   \code{"data"} or \code{"machine"}, set to "data" by default. Both
-#'   \code{"data"} and \code{"machine"} limits will include zero in the axes
-#'   text. For fine control over plot limits refer to the \code{xlim} and
-#'   \code{ylim} arguments.
+#' @param limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param display numeric to control the number or percentage of events to
 #'   display. Values [0,1] indicate the percentage of events to display (i.e.
 #'   value of 1 will display all events), whilst values larger than 1 indicate
@@ -268,7 +268,7 @@ cyto_plot.GatingSet <- function(x,
                                  group_by = NA,
                                  overlay = NA,
                                  gate = NA,
-                                 limits = "data",
+                                 limits = "auto",
                                  display = 25000,
                                  layout,
                                  popup = FALSE,
@@ -594,7 +594,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                        axes_trans = NA,
                                        overlay = NA,
                                        gate = NA,
-                                       limits = "data",
+                                       limits = "auto",
                                        display = 25000,
                                        popup = FALSE,
                                        xlim = NA,
@@ -885,7 +885,7 @@ cyto_plot.flowSet <- function(x,
                                group_by = NA,
                                overlay = NA,
                                gate = NA,
-                               limits = "data",
+                               limits = "auto",
                                display = 25000,
                                layout,
                                popup = FALSE,
@@ -1345,9 +1345,6 @@ cyto_plot.flowSet <- function(x,
 
   # UPDATE ARGUMENTS
   .args_update(args)
-
-  print("FLOWSET")
-  print(label_text)
   
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
 
@@ -1608,7 +1605,7 @@ cyto_plot.flowFrame <- function(x,
                                  axes_trans = NA,
                                  overlay = NA,
                                  gate = NA,
-                                 limits = "data",
+                                 limits = "auto",
                                  display = 25000,
                                  popup = FALSE,
                                  xlim = NA,

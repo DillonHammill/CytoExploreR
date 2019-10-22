@@ -17,7 +17,7 @@
   group_by = NA,
   overlay = NA,
   gate = NA,
-  limits = "data",
+  limits = "auto",
   display = 25000,
   layout,
   popup = FALSE,
@@ -100,7 +100,7 @@
   axes_trans = NA,
   overlay = NA,
   gate = NA,
-  limits = "data",
+  limits = "auto",
   display = 25000,
   popup = FALSE,
   xlim = NA,
@@ -180,7 +180,7 @@
   group_by = NA,
   overlay = NA,
   gate = NA,
-  limits = "data",
+  limits = "auto",
   display = 25000,
   layout,
   popup = FALSE,
@@ -261,7 +261,7 @@
   axes_trans = NA,
   overlay = NA,
   gate = NA,
-  limits = "data",
+  limits = "auto",
   display = 25000,
   popup = FALSE,
   xlim = NA,
@@ -376,11 +376,11 @@ the plot(s).}
 \code{quadGate} or \code{filters}. Lists of these supported gate objects
 are also supported.}
 
-\item{limits}{indicates whether the axes limits should be based on the
-\code{"data"} or \code{"machine"}, set to "data" by default. Both
-\code{"data"} and \code{"machine"} limits will include zero in the axes
-text. For fine control over plot limits refer to the \code{xlim} and
-\code{ylim} arguments.}
+\item{limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"auto"} by default to use optimised axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{display}{numeric to control the number or percentage of events to
 display. Values [0,1] indicate the percentage of events to display (i.e.
