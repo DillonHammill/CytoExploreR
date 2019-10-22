@@ -1685,7 +1685,7 @@ cyto_plot.flowFrame <- function(x,
     # SET PLOT METHOD
     options("cyto_plot_method" = "flowFrame")
     # RESET PLOT METHOD ON EXIT
-    options("cyto_plot_method" = NULL)
+    on.exit(options("cyto_plot_method" = NULL))
   }
 
   # CHANNELS
@@ -1965,6 +1965,26 @@ cyto_plot.flowFrame <- function(x,
           lapply(ind, function(z) {
             label_text_y[z] <<- axes_trans[[channels[2]]]$transform(label_text_y[z])
           })
+        }
+      }
+    }
+  }
+  
+  # TRANSFORM XLIM (FLOWFRAME METHOD ONLY)
+  if(!.all_na(xlim) & getOption("cyto_plot_method") == "flowFrame"){
+    if (!.all_na(axes_trans)) {
+      if (channels[1] %in% names(axes_trans)) {
+        xlim <- axes_trans[[channels[1]]]$transform(xlim)
+      }
+    }
+  }
+    
+  # TRANSFORM YLIM (FLOWFRAME METHOD ONLY)
+  if(!.all_na(ylim) & getOption("cyto_plot_method") == "flowFrame"){
+    if (length(channels) == 2) {
+      if (!.all_na(axes_trans)) {
+        if (channels[2] %in% names(axes_trans)) {
+          ylim <- axes_trans[[channels[2]]]$transform(ylim)
         }
       }
     }
