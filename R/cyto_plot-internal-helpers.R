@@ -489,6 +489,9 @@
                     "label_text_y")){
         res <- rep(c(x[[arg]], rep(NA, TL * TP)), 
                    length.out = TL * TP)
+      }else if(MTD == "flowSet" & arg == "label_text"){
+        res <- rep(c(x[[arg]], rep(NA, TP)), length.out = TP)
+        res <- rep(res, length.out = TL * TP)
       }else{
         res <- rep(x[[arg]], length.out = TL * TP)
       }
