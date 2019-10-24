@@ -71,7 +71,7 @@
 #'   entries.
 #'
 #' @importFrom BiocGenerics colnames
-#' @importFrom openCyto add_pop
+#' @importFrom openCyto gs_add_gating_method
 #' @importFrom methods as
 #' @importFrom utils read.csv write.csv
 #' @importFrom flowCore filters split
@@ -188,7 +188,7 @@ cyto_gate_draw.GatingSet <- function(x,
   }else{
     axes_trans <- NA
   }
-
+  
   # PREPARE SAMPLES ------------------------------------------------------------
 
   # EXTRACT PARENT POPULATION
@@ -461,15 +461,22 @@ cyto_gate_draw.GatingSet <- function(x,
         )
       }
     }, type[!is.na(type)], alias[!is.na(type)])
-    names(gates) <- LAPPLY(alias, function(z){paste(z, collapse = ",")})
-
+    
+    # NAME GATES
+    if(negate == TRUE){
+      names(gates) <- LAPPLY(alias[-length(alias)], function(z){
+        paste(z, collapse = ",")})
+    }else{
+      names(gates) <- LAPPLY(alias, function(z){paste(z, collapse = ",")})
+    }
+    
     # NEGATED POPULATION
     if (negate == TRUE) {
       # GATE
       if (length(unlist(gates)) == 1) {
-        NP <- split(FR_LIST[[1]], unlist(gates))[[2]]
+        NP <- split(FR_LIST[[1]], unlist(gates)[[1]])[[2]]
       } else {
-        negate_filter <- do.call("|", unlist(gates))
+        negate_filter <- do.call("|", unname(unlist(gates)))
         NP <- split(FR_LIST[[1]], negate_filter)[[2]]
       }
       # NEGATED LABEL XCOORD
@@ -539,7 +546,7 @@ cyto_gate_draw.GatingSet <- function(x,
     cyto_gatingTemplate_create(gatingTemplate)
   }
 
-  # ADD_POP - GATINGTEMPLATE ENTRY & APPLY TO GATINGSET
+  # gs_add_gating_method - GATINGTEMPLATE ENTRY & APPLY TO GATINGSET
   message(paste("Adding newly constructed gate(s) to", gatingTemplate, "."))
 
   # READ IN GATINGTEMPLATE
@@ -559,7 +566,7 @@ cyto_gate_draw.GatingSet <- function(x,
     }
     # GATED POPULATIONS
     suppressWarnings(
-      add_pop(
+      gs_add_gating_method(
         gs = x,
         alias = paste(alias[[z]], collapse = ","),
         parent = parent,
@@ -573,25 +580,26 @@ cyto_gate_draw.GatingSet <- function(x,
       )
     )
   })
-
+  
   # NEGATED POPULATIONS
   if (negate == TRUE) {
     pops[[length(pops) + 1]] <- suppressMessages(
-      add_pop(
+      gs_add_gating_method(
         gs = x,
-        alias = alias[[is.na(type)]],
+        alias = alias[[which(is.na(type))]],
         parent = parent,
         pop = "+",
         dims = paste(channels, collapse = ","),
         gating_method = "boolGate",
-        gating_args = paste(paste0("!", alias[[is.na(type)]]), collapse = "&"),
+        gating_args = paste(paste0("!", unlist(alias[which(!is.na(type))])), 
+                            collapse = "&"),
         groupBy = group_by,
         collapseDataForGating = TRUE,
         preprocessing_method = NA
       )
     )
   }
-
+  
   # RBIND GATINGTEMPLATE ENTRIES
   pops <- do.call("rbind", pops)
 
@@ -898,9 +906,9 @@ cyto_gate_draw.flowSet <- function(x,
     if (negate == TRUE) {
       # GATE
       if (length(unlist(gates)) == 1) {
-        NP <- split(FR_LIST[[1]], unlist(gates))[[2]]
+        NP <- split(FR_LIST[[1]], unlist(gates)[[1]])[[2]]
       } else {
-        negate_filter <- do.call("|", unlist(gates))
+        negate_filter <- do.call("|", unname(unlist(gates)))
         NP <- split(FR_LIST[[1]], negate_filter)[[2]]
       }
       # NEGATED LABEL XCOORD
@@ -1122,9 +1130,9 @@ cyto_gate_draw.flowFrame <- function(x,
   if (negate == TRUE) {
     # GATE
     if (length(unlist(gates)) == 1) {
-      NP <- split(fr_list[[1]], unlist(gates))[[2]]
+      NP <- split(fr_list[[1]], unlist(gates)[[1]])[[2]]
     } else {
-      negate_filter <- do.call("|", unlist(gates))
+      negate_filter <- do.call("|", unname(unlist(gates)))
       NP <- split(fr_list[[1]], negate_filter)[[2]]
     }
     # NEGATED LABEL XCOORD
