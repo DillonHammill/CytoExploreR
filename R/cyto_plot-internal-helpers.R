@@ -1283,8 +1283,10 @@
     if (!is.null(nrow(fr_exprs))) {
       if (nrow(fr_exprs) >= 2) {
         # Get density colour for each point
-        point_col[[1]] <- densCols(fr_exprs,
-          colramp = col_scale
+        point_col[[1]] <- suppressWarnings(
+          densCols(fr_exprs,
+                   colramp = col_scale
+                   )
         )
       }
     } else {
@@ -1305,8 +1307,10 @@
       if (!is.null(nrow(fr_exprs))) {
         if (nrow(fr_exprs) >= 2) {
           # Get density colour for each point
-          point_col[[z]] <<- densCols(fr_exprs,
-            colramp = col_scale
+          point_col[[z]] <<- suppressWarnings(
+            densCols(fr_exprs,
+                     colramp = col_scale
+                     )
           )
         }
       } else {
