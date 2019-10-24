@@ -61,8 +61,8 @@ cyto_plot_gate.rectangleGate <- function(gate,
   lims <- par("usr")
   
   # X LIMITS
-  xmin <- lims[3]
-  xmax <- lims[4]
+  xmin <- lims[1]
+  xmax <- lims[2]
   xrng <- xmax - xmin
   xpad <- (xrng - xrng / 1.04) / 2
   xmin <- xmin + 0.5 * xpad # 1% BUFFER
@@ -169,8 +169,8 @@ cyto_plot_gate.polygonGate <- function(gate,
   lims <- par("usr")
   
   # X LIMITS
-  xmin <- lims[3]
-  xmax <- lims[4]
+  xmin <- lims[1]
+  xmax <- lims[2]
   xrng <- xmax - xmin
   xpad <- (xrng - xrng / 1.04) / 2
   xmin <- xmin + 0.5 * xpad # 1% BUFFER
@@ -317,8 +317,8 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
   lims <- par("usr")
   
   # X LIMITS
-  xmin <- lims[3]
-  xmax <- lims[4]
+  xmin <- lims[1]
+  xmax <- lims[2]
   xrng <- xmax - xmin
   xpad <- (xrng - xrng / 1.04) / 2
   xmin <- xmin + 0.5 * xpad # 1% BUFFER
