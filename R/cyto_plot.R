@@ -444,9 +444,9 @@ cyto_plot.GatingSet <- function(x,
     }
   }  
 
-  # GATE - LIST OF GATE OBJECT LISTS
+  # GATE MANUALLY SUPPLIED - LIST OF GATES
   if(!.all_na(gate)){
-    # GATE OBJECT LIST
+    # LIST OF GATE OBJECTS
     if(is(gate)[1] == "list"){
       if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
                                     "polygonGate",
@@ -467,6 +467,9 @@ cyto_plot.GatingSet <- function(x,
     }
   }
   
+  # CAPTURE OVERLAY POPULATION NAMES
+  nms <- NA
+  
   # OVERLAY - POPULATION NAMES
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
@@ -479,6 +482,9 @@ cyto_plot.GatingSet <- function(x,
           cyto_extract(gs, z)
         })
         names(overlay) <- nms
+      }else{
+        stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
+                   collapse = " & "), " do not exist in the GatingSet.")
       }
     }
   }
@@ -506,8 +512,8 @@ cyto_plot.GatingSet <- function(x,
       legend_text <- parent
     # PARENT & OVERLAY
     }else{
-      if(!is.null(names(overlay))){
-        legend_text <- c(parent, names(overlay))
+      if(!.all_na(nms)){
+        legend_text <- c(parent, nms)
       }else{
         legend_text <- parent
       }
@@ -724,6 +730,11 @@ cyto_plot.GatingHierarchy <- function(x,
     }
   }
 
+  print(alias)
+  
+  # CAPTURE OVERLAY POPULATION NAMES
+  nms <- NA
+  
   # OVERLAY - POPULATION NAMES
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
@@ -735,6 +746,9 @@ cyto_plot.GatingHierarchy <- function(x,
           cyto_extract(gh, z)
         })
         names(overlay) <- nms
+      }else{
+        stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
+                   collapse = " & "), " do not exist in the GatingHierarchy.")
       }
     }
   }
@@ -812,8 +826,8 @@ cyto_plot.GatingHierarchy <- function(x,
       legend_text <- parent
       # PARENT & OVERLAY
     }else{
-      if(!is.null(names(overlay))){
-        legend_text <- c(parent, names(overlay))
+      if(!.all_na(nms)){
+        legend_text <- c(parent, nms)
       }else{
         legend_text <- parent
       }
@@ -861,7 +875,7 @@ cyto_plot.GatingHierarchy <- function(x,
       }
     })
   }
-
+  
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
 
   # PULL DOWN ARGUMENTS
@@ -958,14 +972,25 @@ cyto_plot.flowSet <- function(x,
                                border_fill = "white",
                                border_fill_alpha = 1, ...) {
 
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+
+  # CURRENT PARAMETERS
+  old_pars <- par(c("mar", "mfrow"))
+
   # CHECKS ---------------------------------------------------------------------
 
-  # METHOD
+  # METHOD & RESET
   if (is.null(getOption("cyto_plot_method"))) {
     # SET PLOT METHOD
     options("cyto_plot_method" = "flowSet")
-    # RESET PLOT METHOD ON EXIT
-    on.exit(options("cyto_plot_method" = NULL))
+    # RESET PLOT METHOD & GRAPHICAL PARAMETERS ON EXIT
+    on.exit({
+      par(old_pars)
+      options("cyto_plot_method" = NULL)
+    })
+  }else{
+    # RESET GRAPHICAL PARAMETERS ON EXIT
+    on.exit(par(old_pars))
   }
 
   # CUSTOM PLOT - LAYOUT FALSE
@@ -981,14 +1006,6 @@ cyto_plot.flowSet <- function(x,
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
   }
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-
-  # CURRENT PARAMETERS
-  old_pars <- par(c("mar", "mfrow"))
-
-  # RESET ON EXIT
-  on.exit(par(old_pars))
 
   # CYTO_PLOT_THEME ------------------------------------------------------------
 
@@ -1339,7 +1356,7 @@ cyto_plot.flowSet <- function(x,
   }
 
   # REPEAT & SPLIT ARGUMENTS ---------------------------------------------------
-
+  
   # REPEAT & SPLIT ARGUMENTS
   args <- .cyto_plot_args_split(args)
 
@@ -1835,7 +1852,7 @@ cyto_plot.flowFrame <- function(x,
   } else {
     label_text <- rep(c(label_text, rep(NA, TNP)), length.out = TNP)
   }
-
+  
   # LABEL_STAT
   # 1D PLOT NO STACK
   if (length(channels) == 1 & density_stack == 0) {
