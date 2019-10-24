@@ -42,10 +42,10 @@ Imports:
   tidyr,
   dplyr,
   robustbase,
+  gtools,
   visNetwork,
   Rtsne,
-  umap,
-  gtools
+  umap
 Suggests: 
   CytoExploreRData,
   RProtoBufLib,
