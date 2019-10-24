@@ -189,7 +189,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
   invisible(return(gt))
 }
 
-## GATINGTEMPLATE APPLY --------------------------------------------------------
+## GATINGTEMPLATE_APPLY ---------------------------------------------------------
 
 #' Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet
 #'
@@ -315,7 +315,7 @@ cyto_gatingTemplate_apply <- function(x,
 
 ## GATINGTEMPLATE UPDATE ------------------------------------------------------
 
-#' Convert CytoExploreR gatingTemplate to be compatible with  CytoExoloreR
+#' Convert CytoRSuite gatingTemplate to be compatible with CytoExoloreR
 #'
 #' @param gatingTemplate name of the gatingTemplate csv file to convert.
 #' @param save_as name for the updated gatingTemplate csv file, set to "Updated
@@ -332,13 +332,15 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
                                        save_as = "Updated-gatingTemplate.csv") {
 
   # READ IN GATINGTEMPLATE
-  gt <- read.csv(gatingTemplate, header = TRUE)
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE,
+                 stringsAsFactors = FALSE)
   
   # CONVERT OLD GATING METHOD
   gt[gt$gating_method == "gate_draw", "gating_method"] <- "cyto_gate_draw" 
   
   # CONVERT OLD PREPROCESSING  METHOD
-  gt[gt$preprocessing_method == "gate_draw",
+  gt[gt$preprocessing_method == "pp_gate_draw",
      "preprocessing_method"] <- "pp_cyto_gate_draw" 
 
   # SAVE UPDATED GATINGTEMPLATE
