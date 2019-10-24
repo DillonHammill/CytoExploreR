@@ -9,6 +9,8 @@
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
 #'   folder in current working directory).
+#' @param sort logical indicating whether attempts should be made to sort the
+#'   files by name prior to loading, set to \code{TRUE} by default.
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
 #' @return object of class
@@ -36,12 +38,16 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_load <- function(path = ".", ...) {
+cyto_load <- function(path = ".", sort = TRUE, ...) {
 
-  # PATHS - SORTED
-  files <- mixedsort(list.files(path, 
-                                full.names = TRUE))
+  # FILE PATHS
+  files <- list.files(path, full.names = TRUE)
   
+  # SORTED FILE PATHS
+  if(sort == TRUE){
+     files <- mixedsort(files)
+  }
+ 
   # NCDFFLOWSET
   fs <- read.ncdfFlowSet(files = files, ...)
   
