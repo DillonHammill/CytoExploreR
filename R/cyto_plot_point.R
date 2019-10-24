@@ -34,6 +34,7 @@
 #'
 #' @importFrom flowCore exprs
 #' @importFrom graphics points
+#' @importFrom stats rnorm
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -136,6 +137,18 @@ cyto_plot_point.flowFrame <- function(x,
       
       # POINTS
       if(nrow(fr_exprs) != 0){
+        
+        # JITTER BARCODES
+        if(any(channels %in% "Sample ID")){
+          ind <- which(channels %in% "Sample ID")
+          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z){
+            rnorm(n = length(fr_exprs[,ind][fr_exprs[, ind] == z]),
+                  mean = z,
+                  sd = 0.1)
+          })
+        }
+        
+        # PLOT POINTS
         points(x = fr_exprs[,channels[1]],
                y = fr_exprs[,channels[2]],
                pch = point_shape[z],
@@ -240,6 +253,18 @@ cyto_plot_point.list <- function(x,
       
       # POINTS
       if(nrow(fr_exprs) != 0){
+        
+        # JITTER BARCODES
+        if(any(channels %in% "Sample ID")){
+          ind <- which(channels %in% "Sample ID")
+          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z){
+            rnorm(n = length(fr_exprs[,ind][fr_exprs[, ind] == z]),
+                  mean = z,
+                  sd = 0.1)
+          })
+        }
+        
+        # PLOT POINTS
         points(x = fr_exprs[,channels[1]],
                y = fr_exprs[,channels[2]],
                pch = point_shape[z],

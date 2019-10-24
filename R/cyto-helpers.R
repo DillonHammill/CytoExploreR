@@ -1331,6 +1331,73 @@ cyto_sample.list <- function(x,
   return(x)
 }
 
+## CYTO_BARCODE ----------------------------------------------------------------
+
+#' Barcode each file in a flowSet with a sample ID
+#'
+#' Adds a new parameter to each of the flowFrames in the flowSet called
+#' \code{"Sample ID"} to barcode events from each flowFrame.
+#'
+#' @param x object of class \code{flowSet} to be barcoded.
+#'
+#' @return barcoded flowSet with \code{"Sample ID"} column added and annotated.
+#'
+#' @importFrom methods is as
+#' @importFrom flowWorkspace sampleNames
+#' 
+#' @examples
+#' 
+#' # Load in CytoExploreRData to access files
+#' library(CytoExploreRData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#'
+#' # Barcode
+#' cyto_barcode(fs)
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_barcode <- function(x){
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # FLOWSET 
+  if(!is(x, "flowSet")){
+    stop("'cyto_barcode' expects objects of class flowSet.")
+  }
+  
+  # CLASS
+  fs_class <- is(x)[1]
+  
+  # PREPARE DATA ---------------------------------------------------------------
+  
+  # SAMPLENAMES
+  nms <- cyto_names(x)
+  
+  # LIST OF FLOWFRAMES
+  fr_list <- cyto_convert(x, "list of flowFrames")
+  
+  # SAMPLE ID COLUMN
+  fr_list <- lapply(seq(1, length(fr_list)), function(x){
+    mat <-  matrix(rep(x, nrow(fr_list[[x]])),
+                   ncol = 1)
+    colnames(mat) <- "Sample ID"
+    suppressWarnings(cbind(fr_list[[x]], mat))
+  })
+  
+  # UPDATE FLOWSET
+  fs <- as(fr_list, fs_class)
+  
+  # FIX SampleNames
+  sampleNames(fs) <- nms
+  
+  # RETURN BARCODED FLOWSET
+  return(fs)
+  
+}
+
 ## CYTO_MARKERS ----------------------------------------------------------------
 
 #' Assign marker names to flowFrame or flowSet
