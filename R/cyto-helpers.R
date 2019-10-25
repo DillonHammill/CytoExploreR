@@ -171,7 +171,7 @@ cyto_setup <- function(path = ".",
 #' \code{\link{cyto_names}} if a
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 #'
-#' @param object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -210,7 +210,7 @@ cyto_details <- function(x) {
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
 #' converted to \code{"Combined Events"}.
 #'
-#' @param object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -744,6 +744,9 @@ cyto_transform_extract <- function(x,
 #'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierachy} or \code{GatingSet} objects.
+#' @param ... additional arguments passed to
+#'   \code{\link[openCyto:gh_pop_get_data]{gh_pop_get_data}} or
+#'   \code{\link[openCyto:gs_pop_get_data]{gs_pop_get_data}}.
 #'
 #' @return either a \code{flowFrame} or a \code{flowSet}.
 #'
@@ -1119,7 +1122,6 @@ cyto_select <- function(x, ...) {
 #'
 #' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param parent name of the parent population to extract from GatingSet object.
 #' @param group_by names of cyto_details variables to use for merging. Set to
 #'   "all" to merge all samples in \code{x}.
 #'

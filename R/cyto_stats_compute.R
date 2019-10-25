@@ -18,10 +18,13 @@
 #'   \code{\link[flowWorkspace:transformerList]{transformerList}} used to
 #'   transfom the channels of the supplied data. The \code{transformerList} is
 #'   required to return the data to the original linear scale when calculating
-#'   statistics. 
+#'   statistics.
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.
+#' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
+#'   \code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet}
+#'   objects prior to computing statistics.
 #' @param format indicates whether the data should be returned in the
 #'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
 #'   default.

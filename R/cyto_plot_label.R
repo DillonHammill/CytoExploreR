@@ -56,6 +56,7 @@
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density for mode
 #'   calculation.
+#' @param ... not in use.
 #'
 #' @return add a boxed text label to an existing cyto_plot.
 #'

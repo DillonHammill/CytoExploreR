@@ -49,6 +49,8 @@ cyto_plot_point(x, ...)
 \item{x}{object of class \code{flowFrame} or a list of \code{flowFrame}
 onjects.}
 
+\item{...}{not in use.}
+
 \item{channels}{names of the channels used to construct the plot.}
 
 \item{overlay}{optional argument if x is a flowFrame to overlay a list of

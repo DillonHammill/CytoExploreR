@@ -95,6 +95,10 @@ saved.}
 default.}
 
 \item{...}{not in use.}
+
+\item{gate}{object of class \code{rectangleGate}, \code{polygonGate} or
+\code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet}
+objects prior to computing statistics.}
 }
 \value{
 a tibble containing the computed statistics in the wide or long

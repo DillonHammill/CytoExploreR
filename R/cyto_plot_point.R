@@ -31,6 +31,7 @@
 #'   default.
 #' @param contour_line_alpha numeric [0,1] to control transparency of contour
 #'   lines, set to 1 by default to remove transparency.
+#' @param ... not in use.
 #'
 #' @importFrom flowCore exprs
 #' @importFrom graphics points

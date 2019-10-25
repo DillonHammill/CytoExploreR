@@ -17,6 +17,7 @@
 #' @importFrom openCyto gh_generate_template
 #' @importFrom magrittr %>%
 #' @importFrom visNetwork visNetwork visEdges
+#' @importFrom data.table as.data.table
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
@@ -160,7 +161,7 @@ cyto_plot_gating_tree.GatingSet <- function(x, ...) {
 cyto_plot_gating_tree.gatingTemplate <- function(x, ...){
   
   # Convert gatingTemplate to data.table
-  gt <- as.data.table.gatingTemplate(x)
+  gt <- as.data.table(x)
   
   # Preprocess gatingTemplate 
   gt <- .preprocess_csv(gt)

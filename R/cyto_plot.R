@@ -106,6 +106,8 @@
 #'   in 2-D scatter plots, set to 2 by default.
 #' @param contour_line_col colour(s) to use for contour lines in 2-D scatter
 #'   plots, set to \code{"black"} by default.
+#' @param contour_line_alpha numeric [0,1] to control the transparency of
+#'   contour lines, set to 1 by default to remove transparency.
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
@@ -141,6 +143,12 @@
 #'   set to 1 by default.
 #' @param legend_text_col colour(s) to use for text in legend, set to
 #'   \code{"black"} by default.
+#' @param legend_line_type numeric to control the line type for line legends,
+#'   set to 1 by default. Refer to \code{lty} in \code{\link[graphics:par]{par}}
+#'   for alternatives.
+#' @param legend_line_width numeric to control the line width in line legend,
+#'   set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+#'   for alternatives.
 #' @param legend_line_col colour(s) to use for the lines in 1-D plot legends
 #'   when legend is set to \code{"line"}.
 #' @param legend_box_fill fill colour(s) to use for the boxes in 1-D plot

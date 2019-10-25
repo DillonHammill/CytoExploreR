@@ -110,6 +110,8 @@ colour, set to \code{0.6} by default.}
 \code{\link[stats:density]{density}} to adjust kernel density for mode
 calculation.}
 
+\item{...}{not in use.}
+
 \item{trans}{object of class \code{\link[flowWorkspace]{transformerList}}
 which was used to transform the fluorescent channels of the supplied
 flowFrame.}
