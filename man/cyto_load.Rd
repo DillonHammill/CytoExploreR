@@ -4,7 +4,7 @@
 \alias{cyto_load}
 \title{Load .fcs files into ncdfFlowSet}
 \usage{
-cyto_load(path = ".", sort = TRUE, ...)
+cyto_load(path = ".", sort = TRUE, barcode = FALSE, ...)
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in (e.g. name of
@@ -12,6 +12,9 @@ folder in current working directory).}
 
 \item{sort}{logical indicating whether attempts should be made to sort the
 files by name prior to loading, set to \code{TRUE} by default.}
+
+\item{barcode}{logical indicating whether the flowFrames should be barcoded
+using \code{cyto_barcode}, set to FALSE by default.}
 
 \item{...}{additional arguments passed to read.ncdfFlowSet.}
 }

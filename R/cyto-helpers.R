@@ -11,6 +11,8 @@
 #'   folder in current working directory).
 #' @param sort logical indicating whether attempts should be made to sort the
 #'   files by name prior to loading, set to \code{TRUE} by default.
+#' @param barcode logical indicating whether the flowFrames should be barcoded
+#'   using \code{cyto_barcode}, set to FALSE by default.
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
 #' @return object of class
@@ -38,7 +40,9 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_load <- function(path = ".", sort = TRUE, ...) {
+cyto_load <- function(path = ".", 
+                      sort = TRUE,
+                      barcode = FALSE, ...) {
 
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
@@ -56,6 +60,11 @@ cyto_load <- function(path = ".", sort = TRUE, ...) {
   lapply(seq_len(length(nms)), function(z){
     suppressMessages(identifier(fs[[z]]) <<- nms[z])
   })
+  
+  # BARCODING
+  if(barcode == TRUE){
+    fs <- cyto_barcode(fs)
+  }
   
   # RETURN NCDFFLOWSET
   return(fs)
