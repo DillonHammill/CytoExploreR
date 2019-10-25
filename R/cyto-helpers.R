@@ -1368,6 +1368,7 @@ cyto_sample.list <- function(x,
 #'
 #' @importFrom methods is as
 #' @importFrom flowWorkspace `sampleNames<-`
+#' @importFrom flowCore fsApply
 #' 
 #' @examples
 #' 
@@ -1392,33 +1393,22 @@ cyto_barcode <- function(x){
     stop("'cyto_barcode' expects objects of class flowSet.")
   }
   
-  # CLASS
-  fs_class <- is(x)[1]
-  
   # PREPARE DATA ---------------------------------------------------------------
   
   # SAMPLENAMES
   nms <- cyto_names(x)
   
-  # LIST OF FLOWFRAMES
-  fr_list <- cyto_convert(x, "list of flowFrames")
-  
   # SAMPLE ID COLUMN
-  fr_list <- lapply(seq(1, length(fr_list)), function(x){
-    mat <-  matrix(rep(x, nrow(fr_list[[x]])),
+  x <- fsApply(x, function(fr){
+    ind <- match(cyto_names(fr), nms)
+    mat <-  matrix(rep(ind, .cyto_count(fr)),
                    ncol = 1)
     colnames(mat) <- "Sample ID"
-    suppressWarnings(cbind(fr_list[[x]], mat))
+    suppressWarnings(cbind(fr, mat))
   })
   
-  # UPDATE FLOWSET
-  fs <- as(fr_list, fs_class)
-  
-  # FIX SampleNames
-  sampleNames(fs) <- nms
-  
   # RETURN BARCODED FLOWSET
-  return(fs)
+  return(x)
   
 }
 
