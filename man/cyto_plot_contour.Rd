@@ -16,7 +16,8 @@ cyto_plot_contour(x, ...)
   contour_line_type = 1,
   contour_line_width = 1,
   contour_line_col = "black",
-  contour_line_alpha = 1
+  contour_line_alpha = 1,
+  ...
 )
 
 \method{cyto_plot_contour}{flowSet}(
@@ -26,7 +27,8 @@ cyto_plot_contour(x, ...)
   contour_line_type = 1,
   contour_line_width = 1,
   contour_line_col = "black",
-  contour_line_alpha = 1
+  contour_line_alpha = 1,
+  ...
 )
 
 \method{cyto_plot_contour}{list}(
@@ -36,7 +38,8 @@ cyto_plot_contour(x, ...)
   contour_line_type = 1,
   contour_line_width = 1,
   contour_line_col = "black",
-  contour_line_alpha = 1
+  contour_line_alpha = 1,
+  ...
 )
 }
 \arguments{
@@ -44,6 +47,8 @@ cyto_plot_contour(x, ...)
 \code{\link[flowCore:flowFrame-class]{flowFrame}}, or
 \code{\link[flowCore:flowSet-class]{flowSet}} or a list of
 \code{\link[flowCore:flowFrame-class]{flowFrame}} objects.}
+
+\item{...}{not in use.}
 
 \item{channels}{channels used to construct the existing cyto_plot.}
 

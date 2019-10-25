@@ -302,6 +302,11 @@ cyto_stats_compute.GatingHierarchy <- function(x,
     # Cbind with pd
     res <- bind_cols(pd, res[, -1])
     
+    # R CMD CHECK NOTES
+    Population <- NULL
+    count <- NULL
+    Marker <- NULL
+    
     # Convert count statistics to wide format
     if (stat == "count" & format == "wide") {
       res <- res %>%

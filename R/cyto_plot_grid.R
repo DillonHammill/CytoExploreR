@@ -452,8 +452,6 @@ cyto_plot_grid.flowSet <- function(x,
                       axes_trans = axes_trans,
                       axes_text = axes_text,
                       overlay = NA,
-                      xlim = xlim,
-                      ylim = ylim,
                       ...)
       
     }else{
@@ -562,7 +560,7 @@ cyto_plot_grid.flowSet <- function(x,
       }
       
       if(popup & cnt != ns*np){
-        .cyto_plot_window()
+        cyto_plot_new(popup)
       }
       
     }
@@ -583,8 +581,7 @@ cyto_plot_grid.flowSet <- function(x,
   # Turn off graphics device for saving
   if(getOption("cyto_plot_save")){
     
-    if(inherits(x, 
-                basename(getOption("cyto_plot_method")))){
+    if(inherits(x, basename(getOption("cyto_plot_method")))){
       
       # Close graphics device
       dev.off()

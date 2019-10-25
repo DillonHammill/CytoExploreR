@@ -392,7 +392,7 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
-  # EMPTY ALIAS
+  # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
     # ALL GATES IN SUPPLIED CHANNELS
     if (all(alias == "")) {
@@ -416,10 +416,11 @@ cyto_plot.GatingSet <- function(x,
     }
   }
   
-  # EXTRACT GATE OBJECTS
+  # EXTRACT GATE OBJECTS - INCLUDES GATES & NEGATED FILTERS
   if (!.all_na(alias)) {
     # REMOVE DUPLICATE ALIAS
     alias <- unique(alias)
+    # GROUPING
     if (!.all_na(group_by)) {
       gate <- lapply(unique(pd$group_by), function(nm) {
         gt <- lapply(alias, function(z) {
@@ -433,7 +434,9 @@ cyto_plot.GatingSet <- function(x,
         names(gt) <- alias
         return(gt)
       })
+      names(gate) <- unique(pd$group_by)
     } else {
+      # NO GROUPING
       gate <- lapply(seq_len(length(gs)), function(z) {
         gt <- lapply(alias, function(y) {
           gh_pop_get_gate(gs[[z]], y)
@@ -444,6 +447,16 @@ cyto_plot.GatingSet <- function(x,
     }
   }  
 
+  print(gate)
+  
+  # BOOLEAN FILTER - SUPPORT NEGATED AND FILTERS
+  if(!.all_na(gate)){
+    
+  }
+  
+  
+  # NEGATE
+  
   # GATE MANUALLY SUPPLIED - LIST OF GATES
   if(!.all_na(gate)){
     # LIST OF GATE OBJECTS
@@ -483,7 +496,7 @@ cyto_plot.GatingSet <- function(x,
         })
         names(overlay) <- nms
       }else{
-        stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
+        stop(paste(overlay[!overlay %in% cyto_nodes(gs, path = "auto")],
                    collapse = " & "), " do not exist in the GatingSet.")
       }
     }

@@ -9,16 +9,18 @@
 \usage{
 cyto_compensate(x, ...)
 
-\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1)
+\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1, ...)
 
-\method{cyto_compensate}{flowSet}(x, spillover = NULL, select = 1)
+\method{cyto_compensate}{flowSet}(x, spillover = NULL, select = 1, ...)
 
-\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1)
+\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{...}{not in use.}
 
 \item{spillover}{name of the spillover matrix csv file (e.g.
 "Spillover-Matrix.csv") saved in the current working directory.}

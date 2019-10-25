@@ -61,10 +61,11 @@
 #'
 #' @importFrom flowCore Subset
 #' @importFrom methods is
-#' @importFrom flowWorkspace gh_pop_get_gate
+#' @importFrom flowWorkspace gh_pop_get_gate gh_pop_is_negated
+#' @importFrom openCyto gh_generate_template
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -165,7 +166,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   if (.empty(alias)) {
     # Plot all appropriate gates if alias is an empty character string
     if (all(alias == "")) {
-      gt <- templateGen(x)
+      gt <- gh_generate_template(x)
       gt <- gt[basename(gt$parent) == parent, ]
       
       # Match both channels for 2D plots
@@ -241,7 +242,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   # NEGATE
   if(!.all_na(gate)){
     # ALL NEGATED GATES - SET NEGATE TO TRUE
-    if(all(lapply(gate, function(z){.isNegated(z)})))
+    if(all(lapply(gate, function(z){gh_pop_is_negated(z)})))
       # NEGATE NOT SPECIFIED
       if(missing(negate)){
         negate <- TRUE

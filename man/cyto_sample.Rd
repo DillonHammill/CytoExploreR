@@ -9,15 +9,17 @@
 \usage{
 cyto_sample(x, ...)
 
-\method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL)
+\method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL, ...)
 
-\method{cyto_sample}{flowSet}(x, display = 1, seed = NULL)
+\method{cyto_sample}{flowSet}(x, display = 1, seed = NULL, ...)
 
-\method{cyto_sample}{list}(x, display = 1, seed = NULL)
+\method{cyto_sample}{list}(x, display = 1, seed = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 \code{\link[flowCore:flowSet-class]{flowSet}}.}
+
+\item{...}{not in use.}
 
 \item{display}{can be either a numeric [0,1] or integer to indicate the
 percentage or number of events to keep respectively.}

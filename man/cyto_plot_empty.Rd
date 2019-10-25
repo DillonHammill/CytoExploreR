@@ -58,11 +58,14 @@ cyto_plot_empty(x, ...)
   legend_line_width = NA,
   legend_line_col = NA,
   legend_box_fill = NA,
-  legend_point_col = NA
+  legend_point_col = NA,
+  ...
 )
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
+
+\item{...}{not in use.}
 
 \item{axes_trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or

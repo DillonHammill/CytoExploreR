@@ -125,7 +125,7 @@ label must be manually selected. More complex labelling can be acheived
 directly through \code{cyto_plot}.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

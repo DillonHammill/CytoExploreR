@@ -7,11 +7,11 @@
 \alias{cyto_plot_gating_tree.gatingTemplate}
 \title{Plot Gating Trees}
 \usage{
-\method{cyto_plot_gating_tree}{GatingHierarchy}(x, stat = NULL)
+\method{cyto_plot_gating_tree}{GatingHierarchy}(x, stat = NULL, ...)
 
-\method{cyto_plot_gating_tree}{GatingSet}(x)
+\method{cyto_plot_gating_tree}{GatingSet}(x, ...)
 
-\method{cyto_plot_gating_tree}{gatingTemplate}(x)
+\method{cyto_plot_gating_tree}{gatingTemplate}(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy}, \code{GatingSet} or
@@ -20,6 +20,8 @@
 \item{stat}{used in \code{GatingHierachy} method to add either "percent" or
 "count" statistics onto the gating tree, set to NULL by default to exclude
 statistics.}
+
+\item{...}{not in use.}
 }
 \description{
 \code{cyto_plot_gating_tree} provides a simpler visualisation of the gating

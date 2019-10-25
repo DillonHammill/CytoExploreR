@@ -1162,6 +1162,7 @@ cyto_gate_type <- function(gates) {
 #'
 #' @param x gate object(s) to be converted.
 #' @param channels indicates the required dimensions of the gate for plotting.
+#' @param ... not in use.
 #'
 #' @return modified gate object with appropriate dimensions.
 #'
@@ -1182,7 +1183,8 @@ cyto_gate_convert <- function(x, ...){
 #' @noRd
 #' @export
 cyto_gate_convert.default <- function(x, 
-                                      channels = NULL){
+                                      channels = NULL,
+                                      ...){
   
   # Invalid gate object
   if(!is(x) %in% c("list", 
@@ -1201,7 +1203,8 @@ cyto_gate_convert.default <- function(x,
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.rectangleGate <- function(x, 
-                                            channels = NULL){
+                                            channels = NULL,
+                                            ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1276,7 +1279,8 @@ cyto_gate_convert.rectangleGate <- function(x,
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.polygonGate <- function(x, 
-                                          channels = NULL){
+                                          channels = NULL,
+                                          ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1345,7 +1349,8 @@ cyto_gate_convert.polygonGate <- function(x,
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.ellipsoidGate <- function(x, 
-                                            channels = NULL){
+                                            channels = NULL,
+                                            ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1419,7 +1424,8 @@ cyto_gate_convert.ellipsoidGate <- function(x,
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.quadGate <- function(x, 
-                                       channels = NULL){
+                                       channels = NULL,
+                                       ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1452,7 +1458,8 @@ cyto_gate_convert.quadGate <- function(x,
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.filters <- function(x, 
-                                      channels = NULL){
+                                      channels = NULL,
+                                      ...){
   
   # GATE OBJECT LIST -----------------------------------------------------------
   x <- unlist(x)
@@ -1469,7 +1476,8 @@ cyto_gate_convert.filters <- function(x,
 #' @rdname cyto_gate_convert
 #' @export
 cyto_gate_convert.list <- function(x, 
-                                   channels = NULL){
+                                   channels = NULL,
+                                   ...){
   
   # GATE OBJECT LIST -----------------------------------------------------------
   x <- unlist(x)

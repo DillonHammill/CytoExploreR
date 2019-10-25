@@ -20,7 +20,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 
 \method{cyto_plot_gate}{polygonGate}(
@@ -30,7 +31,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 
 \method{cyto_plot_gate}{ellipsoidGate}(
@@ -40,7 +42,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 
 \method{cyto_plot_gate}{quadGate}(
@@ -50,7 +53,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 
 \method{cyto_plot_gate}{filters}(
@@ -60,7 +64,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 
 \method{cyto_plot_gate}{list}(
@@ -70,7 +75,8 @@
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_fill = "white",
-  gate_fill_alpha = 0
+  gate_fill_alpha = 0,
+  ...
 )
 }
 \arguments{
@@ -79,6 +85,8 @@
 \code{\link[flowCore:polygonGate-class]{polygonGate}},
 \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{list} or
 \code{\link[flowCore:filters-class]{filters}}.}
+
+\item{...}{not in use.}
 
 \item{channels}{fluorescent channels to used to construct the plot.}
 

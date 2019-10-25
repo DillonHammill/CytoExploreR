@@ -7,7 +7,7 @@
 #' @return a data.table
 #' @importFrom data.table data.table rbindlist
 #' @importFrom methods extends
-#' @importFrom openCyto gt_get_gate gt_get_parent
+#' @importFrom openCyto gt_get_gate gt_get_parent gt_get_nodes
 #' @noRd
 as.data.table.gatingTemplate <- function(x, keep.rownames = FALSE){
   

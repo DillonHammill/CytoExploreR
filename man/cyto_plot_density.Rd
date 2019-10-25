@@ -21,7 +21,8 @@ cyto_plot_density(x, ...)
   density_fill_alpha = 1,
   density_line_type = 1,
   density_line_width = 1,
-  density_line_col = "black"
+  density_line_col = "black",
+  ...
 )
 
 \method{cyto_plot_density}{list}(
@@ -37,6 +38,8 @@ cyto_plot_density(x, ...)
 }
 \arguments{
 \item{x}{list of density objects for plotting}
+
+\item{...}{not in use.}
 
 \item{channel}{name of the channels to be used to construct the plot.}
 

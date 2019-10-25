@@ -12,6 +12,7 @@
 #' @param stat used in \code{GatingHierachy} method to add either "percent" or
 #'   "count" statistics onto the gating tree, set to NULL by default to exclude
 #'   statistics.
+#' @param ... not in use.
 #'
 #' @importFrom openCyto gh_generate_template
 #' @importFrom magrittr %>%
@@ -60,7 +61,8 @@ cyto_plot_gating_tree <- function(x, ...){
 #' @rdname cyto_plot_gating_tree
 #' @export
 cyto_plot_gating_tree.GatingHierarchy <- function(x,
-                                                  stat = NULL) {
+                                                  stat = NULL,
+                                                  ...) {
   
   # Extract gatingTemplate from GatingHierarchy
   gt <- gh_generate_template(x)
@@ -126,7 +128,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
 
 #' @rdname cyto_plot_gating_tree
 #' @export
-cyto_plot_gating_tree.GatingSet <- function(x) {
+cyto_plot_gating_tree.GatingSet <- function(x, ...) {
   
   # Generate template based on first sample
   gt <- gh_generate_template(x[[1]])
@@ -155,7 +157,7 @@ cyto_plot_gating_tree.GatingSet <- function(x) {
 
 #' @rdname cyto_plot_gating_tree
 #' @export
-cyto_plot_gating_tree.gatingTemplate <- function(x){
+cyto_plot_gating_tree.gatingTemplate <- function(x, ...){
   
   # Convert gatingTemplate to data.table
   gt <- as.data.table.gatingTemplate(x)

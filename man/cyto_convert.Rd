@@ -10,19 +10,21 @@
 \usage{
 cyto_convert(x, ...)
 
-\method{cyto_convert}{flowFrame}(x, return = "flowFrame")
+\method{cyto_convert}{flowFrame}(x, return = "flowFrame", ...)
 
-\method{cyto_convert}{flowSet}(x, return = "flowSet")
+\method{cyto_convert}{flowSet}(x, return = "flowSet", ...)
 
-\method{cyto_convert}{GatingHierarchy}(x, parent = "root", return = "GatingHierarchy")
+\method{cyto_convert}{GatingHierarchy}(x, parent = "root", return = "GatingHierarchy", ...)
 
-\method{cyto_convert}{GatingSet}(x, parent = "root", return = "GatingSet")
+\method{cyto_convert}{GatingSet}(x, parent = "root", return = "GatingSet", ...)
 }
 \arguments{
 \item{x}{\code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{...}{not in use.}
 
 \item{return}{either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
 coerced 'flowFrame list' or coreced 'flowSet list'. GatingSet and flowSet

@@ -18,6 +18,7 @@
 #' @param gate_fill_alpha numeric [0,1] to control gate fill colour
 #'   transparency, set to 0 by default to make gate fill colour completely
 #'   transparent.
+#' @param ... not in use.
 #'
 #' @importFrom graphics par rect polygon abline
 #' @importFrom grDevices adjustcolor
@@ -53,7 +54,8 @@ cyto_plot_gate.rectangleGate <- function(gate,
                                          gate_line_width = 2.5,
                                          gate_line_col = "red",
                                          gate_fill = "white",
-                                         gate_fill_alpha = 0){
+                                         gate_fill_alpha = 0,
+                                         ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -160,7 +162,8 @@ cyto_plot_gate.polygonGate <- function(gate,
                                         gate_line_width = 2.5,
                                         gate_line_col = "red",
                                         gate_fill = "white",
-                                        gate_fill_alpha = 0){
+                                        gate_fill_alpha = 0,
+                                       ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -308,7 +311,8 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
                                           gate_line_width = 2.5,
                                           gate_line_col = "red",
                                           gate_fill = "white",
-                                          gate_fill_alpha = 0){
+                                          gate_fill_alpha = 0,
+                                         ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -459,7 +463,8 @@ cyto_plot_gate.quadGate <- function(gate,
                                      gate_line_width = 2.5,
                                      gate_line_col = "red",
                                      gate_fill = "white",
-                                     gate_fill_alpha = 0){
+                                     gate_fill_alpha = 0,
+                                    ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -566,7 +571,8 @@ cyto_plot_gate.filters <- function(gate,
                                     gate_line_width = 2.5,
                                     gate_line_col = "red",
                                     gate_fill = "white",
-                                    gate_fill_alpha = 0){
+                                    gate_fill_alpha = 0,
+                                   ...){
   
   # PREPARE GATE ---------------------------------------------------------------
   
@@ -599,7 +605,8 @@ cyto_plot_gate.list <- function(gate,
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
                                 gate_fill = "white",
-                                gate_fill_alpha = 0){
+                                gate_fill_alpha = 0,
+                                ...){
 
   # PREPARE GATE ---------------------------------------------------------------
   

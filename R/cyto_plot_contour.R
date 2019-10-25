@@ -16,6 +16,7 @@
 #'   default.
 #' @param contour_line_alpha numeric [0,1] to control transparency of contour
 #'   lines, set to 1 by default to remove transparency.
+#' @param ... not in use.
 #'
 #' @importFrom MASS kde2d
 #' @importFrom graphics contour par
@@ -66,7 +67,8 @@ cyto_plot_contour.flowFrame <- function(x,
                                         contour_line_type = 1,
                                         contour_line_width = 1,
                                         contour_line_col = "black",
-                                        contour_line_alpha = 1){
+                                        contour_line_alpha = 1,
+                                        ...){
   
   # CHECKS -------------------------------------------------------------------
   
@@ -113,7 +115,8 @@ cyto_plot_contour.flowSet <- function(x,
                                       contour_line_type = 1,
                                       contour_line_width = 1,
                                       contour_line_col = "black",
-                                      contour_line_alpha = 1){
+                                      contour_line_alpha = 1,
+                                      ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -160,7 +163,8 @@ cyto_plot_contour.list <- function(x,
                                    contour_line_type = 1,
                                    contour_line_width = 1,
                                    contour_line_col = "black",
-                                   contour_line_alpha = 1){
+                                   contour_line_alpha = 1,
+                                   ...){
   
   # CHECKS ---------------------------------------------------------------------
   

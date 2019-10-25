@@ -84,6 +84,7 @@
 #'   default.
 #' @param border_fill_alpha transparency to use for border_fill colour, set to 1
 #'   by default to add no transparency.
+#' @param ... not in use.
 #'
 #' @importFrom grDevices adjustcolor
 #' @importFrom graphics plot box axis title par
@@ -163,7 +164,8 @@ cyto_plot_empty.flowFrame <- function(x,
                                       legend_line_width = NA,
                                       legend_line_col = NA,
                                       legend_box_fill = NA,
-                                      legend_point_col = NA) {
+                                      legend_point_col = NA,
+                                      ...) {
 
   # GRAPHICAL PARAMETERS -------------------------------------------------------
 
@@ -654,7 +656,8 @@ cyto_plot_empty.list <- function(x,
                                  legend_line_width = NA,
                                  legend_line_col = NA,
                                  legend_box_fill = NA,
-                                 legend_point_col = NA) {
+                                 legend_point_col = NA,
+                                 ...) {
 
   # CHECKS ---------------------------------------------------------------------
 

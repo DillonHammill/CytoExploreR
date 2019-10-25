@@ -791,6 +791,7 @@ cyto_extract <- function(x, parent = "root", ...) {
 #'   objects can also be converted to a 'list of flowFrames'.
 #' @param parent name of parent population to extract from
 #'   \code{GatingHierarchy} and \code{GatingSet} objects.
+#' @param ... not in use.
 #'
 #' @return object specified by 'return' argument.
 #'
@@ -824,7 +825,8 @@ cyto_convert <- function(x, ...) {
 #' @rdname cyto_convert
 #' @export
 cyto_convert.flowFrame <- function(x,
-                                   return = "flowFrame") {
+                                   return = "flowFrame",
+                                   ...) {
   if (return == "list of flowFrames") {
     return <- "flowFrame list"
   }
@@ -851,7 +853,8 @@ cyto_convert.flowFrame <- function(x,
 #' @rdname cyto_convert
 #' @export
 cyto_convert.flowSet <- function(x,
-                                 return = "flowSet") {
+                                 return = "flowSet",
+                                 ...) {
   if (return == "flowSet") {
 
   } else if (return == "flowFrame") {
@@ -896,7 +899,8 @@ cyto_convert.flowSet <- function(x,
 #' @export
 cyto_convert.GatingHierarchy <- function(x,
                                          parent = "root",
-                                         return = "GatingHierarchy") {
+                                         return = "GatingHierarchy",
+                                         ...) {
   if (return == "GatingHierarchy") {
 
   } else if (return == "flowFrame") {
@@ -916,7 +920,8 @@ cyto_convert.GatingHierarchy <- function(x,
 #' @export
 cyto_convert.GatingSet <- function(x,
                                    parent = "root",
-                                   return = "GatingSet") {
+                                   return = "GatingSet",
+                                   ...) {
   if (return == "GatingSet") {
 
   } else if (return == "flowFrame") {
@@ -1195,6 +1200,7 @@ cyto_group_by <- function(x,
 #'   percentage or number of events to keep respectively.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
+#' @param ... not in use.
 #'
 #' @return \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 #'   \code{\link[flowCore:flowSet-class]{flowSet}} restricted to \code{display}
@@ -1230,7 +1236,8 @@ cyto_sample <- function(x, ...) {
 #' @export
 cyto_sample.flowFrame <- function(x,
                                   display = 1,
-                                  seed = NULL) {
+                                  seed = NULL,
+                                  ...) {
 
   # Do nothing if no sampling required
   if (display != 1) {
@@ -1273,7 +1280,8 @@ cyto_sample.flowFrame <- function(x,
 #' @export
 cyto_sample.flowSet <- function(x,
                                 display = 1,
-                                seed = NULL) {
+                                seed = NULL,
+                                ...) {
   # Apply same degree of sampling to each flowFrame in the flowSet
   fsApply(x, cyto_sample, display = display, seed = seed)
 }
@@ -1282,7 +1290,8 @@ cyto_sample.flowSet <- function(x,
 #' @export
 cyto_sample.list <- function(x,
                              display = 1,
-                             seed = NULL) {
+                             seed = NULL,
+                             ...) {
   
   # list of flowSets allowed
   if(all(LAPPLY(x, function(z){inherits(z,"flowSet")}))){
@@ -1349,7 +1358,7 @@ cyto_sample.list <- function(x,
 #' @return barcoded flowSet with \code{"Sample ID"} column added and annotated.
 #'
 #' @importFrom methods is as
-#' @importFrom flowWorkspace sampleNames
+#' @importFrom flowWorkspace `sampleNames<-`
 #' 
 #' @examples
 #' 
@@ -1746,6 +1755,7 @@ cyto_annotate <- function(x, file = NULL) {
 #'   should be extracted when no spillover matrix file is supplied to
 #'   \code{spillover}. To compensate each sample individually using their stored
 #'   spillover matrix file, set \code{select} to NULL.
+#' @param ... not in use.
 #'
 #' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
 #'   object.
@@ -1792,7 +1802,8 @@ cyto_compensate <- function(x, ...) {
 #' @export
 cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
-                                      select = 1) {
+                                      select = 1,
+                                      ...) {
 
   # Spillover matrix supplied - matrix, data.frame or csv file
   if(!is.null(spillover)){
@@ -1848,7 +1859,8 @@ cyto_compensate.flowFrame <- function(x,
 #' @export
 cyto_compensate.flowSet <- function(x,
                                     spillover = NULL,
-                                    select = 1) {
+                                    select = 1,
+                                    ...) {
 
   # Spillover matrix supplied - matrix, data.frame or csv file
   if(!is.null(spillover)){
@@ -1919,7 +1931,8 @@ cyto_compensate.flowSet <- function(x,
 #' @export
 cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
-                                      select = 1) {
+                                      select = 1,
+                                      ...) {
   
   # Extract flowSet
   fs <- cyto_extract(x, parent = "root")

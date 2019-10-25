@@ -11,17 +11,17 @@
 \alias{cyto_gate_prepare}
 \title{Convert Between 1D and 2D Gate Objects}
 \usage{
-\method{cyto_gate_convert}{rectangleGate}(x, channels = NULL)
+\method{cyto_gate_convert}{rectangleGate}(x, channels = NULL, ...)
 
-\method{cyto_gate_convert}{polygonGate}(x, channels = NULL)
+\method{cyto_gate_convert}{polygonGate}(x, channels = NULL, ...)
 
-\method{cyto_gate_convert}{ellipsoidGate}(x, channels = NULL)
+\method{cyto_gate_convert}{ellipsoidGate}(x, channels = NULL, ...)
 
-\method{cyto_gate_convert}{quadGate}(x, channels = NULL)
+\method{cyto_gate_convert}{quadGate}(x, channels = NULL, ...)
 
-\method{cyto_gate_convert}{filters}(x, channels = NULL)
+\method{cyto_gate_convert}{filters}(x, channels = NULL, ...)
 
-\method{cyto_gate_convert}{list}(x, channels = NULL)
+\method{cyto_gate_convert}{list}(x, channels = NULL, ...)
 
 cyto_gate_prepare(x, channels = NULL)
 }
@@ -29,6 +29,8 @@ cyto_gate_prepare(x, channels = NULL)
 \item{x}{gate object(s) to be converted.}
 
 \item{channels}{indicates the required dimensions of the gate for plotting.}
+
+\item{...}{not in use.}
 }
 \value{
 modified gate object with appropriate dimensions.
