@@ -161,7 +161,7 @@ issues. The unstained control is automatically overlaid onto the plot as a
 refernce if supplied.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Bypass directory check for external files
 options("CytoExploreR_wd_check" = FALSE)
@@ -179,7 +179,7 @@ fs <- cyto_extract(gs, "Single Cells")
 # Channel match file
 cmfile <- system.file("extdata",
   "Compensation-Channels.csv",
-  package = "CytoRSuiteData"
+  package = "CytoExploreRData"
 )
 
 # Compensation plots - flowFrame

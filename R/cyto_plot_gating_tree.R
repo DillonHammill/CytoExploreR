@@ -21,7 +21,7 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
 #' @examples 
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' 
 #' # Load in samples
 #' fs <- Activation

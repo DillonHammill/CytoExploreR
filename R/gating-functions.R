@@ -43,7 +43,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -206,7 +206,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -365,7 +365,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -566,7 +566,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -743,7 +743,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -917,7 +917,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -1130,7 +1130,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation
@@ -1289,7 +1289,7 @@
 #'
 #' # Copy and paste into console to interactively draw gates
 #'
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples to flowSet
 #' fs <- Activation

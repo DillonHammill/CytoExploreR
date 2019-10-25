@@ -94,7 +94,7 @@ gtf <- read.csv(system.file("extdata",
 ))
 
 # Gating -
-gt_gating(gt, gs)
+suppressWarnings(gt_gating(gt, gs))
 
 # Extract T Cells Population -
 Va2 <- gs_pop_get_data(gs, "T Cells")

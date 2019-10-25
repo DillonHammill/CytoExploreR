@@ -1,7 +1,9 @@
 ## CYTO_MAP --------------------------------------------------------------------
 
-# UMAP projections can be applied to new datasets but computation is slow. Keep
-# implementation to flowFrame method for now.
+# How to add support for new dimension reduction algorithms:
+# 1. Add a cyto_map which ends in the name of the algorithm.
+# 2. Update cyto_map dispatch function to include a new dimension reduction 
+#    method.
 
 #' Create dimension-reduced maps of cytometry data
 #'

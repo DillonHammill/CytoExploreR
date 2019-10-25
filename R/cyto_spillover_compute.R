@@ -58,7 +58,7 @@
 #'   accordance with \code{spillover}.
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Bypass directory check for external files
 #' options("CytoExploreR_wd_check" = FALSE)
@@ -74,7 +74,7 @@
 #' # Channel match fille
 #' cmfile <- system.file("extdata",
 #'   "Compensation-Channels.csv",
-#'   package = "CytoRSuiteData"
+#'   package = "CytoExploreRData"
 #' )
 #'
 #' # Compute fluorescent spillover matrix

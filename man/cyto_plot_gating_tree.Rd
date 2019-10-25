@@ -30,7 +30,7 @@ objects. The \code{GatingHierachy} method is also capable of displaying
 population statistics such as frequency of parent or count.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

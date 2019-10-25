@@ -88,7 +88,7 @@ reference negative population(s). The calculated spillover matrix is returned
 and written to a named csv file for future use.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Bypass directory check for external files
 options("CytoExploreR_wd_check" = FALSE)
@@ -104,7 +104,7 @@ gating(gt, gs)
 # Channel match fille
 cmfile <- system.file("extdata",
   "Compensation-Channels.csv",
-  package = "CytoRSuiteData"
+  package = "CytoExploreRData"
 )
 
 # Compute fluorescent spillover matrix

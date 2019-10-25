@@ -59,7 +59,7 @@
 #' @importFrom openCyto gt_gating
 #' 
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation

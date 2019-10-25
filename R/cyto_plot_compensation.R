@@ -62,7 +62,7 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Bypass directory check for external files
 #' options("CytoExploreR_wd_check" = FALSE)
@@ -80,7 +80,7 @@
 #' # Channel match file
 #' cmfile <- system.file("extdata",
 #'   "Compensation-Channels.csv",
-#'   package = "CytoRSuiteData"
+#'   package = "CytoExploreRData"
 #' )
 #'
 #' # Compensation plots - flowFrame

@@ -207,7 +207,7 @@
 #' @param ... additional arguments not currently in use.
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load samples into GatingSet
 #' fs <- Activation

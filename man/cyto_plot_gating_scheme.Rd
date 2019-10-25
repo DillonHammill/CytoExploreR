@@ -129,7 +129,7 @@ and has full support for gate tracking and back-gating through
 \code{gate_track} and \code{back_gate}.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

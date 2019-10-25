@@ -618,7 +618,7 @@ by default for no transparency.}
 Explore and visualise cytometry data.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load samples into GatingSet
 fs <- Activation
