@@ -293,7 +293,8 @@ cyto_markers_extract <- function(x,
 #'
 #' # Select a channel for each control from dropdown menu
 #' cyto_channel_select(fs)
-#' @name cyto_channel_select
+#' 
+#' @export
 cyto_channel_select <- function(x){
 
   # Extract data

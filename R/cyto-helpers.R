@@ -1194,6 +1194,76 @@ cyto_group_by <- function(x,
   return(x_list)
 }
 
+## CYTO_MERGE_BY ---------------------------------------------------------------
+
+#' Merge a flowSet by experiment variables
+#'
+#' \code{cyto_merge_by} makes a call to \code{cyto_group_by} to split samples
+#' into groups based on experiment variables. The resulting groups are then
+#' converted to flowFrames using \code{cyto_convert}. \code{cyto_merge_by} is
+#' the preferred way to merge samples in CytoExploreR as it will ensure
+#' appropriate sampling in \code{cyto_plot}.
+#'
+#' @param x object of class \code{flowSet}.
+#'
+#' @return list of flowFrames merged by the grouping variables specified by
+#'   \code{merge_by}.
+#'
+#' @examples
+#'
+#' # Load CytoExploreRData to acces data
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Experiment details
+#' cyto_details(fs)
+#'
+#' # Merge samples by 'Treatment'
+#' fr_list <- cyto_merge_by(fs, "Treatment")
+#'
+#' @importFrom flowCore identifier
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_merge_by <- function(x,
+                          merge_by = "all"){
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # FLOWSET
+  if(!is(x, "flowSet")){
+    stop("'x' should be an object of class flowSet.")
+  }
+  
+  # GROUPING -------------------------------------------------------------------
+  
+  # CYTO_GROUP_BY
+  fs_list <- cyto_group_by(x, group_by = merge_by)
+  
+  # GROUPS
+  grps <- names(fs_list)
+  
+  # MERGING --------------------------------------------------------------------
+  
+  # CONVERT EACH GROUP TO FLOWFRAME
+  fr_list <- lapply(fs_list, function(fs){
+    cyto_convert(fs, "flowFrame")
+  })
+  names(fr_list) <- grps
+  
+  # REPLACE SAMPLENAMES WITH GROUPS
+  lapply(seq_len(length(fr_list)), function(z){
+    identifier(fr_list[[z]]) <<- grps[z]
+  })
+  
+  # RETURN PREPARED FLOWFRAME LIST
+  return(fr_list)
+  
+}
+
 ## CYTO_SAMPLE -----------------------------------------------------------------
 
 #' Sample a flowFrame or flowSet
@@ -1321,7 +1391,7 @@ cyto_sample.list <- function(x,
     # Sampling by event number is more complex
     }else if(display > 1){
       # Identifiers
-      nms <- LAPPLY(x, function(z){identifier(z)})
+      nms <- LAPPLY(x, function(z){cyto_names(z)})
       ind <- seq_len(length(nms))
     
       # Sampling

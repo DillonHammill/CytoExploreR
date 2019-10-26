@@ -26,6 +26,7 @@ fs <- Compensation
 
 # Select a channel for each control from dropdown menu
 cyto_channel_select(fs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
