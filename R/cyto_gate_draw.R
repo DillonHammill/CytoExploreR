@@ -189,45 +189,18 @@ cyto_gate_draw.GatingSet <- function(x,
     axes_trans <- NA
   }
   
+  # NODES
+  nds <- cyto_nodes(x, path = "auto")
+  
   # PREPARE SAMPLES ------------------------------------------------------------
 
   # EXTRACT PARENT POPULATION
   fs <- cyto_extract(x, parent)
 
-  # GROUP ALL
-  if (group_by[1] == "all") {
-    # SELECT
-    if (!is.null(select)) {
-      fs <- cyto_select(fs, select)
-    }
-    # MERGED FLOWFRAME
-    fr <- cyto_convert(fs, "flowFrame")
-    # FLOWFRAME METHOD
-    fr_list <- list(fr)
-    names(fr_list) <- "all"
-    # GROUP variables
-  } else {
-    # GROUPING
-    fs_list <- cyto_group_by(fs, group_by)
-    # SELECT PER GROUP
-    if (!is.null(select)) {
-      fs_list <- lapply(fs_list, function(z) {
-        # Select or return all samples if criteria not met
-        tryCatch(cyto_select(z, select), error = function(e) {
-          z
-        })
-      })
-    }
-    # MERGE EACH FLOWSET
-    fr_list <- lapply(fs_list, function(z) {
-      # Number of samples per group
-      n <- length(z)
-      # Convert fs to flowFrame
-      z <- cyto_convert(z, "flowFrame")
-      return(z)
-    })
-    names(fr_list) <- names(fs_list)
-  }
+  # GROUPING (MERGE_BY)
+  fr_list <- cyto_merge_by(fs,
+                           merge_by = group_by,
+                           select = select)
   
   # GROUPS
   N <- length(fr_list)
@@ -239,8 +212,8 @@ cyto_gate_draw.GatingSet <- function(x,
     # OVERLAY - POPUALTION NAMES
     if (is.character(overlay)) {
       # VALID OVERLAY
-      if (all(overlay %in% basename(cyto_nodes(x)))) {
-        # EXTRACT POPULATIONS
+      if (all(overlay %in% nds)) {
+        # EXTRACT POPULATIONS - LIST OF FLOWSETS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
           cyto_extract(x, z)
@@ -254,33 +227,10 @@ cyto_gate_draw.GatingSet <- function(x,
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
     } else if (inherits(overlay, "flowSet")) {
-      # GROUP VARIABLES
-      if (group_by[1] != "all") {
-        # GROUPING
-        overlay <- cyto_group_by(overlay, group_by)
-        # LIST OF FLOWFRAMES
-        overlay <- lapply(overlay, function(z) {
-          # SELECT
-          if (!is.null(select)) {
-            z <- tryCatch(cyto_select(z, select), error = function(e) {
-              z
-            })
-          }
-          # CONVERT
-          z <- cyto_convert(z, "flowFrame")
-          return(z)
-        })
-        # GROUP ALL
-      } else {
-        # SELECT
-        if (!is.null(select)) {
-          overlay <- cyto_select(overlay, select)
-        }
-        # FLOWFRAME
-        overlay <- cyto_convert(overlay, "flowFrame")
-        # FLOWFRAME LIST
-        overlay <- list(overlay)
-      }
+      # GROUPING (MERGE_BY) - LIST OF FLOWFRAMES
+      overlay <- cyto_merge_by(overlay,
+                               merge_by = group_by,
+                               select = select)
       # FLOWFRAME LIST TO LIST OF FLOWFRAME LISTS
       overlay <- lapply(overlay, function(z) {
         list(z)
@@ -310,34 +260,10 @@ cyto_gate_draw.GatingSet <- function(x,
       }))) {
         # GROUP & MERGE EACH FLOWSET
         overlay <- lapply(overlay, function(z) {
-          # GROUP VARIABLES
-          if (group_by[1] != "all") {
-            # GROUPING
-            x <- cyto_group_by(z, group_by)
-            # Coercion and sampling
-            x <- lapply(x, function(y) {
-              # SELECT
-              if (!is.null(select)) {
-                y <- tryCatch(cyto_select(y, select), error = function(e) {
-                  y
-                })
-              }
-              # CONVERT
-              y <- cyto_convert(y, "flowFrame")
-              return(y)
-            })
-            # GROUP ALL
-          } else {
-            # SELECT
-            if (!is.null(select)) {
-              z <- tryCatch(cyto_select(z, select), error = function(e) {
-                z
-              })
-            }
-            # CONVERT
-            z <- cyto_convert(z, "flowFrame")
-            return(z)
-          }
+          # GROUPING (MERGE_BY)
+          cyto_merge_by(z,
+                        merge_by = group_by,
+                        select = select)
         })
         # OVERLAY TRANSPOSE
         overlay <- overlay %>% transpose()
@@ -361,6 +287,7 @@ cyto_gate_draw.GatingSet <- function(x,
     }else{
       FR_LIST <- fr_list[z]
     }
+    # SAMPLE HERE - CORRECT GATING STATS
     FR_LIST <- cyto_sample(FR_LIST, display = display, seed = 56)
     # TITLE
     if (group_by[1] == "all") {
@@ -649,38 +576,10 @@ cyto_gate_draw.flowSet <- function(x,
 
   # PREPARE SAMPLES ------------------------------------------------------------
 
-  # GROUP ALL
-  if (group_by[1] == "all") {
-    # SELECT
-    if (!is.null(select)) {
-      fs <- cyto_select(fs, select)
-    }
-    # MERGED FLOWFRAME
-    fr <- cyto_convert(fs, "flowFrame")
-    # FLOWFRAME METHOD
-    fr_list <- list(fr)
-    # GROUP variables
-  } else {
-    # GROUPING
-    fs_list <- cyto_group_by(fs, group_by)
-    # SELECT PER GROUP
-    if (!is.null(select)) {
-      fs_list <- lapply(fs_list, function(z) {
-        # Select or return all samples if criteria not met
-        tryCatch(cyto_select(z, select), error = function(e) {
-          z
-        })
-      })
-    }
-    # MERGE EACH FLOWSET
-    fr_list <- lapply(fs_list, function(z) {
-      # Number of samples per group
-      n <- length(z)
-      # Convert fs to flowFrame
-      z <- cyto_convert(z, "flowFrame")
-      return(z)
-    })
-  }
+  # GROUPING (MERGE BY)
+  fr_list <- cyto_merge_by(fs,
+                           merge_by = group_by,
+                           select = select)
 
   # GROUPS
   N <- length(fr_list)
@@ -695,33 +594,10 @@ cyto_gate_draw.flowSet <- function(x,
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
     } else if (inherits(overlay, "flowSet")) {
-      # GROUP VARIABLES
-      if (group_by[1] != "all") {
-        # GROUPING
-        overlay <- cyto_group_by(overlay, group_by)
-        # LIST OF FLOWFRAMES
-        overlay <- lapply(overlay, function(z) {
-          # SELECT
-          if (!is.null(select)) {
-            z <- tryCatch(cyto_select(z, select), error = function(e) {
-              z
-            })
-          }
-          # CONVERT
-          z <- cyto_convert(z, "flowFrame")
-          return(z)
-        })
-        # GROUP ALL
-      } else {
-        # SELECT
-        if (!is.null(select)) {
-          overlay <- cyto_select(overlay, select)
-        }
-        # FLOWFRAME
-        overlay <- cyto_convert(overlay, "flowFrame")
-        # FLOWFRAME LIST
-        overlay <- list(overlay)
-      }
+      # GROUPING (MERGE BY) - LIST OF FLOWFRAMES
+      overlay <- cyto_merge_by(overlay,
+                               merge_by = group_by,
+                               select = select)
       # FLOWFRAME LIST TO LIST OF FLOWFRAME LISTS
       overlay <- lapply(overlay, function(z) {
         list(z)
@@ -751,34 +627,10 @@ cyto_gate_draw.flowSet <- function(x,
       }))) {
         # GROUP & MERGE EACH FLOWSET
         overlay <- lapply(overlay, function(z) {
-          # GROUP VARIABLES
-          if (group_by[1] != "all") {
-            # GROUPING
-            x <- cyto_group_by(z, group_by)
-            # Coercion and sampling
-            x <- lapply(x, function(y) {
-              # SELECT
-              if (!is.null(select)) {
-                y <- tryCatch(cyto_select(y, select), error = function(e) {
-                  y
-                })
-              }
-              # CONVERT
-              y <- cyto_convert(y, "flowFrame")
-              return(y)
-            })
-            # GROUP ALL
-          } else {
-            # SELECT
-            if (!is.null(select)) {
-              z <- tryCatch(cyto_select(z, select), error = function(e) {
-                z
-              })
-            }
-            # CONVERT
-            z <- cyto_convert(z, "flowFrame")
-            return(z)
-          }
+          # GROUPING (MERGE BY)
+          cyto_merge_by(z,
+                        merge_by = group_by,
+                        select = select)
         })
         # OVERLAY TRANSPOSE
         overlay <- overlay %>% transpose()
@@ -802,6 +654,7 @@ cyto_gate_draw.flowSet <- function(x,
     }else{
       FR_LIST <- fr_list[z]
     }
+    # SAMPLE HERE - CORRECT GATING STATS
     FR_LIST <- cyto_sample(FR_LIST, display = display, seed = 56)
     # Title
     if (group_by[1] == "all") {
@@ -989,7 +842,7 @@ cyto_gate_draw.flowFrame <- function(x,
 
   # PREPARE SAMPLES & OVERLAY --------------------------------------------------
   
-  # X FLOW FRAME LIST
+  # X FLOWFRAME LIST
   fr_list <- list(x)
   
   # OVERLAY FLOWFRAME LIST
@@ -1021,7 +874,7 @@ cyto_gate_draw.flowFrame <- function(x,
         ))
       }
     }
-    fr_list <- c(fr_list, overlay)
+    fr_list <- c(fr_list, overlay_list)
   }
   
   # SAMPLING
@@ -1032,8 +885,6 @@ cyto_gate_draw.flowFrame <- function(x,
   # CONSTRUCT PLOT -------------------------------------------------------------
 
   # CYTO_PLOT
-  
-  # CONSTRUCT PLOT
   if (plot == TRUE) {
     if (!.all_na(overlay)) {
       cyto_plot(fr_list[[1]],

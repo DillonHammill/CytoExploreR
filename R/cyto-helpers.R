@@ -1205,6 +1205,14 @@ cyto_group_by <- function(x,
 #' appropriate sampling in \code{cyto_plot}.
 #'
 #' @param x object of class \code{flowSet}.
+#' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
+#'   c("Treatment","Concentration") indicating how the samples should be grouped
+#'   prior to merging.
+#' @param select selection critieria passed to \code{\link{cyto_select}} which
+#'   indicates which samples in each group to retain prior to merging, set to
+#'   NULL by default to merge all samples in each group. Filtering steps should
+#'   be comma separated and wrapped in a list. Refer to
+#'   \code{\link{cyto_select}} for more details.
 #'
 #' @return list of flowFrames merged by the grouping variables specified by
 #'   \code{merge_by}.
@@ -1229,7 +1237,8 @@ cyto_group_by <- function(x,
 #'
 #' @export
 cyto_merge_by <- function(x,
-                          merge_by = "all"){
+                          merge_by = "all",
+                          select = NULL){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1245,6 +1254,18 @@ cyto_merge_by <- function(x,
   
   # GROUPS
   grps <- names(fs_list)
+  
+  # SELECTION ------------------------------------------------------------------
+  
+  # ATTEMPT SELECTION OR RETURN ALL SAMPLES
+  if (!is.null(select)) {
+    fs_list <- lapply(fs_list, function(z) {
+      # Select or return all samples if criteria not met
+      tryCatch(cyto_select(z, select), error = function(e) {
+        z
+      })
+    })
+  }
   
   # MERGING --------------------------------------------------------------------
   

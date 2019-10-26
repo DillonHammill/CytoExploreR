@@ -4,10 +4,20 @@
 \alias{cyto_merge_by}
 \title{Merge a flowSet by experiment variables}
 \usage{
-cyto_merge_by(x, merge_by = "all")
+cyto_merge_by(x, merge_by = "all", select = NULL)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
+
+\item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
+c("Treatment","Concentration") indicating how the samples should be grouped
+prior to merging.}
+
+\item{select}{selection critieria passed to \code{\link{cyto_select}} which
+indicates which samples in each group to retain prior to merging, set to
+NULL by default to merge all samples in each group. Filtering steps should
+be comma separated and wrapped in a list. Refer to
+\code{\link{cyto_select}} for more details.}
 }
 \value{
 list of flowFrames merged by the grouping variables specified by
