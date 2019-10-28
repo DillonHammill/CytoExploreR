@@ -1432,7 +1432,7 @@ cyto_sample.list <- function(x,
           seed = seed
         )
       })
-    # NO BARCODING
+    # NO BARCODING - RELY ON IDENTIFIERS
     } else {
       # Same percentage sampling applied to each flowFrame
       if (display <= 1) {
@@ -1457,27 +1457,12 @@ cyto_sample.list <- function(x,
             if (nms[z] == nms[1]) {
               # Number of events in base layer
               base_events <- nrow(x[[1]])
-              # Number of merged samples in base layer
-              if ("Sample ID" %in% cyto_channels(x[[1]])) {
-                base_samples <- length(unique(x[[1]][, "Sample ID"]))
-              } else {
-                base_samples <- 1
-              }
               # Number of events in overlay
               overlay_events <- nrow(x[[z]])
-              # Number of merged samples in overlay
-              if ("Sample ID" %in% cyto_channels(x[[z]])) {
-                overlay_samples <- length(unique(x[[z]][, "Sample ID"]))
-              } else {
-                overlay_samples <- 1
-              }
-
               # Proportion of overlay relative to base
-              prop <- overlay_events / events
+              prop <- overlay_events / base_events
               # Update display prop * display
-              if (prop < 1) {
-                display <- ceiling(prop * display)
-              }
+              display <- ceiling(prop * display)
               # Sampling
               cyto_sample(x[[z]], display = display, seed = seed)
               # Identifiers don't match - separate samples - same sampling
