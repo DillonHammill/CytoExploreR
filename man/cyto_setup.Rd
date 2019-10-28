@@ -50,7 +50,6 @@ cyto_extract(gs, "root")[[1]]
 
 # Experiment details have been updated
 cyto_details(gs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

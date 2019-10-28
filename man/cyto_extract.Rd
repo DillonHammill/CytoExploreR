@@ -14,8 +14,8 @@ cyto_extract(x, parent = "root", ...)
 \code{GatingHierachy} or \code{GatingSet} objects.}
 
 \item{...}{additional arguments passed to
-\code{\link[openCyto:gh_pop_get_data]{gh_pop_get_data}} or
-\code{\link[openCyto:gs_pop_get_data]{gs_pop_get_data}}.}
+\code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
+\code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}}.}
 }
 \value{
 either a \code{flowFrame} or a \code{flowSet}.
@@ -40,7 +40,6 @@ gs <- GatingSet(Activation)
 
 # Extract root population
 cyto_extract(gs, "root")
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

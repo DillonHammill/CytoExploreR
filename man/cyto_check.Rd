@@ -28,7 +28,6 @@ cyto_check(Activation)
 
 # Invalid list object
 cyto_check(list(Activation))
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

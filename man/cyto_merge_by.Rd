@@ -50,7 +50,6 @@ cyto_details(fs)
 
 # Merge samples by 'Treatment'
 fr_list <- cyto_merge_by(fs, "Treatment")
-
 }
 \seealso{
 \code{\link{cyto_group_by}}

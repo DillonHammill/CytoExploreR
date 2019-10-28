@@ -730,8 +730,8 @@ cyto_transform_extract <- function(x,
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierachy} or \code{GatingSet} objects.
 #' @param ... additional arguments passed to
-#'   \code{\link[openCyto:gh_pop_get_data]{gh_pop_get_data}} or
-#'   \code{\link[openCyto:gs_pop_get_data]{gs_pop_get_data}}.
+#'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
+#'   \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}}.
 #'
 #' @return either a \code{flowFrame} or a \code{flowSet}.
 #'
