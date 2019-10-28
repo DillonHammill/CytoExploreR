@@ -286,6 +286,7 @@ cyto_markers_extract <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
+#' \dontrun{
 #' library(CytoExploreRData)
 #'
 #' # Load in samples
@@ -293,7 +294,7 @@ cyto_markers_extract <- function(x,
 #'
 #' # Select a channel for each control from dropdown menu
 #' cyto_channel_select(fs)
-#' 
+#' }
 #' @export
 cyto_channel_select <- function(x){
 

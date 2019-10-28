@@ -4,7 +4,7 @@
 \alias{cyto_merge_by}
 \title{Merge a flowSet by experiment variables}
 \usage{
-cyto_merge_by(x, merge_by = "all", select = NULL)
+cyto_merge_by(x, merge_by = "all", select = NULL, barcode = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
@@ -18,6 +18,13 @@ indicates which samples in each group to retain prior to merging, set to
 NULL by default to merge all samples in each group. Filtering steps should
 be comma separated and wrapped in a list. Refer to
 \code{\link{cyto_select}} for more details.}
+
+\item{barcode}{logical indicating whether a call should be made to
+\code{\link{cyto_barcode}} prior to grouping and merging samples, set to
+TRUE by default. Barcoding helps \code{\link{cyto_sample}} to appropriately
+sample events based on the number of merged samples.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_barcode}}.}
 }
 \value{
 list of flowFrames merged by the grouping variables specified by
@@ -44,6 +51,15 @@ cyto_details(fs)
 # Merge samples by 'Treatment'
 fr_list <- cyto_merge_by(fs, "Treatment")
 
+}
+\seealso{
+\code{\link{cyto_group_by}}
+
+\code{\link{cyto_select}}
+
+\code{\link{cyto_barcode}}
+
+\code{\link{cyto_sample}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
