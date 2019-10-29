@@ -11,7 +11,7 @@
 #' @param gate list of gate objects to apply to x
 #' @param negate logical indicating whether negated population should be
 #'   included.
-#'   
+#'
 #' @return list of flowFrames
 #'
 #' @importFrom flowCore Subset split
@@ -22,66 +22,72 @@
 #' @noRd
 .cyto_label_pops <- function(x,
                              gate,
-                             negate = FALSE){
-  
+                             negate = FALSE) {
+
   # NO GATES -------------------------------------------------------------------
-  
+
   # RETURN X
-  if(.all_na(gate)){
+  if (.all_na(gate)) {
     return(list(x))
   }
-  
+
   # PREPARE GATES --------------------------------------------------------------
-  
+
   # LIST OF GATE OBJECTS
-  if(is(gate)[1] == "list"){
-    if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
-                                  "polygonGate",
-                                  "ellipsoidGate",
-                                  "quadGate",
-                                  "filters"))){
+  if (is(gate)[1] == "list") {
+    if (all(LAPPLY(gate, "is") %in% c(
+      "rectangleGate",
+      "polygonGate",
+      "ellipsoidGate",
+      "quadGate",
+      "filters"
+    ))) {
       gate <- unlist(gate)
     }
-  }else if(is(gate)[1] == "filters"){
+  } else if (is(gate)[1] == "filters") {
     gate <- unlist(gate)
-  }else if(is(gate)[1] %in% c("rectangleGate",
-                           "polygonGate",
-                           "ellipsoidGate",
-                           "quadGate",
-                           "filters")){
+  } else if (is(gate)[1] %in% c(
+    "rectangleGate",
+    "polygonGate",
+    "ellipsoidGate",
+    "quadGate",
+    "filters"
+  )) {
     gate <- list(gate)
   }
-  
+
   # GATES ----------------------------------------------------------------------
 
   # NEGATED GATE - QUADGATES EXCLUDED
-  if(negate == TRUE & !any(LAPPLY(gate, function(z){is(z, "quadGate")}))){
-    if(length(gate) > 1){
+  if (negate == TRUE & !any(LAPPLY(gate, function(z) {
+    is(z, "quadGate")
+  }))) {
+    if (length(gate) > 1) {
       gate <- c(gate, list(do.call("|", gate)))
-    }else{
+    } else {
       gate <- c(gate, gate)
     }
   }
 
   # POPULATIONS ----------------------------------------------------------------
-  
+
   # GATING
-  pops <- LAPPLY(seq_len(length(gate)), function(z){
+  pops <- LAPPLY(seq_len(length(gate)), function(z) {
     # NEGATED POPULATION
-    if(negate == TRUE & z == length(gate)){
+    if (negate == TRUE & z == length(gate)) {
       split(x, gate[[z]])[[2]]
-    # GATED POPULATIONS 
-    }else{
+      # GATED POPULATIONS
+    } else {
       # QUADGATES RETURN MULTIPLE POPULATIONS
-      if(is(gate[[z]], "quadGate")){
-        split(x, gate[[z]])[c(2,1,3,4)] # FIX ORDER
-      # SINGLE POPULATIONS  
-      }else{
+      if (is(gate[[z]], "quadGate")) {
+        split(x, gate[[z]])[c(2, 1, 3, 4)] # FIX ORDER
+        # SINGLE POPULATIONS
+      } else {
         Subset(x, gate[[z]])
       }
     }
   })
-  
+
   # RETURN LIST OF GATED POPULATIONS
   return(pops)
 }
@@ -107,86 +113,87 @@
                              channels,
                              axes_trans = NA,
                              label_stat,
-                             density_smooth){
-  
+                             density_smooth) {
+
   # CHECKS ---------------------------------------------------------------------
-  
+
   # NO LABEL_STAT
-  if(.all_na(label_stat)){
+  if (.all_na(label_stat)) {
     return(label_stat)
   }
-  
+
   # VALID LABEL_STAT
   label_stat <- LAPPLY(label_stat, ".cyto_stat_check")
-  
+
   # SUPPORTED LABEL_STAT
-  if(length(channels) == 2){
-    if(!any(label_stat %in% c("freq","count"))){
+  if (length(channels) == 2) {
+    if (!any(label_stat %in% c("freq", "count"))) {
       stop("Only count and frequency statistics are supported in 2D plots.")
     }
   }
-  
+
   # GENERAL --------------------------------------------------------------------
-  
+
   # SAMPLES
   SMP <- length(x)
-  
+
   # POPULATIONS PER LAYER
   NP <- length(pops) / SMP
-  
+
   # TOTAL POPULATIONS - SPLIT INDICES
   TNP <- seq_len(NP * SMP)
-  
+
   # SPLIT TNP
   TNP <- split(TNP, rep(seq_len(SMP), each = NP))
-  
+
   # COMPUTE LABEL_STAT ---------------------------------------------------------
-  
+
   # STATISTICS
-  LABEL_STAT <- LAPPLY(seq_len(SMP), function(z){
+  LABEL_STAT <- LAPPLY(seq_len(SMP), function(z) {
     # LABEL_STAT
-    ST <- lapply(TNP[[z]], function(y){
+    ST <- lapply(TNP[[z]], function(y) {
       # STATISTIC SUPPLIED
-      if(!.all_na(label_stat[y])){
+      if (!.all_na(label_stat[y])) {
         # FREQUENCY STATISTIC
-        if(grepl("freq", label_stat[y], ignore.case = TRUE)){
+        if (grepl("freq", label_stat[y], ignore.case = TRUE)) {
           st <- .cyto_count(pops[[y]]) / .cyto_count(x[[z]]) * 100
           st <- paste(.round(st, 2), "%")
           # CV STATISTIC
-        }else if(grepl("CV", label_stat[y], ignore.case = TRUE)){
+        } else if (grepl("CV", label_stat[y], ignore.case = TRUE)) {
           st <- suppressMessages(
             .cyto_CV(pops[[y]],
-                         channels = channels,
-                         trans = axes_trans)
+              channels = channels,
+              trans = axes_trans
+            )
           )
           st <- paste(.round(st, 2), "%")
           # OTHER STATISTIC
-        }else{
+        } else {
           st <- suppressMessages(
             cyto_stats_compute(pops[[y]],
-                                   channels = channels,
-                                   trans = axes_trans,
-                                   stat = label_stat[y],
-                                   format = "long",
-                                   density_smooth = density_smooth)
+              channels = channels,
+              trans = axes_trans,
+              stat = label_stat[y],
+              format = "long",
+              density_smooth = density_smooth
+            )
           )
-          st <- as.numeric(st[,ncol(st)])
-          if(!grepl("count", label_stat[y], ignore.case = TRUE)){
+          st <- as.numeric(st[, ncol(st)])
+          if (!grepl("count", label_stat[y], ignore.case = TRUE)) {
             st <- .round(st, 2)
           }
         }
-      # NO STATISTIC  
-      }else{
+        # NO STATISTIC
+      } else {
         st <- NA
       }
       return(st)
     })
     return(ST)
   })
-  
+
   # RETURN COMPUTED STATISTICS -------------------------------------------------
   return(LABEL_STAT)
-  
 }
 
 ## .CYTO_LABEL_TEXT ------------------------------------------------------------
@@ -203,28 +210,27 @@
 #'
 #' @noRd
 .cyto_label_text <- function(label_text,
-                             label_stat){
-  
+                             label_stat) {
+
   # MERGE LABEL_TEXT & LABEL_STAT
-  LAPPLY(seq_len(length(label_text)), function(z){
+  LAPPLY(seq_len(length(label_text)), function(z) {
     # NO LABEL_TEXT & NO LABEL_STAT
-    if(.all_na(label_text[z]) & .all_na(label_stat[z])){
+    if (.all_na(label_text[z]) & .all_na(label_stat[z])) {
       label_text[z] <<- NA
-    # NO LABEL_TEXT & LABEL_STAT
-    }else if(.all_na(label_text[z]) & !.all_na(label_stat[z])){
+      # NO LABEL_TEXT & LABEL_STAT
+    } else if (.all_na(label_text[z]) & !.all_na(label_stat[z])) {
       label_text[z] <<- label_stat[z]
-    # LABEL_TEXT & NO LABEL_STAT
-    }else if(!.all_na(label_text[z]) & .all_na(label_stat[z])){
+      # LABEL_TEXT & NO LABEL_STAT
+    } else if (!.all_na(label_text[z]) & .all_na(label_stat[z])) {
       label_text[z] <<- label_text[z]
-    # LABEL_TEXT & LABEL_STAT
-    }else if(!.all_na(label_text[z]) & !.all_na(label_stat[z])){
+      # LABEL_TEXT & LABEL_STAT
+    } else if (!.all_na(label_text[z]) & !.all_na(label_stat[z])) {
       label_text[z] <<- paste(label_text[z], label_stat[z], sep = "\n")
     }
   })
-  
+
   # RETURN LABEL_TEXT
   return(label_text)
-  
 }
 
 ## .CYTO_LABEL_COORDS ----------------------------------------------------------
@@ -234,311 +240,320 @@
 #' Used internally within cyto_plot to compute offset label co-ordinates. Only
 #' called if label_position and label are set to TRUE.
 #'
-#' @param x list of named cyto_plot arguments.
+#' @param args list of named cyto_plot arguments.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
-.cyto_label_coords <- function(x) {
-  
-  # INHERIT ARGUMENTS ----------------------------------------------------------
-  
-  # INHERIT CYTO_PLOT ENVIRONMENT
-  .args_update(x)
-  
+.cyto_label_coords <- function(args) {
+
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
+
   # PLOT LIMITS
   lims <- par("usr")
-  
+
   # X LIMITS
   xmin <- lims[1]
   xmax <- lims[2]
   xrng <- xmax - xmin
-  xpad <- (xrng - xrng/1.04)/2 # 2% BUFFER
+  xpad <- (xrng - xrng / 1.04) / 2 # 2% BUFFER
   xmin <- xmin + xpad
   xmax <- xmax - xpad
-  xrng <- xmax - xmin 
-  
+  xrng <- xmax - xmin
+
   # Y LIMITS
   ymin <- lims[3]
   ymax <- lims[4]
   yrng <- ymax - ymin
-  ypad <- (yrng - yrng/1.04)/2 # 2% BUFFER
+  ypad <- (yrng - yrng / 1.04) / 2 # 2% BUFFER
   ymin <- ymin + ypad
   ymax <- ymax - ypad
   yrng <- ymax - ymin
-  
+
   # DENSITY_STACK --------------------------------------------------------------
-  
+
   # 1D PLOT
-  if(length(channels) == 1){
+  if (length(args[["channels"]]) == 1) {
     # NO STACKING
-    if(density_stack == 0){
+    if (args[["density_stack"]] == 0) {
       # DEFAULT Y COORD - 50% Y RANGE
-      y_coords <- rep(0.5 * yrng, length(label_text))
-    # STACKING
-    }else if(density_stack != 0){
+      y_coords <- rep(0.5 * yrng, length(args[["label_text"]]))
+      # STACKING
+    } else if (args[["density_stack"]] != 0) {
       # Y_MAX PER LAYER
-      y_max <- as.numeric(unlist(strsplit(names(fr_dens_list)[1], "-"))[2])
+      y_max <- as.numeric(unlist(
+        strsplit(names(args[["fr_dens_list"]])[1], "-"))[2])
       # STACK LEVELS
-      stk <- LAPPLY(seq(0, SMP, 1), function(z){
-        density_stack * y_max * z
+      stk <- LAPPLY(seq(0, args[["SMP"]], 1), function(z) {
+        args[["density_stack"]] * y_max * z
       })
       # DEFAULT LABEL Y CO-ORDINATES
-      y_coords <- LAPPLY(seq_len(SMP), function(z){
+      y_coords <- LAPPLY(seq_len(args[["SMP"]]), function(z) {
         # HALFWAY BETWEEN HORIZONTAL LINES
         stk[z] + 0.5 * stk[2]
       })
       # REPEAT (Y_COORDS/LAYER)
-      y_coords <- rep(y_coords, each = NP)
+      y_coords <- rep(y_coords, each = args[["NP"]])
     }
   }
-  
+
   # COMPUTE LABEL CO-ORDINATES -------------------------------------------------
-  
+
   # SPLIT TNP LABELS
-  label_ind <- split(seq_len(TNP), rep(seq_len(SMP), each = NP))
-  
+  label_ind <- split(seq_len(args[["TNP"]]), 
+                     rep(seq_len(args[["SMP"]]), each = args[["NP"]]))
+
   # GATE CENTERS
-  if(!.all_na(gate)){
-    gate_centers <- .cyto_gate_center(gate,
-                                      channels = channels,
-                                      text_x = label_text_x,
-                                      text_y = label_text_y)
+  if (!.all_na(args[["gate"]])) {
+    gate_centers <- .cyto_gate_center(args[["gate"]],
+      channels = args[["channels"]],
+      text_x = label_text_x,
+      text_y = label_text_y
+    )
   }
-  
+
   # LABEL_TEXT_XY - MATRIX
-  label_text_xy <- lapply(seq_len(SMP), function(z){    
+  label_text_xy <- lapply(seq_len(args[["SMP"]]), function(z) {
 
     # TEMPORARY STORAGE VECTORS
     text_x <- c()
     text_y <- c()
     # COMPUTE LABEL CO-ORDINATES
-    lapply(label_ind[[z]], function(y){
+    lapply(label_ind[[z]], function(y) {
       # LABEL INDEX (GATE & TEXT_X/Y)
       ind <- match(y, label_ind[[z]])
       # LABEL
-      if(!.all_na(label_text[y])){
+      if (!.all_na(args[["label_text"]][y])) {
         # ID PLOT - CENTER OF RANGE
-        if(length(channels) == 1){
+        if (length(args[["channels"]]) == 1) {
           # GATE
-          if(!.all_na(gate)){
+          if (!.all_na(args[["gate"]])) {
             # GATED POPULATION
-            if(ind <= nrow(gate_centers)){
+            if (ind <= nrow(gate_centers)) {
               # X COORD - GATE CENTER
               text_x[ind] <<- gate_centers[ind, "x"]
               # Y COORD - STACKS/LIMITS
-              if(.all_na(label_text_y[y])){
+              if (.all_na(label_text_y[y])) {
                 text_y[ind] <<- y_coords[y]
               }
-            # NEGATED POPULATION
-            }else if(ind > nrow(gate_centers)){
+              # NEGATED POPULATION
+            } else if (ind > nrow(gate_centers)) {
               # X COORD - RANGE CENTER
-              if(.all_na(label_text_x[y])){
+              if (.all_na(label_text_x[y])) {
                 # NO EVENTS
-                if(.cyto_count(pops[[y]]) == 0){
+                if (.cyto_count(args[["pops"]][[y]]) == 0) {
                   # RANGE CENTER - PLOT LIMITS
                   text_x[ind] <<- mean(c(xmin, xmax))
-                }else{
+                } else {
                   # RANGE
                   rng <- suppressMessages(
-                    .cyto_range(pops[[y]],
-                                channels = channels,
-                                limits = limits,
-                                buffer = 0,
-                                anchor = FALSE)[, channels]
+                    .cyto_range(args[["pops"]][[y]],
+                      channels = args[["channels"]],
+                      limits = args[["limits"]],
+                      buffer = 0,
+                      anchor = FALSE
+                    )[, args[["channels"]]]
                   )
                   # UNIMODAL - 50% RANGE
-                  if(abs(diff(rng)) <= 0.6*xrng){
+                  if (abs(diff(rng)) <= 0.6 * xrng) {
                     text_x[ind] <<- quantile(rng, 0.5)
-                  # UMULTIMODAL - 56% RANGE
-                  }else{
-                    text_x[ind] <<-quantile(rng, 0.56)
+                    # UMULTIMODAL - 56% RANGE
+                  } else {
+                    text_x[ind] <<- quantile(rng, 0.56)
                   }
                 }
-              # X COORD MANUALLY SUPPLIED
-              }else if(!.all_na(label_text_x[y])){
+                # X COORD MANUALLY SUPPLIED
+              } else if (!.all_na(label_text_x[y])) {
                 text_x[ind] <<- label_text_x[y]
               }
               # Y COORD - STACKS/LIMITS
-              if(.all_na(label_text_y[y])){
+              if (.all_na(label_text_y[y])) {
                 text_y[ind] <<- y_coords[y]
-              # Y COORD MANUALLY SUPPLIED
-              }else if(!.all_na(label_text_y[y])){
+                # Y COORD MANUALLY SUPPLIED
+              } else if (!.all_na(label_text_y[y])) {
                 text_y[ind] <<- label_text_y[y]
               }
             }
-          # NO GATE
-          }else if(.all_na(gate)){
+            # NO GATE
+          } else if (.all_na(args[["gate"]])) {
             # X COORD - RANGE CENTER
-            if(.all_na(label_text_x[y])){
+            if (.all_na(label_text_x[y])) {
               # NO EVENTS
-              if(.cyto_count(pops[[y]]) == 0){
+              if (.cyto_count(args[["pops"]][[y]]) == 0) {
                 # RANGE CENTER - PLOT LIMITS
                 text_x[ind] <<- mean(c(xmin, xmax))
-              }else{
+              } else {
                 # RANGE
                 rng <- suppressMessages(
-                  .cyto_range(pops[[y]],
-                              channels = channels,
-                              limits = limits,
-                              buffer = 0,
-                              anchor = FALSE)[, channels]
+                  .cyto_range(args[["pops"]][[y]],
+                    channels = args[["channels"]],
+                    limits = args[["limits"]],
+                    buffer = 0,
+                    anchor = FALSE
+                  )[, args[["channels"]]]
                 )
                 # UNIMODAL - 50% RANGE
-                if(abs(diff(rng)) <= 0.6 * xrng){
+                if (abs(diff(rng)) <= 0.6 * xrng) {
                   text_x[ind] <<- quantile(rng, 0.5)
                   # MULTIMODAL - 56% RANGE
-                }else{
-                  text_x[ind] <<-quantile(rng, 0.56)
+                } else {
+                  text_x[ind] <<- quantile(rng, 0.56)
                 }
               }
-            # X COORD MANUALLY SUPPLIED
-            }else if(!.all_na(label_text_x[y])){
+              # X COORD MANUALLY SUPPLIED
+            } else if (!.all_na(label_text_x[y])) {
               text_x[ind] <<- label_text_x[y]
             }
             # Y COORD - STACKS/LIMITS
-            if(.all_na(label_text_y[y])){
+            if (.all_na(label_text_y[y])) {
               text_y[ind] <<- y_coords[y]
-            # Y COORD MANUALLY SUPPLIED
-            }else if(!.all_na(label_text_y[y])){
+              # Y COORD MANUALLY SUPPLIED
+            } else if (!.all_na(label_text_y[y])) {
               text_y[ind] <<- label_text_y[y]
             }
           }
-        # 2D PLOT - MODE
-        }else if(length(channels) == 2){
+          # 2D PLOT - MODE
+        } else if (length(args[["channels"]]) == 2) {
           # GATE
-          if(!.all_na(gate)){
+          if (!.all_na(args[["gate"]])) {
             # GATED POPULATION
-            if(ind <= nrow(gate_centers)){
+            if (ind <= nrow(gate_centers)) {
               # X COORD - GATE CENTER
               text_x[ind] <<- gate_centers[ind, "x"]
               # Y COORD - GATE CENTER
               text_y[ind] <<- gate_centers[ind, "y"]
-            # NEGATED POPULATION
-            }else if(ind > nrow(gate_centers)){
+              # NEGATED POPULATION
+            } else if (ind > nrow(gate_centers)) {
               # X COORD - MODE/RANGE CENTER
-              if(.all_na(label_text_x[y])){
+              if (.all_na(label_text_x[y])) {
                 # NO EVENTS
-                if(.cyto_count(pops[[y]]) < 2){
+                if (.cyto_count(args[["pops"]][[y]]) < 2) {
                   # RANGE CENTER
                   text_x[ind] <<- mean(c(xmin, xmax))
-                }else{
+                } else {
                   # MODE
                   text_x[ind] <<- suppressMessages(
-                    .cyto_mode(pops[[y]],
-                               channels = channels[1],
-                               density_smooth = density_smooth)
+                    .cyto_mode(args[["pops"]][[y]],
+                      channels = args[["channels"]][1],
+                      density_smooth = args[["density_smooth"]]
+                    )
                   )
                 }
-              # X COORD MANUALLY SUPPLIED
-              }else if(!.all_na(label_text_x[y])){
+                # X COORD MANUALLY SUPPLIED
+              } else if (!.all_na(label_text_x[y])) {
                 text_x[ind] <<- label_text_x[y]
               }
               # Y COORD - MODE/RANGE CENTER
-              if(.all_na(label_text_y[y])){
+              if (.all_na(label_text_y[y])) {
                 # NO EVENTS
-                if(.cyto_count(pops[[y]]) == 0){
+                if (.cyto_count(args[["pops"]][[y]]) == 0) {
                   # RANGE CENTER
                   text_y[ind] <<- mean(c(ymin, ymax))
-                }else{
+                } else {
                   # MODE
                   text_y[ind] <<- suppressMessages(
-                    .cyto_mode(pops[[y]],
-                               channels = channels[2],
-                               density_smooth = density_smooth)
+                    .cyto_mode(args[["pops"]][[y]],
+                      channels = args[["channels"]][2],
+                      density_smooth = args[["density_smooth"]]
+                    )
                   )
                 }
-              # Y COORD MANUALLY SUPPLIED
-              }else if(!.all_na(label_text_y[y])){
+                # Y COORD MANUALLY SUPPLIED
+              } else if (!.all_na(label_text_y[y])) {
                 text_y[ind] <<- label_text_y[y]
               }
             }
-          # NO GATE
-          }else if(.all_na(gate)){
+            # NO GATE
+          } else if (.all_na(args[["gate"]])) {
             # X COORD - MODE/RANGE CENTER
-            if(.all_na(label_text_x[y])){
+            if (.all_na(label_text_x[y])) {
               # NO EVENTS
-              if(.cyto_count(pops[[y]]) < 2){
-                # RANGE CENTER  
-                text_x[ind] <<- mean(c(xmin,xmax))
-              }else{
+              if (.cyto_count(args[["pops"]][[y]]) < 2) {
+                # RANGE CENTER
+                text_x[ind] <<- mean(c(xmin, xmax))
+              } else {
                 # MODE
                 text_x[ind] <<- suppressMessages(
-                  .cyto_mode(pops[[y]],
-                             channels = channels[1],
-                             density_smooth = density_smooth)
+                  .cyto_mode(args[["pops"]][[y]],
+                    channels = args[["channels"]][1],
+                    density_smooth = args[["density_smooth"]]
+                  )
                 )
               }
-            # X COORD SUPPLIED MANUALLY
-            }else if(!.all_na(label_text_x[y])){
+              # X COORD SUPPLIED MANUALLY
+            } else if (!.all_na(label_text_x[y])) {
               text_x[ind] <<- label_text_x[y]
             }
             # Y COORD - MODE
-            if(.all_na(label_text_y[y])){
+            if (.all_na(label_text_y[y])) {
               # NO EVENTS
-              if(.cyto_count(pops[[y]]) < 2){
+              if (.cyto_count(args[["pops"]][[y]]) < 2) {
                 text_y[ind] <<- mean(c(ymin, ymax))
-              }else{
+              } else {
                 # MODE
                 text_y[ind] <<- suppressMessages(
-                  .cyto_mode(pops[[y]],
-                             channels = channels[2],
-                             density_smooth = density_smooth)
+                  .cyto_mode(args[["pops"]][[y]],
+                    channels = args[["channels"]][2],
+                    density_smooth = args[["density_smooth"]]
+                  )
                 )
               }
-            # Y COORD MANUALLY SUPPLIED
-            }else if(!.all_na(label_text_y[y])){
+              # Y COORD MANUALLY SUPPLIED
+            } else if (!.all_na(label_text_y[y])) {
               text_y[ind] <<- label_text_y[y]
             }
           }
         }
-      # NO LABEL 
-      }else if(.all_na(label_text[y])){
+        # NO LABEL
+      } else if (.all_na(args[["label_text"]][y])) {
         text_x[ind] <<- NA
         text_y[ind] <<- NA
       }
     })
     # MATRIX
     text_xy <- matrix(c(text_x, text_y),
-                      ncol = 2,
-                      byrow = FALSE)
-    colnames(text_xy) <- c("x","y")
+      ncol = 2,
+      byrow = FALSE
+    )
+    colnames(text_xy) <- c("x", "y")
     return(text_xy)
   })
   label_text_xy <- do.call("rbind", label_text_xy)
-  
+
   # UPDATE LABEL_TEXT_X & LABEL_TEXT_Y
   label_text_x <- unlist(label_text_xy[, "x"])
   label_text_y <- unlist(label_text_xy[, "y"])
-  
+
   # OFFSET LABEL CO-ORDINATES --------------------------------------------------
-  
+
   # LABEL DIMENSIONS
-  label_dims <- lapply(seq_len(length(label_text)), function(z) {
+  label_dims <- lapply(seq_len(length(args[["label_text"]])), function(z) {
     # COMPUTE LABEL DIMENSIONS
-    if(!.all_na(label_text[z])){
-      .cyto_label_dims(label_text = label_text[z],
-                       label_text_x = label_text_x[z],
-                       label_text_y = label_text_y[z],
-                       label_text_size = label_text_size[z])
-    }else{
+    if (!.all_na(args[["label_text"]][z])) {
+      .cyto_label_dims(
+        label_text = args[["label_text"]][z],
+        label_text_x = label_text_x[z],
+        label_text_y = label_text_y[z],
+        label_text_size = args[["label_text_size"]][z]
+      )
+    } else {
       matrix(rep(NA, 4),
-             ncol = 2,
-             dimnames = list(NULL, c("x", "y")))
+        ncol = 2,
+        dimnames = list(NULL, c("x", "y"))
+      )
     }
   })
-  
+
   # OFFSET BY LAYER
-  if(length(channels) == 1 & density_stack != 0){
+  if (length(args[["channels"]]) == 1 & args[["density_stack"]] != 0) {
     # SPLIT LABEL_DIMS BY LAYER
-    label_dims <- split(label_dims, rep(seq_len(SMP), each = NP))
+    label_dims <- split(label_dims, 
+                        rep(seq_len(args[["SMP"]]), each = args[["NP"]]))
     # OFFSET PER LAYER
-    lapply(seq_len(SMP), function(z){
+    lapply(seq_len(args[["SMP"]]), function(z) {
       # LABEL OVERLAP
-      if(.cyto_label_overlap(label_dims[[z]])){
+      if (.cyto_label_overlap(label_dims[[z]])) {
         # LABEL HEIGHT - OFFSETTING
-        label_height <- max(LAPPLY(label_dims[[z]], function(y){
+        label_height <- max(LAPPLY(label_dims[[z]], function(y) {
           max(y[, "y"]) - min(y[, "y"])
         }))
         # LABEL HEIGHT BUFFERING
@@ -547,38 +562,40 @@
         text_y <- label_text_y[label_ind[[z]]]
         # OFFSET Y CO-ORDINATES
         label_text_y[label_ind[[z]]] <<- .spread.labels(text_y,
-                                                        mindiff = label_height,
-                                                        min = ymin,
-                                                        max = ymax)
+          mindiff = label_height,
+          min = ymin,
+          max = ymax
+        )
       }
     })
-  # OFFSET ALL LABELS  
-  }else{
+    # OFFSET ALL LABELS
+  } else {
     # LABEL OVERLAP
-    if(.cyto_label_overlap(label_dims)){
+    if (.cyto_label_overlap(label_dims)) {
       # LABEL HEIGHT - OFFSETTING
-      label_height <- max(LAPPLY(label_dims, function(y){
+      label_height <- max(LAPPLY(label_dims, function(y) {
         max(y[, "y"]) - min(y[, "y"])
       }))
       # LABEL HEIGHT BUFFERING
       label_height <- 1.18 * label_height
       # OFFSET Y CO-ORDINATES
       label_text_y <- .spread.labels(label_text_y,
-                                     mindiff = label_height,
-                                     min = ymin,
-                                     max = ymax)
+        mindiff = label_height,
+        min = ymin,
+        max = ymax
+      )
     }
   }
-  
+
   # RETURN COMPUTED LABEL CO-ORDINATES -----------------------------------------
-  
+
   # LABEL CO-ORDINATE MATRIX
   label_text_xy <- matrix(c(label_text_x, label_text_y),
-                          ncol = 2,
-                          byrow = FALSE)
+    ncol = 2,
+    byrow = FALSE
+  )
   colnames(label_text_xy) <- c("x", "y")
   return(label_text_xy)
-  
 }
 
 ## .CYTO_LABEL_DIMS ------------------------------------------------------------
@@ -602,38 +619,38 @@
                              xpad = 1.2,
                              ypad = 1.2,
                              adj = 0.5) {
-  
+
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
+
   # RESET CEX & XPD
-  old_pars <- par(c("cex","xpd"))
+  old_pars <- par(c("cex", "xpd"))
   on.exit(par(old_pars))
-  
+
   # SET CEX & XPD
   par(cex = label_text_size)
   par(xpd = TRUE)
-  
+
   # LABEL DIMENSIONS -----------------------------------------------------------
-  
+
   # BOX ADJUSTMENT
   box_adj <- adj + (xpad - 1) * label_text_size * (0.5 - adj)
-  
+
   # BOX DIMENSIONS
   lwidths <- strwidth(label_text)
   rwidths <- lwidths * (1 - box_adj)
   lwidths <- lwidths * box_adj
   bheights <- theights <- strheight(label_text) * 0.5
-  
+
   # BOX X COORDS
   xr <- label_text_x - lwidths * xpad
   xl <- label_text_x + lwidths * xpad
-  
+
   # BOX Y COORDS
   yb <- label_text_y - bheights * ypad
   yt <- label_text_y + theights * ypad
-  
+
   # LABEL DIMENSIONS MATRIX ----------------------------------------------------
-  
+
   # MATRIX - TOP LEFT THEN BOTTOM RIGHT
   coords <- matrix(c(
     min(c(xl, xr)),
@@ -645,10 +662,9 @@
   byrow = TRUE
   )
   colnames(coords) <- c("x", "y")
-  
+
   # RETURN LABEL DIMENSIONS ----------------------------------------------------
   return(coords)
-  
 }
 
 ## .CYTO_LABEL_OVERLAP ---------------------------------------------------------
@@ -663,7 +679,7 @@
 #'
 #' @noRd
 .cyto_label_overlap <- function(x) {
-  
+
   # For each rectangle in x
   overlaps <- LAPPLY(seq_len(length(x)), function(y) {
 
@@ -679,10 +695,10 @@
       y2 <- x[[z]][, "y"]
 
       # MISSING LABELS - NO OVERLAP
-      if(any(is.na(c(x1,x2,y1,y2)))){
+      if (any(is.na(c(x1, x2, y1, y2)))) {
         return(FALSE)
       }
-      
+
       # X co-ordinates are overlapping
       if (min(x2) >= min(x1) & min(x2) <= max(x1) |
         max(x2) >= min(x1) & max(x2) <= max(x1)) {
