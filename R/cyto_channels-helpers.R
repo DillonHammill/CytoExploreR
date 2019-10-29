@@ -43,7 +43,7 @@
 #' # GatingSet - exclude FSC & SSC channels
 #' cyto_channels(gs, exclude = c("FSC","SSC"))
 #'
-#' @name cyto_channels
+#' @export
 cyto_channels <- function(x, exclude = NULL){
   
   # CHANNELS

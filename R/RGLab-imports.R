@@ -13,3 +13,8 @@
 #' @importFrom utils getFromNamespace
 #' @noRd
 .preprocess_csv <- getFromNamespace(".preprocess_csv", "openCyto")
+
+#' openCyto .argDeparser
+#' @importFrom utils getFromNamespace
+#' @noRd
+.argDeparser <- getFromNamespace(".argDeparser", "openCyto")

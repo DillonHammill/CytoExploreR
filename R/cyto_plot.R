@@ -1,5 +1,10 @@
 ## CYTO_PLOT -------------------------------------------------------------------
 
+# Boolean gates cannot be plotted as the generated gatingTemplate does not
+# contain any gating_args to define which populations were combined. Users will
+# need to manually set the negate argument to TRUE and supply a label to
+# label_text.
+
 #' cyto_plot
 #'
 #' Explore and visualise cytometry data.
@@ -269,85 +274,85 @@ cyto_plot <- function(x, ...) {
 #' @rdname cyto_plot
 #' @export
 cyto_plot.GatingSet <- function(x,
-                                 parent,
-                                 alias = NA,
-                                 channels,
-                                 axes_trans = NA,
-                                 group_by = NA,
-                                 overlay = NA,
-                                 gate = NA,
-                                 limits = "auto",
-                                 display = 25000,
-                                 layout,
-                                 popup = FALSE,
-                                 xlim = NA,
-                                 ylim = NA,
-                                 xlab,
-                                 ylab,
-                                 title,
-                                 negate,
-                                 density_modal = TRUE,
-                                 density_smooth = 0.6,
-                                 density_stack = 0,
-                                 density_layers = NA,
-                                 density_cols = NA,
-                                 density_fill = NA,
-                                 density_fill_alpha = 1,
-                                 density_line_type = 1,
-                                 density_line_width = 1,
-                                 density_line_col = "black",
-                                 point_shape = ".",
-                                 point_size = 2,
-                                 point_col_scale = NA,
-                                 point_cols = NA,
-                                 point_col = NA,
-                                 point_col_alpha = 1,
-                                 contour_lines = 0,
-                                 contour_line_type = 1,
-                                 contour_line_width = 1,
-                                 contour_line_col = "black",
-                                 contour_line_alpha = 1,
-                                 axes_text = c(TRUE, TRUE),
-                                 axes_text_font = 1,
-                                 axes_text_size = 1,
-                                 axes_text_col = "black",
-                                 axes_label_text_font = 1,
-                                 axes_label_text_size = 1.1,
-                                 axes_label_text_col = "black",
-                                 title_text_font = 2,
-                                 title_text_size = 1.1,
-                                 title_text_col = "black",
-                                 legend = FALSE,
-                                 legend_text = NA,
-                                 legend_text_font = 1,
-                                 legend_text_size = 1,
-                                 legend_text_col = "black",
-                                 legend_line_type = NA,
-                                 legend_line_width = NA,
-                                 legend_line_col = NA,
-                                 legend_box_fill = NA,
-                                 legend_point_col = NA,
-                                 gate_line_type = 1,
-                                 gate_line_width = 2.5,
-                                 gate_line_col = "red",
-                                 gate_fill = "white",
-                                 gate_fill_alpha = 0,
-                                 label,
-                                 label_text = NA,
-                                 label_stat = "",
-                                 label_position = "auto",
-                                 label_text_x = NA,
-                                 label_text_y = NA,
-                                 label_text_font = 2,
-                                 label_text_size = 0.8,
-                                 label_text_col = "black",
-                                 label_fill = "white",
-                                 label_fill_alpha = 0.6,
-                                 border_line_type = 1,
-                                 border_line_width = 1,
-                                 border_line_col = "black",
-                                 border_fill = "white",
-                                 border_fill_alpha = 1, ...) {
+                                parent,
+                                alias = NA,
+                                channels,
+                                axes_trans = NA,
+                                group_by = NA,
+                                overlay = NA,
+                                gate = NA,
+                                limits = "auto",
+                                display = 25000,
+                                layout,
+                                popup = FALSE,
+                                xlim = NA,
+                                ylim = NA,
+                                xlab,
+                                ylab,
+                                title,
+                                negate,
+                                density_modal = TRUE,
+                                density_smooth = 0.6,
+                                density_stack = 0,
+                                density_layers = NA,
+                                density_cols = NA,
+                                density_fill = NA,
+                                density_fill_alpha = 1,
+                                density_line_type = 1,
+                                density_line_width = 1,
+                                density_line_col = "black",
+                                point_shape = ".",
+                                point_size = 2,
+                                point_col_scale = NA,
+                                point_cols = NA,
+                                point_col = NA,
+                                point_col_alpha = 1,
+                                contour_lines = 0,
+                                contour_line_type = 1,
+                                contour_line_width = 1,
+                                contour_line_col = "black",
+                                contour_line_alpha = 1,
+                                axes_text = c(TRUE, TRUE),
+                                axes_text_font = 1,
+                                axes_text_size = 1,
+                                axes_text_col = "black",
+                                axes_label_text_font = 1,
+                                axes_label_text_size = 1.1,
+                                axes_label_text_col = "black",
+                                title_text_font = 2,
+                                title_text_size = 1.1,
+                                title_text_col = "black",
+                                legend = FALSE,
+                                legend_text = NA,
+                                legend_text_font = 1,
+                                legend_text_size = 1,
+                                legend_text_col = "black",
+                                legend_line_type = NA,
+                                legend_line_width = NA,
+                                legend_line_col = NA,
+                                legend_box_fill = NA,
+                                legend_point_col = NA,
+                                gate_line_type = 1,
+                                gate_line_width = 2.5,
+                                gate_line_col = "red",
+                                gate_fill = "white",
+                                gate_fill_alpha = 0,
+                                label,
+                                label_text = NA,
+                                label_stat = "",
+                                label_position = "auto",
+                                label_text_x = NA,
+                                label_text_y = NA,
+                                label_text_font = 2,
+                                label_text_size = 0.8,
+                                label_text_col = "black",
+                                label_fill = "white",
+                                label_fill_alpha = 0.6,
+                                border_line_type = 1,
+                                border_line_width = 1,
+                                border_line_col = "black",
+                                border_fill = "white",
+                                border_fill_alpha = 1, ...) {
 
   # GATINGSET METHOD - CALLS FLOWSET METHOD
 
@@ -368,13 +373,16 @@ cyto_plot.GatingSet <- function(x,
   # GATINGSET - gs (x available for flowSet method call)
   gs <- x
 
+  # GATINGHIERARCHY
+  gh <- gs[[1]]
+  
   # TRANSFORMATIONS
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGSET
     axes_trans <- gs@transformation
-    if(length(axes_trans) != 0){
+    if (length(axes_trans) != 0) {
       axes_trans <- axes_trans[[1]]
-    }else{
+    } else {
       axes_trans <- NA
     }
   }
@@ -383,7 +391,7 @@ cyto_plot.GatingSet <- function(x,
 
   # EXTRACT PARENT POPULATIONS
   x <- cyto_extract(gs, parent)
-  
+
   # EXPERIMENT DETAILS
   pd <- cyto_details(gs)
 
@@ -402,32 +410,41 @@ cyto_plot.GatingSet <- function(x,
 
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
-    # ALL GATES IN SUPPLIED CHANNELS
-    if (all(alias == "")) {
-      gt <- gh_generate_template(gs[[1]])
-      gt <- gt[basename(gt$parent) == parent, ]
-      # 2D PLOT - BOTH CHANNELS MATCH
-      if (length(channels) == 2) {
-        alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
-        # 1D PLOT - ONE CHANNEL MATCH
-      } else if (length(channels) == 1) {
-        ind <- lapply(gt$dims, function(z) {
-          grep(channels, z)
-        })
-        ind <- LAPPLY(ind, "length") != 0
-        alias <- gt$alias[ind]
-      }
-      # NO ALIAS IN SUPPLIED CHANNELS
-      if (length(alias) == 0) {
-        alias <- NA
-      }
+    # GATINGTEMPLATE
+    gt <- gh_generate_template(gs[[1]])
+    # RESTRICT TO PARENT
+    gt <- gt[basename(gt$parent) == parent, ]
+    # 2D PLOT - BOTH CHANNELS MATCH
+    if (length(channels) == 2) {
+      alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+      # 1D PLOT - ONE CHANNEL MATCH
+    } else if (length(channels) == 1) {
+      ind <- lapply(gt$dims, function(z) {
+        grep(channels, z)
+      })
+      ind <- LAPPLY(ind, "length") != 0
+      alias <- gt$alias[ind]
+    }
+    # NO ALIAS IN SUPPLIED CHANNELS
+    if (length(alias) == 0) {
+      alias <- NA
     }
   }
-  
+
   # EXTRACT GATE OBJECTS - INCLUDES GATES & NEGATED FILTERS
   if (!.all_na(alias)) {
     # REMOVE DUPLICATE ALIAS
     alias <- unique(alias)
+    # CAN'T PLOT BOOLEAN GATES (TEMPLATE DOES NOT CONTAIN GATING ARGS)
+    if(any(LAPPLY(alias, function(z){
+      gh_pop_is_bool_gate(gh, z)
+    }))) {
+      message("Skipping boolean gates...")
+      alias <- alias[-which(LAPPLY(alias, function(x){
+        gh_pop_is_bool_gate(gh, z)
+      }))]
+    }
+
     # GROUPING
     if (!.all_na(group_by)) {
       gate <- lapply(unique(pd$group_by), function(nm) {
@@ -453,44 +470,46 @@ cyto_plot.GatingSet <- function(x,
         return(gt)
       })
     }
-  }  
-
-  print(gate)
-  
-  # BOOLEAN FILTER - SUPPORT NEGATED AND FILTERS
-  if(!.all_na(gate)){
-    
   }
-  
-  
-  # NEGATE
-  
+
   # GATE MANUALLY SUPPLIED - LIST OF GATES
-  if(!.all_na(gate)){
+  if (!.all_na(gate)) {
     # LIST OF GATE OBJECTS
-    if(is(gate)[1] == "list"){
-      if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
-                                    "polygonGate",
-                                    "ellipsoidGate",
-                                    "quadGate",
-                                    "filters"))){
+    if (is(gate)[1] == "list") {
+      if (all(LAPPLY(gate, "is") %in% c(
+        "rectangleGate",
+        "polygonGate",
+        "ellipsoidGate",
+        "quadGate",
+        "filters"
+      ))) {
         gate <- unlist(gate)
       }
-    # FILTERS OBJECT
-    }else if(is(gate)[1] == "filters"){
+      # FILTERS OBJECT
+    } else if (is(gate)[1] == "filters") {
       gate <- unlist(gate)
-    # GATE OBJECT
-    }else if(is(gate)[1] %in% c("rectangleGate",
-                             "polygonGate",
-                             "ellipsoidGate",
-                             "quadGate")){
+      # GATE OBJECT
+    } else if (is(gate)[1] %in% c(
+      "rectangleGate",
+      "polygonGate",
+      "ellipsoidGate",
+      "quadGate"
+    )) {
       gate <- list(gate)
     }
   }
-  
+
+  # SKIP BOOLEAN GATES
+  if (any(LAPPLY(gate, function(x) {
+    is(x)
+  }) == "booleanFilter")) {
+    message("Skipping boolean gates...")
+    gate <- gate[!LAPPLY(gate, function(x){is(x)}) == "booleanFilter"]
+  }
+
   # CAPTURE OVERLAY POPULATION NAMES
   nms <- NA
-  
+
   # OVERLAY - POPULATION NAMES
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
@@ -503,62 +522,64 @@ cyto_plot.GatingSet <- function(x,
           cyto_extract(gs, z)
         })
         names(overlay) <- nms
-      }else{
+      } else {
         stop(paste(overlay[!overlay %in% cyto_nodes(gs, path = "auto")],
-                   collapse = " & "), " do not exist in the GatingSet.")
+          collapse = " & "
+        ), " do not exist in the GatingSet.")
       }
     }
   }
-  
+
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
   # NEGATE
   if (missing(negate)) {
     negate <- FALSE
   }
-  
+
   # LABEL_TEXT - ALIAS
-  if(missing(label_text)){
-    if(!.all_na(alias)){
+  if (missing(label_text)) {
+    if (!.all_na(alias)) {
       label_text <- alias
-    }else{
+    } else {
       label_text <- NA
     }
   }
-  
+
   # LEGEND_TEXT
-  if(.all_na(legend_text)){
+  if (.all_na(legend_text)) {
     # PARENT ONLY
-    if(.all_na(overlay)){
+    if (.all_na(overlay)) {
       legend_text <- parent
-    # PARENT & OVERLAY
-    }else{
-      if(!.all_na(nms)){
+      # PARENT & OVERLAY
+    } else {
+      if (!.all_na(nms)) {
         legend_text <- c(parent, nms)
-      }else{
+      } else {
         legend_text <- parent
       }
     }
   }
-  
+
   # TITLE
   if (missing(title)) {
     # SAMPLENAME
-    if(.all_na(group_by)){
+    if (.all_na(group_by)) {
       title <- cyto_names(x)
-    # GROUP_BY
-    }else{
-      if(group_by[1] == "all"){
+      # GROUP_BY
+    } else {
+      if (group_by[1] == "all") {
         title <- "Combined Events"
-      }else{
+      } else {
         pd_split <- split(pd, pd[, group_by],
-                          sep = " ",
-                          lex.order = TRUE,
-                          drop = TRUE)
+          sep = " ",
+          lex.order = TRUE,
+          drop = TRUE
+        )
         title <- names(pd_split)
       }
     }
-    
+
     # PARENT
     title <- LAPPLY(title, function(z) {
       if (parent == "root") {
@@ -596,7 +617,7 @@ cyto_plot.GatingSet <- function(x,
       }
     })
   }
-  
+
   # CALL CYTO_PLOT FLOWSET METHOD ----------------------------------------------
 
   # PULL DOWN ARGUMENTS
@@ -615,82 +636,82 @@ cyto_plot.GatingSet <- function(x,
 #' @rdname cyto_plot
 #' @export
 cyto_plot.GatingHierarchy <- function(x,
-                                       parent,
-                                       alias = NA,
-                                       channels,
-                                       axes_trans = NA,
-                                       overlay = NA,
-                                       gate = NA,
-                                       limits = "auto",
-                                       display = 25000,
-                                       popup = FALSE,
-                                       xlim = NA,
-                                       ylim = NA,
-                                       xlab,
-                                       ylab,
-                                       title ,
-                                       negate,
-                                       density_modal = TRUE,
-                                       density_smooth = 0.6,
-                                       density_stack = 0,
-                                       density_cols = NA,
-                                       density_fill = NA,
-                                       density_fill_alpha = 1,
-                                       density_line_type = 1,
-                                       density_line_width = 1,
-                                       density_line_col = "black",
-                                       point_shape = ".",
-                                       point_size = 2,
-                                       point_col_scale = NA,
-                                       point_cols = NA,
-                                       point_col = NA,
-                                       point_col_alpha = 1,
-                                       contour_lines = 0,
-                                       contour_line_type = 1,
-                                       contour_line_width = 1,
-                                       contour_line_col = "black",
-                                       contour_line_alpha = 1,
-                                       axes_text = c(TRUE, TRUE),
-                                       axes_text_font = 1,
-                                       axes_text_size = 1,
-                                       axes_text_col = "black",
-                                       axes_label_text_font = 1,
-                                       axes_label_text_size = 1.1,
-                                       axes_label_text_col = "black",
-                                       title_text_font = 2,
-                                       title_text_size = 1.1,
-                                       title_text_col = "black",
-                                       legend = FALSE,
-                                       legend_text = NA,
-                                       legend_text_font = 1,
-                                       legend_text_size = 1,
-                                       legend_text_col = "black",
-                                       legend_line_type = NA,
-                                       legend_line_width = NA,
-                                       legend_line_col = NA,
-                                       legend_box_fill = NA,
-                                       legend_point_col = NA,
-                                       gate_line_type = 1,
-                                       gate_line_width = 2.5,
-                                       gate_line_col = "red",
-                                       gate_fill = "white",
-                                       gate_fill_alpha = 0,
-                                       label,
-                                       label_text,
-                                       label_stat,
-                                       label_position = "auto",
-                                       label_text_x = NA,
-                                       label_text_y = NA,
-                                       label_text_font = 2,
-                                       label_text_size = 1,
-                                       label_text_col = "black",
-                                       label_fill = "white",
-                                       label_fill_alpha = 0.6,
-                                       border_line_type = 1,
-                                       border_line_width = 1,
-                                       border_line_col = "black",
-                                       border_fill = "white",
-                                       border_fill_alpha = 1, ...) {
+                                      parent,
+                                      alias = NA,
+                                      channels,
+                                      axes_trans = NA,
+                                      overlay = NA,
+                                      gate = NA,
+                                      limits = "auto",
+                                      display = 25000,
+                                      popup = FALSE,
+                                      xlim = NA,
+                                      ylim = NA,
+                                      xlab,
+                                      ylab,
+                                      title,
+                                      negate,
+                                      density_modal = TRUE,
+                                      density_smooth = 0.6,
+                                      density_stack = 0,
+                                      density_cols = NA,
+                                      density_fill = NA,
+                                      density_fill_alpha = 1,
+                                      density_line_type = 1,
+                                      density_line_width = 1,
+                                      density_line_col = "black",
+                                      point_shape = ".",
+                                      point_size = 2,
+                                      point_col_scale = NA,
+                                      point_cols = NA,
+                                      point_col = NA,
+                                      point_col_alpha = 1,
+                                      contour_lines = 0,
+                                      contour_line_type = 1,
+                                      contour_line_width = 1,
+                                      contour_line_col = "black",
+                                      contour_line_alpha = 1,
+                                      axes_text = c(TRUE, TRUE),
+                                      axes_text_font = 1,
+                                      axes_text_size = 1,
+                                      axes_text_col = "black",
+                                      axes_label_text_font = 1,
+                                      axes_label_text_size = 1.1,
+                                      axes_label_text_col = "black",
+                                      title_text_font = 2,
+                                      title_text_size = 1.1,
+                                      title_text_col = "black",
+                                      legend = FALSE,
+                                      legend_text = NA,
+                                      legend_text_font = 1,
+                                      legend_text_size = 1,
+                                      legend_text_col = "black",
+                                      legend_line_type = NA,
+                                      legend_line_width = NA,
+                                      legend_line_col = NA,
+                                      legend_box_fill = NA,
+                                      legend_point_col = NA,
+                                      gate_line_type = 1,
+                                      gate_line_width = 2.5,
+                                      gate_line_col = "red",
+                                      gate_fill = "white",
+                                      gate_fill_alpha = 0,
+                                      label,
+                                      label_text,
+                                      label_stat,
+                                      label_position = "auto",
+                                      label_text_x = NA,
+                                      label_text_y = NA,
+                                      label_text_font = 2,
+                                      label_text_size = 1,
+                                      label_text_col = "black",
+                                      label_fill = "white",
+                                      label_fill_alpha = 0.6,
+                                      border_line_type = 1,
+                                      border_line_width = 1,
+                                      border_line_col = "black",
+                                      border_fill = "white",
+                                      border_fill_alpha = 1, ...) {
 
   # GATINGHIERARCHY METHOD - CALLS FLOWFRAME METHOD
 
@@ -715,9 +736,9 @@ cyto_plot.GatingHierarchy <- function(x,
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGHIERARCHY
     axes_trans <- gh@transformation
-    if(length(axes_trans) != 0){
+    if (length(axes_trans) != 0) {
       axes_trans <- axes_trans[[1]]
-    }else{
+    } else {
       axes_trans <- NA
     }
   }
@@ -752,10 +773,10 @@ cyto_plot.GatingHierarchy <- function(x,
   }
 
   print(alias)
-  
+
   # CAPTURE OVERLAY POPULATION NAMES
   nms <- NA
-  
+
   # OVERLAY - POPULATION NAMES
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
@@ -767,13 +788,14 @@ cyto_plot.GatingHierarchy <- function(x,
           cyto_extract(gh, z)
         })
         names(overlay) <- nms
-      }else{
+      } else {
         stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
-                   collapse = " & "), " do not exist in the GatingHierarchy.")
+          collapse = " & "
+        ), " do not exist in the GatingHierarchy.")
       }
     }
   }
-  
+
   # EXTRACT GATE OBJECTS
   if (!.all_na(alias)) {
     # SUPPORT NEGATED GATES
@@ -795,30 +817,34 @@ cyto_plot.GatingHierarchy <- function(x,
       gh_pop_get_gate(gh, z)
     })
   }
-  
+
   # PREPARE GATES --------------------------------------------------------------
 
   # SUPPORT NEGATED BOOLEAN FILTERS (|)
-  
+
   # GATE - LIST OF GATE OBJECTS
-  if(!.all_na(gate)){
+  if (!.all_na(gate)) {
     # GATE OBJECT LIST
-    if(is(gate)[1] == "list"){
-      if(all(LAPPLY(gate, "is") %in% c("rectangleGate",
-                                    "polygonGate",
-                                    "ellipsoidGate",
-                                    "quadGate",
-                                    "filters"))){
+    if (is(gate)[1] == "list") {
+      if (all(LAPPLY(gate, "is") %in% c(
+        "rectangleGate",
+        "polygonGate",
+        "ellipsoidGate",
+        "quadGate",
+        "filters"
+      ))) {
         gate <- unlist(gate)
       }
       # FILTERS OBJECT
-    }else if(is(gate)[1] == "filters"){
+    } else if (is(gate)[1] == "filters") {
       gate <- unlist(gate)
       # GATE OBJECT
-    }else if(is(gate)[1] %in% c("rectangleGate",
-                             "polygonGate",
-                             "ellipsoidGate",
-                             "quadGate")){
+    } else if (is(gate)[1] %in% c(
+      "rectangleGate",
+      "polygonGate",
+      "ellipsoidGate",
+      "quadGate"
+    )) {
       gate <- list(gate)
     }
   }
@@ -828,33 +854,33 @@ cyto_plot.GatingHierarchy <- function(x,
   # NEGATE
   if (missing(negate)) {
     negate <- FALSE
-  }  
-  
+  }
+
   # LABEL_TEXT
-  if(missing(label_text)){
-    # ALIAS 
-    if(!.all_na(alias)){
-        label_text <- alias
-    }else{
-        label_text <- NA
+  if (missing(label_text)) {
+    # ALIAS
+    if (!.all_na(alias)) {
+      label_text <- alias
+    } else {
+      label_text <- NA
     }
   }
-  
+
   # LEGEND_TEXT
-  if(.all_na(legend_text)){
+  if (.all_na(legend_text)) {
     # PARENT ONLY
-    if(.all_na(overlay)){
+    if (.all_na(overlay)) {
       legend_text <- parent
       # PARENT & OVERLAY
-    }else{
-      if(!.all_na(nms)){
+    } else {
+      if (!.all_na(nms)) {
         legend_text <- c(parent, nms)
-      }else{
+      } else {
         legend_text <- parent
       }
     }
   }
-  
+
   # TITLE
   if (missing(title)) {
     # SAMPLENAME
@@ -896,7 +922,7 @@ cyto_plot.GatingHierarchy <- function(x,
       }
     })
   }
-  
+
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
 
   # PULL DOWN ARGUMENTS
@@ -907,7 +933,7 @@ cyto_plot.GatingHierarchy <- function(x,
 
   # RESTRICT ARGUMENTS
   args <- args[names(args) %in% ARGS]
-  
+
   # CALL FLOWFRAME METHOD
   do.call("cyto_plot.flowFrame", args)
 }
@@ -915,83 +941,83 @@ cyto_plot.GatingHierarchy <- function(x,
 #' @rdname cyto_plot
 #' @export
 cyto_plot.flowSet <- function(x,
-                               channels,
-                               axes_trans = NA,
-                               group_by = NA,
-                               overlay = NA,
-                               gate = NA,
-                               limits = "auto",
-                               display = 25000,
-                               layout,
-                               popup = FALSE,
-                               xlim = NA,
-                               ylim = NA,
-                               xlab,
-                               ylab,
-                               title,
-                               negate = FALSE,
-                               density_modal = TRUE,
-                               density_smooth = 0.6,
-                               density_stack = 0,
-                               density_layers = NA,
-                               density_cols = NA,
-                               density_fill = NA,
-                               density_fill_alpha = 1,
-                               density_line_type = 1,
-                               density_line_width = 1,
-                               density_line_col = "black",
-                               point_shape = ".",
-                               point_size = 2,
-                               point_col_scale = NA,
-                               point_cols = NA,
-                               point_col = NA,
-                               point_col_alpha = 1,
-                               contour_lines = 0,
-                               contour_line_type = 1,
-                               contour_line_width = 1,
-                               contour_line_col = "black",
-                               contour_line_alpha = 1,
-                               axes_text = c(TRUE, TRUE),
-                               axes_text_font = 1,
-                               axes_text_size = 1,
-                               axes_text_col = "black",
-                               axes_label_text_font = 1,
-                               axes_label_text_size = 1.1,
-                               axes_label_text_col = "black",
-                               title_text_font = 2,
-                               title_text_size = 1.1,
-                               title_text_col = "black",
-                               legend = FALSE,
-                               legend_text = NA,
-                               legend_text_font = 1,
-                               legend_text_size = 1,
-                               legend_text_col = "black",
-                               legend_line_type = NA,
-                               legend_line_width = NA,
-                               legend_line_col = NA,
-                               legend_box_fill = NA,
-                               legend_point_col = NA,
-                               gate_line_type = 1,
-                               gate_line_width = 2.5,
-                               gate_line_col = "red",
-                               gate_fill = "white",
-                               gate_fill_alpha = 0,
-                               label,
-                               label_text = NA,
-                               label_stat,
-                               label_position = "auto",
-                               label_text_x = NA,
-                               label_text_y = NA,
-                               label_text_font = 2,
-                               label_text_size = 0.8,
-                               label_text_col = "black",
-                               label_fill = "white",
-                               label_fill_alpha = 0.6,
-                               border_line_type = 1,
-                               border_line_width = 1,
-                               border_line_col = "black",
-                               border_fill = "white",
-                               border_fill_alpha = 1, ...) {
+                              channels,
+                              axes_trans = NA,
+                              group_by = NA,
+                              overlay = NA,
+                              gate = NA,
+                              limits = "auto",
+                              display = 25000,
+                              layout,
+                              popup = FALSE,
+                              xlim = NA,
+                              ylim = NA,
+                              xlab,
+                              ylab,
+                              title,
+                              negate = FALSE,
+                              density_modal = TRUE,
+                              density_smooth = 0.6,
+                              density_stack = 0,
+                              density_layers = NA,
+                              density_cols = NA,
+                              density_fill = NA,
+                              density_fill_alpha = 1,
+                              density_line_type = 1,
+                              density_line_width = 1,
+                              density_line_col = "black",
+                              point_shape = ".",
+                              point_size = 2,
+                              point_col_scale = NA,
+                              point_cols = NA,
+                              point_col = NA,
+                              point_col_alpha = 1,
+                              contour_lines = 0,
+                              contour_line_type = 1,
+                              contour_line_width = 1,
+                              contour_line_col = "black",
+                              contour_line_alpha = 1,
+                              axes_text = c(TRUE, TRUE),
+                              axes_text_font = 1,
+                              axes_text_size = 1,
+                              axes_text_col = "black",
+                              axes_label_text_font = 1,
+                              axes_label_text_size = 1.1,
+                              axes_label_text_col = "black",
+                              title_text_font = 2,
+                              title_text_size = 1.1,
+                              title_text_col = "black",
+                              legend = FALSE,
+                              legend_text = NA,
+                              legend_text_font = 1,
+                              legend_text_size = 1,
+                              legend_text_col = "black",
+                              legend_line_type = NA,
+                              legend_line_width = NA,
+                              legend_line_col = NA,
+                              legend_box_fill = NA,
+                              legend_point_col = NA,
+                              gate_line_type = 1,
+                              gate_line_width = 2.5,
+                              gate_line_col = "red",
+                              gate_fill = "white",
+                              gate_fill_alpha = 0,
+                              label,
+                              label_text = NA,
+                              label_stat,
+                              label_position = "auto",
+                              label_text_x = NA,
+                              label_text_y = NA,
+                              label_text_font = 2,
+                              label_text_size = 0.8,
+                              label_text_col = "black",
+                              label_fill = "white",
+                              label_fill_alpha = 0.6,
+                              border_line_type = 1,
+                              border_line_width = 1,
+                              border_line_col = "black",
+                              border_fill = "white",
+                              border_fill_alpha = 1, ...) {
 
   # GRAPHICAL PARAMETERS -------------------------------------------------------
 
@@ -1009,7 +1035,7 @@ cyto_plot.flowSet <- function(x,
       par(old_pars)
       options("cyto_plot_method" = NULL)
     })
-  }else{
+  } else {
     # RESET GRAPHICAL PARAMETERS ON EXIT
     on.exit(par(old_pars))
   }
@@ -1150,14 +1176,14 @@ cyto_plot.flowSet <- function(x,
     })
     names(fr_list) <- NMS
   }
-  
+
   # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE
   lapply(seq_len(length(channels)), function(z) {
     if (grepl("FSC", channels[z], ignore.case = TRUE) |
-        grepl("SSC", channels[z], ignore.case = TRUE)) {
+      grepl("SSC", channels[z], ignore.case = TRUE)) {
       fr_list <<- lapply(fr_list, function(y) {
         # LIST OF FLOWFRAMES
-        lapply(y, function(w){
+        lapply(y, function(w) {
           if (min(range(w, type = "data")[, channels[z]]) < 0) {
             coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
             rownames(coords) <- c("min", "max")
@@ -1168,11 +1194,10 @@ cyto_plot.flowSet <- function(x,
             return(w)
           }
         })
-
       })
     }
   })
-  
+
   # DENSITY_LAYERS -------------------------------------------------------------
 
   # SUPPORT SPLIT STACKED SAMPLES (NO OVERLAY)
@@ -1278,9 +1303,11 @@ cyto_plot.flowSet <- function(x,
     axes_text_x <- .cyto_plot_axes_text(x[[1]],
       channels = channels[1],
       axes_trans = axes_trans,
-      axes_range = structure(list(xlim, ylim), 
-                             names = rep(c(channels, NA),
-                                         length.out = 2)),
+      axes_range = structure(list(xlim, ylim),
+        names = rep(c(channels, NA),
+          length.out = 2
+        )
+      ),
       limits = limits
     )[[1]]
   } else {
@@ -1294,8 +1321,10 @@ cyto_plot.flowSet <- function(x,
         channels = channels[2],
         axes_trans = axes_trans,
         axes_range = structure(list(xlim, ylim),
-                               names = rep(c(channels, NA),
-                                           length.out = 2)),
+          names = rep(c(channels, NA),
+            length.out = 2
+          )
+        ),
         limits = limits
       )[[1]]
     } else if (length(channels) == 1) {
@@ -1358,15 +1387,15 @@ cyto_plot.flowSet <- function(x,
     "density_stack",
     "density_layers"
   )]
-  
+
   # PREVIOUS CALL BELONGS TO FLOWFRAME METHOD
-  if(!all(names(previous_call) %in% names(current_call))){
+  if (!all(names(previous_call) %in% names(current_call))) {
     previous_call <- NULL
   }
-    
+
   # UPDATE CYTO_PLOT_CALL
   options("cyto_plot_call" = current_call)
-  
+
   # RESET SAVED LABEL CO-ORDINATES - MATCHING CALLS / NO CYTO_PLOT_SAVE
   if (!isTRUE(all.equal(previous_call, current_call)) |
     getOption("cyto_plot_save") == FALSE) {
@@ -1377,13 +1406,13 @@ cyto_plot.flowSet <- function(x,
   }
 
   # REPEAT & SPLIT ARGUMENTS ---------------------------------------------------
-  
+
   # REPEAT & SPLIT ARGUMENTS
   args <- .cyto_plot_args_split(args)
 
   # UPDATE ARGUMENTS
   .args_update(args)
-  
+
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
 
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
@@ -1639,80 +1668,80 @@ cyto_plot.flowSet <- function(x,
 #' @rdname cyto_plot
 #' @export
 cyto_plot.flowFrame <- function(x,
-                                 channels,
-                                 axes_trans = NA,
-                                 overlay = NA,
-                                 gate = NA,
-                                 limits = "auto",
-                                 display = 25000,
-                                 popup = FALSE,
-                                 xlim = NA,
-                                 ylim = NA,
-                                 xlab,
-                                 ylab,
-                                 title,
-                                 negate = FALSE,
-                                 density_modal = TRUE,
-                                 density_smooth = 0.6,
-                                 density_stack = 0,
-                                 density_cols = NA,
-                                 density_fill = NA,
-                                 density_fill_alpha = 1,
-                                 density_line_type = 1,
-                                 density_line_width = 1,
-                                 density_line_col = "black",
-                                 point_shape = ".",
-                                 point_size = 2,
-                                 point_col_scale = NA,
-                                 point_cols = NA,
-                                 point_col = NA,
-                                 point_col_alpha = 1,
-                                 contour_lines = 0,
-                                 contour_line_type = 1,
-                                 contour_line_width = 1,
-                                 contour_line_col = "black",
-                                 contour_line_alpha = 1,
-                                 axes_text = c(TRUE, TRUE),
-                                 axes_text_font = 1,
-                                 axes_text_size = 1,
-                                 axes_text_col = "black",
-                                 axes_label_text_font = 1,
-                                 axes_label_text_size = 1.1,
-                                 axes_label_text_col = "black",
-                                 title_text_font = 2,
-                                 title_text_size = 1.1,
-                                 title_text_col = "black",
-                                 legend = FALSE,
-                                 legend_text = NA,
-                                 legend_text_font = 1,
-                                 legend_text_size = 1,
-                                 legend_text_col = "black",
-                                 legend_line_type = NA,
-                                 legend_line_width = NA,
-                                 legend_line_col = NA,
-                                 legend_box_fill = NA,
-                                 legend_point_col = NA,
-                                 gate_line_type = 1,
-                                 gate_line_width = 2.5,
-                                 gate_line_col = "red",
-                                 gate_fill = "white",
-                                 gate_fill_alpha = 0,
-                                 label,
-                                 label_text,
-                                 label_stat,
-                                 label_position = "auto",
-                                 label_text_x = NA,
-                                 label_text_y = NA,
-                                 label_text_font = 2,
-                                 label_text_size = 1,
-                                 label_text_col = "black",
-                                 label_fill = "white",
-                                 label_fill_alpha = 0.6,
-                                 border_line_type = 1,
-                                 border_line_width = 1,
-                                 border_line_col = "black",
-                                 border_fill = "white",
-                                 border_fill_alpha = 1, ...) {
+                                channels,
+                                axes_trans = NA,
+                                overlay = NA,
+                                gate = NA,
+                                limits = "auto",
+                                display = 25000,
+                                popup = FALSE,
+                                xlim = NA,
+                                ylim = NA,
+                                xlab,
+                                ylab,
+                                title,
+                                negate = FALSE,
+                                density_modal = TRUE,
+                                density_smooth = 0.6,
+                                density_stack = 0,
+                                density_cols = NA,
+                                density_fill = NA,
+                                density_fill_alpha = 1,
+                                density_line_type = 1,
+                                density_line_width = 1,
+                                density_line_col = "black",
+                                point_shape = ".",
+                                point_size = 2,
+                                point_col_scale = NA,
+                                point_cols = NA,
+                                point_col = NA,
+                                point_col_alpha = 1,
+                                contour_lines = 0,
+                                contour_line_type = 1,
+                                contour_line_width = 1,
+                                contour_line_col = "black",
+                                contour_line_alpha = 1,
+                                axes_text = c(TRUE, TRUE),
+                                axes_text_font = 1,
+                                axes_text_size = 1,
+                                axes_text_col = "black",
+                                axes_label_text_font = 1,
+                                axes_label_text_size = 1.1,
+                                axes_label_text_col = "black",
+                                title_text_font = 2,
+                                title_text_size = 1.1,
+                                title_text_col = "black",
+                                legend = FALSE,
+                                legend_text = NA,
+                                legend_text_font = 1,
+                                legend_text_size = 1,
+                                legend_text_col = "black",
+                                legend_line_type = NA,
+                                legend_line_width = NA,
+                                legend_line_col = NA,
+                                legend_box_fill = NA,
+                                legend_point_col = NA,
+                                gate_line_type = 1,
+                                gate_line_width = 2.5,
+                                gate_line_col = "red",
+                                gate_fill = "white",
+                                gate_fill_alpha = 0,
+                                label,
+                                label_text,
+                                label_stat,
+                                label_position = "auto",
+                                label_text_x = NA,
+                                label_text_y = NA,
+                                label_text_font = 2,
+                                label_text_size = 1,
+                                label_text_col = "black",
+                                label_fill = "white",
+                                label_fill_alpha = 0.6,
+                                border_line_type = 1,
+                                border_line_width = 1,
+                                border_line_col = "black",
+                                border_fill = "white",
+                                border_fill_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -1818,13 +1847,13 @@ cyto_plot.flowFrame <- function(x,
     if (grepl("FSC", channels[z], ignore.case = TRUE) |
       grepl("SSC", channels[z], ignore.case = TRUE)) {
       fr_list <<- lapply(fr_list, function(y) {
-        if (BiocGenerics::nrow(y) != 0){
-          if(min(range(y, type = "data")[, channels[z]]) < 0) {
-          coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
-          rownames(coords) <- c("min", "max")
-          colnames(coords) <- channels[z]
-          nonDebris <- rectangleGate(.gate = coords)
-          y <- Subset(y, nonDebris)
+        if (BiocGenerics::nrow(y) != 0) {
+          if (min(range(y, type = "data")[, channels[z]]) < 0) {
+            coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
+            rownames(coords) <- c("min", "max")
+            colnames(coords) <- channels[z]
+            nonDebris <- rectangleGate(.gate = coords)
+            y <- Subset(y, nonDebris)
           }
         }
         return(y)
@@ -1866,14 +1895,14 @@ cyto_plot.flowFrame <- function(x,
   TNP_split <- split(seq_len(TNP), rep(seq_len(SMP), each = NP))
 
   # ARGUMENT PREPARATION -------------------------------------------------------
-  
+
   # LABEL_TEXT
   if (all(LAPPLY(label_text, ".empty"))) {
     label_text <- rep(NA, TNP)
   } else {
     label_text <- rep(c(label_text, rep(NA, TNP)), length.out = TNP)
   }
-  
+
   # LABEL_STAT
   # 1D PLOT NO STACK
   if (length(channels) == 1 & density_stack == 0) {
@@ -2005,18 +2034,18 @@ cyto_plot.flowFrame <- function(x,
       }
     }
   }
-  
+
   # TRANSFORM XLIM (FLOWFRAME METHOD ONLY)
-  if(!.all_na(xlim) & getOption("cyto_plot_method") == "flowFrame"){
+  if (!.all_na(xlim) & getOption("cyto_plot_method") == "flowFrame") {
     if (!.all_na(axes_trans)) {
       if (channels[1] %in% names(axes_trans)) {
         xlim <- axes_trans[[channels[1]]]$transform(xlim)
       }
     }
   }
-    
+
   # TRANSFORM YLIM (FLOWFRAME METHOD ONLY)
-  if(!.all_na(ylim) & getOption("cyto_plot_method") == "flowFrame"){
+  if (!.all_na(ylim) & getOption("cyto_plot_method") == "flowFrame") {
     if (length(channels) == 2) {
       if (!.all_na(axes_trans)) {
         if (channels[2] %in% names(axes_trans)) {
@@ -2025,7 +2054,7 @@ cyto_plot.flowFrame <- function(x,
       }
     }
   }
-  
+
   # POPULATIONS TO LABEL -------------------------------------------------------
 
   # LIST OF POPULATIONS - NEEDED FOR POSITION & STATISTICS
@@ -2047,11 +2076,11 @@ cyto_plot.flowFrame <- function(x,
       return(POPS)
     })
   }
-  
+
   # COMPUTE LABEL STATISTICS ---------------------------------------------------
 
   # STATISTICS
-  if(label == TRUE){
+  if (label == TRUE) {
     label_stat <- .cyto_label_stat(fr_list,
       pops = pops,
       channels = channels,
@@ -2066,7 +2095,7 @@ cyto_plot.flowFrame <- function(x,
       label_stat
     )
   }
-  
+
   # ARGUMENT SPLITTING ---------------------------------------------------------
 
   # ARGUMENTS
@@ -2080,7 +2109,7 @@ cyto_plot.flowFrame <- function(x,
 
   # PULL DOWN ARGUMENTS
   args <- .args_list()
-  
+
   # CYTO_PLOT_CALL & LABEL RESET -----------------------------------------------
 
   # PREVIOUS CALL
@@ -2146,7 +2175,7 @@ cyto_plot.flowFrame <- function(x,
       options("cyto_plot_label_coords" = NULL)
     }
   }
-  
+
   # GRAPHICS DEVICE ------------------------------------------------------------
 
   # PREPARE GRAPHICS DEVICE
@@ -2288,7 +2317,7 @@ cyto_plot.flowFrame <- function(x,
       options("cyto_plot_save" = FALSE)
     }
   }
-  
+
   # RETURN RECORDED PLOT
   invisible(recordPlot())
 }
