@@ -32,12 +32,12 @@ gs <- transform(gs, trans)
 
 # Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Get gate type used for T Cells gate
-gate_type(getGate(gs, "Cells")[[1]])
-gate_type(getGate(gs, "T Cells")[[1]])
-gate_type(getGate(gs, "CD69+ CD4 T Cells")[[1]])
+cyto_gate_type(cyto_extract(gs, "Cells")[[1]])
+cyto_gate_type(cyto_extract(gs, "T Cells")[[1]])
+cyto_gate_type(cyto_extract(gs, "CD69+ CD4 T Cells")[[1]])
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

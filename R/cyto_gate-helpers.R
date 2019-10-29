@@ -258,7 +258,7 @@ cyto_gate_rename <- function(x,
 #' )
 #' 
 #' # Extract T Cells gate
-#' gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
+#' cyto_gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
 #' 
 #' # Reset CytoExploreR_wd_check to default
 #' options("CytoExploreR_wd_check" = TRUE)
@@ -952,12 +952,12 @@ cyto_gate_edit <- function(x,
 #' 
 #' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #' 
 #' # Get gate type used for T Cells gate
-#' gate_type(getGate(gs, "Cells")[[1]])
-#' gate_type(getGate(gs, "T Cells")[[1]])
-#' gate_type(getGate(gs, "CD69+ CD4 T Cells")[[1]])
+#' cyto_gate_type(cyto_extract(gs, "Cells")[[1]])
+#' cyto_gate_type(cyto_extract(gs, "T Cells")[[1]])
+#' cyto_gate_type(cyto_extract(gs, "CD69+ CD4 T Cells")[[1]])
 #' @export
 cyto_gate_type <- function(gates) {
   

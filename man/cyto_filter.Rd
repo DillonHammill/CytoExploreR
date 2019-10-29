@@ -24,7 +24,7 @@ Filter samples based on experiment variables
 \examples{
 
 # Load in CytoExploreRData to access data
-library(CytoExploreR)
+library(CytoExploreRData)
 
 # Look at experiment details
 cyto_details(Activation)

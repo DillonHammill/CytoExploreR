@@ -22,7 +22,7 @@ library(CytoExploreRData)
 fs <- Activation
 
 # Add samples to GatingSet
-gs <- GtaingSet(fs)
+gs <- GatingSet(fs)
 
 # Fluorescent channels of flowFrame
 cyto_fluor_channels(fs[[1]])

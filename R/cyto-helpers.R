@@ -275,8 +275,6 @@ cyto_names.list <- function(x) {
 #' # Valid object
 #' cyto_check(Activation)
 #'
-#' # Invalid list object
-#' cyto_check(list(Activation))
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -730,7 +728,7 @@ cyto_transform_extract <- function(x,
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierachy} or \code{GatingSet} objects.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
+#'   \code{\link[flowWorkspace:gs_pop_get_data]{gh_pop_get_data}} or
 #'   \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}}.
 #'
 #' @return either a \code{flowFrame} or a \code{flowSet}.
@@ -807,7 +805,8 @@ cyto_extract <- function(x, parent = "root", ...) {
 #' cyto_convert(Activation, "flowFrame")
 #'
 #' # Convert GatingSet to flowFrame
-#' cyto_convert(GatingSet(Activation), "flowFrame", parent = "T Cells")
+#' cyto_convert(GatingSet(Activation), "flowFrame", parent = "root")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_convert
@@ -958,7 +957,7 @@ cyto_convert.GatingSet <- function(x,
 #' @examples
 #'
 #' # Load in CytoExploreRData to access data
-#' library(CytoExploreR)
+#' library(CytoExploreRData)
 #'
 #' # Look at experiment details
 #' cyto_details(Activation)
@@ -1021,7 +1020,7 @@ cyto_filter <- function(x, ...) {
 #' @examples
 #'
 #' # Load in CytoExploreRData to access data
-#' library(CytoExploreR)
+#' library(CytoExploreRData)
 #'
 #' # Look at experiment details
 #' cyto_details(Activation)

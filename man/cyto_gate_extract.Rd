@@ -47,7 +47,7 @@ gtfile <- system.file("extdata",
 )
 
 # Extract T Cells gate
-gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
+cyto_gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
 
 # Reset CytoExploreR_wd_check to default
 options("CytoExploreR_wd_check" = TRUE)
