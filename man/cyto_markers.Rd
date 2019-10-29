@@ -8,13 +8,13 @@
 \alias{cyto_markers.flowFrame}
 \title{Extract marker names}
 \usage{
-cyto_markers.GatingSet(x)
+\method{cyto_markers}{GatingSet}(x)
 
-cyto_markers.GatingHierarchy(x)
+\method{cyto_markers}{GatingHierarchy}(x)
 
-cyto_markers.flowSet(x)
+\method{cyto_markers}{flowSet}(x)
 
-cyto_markers.flowFrame(x)
+\method{cyto_markers}{flowFrame}(x)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

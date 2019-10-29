@@ -106,6 +106,12 @@ cyto_channels <- function(x, exclude = NULL){
 #' @name cyto_markers
 NULL
 
+#' @noRd
+#' @export
+cyto_markers <- function(x){
+  UseMethod("cyto_markers")
+}
+
 #' @rdname cyto_markers
 #' @export
 cyto_markers.GatingSet <- function(x){
@@ -146,7 +152,7 @@ cyto_markers.flowFrame <- function(x){
   if(.all_na(markers)){
     return(NULL)
   }else{
-    markers <- markers[!.all_na(markers)]
+    markers <- markers[!is.na(markers)]
     return(markers)
   }
 }
