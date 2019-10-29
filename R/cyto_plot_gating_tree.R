@@ -14,7 +14,7 @@
 #'   statistics.
 #' @param ... not in use.
 #'
-#' @importFrom openCyto gh_generate_template
+#' @importFrom openCyto gh_generate_template CytoExploreR_.preprocess_csv
 #' @importFrom magrittr %>%
 #' @importFrom visNetwork visNetwork visEdges
 #' @importFrom data.table as.data.table
@@ -102,7 +102,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
     }
     
     # Normalise as a percentage of parent
-    if(stat == "percent"){
+    if(stat %in% c("percent","freq")){
       
       # Order counts based on parent names
       stats <- node_counts$Count/
@@ -164,7 +164,7 @@ cyto_plot_gating_tree.gatingTemplate <- function(x, ...){
   gt <- as.data.table(x)
   
   # Preprocess gatingTemplate 
-  gt <- .preprocess_csv(gt)
+  gt <- CytoExploreR_.preprocess_csv(gt)
   
   # Convert preprocessed gt to data.frame
   gt <- as.data.frame(gt[, c("alias","parent"), with = FALSE])

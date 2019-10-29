@@ -372,7 +372,7 @@ cyto_gate_extract <- function(parent,
 #' @importFrom flowWorkspace getData getTransformations GatingSet getGate
 #'   setGate recompute pData
 #' @importFrom flowCore parameters filterList
-#' @importFrom openCyto gatingTemplate
+#' @importFrom openCyto gatingTemplate CytoExploreR_.argDeparser
 #' @importFrom data.table as.data.table fread :=
 #' @importFrom methods as
 #' @importFrom utils select.list write.csv
@@ -885,7 +885,8 @@ cyto_gate_edit <- function(x,
   # MODIFY GATINGTEMPLATE - GATED POPULATIONS ONLY (IGNORE NEGATED ENTRIES)
   for (i in seq_len(length(als))) {
     gt[parent == prnt & alias == als[i], gating_method := gtmd]
-    gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(
+    gt[parent == prnt & alias == als[i], 
+       gating_args := CytoExploreR_.argDeparser(list(
       gate = gates_gT_transposed[[i]]
     ))]
     gt[parent == prnt & alias == als[i], collapseDataForGating := TRUE]

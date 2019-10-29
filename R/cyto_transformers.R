@@ -677,16 +677,19 @@ cyto_transformer_biex.flowFrame <- function(x,
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}.
 #'
+#'
 #' @return a \code{transformerList} object.
 #'
-#' @importFrom flowCore inverseLogicleTransform
+#' @importFrom flowCore inverseLogicleTransform CytoExploreR_.estimateLogicle
 #' @importFrom flowWorkspace flow_trans transformerList
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
-#' @seealso \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+#' @seealso
+#'   \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+#'
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_combine}}
@@ -803,7 +806,7 @@ cyto_transformer_logicle.flowFrame <- function(x,
   }
 
   # Sort out transformations
-  transform_list <- .estimateLogicle(
+  transform_list <- CytoExploreR_.estimateLogicle(
     x,
     channels = channels,
     ...
