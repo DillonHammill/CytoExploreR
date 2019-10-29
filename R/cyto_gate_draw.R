@@ -289,11 +289,17 @@ cyto_gate_draw.GatingSet <- function(x,
     }
     # SAMPLE HERE - CORRECT GATING STATS
     FR_LIST <- cyto_sample(FR_LIST, display = display, seed = 56)
+    # PARENT TITLE
+    if(parent == "root"){
+      prnt <- "All Events"
+    }else{
+      prnt <- parent
+    }
     # TITLE
     if (group_by[1] == "all") {
-      title <- paste("Combined Events", "\n", parent)
+      title <- paste("Combined Events", "\n", prnt)
     } else {
-      title <- paste(names(fr_list)[z], "\n", parent)
+      title <- paste(names(fr_list)[z], "\n", prnt)
     }
     # CONSTRUCT PLOT - DISPLAY ALL EVENTS
     if (plot == TRUE) {
