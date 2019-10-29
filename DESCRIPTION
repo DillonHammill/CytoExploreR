@@ -16,7 +16,7 @@ Description: An intuitive and interactive approach to cytometry analysis in R.
 URL: https://github.com/DillonHammill/CytoExploreR
 BugReports: https://github.com/DillonHammill/CytoExploreR/issues
 Depends: 
-  R (>= 2.10),
+  R (>= 3.5.0),
   flowCore (>= 1.51.7),
   flowWorkspace (>= 3.33.9),
   openCyto (>= 1.23.5),

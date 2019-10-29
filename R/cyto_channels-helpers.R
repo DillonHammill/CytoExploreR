@@ -61,6 +61,96 @@ cyto_channels <- function(x, exclude = NULL){
   
 }
 
+## CYTO_MARKERS ----------------------------------------------------------------
+
+#' Extract marker names
+#' 
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   
+#' @return vector of marker names or NULL if no markers have been assigned.
+#' 
+#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace pData
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_channels}}
+#' @seealso \code{\link{cyto_fluor_channels}}
+#'
+#' @examples
+#'
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # flowFrame
+#' cyto_markers(fs[[1]])
+#'
+#' # flowset
+#' cyto_markers(fs)
+#'
+#' # GatingHierachy
+#' cyto_markers(gs[[1]])
+#'
+#' # GatingSet
+#' cyto_markers(gs)
+#' 
+#' @name cyto_markers
+NULL
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.GatingSet <- function(x){
+  # Extract data
+  fs <- cyto_extract(x, "root")
+  # flowFrame
+  fr <- fs[[1]]
+  # flowFrame method call
+  cyto_markers(fr)
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.GatingHierarchy <- function(x){
+  # Extract data
+  fr <- cyto_extract(x, "root")
+  # flowFrame method call
+  cyto_markers(fr)
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.flowSet <- function(x){
+  # flowFrame
+  fr <- x[[1]]
+  # flowFrame method call
+  cyto_markers(fr)
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.flowFrame <- function(x){
+  # Extract marker information
+  markers <- pData(parameters(x))$desc
+  # Add channels as names
+  names(markers) <- pData(parameters(x))$name
+  # Remove NA entries
+  if(.all_na(markers)){
+    return(NULL)
+  }else{
+    markers <- markers[!.all_na(markers)]
+    return(markers)
+  }
+}
+
 ## CYTO_FLUOR_CHANNELS ---------------------------------------------------------
 
 #' Extract Fluorescent Channels

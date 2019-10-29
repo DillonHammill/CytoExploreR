@@ -78,10 +78,10 @@ cyto_load <- function(path = ".",
 #' read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
 #' \code{\link{cyto_load}} which is then added to a
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
-#' to \code{\link{cyto_markers}} and \code{\link{cyto_annotate}} to update the
+#' to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to update the
 #' GatingSet with the details of the experiment. These details can be modified
-#' later with additional calls to \code{\link{cyto_markers}} and/or
-#' \code{\link{cyto_annotate}}. Users are also asked to provide a name for a
+#' later with additional calls to \code{\link{cyto_markers_edit}} and/or
+#' \code{\link{cyto_details_edit}}. Users are also asked to provide a name for a
 #' gatingTemplate csv file which will be created if necessary and assigned as
 #' the active gatingTemplate.
 #'
@@ -130,11 +130,11 @@ cyto_setup <- function(path = ".",
 
   # Markers
   message("Associate markers with their respective channels.")
-  gs <- cyto_markers(gs)
+  gs <- cyto_markers_edit(gs)
 
   # Annotate
   message("Annotate samples with experiment details.")
-  gs <- cyto_annotate(gs)
+  gs <- cyto_details_edit(gs)
 
   # Check gatingTemplate
   if (!is.null(gatingTemplate)) {
@@ -1567,12 +1567,12 @@ cyto_barcode <- function(x,
   return(x)
 }
 
-## CYTO_MARKERS ----------------------------------------------------------------
+## CYTO_MARKERS_EDIT -----------------------------------------------------------
 
 #' Assign marker names to flowFrame or flowSet
 #'
-#' \code{cyto_markers} opens an editable table containing a list of channels and
-#' markers for a \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{cyto_markers_edit} opens an editable table containing a list of
+#' channels and markers for a \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #' \code{\link[flowCore:flowSet-class]{flowSet}},
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Users can edit the
@@ -1602,13 +1602,13 @@ cyto_barcode <- function(x,
 #' fs <- Activation
 #'
 #' # Add marker names to channels - edit table
-#' fs <- cyto_markers(fs)
+#' fs <- cyto_markers_edit(fs)
 #' }
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_markers <- function(x, file = NULL) {
+cyto_markers_edit <- function(x, file = NULL) {
 
   # check class of x
   cyto_check(x)
@@ -1744,7 +1744,7 @@ cyto_markers <- function(x, file = NULL) {
   return(x)
 }
 
-## CYTO_ANNOTATE ---------------------------------------------------------------
+## CYTO_DETAILS_EDIT -----------------------------------------------------------
 
 #' Interactively edit cyto_details for a flowSet or GatingSet
 #'
@@ -1771,11 +1771,11 @@ cyto_markers <- function(x, file = NULL) {
 #' fs <- Activation
 #'
 #' # Edit cyto_details in table editor
-#' cyto_annotate(fs)
+#' cyto_details_edit(fs)
 #' }
 #'
 #' @export
-cyto_annotate <- function(x, file = NULL) {
+cyto_details_edit <- function(x, file = NULL) {
 
   # x should be a flowSet or GatingSet
   if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {

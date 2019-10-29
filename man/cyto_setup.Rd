@@ -26,10 +26,10 @@ prepare your cytometry data for downstream analyses. The .fcs files are first
 read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
 \code{\link{cyto_load}} which is then added to a
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
-to \code{\link{cyto_markers}} and \code{\link{cyto_annotate}} to update the
+to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to update the
 GatingSet with the details of the experiment. These details can be modified
-later with additional calls to \code{\link{cyto_markers}} and/or
-\code{\link{cyto_annotate}}. Users are also asked to provide a name for a
+later with additional calls to \code{\link{cyto_markers_edit}} and/or
+\code{\link{cyto_details_edit}}. Users are also asked to provide a name for a
 gatingTemplate csv file which will be created if necessary and assigned as
 the active gatingTemplate.
 }
