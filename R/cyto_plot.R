@@ -1,10 +1,5 @@
 ## CYTO_PLOT -------------------------------------------------------------------
 
-# Boolean gates cannot be plotted as the generated gatingTemplate does not
-# contain any gating_args to define which populations were combined. Users will
-# need to manually set the negate argument to TRUE and supply a label to
-# label_text.
-
 #' cyto_plot
 #'
 #' Explore and visualise cytometry data.
@@ -375,7 +370,7 @@ cyto_plot.GatingSet <- function(x,
 
   # GATINGHIERARCHY
   gh <- gs[[1]]
-  
+
   # TRANSFORMATIONS
   if (.all_na(axes_trans)) {
     # TRANSFORMERLIST FROM GATINGSET
@@ -408,12 +403,12 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
+  # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
+  gt <- gh_generate_template(gh)
+  gt <- gt[basename(gt$parent) == parent, ]
+  
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
-    # GATINGTEMPLATE
-    gt <- gh_generate_template(gs[[1]])
-    # RESTRICT TO PARENT
-    gt <- gt[basename(gt$parent) == parent, ]
     # 2D PLOT - BOTH CHANNELS MATCH
     if (length(channels) == 2) {
       alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
@@ -429,39 +424,123 @@ cyto_plot.GatingSet <- function(x,
     if (length(alias) == 0) {
       alias <- NA
     }
+    # BOOL GATE CHECK - BOOL GATES HAVE NO CHANNELS IN TEMPLATE
+    if (!.all_na(alias)) {
+      # CHECK FOR BOOL GATES
+      if (any(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))) {
+        # EMPTY CHANNELS ALIAS INDEX
+        ind <- which(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))
+        # PULL OUT ALIAS
+        empty_alias <- gt$alias[!gt$alias %in% alias][ind]
+        # ADD VALID BOOL GATES TO ALIAS
+        valid_bool_gate <- LAPPLY(empty_alias, function(z) {
+          # EXTRACT GATE
+          g <- gh_pop_get_gate(gh, z)
+          # BOOL GATE
+          if (is(g, "booleanFilter")) {
+            # BOOLEAN LOGIC
+            bool <- g@deparse
+            # ONLY NOT AND BOOL GATES SUPPORTED
+            if (!grepl("!", bool) | !grepl("&", bool)) {
+              message("Only NOT AND boolean gates are supported.")
+              return(FALSE)
+              # NOT AND GATE - CORRECT ALIAS
+            } else {
+              # STRIP &
+              bool_alias <- strsplit(bool, "&")[[1]]
+              # STRIP !
+              bool_alias <- unlist(strsplit(bool_alias, "!"))
+              # REMOVE EMPTY ALIAS
+              bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
+              # BOOL ALIAS MUST BE IN ALIAS
+              if(all(bool_alias %in% alias)){
+                return(TRUE)
+              }else{
+                return(FALSE)
+              }
+            }
+            # NOT A BOOL GATE
+          } else {
+            return(FALSE)
+          }
+        })
+        if (any(valid_bool_gate)) {
+          # UPDATE ALIAS
+          alias <- c(alias, empty_alias[which(valid_bool_gate)])
+          # TURN ON NEGATE
+          if(missing(negate)){
+            negate <- TRUE
+          }
+        }
+      }
+    }
+  # ALIAS MANUALLY SUPPLIED - CONTAINS BOOLEAN FILTER (MUST HAVE ALL ALIAS)
+  }else if(!.all_na(alias)){
+    # ALIAS MAY BE BOOL GATE
+    if(any(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))){
+      # EMPTY CHANNELS ALIAS INDEX
+      ind <- which(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))
+      empty_alias <- alias[ind]
+      # VALID BOOL GATE - ALIAS CORRECT
+      lapply(empty_alias, function(z){
+        # EXTRACT GATE
+        g <- gh_pop_get_gate(gh, z)
+        # BOOL GATE
+        if(is(g, "booleanFilter")){
+          # BOOLEAN LOGIC
+          bool <- g@deparse
+          # ONLY NOT AND BOOL GATES SUPPORTED
+          if (!grepl("!", bool) | !grepl("&", bool)) {
+            message("Only NOT AND boolean gates are supported.")
+            # REMOVE FROM ALIAS
+            alias <<- alias[alias != z]
+            # NEGATE
+            negate <- FALSE
+            # NOT AND GATE - CORRECT ALIAS
+          } else {
+            # STRIP &
+            bool_alias <- unlist(strsplit(bool, "&"))
+            # STRIP !
+            bool_alias <- unlist(strsplit(bool_alias, "!"))
+            # REMOVE EMPTY ALIAS
+            bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
+            # BOOL ALIAS MUST BE IN ALIAS
+            if(!all(bool_alias %in% alias)){
+              alias <<- unique(c(alias, bool_alias))
+              # BOOL ALIAS MUST BE LAST
+              alias <<- c(alias[!alias == z], z)
+            }
+            # NEGATE 
+            negate <- TRUE
+          }
+        # NOT BOOL GATE 
+        }else{
+          # REMOVE FROM ALIAS
+          message(paste0("Cannot plot gate ", z,"."))
+          alias <<- alias[-match(z, alias)]
+        }
+      })
+    }
   }
 
-  # EXTRACT GATE OBJECTS - INCLUDES GATES & NEGATED FILTERS
+  # EXTRACT GATE OBJECTS - BYPASS BOOLEAN FILTERS
   if (!.all_na(alias)) {
     # REMOVE DUPLICATE ALIAS
     alias <- unique(alias)
-    # CAN'T PLOT BOOLEAN GATES (TEMPLATE DOES NOT CONTAIN GATING ARGS)
-    if(any(LAPPLY(alias, function(z){
-      gh_pop_is_bool_gate(gh, z)
-    }))) {
-      message("Skipping boolean gates...")
-      alias <- alias[-which(LAPPLY(alias, function(x){
-        gh_pop_is_bool_gate(gh, z)
-      }))]
-    }
-
     # GROUPING
     if (!.all_na(group_by)) {
       gate <- lapply(unique(pd$group_by), function(nm) {
         gt <- lapply(alias, function(z) {
           ind <- pd$name[match(nm, pd$group_by)[1]]
           ind <- which(pd$name == ind)
-          gh_pop_get_gate(
-            gs[[ind]],
-            z
-          )
+          gh_pop_get_gate(gs[[ind]], z)
         })
         names(gt) <- alias
         return(gt)
       })
       names(gate) <- unique(pd$group_by)
+    # NO GROUPING  
     } else {
-      # NO GROUPING
       gate <- lapply(seq_len(length(gs)), function(z) {
         gt <- lapply(alias, function(y) {
           gh_pop_get_gate(gs[[z]], y)
@@ -470,9 +549,19 @@ cyto_plot.GatingSet <- function(x,
         return(gt)
       })
     }
+    # REMOVE BOOLEAN GATES
+    gate <- lapply(gate, function(z){
+      z[LAPPLY(z, function(z){is(z, "booleanFilter")})] <- NULL
+      return(z)
+    })
+    # NEGATED GATES - SINGLE NEGATED GATE
+    if(all(LAPPLY(alias, function(z){gh_pop_is_negated(gh, z)}))){
+      # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
+      alias <- c(NA, alias)
+    }
   }
-
-  # GATE MANUALLY SUPPLIED - LIST OF GATES
+  
+  # GATE MANUALLY SUPPLIED - LIST OF GATES (BOOLEAN GATES NOT SUPPORTED)
   if (!.all_na(gate)) {
     # LIST OF GATE OBJECTS
     if (is(gate)[1] == "list") {
@@ -499,14 +588,6 @@ cyto_plot.GatingSet <- function(x,
     }
   }
 
-  # SKIP BOOLEAN GATES
-  if (any(LAPPLY(gate, function(x) {
-    is(x)
-  }) == "booleanFilter")) {
-    message("Skipping boolean gates...")
-    gate <- gate[!LAPPLY(gate, function(x){is(x)}) == "booleanFilter"]
-  }
-
   # CAPTURE OVERLAY POPULATION NAMES
   nms <- NA
 
@@ -515,7 +596,7 @@ cyto_plot.GatingSet <- function(x,
     # POPULATION NAMES TO OVERLAY
     if (is.character(overlay)) {
       # VALID OVERLAY
-      if (all(overlay %in% basename(cyto_nodes(gs)))) {
+      if (all(overlay %in% cyto_nodes(gs, path = "auto"))) {
         # EXTRACT POPULATIONS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
@@ -748,83 +829,148 @@ cyto_plot.GatingHierarchy <- function(x,
   # EXTRACT PARENT POPULATION
   x <- cyto_extract(gh, parent)
 
-  # EMPTY ALIAS
+  # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
+  gt <- gh_generate_template(gh)
+  gt <- gt[basename(gt$parent) == parent, ]
+  
+  # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
-    # ALL GATES IN SUPPLIED CHANNELS
-    if (all(alias == "")) {
-      gt <- gh_generate_template(gh)
-      gt <- gt[basename(gt$parent) == parent, ]
-      # 2D PLOT - BOTH CHANNELS MATCH
-      if (length(channels) == 2) {
-        alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
-        # 1D PLOT - ONE CHANNEL MATCH
-      } else if (length(channels) == 1) {
-        ind <- lapply(gt$dims, function(z) {
-          grep(channels, z)
-        })
-        ind <- LAPPLY(ind, "length") != 0
-        alias <- gt$alias[ind]
-      }
-      # NO ALIAS IN SUPPLIED CHANNELS
-      if (length(alias) == 0) {
-        alias <- NA
-      }
+    # 2D PLOT - BOTH CHANNELS MATCH
+    if (length(channels) == 2) {
+      alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+      # 1D PLOT - ONE CHANNEL MATCH
+    } else if (length(channels) == 1) {
+      ind <- lapply(gt$dims, function(z) {
+        grep(channels, z)
+      })
+      ind <- LAPPLY(ind, "length") != 0
+      alias <- gt$alias[ind]
     }
-  }
-
-  print(alias)
-
-  # CAPTURE OVERLAY POPULATION NAMES
-  nms <- NA
-
-  # OVERLAY - POPULATION NAMES
-  if (!.all_na(overlay)) {
-    # POPULATION NAMES TO OVERLAY
-    if (is.character(overlay)) {
-      if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
-        # EXTRACT POPULATIONS
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          cyto_extract(gh, z)
-        })
-        names(overlay) <- nms
-      } else {
-        stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
-          collapse = " & "
-        ), " do not exist in the GatingHierarchy.")
-      }
+    # NO ALIAS IN SUPPLIED CHANNELS
+    if (length(alias) == 0) {
+      alias <- NA
     }
-  }
-
-  # EXTRACT GATE OBJECTS
-  if (!.all_na(alias)) {
-    # SUPPORT NEGATED GATES
-    if (!.all_na(paste(parent, alias, sep = "/"))) {
-      if (all(LAPPLY(alias, function(z) {
-        gh_pop_is_negated(gh, z)
-      }))) {
-        # NEGATE
-        if (missing(negate)) {
-          negate <- TRUE
+    # BOOL GATE CHECK - BOOL GATES HAVE NO CHANNELS IN TEMPLATE
+    if (!.all_na(alias)) {
+      # CHECK FOR BOOL GATES
+      if (any(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))) {
+        # EMPTY CHANNELS ALIAS INDEX
+        ind <- which(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))
+        # PULL OUT ALIAS
+        empty_alias <- gt$alias[!gt$alias %in% alias][ind]
+        # ADD VALID BOOL GATES TO ALIAS
+        valid_bool_gate <- LAPPLY(empty_alias, function(z) {
+          # EXTRACT GATE
+          g <- gh_pop_get_gate(gh, z)
+          # BOOL GATE
+          if (is(g, "booleanFilter")) {
+            # BOOLEAN LOGIC
+            bool <- g@deparse
+            # ONLY NOT AND BOOL GATES SUPPORTED
+            if (!grepl("!", bool) | !grepl("&", bool)) {
+              message("Only NOT AND boolean gates are supported.")
+              return(FALSE)
+              # NOT AND GATE - CORRECT ALIAS
+            } else {
+              # STRIP &
+              bool_alias <- strsplit(bool, "&")[[1]]
+              # STRIP !
+              bool_alias <- unlist(strsplit(bool_alias, "!"))
+              # REMOVE EMPTY ALIAS
+              bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
+              # BOOL ALIAS MUST BE IN ALIAS
+              if(all(bool_alias %in% alias)){
+                return(TRUE)
+              }else{
+                return(FALSE)
+              }
+            }
+            # NOT A BOOL GATE
+          } else {
+            return(FALSE)
+          }
+        })
+        if (any(valid_bool_gate)) {
+          # UPDATE ALIAS
+          alias <- c(alias, empty_alias[which(valid_bool_gate)])
+          # TURN ON NEGATE
+          if(missing(negate)){
+            negate <- TRUE
+          }
         }
-        # INCLUDE GATED POPULATION (IF NOT IN ALIAS)
       }
     }
+    # ALIAS MANUALLY SUPPLIED - CONTAINS BOOLEAN FILTER (MUST HAVE ALL ALIAS)
+  }else if(!.all_na(alias)){
+    # ALIAS MAY BE BOOL GATE
+    if(any(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))){
+      # EMPTY CHANNELS ALIAS INDEX
+      ind <- which(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))
+      empty_alias <- alias[ind]
+      # VALID BOOL GATE - ALIAS CORRECT
+      lapply(empty_alias, function(z){
+        # EXTRACT GATE
+        g <- gh_pop_get_gate(gh, z)
+        # BOOL GATE
+        if(is(g, "booleanFilter")){
+          # BOOLEAN LOGIC
+          bool <- g@deparse
+          # ONLY NOT AND BOOL GATES SUPPORTED
+          if (!grepl("!", bool) | !grepl("&", bool)) {
+            message("Only NOT AND boolean gates are supported.")
+            # REMOVE FROM ALIAS
+            alias <<- alias[alias != z]
+            # NEGATE
+            negate <- FALSE
+            # NOT AND GATE - CORRECT ALIAS
+          } else {
+            # STRIP &
+            bool_alias <- unlist(strsplit(bool, "&"))
+            # STRIP !
+            bool_alias <- unlist(strsplit(bool_alias, "!"))
+            # REMOVE EMPTY ALIAS
+            bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
+            # BOOL ALIAS MUST BE IN ALIAS
+            if(!all(bool_alias %in% alias)){
+              alias <<- unique(c(alias, bool_alias))
+              # BOOL ALIAS MUST BE LAST
+              alias <<- c(alias[!alias == z], z)
+            }
+            # NEGATE 
+            negate <- TRUE
+          }
+          # NOT BOOL GATE 
+        }else{
+          # REMOVE FROM ALIAS
+          message(paste0("Cannot plot gate ", z,"."))
+          alias <<- alias[-match(z, alias)]
+        }
+      })
+    }
+  }
+  
+  # EXTRACT GATE OBJECTS - BYPASS BOOLEAN FILTERS
+  if (!.all_na(alias)) {
     # REMOVE DUPLICATE ALIAS
     alias <- unique(alias)
-    # LIST OF GATE OBJECTS
-    gate <- lapply(alias, function(z) {
-      gh_pop_get_gate(gh, z)
+    # GATES
+    gate <- lapply(alias, function(y) {
+      gh_pop_get_gate(gh, y)
     })
+    names(gate) <- alias
+    # REMOVE BOOLEAN GATES
+    ind <- which(LAPPLY(gate, function(z){is(z, "booleanFilter")}))
+    gate[ind] <- NULL
+    # NEGATED GATES - SINGLE NEGATED GATE
+    if(all(LAPPLY(alias, function(z){gh_pop_is_negated(gh, z)}))){
+      # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
+      alias <- c(NA, alias)
+    }
   }
-
-  # PREPARE GATES --------------------------------------------------------------
-
-  # SUPPORT NEGATED BOOLEAN FILTERS (|)
-
-  # GATE - LIST OF GATE OBJECTS
+  
+  # GATE MANUALLY SUPPLIED - LIST OF GATES (BOOLEAN GATES NOT SUPPORTED)
   if (!.all_na(gate)) {
-    # GATE OBJECT LIST
+    # LIST OF GATE OBJECTS
     if (is(gate)[1] == "list") {
       if (all(LAPPLY(gate, "is") %in% c(
         "rectangleGate",
@@ -846,6 +992,28 @@ cyto_plot.GatingHierarchy <- function(x,
       "quadGate"
     )) {
       gate <- list(gate)
+    }
+  }
+
+  # CAPTURE OVERLAY POPULATION NAMES
+  nms <- NA
+
+  # OVERLAY - POPULATION NAMES
+  if (!.all_na(overlay)) {
+    # POPULATION NAMES TO OVERLAY
+    if (is.character(overlay)) {
+      if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
+        # EXTRACT POPULATIONS
+        nms <- overlay
+        overlay <- lapply(overlay, function(z) {
+          cyto_extract(gh, z)
+        })
+        names(overlay) <- nms
+      } else {
+        stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
+          collapse = " & "
+        ), " do not exist in the GatingHierarchy.")
+      }
     }
   }
 

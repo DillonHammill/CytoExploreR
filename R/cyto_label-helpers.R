@@ -306,8 +306,8 @@
   if (!.all_na(args[["gate"]])) {
     gate_centers <- .cyto_gate_center(args[["gate"]],
       channels = args[["channels"]],
-      text_x = label_text_x,
-      text_y = label_text_y
+      text_x = args[["label_text_x"]],
+      text_y = args[["label_text_y"]]
     )
   }
 
@@ -332,13 +332,13 @@
               # X COORD - GATE CENTER
               text_x[ind] <<- gate_centers[ind, "x"]
               # Y COORD - STACKS/LIMITS
-              if (.all_na(label_text_y[y])) {
+              if (.all_na(args[["label_text_y"]][y])) {
                 text_y[ind] <<- y_coords[y]
               }
               # NEGATED POPULATION
             } else if (ind > nrow(gate_centers)) {
               # X COORD - RANGE CENTER
-              if (.all_na(label_text_x[y])) {
+              if (.all_na(args[["label_text_x"]][y])) {
                 # NO EVENTS
                 if (.cyto_count(args[["pops"]][[y]]) == 0) {
                   # RANGE CENTER - PLOT LIMITS
@@ -362,21 +362,21 @@
                   }
                 }
                 # X COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_x[y])) {
-                text_x[ind] <<- label_text_x[y]
+              } else if (!.all_na(args[["label_text_x"]][y])) {
+                text_x[ind] <<- args[["label_text_x"]][y]
               }
               # Y COORD - STACKS/LIMITS
-              if (.all_na(label_text_y[y])) {
+              if (.all_na(args[["label_text_y"]][y])) {
                 text_y[ind] <<- y_coords[y]
                 # Y COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_y[y])) {
-                text_y[ind] <<- label_text_y[y]
+              } else if (!.all_na(args[["label_text_y"]][y])) {
+                text_y[ind] <<- args[["label_text_y"]][y]
               }
             }
             # NO GATE
           } else if (.all_na(args[["gate"]])) {
             # X COORD - RANGE CENTER
-            if (.all_na(label_text_x[y])) {
+            if (.all_na(args[["label_text_x"]][y])) {
               # NO EVENTS
               if (.cyto_count(args[["pops"]][[y]]) == 0) {
                 # RANGE CENTER - PLOT LIMITS
@@ -400,15 +400,15 @@
                 }
               }
               # X COORD MANUALLY SUPPLIED
-            } else if (!.all_na(label_text_x[y])) {
-              text_x[ind] <<- label_text_x[y]
+            } else if (!.all_na(args[["label_text_x"]][y])) {
+              text_x[ind] <<- args[["label_text_x"]][y]
             }
             # Y COORD - STACKS/LIMITS
-            if (.all_na(label_text_y[y])) {
+            if (.all_na(args[["label_text_y"]][y])) {
               text_y[ind] <<- y_coords[y]
               # Y COORD MANUALLY SUPPLIED
-            } else if (!.all_na(label_text_y[y])) {
-              text_y[ind] <<- label_text_y[y]
+            } else if (!.all_na(args[["label_text_y"]][y])) {
+              text_y[ind] <<- args[["label_text_y"]][y]
             }
           }
           # 2D PLOT - MODE
@@ -424,7 +424,7 @@
               # NEGATED POPULATION
             } else if (ind > nrow(gate_centers)) {
               # X COORD - MODE/RANGE CENTER
-              if (.all_na(label_text_x[y])) {
+              if (.all_na(args[["label_text_x"]][y])) {
                 # NO EVENTS
                 if (.cyto_count(args[["pops"]][[y]]) < 2) {
                   # RANGE CENTER
@@ -439,11 +439,11 @@
                   )
                 }
                 # X COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_x[y])) {
-                text_x[ind] <<- label_text_x[y]
+              } else if (!.all_na(args[["label_text_x"]][y])) {
+                text_x[ind] <<- args[["label_text_x"]][y]
               }
               # Y COORD - MODE/RANGE CENTER
-              if (.all_na(label_text_y[y])) {
+              if (.all_na(args[["label_text_y"]][y])) {
                 # NO EVENTS
                 if (.cyto_count(args[["pops"]][[y]]) == 0) {
                   # RANGE CENTER
@@ -458,14 +458,14 @@
                   )
                 }
                 # Y COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_y[y])) {
-                text_y[ind] <<- label_text_y[y]
+              } else if (!.all_na(args[["label_text_y"]][y])) {
+                text_y[ind] <<- args[["label_text_y"]][y]
               }
             }
             # NO GATE
           } else if (.all_na(args[["gate"]])) {
             # X COORD - MODE/RANGE CENTER
-            if (.all_na(label_text_x[y])) {
+            if (.all_na(args[["label_text_x"]][y])) {
               # NO EVENTS
               if (.cyto_count(args[["pops"]][[y]]) < 2) {
                 # RANGE CENTER
@@ -480,11 +480,11 @@
                 )
               }
               # X COORD SUPPLIED MANUALLY
-            } else if (!.all_na(label_text_x[y])) {
-              text_x[ind] <<- label_text_x[y]
+            } else if (!.all_na(args[["label_text_x"]][y])) {
+              text_x[ind] <<- args[["label_text_x"]][y]
             }
             # Y COORD - MODE
-            if (.all_na(label_text_y[y])) {
+            if (.all_na(args[["label_text_y"]][y])) {
               # NO EVENTS
               if (.cyto_count(args[["pops"]][[y]]) < 2) {
                 text_y[ind] <<- mean(c(ymin, ymax))
@@ -498,8 +498,8 @@
                 )
               }
               # Y COORD MANUALLY SUPPLIED
-            } else if (!.all_na(label_text_y[y])) {
-              text_y[ind] <<- label_text_y[y]
+            } else if (!.all_na(args[["label_text_y"]][y])) {
+              text_y[ind] <<- args[["label_text_y"]][y]
             }
           }
         }
@@ -520,8 +520,8 @@
   label_text_xy <- do.call("rbind", label_text_xy)
 
   # UPDATE LABEL_TEXT_X & LABEL_TEXT_Y
-  label_text_x <- unlist(label_text_xy[, "x"])
-  label_text_y <- unlist(label_text_xy[, "y"])
+  args[["label_text_x"]] <- unlist(label_text_xy[, "x"])
+  args[["label_text_y"]] <- unlist(label_text_xy[, "y"])
 
   # OFFSET LABEL CO-ORDINATES --------------------------------------------------
 
@@ -531,8 +531,8 @@
     if (!.all_na(args[["label_text"]][z])) {
       .cyto_label_dims(
         label_text = args[["label_text"]][z],
-        label_text_x = label_text_x[z],
-        label_text_y = label_text_y[z],
+        label_text_x = args[["label_text_x"]][z],
+        label_text_y = args[["label_text_y"]][z],
         label_text_size = args[["label_text_size"]][z]
       )
     } else {
@@ -559,13 +559,14 @@
         # LABEL HEIGHT BUFFERING
         label_height <- 1.18 * label_height
         # Y COORDS TO OFFSET
-        text_y <- label_text_y[label_ind[[z]]]
+        text_y <- args[["label_text_y"]][label_ind[[z]]]
         # OFFSET Y CO-ORDINATES
-        label_text_y[label_ind[[z]]] <<- .spread.labels(text_y,
+        args[["label_text_y"]][label_ind[[z]]] <<- suppressWarnings(
+          .spread.labels(text_y,
           mindiff = label_height,
           min = ymin,
           max = ymax
-        )
+        ))
       }
     })
     # OFFSET ALL LABELS
@@ -579,18 +580,19 @@
       # LABEL HEIGHT BUFFERING
       label_height <- 1.18 * label_height
       # OFFSET Y CO-ORDINATES
-      label_text_y <- .spread.labels(label_text_y,
+      args[["label_text_y"]] <- suppressWarnings(
+        .spread.labels(args[["label_text_y"]],
         mindiff = label_height,
         min = ymin,
         max = ymax
-      )
+      ))
     }
   }
 
   # RETURN COMPUTED LABEL CO-ORDINATES -----------------------------------------
 
   # LABEL CO-ORDINATE MATRIX
-  label_text_xy <- matrix(c(label_text_x, label_text_y),
+  label_text_xy <- matrix(c(args[["label_text_x"]], args[["label_text_y"]]),
     ncol = 2,
     byrow = FALSE
   )
