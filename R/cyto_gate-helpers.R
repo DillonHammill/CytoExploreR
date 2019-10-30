@@ -149,7 +149,7 @@ cyto_gate_remove <- function(gs,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom flowWorkspace setNode
+#' @importFrom flowWorkspace gh_pop_set_name gs_pop_set_name
 #' @importFrom utils read.csv write.csv
 #' @importFrom tools file_ext
 #'
@@ -181,7 +181,11 @@ cyto_gate_rename <- function(x,
   
   # RENAME GATES IN GATINGHIERARCHY/GATINGSET
   mapply(function(alias, name){
-    setNode(x, alias, name)
+    if(is(x, "GatingHierarchy")){
+      gh_pop_set_name(x, alias, name)
+    }else{
+      gs_pop_set_name(x, alias, name)
+    }
   }, alias, names)
   
   # READ IN GATINGTEMPLATE
