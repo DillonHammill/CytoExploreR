@@ -24,7 +24,7 @@
 #' @return an object of class \code{GatingSet} with gate and children removed
 #'   and updated gatingTemplate to reflect these changes.
 #'
-#' @importFrom flowWorkspace gh_pop_get_descendants gs_get_pop_paths getNodes
+#' @importFrom flowWorkspace gh_pop_get_descendants gs_get_pop_paths
 #' @importFrom utils read.csv write.csv
 #' @importFrom tools file_ext
 #'
