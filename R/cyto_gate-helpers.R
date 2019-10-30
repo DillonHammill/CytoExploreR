@@ -24,7 +24,7 @@
 #' @return an object of class \code{GatingSet} with gate and children removed
 #'   and updated gatingTemplate to reflect these changes.
 #'
-#' @importFrom flowWorkspace getDescendants Rm getNodes
+#' @importFrom flowWorkspace gh_pop_get_descendants gs_get_pop_paths getNodes
 #' @importFrom utils read.csv write.csv
 #' @importFrom tools file_ext
 #'
@@ -39,15 +39,14 @@
 #' gs <- GatingSet(fs)
 #'
 #' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' gs <- cyto_compensate(gs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #'
 #' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Remove T Cells population - replace gatingTemplate name
 #' cyto_gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")
@@ -66,7 +65,7 @@ cyto_gate_remove <- function(gs,
   }
   
   # ALIAS
-  if (!all(alias %in% basename(getNodes(gs)))) {
+  if (!all(alias %in% cyto_nodes(gs, path = "auto"))) {
     stop("Supplied alias does not exist in the GatingSet.")
   }
   
@@ -105,7 +104,7 @@ cyto_gate_remove <- function(gs,
   # CHILDREN
   chldrn <- LAPPLY(
     alias,
-    function(x) basename(getDescendants(gs[[1]], paste0(parent,"/",x)))
+    function(x) basename(gh_pop_get_descendants(gs[[1]], paste0(parent,"/",x)))
   )
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- unique(c(alias, chldrn))
@@ -124,8 +123,8 @@ cyto_gate_remove <- function(gs,
   
   # REMOVE NODES FROM GATINGSET
   for (i in seq_len(length(alias))) {
-    if (alias[i] %in% basename(getNodes(gs))) {
-      suppressMessages(Rm(paste0(parent,"/", alias[i]), gs))
+    if (alias[i] %in% cyto_nodes(gs, path = "auto")) {
+      suppressMessages(gs_get_pop_paths(paste0(parent,"/", alias[i]), gs))
     }
   }
   
@@ -147,7 +146,7 @@ cyto_gate_remove <- function(gs,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom flowWorkspace getNodes setNode
+#' @importFrom flowWorkspace setNode
 #' @importFrom utils read.csv write.csv
 #' @importFrom tools file_ext
 #'
@@ -173,7 +172,7 @@ cyto_gate_rename <- function(x,
   }
   
   # ALIAS INVALID
-  if(!all(alias %in% basename(getNodes(x)))){
+  if(!all(alias %in% cyto_nodes(x, path = "auto"))){
     stop(paste0("Supplied gate(s) do not exist in this ", class(x), "."))
   }
   
@@ -223,8 +222,7 @@ cyto_gate_rename <- function(x,
 #'   "gatingTemplate.csv") where the gate(s) are saved.
 #' @param ... not used.
 #'
-#' @importFrom flowWorkspace getGate getNodes
-#' @importFrom openCyto gating
+#' @importFrom openCyto gt_gating gt_get_nodes gt_get_gate
 #' @importFrom flowCore filters parameters<-
 #' @importFrom tools file_ext
 #'
@@ -241,15 +239,14 @@ cyto_gate_rename <- function(x,
 #' gs <- GatingSet(fs)
 #' 
 #' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' gs <- cyto_compensate(gs)
 #' 
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #' 
 #' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #' 
 #' # gatingTemplate
 #' gtfile <- system.file("extdata",
@@ -296,7 +293,7 @@ cyto_gate_extract <- function(parent,
   gt <- suppressMessages(gatingTemplate(gatingTemplate))
   
   # EXTRACT NODES - GATINGTEMPLATE
-  nds <- getNodes(gt, only.names = TRUE)
+  nds <- gt_get_nodes(gt, only.names = TRUE)
   
   # PARENTAL NODE
   parent <- names(nds[match(parent, nds)])
@@ -313,7 +310,7 @@ cyto_gate_extract <- function(parent,
     })
     ind <- ind[!is.na(ind)][1]
     alias <- names(nds[ind])
-    gm <- getGate(gt, parent, alias)
+    gm <- gt_get_gate(gt, parent, alias)
     gate <- eval(parameters(gm)$gate)
     return(gate)
   })
@@ -369,8 +366,7 @@ cyto_gate_extract <- function(parent,
 #' @return an object of class \code{GatingSet} with edited gate applied, as well
 #'   as gatingTemplate file with edited gate saved.
 #'
-#' @importFrom flowWorkspace getData getTransformations GatingSet getGate
-#'   setGate recompute pData
+#' @importFrom flowWorkspace gh_pop_get_gate gs_pop_set_gate recompute 
 #' @importFrom flowCore parameters filterList
 #' @importFrom openCyto gatingTemplate CytoExploreR_.argDeparser
 #' @importFrom data.table as.data.table fread :=
@@ -392,18 +388,17 @@ cyto_gate_extract <- function(parent,
 #' gs <- GatingSet(fs)
 #'
 #' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' gs <- cyto_compensate(gs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #'
 #' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Edit CD4 T Cells Gate - replace gatingTemplate name
-#' gate_edit(gs,
+#' cyto_gate_edit(gs,
 #'   parent = "T Cells",
 #'   alias = "CD4 T Cells",
 #'   gatingTemplate = "gatingTemplate.csv"
@@ -526,7 +521,7 @@ cyto_gate_edit <- function(x,
   # GATES FORMATTED FOR GATINGSET (NO QUADGATES) - EXISTING GATES
   gates_gs <- lapply(gs_list, function(gs){
     gates <- lapply(alias, function(z){
-      getGate(gs[[1]], paste(parent, z, sep = "/"))
+      gh_pop_get_gate(gs[[1]], paste(parent, z, sep = "/"))
     })
     names(gates) <- alias
     return(gates)
@@ -913,7 +908,7 @@ cyto_gate_edit <- function(x,
         gates_update <- rep(list(gates_gs[[z]][[alias[y]]]), 
                             length(gs[ind]))
         names(gates_update) <- cyto_names(gs[ind])
-        suppressMessages(setGate(gs[ind], 
+        suppressMessages(gs_pop_set_gate(gs[ind], 
                                  paste(parent, alias[y], sep = "/"),
                                  gates_update))
       }
@@ -945,11 +940,10 @@ cyto_gate_edit <- function(x,
 #' gs <- GatingSet(fs)
 #' 
 #' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' gs <- cyto_compensate(gs)
 #' 
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #' 
 #' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate

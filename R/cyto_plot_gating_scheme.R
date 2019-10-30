@@ -66,15 +66,14 @@
 #' gs <- GatingSet(fs)
 #'
 #' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' gs <- cyto_compensate(gs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #'
-#' # Gate using gate_draw
+#' # Gate using cyto_gate_draw
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Gating scheme
 #' cyto_plot_gating_scheme(gs[[4]])
@@ -121,21 +120,21 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
                                                     title_text_col = NA,
                                                     label_text_size = 0.8, ...) {
 
-
-  # Set plot method
+  # CHECKS ---------------------------------------------------------------------
+  
+  # PLOT METHOD
   if (is.null(getOption("cyto_plot_method"))) {
     options("cyto_plot_method" = "Gating/GatingHierarchy")
   }
 
-  # Assign x to gh
+  # GATINHIERARCHY
   gh <- x
 
-  # Gating template supplied - apply to GatingHierarchy
+  # GATINGTEMPLATE SUPPLIED
   if (!is.null(gatingTemplate)) {
     if (getOption("CytoExploreR_wd_check") == TRUE) {
       if (file_wd_check(gatingTemplate)) {
-        gt <- gatingTemplate(gatingTemplate)
-        gt_gating(gt, gh)
+        cyto_gatingTemplate_apply(gh, gatingTemplate)
       } else {
         stop(paste(
           gatingTemplate,
@@ -143,23 +142,24 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
         ))
       }
     } else {
-      gt <- gatingTemplate(gatingTemplate)
-      gt_gating(gt, gh)
+      cyto_gatingTemplate_apply(gs, gatingTemplate)
     }
   }
 
-  # Back-gating
+  # PREPARE ARGUMENTS ----------------------------------------------------------
+  
+  # BACK_GATE
   if (back_gate[1] == TRUE) {
     back_gate <- "all"
   }
 
-  # Populations
+  # POPULATIONS
   pops <- cyto_nodes(gh, path = "auto")
 
-  # Number of Populations
+  # NUMBER POPULATIONS
   npop <- length(pops)
 
-  # Back gating
+  # BACK GATING
   if (back_gate[1] != FALSE) {
     if (back_gate[1] == "all") {
       overlay <- pops[-1]
@@ -170,10 +170,10 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     overlay <- NA
   }
 
-  # Number of overlays
+  # NUMBER OVERLAYS
   ovn <- length(overlay)
 
-  # Border thickness
+  # BORDER_LINE_WIDTH
   if (!gate_track) {
     if (missing(border_line_width)) {
       border_line_width <- 1
@@ -184,7 +184,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     }
   }
 
-  # Colours
+  # POINT_COLS
   cols <- c(
     "cyan",
     "deepskyblue",
@@ -321,13 +321,16 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     stringsAsFactors = FALSE
   )
 
-  # Header - add spaces to center
+  # CENTER HEADER
   if (missing(header)) {
-    header <- "       Gating Scheme"
+    header <- cyto_names(gh)
   }
 
-  # Use GatingHierarchy directly to get gating scheme
+  # GATING SCHEME --------------------------------------------------------------
+  
+  # GATING SCHEME FROM GATINGHIERARCHY
   gt <- gh_generate_template(gh)
+  # EXTRACT GATING SCHEME INFORMATION
   gts <- data.frame(
     parent = basename(gt$parent),
     alias = gt$alias,
@@ -348,16 +351,16 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     stringsAsFactors = FALSE
   )
 
-  # Extract unique parents for plotting
+  # UNIQUE PARENTS 
   parents <- unique(gts$parent)
 
-  # Pop-up window?
+  # POP_UP
   cyto_plot_new(popup = popup)
 
-  # Number of plots
+  # PLOT NUMBER
   np <- nrow(unique(gts[, c("parent", "xchannel", "ychannel")]))
 
-  # Calculate layout parameters based on number of parents
+  # LAYOUT (PARENT NUMBER)
   if (missing(layout)) {
     if (legend == FALSE) {
       layout <- c(
@@ -388,7 +391,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     par(oma = c(0, 0, 3, 0))
   }
 
-  # Titles
+  # TITLES
   if (missing(title)) {
     prnts <- parents
     if ("root" %in% prnts) {
@@ -397,7 +400,9 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     title <- prnts
   }
 
-  # New plot per parent
+  # PLOT CONSTRUCTION ----------------------------------------------------------
+  
+  # NEW PLOT PER PARENT
   mapply(function(parents, title) {
     gt <- gts[gts$parent == parents, ]
 

@@ -91,18 +91,17 @@ fs <- Activation
 gs <- GatingSet(fs)
 
 # Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
 # Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Edit CD4 T Cells Gate - replace gatingTemplate name
-gate_edit(gs,
+cyto_gate_edit(gs,
   parent = "T Cells",
   alias = "CD4 T Cells",
   gatingTemplate = "gatingTemplate.csv"
