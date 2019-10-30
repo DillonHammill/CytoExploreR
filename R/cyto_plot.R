@@ -441,10 +441,13 @@ cyto_plot.GatingSet <- function(x,
             # BOOLEAN LOGIC
             bool <- g@deparse
             # ONLY NOT AND BOOL GATES SUPPORTED
-            if (!grepl("!", bool) | !grepl("&", bool)) {
+            if(!grepl("!", bool)){
+              message("Only NOT boolean gates are supported.")
+              return(FALSE)
+            }else if(grepl("|", bool, fixed = TRUE)){
               message("Only NOT AND boolean gates are supported.")
               return(FALSE)
-              # NOT AND GATE - CORRECT ALIAS
+            # NOT AND GATE - CORRECT ALIAS
             } else {
               # STRIP &
               bool_alias <- strsplit(bool, "&")[[1]]
@@ -490,7 +493,13 @@ cyto_plot.GatingSet <- function(x,
           # BOOLEAN LOGIC
           bool <- g@deparse
           # ONLY NOT AND BOOL GATES SUPPORTED
-          if (!grepl("!", bool) | !grepl("&", bool)) {
+          if(!grepl("!", bool)){
+            message("Only NOT boolean gates are supported.")
+            # REMOVE FROM ALIAS
+            alias <<- alias[alias != z]
+            # NEGATE
+            negate <- FALSE
+          }else if(grepl("|", bool, fixed = TRUE)){
             message("Only NOT AND boolean gates are supported.")
             # REMOVE FROM ALIAS
             alias <<- alias[alias != z]
@@ -867,10 +876,13 @@ cyto_plot.GatingHierarchy <- function(x,
             # BOOLEAN LOGIC
             bool <- g@deparse
             # ONLY NOT AND BOOL GATES SUPPORTED
-            if (!grepl("!", bool) | !grepl("&", bool)) {
+            if(!grepl("!", bool)){
+              message("Only NOT boolean gates are supported.")
+              return(FALSE)
+            }else if(grepl("|", bool, fixed = TRUE)){
               message("Only NOT AND boolean gates are supported.")
               return(FALSE)
-              # NOT AND GATE - CORRECT ALIAS
+            # NOT AND GATE - CORRECT ALIAS
             } else {
               # STRIP &
               bool_alias <- strsplit(bool, "&")[[1]]
@@ -916,13 +928,19 @@ cyto_plot.GatingHierarchy <- function(x,
           # BOOLEAN LOGIC
           bool <- g@deparse
           # ONLY NOT AND BOOL GATES SUPPORTED
-          if (!grepl("!", bool) | !grepl("&", bool)) {
+          if(!grepl("!", bool)){
+            message("Only NOT boolean gates are supported.")
+            # REMOVE FROM ALIAS
+            alias <<- alias[alias != z]
+            # NEGATE
+            negate <- FALSE
+          }else if(grepl("|", bool, fixed = TRUE)){
             message("Only NOT AND boolean gates are supported.")
             # REMOVE FROM ALIAS
             alias <<- alias[alias != z]
             # NEGATE
             negate <- FALSE
-            # NOT AND GATE - CORRECT ALIAS
+           # NOT AND GATE - CORRECT ALIAS
           } else {
             # STRIP &
             bool_alias <- unlist(strsplit(bool, "&"))
