@@ -24,7 +24,7 @@
 #' @return an object of class \code{GatingSet} with gate and children removed
 #'   and updated gatingTemplate to reflect these changes.
 #'
-#' @importFrom flowWorkspace gh_pop_get_descendants gs_get_pop_paths
+#' @importFrom flowWorkspace gh_pop_get_descendants gs_pop_remove
 #' @importFrom utils read.csv write.csv
 #' @importFrom tools file_ext
 #'
@@ -85,21 +85,26 @@ cyto_gate_remove <- function(gs,
   }
   
   # READ IN GATINGTEMPLATE
-  gt <- read.csv(gatingTemplate, header = TRUE) 
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE,
+                 stringsAsFactors = FALSE) 
   
   # PREPARE GATINGTEMPLATE ALIAS
   gt_alias <- lapply(gt$alias, function(z){
     unlist(strsplit(as.character(z), ","))
   })
-  
-  # QUADGATES - REMOVE ALL NODES
+
+  # MULTIPLE ALIAS - REMOVE ALL ASSOCIATED NODES
   alias <- unique(LAPPLY(seq_len(length(alias)), function(z){
     LAPPLY(gt_alias, function(y){
       if(any(grepl(alias[z], y, fixed = TRUE))){
         y
+      }else{
+        NA
       }
     })
   }))
+  alias <- alias[!is.na(alias)]
   
   # CHILDREN
   chldrn <- LAPPLY(
@@ -108,12 +113,10 @@ cyto_gate_remove <- function(gs,
   )
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- unique(c(alias, chldrn))
-  
+
   # REMOVE ROWS ALIAS == CHILDREN
   ind <- LAPPLY(gt_alias, function(z){
-    LAPPLY(chldrn, function(y){
-      any(grepl(y, z), fixed = TRUE)
-    })
+    any(chldrn %in% z)
   })
   gt <- gt[!ind, ]
   
@@ -124,7 +127,7 @@ cyto_gate_remove <- function(gs,
   # REMOVE NODES FROM GATINGSET
   for (i in seq_len(length(alias))) {
     if (alias[i] %in% cyto_nodes(gs, path = "auto")) {
-      suppressMessages(gs_get_pop_paths(paste0(parent,"/", alias[i]), gs))
+      suppressMessages(gs_pop_remove(gs, paste0(parent,"/", alias[i])))
     }
   }
   
