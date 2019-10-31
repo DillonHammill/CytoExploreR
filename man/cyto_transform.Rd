@@ -81,9 +81,9 @@ Apply Transformations to Cytometry Data
 \examples{
 
 # Load in CytoExploreRData to access data
-library(CytoExploreR)
+library(CytoExploreRData)
 
-# Use Activation flowSet
+# Activation flowSet
 fs <- Activation
 
 # Automatically transform flowSet
@@ -102,6 +102,7 @@ gs_trans <- cyto_transform(gs, trans_type = "logicle")
 # Manually construct & apply transformations
 trans <- cyto_transformer_logicle(gs)
 gs_trans <- cyto_transform(gs, trans)
+
 }
 \seealso{
 \code{\link{cyto_transformer_log}}

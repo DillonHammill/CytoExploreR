@@ -36,6 +36,7 @@
 #'
 #' # fs is a ncdfFlowSet
 #' class(fs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -115,6 +116,7 @@ cyto_load <- function(path = ".",
 #'
 #' # Experiment details have been updated
 #' cyto_details(gs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -172,9 +174,22 @@ cyto_setup <- function(path = ".",
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
-#' @importFrom flowWorkspace pData
-#'
 #' @return experiment details as data.frame.
+#' 
+#' @importFrom flowWorkspace pData
+#' 
+#' @examples 
+#' 
+#' # Load in CytoExploreRData to acces data
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Experiment details
+#' cyto_details(fs)
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_details <- function(x) {
@@ -210,13 +225,38 @@ cyto_details <- function(x) {
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
+#' @return names associated with the supplied object.
+#' 
 #' @importFrom flowCore identifier
 #' @importFrom flowWorkspace sampleNames
+#' 
+#' @examples 
+#' 
+#' #' # Load in CytoExploreRData to acces data
+#' library(CytoExploreRData)
 #'
-#' @return names associated with the supplied object.
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#' 
+#' # flowFrame
+#' cyto_names(fs[[1]])
+#' 
+#' # flowSet
+#' cyto_names(fs)
+#' 
+#' # GatingHierarchy
+#' cyto_names(gs[[1]])
+#' 
+#' # GatingSet
+#' cyto_names(gs)
 #'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @rdname cyto_names
-#'
+#' 
 #' @export
 cyto_names <- function(x) {
   UseMethod("cyto_names")
@@ -333,9 +373,9 @@ cyto_check <- function(x) {
 #' @examples
 #'
 #' # Load in CytoExploreRData to access data
-#' library(CytoExploreR)
+#' library(CytoExploreRData)
 #'
-#' # Use Activation flowSet
+#' # Activation flowSet
 #' fs <- Activation
 #'
 #' # Automatically transform flowSet
@@ -354,6 +394,7 @@ cyto_check <- function(x) {
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -688,6 +729,7 @@ cyto_transform.transformerList <- function(x,
 #'
 #' # Convert transformerList into inverse transformList
 #' inv <- cyto_transform_extract(trans, inverse = TRUE)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -743,8 +785,12 @@ cyto_transform_extract <- function(x,
 #' # GatingSet
 #' gs <- GatingSet(Activation)
 #'
-#' # Extract root population
+#' # Extract flowFrame
+#' cyto_extract(gs[[1]], "root")
+#'
+#' # Extract flowSet
 #' cyto_extract(gs, "root")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -974,6 +1020,7 @@ cyto_convert.GatingSet <- function(x,
 #'   Activation,
 #'   Treatment %in% c("Stim-A", "Stim-C")
 #' )
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1036,6 +1083,7 @@ cyto_filter <- function(x, ...) {
 #'   Activation,
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
 #' )
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1120,6 +1168,7 @@ cyto_select <- function(x, ...) {
 #' # Group GatingSet by Treatment and OVAConc
 #' gs <- GatingSet(Activation)
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -1201,6 +1250,8 @@ cyto_group_by <- function(x,
 #'
 #' @return list of flowFrames merged by the grouping variables specified by
 #'   \code{merge_by}.
+#'   
+#' @importFrom flowCore `identifier<-`
 #'
 #' @examples
 #'
@@ -1215,8 +1266,7 @@ cyto_group_by <- function(x,
 #'
 #' # Merge samples by 'Treatment'
 #' fr_list <- cyto_merge_by(fs, "Treatment")
-#' @importFrom flowCore `identifier<-`
-#'
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_group_by}}
@@ -1319,6 +1369,7 @@ cyto_merge_by <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -1382,8 +1433,7 @@ cyto_sample.flowSet <- function(x,
   fsApply(x, cyto_sample, display = display, seed = seed)
 }
 
-#' @rdname cyto_sample
-#' @export
+#' @noRd
 cyto_sample.list <- function(x,
                              display = 1,
                              seed = NULL,
@@ -1506,6 +1556,7 @@ cyto_sample.list <- function(x,
 #'
 #' # Barcode
 #' cyto_barcode(fs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1586,14 +1637,15 @@ cyto_barcode <- function(x,
 #'   \code{GatingSet}.
 #' @param file name of csv file containing columns 'Channel' and 'Marker'.
 #'
+#' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
+#' 
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters markernames markernames<-
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
-#'
-#' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
-#'
+#' 
 #' @examples
+#' 
 #' \dontrun{
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
@@ -1759,9 +1811,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 #' @importFrom flowCore pData<-
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
+#' 
 #' @examples
 #' \dontrun{
 #' # Load in CytoExploreRData to access data
@@ -1774,6 +1824,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 #' cyto_details_edit(fs)
 #' }
 #'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' @export
 cyto_details_edit <- function(x, file = NULL) {
 
@@ -1926,6 +1977,7 @@ cyto_details_edit <- function(x, file = NULL) {
 #'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -2158,12 +2210,18 @@ cyto_compensate.GatingSet <- function(x,
 #' @return character vector of gated node/population names.
 #'
 #' @importFrom flowWorkspace gs_get_pop_paths
+#' @importFrom methods is
 #'
 #' @export
 cyto_nodes <- function(x, ...) {
 
-  # Make call to gs_get_pop_paths
-  gs_get_pop_paths(x, ...)
+  # Make call to gh/gs_get_pop_paths
+  if(is(x, "GatingHierarchy")){
+    gh_get_pop_paths(x, ...)
+  }else if(is(x, "GatingSet")){
+    gs_get_pop_paths(x, ...)
+  }
+  
 }
 
 ## CYTO_CHANNEL_MATCH ----------------------------------------------------------

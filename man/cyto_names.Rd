@@ -38,3 +38,30 @@ names from flowFrame, flowSet GatingHierarchy or GatingSet. Anynonymous
 \code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
 converted to \code{"Combined Events"}.
 }
+\examples{
+
+#' # Load in CytoExploreRData to acces data
+library(CytoExploreRData)
+
+# Activation flowSet
+fs <- Activation
+
+# Activation GatingSet
+gs <- GatingSet(fs)
+
+# flowFrame
+cyto_names(fs[[1]])
+
+# flowSet
+cyto_names(fs)
+
+# GatingHierarchy
+cyto_names(gs[[1]])
+
+# GatingSet
+cyto_names(gs)
+
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

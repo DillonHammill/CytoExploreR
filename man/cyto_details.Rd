@@ -21,3 +21,18 @@ Simply an autocomplete-friendly wrapper around
 \code{\link{cyto_names}} if a
 \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 }
+\examples{
+
+# Load in CytoExploreRData to acces data
+library(CytoExploreRData)
+
+# Activation flowSet
+fs <- Activation
+
+# Experiment details
+cyto_details(fs)
+
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+}

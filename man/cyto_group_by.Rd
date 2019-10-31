@@ -31,6 +31,7 @@ cyto_group_by(Activation, "Treatment")
 # Group GatingSet by Treatment and OVAConc
 gs <- GatingSet(Activation)
 cyto_group_by(gs, c("Treatment", "OVAConc"))
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
