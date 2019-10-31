@@ -199,7 +199,10 @@ cyto_details <- function(x) {
     return(cyto_names(x))
     # Return experiment details for other objects
   } else {
-    return(pData(x))
+    # Fix AsIs for name column
+    pd <- pData(x)
+    pd$name <- factor(pd$name, levels = pd$name)
+    return(pd)
   }
 }
 
@@ -1234,6 +1237,8 @@ cyto_group_by <- function(x,
 #' appropriate sampling in \code{cyto_plot}.
 #'
 #' @param x object of class \code{flowSet}.
+#' @param parent name of the parent population to merge when a \code{GatingSet}
+#'   object is supplied, set to the \code{"root"} node by default.
 #' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
 #'   prior to merging.
@@ -1250,7 +1255,7 @@ cyto_group_by <- function(x,
 #'
 #' @return list of flowFrames merged by the grouping variables specified by
 #'   \code{merge_by}.
-#'   
+#'
 #' @importFrom flowCore `identifier<-`
 #'
 #' @examples
@@ -1266,7 +1271,7 @@ cyto_group_by <- function(x,
 #'
 #' # Merge samples by 'Treatment'
 #' fr_list <- cyto_merge_by(fs, "Treatment")
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_group_by}}
@@ -1274,19 +1279,44 @@ cyto_group_by <- function(x,
 #' @seealso \code{\link{cyto_barcode}}
 #' @seealso \code{\link{cyto_sample}}
 #'
+#' @name cyto_merge_by
+NULL
+
+#' @rdname cyto_merge_by
+#' @noRd
+cyto_merge_by <- function(x, ...){
+  UseMethod("cyto_merge_by")
+}
+
+#' @rdname cyto_merge_by
 #' @export
-cyto_merge_by <- function(x,
-                          merge_by = "all",
-                          select = NULL,
-                          barcode = TRUE,
-                          ...) {
+cyto_merge_by.GatingSet <- function(x,
+                                    parent = "root",
+                                    merge_by = "all",
+                                    select = NULL,
+                                    barcode = TRUE,
+                                    ...){
+  
+  # EXTRACT POPULATON
+  fs <- cyto_extract(x, parent)
+  
+  # CALL FLOWSET METHOD
+  cyto_merge_by(fs,
+                parent = parent,
+                merge_by = merge_by,
+                select = select,
+                barcode = barcode,
+                ...)
+  
+}
 
-  # CHECKS ---------------------------------------------------------------------
-
-  # FLOWSET
-  if (!is(x, "flowSet")) {
-    stop("'x' should be an object of class flowSet.")
-  }
+#' @rdname cyto_merge_by
+#' @export
+cyto_merge_by.flowSet <- function(x,
+                                  merge_by = "all",
+                                  select = NULL,
+                                  barcode = TRUE,
+                                  ...) {
 
   # BARCODING ------------------------------------------------------------------
 

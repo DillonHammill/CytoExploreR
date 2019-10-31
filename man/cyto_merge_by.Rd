@@ -2,12 +2,26 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_merge_by}
 \alias{cyto_merge_by}
+\alias{cyto_merge_by.GatingSet}
+\alias{cyto_merge_by.flowSet}
 \title{Merge a flowSet by experiment variables}
 \usage{
-cyto_merge_by(x, merge_by = "all", select = NULL, barcode = TRUE, ...)
+\method{cyto_merge_by}{GatingSet}(
+  x,
+  parent = "root",
+  merge_by = "all",
+  select = NULL,
+  barcode = TRUE,
+  ...
+)
+
+\method{cyto_merge_by}{flowSet}(x, merge_by = "all", select = NULL, barcode = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowSet}.}
+
+\item{parent}{name of the parent population to merge when a \code{GatingSet}
+object is supplied, set to the \code{"root"} node by default.}
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
