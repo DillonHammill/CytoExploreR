@@ -1308,7 +1308,6 @@ cyto_merge_by.GatingSet <- function(x,
   
   # CALL FLOWSET METHOD
   cyto_merge_by(fs,
-                parent = parent,
                 merge_by = merge_by,
                 select = select,
                 barcode = barcode,
@@ -2314,7 +2313,7 @@ cyto_channel_match <- function(x,
   # Edit cm
   cm <- suppressWarnings(edit(cm))
 
-  # Check that alll channels are valid or throw an error
+  # Check that all channels are valid or throw an error
   if (!all(cm$channel %in% c("Unstained", cyto_fluor_channels(x)))) {
     stop("Some inputs in the channel column are not valid.")
   }

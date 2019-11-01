@@ -29,7 +29,7 @@ files <- mixedsort(list.files(path = paste0(datadir, "/Activation"),
 fs <- read.flowSet(files = files)
 
 # Sample for speed -
-fs <- cyto_sample(fs, display = 5000, seed = 20)
+fs <- cyto_sample(fs, display = 2000, seed = 20)
 
 # Samplenames
 nms <- sampleNames(fs)
@@ -115,7 +115,7 @@ Compensation <- read.flowSet(
 
 # Sample for speed -
 Comp <- fsApply(Compensation, function(fr) {
-  cyto_sample(fr, display = 0.04, seed = 20)
+  cyto_sample(fr, display = 500)
 })
 
 # GatingSet -

@@ -134,6 +134,7 @@ test_that("cyto_convert", {
     )
   }
   fr_list_exp <- lapply(seq_len(length(fs)), function(x){fs[[x]]})
+  names(fr_list_exp) <- cyto_names(fs)
   expect_equal(cyto_convert(fs, "flowFrame"), fr_exp)
   expect_equal(cyto_convert(fs, "flowSet"), fs)
   expect_equal(cyto_convert(fs, "flowFrame list"), list(fr_exp))
@@ -159,6 +160,7 @@ test_that("cyto_convert", {
   }
   fr_list_exp <- lapply(seq_len(length(gs)), 
                         function(y){gs_pop_get_data(gs,"root")[[y]]})
+  names(fr_list_exp) <- cyto_names(fs)
   expect_equal(cyto_convert(gs, "root", "flowFrame"),
                fr_exp)
   expect_equal(cyto_convert(gs, "root", "list of flowFrames"),
@@ -173,6 +175,28 @@ test_that("cyto_convert", {
 })
 
 # CYTO_FILTER ------------------------------------------------------------------
+
+test_that("cyto_filter", {
+  
+  expect_error(cyto_filter(list(fs), Treatment = "Stim-C"),
+               "'x' should be an object of class flowSet or GatingSet.")
+  
+  expect_equal(cyto_filter(fs, Treatment == "Stim-C"), 
+               fs[c(17,18,19,20,21,22,23,24)])
+  
+  expect_equal(cyto_filter(fs, Treatment == "Stim-A", OVAConc %in% c(0,0.5)),
+               fs[c(1,2,7,8)])
+  
+  # Filtered GatingSet will have different guid slot
+  expect_equivalent(cyto_filter(gs, Treatment == "Stim-C"), 
+                    gs[c(17, 18, 19, 20, 21, 22, 23, 24)])
+  
+  expect_equivalent(cyto_filter(gs, 
+                                Treatment == "Stim-A", 
+                                OVAConc %in% c(0,0.5)),
+                    gs[c(1, 2, 7, 8)])
+  
+})
 
 # CYTO_SELECT ------------------------------------------------------------------
 
@@ -240,11 +264,67 @@ test_that("cyto_group_by", {
 
 test_that("cyto_merge_by", {
   
+  fs <- cyto_extract(gs[c(1,2,9,10,17,18,25,26)], "root")
+  fs <- cyto_barcode(fs)
+  fs_list <- cyto_group_by(fs, "Treatment")
+  fr_list <- lapply(seq_len(length(fs_list)), function(z){
+    x <- cyto_convert(fs_list[[z]], "flowFrame")
+    identifier(x) <- paste0("Stim-", c("A","B","C","D"))[z]
+    return(x)
+  })
+  names(fr_list) <- paste0("Stim-", c("A","B","C","D"))
+  expect_equal(cyto_merge_by(gs[c(1,2,9,10,17,18,25,26)], 
+                             merge_by = "Treatment"),
+               fr_list)
+  
 })
 
 # CYTO_SAMPLE ------------------------------------------------------------------
 
+test_that("cyto_sample", {
+  
+  # flowFrame
+  expect_equal(nrow(cyto_sample(fs[[1]], 0.1)), 200)
+  expect_equal(nrow(cyto_sample(fs[[1]], 200)), 200)
+  
+  # flowSet
+  fs_sample <- cyto_sample(fs, 0.1)
+  fs_sample <- LAPPLY(seq_len(length(fs)), function(x){
+    nrow(fs_sample[[x]])
+  })
+  expect_equal(fs_sample, rep(200, 33))
+  
+  fs_sample <- cyto_sample(fs, 200)
+  fs_sample <- LAPPLY(seq_len(length(fs)), function(x){
+    nrow(fs_sample[[x]])
+  })
+  expect_equal(fs_sample, rep(200, 33))
+  
+  # list (unexported - used in cyto_plot only)
+  
+})
+
 # CYTO_BARCODE -----------------------------------------------------------------
+
+test_that("cyto_barcode", {
+  
+  # SAMPLES
+  fs <- fs[c(1,2)]
+  barcode <- lapply(seq_len(2), function(z){
+    matrix(rep(z, nrow(fs[[z]])),
+           ncol = 1,
+           dimnames = list(NULL, "Sample ID"))
+  })
+  fs_barcode <- fsApply(fs, function(x){
+    cbind(x, barcode[[match(cyto_names(x), cyto_names(fs))]])
+  })
+  expect_equal(cyto_barcode(fs[1:2]),
+               fs_barcode)
+  
+  # EVENTS
+  
+  
+})
 
 # CYTO_MARKERS_EDIT ------------------------------------------------------------
 
@@ -252,7 +332,64 @@ test_that("cyto_merge_by", {
 
 # CYTO_COMPENSATE --------------------------------------------------------------
 
-# CYTO_NODES -------------------------------------------------------------------
+test_that("cyto_compensate", {
+  
+  # Write fs[[1]]@description$SPILL to csv file for testing
+  spill <- fs[[1]]@description$SPILL
+  rownames(spill) <- colnames(spill)
+  write.csv(spill, "Test-Spillover-Matrix.csv")
+  
+  # flowFrame
+  expect_equivalent(cyto_compensate(fs[[1]]),
+                    gs_pop_get_data(gs, "root")[[1]])
+  expect_equivalent(cyto_compensate(fs[[1]], "Test-Spillover-Matrix.csv"),
+                    gs_pop_get_data(gs, "root")[[1]])
+  
+  # flowSet
+  expect_equivalent(cyto_compensate(fs),
+                    gs_pop_get_data(gs, "root"))
+  expect_equivalent(cyto_compensate(fs, "Test-Spillover-Matrix.csv"),
+                    gs_pop_get_data(gs, "root"))
+  
+  # GatingSet
+  expect_equivalent(cyto_compensate(GatingSet(fs)),
+                    gs)
+  expect_equivalent(cyto_compensate(GatingSet(fs), "Test-Spillover-Matrix.csv"),
+                    gs)
+  
+})
 
 # CYTO_CHANNEL_MATCH -----------------------------------------------------------
 
+test_that("cyto_channel_match", {
+  
+  channel_match <- data.frame("name" = c("Compensation-7AAD.fcs",
+                                          "Compensation-AF700.fcs",
+                                          "Compensation-APC-Cy7.fcs",
+                                          "Compensation-APC.fcs",
+                                          "Compensation-FITC.fcs",
+                                          "Compensation-PE.fcs",
+                                          "Compensation-Unstained.fcs"),
+                               "channel" = c("7-AAD-A",
+                                             "Alexa Fluor 700-A",
+                                             "APC-Cy7-A",
+                                             "Alexa Fluor 647-A",
+                                             "Alexa Fluor 488-A",
+                                             "PE-A",
+                                             "Unstained"))
+  mock_edit <- mockery::mock(channel_match)
+  mock_channel_match <- testthat::with_mock(
+    edit = mock_edit,
+    cyto_channel_match(Comp,channel_match = "Channel-Match"))
+  expect_equal(read.csv("Channel-Match.csv"), channel_match)
+  expect_equal(mock_channel_match, channel_match)
+  
+})
+
+# REMOVE GENERATED FILES -------------------------------------------------------
+
+# Spillover matrix
+base::unlink("Test-Spillover-Matrix.csv")
+
+# Channel match 
+base::unlink("Channel-Match.csv")
