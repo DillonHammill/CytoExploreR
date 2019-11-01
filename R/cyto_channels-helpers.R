@@ -145,9 +145,9 @@ cyto_markers.flowSet <- function(x){
 #' @export
 cyto_markers.flowFrame <- function(x){
   # Extract marker information
-  markers <- pData(parameters(x))$desc
+  markers <- as.character(pData(parameters(x))$desc)
   # Add channels as names
-  names(markers) <- pData(parameters(x))$name
+  names(markers) <- as.character(pData(parameters(x))$name)
   # Remove NA entries
   if(.all_na(markers)){
     return(NULL)

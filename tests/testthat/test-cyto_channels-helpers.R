@@ -3,12 +3,47 @@ context("cyto_channels-helpers")
 # CYTO_CHANNELS ----------------------------------------------------------------
 
 test_that("cyto_channels", {
+  
   # ALL CHANNELS
   expect_equal(cyto_channels(fs[[1]]),
                chans)
   # EXCLUDE CHANNELS
   expect_equal(cyto_channels(fs[[1]], exclude = c("FSC","SSC")),
                chans[-seq_len(6)])
+})
+
+# CYTO_MARKERS -----------------------------------------------------------------
+
+test_that("cyto_markers", {
+  
+  # GatingSet -> flowFrame
+  markers <- c("CD8",
+               "Va2",
+               "CD69",
+               "Hoechst-405",
+               "Hoechst-430",
+               "CD44",
+               "CD4",
+               "CD11c")
+  names(markers) <- c("Alexa Fluor 488-A",
+                      "PE-A",
+                      "7-AAD-A",
+                      "Alexa Fluor 405-A",
+                      "Alexa Fluor 430-A",
+                      "Alexa Fluor 647-A",
+                      "Alexa Fluor 700-A",
+                      "APC-Cy7-A")
+  expect_equal(cyto_markers(gs),
+               markers)
+  
+  # GatingHierachy -> flowFrame
+  expect_equal(cyto_markers(gs[[1]]),
+               markers)
+  
+  # flowSet
+  expect_equal(cyto_markers(fs),
+               markers)
+  
 })
 
 # CYTO_FLUOR_CHANNELS ----------------------------------------------------------
