@@ -442,15 +442,7 @@
 
   # Use default colour scale
   if (.all_na(args[["point_col_scale"]])) {
-    args[["point_col_scale"]] <- c(
-      "blue",
-      "turquoise",
-      "green",
-      "yellow",
-      "orange",
-      "red",
-      "darkred"
-    )
+    args[["point_col_scale"]] <- .cyto_plot_colour_palette(type = "point_col_scale") 
   }
 
   return(args[["point_col_scale"]])
@@ -1029,26 +1021,7 @@
   
   # No density_cols supplied
   if (.all_na(density_cols)) {
-    density_cols <- c(
-      "grey",
-      "bisque4",
-      "brown1",
-      "red",
-      "darkred",
-      "chocolate",
-      "orange",
-      "yellow",
-      "yellowgreen",
-      "green",
-      "aquamarine",
-      "cyan",
-      "cornflowerblue",
-      "blue",
-      "blueviolet",
-      "purple",
-      "magenta",
-      "deeppink"
-    )
+    density_cols <- .cyto_plot_colour_palette(type = "density")
   }
 
   # Make colorRampPalette
@@ -1108,7 +1081,6 @@
 #' @importFrom grDevices densCols colorRampPalette adjustcolor
 #' @importFrom flowCore exprs
 #'
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
@@ -1133,15 +1105,7 @@
   
   # No colours supplied for density gradient
   if (.all_na(point_col_scale)) {
-    point_col_scale <- c(
-      "blue",
-      "turquoise",
-      "green",
-      "yellow",
-      "orange",
-      "red",
-      "darkred"
-    )
+    point_col_scale <- .cyto_plot_colour_palette(type = "point_col_scale")
   }
 
   # Make colorRampPalette
@@ -1153,16 +1117,7 @@
 
   # No colours supplied for selection
   if (.all_na(point_cols)) {
-    point_cols <- c(
-      "black",
-      "darkorchid",
-      "blueviolet",
-      "magenta",
-      "deeppink",
-      "red4",
-      "orange",
-      "springgreen4"
-    )
+    point_cols <- .cyto_plot_colour_palette(type = "point") 
   }
   
   # Make colorRampPalette
@@ -1251,4 +1206,76 @@
   })
   
   return(point_col)
+}
+
+#' cyto_plot colour palette
+#'
+#' @param type indicates whether to return the "point_cols", "point_col_scale"
+#'   or "density_cols" colour palette.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_plot_colour_palette <- function(type = "point_cols"){
+  # POINT COLOUR PALETTE
+  if(type == "point_cols"){
+      pal <- c(  "#1B1919FF",
+                 "#ADB6B6FF",
+                 "#99CCFFFF",
+                 "#6699FFFF",
+                 "#466983FF",
+                 "#0099B4FF",
+                 "#00468BFF",
+                 "#1A0099FF",
+                 "#660099FF",
+                 "#990080FF",
+                 "#925E9FFF",
+                 "#CC99FFFF",
+                 "#FF1463FF",
+                 "#FDAF91FF",
+                 "#FF00CCFF",
+                 "#ED0000FF",
+                 "#924822FF",
+                 "#CE3D32FF",
+                 "#FF9900FF",
+                 "#FFCC00FF",
+                 "#F0E685FF",
+                 "#CCFF00FF",
+                 "#42B540FF",
+                 "#00D68FFF",
+                 "#00991AFF")
+  # POINT COLOUR SCALE
+  }else if(type == "point_col_scale"){
+    pal <- c(
+      "blue",
+      "turquoise",
+      "green",
+      "yellow",
+      "orange",
+      "red",
+      "darkred"
+    )
+  # DENSITY COLOUR PALETTE
+  }else if(type == "density_cols"){
+    pal <- c(      "grey",
+                   "bisque4",
+                   "brown1",
+                   "red",
+                   "darkred",
+                   "chocolate",
+                   "orange",
+                   "yellow",
+                   "yellowgreen",
+                   "green",
+                   "aquamarine",
+                   "cyan",
+                   "cornflowerblue",
+                   "blue",
+                   "blueviolet",
+                   "purple",
+                   "magenta",
+                   "deeppink")
+  }
+
+  return(pal)
 }
