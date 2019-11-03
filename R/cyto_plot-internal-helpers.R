@@ -1021,7 +1021,7 @@
   
   # No density_cols supplied
   if (.all_na(density_cols)) {
-    density_cols <- .cyto_plot_colour_palette(type = "density")
+    density_cols <- .cyto_plot_colour_palette(type = "density_cols")
   }
 
   # Make colorRampPalette
@@ -1117,7 +1117,7 @@
 
   # No colours supplied for selection
   if (.all_na(point_cols)) {
-    point_cols <- .cyto_plot_colour_palette(type = "point") 
+    point_cols <- .cyto_plot_colour_palette(type = "point_cols") 
   }
   
   # Make colorRampPalette
