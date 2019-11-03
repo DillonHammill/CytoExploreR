@@ -406,7 +406,7 @@ cyto_plot.GatingSet <- function(x,
   # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
   gt <- gh_generate_template(gh)
   gt <- gt[basename(gt$parent) == parent, ]
-  
+
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
     # 2D PLOT - BOTH CHANNELS MATCH
@@ -471,9 +471,7 @@ cyto_plot.GatingSet <- function(x,
           # UPDATE ALIAS
           alias <- c(alias, empty_alias[which(valid_bool_gate)])
           # TURN ON NEGATE
-          if(missing(negate)){
-            negate <- TRUE
-          }
+          negate <- TRUE
         }
       }
     }
@@ -482,7 +480,8 @@ cyto_plot.GatingSet <- function(x,
     # ALIAS MAY BE BOOL GATE
     if(any(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))){
       # EMPTY CHANNELS ALIAS INDEX
-      ind <- which(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))
+      ind <- which(LAPPLY(alias, function(z){
+        .empty(gt[gt$alias == z, "dims"])}))
       empty_alias <- alias[ind]
       # VALID BOOL GATE - ALIAS CORRECT
       lapply(empty_alias, function(z){
@@ -496,15 +495,15 @@ cyto_plot.GatingSet <- function(x,
           if(!grepl("!", bool)){
             message("Only NOT boolean gates are supported.")
             # REMOVE FROM ALIAS
-            alias <<- alias[alias != z]
+            alias <<- alias[-match(z, alias)]
             # NEGATE
-            negate <- FALSE
+            negate <<- FALSE
           }else if(grepl("|", bool, fixed = TRUE)){
             message("Only NOT AND boolean gates are supported.")
             # REMOVE FROM ALIAS
-            alias <<- alias[alias != z]
+            alias <<- alias[-match(z, alias)]
             # NEGATE
-            negate <- FALSE
+            negate <<- FALSE
             # NOT AND GATE - CORRECT ALIAS
           } else {
             # STRIP &
@@ -516,12 +515,12 @@ cyto_plot.GatingSet <- function(x,
             # BOOL ALIAS MUST BE IN ALIAS
             if(!all(bool_alias %in% alias)){
               alias <<- unique(c(alias, bool_alias))
-              # BOOL ALIAS MUST BE LAST
-              alias <<- c(alias[!alias == z], z)
             }
             # NEGATE 
-            negate <- TRUE
+            negate <<- TRUE
           }
+          # BOOLEAN ALIAS MUST BE LAST
+          alias <<- c(alias[-match(z, alias)], z)
         # NOT BOOL GATE 
         }else{
           # REMOVE FROM ALIAS
@@ -531,7 +530,7 @@ cyto_plot.GatingSet <- function(x,
       })
     }
   }
-
+  
   # EXTRACT GATE OBJECTS - BYPASS BOOLEAN FILTERS
   if (!.all_na(alias)) {
     # REMOVE DUPLICATE ALIAS
@@ -917,7 +916,8 @@ cyto_plot.GatingHierarchy <- function(x,
     # ALIAS MAY BE BOOL GATE
     if(any(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))){
       # EMPTY CHANNELS ALIAS INDEX
-      ind <- which(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))
+      ind <- which(LAPPLY(alias, function(z){
+        .empty(gt[gt$alias == z, "dims"])}))
       empty_alias <- alias[ind]
       # VALID BOOL GATE - ALIAS CORRECT
       lapply(empty_alias, function(z){
@@ -931,16 +931,16 @@ cyto_plot.GatingHierarchy <- function(x,
           if(!grepl("!", bool)){
             message("Only NOT boolean gates are supported.")
             # REMOVE FROM ALIAS
-            alias <<- alias[alias != z]
+            alias <<- alias[-match(z, alias)]
             # NEGATE
-            negate <- FALSE
+            negate <<- FALSE
           }else if(grepl("|", bool, fixed = TRUE)){
             message("Only NOT AND boolean gates are supported.")
             # REMOVE FROM ALIAS
-            alias <<- alias[alias != z]
+            alias <<- alias[-match(z, alias)]
             # NEGATE
-            negate <- FALSE
-           # NOT AND GATE - CORRECT ALIAS
+            negate <<- FALSE
+            # NOT AND GATE - CORRECT ALIAS
           } else {
             # STRIP &
             bool_alias <- unlist(strsplit(bool, "&"))
@@ -951,12 +951,12 @@ cyto_plot.GatingHierarchy <- function(x,
             # BOOL ALIAS MUST BE IN ALIAS
             if(!all(bool_alias %in% alias)){
               alias <<- unique(c(alias, bool_alias))
-              # BOOL ALIAS MUST BE LAST
-              alias <<- c(alias[!alias == z], z)
             }
             # NEGATE 
-            negate <- TRUE
+            negate <<- TRUE
           }
+          # BOOLEAN ALIAS MUST BE LAST
+          alias <<- c(alias[-match(z, alias)], z)
           # NOT BOOL GATE 
         }else{
           # REMOVE FROM ALIAS
