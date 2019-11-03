@@ -561,12 +561,14 @@
         # Y COORDS TO OFFSET
         text_y <- args[["label_text_y"]][label_ind[[z]]]
         # OFFSET Y CO-ORDINATES
-        args[["label_text_y"]][label_ind[[z]]] <<- suppressWarnings(
+        args[["label_text_y"]][label_ind[[z]]] <<- tryCatch(suppressWarnings(
           .spread.labels(text_y,
           mindiff = label_height,
           min = ymin,
           max = ymax
-        ))
+          )), error = function(e){
+          return(args[["label_text_y"]])
+        })
       }
     })
     # OFFSET ALL LABELS
@@ -580,12 +582,14 @@
       # LABEL HEIGHT BUFFERING
       label_height <- 1.18 * label_height
       # OFFSET Y CO-ORDINATES
-      args[["label_text_y"]] <- suppressWarnings(
+      args[["label_text_y"]] <- tryCatch(suppressWarnings(
         .spread.labels(args[["label_text_y"]],
         mindiff = label_height,
         min = ymin,
         max = ymax
-      ))
+        )), error = function(e){
+        return(args[["label_text_y"]])
+      })
     }
   }
 
