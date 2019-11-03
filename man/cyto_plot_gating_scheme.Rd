@@ -13,20 +13,14 @@
   gate_track = FALSE,
   show_all = FALSE,
   header,
-  title,
   popup = FALSE,
   layout,
-  point_col,
-  density_stack = 0.5,
-  density_fill,
-  gate_line_col,
-  border_line_col = NA,
+  point_col = NA,
+  label_text_size = 0.8,
   border_line_width,
   legend = TRUE,
   legend_text,
   legend_text_size = 1.2,
-  title_text_col = NA,
-  label_text_size = 0.8,
   ...
 )
 
@@ -79,8 +73,6 @@ default.}
 \item{header}{character string to use as the header for the plot layout, set
 to "Gating Scheme" by default.}
 
-\item{title}{vector of titles to use above each plot.}
-
 \item{popup}{logical indicating whether the gating scheme should be plotted
 in a pop-up window, set to FALSE by default.}
 
@@ -91,18 +83,8 @@ for plotting \code{c(#rows, #columns)}.}
 red-blue colour scale. Control the colour of overlays by supplying multiple
 colours to this argument (e.g. c("blue","red")).}
 
-\item{density_stack}{numeric [0,1] indicating the degree of offset for 1-D
-density distributions with overlay, set to 0.5 by default.}
-
-\item{density_fill}{fill colour for 1D density distributions. Control the
-colour of overlays by supplying multiple colours to this argument (e.g.
-c(NA,"red")).}
-
-\item{gate_line_col}{vector of colours to use for gates. Individual gate
-colours can only be controlled when \code{gate_track} is set to TRUE.}
-
-\item{border_line_col}{line colour for plot border, set to "black" by
-default.}
+\item{label_text_size}{numeric to control the size of text in the plot
+labels, set to 0.8 by default.}
 
 \item{border_line_width}{line width for plot border, set to 3 when gate_track
 is TRUE.}
@@ -115,11 +97,6 @@ overlay is supplied.}
 
 \item{legend_text_size}{character expansion for legend text, set to 1.2 by
 default.}
-
-\item{title_text_col}{colour for plot title.}
-
-\item{label_text_size}{numeric to control the size of text in the plot
-labels, set to 0.8 by default.}
 
 \item{...}{extra arguments passed to \code{\link{cyto_plot}}.}
 }
@@ -157,7 +134,6 @@ cyto_plot_gating_scheme(gs[[32]],
 cyto_plot_gating_scheme(gs[1:4],
   gate_track = TRUE
 )
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
