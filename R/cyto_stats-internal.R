@@ -841,7 +841,7 @@
   if(!.all_na(channels)){
     channels <- cyto_channels_extract(x, channels, plot)
   }else{
-    channels <- BiocGenerics::colnames(x)
+    channels <- cyto_channels(x)
   }
   
   # Time parameter always uses data limits

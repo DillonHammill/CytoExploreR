@@ -902,17 +902,39 @@ cyto_convert.flowSet <- function(x,
 
   } else if (return == "flowFrame") {
     x <- as(x, "flowFrame")
-    if ("Original" %in% BiocGenerics::colnames(x)) {
-      x <- suppressWarnings(
-        x[, -match("Original", BiocGenerics::colnames(x))]
-      )
+    # REMOVE ORIGINAL PARAMETER
+    if ("Original" %in% cyto_channels(x)) {
+      # CANNOT BE EMPTY FLOWFRAME
+      if(nrow(x) == 0){
+        # ADD EVENT
+        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        # REMOVE ORIGINAL PARAMETER & ADDED EVENT
+        x <- suppressWarnings(
+          x[-1, -match("Original", cyto_channels(x))]
+        )
+      }else{
+        x <- suppressWarnings(
+          x[, -match("Original", cyto_channels(x))]
+        )
+      }
     }
   } else if (return == "flowFrame list") {
     x <- as(x, "flowFrame")
-    if ("Original" %in% BiocGenerics::colnames(x)) {
-      x <- suppressWarnings(
-        x[, -match("Original", BiocGenerics::colnames(x))]
-      )
+    # REMOVE ORIGINAL PARAMETER
+    if ("Original" %in% cyto_channels(x)) {
+      # CANNOT BE EMPTY FLOWFRAME
+      if(nrow(x) == 0){
+        # ADD EVENT
+        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        # REMOVE ORIGINAL PARAMETER & ADDED EVENT
+        x <- suppressWarnings(
+          x[-1, -match("Original", cyto_channels(x))]
+        )
+      }else{
+        x <- suppressWarnings(
+          x[, -match("Original", cyto_channels(x))]
+        )
+      }
     }
     x <- list(x)
   } else if (return == "list of flowFrames") {
@@ -926,10 +948,21 @@ cyto_convert.flowSet <- function(x,
     x <- GatingSet(x)
   } else if (return == "GatingHierarchy") {
     x <- as(x, "flowFrame")
-    if ("Original" %in% BiocGenerics::colnames(x)) {
-      x <- suppressWarnings(
-        x[, -match("Original", BiocGenerics::colnames(x))]
-      )
+    # REMOVE ORIGINAL PARAMETER
+    if ("Original" %in% cyto_channels(x)) {
+      # CANNOT BE EMPTY FLOWFRAME
+      if(nrow(x) == 0){
+        # ADD EVENT
+        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        # REMOVE ORIGINAL PARAMETER & ADDED EVENT
+        x <- suppressWarnings(
+          x[-1, -match("Original", cyto_channels(x))]
+        )
+      }else{
+        x <- suppressWarnings(
+          x[, -match("Original", cyto_channels(x))]
+        )
+      }
     }
     x <- flowSet(x)
     x <- GatingSet(x)[[1]]
@@ -1288,8 +1321,8 @@ cyto_group_by <- function(x,
 #' @name cyto_merge_by
 NULL
 
-#' @rdname cyto_merge_by
 #' @noRd
+#' @export
 cyto_merge_by <- function(x, ...){
   UseMethod("cyto_merge_by")
 }
@@ -1352,15 +1385,21 @@ cyto_merge_by.flowSet <- function(x,
 
   # CONVERT EACH GROUP TO FLOWFRAME
   fr_list <- lapply(fs_list, function(fs) {
-    cyto_convert(fs, "flowFrame")
+    if(!is(fs, "flowFrame")){
+      cyto_convert(fs, "flowFrame")
+    }else{
+      fs
+    }
   })
   names(fr_list) <- grps
 
   # REPLACE SAMPLENAMES WITH GROUPS
-  lapply(seq_len(length(fr_list)), function(z) {
-    identifier(fr_list[[z]]) <<- grps[z]
-  })
-
+  if(!all(cyto_names(fr_list) %in% grps)){
+    lapply(seq_len(length(fr_list)), function(z) {
+      identifier(fr_list[[z]]) <<- grps[z]
+    })
+  }
+  
   # RETURN PREPARED FLOWFRAME LIST
   return(fr_list)
 }
@@ -1421,6 +1460,11 @@ cyto_sample.flowFrame <- function(x,
                                   seed = NULL,
                                   ...) {
 
+  # NO SAMPLING - EMPTY FLOWFRAME
+  if(nrow(x@exprs) == 0){
+    return(x)
+  }
+  
   # Do nothing if no sampling required
   if (display != 1) {
 

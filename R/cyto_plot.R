@@ -1204,7 +1204,7 @@ cyto_plot.flowSet <- function(x,
                               border_line_col = "black",
                               border_fill = "white",
                               border_fill_alpha = 1, ...) {
-
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
 
   # CURRENT PARAMETERS
@@ -1262,13 +1262,9 @@ cyto_plot.flowSet <- function(x,
 
   # DATA TO LIST & GROUP - CONVERT GROUPS TO FLOWFRAMES
   if (!.all_na(group_by)) {
-    fs_list <- cyto_group_by(x, group_by)
-    fr_list <- lapply(fs_list, function(z) {
-      cyto_convert(z, "flowFrame")
-    })
+    fr_list <- cyto_merge_by(x, group_by)
   } else {
-    fr_list <- cyto_convert(x, "list of flowFrames")
-    names(fr_list) <- cyto_names(x)
+    fr_list <- cyto_merge_by(x, merge_by = "name")
   }
 
   # OVERLAY LIST & GROUP
@@ -1280,13 +1276,10 @@ cyto_plot.flowSet <- function(x,
     } else if (inherits(overlay, "flowSet")) {
       # GROUPING
       if (!.all_na(group_by)) {
-        overlay_list <- cyto_group_by(overlay, group_by)
-        overlay_list <- lapply(overlay_list, function(z) {
-          cyto_convert(z, "flowFrame")
-        })
+        overlay_list <- cyto_merge_by(overlay, merge_by = group_by)
         # NO GROUPING
       } else {
-        overlay_list <- cyto_convert(overlay, "list of flowFrames")
+        overlay_list <- cyto_merge_by(overlay, merge_by = "name")
       }
       # LIST OF FLOWFRAME LISTS
       overlay_list <- lapply(overlay_list, function(z) {
@@ -1316,17 +1309,12 @@ cyto_plot.flowSet <- function(x,
         # GROUPING
         if (!.all_na(group_by)) {
           overlay_list <- lapply(overlay, function(z) {
-            cyto_group_by(z, group_by)
-          })
-          overlay_list <- lapply(overlay_list, function(z) {
-            lapply(z, function(y) {
-              cyto_convert(y, "flowFrame")
-            })
+            cyto_merge_by(z, merge_by = group_by)
           })
           # NO GROUPING
         } else {
           overlay_list <- lapply(overlay, function(z) {
-            cyto_convert(z, "list of flowFrames")
+            cyto_merge_by(z, merge_by = "name")
           })
         }
         overlay_list <- overlay_list %>% transpose()
@@ -1370,13 +1358,17 @@ cyto_plot.flowSet <- function(x,
       fr_list <<- lapply(fr_list, function(y) {
         # LIST OF FLOWFRAMES
         lapply(y, function(w) {
-          if (min(range(w, type = "data")[, channels[z]]) < 0) {
-            coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
-            rownames(coords) <- c("min", "max")
-            colnames(coords) <- channels[z]
-            nonDebris <- rectangleGate(.gate = coords)
-            Subset(w, nonDebris)
-          } else {
+          if(nrow(w@exprs) > 0){
+            if (min(range(w, type = "data")[, channels[z]]) < 0) {
+              coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
+              rownames(coords) <- c("min", "max")
+              colnames(coords) <- channels[z]
+              nonDebris <- rectangleGate(.gate = coords)
+              Subset(w, nonDebris)
+            } else {
+              return(w)
+            }
+          }else{
             return(w)
           }
         })
