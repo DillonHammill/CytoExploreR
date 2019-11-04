@@ -741,6 +741,7 @@ cyto_plot_new <- function(popup = FALSE, ...) {
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
+#' @importFrom grDevices dev.off
 #' @export
 cyto_plot_reset <- function() {
 
@@ -770,6 +771,9 @@ cyto_plot_reset <- function() {
 
   # Save label co-ordinates as list
   options("cyto_plot_label_coords" = NULL)
+  
+  # Turn off graphics device
+  dev.off()
 }
 
 ## CYTO_PLOT_SAVE --------------------------------------------------------------
