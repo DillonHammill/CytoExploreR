@@ -1761,7 +1761,11 @@ cyto_plot.flowSet <- function(x,
       # RECORD PLOT (FULL PAGE OR ALL SAMPLES)
       if(cnt %% np == 0 |
          cnt == length(fr_list)){
-        p <- cyto_plot_record()
+        if(getOption("cyto_plot_method") == "flowSet"){
+          p <- cyto_plot_record()
+        }else{
+          p <- NULL
+        }
       }else{
         p <- NULL
       }
