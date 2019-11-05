@@ -717,7 +717,7 @@ cyto_plot.GatingSet <- function(x,
 
   # RESTRICT ARGUMENTS
   args <- args[names(args) %in% ARGS]
-
+  
   # CALL FLOWSET METHOD
   do.call("cyto_plot.flowSet", args)
 }
@@ -1223,7 +1223,9 @@ cyto_plot.flowSet <- function(x,
     })
   } else {
     # RESET GRAPHICAL PARAMETERS ON EXIT
-    on.exit(par(old_pars))
+    if(getOption("cyto_plot_method") == "flowSet"){
+      on.exit(par(old_pars))
+    }
   }
 
   # CUSTOM PLOT - LAYOUT FALSE
@@ -1535,7 +1537,9 @@ cyto_plot.flowSet <- function(x,
   }
 
   # SET LAYOUT
-  par("mfrow" = layout)
+  if(!all(layout == FALSE)){
+    par("mfrow" = layout)
+  }
   np <- layout[1] * layout[2]
 
   # CYTO_PLOT_CALL -------------------------------------------------------------
@@ -1585,12 +1589,14 @@ cyto_plot.flowSet <- function(x,
 
   # REPEAT & SPLIT ARGUMENTS ---------------------------------------------------
 
+  print(label_text)
+  
   # REPEAT & SPLIT ARGUMENTS
   args <- .cyto_plot_args_split(args)
 
   # UPDATE ARGUMENTS
   .args_update(args)
-
+  
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
 
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD

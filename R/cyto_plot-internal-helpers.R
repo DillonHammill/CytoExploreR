@@ -397,11 +397,11 @@
     if(arg %in% names(x)){
       if(arg %in% c("label_text_x", 
                     "label_text_y")){
-        res <- rep(c(x[[arg]], rep(NA, TL * TP)), 
-                   length.out = TL * TP)
+        res <- rep(c(x[[arg]], rep(NA, L * TP)), length.out = L * TP)
+        res <- rep(res, N)
       }else if(MTD == "flowSet" & arg == "label_text"){
-        res <- rep(c(x[[arg]], rep(NA, TP)), length.out = TP)
-        res <- rep(res, length.out = TL * TP)
+        res <- rep(c(x[[arg]], rep(NA, L * TP)), length.out = L * TP)
+        res <- rep(res, N)
       }else{
         res <- rep(x[[arg]], length.out = TL * TP)
       }
@@ -1207,6 +1207,8 @@
   
   return(point_col)
 }
+
+## .CYTO_PLOT_COLOUR_PALETTE ---------------------------------------------------
 
 #' cyto_plot colour palette
 #'

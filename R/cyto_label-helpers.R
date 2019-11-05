@@ -281,7 +281,8 @@
     } else if (args[["density_stack"]] != 0) {
       # Y_MAX PER LAYER
       y_max <- as.numeric(unlist(
-        strsplit(names(args[["fr_dens_list"]])[1], "-"))[2])
+        strsplit(names(args[["fr_dens_list"]])[1], "-")
+      )[2])
       # STACK LEVELS
       stk <- LAPPLY(seq(0, args[["SMP"]], 1), function(z) {
         args[["density_stack"]] * y_max * z
@@ -299,18 +300,20 @@
   # COMPUTE LABEL CO-ORDINATES -------------------------------------------------
 
   # SPLIT TNP LABELS
-  label_ind <- split(seq_len(args[["TNP"]]), 
-                     rep(seq_len(args[["SMP"]]), each = args[["NP"]]))
+  label_ind <- split(
+    seq_len(args[["TNP"]]),
+    rep(seq_len(args[["SMP"]]), each = args[["NP"]])
+  )
 
-  # GATE CENTERS
+  # GATE CENTERS - (IGNORE SUPPLIED LABEL COORDS)
   if (!.all_na(args[["gate"]])) {
     gate_centers <- .cyto_gate_center(args[["gate"]],
       channels = args[["channels"]],
-      text_x = args[["label_text_x"]],
-      text_y = args[["label_text_y"]]
+      text_x = rep(NA, .cyto_gate_count(args[["gate"]], total = TRUE)),
+      text_y = rep(NA, .cyto_gate_count(args[["gate"]], total = TRUE))
     )
   }
-
+  
   # LABEL_TEXT_XY - MATRIX
   label_text_xy <- lapply(seq_len(args[["SMP"]]), function(z) {
 
@@ -330,7 +333,11 @@
             # GATED POPULATION
             if (ind <= nrow(gate_centers)) {
               # X COORD - GATE CENTER
-              text_x[ind] <<- gate_centers[ind, "x"]
+              if(.all_na(args[["label_text_x"]][y])){
+                text_x[ind] <<- gate_centers[ind, "x"]
+              }else{
+                text_x[ind] <<- args[["label_text_x"]][y]
+              }
               # Y COORD - STACKS/LIMITS
               if (.all_na(args[["label_text_y"]][y])) {
                 text_y[ind] <<- y_coords[y]
@@ -418,9 +425,17 @@
             # GATED POPULATION
             if (ind <= nrow(gate_centers)) {
               # X COORD - GATE CENTER
-              text_x[ind] <<- gate_centers[ind, "x"]
+              if(.all_na(args[["label_text_x"]][y])){
+                text_x[ind] <<- gate_centers[ind, "x"]
+              }else{
+                text_x[ind] <<- args[["label_text_x"]][y]
+              }
               # Y COORD - GATE CENTER
-              text_y[ind] <<- gate_centers[ind, "y"]
+              if(.all_na(args[["label_text_y"]][y])){
+                text_y[ind] <<- gate_centers[ind, "y"]
+              }else{
+                text_y[ind] <<- args[["label_text_y"]][y]
+              }
               # NEGATED POPULATION
             } else if (ind > nrow(gate_centers)) {
               # X COORD - MODE/RANGE CENTER
@@ -542,12 +557,14 @@
       )
     }
   })
-
+  
   # OFFSET BY LAYER
   if (length(args[["channels"]]) == 1 & args[["density_stack"]] != 0) {
     # SPLIT LABEL_DIMS BY LAYER
-    label_dims <- split(label_dims, 
-                        rep(seq_len(args[["SMP"]]), each = args[["NP"]]))
+    label_dims <- split(
+      label_dims,
+      rep(seq_len(args[["SMP"]]), each = args[["NP"]])
+    )
     # OFFSET PER LAYER
     lapply(seq_len(args[["SMP"]]), function(z) {
       # LABEL OVERLAP
@@ -555,19 +572,22 @@
         # LABEL HEIGHT - OFFSETTING
         label_height <- max(LAPPLY(label_dims[[z]], function(y) {
           max(y[, "y"]) - min(y[, "y"])
-        }))
+        }), na.rm = TRUE)
         # LABEL HEIGHT BUFFERING
         label_height <- 1.18 * label_height
         # Y COORDS TO OFFSET
         text_y <- args[["label_text_y"]][label_ind[[z]]]
-        # OFFSET Y CO-ORDINATES
-        args[["label_text_y"]][label_ind[[z]]] <<- tryCatch(suppressWarnings(
-          .spread.labels(text_y,
-          mindiff = label_height,
-          min = ymin,
-          max = ymax
-          )), error = function(e){
-          return(args[["label_text_y"]])
+        # OFFSET Y CO-ORDINATES (EXCLUDE NA)
+        args[["label_text_y"]][label_ind[[z]]][!is.na(text_y)] <<- tryCatch({
+          suppressWarnings(
+            .spread.labels(text_y[!is.na(text_y)],
+              mindiff = label_height,
+              min = ymin,
+              max = ymax
+            )
+          )
+        }, error = function(e) {
+          return(text_y[!is.na(text_y)])
         })
       }
     })
@@ -578,18 +598,18 @@
       # LABEL HEIGHT - OFFSETTING
       label_height <- max(LAPPLY(label_dims, function(y) {
         max(y[, "y"]) - min(y[, "y"])
-      }))
+      }), na.rm = TRUE)
       # LABEL HEIGHT BUFFERING
       label_height <- 1.18 * label_height
-      # OFFSET Y CO-ORDINATES
-      args[["label_text_y"]] <- tryCatch(suppressWarnings(
-        .spread.labels(args[["label_text_y"]],
-        mindiff = label_height,
-        min = ymin,
-        max = ymax
-        )), error = function(e){
-        return(args[["label_text_y"]])
-      })
+      # OFFSET Y CO-ORDINATES (EXCLUDE NA)
+      args[["label_text_y"]][!is.na(args[["label_text_y"]])] <-
+        suppressMessages(
+          .spread.labels(args[["label_text_y"]][!is.na(args[["label_text_y"]])],
+            mindiff = label_height,
+            min = ymin,
+            max = ymax
+          )
+        )
     }
   }
 
