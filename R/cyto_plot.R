@@ -1535,15 +1535,16 @@ cyto_plot.flowSet <- function(x,
       density_stack = density_stack,
       density_layers = density_layers
     )
-  } else if (all(layout == FALSE) | .all_na(layout)) {
-    # CURRENT DIMENSIONS
-    layout <- par("mfrow")
-  }
-
-  # SET LAYOUT
-  if(!all(layout == FALSE)){
     par("mfrow" = layout)
+  } else if (all(layout == FALSE) | .all_na(layout)) {
+    # USE CURRENT DIMENSIONS
+    if(getOption("cyto_plot_method") == "flowSet"){
+      layout <- par("mfrow")
+      par("mfrow" = layout)
+    }
   }
+  
+  # NUMBER OF PLOTS PER PAGE
   np <- layout[1] * layout[2]
 
   # CYTO_PLOT_CALL -------------------------------------------------------------
