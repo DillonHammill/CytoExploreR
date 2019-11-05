@@ -780,6 +780,43 @@ cyto_plot_reset <- function() {
   invisible(NULL)
 }
 
+## CYTO_PLOT_RECORD ------------------------------------------------------------
+
+#' Record an existing cyto_plot
+#'
+#' \code{cyto_plot_record} will record an existing plot such that it can be
+#' saved to an R object for future reference.
+#'
+#' @importFrom grDevices recordPlot
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @examples 
+#' \dontrun{
+#' 
+#' # Load CytoExploreRData to acces data
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Construct cyto_plot
+#' cyto_plot(fs[[1]],
+#'           channels = c("FSC-A", "SSC-A"))
+#'           
+#' # Record plot and save to object called p
+#' p <- cyto_plot_record()
+#' 
+#' # Calling p will bring back the recorded plot
+#' p
+#' 
+#' }
+#'
+#' @export
+cyto_plot_record <- function(){
+  recordPlot()
+}
+
 ## CYTO_PLOT_SAVE --------------------------------------------------------------
 
 #' Save High Resolution cyto_plot Images
