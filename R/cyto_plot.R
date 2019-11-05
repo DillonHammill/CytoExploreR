@@ -404,9 +404,11 @@ cyto_plot.GatingSet <- function(x,
   }
 
   # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
-  gt <- gh_generate_template(gh)
-  gt <- gt[basename(gt$parent) == parent, ]
-
+  if(!.all_na(alias)){
+    gt <- gh_generate_template(gh)
+    gt <- gt[basename(gt$parent) == parent, ]
+  }
+ 
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
     # 2D PLOT - BOTH CHANNELS MATCH
@@ -838,8 +840,10 @@ cyto_plot.GatingHierarchy <- function(x,
   x <- cyto_extract(gh, parent)
 
   # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
-  gt <- gh_generate_template(gh)
-  gt <- gt[basename(gt$parent) == parent, ]
+  if(!.all_na(alias)){
+    gt <- gh_generate_template(gh)
+    gt <- gt[basename(gt$parent) == parent, ]
+  }
   
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
@@ -1588,8 +1592,6 @@ cyto_plot.flowSet <- function(x,
   }
 
   # REPEAT & SPLIT ARGUMENTS ---------------------------------------------------
-
-  print(label_text)
   
   # REPEAT & SPLIT ARGUMENTS
   args <- .cyto_plot_args_split(args)
@@ -1601,7 +1603,7 @@ cyto_plot.flowSet <- function(x,
 
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
   cnt <- 0
-  mapply(
+  plots <- mapply(
     function(x,
                  gate,
                  limits,
@@ -1756,6 +1758,14 @@ cyto_plot.flowSet <- function(x,
         border_fill_alpha = border_fill_alpha
       )
 
+      # RECORD PLOT (FULL PAGE OR ALL SAMPLES)
+      if(cnt %% np == 0 |
+         cnt == length(fr_list)){
+        p <- cyto_plot_record()
+      }else{
+        p <- NULL
+      }
+      
       # NEW PLOT PAGE
       if (popup == TRUE &
         cnt %% np == 0 &
@@ -1763,6 +1773,10 @@ cyto_plot.flowSet <- function(x,
         cyto_plot_new(popup = popup)
         par("mfrow" = layout)
       }
+      
+      # RETURN RECORDED PLOT
+      return(p)
+      
     },
     fr_list,
     gate,
@@ -1831,7 +1845,7 @@ cyto_plot.flowSet <- function(x,
     border_fill_alpha
   )
 
-  # RECORD/SAVE ----------------------------------------------------------------
+  # CYTO_PLOT_SAVE -------------------------------------------------------------
 
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save") == TRUE) {
@@ -1845,8 +1859,12 @@ cyto_plot.flowSet <- function(x,
     }
   }
 
-  # RETURN RECORDED PLOT
-  invisible(recordPlot())
+  # RETURN RECORDED PLOTS
+  plots[LAPPLY(plots, is.null)] <- NULL
+  if(length(plots) == 0){
+    plots <- NULL
+  }
+  invisible(plots)
 }
 
 #' @rdname cyto_plot
@@ -2488,7 +2506,16 @@ cyto_plot.flowFrame <- function(x,
     }
   }
 
-  # RECORD/SAVE ----------------------------------------------------------------
+  # RECORD PLOT ----------------------------------------------------------------
+  
+  # RECORD FLOWFRAME METHOD ONLY
+  if(getOption("cyto_plot_method") == "flowFrame"){
+    p <- cyto_plot_record()
+  }else{
+    p <- NULL
+  }
+  
+  # CYTO_PLOT_SAVE -------------------------------------------------------------
 
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save") == TRUE) {
@@ -2503,5 +2530,6 @@ cyto_plot.flowFrame <- function(x,
   }
 
   # RETURN RECORDED PLOT
-  invisible(recordPlot())
+  invisible(p)
+  
 }
