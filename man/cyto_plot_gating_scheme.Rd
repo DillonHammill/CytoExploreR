@@ -21,32 +21,31 @@
   legend = TRUE,
   legend_text,
   legend_text_size = 1.2,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
   ...
 )
 
 \method{cyto_plot_gating_scheme}{GatingSet}(
   x,
   gatingTemplate = NULL,
-  group_by,
+  group_by = "name",
   back_gate = FALSE,
   gate_track = FALSE,
   show_all = FALSE,
-  display = NULL,
-  header = NA,
-  title = NULL,
+  header,
   popup = FALSE,
   layout = NULL,
-  point_col = NULL,
-  density_stack = 0.5,
-  density_fill = NULL,
-  gate_line_col = NULL,
-  border_line_col = NULL,
+  point_col = NA,
+  label_text_size = 0.8,
   border_line_width = NULL,
   legend = TRUE,
   legend_text = NULL,
   legend_text_size = 1.2,
-  title_text_col = NULL,
-  label_text_size = 0.8,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
   ...
 )
 }
@@ -98,6 +97,15 @@ overlay is supplied.}
 \item{legend_text_size}{character expansion for legend text, set to 1.2 by
 default.}
 
+\item{header_text_font}{numeric to control the font of the header, set to 2
+by default for bold font.}
+
+\item{header_text_size}{numeric to control the size of the header text, set
+to 1 by default.}
+
+\item{header_text_col}{colour to use for header text, set to "black" by
+default.}
+
 \item{...}{extra arguments passed to \code{\link{cyto_plot}}.}
 }
 \description{
@@ -134,6 +142,7 @@ cyto_plot_gating_scheme(gs[[32]],
 cyto_plot_gating_scheme(gs[1:4],
   gate_track = TRUE
 )
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
