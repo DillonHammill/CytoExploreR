@@ -17,6 +17,7 @@ cyto_transformer_logicle(x, ...)
   select = NULL,
   plot = TRUE,
   popup = FALSE,
+  display = 25000,
   ...
 )
 
@@ -27,6 +28,7 @@ cyto_transformer_logicle(x, ...)
   select = NULL,
   plot = TRUE,
   popup = FALSE,
+  display = 25000,
   ...
 )
 
@@ -35,8 +37,9 @@ cyto_transformer_logicle(x, ...)
   channels = NULL,
   parent = "root",
   select = NULL,
-  plot = FALSE,
+  plot = TRUE,
   popup = FALSE,
+  display = 25000,
   ...
 )
 
@@ -47,6 +50,7 @@ cyto_transformer_logicle(x, ...)
   select = NULL,
   plot = TRUE,
   popup = FALSE,
+  display = 25000,
   ...
 )
 }
@@ -55,7 +59,8 @@ cyto_transformer_logicle(x, ...)
 \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}.}
+\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+and \code{\link{cyto_plot}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
@@ -72,6 +77,9 @@ be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether the plots should be constructed in a
 pop-up window.}
+
+\item{display}{number or frequency of events to display in plots, set to
+25000 events by default. See \code{\link{cyto_plot}} for details.}
 }
 \value{
 a \code{transformerList} object.
