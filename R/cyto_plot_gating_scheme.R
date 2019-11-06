@@ -31,8 +31,7 @@
 #'   colours to this argument (e.g. c("blue","red")).
 #' @param label_text_size numeric to control the size of text in the plot
 #'   labels, set to 0.8 by default.
-#' @param border_line_width line width for plot border, set to 3 when gate_track
-#'   is TRUE.
+#' @param gate_line_col colour to use for gate borders, set to "red" by default.
 #' @param legend logical indicating whether a legend should be included when an
 #'   overlay is supplied.
 #' @param legend_text vector of character strings to use for legend when an
@@ -44,6 +43,12 @@
 #' @param header_text_size numeric to control the size of the header text, set
 #'   to 1 by default.
 #' @param header_text_col colour to use for header text, set to "black" by
+#'   default.
+#' @param border_line_width line width for plot border, set to 3 when gate_track
+#'   is TRUE.
+#' @param border_line_col line colour for plot border, set to "black" by
+#'   default.
+#' @param title_text_col colour to use for title text, set to "black" by
 #'   default.
 #' @param ... extra arguments passed to \code{\link{cyto_plot}}.
 #'
@@ -104,13 +109,16 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
                                                     layout,
                                                     point_col = NA,
                                                     label_text_size = 0.8,
-                                                    border_line_width,
+                                                    gate_line_col = "red",
                                                     legend = TRUE,
                                                     legend_text,
                                                     legend_text_size = 1.2,
                                                     header_text_font = 2,
                                                     header_text_size = 1,
                                                     header_text_col = "black",
+                                                    border_line_width,
+                                                    border_line_col = "black",
+                                                    title_text_col = "black",
                                                     ...) {
 
   # GRAPHICAL PARAMETERS -------------------------------------------------------
@@ -182,33 +190,37 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     overlay <- NA
   }
 
-  # POPULATION COLOURS
-  if (.all_na(point_col) &
-    (back_gate[1] != FALSE | gate_track == TRUE)) {
-    # POINT_COLS
-    if (!is.null(cyto_plot_theme)) {
-      if ("point_cols" %in% names(cyto_plot_theme)) {
-        point_cols <- cyto_plot_theme[["point_cols"]]
+  # POPULATION COLOURS - NOT SPECIFIED
+  if(.all_na(point_col)){
+    # BACK GATE OR GATE TRACK (SELECT FROM POINT_COLS)
+    if(back_gate[1] != FALSE | gate_track == TRUE){
+      if (!is.null(cyto_plot_theme)) {
+        if ("point_cols" %in% names(cyto_plot_theme)) {
+          point_cols <- cyto_plot_theme[["point_cols"]]
+        }
+      } else {
+        point_cols <- .cyto_plot_colour_palette(type = "point_cols")
       }
-    } else {
-      point_cols <- .cyto_plot_colour_palette(type = "point_cols")
+      # COLOUR PALETTE
+      cols <- colorRampPalette(point_cols)
+      # POPULATION COLOURS
+      pop_cols <- cols(pop_count)
+    }else{
+      pop_cols <- rep(NA, pop_count)
     }
-    # COLOUR PALETTE
-    cols <- colorRampPalette(point_cols)
-    # POPULATION COLOURS
-    pop_cols <- cols(pop_count)
-  } else {
-    pop_cols <- rep(NA, pop_count)
+  # POPULATION COLOURS - MANUALLY SUPPLIED
+  }else{
+    pop_cols <- rep(point_col, length.out = pop_count)
   }
 
   # POPULATION COLOURS (DATA FRAME)
   pop_details <- data.frame(
     "node" = pops,
     "point_col" = pop_cols,
-    "gate_line_col" = rep("red", pop_count),
+    "gate_line_col" = rep(gate_line_col, pop_count),
     "density_fill" = pop_cols,
-    "border_line_col" = rep("black", pop_count),
-    "title_text_col" = rep("black", pop_count),
+    "border_line_col" = rep(border_line_col, pop_count),
+    "title_text_col" = rep(title_text_col, pop_count),
     stringsAsFactors = FALSE
   )
 
@@ -519,13 +531,16 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
                                               layout = NULL,
                                               point_col = NA,
                                               label_text_size = 0.8,
-                                              border_line_width = NULL,
+                                              gate_line_col = "red",
                                               legend = TRUE,
                                               legend_text = NULL,
                                               legend_text_size = 1.2,
                                               header_text_font = 2,
                                               header_text_size = 1,
-                                              header_text_col = "black", ...) {
+                                              header_text_col = "black", 
+                                              border_line_width = NULL,
+                                              border_line_col = "black",
+                                              title_text_col = "black", ...) {
 
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -596,33 +611,37 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     overlay <- NA
   }
   
-  # POPULATION COLOURS
-  if (.all_na(point_col) &
-      (back_gate[1] != FALSE | gate_track == TRUE)) {
-    # POINT_COLS
-    if (!is.null(cyto_plot_theme)) {
-      if ("point_cols" %in% names(cyto_plot_theme)) {
-        point_cols <- cyto_plot_theme[["point_cols"]]
+  # POPULATION COLOURS - NOT SPECIFIED
+  if(.all_na(point_col)){
+    # BACK GATE OR GATE TRACK (SELECT FROM POINT_COLS)
+    if(back_gate[1] != FALSE | gate_track == TRUE){
+      if (!is.null(cyto_plot_theme)) {
+        if ("point_cols" %in% names(cyto_plot_theme)) {
+          point_cols <- cyto_plot_theme[["point_cols"]]
+        }
+      } else {
+        point_cols <- .cyto_plot_colour_palette(type = "point_cols")
       }
-    } else {
-      point_cols <- .cyto_plot_colour_palette(type = "point_cols")
+      # COLOUR PALETTE
+      cols <- colorRampPalette(point_cols)
+      # POPULATION COLOURS
+      pop_cols <- cols(pop_count)
+    }else{
+      pop_cols <- rep(NA, pop_count)
     }
-    # COLOUR PALETTE
-    cols <- colorRampPalette(point_cols)
-    # POPULATION COLOURS
-    pop_cols <- cols(pop_count)
-  } else {
-    pop_cols <- rep(NA, pop_count)
+    # POPULATION COLOURS - MANUALLY SUPPLIED
+  }else{
+    pop_cols <- rep(point_col, length.out = pop_count)
   }
   
   # POPULATION COLOURS (DATA FRAME)
   pop_details <- data.frame(
     "node" = pops,
     "point_col" = pop_cols,
-    "gate_line_col" = rep("red", pop_count),
+    "gate_line_col" = rep(gate_line_col, pop_count),
     "density_fill" = pop_cols,
-    "border_line_col" = rep("black", pop_count),
-    "title_text_col" = rep("black", pop_count),
+    "border_line_col" = rep(border_line_col, pop_count),
+    "title_text_col" = rep(title_text_col, pop_count),
     stringsAsFactors = FALSE
   )
   

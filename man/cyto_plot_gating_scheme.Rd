@@ -17,13 +17,16 @@
   layout,
   point_col = NA,
   label_text_size = 0.8,
-  border_line_width,
+  gate_line_col = "red",
   legend = TRUE,
   legend_text,
   legend_text_size = 1.2,
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
+  border_line_width,
+  border_line_col = "black",
+  title_text_col = "black",
   ...
 )
 
@@ -39,13 +42,16 @@
   layout = NULL,
   point_col = NA,
   label_text_size = 0.8,
-  border_line_width = NULL,
+  gate_line_col = "red",
   legend = TRUE,
   legend_text = NULL,
   legend_text_size = 1.2,
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
+  border_line_width = NULL,
+  border_line_col = "black",
+  title_text_col = "black",
   ...
 )
 }
@@ -85,8 +91,7 @@ colours to this argument (e.g. c("blue","red")).}
 \item{label_text_size}{numeric to control the size of text in the plot
 labels, set to 0.8 by default.}
 
-\item{border_line_width}{line width for plot border, set to 3 when gate_track
-is TRUE.}
+\item{gate_line_col}{colour to use for gate borders, set to "red" by default.}
 
 \item{legend}{logical indicating whether a legend should be included when an
 overlay is supplied.}
@@ -104,6 +109,15 @@ by default for bold font.}
 to 1 by default.}
 
 \item{header_text_col}{colour to use for header text, set to "black" by
+default.}
+
+\item{border_line_width}{line width for plot border, set to 3 when gate_track
+is TRUE.}
+
+\item{border_line_col}{line colour for plot border, set to "black" by
+default.}
+
+\item{title_text_col}{colour to use for title text, set to "black" by
 default.}
 
 \item{...}{extra arguments passed to \code{\link{cyto_plot}}.}
