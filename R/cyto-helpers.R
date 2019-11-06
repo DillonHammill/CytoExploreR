@@ -1309,7 +1309,7 @@ cyto_group_by <- function(x,
 #' fr_list <- cyto_merge_by(fs, "Treatment")
 #' 
 #' # Merge samples by 'OVAConc'
-#' fr_list <- cyto_merge_by(gs, "OVAConc")
+#' fr_list <- cyto_merge_by(fs, "OVAConc")
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2288,7 +2288,7 @@ cyto_compensate.GatingSet <- function(x,
 #'
 #' @return character vector of gated node/population names.
 #'
-#' @importFrom flowWorkspace gs_get_pop_paths
+#' @importFrom flowWorkspace gh_get_pop_paths gs_get_pop_paths
 #' @importFrom methods is
 #'
 #' @export

@@ -69,7 +69,7 @@ cyto_details(fs)
 fr_list <- cyto_merge_by(fs, "Treatment")
 
 # Merge samples by 'OVAConc'
-fr_list <- cyto_merge_by(gs, "OVAConc")
+fr_list <- cyto_merge_by(fs, "OVAConc")
 
 }
 \seealso{

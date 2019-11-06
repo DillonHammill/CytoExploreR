@@ -157,7 +157,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
         ))
       }
     } else {
-      cyto_gatingTemplate_apply(gs, gatingTemplate)
+      cyto_gatingTemplate_apply(gh, gatingTemplate)
     }
   }
 
