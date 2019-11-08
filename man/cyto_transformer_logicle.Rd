@@ -8,8 +8,6 @@
 \alias{cyto_transformer_logicle.flowFrame}
 \title{Definition(s) of logicle transformation(s)}
 \usage{
-cyto_transformer_logicle(x, ...)
-
 \method{cyto_transformer_logicle}{GatingSet}(
   x,
   channels = NULL,
@@ -58,10 +56,6 @@ cyto_transformer_logicle(x, ...)
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{additional arguments passed to
-\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
-and \code{\link{cyto_plot}}.}
-
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
 if no channels/markers are supplied.}
@@ -80,6 +74,10 @@ pop-up window.}
 
 \item{display}{number or frequency of events to display in plots, set to
 25000 events by default. See \code{\link{cyto_plot}} for details.}
+
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+and \code{\link{cyto_plot}}.}
 }
 \value{
 a \code{transformerList} object.

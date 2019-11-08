@@ -11,7 +11,7 @@
 #' Definition(s) of Log Transformation(s)
 #'
 #' CytoExploreR implementation of \code{flowWorkspace}
-#' \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
+#' \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation which
 #' always returns a \code{\link[flowWorkspace:transformerList]{transformerList}}
 #' object and displays the result of the transformation(s) using
 #' \code{\link{cyto_plot}}. To combine different types of transformations have a
@@ -34,24 +34,27 @@
 #' @param display number or frequency of events to display in plots, set to
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} and
+#'   \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} and
 #'   \code{\link{cyto_plot}}.
 #'
 #' @return a \code{transformerList} object.
 #'
-#' @importFrom flowWorkspace flowjo_flog flow_trans transformerList
+#' @importFrom flowWorkspace flowjo_log_trans flow_trans transformerList
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}
+#' @seealso \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_logicle}}
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transformer_log
+#' @name cyto_transformer_log
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_log <- function(x, ...){
   UseMethod("cyto_transformer_log")
@@ -172,26 +175,13 @@ cyto_transformer_log.flowFrame <- function(x,
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
   }
   
-  # FLOWJO_FLOG ARGUMENTS
-  flowjo_flog_args <- formalArgs("flowjo_flog")
-  # REMOVE INVERSE ARGUMENT
-  flowjo_flog_args <- flowjo_flog_args[-match("inverse", flowjo_flog_args)]
+  # FLOWJO_LOG ARGUMENTS
+  flowjo_log_args <- formalArgs("flowjo_log_trans")
   
   # TRANSFORMATIONS
-  transform_list <- lapply(channels, function(z) {
-    do.call("flowjo_flog", 
-            c(args[names(args) %in% flowjo_flog_args],
-              list("inverse" = FALSE)))
-  })
-  transformer_list <- lapply(transform_list, function(z) {
-    inv <- do.call("flowjo_flog", 
-                   c(args[names(args) %in% flowjo_flog_args],
-                     list("inverse" = TRUE)))
-    flow_trans(
-      "log",
-      z@.Data,
-      inv@.Data
-    )
+  transformer_list <- lapply(channels, function(z) {
+    do.call("flowjo_log_trans", 
+            args[names(args) %in% flowjo_log_args])
   })
   names(transformer_list) <- channels
   transformer_list <- transformerList(
@@ -286,7 +276,10 @@ cyto_transformer_log.flowFrame <- function(x,
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transformer_arcsinh
+#' @name cyto_transformer_arcsinh
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_arcsinh <- function(x, ...) {
   UseMethod("cyto_transformer_arcsinh")
@@ -518,7 +511,10 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transformer_biex
+#' @name cyto_transformer_biex
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_biex <- function(x, ...) {
   UseMethod("cyto_transformer_biex")
@@ -747,13 +743,15 @@ cyto_transformer_biex.flowFrame <- function(x,
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 #' @seealso
 #' \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
-#'
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transformer_logicle
+#' @name cyto_transformer_logicle
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_logicle <- function(x, ...) {
   UseMethod("cyto_transformer_logicle")
