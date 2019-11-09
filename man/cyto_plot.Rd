@@ -644,10 +644,10 @@ gs <- transform(gs, trans)
 
 # Apply gatingTemplate
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # 2-D scatter plot with overlay & Gates
-cyto_plot(gs,
+cyto_plot(gs[1:9],
   parent = "CD4 T Cells",
   alias = "CD69+ CD4 T Cells",
   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
@@ -655,7 +655,7 @@ cyto_plot(gs,
 )
 
 # 2-D Scatter Plots with Back-Gating & Gates
-cyto_plot(gs,
+cyto_plot(gs[1:9],
   parent = "T Cells",
   alias = c("CD4 T Cells", "CD8 T Cells"),
   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
