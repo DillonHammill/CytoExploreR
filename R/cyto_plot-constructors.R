@@ -183,7 +183,7 @@
 
   # LABEL ARGUMENTS
   label_args <- args[names(args) %in% label_args]
-
+  
   # GATE & ASSOCIATED LABELS ---------------------------------------------------
 
   # GATES & LABELS
@@ -194,7 +194,7 @@
       do.call(
         "cyto_plot_gate",
         c(
-          list("channels" = NULL),
+          list("channels" = gate_args[["channels"]]),
           lapply(
             gate_args[!grepl("channels", names(gate_args))],
             `[[`, z
