@@ -2,34 +2,10 @@
 % Please edit documentation in R/cyto_plot_gating_scheme.R
 \name{cyto_plot_gating_scheme}
 \alias{cyto_plot_gating_scheme}
-\alias{cyto_plot_gating_scheme.GatingHierarchy}
 \alias{cyto_plot_gating_scheme.GatingSet}
+\alias{cyto_plot_gating_scheme.GatingHierarchy}
 \title{Plot Cytometry Gating Strategies}
 \usage{
-\method{cyto_plot_gating_scheme}{GatingHierarchy}(
-  x,
-  gatingTemplate = NULL,
-  back_gate = FALSE,
-  gate_track = FALSE,
-  show_all = FALSE,
-  header,
-  popup = FALSE,
-  layout,
-  point_col = NA,
-  label_text_size = 0.8,
-  gate_line_col = "red",
-  legend = TRUE,
-  legend_text,
-  legend_text_size = 1.2,
-  header_text_font = 2,
-  header_text_size = 1,
-  header_text_col = "black",
-  border_line_width,
-  border_line_col = "black",
-  title_text_col = "black",
-  ...
-)
-
 \method{cyto_plot_gating_scheme}{GatingSet}(
   x,
   gatingTemplate = NULL,
@@ -54,6 +30,30 @@
   title_text_col = "black",
   ...
 )
+
+\method{cyto_plot_gating_scheme}{GatingHierarchy}(
+  x,
+  gatingTemplate = NULL,
+  back_gate = FALSE,
+  gate_track = FALSE,
+  show_all = FALSE,
+  header,
+  popup = FALSE,
+  layout,
+  point_col = NA,
+  label_text_size = 0.8,
+  gate_line_col = "red",
+  legend = TRUE,
+  legend_text,
+  legend_text_size = 1.2,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  border_line_width,
+  border_line_col = "black",
+  title_text_col = "black",
+  ...
+)
 }
 \arguments{
 \item{x}{object of class
@@ -63,6 +63,10 @@
 \item{gatingTemplate}{name of the gatingTemplate csv file used to gate
 \code{x}. If not supplied the gating scheme will be obtained directly from
 the GatingSet.}
+
+\item{group_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to plot each sample
+separately.}
 
 \item{back_gate}{names of the population(s) to back-gate, set to \code{FALSE}
 by default to turn off back-gating. To back-gate all populations set this
