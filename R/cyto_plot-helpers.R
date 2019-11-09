@@ -272,7 +272,7 @@ cyto_plot_empty.flowFrame <- function(x,
       )
       # YLIM
       ymin <- as.numeric(unlist(strsplit(names(fr_dens)[1], "-"))[1])
-      ymax <- as.numeric(unlist(strsplit(names(fr_dens)[smp], " -"))[2])
+      ymax <- as.numeric(unlist(strsplit(names(fr_dens)[smp], "-"))[2])
       ylim <- c(ymin, ymax)
       # 2D PLOT
     } else if (length(channels) == 2) {
