@@ -96,15 +96,15 @@
 #' library(CytoExploreRData)
 #'
 #' # Construct an empty 2D plot with black background
-#' cyto_plot_empty(Activation[1],
+#' cyto_plot_empty(Activation[[32]],
 #'   channels = c("FSC-A", "SSC-A"),
 #'   border_fill = "black"
 #' )
 #'
 #' # Construct an empty 1D plot
-#' cyto_plot_empty(Activation[1],
+#' cyto_plot_empty(Activation[[32]],
 #'   channels = c("FSC-A"),
-#'   overlay = Activation[2:4]
+#'   overlay = Activation[1:2]
 #' )
 #' @rdname cyto_plot_empty
 #' @export
