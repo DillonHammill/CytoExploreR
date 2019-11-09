@@ -282,7 +282,7 @@ cyto_plot_empty.flowFrame <- function(x,
     # GATE COORDS
     if(!.all_na(gate)){
       # MIN & MAX GATE COORDS
-      gate_ycoords <- gate_coords[, channels[1]]
+      gate_ycoords <- gate_coords[, channels[2]]
       gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
       # GATE COORDS BELOW YMIN
       if(is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]){

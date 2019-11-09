@@ -413,7 +413,8 @@ cyto_plot.GatingSet <- function(x,
   if (.empty(alias)) {
     # 2D PLOT - BOTH CHANNELS MATCH
     if (length(channels) == 2) {
-      alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+      alias <- gt$alias[gt$dims == paste(channels, collapse = ",") |
+                          gt$dims == paste(rev(channels), collapse = ",")]
       # 1D PLOT - ONE CHANNEL MATCH
     } else if (length(channels) == 1) {
       ind <- lapply(gt$dims, function(z) {
@@ -849,7 +850,8 @@ cyto_plot.GatingHierarchy <- function(x,
   if (.empty(alias)) {
     # 2D PLOT - BOTH CHANNELS MATCH
     if (length(channels) == 2) {
-      alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
+      alias <- gt$alias[gt$dims == paste(channels, collapse = ",") |
+                          gt$dims == paste(rev(channels), collapse = ",")]
       # 1D PLOT - ONE CHANNEL MATCH
     } else if (length(channels) == 1) {
       ind <- lapply(gt$dims, function(z) {
