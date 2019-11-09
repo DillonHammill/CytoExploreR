@@ -213,9 +213,8 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   
   # Extract pData
   pd <- cyto_details(gh)
-  name_class <- class(pd$name)
   pd <- as_tibble(remove_rownames(pData(gh)))
-  class(pd$name) <- name_class # remove weird <I(chr)> class
+  pd$name <- as.factor(pd$name) # remove weird <I(chr)> class
   
   # Repeat row alias times - add stats as columns
   pd <- do.call(
