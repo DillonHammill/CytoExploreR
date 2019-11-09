@@ -87,7 +87,7 @@
 #' )
 #'
 #' # Gate-tracking
-#' cyto_plot_gating_scheme(gs[1:4],
+#' cyto_plot_gating_scheme(gs[1:2],
 #'   gate_track = TRUE
 #' )
 #'

@@ -30,11 +30,11 @@
 #' fs <- Activation
 #'
 #' # Apply compensation
-#' fs <- compensate(fs, fs[[32]]@description$SPILL)
+#' fs <- cyto_compensate(fs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
-#' fs <- transform(fs, trans)
+#' trans <- cyto_transformer_logicle(fs)
+#' fs <- cyto_transform(fs, trans)
 #'
 #' # Plot
 #' cyto_plot(fs[[32]],
