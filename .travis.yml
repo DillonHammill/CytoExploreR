@@ -31,18 +31,13 @@ r_packages:
   - methods
   - stats
   - utils
-  - graphics
-  - grDevices
-  - tools
   - magrittr
   - purrr
-  - parallel
   - tibble
   - tidyr
   - dplyr
   - robustbase
   - gtools
-  - visNetork
   - Rtsne
   - umap
   - rmarkdown
@@ -56,6 +51,7 @@ r_github_packages:
   - r-lib/testthat
   - r-lib/vdiffr
   - r-lib/pkgdown
+  - datastorm-open/visNetwork
   - rstudio/shinytest
   - DillonHammill/CytoExploreRData
   
