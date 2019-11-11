@@ -35,6 +35,16 @@ r_packages:
   - grDevices
   - tools
   - magrittr
+  - purrr
+  - parallel
+  - tibble
+  - tidyr
+  - dplyr
+  - robustbase
+  - gtools
+  - visNetork
+  - Rtsne
+  - umap
   - rmarkdown
   - robustbase
 
@@ -47,7 +57,7 @@ r_github_packages:
   - r-lib/vdiffr
   - r-lib/pkgdown
   - rstudio/shinytest
-  - DillonHammill/CytoRSuiteData
+  - DillonHammill/CytoExploreRData
   
 use_bioc: true
 
