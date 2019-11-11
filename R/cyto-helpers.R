@@ -100,7 +100,7 @@ cyto_load <- function(path = ".",
 #' @importFrom tools file_ext
 #'
 #' @examples
-#'
+#' \dontrun{
 #' # Load in CytoExploreRData to acces data
 #' library(CytoExploreRData)
 #'
@@ -116,6 +116,7 @@ cyto_load <- function(path = ".",
 #'
 #' # Experiment details have been updated
 #' cyto_details(gs)
+#' }
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -179,7 +180,7 @@ cyto_setup <- function(path = ".",
 #' @importFrom flowWorkspace pData
 #' 
 #' @examples 
-#' 
+#' \dontrun{
 #' # Load in CytoExploreRData to acces data
 #' library(CytoExploreRData)
 #'
@@ -188,6 +189,7 @@ cyto_setup <- function(path = ".",
 #' 
 #' # Experiment details
 #' cyto_details(fs)
+#' }
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'

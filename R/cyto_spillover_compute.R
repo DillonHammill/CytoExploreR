@@ -58,6 +58,7 @@
 #'   accordance with \code{spillover}.
 #'
 #' @examples
+#' \dontrun{
 #' library(CytoExploreRData)
 #'
 #' # Bypass directory check for external files
@@ -78,7 +79,7 @@
 #' )
 #'
 #' # Compute fluorescent spillover matrix
-#' spill <- spillover_compute(getData(gs, "Single Cells"),
+#' spill <- cyto_spillover_compute(getData(gs, "Single Cells"),
 #'   channel_match = cmfile,
 #'   spillover = "Example-spillover.csv"
 #' )
@@ -88,6 +89,7 @@
 #'
 #' # Return CytoExploreR_wd_check to default
 #' options("CytoExploreR_wd_check" = TRUE)
+#' }
 #' @importFrom flowCore each_col fsApply sampleNames flowSet Subset
 #' @importFrom flowWorkspace pData GatingSet
 #' @importFrom methods as

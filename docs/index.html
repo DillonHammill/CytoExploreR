@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Compensation, Gating &amp; Visualisation Toolkit for Analysis of Flow Cytometry Data • CytoRSuite</title>
+<title>Interactive Analysis of Cytometry Data • CytoExploreR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
@@ -13,15 +13,16 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Compensation, Gating &amp; Visualisation Toolkit for Analysis of Flow Cytometry Data">
-<meta property="og:description" content="An intuitive and interactive approach to flow cytometry analysis in R. 
-  CytoRSuite contains tools for every stage of the analysis pipeline including 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<script src="pkgdown.js"></script><meta property="og:title" content="Interactive Analysis of Cytometry Data">
+<meta property="og:description" content="An intuitive and interactive approach to cytometry analysis in R. 
+  CytoExploreR contains tools for every stage of the analysis pipeline including 
   user-guided automatic compensation, realtime editing of spillover matrices, 
-  manual gate drawing, gate editing, visualisation of all existing flow cytometry 
+  manual gate drawing, gate editing, visualisation of all existing cytometry 
   objects and export of population level statistics for further analysis. Furthermore,
-  through linking to openCyto, CytoRSuite provides the tools necessary to easily combine 
+  through linking to openCyto, CytoExploreR provides the tools necessary to easily combine 
   manual and automated gating approaches in R.">
 <meta property="og:image" content="/logo.png">
 <meta name="twitter:card" content="summary">
@@ -31,7 +32,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-article">
+    <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -42,7 +43,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">CytoRSuite</a>
+        <a class="navbar-link" href="index.html">CytoExploreR</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
@@ -51,39 +52,12 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
-</li>
-<li>
-  <a href="articles/CytoRSuite.html">Get started</a>
 </li>
 <li>
   <a href="reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="articles/CytoRSuite-Compensation.html">CytoRSuite: Compensation of Fluorescent Spillover</a>
-    </li>
-    <li>
-      <a href="articles/CytoRSuite-Gate-Manipulation.html">CytoRSuite: Gate Manipulation</a>
-    </li>
-    <li>
-      <a href="articles/CytoRSuite-Gating-Functions.html">CytoRSuite: Gating Functions</a>
-    </li>
-    <li>
-      <a href="articles/CytoRSuite-Manual-Automated-Gating.html">CytoRSuite: Manual and Automated Gating</a>
-    </li>
-    <li>
-      <a href="articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation Using cyto_plot</a>
-    </li>
-  </ul>
 </li>
 <li>
   <a href="news/index.html">Changelog</a>
@@ -91,8 +65,8 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/DillonHammill/CytoRSuite">
-    <span class="fa fa-github fa-lg"></span>
+  <a href="https://github.com/DillonHammill/CytoExploreR">
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -105,72 +79,97 @@
 <!--/.navbar -->
 
       
-      </header><div class="row">
-  <div class="col-md-9 contents">
-    
 
-    
-    
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-<div id="cytorsuite" class="section level1">
+      </header><div class="row">
+  <div class="contents col-md-9">
+
+<div id="cytoexplorer-" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#cytorsuite" class="anchor"></a>CytoRSuite <img src="reference/figures/logo.png" align="right" alt="" width="130">
+<a href="#cytoexplorer-" class="anchor"></a>CytoExploreR <img src="reference/figures/logo.png" align="right" alt="" width="130">
 </h1></div>
 
-<p><strong>CytoRSuite</strong> is designed to provide an interactive interface for the analysis of flow cytometry data in R. If you are new to <strong>CytoRSuite</strong> visit <a href="https://dillonhammill.github.io/CytoRSuite/" class="uri">https://dillonhammill.github.io/CytoRSuite/</a> to get started.</p>
+<p><strong>CytoExploreR</strong> is comprehensive collection of exploratory cytometry analysis tools under a unified interactive framework. If you are new to <strong>CytoExploreR</strong> visit <a href="https://dillonhammill.github.io/CytoExploreR/" class="uri">https://dillonhammill.github.io/CytoExploreR/</a> to get started.</p>
 </div>
 <div id="installation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h1>
-<p><strong>CytoRSuite</strong> is built on the existing flow cytometry infrastructure for R developed by the <a href="https://github.com/RGLab">RGLab</a>. In order to properly install <strong>CytoRSuite</strong> and its dependencies the following platform-specific tools are required:</p>
-<div id="windows-and-linux" class="section level2">
+<div id="r" class="section level2">
 <h2 class="hasAnchor">
-<a href="#windows-and-linux" class="anchor"></a>Windows and Linux</h2>
-<p>flowWorkspace requires additional C++ libraries to build from source using Rtools for windows users. Windows and Linux users should follow these <a href="https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL">instructions</a> before proceeding.</p>
+<a href="#r" class="anchor"></a>R</h2>
+<p><strong>CytoExploreR</strong> has a minimal requirement for R 3.5.0. If necessary, newer versions of R can be installed by clicking on your operating system in <a href="https://cran.r-project.org/bin/">this link</a> and following the installation instructions.</p>
+</div>
+<div id="rstudio" class="section level2">
+<h2 class="hasAnchor">
+<a href="#rstudio" class="anchor"></a>RStudio</h2>
+<p>For the best user experience it is recommended that RStudio be installed as well. RStudio Desktop is free to download and can installed from the <a href="https://rstudio.com/products/rstudio/#rstudio-desktop">RStudio website</a>.</p>
+<p>After successfully installing R and RStudio, the following additional platform-specific tools are required:</p>
 </div>
 <div id="mac" class="section level2">
 <h2 class="hasAnchor">
 <a href="#mac" class="anchor"></a>Mac</h2>
-<p>Mac users will need to ensure that <strong>XQuartz</strong> is in their list of installed Applications. <strong>XQuartz</strong> is commonly found in the utilities folder. If <strong>XQuartz</strong> is missing from your list of applications it can be installed from this <a href="https://www.xquartz.org/">link</a>. Restart your computer following installation.</p>
+<ul>
+<li>Install Xcode developer tools from the <a href="https://apps.apple.com/au/app/xcode/id497799835?mt=12">App Store</a>. Restart your computer.</li>
+<li>Install command line tools by opening the terminal and running xcode-select –install</li>
+<li>Install macOS R toolchain by installing clang7 and gfortran <a href="https://cran.r-project.org/bin/macosx/tools/">here</a>
+</li>
+<li>Check if XQuartz is listed in your installed Applications, it may be hiding in the utilities folder. If XQuartz is missing on your computer, it can be installed from the <a href="https://www.xquartz.org/">XQuartz</a> website.</li>
+<li>Restart your computer so all these changes will take effect.</li>
+</ul>
 </div>
-<div id="flowcore-flowworkspace-opencyto" class="section level2">
+<div id="windows" class="section level2">
 <h2 class="hasAnchor">
-<a href="#flowcore-flowworkspace-opencyto" class="anchor"></a>flowCore, flowWorkspace &amp; openCyto</h2>
-<p>Once these tools are installed, users can proceed to installing the latest versions of <a href="https://github.com/RGLab/flowCore">flowCore</a>, <a href="https://github.com/RGLab/flowWorkspace">flowWorkspace</a> and <a href="https://github.com/RGLab/openCyto">openCyto</a> from Bioconductor.</p>
+<a href="#windows" class="anchor"></a>Windows</h2>
+<ul>
+<li>Install the appropriate <a href="https://cran.r-project.org/bin/windows/Rtools/">Rtools</a> for your R installation.</li>
+<li>Follow these <a href="https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL">instructions</a> to install and setup the additional C++ libraries required to successfully build flowWorkspace.</li>
+<li>Restart your computer.</li>
+</ul>
+<p>Now that all the setup is complete, let’s install all the necssary dependencies of <strong>CytoExploreR</strong>:</p>
+</div>
+<div id="flowcore-flowworkspace--opencyto" class="section level2">
+<h2 class="hasAnchor">
+<a href="#flowcore-flowworkspace--opencyto" class="anchor"></a>flowCore, flowWorkspace &amp; openCyto</h2>
+<p>From within RStudio, run the following in the console to install the latest versions of<a href="https://github.com/RGLab/flowCore">flowCore</a>, <a href="https://github.com/RGLab/flowWorkspace">flowWorkspace</a> and <a href="https://github.com/RGLab/openCyto">openCyto</a> from Bioconductor.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># Bioconductor</span></a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"BiocManager"</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"BiocManager"</span>)</a>
 <a class="sourceLine" id="cb1-3" title="3"><span class="co"># Install flowCore, flowWorkspace and openCyto</span></a>
-<a class="sourceLine" id="cb1-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(BiocManager)</a>
-<a class="sourceLine" id="cb1-5" title="5"><span class="kw">install</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"flowCore"</span>, <span class="st">"flowWorkspace"</span>, <span class="st">"openCyto"</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb1-4" title="4"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(BiocManager)</a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="kw">install</span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"flowCore"</span>, <span class="st">"flowWorkspace"</span>, <span class="st">"openCyto"</span>))</a></code></pre></div>
+<p>Now that all the dependencies are installed, let’s move on to installing <strong>CytoExploreR</strong>:</p>
 </div>
-<div id="cytorsuite-1" class="section level2">
+<div id="cytoexplorer" class="section level2">
 <h2 class="hasAnchor">
-<a href="#cytorsuite-1" class="anchor"></a>CytoRSuite</h2>
-<p>Once these packages are successfully installed, users will need to install <strong>CytoRSuiteData</strong> which contains example datasets which will be used to demonstrate the features of <strong>CytoRSuite</strong>. <strong>CytoRSuite</strong> can then be installed from GitHub.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co"># CytoRSuiteData development version on GitHub</span></a>
-<a class="sourceLine" id="cb2-2" title="2">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"DillonHammill/CytoRSuiteData"</span>)</a>
-<a class="sourceLine" id="cb2-3" title="3"><span class="co"># CytoRSuite development version on GitHub</span></a>
-<a class="sourceLine" id="cb2-4" title="4">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"DillonHammill/CytoRSuite"</span>, <span class="dt">build_vignettes =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<a href="#cytoexplorer" class="anchor"></a>CytoExploreR</h2>
+<p>To successfully install <strong>CytoExploreR</strong> users will first need to install <strong>CytoExploreRData</strong> which contains example datasets that will be used within <strong>CytoExploreR</strong> to demonstrate key features.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co"># CytoExploreRData development version on GitHub</span></a>
+<a class="sourceLine" id="cb2-2" title="2">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"DillonHammill/CytoExploreRData"</span>)</a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co"># CytoExploreR development version on GitHub</span></a>
+<a class="sourceLine" id="cb2-4" title="4">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"DillonHammill/CytoExploreR"</span>)</a></code></pre></div>
 </div>
 </div>
 <div id="overview" class="section level1">
 <h1 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h1>
-<p><strong>CytoRSuite</strong> provides an interactive interface for analysis of flow cytometry data. Some key features include:</p>
+<p><strong>CytoExploreR</strong> provides an interactive interface for analysis of flow cytometry data. Some key features include:</p>
 <ul>
-<li>user guided automatic compensation using <code>spillover_compute</code>
+<li>user guided automatic compensation using <code>cyto_spillover_compute</code>
 </li>
-<li>interactively modify spillover matrices using <code>spillover_edit</code>
+<li>interactively modify spillover matrices using <code>cyto_spillover_edit</code>
+</li>
+<li>compute spillover spreading matrices with <code>cyto_spillover_spread_compute</code>
 </li>
 <li>visualise compensation in all channels using <code>cyto_plot_compensation</code>
 </li>
 <li>easily associate experimental details with each file using <code>cyto_annotate</code>
 </li>
-<li>manual gate drawing using <code>gate_draw</code>
+<li>customisable data transformations using <code>cyto_transform</code> which includes support for log, arcsinh, logicle and biexponential transformations</li>
+<li>manual gate drawing using <code>cyto_gate_draw</code>
 </li>
-<li>ability to edit drawn gates using <code>gate_edit</code>
+<li>ability to edit drawn gates using <code>cyto_gate_edit</code>
 </li>
-<li>remove gates using <code>gate_remove</code>
+<li>remove gates using <code>cyto_gate_remove</code>
+</li>
+<li>rename gates using <code>cyto_gate_rename</code>
 </li>
 <li>gate saving directly to an openCyto <code>gatingTemplate</code> for future use</li>
 <li>support for using both manual and automated gating approaches through linking to <code>openCyto</code>
@@ -179,161 +178,55 @@
 </li>
 <li>visualisation of complete gating strategies with back-gating and/or gate tracking using <code>cyto_plot_gating_scheme</code>
 </li>
+<li>visualisation of gating trees using <code>cyto_plot_gating_tree</code>
+</li>
 <li>visualisation of marker expression profiles in all channels using <code>cyto_plot_profile</code>
 </li>
-<li>export population level statistics using <code>cyto_stats_compute</code>
+<li>visualisation of populations in all possible bivariate plots using <code>cyto_plot_explore</code>
+</li>
+<li>export population level statistics tidyverse style using <code>cyto_stats_compute</code>
 </li>
 </ul>
 </div>
 <div id="usage" class="section level1">
 <h1 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h1>
-<p>The full details of how <strong>CytoRSuite</strong> works will be tackled individually in the package vignettes, but a succinct usage outline is described below:</p>
-<ol style="list-style-type: decimal">
-<li>
-<p>Compensation of fluorescent spillover</p>
-<p>1.1 Load compensation controls into a <code>ncdfFlowSet</code></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuite)</a>
-<a class="sourceLine" id="cb3-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(CytoRSuiteData)</a>
-<a class="sourceLine" id="cb3-3" title="3"></a>
-<a class="sourceLine" id="cb3-4" title="4"><span class="co"># Save .fcs files to folder "Compensation Controls" in working directory</span></a>
-<a class="sourceLine" id="cb3-5" title="5">files &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list.files">list.files</a></span>(<span class="dt">path =</span> <span class="st">"Compensation Controls"</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-6" title="6">fs &lt;-<span class="st"> </span><span class="kw">read.ncdfFlowSet</span>(<span class="dt">files =</span> files)</a></code></pre></div>
-<p>1.2 Load compensation controls into <code>GatingSet</code> for gating</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># Add flowSet to GatingSet</span></a>
-<a class="sourceLine" id="cb4-2" title="2">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a></code></pre></div>
-<p>1.3 Gate Single Cells using <code>gate_draw</code></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co"># Gate Cells</span></a>
-<a class="sourceLine" id="cb5-2" title="2"><span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs, </a>
-<a class="sourceLine" id="cb5-3" title="3">          <span class="dt">parent =</span> <span class="st">"root"</span>,</a>
-<a class="sourceLine" id="cb5-4" title="4">          <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb5-5" title="5">          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),</a>
-<a class="sourceLine" id="cb5-6" title="6">          <span class="dt">type =</span> <span class="st">"polygon"</span>,</a>
-<a class="sourceLine" id="cb5-7" title="7">          <span class="dt">gatingTemplate =</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</a>
-<a class="sourceLine" id="cb5-8" title="8"></a>
-<a class="sourceLine" id="cb5-9" title="9"><span class="co"># Gate Single Cells</span></a>
-<a class="sourceLine" id="cb5-10" title="10">    <span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs, </a>
-<a class="sourceLine" id="cb5-11" title="11">          <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb5-12" title="12">          <span class="dt">alias =</span> <span class="st">"Single Cells"</span>,</a>
-<a class="sourceLine" id="cb5-13" title="13">          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span>),</a>
-<a class="sourceLine" id="cb5-14" title="14">          <span class="dt">type =</span> <span class="st">"polygon"</span>,</a>
-<a class="sourceLine" id="cb5-15" title="15">          <span class="dt">gatingTemplate =</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</a></code></pre></div>
-<p><img src="reference/figures/README-Compensation-gates.png" width="100%" height="100%" style="display: block; margin: auto;"></p>
-<p>1.4 Compute fluorescent spillover matrix using <code>spillover_compute</code></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw"><a href="reference/spillover_compute.html">spillover_compute</a></span>(gs, </a>
-<a class="sourceLine" id="cb6-2" title="2">                  <span class="dt">parent =</span> <span class="st">"Single Cells"</span>)</a></code></pre></div>
-<p>1.5 Interactively edit computed spillover matrix using <code>spillover_edit</code></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw"><a href="reference/spillover_edit.html">spillover_edit</a></span>(gs, </a>
-<a class="sourceLine" id="cb7-2" title="2">               <span class="dt">parent =</span> <span class="st">"Single Cells"</span>, </a>
-<a class="sourceLine" id="cb7-3" title="3">               <span class="dt">channel_match =</span> <span class="st">"Compensation-Channels.csv"</span>, </a>
-<a class="sourceLine" id="cb7-4" title="4">               <span class="dt">spillover =</span> <span class="st">"Spillover-Matrix.csv"</span>)</a></code></pre></div>
-<p><img src="reference/figures/README-spillover_edit.png" width="100%" height="100%" style="display: block; margin: auto;"></p>
-</li>
-<li>
-<p>Analyse samples</p>
-<p>2.1 Load samples into a <code>ncdfFlowSet</code></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co"># Save samples to folder "Samples" in working directory</span></a>
-<a class="sourceLine" id="cb8-2" title="2">files &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list.files">list.files</a></span>(<span class="dt">path =</span> <span class="st">"Samples"</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb8-3" title="3">fs &lt;-<span class="st"> </span><span class="kw">read.ncdfFlowSet</span>(<span class="dt">files =</span> files)</a></code></pre></div>
-<p>2.2 Annotate samples with markers using <code>cyto_markers</code></p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw"><a href="reference/cyto_markers.html">cyto_markers</a></span>(fs)</a></code></pre></div>
-<p><img src="reference/figures/README-cyto_markers.png" width="40%" height="40%" style="display: block; margin: auto;"></p>
-<p>2.3 Annotate samples with experimental details using <code>cyto_annotate</code></p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw"><a href="reference/cyto_annotate.html">cyto_annotate</a></span>(fs)</a></code></pre></div>
-<p><img src="reference/figures/README-cyto_annotate.png" width="30%" height="30%" style="display: block; margin: auto;"></p>
-<p>2.4 Add samples to GatingSet</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">gs &lt;-<span class="st"> </span><span class="kw">GatingSet</span>(fs)</a></code></pre></div>
-<p>2.4 Apply fluorescent compensation</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="co"># Load in spillover matrix</span></a>
-<a class="sourceLine" id="cb12-2" title="2">spill &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/read.table">read.csv</a></span>(<span class="st">"Spillover-Matrix.csv"</span>, </a>
-<a class="sourceLine" id="cb12-3" title="3">                  <span class="dt">header =</span> <span class="ot">TRUE</span>, </a>
-<a class="sourceLine" id="cb12-4" title="4">                  <span class="dt">row.names =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb12-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(spill) &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">rownames</a></span>(spill)</a>
-<a class="sourceLine" id="cb12-6" title="6"></a>
-<a class="sourceLine" id="cb12-7" title="7"><span class="co"># Apply compensation to samples</span></a>
-<a class="sourceLine" id="cb12-8" title="8">gs &lt;-<span class="st"> </span><span class="kw">compensate</span>(gs, spill)</a></code></pre></div>
-<p>2.5 Transform fluorescent channels for gating</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co"># Fluorescent channels</span></a>
-<a class="sourceLine" id="cb13-2" title="2">chans &lt;-<span class="st"> </span><span class="kw"><a href="reference/cyto_fluor_channels.html">cyto_fluor_channels</a></span>(gs)</a>
-<a class="sourceLine" id="cb13-3" title="3"></a>
-<a class="sourceLine" id="cb13-4" title="4"><span class="co"># Logicle transformation</span></a>
-<a class="sourceLine" id="cb13-5" title="5">trans &lt;-<span class="st"> </span><span class="kw">estimateLogicle</span>(gs[[<span class="dv">4</span>]], chans)</a>
-<a class="sourceLine" id="cb13-6" title="6">gs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/transform">transform</a></span>(gs, trans)</a></code></pre></div>
-<p>2.6 Build gating scheme using <code>gate_draw</code></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="co"># Cells</span></a>
-<a class="sourceLine" id="cb14-2" title="2"><span class="kw"><a href="reference/gate_draw.html">gate_draw</a></span>(gs,</a>
-<a class="sourceLine" id="cb14-3" title="3">          <span class="dt">parent =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb14-4" title="4">          <span class="dt">alias =</span> <span class="st">"Cells"</span>,</a>
-<a class="sourceLine" id="cb14-5" title="5">          <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),</a>
-<a class="sourceLine" id="cb14-6" title="6">          <span class="dt">gatingTemplate =</span> <span class="st">"Example-gatingTemplate.csv"</span>)</a>
-<a class="sourceLine" id="cb14-7" title="7"></a>
-<a class="sourceLine" id="cb14-8" title="8"><span class="co"># Copy above &amp; edit to add new population(s)</span></a>
-<a class="sourceLine" id="cb14-9" title="9"><span class="co"># Repeat until gating scheme is complete</span></a></code></pre></div>
-</li>
-</ol>
-<p><img src="reference/figures/README-gate_draw.gif" width="60%" height="60%" style="display: block; margin: auto;"></p>
-<ol start="3" style="list-style-type: decimal">
-<li>Visualise gating schemes using <code>cyto_plot_gating_scheme</code>
-</li>
-</ol>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw"><a href="reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span>(gs[[<span class="dv">4</span>]], <span class="dt">back_gate =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
-<p><img src="reference/figures/README-cyto_plot_gating_scheme.png" width="100%" height="100%" style="display: block; margin: auto;"></p>
-<ol start="4" style="list-style-type: decimal">
-<li>Export population-level statistics using <code>cyto_stats_compute</code>
-</li>
-</ol>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw"><a href="reference/cyto_stats_compute.html">cyto_stats_compute</a></span>(gs,</a>
-<a class="sourceLine" id="cb16-2" title="2">                   <span class="dt">alias =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD4 T Cells"</span>,<span class="st">"CD8 T Cells"</span>),</a>
-<a class="sourceLine" id="cb16-3" title="3">                   <span class="dt">channels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CD44"</span>,<span class="st">"CD69"</span>),</a>
-<a class="sourceLine" id="cb16-4" title="4">                   <span class="dt">stat =</span> <span class="st">"median"</span>)</a></code></pre></div>
-<pre><code>#&gt; $`CD4 T Cells`
-#&gt;                 OVAConc Alexa Fluor 647-A   7-AAD-A
-#&gt; Activation1.fcs   0.000          675.1999  606.7077
-#&gt; Activation2.fcs   0.005          720.3611  656.8873
-#&gt; Activation3.fcs   0.050          971.4868  744.3725
-#&gt; Activation4.fcs   0.500         1503.4010 1233.6546
-#&gt; 
-#&gt; $`CD8 T Cells`
-#&gt;                 OVAConc Alexa Fluor 647-A  7-AAD-A
-#&gt; Activation1.fcs   0.000          414.2267 260.0531
-#&gt; Activation2.fcs   0.005          410.1949 248.5102
-#&gt; Activation3.fcs   0.050          454.0508 312.6521
-#&gt; Activation4.fcs   0.500          552.0260 382.5721</code></pre>
 </div>
 <div id="news" class="section level1">
 <h1 class="hasAnchor">
 <a href="#news" class="anchor"></a>News</h1>
-<p>There is a Changelog for the GitHub <code>master</code> branch which will reflect any updates made to improve the stability, usability or plenitude of the package. Users should refer to the <a href="https://dillonhammill.github.io/CytoRSuite/news/index.html">Changelog</a> before installing new versions of the package.</p>
+<p>There is a Changelog for the GitHub <code>master</code> branch which will reflect any updates made to improve the stability, usability or plenitude of the package. Users should refer to the <a href="https://dillonhammill.github.io/CytoExploreR/news/index.html">Changelog</a> before installing new versions of the package.</p>
 </div>
 <div id="credits" class="section level1">
 <h1 class="hasAnchor">
 <a href="#credits" class="anchor"></a>Credits</h1>
-<p><strong>CytoRSuite</strong> would not be possible without the existing flow cytometry infrastructure developed by the RGLab. <strong>CytoRSuite</strong> started out as simple plugin for openCyto to facilitate gate drawing but has evolved into a fully-fledged flow cytometry analysis package thanks to the support and guidance of members of the RGLab. Please take the time to check out their work on <a href="https://github.com/RGLab">GitHub</a>.</p>
+<p><strong>CytoExploreR</strong> would not be possible without the existing flow cytometry infrastructure developed by the RGLab. <strong>CytoExploreR</strong> started out as simple plugin for openCyto to facilitate gate drawing but has evolved into a fully-fledged flow cytometry analysis package thanks to the support and guidance of members of the RGLab. Please take the time to check out their work on <a href="https://github.com/RGLab">GitHub</a>.</p>
 </div>
 <div id="development" class="section level1">
 <h1 class="hasAnchor">
 <a href="#development" class="anchor"></a>Development</h1>
-<p><strong>CytoRSuite</strong> is a maturing package which will continue to be sculpted by the feedback and feature requests of users. The GitHub <code>master</code> branch will always contain the most stable build of the package. New features and updates will be made to a separate branch and merged to the <code>master</code> branch when stable and tested. The <a href="https://dillonhammill.github.io/CytoRSuite/news/index.html">Changelog</a> will reflect any changes made to the <code>master</code> branch.</p>
+<p><strong>CytoExploreR</strong> is a maturing package which will continue to be sculpted by the feedback and feature requests of users. The GitHub <code>master</code> branch will always contain the most stable build of the package. New features and updates will be made to a separate branch and merged to the <code>master</code> branch when stable and tested. The <a href="https://dillonhammill.github.io/CytoExploreR/news/index.html">Changelog</a> will reflect any changes made to the <code>master</code> branch.</p>
 </div>
 <div id="getting-help" class="section level1">
 <h1 class="hasAnchor">
 <a href="#getting-help" class="anchor"></a>Getting help</h1>
-<p>The <a href="https://dillonhammill.github.io/CytoRSuite/articles/CytoRSuite.html">Get Started</a> and <a href="https://dillonhammill.github.io/CytoRSuite/reference/index.html">Reference</a> sections on the <strong>CytoRSuite</strong> website are your first port of call if you require any help. For more detailed workflows refer the <strong>Articles</strong> tab. If you encounter any issues with the functioning of the package refer to these <a href="https://github.com/DillonHammill/CytoRSuite/issues">issues</a> to see if the problem has been identified and resolved. Feel free to post new issues on the GitHub page if they have not already been addressed.</p>
+<p>The <a href="https://dillonhammill.github.io/CytoExploreR/articles/CytoExploreR.html">Get Started</a> and <a href="https://dillonhammill.github.io/CytoExploreR/reference/index.html">Reference</a> sections on the <strong>CytoExploreR</strong> website are your first port of call if you require any help. For more detailed workflows refer the <strong>Articles</strong> tab. If you encounter any issues with the functioning of the package refer to these <a href="https://github.com/DillonHammill/CytoExploreR/issues">issues</a> to see if the problem has been identified and resolved. Feel free to post new issues on the GitHub page if they have not already been addressed.</p>
 </div>
 <div id="code-of-conduct" class="section level1">
 <h1 class="hasAnchor">
 <a href="#code-of-conduct" class="anchor"></a>Code of conduct</h1>
-<p>Please note that the <strong>CytoRSuite</strong> project is released with a <a href="CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Please note that the <strong>CytoExploreR</strong> project is released with a <a href="CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/DillonHammill/CytoRSuite">https://​github.com/​DillonHammill/​CytoRSuite</a>
+<li>Browse source code at <br><a href="https://github.com/DillonHammill/CytoExploreR">https://​github.com/​DillonHammill/​CytoExploreR</a>
 </li>
-<li>Report a bug at <br><a href="https://github.com/DillonHammill/CytoRSuite/issues">https://​github.com/​DillonHammill/​CytoRSuite/​issues</a>
+<li>Report a bug at <br><a href="https://github.com/DillonHammill/CytoExploreR/issues">https://​github.com/​DillonHammill/​CytoExploreR/​issues</a>
 </li>
 </ul>
 </div>
@@ -341,6 +234,12 @@
 <h2>License</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.r-project.org/Licenses/GPL-2">GPL-2</a></li>
+</ul>
+</div>
+<div class="community">
+<h2>Community</h2>
+<ul class="list-unstyled">
+<li><a href="CODE_OF_CONDUCT.html">Code of conduct</a></li>
 </ul>
 </div>
 <div class="developers">
@@ -351,19 +250,18 @@
 </ul>
 </div>
 
-      <div class="dev-status">
+  <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.repostatus.org/#active"><img src="https://www.repostatus.org/badges/latest/active.svg" alt="Project Status: Active – The project has reached a stable, usable state and is being actively developed."></a></li>
-<li><a href="https://travis-ci.org/DillonHammill/CytoRSuite"><img src="https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master" alt="Travis build status"></a></li>
-<li><a href="https://codecov.io/github/DillonHammill/CytoRSuite?branch=master"><img src="https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
+<li><a href="https://travis-ci.org/DillonHammill/CytoExploreR"><img src="https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://codecov.io/github/DillonHammill/CytoExploreR?branch=master"><img src="https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
 <li><a href="https://www.tidyverse.org/lifecycle/#maturing"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="lifecycle"></a></li>
-<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2019--03--30-yellowgreen.svg" alt="Last-changedate"></a></li>
+<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2019--11--09-yellowgreen.svg" alt="Last-changedate"></a></li>
 <li><a href="https://github.com/ropensci/software-review/issues/281"><img src="https://badges.ropensci.org/281_status.svg"></a></li>
 </ul>
 </div>
 </div>
-
 </div>
 
 
@@ -372,12 +270,14 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

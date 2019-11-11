@@ -159,14 +159,6 @@ cyto_plot_label(getData(gs, "CD4 T Cells")[[32]],
   label_text_y = 50
 )
 
-# Label - no statistic
-cyto_plot_label(
-  label_text = "Activated \\n Cells",
-  label_text_x = 3,
-  label_text_y = 25,
-  label_fill = "red"
-)
-
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

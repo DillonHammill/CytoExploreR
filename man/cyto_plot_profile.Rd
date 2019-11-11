@@ -128,12 +128,12 @@ gt <- Activation_gatingTemplate
 gt_gating(gt, gs)
 
 # Plot expression profile of T Cells in all channels
-cyto_plot_profile(gs,
+cyto_plot_profile(gs[1:9],
   parent = "T Cells"
 )
 
 # Group samples by Treatment & select highest OVAConc
- cyto_plot_profile(gs,
+ cyto_plot_profile(gs[1:9],
   parent = "CD4 T Cells",
   group_by = "Treatment",
   select = list("OVAConc" = 0.5),

@@ -12,7 +12,7 @@ Revert unwanted cyto_plot_save call
 \examples{
 
 # Unwanted cyto_plot_save call
-cyto_plot_save()
+cyto_plot_save("Mistake.png")
 
 # Revert unwanted cyto_plot_save call
 cyto_plot_save_reset()

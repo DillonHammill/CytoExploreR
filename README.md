@@ -11,40 +11,66 @@ status](https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master)](htt
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--10--10-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2019--11--09-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
-**CytoExploreR** is designed to provide an interactive interface for the
-analysis of cytometry data in R. If you are new to **CytoExploreR**
-visit <https://dillonhammill.github.io/CytoExploreR/> to get started.
+**CytoExploreR** is comprehensive collection of exploratory cytometry
+analysis tools under a unified interactive framework. If you are new to
+**CytoExploreR** visit <https://dillonhammill.github.io/CytoExploreR/>
+to get started.
 
 # Installation
 
-**CytoExploreR** is built on the existing flow cytometry infrastructure
-for R developed by the [RGLab](https://github.com/RGLab). In order to
-properly install **CytoExploreR** and its dependencies the following
+## R
+
+**CytoExploreR** has a minimal requirement for R 3.5.0. If necessary,
+newer versions of R can be installed by clicking on your operating
+system in [this link](https://cran.r-project.org/bin/) and following the
+installation instructions.
+
+## RStudio
+
+For the best user experience it is recommended that RStudio be installed
+as well. RStudio Desktop is free to download and can installed from the
+[RStudio
+website](https://rstudio.com/products/rstudio/#rstudio-desktop).
+
+After successfully installing R and RStudio, the following additional
 platform-specific tools are required:
-
-## Windows and Linux
-
-flowWorkspace requires additional C++ libraries to build from source
-using Rtools for windows users. Windows and Linux users should follow
-these
-[instructions](https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL)
-before proceeding.
 
 ## Mac
 
-Mac users will need to ensure that **XQuartz** is in their list of
-installed Applications. **XQuartz** is commonly found in the utilities
-folder. If **XQuartz** is missing from your list of applications it can
-be installed from this [link](https://www.xquartz.org/). Restart your
-computer following installation.
+  - Install Xcode developer tools from the [App
+    Store](https://apps.apple.com/au/app/xcode/id497799835?mt=12).
+    Restart your computer.
+  - Install command line tools by opening the terminal and running
+    xcode-select –install
+  - Install macOS R toolchain by installing clang7 and gfortran
+    [here](https://cran.r-project.org/bin/macosx/tools/)
+  - Check if XQuartz is listed in your installed Applications, it may be
+    hiding in the utilities folder. If XQuartz is missing on your
+    computer, it can be installed from the
+    [XQuartz](https://www.xquartz.org/) website.
+  - Restart your computer so all these changes will take effect.
+
+## Windows
+
+  - Install the appropriate
+    [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for your R
+    installation.
+  - Follow these
+    [instructions](https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL)
+    to install and setup the additional C++ libraries required to
+    successfully build flowWorkspace.
+  - Restart your computer.
+
+Now that all the setup is complete, let’s install all the necssary
+dependencies of **CytoExploreR**:
 
 ## flowCore, flowWorkspace & openCyto
 
-Once these tools are installed, users can proceed to installing the
-latest versions of [flowCore](https://github.com/RGLab/flowCore),
+From within RStudio, run the following in the console to install the
+latest versions of[flowCore](https://github.com/RGLab/flowCore),
 [flowWorkspace](https://github.com/RGLab/flowWorkspace) and
 [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
 
@@ -56,18 +82,20 @@ library(BiocManager)
 install(c("flowCore", "flowWorkspace", "openCyto"))
 ```
 
+Now that all the dependencies are installed, let’s move on to installing
+**CytoExploreR**:
+
 ## CytoExploreR
 
-Once these packages are successfully installed, users will need to
-install **CytoExploreRData** which contains example datasets which will
-be used to demonstrate the features of **CytoExploreR**.
-**CytoExploreR** can then be installed from GitHub.
+To successfully install **CytoExploreR** users will first need to
+install **CytoExploreRData** which contains example datasets that will
+be used within **CytoExploreR** to demonstrate key features.
 
 ``` r
 # CytoExploreRData development version on GitHub
 devtools::install_github("DillonHammill/CytoExploreRData")
 # CytoExploreR development version on GitHub
-devtools::install_github("DillonHammill/CytoExploreR", build_vignettes = TRUE)
+devtools::install_github("DillonHammill/CytoExploreR")
 ```
 
 # Overview
@@ -84,7 +112,7 @@ cytometry data. Some key features include:
   - easily associate experimental details with each file using
     `cyto_annotate`
   - customisable data transformations using `cyto_transform` which
-    includes support for log, arcsinh, logical and biexponential
+    includes support for log, arcsinh, logicle and biexponential
     transformations
   - manual gate drawing using `cyto_gate_draw`
   - ability to edit drawn gates using `cyto_gate_edit`
@@ -106,168 +134,6 @@ cytometry data. Some key features include:
     `cyto_stats_compute`
 
 # Usage
-
-The full details of how **CytoExploreR** works will be tackled
-individually in the package vignettes, but a succinct usage outline is
-described below:
-
-1.  Compensation of fluorescent spillover
-    
-    1.1 Load compensation controls into a `ncdfFlowSet`
-    
-    ``` r
-    library(CytoExploreR)
-    library(CytoExploreRData)
-    
-    # Save .fcs files to folder "Compensation Controls" in working directory
-    files <- list.files(path = "Compensation Controls", full.names = TRUE)
-    fs <- read.ncdfFlowSet(files = files)
-    ```
-    
-    1.2 Load compensation controls into `GatingSet` for gating
-    
-    ``` r
-    # Add flowSet to GatingSet
-    gs <- GatingSet(fs)
-    ```
-    
-    1.3 Gate Single Cells using `cyto_gate_draw`
-    
-    ``` r
-    # Gate Cells
-    cyto_gate_draw(gs, 
-              parent = "root",
-              alias = "Cells",
-              channels = c("FSC-A","SSC-A"),
-              type = "polygon",
-              gatingTemplate = "Compensation-gatingTemplate.csv")
-    
-    # Gate Single Cells
-        cyto_gate_draw(gs, 
-              parent = "Cells",
-              alias = "Single Cells",
-              channels = c("FSC-A","FSC-H"),
-              type = "polygon",
-              gatingTemplate = "Compensation-gatingTemplate.csv")
-    ```
-    
-    <img src="man/figures/README-Compensation-gates.png" width="100%" height="100%" style="display: block; margin: auto;" />
-    
-    1.4 Compute fluorescent spillover matrix using
-    `cyto_spillover_compute`
-    
-    ``` r
-    cyto_spillover_compute(gs, 
-                      parent = "Single Cells")
-    ```
-    
-    1.5 Interactively edit computed spillover matrix using
-    `cyto_spillover_edit`
-    
-    ``` r
-    cyto_spillover_edit(gs, 
-                   parent = "Single Cells", 
-                   channel_match = "Compensation-Channels.csv", 
-                   spillover = "Spillover-Matrix.csv")
-    ```
-    
-    <img src="man/figures/README-spillover_edit.png" width="100%" height="100%" style="display: block; margin: auto;" />
-
-2.  Analyse samples
-    
-    2.1 Load samples into a `ncdfFlowSet`
-    
-    ``` r
-    # Save samples to folder "Samples" in working directory
-    files <- list.files(path = "Samples", full.names = TRUE)
-    fs <- read.ncdfFlowSet(files = files)
-    ```
-    
-    2.2 Annotate samples with markers using
-    `cyto_markers`
-    
-    ``` r
-    cyto_markers(fs)
-    ```
-    
-    <img src="man/figures/README-cyto_markers.png" width="40%" height="40%" style="display: block; margin: auto;" />
-    
-    2.3 Annotate samples with experimental details using
-    `cyto_annotate`
-    
-    ``` r
-    cyto_annotate(fs)
-    ```
-    
-    <img src="man/figures/README-cyto_annotate.png" width="30%" height="30%" style="display: block; margin: auto;" />
-    
-    2.4 Add samples to GatingSet
-    
-    ``` r
-    gs <- GatingSet(fs)
-    ```
-    
-    2.4 Apply fluorescent compensation
-    
-    ``` r
-    # Load in spillover matrix
-    spill <- read.csv("Spillover-Matrix.csv", 
-                      header = TRUE, 
-                      row.names = 1)
-    colnames(spill) <- rownames(spill)
-    
-    # Apply compensation to samples
-    gs <- compensate(gs, spill)
-    ```
-    
-    2.5 Transform fluorescent channels for gating
-    
-    ``` r
-    # Fluorescent channels
-    chans <- cyto_fluor_channels(gs)
-    
-    # Logicle transformation
-    trans <- estimateLogicle(gs[[4]], chans)
-    gs <- transform(gs, trans)
-    ```
-    
-    2.6 Build gating scheme using `cyto_gate_draw`
-    
-    ``` r
-    # Cells
-    cyto_gate_draw(gs,
-              parent = "Cells",
-              alias = "Cells",
-              channels = c("FSC-A","SSC-A"),
-              gatingTemplate = "Example-gatingTemplate.csv")
-    
-    # Copy above & edit to add new population(s)
-    # Repeat until gating scheme is complete
-    ```
-
-<img src="man/figures/README-gate_draw.gif" width="60%" height="60%" style="display: block; margin: auto;" />
-
-3.  Visualise gating schemes using
-`cyto_plot_gating_scheme`
-
-<!-- end list -->
-
-``` r
-cyto_plot_gating_scheme(gs[[4]], back_gate = TRUE)
-```
-
-<img src="man/figures/README-cyto_plot_gating_scheme.png" width="100%" height="100%" style="display: block; margin: auto;" />
-
-4.  Export population-level statistics using `cyto_stats_compute`
-
-<!-- end list -->
-
-``` r
-cyto_stats_compute(gs,
-                   alias = c("CD4 T Cells","CD8 T Cells"),
-                   channels = c("CD44","CD69"),
-                   stat = "median")
-```
 
 # News
 

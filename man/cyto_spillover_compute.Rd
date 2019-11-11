@@ -88,6 +88,7 @@ reference negative population(s). The calculated spillover matrix is returned
 and written to a named csv file for future use.
 }
 \examples{
+\dontrun{
 library(CytoExploreRData)
 
 # Bypass directory check for external files
@@ -108,7 +109,7 @@ cmfile <- system.file("extdata",
 )
 
 # Compute fluorescent spillover matrix
-spill <- spillover_compute(getData(gs, "Single Cells"),
+spill <- cyto_spillover_compute(getData(gs, "Single Cells"),
   channel_match = cmfile,
   spillover = "Example-spillover.csv"
 )
@@ -118,6 +119,7 @@ gs <- compensate(gs, spill)
 
 # Return CytoExploreR_wd_check to default
 options("CytoExploreR_wd_check" = TRUE)
+}
 }
 \references{
 C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral

@@ -985,7 +985,7 @@ cyto_plot_save <- function(file,
 #' @examples
 #'
 #' # Unwanted cyto_plot_save call
-#' cyto_plot_save()
+#' cyto_plot_save("Mistake.png")
 #'
 #' # Revert unwanted cyto_plot_save call
 #' cyto_plot_save_reset()
@@ -994,7 +994,7 @@ cyto_plot_save <- function(file,
 #' @export
 cyto_plot_save_reset <- function() {
   # TURN OFF GLOBAL OPTION
-  options("cyto_plot_save" == FALSE)
+  options("cyto_plot_save" = FALSE)
   # TURN OFF GRAPHICS DEVICE
   dev.off()
 }

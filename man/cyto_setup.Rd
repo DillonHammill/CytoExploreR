@@ -34,7 +34,7 @@ gatingTemplate csv file which will be created if necessary and assigned as
 the active gatingTemplate.
 }
 \examples{
-
+\dontrun{
 # Load in CytoExploreRData to acces data
 library(CytoExploreRData)
 
@@ -50,6 +50,7 @@ cyto_extract(gs, "root")[[1]]
 
 # Experiment details have been updated
 cyto_details(gs)
+}
 
 }
 \author{

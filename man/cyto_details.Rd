@@ -22,7 +22,7 @@ Simply an autocomplete-friendly wrapper around
 \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 }
 \examples{
-
+\dontrun{
 # Load in CytoExploreRData to acces data
 library(CytoExploreRData)
 
@@ -31,6 +31,7 @@ fs <- Activation
 
 # Experiment details
 cyto_details(fs)
+}
 
 }
 \author{
