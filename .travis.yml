@@ -53,18 +53,15 @@ r_github_packages:
   - r-lib/pkgdown
   - datastorm-open/visNetwork
   - rstudio/shinytest
+  - BioConductor/BiocGenerics
+  - grimbough/Rhdf5lib
+  - RGLab/RProtoBufLib
+  - RGLab/flowCore
+  - RGLab/ncdfFlow
+  - RGLab/cytolib
+  - RGLab/flowWorkspace
+  - RGLab/openCyto  
   - DillonHammill/CytoExploreRData
-  
-use_bioc: true
-
-bioc_packages:
-  - BiocGenerics
-  - RProtoBufLib
-  - flowCore
-  - ncdfFlow
-  - cytolib
-  - flowWorkspace
-  - openCyto
   
 warnings_are_errors: false
 
