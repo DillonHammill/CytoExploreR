@@ -20,8 +20,12 @@ matrix:
 cache: 
   packages: TRUE
 
+bioc_required: true
+
 before_install:
   - R -e 'install.packages("devtools")'
+  - R -e 'install.packages("BiocManager")'
+  - R -e 'devtools::install_github("Bioconductor/BiocGenerics", ref = "master")'
 
 r_packages:
   - data.table
@@ -53,7 +57,6 @@ r_github_packages:
   - r-lib/pkgdown
   - datastorm-open/visNetwork
   - rstudio/shinytest
-  - BioConductor/BiocGenerics
   - grimbough/Rhdf5lib
   - RGLab/RProtoBufLib
   - RGLab/flowCore
