@@ -35,21 +35,24 @@ r_packages:
   - methods
   - stats
   - utils
+  - graphics
+  - grDevices
+  - tools
   - magrittr
   - purrr
+  - parallel
   - tibble
   - tidyr
   - dplyr
   - robustbase
-  - gtools
   - Rtsne
-  - umap
-  - rmarkdown
-  - robustbase
+  - umap    
+  - gtools
 
 r_github_packages:
   - jrowen/rhandsontable
   - rlbarter/superheat
+  - rstudio/rmarkdown
   - yihui/knitr
   - r-lib/covr
   - r-lib/testthat
