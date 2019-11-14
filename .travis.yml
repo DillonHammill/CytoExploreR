@@ -61,12 +61,12 @@ r_github_packages:
   - datastorm-open/visNetwork
   - rstudio/shinytest
   - grimbough/Rhdf5lib
-  - RGLab/RProtoBufLib
-  - RGLab/flowCore
-  - RGLab/ncdfFlow
-  - RGLab/cytolib
-  - RGLab/flowWorkspace
-  - RGLab/openCyto  
+  - RGLab/RProtoBufLib@trunk
+  - RGLab/flowCore@trunk
+  - RGLab/ncdfFlow@trunk
+  - RGLab/cytolib@trunk
+  - RGLab/flowWorkspace@trunk
+  - RGLab/openCyto@trunk  
   - DillonHammill/CytoExploreRData
   
 warnings_are_errors: false
