@@ -1406,6 +1406,121 @@ cyto_merge_by.flowSet <- function(x,
   return(fr_list)
 }
 
+## CYTO_SPLIT ------------------------------------------------------------------
+
+#' Split samples merged with cyto_merge
+#'
+#' Extract individual samples merged using \code{cyto_merge()} based on
+#' \code{"Sample ID"} column created by \code{cyto_barcode()}.
+#'
+#' @param x object of class \code{flowFrame}.
+#' @param names vector of names to assign to each of the extracted flowFrames
+#'   hwne saving the split files.
+#' @param save_as name of the folder to which the unmerged flowFrames should be
+#'   written to .fcs files. Files are only created when this argument is
+#'   supplied.
+#'
+#' @return list of split flowFrames.
+#' 
+#' @importFrom flowCore flowFrame write.FCS exprs identifier keyword split
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @examples 
+#' # Load CytoExploreRData to access data
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Merge samples
+#' fr <- cyto_merge_by(fs, "all")[[1]]
+#' 
+#' # Split merged samples
+#' fr_list <- cyto_split(fr, names = cyto_names(fs))
+#' 
+#' @seealso \code{\link{cyto_merge_by}}
+#' @seealso \code{\link{cyto_barcode}}
+#'
+#' @export
+cyto_split <- function(x,
+                       names = NULL,
+                       save_as = NULL){
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # FLOWFRAME
+  if(!is(x, "flowFrame")){
+    stop("cyto_split() expects a flowFrame object.")
+  }
+  
+  # SAMPLE ID
+  if(!"Sample ID" %in% cyto_channels(x)){
+    stop("Merged samples must be barcoded in cyto_merge().")
+  }
+  
+  # SPLIT INTO FLOWFRAMES ------------------------------------------------------
+  
+  # EXTRACT DATA
+  fr_exprs <- exprs(x)
+
+  # SAMPLE IDs
+  sample_id <- unique(fr_exprs[, "Sample ID"])
+  samples <- length(sample_id)
+  
+  # SPLIT BY SAMPLE ID
+  fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
+  
+  # NAMES
+  if(!is.null(names)){
+    # INSUFFICIENT NAMES
+    if(length(names) != length(sample_id)){
+      stop("Supply a name for each file.")
+    }
+  # NO NAMES
+  }else{
+    names <- paste("Sample-", sample_id)
+  }
+  
+  # NAME SPLIT FILES
+  lapply(seq_len(samples), function(z){
+    identifier(fr_list[[z]]) <<- names[z]
+  })
+  names(fr_list) <- names
+  
+  # SAVE SPLIT FLOWFRAMES ------------------------------------------------------
+  
+  # SAVE TO NEW FOLDER
+  if(!is.null(save_as)){
+    
+    # CREATE NEW DIRECTORY
+    if(!dir.exists(save_as)){
+      
+      # DIRECTORY
+      dir.create(save_as)
+      
+      # WRITE FCS FILES TO NEW DIRECTORY
+      lapply(fr_list, function(z){
+        write.FCS(z, paste0(save_as, "/", cyto_names(z)))
+      })
+      
+    # SAVE TO EXISTING DIRECTORY  
+    }else{
+      
+      # WRITE FCS FILES TO CURRENT WORKING DIRECTORY
+      lapply(fr_list, function(z){
+        write.FCS(z, cyto_names(z))
+      })
+      
+    }
+
+  }
+  
+  # RETURN SPLIT FLOWFRAMES
+  return(fr_list)
+  
+}
+
 ## CYTO_SAMPLE -----------------------------------------------------------------
 
 #' Sample a flowFrame or flowSet
