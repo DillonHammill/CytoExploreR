@@ -17,9 +17,6 @@ matrix:
      osx_image: xcode7.3
      disable_homebrew: true
 
-cache: 
-  packages: TRUE
-
 bioc_required: true
 
 before_install:
