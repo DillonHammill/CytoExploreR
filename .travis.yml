@@ -28,9 +28,9 @@ before_install:
   - R -e 'devtools::install_github("Bioconductor/BiocGenerics", ref = "master")'
 
 install:
-  - R -e 'devtools::install_github("RGLab/cytolib", ref = "trunk")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel", ref="master")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/cytolib", ref = "trunk")'  
   - R -e 'devtools::install_github("RGLab/flowCore", ref="trunk")'
   - R -e 'devtools::install_github("RGLab/ncdfFlow", ref="trunk")'
   - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
