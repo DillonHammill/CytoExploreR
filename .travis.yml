@@ -27,6 +27,16 @@ before_install:
   - R -e 'install.packages("BiocManager")'
   - R -e 'devtools::install_github("Bioconductor/BiocGenerics", ref = "master")'
 
+install:
+  - R -e 'devtools::install_github("RGLab/cytolib", ref = "trunk")'
+  - R -e 'devtools::install_github("RcppCore/RcppParallel", ref="master")'
+  - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/flowCore", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/ncdfFlow", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspace", ref = "trunk")'
+  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
+  
 r_packages:
   - data.table
   - shiny
@@ -60,13 +70,6 @@ r_github_packages:
   - r-lib/pkgdown
   - datastorm-open/visNetwork
   - rstudio/shinytest
-  - grimbough/Rhdf5lib
-  - RGLab/RProtoBufLib@trunk
-  - RGLab/flowCore@trunk
-  - RGLab/ncdfFlow@trunk
-  - RGLab/cytolib@trunk
-  - RGLab/flowWorkspace@trunk
-  - RGLab/openCyto@trunk  
   - DillonHammill/CytoExploreRData
   
 warnings_are_errors: false
