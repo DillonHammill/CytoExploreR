@@ -26,8 +26,12 @@ before_install:
   - R -e 'install.packages("devtools")'
   - R -e 'install.packages("BiocManager")'
   - R -e 'devtools::install_github("Bioconductor/BiocGenerics", ref = "master")'
-
+  
 install:
+  - R -e 'BiocManager::install("Rhdf5lib")'
+  - R -e 'BiocManager::install("flowCore")'
+  - R -e 'BiocManager::install("flowWorkspace")'
+  - R -e 'BiocManager::install("openCyto")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel", ref="master")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
   - R -e 'devtools::install_github("RGLab/cytolib", ref = "trunk")'
@@ -36,6 +40,7 @@ install:
   - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
   - R -e 'devtools::install_github("RGLab/flowWorkspace", ref = "trunk")'
   - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
+  - R -e 'devtools::install_deps(upgrade = "Always")'
   
 r_packages:
   - data.table
