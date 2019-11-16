@@ -579,7 +579,7 @@
         text_y <- args[["label_text_y"]][label_ind[[z]]]
         # OFFSET Y CO-ORDINATES (EXCLUDE NA)
         args[["label_text_y"]][label_ind[[z]]][!is.na(text_y)] <<- tryCatch({
-          suppressWarnings(
+          .suppress_all_messages(
             .spread.labels(text_y[!is.na(text_y)],
               mindiff = label_height,
               min = ymin,
@@ -603,7 +603,7 @@
       label_height <- 1.18 * label_height
       # OFFSET Y CO-ORDINATES (EXCLUDE NA)
       args[["label_text_y"]][!is.na(args[["label_text_y"]])] <-
-        suppressMessages(
+        .suppress_all_messages(
           .spread.labels(args[["label_text_y"]][!is.na(args[["label_text_y"]])],
             mindiff = label_height,
             min = ymin,

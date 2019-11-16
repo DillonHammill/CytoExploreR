@@ -149,3 +149,11 @@ LAPPLY <- function(...){
   }
   return(pars)
 }
+
+# SUPPRESS WARNINGS & MESSAGES -------------------------------------------------
+
+#' Suppress warnings and messages
+#' @noRd
+.suppress_all_messages <- function(...){
+  suppressWarnings(suppressMessages(...))
+}
