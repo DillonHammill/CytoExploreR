@@ -657,24 +657,19 @@
     pts <- as.matrix(pts)
     colnames(pts) <- channels[1]
     rownames(pts) <- c("min", "max")
-    abline(v = coords$x, lwd = 2.5, col = "red")
   } else if (length(channels) == 2) {
     pts <- data.frame(x = c(coords$x, Inf), y = c(coords$y, Inf))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")
-    rect(
-      xleft = min(coords$x),
-      ybottom = min(coords$y),
-      xright = max(exprs(fr)[, channels[1]]),
-      ytop = max(exprs(fr)[, channels[2]]),
-      border = "red",
-      lwd = 2.5
-    )
   }
 
   # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
+  
+  # PLOT GATE
+  cyto_plot_gate(gate = gate,
+                 channels = channels)
 
   # LABEL GATED POPULATION
   if (label == TRUE) {
@@ -833,24 +828,20 @@
     pts <- as.matrix(pts)
     colnames(pts) <- channels[1]
     rownames(pts) <- c("min", "max")
-    abline(v = coords$x, lwd = 2.5, col = "red")
   } else if (length(channels) == 2) {
     pts <- data.frame(x = c(-Inf, coords$x), y = c(-Inf, coords$y))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")
-    rect(
-      xleft = min(exprs(fr)[, channels[1]]),
-      ybottom = min(exprs(fr)[, channels[2]]),
-      xright = max(coords$x), ytop = max(coords$y),
-      border = "red",
-      lwd = 2.5
-    )
   }
 
-  # CONSTRUCT GATES
+  # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
+  # PLOT GATE
+  cyto_plot_gate(gate = gate,
+                 channels = channels)
+  
   # LABEL GATED POPULATION
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION

@@ -99,21 +99,21 @@ cyto_plot_gate.rectangleGate <- function(gate,
   }else{
     channels <- parameters(gate)
   }
-
+  
   # PLOT GATE ------------------------------------------------------------------
   
   # 1D PLOT
   if(length(channels) == 1){
     # REPLACE INFINITE X COORDS
-    if(is.infinite(gate@min[channels[1]])){
-      gate@min[channels[1]] <- xmin
+    if(is.infinite(gate@min)){
+      gate@min <- xmin
     }
-    if(is.infinite(gate@max[channels[1]])){
-      gate@max[channels[1]] <- xmax
+    if(is.infinite(gate@max)){
+      gate@max <- xmax
     }
     # PLOT GATE
-    rect(xleft = gate@min[channels[1]],
-         xright = gate@max[channels[1]],
+    rect(xleft = gate@min,
+         xright = gate@max,
          ybottom = ymin,
          ytop = ymax,
          lty = gate_line_type,
