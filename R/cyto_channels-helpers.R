@@ -192,7 +192,15 @@ cyto_markers.flowFrame <- function(x){
 #'
 #' @export
 cyto_fluor_channels <- function(x){
-  cyto_channels(x, exclude = c("FSC","SSC","Time","Original"))
+  cyto_channels(x, exclude = c("FSC",
+                               "SSC",
+                               "Time",
+                               "Original",
+                               "Sample ID",
+                               "Event ID",
+                               "UMAP",
+                               "tSNE",
+                               "PCA"))
 }
 
 ## CYTO_CHANNELS_EXTRACT -------------------------------------------------------
