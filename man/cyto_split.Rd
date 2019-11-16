@@ -35,7 +35,6 @@ fr <- cyto_merge_by(fs, "all")[[1]]
 
 # Split merged samples
 fr_list <- cyto_split(fr, names = cyto_names(fs))
-
 }
 \seealso{
 \code{\link{cyto_merge_by}}

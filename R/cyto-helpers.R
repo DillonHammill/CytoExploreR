@@ -36,7 +36,6 @@
 #'
 #' # fs is a ncdfFlowSet
 #' class(fs)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -117,7 +116,7 @@ cyto_load <- function(path = ".",
 #' # Experiment details have been updated
 #' cyto_details(gs)
 #' }
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -176,21 +175,21 @@ cyto_setup <- function(path = ".",
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @return experiment details as data.frame.
-#' 
+#'
 #' @importFrom flowWorkspace pData
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
 #' # Load in CytoExploreRData to acces data
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Experiment details
 #' cyto_details(fs)
 #' }
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -231,37 +230,36 @@ cyto_details <- function(x) {
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @return names associated with the supplied object.
-#' 
+#'
 #' @importFrom flowCore identifier
 #' @importFrom flowWorkspace sampleNames
-#' 
-#' @examples 
-#' 
+#'
+#' @examples
+#'
 #' #' # Load in CytoExploreRData to acces data
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Activation GatingSet
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # flowFrame
 #' cyto_names(fs[[1]])
-#' 
+#'
 #' # flowSet
 #' cyto_names(fs)
-#' 
+#'
 #' # GatingHierarchy
 #' cyto_names(gs[[1]])
-#' 
+#'
 #' # GatingSet
 #' cyto_names(gs)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @rdname cyto_names
-#' 
+#'
 #' @export
 cyto_names <- function(x) {
   UseMethod("cyto_names")
@@ -319,7 +317,6 @@ cyto_names.list <- function(x) {
 #'
 #' # Valid object
 #' cyto_check(Activation)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -399,7 +396,6 @@ cyto_check <- function(x) {
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -501,47 +497,50 @@ cyto_transform.default <- function(x,
   if (plot == TRUE) {
 
     # Plot if space sufficient space
-    tryCatch({
+    tryCatch(
+      {
 
-      # Pull out flowFrame/flowSet to plot
-      cyto_data <- cyto_extract(x, parent)
+        # Pull out flowFrame/flowSet to plot
+        cyto_data <- cyto_extract(x, parent)
 
-      # Convert to flowFrame for plotting
-      cyto_data <- cyto_convert(cyto_data, "flowFrame")
+        # Convert to flowFrame for plotting
+        cyto_data <- cyto_convert(cyto_data, "flowFrame")
 
-      # Channels
-      channels <- names(transformer_list)
+        # Channels
+        channels <- names(transformer_list)
 
-      # Old graphics parameters
-      old_pars <- .par("mfrow")
-      on.exit(par(old_pars))
+        # Old graphics parameters
+        old_pars <- .par("mfrow")
+        on.exit(par(old_pars))
 
-      # Set up plotting area
-      cyto_plot_new(popup = popup)
-      n <- length(channels)
-      cyto_plot_layout(
-        n2mfrow(n)[1],
-        n2mfrow(n)[2]
-      )
+        # Set up plotting area
+        cyto_plot_new(popup = popup)
+        n <- length(channels)
+        cyto_plot_layout(
+          n2mfrow(n)[1],
+          n2mfrow(n)[2]
+        )
 
-      # Generate plot for each channel
-      lapply(channels, function(chan) {
-        if (inverse == FALSE) {
-          cyto_plot(cyto_data,
-            channels = chan,
-            axes_trans = transformer_list,
-            title = NA
-          )
-        } else if (inverse == TRUE) {
-          cyto_plot(cyto_data,
-            channels = chan,
-            title = NA
-          )
-        }
-      })
-    }, error = function(e) {
-      message("Insufficient plotting space, transformations have been applied.")
-    })
+        # Generate plot for each channel
+        lapply(channels, function(chan) {
+          if (inverse == FALSE) {
+            cyto_plot(cyto_data,
+              channels = chan,
+              axes_trans = transformer_list,
+              title = NA
+            )
+          } else if (inverse == TRUE) {
+            cyto_plot(cyto_data,
+              channels = chan,
+              title = NA
+            )
+          }
+        })
+      },
+      error = function(e) {
+        message("Insufficient plotting space, transformations have been applied.")
+      }
+    )
   }
 
   # Return transformed data
@@ -576,39 +575,42 @@ cyto_transform.transformList <- function(x,
   # Construct plots
   if (plot == TRUE) {
     # Plot if sufficient space
-    tryCatch({
+    tryCatch(
+      {
 
-      # Pull out flowFrame/flowSet to plot
-      cyto_data <- cyto_extract(x)
+        # Pull out flowFrame/flowSet to plot
+        cyto_data <- cyto_extract(x)
 
-      # Convert to flowFrame for plotting
-      cyto_data <- cyto_convert(cyto_data, "flowFrame")
+        # Convert to flowFrame for plotting
+        cyto_data <- cyto_convert(cyto_data, "flowFrame")
 
-      # Channels
-      channels <- names(trans@transforms)
+        # Channels
+        channels <- names(trans@transforms)
 
-      # Old graphics parameters
-      old_pars <- .par("mfrow")
-      on.exit(par(old_pars))
+        # Old graphics parameters
+        old_pars <- .par("mfrow")
+        on.exit(par(old_pars))
 
-      # Set up plotting area
-      cyto_plot_new(popup = popup)
-      n <- length(channels)
-      cyto_plot_layout(
-        n2mfrow(n)[1],
-        n2mfrow(n)[2]
-      )
-
-      # Generate plot for each channel - axes will not be transformed correctly
-      lapply(channels, function(chan) {
-        cyto_plot(cyto_data,
-          channels = chan,
-          title = NA
+        # Set up plotting area
+        cyto_plot_new(popup = popup)
+        n <- length(channels)
+        cyto_plot_layout(
+          n2mfrow(n)[1],
+          n2mfrow(n)[2]
         )
-      })
-    }, error = function(e) {
-      message("Insufficient plotting space, transformations have been applied.")
-    })
+
+        # Generate plot for each channel - axes will not be transformed correctly
+        lapply(channels, function(chan) {
+          cyto_plot(cyto_data,
+            channels = chan,
+            title = NA
+          )
+        })
+      },
+      error = function(e) {
+        message("Insufficient plotting space, transformations have been applied.")
+      }
+    )
   }
 
   # Return transformed data
@@ -654,47 +656,50 @@ cyto_transform.transformerList <- function(x,
   # Construct plots
   if (plot == TRUE) {
     # Plot if sufficient space
-    tryCatch({
+    tryCatch(
+      {
 
-      # Extract flowFrame/flowSet for plottng
-      cyto_data <- cyto_extract(x)
+        # Extract flowFrame/flowSet for plottng
+        cyto_data <- cyto_extract(x)
 
-      # Convert to flowFrame for plotting
-      cyto_data <- cyto_convert(cyto_data, "flowFrame")
+        # Convert to flowFrame for plotting
+        cyto_data <- cyto_convert(cyto_data, "flowFrame")
 
-      # Channels
-      channels <- names(trans)
+        # Channels
+        channels <- names(trans)
 
-      # Old graphics parameters
-      old_pars <- .par("mfrow")
-      on.exit(par(old_pars))
+        # Old graphics parameters
+        old_pars <- .par("mfrow")
+        on.exit(par(old_pars))
 
-      # Set up plotting area
-      cyto_plot_new(popup = popup)
-      n <- length(channels)
-      cyto_plot_layout(
-        n2mfrow(n)[1],
-        n2mfrow(n)[2]
-      )
+        # Set up plotting area
+        cyto_plot_new(popup = popup)
+        n <- length(channels)
+        cyto_plot_layout(
+          n2mfrow(n)[1],
+          n2mfrow(n)[2]
+        )
 
-      # Generate plot for each channel
-      lapply(channels, function(chan) {
-        if (inverse == FALSE) {
-          cyto_plot(cyto_data,
-            channels = chan,
-            axes_trans = trans,
-            title = NA
-          )
-        } else if (inverse == TRUE) {
-          cyto_plot(cyto_data,
-            channels = chan,
-            title = NA
-          )
-        }
-      })
-    }, error = function(e) {
-      message("Insufficient plotting space, transformations have been applied.")
-    })
+        # Generate plot for each channel
+        lapply(channels, function(chan) {
+          if (inverse == FALSE) {
+            cyto_plot(cyto_data,
+              channels = chan,
+              axes_trans = trans,
+              title = NA
+            )
+          } else if (inverse == TRUE) {
+            cyto_plot(cyto_data,
+              channels = chan,
+              title = NA
+            )
+          }
+        })
+      },
+      error = function(e) {
+        message("Insufficient plotting space, transformations have been applied.")
+      }
+    )
   }
 
   # Return transformed data
@@ -734,7 +739,6 @@ cyto_transform.transformerList <- function(x,
 #'
 #' # Convert transformerList into inverse transformList
 #' inv <- cyto_transform_extract(trans, inverse = TRUE)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -795,7 +799,6 @@ cyto_transform_extract <- function(x,
 #'
 #' # Extract flowSet
 #' cyto_extract(gs, "root")
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -857,7 +860,6 @@ cyto_extract <- function(x, parent = "root", ...) {
 #'
 #' # Convert GatingSet to flowFrame
 #' cyto_convert(GatingSet(Activation), "flowFrame", parent = "root")
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_convert
@@ -907,14 +909,14 @@ cyto_convert.flowSet <- function(x,
     # REMOVE ORIGINAL PARAMETER
     if ("Original" %in% cyto_channels(x)) {
       # CANNOT BE EMPTY FLOWFRAME
-      if(nrow(x) == 0){
+      if (nrow(x) == 0) {
         # ADD EVENT
         x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
         )
-      }else{
+      } else {
         x <- suppressWarnings(
           x[, -match("Original", cyto_channels(x))]
         )
@@ -925,14 +927,14 @@ cyto_convert.flowSet <- function(x,
     # REMOVE ORIGINAL PARAMETER
     if ("Original" %in% cyto_channels(x)) {
       # CANNOT BE EMPTY FLOWFRAME
-      if(nrow(x) == 0){
+      if (nrow(x) == 0) {
         # ADD EVENT
         x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
         )
-      }else{
+      } else {
         x <- suppressWarnings(
           x[, -match("Original", cyto_channels(x))]
         )
@@ -953,14 +955,14 @@ cyto_convert.flowSet <- function(x,
     # REMOVE ORIGINAL PARAMETER
     if ("Original" %in% cyto_channels(x)) {
       # CANNOT BE EMPTY FLOWFRAME
-      if(nrow(x) == 0){
+      if (nrow(x) == 0) {
         # ADD EVENT
         x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
         )
-      }else{
+      } else {
         x <- suppressWarnings(
           x[, -match("Original", cyto_channels(x))]
         )
@@ -1058,7 +1060,6 @@ cyto_convert.GatingSet <- function(x,
 #'   Activation,
 #'   Treatment %in% c("Stim-A", "Stim-C")
 #' )
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1121,7 +1122,6 @@ cyto_filter <- function(x, ...) {
 #'   Activation,
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
 #' )
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1206,7 +1206,6 @@ cyto_select <- function(x, ...) {
 #' # Group GatingSet by Treatment and OVAConc
 #' gs <- GatingSet(Activation)
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -1300,7 +1299,7 @@ cyto_group_by <- function(x,
 #'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Activation GatingSet
 #' gs <- GatingSet(fs)
 #'
@@ -1309,10 +1308,9 @@ cyto_group_by <- function(x,
 #'
 #' # Merge samples by 'Treatment'
 #' fr_list <- cyto_merge_by(fs, "Treatment")
-#' 
+#'
 #' # Merge samples by 'OVAConc'
 #' fr_list <- cyto_merge_by(fs, "OVAConc")
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_group_by}}
@@ -1325,7 +1323,7 @@ NULL
 
 #' @noRd
 #' @export
-cyto_merge_by <- function(x, ...){
+cyto_merge_by <- function(x, ...) {
   UseMethod("cyto_merge_by")
 }
 
@@ -1336,18 +1334,18 @@ cyto_merge_by.GatingSet <- function(x,
                                     merge_by = "all",
                                     select = NULL,
                                     barcode = TRUE,
-                                    ...){
-  
+                                    ...) {
+
   # EXTRACT POPULATON
   fs <- cyto_extract(x, parent)
-  
+
   # CALL FLOWSET METHOD
   cyto_merge_by(fs,
-                merge_by = merge_by,
-                select = select,
-                barcode = barcode,
-                ...)
-  
+    merge_by = merge_by,
+    select = select,
+    barcode = barcode,
+    ...
+  )
 }
 
 #' @rdname cyto_merge_by
@@ -1387,21 +1385,21 @@ cyto_merge_by.flowSet <- function(x,
 
   # CONVERT EACH GROUP TO FLOWFRAME
   fr_list <- lapply(fs_list, function(fs) {
-    if(!is(fs, "flowFrame")){
+    if (!is(fs, "flowFrame")) {
       cyto_convert(fs, "flowFrame")
-    }else{
+    } else {
       fs
     }
   })
   names(fr_list) <- grps
 
   # REPLACE SAMPLENAMES WITH GROUPS
-  if(!all(cyto_names(fr_list) %in% grps)){
+  if (!all(cyto_names(fr_list) %in% grps)) {
     lapply(seq_len(length(fr_list)), function(z) {
       identifier(fr_list[[z]]) <<- grps[z]
     })
   }
-  
+
   # RETURN PREPARED FLOWFRAME LIST
   return(fr_list)
 }
@@ -1421,104 +1419,100 @@ cyto_merge_by.flowSet <- function(x,
 #'   supplied.
 #'
 #' @return list of split flowFrames.
-#' 
+#'
 #' @importFrom flowCore flowFrame write.FCS exprs identifier keyword split
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @examples 
+#'
+#' @examples
 #' # Load CytoExploreRData to access data
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Merge samples
 #' fr <- cyto_merge_by(fs, "all")[[1]]
-#' 
+#'
 #' # Split merged samples
 #' fr_list <- cyto_split(fr, names = cyto_names(fs))
-#' 
 #' @seealso \code{\link{cyto_merge_by}}
 #' @seealso \code{\link{cyto_barcode}}
 #'
 #' @export
 cyto_split <- function(x,
                        names = NULL,
-                       save_as = NULL){
-  
+                       save_as = NULL) {
+
   # CHECKS ---------------------------------------------------------------------
-  
+
   # FLOWFRAME
-  if(!is(x, "flowFrame")){
+  if (!is(x, "flowFrame")) {
     stop("cyto_split() expects a flowFrame object.")
   }
-  
+
   # SAMPLE ID
-  if(!"Sample ID" %in% cyto_channels(x)){
+  if (!"Sample ID" %in% cyto_channels(x)) {
     stop("Merged samples must be barcoded in cyto_merge().")
   }
-  
+
   # SPLIT INTO FLOWFRAMES ------------------------------------------------------
-  
+
   # EXTRACT DATA
   fr_exprs <- exprs(x)
 
   # SAMPLE IDs
   sample_id <- unique(fr_exprs[, "Sample ID"])
   samples <- length(sample_id)
-  
+
   # SPLIT BY SAMPLE ID
   fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
-  
+
   # NAMES
-  if(!is.null(names)){
+  if (!is.null(names)) {
     # INSUFFICIENT NAMES
-    if(length(names) != length(sample_id)){
+    if (length(names) != length(sample_id)) {
       stop("Supply a name for each file.")
     }
-  # NO NAMES
-  }else{
+    # NO NAMES
+  } else {
     names <- paste("Sample-", sample_id)
   }
-  
+
   # NAME SPLIT FILES
-  lapply(seq_len(samples), function(z){
+  lapply(seq_len(samples), function(z) {
     identifier(fr_list[[z]]) <<- names[z]
   })
   names(fr_list) <- names
-  
+
   # SAVE SPLIT FLOWFRAMES ------------------------------------------------------
-  
+
   # SAVE TO NEW FOLDER
-  if(!is.null(save_as)){
-    
+  if (!is.null(save_as)) {
+
     # CREATE NEW DIRECTORY
-    if(!dir.exists(save_as)){
-      
+    if (!dir.exists(save_as)) {
+
       # DIRECTORY
       dir.create(save_as)
-      
+
       # WRITE FCS FILES TO NEW DIRECTORY
-      lapply(fr_list, function(z){
+      lapply(fr_list, function(z) {
         write.FCS(z, paste0(save_as, "/", cyto_names(z)))
       })
-      
-    # SAVE TO EXISTING DIRECTORY  
-    }else{
-      
+
+      # SAVE TO EXISTING DIRECTORY
+    } else {
+
       # WRITE FCS FILES TO CURRENT WORKING DIRECTORY
-      lapply(fr_list, function(z){
+      lapply(fr_list, function(z) {
         write.FCS(z, cyto_names(z))
       })
-      
     }
-
   }
-  
+
   # RETURN SPLIT FLOWFRAMES
   return(fr_list)
-  
 }
 
 ## CYTO_SAMPLE -----------------------------------------------------------------
@@ -1560,7 +1554,6 @@ cyto_split <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -1578,10 +1571,10 @@ cyto_sample.flowFrame <- function(x,
                                   ...) {
 
   # NO SAMPLING - EMPTY FLOWFRAME
-  if(nrow(x@exprs) == 0){
+  if (nrow(x@exprs) == 0) {
     return(x)
   }
-  
+
   # Do nothing if no sampling required
   if (display != 1) {
 
@@ -1629,95 +1622,113 @@ cyto_sample.flowSet <- function(x,
   fsApply(x, cyto_sample, display = display, seed = seed)
 }
 
-#' @noRd
+#' @rdname cyto_sample
+#' @export
 cyto_sample.list <- function(x,
                              display = 1,
                              seed = NULL,
                              ...) {
 
-  # LIST OF FLOWSETS
-  if (all(LAPPLY(x, function(z) {
-    inherits(z, "flowSet")
-  }))) {
-    # Same sampling applied to all samples
-    x <- lapply(x, function(z) {
-      cyto_sample(z, display = display, seed = seed)
-    })
-    # LIST OF FLOWFRAMES
-  } else if (all(LAPPLY(x, function(z) {
-    inherits(z, "flowFrame")
-  }))) {
-    # BARCODED FLOWFRAMES
-    if (any(LAPPLY(x, function(z) {
-      "Sample ID" %in% cyto_channels(z)
+  # CYTO_PLOT SAMPLING - RATIOS
+  if (!is.null(getOption("cyto_plot_method"))) {
+
+    # LIST OF FLOWSETS
+    if (all(LAPPLY(x, function(z) {
+      inherits(z, "flowSet")
     }))) {
-      # SAMPLES PER FLOWFRAME - ASSUME FLOWFRAME IF NO BARCODE
-      samples <- LAPPLY(x, function(z) {
-        tryCatch(length(unique(exprs(z)[, "Sample ID"])), 
-                          error = function(e){1})
+      # Same sampling applied to all samples
+      x <- lapply(x, function(z) {
+        cyto_sample(z, display = display, seed = seed)
       })
-      # EVENTS PER SAMPLE - EACH LAYER
-      events_per_sample <- LAPPLY(seq_len(length(x)), function(z){
-        nrow(x[[z]])/samples[z]
-      })
-      # EVENTS RATIO - BASE LAYER REFERENCE
-      events_ratio <- events_per_sample/events_per_sample[1]
-      # SCALE SAMPLING EVENTS USING BASE LAYER AS REFERENCE
-      if (display <= 1) {
-        events_to_sample <- rep(display * nrow(x[[1]]), length(x)) *
-          events_ratio
-      } else {
-        events_to_sample <- rep(display, length(x)) *
-          events_ratio
-      }
-      # SAMPLING
-      lapply(seq_len(length(x)), function(z) {
-        x[[z]] <<- cyto_sample(x[[z]],
-          display = events_to_sample[z],
-          seed = seed
-        )
-      })
-    # NO BARCODING - RELY ON IDENTIFIERS
-    } else {
-      # Same percentage sampling applied to each flowFrame
-      if (display <= 1) {
-        # Same sampling applied to all samples
-        x <- lapply(x, function(z) {
-          cyto_sample(z, display = display, seed = seed)
-        })
-        # Sampling by event number is more complex
-      } else if (display > 1) {
-        # Identifiers
-        nms <- LAPPLY(x, function(z) {
-          cyto_names(z)
-        })
-        ind <- seq_len(length(nms))
-        # Sampling
-        x <- lapply(ind, function(z) {
-          # Base layer sampled as per usual
-          if (z == 1) {
-            cyto_sample(x[[z]], display = display, seed = seed)
-          } else {
-            # Identifier matches base - sample size decreased
-            if (nms[z] == nms[1]) {
-              # Number of events in base layer
-              base_events <- nrow(x[[1]])
-              # Number of events in overlay
-              overlay_events <- nrow(x[[z]])
-              # Proportion of overlay relative to base
-              prop <- overlay_events / base_events
-              # Update display prop * display
-              display <- ceiling(prop * display)
-              # Sampling
-              cyto_sample(x[[z]], display = display, seed = seed)
-              # Identifiers don't match - separate samples - same sampling
-            } else {
-              cyto_sample(x[[z]], display = display, seed = seed)
+      # LIST OF FLOWFRAMES
+    } else if (all(LAPPLY(x, function(z) {
+      inherits(z, "flowFrame")
+    }))) {
+      # BARCODED FLOWFRAMES
+      if (any(LAPPLY(x, function(z) {
+        "Sample ID" %in% cyto_channels(z)
+      }))) {
+        # SAMPLES PER FLOWFRAME - ASSUME FLOWFRAME IF NO BARCODE
+        samples <- LAPPLY(x, function(z) {
+          tryCatch(length(unique(exprs(z)[, "Sample ID"])),
+            error = function(e) {
+              1
             }
-          }
+          )
         })
+        # EVENTS PER SAMPLE - EACH LAYER
+        events_per_sample <- LAPPLY(seq_len(length(x)), function(z) {
+          nrow(x[[z]]) / samples[z]
+        })
+        # EVENTS RATIO - BASE LAYER REFERENCE
+        events_ratio <- events_per_sample / events_per_sample[1]
+        # SCALE SAMPLING EVENTS USING BASE LAYER AS REFERENCE
+        if (display <= 1) {
+          events_to_sample <- rep(display * nrow(x[[1]]), length(x)) *
+            events_ratio
+        } else {
+          events_to_sample <- rep(display, length(x)) *
+            events_ratio
+        }
+        # SAMPLING
+        lapply(seq_len(length(x)), function(z) {
+          x[[z]] <<- cyto_sample(x[[z]],
+            display = events_to_sample[z],
+            seed = seed
+          )
+        })
+        # NO BARCODING - RELY ON IDENTIFIERS
+      } else {
+        # Same percentage sampling applied to each flowFrame
+        if (display <= 1) {
+          # Same sampling applied to all samples
+          x <- lapply(x, function(z) {
+            cyto_sample(z, display = display, seed = seed)
+          })
+          # Sampling by event number is more complex
+        } else if (display > 1) {
+          # Identifiers
+          nms <- LAPPLY(x, function(z) {
+            cyto_names(z)
+          })
+          ind <- seq_len(length(nms))
+          # Sampling
+          x <- lapply(ind, function(z) {
+            # Base layer sampled as per usual
+            if (z == 1) {
+              cyto_sample(x[[z]], display = display, seed = seed)
+            } else {
+              # Identifier matches base - sample size decreased
+              if (nms[z] == nms[1]) {
+                # Number of events in base layer
+                base_events <- nrow(x[[1]])
+                # Number of events in overlay
+                overlay_events <- nrow(x[[z]])
+                # Proportion of overlay relative to base
+                prop <- overlay_events / base_events
+                # Update display prop * display
+                display <- ceiling(prop * display)
+                # Sampling
+                cyto_sample(x[[z]], display = display, seed = seed)
+                # Identifiers don't match - separate samples - same sampling
+              } else {
+                cyto_sample(x[[z]], display = display, seed = seed)
+              }
+            }
+          })
+        }
       }
     }
+
+  # GENERIC SAMPLING
+  }else{
+    
+    # ALLOW DIFFERENT SAMPLING PER ELEMENT
+    display <- rep(display, length(x))
+    x <- mapply(function(x, display){
+      cyto_sample(x, display)
+    }, x, display)
+    
   }
 
   # Return sampled list
@@ -1752,7 +1763,6 @@ cyto_sample.list <- function(x,
 #'
 #' # Barcode
 #' cyto_barcode(fs)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1834,14 +1844,14 @@ cyto_barcode <- function(x,
 #' @param file name of csv file containing columns 'Channel' and 'Marker'.
 #'
 #' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
-#' 
+#'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters markernames markernames<-
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
-#' 
+#'
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
@@ -2007,7 +2017,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 #' @importFrom flowCore pData<-
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' # Load in CytoExploreRData to access data
@@ -2173,7 +2183,6 @@ cyto_details_edit <- function(x, file = NULL) {
 #'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -2412,12 +2421,11 @@ cyto_compensate.GatingSet <- function(x,
 cyto_nodes <- function(x, ...) {
 
   # Make call to gh/gs_get_pop_paths
-  if(is(x, "GatingHierarchy")){
+  if (is(x, "GatingHierarchy")) {
     gh_get_pop_paths(x, ...)
-  }else if(is(x, "GatingSet")){
+  } else if (is(x, "GatingSet")) {
     gs_get_pop_paths(x, ...)
   }
-  
 }
 
 ## CYTO_CHANNEL_MATCH ----------------------------------------------------------

@@ -52,7 +52,6 @@ cyto_convert(Activation, "flowFrame")
 
 # Convert GatingSet to flowFrame
 cyto_convert(GatingSet(Activation), "flowFrame", parent = "root")
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

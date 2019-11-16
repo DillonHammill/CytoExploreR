@@ -25,7 +25,6 @@ library(CytoExploreRData)
 
 # Valid object
 cyto_check(Activation)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -42,7 +42,6 @@ fs <- cyto_load(path)
 
 # fs is a ncdfFlowSet
 class(fs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

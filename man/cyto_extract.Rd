@@ -43,7 +43,6 @@ cyto_extract(gs[[1]], "root")
 
 # Extract flowSet
 cyto_extract(gs, "root")
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
