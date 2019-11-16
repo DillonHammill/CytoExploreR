@@ -344,7 +344,7 @@ cyto_check <- function(x) {
 #' @param trans object of class
 #'   \code{\link[flowWorkspace:transformerList]{transformerList}} containing the
 #'   transformation definitions to apply to \code{x}.
-#' @param trans_type type of transformation to apply when no trans object is
+#' @param type type of transformation to apply when no trans object is
 #'   supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
 #'   \code{"logicle"}.
 #' @param channels names of the channels to transform. Only required when no
@@ -381,7 +381,7 @@ cyto_check <- function(x) {
 #' fs <- Activation
 #'
 #' # Automatically transform flowSet
-#' fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
+#' fs_trans <- cyto_transform(fs, type = "arcsinh")
 #'
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_biex(fs)
@@ -391,11 +391,12 @@ cyto_check <- function(x) {
 #' gs <- GatingSet(fs)
 #'
 #' # Automatically transform GatingSet
-#' gs_trans <- cyto_transform(gs, trans_type = "logicle")
+#' gs_trans <- cyto_transform(gs, type = "logicle")
 #'
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -415,7 +416,7 @@ cyto_transform <- function(x, trans = NULL, ...) {
 #' @export
 cyto_transform.default <- function(x,
                                    trans = NULL,
-                                   trans_type = "logicle",
+                                   type = "logicle",
                                    channels = NULL,
                                    parent = "root",
                                    select = NULL,
@@ -436,28 +437,28 @@ cyto_transform.default <- function(x,
     }
 
     # Dispatch based on trans_type argument to get TransformerList
-    if (trans_type == "log") {
+    if (type == "log") {
       transformer_list <- cyto_transformer_log(x,
         channels = channels,
         parent = parent,
         select = select,
         plot = FALSE, ...
       )
-    } else if (trans_type == "arcsinh") {
+    } else if (type == "arcsinh") {
       transformer_list <- cyto_transformer_arcsinh(x,
         channels = channels,
         parent = parent,
         select = select,
         plot = FALSE, ...
       )
-    } else if (trans_type == "biex") {
+    } else if (type == "biex") {
       transformer_list <- cyto_transformer_biex(x,
         channels = channels,
         parent = parent,
         select = select,
         plot = FALSE, ...
       )
-    } else if (trans_type == "logicle") {
+    } else if (type == "logicle") {
       transformer_list <- cyto_transformer_logicle(x,
         channels = channels,
         parent = parent,

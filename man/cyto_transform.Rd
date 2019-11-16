@@ -12,7 +12,7 @@ cyto_transform(x, trans = NULL, ...)
 \method{cyto_transform}{default}(
   x,
   trans = NULL,
-  trans_type = "logicle",
+  type = "logicle",
   channels = NULL,
   parent = "root",
   select = NULL,
@@ -48,7 +48,7 @@ transformation definitions to apply to \code{x}.}
 or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
 supplied.}
 
-\item{trans_type}{type of transformation to apply when no trans object is
+\item{type}{type of transformation to apply when no trans object is
 supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
 \code{"logicle"}.}
 
@@ -87,7 +87,7 @@ library(CytoExploreRData)
 fs <- Activation
 
 # Automatically transform flowSet
-fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
+fs_trans <- cyto_transform(fs, type = "arcsinh")
 
 # Manually construct & apply transformations
 trans <- cyto_transformer_biex(fs)
@@ -97,11 +97,12 @@ fs_trans <- cyto_transform(fs, trans)
 gs <- GatingSet(fs)
 
 # Automatically transform GatingSet
-gs_trans <- cyto_transform(gs, trans_type = "logicle")
+gs_trans <- cyto_transform(gs, type = "logicle")
 
 # Manually construct & apply transformations
 trans <- cyto_transformer_logicle(gs)
 gs_trans <- cyto_transform(gs, trans)
+
 }
 \seealso{
 \code{\link{cyto_transformer_log}}
