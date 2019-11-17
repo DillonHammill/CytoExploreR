@@ -1415,17 +1415,15 @@ cyto_merge_by.flowSet <- function(x,
 #' @param x object of class \code{flowFrame}.
 #' @param names vector of names to assign to each of the extracted flowFrames
 #'   hwne saving the split files.
-#' @param save_as name of the folder to which the unmerged flowFrames should be
-#'   written to .fcs files. Files are only created when this argument is
-#'   supplied.
 #'
 #' @return list of split flowFrames.
 #'
-#' @importFrom flowCore flowFrame write.FCS exprs identifier keyword split
+#' @importFrom flowCore flowFrame exprs identifier keyword split
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
+#' 
 #' # Load CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -1437,13 +1435,13 @@ cyto_merge_by.flowSet <- function(x,
 #'
 #' # Split merged samples
 #' fr_list <- cyto_split(fr, names = cyto_names(fs))
+#' 
 #' @seealso \code{\link{cyto_merge_by}}
 #' @seealso \code{\link{cyto_barcode}}
 #'
 #' @export
 cyto_split <- function(x,
-                       names = NULL,
-                       save_as = NULL) {
+                       names = NULL) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -1486,34 +1484,177 @@ cyto_split <- function(x,
   })
   names(fr_list) <- names
 
-  # SAVE SPLIT FLOWFRAMES ------------------------------------------------------
-
-  # SAVE TO NEW FOLDER
-  if (!is.null(save_as)) {
-
-    # CREATE NEW DIRECTORY
-    if (!dir.exists(save_as)) {
-
-      # DIRECTORY
-      dir.create(save_as)
-
-      # WRITE FCS FILES TO NEW DIRECTORY
-      lapply(fr_list, function(z) {
-        write.FCS(z, paste0(save_as, "/", cyto_names(z)))
-      })
-
-      # SAVE TO EXISTING DIRECTORY
-    } else {
-
-      # WRITE FCS FILES TO CURRENT WORKING DIRECTORY
-      lapply(fr_list, function(z) {
-        write.FCS(z, cyto_names(z))
-      })
-    }
-  }
-
   # RETURN SPLIT FLOWFRAMES
   return(fr_list)
+}
+
+## CYTO_SAVE -------------------------------------------------------------------
+
+#' Write samples to fcs files in new folder
+#'
+#' @param x object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
+#' @param parent name of the parent population to extract when a
+#'   \code{GatingHierarchy} or \code{GatingSet} object is supplied, defaults to
+#'   the "root" node if not supplied.
+#' @param split logical indicating whether samples merged using
+#'   \code{cyto_merge_by} should be split prior to writing fcs files, set to
+#'   FALSE by default.
+#' @param names original names of the samples prior to merging using
+#'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
+#'   re-assigned to each of split flowFrames and included in the file names.
+#' @param save_as name of the folder to which the written fcs files should be
+#'   saved, set to NULL by default to save the files to the current working
+#'   directory.
+#' @param trans object of class \code{transformerList} containg the
+#'   transformation definitions applied to the supplied data. If transformations
+#'   are supplied, the data will be inverse transformed prior to saving to
+#'   return the data on the original linear scale.
+#'
+#' @return flowFrame or list of flowFrames that were saved to fcs files.
+#'
+#' @importFrom flowCore write.FCS
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' 
+#' \dontrun{
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Save each flowFrame to file
+#' cyto_save(fs)
+#' }
+#'
+#' @seealso \code{\link{cyto_split}}
+#'
+#' @rdname cyto_save
+#'
+#' @export
+cyto_save <- function(x, ...){
+  UseMethod("cyto_save")
+}
+
+#' @rdname cyto_save
+#' @export
+cyto_save.GatingSet <- function(x, 
+                                parent = "root",
+                                split = FALSE,
+                                names = NULL,
+                                save_as = NULL,
+                                trans = NULL){
+  
+  # EXTRACT DATA
+  message(paste("Extracting the ", parent, " node from the GatingSet."))
+  fs <- cyto_extract(x, parent = parent)
+  
+  # FLOWSET METHOD
+  fr_list <- cyto_save(x = fs,
+                       split = split,
+                       names = names,
+                       save_as = save_as,
+                       trans = trans)
+  
+  # RETURN DATA
+  return(fr_list)
+  
+}
+
+#' @rdname cyto_save
+#' @export
+cyto_save.GatingHierarchy <- function(x, 
+                                     parent = "root",
+                                     split = FALSE,
+                                     names = NULL,
+                                     save_as = NULL,
+                                     trans = NULL){
+  
+  # EXTRACT DATA
+  message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
+  fr <- cyto_extract(x, paraent = parent)
+  
+  # FLOWFRAME METHOD
+  fr_list <- cyto_save(x = fr,
+                       split = split,
+                       names = names,
+                       save_as = save_as,
+                       trans = trans)
+    
+  # RETURN DATA
+  return(fr_list)  
+    
+}
+
+#' @rdname cyto_save
+#' @export
+cyto_save.flowSet <- function(x,
+                              split = FALSE,
+                              names = NULL,
+                              save_as = NULL,
+                              trans = NULL){
+  
+  # LIST OF FLOWFRAMES
+  fr_list <- cyto_convert(x, "list of flowFrames")
+  
+  # FLOWFRAME METHOD
+  fr_list <- lapply(fr_list, function(z){
+    cyto_save(z,
+              split = split,
+              names = names,
+              save_as = save_as,
+              trans = trans)
+  })
+  
+  # RETURN DATA
+  return(unlist(fr_list))
+  
+}
+
+#' @rdname cyto_save
+#' @export
+cyto_save.flowFrame <- function(x,
+                                split = FALSE,
+                                names = NULL,
+                                save_as = NULL,
+                                trans = NULL){
+  
+  # INVERSE TRANSFORMATIONS
+  if(!is.null(trans)){
+    message("Data will be inverse transformed prior to saving...")
+    x <- cyto_transform(x, 
+                        trans = trans,
+                        inverse = TRUE)
+  }
+  
+  # SPLIT
+  if(split == TRUE){
+    fr_list <- cyto_split(x, 
+                          names = names)
+  }else{
+    fr_list <- list(x)
+  }
+  
+  # SAVE
+  lapply(fr_list, function(z){
+    # NO DIRECTORY SPECIFIED
+    if(is.null(save_as)){
+      write.FCS(z,
+                cyto_names(z))
+    # DIRECTORY SPECIFIED
+    }else{
+      write.FCS(z,
+                paste0(save_as, "/", cyto_names(z)))
+    }
+    
+  })
+  
+  # RETURN DATA
+  return(unlist(fr_list))
+  
 }
 
 ## CYTO_SAMPLE -----------------------------------------------------------------
@@ -1555,6 +1696,7 @@ cyto_split <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -1764,6 +1906,7 @@ cyto_sample.list <- function(x,
 #'
 #' # Barcode
 #' cyto_barcode(fs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export

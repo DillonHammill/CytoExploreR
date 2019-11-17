@@ -54,6 +54,7 @@ cyto_sample(fs[[1]], 0.5)
 
 # Restrict first sample to 10000 events
 cyto_sample(fs[[1]], 10000)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

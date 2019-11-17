@@ -4,17 +4,13 @@
 \alias{cyto_split}
 \title{Split samples merged with cyto_merge}
 \usage{
-cyto_split(x, names = NULL, save_as = NULL)
+cyto_split(x, names = NULL)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}.}
 
 \item{names}{vector of names to assign to each of the extracted flowFrames
 hwne saving the split files.}
-
-\item{save_as}{name of the folder to which the unmerged flowFrames should be
-written to .fcs files. Files are only created when this argument is
-supplied.}
 }
 \value{
 list of split flowFrames.
@@ -24,6 +20,7 @@ Extract individual samples merged using \code{cyto_merge()} based on
 \code{"Sample ID"} column created by \code{cyto_barcode()}.
 }
 \examples{
+
 # Load CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -35,6 +32,7 @@ fr <- cyto_merge_by(fs, "all")[[1]]
 
 # Split merged samples
 fr_list <- cyto_split(fr, names = cyto_names(fs))
+
 }
 \seealso{
 \code{\link{cyto_merge_by}}
