@@ -3,6 +3,13 @@
 #' Create dimension-reduced maps of cytometry data
 #'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
+#' @param parent name of the parent population to extract from
+#'   \code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
+#'   \code{"root} node by default.
+#' @param select designates which samples should be used for mapping when a
+#'   \code{flowSet} or \code{GatingSet} object is supplied. Filtering steps
+#'   should be comma separated and wrapped in a list. Refer to
+#'   \code{\link{cyto_select}}.
 #' @param channels vector of channels names indicating the channels that should
 #'   be used by the dimension reduction algorithm to compute the 2-dimensional
 #'   map, set to all channels by default. Restricting the number of channels can
@@ -55,6 +62,132 @@ NULL
 #' @export
 cyto_map <- function(x, ...){
   UseMethod("cyto_map")
+}
+
+#' @rdname cyto_map
+#' @export
+cyto_map.GatingSet <- function(x,
+                               parent = NULL,
+                               select = NULL,
+                               channels,
+                               display = 50000,
+                               method = "UMAP",
+                               save = TRUE,
+                               split = TRUE,
+                               names = NULL,
+                               save_as = "cyto_map",
+                               trans = NULL,
+                               plot = TRUE,
+                               seed,
+                               ...){
+  
+  # EXTRACT DATA
+  fs <- cyto_extract(x, parent = parent)
+  
+  # SELECT DATA
+  if(!is.null(select)){
+    fs <- cyto_select(fs, select)
+  }
+  
+  # MERGE BY
+  fr <- cyto_merge_by(fs, merge_by = "all")
+  
+  # FLOWFRAME METHOD
+  fr_list <- cyto_map(fr,
+                      channels = channels,
+                      display = display,
+                      method = method,
+                      save = save,
+                      split = split,
+                      names = names,
+                      save_as = save_as,
+                      trans = trans,
+                      plot = plot,
+                      seed = seed, ...)
+  
+  # RETURN SPLIT MAPPED FLOWFRAMES
+  return(fr_list)
+  
+}
+
+#' @rdname cyto_map
+#' @export
+cyto_map.GatingHierarchy <- function(x,
+                                     parent = NULL,
+                                     channels,
+                                     display = 50000,
+                                     method = "UMAP",
+                                     save = TRUE,
+                                     split = TRUE,
+                                     names = NULL,
+                                     save_as = "cyto_map",
+                                     trans = NULL,
+                                     plot = TRUE,
+                                     seed,
+                                     ...){
+  
+  # EXTRACT DATA
+  fr <- cyto_extract(x, parent = parent)
+  
+  # FLOWFRAME METHOD
+  fr_list <- cyto_map(fr,
+                      channels = channels,
+                      display = display,
+                      method = method,
+                      save = save,
+                      split = split,
+                      names = names,
+                      save_as = save_as,
+                      trans = trans,
+                      plot = plot,
+                      seed = seed, ...)
+  
+  # RETURN SPLIT MAPPED FLOWFRAMES
+  return(fr_list)
+  
+}
+
+#' @rdname cyto_map
+#' @export
+cyto_map.flowSet <- function(x,
+                             select = NULL,
+                             channels,
+                             display = 50000,
+                             method = "UMAP",
+                             save = TRUE,
+                             split = TRUE,
+                             names = NULL,
+                             save_as = "cyto_map",
+                             trans = NULL,
+                             plot = TRUE,
+                             seed,
+                             ...){
+  
+  # SELECT SAMPLES
+  if(!is.null(select)){
+    fs <- cyto_select(x, select)
+  }
+  
+  # MERGE SAMPLES
+  fr <- cyto_merge_by(fs, 
+                      merge_by = "all")
+  
+  # FLOWFRAME METHOD
+  fr_list <- cyto_map(fr,
+                      channels = channels,
+                      display = display,
+                      method = method,
+                      save = save,
+                      split = split,
+                      names = names,
+                      save_as = save_as,
+                      trans = trans,
+                      plot = plot,
+                      seed = seed, ...)
+  
+  # RETURN SPLIT MAPPED FLOWFRAMES
+  return(fr_list)
+  
 }
 
 #' @rdname cyto_map

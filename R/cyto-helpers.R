@@ -1575,7 +1575,7 @@ cyto_save.GatingHierarchy <- function(x,
   
   # EXTRACT DATA
   message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-  fr <- cyto_extract(x, paraent = parent)
+  fr <- cyto_extract(x, parent = parent)
   
   # FLOWFRAME METHOD
   fr_list <- cyto_save(x = fr,

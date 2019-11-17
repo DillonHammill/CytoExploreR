@@ -2,10 +2,62 @@
 % Please edit documentation in R/cyto_map.R
 \name{cyto_map}
 \alias{cyto_map}
+\alias{cyto_map.GatingSet}
+\alias{cyto_map.GatingHierarchy}
+\alias{cyto_map.flowSet}
 \alias{cyto_map.flowFrame}
 \title{Create dimension-reduced maps of cytometry data}
 \usage{
 cyto_map(x, ...)
+
+\method{cyto_map}{GatingSet}(
+  x,
+  parent = NULL,
+  select = NULL,
+  channels,
+  display = 50000,
+  method = "UMAP",
+  save = TRUE,
+  split = TRUE,
+  names = NULL,
+  save_as = "cyto_map",
+  trans = NULL,
+  plot = TRUE,
+  seed,
+  ...
+)
+
+\method{cyto_map}{GatingHierarchy}(
+  x,
+  parent = NULL,
+  channels,
+  display = 50000,
+  method = "UMAP",
+  save = TRUE,
+  split = TRUE,
+  names = NULL,
+  save_as = "cyto_map",
+  trans = NULL,
+  plot = TRUE,
+  seed,
+  ...
+)
+
+\method{cyto_map}{flowSet}(
+  x,
+  select = NULL,
+  channels,
+  display = 50000,
+  method = "UMAP",
+  save = TRUE,
+  split = TRUE,
+  names = NULL,
+  save_as = "cyto_map",
+  trans = NULL,
+  plot = TRUE,
+  seed,
+  ...
+)
 
 \method{cyto_map}{flowFrame}(
   x,
@@ -28,6 +80,15 @@ cyto_map(x, ...)
 \item{...}{additional arguments passed to the called dimension reduction
 function. Links to the documentation for these functions can be found
 below.}
+
+\item{parent}{name of the parent population to extract from
+\code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
+\code{"root} node by default.}
+
+\item{select}{designates which samples should be used for mapping when a
+\code{flowSet} or \code{GatingSet} object is supplied. Filtering steps
+should be comma separated and wrapped in a list. Refer to
+\code{\link{cyto_select}}.}
 
 \item{channels}{vector of channels names indicating the channels that should
 be used by the dimension reduction algorithm to compute the 2-dimensional
