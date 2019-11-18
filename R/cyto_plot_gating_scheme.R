@@ -956,6 +956,5 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   
   # RETURN RECORDED PLOT
   invisible(cyto_plot_record())
+  
 }
-
-
