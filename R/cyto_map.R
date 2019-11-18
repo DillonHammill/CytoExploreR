@@ -14,7 +14,8 @@
 #'   be used by the dimension reduction algorithm to compute the 2-dimensional
 #'   map, set to all channels by default. Restricting the number of channels can
 #'   greatly improved processing speed but may result in poorer resolution.
-#' @param display number of events to map, set to 50 000 events by default.
+#' @param display total number of events to map, set to 100 000 events by
+#'   default.
 #' @param type direction reduction method to use to generate the map, supported
 #'   options include "PCA", "tSNE" and "UMAP".
 #' @param save logical indicating whether the mapped \code{flowFrame} or
@@ -67,10 +68,10 @@ cyto_map <- function(x, ...){
 #' @rdname cyto_map
 #' @export
 cyto_map.GatingSet <- function(x,
-                               parent = NULL,
+                               parent = "root",
                                select = NULL,
                                channels,
-                               display = 50000,
+                               display = 100000,
                                method = "UMAP",
                                save = TRUE,
                                split = TRUE,
@@ -113,9 +114,9 @@ cyto_map.GatingSet <- function(x,
 #' @rdname cyto_map
 #' @export
 cyto_map.GatingHierarchy <- function(x,
-                                     parent = NULL,
+                                     parent = "root",
                                      channels,
-                                     display = 50000,
+                                     display = 100000,
                                      method = "UMAP",
                                      save = TRUE,
                                      split = TRUE,
@@ -152,7 +153,7 @@ cyto_map.GatingHierarchy <- function(x,
 cyto_map.flowSet <- function(x,
                              select = NULL,
                              channels,
-                             display = 50000,
+                             display = 100000,
                              method = "UMAP",
                              save = TRUE,
                              split = TRUE,
@@ -194,7 +195,7 @@ cyto_map.flowSet <- function(x,
 #' @export
 cyto_map.flowFrame <- function(x,
                                channels,
-                               display = 50000,
+                               display = 100000,
                                method = "UMAP",
                                save = TRUE,
                                split = TRUE,

@@ -12,10 +12,10 @@ cyto_map(x, ...)
 
 \method{cyto_map}{GatingSet}(
   x,
-  parent = NULL,
+  parent = "root",
   select = NULL,
   channels,
-  display = 50000,
+  display = 1e+05,
   method = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -29,9 +29,9 @@ cyto_map(x, ...)
 
 \method{cyto_map}{GatingHierarchy}(
   x,
-  parent = NULL,
+  parent = "root",
   channels,
-  display = 50000,
+  display = 1e+05,
   method = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -47,7 +47,7 @@ cyto_map(x, ...)
   x,
   select = NULL,
   channels,
-  display = 50000,
+  display = 1e+05,
   method = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -62,7 +62,7 @@ cyto_map(x, ...)
 \method{cyto_map}{flowFrame}(
   x,
   channels,
-  display = 50000,
+  display = 1e+05,
   method = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -95,7 +95,8 @@ be used by the dimension reduction algorithm to compute the 2-dimensional
 map, set to all channels by default. Restricting the number of channels can
 greatly improved processing speed but may result in poorer resolution.}
 
-\item{display}{number of events to map, set to 50 000 events by default.}
+\item{display}{total number of events to map, set to 100 000 events by
+default.}
 
 \item{save}{logical indicating whether the mapped \code{flowFrame} or
 \code{flowSet} should be saved as .fcs file(s) in a folder in the current
