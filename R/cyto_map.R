@@ -5,7 +5,7 @@
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
-#'   \code{"root} node by default.
+#'   \code{"root"} node by default.
 #' @param select designates which samples should be used for mapping when a
 #'   \code{flowSet} or \code{GatingSet} object is supplied. Filtering steps
 #'   should be comma separated and wrapped in a list. Refer to
