@@ -16,7 +16,8 @@ cyto_plot_save(
 }
 \arguments{
 \item{file}{name of the file to which the plot should be saved (including the
-file extension). Supported file formats include png, tiff jpeg and pdf.}
+file extension). Supported file formats include png, tiff, jpeg, svg and
+pdf.}
 
 \item{width}{numeric indicating the width of exported plot in \code{units},
 set to 7 by default for image with width of 7 inches.}
@@ -26,7 +27,8 @@ set to 7 by default for image with width of 7 inches.}
 
 \item{units}{units to be used to set plot size, can be either pixels
 (\code{px}), inches (\code{inches}), centimetres (\code{cm}) or millimetres
-(\code{mm}). Set to \code{"in"} by default.}
+(\code{mm}). Set to \code{"in"} by default. Units cannot be altered for
+\code{svg} and \code{pdf} graphics devices.}
 
 \item{res}{resolution in ppi, set to 300 by default.}
 
@@ -34,7 +36,7 @@ set to 7 by default for image with width of 7 inches.}
 separate numbered files, set to \code{TRUE} by default.}
 
 \item{...}{additional arguments for the appropriate \code{png()},
-\code{tiff()}, \code{jpeg()} or \code{pdf} graphics devices.}
+\code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.}
 }
 \description{
 Save High Resolution cyto_plot Images
@@ -76,6 +78,18 @@ cyto_plot(gs,
   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
   layout = c(1, 2)
 )
+
+}
+\seealso{
+\code{\link[grDevices:pdf]{pdf}}
+
+\code{\link[grDevices:tiff]{tiff}}
+
+\code{\link[grDevices:jpeg]{jpeg}}
+
+\code{\link[grDevices:png]{png}}
+
+\code{\link[grDevices:svg]{svg}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

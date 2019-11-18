@@ -851,22 +851,24 @@ cyto_plot_record <- function(){
 #' Save High Resolution cyto_plot Images
 #'
 #' @param file name of the file to which the plot should be saved (including the
-#'   file extension). Supported file formats include png, tiff jpeg and pdf.
+#'   file extension). Supported file formats include png, tiff, jpeg, svg and
+#'   pdf.
 #' @param width numeric indicating the width of exported plot in \code{units},
 #'   set to 7 by default for image with width of 7 inches.
 #' @param height numeric indicating the height of the exported plot in
 #'   \code{units}, set to 7 by default for image with height of 7 inches.
 #' @param units units to be used to set plot size, can be either pixels
 #'   (\code{px}), inches (\code{inches}), centimetres (\code{cm}) or millimetres
-#'   (\code{mm}). Set to \code{"in"} by default.
+#'   (\code{mm}). Set to \code{"in"} by default. Units cannot be altered for
+#'   \code{svg} and \code{pdf} graphics devices.
 #' @param res resolution in ppi, set to 300 by default.
 #' @param multiple logical indicating whether multiple pages should be saved to
 #'   separate numbered files, set to \code{TRUE} by default.
 #' @param ... additional arguments for the appropriate \code{png()},
-#'   \code{tiff()}, \code{jpeg()} or \code{pdf} graphics devices.
+#'   \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.
 #'
 #' @importFrom tools file_ext file_path_sans_ext
-#' @importFrom grDevices png tiff jpeg pdf
+#' @importFrom grDevices png tiff jpeg pdf svg
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -907,6 +909,13 @@ cyto_plot_record <- function(){
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   layout = c(1, 2)
 #' )
+#' 
+#' @seealso \code{\link[grDevices:pdf]{pdf}}
+#' @seealso \code{\link[grDevices:tiff]{tiff}}
+#' @seealso \code{\link[grDevices:jpeg]{jpeg}}
+#' @seealso \code{\link[grDevices:png]{png}}
+#' @seealso \code{\link[grDevices:svg]{svg}}
+#' 
 #' @export
 cyto_plot_save <- function(file,
                            width = 7,
@@ -918,7 +927,6 @@ cyto_plot_save <- function(file,
 
   # File missing extension
   if (file_ext(file) == "") {
-
     # Modify file name to export png by default
     file <- paste0(file, ".png")
   }
@@ -932,7 +940,7 @@ cyto_plot_save <- function(file,
     )
   }
 
-  # png device
+  # PNG DEVICE
   if (file_ext(file) == "png") {
     png(
       filename = file,
@@ -942,6 +950,7 @@ cyto_plot_save <- function(file,
       res = res,
       ...
     )
+  # TIFF DEVICE
   } else if (file_ext(file) == "tiff") {
     tiff(
       filename = file,
@@ -951,6 +960,7 @@ cyto_plot_save <- function(file,
       res = res,
       ...
     )
+  # JPEG DEVICE
   } else if (file_ext(file) == "jpeg") {
     jpeg(
       filename = file,
@@ -960,12 +970,20 @@ cyto_plot_save <- function(file,
       res = res,
       ...
     )
+  # PDF DEVICE
   } else if (file_ext(file) == "pdf") {
     pdf(
       file = file,
       width = width,
       height = height,
       onefile = multiple,
+      ...
+    )
+  } else if(file_ext(file) == "svg") {
+    svg(
+      filename = file,
+      width = width,
+      height = height,
       ...
     )
   } else {
@@ -998,7 +1016,6 @@ cyto_plot_save_reset <- function() {
   # TURN OFF GRAPHICS DEVICE
   dev.off()
 }
-
 
 ## CYTO_PLOT_LAYOUT ------------------------------------------------------------
 
