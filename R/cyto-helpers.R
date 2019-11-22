@@ -1097,12 +1097,15 @@ cyto_filter <- function(x, ...) {
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param exclude logical indicating whether samples matching the input
+#'   selection criteria should be excluded from the returned \code{flowSet} or
+#'   \code{GatingSet}.
 #' @param ... named list containing experimental variables to be used to select
 #'   samples or named arguments containing the levels of the variables to
 #'   select. See below examples for use cases.
 #'
 #' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
-#'   the selection criteria.
+#'   the designated selection criteria.
 #'
 #' @examples
 #'
@@ -1123,10 +1126,13 @@ cyto_filter <- function(x, ...) {
 #'   Activation,
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
 #' )
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_select <- function(x, ...) {
+cyto_select <- function(x,
+                        exclude = FALSE,
+                        ...) {
 
   # Check class of x
   if (!any(inherits(x, "flowSet") |
@@ -1144,7 +1150,7 @@ cyto_select <- function(x, ...) {
 
   # Extract experiment details
   pd <- cyto_details(x)
-
+  
   # Check that all varaibles are valid
   if (!all(names(args) %in% colnames(pd))) {
     lapply(names(args), function(y) {
@@ -1181,7 +1187,13 @@ cyto_select <- function(x, ...) {
   # Get indices for selected samples
   ind <- match(pd_filter[, "name"], pd[, "name"])
 
-  return(x[ind])
+  # Exclude
+  if(exclude == TRUE){
+    return(x[-ind])
+  }else{
+    return(x[ind])
+  }
+
 }
 
 ## CYTO_GROUP_BY ---------------------------------------------------------------
@@ -2636,4 +2648,50 @@ cyto_channel_match <- function(x,
 
   # Return edited channel match file
   return(cm)
+}
+
+## CYTO_EMPTY ------------------------------------------------------------------
+
+#' Construct an empty flowFrame
+#'
+#' @param name name to add to the constructed flowFrame.
+#' @param channels channels to include in the constructed flowFrame.
+#' @param ... additional arguments passed to
+#'   \code{\link[flowCore:flowFrame]{flowFrame}}.
+#'
+#' @importFrom flowCore identifier<- flowFrame
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' 
+#' # Construct empty flowFrame
+#' cyto_empty(name = "Test.csv", channels = c("FSC-A", "SSC-A", "PE-A"))
+#'
+#' @export
+cyto_empty <- function(name = NULL,
+                       channels = NULL, ...){
+  
+  # CHANNELS
+  if(is.null(channels)){
+    stop("Supply the names of the channels to include in the flowFrame.")
+  }
+  
+  # CONSTRUCT EMPTY FLOWFRAME
+  empty_flowFrame <- matrix(0,
+                            ncol = length(channels),
+                            nrow = 1,
+                            byrow = TRUE)
+  colnames(empty_flowFrame) <- channels
+  empty_flowFrame <- flowFrame(empty_flowFrame, ...)
+  empty_flowFrame <- empty_flowFrame[-1, ]
+  
+  # NAME
+  if(!is.null(name)){
+    identifier(empty_flowFrame) <- name
+  }
+  
+  # RETURN EMPTY FLOWFRAME
+  return(empty_flowFrame)
+  
 }
