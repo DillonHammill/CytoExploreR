@@ -4,19 +4,16 @@
 \alias{cyto_select}
 \title{Select samples based on experiment variables}
 \usage{
-cyto_select(x, exclude = FALSE, ...)
+cyto_select(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{exclude}{logical indicating whether samples matching the input
-selection criteria should be excluded from the returned \code{flowSet} or
-\code{GatingSet}.}
-
 \item{...}{named list containing experimental variables to be used to select
 samples or named arguments containing the levels of the variables to
-select. See below examples for use cases.}
+select. See below examples for use cases. Selected samples can be excluded
+by setting \code{exclude} to TRUE.}
 }
 \value{
 \code{flowSet} or \code{GatingSet} restricted to samples which meet
@@ -43,6 +40,12 @@ fs <- cyto_select(Activation,
 fs <- cyto_select(
   Activation,
   list("Treatment" = c("Stim-A", "Stim-C"))
+)
+
+# Exclude Stim-D treatment group
+fs <- cyto_select(Activation,
+  Treatment = "Stim-D",
+  exclude = TRUE
 )
 
 }

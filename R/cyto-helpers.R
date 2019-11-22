@@ -1097,12 +1097,10 @@ cyto_filter <- function(x, ...) {
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param exclude logical indicating whether samples matching the input
-#'   selection criteria should be excluded from the returned \code{flowSet} or
-#'   \code{GatingSet}.
 #' @param ... named list containing experimental variables to be used to select
 #'   samples or named arguments containing the levels of the variables to
-#'   select. See below examples for use cases.
+#'   select. See below examples for use cases. Selected samples can be excluded
+#'   by setting \code{exclude} to TRUE.
 #'
 #' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
 #'   the designated selection criteria.
@@ -1127,11 +1125,16 @@ cyto_filter <- function(x, ...) {
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
 #' )
 #'
+#' # Exclude Stim-D treatment group
+#' fs <- cyto_select(Activation,
+#'   Treatment = "Stim-D",
+#'   exclude = TRUE
+#' )
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_select <- function(x,
-                        exclude = FALSE,
                         ...) {
 
   # Check class of x
@@ -1142,12 +1145,20 @@ cyto_select <- function(x,
 
   # Pull down ... arguments to list
   args <- list(...)
-
+  
   # ... is already a named list of arguments
   if (class(args[[1]]) == "list") {
     args <- args[[1]]
   }
-
+  
+  # Exclude
+  if(any(grepl("exclude", names(args)))){
+    exclude <- args[[which(grepl("exclude", names(args)))]]
+    args <- args[-which(grepl("exclude", names(args)))]
+  }else{
+    exclude <- FALSE
+  }
+  
   # Extract experiment details
   pd <- cyto_details(x)
   
