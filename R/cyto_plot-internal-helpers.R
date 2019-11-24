@@ -469,7 +469,7 @@
   smp <- length(x)
 
   # Plot layout
-  if (.empty(layout)) {
+  if (is.null(layout) | .empty(layout)) {
     if (smp > 1) {
       mfrw <- c(grDevices::n2mfrow(smp)[2], grDevices::n2mfrow(smp)[1])
     } else {
