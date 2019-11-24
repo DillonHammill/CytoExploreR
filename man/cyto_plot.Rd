@@ -14,7 +14,7 @@
   alias = NA,
   channels,
   axes_trans = NA,
-  group_by = NA,
+  group_by = "name",
   overlay = NA,
   gate = NA,
   limits = "auto",
@@ -177,7 +177,7 @@
   x,
   channels,
   axes_trans = NA,
-  group_by = NA,
+  group_by = "name",
   overlay = NA,
   gate = NA,
   limits = "auto",
@@ -363,7 +363,7 @@ internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
 
 \item{group_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to NULL by default to prevent merging. To
+groups prior to plotting, set to "name" by default to prevent merging. To
 merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},

@@ -27,7 +27,7 @@
 #'   internally to ensure that the axes on the constructed plots are
 #'   appropriately labelled.
 #' @param group_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to NULL by default to prevent merging. To
+#'   groups prior to plotting, set to "name" by default to prevent merging. To
 #'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
 #'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
@@ -273,7 +273,7 @@ cyto_plot.GatingSet <- function(x,
                                 alias = NA,
                                 channels,
                                 axes_trans = NA,
-                                group_by = NA,
+                                group_by = "name",
                                 overlay = NA,
                                 gate = NA,
                                 limits = "auto",
@@ -1135,7 +1135,7 @@ cyto_plot.GatingHierarchy <- function(x,
 cyto_plot.flowSet <- function(x,
                               channels,
                               axes_trans = NA,
-                              group_by = NA,
+                              group_by = "name",
                               overlay = NA,
                               gate = NA,
                               limits = "auto",
@@ -1269,11 +1269,7 @@ cyto_plot.flowSet <- function(x,
   # SAMPLE PREPARATION - BASE LAYERS & OVERLAYS --------------------------------
 
   # DATA TO LIST & GROUP - CONVERT GROUPS TO FLOWFRAMES
-  if (!.all_na(group_by)) {
-    fr_list <- cyto_merge_by(x, group_by)
-  } else {
-    fr_list <- cyto_merge_by(x, merge_by = "name")
-  }
+  fr_list <- cyto_merge_by(x, group_by)
 
   # OVERLAY LIST & GROUP
   if (!.all_na(overlay)) {
@@ -1283,12 +1279,7 @@ cyto_plot.flowSet <- function(x,
       # FLOWSET TO LIST OF FLOWFRAMES
     } else if (inherits(overlay, "flowSet")) {
       # GROUPING
-      if (!.all_na(group_by)) {
-        overlay_list <- cyto_merge_by(overlay, merge_by = group_by)
-        # NO GROUPING
-      } else {
-        overlay_list <- cyto_merge_by(overlay, merge_by = "name")
-      }
+      overlay_list <- cyto_merge_by(overlay, merge_by = group_by)
       # LIST OF FLOWFRAME LISTS
       overlay_list <- lapply(overlay_list, function(z) {
         list(z)
@@ -1315,16 +1306,9 @@ cyto_plot.flowSet <- function(x,
         inherits(z, "flowSet")
       }))) {
         # GROUPING
-        if (!.all_na(group_by)) {
-          overlay_list <- lapply(overlay, function(z) {
-            cyto_merge_by(z, merge_by = group_by)
-          })
-          # NO GROUPING
-        } else {
-          overlay_list <- lapply(overlay, function(z) {
-            cyto_merge_by(z, merge_by = "name")
-          })
-        }
+        overlay_list <- lapply(overlay, function(z) {
+          cyto_merge_by(z, merge_by = group_by)
+        })
         overlay_list <- overlay_list %>% transpose()
         # OVERLAY NOT SUPPORTED
       } else {
@@ -1529,7 +1513,7 @@ cyto_plot.flowSet <- function(x,
     cyto_plot_new(popup)
   }
 
-  # LAYOUT
+  # LAYOUT MISSING
   if (.empty(layout)) {
     # LAYOUT DIMENSIONS
     layout <- .cyto_plot_layout(fr_list,
@@ -1538,12 +1522,16 @@ cyto_plot.flowSet <- function(x,
       density_layers = density_layers
     )
     par("mfrow" = layout)
+  # LAYOUT TURNED OFF
   } else if (all(layout == FALSE) | .all_na(layout)) {
     # USE CURRENT DIMENSIONS
     if(getOption("cyto_plot_method") == "flowSet"){
       layout <- par("mfrow")
       par("mfrow" = layout)
     }
+  # LAYOUT SUPPLIED
+  }else{
+    par("mfrow" = layout)
   }
   
   # NUMBER OF PLOTS PER PAGE
@@ -1685,15 +1673,15 @@ cyto_plot.flowSet <- function(x,
 
       # CALL CYTO_PLOT FLOWFRAME METHOD
       cyto_plot(x[[1]],
-        channels = channels,
+        channels = channels, #
         overlay = overlay,
         gate = gate,
-        axes_trans = axes_trans,
-        limits = limits,
+        axes_trans = axes_trans, #
+        limits = limits, #
         display = display,
-        popup = FALSE,
-        xlim = xlim,
-        ylim = ylim,
+        popup = FALSE, #
+        xlim = xlim, #
+        ylim = ylim, #
         xlab = xlab,
         ylab = ylab,
         title = title,
