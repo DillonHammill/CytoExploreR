@@ -1661,7 +1661,16 @@ cyto_save.flowFrame <- function(x,
     fr_list <- list(x)
   }
   
-  # SAVE
+  # MESSAGE
+  if(is.null(save_as)){
+    location <- "current working directory."
+  }else{
+    location <- save_as
+  }
+  message(paste("Writing FCS files to",
+                location))
+  
+  # WRITE FCS FILES
   lapply(fr_list, function(z){
     # NO DIRECTORY SPECIFIED
     if(is.null(save_as)){
@@ -1669,6 +1678,10 @@ cyto_save.flowFrame <- function(x,
                 cyto_names(z))
     # DIRECTORY SPECIFIED
     }else{
+      # CREATE DIRECTORY
+      if(!dir.exists(save_as)){
+        dir.create(save_as)
+      }
       write.FCS(z,
                 paste0(save_as, "/", cyto_names(z)))
     }
