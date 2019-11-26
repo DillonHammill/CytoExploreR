@@ -45,7 +45,8 @@ Imports:
   gtools,
   visNetwork,
   Rtsne,
-  umap
+  umap,
+  EmbedSOM
 Suggests: 
   CytoExploreRData,
   RProtoBufLib,

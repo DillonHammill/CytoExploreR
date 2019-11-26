@@ -16,8 +16,8 @@
 #'   greatly improved processing speed but may result in poorer resolution.
 #' @param display total number of events to map, set to 100 000 events by
 #'   default.
-#' @param type direction reduction method to use to generate the map, supported
-#'   options include "PCA", "tSNE" and "UMAP".
+#' @param type direction reduction type to use to generate the map, supported
+#'   options include "PCA", "tSNE", "UMAP" and "EmbedSOM".
 #' @param save logical indicating whether the mapped \code{flowFrame} or
 #'   \code{flowSet} should be saved as .fcs file(s) in a folder in the current
 #'   working directory.
@@ -44,15 +44,16 @@
 #' @return flowFrame or list of split flowFrames containing the mapped
 #'   projection parameters.
 #'
-#' @importFrom flowCore exprs keyword
+#' @importFrom flowCore exprs keyword write.FCS
 #' @importFrom stats prcomp
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
-#' @importFrom flowCore write.FCS
+#' @importFrom EmbedSOM SOM EmbedSOM
 #'
 #' @seealso \code{\link[stats:prcomp]{PCA}}
 #' @seealso \code{\link[Rtsne:Rtsne]{tSNE}}
 #' @seealso \code{\link[umap:umap]{UMAP}}
+#' @seealso \code{\link[EmbedSOM:EmbedSOM]}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -72,7 +73,7 @@ cyto_map.GatingSet <- function(x,
                                select = NULL,
                                channels,
                                display = 100000,
-                               method = "UMAP",
+                               type = "UMAP",
                                save = TRUE,
                                split = TRUE,
                                names = NULL,
@@ -97,7 +98,7 @@ cyto_map.GatingSet <- function(x,
   fr_list <- cyto_map(fr,
                       channels = channels,
                       display = display,
-                      method = method,
+                      type = type,
                       save = save,
                       split = split,
                       names = names,
@@ -117,7 +118,7 @@ cyto_map.GatingHierarchy <- function(x,
                                      parent = "root",
                                      channels,
                                      display = 100000,
-                                     method = "UMAP",
+                                     type = "UMAP",
                                      save = TRUE,
                                      split = TRUE,
                                      names = NULL,
@@ -134,7 +135,7 @@ cyto_map.GatingHierarchy <- function(x,
   fr_list <- cyto_map(fr,
                       channels = channels,
                       display = display,
-                      method = method,
+                      type = type,
                       save = save,
                       split = split,
                       names = names,
@@ -154,7 +155,7 @@ cyto_map.flowSet <- function(x,
                              select = NULL,
                              channels,
                              display = 100000,
-                             method = "UMAP",
+                             type = "UMAP",
                              save = TRUE,
                              split = TRUE,
                              names = NULL,
@@ -177,7 +178,7 @@ cyto_map.flowSet <- function(x,
   fr_list <- cyto_map(fr,
                       channels = channels,
                       display = display,
-                      method = method,
+                      type = type,
                       save = save,
                       split = split,
                       names = names,
@@ -196,7 +197,7 @@ cyto_map.flowSet <- function(x,
 cyto_map.flowFrame <- function(x,
                                channels,
                                display = 100000,
-                               method = "UMAP",
+                               type = "UMAP",
                                save = TRUE,
                                split = TRUE,
                                names = NULL,
@@ -215,7 +216,11 @@ cyto_map.flowFrame <- function(x,
                               exclude = c("Time",
                                           "Original",
                                           "Sample ID",
-                                          "Event ID"))
+                                          "Event ID",
+                                          "PCA",
+                                          "tSNE",
+                                          "UMAP",
+                                          "EmbedSOM"))
   }
   
   # CONVERT CHANNELS
@@ -244,7 +249,7 @@ cyto_map.flowFrame <- function(x,
   }
   
   # PCA
-  if(grepl(method, "PCA", ignore.case = TRUE)){
+  if(grepl(type, "PCA", ignore.case = TRUE)){
     # MAPPING
     mp <- prcomp(fr_exprs, ...)
     # MAPPING CO-ORDINATES
@@ -253,23 +258,30 @@ cyto_map.flowFrame <- function(x,
     # ADD MAPPING COORDS TO FLOWFRAME
     x <- cbind(x, coords)
   # tSNE
-  }else if(grepl(method, "tSNE", ignore.case = TRUE)){
+  }else if(grepl(type, "tSNE", ignore.case = TRUE)){
     # MAPPING 
     mp <- Rtsne(fr_exprs, ...)
     # MAPPING CO-ORDINATES
     coords <- mp$Y
     colnames(coords) <- c("tSNE-1","tSNE-2")
-
   # UMAP 
-  }else if(grepl(method, "UMAP", ignore.case = TRUE)){
+  }else if(grepl(type, "UMAP", ignore.case = TRUE)){
     # MAPPING
     mp <- umap(fr_exprs, ...)
     # MAPPING CO-ORDINATES
     coords <- mp$layout
     colnames(coords) <- c("UMAP-1","UMAP-2")
-  # UNSUPPORTED METHOD  
+  # EMBEDSOM
+  } else if(grepl(type, "EmbedSOM", ignore.case = TRUE)){
+    # CREATE SOM
+    mp <- SOM(fr_exprs)
+    mp <- EmbedSOM(data = fr_exprs, map = mp, ...)
+    # MAPPING CO-ORDINATES
+    coords <- mp
+    colnames(coords) <- c("EmbedSOM-1", "EmbedSOM-2")
+  # UNSUPPORTED TYPE  
   }else{
-    stop(paste(method, "is not a supported mapping method."))
+    stop(paste(type, "is not a supported mapping type."))
   }
   
   # ADD MAPPING COORDS TO FLOWFRAME
@@ -288,10 +300,10 @@ cyto_map.flowFrame <- function(x,
   # CYTO_SAVE
   if(save == TRUE){
     fr_list <- cyto_save(x,
-                       split = split,
-                       names = names,
-                       save_as = save_as,
-                       trans = trans)
+                         split = split,
+                         names = names,
+                         save_as = save_as,
+                         trans = trans)
   }else{
     fr_list <- x
   }

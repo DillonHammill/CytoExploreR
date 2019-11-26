@@ -15,8 +15,8 @@ cyto_map(x, ...)
   parent = "root",
   select = NULL,
   channels,
-  display = 1e+05,
-  method = "UMAP",
+  display = 100000,
+  type = "UMAP",
   save = TRUE,
   split = TRUE,
   names = NULL,
@@ -31,8 +31,8 @@ cyto_map(x, ...)
   x,
   parent = "root",
   channels,
-  display = 1e+05,
-  method = "UMAP",
+  display = 100000,
+  type = "UMAP",
   save = TRUE,
   split = TRUE,
   names = NULL,
@@ -47,8 +47,8 @@ cyto_map(x, ...)
   x,
   select = NULL,
   channels,
-  display = 1e+05,
-  method = "UMAP",
+  display = 100000,
+  type = "UMAP",
   save = TRUE,
   split = TRUE,
   names = NULL,
@@ -62,8 +62,8 @@ cyto_map(x, ...)
 \method{cyto_map}{flowFrame}(
   x,
   channels,
-  display = 1e+05,
-  method = "UMAP",
+  display = 100000,
+  type = "UMAP",
   save = TRUE,
   split = TRUE,
   names = NULL,
@@ -98,6 +98,9 @@ greatly improved processing speed but may result in poorer resolution.}
 \item{display}{total number of events to map, set to 100 000 events by
 default.}
 
+\item{type}{direction reduction type to use to generate the map, supported
+options include "PCA", "tSNE", "UMAP" and "EmbedSOM".}
+
 \item{save}{logical indicating whether the mapped \code{flowFrame} or
 \code{flowSet} should be saved as .fcs file(s) in a folder in the current
 working directory.}
@@ -123,9 +126,6 @@ using \code{cyto_plot}.}
 
 \item{seed}{integer to set seed prior to mapping to ensure consistent results
 between runs.}
-
-\item{type}{direction reduction method to use to generate the map, supported
-options include "PCA", "tSNE" and "UMAP".}
 }
 \value{
 flowFrame or list of split flowFrames containing the mapped
@@ -140,6 +140,8 @@ Create dimension-reduced maps of cytometry data
 \code{\link[Rtsne:Rtsne]{tSNE}}
 
 \code{\link[umap:umap]{UMAP}}
+
+\code{\link[EmbedSOM:EmbedSOM]}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
