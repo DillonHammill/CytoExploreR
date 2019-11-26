@@ -1661,14 +1661,25 @@ cyto_save.flowFrame <- function(x,
     fr_list <- list(x)
   }
   
+  # DIRECTORY CHECK
+  if(dir.exists(save_as)){
+    # FILES WILL BE OVERWRITTEN
+    if(any(list.files(save_as) %in% cyto_names(fr_list))){
+      message(paste("Files will be overwritten in", save_as, ".")) 
+      opt <- readline("Do you want to continue? (Y/N)")
+      if(grepl("n", opt, ignore.case = TRUE)){
+        invisible(NULL)
+      }
+    }
+  }
+  
   # MESSAGE
   if(is.null(save_as)){
     location <- "current working directory."
   }else{
     location <- save_as
   }
-  message(paste("Writing FCS files to",
-                location))
+  message(paste("Writing FCS files to", location, "..."))
   
   # WRITE FCS FILES
   lapply(fr_list, function(z){
