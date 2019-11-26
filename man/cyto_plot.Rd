@@ -369,7 +369,8 @@ merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 \item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
 \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
 \code{list of flowFrame lists} containing populations to be overlaid onto
-the plot(s).}
+the plot(s). This argument can be set to "children" or "descendants" when a
+\code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.}
 
 \item{gate}{gate objects to be plotted, can be either objects of class
 \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},

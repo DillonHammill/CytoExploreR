@@ -32,7 +32,8 @@
 #' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
 #'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
 #'   \code{list of flowFrame lists} containing populations to be overlaid onto
-#'   the plot(s).
+#'   the plot(s). This argument can be set to "children" or "descendants" when a
+#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
 #' @param gate gate objects to be plotted, can be either objects of class
 #'   \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},
 #'   \code{quadGate} or \code{filters}. Lists of these supported gate objects
@@ -253,7 +254,8 @@
 #' @importFrom purrr transpose
 #' @importFrom openCyto gh_generate_template
 #' @importFrom methods formalArgs is
-#' @importFrom flowWorkspace gh_pop_is_negated
+#' @importFrom flowWorkspace gh_pop_is_negated gs_pop_get_children
+#'   gh_pop_get_descendants
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -606,6 +608,15 @@ cyto_plot.GatingSet <- function(x,
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
     if (is.character(overlay)) {
+      # OVERLAY DESCENDANTS
+      if(any(grepl(overlay, "descendants"))){
+        overlay <- tryCatch(gh_pop_get_descendants(gs[[1]], parent), 
+                            error = function(e){NA}) 
+      # OVERLAY CHILDREN  
+      }else if(any(grepl(overlay, "children"))){
+        overlay <- tryCatch(gs_pop_get_children(gs, parent),
+                            error = function(e){NA})
+      }
       # VALID OVERLAY
       if (all(overlay %in% cyto_nodes(gs, path = "auto"))) {
         # EXTRACT POPULATIONS
@@ -1026,6 +1037,16 @@ cyto_plot.GatingHierarchy <- function(x,
   if (!.all_na(overlay)) {
     # POPULATION NAMES TO OVERLAY
     if (is.character(overlay)) {
+      # OVERLAY DESCENDANTS
+      if(any(grepl(overlay, "descendants"))){
+        overlay <- tryCatch(gh_pop_get_descendants(gh, parent), 
+                            error = function(e){NA}) 
+        # OVERLAY CHILDREN  
+      }else if(any(grepl(overlay, "children"))){
+        overlay <- tryCatch(gh_pop_get_children(gh, parent),
+                            error = function(e){NA})
+      }
+      # VALID OVERLAY
       if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
         # EXTRACT POPULATIONS
         nms <- overlay
