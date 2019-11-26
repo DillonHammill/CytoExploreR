@@ -40,7 +40,7 @@
   if(is.null(x)){
     return(FALSE)
   }else{
-    return(all(suppressWarnings(is.na(x))))
+    return(all(suppressWarnings(is.na(unlist(x)))))
   }
 }
 
