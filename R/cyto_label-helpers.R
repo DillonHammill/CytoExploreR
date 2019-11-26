@@ -156,7 +156,13 @@
       if (!.all_na(label_stat[y])) {
         # FREQUENCY STATISTIC
         if (grepl("freq", label_stat[y], ignore.case = TRUE)) {
-          st <- .cyto_count(pops[[y]]) / .cyto_count(x[[z]]) * 100
+          # PERCENT OF BASE LAYER (WITHOUT GATES)
+          if(length(pops) == length(x)){
+            st <- .cyto_count(pops[[y]]) / .cyto_count(x[[1]]) * 100
+          # PERCENT GATED PER LAYER
+          }else{
+            st <- .cyto_count(pops[[y]]) / .cyto_count(x[[z]]) * 100
+          }
           st <- paste(.round(st, 2), "%")
           # CV STATISTIC
         } else if (grepl("CV", label_stat[y], ignore.case = TRUE)) {

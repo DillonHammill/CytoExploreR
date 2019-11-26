@@ -147,6 +147,9 @@
   P <- .cyto_gate_count(args[["gate"]], 
                         negate = FALSE, 
                         total = FALSE)
+  
+  # LABEL
+  label <- args[["label"]]
 
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
@@ -202,7 +205,8 @@
         )
       )
       # RETAIN MANUALLY SELECTED CO-ORDINATES
-      if (!.all_na(args[["label_text"]][[z]])) {
+      if (label == TRUE &
+          !.all_na(args[["label_text"]][[z]])) {
         # ADD LABELS
         text_xy <- do.call("cyto_plot_labeller", lapply(label_args, `[[`, z))
       } else {
@@ -215,7 +219,8 @@
       # NEGATED POPULATION(S) - LABEL(s) ONLY
     } else {
       # RETAIN MANUALLY SELECTED CO-ORDINATES
-      if (!.all_na(args[["label_text"]][[z]])) {
+      if (label == TRUE &
+          !.all_na(args[["label_text"]][[z]])) {
         # ADD LABELS
         text_xy <- do.call("cyto_plot_labeller", lapply(label_args, `[[`, z))
       } else {

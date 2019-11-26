@@ -775,7 +775,7 @@
         adjustcolor(col, alpha)
       }, legend_point_col, point_col_alpha)
     }
-
+    
     legend(
       x = 1.08 * par("usr")[2],
       y = cnt + 0.6 * lgnd_height,
