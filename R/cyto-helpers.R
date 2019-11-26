@@ -1498,7 +1498,7 @@ cyto_split <- function(x,
     }
     # NO NAMES
   } else {
-    names <- paste("Sample-", sample_id)
+    names <- paste0("Sample-", sample_id)
   }
 
   # NAME SPLIT FILES
