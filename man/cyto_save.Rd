@@ -6,7 +6,7 @@
 \alias{cyto_save.GatingHierarchy}
 \alias{cyto_save.flowSet}
 \alias{cyto_save.flowFrame}
-\title{Write samples to fcs files in new folder}
+\title{Write samples to fcs files in new folder or save GatingSet}
 \usage{
 cyto_save(x, ...)
 
@@ -61,11 +61,12 @@ return the data on the original linear scale.}
 flowFrame or list of flowFrames that were saved to fcs files.
 }
 \description{
-Write samples to fcs files in new folder
+Write samples to fcs files in new folder or save GatingSet
 }
 \examples{
 
 \dontrun{
+
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -74,6 +75,7 @@ fs <- Activation
 
 # Save each flowFrame to file
 cyto_save(fs)
+
 }
 
 }

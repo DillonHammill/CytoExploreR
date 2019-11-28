@@ -19,14 +19,16 @@ using \code{cyto_barcode}, set to FALSE by default.}
 \item{...}{additional arguments passed to read.ncdfFlowSet.}
 }
 \value{
-object of class
-  \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
+object of class \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}
+  or \code{\link[flowWorkspace:GatingSet-class]}.
 }
 \description{
 \code{cyto_load} is a convenient wrapper around
 \code{\link[base:list.files]{list.files}} and
 \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-to load .fcs files into a ncdfFlowSet.
+to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also awrapper
+around \code{\link[flowWorkspace:load_gs]{load_gs}} to load saved GatingSet
+objects.
 }
 \examples{
 
@@ -42,6 +44,7 @@ fs <- cyto_load(path)
 
 # fs is a ncdfFlowSet
 class(fs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

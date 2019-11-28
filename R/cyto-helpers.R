@@ -5,7 +5,9 @@
 #' \code{cyto_load} is a convenient wrapper around
 #' \code{\link[base:list.files]{list.files}} and
 #' \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-#' to load .fcs files into a ncdfFlowSet.
+#' to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also awrapper
+#' around \code{\link[flowWorkspace:load_gs]{load_gs}} to load saved GatingSet
+#' objects.
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
 #'   folder in current working directory).
@@ -15,12 +17,14 @@
 #'   using \code{cyto_barcode}, set to FALSE by default.
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
-#' @return object of class
-#'   \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
+#' @return object of class \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}
+#'   or \code{\link[flowWorkspace:GatingSet-class]}.
 #'
 #' @importFrom flowCore identifier identifier<-
 #' @importFrom ncdfFlow read.ncdfFlowSet
+#' @importFrom flowWorkspace load_gs
 #' @importFrom gtools mixedsort
+#' @importFrom tools file_ext
 #'
 #' @examples
 #'
@@ -36,6 +40,7 @@
 #'
 #' # fs is a ncdfFlowSet
 #' class(fs)
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -51,22 +56,30 @@ cyto_load <- function(path = ".",
     files <- mixedsort(files)
   }
 
-  # NCDFFLOWSET
-  fs <- read.ncdfFlowSet(files = files, ...)
+  # SAVED GATINGSET
+  if(all(c("pb","rds") %in% file_ext(files))){
+    # LOAD GATINGSET
+    x <- gs_load(path = path)
+  # FCS FILES  
+  }else{
+    # NCDFFLOWSET
+    x <- read.ncdfFlowSet(files = files, ...)
 
-  # CORRECT GUID SLOTS
-  nms <- cyto_names(fs)
-  lapply(seq_len(length(nms)), function(z) {
-    suppressMessages(identifier(fs[[z]]) <<- nms[z])
-  })
+    # CORRECT GUID SLOTS
+    nms <- cyto_names(x)
+    lapply(seq_len(length(nms)), function(z) {
+      suppressMessages(identifier(x[[z]]) <<- nms[z])
+    })
 
-  # BARCODING
-  if (barcode == TRUE) {
-    fs <- cyto_barcode(fs)
+    # BARCODING
+    if (barcode == TRUE) {
+      x <- cyto_barcode(x)
+    }
+    
   }
-
+  
   # RETURN NCDFFLOWSET
-  return(fs)
+  return(x)
 }
 
 ## CYTO_SETUP ------------------------------------------------------------------
@@ -78,12 +91,12 @@ cyto_load <- function(path = ".",
 #' read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
 #' \code{\link{cyto_load}} which is then added to a
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
-#' to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to update the
-#' GatingSet with the details of the experiment. These details can be modified
-#' later with additional calls to \code{\link{cyto_markers_edit}} and/or
-#' \code{\link{cyto_details_edit}}. Users are also asked to provide a name for a
-#' gatingTemplate csv file which will be created if necessary and assigned as
-#' the active gatingTemplate.
+#' to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
+#' update the GatingSet with the details of the experiment. These details can be
+#' modified later with additional calls to \code{\link{cyto_markers_edit}}
+#' and/or \code{\link{cyto_details_edit}}. Users can optionally provide a
+#' name for a gatingTemplate csv file which will be created if necessary and
+#' assigned as the active gatingTemplate.
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
 #'   a folder in current working directory).
@@ -99,7 +112,9 @@ cyto_load <- function(path = ".",
 #' @importFrom tools file_ext
 #'
 #' @examples
+#' 
 #' \dontrun{
+#' 
 #' # Load in CytoExploreRData to acces data
 #' library(CytoExploreRData)
 #'
@@ -115,6 +130,7 @@ cyto_load <- function(path = ".",
 #'
 #' # Experiment details have been updated
 #' cyto_details(gs)
+#' 
 #' }
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -124,19 +140,22 @@ cyto_setup <- function(path = ".",
                        gatingTemplate = NULL, ...) {
 
   # Load in .fsc files to ncdfFlowSet
-  fs <- cyto_load(path, ...)
+  x <- cyto_load(path, ...)
 
-  # Add fs to GatingSet
-  message("Adding samples to a GatingSet.")
-  gs <- GatingSet(fs)
+  # FLOWSET LOADED
+  if(is(x, "flowSet")){
+    # Add flowSet to GatingSet
+    message("Adding samples to a GatingSet.")
+    x <- GatingSet(x)
+  }
 
   # Markers
   message("Associate markers with their respective channels.")
-  gs <- cyto_markers_edit(gs)
+  x <- cyto_markers_edit(x)
 
   # Annotate
   message("Annotate samples with experiment details.")
-  gs <- cyto_details_edit(gs)
+  x <- cyto_details_edit(x)
 
   # Check gatingTemplate
   if (!is.null(gatingTemplate)) {
@@ -157,7 +176,7 @@ cyto_setup <- function(path = ".",
     }
   }
 
-  return(gs)
+  return(x)
 }
 
 ## CYTO_DETAILS ----------------------------------------------------------------
@@ -884,14 +903,14 @@ cyto_convert.flowFrame <- function(x,
   } else if (return %in% c("flowFrame list", "list of flowFrames")) {
     x <- list(x)
   } else if (return == "flowSet") {
-    x <- flowSet(x)
+    x <- as(flowSet(x), "ncdfFlowSet")
   } else if (return == "flowSet list") {
-    x <- list(flowSet(x))
+    x <- list(as(flowSet(x)), "ncdfFlowSet")
   } else if (return == "GatingSet") {
-    x <- flowSet(x)
+    x <- as(flowSet(x), "ncdfFlowSet")
     x <- GatingSet(x)
   } else if (return == "GatingHierarchy") {
-    x <- flowSet(x)
+    x <- as(flowSet(x), "ncdfFlowSet")
     x <- GatingSet(x)[[1]]
   }
 
@@ -969,7 +988,7 @@ cyto_convert.flowSet <- function(x,
         )
       }
     }
-    x <- flowSet(x)
+    x <- as(flowSet(x), "ncdfFlowSet")
     x <- GatingSet(x)[[1]]
   }
 
@@ -989,9 +1008,9 @@ cyto_convert.GatingHierarchy <- function(x,
   } else if (return %in% c("flowFrame list", "list of flowFrames")) {
     x <- list(cyto_extract(x, parent))
   } else if (return == "flowSet") {
-    x <- flowSet(cyto_extract(x, parent))
+    x <- as(flowSet(cyto_extract(x, parent)), "ncdfFlowSet")
   } else if (return == "flowSet list") {
-    x <- list(flowSet(cyto_extract(x, parent)))
+    x <- list(as(flowSet(cyto_extract(x, parent)), "ncdfFlowSet"))
   }
 
   return(x)
@@ -1019,7 +1038,8 @@ cyto_convert.GatingSet <- function(x,
   } else if (return == "flowSet list") {
     x <- list(cyto_extract(x, parent))
   } else if (return == "GatingHierachy") {
-    x <- flowSet(cyto_convert(cyto_extract(x, parent), "flowFrame"))
+    x <- as(flowSet(cyto_convert(cyto_extract(x, parent), "flowFrame")),
+            "ncdfFlowSet")
     x <- GatingSet(x)[[1]]
   }
 
@@ -1513,7 +1533,7 @@ cyto_split <- function(x,
 
 ## CYTO_SAVE -------------------------------------------------------------------
 
-#' Write samples to fcs files in new folder
+#' Write samples to fcs files in new folder or save GatingSet
 #'
 #' @param x object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
@@ -1543,6 +1563,7 @@ cyto_split <- function(x,
 #' @examples
 #' 
 #' \dontrun{
+#' 
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -1551,6 +1572,7 @@ cyto_split <- function(x,
 #'
 #' # Save each flowFrame to file
 #' cyto_save(fs)
+#' 
 #' }
 #'
 #' @seealso \code{\link{cyto_split}}
