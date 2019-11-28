@@ -1221,31 +1221,29 @@
 .cyto_plot_colour_palette <- function(type = "point_cols"){
   # POINT COLOUR PALETTE
   if(type == "point_cols"){
-      pal <- c(  "#1B1919FF",
-                 "#ADB6B6FF",
-                 "#99CCFFFF",
-                 "#6699FFFF",
-                 "#466983FF",
-                 "#0099B4FF",
-                 "#00468BFF",
-                 "#1A0099FF",
-                 "#660099FF",
-                 "#990080FF",
-                 "#925E9FFF",
-                 "#CC99FFFF",
-                 "#FF1463FF",
-                 "#FDAF91FF",
-                 "#FF00CCFF",
-                 "#ED0000FF",
-                 "#924822FF",
-                 "#CE3D32FF",
-                 "#FF9900FF",
-                 "#FFCC00FF",
-                 "#F0E685FF",
-                 "#CCFF00FF",
-                 "#42B540FF",
-                 "#00D68FFF",
-                 "#00991AFF")
+    
+    pal <- c("grey50",
+                 "bisque4",
+                 "brown1",
+                 "red",
+                 "darkred",
+                 "chocolate",
+                 "orange",
+                 "yellow",
+                 "yellowgreen",
+                 "green",
+                 "limegreen",
+                 "turquoise",
+                 "aquamarine",
+                 "cyan",
+                 "cornflowerblue",
+                 "blue",
+                 "blueviolet",
+                 "purple4",
+                 "purple",
+                 "magenta",
+                 "deeppink")
+
   # POINT COLOUR SCALE
   }else if(type == "point_col_scale"){
     pal <- c(
@@ -1259,24 +1257,27 @@
     )
   # DENSITY COLOUR PALETTE
   }else if(type == "density_cols"){
-    pal <- c(      "grey",
-                   "bisque4",
-                   "brown1",
-                   "red",
-                   "darkred",
-                   "chocolate",
-                   "orange",
-                   "yellow",
-                   "yellowgreen",
-                   "green",
-                   "aquamarine",
-                   "cyan",
-                   "cornflowerblue",
-                   "blue",
-                   "blueviolet",
-                   "purple",
-                   "magenta",
-                   "deeppink")
+    pal <- c("grey50",
+             "bisque4",
+             "brown1",
+             "red",
+             "darkred",
+             "chocolate",
+             "orange",
+             "yellow",
+             "yellowgreen",
+             "green",
+             "limegreen",
+             "turquoise",
+             "aquamarine",
+             "cyan",
+             "cornflowerblue",
+             "blue",
+             "blueviolet",
+             "purple4",
+             "purple",
+             "magenta",
+             "deeppink")
   }
 
   return(pal)

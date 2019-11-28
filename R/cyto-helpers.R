@@ -1548,20 +1548,20 @@ cyto_split <- function(x,
 #'   FALSE by default.
 #' @param names original names of the samples prior to merging using
 #'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
-#'   re-assigned to each of split flowFrames and included in the FCS file names.
+#'   re-assigned to each of split flowFrames.
 #' @param save_as name of the folder to which the written FCS files should be
 #'   saved, set to NULL by default to save the files to the current working
 #'   directory. To prevent files being overwritten, it is recommended that
 #'   \code{save_as} directory not be manually created before running
 #'   \code{cyto_save}.
 #' @param inverse_transform logical indicating whether the data should be
-#'   inverse transformed prior to writing FCS files. Inverse transformations of
-#'   \code{flowFrame} or \code{flowSet} objects requires passing of transformers
-#'   through the \code{trans} argument.
-#' @param trans object of class \code{transformerList} containg the
+#'   inverse transformed prior to writing FCS files, set to TRUE by default.
+#'   Inverse transformations of \code{flowFrame} or \code{flowSet} objects
+#'   requires passing of transformers through the \code{trans} argument.
+#' @param trans object of class \code{transformerList} containing the
 #'   transformation definitions applied to the supplied data. Used internally
-#'   when \code{inverse_transform} is TRUE, to inverse the transformations prior to
-#'   writing FCS files.
+#'   when \code{inverse_transform} is TRUE, to inverse the transformations prior
+#'   to writing FCS files.
 #'
 #' @return flowFrame or list of flowFrames that were saved to FCS files.
 #'
@@ -1704,14 +1704,6 @@ cyto_save.flowFrame <- function(x,
                                 inverse_transform = TRUE,
                                 trans = NULL){
   
-  # INVERSE TRANSFORMATIONS
-  if(inverse_transform == TRUE){
-    message("Data will be inverse transformed prior to saving...")
-    x <- cyto_transform(x, 
-                        trans = trans,
-                        inverse = TRUE)
-  }
-  
   # SPLIT
   if(split == TRUE){
     fr_list <- cyto_split(x, 
@@ -1721,7 +1713,7 @@ cyto_save.flowFrame <- function(x,
   }
   
   # DIRECTORY CHECK
-  if(dir.exists(save_as)){
+  if(!is.null(save_as) & dir.exists(save_as)){
     # FILES WILL BE OVERWRITTEN
     if(any(list.files(save_as) %in% cyto_names(fr_list))){
       message(paste("Files will be overwritten in", save_as, ".")) 
@@ -1742,6 +1734,13 @@ cyto_save.flowFrame <- function(x,
   
   # WRITE FCS FILES
   lapply(fr_list, function(z){
+    # INVERSE TRANSFORM
+    if(inverse_transform == TRUE){
+      z <- cyto_transform(z,
+                          trans = trans,
+                          inverse = TRUE,
+                          plot = FALSE)
+    }
     # NO DIRECTORY SPECIFIED
     if(is.null(save_as)){
       write.FCS(z,

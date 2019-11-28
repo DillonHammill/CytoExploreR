@@ -29,6 +29,10 @@
 #'   re-assigned to each of split flowFrames and included in the file names.
 #' @param save_as name of the folder to save the .fcs files to when save is
 #'   TRUE, set to "cyto_map" by default.
+#' @param inverse_transform logical indicating whether the data should be
+#'   inverse transformed prior to writing FCS files, set to TRUE by default.
+#'   Inverse transformations of \code{flowFrame} or \code{flowSet} objects
+#'   requires passing of transformers through the \code{trans} argument.
 #' @param trans object of class \code{transformerList} containg the
 #'   transformation definitions applied to the supplied data. If transformations
 #'   are supplied, the data will be inverse transformed prior to saving to
@@ -81,6 +85,7 @@ cyto_map.GatingSet <- function(x,
                                split = TRUE,
                                names = NULL,
                                save_as = "cyto_map",
+                               inverse_transform = TRUE,
                                trans = NULL,
                                plot = TRUE,
                                seed,
@@ -123,6 +128,7 @@ cyto_map.GatingSet <- function(x,
                        split = split,
                        names = names,
                        save_as = save_as,
+                       inverse_transform = inverse_transform,
                        trans = trans,
                        plot = FALSE,
                        seed = seed, ...)
@@ -138,7 +144,7 @@ cyto_map.GatingSet <- function(x,
     # COMPENSATION
     gs_clone@compensation <- list("all" = gh_comp)
     # APPLY GATES
-    paths <- gh_get_pop_paths(gh)
+    paths <- cyto_nodes(gh)
     paths <- paths[paths != "root"]
     gates <- lapply(paths, function(z){
       list("parent" = gh_pop_get_parent(gh, z),
@@ -217,6 +223,7 @@ cyto_map.GatingHierarchy <- function(x,
                        split = split,
                        names = names,
                        save_as = save_as,
+                       inverse_transform = inverse_transform,
                        trans = trans,
                        plot = FALSE,
                        seed = seed, ...)
@@ -237,7 +244,7 @@ cyto_map.GatingHierarchy <- function(x,
     names(gs_comp) <- cyto_names(x)
     x@compensation <- gs_comp
     # APPLY GATES
-    paths <- gh_get_pop_paths(gh)
+    paths <- cyto_nodes(gh)
     paths <- paths[paths != "root"]
     gates <- lapply(paths, function(z){
       list("parent" = gh_pop_get_parent(gh, z),
@@ -291,6 +298,7 @@ cyto_map.flowSet <- function(x,
                              split = TRUE,
                              names = NULL,
                              save_as = "cyto_map",
+                             inverse_transform = inverse_transform,
                              trans = NULL,
                              plot = TRUE,
                              seed,
@@ -319,6 +327,7 @@ cyto_map.flowSet <- function(x,
                 split = split,
                 names = names,
                 save_as = save_as,
+                inverse_transform = inverse_transform,
                 trans = trans,
                 plot = plot,
                 seed = seed, ...)
@@ -338,6 +347,7 @@ cyto_map.flowFrame <- function(x,
                                split = TRUE,
                                names = NULL,
                                save_as = "cyto_map",
+                               inverse_transform = inverse_transform,
                                trans = NULL,
                                plot = TRUE,
                                seed,
@@ -407,7 +417,7 @@ cyto_map.flowFrame <- function(x,
     # MAPPING CO-ORDINATES
     coords <- mp$layout
     colnames(coords) <- c("UMAP-1","UMAP-2")
-  # EMBEDSOM
+  # EmbedSOM
   } else if(grepl(type, "EmbedSOM", ignore.case = TRUE)){
     # DATA
     data <- fr_exprs
@@ -452,13 +462,13 @@ cyto_map.flowFrame <- function(x,
                    split = split,
                    names = names,
                    save_as = save_as,
+                   inverse_transform = inverse_transform,
                    trans = trans)
   }
   
   # SPLIT FLOWFRAMES TO FLOWSET
   if(is(x, "list")){
     x <- cyto_convert(x, "flowSet")
-    x <- as(x, "ncdfFlowSet")
   }
   
   # RETURN MAPPED FLOWFRAME/FLOWSET --------------------------------------------

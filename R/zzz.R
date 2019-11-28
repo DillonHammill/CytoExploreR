@@ -40,12 +40,14 @@
   options("cyto_plot_label_coords" = NULL)
   
   # Register gating and preprocessing functions with openCyto
-  openCyto::register_plugins(fun = .cyto_gate_manual, 
+  suppressMessages(
+    {openCyto::register_plugins(fun = .cyto_gate_manual, 
                              methodName = "cyto_gate_manual")
-  openCyto::register_plugins(fun = .cyto_gate_draw, 
+    openCyto::register_plugins(fun = .cyto_gate_draw, 
                              methodName = "cyto_gate_draw")
-  openCyto::register_plugins(fun = .pp_cyto_gate_draw, 
+    openCyto::register_plugins(fun = .pp_cyto_gate_draw, 
                              methodName = "pp_cyto_gate_draw", 
                              dep = NA, "preprocessing")
+    })
   
 }

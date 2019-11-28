@@ -65,7 +65,7 @@ FALSE by default.}
 
 \item{names}{original names of the samples prior to merging using
 \code{cyto_merge_by}, only required when split is TRUE. These names will be
-re-assigned to each of split flowFrames and included in the FCS file names.}
+re-assigned to each of split flowFrames.}
 
 \item{save_as}{name of the folder to which the written FCS files should be
 saved, set to NULL by default to save the files to the current working
@@ -74,14 +74,14 @@ directory. To prevent files being overwritten, it is recommended that
 \code{cyto_save}.}
 
 \item{inverse_transform}{logical indicating whether the data should be
-inverse transformed prior to writing FCS files. Inverse transformations of
-\code{flowFrame} or \code{flowSet} objects requires passing of transformers
-through the \code{trans} argument.}
+inverse transformed prior to writing FCS files, set to TRUE by default.
+Inverse transformations of \code{flowFrame} or \code{flowSet} objects
+requires passing of transformers through the \code{trans} argument.}
 
-\item{trans}{object of class \code{transformerList} containg the
+\item{trans}{object of class \code{transformerList} containing the
 transformation definitions applied to the supplied data. Used internally
-when \code{inverse_transform} is TRUE, to inverse the transformations prior to
-writing FCS files.}
+when \code{inverse_transform} is TRUE, to inverse the transformations prior
+to writing FCS files.}
 }
 \value{
 flowFrame or list of flowFrames that were saved to FCS files.

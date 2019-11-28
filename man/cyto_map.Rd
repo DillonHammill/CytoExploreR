@@ -21,6 +21,7 @@ cyto_map(x, ...)
   split = TRUE,
   names = NULL,
   save_as = "cyto_map",
+  inverse_transform = TRUE,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -53,6 +54,7 @@ cyto_map(x, ...)
   split = TRUE,
   names = NULL,
   save_as = "cyto_map",
+  inverse_transform = inverse_transform,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -68,6 +70,7 @@ cyto_map(x, ...)
   split = TRUE,
   names = NULL,
   save_as = "cyto_map",
+  inverse_transform = inverse_transform,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -115,6 +118,11 @@ re-assigned to each of split flowFrames and included in the file names.}
 
 \item{save_as}{name of the folder to save the .fcs files to when save is
 TRUE, set to "cyto_map" by default.}
+
+\item{inverse_transform}{logical indicating whether the data should be
+inverse transformed prior to writing FCS files, set to TRUE by default.
+Inverse transformations of \code{flowFrame} or \code{flowSet} objects
+requires passing of transformers through the \code{trans} argument.}
 
 \item{trans}{object of class \code{transformerList} containg the
 transformation definitions applied to the supplied data. If transformations
