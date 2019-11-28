@@ -6,62 +6,88 @@
 \alias{cyto_save.GatingHierarchy}
 \alias{cyto_save.flowSet}
 \alias{cyto_save.flowFrame}
-\title{Write samples to fcs files in new folder or save GatingSet}
+\title{Write samples to FCS files in new folder or save GatingSet}
 \usage{
 cyto_save(x, ...)
 
 \method{cyto_save}{GatingSet}(
   x,
-  parent = "root",
+  parent = NULL,
   split = FALSE,
   names = NULL,
   save_as = NULL,
+  inverse_transform = TRUE,
   trans = NULL
 )
 
 \method{cyto_save}{GatingHierarchy}(
   x,
-  parent = "root",
+  parent = NULL,
   split = FALSE,
   names = NULL,
   save_as = NULL,
+  inverse_transform = TRUE,
   trans = NULL
 )
 
-\method{cyto_save}{flowSet}(x, split = FALSE, names = NULL, save_as = NULL, trans = NULL)
+\method{cyto_save}{flowSet}(
+  x,
+  split = FALSE,
+  names = NULL,
+  save_as = NULL,
+  inverse_transform = TRUE,
+  trans = NULL
+)
 
-\method{cyto_save}{flowFrame}(x, split = FALSE, names = NULL, save_as = NULL, trans = NULL)
+\method{cyto_save}{flowFrame}(
+  x,
+  split = FALSE,
+  names = NULL,
+  save_as = NULL,
+  inverse_transform = TRUE,
+  trans = NULL
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{parent}{name of the parent population to extract when a
-\code{GatingHierarchy} or \code{GatingSet} object is supplied, defaults to
-the "root" node if not supplied.}
+\code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name
+of the parent is supplied the samples will be written to FCS files in the
+specified \code{save_as} directory. Otherwise the entire \code{GatingSet}
+or \code{GatingHierarchy} will be saved to the specified \code{save_as}
+directory.}
 
 \item{split}{logical indicating whether samples merged using
-\code{cyto_merge_by} should be split prior to writing fcs files, set to
+\code{cyto_merge_by} should be split prior to writing FCS files, set to
 FALSE by default.}
 
 \item{names}{original names of the samples prior to merging using
 \code{cyto_merge_by}, only required when split is TRUE. These names will be
-re-assigned to each of split flowFrames and included in the file names.}
+re-assigned to each of split flowFrames and included in the FCS file names.}
 
-\item{save_as}{name of the folder to which the written fcs files should be
+\item{save_as}{name of the folder to which the written FCS files should be
 saved, set to NULL by default to save the files to the current working
-directory.}
+directory. To prevent files being overwritten, it is recommended that
+\code{save_as} directory not be manually created before running
+\code{cyto_save}.}
+
+\item{inverse_transform}{logical indicating whether the data should be
+inverse transformed prior to writing FCS files. Inverse transformations of
+\code{flowFrame} or \code{flowSet} objects requires passing of transformers
+through the \code{trans} argument.}
 
 \item{trans}{object of class \code{transformerList} containg the
-transformation definitions applied to the supplied data. If transformations
-are supplied, the data will be inverse transformed prior to saving to
-return the data on the original linear scale.}
+transformation definitions applied to the supplied data. Used internally
+when \code{inverse_transform} is TRUE, to inverse the transformations prior to
+writing FCS files.}
 }
 \value{
-flowFrame or list of flowFrames that were saved to fcs files.
+flowFrame or list of flowFrames that were saved to FCS files.
 }
 \description{
-Write samples to fcs files in new folder or save GatingSet
+Write samples to FCS files in new folder or save GatingSet
 }
 \examples{
 

@@ -1533,37 +1533,47 @@ cyto_split <- function(x,
 
 ## CYTO_SAVE -------------------------------------------------------------------
 
-#' Write samples to fcs files in new folder or save GatingSet
+#' Write samples to FCS files in new folder or save GatingSet
 #'
 #' @param x object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param parent name of the parent population to extract when a
-#'   \code{GatingHierarchy} or \code{GatingSet} object is supplied, defaults to
-#'   the "root" node if not supplied.
+#'   \code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name
+#'   of the parent is supplied the samples will be written to FCS files in the
+#'   specified \code{save_as} directory. Otherwise the entire \code{GatingSet}
+#'   or \code{GatingHierarchy} will be saved to the specified \code{save_as}
+#'   directory.
 #' @param split logical indicating whether samples merged using
-#'   \code{cyto_merge_by} should be split prior to writing fcs files, set to
+#'   \code{cyto_merge_by} should be split prior to writing FCS files, set to
 #'   FALSE by default.
 #' @param names original names of the samples prior to merging using
 #'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
-#'   re-assigned to each of split flowFrames and included in the file names.
-#' @param save_as name of the folder to which the written fcs files should be
+#'   re-assigned to each of split flowFrames and included in the FCS file names.
+#' @param save_as name of the folder to which the written FCS files should be
 #'   saved, set to NULL by default to save the files to the current working
-#'   directory.
+#'   directory. To prevent files being overwritten, it is recommended that
+#'   \code{save_as} directory not be manually created before running
+#'   \code{cyto_save}.
+#' @param inverse_transform logical indicating whether the data should be
+#'   inverse transformed prior to writing FCS files. Inverse transformations of
+#'   \code{flowFrame} or \code{flowSet} objects requires passing of transformers
+#'   through the \code{trans} argument.
 #' @param trans object of class \code{transformerList} containg the
-#'   transformation definitions applied to the supplied data. If transformations
-#'   are supplied, the data will be inverse transformed prior to saving to
-#'   return the data on the original linear scale.
+#'   transformation definitions applied to the supplied data. Used internally
+#'   when \code{inverse_transform} is TRUE, to inverse the transformations prior to
+#'   writing FCS files.
 #'
-#' @return flowFrame or list of flowFrames that were saved to fcs files.
+#' @return flowFrame or list of flowFrames that were saved to FCS files.
 #'
 #' @importFrom flowCore write.FCS
+#' @importFrom flowWorkspace save_gs
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' 
+#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -1572,7 +1582,7 @@ cyto_split <- function(x,
 #'
 #' # Save each flowFrame to file
 #' cyto_save(fs)
-#' 
+#'
 #' }
 #'
 #' @seealso \code{\link{cyto_split}}
@@ -1587,50 +1597,74 @@ cyto_save <- function(x, ...){
 #' @rdname cyto_save
 #' @export
 cyto_save.GatingSet <- function(x, 
-                                parent = "root",
+                                parent = NULL,
                                 split = FALSE,
                                 names = NULL,
                                 save_as = NULL,
+                                inverse_transform = TRUE,
                                 trans = NULL){
   
-  # EXTRACT DATA
-  message(paste("Extracting the ", parent, " node from the GatingSet."))
-  fs <- cyto_extract(x, parent = parent)
+  # SAVE GATINGSET
+  if(is.null(parent)){
+    # SAVE GATINGSET
+    save_gs(x, save_as)
+    # RETURN GATINGSET
+    invisible(x)
+  # SAVE FCS FILES
+  }else{
+    # EXTRACT DATA
+    message(paste("Extracting the ", parent, " node from the GatingSet."))
+    fs <- cyto_extract(x, parent = parent)
+    # TRANSFORMATIONS
+    trans <- gs@transformation[[1]]
+    # FLOWSET METHOD
+    fr_list <- cyto_save(x = fs,
+                         split = split,
+                         names = names,
+                         save_as = save_as,
+                         inverse_transform = inverse_transform,
+                         trans = trans)
   
-  # FLOWSET METHOD
-  fr_list <- cyto_save(x = fs,
-                       split = split,
-                       names = names,
-                       save_as = save_as,
-                       trans = trans)
-  
-  # RETURN DATA
-  return(fr_list)
+    # RETURN DATA
+    invisible(fr_list)
+  }
   
 }
 
 #' @rdname cyto_save
 #' @export
 cyto_save.GatingHierarchy <- function(x, 
-                                     parent = "root",
+                                     parent = NULL,
                                      split = FALSE,
                                      names = NULL,
                                      save_as = NULL,
+                                     inverse_transform = TRUE,
                                      trans = NULL){
   
-  # EXTRACT DATA
-  message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-  fr <- cyto_extract(x, parent = parent)
-  
-  # FLOWFRAME METHOD
-  fr_list <- cyto_save(x = fr,
-                       split = split,
-                       names = names,
-                       save_as = save_as,
-                       trans = trans)
+  # SAVE GATINGHIERARCHY
+  if(is.null(parent)){
+    # SAVE GATINGHIERARCHY
+    save_gs(x, save_as)
+    # RETURN GATINGHIERARCHY
+    invisible(x)
+  # SAVE FCS FILES
+  }else{
+    # EXTRACT DATA
+    message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
+    fr <- cyto_extract(x, parent = parent)
+    # TRANSFORMATIONS
+    trans <- gs@transformation[[1]]
+    # FLOWSET METHOD
+    fr_list <- cyto_save(x = fr,
+                         split = split,
+                         names = names,
+                         save_as = save_as,
+                         inverse_transform = inverse_transform,
+                         trans = trans)
     
-  # RETURN DATA
-  return(fr_list)  
+    # RETURN DATA
+    invisible(fr_list)
+  }
     
 }
 
@@ -1640,6 +1674,7 @@ cyto_save.flowSet <- function(x,
                               split = FALSE,
                               names = NULL,
                               save_as = NULL,
+                              inverse_transform = TRUE,
                               trans = NULL){
   
   # LIST OF FLOWFRAMES
@@ -1651,6 +1686,7 @@ cyto_save.flowSet <- function(x,
               split = split,
               names = names,
               save_as = save_as,
+              inverse_transform = inverse_transform,
               trans = trans)
   })
   
@@ -1665,10 +1701,11 @@ cyto_save.flowFrame <- function(x,
                                 split = FALSE,
                                 names = NULL,
                                 save_as = NULL,
+                                inverse_transform = TRUE,
                                 trans = NULL){
   
   # INVERSE TRANSFORMATIONS
-  if(!is.null(trans)){
+  if(inverse_transform == TRUE){
     message("Data will be inverse transformed prior to saving...")
     x <- cyto_transform(x, 
                         trans = trans,
