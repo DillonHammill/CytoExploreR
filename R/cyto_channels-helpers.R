@@ -10,6 +10,7 @@
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select vector of channel names to select.
 #' @param exclude vector of channel names to exclude.
 #'
 #' @return vector of channel names.
@@ -44,10 +45,19 @@
 #' cyto_channels(gs, exclude = c("FSC","SSC"))
 #'
 #' @export
-cyto_channels <- function(x, exclude = NULL){
+cyto_channels <- function(x, 
+                          select = NULL,
+                          exclude = NULL){
   
   # CHANNELS
   channels <- colnames(x)
+  
+  # SELECT
+  if(!is.null(select)){
+    lapply(select, function(z){
+      channels <<- channels[grepl(z, channels, ignore.case = TRUE)]
+    })
+  }
   
   # EXCLUDE
   if(!is.null(exclude)){

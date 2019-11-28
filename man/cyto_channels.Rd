@@ -4,13 +4,15 @@
 \alias{cyto_channels}
 \title{Extract channel names}
 \usage{
-cyto_channels(x, exclude = NULL)
+cyto_channels(x, select = NULL, exclude = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{select}{vector of channel names to select.}
 
 \item{exclude}{vector of channel names to exclude.}
 }

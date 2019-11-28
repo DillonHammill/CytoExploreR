@@ -15,7 +15,7 @@ cyto_map(x, ...)
   parent = "root",
   select = NULL,
   channels,
-  display = 100000,
+  display = 1,
   type = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -31,7 +31,7 @@ cyto_map(x, ...)
   x,
   parent = "root",
   channels,
-  display = 100000,
+  display = 1,
   type = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -47,7 +47,7 @@ cyto_map(x, ...)
   x,
   select = NULL,
   channels,
-  display = 100000,
+  display = 1,
   type = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -62,7 +62,7 @@ cyto_map(x, ...)
 \method{cyto_map}{flowFrame}(
   x,
   channels,
-  display = 100000,
+  display = 1,
   type = "UMAP",
   save = TRUE,
   split = TRUE,
@@ -93,12 +93,12 @@ should be comma separated and wrapped in a list. Refer to
 \item{channels}{vector of channels names indicating the channels that should
 be used by the dimension reduction algorithm to compute the 2-dimensional
 map, set to all channels by default. Restricting the number of channels can
-greatly improved processing speed but may result in poorer resolution.}
+greatly improve processing speed.}
 
-\item{display}{total number of events to map, set to 100 000 events by
-default.}
+\item{display}{total number of events to map, all events in the combined data
+are mapped by default.}
 
-\item{type}{direction reduction type to use to generate the map, supported
+\item{type}{dimension reduction type to use to generate the map, supported
 options include "PCA", "tSNE", "UMAP" and "EmbedSOM".}
 
 \item{save}{logical indicating whether the mapped \code{flowFrame} or
@@ -128,8 +128,8 @@ using \code{cyto_plot}.}
 between runs.}
 }
 \value{
-flowFrame or list of split flowFrames containing the mapped
-  projection parameters.
+flowFrame, flowSet, GatingHierarchy or GatingSet containing the
+  mapped projection parameters.
 }
 \description{
 Create dimension-reduced maps of cytometry data
@@ -140,6 +140,8 @@ Create dimension-reduced maps of cytometry data
 \code{\link[Rtsne:Rtsne]{tSNE}}
 
 \code{\link[umap:umap]{UMAP}}
+
+\code{\link[EmbedSOM:SOM]}
 
 \code{\link[EmbedSOM:EmbedSOM]}
 }

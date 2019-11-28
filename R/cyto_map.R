@@ -13,10 +13,10 @@
 #' @param channels vector of channels names indicating the channels that should
 #'   be used by the dimension reduction algorithm to compute the 2-dimensional
 #'   map, set to all channels by default. Restricting the number of channels can
-#'   greatly improved processing speed but may result in poorer resolution.
-#' @param display total number of events to map, set to 100 000 events by
-#'   default.
-#' @param type direction reduction type to use to generate the map, supported
+#'   greatly improve processing speed.
+#' @param display total number of events to map, all events in the combined data
+#'   are mapped by default.
+#' @param type dimension reduction type to use to generate the map, supported
 #'   options include "PCA", "tSNE", "UMAP" and "EmbedSOM".
 #' @param save logical indicating whether the mapped \code{flowFrame} or
 #'   \code{flowSet} should be saved as .fcs file(s) in a folder in the current
@@ -41,10 +41,12 @@
 #'   function. Links to the documentation for these functions can be found
 #'   below.
 #'
-#' @return flowFrame or list of split flowFrames containing the mapped
-#'   projection parameters.
+#' @return flowFrame, flowSet, GatingHierarchy or GatingSet containing the
+#'   mapped projection parameters.
 #'
 #' @importFrom flowCore exprs keyword write.FCS
+#' @importFrom flowWorkspace GatingSet gs_cyto_data<- gh_pop_get_parent
+#'   gh_pop_get_gate gs_pop_add gs_clone
 #' @importFrom stats prcomp
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
@@ -53,6 +55,7 @@
 #' @seealso \code{\link[stats:prcomp]{PCA}}
 #' @seealso \code{\link[Rtsne:Rtsne]{tSNE}}
 #' @seealso \code{\link[umap:umap]{UMAP}}
+#' @seealso \code{\link[EmbedSOM:SOM]}
 #' @seealso \code{\link[EmbedSOM:EmbedSOM]}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -72,7 +75,7 @@ cyto_map.GatingSet <- function(x,
                                parent = "root",
                                select = NULL,
                                channels,
-                               display = 100000,
+                               display = 1,
                                type = "UMAP",
                                save = TRUE,
                                split = TRUE,
@@ -83,8 +86,20 @@ cyto_map.GatingSet <- function(x,
                                seed,
                                ...){
   
+  # CLONE GATINGSET
+  gs_clone <- clone(x)
+  
+  # GATINGHIERARCHY
+  gh <- gs_clone[[1]]
+  
+  # COMPENSATION
+  gh_comp <- gh@compensation[[1]]
+  
+  # TRANSFORMATIONS
+  gh_trans <- gh@transformation[[1]]
+  
   # EXTRACT DATA
-  fs <- cyto_extract(x, parent = parent)
+  fs <- cyto_extract(gs_clone, parent = parent)
   
   # SELECT DATA
   if(!is.null(select)){
@@ -94,21 +109,74 @@ cyto_map.GatingSet <- function(x,
   # MERGE BY
   fr <- cyto_merge_by(fs, merge_by = "all")
   
-  # FLOWFRAME METHOD
-  fr_list <- cyto_map(fr,
-                      channels = channels,
-                      display = display,
-                      type = type,
-                      save = save,
-                      split = split,
-                      names = names,
-                      save_as = save_as,
-                      trans = trans,
-                      plot = plot,
-                      seed = seed, ...)
+  # NAMES
+  if(is.null(names)){
+    names <- cyto_names(fs)
+  }
+  
+  # FLOWFRAME METHOD - FLOWFRAME/FLOWSET RETURN
+  map_data <- cyto_map(fr,
+                       channels = channels,
+                       display = display,
+                       type = type,
+                       save = save,
+                       split = split,
+                       names = names,
+                       save_as = save_as,
+                       trans = trans,
+                       plot = FALSE,
+                       seed = seed, ...)
+  
+  # UPDATE GATINGSET - CLONE
+  if(is(map_data, "flowSet")){
+    gs_cyto_data(gs_clone) <- map_data
+  # CREATE GATINGSET - MERGED FLOWSET
+  }else if(is(map_data, "flowFrame")){
+    gs_clone <- suppressMessages(GatingSet(cyto_convert(map_data, "flowSet")))
+    # TRANSFORMATIONS
+    gs_clone@transformation <- list("all" = gh_trans)
+    # COMPENSATION
+    gs_clone@compensation <- list("all" = gh_comp)
+    # APPLY GATES
+    paths <- gh_get_pop_paths(gh)
+    paths <- paths[paths != "root"]
+    gates <- lapply(paths, function(z){
+      list("parent" = gh_pop_get_parent(gh, z),
+           "gate" = gh_pop_get_gate(gh, z))
+    })
+    lapply(gates, function(gate){
+      suppressMessages(
+        gs_pop_add(gs_clone, 
+                   gate = gate$gate, 
+                   parent = gate$parent)
+        )
+    })
+  }
+  
+  # PLOT MAP
+  if(plot == TRUE){
+    # OVERLAY
+    overlay <- tryCatch(gh_pop_get_descendants(gs_clone[[1]]), 
+                        error = function(e){NA})
+    # LEGEND
+    if(!.all_na(overlay)){
+      legend <- TRUE
+    }else{
+      legend <- FALSE
+    }
+    # CYTO_PLOT DESCENDANTS
+    cyto_plot(gs_clone,
+              parent = parent,
+              channels = cyto_channels(x, select = type),
+              overlay = overlay,
+              group_by = "all",
+              display = display,
+              title = paste0("Combined Events", "\n", type),
+              legend = legend)
+  }
   
   # RETURN SPLIT MAPPED FLOWFRAMES
-  return(fr_list)
+  return(gs_clone)
   
 }
 
@@ -117,7 +185,7 @@ cyto_map.GatingSet <- function(x,
 cyto_map.GatingHierarchy <- function(x,
                                      parent = "root",
                                      channels,
-                                     display = 100000,
+                                     display = 1,
                                      type = "UMAP",
                                      save = TRUE,
                                      split = TRUE,
@@ -128,24 +196,87 @@ cyto_map.GatingHierarchy <- function(x,
                                      seed,
                                      ...){
   
+  # ASSIGN X TO GH
+  gh <- x
+  
   # EXTRACT DATA
-  fr <- cyto_extract(x, parent = parent)
+  fr <- cyto_extract(gh, parent = parent)
   
-  # FLOWFRAME METHOD
-  fr_list <- cyto_map(fr,
-                      channels = channels,
-                      display = display,
-                      type = type,
-                      save = save,
-                      split = split,
-                      names = names,
-                      save_as = save_as,
-                      trans = trans,
-                      plot = plot,
-                      seed = seed, ...)
+  # EXTRACT TRANSFORMATIONS
+  gh_trans <- gh@transformation[[1]]
   
-  # RETURN SPLIT MAPPED FLOWFRAMES
-  return(fr_list)
+  # EXTRACT COMPENSATION (GH CONTAINS ALL MATRICES)
+  gh_comp <- gh@compensation[[match(cyto_names(gh), names(gh@compensation))]]
+  
+  # FLOWFRAME METHOD - FLOWFRAME/FLOWSET RETURN
+  map_data <- cyto_map(fr,
+                       channels = channels,
+                       display = display,
+                       type = type,
+                       save = save,
+                       split = split,
+                       names = names,
+                       save_as = save_as,
+                       trans = trans,
+                       plot = FALSE,
+                       seed = seed, ...)
+  
+  # UPDATE GATINGHIERARCHY
+  if(is(map_data, "flowFrame")){
+    gs_cyto_data(x) <- cyto_convert(map_data, "flowSet")
+  # CREATE GATINGSET
+  }else if(is(map_data, "flowSet")){
+    # GATINGSET
+    x <- suppressMessages(GatingSet(map_data))
+    # TRANSFORMATIONS
+    gs_trans <- rep(list(gh_trans), length(x))
+    names(gs_trans) <- cyto_names(x)
+    x@transformation <- gs_trans
+    # COMPENSATION
+    gs_comp <- rep(list(gh_comp), length(x))
+    names(gs_comp) <- cyto_names(x)
+    x@compensation <- gs_comp
+    # APPLY GATES
+    paths <- gh_get_pop_paths(gh)
+    paths <- paths[paths != "root"]
+    gates <- lapply(paths, function(z){
+      list("parent" = gh_pop_get_parent(gh, z),
+           "gate" = gh_pop_get_gate(gh, z))
+    })
+    lapply(gates, function(gate){
+      suppressMessages(gs_pop_add(x, gate = gate$gate, parent = gate$parent))
+    })
+  }
+
+  # PLOT MAP
+  if(plot == TRUE){
+    # OVERLAY
+    if(is(x, "GatingSet")){
+      overlay <- tryCatch(gh_pop_get_descendants(x[[1]]), 
+                        error = function(e){NA})
+    }else if(is(x, "GatingHierarchy")){
+      overlay <- tryCatch(gh_pop_get_descendants(x), 
+                          error = function(e){NA})
+    }
+    # LEGEND
+    if(!.all_na(overlay)){
+      legend <- TRUE
+    }else{
+      legend <- FALSE
+    }
+    # CYTO_PLOT DESCENDANTS
+    cyto_plot(x,
+              parent = parent,
+              channels = cyto_channels(x, select = type),
+              overlay = overlay,
+              group_by = "all",
+              display = display,
+              title = paste0("Combined Events", "\n", type),
+              legend = legend)
+  }
+  
+  # RETURN GATINGHIERARCHY/GATINGSET
+  return(x)
   
 }
 
@@ -154,7 +285,7 @@ cyto_map.GatingHierarchy <- function(x,
 cyto_map.flowSet <- function(x,
                              select = NULL,
                              channels,
-                             display = 100000,
+                             display = 1,
                              type = "UMAP",
                              save = TRUE,
                              split = TRUE,
@@ -172,23 +303,28 @@ cyto_map.flowSet <- function(x,
   
   # MERGE SAMPLES
   fr <- cyto_merge_by(fs, 
-                      merge_by = "all")
+                      merge_by = "all")[[1]]
+  
+  # NAMES
+  if(is.nul(names)){
+    names <- cyto_names(fs)
+  }
   
   # FLOWFRAME METHOD
-  fr_list <- cyto_map(fr,
-                      channels = channels,
-                      display = display,
-                      type = type,
-                      save = save,
-                      split = split,
-                      names = names,
-                      save_as = save_as,
-                      trans = trans,
-                      plot = plot,
-                      seed = seed, ...)
+  x <- cyto_map(fr,
+                channels = channels,
+                display = display,
+                type = type,
+                save = save,
+                split = split,
+                names = names,
+                save_as = save_as,
+                trans = trans,
+                plot = plot,
+                seed = seed, ...)
   
-  # RETURN SPLIT MAPPED FLOWFRAMES
-  return(fr_list)
+  # RETURN MAPPED DATA - FLOWFRAME/FLOWSET
+  return(x)
   
 }
 
@@ -196,7 +332,7 @@ cyto_map.flowSet <- function(x,
 #' @export
 cyto_map.flowFrame <- function(x,
                                channels,
-                               display = 100000,
+                               display = 1,
                                type = "UMAP",
                                save = TRUE,
                                split = TRUE,
@@ -273,9 +409,21 @@ cyto_map.flowFrame <- function(x,
     colnames(coords) <- c("UMAP-1","UMAP-2")
   # EMBEDSOM
   } else if(grepl(type, "EmbedSOM", ignore.case = TRUE)){
-    # CREATE SOM
-    mp <- SOM(fr_exprs)
-    mp <- EmbedSOM(data = fr_exprs, map = mp, ...)
+    # DATA
+    data <- fr_exprs
+    # PULL DOWN ARGUMENTS
+    args <- .args_list()
+    # CREATE SOM - FLOWSOM NOT SUPPLIED (fsom)
+    if(!"fsom" %in% names(args)){
+      # SOM
+      mp <- do.call("SOM", 
+                    args[names(args) %in% formalArgs(EmbedSOM::SOM)])
+      # SOM ARGUMENTS
+      args[["map"]] <- mp
+    }
+    # EMBEDSOM
+    mp <- do.call("EmbedSOM",
+                  args[names(args) %in% formalArgs(EmbedSOM::EmbedSOM)])
     # MAPPING CO-ORDINATES
     coords <- mp
     colnames(coords) <- c("EmbedSOM-1", "EmbedSOM-2")
@@ -292,23 +440,28 @@ cyto_map.flowFrame <- function(x,
   # CYTO_PLOT - MAP
   if(plot == TRUE){
     cyto_plot(x,
-              channels = colnames(coords))
+              channels = colnames(coords),
+              title = paste0("Combined Events", "\n", type))
   }
 
   # SAVE MAPPED FLOWFRAME(S) ---------------------------------------------------
   
   # CYTO_SAVE
   if(save == TRUE){
-    fr_list <- cyto_save(x,
-                         split = split,
-                         names = names,
-                         save_as = save_as,
-                         trans = trans)
-  }else{
-    fr_list <- x
+    x <- cyto_save(x,
+                   split = split,
+                   names = names,
+                   save_as = save_as,
+                   trans = trans)
   }
   
-  # RETURN MAPPED FLOWFRAME ----------------------------------------------------
-  return(fr_list)
+  # SPLIT FLOWFRAMES TO FLOWSET
+  if(is(x, "list")){
+    x <- cyto_convert(x, "flowSet")
+    x <- as(x, "ncdfFlowSet")
+  }
+  
+  # RETURN MAPPED FLOWFRAME/FLOWSET --------------------------------------------
+  return(x)
   
 }
