@@ -5,12 +5,12 @@
 #' \code{cyto_load} is a convenient wrapper around
 #' \code{\link[base:list.files]{list.files}} and
 #' \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-#' to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also awrapper
+#' to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also a wrapper
 #' around \code{\link[flowWorkspace:load_gs]{load_gs}} to load saved GatingSet
 #' objects.
 #'
-#' @param path points to the location of the .fcs files to read in (e.g. name of
-#'   folder in current working directory).
+#' @param path points to the location of the .fcs files to read in. Preferably
+#'   the name of folder in current working directory.
 #' @param sort logical indicating whether attempts should be made to sort the
 #'   files by name prior to loading, set to \code{TRUE} by default.
 #' @param barcode logical indicating whether the flowFrames should be barcoded
@@ -18,7 +18,7 @@
 #' @param ... additional arguments passed to read.ncdfFlowSet.
 #'
 #' @return object of class \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}
-#'   or \code{\link[flowWorkspace:GatingSet-class]}.
+#'   or \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @importFrom flowCore identifier identifier<-
 #' @importFrom ncdfFlow read.ncdfFlowSet
@@ -59,7 +59,7 @@ cyto_load <- function(path = ".",
   # SAVED GATINGSET
   if(all(c("pb","rds") %in% file_ext(files))){
     # LOAD GATINGSET
-    x <- gs_load(path = path)
+    x <- load_gs(path = path)
   # FCS FILES  
   }else{
     # NCDFFLOWSET
@@ -905,7 +905,7 @@ cyto_convert.flowFrame <- function(x,
   } else if (return == "flowSet") {
     x <- as(flowSet(x), "ncdfFlowSet")
   } else if (return == "flowSet list") {
-    x <- list(as(flowSet(x)), "ncdfFlowSet")
+    x <- list(as(flowSet(x), "ncdfFlowSet"))
   } else if (return == "GatingSet") {
     x <- as(flowSet(x), "ncdfFlowSet")
     x <- GatingSet(x)
@@ -1562,6 +1562,7 @@ cyto_split <- function(x,
 #'   transformation definitions applied to the supplied data. Used internally
 #'   when \code{inverse_transform} is TRUE, to inverse the transformations prior
 #'   to writing FCS files.
+#' @param ... not in use.
 #'
 #' @return flowFrame or list of flowFrames that were saved to FCS files.
 #'
@@ -1602,7 +1603,7 @@ cyto_save.GatingSet <- function(x,
                                 names = NULL,
                                 save_as = NULL,
                                 inverse_transform = TRUE,
-                                trans = NULL){
+                                trans = NULL, ...){
   
   # SAVE GATINGSET
   if(is.null(parent)){
@@ -1616,7 +1617,7 @@ cyto_save.GatingSet <- function(x,
     message(paste("Extracting the ", parent, " node from the GatingSet."))
     fs <- cyto_extract(x, parent = parent)
     # TRANSFORMATIONS
-    trans <- gs@transformation[[1]]
+    trans <- x@transformation[[1]]
     # FLOWSET METHOD
     fr_list <- cyto_save(x = fs,
                          split = split,
@@ -1639,7 +1640,8 @@ cyto_save.GatingHierarchy <- function(x,
                                      names = NULL,
                                      save_as = NULL,
                                      inverse_transform = TRUE,
-                                     trans = NULL){
+                                     trans = NULL,
+                                     ...){
   
   # SAVE GATINGHIERARCHY
   if(is.null(parent)){
@@ -1653,7 +1655,7 @@ cyto_save.GatingHierarchy <- function(x,
     message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
     fr <- cyto_extract(x, parent = parent)
     # TRANSFORMATIONS
-    trans <- gs@transformation[[1]]
+    trans <- x@transformation[[1]]
     # FLOWSET METHOD
     fr_list <- cyto_save(x = fr,
                          split = split,
@@ -1675,7 +1677,8 @@ cyto_save.flowSet <- function(x,
                               names = NULL,
                               save_as = NULL,
                               inverse_transform = TRUE,
-                              trans = NULL){
+                              trans = NULL,
+                              ...){
   
   # LIST OF FLOWFRAMES
   fr_list <- cyto_convert(x, "list of flowFrames")
@@ -1702,7 +1705,8 @@ cyto_save.flowFrame <- function(x,
                                 names = NULL,
                                 save_as = NULL,
                                 inverse_transform = TRUE,
-                                trans = NULL){
+                                trans = NULL,
+                                ...){
   
   # SPLIT
   if(split == TRUE){
@@ -1735,7 +1739,7 @@ cyto_save.flowFrame <- function(x,
   # WRITE FCS FILES
   lapply(fr_list, function(z){
     # INVERSE TRANSFORM
-    if(inverse_transform == TRUE){
+    if(inverse_transform == TRUE & !is.null(trans)){
       z <- cyto_transform(z,
                           trans = trans,
                           inverse = TRUE,

@@ -7,8 +7,8 @@
 cyto_load(path = ".", sort = TRUE, barcode = FALSE, ...)
 }
 \arguments{
-\item{path}{points to the location of the .fcs files to read in (e.g. name of
-folder in current working directory).}
+\item{path}{points to the location of the .fcs files to read in. Preferably
+the name of folder in current working directory.}
 
 \item{sort}{logical indicating whether attempts should be made to sort the
 files by name prior to loading, set to \code{TRUE} by default.}
@@ -20,13 +20,13 @@ using \code{cyto_barcode}, set to FALSE by default.}
 }
 \value{
 object of class \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}
-  or \code{\link[flowWorkspace:GatingSet-class]}.
+  or \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \description{
 \code{cyto_load} is a convenient wrapper around
 \code{\link[base:list.files]{list.files}} and
 \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also awrapper
+to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also a wrapper
 around \code{\link[flowWorkspace:load_gs]{load_gs}} to load saved GatingSet
 objects.
 }

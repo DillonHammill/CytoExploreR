@@ -75,6 +75,7 @@
 #' @importFrom methods as
 #' @importFrom utils read.csv write.csv
 #' @importFrom flowCore filters split
+#' @importFrom flowWorkspace gs_pop_get_children gh_pop_get_descendants
 #' @importFrom tools file_ext
 #' @importFrom graphics par
 #' @importFrom purrr transpose
@@ -209,6 +210,15 @@ cyto_gate_draw.GatingSet <- function(x,
 
   # Organise overlays - list of flowFrame lists of length(fr_list)
   if (!.all_na(overlay)) {
+    # OVERLAY DESCENDANTS
+    if(any(grepl(overlay, "descendants"))){
+      overlay <- tryCatch(gh_pop_get_descendants(x[[1]], parent), 
+                          error = function(e){NA}) 
+      # OVERLAY CHILDREN  
+    }else if(any(grepl(overlay, "children"))){
+      overlay <- tryCatch(gs_pop_get_children(x, parent),
+                          error = function(e){NA})
+    }
     # OVERLAY - POPUALTION NAMES
     if (is.character(overlay)) {
       # VALID OVERLAY
@@ -287,6 +297,8 @@ cyto_gate_draw.GatingSet <- function(x,
     }else{
       FR_LIST <- fr_list[z]
     }
+    print(FR_LIST)
+    print(FR_LIST[[1]])
     # SAMPLE HERE - CORRECT GATING STATS
     FR_LIST <- cyto_sample(FR_LIST, display = display, seed = 56)
     # PARENT TITLE

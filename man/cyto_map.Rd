@@ -38,6 +38,7 @@ cyto_map(x, ...)
   split = TRUE,
   names = NULL,
   save_as = "cyto_map",
+  inverse_transform = TRUE,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -105,7 +106,7 @@ are mapped by default.}
 options include "PCA", "tSNE", "UMAP" and "EmbedSOM".}
 
 \item{save}{logical indicating whether the mapped \code{flowFrame} or
-\code{flowSet} should be saved as .fcs file(s) in a folder in the current
+\code{flowSet} should be saved as .fcs files in a folder in the current
 working directory.}
 
 \item{split}{logical indicating whether samples merged using
@@ -149,9 +150,9 @@ Create dimension-reduced maps of cytometry data
 
 \code{\link[umap:umap]{UMAP}}
 
-\code{\link[EmbedSOM:SOM]}
+\code{\link[EmbedSOM:SOM]{SOM}}
 
-\code{\link[EmbedSOM:EmbedSOM]}
+\code{\link[EmbedSOM:EmbedSOM]{EmbedSOM}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

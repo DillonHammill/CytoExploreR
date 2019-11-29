@@ -17,7 +17,8 @@ cyto_save(x, ...)
   names = NULL,
   save_as = NULL,
   inverse_transform = TRUE,
-  trans = NULL
+  trans = NULL,
+  ...
 )
 
 \method{cyto_save}{GatingHierarchy}(
@@ -27,7 +28,8 @@ cyto_save(x, ...)
   names = NULL,
   save_as = NULL,
   inverse_transform = TRUE,
-  trans = NULL
+  trans = NULL,
+  ...
 )
 
 \method{cyto_save}{flowSet}(
@@ -36,7 +38,8 @@ cyto_save(x, ...)
   names = NULL,
   save_as = NULL,
   inverse_transform = TRUE,
-  trans = NULL
+  trans = NULL,
+  ...
 )
 
 \method{cyto_save}{flowFrame}(
@@ -45,12 +48,15 @@ cyto_save(x, ...)
   names = NULL,
   save_as = NULL,
   inverse_transform = TRUE,
-  trans = NULL
+  trans = NULL,
+  ...
 )
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
+
+\item{...}{not in use.}
 
 \item{parent}{name of the parent population to extract when a
 \code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name

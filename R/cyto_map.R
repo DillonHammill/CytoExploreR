@@ -19,7 +19,7 @@
 #' @param type dimension reduction type to use to generate the map, supported
 #'   options include "PCA", "tSNE", "UMAP" and "EmbedSOM".
 #' @param save logical indicating whether the mapped \code{flowFrame} or
-#'   \code{flowSet} should be saved as .fcs file(s) in a folder in the current
+#'   \code{flowSet} should be saved as .fcs files in a folder in the current
 #'   working directory.
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing fcs files, set to
@@ -59,8 +59,8 @@
 #' @seealso \code{\link[stats:prcomp]{PCA}}
 #' @seealso \code{\link[Rtsne:Rtsne]{tSNE}}
 #' @seealso \code{\link[umap:umap]{UMAP}}
-#' @seealso \code{\link[EmbedSOM:SOM]}
-#' @seealso \code{\link[EmbedSOM:EmbedSOM]}
+#' @seealso \code{\link[EmbedSOM:SOM]{SOM}}
+#' @seealso \code{\link[EmbedSOM:EmbedSOM]{EmbedSOM}}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -92,7 +92,7 @@ cyto_map.GatingSet <- function(x,
                                ...){
   
   # CLONE GATINGSET
-  gs_clone <- clone(x)
+  gs_clone <- gs_clone(x)
   
   # GATINGHIERARCHY
   gh <- gs_clone[[1]]
@@ -197,6 +197,7 @@ cyto_map.GatingHierarchy <- function(x,
                                      split = TRUE,
                                      names = NULL,
                                      save_as = "cyto_map",
+                                     inverse_transform = TRUE,
                                      trans = NULL,
                                      plot = TRUE,
                                      seed,
@@ -314,7 +315,7 @@ cyto_map.flowSet <- function(x,
                       merge_by = "all")[[1]]
   
   # NAMES
-  if(is.nul(names)){
+  if(is.null(names)){
     names <- cyto_names(fs)
   }
   
