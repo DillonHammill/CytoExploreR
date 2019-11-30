@@ -824,16 +824,6 @@ cyto_transform_extract <- function(x,
 #' @export
 cyto_extract <- function(x, parent = "root", ...) {
 
-  # Throw error for invalid object
-  if (!cyto_check(x)) {
-    stop(
-      paste(
-        "'x' should be either a flowFrame, flowSet, GatingHierarchy",
-        "or GatingSet."
-      )
-    )
-  }
-
   # Extract data from GatingHierarchy
   if (inherits(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
@@ -848,14 +838,12 @@ cyto_extract <- function(x, parent = "root", ...) {
 
 #' Convert between cytometry objects
 #'
-#' Automatically removes 'Original' column for coerced objects.
-#'
 #' @param x \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param return either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
-#'   coerced 'flowFrame list' or coreced 'flowSet list'. GatingSet and flowSet
+#'   coerced 'flowFrame list' or coerced 'flowSet list'. GatingSet and flowSet
 #'   objects can also be converted to a 'list of flowFrames'.
 #' @param parent name of parent population to extract from
 #'   \code{GatingHierarchy} and \code{GatingSet} objects.
@@ -864,7 +852,7 @@ cyto_extract <- function(x, parent = "root", ...) {
 #' @return object specified by 'return' argument.
 #'
 #' @importFrom flowCore flowSet
-#' @importFrom flowWorkspace GatingSet
+#' @importFrom flowWorkspace GatingSet sampleNames
 #' @importFrom methods as
 #'
 #' @examples
@@ -894,6 +882,11 @@ cyto_convert <- function(x, ...) {
 cyto_convert.flowFrame <- function(x,
                                    return = "flowFrame",
                                    ...) {
+  
+  # NAME
+  nm <- cyto_names(x)
+  
+  # CONVERSIONS
   if (return == "list of flowFrames") {
     return <- "flowFrame list"
   }
@@ -903,14 +896,22 @@ cyto_convert.flowFrame <- function(x,
   } else if (return %in% c("flowFrame list", "list of flowFrames")) {
     x <- list(x)
   } else if (return == "flowSet") {
-    x <- as(flowSet(x), "ncdfFlowSet")
+    x <- flowSet(x)
+    sampleNames(x) <- nm
+    x <- as(x, "ncdfFlowSet")
   } else if (return == "flowSet list") {
-    x <- list(as(flowSet(x), "ncdfFlowSet"))
+    x <- list(flowSet(x))
+    sampleNames(x[[1]]) <- nm
+    x <- list(as(x[[1]], "ncdfFlowSet"))
   } else if (return == "GatingSet") {
-    x <- as(flowSet(x), "ncdfFlowSet")
+    x <- flowSet(x)
+    sampleNames(x) <- nm
+    x <- as(x, "ncdfFlowSet")
     x <- GatingSet(x)
   } else if (return == "GatingHierarchy") {
-    x <- as(flowSet(x), "ncdfFlowSet")
+    x <- flowSet(x)
+    sampleNames(x) <- nm
+    x <- as(x, "ncdfFlowSet")
     x <- GatingSet(x)[[1]]
   }
 
@@ -1001,6 +1002,10 @@ cyto_convert.GatingHierarchy <- function(x,
                                          parent = "root",
                                          return = "GatingHierarchy",
                                          ...) {
+  
+  # NAME
+  nm <- cyto_names(x)
+  
   if (return == "GatingHierarchy") {
 
   } else if (return == "flowFrame") {
@@ -1008,9 +1013,13 @@ cyto_convert.GatingHierarchy <- function(x,
   } else if (return %in% c("flowFrame list", "list of flowFrames")) {
     x <- list(cyto_extract(x, parent))
   } else if (return == "flowSet") {
-    x <- as(flowSet(cyto_extract(x, parent)), "ncdfFlowSet")
+    x <- flowSet(cyto_extract(x, parent))
+    sampleNames(x) <- nm
+    x <- as(x, "ncdfFlowSet")
   } else if (return == "flowSet list") {
-    x <- list(as(flowSet(cyto_extract(x, parent)), "ncdfFlowSet"))
+    x <- list(flowSet(cyto_extract(x, parent)))
+    sampleNames(x[[1]]) <- nm
+    x <- list(as(x[[1]], "ncdfFlowSet"))
   }
 
   return(x)
@@ -1509,7 +1518,7 @@ cyto_split <- function(x,
 
   # SPLIT BY SAMPLE ID
   fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
-
+  
   # NAMES
   if (!is.null(names)) {
     # INSUFFICIENT NAMES
@@ -2224,7 +2233,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 
   # Edit dt - data.frame must have no rownames for editor
   dt <- suppressWarnings(edit(dt))
-
+  
   # Update channels
   BiocGenerics::colnames(x) <- dt$Channel
 

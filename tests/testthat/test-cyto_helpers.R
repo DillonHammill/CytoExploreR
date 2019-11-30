@@ -1,16 +1,8 @@
 context("cyto-helpers")
 
-# CYTO_LOAD --------------------------------------------------------------------
+# CYTO_LOAD & CYTO_SETUP -------------------------------------------------------
 
-test_that("cyto_load", {
-  
-  # NCDFFLOWSET
-  test_fs <- cyto_load(path = paste0(datadir, "/Activation")) 
-  expect_true(is(test_fs, "ncdfFlowSet"))
-  
-})
-
-# CYTO_SETUP -------------------------------------------------------------------
+# USED TO LOAD IN TEST DATASETS
 
 # CYTO_DETAILS -----------------------------------------------------------------
 
@@ -123,8 +115,8 @@ test_that("cyto_convert", {
   # flowFrame ------------------------------------------------------------------
   expect_equal(cyto_convert(fs[[1]], "flowFrame"), fs[[1]])
   expect_equal(cyto_convert(fs[[1]], "flowFrame list"), list(fs[[1]]))
-  expect_equal(cyto_convert(fs[[1]], "flowSet"), flowSet(fs[[1]]))
-  expect_equal(cyto_convert(fs[[1]], "flowSet list"), list(flowSet(fs[[1]])))
+  expect_equivalent(cyto_convert(fs[[1]], "flowSet"), fs[1])
+  expect_equivalent(cyto_convert(fs[[1]], "flowSet list"), list(fs[1]))
   
   # flowSet --------------------------------------------------------------------
   fr_exp <- as(fs,"flowFrame")
@@ -146,9 +138,9 @@ test_that("cyto_convert", {
                gs_pop_get_data(gs,"root")[[1]])
   expect_equal(cyto_convert(gs[[1]],"root" ,"flowFrame list"),
                list(gs_pop_get_data(gs,"root")[[1]]))
-  expect_equal(cyto_convert(gs[[1]], "root", "flowSet"),
+  expect_equivalent(cyto_convert(gs[[1]], "root", "flowSet"),
                flowSet(gs_pop_get_data(gs,"root")[[1]]))
-  expect_equal(cyto_convert(gs[[1]],"root", "flowSet list"),
+  expect_equivalent(cyto_convert(gs[[1]],"root", "flowSet list"),
                list(flowSet(gs_pop_get_data(gs,"root")[[1]])))
   
   # GatingSet ------------------------------------------------------------------
@@ -260,10 +252,11 @@ test_that("cyto_group_by", {
   
 })
 
-# CYTO_MERGE_BY ----------------------------------------------------------------
+# CYTO_MERGE_BY & CYTO_SPLIT ---------------------------------------------------
 
 test_that("cyto_merge_by", {
   
+  # CYTO_MERGE_BY
   fs <- cyto_extract(gs[c(1,2,9,10,17,18,25,26)], "root")
   fs <- cyto_barcode(fs)
   fs_list <- cyto_group_by(fs, "Treatment")
@@ -276,6 +269,29 @@ test_that("cyto_merge_by", {
   expect_equal(cyto_merge_by(gs[c(1,2,9,10,17,18,25,26)], 
                              merge_by = "Treatment"),
                fr_list)
+  
+  # CYTO_SPLIT
+  expect_equivalent(cyto_split(fr_list[[1]],
+                          names = c("Activation_1.fcs",
+                                    "Activation_2.fcs")),
+                    list("Activation_1.fcs" = fs[[1]], 
+                         "Activation_2.fcs" = fs[[2]]))
+  
+})
+
+# CYTO_SAVE --------------------------------------------------------------------
+
+test_that("cyto_save", {
+  
+  # GATINGSET
+  cyto_save(gs[1], parent = "T Cells", save_as = "Saved-Samples")
+  expect_true(dir.exists("Saved-Samples"))
+  expect_true(grepl("Activation_1.fcs", list.files("Saved-Samples")))
+  
+  # GATINGHIERARCHY
+  cyto_save(gs[[2]], parent = "T Cells", save_as = "Saved-Samples")
+  expect_true(dir.exists("Saved-Samples"))
+  expect_true(any(grepl("Activation_2.fcs", list.files("Saved-Samples"))))
   
 })
 
@@ -322,13 +338,49 @@ test_that("cyto_barcode", {
                fs_barcode)
   
   # EVENTS
-  
+  fs <- fs[c(1,2)]
+  barcode <- split(seq_len(4000), c(rep(1, 2000),
+                                    rep(2, 2000)))
+  barcode <- lapply(barcode, function(z){
+    matrix(z,
+           ncol = 1,
+           dimnames = list(NULL, "Event ID"))
+  })
+  fs_barcode <- fsApply(fs, function(x){
+    cbind(x, barcode[[match(cyto_names(x), cyto_names(fs))]])
+  })
+  expect_equal(cyto_barcode(fs[1:2],
+                            type = "events"),
+               fs_barcode)
   
 })
 
 # CYTO_MARKERS_EDIT ------------------------------------------------------------
 
+test_that("cyto_markers_edit", {
+  
+  mock_edit <- mock(data.frame("Channel" = cyto_channels(fs),
+                               "Marker" = pData(parameters(fs[[1]]))$desc,
+                               stringsAsFactors = FALSE,
+                               row.names = NULL))
+  testthat::with_mock(edit = mock_edit,
+                      expect_equal(cyto_markers_edit(fs),
+                                   fs))
+  
+})
+
 # CYTO_DETAILS_EDIT ------------------------------------------------------------
+
+test_that("cyto_details_edit", {
+  
+  pd <- cyto_details(fs)
+  rownames(pd) <- NULL
+  mock_edit <- mock(cyto_details(fs))
+  testthat::with_mock(edit = mock_edit,
+                      expect_equivalent(cyto_details_edit(fs),
+                                   fs))
+  
+})
 
 # CYTO_COMPENSATE --------------------------------------------------------------
 
@@ -359,6 +411,17 @@ test_that("cyto_compensate", {
   
 })
 
+# CYTO_NODES -------------------------------------------------------------------
+
+test_that("cyto_nodes", {
+  
+  # GATINGSET
+  expect_equal(cyto_nodes(gs), gs_get_pop_paths(gs))
+  #GATINHIERARCHY
+  expect_equal(cyto_nodes(gs[[1]]), gh_get_pop_paths(gs[[1]]))
+  
+})
+
 # CYTO_CHANNEL_MATCH -----------------------------------------------------------
 
 test_that("cyto_channel_match", {
@@ -380,9 +443,30 @@ test_that("cyto_channel_match", {
   mock_edit <- mockery::mock(channel_match)
   mock_channel_match <- testthat::with_mock(
     edit = mock_edit,
-    cyto_channel_match(Comp,channel_match = "Channel-Match"))
+    cyto_channel_match(fs_comp,channel_match = "Channel-Match"))
   expect_equal(read.csv("Channel-Match.csv"), channel_match)
   expect_equal(mock_channel_match, channel_match)
+  
+})
+
+# CYTO_EMPTY -------------------------------------------------------------------
+
+test_that("cyto_empty", {
+  
+  chans <- cyto_channels(fs)
+  empty_flowFrame <- matrix(0,
+                            ncol = length(chans),
+                            nrow = 1,
+                            byrow = TRUE)
+  colnames(empty_flowFrame) <- chans
+  empty_flowFrame <- flowFrame(empty_flowFrame)
+  empty_flowFrame <- empty_flowFrame[-1, ]
+  identifier(empty_flowFrame) <- "Activation_1.fcs"
+  expect_error(cyto_empty("Activation_1.fcs"),
+               "Supply the names of the channels to include in the flowFrame.")
+  expect_equal(cyto_empty("Activation_1.fcs",
+                          channels = cyto_channels(fs)),
+               empty_flowFrame)
   
 })
 
@@ -393,3 +477,12 @@ base::unlink("Test-Spillover-Matrix.csv")
 
 # Channel match 
 base::unlink("Channel-Match.csv")
+
+# Experiment markers
+base::unlink(paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv"))
+
+# Experiment details
+base::unlink(paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Details.csv"))
+
+# Saved samples
+base::unlink("Saved-Samples", recursive = TRUE)

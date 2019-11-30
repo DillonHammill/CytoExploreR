@@ -27,7 +27,7 @@ cyto_convert(x, ...)
 \item{...}{not in use.}
 
 \item{return}{either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
-coerced 'flowFrame list' or coreced 'flowSet list'. GatingSet and flowSet
+coerced 'flowFrame list' or coerced 'flowSet list'. GatingSet and flowSet
 objects can also be converted to a 'list of flowFrames'.}
 
 \item{parent}{name of parent population to extract from
@@ -37,7 +37,7 @@ objects can also be converted to a 'list of flowFrames'.}
 object specified by 'return' argument.
 }
 \description{
-Automatically removes 'Original' column for coerced objects.
+Convert between cytometry objects
 }
 \examples{
 

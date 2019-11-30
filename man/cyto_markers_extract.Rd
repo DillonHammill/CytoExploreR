@@ -33,6 +33,20 @@ marker names are valid for the
 marker names. The name of the channel will be returned if there is no
 associated marker found.
 }
+\examples{
+
+library(CytoExploreRData)
+
+# Load in samples
+fs <- Activation
+
+# Add samples to GatingSet
+gs <- GatingSet(fs)
+
+# Extract markers used for PE-A and Alexa Fluor 488-A
+cyto_markers_extract(gs, c("Alexa Fluor 488-A","PE-A"))
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

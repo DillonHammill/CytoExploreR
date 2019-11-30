@@ -210,7 +210,8 @@ cyto_fluor_channels <- function(x){
                                "Event ID",
                                "UMAP",
                                "tSNE",
-                               "PCA"))
+                               "PCA",
+                               "EmbedSOM"))
 }
 
 ## CYTO_CHANNELS_EXTRACT -------------------------------------------------------
@@ -244,6 +245,19 @@ cyto_fluor_channels <- function(x){
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' 
+#' library(CytoExploreRData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#'
+#' # Add samples to GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # Extract channels used for CD4 & CD8
+#' cyto_channels_extract(gs, c("CD4", "CD8"))
 #'
 #' @rdname cyto_channels_extract
 #'
@@ -330,6 +344,19 @@ cyto_channels_extract <- function(x,
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#'
+#' library(CytoExploreRData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#'
+#' # Add samples to GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # Extract markers used for PE-A and Alexa Fluor 488-A
+#' cyto_markers_extract(gs, c("Alexa Fluor 488-A","PE-A"))
 #'
 #' @rdname cyto_markers_extract
 #'

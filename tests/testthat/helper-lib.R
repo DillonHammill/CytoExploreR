@@ -14,28 +14,13 @@ library(robustbase)
 library(tibble)
 library(dplyr)
 
-# mixedsort
-library(gtools)
-
 # Data directory CytoExploreRData ----------------------------------------------
 datadir <- system.file("extdata", package = "CytoExploreRData")
 
 # Activation GatingSet ---------------------------------------------------------
 
 # Assign Activation dataset to fs -
-files <- mixedsort(list.files(path = paste0(datadir, "/Activation"), 
-                              pattern = ".fcs", 
-                              full.names = TRUE))
-fs <- read.flowSet(files = files)
-
-# Sample for speed -
-fs <- cyto_sample(fs, display = 2000, seed = 20)
-
-# Samplenames
-nms <- sampleNames(fs)
-
-# Extract channels
-chans <- colnames(fs)
+fs <- cyto_load(paste0(datadir, "/Activation"))
 
 # pData information -
 pData(fs)$OVAConc <- c(rep(c(0, 0, 0.005, 0.005, 0.05, 0.05, 0.5, 0.5), 4), 0)
@@ -52,10 +37,11 @@ pData(fs)$Treatment <- factor(pData(fs)$Treatment, levels = c(
   "Stim-C",
   "Stim-D", "NA"
 ))
-chnls <- c(
+chans <- c(
   "Alexa Fluor 405-A",
   "Alexa Fluor 430-A",
-  "APC-Cy7-A", "PE-A",
+  "APC-Cy7-A", 
+  "PE-A",
   "Alexa Fluor 488-A",
   "Alexa Fluor 700-A",
   "Alexa Fluor 647-A",
@@ -71,24 +57,27 @@ markers <- c(
   "CD44",
   "CD69"
 )
-names(markers) <- chnls
+names(markers) <- chans
 markernames(fs) <- markers
+
+# Sample for speed -
+fs <- cyto_sample(fs, display = 2000, seed = 20)
 
 # GatingSet -
 gs <- GatingSet(fs)
 
 # Compensation -
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transformation -
-trans <- estimateLogicle(gs[[32]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+trans <- cyto_transformer_logicle(gs)
+gs <- transform(gs, trans, plot = FALSE)
 
 # gatingTemplate -
 gt <- gatingTemplate(paste0(datadir, "/Activation-gatingTemplate.csv"))
 
 # gatingTemplate file -
-gtf <- read.csv(system.file("extdata",
+gt_file <- read.csv(system.file("extdata",
   "Activation-gatingTemplate.csv",
   package = "CytoExploreRData"
 ))
@@ -96,48 +85,31 @@ gtf <- read.csv(system.file("extdata",
 # Gating -
 suppressWarnings(gt_gating(gt, gs))
 
-# Extract T Cells Population -
-Va2 <- gs_pop_get_data(gs, "T Cells")
-
-# Extract a flowFrame/flowSet for testing -
-fr_test <- Va2[[32]]
-fs_test <- Va2[c(26, 28, 30, 32)]
-gs_test <- gs[c(26, 28, 30, 32)]
-
 # Compensation GatingSet -------------------------------------------------------
-Compensation <- read.flowSet(
-  path = paste0(
-    datadir,
-    "/Compensation"
-  ),
-  pattern = ".fcs"
-)
+fs_comp <- cyto_load(paste0(datadir,"/Compensation"))
 
 # Sample for speed -
-Comp <- fsApply(Compensation, function(fr) {
-  cyto_sample(fr, display = 500)
-})
+fs_comp <- cyto_sample(fs_comp, display = 2000, seed = 20)
 
 # GatingSet -
-gsc <- GatingSet(Comp)
+gs_comp <- GatingSet(fs_comp)
 
 # Transformed GatingSet -
-gsct <- cyto_transform(gs_clone(gsc),
-                       trans_type = "biex",
-                       plot = FALSE)
+gs_comp_trans <- cyto_transform(gs_clone(gs_comp),
+                                type = "logicle",
+                                plot = FALSE)
 
 # gatingTemplate -
-gtc <- gatingTemplate(paste0(datadir, "/Compensation-gatingTemplate.csv"))
+gt_comp <- gatingTemplate(paste0(datadir, "/Compensation-gatingTemplate.csv"))
 
 # gatingTemplate file
-gtcf <- read.csv(system.file("extdata",
+gt_comp_file <- read.csv(system.file("extdata",
   "Compensation-gatingTemplate.csv",
   package = "CytoExploreRData"
 ))
 
 # Gating -
-gt_gating(gtc, gsc)
-gt_gating(gtc, gsct)
+gt_gating(gt_comp, gs_comp)
 
 # Path to channel_match file
 channel_match_file <- paste0(datadir, "/Compensation-Channels.csv")

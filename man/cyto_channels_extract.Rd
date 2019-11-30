@@ -33,6 +33,20 @@ marker names are valid for the
 valid channel names. \code{cyto_channels_extract} is particularly useful for
 determining which channel(s) are associated with particular marker(s).
 }
+\examples{
+
+library(CytoExploreRData)
+
+# Load in samples
+fs <- Activation
+
+# Add samples to GatingSet
+gs <- GatingSet(fs)
+
+# Extract channels used for CD4 & CD8
+cyto_channels_extract(gs, c("CD4", "CD8"))
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

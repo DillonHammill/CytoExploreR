@@ -6,10 +6,17 @@ test_that("cyto_channels", {
   
   # ALL CHANNELS
   expect_equal(cyto_channels(fs[[1]]),
-               chans)
+               colnames(fs[[1]]))
+  # SELECT CHANNELS
+  expect_equal(cyto_channels(fs[[1]], select = "Alexa"),
+               c("Alexa Fluor 488-A",
+                 "Alexa Fluor 405-A",
+                 "Alexa Fluor 430-A",
+                 "Alexa Fluor 647-A",
+                 "Alexa Fluor 700-A"))
   # EXCLUDE CHANNELS
   expect_equal(cyto_channels(fs[[1]], exclude = c("FSC","SSC")),
-               chans[-seq_len(6)])
+               colnames(fs[[1]])[-seq_len(6)])
 })
 
 # CYTO_MARKERS -----------------------------------------------------------------
@@ -40,6 +47,10 @@ test_that("cyto_markers", {
   expect_equal(cyto_markers(gs[[1]]),
                markers)
   
+  # GatingSet - > flowFrame
+  expect_equal(cyto_markers(gs[1]),
+               markers)
+  
   # flowSet
   expect_equal(cyto_markers(fs),
                markers)
@@ -51,7 +62,9 @@ test_that("cyto_markers", {
 test_that("cyto_fluor_channels",{
   # FLUORESCENT CHANNELS
   expect_equal(cyto_fluor_channels(fs[[1]]),
-               chans[-c(seq_len(6),length(chans))])
+               cyto_channels(fs[[1]], exclude = c("Time",
+                                                  "FSC",
+                                                  "SSC")))
 })
 
 # CYTO_CHANNELS_EXTRACT --------------------------------------------------------
@@ -94,7 +107,7 @@ test_that("cyto_channel_select", {
   
   mock_menu <- mock(4, 10, 11, 9, 1, 2, 12, cycle = TRUE)
   testthat::with_mock(menu = mock_menu,
-                      expect_equal(cyto_channel_select(Comp),
+                      expect_equal(cyto_channel_select(gs_comp),
                                    c("7-AAD-A",
                                      "Alexa Fluor 700-A",
                                      "APC-Cy7-A",
