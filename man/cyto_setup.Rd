@@ -37,7 +37,7 @@ assigned as the active gatingTemplate.
 
 \dontrun{
 
-# Load in CytoExploreRData to acces data
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Get path to Activation .fcs files in CytoExploreRData
@@ -52,7 +52,6 @@ cyto_extract(gs, "root")[[1]]
 
 # Experiment details have been updated
 cyto_details(gs)
-
 }
 
 }

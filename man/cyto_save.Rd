@@ -90,7 +90,8 @@ when \code{inverse_transform} is TRUE, to inverse the transformations prior
 to writing FCS files.}
 }
 \value{
-flowFrame or list of flowFrames that were saved to FCS files.
+list of flowFrames containing the data that was saved to the FCS
+  files.
 }
 \description{
 Write samples to FCS files in new folder or save GatingSet
@@ -107,7 +108,6 @@ fs <- Activation
 
 # Save each flowFrame to file
 cyto_save(fs)
-
 }
 
 }

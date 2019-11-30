@@ -1,5 +1,4 @@
 library(testthat)
-library(mockery)
 library(CytoExploreR)
 library(CytoExploreRData)
 

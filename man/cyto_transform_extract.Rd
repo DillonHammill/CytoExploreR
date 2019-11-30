@@ -23,7 +23,7 @@ Extract Transformations from TransformerList
 }
 \examples{
 
-# Load CytoExploreRData to acess data
+# Load CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Load in samples to flowSet

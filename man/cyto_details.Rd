@@ -23,7 +23,7 @@ Simply an autocomplete-friendly wrapper around
 }
 \examples{
 \dontrun{
-# Load in CytoExploreRData to acces data
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Activation flowSet

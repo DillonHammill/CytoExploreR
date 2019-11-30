@@ -102,7 +102,6 @@ gs_trans <- cyto_transform(gs, type = "logicle")
 # Manually construct & apply transformations
 trans <- cyto_transformer_logicle(gs)
 gs_trans <- cyto_transform(gs, trans)
-
 }
 \seealso{
 \code{\link{cyto_transformer_log}}

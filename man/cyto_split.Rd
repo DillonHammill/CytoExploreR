@@ -10,7 +10,7 @@ cyto_split(x, names = NULL)
 \item{x}{object of class \code{flowFrame}.}
 
 \item{names}{vector of names to assign to each of the extracted flowFrames
-hwne saving the split files.}
+when saving the split files.}
 }
 \value{
 list of split flowFrames.
@@ -32,7 +32,6 @@ fr <- cyto_merge_by(fs, "all")[[1]]
 
 # Split merged samples
 fr_list <- cyto_split(fr, names = cyto_names(fs))
-
 }
 \seealso{
 \code{\link{cyto_merge_by}}

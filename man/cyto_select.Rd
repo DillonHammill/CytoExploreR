@@ -47,7 +47,6 @@ fs <- cyto_select(Activation,
   Treatment = "Stim-D",
   exclude = TRUE
 )
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

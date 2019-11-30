@@ -34,13 +34,13 @@ names associated with the supplied object.
 Simply a convenient and autocomplete-friendly wrapper around
 \code{\link[flowCore:identifier-methods]{identifier}}
 \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
-names from flowFrame, flowSet GatingHierarchy or GatingSet. Anynonymous
+names from flowFrame, flowSet GatingHierarchy or GatingSet. Anonymous
 \code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
 converted to \code{"Combined Events"}.
 }
 \examples{
 
-#' # Load in CytoExploreRData to acces data
+#' # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Activation flowSet

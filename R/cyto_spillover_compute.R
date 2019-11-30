@@ -172,7 +172,6 @@ cyto_spillover_compute.flowSet <- function(x,
   channels <- cyto_fluor_channels(x)
 
   # Get complete transformerList
-  message("'cyto_spillover_compute' expects un-transformed data.")
   axes_trans <- .cyto_transformer_complete(x, axes_trans)
   
   # Apply transformations

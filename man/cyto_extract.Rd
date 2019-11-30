@@ -11,7 +11,7 @@ cyto_extract(x, parent = "root", ...)
 \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{parent}{name of the parent population to extract from
-\code{GatingHierachy} or \code{GatingSet} objects.}
+\code{GatingHierarchy} or \code{GatingSet} objects.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gs_pop_get_data]{gh_pop_get_data}} or

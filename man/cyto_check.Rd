@@ -20,7 +20,7 @@ Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
 }
 \examples{
 
-# Load in CytoExploreRData to acess data
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Valid object

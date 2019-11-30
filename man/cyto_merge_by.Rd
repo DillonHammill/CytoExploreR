@@ -53,7 +53,7 @@ appropriate sampling in \code{cyto_plot}.
 }
 \examples{
 
-# Load CytoExploreRData to acces data
+# Load CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Activation flowSet

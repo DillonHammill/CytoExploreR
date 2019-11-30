@@ -609,11 +609,11 @@ cyto_plot.GatingSet <- function(x,
     # POPULATION NAMES TO OVERLAY
     if (is.character(overlay)) {
       # OVERLAY DESCENDANTS
-      if(any(grepl(overlay, "descendants"))){
+      if(any(grepl("descendants", overlay))){
         overlay <- tryCatch(gh_pop_get_descendants(gs[[1]], parent), 
                             error = function(e){NA}) 
       # OVERLAY CHILDREN  
-      }else if(any(grepl(overlay, "children"))){
+      }else if(any(grepl("children", overlay))){
         overlay <- tryCatch(gs_pop_get_children(gs, parent),
                             error = function(e){NA})
       }
@@ -1038,11 +1038,11 @@ cyto_plot.GatingHierarchy <- function(x,
     # POPULATION NAMES TO OVERLAY
     if (is.character(overlay)) {
       # OVERLAY DESCENDANTS
-      if(any(grepl(overlay, "descendants"))){
+      if(any(grepl("descendants", overlay))){
         overlay <- tryCatch(gh_pop_get_descendants(gh, parent), 
                             error = function(e){NA}) 
         # OVERLAY CHILDREN  
-      }else if(any(grepl(overlay, "children"))){
+      }else if(any(grepl("children", overlay))){
         overlay <- tryCatch(gh_pop_get_children(gh, parent),
                             error = function(e){NA})
       }

@@ -210,17 +210,17 @@ cyto_gate_draw.GatingSet <- function(x,
 
   # Organise overlays - list of flowFrame lists of length(fr_list)
   if (!.all_na(overlay)) {
-    # OVERLAY DESCENDANTS
-    if(any(grepl(overlay, "descendants"))){
-      overlay <- tryCatch(gh_pop_get_descendants(x[[1]], parent), 
-                          error = function(e){NA}) 
-      # OVERLAY CHILDREN  
-    }else if(any(grepl(overlay, "children"))){
-      overlay <- tryCatch(gs_pop_get_children(x, parent),
-                          error = function(e){NA})
-    }
     # OVERLAY - POPUALTION NAMES
     if (is.character(overlay)) {
+      # OVERLAY DESCENDANTS
+      if(any(grepl("descendants", overlay))){
+        overlay <- tryCatch(gh_pop_get_descendants(x[[1]], parent), 
+                            error = function(e){NA}) 
+        # OVERLAY CHILDREN  
+      }else if(any(grepl("children", overlay))){
+        overlay <- tryCatch(gs_pop_get_children(x, parent),
+                            error = function(e){NA})
+      }
       # VALID OVERLAY
       if (all(overlay %in% nds)) {
         # EXTRACT POPULATIONS - LIST OF FLOWSETS

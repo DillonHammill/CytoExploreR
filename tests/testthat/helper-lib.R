@@ -1,6 +1,9 @@
 # Load Packages ----------------------------------------------------------------
 library(CytoExploreRData)
 
+# Load in mockery for mocking
+library(mockery)
+
 # Load in vdiffr for image comparison -
 library(vdiffr)
 

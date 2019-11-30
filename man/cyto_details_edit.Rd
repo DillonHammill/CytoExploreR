@@ -13,7 +13,7 @@ cyto_details_edit(x, file = NULL)
 \item{file}{name of csv file containing experimental information.}
 }
 \value{
-NULL and return \code{flowSet} or \code{gatingSet} with updated
+NULL and return \code{flowSet} or \code{GatingSet} with updated
   experimental details.
 }
 \description{
