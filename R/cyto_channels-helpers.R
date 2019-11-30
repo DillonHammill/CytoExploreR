@@ -35,10 +35,10 @@
 #' # flowFrame
 #' cyto_channels(fs[[1]])
 #'
-#' # flowset
+#' # flowSet
 #' cyto_channels(fs)
 #'
-#' # GatingHierachy
+#' # GatingHierarchy
 #' cyto_channels(gs[[1]])
 #'
 #' # GatingSet - exclude FSC & SSC channels
@@ -104,10 +104,10 @@ cyto_channels <- function(x,
 #' # flowFrame
 #' cyto_markers(fs[[1]])
 #'
-#' # flowset
+#' # flowSet
 #' cyto_markers(fs)
 #'
-#' # GatingHierachy
+#' # GatingHierarchy
 #' cyto_markers(gs[[1]])
 #'
 #' # GatingSet
@@ -221,7 +221,7 @@ cyto_fluor_channels <- function(x){
 #' \code{cyto_channels_extract} will check whether the supplied channels or
 #' marker names are valid for the
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowset}},
+#' \code{\link[flowCore:flowSet-class]{flowSet}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' valid channel names. \code{cyto_channels_extract} is particularly useful for
@@ -229,7 +229,7 @@ cyto_fluor_channels <- function(x){
 #'
 #' @param x an object of class
 #'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowset}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
@@ -240,7 +240,7 @@ cyto_fluor_channels <- function(x){
 #'
 #' @return  A vector of valid channel names.
 #'
-#' @importFrom flowWorkspace pData getData
+#' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
 #' @importFrom methods is
 #'
@@ -320,7 +320,7 @@ cyto_channels_extract <- function(x,
 #' \code{cyto_markers_extract} will check whether the supplied channels or
 #' marker names are valid for the
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowset}},
+#' \code{\link[flowCore:flowSet-class]{flowSet}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' marker names. The name of the channel will be returned if there is no
@@ -328,7 +328,7 @@ cyto_channels_extract <- function(x,
 #'
 #' @param x an object of class
 #'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowset}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor

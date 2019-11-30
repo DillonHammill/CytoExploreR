@@ -38,10 +38,10 @@ gs <- GatingSet(fs)
 # flowFrame
 cyto_channels(fs[[1]])
 
-# flowset
+# flowSet
 cyto_channels(fs)
 
-# GatingHierachy
+# GatingHierarchy
 cyto_channels(gs[[1]])
 
 # GatingSet - exclude FSC & SSC channels

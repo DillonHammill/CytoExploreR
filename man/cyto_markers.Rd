@@ -42,10 +42,10 @@ gs <- GatingSet(fs)
 # flowFrame
 cyto_markers(fs[[1]])
 
-# flowset
+# flowSet
 cyto_markers(fs)
 
-# GatingHierachy
+# GatingHierarchy
 cyto_markers(gs[[1]])
 
 # GatingSet
