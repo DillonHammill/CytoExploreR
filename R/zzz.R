@@ -9,6 +9,9 @@
   # Turn off bell noises whilst gating
   options("locatorBell" = FALSE)
   
+  # Interactive mode
+  options("CytoExploreR_interactive" = TRUE)
+  
   # Select active gatingTemplate
   options("CytoExploreR_gatingTemplate" = NULL)
   

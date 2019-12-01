@@ -17,6 +17,9 @@ library(robustbase)
 library(tibble)
 library(dplyr)
 
+# Turn off interactive mode
+options("CytoExploreR_interactive" = FALSE)
+
 # Data directory CytoExploreRData ----------------------------------------------
 datadir <- system.file("extdata", package = "CytoExploreRData")
 
@@ -165,7 +168,7 @@ colnames(coords) <- c("FSC-A",
 rownames(coords) <- c("min",
                       "max")
 rg2 <- rectangleGate(.gate = coords,
-                     filterId = "Cells")
+                     filterId = "A")
 
 # POLYGONGATE
 coords <- matrix(c(0,
@@ -181,22 +184,22 @@ coords <- matrix(c(0,
 colnames(coords) <- c("FSC-A",
                       "SSC-A")
 pg <- polygonGate(.gate = coords, 
-                  filterId = "Cells")
+                  filterId = "E")
 
 # ELLIPSOIDGATE
-cov <- matrix(c(900000000,
-                0.00000008304362,
-                0.00000008304362,
-                2256250000),
+cov <- matrix(c(625249999.99999988079,
+                0.00000000311,
+                0.00000000311,
+                676000000.00000000000),
               ncol = 2,
               dimnames = list(c("FSC-A",
                                 "SSC-A"), 
                               c("FSC-A", 
                                 "SSC-A"))
 )
-mean <- c("FSC-A" = 65000, 
-          "SSC-A" = 51250)
-eg <- ellipsoidGate(filterId = "Cells", 
+mean <- c("FSC-A" = 50000, 
+          "SSC-A" = 50250)
+eg <- ellipsoidGate(filterId = "G", 
                     .gate = cov, mean = mean)
 
 # QUADGATE
@@ -206,7 +209,7 @@ coords <- matrix(c(50000,
 colnames(coords) <- c("FSC-A",
                       "SSC-A")
 qg <- quadGate(.gate = coords, 
-               filterId = "A|B|C|D")
+               filterId = "H|I|J|K")
 
 # GATE OBJECT TYPES ------------------------------------------------------------
 
@@ -233,7 +236,7 @@ colnames(coords) <- c("FSC-A",
                       "SSC-A")
 rownames(coords) <- c("min",
                       "max")
-ig <- rectangleGate(filterId = "Cells", 
+ig <- rectangleGate(filterId = "B", 
                     .gate = coords)
 
 # 2D y axis -
@@ -247,14 +250,14 @@ colnames(coords) <- c("FSC-A",
                       "SSC-A")
 rownames(coords) <- c("min", 
                       "max")
-igy <- rectangleGate(filterId = "Cells",
+igy <- rectangleGate(filterId = "C",
                      .gate = coords)
 
 # thresholdGate -
 # 2D -
 coords <- matrix(c(25000,
                    Inf, 
-                   5000, 
+                   50000, 
                    Inf), 
                  ncol = 2, 
                  nrow = 2)
@@ -262,7 +265,7 @@ colnames(coords) <- c("FSC-A",
                       "SSC-A")
 rownames(coords) <- c("min", 
                       "max")
-tg <- rectangleGate(filterId = "Cells",
+tg <- rectangleGate(filterId = "D",
                     .gate = coords)
 
 # 1D -
@@ -288,7 +291,7 @@ colnames(coords) <- c("FSC-A",
                       "SSC-A")
 rownames(coords) <- c("min", 
                       "max")
-bg <- rectangleGate(filterId = "Cells",
+bg <- rectangleGate(filterId = "E",
                     .gate = coords)
 
 # 1D -
@@ -350,102 +353,3 @@ qg2 <- filters(list(q1,
                     q2, 
                     q3, 
                     q4))
-
-# web (EXPERIMENTAL) -
-coords <- matrix(c(120627.90, 
-                   4610.20, 
-                   4610.20, 
-                   63013.78, 
-                   147367.85,
-                   104838.23, 
-                   729.81,
-                   729.81), 
-                 ncol = 2, 
-                 nrow = 4)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg1 <- polygonGate(filterId = "A", 
-                   .gate = coords)
-coords <- matrix(c(120627.90, 
-                   63013.78, 
-                   168882.41, 
-                   147367.85, 
-                   729.81, 
-                   729.81), 
-                 ncol = 2, 
-                 nrow = 3)
-colnames(coords) <- c("FSC-A","SSC-A")
-pg2 <- polygonGate(filterId = "B", 
-                   .gate = coords)
-coords <- matrix(c(120627.90,
-                   168882.41,
-                   248647.95, 
-                   147367.85, 
-                   729.81,
-                   729.81), 
-                 ncol = 2, 
-                 nrow = 3)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg3 <- polygonGate(filterId = "C", 
-                   .gate = coords)
-coords <- matrix(c(120627.90,
-                   248647.95,
-                   262143.00,
-                   262143.00,
-                   147367.85,
-                   729.81,
-                   729.81,
-                   184232.42), 
-                 ncol = 2, 
-                 nrow = 4)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg4 <- polygonGate(filterId = "D", 
-                   .gate = coords)
-coords <- matrix(c(120627.9,
-                   262143.0,
-                   262143.0,
-                   233708.6,
-                   147367.9,
-                   184232.4,
-                   262143.0,
-                   262143.0), 
-                 ncol = 2, 
-                 nrow = 4)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg5 <- polygonGate(filterId = "E", 
-                   .gate = coords)
-coords <- matrix(c(120627.9,
-                   233708.6,
-                   107041.4,
-                   147367.9, 
-                   262143.0,
-                   262143.0), 
-                 ncol = 2, 
-                 nrow = 3)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg6 <- polygonGate(filterId = "F", 
-                   .gate = coords)
-coords <- matrix(c(120627.9, 
-                   107041.4, 
-                   4610.2, 
-                   4610.2, 
-                   147367.9, 
-                   262143.0,
-                   262143.0, 
-                   237418.4), 
-                 ncol = 2, 
-                 nrow = 4)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg7 <- polygonGate(filterId = "G", .gate = coords)
-coords <- matrix(c(120627.9, 
-                   4610.2, 
-                   4610.2, 
-                   147367.9,
-                   237418.4,
-                   104838.2), 
-                 ncol = 2, 
-                 nrow = 3)
-colnames(coords) <- c("FSC-A", "SSC-A")
-pg8 <- polygonGate(filterId = "H",
-                   .gate = coords)
-
-wg <- filters(list(pg1, pg2, pg3, pg4, pg5, pg6, pg7, pg8))

@@ -19,3 +19,6 @@ test_that("CytoExploreR loading", {
   expect_true(openCyto:::.isRegistered("pp_cyto_gate_draw"))
   expect_true(openCyto:::.isRegistered("cyto_gate_draw"))
 })
+
+# Reset CytoExploreR_interactive
+options("CytoExploreR_interactive" = TRUE)
