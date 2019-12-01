@@ -12,6 +12,8 @@
 #' @importFrom flowCore parameters flowFrame
 #' @importFrom flowWorkspace pData
 #' @importFrom graphics par mtext text
+#' @importFrom purrr transpose
+#' @importFrom magrittr %>%
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -27,21 +29,31 @@ cyto_plot_grid <- function(x, ...){
 #' @rdname cyto_plot_grid
 #' @export
 cyto_plot_grid.flowSet <- function(x,
-                                   channels = NULL,
-                                   axes_trans = NULL,
-                                   group_by = FALSE,
-                                   overlay = NULL,
+                                   channels,
+                                   axes_trans = NA,
+                                   group_by = "name",
+                                   overlay = NA,
                                    gate = NA,
-                                   display = 1,
-                                   layout = NULL,
                                    popup = FALSE,
-                                   xlab,
-                                   ylab,
+                                   layout = NULL,
+                                   xlab = "",
+                                   ylab = "",
+                                   limits = "auto",
+                                   xlim = NA,
+                                   ylim = NA,
                                    title = c(NA,NA),
                                    format = "row",
                                    header = NULL,
                                    panel_x_label = NULL,
                                    panel_y_label = NULL,
+                                   negate = FALSE,
+                                   density_modal = TRUE,
+                                   label,
+                                   label_text = NA,
+                                   label_stat,
+                                   label_position = "auto",
+                                   label_text_x = NA,
+                                   label_text_y = NA,
                                    axes_label_text_font = 2,
                                    axes_label_text_size = 1,
                                    axes_label_text_col = "black",
@@ -55,448 +67,627 @@ cyto_plot_grid.flowSet <- function(x,
                                    panel_label_size = c(1,1),
                                    panel_label_col = c("black","black"), ...) {
   
-  # cyto_plot_grid is designed to plot multiple groups only (1-3 variables)
-  if(all(group_by[1] %in% c(TRUE,"all"))){
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # CURRENT PARAMETERS
+  old_pars <- .par(c("oma","mfrow","mar"))
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # GROUPING VARIABLES (1-3)
+  if(all(group_by[1] == "all")){
     stop("Use cyto_plot when grouping all samples into the same group.")
   }else if(length(group_by) > 3){
     stop("cyto_plot_grid supports a maximum of 3 grouping variables.")
   }
   
-  # Signal cyto_plot_grid is being used
+  # SIGNAL CYTO_PLOT_GRID
   options("cyto_plot_grid" = TRUE)
   
-  # Set plot method
+  # METHOD & RESET
   if(is.null(getOption("cyto_plot_method"))){
+    # SET PLOT METHOD
     options("cyto_plot_method" = "grid/flowSet")
+    # RESET PLOT METHOD & GRAPHICAL PARAMETERS ON EXIT
+    on.exit({
+      par(old_pars)
+      options("cyto_plot_method" = NULL)
+      options("cyto_plot_grid" = FALSE)
+    })
+  }else{
+    # RESET GRAPHICAL PARAMETERS ON EXIT
+    on.exit({
+      par(old_pars)
+      options("cyto_plot_grid" = FALSE)})
   }
   
-  # Channels missing
+  # CHANNELS
   if(missing(channels)){
     stop("Supply channel/marker(s) to construct the plot")
   }
   
-  # Assign x to fs
+  # ORGANISE DATA ---------------------------------------------------------------
+  
+  # ASSIGN X TO FS
   fs <- x
+  
+  # SAMPLES
   smp <- length(fs)
   
-  # Extract pData
+  # EXPERIMENT DETAILS
   pd <- cyto_details(fs)
   
-  # Check channels
+  # GROUP_BY FACTORS - DROP MISSING LEVELS
+  lapply(group_by, function(z){
+    # GROUP_BY VARIABLES AS FACTORS (LEVELS MAY BE MANUALLY SET)
+    if(!is(pd[, z], "factor")){
+      pd[, z] <<- factor(pd[, z], levels = unique(pd[, z]))
+    }
+    # DROP MISSING FACTOR LEVELS
+    pd[, z] <<- droplevels(pd[, z])
+  })
+  
+  # CHANNELS
   channels <- cyto_channels_extract(fs, 
                                     channels, 
                                     plot = TRUE)
   
-  # No grouping
-  if(all(group_by == FALSE)){
-    
-    # Set layout
-    layout <- .cyto_plot_layout(x = fs,
-                                layout = layout,
-                                density_stack = density_stack,
-                                density_layers = density_layers)
-    
-    # Grouping  
-  }else{
-    
-    # Set layout
-    if(length(group_by) == 1){
-      
-      if(is.null(layout)){
-        
-        # Layout in single row
-        if(format == "row"){
-          layout <- c(1, nlevels(as.factor(pd[,group_by])))
-          #Layout in a single column
-        }else if(format == "column"){
-          layout <- c(nlevels(as.factor(pd[,group_by])), 1)
-        }
-        
-      }
-      
-    }else{
-      
-      # Layout uses first 2 variables - 3rd indicates # of sheets
-      if(is.null(layout)){
-        layout <- c(nlevels(as.factor(pd[,group_by[2]])),
-                    nlevels(as.factor(pd[,group_by[1]])))
-      }
-      
+  # LAYOUT/GRID/EXPECTED GROUPS ------------------------------------------------
+  
+  # EXPECTED GROUPS - NO GROUPING
+  if(all(group_by == "name")){
+    # LAYOUT - ALL SAMPLES SAME SHEET
+    if(is.null(layout)){
+      layout <- .cyto_plot_layout(x = fs,
+                                  layout = NULL)
     }
+    # SHEETS
+    sheets <- ceiling(smp/prod(layout))
+    # TOTAL PANELS
+    panels <- prod(layout) * sheets
+    # EXPECTED GROUPS 
+    expected_groups <- rep(list(NA), panels)
+    names(expected_groups) <- rep(c(cyto_names(fs),
+                                    paste0("Blank",
+                                           seq_len(panels-smp))),
+                                  length.out = panels)
+  # EXPECTED GROUPS - ONE GROUPING VARIABLE
+  }else if(length(group_by) == 1){
+    # LAYOUT MUST BE A SINGLE ROW OR COLUMN
+    if(!is.null(layout)){
+      if(!any(layout == 1)){
+        message("'layout' must be a single row or column.")
+        layout <- NULL
+      }
+    }
+    # LAYOUT - ROW/COLUMN
+    if(is.null(layout)){
+      # ROW LAYOUT
+      if(grepl("row", format)){
+        layout <- c(1, nlevels(pd[, group_by]))
+      # COLUMN LAYOUT
+      }else if(grepl("column", format)){
+        layout <- c(nlevels(pd[, group_by]), 1)
+      }
+    }
+    # GROUPS
+    groups <- nlevels(pd[, group_by])
+    # SHEETS
+    sheets <- ceiling(groups/prod(layout))
+    # PANELS
+    panels <- prod(layout) * sheets
+    # EXPECTED GROUPS
+    expected_groups <- rep(list(NA), panels)
+    names(expected_groups) <- rep(c(levels(pd[, group_by]),
+                                    paste0("Blank",
+                                           seq_len(panels-groups))),
+                                  length.out = panels)
+  # EXPECTED GROUPS - TWO GROUPING VARIABLES  
+  }else if(length(group_by) == 2){
+    # LAYOUT
+    if(is.null(layout)){
+      layout <- c(nlevels(pd[,group_by[2]]),
+                  nlevels(pd[,group_by[1]]))
+    }
+    # GROUPS
+    groups <- nlevels(pd[, group_by[1]]) * nlevels(pd[, group_by[2]])
+    # SHEETS
+    sheets <- ceiling(groups/prod(layout))
+    # PANELS
+    panels <- prod(layout) * sheets
+    # EXPECTED GROUPS
+    expected_groups <- rep(list(NA), panels)
+    names(expected_groups) <- LAPPLY(
+      levels(pd[, group_by[2]]),
+      function(x){
+        paste(levels(pd[, group_by[1]]), x)
+      })
+  # EXPECTED GROUPS - THREE GROUPING VARIABLES  
+  }else if(length(group_by) == 3){
+    # LAYOUT - THIRD VARIABLE INDICATES SHEETS
+    if(is.null(layout)){
+      layout <- c(nlevels(pd[,group_by[2]]),
+                nlevels(pd[,group_by[1]]))
+    }
+    # GROUPS
+    groups <- nlevels(pd[, group_by[1]]) * nlevels(pd[, group_by[2]]) *
+      nlevels(pd[, group_by[3]])
+    # SHEETS
+    sheets <- ceiling(groups/prod(layout))
+    # PANELS
+    panels <- prod(layout) * sheets
+    # EXPECT FULL GRID
+    expected_groups <- rep(list(NA), panels)
+    names(expected_groups) <- LAPPLY(
+      levels(pd[, group_by[3]]),
+      function(y){
+        paste(LAPPLY(
+          levels(pd[, group_by[2]]),
+          function(x){
+            paste(levels(pd[, group_by[1]]), x)
+          }), y)
+      })
+  }
+  
+  # GRID DIMENSIONS PER SHEET
+  grid <- split(seq_len(panels),
+                rep(seq_len(sheets), 
+                    each = prod(layout)))
+  grid <- lapply(grid, function(z){
+    matrix(z,
+           nrow = layout[1],
+           ncol = layout[2],
+           byrow = TRUE)
+  })
+
+  # PREPARE DATA FOR CYTO_PLOT CALLS -------------------------------------------
+  
+  # GROUPING - LIST OF MERGED FLOWFRAMES
+  fr_list <- cyto_merge_by(fs,
+                           merge_by = group_by)
+  
+  # TRANSPOSE TO LIST OF FLOWFRAME LISTS
+  fr_list <- list(fr_list) %>% transpose()
+  
+  # OVERLAY
+  if (!.all_na(overlay)) {
+    # REPEAT FLOWFRAME PER PLOT
+    if (inherits(overlay, "flowFrame")) {
+      overlay_list <- rep(list(list(overlay)), length(fr_list))
+      # FLOWSET TO LIST OF FLOWFRAMES
+    } else if (inherits(overlay, "flowSet")) {
+      # GROUPING
+      overlay_list <- cyto_merge_by(overlay,
+                                    merge_by = group_by)
+      # LIST OF FLOWFRAME LISTS
+      overlay_list <- lapply(overlay_list, function(z) {
+        list(z)
+      })
+      # LIST OF FLOWSETS TO LIST OF FLOWFRAME LISTS
+    } else if (inherits(overlay, "list")) {
+      # ALLOW LIST OF FLOWFRAMES OF LENGTH FR_LIST
+      if (all(LAPPLY(unlist(overlay), function(z) {
+        inherits(z, "flowFrame")
+      }))) {
+        # SAME LENGTH AS FR_LIST
+        if (length(overlay) != length(fr_list)) {
+          stop(
+            paste(
+              "'overlay' must be a list of flowFrame lists -",
+              "one flowFrame list per plot."
+            )
+          )
+        }
+        # NO GROUPING APPLIED
+        overlay_list <- overlay
+        # LIST OF FLOWSETS
+      } else if (all(LAPPLY(overlay, function(z) {
+        inherits(z, "flowSet")
+      }))) {
+        # GROUPING
+        overlay_list <- lapply(overlay, function(z){
+          cyto_merge_by(z,
+                        merge_by = group_by)
+        })
+        overlay_list <- overlay_list %>% transpose()
+        # OVERLAY NOT SUPPORTED
+      } else {
+        stop(
+          paste(
+            "'overlay' should be either a flowFrame, flowSet, list of flowFrame",
+            "lists or list of flowSet lists."
+          )
+        )
+      }
+    }
+    # NAME OVERLAY
+    names(overlay_list) <- names(fr_list)
+    
+    # COMBINE FR_LIST & OVERLAY_LIST - LIST OF FLOWFRAME LISTS
+    fr_list <- lapply(seq_along(fr_list), function(z){
+      c(fr_list[[z]], overlay_list[[z]])
+    })
+    names(fr_list) <- names(overlay_list)
     
   }
   
-  # Grid dimensions
-  nrow <- layout[1]
-  ncol <- layout[2]
+  # REPLACE ELEMENTS OF expected_groups WITH MATCHING FR_LIST ELEMENTS
+  ind <- match(names(fr_list), names(expected_groups))
+  expected_groups[ind] <- fr_list
   
-  # Number of plots per sheet
-  np <- prod(layout)
-  
-  # Total number of plots (np*ns)
-  if(all(group_by == FALSE)){
-    tnp <- length(fs)
-  }else{
-    tnp <- prod(unlist(
-      lapply(group_by, function(x){
-        nlevels(as.factor(pd[,x]))
-      })
-    ))
-  }
-  
-  # Number of sheets
-  ns <- ceiling(tnp/np)
+  # REPLACE NA IN expected_groups WITH EMPTY FLOWFRAME
+  if(any(LAPPLY(expected_groups, ".all_na"))){
+    
+    # EXPECTED NUMBER OF LAYERS PER PLOT
+    N <- max(LAPPLY(expected_groups, "length"))
+    
+    # MISSING FACTOR GROUP LEVELS
+    empty_group <- which(LAPPLY(expected_groups, ".all_na"))
 
-  # Each level of group_by[3] is on a new sheet
-  if(length(group_by) == 3){
-    ns <- ns * nlevels(as.factor(pd[,group_by[3]]))
-  }
+    # VALID GROUP
+    valid_group <- expected_groups[[which(!LAPPLY(expected_groups, ".all_na"))[1]]]
+    
+    # REPLACE NA WITH LIST OF EMPTY FLOWFRAMES
+    lapply(empty_group, function(z){
+      # CREATE EMPTY FLOWFRAME
+      empty_flowFrame <- cyto_empty(name = names(expected_groups)[z],
+                                    channels = cyto_channels(valid_group[[1]]))
+      # REPLACE NA WITH LIST OF EMPTY FLOWFRAMES
+      expected_groups[[z]] <<- rep(list(empty_flowFrame), N)
+    })
+
+  }  
+
+  # PREPARE CYTO_PLOT ARGUMENTS ------------------------------------------------
   
-  # Use layout to determine which plots require axes
-  axes_text <- rep(list(c(FALSE,FALSE)), np * ns)
-  
-  # Grid matrix per sheet
-  grd <- matrix(seq_len(ncol * nrow), ncol = ncol, nrow = nrow, byrow = TRUE)
-  grd <- lapply(seq_len(ns), function(x){
-    grd * ns
+  # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE
+  lapply(seq_len(length(channels)), function(z) {
+    if (grepl("FSC", channels[z], ignore.case = TRUE) |
+        grepl("SSC", channels[z], ignore.case = TRUE)) {
+      fr_list <<- lapply(fr_list, function(y) {
+        # LIST OF FLOWFRAMES
+        lapply(y, function(w) {
+          if(nrow(w@exprs) > 0){
+            if (min(range(w, type = "data")[, channels[z]]) < 0) {
+              coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
+              rownames(coords) <- c("min", "max")
+              colnames(coords) <- channels[z]
+              nonDebris <- rectangleGate(.gate = coords)
+              Subset(w, nonDebris)
+            } else {
+              return(w)
+            }
+          }else{
+            return(w)
+          }
+        })
+      })
+    }
   })
   
-  # Plots requiring Y axis
-  axes_y <- LAPPLY(grd, function(x){
-    x[,1]
+  # GATES - LIST OF GATE OBJECT LISTS
+  if (!.all_na(gate)) {
+    # REPEAT GATE OBJECTS PER PLOT
+    if (any(is(gate) %in% c(
+      "rectangleGate",
+      "polygonGate",
+      "ellipsoidGate",
+      "quadGate",
+      "filters"
+    ))) {
+      gate <- list(gate)
+    }
+    # LIST OF GATE OBJECTS - REPEAT PER PLOT
+    if (all(LAPPLY(gate, function(z) {
+      any(is(z) %in% c(
+        "rectangleGate",
+        "polygonGate",
+        "ellipsoidGate",
+        "quadGate",
+        "filters"
+      ))
+    }))) {
+      gate <- rep(list(gate), length.out = length(fr_list))
+    }
+  }
+  
+  # XLIM
+  if (.all_na(xlim)) {
+    xlim <- .cyto_range(fr_list,
+                        channels = channels[1],
+                        limits = limits
+    )[, channels[1]]
+    # XLIM MANUALLY SUPPLIED
+  } else {
+    if (!.all_na(axes_trans)) {
+      if (channels[1] %in% names(axes_trans)) {
+        xlim <- axes_trans[[channels[1]]]$transform(xlim)
+      }
+    }
+  }
+  
+  # YLIM - 1D CALCULATED LATER
+  if (.all_na(ylim)) {
+    # 2D PLOT
+    if (length(channels) == 2) {
+      ylim <- .cyto_range(fr_list,
+                          channels = channels[2],
+                          limits = limits
+      )[, channels[2]]
+    }
+    # YLIM MANUALLY SUPPLIED
+  } else {
+    # 2D PLOT
+    if (length(channels) == 2) {
+      if (!.all_na(axes_trans)) {
+        if (channels[2] %in% names(axes_trans)) {
+          ylim <- axes_trans[[channels[2]]]$transform(ylim)
+        }
+      }
+    }
+  }
+  
+  # SETUP AXES_TEXT
+  axes_text <- rep(list(c(FALSE,FALSE)), panel)
+  
+  # PLOTS REQUIRING Y AXIS
+  axes_y <- LAPPLY(grid, function(x){
+    x[, 1]
   })
   lapply(axes_y, function(x){
     axes_text[[x]][2] <<- TRUE
   })
   
-  # Plots requiring X axis
-  axes_x <- LAPPLY(grd, function(x){
+  # PLOTS REQUIRING X AXIS
+  axes_x <- LAPPLY(grid, function(x){
     x[nrow(x),]
   })
   lapply(axes_x, function(y){
     axes_text[[y]][1] <<- TRUE
   })
   
-  # Extract channel info
-  fr.data <- pData(parameters(fs[[1]]))
-  fr.channels <- BiocGenerics::colnames(fs[[1]])
+  # AXES LABELS
+  axes_labels <- .cyto_plot_axes_label(x = fs[[1]],
+                                       channels = channels,
+                                       xlab = xlab,
+                                       ylab = ylab,
+                                       density_modal = density_modal)
+  xlab <- axes_labels[[1]]
+  ylab <- axes_labels[[2]]
   
-  # X axis title
-  if (missing(xlab)) {
-    if (!is.na(fr.data$desc[which(fr.channels == channels[1])])) {
-      xlab <- paste(fr.data$desc[which(fr.channels == channels[1])],
-                    channels[1],
-                    sep = " "
-      )
-    } else if (is.na(fr.data$desc[which(fr.channels == channels[1])])) {
-      xlab <- paste(channels[1], sep = " ")
-    }
-  }
+  # PANELS TO LABEL
+  panel_label <- rep(list(c(FALSE,FALSE)), panels)
   
-  # Y axis title
-  if (missing(ylab)) {
-    if (!is.na(fr.data$desc[which(fr.channels == channels[2])])) {
-      ylab <- paste(fr.data$desc[which(fr.channels == channels[2])],
-                    channels[2],
-                    sep = " "
-      )
-    } else if (is.na(fr.data$desc[which(fr.channels == channels[2])])) {
-      ylab <- paste(channels[2], sep = " ")
-    }
-  }
-  
-  # Pop-up window
-  cyto_plot_new(popup = popup)
-  
-  # Set plot layout
-  par(mfrow = layout)
-  
-  # Remove marginal space around each plot
-  par(mar = c(0,0,0,0))
-  
-  # Add space for labels, titles and headers
-  if(is.null(header)){
-    par(oma = c(6,6,5,5))
-  }else{
-    par(oma = c(6,6,8,5))
-  }
-  
-  # Create a list containing all groups (without missing levels)
-  if(all(group_by == FALSE)){
-    grp_exp <- rep(list(NA), tnp)
-  }else if(length(group_by) == 1){
-    grp_exp <- rep(list(NA), nlevels(as.factor(pd[,group_by])))
-    names(grp_exp) <- levels(as.factor(pd[,group_by]))
-  }else if(length(group_by) == 2){
-    grp_exp <- rep(list(NA), nlevels(as.factor(pd[,group_by[1]])) *
-                     nlevels(as.factor(pd[,group_by[2]])))
-    names(grp_exp) <- LAPPLY(
-      levels(as.factor(pd[,group_by[2]])),
-      function(x){
-        paste(levels(as.factor(pd[,group_by[1]])), x)
-      })
-  }else if(length(group_by) == 3){
-    grp_exp <- rep(list(NA), nlevels(as.factor(pd[,group_by[1]])) *
-                     nlevels(as.factor(pd[,group_by[2]])) *
-                     nlevels(as.factor(pd[,group_by[3]])))
-    names(grp_exp) <- LAPPLY(
-      levels(as.factor(pd[group_by[3]])),
-      function(y){
-        paste(LAPPLY(
-          levels(as.factor(pd$group_by[2])),
-          function(x){
-            paste(levels(as.factor(pd$group_by[1])), x)
-          }), y)
-      })
-    
-  }
-  
-  # Group samples into list of named flowFrames
-  if(all(group_by == FALSE)){
-    fr.list <- lapply(seq_len(length(fs)), function(x){
-      fs[[x]]
-    })
-  }else{
-    fr.list <- cyto_group_by(fs,
-                             group_by = group_by)
-    fr.list <- lapply(fr.list, function(z){
-      cyto_convert(z, "flowFrame")
-    })
-  }
-  
-  # Group overlay into list of named flowFrame lists
-  if(!is.null(overlay)){
-    overlay <- .cyto_overlay_check(x = fs,
-                                   overlay = overlay,
-                                   display = NULL)
-    
-    if(all(group_by != FALSE)){
-      overlay <- .cyto_overlay_merge(x = fs,
-                                     overlay = overlay,
-                                     group_by = group_by,
-                                     display = NULL)
-    }
-  }else{
-    overlay <- NA
-  }
-  
-  # Replace elements of grp_exp with matching fr.list elements
-  if(all(group_by == FALSE)){
-    grp_exp[seq_len(length(fs))] <- fr.list
-  }else{
-    ind <- match(names(fr.list), names(grp_exp))
-    grp_exp[ind] <- fr.list
-  }
-  
-  # Replace NA with grp_exp with empty flowFrame
-  if(any(is.na(grp_exp))){
-    
-    # Make flowFrame with same range as fs[[1]] - prevent axes issues
-    mn <- LAPPLY(
-      colnames(fs[[1]]), 
-      function(x){
-        min(exprs(fs[[1]])[,x])
-      }
-    )
-    mx <- LAPPLY(
-      colnames(fs[[1]]),
-      function(x){
-        max(exprs(fs[[1]])[,x])
-      }
-    )
-    
-    empty_flowFrame <- matrix(c(mn,mx),
-                              ncol = BiocGenerics::ncol(fs[[1]]),
-                              nrow = 2,
-                              byrow = TRUE)
-    colnames(empty_flowFrame) <- colnames(fs[[1]])
-    empty_flowFrame <- flowCore::flowFrame(exprs = empty_flowFrame)
-    grp_exp[is.na(grp_exp)] <- rep(list(empty_flowFrame), 
-                                   length(which(is.na(grp_exp))))
-    
-  }
-  
-  # Logical indicating which panels require X/Y labels
-  panel_label <- rep(list(c(FALSE,FALSE)), length(grp_exp))
-  
-  # Plots requiring y panel label
-  panel_label_y <- LAPPLY(grd, function(x){
-    x[,ncol(x)]
+  # Y PANEL LABEL
+  panel_label_y <- LAPPLY(grid, function(x){
+    x[, ncol(x)]
   })
   lapply(panel_label_y, function(y){
-    panel_label[[y]][2] <<- TRUE
+    # PANEL Y LABELS REQUIRE MULTIPLE GROUPING VARIABLES OR COLUMN FORMAT
+    if(length(group_by) > 1 |
+       (length(group_by) == 1 & grepl("column", format))){
+      panel_label[[y]][2] <<- TRUE
+    }
   })
   
-  # Plots requiring x axis
-  panel_label_x <- LAPPLY(grd, function(x){
-    x[1,]
+  # X PANEL LABEL
+  panel_label_x <- LAPPLY(grid, function(x){
+    x[1, ]
   })
   lapply(panel_label_x, function(y){
-    panel_label[[y]][1] <<- TRUE
+    # PANEL X LABELS ALWAYS REQUIRED UNLESS COLUMN FORMAT & SINGLE VARIABLE
+    if(!length(group_by) == 1 & grepl("column", format)){
+      panel_label[[y]][1] <<- TRUE
+    }
   })
   
-  # Single group_by panel label 
-  if(length(group_by) == 1 & all(group_by != FALSE)){
-    
-    if(format == "row"){
-      panel_label <- rep(list(c(TRUE,FALSE)),
-                         nlevels(as.factor(pd[,group_by])))
-      panel_label[[length(panel_label)]][2] <- TRUE
-    }else if(format == "column"){
-      panel_label <- rep(list(c(FALSE,TRUE)),
-                         nlevels(as.factor(pd[,group_by])))
-      panel_label[[1]][1] <- TRUE
-    }
-    
-  }
-  
-  # X panel labels
-  if(missing(panel_x_label)){
-    if(all(group_by == FALSE)){
+  # X PANEL LABELS
+  if(is.null(panel_x_label)){
+    if(all(group_by == "name")){
       panel_x_label <- NA
     }else if(length(group_by) == 1){
       if(format == "row"){
-        panel_x_label <- levels(as.factor(pd[,group_by]))
+        panel_x_label <- levels(pd[,group_by])
       }else if(format == "column"){
         panel_x_label <- NA
       }
     }else{
-      panel_x_label <- levels(as.factor(pd[,group_by[1]]))
+      panel_x_label <- levels(pd[,group_by[1]])
     }
   }
   
-  # Y panel labels
-  if(missing(panel_y_label)){
-    if(all(group_by == FALSE)){
+  # Y PANEL LABELS
+  if(is.null(panel_y_label)){
+    if(all(group_by == "name")){
       panel_y_label <- NA
     }else if(length(group_by) == 1){
       if(format == "row"){
         panel_y_label <- NA
       }else if(format == "column"){
-        panel_y_label <- levels(as.factor(pd[,group_by]))
+        panel_y_label <- levels(pd[,group_by])
       }
     }else{
-      panel_y_label <- levels(as.factor(pd[,group_by[2]]))
+      panel_y_label <- levels(pd[,group_by[2]])
     }
   }
   
-  # Header
+  # HEADER
   if(is.null(header)){
-    
-    # Use 3rd variable for plot headers
+    # 3RD VARIABLE AS PLOT HEADER
     if(length(group_by) == 3){
-      header <- rep(levels(as.factor(pd[,group_by[3]])), each = ns)
+      header <- rep(levels(pd[,group_by[3]]), 
+                    each = ceiling(nlevels(pd[, group_by[3]]) / sheets))
     }
-    
-  }else if(length(header) != ns){
-    
-    header <- rep(header, each = ns)
-    
+  }else if(length(header) != sheets){
+    header <- rep(header, times = sheets)
+  }  
+  
+  # RESET SAVED LABEL CO-ORDINATES ---------------------------------------------
+  
+  # PREVIOUS CALL
+  previous_call <- getOption("cyto_plot_call")
+  
+  # CURRENT CALL (gh does not match)
+  current_call <- list("x" = fs,
+                       "channels" = channels,
+                       "overlay" = overlay,
+                       "group_by" = group_by,
+                       "limits" = limits,
+                       "gate" = gate,
+                       "negate" = negate,
+                       "label" = label,
+                       "label_text" = label_text,
+                       "label_stat" = label_stat,
+                       "label_position" = label_position,
+                       "label_text_x" = label_text_x,
+                       "label_text_y" = label_text_y,
+                       "density_modal" = density_modal,
+                       "layout" = layout)
+  
+  # PREVIOUS CALL BELONGS TO DIFFERENT METHOD
+  if(!all(names(previous_call) %in% names(current_call))){
+    previous_call <- NULL
   }
   
-  # cyto_plot arguments - rep length(grp_exp) - SKIP
-  if(1 == 2){
-      ovn <- length(overlay) + 1
+  # UPDATE CYTO_PLOT_CALL
+  options("cyto_plot_call" = current_call)
+  
+  # RESET SAVED LABEL CO-ORDINATES - MATCHING CALLS / NO CYTO_PLOT_SAVE
+  if (!isTRUE(all.equal(previous_call, current_call)) |
+      getOption("cyto_plot_save") == FALSE) {
+    # RESET SAVED LABEL CO-ORDINATES
+    options("cyto_plot_label_coords" = NULL)
+    # RESET CYTO_PLOT_MATCH
+    options("cyto_plot_match" = NULL)
+  }
+  
+  # REPEAT CYTO_PLOT ARGUMENTS -------------------------------------------------
+  
+  # PULL DOWN ARGUMENTS
   args <- .args_list()
-  args <- .cyto_plot_args_split(args,
-    channels = channels,
-    n = ovn * np,
-    plots = np,
-    layers = ovn,
-    gates = length(gate))
+  
+  # REPEAT & SPLIT ARGUMENTS
+  args <- .cyto_plot_args_split(args)
+  
+  # PLOTTING ARGUMENTS
+  cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
+  
+  # REMOVE UNWANTED ARGUMENTS
+  cyto_plot_args <- cyto_plot_args[-which(
+    LAPPLY(c("x",
+             "channels",
+             "overlay",
+             "axes_trans",
+             "popup",
+             "limits",
+             "title",
+             "axes_label"), function(z){
+               grepl(z, cyto_plot_args)
+             }))]
+  
+  # RESTRICT ARGS TO CYTO_PLOT_ARGS ONLY
+  args <- args[names(args) %in% cyto_plot_args]
+  
+  # SETUP PLOTTING SPACE -------------------------------------------------------
+  
+  # POPUP
+  cyto_plot_new(popup = popup)
+  
+  # SET LAYOUT
+  par(mfrow = layout)
+  
+  # REMOVE MARGINAL SPACE AROUND EACH PLOT
+  par(mar = c(0,0,0,0))
+  
+  # SPACE FOR LABELS, TITLES & HEADERS
+  if(is.null(header)){
+    par(oma = c(6,6,5,6)) # used to c(6,6,5,5)
+  }else{
+    par(oma = c(6,6,8,6)) # used to be c(6,6,8,5)
   }
   
-  # run through each element of grp_exp - empty plot if NA
+  # PLOT CONTRUCTION -----------------------------------------------------------
+  
+  # PLOT PER expected_groups ELEMENT
   cnt <- 0
   sht <- 0
-  mapply(function(x, 
-                  overlay,
-                  axes_text, 
-                  panel_label){
+  plots <- lapply(seq_along(expected_groups), function(z){
     
-    # Update counter
+    print(expected_groups[[z]])
+    
+    # COUNTER
     cnt <<- cnt + 1
     
-    # Update sheet number
-    if(x %in% seq_len(ns)*np){
+    # SHEET NUMBER
+    if(z %in% seq_len(ns)*np){
       sht <<- sht + 1
     }
     
-    # Replace NA with grp_exp with empty flowFrame
-    if(is.na(grp_exp[[x]])){
-      
-      # Make flowFrame with same range as fs[[1]] - prevent axes issues
-      mn <- LAPPLY(
-        colnames(fs[[1]]), 
-        function(x){
-          min(exprs(fs[[1]])[,x])
-        }
-      )
-      mx <- LAPPLY(
-        colnames(fs[[1]]),
-        function(x){
-          max(exprs(fs[[1]])[,x])
-        }
-      )
-      
-      empty_flowFrame <- matrix(c(mn,mx),
-                                ncol = BiocGenerics::ncol(fs[[1]]),
-                                nrow = 2,
-                                byrow = TRUE)
-      colnames(empty_flowFrame) <- colnames(fs[[1]])
-      empty_flowFrame <- flowCore::flowFrame(exprs = empty_flowFrame)
-      
-      # Call to .cyto_plot_empty
-      cyto_plot_empty(empty_flowFrame,
-                      channels = channels,
-                      axes_trans = axes_trans,
-                      axes_text = axes_text,
-                      overlay = NA,
-                      ...)
-      
+    # OVERLAY
+    if(length(expected_groups[[z]]) > 1){
+      x <- expected_groups[[z]][[1]]
+      overlay <- expected_groups[[z]][-1]
     }else{
-      # Call to cyto_plot flowFrame method
-      cyto_plot(grp_exp[[x]],
-                channels = channels,
-                axes_trans = axes_trans,
-                overlay = overlay,
-                gate = gate,
-                title = NA,
-                axes_text = axes_text, ...)
+      x <- expected_groups[[z]][[1]]
+      overlay <- NA
     }
     
-    # Add X panel labels where necessary
+    # ARGUMENTS
+    cyto_plot_args <- lapply(args, function(y){
+      if(is(y, "list")){
+        y[[z]]
+      }else{
+        y[z]
+      }
+    })
+    
+    # CYTO_PLOT FLOWFRAME METHOD
+    do.call("cyto_plot",
+            c(cyto_plot_args,
+              list("x" = x,
+                   "channels" = channels,
+                   "overlay" = overlay,
+                   "axes_trans" = axes_trans,
+                   "popup" = FALSE,
+                   "limits" = limits,
+                   "title" = NA)))
+
+    # PLOT LIMITS
+    lims <- par("usr")
+    xmin <- lims[1]
+    xmax <- lims[2]
+    xrng <- xmax - xmin
+    ymin <- lims[3]
+    ymax <- lims[4]
+    
+    # PANEL X LABELS
     if(panel_label[1] & !is.na(panel_x_label)){
-      
-      mtext(panel_x_label[x/sht],
+      mtext(panel_x_label[z/sht],
             outer = FALSE,
             side = 3,
             line = 0.5,
             font = panel_label_font[1],
             cex = panel_label_size[1],
             col = panel_label_col[1])
-      
     }
     
-    # Add Y panel labels where necessary
+    # PANEL Y LABELS
     if(panel_label[2] & !is.na(panel_y_label)){
-      
       # mtext does not support text rotation - need to use text for y labels
-      text(x = par("usr")[2] + 0.07*(par("usr")[2] - par("usr")[1]),
-           y = mean(par("usr")[3:4]),
-           labels = panel_y_label[x/(ncol*sht)],
+      text(x = xmax + 0.07*xrng,
+           y = mean(c(ymin, ymax)),
+           labels = panel_y_label[z/(ncol*sht)],
            font = panel_label_font[2],
            cex = 1.5*panel_label_size[2],
            col = panel_label_col[2],
            srt = 270,
            xpd = NA)
-      
     }
     
-    # Add axes labels, panel labels, titles and headers when plot is full
+    # AXES LABELS, PANEL LABELS, TITLES and HEADERS - FULL SHEET
     if(cnt %% prod(layout) == 0){
       
-      # X Axis label
+      # X AXIS LABEL
       mtext(xlab, 
             outer = TRUE, 
             side = 1, 
@@ -505,7 +696,7 @@ cyto_plot_grid.flowSet <- function(x,
             cex = axes_label_text_size,
             col = axes_label_text_col)
       
-      # Y Axis label
+      # Y AXIS LABEL
       mtext(ylab, 
             outer = TRUE, 
             side = 2, 
@@ -514,7 +705,7 @@ cyto_plot_grid.flowSet <- function(x,
             cex = axes_label_text_size,
             col = axes_label_text_col)
       
-      # Add X Title
+      # X TITLE
       if(is.na(title[1]) & all(group_by != FALSE)){
         title[1] <- group_by[1]
       }
@@ -529,26 +720,24 @@ cyto_plot_grid.flowSet <- function(x,
               col = title_text_col[1])
       }
       
-      # Add Y Title
+      # Y TITLE
       if(is.na(title[2]) & all(group_by != FALSE)){
         title[2] <- group_by[2]
       }
       
       if(!is.na(title[2])){
-        
         # mtext does not support text rotation - need to use text for y labels
-        text(x = par("usr")[2] + 0.2*(par("usr")[2] - par("usr")[1]),
-             y = 2*par("usr")[4], # HALF GRID SIZE
+        text(x = xmax + 0.2*xrng,
+             y = 2*ymax, # HALF GRID SIZE
              labels = title[2],
              font = title_text_font[2],
              cex = 1.8*title_text_size[2],
              col = title_text_col[2],
              srt = 270,
              xpd = NA)
-        
       }
       
-      # Add Header
+      # HEADER
       if(!is.null(header)){
         mtext(header[sht], 
               outer = TRUE, 
@@ -559,42 +748,37 @@ cyto_plot_grid.flowSet <- function(x,
               col = header_text_col)
       }
       
+      # RECORD PLOT
+      plot <- cyto_plot_record()
+      
+      # POPUP
       if(popup & cnt != ns*np){
         cyto_plot_new(popup)
       }
       
+      # RETURN RECORDED PLOT
+      return(plot)
+      
     }
     
-  }, seq_len(length(grp_exp)),
-  overlay,
-  axes_text,
-  panel_label
-  )
+  })
   
-  # Reset cyto_plot_grid option
-  options("cyto_plot_grid" = FALSE)
+  # RECORD/SAVE ----------------------------------------------------------------
   
-  # Reset parameters to default
-  par(mar = c(5.1,4.1,4.1,2.1))
-  par(oma = c(0,0,0,0))
-  
-  # Turn off graphics device for saving
+  # TURN OFF GRAPHICS DEVICE
   if(getOption("cyto_plot_save")){
-    
     if(inherits(x, basename(getOption("cyto_plot_method")))){
       
-      # Close graphics device
+      # CLOSE GRAPHICS DEVICE
       dev.off()
       
-      # Reset cyto_plot_save
+      # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
-      
-      # Reset cyto_plot_method
-      options("cyto_plot_method" = NULL)
-      
     }
-    
   }
+  
+  # RETURN RECORDED PLOT
+  invisible(plots)
   
 } 
 

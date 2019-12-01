@@ -55,7 +55,7 @@ prior to gating, set to the length of x by default to construct a single
 gate for all samples. If group_by is supplied a different gate will be
 constructed for each group.}
 
-\item{select}{vector containing the indicies of samples within gs to use for
+\item{select}{vector containing the indices of samples within gs to use for
 plotting.}
 
 \item{negate}{logical indicating whether a gatingTemplate entry should be

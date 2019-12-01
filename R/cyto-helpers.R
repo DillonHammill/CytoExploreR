@@ -1462,7 +1462,8 @@ cyto_merge_by.flowSet <- function(x,
 #'
 #' @param x object of class \code{flowFrame}.
 #' @param names vector of names to assign to each of the extracted flowFrames
-#'   when saving the split files.
+#'   when saving the split files. Name should be supplied in the order used
+#'   prior to merging.
 #'
 #' @return list of split flowFrames.
 #'
