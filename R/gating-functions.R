@@ -1040,7 +1040,7 @@
     cvm <- solve(cinv)
 
     dimnames(cvm) <- list(channels, channels)
-
+    
     gate <- ellipsoidGate(
       .gate = cvm,
       mean = center,
@@ -1347,16 +1347,16 @@
     pch = 16,
     col = "red"
   )
-
+  
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
 
   # Minimum and maximum limits of plot
-  xmin <- par("usr")[1]
-  xmax <- par("usr")[2]
-  ymin <- par("usr")[3]
-  ymax <- par("usr")[4]
-
+  xmin <- round(par("usr")[1], 2)
+  xmax <- round(par("usr")[2], 2)
+  ymin <- round(par("usr")[3], 2)
+  ymax <- round(par("usr")[4], 2)
+  
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
     options("show.error.messages" = FALSE)
@@ -1381,7 +1381,7 @@
   coords <- as.data.frame(do.call(rbind, coords))
   colnames(coords) <- c("x", "y")
   coords <- rbind(center, coords)
-
+  
   # Determine which quadrants the points are in
   # bottom left anti-clockwise to top right (relative to center)
   quads <- c(0, rep(NA, length(alias)))
@@ -1406,7 +1406,7 @@
   }
   coords[, "Q"] <- quads
   coords <- coords[with(coords, order(coords$Q)), ]
-
+  
   # Push points to plot limits (intersection with plot limits)
 
   # Quadrant 1: find limit intercept and modify point co-ordinates
@@ -1524,7 +1524,7 @@
     }
     coords[coords$Q == 4, ] <- q4
   }
-
+  
   # If multiple points in same quadrant order anticlockwise Q1-Q4
   if (anyDuplicated(coords$Q) != 0) {
 
@@ -1575,7 +1575,7 @@
   for (i in 2:(length(coords$Q) - 1)) {
     gates[[i - 1]] <- rbind(coords[1, ], coords[i, ], coords[i + 1, ])
   }
-
+  
   # Check if a corner lies between the points - add as gate co-ordinate
   # Calculate corner points using min & max values
   Q1 <- c(xmin, ymin, 1)
@@ -1586,8 +1586,9 @@
   colnames(Q) <- c("x", "y", "Q")
   Q <- data.frame(Q)
 
-  indx <- 1:(length(alias) - 1)
-
+  # LAST GATE INHERITS REMAINING CORNERS
+  indx <- seq_len(length(alias) - 1)
+  
   # Add corners to appropriate gates step-wise
   gates[indx] <- lapply(gates[indx], function(x) {
 
@@ -1651,8 +1652,8 @@
       }
 
       # ADJACENT - points in adjacent quadrants
-    } else if (any(x[3, "Q"] - x[2, "Q"] == c(0, 1))) {
-
+    } else if ((x[3, "Q"] - x[2, "Q"]) %in% c(0, 1)) {
+      
       # Q1-Q2
       if (x[2, "Q"] == 1 & x[3, "Q"] == 2) {
         if (x[2, "x"] == xmin & x[3, "x"] == xmax) {
@@ -1665,7 +1666,7 @@
             Q <<- Q[-match(c(1, 2), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] == xmin & x[3, "x"] != xmax) {
-
+          
           # Include Q1 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, x[3, ])
 
@@ -1859,14 +1860,13 @@
       gates[[length(alias)]][3, ]
     )
   }
-
-
+  
   # CONSTRUCT GATES
   gates <- lapply(seq(1, length(gates), 1), function(x) {
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
     rownames(coords) <- NULL
-
+    
     # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
@@ -1893,7 +1893,7 @@
 
     return(gate)
   })
-
+  
   # RETURN CONSTRUCTED GATES
   gates <- filters(gates)
   return(gates)
