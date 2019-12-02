@@ -37,13 +37,12 @@
 #' template <- add_pop(
 #'   gs,
 #'   alias = "Lymphocytes", pop = "+", parent = "root",
-#'   dims = "FSC-A,SSC-A", gating_method = "gate_manual",
+#'   dims = "FSC-A,SSC-A", gating_method = "cyto_gate_manual",
 #'   gating_args = "display=0.5,alias='Lymphocytes',type='ellipse'",
 #'   collapseDataForGating = TRUE, groupBy = 2
 #' )
 #'
 #' # gating window will open to construct gate left click vertices on plot
-#' # and close gate by right click and selecting "stop".
 #' cyto_plot(gs[[1]],
 #'   parent = "root",
 #'   alias = "Lymphocytes",
@@ -58,7 +57,9 @@
                          alias, ...) {
 
   # Determine vertices of polygon using gate_draw
-  gates <- cyto_gate_draw(x = fr, channels = channels, alias = alias, ...)
+  gates <- cyto_gate_draw(x = fr, 
+                          channels = channels, 
+                          alias = alias, ...)
 
   return(gates)
 }
