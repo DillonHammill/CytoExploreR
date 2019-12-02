@@ -814,10 +814,10 @@ cyto_gate_draw.flowSet <- function(x,
     
   })
   names(filters_list) <- names(fr_list)
-  
+
   # COMBINE GATES IN EACH LIST ELEMENT
   filters_list <- lapply(filters_list, function(z) {
-    filters(z)
+    filters(unlist(z))
   })
   
   # ALL GROUPED RETURN FILTERS OBJECT
@@ -1034,6 +1034,6 @@ cyto_gate_draw.flowFrame <- function(x,
   # RETURN GATE OBJECTS --------------------------------------------------------
 
   # GATES AS FILTERS OBJECTS
-  gates <- filters(gates)
+  gates <- filters(unlist(gates))
   return(gates)
 }
