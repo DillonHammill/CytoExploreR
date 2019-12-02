@@ -57,7 +57,7 @@ gs <- transform(gs, trans)
 
 # Apply gatingTemplate
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Save png image of gating scheme after plotting
 cyto_plot_save("Gating-Scheme.png",

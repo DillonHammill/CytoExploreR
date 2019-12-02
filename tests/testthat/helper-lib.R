@@ -154,7 +154,7 @@ colnames(coords) <- "FSC-A"
 rownames(coords) <- c("min",
                       "max")
 rg1 <- rectangleGate(.gate = coords, 
-                     filterId = "Cells")
+                     filterId = "P")
 
 # 2D RECTANGLEGATE (RECTANGLE)
 coords <- matrix(c(0, 
@@ -184,7 +184,7 @@ coords <- matrix(c(0,
 colnames(coords) <- c("FSC-A",
                       "SSC-A")
 pg <- polygonGate(.gate = coords, 
-                  filterId = "E")
+                  filterId = "F")
 
 # ELLIPSOIDGATE
 cov <- matrix(c(625249999.99999988079,
@@ -276,7 +276,7 @@ coords <- matrix(c(25000,
 colnames(coords) <- c("FSC-A")
 rownames(coords) <- c("min", 
                       "max")
-tg1 <- rectangleGate(filterId = "Cells",
+tg1 <- rectangleGate(filterId = "Q",
                      .gate = coords)
 
 # boundaryGate -
@@ -302,7 +302,7 @@ coords <- matrix(c(-Inf,
 colnames(coords) <- c("FSC-A")
 rownames(coords) <- c("min", 
                       "max")
-bg1 <- rectangleGate(filterId = "Cells", 
+bg1 <- rectangleGate(filterId = "R", 
                      .gate = coords)
 
 # quadrantGates -

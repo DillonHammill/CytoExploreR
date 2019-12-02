@@ -2,11 +2,11 @@ context("cyto_gate_draw")
 
 # CYTO_GATE_DRAW ---------------------------------------------------------------
 
+# WEB GATE NAMES DON'T MATCH
+
 test_that("cyto_gate_draw", {
 
-  # 2D GATES -------------------------------------------------------------------
-  
-  # 2D GATE TYPES
+  # GATE TYPES
   gate_types <- c(
     "rectangle",
     "interval", # X AXIS
@@ -16,10 +16,13 @@ test_that("cyto_gate_draw", {
     "polygon",
     "ellipse",
     "quadrant",
-    "web"
+    "web",
+    "interval",
+    "threshold",
+    "boundary"
   )
 
-  # 2D GATE NAMES
+  # GATE NAMES
   gate_names <- list(
     "A",
     "B",
@@ -29,10 +32,13 @@ test_that("cyto_gate_draw", {
     "F",
     "G",
     c("H", "I", "J", "K"),
-    c("L", "M", "N", "O")
+    c("L", "M", "N", "O"),
+    "P",
+    "Q",
+    "R"
   )
 
-  # 2D GATE COORDS
+  # GATE COORDS
   gate_coords <- list(
     list(
       "x" = c(0, 50000),
@@ -40,8 +46,8 @@ test_that("cyto_gate_draw", {
     ),
     list(
       "x" = c(25000, 150000),
-      "y" = c(50000, 50000)
-    ), # IRRELEVANT
+      "y" = c(50000, 50000) # IRRELEVANT
+    ), 
     list(
       "x" = c(50000, 50000), # IRRELEVANT
       "y" = c(25000, 150000)
@@ -77,14 +83,29 @@ test_that("cyto_gate_draw", {
            "y" = c(150000)),
       list("x" = c(50000),
            "y" = c(250000))
+    ),
+    list(
+      "x" = c(0, 50000),
+      "y" = c(50, 50) # IRRELEVANT
+    ),
+    list(
+      "x" = c(25000),
+      "y" = c(50)
+    ),
+    list(
+      "x" = c(200000),
+      "y" = c(50)
     )
   )
 
-  # 2D GATE AXIS
+  # GATE AXIS
   gate_axes <- c(
     "x",
     "x",
     "y",
+    "x",
+    "x",
+    "x",
     "x",
     "x",
     "x",
@@ -95,20 +116,33 @@ test_that("cyto_gate_draw", {
 
   # GATES
   gates <- list(
-    rg2,
-    ig,
-    igy,
-    tg,
-    bg,
-    pg,
-    eg,
-    qg,
-    list(wg1,wg2,wg3,wg4)
+    list("A" = rg2),
+    list("B" = ig),
+    list("C" = igy),
+    list("D" = tg),
+    list("E" = bg),
+    list("F" = pg),
+    list("G" = eg),
+    list("H|I|J|K" = qg),
+    list("L" = wg1,
+         "M" = wg2,
+         "N" = wg3,
+         "O" = wg4),
+    list("P" = rg1),
+    list("Q" = tg1),
+    list("R" = bg1)
   )
 
+  # GATE CHANNELS
+  gate_channels <- c(rep(list(c("FSC-A","SSC-A")), 9),
+                     list("FSC-A"),
+                     list("FSC-A"),
+                     list("FSC-A"))
+  
   # TESTS
   mapply(
-    function(gate_name,
+    function(gate_channels,
+             gate_name,
              gate_type,
              gate_coord,
              gate_axis,
@@ -120,33 +154,30 @@ test_that("cyto_gate_draw", {
                              gate_coord[[3]],
                              gate_coord[[4]],
                              gate_coord[[5]])
-        gate <- filters(gate)
       }else{
         mock_locator <- mock(gate_coord)
-        gate <- filters(list(gate))
       }
+      # GATE
+      gate <- list(gate)
+      names(gate) <- "Combined Events"
+      # print(gate)
       testthat::with_mock(locator = mock_locator,{
         expect_equivalent(
           cyto_gate_draw(fs,
-            channels = c("FSC-A", "SSC-A"),
+            channels = gate_channels,
             alias = gate_name,
             type = gate_type,
             axis = gate_axis
           ),
           gate,
-          tolerance = 0.0000000001)})
+          tolerance = 0.1)})
     },
+    gate_channels,
     gate_names,
     gate_types,
     gate_coords,
     gate_axes,
     gates
   )
-  
-  # 1D GATES -------------------------------------------------------------------
-  
-  # 1D GATE TYPES
-  gate_types <- c("")
-  
   
 })

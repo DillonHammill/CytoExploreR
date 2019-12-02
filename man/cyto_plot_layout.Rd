@@ -35,7 +35,7 @@ gs <- transform(gs, trans)
 
 # Apply gatingTemplate
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Set out plot layout
 cyto_plot_layout(1, 2)

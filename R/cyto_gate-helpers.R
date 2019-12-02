@@ -398,6 +398,8 @@ cyto_gate_extract <- function(parent,
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param plot logical indicating whether a plot should be drawn, set to
+#'   \code{TRUE} by default.
 #' @param ... additional arguments for \code{\link{cyto_plot.flowFrame}}.
 #'
 #' @return an object of class \code{GatingSet} with edited gate applied, as well
@@ -410,7 +412,6 @@ cyto_gate_extract <- function(parent,
 #' @importFrom methods as
 #' @importFrom utils select.list write.csv
 #' @importFrom tools file_ext
-#' @importFrom magrittr %>%
 #' @importFrom purrr transpose
 #' @importFrom methods is
 #'
@@ -455,7 +456,8 @@ cyto_gate_edit <- function(x,
                            negate = FALSE,
                            display = 25000,
                            axis = "x",
-                           label = TRUE, ...) {
+                           label = TRUE,
+                           plot = TRUE, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -557,6 +559,7 @@ cyto_gate_edit <- function(x,
 
   # GROUPS
   N <- length(gs_list)
+  GRPS <- names(gs_list)
 
   # GATES FORMATTED FOR GATINGSET (NO QUADGATES) - EXISTING GATES
   gates_gs <- lapply(gs_list, function(gs) {
@@ -599,7 +602,7 @@ cyto_gate_edit <- function(x,
     merge_by = group_by,
     select = select
   )
-  names(fr_list) <- names(gs_list)
+  names(fr_list) <- GRPS
 
   # PREPARE OVERLAY ------------------------------------------------------------
 
@@ -609,27 +612,36 @@ cyto_gate_edit <- function(x,
     if (is.character(overlay)) {
       # OVERLAY DESCENDANTS
       if (any(grepl("descendants", overlay))) {
-        overlay <- tryCatch(gh_pop_get_descendants(x[[1]], parent),
-          error = function(e) {
-            NA
-          }
+        overlay <- tryCatch(gh_pop_get_descendants(x[[1]],
+          parent,
+          path = "auto"
+        ),
+        error = function(e) {
+          NA
+        }
         )
         # OVERLAY CHILDREN
       } else if (any(grepl("children", overlay))) {
-        overlay <- tryCatch(gs_pop_get_children(x, parent),
-          error = function(e) {
-            NA
-          }
+        overlay <- tryCatch(gs_pop_get_children(x,
+          parent,
+          path = "auto"
+        ),
+        error = function(e) {
+          NA
+        }
         )
       }
-      # VALID OVERLAY
-      if (all(overlay %in% nds)) {
-        # EXTRACT POPULATIONS
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          cyto_extract(x, z)
-        })
-        names(overlay) <- nms
+      # CHECK OVERLAY - MAY BE NA ABOVE
+      if (!.all_na(overlay)) {
+        # VALID OVERLAY
+        if (all(overlay %in% nds)) {
+          # EXTRACT POPULATIONS
+          nms <- overlay
+          overlay <- lapply(overlay, function(z) {
+            cyto_extract(x, z)
+          })
+          names(overlay) <- nms
+        }
       }
     }
     # OVERLAY - FLOWFRAME
@@ -688,16 +700,44 @@ cyto_gate_edit <- function(x,
         ))
       }
     }
+  }else{
+    overlay <- rep(list(list(NA)), N)
   }
 
   # COMBINE FR_LIST & OVERLAY
-  if (!.all_na(overlay)) {
-    fr_list <- lapply(N, function(z) {
-      c(fr_list[z], overlay[[z]])
-    })
-    names(fr_list) <- names(gs_list)
-  }
+  fr_list <- lapply(seq_along(fr_list), function(z) {
+    return(c(fr_list[z], overlay[[z]]))
+  })
+  names(fr_list) <- GRPS
 
+  # SAMPLING
+  fr_list <- lapply(seq_along(fr_list), function(z) {
+    # NO OVERLAY
+    if (!all(LAPPLY(fr_list[[z]], function(w) {
+      is(w, "flowFrame")
+    }))) {
+      lapply(seq_along(fr_list[[z]]), function(y) {
+        if (is(fr_list[[z]][[y]], "flowFrame")) {
+          cyto_sample(fr_list[[z]][[y]],
+                      display = display,
+                      seed = 56,
+                      plot = FALSE
+          )
+        } else {
+          fr_list[[z]][[y]]
+        }
+      })
+      # OVERLAY - SCALED SAMPLING
+    } else {
+      cyto_sample(fr_list[[z]],
+                  display = display,
+                  seed = 56,
+                  plot = TRUE
+      ) # use scaled sampling
+    }
+  })
+  names(fr_list) <- GRPS
+  
   # SELECT GROUP(S) TO EDIT ----------------------------------------------------
 
   # MENU - SELECT GROUPS TO EDIT
@@ -727,31 +767,26 @@ cyto_gate_edit <- function(x,
   # PLOT/EDIT/SAVE EACH GROUP - ORGANISE FOR GS & GT
   lapply(match(grps, names(fr_list)), function(y) {
 
-    # SAMPLING
-    FR_LIST <- cyto_sample(fr_list[y], display = display, seed = 56)
+    # CYTO_PLOT - PROPER TITLES
+    if(plot == TRUE){
+      
+      # EXISTING GATES TO PLOT
+      gate <- gates_gT[[y]]
 
-    # EXISTING GATES TO PLOT
-    gate <- gates_gT[[y]]
+      # PARENT TITLE
+      if (parent == "root") {
+        prnt <- "All Events"
+      } else {
+        prnt <- parent
+      }
 
-    # PARENT TITLE
-    if (parent == "root") {
-      prnt <- "All Events"
-    } else {
-      prnt <- parent
-    }
+      # TITLE
+      title <- paste(GRPS[y], "\n", prnt)
 
-    # Title
-    if (group_by[1] == "all") {
-      title <- paste("Combined Events", "\n", prnt)
-    } else {
-      title <- paste(names(fr_list)[y], "\n", prnt)
-    }
-
-    # Call to cyto_plot - careful about overlay
-    if (!length(FR_LIST) == 1) {
-      cyto_plot(FR_LIST[[1]],
+      # CYTO_PLOT
+      cyto_plot(fr_list[y][[1]],
         channels = channels,
-        overlay = FR_LIST[seq(2, length(FR_LIST))],
+        overlay = fr_list[y][seq(2, length(fr_list[y]))],
         legend = FALSE,
         gate = gate,
         gate_line_col = "magenta",
@@ -762,22 +797,9 @@ cyto_gate_edit <- function(x,
         gate_line_width = 2.5,
         popup = TRUE, ...
       )
-    } else {
-      cyto_plot(FR_LIST[[1]],
-        channels = channels,
-        overlay = NA,
-        legend = FALSE,
-        gate = gate,
-        gate_line_col = "magenta",
-        gate_line_alpha = 0.8,
-        axes_trans = axes_trans,
-        label = FALSE,
-        title = title,
-        gate_line_width = 2.5,
-        popup = TRUE, ...
-      )
+      
     }
-
+    
     # 2D Interval gates require axis argument
     if ("interval" %in% type) {
       intvl <- rbind(
@@ -792,7 +814,7 @@ cyto_gate_edit <- function(x,
     }
 
     # DRAW NEW GATES - FILTERS OBJECT OF LENGTH ALIAS (NEGATE LABEL)
-    gate_new <- cyto_gate_draw(FR_LIST[[1]],
+    gate_new <- cyto_gate_draw(fr_list[y][[1]],
       alias = unlist(alias),
       channels = channels,
       type = type,
@@ -801,6 +823,8 @@ cyto_gate_edit <- function(x,
       plot = FALSE
     )
 
+    print(gate_new)
+    
     # REMOVE FILTERS LAYER
     gate_new <- unlist(gate_new)
     names(gate_new) <- LAPPLY(alias, function(z) {
@@ -825,7 +849,7 @@ cyto_gate_edit <- function(x,
   })
 
   # PREPARE GATES FOR GATINGTEMPLATE - LIST OF FILTERS OF LENGTH ALIAS
-  gates_gT_transposed <- gates_gT %>% transpose()
+  gates_gT_transposed <- transpose(gates_gT)
 
   # ADD GATES TO FILTERS LISTS
   gates_gT_transposed <- lapply(gates_gT_transposed, function(z) {

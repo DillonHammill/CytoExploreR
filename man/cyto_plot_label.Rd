@@ -141,7 +141,7 @@ trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 gs <- transform(gs, trans)
 
 # Gate using gate_draw
-gating(Activation_gatingTemplate, gs)
+gt_gating(Activation_gatingTemplate, gs)
 
 # Plot
 cyto_plot(gs[[32]],
@@ -150,7 +150,7 @@ cyto_plot(gs[[32]],
 )
 
 # Label - median fluorescent intensity
-cyto_plot_label(getData(gs, "CD4 T Cells")[[32]],
+cyto_plot_label(cyto_extract(gs, "CD4 T Cells")[[32]],
   channels = "CD69",
   label_stat = "median",
   label_text = "MedFI",

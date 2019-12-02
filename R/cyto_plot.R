@@ -610,25 +610,32 @@ cyto_plot.GatingSet <- function(x,
     if (is.character(overlay)) {
       # OVERLAY DESCENDANTS
       if(any(grepl("descendants", overlay))){
-        overlay <- tryCatch(gh_pop_get_descendants(gs[[1]], parent), 
+        overlay <- tryCatch(gh_pop_get_descendants(gs[[1]], 
+                                                   parent,
+                                                   path = "auto"), 
                             error = function(e){NA}) 
       # OVERLAY CHILDREN  
       }else if(any(grepl("children", overlay))){
-        overlay <- tryCatch(gs_pop_get_children(gs, parent),
+        overlay <- tryCatch(gs_pop_get_children(gs, 
+                                                parent,
+                                                path = "auto"),
                             error = function(e){NA})
       }
-      # VALID OVERLAY
-      if (all(overlay %in% cyto_nodes(gs, path = "auto"))) {
-        # EXTRACT POPULATIONS
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          cyto_extract(gs, z)
-        })
-        names(overlay) <- nms
-      } else {
-        stop(paste(overlay[!overlay %in% cyto_nodes(gs, path = "auto")],
-          collapse = " & "
-        ), " do not exist in the GatingSet.")
+      # CHECK OVERLAY - MAY BE NA ABOVE
+      if(!.all_na(overlay)){
+        # VALID OVERLAY NODES
+        if (all(overlay %in% cyto_nodes(gs, path = "auto"))) {
+          # EXTRACT POPULATIONS
+          nms <- overlay
+          overlay <- lapply(overlay, function(z) {
+            cyto_extract(gs, z)
+          })
+          names(overlay) <- nms
+        } else {
+          stop(paste(overlay[!overlay %in% cyto_nodes(gs, path = "auto")],
+            collapse = " & "
+          ), " do not exist in the GatingSet.")
+        }
       }
     }
   }
@@ -1039,25 +1046,32 @@ cyto_plot.GatingHierarchy <- function(x,
     if (is.character(overlay)) {
       # OVERLAY DESCENDANTS
       if(any(grepl("descendants", overlay))){
-        overlay <- tryCatch(gh_pop_get_descendants(gh, parent), 
+        overlay <- tryCatch(gh_pop_get_descendants(gh, 
+                                                   parent,
+                                                   path = "auto"), 
                             error = function(e){NA}) 
         # OVERLAY CHILDREN  
       }else if(any(grepl("children", overlay))){
-        overlay <- tryCatch(gh_pop_get_children(gh, parent),
+        overlay <- tryCatch(gh_pop_get_children(gh, 
+                                                parent,
+                                                path = "auto"),
                             error = function(e){NA})
       }
-      # VALID OVERLAY
-      if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
-        # EXTRACT POPULATIONS
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          cyto_extract(gh, z)
-        })
-        names(overlay) <- nms
-      } else {
-        stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
-          collapse = " & "
-        ), " do not exist in the GatingHierarchy.")
+      # CHECK OVERLAY - MAY BE NA ABOVE
+      if(!.all_na(overlay)){
+        # VALID OVERLAY
+        if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
+          # EXTRACT POPULATIONS
+          nms <- overlay
+          overlay <- lapply(overlay, function(z) {
+            cyto_extract(gh, z)
+          })
+          names(overlay) <- nms
+        } else {
+          stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
+            collapse = " & "
+          ), " do not exist in the GatingHierarchy.")
+        }
       }
     }
   }
@@ -2057,7 +2071,10 @@ cyto_plot.flowFrame <- function(x,
 
   # SAMPLING - SET SEED
   if (display != 1) {
-    fr_list <- cyto_sample(fr_list, display = display, seed = 56)
+    fr_list <- cyto_sample(fr_list, 
+                           display = display, 
+                           seed = 56,
+                           plot = TRUE)
   }
 
   # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE

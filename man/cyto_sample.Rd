@@ -13,7 +13,7 @@ cyto_sample(x, ...)
 
 \method{cyto_sample}{flowSet}(x, display = 1, seed = NULL, ...)
 
-\method{cyto_sample}{list}(x, display = 1, seed = NULL, ...)
+\method{cyto_sample}{list}(x, display = 1, seed = NULL, plot = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
@@ -26,6 +26,9 @@ percentage or number of events to keep respectively.}
 
 \item{seed}{value used to \code{set.seed()} internally. Setting a value for
 seed will return the same result with each run.}
+
+\item{plot}{logical required for lists to indicate whether sampling should be
+scaled per flowFrame to retain original ratios, as used in cyto_plot.}
 }
 \value{
 \code{\link[flowCore:flowFrame-class]{flowFrame}} or

@@ -123,7 +123,7 @@ gs <- transform(gs, trans)
 
 # Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Compute statistics - median
 cyto_stats_compute(gs,

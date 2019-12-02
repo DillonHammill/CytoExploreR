@@ -814,7 +814,6 @@
 #' @return vector containing minimum and maximum values.
 #'
 #' @importFrom flowCore flowSet fsApply
-#' @importFrom flowWorkspace getData
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'

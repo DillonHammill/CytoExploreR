@@ -1417,7 +1417,12 @@ cyto_merge_by.flowSet <- function(x,
 
   # GROUPS
   grps <- names(fs_list)
-
+  
+  # COMBINED EVENTS
+  if("all" %in% grps){
+    grps[which("all" %in% grps)] <- "Combined Events"
+  }
+  
   # SELECTION ------------------------------------------------------------------
 
   # ATTEMPT SELECTION OR RETURN ALL SAMPLES
@@ -1879,6 +1884,8 @@ cyto_save.flowFrame <- function(x,
 #'   percentage or number of events to keep respectively.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
+#' @param plot logical required for lists to indicate whether sampling should be
+#'   scaled per flowFrame to retain original ratios, as used in cyto_plot.
 #' @param ... not in use.
 #'
 #' @return \code{\link[flowCore:flowFrame-class]{flowFrame}} or
@@ -1974,10 +1981,11 @@ cyto_sample.flowSet <- function(x,
 cyto_sample.list <- function(x,
                              display = 1,
                              seed = NULL,
+                             plot = FALSE,
                              ...) {
 
   # CYTO_PLOT SAMPLING - RATIOS
-  if (!is.null(getOption("cyto_plot_method"))) {
+  if (plot == TRUE) {
 
     # LIST OF FLOWSETS
     if (all(LAPPLY(x, function(z) {
@@ -2075,6 +2083,7 @@ cyto_sample.list <- function(x,
     x <- mapply(function(x, display) {
       cyto_sample(x, display)
     }, x, display)
+    
   }
 
   # Return sampled list

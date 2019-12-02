@@ -888,7 +888,7 @@ cyto_plot_record <- function(){
 #'
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Save png image of gating scheme after plotting
 #' cyto_plot_save("Gating-Scheme.png",
@@ -1048,7 +1048,7 @@ cyto_plot_save_reset <- function() {
 #'
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Set out plot layout
 #' cyto_plot_layout(1, 2)
@@ -1106,7 +1106,7 @@ cyto_plot_layout <- function(nrow,
 #'
 #' # Apply gatingTemplate
 #' gt <- Activation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Save custom plot
 #' cyto_plot_save("Custom.png",

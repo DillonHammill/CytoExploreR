@@ -18,6 +18,7 @@ cyto_gate_edit(
   display = 25000,
   axis = "x",
   label = TRUE,
+  plot = TRUE,
   ...
 )
 }
@@ -72,6 +73,9 @@ gated for 2-D interval gates.}
 \item{label}{logical indicating whether to include
 \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 default.}
+
+\item{plot}{logical indicating whether a plot should be drawn, set to
+\code{TRUE} by default.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot.flowFrame}}.}
 }

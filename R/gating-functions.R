@@ -1,4 +1,4 @@
-## INTERNAL GATING FUNCTIONS ---------------------------------------------------
+## POLYGON ---------------------------------------------------------------------
 
 #' Draw Polygon Gate(s) Around Populations.
 #'
@@ -22,11 +22,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
-#'   object(s).
+#' @return a list of \code{\link[flowCore:polygonGate-class]{polygonGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, polygonGate, openCyto
 #'
@@ -35,8 +34,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -57,7 +56,7 @@
 #'   channels = c("FSC-A", "SSC-A")
 #' )
 #'
-#' # pg is a filters object - extract polygonGate using `[[`
+#' # pg is a list of polygonGate objects - extract gates using `[[`
 #' pg[[1]]
 #' }
 #'
@@ -155,11 +154,13 @@
 
     return(gate)
   })
-
+  
   # RETURN CONSTRUCTED GATES
-  gates <- filters(gates)
+  names(gates) <- alias
   return(gates)
 }
+
+## RECTANGLEGATE ---------------------------------------------------------------
 
 #' Draw Rectangle Gate(s) Around Populations.
 #'
@@ -184,11 +185,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
-#'   object(s).
+#' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto
 #'
@@ -198,8 +198,8 @@
 #' @importFrom flowCore exprs
 #' @importFrom graphics locator rect
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -221,7 +221,7 @@
 #'   contour_lines = 15
 #' )
 #'
-#' # rg is a filters object - extract rectangleGate using `[[`
+#' # rg is a list of rectangleGate objects - extract gates using `[[`
 #' rg[[1]]
 #' }
 #'
@@ -314,9 +314,11 @@
   })
 
   # RETURN CONSTRUCTED GATES
-  gates <- filters(gates)
+  names(gates) <- alias
   return(gates)
 }
+
+## INTERVAL --------------------------------------------------------------------
 
 #' Draw Interval Gate(s) Around Populations.
 #'
@@ -344,11 +346,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
-#'   object(s).
+#' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, interval
 #'
@@ -357,8 +358,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -381,7 +382,7 @@
 #'   density_stack = 0.5
 #' )
 #'
-#' # ig is a filters object - extract rectangleGate using `[[`
+#' # ig is a list of rectangleGate objects - extract gates using `[[`
 #' ig[[1]]
 #'
 #' # Get 2-D interval gate on y axis using .cyto_gate_interval_draw
@@ -391,7 +392,7 @@
 #'   axis = "y"
 #' )
 #'
-#' # ig is a filters object - extract rectangleGate using `[[`
+#' # ig is a list of rectangleGate objects - extract gates using `[[`
 #' ig[[1]]
 #' }
 #'
@@ -483,7 +484,6 @@
         rownames(coords) <- c("min", "max")
       }
       gate <- rectangleGate(.gate = coords, filterId = alias)
-
     } else if (axis == "y") {
       if (length(channels) == 1) {
         stop("Cannot gate y axis if a single channel is supplied.")
@@ -518,9 +518,11 @@
   })
 
   # RETURN CONSTRUCTED GATES
-  gates <- filters(gates)
+  names(gates) <- alias
   return(gates)
 }
+
+## THRESHOLD -------------------------------------------------------------------
 
 #' Draw Threshold Gate(s) Around Populations.
 #'
@@ -545,11 +547,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
-#'   object.
+#' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, threshold
 #'
@@ -558,8 +559,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -580,7 +581,7 @@
 #'   channels = c("PE-A")
 #' )
 #'
-#' # tg is a filters object - extract rectangleGate using `[[`
+#' # tg is a list of rectangleGate objects - extract gates using `[[`
 #' tg[[1]]
 #'
 #' #' # Get 2-D threshold gate using .cyto_gate_threshold_draw - overlay control
@@ -590,7 +591,7 @@
 #'   overlay = fs[[1]]
 #' )
 #'
-#' # tg is a filters object - extract rectangleGate using `[[`
+#' # tg is a list of rectangleGate objects - extract gates using `[[`
 #' tg[[1]]
 #' }
 #'
@@ -666,10 +667,12 @@
 
   # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
-  
+
   # PLOT GATE
-  cyto_plot_gate(gate = gate,
-                 channels = channels)
+  cyto_plot_gate(
+    gate = gate,
+    channels = channels
+  )
 
   # LABEL GATED POPULATION
   if (label == TRUE) {
@@ -689,10 +692,13 @@
     )
   }
 
-  # REURN CONSTRUCTED GATES
-  gates <- filters(list(gate))
+  # RETURN CONSTRUCTED GATES
+  gates <- list(gate)
+  names(gates) <- alias
   return(gates)
 }
+
+## BOUNDARY --------------------------------------------------------------------
 
 #' Draw Boundary Gate(s) Around Populations.
 #'
@@ -717,11 +723,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
-#'   object.
+#' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, boundary
 #'
@@ -730,8 +735,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -752,7 +757,7 @@
 #'   channels = c("PE-A")
 #' )
 #'
-#' # bg is a filters object - extract rectangleGate using `[[`
+#' # bg is a list of rectangleGate objects - extract gates using `[[`
 #' bg[[1]]
 #'
 #' #' # Get 2-D boundary gate using .cyto_gate_boundary_draw
@@ -761,7 +766,7 @@
 #'   channels = c("PE-A", "Alexa Fluor 700-A")
 #' )
 #'
-#' # bg is a filters object - extract rectangleGate using `[[`
+#' # bg is a list of rectangleGate objects - extract gates using `[[`
 #' bg[[1]]
 #' }
 #'
@@ -839,9 +844,11 @@
   gate <- rectangleGate(.gate = pts, filterId = alias)
 
   # PLOT GATE
-  cyto_plot_gate(gate = gate,
-                 channels = channels)
-  
+  cyto_plot_gate(
+    gate = gate,
+    channels = channels
+  )
+
   # LABEL GATED POPULATION
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
@@ -861,9 +868,12 @@
   }
 
   # RETURN CONSTRUCTED GATES
-  gates <- filters(list(gate))
+  gates <- list(gate)
+  names(gates) <- alias
   return(gates)
 }
+
+## ELLIPSE ---------------------------------------------------------------------
 
 #' Draw Ellipsoid Gate(s) Around Populations.
 #'
@@ -886,11 +896,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
-#'   object(s).
+#' @return a list of \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, ellipsoidGate, openCyto, ellipse
 #'
@@ -900,8 +909,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -923,7 +932,7 @@
 #'   overlay = fs[[1]]
 #' )
 #'
-#' # eg is a filters object - extract ellipsoidGate using `[[`
+#' # eg is a list of ellipsoidGate objects - extract gates using `[[`
 #' eg[[1]]
 #' }
 #'
@@ -1040,7 +1049,7 @@
     cvm <- solve(cinv)
 
     dimnames(cvm) <- list(channels, channels)
-    
+
     gate <- ellipsoidGate(
       .gate = cvm,
       mean = center,
@@ -1073,10 +1082,12 @@
     return(gate)
   })
 
-  # RETURN FILTERS OBJECT
-  gates <- filters(gates)
+  # RETURN CONSTRUCTED GATES
+  names(gates) <- alias
   return(gates)
 }
+
+## QUADRANT --------------------------------------------------------------------
 
 #' Draw Quadrant Gates Around Populations.
 #'
@@ -1101,10 +1112,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:quadGate]{quadGate}}.
+#' @return a list containing the constructed
+#'   \code{\link[flowCore:quadGate]{quadGate}} object.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, quadrants
 #'
@@ -1113,8 +1124,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -1135,8 +1146,8 @@
 #'   channels = c("Alexa Fluor 700-A", "Alexa Fluor 488-A")
 #' )
 #'
-#' # qg is a filters object - extract each rectangleGate using `[[`
-#' qg[[4]]
+#' # qg is a list containing the constructed quadGate
+#' qg[[1]]
 #' }
 #'
 #' @noRd
@@ -1229,18 +1240,21 @@
     )
   }
 
-  # RETURN FILTERS OBJECT
+  # RETURN CONSTRUCTED GATE
   gate <- list(gate)
+  names(gate) <- paste(alias, collapse = "|")
   return(gate)
 }
 
+## WEB -------------------------------------------------------------------------
+
 #' Draw Web Gates Around Populations - EXPERIMENTAL
 #'
-#' \code{.cyto_gate_web_draw} is a variation of drawQuadrant which allows more
-#' flexibility with gate co-ordinates (angled lines) and supports any number of
-#' gates as indicated by the \code{alias} argument. To construct the gate simply
-#' select the center point and surrounding divider points on plot edge.
-#' \code{.cyto_gate_web_draw} will construct the
+#' \code{.cyto_gate_web_draw} is a variation of cyto_gate_quadrant_draw which
+#' allows more flexibility with gate co-ordinates (angled lines) and supports
+#' any number of gates as indicated by the \code{alias} argument. To construct
+#' the gate simply select the center point and surrounding divider points on
+#' plot edge. \code{.cyto_gate_web_draw} will construct the
 #' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and store them
 #' in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
@@ -1258,11 +1272,10 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
-#' @param ... additional arguments for \code{\link{cyto_plot,flowFrame-method}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
-#' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
-#'   object(s).
+#' @return a list of \code{\link[flowCore:polygonGate-class]{polygonGate}}
+#'   objects.
 #'
 #' @keywords manual, gating, draw, polygonGate, openCyto, .cyto_gate_web_draw
 #'
@@ -1272,8 +1285,8 @@
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
-#' @seealso \code{\link{gate_draw}}
+#' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_gate_draw}}
 #'
 #' @examples
 #' \dontrun{
@@ -1347,7 +1360,7 @@
     pch = 16,
     col = "red"
   )
-  
+
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
 
@@ -1356,7 +1369,7 @@
   xmax <- round(par("usr")[2], 2)
   ymin <- round(par("usr")[3], 2)
   ymax <- round(par("usr")[4], 2)
-  
+
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
     options("show.error.messages" = FALSE)
@@ -1381,7 +1394,7 @@
   coords <- as.data.frame(do.call(rbind, coords))
   colnames(coords) <- c("x", "y")
   coords <- rbind(center, coords)
-  
+
   # Determine which quadrants the points are in
   # bottom left anti-clockwise to top right (relative to center)
   quads <- c(0, rep(NA, length(alias)))
@@ -1406,7 +1419,7 @@
   }
   coords[, "Q"] <- quads
   coords <- coords[with(coords, order(coords$Q)), ]
-  
+
   # Push points to plot limits (intersection with plot limits)
 
   # Quadrant 1: find limit intercept and modify point co-ordinates
@@ -1524,7 +1537,7 @@
     }
     coords[coords$Q == 4, ] <- q4
   }
-  
+
   # If multiple points in same quadrant order anticlockwise Q1-Q4
   if (anyDuplicated(coords$Q) != 0) {
 
@@ -1575,7 +1588,7 @@
   for (i in 2:(length(coords$Q) - 1)) {
     gates[[i - 1]] <- rbind(coords[1, ], coords[i, ], coords[i + 1, ])
   }
-  
+
   # Check if a corner lies between the points - add as gate co-ordinate
   # Calculate corner points using min & max values
   Q1 <- c(xmin, ymin, 1)
@@ -1588,7 +1601,7 @@
 
   # LAST GATE INHERITS REMAINING CORNERS
   indx <- seq_len(length(alias) - 1)
-  
+
   # Add corners to appropriate gates step-wise
   gates[indx] <- lapply(gates[indx], function(x) {
 
@@ -1653,7 +1666,7 @@
 
       # ADJACENT - points in adjacent quadrants
     } else if ((x[3, "Q"] - x[2, "Q"]) %in% c(0, 1)) {
-      
+
       # Q1-Q2
       if (x[2, "Q"] == 1 & x[3, "Q"] == 2) {
         if (x[2, "x"] == xmin & x[3, "x"] == xmax) {
@@ -1666,7 +1679,7 @@
             Q <<- Q[-match(c(1, 2), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] == xmin & x[3, "x"] != xmax) {
-          
+
           # Include Q1 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, x[3, ])
 
@@ -1860,13 +1873,13 @@
       gates[[length(alias)]][3, ]
     )
   }
-  
+
   # CONSTRUCT GATES
   gates <- lapply(seq(1, length(gates), 1), function(x) {
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
     rownames(coords) <- NULL
-    
+
     # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
@@ -1884,7 +1897,7 @@
       gate_stat <- paste(.round(gate_stat), "%")
       # PLOT LABEL
       cyto_plot_labeller(
-        label_text = paste(alias, gate_stat, sep = "\n"),
+        label_text = paste(alias[x], gate_stat, sep = "\n"),
         label_text_size = 1,
         label_text_x = gate_center[, "x"],
         label_text_y = gate_center[, "y"]
@@ -1893,8 +1906,8 @@
 
     return(gate)
   })
-  
+
   # RETURN CONSTRUCTED GATES
-  gates <- filters(gates)
+  names(gates) <- alias
   return(gates)
 }

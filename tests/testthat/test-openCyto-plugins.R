@@ -14,7 +14,7 @@ test_that("cyto_gate_manual", {
                                    type = "r",
                                    plot = TRUE,
                                    display = 100), 
-               filters(list("rectangle" = rg2)))
+               list("A" = rg2))
   )
 
 })

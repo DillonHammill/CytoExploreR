@@ -25,7 +25,7 @@ gs <- transform(gs, trans)
 
 # Apply gatingTemplate
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Save custom plot
 cyto_plot_save("Custom.png",

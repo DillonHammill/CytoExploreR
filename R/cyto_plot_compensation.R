@@ -72,7 +72,7 @@
 #'
 #' # Gate single cells using cyto_gate_draw
 #' gt <- Compensation_gatingTemplate
-#' gating(gt, gs)
+#' gt_gating(gt, gs)
 #'
 #' # Extract flowSet for plotting
 #' fs <- cyto_extract(gs, "Single Cells")

@@ -120,21 +120,20 @@ default.}
 \item{...}{additional arguments for \code{\link{cyto_plot}}.}
 }
 \value{
-\code{flowFrame} and \code{flowSet} methods return a list of
-  \code{\link[flowCore:filters-class]{filters}} objects, whilst the
-  \code{GatingSet} applies the constructed gates directly to the
-  \code{GatingSet} and adds appropriate entries into the specified
-  \code{gatingTemplate}. The \code{GatingSet} method does return the
-  constructed gates but instead invisibly returns the \code{gatingTemplate}
-  entries.
+\code{flowFrame} and \code{flowSet} methods return a list of flowCore
+  gate objects per group in group_by, whilst the \code{GatingSet} applies the
+  constructed gates directly to the \code{GatingSet} and adds appropriate
+  entries into the specified \code{gatingTemplate}. The \code{GatingSet}
+  method does not return the constructed gates but instead invisibly returns
+  the \code{gatingTemplate} entries.
 }
 \description{
 \code{cyto_gate_draw} allows to users to interactive draw gates around
 populations which are returned as \code{flowCore} gate objects. The flowFrame
 and flowSet methods simply return the constructed gates as a list of
-\code{\link[flowCore:filters-class]{filters}}, whilst the GatingSet method
-automatically applies the constructed gates to the GatingSet and saves the
-constructed gates in an \code{openCyto}
+flowCore-compatible gate objects, whilst the GatingSet method automatically
+applies the constructed gates to the GatingSet and saves the constructed
+gates in an \code{openCyto}
 \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}} for future use.
 See \code{\link{cyto_gate_edit}}, \code{\link{cyto_gate_remove}} and
 \code{\link{cyto_gate_rename}} to manipulate constructed gates and modify
@@ -157,7 +156,7 @@ trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 gs <- transform(gs, trans)
 
 # Gate using cyto_gate_draw
-gating(Activation_gatingTemplate, gs)
+gt_gating(Activation_gatingTemplate, gs)
 
 # draw gates using cyto_gate_draw
 cyto_gate_draw(gs,

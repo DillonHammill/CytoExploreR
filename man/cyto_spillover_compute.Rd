@@ -100,7 +100,7 @@ gs <- GatingSet(Compensation)
 
 # Gate using cyto_gate_draw
 gt <- Compensation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Channel match fille
 cmfile <- system.file("extdata",
@@ -109,7 +109,7 @@ cmfile <- system.file("extdata",
 )
 
 # Compute fluorescent spillover matrix
-spill <- cyto_spillover_compute(getData(gs, "Single Cells"),
+spill <- cyto_spillover_compute(cyto_extract(gs, "Single Cells"),
   channel_match = cmfile,
   spillover = "Example-spillover.csv"
 )
