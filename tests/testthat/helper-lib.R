@@ -76,7 +76,7 @@ gs <- GatingSet(fs)
 gs <- cyto_compensate(gs)
 
 # Transformation -
-trans <- cyto_transformer_logicle(gs)
+trans <- cyto_transformer_logicle(gs, plot = FALSE)
 gs <- transform(gs, trans, plot = FALSE)
 
 # gatingTemplate -
@@ -314,8 +314,7 @@ coords <- matrix(c(-Inf,
                                    "max"), 
                                  c("FSC-A", 
                                    "SSC-A")))
-q1 <- rectangleGate(filterId = "A",
-                     .gate = coords)
+q1 <- rectangleGate(filterId = "A", .gate = coords)
 coords <- matrix(c(150000, 
                    Inf, 
                    -Inf, 
@@ -325,8 +324,7 @@ coords <- matrix(c(150000,
                                    "max"), 
                                  c("FSC-A",
                                    "SSC-A")))
-q2 <- rectangleGate(filterId = "B", 
-                     .gate = coords)
+q2 <- rectangleGate(filterId = "B", .gate = coords)
 coords <- matrix(c(150000,
                    Inf, 
                    150000, 
@@ -336,8 +334,7 @@ coords <- matrix(c(150000,
                                    "max"), 
                                  c("FSC-A", 
                                    "SSC-A")))
-q3 <- rectangleGate(filterId = "C",
-                     .gate = coords)
+q3 <- rectangleGate(filterId = "C", .gate = coords)
 coords <- matrix(c(-Inf, 
                    150000, 
                    150000, 
@@ -347,9 +344,74 @@ coords <- matrix(c(-Inf,
                                    "max"), 
                                  c("FSC-A",
                                    "SSC-A")))
-q4 <- rectangleGate(filterId = "D",
-                     .gate = coords)
+q4 <- rectangleGate(filterId = "D", .gate = coords)
 qg2 <- filters(list(q1,
                     q2, 
                     q3, 
                     q4))
+
+# Web gates
+coords <- matrix(c(100000.00,
+                   -21810.30,
+                   -21810.30,
+                   160905.10,
+                   100000.00,
+                   18793.13,
+                   -21810.30,
+                   21810.30),
+                 ncol = 2, 
+                 nrow = 4,
+                 byrow = FALSE)
+colnames(coords) <- c("FSC-A",
+                      "SSC-A")
+wg1 <- polygonGate(.gate = coords, 
+                    filterId = "L")
+
+coords <- matrix(c(100000.00,
+                   160905.10,
+                   283953.30,
+                   283953.30,
+                   100000.00,
+                   -21810.30,
+                   -21810.30,
+                   165697.60),
+                 ncol = 2, 
+                 nrow = 4,
+                 byrow = FALSE)
+colnames(coords) <- c("FSC-A",
+                      "SSC-A")
+wg2 <- polygonGate(.gate = coords, 
+                   filterId = "M")
+
+coords <- matrix(c(100000.00,
+                   283953.30,
+                   283953.30,
+                   38682.23,
+                   100000.00,
+                   165697.60,
+                   283953.30,
+                   283953.30),
+                 ncol = 2, 
+                 nrow = 4,
+                 byrow = FALSE)
+colnames(coords) <- c("FSC-A",
+                      "SSC-A")
+wg3 <- polygonGate(.gate = coords, 
+                   filterId = "N")
+
+coords <- matrix(c(100000.00,
+                   38682.23,
+                   -21810.30,
+                   -21810.3,
+                   100000.00,
+                   283953.30,
+                   283953.30,
+                   18793.13),
+                 ncol = 2, 
+                 nrow = 4,
+                 byrow = FALSE)
+colnames(coords) <- c("FSC-A",
+                      "SSC-A")
+wg4 <- polygonGate(.gate = coords, 
+                   filterId = "O")
+wg <- filters(list(wg1,wg2,wg3,wg4))

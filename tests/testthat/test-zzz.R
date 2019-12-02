@@ -5,6 +5,7 @@ context("zzz")
 test_that("CytoExploreR loading", {
   CytoExploreR:::.onLoad()
   expect_false(getOption("locatorBell"))
+  expect_equal(getOption("CytoExploreR_interactive"), TRUE)
   expect_equal(getOption("CytoExploreR_gatingTemplate"), NULL)
   expect_true(getOption("CytoExploreR_wd_check") == TRUE)
   expect_equal(getOption("cyto_plot_call"), NULL)
