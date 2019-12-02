@@ -750,7 +750,7 @@ cyto_plot_new <- function(popup = FALSE, ...) {
     dev.new()
   }
   # Open popup window - either windows/X11/xquartz
-  if (popup == TRUE & interactive()) {
+  if (popup == TRUE & getOption("CytoExploreR_interactive")) {
     if (.Platform$OS.type == "windows") {
       dev.new(...)
     } else if (.Platform$OS.type == "unix") {
