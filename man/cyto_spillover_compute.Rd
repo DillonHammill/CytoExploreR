@@ -64,7 +64,7 @@ internal or universal unstained reference populations based on channel
 selection. \code{cyto_spillover_compute} expects the fluorescent channels of
 the samples to be un-transformed, biexponential transformations will be
 applied internally when appropriate to allow proper visualisation of the
-data. To use your own custom transformations, simply suppply a
+data. To use your own custom transformations, simply supply a
 transformerList object to the \code{axes_trans} argument.
 
 \code{cyto_spillover_compute} begins by the user selecting which fluorescent

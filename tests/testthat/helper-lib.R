@@ -116,6 +116,7 @@ gt_comp_file <- read.csv(system.file("extdata",
 
 # Gating -
 gt_gating(gt_comp, gs_comp)
+gt_gating(gt_comp, gs_comp_trans)
 
 # Path to channel_match file
 channel_match_file <- paste0(datadir, "/Compensation-Channels.csv")
