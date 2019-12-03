@@ -2549,10 +2549,13 @@ cyto_compensate <- function(x, ...) {
 
 #' @rdname cyto_compensate
 #' @export
-cyto_compensate.flowFrame <- function(x,
+cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
                                       select = 1,
                                       ...) {
+
+  # Extract flowSet
+  fs <- cyto_extract(x, parent = "root")
 
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
@@ -2574,8 +2577,8 @@ cyto_compensate.flowFrame <- function(x,
       colnames(spill) <- rownames(spill)
 
       # column/row names must be valid channels
-      if (!all(rownames(spill) %in% BiocGenerics::colnames(x)) |
-        !all(rownames(spill) %in% BiocGenerics::colnames(x))) {
+      if (!all(rownames(spill) %in% BiocGenerics::colnames(fs)) |
+        !all(rownames(spill) %in% BiocGenerics::colnames(fs))) {
         stop(
           paste(
             "'spillover' must have valid fluorescent channels as rownames",
@@ -2584,25 +2587,40 @@ cyto_compensate.flowFrame <- function(x,
         )
       }
 
+      # Convert spill into a named list
+      spill <- rep(list(spill), length(fs))
+      names(spill) <- cyto_names(fs)
+
       # spillover is a matrix/data.frame
     } else if (inherits(spillover, "matrix") |
       inherits(spillover, "data.frame")) {
 
       # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% BiocGenerics::colnames(x))) {
+      if (!all(colnames(spillover) %in% BiocGenerics::colnames(fs))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
       } else {
         spill <- spillover
       }
+
+      # Convert spill into a named list
+      spill <- rep(list(spill), length(fs))
+      names(spill) <- cyto_names(fs)
     }
 
-    # Extract spillover matrix directly from x
+    # Extract spillover matrix directly from fs
   } else if (is.null(spillover)) {
-    spill <- x@description$SPILL
+    if (!is.null(select)) {
+      spill <- rep(list(fs[[select]]@description$SPILL), length(fs))
+      names(spill) <- cyto_names(fs)
+    } else {
+      spill <- lapply(cyto_names(fs), function(y) {
+        fs[[y]]@description$SPILL
+      })
+    }
   }
 
   # Apply compensation
-  flowCore::compensate(x, spill)
+  flowWorkspace::compensate(x, spill)
 }
 
 #' @rdname cyto_compensate
@@ -2680,13 +2698,10 @@ cyto_compensate.flowSet <- function(x,
 
 #' @rdname cyto_compensate
 #' @export
-cyto_compensate.GatingSet <- function(x,
+cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
                                       select = 1,
                                       ...) {
-
-  # Extract flowSet
-  fs <- cyto_extract(x, parent = "root")
 
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
@@ -2708,8 +2723,8 @@ cyto_compensate.GatingSet <- function(x,
       colnames(spill) <- rownames(spill)
 
       # column/row names must be valid channels
-      if (!all(rownames(spill) %in% BiocGenerics::colnames(fs)) |
-        !all(rownames(spill) %in% BiocGenerics::colnames(fs))) {
+      if (!all(rownames(spill) %in% BiocGenerics::colnames(x)) |
+        !all(rownames(spill) %in% BiocGenerics::colnames(x))) {
         stop(
           paste(
             "'spillover' must have valid fluorescent channels as rownames",
@@ -2718,40 +2733,25 @@ cyto_compensate.GatingSet <- function(x,
         )
       }
 
-      # Convert spill into a named list
-      spill <- rep(list(spill), length(fs))
-      names(spill) <- cyto_names(fs)
-
       # spillover is a matrix/data.frame
     } else if (inherits(spillover, "matrix") |
       inherits(spillover, "data.frame")) {
 
       # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% BiocGenerics::colnames(fs))) {
+      if (!all(colnames(spillover) %in% BiocGenerics::colnames(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
       } else {
         spill <- spillover
       }
-
-      # Convert spill into a named list
-      spill <- rep(list(spill), length(fs))
-      names(spill) <- cyto_names(fs)
     }
 
-    # Extract spillover matrix directly from fs
+    # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
-    if (!is.null(select)) {
-      spill <- rep(list(fs[[select]]@description$SPILL), length(fs))
-      names(spill) <- cyto_names(fs)
-    } else {
-      spill <- lapply(cyto_names(fs), function(y) {
-        fs[[y]]@description$SPILL
-      })
-    }
+    spill <- x@description$SPILL
   }
 
   # Apply compensation
-  flowWorkspace::compensate(x, spill)
+  flowCore::compensate(x, spill)
 }
 
 ## CYTO_NODES ------------------------------------------------------------------

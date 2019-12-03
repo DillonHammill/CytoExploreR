@@ -2,18 +2,18 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_compensate}
 \alias{cyto_compensate}
-\alias{cyto_compensate.flowFrame}
-\alias{cyto_compensate.flowSet}
 \alias{cyto_compensate.GatingSet}
+\alias{cyto_compensate.flowSet}
+\alias{cyto_compensate.flowFrame}
 \title{Apply fluorescence compensation to samples}
 \usage{
 cyto_compensate(x, ...)
 
-\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1, ...)
+\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1, ...)
 
 \method{cyto_compensate}{flowSet}(x, spillover = NULL, select = 1, ...)
 
-\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1, ...)
+\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
