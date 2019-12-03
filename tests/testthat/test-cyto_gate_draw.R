@@ -167,7 +167,8 @@ test_that("cyto_gate_draw", {
             channels = gate_channels,
             alias = gate_name,
             type = gate_type,
-            axis = gate_axis
+            axis = gate_axis,
+            display = 100
           ),
           gate,
           tolerance = 0.1)})

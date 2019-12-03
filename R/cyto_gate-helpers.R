@@ -578,7 +578,7 @@ cyto_gate_edit <- function(x,
     }
     return(z)
   })
-
+  
   # PREPARE TYPE & ALIAS -------------------------------------------------------
 
   # GET GATE TYPE FROM EXISTING GATES
@@ -784,9 +784,9 @@ cyto_gate_edit <- function(x,
       title <- paste(GRPS[y], "\n", prnt)
 
       # CYTO_PLOT
-      cyto_plot(fr_list[y][[1]],
+      cyto_plot(fr_list[[y]][[1]],
         channels = channels,
-        overlay = fr_list[y][seq(2, length(fr_list[y]))],
+        overlay = fr_list[[y]][seq_along(fr_list[[y]])[-1]],
         legend = FALSE,
         gate = gate,
         gate_line_col = "magenta",
@@ -814,7 +814,7 @@ cyto_gate_edit <- function(x,
     }
 
     # DRAW NEW GATES - FILTERS OBJECT OF LENGTH ALIAS (NEGATE LABEL)
-    gate_new <- cyto_gate_draw(fr_list[y][[1]],
+    gate_new <- cyto_gate_draw(fr_list[[y]][[1]],
       alias = unlist(alias),
       channels = channels,
       type = type,
@@ -822,11 +822,8 @@ cyto_gate_edit <- function(x,
       axis = axis,
       plot = FALSE
     )
-
-    print(gate_new)
     
-    # REMOVE FILTERS LAYER
-    gate_new <- unlist(gate_new)
+    # NAME GATES
     names(gate_new) <- LAPPLY(alias, function(z) {
       paste(z, collapse = ",")
     })
@@ -838,7 +835,6 @@ cyto_gate_edit <- function(x,
       }
       return(z)
     })
-    gate_prep <- unlist(gate_prep)
     names(gate_prep) <- unlist(alias)
 
     # MODIFY EXISTING GATES - GATINGSET
@@ -847,19 +843,22 @@ cyto_gate_edit <- function(x,
     # MODIFY EXISTING GATES - GATINGTEMPLATE
     gates_gT[[y]] <<- gate_new
   })
-
+  
   # PREPARE GATES FOR GATINGTEMPLATE - LIST OF FILTERS OF LENGTH ALIAS
   gates_gT_transposed <- transpose(gates_gT)
-
+  
   # ADD GATES TO FILTERS LISTS
-  gates_gT_transposed <- lapply(gates_gT_transposed, function(z) {
-    if (!any(LAPPLY(z, function(y) {
-      is(y, "quadGate")
-    }))) {
-      z <- filters(z)
-    }
-    return(z)
+  gates_gT_transposed <- lapply(seq_along(gates_gT_transposed), 
+                               function(z){
+    gates <- lapply(seq_along(gates_gT_transposed[[z]]), function(y){
+      if(!is(gates_gT_transposed[[z]][[y]], "quadGate")){
+        filters(gates_gT_transposed[[z]][y])
+      }
+    })
+    names(gates) <- GRPS
+    return(gates)
   })
+  names(gates_gT_transposed) <- alias
 
   # DATA.TABLE FRIENDLY NAMES
   prnt <- parent
@@ -1402,7 +1401,6 @@ cyto_gate_convert.ellipsoidGate <- function(x,
       # COORDS IN CHANNEL
       coords <- x@boundaries[, channels[channels %in% chans]]
       coords <- c(min(coords), max(coords))
-      print(coords)
       # RECTANGLEGATE
       coords <- matrix(coords,
         ncol = 1,

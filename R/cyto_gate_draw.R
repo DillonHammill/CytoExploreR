@@ -414,7 +414,7 @@ cyto_gate_draw.GatingSet <- function(x,
   }
 
   # GATINGTEMPLATE NOT CREATED YET
-  if (!any(grepl(gatingTemplate, list.files()))) {
+  if (!gatingTemplate %in% list.files()) {
     message(
       paste("Creating", gatingTemplate, "to save the constructed gate(s).")
     )

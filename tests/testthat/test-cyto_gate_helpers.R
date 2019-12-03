@@ -31,8 +31,10 @@ test_that("cyto_gate_edit", {
                fixed = TRUE)
   
   # EDIT CD4 T Cells & CD8 T Cells Gates
-  mock_cyto_gate_draw <- mock(list(filters(list(CD4)),
-                                   filters(list(CD8))))
+  gate <- list("CD4 T Cells" = CD4,
+               "CD8 T Cells" = CD8)
+  names(gate) <- "all"
+  mock_cyto_gate_draw <- mock(gate)
   testthat::with_mock(cyto_gate_draw = mock_cyto_gate_draw,
                       cyto_gate_edit(gs_clone,
                                      parent = "T Cells",
@@ -48,11 +50,8 @@ test_that("cyto_gate_edit", {
                                  alias = c("CD4 T Cells",
                                            "CD8 T Cells"),
                                  gatingTemplate = "Activation-gatingTemplate.csv"),
-                    list(filters(list(CD4)),
-                         filters(list(CD8))))
-  
-  # CLOSE GRAPHICS DEVICE
-  dev.off()
+                    list(list(filters(list(CD4))),
+                         list(filters(list(CD8)))))
   
 })
 
