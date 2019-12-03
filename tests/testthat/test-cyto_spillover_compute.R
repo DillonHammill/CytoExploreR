@@ -5,9 +5,6 @@ context("cyto_spillover_compute")
 # UNIVERSAL UNSTAINED CONTROL
 test_that("cyto_spillover_compute universal reference", {
   
-  # CHANNELS
-  mock_menu <- mock(4, 10, 11, 9, 1, 2, 12, cycle = TRUE)
-  
   # GATES
   mock_locator <- mock(list("x" = c(1740, 4265),
                             "y" = c(50,50)),
@@ -33,11 +30,11 @@ test_that("cyto_spillover_compute universal reference", {
   rownames(SPILL) <- cyto_fluor_channels(gs_comp)
   
   # GATINGSET
-  testthat::with_mock(menu = mock_menu,
-                      locator = mock_locator,{
+  testthat::with_mock(locator = mock_locator,{
                         expect_equal(
                           cyto_spillover_compute(gs_comp,
                                                  parent = "Single Cells",
+                                                 channel_match = "Reference-Compensation-Channels.csv",
                                                  spillover = "Spillover-Matrix.csv"),
                           SPILL)
                       })
@@ -122,4 +119,4 @@ test_that("cyto_spillover_compute internal reference", {
 
 # DELETE FILES
 base::unlink("Spillover-Matrix.csv")
-base::unlink(paste0(format(Sys.Date(), "%d%m%y"),"-","Compensation-Channels.csv"))
+base::unlink(paste0(format(Sys.Date(), "%d%m%y"),"-Compensation-Channels.csv"))

@@ -217,6 +217,28 @@ cyto_spillover_compute.flowSet <- function(x,
     }
   }
 
+  # Multiple controls per channel
+  if(length(unique(pd$channel)) != length(pd$name)){
+    lapply(unique(pd$channel), function(z){
+      if(nrow(pd[pd$channel == z, ]) > 1){
+        # PULL OUT SAMPLES
+        fs <- x[pd[pd$channel == z, "name"]]
+        # CALCULATE MEDFI
+        MEDFI <- suppressMessages(
+          cyto_stats_compute(fs,
+                             channels = z,
+                             stat = "median")[, z]
+        )
+        # MAXIMUM SIGNAL
+        max <- max(MEDFI)
+        ind <- which(MEDFI != max)
+        remove_names <- MEDFI[ind, "name"]
+        # REMOVE SAMPLES - LOW SIGNAL
+        x <<- x[-match(remove_names, pd$name)]
+      }
+    })
+  }
+  
   # Universal reference population
   if ("Unstained" %in% pd$channel) {
 
