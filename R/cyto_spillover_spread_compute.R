@@ -26,12 +26,11 @@
 #'   controls have been compensated. Compensation controls must be compensated
 #'   prior tro calculation of spillover spreading matrix. If \code{compensated}
 #'   is set to FALSE, the compensation controls will be compensated internally
-#'   using the supplied \code{spillover}.
+#'   using the supplied \code{spillover} matrix.
 #' @param spillover name of the output spillover matrix csv file to be used
 #'   internally to compensate the compensation controls. If no spillover matrix
-#'   is supplied \code{spillover_spread_compute} will look for a
-#'   "Spillover-Matrix.csv" file or as a last resort use the spillover matrix
-#'   attached to compensation controls.
+#'   is supplied \code{spillover_spread_compute}, the spillover matrix
+#'   attached to compensation controls will be applied.
 #' @param spillover_spread name of the csv file to which the spillover spreading
 #'   matrix will be saved, set to \code{"date-Spillover-Spread-Matrix.csv"} by
 #'   default.
@@ -48,6 +47,9 @@
 #' @importFrom grDevices graphics.off dev.new
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_spillover_compute}}
+#' @seealso \code{\link{cyto_spillover_edit}}
 #'
 #' @name cyto_spillover_spread_compute
 NULL
@@ -106,13 +108,7 @@ cyto_spillover_spread_compute.GatingSet <- function(x,
   }else{
     # Spillover
     if(is.null(spillover)){
-      if(grepl("Spillover-Matrix.csv", list.files(), ignore.case = TRUE)){
-        spillover <- list.files()[grepl("Spillover-Matrix.csv",
-                                        list.files(),
-                                        ignore.case = TRUE)]
-      }else{
-        spillover <- fs[[1]]@description$SPILL
-      }
+      spillover <- fs[[1]]@description$SPILL
     }
     # Apply compensation
     fs <- cyto_compensate(fs, spillover)
@@ -194,6 +190,28 @@ cyto_spillover_spread_compute.flowSet <- function(x,
     }
   }
 
+  # Multiple controls per channel
+  if(length(unique(pd$channel)) != length(pd$name)){
+    lapply(unique(pd$channel), function(z){
+      if(nrow(pd[pd$channel == z, ]) > 1){
+        # PULL OUT SAMPLES
+        fs_copy <- x[pd[pd$channel == z, "name"]]
+        # CALCULATE MEDFI
+        MEDFI <- suppressMessages(
+          cyto_stats_compute(fs_copy,
+                             channels = z,
+                             stat = "median")[, z]
+        )
+        # MAXIMUM SIGNAL
+        max <- max(MEDFI)
+        ind <- which(MEDFI != max)
+        remove_names <- MEDFI[ind, "name"]
+        # REMOVE SAMPLES - LOW SIGNAL
+        fs <<- fs[-match(remove_names, pd$name)]
+      }
+    })
+  }
+  
   # Extract summary statistics
   sm <- pData(parameters(fs[[1]]))
   

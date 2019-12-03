@@ -53,13 +53,12 @@ following the channel selection process.}
 controls have been compensated. Compensation controls must be compensated
 prior tro calculation of spillover spreading matrix. If \code{compensated}
 is set to FALSE, the compensation controls will be compensated internally
-using the supplied \code{spillover}.}
+using the supplied \code{spillover} matrix.}
 
 \item{spillover}{name of the output spillover matrix csv file to be used
 internally to compensate the compensation controls. If no spillover matrix
-is supplied \code{spillover_spread_compute} will look for a
-"Spillover-Matrix.csv" file or as a last resort use the spillover matrix
-attached to compensation controls.}
+is supplied \code{spillover_spread_compute}, the spillover matrix
+attached to compensation controls will be applied.}
 
 \item{spillover_spread}{name of the csv file to which the spillover spreading
 matrix will be saved, set to \code{"date-Spillover-Spread-Matrix.csv"} by
@@ -76,6 +75,11 @@ Nguyen R, Perfetto S, Mahnke YD, Chattopadhyay P & Roederer M,
   (2013). Quantifying spillover spreading for comparing instrument
   performance and aiding in multicolor panel design. Cytometry A,
   83(3):306-15.
+}
+\seealso{
+\code{\link{cyto_spillover_compute}}
+
+\code{\link{cyto_spillover_edit}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
