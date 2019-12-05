@@ -40,6 +40,7 @@
 #'
 #' # fs is a ncdfFlowSet
 #' class(fs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -108,6 +109,7 @@ cyto_load <- function(path = ".",
 #'
 #' @importFrom flowWorkspace GatingSet
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -193,6 +195,7 @@ cyto_setup <- function(path = ".",
 #' @return experiment details as data.frame.
 #'
 #' @importFrom flowWorkspace pData
+#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
@@ -212,7 +215,7 @@ cyto_setup <- function(path = ".",
 cyto_details <- function(x) {
 
   # Return identifier for flowFrame
-  if (inherits(x, "flowFrame")) {
+  if (is(x, "flowFrame")) {
     return(cyto_names(x))
     # Return experiment details for other objects
   } else {
@@ -326,6 +329,8 @@ cyto_names.list <- function(x) {
 #'
 #' @return TRUE or FALSE if object meets this class criteria.
 #'
+#' @importFrom methods is
+#'
 #' @examples
 #'
 #' # Load in CytoExploreRData to access data
@@ -333,16 +338,17 @@ cyto_names.list <- function(x) {
 #'
 #' # Valid object
 #' cyto_check(Activation)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_check <- function(x) {
 
   # Check for valid class of object
-  if (!any(inherits(x, "flowFrame") |
-    inherits(x, "flowSet") |
-    inherits(x, "GatingHierarchy") |
-    inherits(x, "GatingSet"))) {
+  if (!any(is(x, "flowFrame") |
+    is(x, "flowSet") |
+    is(x, "GatingHierarchy") |
+    is(x, "GatingSet"))) {
     stop("'x' should be a flowFrame, flowSet, GatingHierarchy or GatingSet.")
   }
 
@@ -387,6 +393,7 @@ cyto_check <- function(x) {
 #' @importFrom flowCore transform
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -444,7 +451,7 @@ cyto_transform.default <- function(x,
   if (is.null(trans)) {
 
     # Message not recommended to auto-transform flowFrame/flowSet objects
-    if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
+    if (is(x, "flowFrame") | is(x, "flowSet")) {
       message(paste(
         "Automatically transforming flowFrame/flowSet objects",
         "is not recommended as transformation definitions will be lost."
@@ -484,8 +491,8 @@ cyto_transform.default <- function(x,
   }
 
   # Apply transformations
-  if (inherits(x, "flowFrame") |
-    inherits(x, "flowSet")) {
+  if (is(x, "flowFrame") |
+    is(x, "flowSet")) {
 
     # Extract transformations from transformerList to transformList
     transform_list <- cyto_transform_extract(transformer_list,
@@ -494,8 +501,8 @@ cyto_transform.default <- function(x,
 
     # Apply transformations
     x <- suppressMessages(transform(x, transform_list))
-  } else if (inherits(x, "GatingHierarchy") |
-    inherits(x, "GatingSet")) {
+  } else if (is(x, "GatingHierarchy") |
+    is(x, "GatingSet")) {
 
     # Inverse transformations not yet supported
     if (inverse == TRUE) {
@@ -572,8 +579,8 @@ cyto_transform.transformList <- function(x,
                                          ...) {
 
   # Added for backwards compatibility - flowFrame/flowSet objects only
-  if (inherits(x, "GatingHierarchy") |
-    inherits(x, "GatingSet")) {
+  if (is(x, "GatingHierarchy") |
+    is(x, "GatingSet")) {
     stop(paste(
       "GatingHierarchy and GatingSet objects require transformerList",
       "objects to apply transformations."
@@ -581,8 +588,8 @@ cyto_transform.transformList <- function(x,
   }
 
   # Apply transformations to flowFrame/flowSet
-  if (inherits(x, "flowFrame") |
-    inherits(x, "flowSet")) {
+  if (is(x, "flowFrame") |
+    is(x, "flowSet")) {
 
     # Transformations applied as is - allow for inverse transformList
     x <- suppressMessages(transform(x, trans))
@@ -643,8 +650,8 @@ cyto_transform.transformerList <- function(x,
                                            ...) {
 
   # Apply transformations to flowFrame/flowSet
-  if (inherits(x, "flowFrame") |
-    inherits(x, "flowSet")) {
+  if (is(x, "flowFrame") |
+    is(x, "flowSet")) {
 
     # Extract transformations to transformList
     transform_list <- cyto_transform_extract(trans, inverse = inverse)
@@ -654,8 +661,8 @@ cyto_transform.transformerList <- function(x,
 
 
     # Apply transformations to GatingHierarchy/GatingSet
-  } else if (inherits(x, "GatingHierarchy") |
-    inherits(x, "GatingSet")) {
+  } else if (is(x, "GatingHierarchy") |
+    is(x, "GatingSet")) {
 
     # Inverse transformations not supported
     if (inverse == TRUE) {
@@ -737,6 +744,7 @@ cyto_transform.transformerList <- function(x,
 #'   containing the desired transformations.
 #'
 #' @importFrom flowCore transformList
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -762,10 +770,10 @@ cyto_transform_extract <- function(x,
                                    inverse = FALSE) {
 
   # TransformLists are returned unaltered
-  if (inherits(x, "transformList")) {
+  if (is(x, "transformList")) {
     return(x)
     # TransformList extracted from transformerList
-  } else if (inherits(x, "transformerList")) {
+  } else if (is(x, "transformerList")) {
     # Extract transformations into transformList
     if (inverse == TRUE) {
       x <- transformList(names(x), lapply(x, `[[`, "inverse"))
@@ -801,6 +809,7 @@ cyto_transform_extract <- function(x,
 #' @return either a \code{flowFrame} or a \code{flowSet}.
 #'
 #' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -821,9 +830,9 @@ cyto_transform_extract <- function(x,
 cyto_extract <- function(x, parent = "root", ...) {
 
   # Extract data from GatingHierarchy
-  if (inherits(x, "GatingHierarchy")) {
+  if (is(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
-  } else if (inherits(x, "GatingSet")) {
+  } else if (is(x, "GatingSet")) {
     x <- gs_pop_get_data(x, parent, ...)
   }
 
@@ -1067,6 +1076,7 @@ cyto_convert.GatingSet <- function(x,
 #'   the filtering criteria.
 #'
 #' @importFrom dplyr filter
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -1094,8 +1104,8 @@ cyto_convert.GatingSet <- function(x,
 cyto_filter <- function(x, ...) {
 
   # Check class of x
-  if (!any(inherits(x, "flowSet") |
-    inherits(x, "GatingSet"))) {
+  if (!any(is(x, "flowSet") |
+    is(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
 
@@ -1164,8 +1174,8 @@ cyto_select <- function(x,
                         ...) {
 
   # Check class of x
-  if (!any(inherits(x, "flowSet") |
-    inherits(x, "GatingSet"))) {
+  if (!any(is(x, "flowSet") |
+    is(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
 
@@ -1244,6 +1254,8 @@ cyto_select <- function(x,
 #' @return a named list of \code{flowSet} or \code{GatingSet} objects
 #'   respectively.
 #'
+#' @importFrom methods is
+#'
 #' @examples
 #'
 #' # Load in CytoExploreRData to access data
@@ -1264,7 +1276,7 @@ cyto_group_by <- function(x,
                           group_by = "all") {
 
   # Check class of x
-  if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
+  if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
 
@@ -1340,6 +1352,7 @@ cyto_group_by <- function(x,
 #'   \code{merge_by}.
 #'
 #' @importFrom flowCore `identifier<-`
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -1473,6 +1486,7 @@ cyto_merge_by.flowSet <- function(x,
 #' @return list of split flowFrames.
 #'
 #' @importFrom flowCore flowFrame exprs identifier keyword split
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1894,6 +1908,7 @@ cyto_save.flowFrame <- function(x,
 #'
 #' @importFrom BiocGenerics nrow
 #' @importFrom flowCore sampleFilter Subset fsApply exprs
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -1989,7 +2004,7 @@ cyto_sample.list <- function(x,
 
     # LIST OF FLOWSETS
     if (all(LAPPLY(x, function(z) {
-      inherits(z, "flowSet")
+      is(z, "flowSet")
     }))) {
       # Same sampling applied to all samples
       x <- lapply(x, function(z) {
@@ -1997,7 +2012,7 @@ cyto_sample.list <- function(x,
       })
       # LIST OF FLOWFRAMES
     } else if (all(LAPPLY(x, function(z) {
-      inherits(z, "flowFrame")
+      is(z, "flowFrame")
     }))) {
       # BARCODED FLOWFRAMES
       if (any(LAPPLY(x, function(z) {
@@ -2204,6 +2219,7 @@ cyto_barcode <- function(x,
 #' @importFrom flowCore parameters markernames markernames<-
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -2227,24 +2243,24 @@ cyto_markers_edit <- function(x, file = NULL) {
   cyto_check(x)
 
   # flowFrame
-  if (inherits(x, "flowFrame")) {
+  if (is(x, "flowFrame")) {
 
     # Extract details of parameters
     pd <- cyto_details(parameters(x))
 
     # flowSet
-  } else if (inherits(x, "flowSet")) {
+  } else if (is(x, "flowSet")) {
 
     # Extract details of parameters
     pd <- cyto_details(parameters(x[[1]]))
 
     # GatingHierarchy
-  } else if (inherits(x, "GatingHierarchy")) {
+  } else if (is(x, "GatingHierarchy")) {
     fr <- cyto_extract(x, "root")
     pd <- cyto_details(parameters(fr))
 
     # GatingSet
-  } else if (inherits(x, "GatingSet")) {
+  } else if (is(x, "GatingSet")) {
     fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
   }
@@ -2372,6 +2388,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 #' @importFrom flowCore pData<-
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
@@ -2390,7 +2407,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 cyto_details_edit <- function(x, file = NULL) {
 
   # x should be a flowSet or GatingSet
-  if (!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
+  if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
     stop("Please supply either a flowSet or a GatingSet")
   }
 
@@ -2463,7 +2480,7 @@ cyto_details_edit <- function(x, file = NULL) {
   # Edit cyto_details
   pd <- suppressWarnings(edit(pd))
   rownames(pd) <- pd$name
-
+  
   # Update cyto_details
   cyto_details(x) <- pd
 
@@ -2512,6 +2529,7 @@ cyto_details_edit <- function(x, file = NULL) {
 #'
 #' @importFrom utils read.csv
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -2561,7 +2579,7 @@ cyto_compensate.GatingSet <- function(x,
   if (!is.null(spillover)) {
 
     # spillover is a character string containing name of csv file
-    if (inherits(spillover, "character")) {
+    if (is(spillover, "character")) {
       # No file extension
       if (file_ext(spillover) == "") {
         spillover <- paste0(spillover, ".csv")
@@ -2592,8 +2610,8 @@ cyto_compensate.GatingSet <- function(x,
       names(spill) <- cyto_names(fs)
 
       # spillover is a matrix/data.frame
-    } else if (inherits(spillover, "matrix") |
-      inherits(spillover, "data.frame")) {
+    } else if (is(spillover, "matrix") |
+      is(spillover, "data.frame")) {
 
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% BiocGenerics::colnames(fs))) {
@@ -2634,7 +2652,7 @@ cyto_compensate.flowSet <- function(x,
   if (!is.null(spillover)) {
 
     # spillover is a character string containing name of csv file
-    if (inherits(spillover, "character")) {
+    if (is(spillover, "character")) {
       # No file extension
       if (file_ext(spillover) == "") {
         spillover <- paste0(spillover, ".csv")
@@ -2665,8 +2683,8 @@ cyto_compensate.flowSet <- function(x,
       names(spill) <- cyto_names(x)
 
       # spillover is a matrix/data.frame
-    } else if (inherits(spillover, "matrix") |
-      inherits(spillover, "data.frame")) {
+    } else if (is(spillover, "matrix") |
+      is(spillover, "data.frame")) {
 
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% BiocGenerics::colnames(x))) {
@@ -2707,7 +2725,7 @@ cyto_compensate.flowFrame <- function(x,
   if (!is.null(spillover)) {
 
     # spillover is a character string containing name of csv file
-    if (inherits(spillover, "character")) {
+    if (is(spillover, "character")) {
       # No file extension
       if (file_ext(spillover) == "") {
         spillover <- paste0(spillover, ".csv")
@@ -2734,8 +2752,8 @@ cyto_compensate.flowFrame <- function(x,
       }
 
       # spillover is a matrix/data.frame
-    } else if (inherits(spillover, "matrix") |
-      inherits(spillover, "data.frame")) {
+    } else if (is(spillover, "matrix") |
+      is(spillover, "data.frame")) {
 
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% BiocGenerics::colnames(x))) {

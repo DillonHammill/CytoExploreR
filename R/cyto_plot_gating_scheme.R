@@ -60,6 +60,7 @@
 #' @importFrom graphics plot.new legend
 #' @importFrom flowWorkspace gh_pop_get_descendants gh_pop_is_negated
 #' @importFrom openCyto gt_gating
+#' @importFrom methods is
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -521,7 +522,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   
   # TURN OFF GRAPHICS DEVICE
   if (getOption("cyto_plot_save")) {
-    if (inherits(x,basename(getOption("cyto_plot_method")))) {
+    if (is(x,basename(getOption("cyto_plot_method")))) {
 
       # CLOSE GRAPHICS DEVICE
       dev.off()
@@ -944,7 +945,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   
   # TURN OFF GRAPHICS DEVICE
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
 
       # CLOSE GRAPHICS DEVICE
       dev.off()

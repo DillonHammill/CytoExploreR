@@ -94,7 +94,7 @@
 #' }
 #' @importFrom flowCore each_col fsApply sampleNames flowSet Subset
 #' @importFrom flowWorkspace pData GatingSet
-#' @importFrom methods as
+#' @importFrom methods as is
 #' @importFrom utils read.csv write.csv
 #' @importFrom stats median
 #' @importFrom tools file_ext
@@ -187,9 +187,9 @@ cyto_spillover_compute.flowSet <- function(x,
     write.csv(pd, paste0(format(Sys.Date(), "%d%m%y"),
                          "-", "Compensation-Channels.csv"), row.names = FALSE)
   } else {
-    if (inherits(channel_match, "data.frame") |
-        inherits(channel_match, "matrix") |
-        inherits(channel_match, "tibble")) {
+    if (is(channel_match, "data.frame") |
+        is(channel_match, "matrix") |
+        is(channel_match, "tibble")) {
       if (!all(c("name", "channel") %in% colnames(channel_match))) {
         stop("channel_match should contains columns 'name' and 'channel'.")
       }
@@ -438,7 +438,7 @@ cyto_spillover_compute.flowSet <- function(x,
   }
   
   # write spillover matrix to csv file
-  if (!inherits(spillover, "character")) {
+  if (!is(spillover, "character")) {
     stop("'spillover' should be the name of a csv file.")
   } else {
     if (!file_ext(spillover) == "csv") {

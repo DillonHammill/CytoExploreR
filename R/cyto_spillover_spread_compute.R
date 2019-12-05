@@ -45,6 +45,7 @@
 #' @importFrom flowCore Subset parameters exprs
 #' @importFrom stats quantile na.omit
 #' @importFrom grDevices graphics.off dev.new
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -158,9 +159,9 @@ cyto_spillover_spread_compute.flowSet <- function(x,
     write.csv(pd, paste0(format(Sys.Date(),"%d%m%y"), 
                          "-", "Channel-Match.csv"), row.names = FALSE)
   } else {
-    if (inherits(channel_match, "data.frame") |
-        inherits(channel_match, "matrix") |
-        inherits(channel_match, "tibble")) {
+    if (is(channel_match, "data.frame") |
+        is(channel_match, "matrix") |
+        is(channel_match, "tibble")) {
       if (!all(c("name", "channel") %in% colnames(channel_match))) {
         stop("channel_match should contains columns 'name' and 'channel'.")
       }
@@ -492,7 +493,7 @@ cyto_spillover_spread_compute.flowSet <- function(x,
   }
   
   # Write to csv file
-  if (!inherits(spillover_spread, "character")) {
+  if (!is(spillover_spread, "character")) {
     stop("'spillover_spread' should be the name of a csv file.")
   } else {
     if (!file_ext(spillover_spread) == "csv") {

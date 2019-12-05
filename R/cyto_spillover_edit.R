@@ -83,7 +83,7 @@
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme
 #' @importFrom magrittr %>%
-#' @importFrom methods as
+#' @importFrom methods as is
 #' @importFrom stats median loess predict
 #' @importFrom graphics lines layout
 #' @importFrom tools file_ext
@@ -200,8 +200,8 @@ cyto_spillover_edit.flowSet <- function(x,
   if(!is.null(channel_match)){
   
     # channel_match is a data.frame or matrix or tibble
-    if(inherits(channel_match, "data.frame") |
-       inherits(channel_match, "matrix")){
+    if(is(channel_match, "data.frame") |
+       is(channel_match, "matrix")){
       # channel_match must contain "name" and "channel" columns
       if(!any(grepl("name", colnames(channel_match), ignore.case = TRUE)) |
          !any(grepl("channel", colnames(channel_match), ignore.case = TRUE))) {
@@ -260,8 +260,8 @@ cyto_spillover_edit.flowSet <- function(x,
   # Spillover matrix supplied
   if (!is.null(spillover)) {
     # spillover is a data.frame or matrix or tibble
-    if (inherits(spillover, "matrix") |
-        inherits(spillover, "data.frame")) {
+    if (is(spillover, "matrix") |
+        is(spillover, "data.frame")) {
       # spill should be a matrix
       spill <- spillover
       spill <- as.matrix(spill)

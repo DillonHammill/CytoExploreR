@@ -248,11 +248,11 @@ cyto_gate_draw.GatingSet <- function(x,
       }
     }
     # OVERLAY - FLOWFRAME
-    if (inherits(overlay, "flowFrame")) {
+    if (is(overlay, "flowFrame")) {
       # Always show all events
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
-    } else if (inherits(overlay, "flowSet")) {
+    } else if (is(overlay, "flowSet")) {
       # GROUPING (MERGE_BY) - LIST OF FLOWFRAMES
       overlay <- cyto_merge_by(overlay,
         merge_by = group_by,
@@ -263,15 +263,15 @@ cyto_gate_draw.GatingSet <- function(x,
         list(z)
       })
       # OVERLAY - LIST OF FLOWFRAMES OR FLOWSETS
-    } else if (inherits(overlay, "list")) {
+    } else if (is(overlay, "list")) {
       # LIST OF FLOWFRAMES - REPEAT FR_LIST TIMES
       if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         overlay <- rep(list(overlay), N)
         # LIST FLOWFRAME LISTS OF LENGTH FR_LIST
       } else if (all(LAPPLY(unlist(overlay), function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -283,7 +283,7 @@ cyto_gate_draw.GatingSet <- function(x,
         }
         # LIST OF FLOWSETS
       } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
+        is(z, "flowSet")
       }))) {
         # GROUP & MERGE EACH FLOWSET
         overlay <- lapply(overlay, function(z) {
@@ -531,11 +531,11 @@ cyto_gate_draw.flowSet <- function(x,
   # Organise overlays - list of flowFrame lists of length(fr_list)
   if (!.all_na(overlay)) {
     # OVERLAY - FLOWFRAME
-    if (inherits(overlay, "flowFrame")) {
+    if (is(overlay, "flowFrame")) {
       # Always show all events
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
-    } else if (inherits(overlay, "flowSet")) {
+    } else if (is(overlay, "flowSet")) {
       # GROUPING (MERGE BY) - LIST OF FLOWFRAMES
       overlay <- cyto_merge_by(overlay,
         merge_by = group_by,
@@ -546,15 +546,15 @@ cyto_gate_draw.flowSet <- function(x,
         list(z)
       })
       # OVERLAY - LIST OF FLOWFRAMES OR FLOWSETS
-    } else if (inherits(overlay, "list")) {
+    } else if (is(overlay, "list")) {
       # LIST OF FLOWFRAMES - REPEAT FR_LIST TIMES
       if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         overlay <- rep(list(overlay), N)
         # LIST FLOWFRAME LISTS OF LENGTH FR_LIST
       } else if (all(LAPPLY(unlist(overlay), function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -566,7 +566,7 @@ cyto_gate_draw.flowSet <- function(x,
         }
         # LIST OF FLOWSETS
       } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
+        is(z, "flowSet")
       }))) {
         # GROUP & MERGE EACH FLOWSET
         overlay <- lapply(overlay, function(z) {
@@ -658,21 +658,21 @@ cyto_gate_draw.flowFrame <- function(x,
   # OVERLAY FLOWFRAME LIST
   if (!.all_na(overlay)) {
     # OVERLAY FLOWFRAME
-    if (inherits(overlay, "flowFrame")) {
+    if (is(overlay, "flowFrame")) {
       overlay_list <- list(overlay)
       # OVERLAY FLOWSET
-    } else if (inherits(overlay, "flowSet")) {
+    } else if (is(overlay, "flowSet")) {
       overlay_list <- cyto_convert(overlay, "list of flowFrames")
       # OVERLAY FLOWFRAME LIST
-    } else if (inherits(overlay, "list")) {
+    } else if (is(overlay, "list")) {
       # overlay should be list of flowFrames
       if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         overlay_list <- overlay
         # OVERLAY LIST OF FLOWSETS
       } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
+        is(z, "flowSet")
       }))) {
         overlay <- overlay[[1]]
         overlay_list <- cyto_convert(overlay, "list of flowFrames")

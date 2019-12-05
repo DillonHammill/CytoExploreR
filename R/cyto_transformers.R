@@ -975,6 +975,7 @@ cyto_transformer_combine <- function(...) {
 ## .CYTO_TRANSFORMER_COMPLETE --------------------------------------------------
 
 #' Get complete transformerList for compensation functions
+#' @importFrom methods is
 #' @noRd
 .cyto_transformer_complete <- function(x, ...){
   UseMethod(".cyto_transformer_complete")
@@ -995,7 +996,7 @@ cyto_transformer_combine <- function(...) {
   # Transformations supplied
   if(!.all_na(axes_trans)){
     # Must be transformerList
-    if(!inherits(axes_trans, "transformerList")){
+    if(!is(axes_trans, "transformerList")){
       stop("'axes_trans' must be an object of class transformerList.")
     }
     # Some transformations are missing
@@ -1040,7 +1041,7 @@ cyto_transformer_combine <- function(...) {
   # Transformations supplied
   if(!.all_na(axes_trans)){
     # Must be transformerList
-    if(!inherits(axes_trans, "transformerList")){
+    if(!is(axes_trans, "transformerList")){
       stop("'axes_trans' must be an object of class transformerList.")
     }
     # Some stranformations are missing

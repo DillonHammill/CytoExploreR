@@ -58,6 +58,7 @@
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par mtext
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -208,7 +209,7 @@ cyto_plot_compensation.GatingSet <- function(x,
 
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
 
       # Close graphics device
       dev.off()
@@ -302,7 +303,7 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
@@ -554,7 +555,7 @@ cyto_plot_compensation.flowSet <- function(x,
 
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
 
       # Close graphics device
       dev.off()
@@ -740,7 +741,7 @@ cyto_plot_compensation.flowFrame <- function(x,
 
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
 
       # Close graphics device
       dev.off()

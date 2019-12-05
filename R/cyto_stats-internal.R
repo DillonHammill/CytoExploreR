@@ -21,6 +21,7 @@
 #'
 #' @importFrom flowCore Subset
 #' @importFrom tibble tibble
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
@@ -29,15 +30,15 @@
                         gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
@@ -69,6 +70,7 @@
 #'
 #' @importFrom flowCore Subset
 #' @importFrom tibble tibble
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -77,7 +79,7 @@
                        gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -88,16 +90,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -135,6 +137,7 @@
 #'
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -145,7 +148,7 @@
                        gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -164,16 +167,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -220,6 +223,7 @@
 #'
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -230,7 +234,7 @@
                                  gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
 
@@ -239,16 +243,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -333,6 +337,7 @@
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' @importFrom robustbase colMedians
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -343,7 +348,7 @@
                         gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -362,16 +367,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -422,6 +427,7 @@
 #'
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -433,7 +439,7 @@
                        density_smooth = 0.6){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -452,16 +458,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -514,6 +520,7 @@
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' @importFrom robustbase colMedians
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -524,7 +531,7 @@
                     gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -543,16 +550,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }

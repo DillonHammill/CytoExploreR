@@ -256,6 +256,7 @@
 #' @importFrom methods formalArgs is
 #' @importFrom flowWorkspace gh_pop_is_negated gs_pop_get_children
 #'   gh_pop_get_descendants gh_pop_get_children
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1309,10 +1310,10 @@ cyto_plot.flowSet <- function(x,
   # OVERLAY LIST & GROUP
   if (!.all_na(overlay)) {
     # REPEAT FLOWFRAME PER PLOT
-    if (inherits(overlay, "flowFrame")) {
+    if (is(overlay, "flowFrame")) {
       overlay_list <- rep(list(list(overlay)), length(fr_list))
       # FLOWSET TO LIST OF FLOWFRAMES
-    } else if (inherits(overlay, "flowSet")) {
+    } else if (is(overlay, "flowSet")) {
       # GROUPING
       overlay_list <- cyto_merge_by(overlay, merge_by = group_by)
       # LIST OF FLOWFRAME LISTS
@@ -1320,10 +1321,10 @@ cyto_plot.flowSet <- function(x,
         list(z)
       })
       # LIST OF FLOWSETS TO LIST OF FLOWFRAME LISTS
-    } else if (inherits(overlay, "list")) {
+    } else if (is(overlay, "list")) {
       # ALLOW LIST OF FLOWFRAMES OF LENGTH FR_LIST
       if (all(LAPPLY(unlist(overlay), function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         # SAME LENGTH AS FR_LIST
         if (length(overlay) != length(fr_list)) {
@@ -1338,7 +1339,7 @@ cyto_plot.flowSet <- function(x,
         overlay_list <- overlay
         # LIST OF FLOWSETS
       } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
+        is(z, "flowSet")
       }))) {
         # GROUPING
         overlay_list <- lapply(overlay, function(z) {
@@ -1879,7 +1880,7 @@ cyto_plot.flowSet <- function(x,
 
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save") == TRUE) {
-    if (inherits(x, getOption("cyto_plot_method"))) {
+    if (is(x, getOption("cyto_plot_method"))) {
       if (!getOption("cyto_plot_custom")) {
         # CLOSE GRAPHICS DEVICE
         dev.off()
@@ -1994,7 +1995,7 @@ cyto_plot.flowFrame <- function(x,
 
   # AXES_TRANS
   if (!.all_na(axes_trans)) {
-    if (inherits(axes_trans, "transformList")) {
+    if (is(axes_trans, "transformList")) {
       axes_trans <- NA
       message("Supply a transformerList object to axes_trans to transform axes.")
     }
@@ -2028,21 +2029,21 @@ cyto_plot.flowFrame <- function(x,
   if (!.all_na(overlay)) {
     # overlay must be list of flowFrames
     # flowFrame overlay added to list
-    if (inherits(overlay, "flowFrame")) {
+    if (is(overlay, "flowFrame")) {
       overlay_list <- list(overlay)
       # flowSet overlay convert to list of flowFrames
-    } else if (inherits(overlay, "flowSet")) {
+    } else if (is(overlay, "flowSet")) {
       overlay_list <- cyto_convert(overlay, "list of flowFrames")
       # flowFrame list overlay as is - flowSet list overlay use overlay[[1]]
-    } else if (inherits(overlay, "list")) {
+    } else if (is(overlay, "list")) {
       # overlay should be list of flowFrames
       if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         overlay_list <- overlay
         # overlay list of flowSets - use first fs convert to list of flowFrames
       } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
+        is(z, "flowSet")
       }))) {
         overlay <- overlay[[1]]
         overlay_list <- cyto_convert(overlay, "list of flowFrames")
@@ -2552,7 +2553,7 @@ cyto_plot.flowFrame <- function(x,
 
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save") == TRUE) {
-    if (inherits(x, getOption("cyto_plot_method"))) {
+    if (is(x, getOption("cyto_plot_method"))) {
       if (!getOption("cyto_plot_custom")) {
         # CLOSE GRAPHICS DEVICE
         dev.off()

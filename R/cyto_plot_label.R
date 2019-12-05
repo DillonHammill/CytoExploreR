@@ -313,7 +313,7 @@ cyto_plot_label.flowFrame <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # FLOWFRAME
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' must be a flowFrame object.")
   }
   

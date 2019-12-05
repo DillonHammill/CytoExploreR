@@ -46,6 +46,7 @@
 #' @importFrom tidyr spread gather
 #' @importFrom tibble as_tibble add_column remove_rownames
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -119,7 +120,7 @@ cyto_stats_compute.GatingSet <- function(x,
     # Check transformerList is supplied
   }else if(!.all_na(trans)){
     # transformerLists only
-    if(!inherits(trans, "transformerList")){
+    if(!is(trans, "transformerList")){
       stop("'trans' must be an object of class transformerList!")
     }
   }
@@ -184,7 +185,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
     # Check transformerList is supplied
   }else if(!.all_na(trans)){
     # transformerLists only
-    if(!inherits(trans, "transformerList")){
+    if(!is(trans, "transformerList")){
       stop("'trans' must be an object of class transformerList!")
     }
   }
@@ -436,7 +437,7 @@ cyto_stats_compute.flowFrame <- function(x,
   # Check transformerList is supplied
   }else if(!.all_na(trans)){
     # transformerLists only
-    if(!inherits(trans, "transformerList")){
+    if(!is(trans, "transformerList")){
       stop("'trans' must be an object of class transformerList!")
     }
   }

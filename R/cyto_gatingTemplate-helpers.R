@@ -120,6 +120,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #' @importFrom flowWorkspace recompute
 #' @importFrom utils edit read.csv write.csv
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
@@ -133,7 +134,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 
   # x of wrong class
-  if (!inherits(x, "GatingSet")) {
+  if (!is(x, "GatingSet")) {
     stop("'x' should be either a GatingSet object.")
   }
 
@@ -209,6 +210,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
@@ -238,8 +240,8 @@ cyto_gatingTemplate_apply <- function(x,
     stop("Supply a GatingHierarchy or GatingSet to 'x'.")
   } else {
     if (!any(c(
-      inherits(x, "GatingSet"),
-      inherits(x, "GatingHierarchy")
+      is(x, "GatingSet"),
+      is(x, "GatingHierarchy")
     ))) {
       stop("'x' must be an object of class GatingHierarchy or GatingSet.")
     }
@@ -249,10 +251,10 @@ cyto_gatingTemplate_apply <- function(x,
   if (!is.null(gatingTemplate)) {
 
     # gatingTemplate object
-    if (inherits(gatingTemplate, "gatingTemplate")) {
+    if (is(gatingTemplate, "gatingTemplate")) {
 
       # Apply gatingTemplates to GatingSets only
-      if (!inherits(x, "GatingSet")) {
+      if (!is(x, "GatingSet")) {
         stop("gatingTemplates can only be applied to GatingSet objects.")
       }
 

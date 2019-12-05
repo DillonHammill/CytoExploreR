@@ -645,11 +645,11 @@ cyto_gate_edit <- function(x,
       }
     }
     # OVERLAY - FLOWFRAME
-    if (inherits(overlay, "flowFrame")) {
+    if (is(overlay, "flowFrame")) {
       # Always show all events
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
-    } else if (inherits(overlay, "flowSet")) {
+    } else if (is(overlay, "flowSet")) {
       # GROUPING (MERGE_BY) - LIST OF FLOWFRAMES
       overlay <- cyto_merge_by(overlay,
         merge_by = group_by,
@@ -660,15 +660,15 @@ cyto_gate_edit <- function(x,
         list(z)
       })
       # OVERLAY - LIST OF FLOWFRAMES OR FLOWSETS
-    } else if (inherits(overlay, "list")) {
+    } else if (is(overlay, "list")) {
       # LIST OF FLOWFRAMES - REPEAT FR_LIST TIMES
       if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         overlay <- rep(list(overlay), N)
         # LIST FLOWFRAME LISTS OF LENGTH FR_LIST
       } else if (all(LAPPLY(unlist(overlay), function(z) {
-        inherits(z, "flowFrame")
+        is(z, "flowFrame")
       }))) {
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -680,7 +680,7 @@ cyto_gate_edit <- function(x,
         }
         # LIST OF FLOWSETS
       } else if (all(LAPPLY(overlay, function(z) {
-        inherits(z, "flowSet")
+        is(z, "flowSet")
       }))) {
         # GROUP & MERGE EACH FLOWSET
         overlay <- lapply(overlay, function(z) {

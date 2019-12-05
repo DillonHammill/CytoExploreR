@@ -12,6 +12,8 @@
 #' @param limits either "data" or "machine".
 #'
 #' @return list containing axis labels and breaks.
+#' 
+#' @importFrom methods is
 #'
 #' @noRd
 .cyto_plot_axes_text <- function(x,
@@ -25,7 +27,7 @@
     return(NA)
   } else {
     # axes_trans of incorrect class
-    if (!inherits(axes_trans, "transformerList")) {
+    if (!is(axes_trans, "transformerList")) {
       stop("Supply a valid transformerList object to 'axes_trans'.")
     }
   }
@@ -497,6 +499,8 @@
 #' @param title if NULL remove excess space above plot.
 #' @param axes_text vector of logicals indicating whether the x and y axes
 #'   should be included on the plot.
+#'   
+#' @importFrom methods is
 #'
 #' @noRd
 .cyto_plot_margins <- function(x,
@@ -528,7 +532,7 @@
     }
 
     # Remove space below plot if x axis is missing
-    if (!all(inherits(axes_text[[1]], "list"))) {
+    if (!all(is(axes_text[[1]], "list"))) {
       if (.all_na(axes_text[[1]])) {
         # NA == FALSE returns NA not T/F
       } else if (all(axes_text[[1]] == FALSE)) {
@@ -537,7 +541,7 @@
     }
 
     # Remove space below plot if y axis is missing
-    if (!all(inherits(axes_text[[2]], "list"))) {
+    if (!all(is(axes_text[[2]], "list"))) {
       if (.all_na(axes_text[[2]])) {
         # NA == FALSE return NA not T/F
       } else if (all(axes_text[[2]] == FALSE)) {
@@ -1080,6 +1084,7 @@
 #'
 #' @importFrom grDevices densCols colorRampPalette adjustcolor
 #' @importFrom flowCore exprs
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -1132,7 +1137,7 @@
   point_col_alpha <- rep(point_col_alpha, length.out = SMP)
 
   # Convert point_col to list
-  if (!inherits(point_col, "list")) {
+  if (!is(point_col, "list")) {
     point_col <- lapply(seq(1, SMP), function(z) {
       point_col[z]
     })

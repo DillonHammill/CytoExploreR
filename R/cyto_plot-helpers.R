@@ -117,7 +117,7 @@
 #'
 #' @importFrom grDevices adjustcolor
 #' @importFrom graphics plot box axis title par
-#' @importFrom methods formalArgs
+#' @importFrom methods formalArgs is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -232,8 +232,8 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # Convert overlay to list of flowFrames
   if (!.all_na(overlay) &
-    any(inherits(overlay, "flowFrame") |
-      inherits(overlay, "flowSet"))) {
+    any(is(overlay, "flowFrame") |
+      is(overlay, "flowSet"))) {
     overlay <- cyto_convert(overlay, "list of flowFrames")
   }
 
@@ -327,12 +327,12 @@ cyto_plot_empty.flowFrame <- function(x,
   # AXES TEXT ------------------------------------------------------------------
 
   # Convert axes_text to list - allows inheritance from cyto_plot
-  if (!inherits(axes_text, "list")) {
+  if (!is(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
 
   # X axis breaks and labels -  can be inherited from cyto_plot
-  if (!inherits(axes_text[[1]], "list")) {
+  if (!is(axes_text[[1]], "list")) {
     if (.all_na(axes_text[[1]])) {
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[1]] == TRUE) {
@@ -348,7 +348,7 @@ cyto_plot_empty.flowFrame <- function(x,
   }
 
   # Y axis breaks and labels - can be inherited from cyto_plot
-  if (!inherits(axes_text[[2]], "list")) {
+  if (!is(axes_text[[2]], "list")) {
     if (.all_na(axes_text[[2]])) {
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[2]] == TRUE) {
@@ -420,7 +420,7 @@ cyto_plot_empty.flowFrame <- function(x,
   )
 
   # X AXIS - TRANSFORMED
-  if (inherits(axes_text[[1]], "list")) {
+  if (is(axes_text[[1]], "list")) {
     # MINOR TICKS
     mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
     axis(1,
@@ -471,7 +471,7 @@ cyto_plot_empty.flowFrame <- function(x,
   }
 
   # Y AXIS - TRANSFORMED
-  if (inherits(axes_text[[2]], "list")) {
+  if (is(axes_text[[2]], "list")) {
     # MINOR TICKS
     mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
     axis(2,
@@ -550,7 +550,7 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # XLAB - position labels closer if axes text is missing
   if (!.all_na(xlab)) {
-    if (inherits(axes_text[[1]], "list")) {
+    if (is(axes_text[[1]], "list")) {
       title(
         xlab = xlab,
         font.lab = axes_label_text_font,
@@ -577,7 +577,7 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # YLAB - position labels closer if axes text is missing
   if (!.all_na(ylab)) {
-    if (inherits(axes_text[[2]], "list")) {
+    if (is(axes_text[[2]], "list")) {
       title(
         ylab = ylab,
         font.lab = axes_label_text_font,
