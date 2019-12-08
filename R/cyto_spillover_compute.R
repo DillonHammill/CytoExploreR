@@ -121,6 +121,7 @@ NULL
 cyto_spillover_compute <- function(x, ...) {
   UseMethod("cyto_spillover_compute")
 }
+
 #' @rdname cyto_spillover_compute
 #' @export
 cyto_spillover_compute.GatingSet <- function(x,
@@ -142,7 +143,13 @@ cyto_spillover_compute.GatingSet <- function(x,
   if (any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
     # MARKERS TO CHANNELS
     ind <- which(grepl("channel", colnames(pd), ignore.case = TRUE))
-    pd$channel <- cyto_channels_extract(x, pd[, ind])
+    pd[, "channel"] <- LAPPLY(pd[, ind], function(z){
+      if(!grepl("unstained", z, ignore.case = TRUE)){
+        return(cyto_channels_extract(x, z))
+      }else{
+        return(z)
+      }
+    })  
   }
 
   # CHANNELS
