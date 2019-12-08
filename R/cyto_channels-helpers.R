@@ -450,7 +450,11 @@ cyto_channel_select <- function(x){
   # Run through list of flowFrames
   chans <- LAPPLY(seq_len(length(x)), function(z){
     message(cyto_names(x[[z]]))
-    opts[menu(choices = opts, graphics = TRUE)]
+    ind <- menu(choices = opts, graphics = TRUE)
+    if(ind == 0){
+      stop(paste0("No channel selected for ", cyto_names(x[[z]]), "."))
+    }
+    opts[ind]
   })
   
   return(chans)
