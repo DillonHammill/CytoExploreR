@@ -1227,7 +1227,7 @@
   # POINT COLOUR PALETTE
   if(type == "point_cols"){
     
-    pal <- c("grey50",
+    pal <- c("grey25",
                  "bisque4",
                  "brown1",
                  "red",
