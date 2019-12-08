@@ -40,7 +40,7 @@ converted to \code{"Combined Events"}.
 }
 \examples{
 
-#' # Load in CytoExploreRData to access data
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Activation flowSet
@@ -60,6 +60,7 @@ cyto_names(gs[[1]])
 
 # GatingSet
 cyto_names(gs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

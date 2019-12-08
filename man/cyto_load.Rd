@@ -4,11 +4,24 @@
 \alias{cyto_load}
 \title{Load .fcs files into ncdfFlowSet}
 \usage{
-cyto_load(path = ".", sort = TRUE, barcode = FALSE, ...)
+cyto_load(
+  path = ".",
+  select = NULL,
+  exclude = NULL,
+  sort = TRUE,
+  barcode = FALSE,
+  ...
+)
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in. Preferably
 the name of folder in current working directory.}
+
+\item{select}{vector of file names to select when loading files, set to NULL
+be default to select all files in the specified directory.}
+
+\item{exclude}{vector of file names to exclude when loading files, set to
+NULL by default to load all files in the specified directory.}
 
 \item{sort}{logical indicating whether attempts should be made to sort the
 files by name prior to loading, set to \code{TRUE} by default.}

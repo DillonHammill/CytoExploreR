@@ -11,6 +11,10 @@
 #'
 #' @param path points to the location of the .fcs files to read in. Preferably
 #'   the name of folder in current working directory.
+#' @param select vector of file names to select when loading files, set to NULL
+#'   be default to select all files in the specified directory.
+#' @param exclude vector of file names to exclude when loading files, set to
+#'   NULL by default to load all files in the specified directory.
 #' @param sort logical indicating whether attempts should be made to sort the
 #'   files by name prior to loading, set to \code{TRUE} by default.
 #' @param barcode logical indicating whether the flowFrames should be barcoded
@@ -40,17 +44,37 @@
 #'
 #' # fs is a ncdfFlowSet
 #' class(fs)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_load <- function(path = ".",
+                      select = NULL,
+                      exclude = NULL,
                       sort = TRUE,
                       barcode = FALSE, ...) {
 
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
 
+  # SELECT
+  if(!is.null(select)){
+    lapply(select, function(z){
+      if(any(grepl(z, files, ignore.case = TRUE))){
+        files <<- files[which(grepl(z, files, ignore.case = TRUE))]
+      }
+    })
+  }
+  
+  # EXCLUDE
+  if(!is.null(exclude)){
+    lapply(exclude, function(z){
+      if(any(grepl(z, files, ignore.case = TRUE))){
+        files <<- files[-which(grepl(z, files, ignore.case = TRUE))]
+      }
+    })
+  }
+  
   # SORTED FILE PATHS
   if (sort == TRUE) {
     files <- mixedsort(files)
@@ -139,7 +163,7 @@ cyto_setup <- function(path = ".",
                        gatingTemplate = NULL, ...) {
 
   # Load in .fsc files to ncdfFlowSet
-  x <- cyto_load(path, ...)
+  x <- cyto_load(path = path, ...)
 
   # FLOWSET LOADED
   if (is(x, "flowSet")) {
@@ -255,7 +279,7 @@ cyto_details <- function(x) {
 #'
 #' @examples
 #'
-#' #' # Load in CytoExploreRData to access data
+#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
@@ -275,6 +299,7 @@ cyto_details <- function(x) {
 #'
 #' # GatingSet
 #' cyto_names(gs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_names
@@ -303,7 +328,7 @@ cyto_names.flowSet <- function(x) {
 #' @rdname cyto_names
 #' @export
 cyto_names.GatingHierarchy <- function(x) {
-  x@name
+  sampleNames(x)
 }
 
 #' @rdname cyto_names
@@ -419,6 +444,7 @@ cyto_check <- function(x) {
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -458,7 +484,7 @@ cyto_transform.default <- function(x,
       ))
     }
 
-    # Dispatch based on trans_type argument to get TransformerList
+    # Dispatch based on type argument to get TransformerList
     if (type == "log") {
       transformer_list <- cyto_transformer_log(x,
         channels = channels,
@@ -1230,7 +1256,7 @@ cyto_select <- function(x,
       pd_filter <<- pd_filter[ind, ]
     }
   })
-
+  
   # Get indices for selected samples
   ind <- match(pd_filter[, "name"], pd[, "name"])
 
@@ -1240,6 +1266,7 @@ cyto_select <- function(x,
   } else {
     return(x[ind])
   }
+  
 }
 
 ## CYTO_GROUP_BY ---------------------------------------------------------------
@@ -2910,4 +2937,47 @@ cyto_empty <- function(name = NULL,
 
   # RETURN EMPTY FLOWFRAME
   return(empty_flowFrame)
+}
+
+## CYTO_COPY -------------------------------------------------------------------
+
+#' Copy a cytoset or cytoframe
+#'
+#' A wrapper around
+#' \code{\link[flowWorkspace:cytoframe_to_flowFrame]{cytoframe_to_flowFrame}}
+#' and \code{\link[flowWorkspace:cytoset_to_flowSet]{cytoset_to_flowSet}}.
+#'
+#' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}} object.
+#'
+#' @return flowFrame or flowSet object.
+#'
+#' @importFrom flowWorkspace cytoframe_to_flowFrame cytoset_to_flowSet
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#'
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Activation cytoset
+#' cs <- flowSet_to_cytoset(fs)
+#'
+#' # Activation flowSet
+#' fs <- cyto_copy(fs)
+#'
+#' @export
+cyto_copy <- function(x){
+  if(is(x, "cytoframe")){
+    return(cytoframe_to_flowFrame(x))
+  }else if(is(x, "cytoset")){
+    return(cytoset_to_flowSet(x))
+  }else{
+    return(x)
+  }
 }

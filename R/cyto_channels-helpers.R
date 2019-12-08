@@ -290,24 +290,20 @@ cyto_channels_extract <- function(x,
     channels <- chans[channels]
   }
   
-  # Check if channels match colnames of flowFrame
-  if (all(channels %in% chans)) {
-    
-    # Supplied channels are valid
-  } else if (!all(channels %in% chans)) {
-    lapply(channels, function(channel) {
-      if (channel %in% chans) {
-        
-        
-      } else if (channel %in% fr_data$desc) {
-        channels[channels %in% channel] <<- as.character(
-          fr_data$name[match(channel, fr_data$desc)]
-        )
-      } else if (!channel %in% chans & !channel %in% fr_data$desc) {
-        stop(paste(channel, "is not a valid channel/marker."))
-      }
-    })
-  }
+  # Extract channels
+  LAPPLY(channels, function(z){
+    if(.all_na(z)){
+      
+    }else if(z %in% chans){
+      
+    } else if (z %in% fr_data$desc) {
+      channels[channels %in% z] <<- as.character(
+        fr_data$name[match(z, fr_data$desc)]
+      )
+    } else if (!z %in% chans & !z %in% fr_data$desc) {
+      stop(paste(z, "is not a valid channel/marker."))
+    }
+  })
   
   return(channels)
   

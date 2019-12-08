@@ -1078,7 +1078,11 @@ cyto_transformer_combine <- function(...) {
   channels <- cyto_fluor_channels(x)
   
   # Extract transformations from GatingHierarchy
-  gh_trans <- x@transformation
+  gh_trans <- gh_get_transformations(x,
+                                     only.function = FALSE)
+  if(length(gh_trans) != 0){
+    gh_trans <- cyto_transformer_combine(gh_trans)
+  }
   
   # In case NULL axes_trans
   if(is.null(axes_trans)){
