@@ -642,7 +642,7 @@
 
   # LEGEND_TEXT ----------------------------------------------------------------
   if (legend != FALSE) {
-    if (.all_na(legend_text)) {
+    if (.all_na(legend_text) | length(unique(legend_text)) == 1) {
       legend_text <- cyto_names(x)
     }
   }
