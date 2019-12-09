@@ -11,12 +11,13 @@
 #' Definition(s) of Log Transformation(s)
 #'
 #' CytoExploreR implementation of \code{flowWorkspace}
-#' \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation which
-#' always returns a \code{\link[flowWorkspace:transformerList]{transformerList}}
-#' object and displays the result of the transformation(s) using
-#' \code{\link{cyto_plot}}. To combine different types of transformations have a
-#' look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
-#' should be used to apply the transformations to the data.
+#' \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation
+#' which always returns a
+#' \code{\link[flowWorkspace:transformerList]{transformerList}} object and
+#' displays the result of the transformation(s) using \code{\link{cyto_plot}}.
+#' To combine different types of transformations have a look at
+#' \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}} should
+#' be used to apply the transformations to the data.
 #'
 #' @param x an object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
@@ -231,7 +232,7 @@ cyto_transformer_log.flowFrame <- function(x,
   
 }
 
-## CYTO_TRANSFORMER_ARCSINH ------------------------------------------------------
+## CYTO_TRANSFORMER_ARCSINH ----------------------------------------------------
 
 #' Definition(s) of arcsinh transformation(s)
 #'
@@ -465,7 +466,7 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
   return(transformer_list)
 }
 
-## CYTO_TRANSFORMER_BIEX ---------------------------------------------------------
+## CYTO_TRANSFORMER_BIEX -------------------------------------------------------
 
 #' Definition(s) of biexponential transformation(s)
 #'
@@ -729,7 +730,7 @@ cyto_transformer_biex.flowFrame <- function(x,
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
-#'   and \code{\link{cyto_plot}}.
+#'    and \code{\link{cyto_plot}}.
 #'
 #'
 #' @return a \code{transformerList} object.
@@ -933,7 +934,7 @@ cyto_transformer_logicle.flowFrame <- function(x,
   return(transformer_list)
 }
 
-## CYTO_TRANSFORMER_COMBINE ------------------------------------------------------
+## CYTO_TRANSFORMER_COMBINE ----------------------------------------------------
 
 #' Combine cyto_transformer definitions
 #'
@@ -1224,4 +1225,60 @@ cyto_transformer_combine <- function(...) {
   # Return complete transformerList
   return(axes_trans)
   
+}
+
+## CYTO_TRANSFORMER_EXTRACT ----------------------------------------------------
+
+#' Extract transformers from a GatingHierarchy or GatingSet
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}
+#'   or \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'
+#' @return transformerList or NA.
+#'
+#' @importFrom flowWorkspace gh_get_transformations
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' 
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#' 
+#' # Apply transformations
+#' gs <- cyto_transform(gs, channels = c("CD4", "CD8"))
+#'
+#' # Extract transformations
+#' trans <- cyto_transformer_extract(gs)
+#'
+#' @export
+cyto_transformer_extract <- function(x){
+  
+  # GATINGSET
+  if(is(x, "GatingSet")){
+    x <- x[[1]]
+  }
+  
+  # GATINGHIERARCHY
+  if(is(x, "GatingHierarchy")){
+    transformers <- gh_get_transformations(x, 
+                                           only.function = FALSE)
+    if(length(transformers) != 0){
+      transformers <- cyto_transformer_combine(transformers)
+    }else{
+      transformers <- NA
+    }
+  # FLOWFRAME/FLOWSET
+  }else{
+    transformers <- NA
+  }
+  
+  # RETURN TRANSFORMERLIST
+  return(transformers)
 }
