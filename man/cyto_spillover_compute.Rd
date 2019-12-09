@@ -25,7 +25,7 @@
 }
 \arguments{
 \item{x}{object of class \code{flowSet} or \code{GatingSet} containing
-un-transformed pre-gated compensation controls.}
+transformed and gated compensation controls.}
 
 \item{parent}{name of the population to use for the spillover calculation
 when a GatingSet object is supplied, set to the last node of the GatingSet

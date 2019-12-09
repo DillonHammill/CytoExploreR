@@ -37,7 +37,7 @@
 #' and written to a named csv file for future use.
 #'
 #' @param x object of class \code{flowSet} or \code{GatingSet} containing
-#'   un-transformed pre-gated compensation controls.
+#'   transformed and gated compensation controls.
 #' @param parent name of the population to use for the spillover calculation
 #'   when a GatingSet object is supplied, set to the last node of the GatingSet
 #'   by default (e.g. "Single Cells"). For greater flexibility, users can
@@ -143,13 +143,13 @@ cyto_spillover_compute.GatingSet <- function(x,
   if (any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
     # MARKERS TO CHANNELS
     ind <- which(grepl("channel", colnames(pd), ignore.case = TRUE))
-    pd[, "channel"] <- LAPPLY(pd[, ind], function(z){
-      if(!grepl("unstained", z, ignore.case = TRUE)){
+    pd[, "channel"] <- LAPPLY(pd[, ind], function(z) {
+      if (!grepl("unstained", z, ignore.case = TRUE)) {
         return(cyto_channels_extract(x, z))
-      }else{
+      } else {
         return(z)
       }
-    })  
+    })
   }
 
   # CHANNELS
@@ -175,7 +175,7 @@ cyto_spillover_compute.GatingSet <- function(x,
         is(channel_match, "matrix") |
         is(channel_match, "tibble")) {
         if (!all(c("name", "channel") %in% colnames(channel_match))) {
-          stop("channel_match should contains columns 'name' and 'channel'.")
+          stop("channel_match must contain columns 'name' and 'channel'.")
         }
         cm <- channel_match
         chans <- cm$channel[match(cyto_names(x), rownames(cm))]
@@ -258,6 +258,11 @@ cyto_spillover_compute.GatingSet <- function(x,
       if (nrow(pd_chunk) > 1) {
         # BYPASS UNSTAINED
         if (!grepl("unstained", z, ignore.case = TRUE)) {
+          # MESSAGE
+          message(paste0(
+            "Selecting the control with best signal for the ",
+            z, " ", channel, "."
+          ))
           # EXTRACT DATA
           fr_list <- lapply(seq_len(nrow(pd_chunk)), function(z) {
             cyto_extract(
@@ -296,7 +301,7 @@ cyto_spillover_compute.GatingSet <- function(x,
   # UNIVERSAL REFERENCE
   if (any(grepl("unstained", pd[, "channel"], ignore.case = TRUE))) {
 
-    # REMOVE EXCESS UNSTAINED CONTROLS - USE UNSTAINED WITH BEST CVs?
+    # REMOVE EXCESS UNSTAINED CONTROLS - SELECT FIRST INSTANCE
     if (length(which(grepl("unstained", pd[, "channel"],
       ignore.case = TRUE
     ))) > 1) {
@@ -327,38 +332,18 @@ cyto_spillover_compute.GatingSet <- function(x,
       )
     })
     names(POS) <- cyto_names(POS_gs)
-    
+
     # RESTRICT CYTO_DETAILS
     pd <- pd[pd[, "name"] != cyto_names(NIL_gs), ]
 
-    # INTERNAL TRANSFORMATIONS
-    if (.all_na(axes_trans)) {
-      POOL <- flowSet(c(NIL, POS))
-      axes_trans <- cyto_transformer_biex(POOL,
-        channels = unique(pd[, "channel"]),
-        plot = FALSE
-      )
-      NIL <- lapply(NIL, function(z) {
-        cyto_transform(z,
-          trans = axes_trans,
-          plot = FALSE
-        )
-      })
-      POS <- lapply(POS, function(z) {
-        cyto_transform(z,
-          trans = axes_trans,
-          plot = FALSE
-        )
-      })
-    }
-
-    # Names
+    # NAMES
     nms <- names(POS)
 
-    # Samples
+    # SAMPLES
     smp <- length(POS)
 
-    # Gate positive populations
+    # GATE POSITIVE SIGNAL
+    pos_pops <- list()
     neg_pops <- list()
     pops <- lapply(seq_len(smp), function(z) {
 
@@ -373,7 +358,23 @@ cyto_spillover_compute.GatingSet <- function(x,
 
       # Reference
       ref <- NIL[[parent]]
-      neg_pops <<- c(neg_pops, list(ref))
+
+      # INTERNAL TRANSFORMATIONS - GATED CHANNEL ONLY
+      if (.all_na(axes_trans)) {
+        POOL <- flowSet(list(ref, fr))
+        axes_trans <- cyto_transformer_biex(POOL,
+          channels = chan,
+          plot = FALSE
+        )
+        ref <- cyto_transform(ref,
+          trans = axes_trans,
+          plot = FALSE
+        )
+        fr <- cyto_transform(fr,
+          trans = axes_trans,
+          plot = FALSE
+        )
+      }
 
       # Plot
       cyto_plot(ref,
@@ -398,20 +399,48 @@ cyto_spillover_compute.GatingSet <- function(x,
       )
       fr <- Subset(fr, gt[[1]])
 
-      return(fr)
+      # INVERSE TRANSFORMATIONS
+      fr <- cyto_transform(fr,
+        trans = axes_trans,
+        inverse = TRUE,
+        plot = FALSE
+      )
+      ref <- cyto_transform(ref,
+        trans = axes_trans,
+        inverse = TRUE,
+        plot = FALSE
+      )
+
+      # SAVE GATED POPULATIONS
+      pos_pops[[z]] <<- fr
+      neg_pops[[z]] <<- ref
+      
     })
-    names(pops) <- nms
-    pops <- flowSet(pops)
+    names(pos_pops) <- nms
+    pos_pops <- flowSet(pos_pops)
     names(neg_pops) <- nms
     neg_pops <- flowSet(neg_pops)
 
-    # Calculate medFI for all channels - reference (REPETITIVE)
-    neg <- suppressMessages(cyto_stats_compute(neg_pops,
-      trans = axes_trans,
-      stat = "median",
-      channels = channels,
-      format = "wide"
-    ))
+    # MEDFI ALL CHANNELS (LINEAR DATA)
+    neg <- list()
+    lapply(seq_along(neg_pops), function(z){
+      # CHECK PREVIOUS - PREVENT DUPLICATE COMPUTATION
+      if(z > 1 & any(LAPPLY(seq_len(z-1), function(y){
+        identical(neg_pops[[z]], neg_pops[[y]])
+      }))){
+        neg[[z]] <<- neg[[which(LAPPLY(seq_len(z-1), function(y){
+          identical(neg_pops[[z]], neg_pops[[y]])
+        }))[1]]]
+      }else{
+        neg[[z]] <<- suppressMessages(
+          cyto_stats_compute(neg_pops[[z]],
+                             stat = "median",
+                             channels = channels,
+                             format = "wide")
+        )
+      }
+    })
+    neg <- do.call("rbind", neg)
     neg <- neg[, -which(names(neg) %in% colnames(pd))]
     colnames(neg) <- channels
     neg <- neg[, channels]
@@ -419,8 +448,7 @@ cyto_spillover_compute.GatingSet <- function(x,
     rownames(neg) <- nms
 
     # Calculate medFI for all channels in all stained controls
-    pos <- suppressMessages(cyto_stats_compute(pops,
-      trans = axes_trans,
+    pos <- suppressMessages(cyto_stats_compute(pos_pops,
       stat = "median",
       channels = channels,
       format = "wide"
@@ -431,10 +459,8 @@ cyto_spillover_compute.GatingSet <- function(x,
     pos <- data.matrix(pos)
     rownames(pos) <- nms
 
-    # INTERNAL REFERENCE
-  } else if (!any(grepl("unstained", pd[, "channel"]))) {
-
-    # Each control has its own positive and negative population
+    # INTERNAL REFERENCE - POSITIVE & NEGATIVE WITHIN CONTROL
+  } else if (!any(grepl("unstained", pd[, "channel"], ignore.case = TRUE))) {
 
     # EXTRACT POPULATIONS
     pops <- lapply(seq_along(x), function(z) {
@@ -445,28 +471,38 @@ cyto_spillover_compute.GatingSet <- function(x,
     })
     names(pops) <- cyto_names(x)
 
-    # Names
+    # NAMES
     nms <- names(pops)
 
-    # Samples
+    # SAMPLES
     smp <- length(pops)
 
-    # List of negative populations
+    # NEGATIVE POPULATIONS
     neg_pops <- list()
 
-    # List of positive populations
+    # POSITIVE POPULATIONS
     pos_pops <- list()
 
-    # Gate positive and negative populations for each control
+    # GATE NEGATIVE & POSITIVE SIGNAL PER CONTROL
     lapply(seq_len(smp), function(z) {
 
-      # Extract flowFrame
+      # CONTROL
       fr <- pops[[z]]
 
-      # Channel
+      # CHANNEL
       chan <- pd$channel[z]
 
-      # Plot
+      # INTERNAL TRANSFORMATIONS - GATED CHANNEL ONLY
+      if (.all_na(axes_trans)) {
+        axes_trans <- cyto_transformer_biex(fr,
+                                            channels = chan,
+                                            plot = FALSE)
+        fr <- cyto_transform(fr,
+                             trans = axes_trans,
+                             plot = FALSE)
+      }
+      
+      # PLOT
       cyto_plot(fr,
         channels = chan,
         density_stack = 0,
@@ -478,7 +514,7 @@ cyto_spillover_compute.GatingSet <- function(x,
         title = nms[z], ...
       )
 
-      # Gate negative population
+      # GATE NEGATIVE POPULATION
       gt <- cyto_gate_draw(
         x = fr,
         alias = paste0(chan, "-"),
@@ -486,9 +522,9 @@ cyto_spillover_compute.GatingSet <- function(x,
         type = "interval",
         plot = FALSE
       )
-      neg_pops[[z]] <<- Subset(fr, gt[[1]])
+      neg_pop <- Subset(fr, gt[[1]])
 
-      # Gate positive population
+      # GaATE POSITIVE POPULATION
       gt <- cyto_gate_draw(
         x = fr,
         alias = paste0(chan, "+"),
@@ -496,7 +532,22 @@ cyto_spillover_compute.GatingSet <- function(x,
         type = "interval",
         plot = FALSE
       )
-      pos_pops[[z]] <<- Subset(fr, gt[[1]])
+      pos_pop <- Subset(fr, gt[[1]])
+      
+      # INVERSE TRANSFORMATIONS
+      neg_pop <- cyto_transform(neg_pop,
+                           trans = axes_trans,
+                           inverse = TRUE,
+                           plot = FALSE
+      )
+      pos_pop <- cyto_transform(pos_pop,
+                                trans = axes_trans,
+                                inverse = TRUE,
+                                plot = FALSE
+      )
+      neg_pops[[z]] <<- neg_pop
+      pos_pops[[z]] <<- pos_pop
+      
     })
 
     # Add names to pops lists
@@ -509,7 +560,6 @@ cyto_spillover_compute.GatingSet <- function(x,
 
     # Calculate medFI for negative populations
     neg <- suppressMessages(cyto_stats_compute(neg_pops,
-      trans = axes_trans,
       stat = "median",
       channels = channels,
       format = "wide"
@@ -522,7 +572,6 @@ cyto_spillover_compute.GatingSet <- function(x,
 
     # Calculate medFI for all channels in all stained controls
     pos <- suppressMessages(cyto_stats_compute(pos_pops,
-      trans = axes_trans,
       stat = "median",
       channels = channels,
       format = "wide"
@@ -533,22 +582,22 @@ cyto_spillover_compute.GatingSet <- function(x,
     pos <- data.matrix(pos)
     rownames(pos) <- nms
   }
-  
+
   # Subtract background fluorescence
   signal <- pos - neg
   signal <- as.matrix(signal)
-  
+
   # Construct spillover matrix - include values for which there is a control
   spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
   colnames(spill) <- channels
   rownames(spill) <- channels
-  
+
   # Normalise each row to stained channel
   lapply(seq(1, nrow(signal), 1), function(x) {
     signal[x, ] <<- signal[x, ] /
       signal[x, match(pd$channel[x], colnames(spill))]
   })
-  
+
   # Insert values into appropriate rows
   rws <- match(pd$channel, rownames(spill))
   spill[rws, ] <- signal
@@ -579,41 +628,66 @@ cyto_spillover_compute.flowSet <- function(x,
                                            spillover = NULL,
                                            ...) {
 
-  # Extract pData information
+  # PREPARE ARGUMENTS ---------------------------------------------------------
+
+  # CYTOSET NEGATIVE INDEXING ISSUE
+  x <- cyto_copy(x)
+  
+  # EXPERIMENT DETAILS
   pd <- cyto_details(x)
 
-  # Extract fluorescent channels
+  # PREPARE CHANNEL_MATCH VARIABLE
+  if (any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
+    # MARKERS TO CHANNELS
+    ind <- which(grepl("channel", colnames(pd), ignore.case = TRUE))
+    pd[, "channel"] <- LAPPLY(pd[, ind], function(z) {
+      if (!grepl("unstained", z, ignore.case = TRUE)) {
+        return(cyto_channels_extract(x, z))
+      } else {
+        return(z)
+      }
+    })
+  }
+
+  # CHANNELS
   channels <- cyto_fluor_channels(x)
 
-  # Get complete transformerList
-  axes_trans <- .cyto_transformer_complete(x, axes_trans)
+  # TRANSFORMATIONS
+  if (is.null(axes_trans)) {
+    axes_trans <- NA
+  }
 
-  # Apply transformations
-  x <- cyto_transform(x,
-    axes_trans,
-    plot = FALSE
-  )
+  # PREPARE CHANNEL_MATCH ------------------------------------------------------
 
-  # Select a fluorescent channel for each compensation control
-  if (is.null(channel_match)) {
-    pd$channel <- paste(cyto_channel_select(x))
-    write.csv(pd, paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-", "Compensation-Channels.csv"
-    ), row.names = FALSE)
-  } else {
-    if (is(channel_match, "data.frame") |
-      is(channel_match, "matrix") |
-      is(channel_match, "tibble")) {
-      if (!all(c("name", "channel") %in% colnames(channel_match))) {
-        stop("channel_match should contains columns 'name' and 'channel'.")
-      }
-      cm <- channel_match
-      chans <- cm$channel[match(cyto_names(x), rownames(cm))]
-      pd$channel <- paste(chans)
+  # CHANNEL MATCH MISSING
+  if (!"channel" %in% colnames(pd)) {
+    # TRY CHANNEL_MATCH
+    if (is.null(channel_match)) {
+      pd$channel <- paste(cyto_channel_select(x))
     } else {
-      if (getOption("CytoExploreR_wd_check") == TRUE) {
-        if (file_wd_check(channel_match)) {
+      if (is(channel_match, "data.frame") |
+        is(channel_match, "matrix") |
+        is(channel_match, "tibble")) {
+        if (!all(c("name", "channel") %in% colnames(channel_match))) {
+          stop("channel_match must contain columns 'name' and 'channel'.")
+        }
+        cm <- channel_match
+        chans <- cm$channel[match(cyto_names(x), rownames(cm))]
+        pd$channel <- paste(chans)
+      } else {
+        if (getOption("CytoExploreR_wd_check") == TRUE) {
+          if (file_wd_check(channel_match)) {
+            cm <- read.csv(channel_match,
+              header = TRUE,
+              row.names = 1,
+              stringsAsFactors = FALSE
+            )
+            chans <- cm$channel[match(cyto_names(x), row.names(cm))]
+            pd$channel <- paste(chans)
+          } else {
+            stop(paste(channel_match, "is not in this working directory."))
+          }
+        } else {
           cm <- read.csv(channel_match,
             header = TRUE,
             row.names = 1,
@@ -621,71 +695,136 @@ cyto_spillover_compute.flowSet <- function(x,
           )
           chans <- cm$channel[match(cyto_names(x), row.names(cm))]
           pd$channel <- paste(chans)
-        } else {
-          stop(paste(channel_match, "is not in this working directory."))
         }
-      } else {
-        cm <- read.csv(channel_match,
-          header = TRUE,
-          row.names = 1,
-          stringsAsFactors = FALSE
-        )
-        chans <- cm$channel[match(cyto_names(x), row.names(cm))]
-        pd$channel <- paste(chans)
       }
     }
   }
 
-  # Multiple controls per channel
-  if (length(unique(pd$channel)) != length(pd$name)) {
-    lapply(unique(pd$channel), function(z) {
-      if (nrow(pd[pd$channel == z, ]) > 1) {
-        # PULL OUT SAMPLES
-        fs <- x[pd[pd$channel == z, "name"]]
-        # CALCULATE MEDFI
-        MEDFI <- suppressMessages(
-          cyto_stats_compute(fs,
-            channels = z,
-            stat = "median"
-          )[, z]
-        )
-        # MAXIMUM SIGNAL
-        max <- max(MEDFI)
-        ind <- which(MEDFI != max)
-        remove_names <- MEDFI[ind, "name"]
-        # REMOVE SAMPLES - LOW SIGNAL
-        x <<- x[-match(remove_names, pd$name)]
+  # UPDATE CHANNEL_MATCH FILE & CYTO_DETAILS -----------------------------------
+
+  # SAVE CHANNEL_MATCH
+  if (is.null(channel_match)) {
+    write.csv(pd, paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-", "Compensation-Channels.csv"
+    ), row.names = FALSE)
+  } else {
+    write.csv(pd, channel_match, row.names = FALSE)
+  }
+
+  # CYTO_DETAILS
+  cyto_details(x) <- pd
+
+  # REMOVE EXCESS CONTROLS -----------------------------------------------------
+
+  # MULTIPLE CONTROLS PER CHANNEL (BYPASS UNSTAINED)
+  if (length(unique(pd[, "channel"])) < length(pd[, "name"])) {
+    chans <- unique(pd[, "channel"])
+    lapply(chans, function(z) {
+      # RESTRICT CYTO_DETAILS
+      pd_chunk <- pd[pd$channel == z, ]
+      # MULTIPLE CONTROLS
+      if (nrow(pd_chunk) > 1) {
+        # BYPASS UNSTAINED
+        if (!grepl("unstained", z, ignore.case = TRUE)) {
+          # MESSAGE
+          message(paste0(
+            "Selecting the control with best signal for the ",
+            z, " ", channel, "."
+          ))
+          # EXTRACT DATA
+          fr_list <- lapply(seq_len(nrow(pd_chunk)), function(z) {
+            x[[pd_chunk$name[z]]]
+          })
+          names(fr_list) <- cyto_names(fr_list)
+          fs <- as(fr_list, "flowSet")
+          # CALCULATE MEDFI
+          MEDFI <- suppressMessages(
+            cyto_stats_compute(fs,
+              channels = z,
+              stat = "median",
+              trans = axes_trans
+            )
+          )
+          # MAXIMUM SIGNAL
+          max_MEDFI <- max(MEDFI[, ncol(MEDFI)])
+          ind <- which(MEDFI[, ncol(MEDFI)] != max_MEDFI)
+          remove_names <- MEDFI[ind, "name", drop = TRUE]
+          droplevels(remove_names)
+          # REMOVE SAMPLES - LOW SIGNAL
+          x <<- x[-match(remove_names, pd[, "name"])]
+          cyto_details(x)[, "name"] <<- droplevels(cyto_details(x)[, "name"])
+        }
       }
     })
   }
 
-  # Universal reference population
-  if ("Unstained" %in% pd$channel) {
+  # RESTRICT CYTO_DETAILS
+  pd <- cyto_details(x)
 
-    # Extract unstained control based on selected channels in pData(x)
-    NIL <- x[[match("Unstained", pd$channel)]]
-    x <- x[-match("Unstained", pd$channel)]
+  # SPILLOVER COMPUTATION -----------------------------------------------------
 
-    # Names
+  # UNIVERSAL REFERENCE
+  if (any(grepl("unstained", pd[, "channel"], ignore.case = TRUE))) {
+
+    # REMOVE EXCESS UNSTAINED CONTROLS - USE UNSTAINED WITH BEST CVs?
+    if (length(which(grepl("unstained", pd[, "channel"],
+      ignore.case = TRUE
+    ))) > 1) {
+      message("Removing excess unstained controls...")
+      x <- x[-which(grepl("unstained", pd[, "channel"],
+        ignore.case = TRUE
+      ))[-1]]
+      pd <- cyto_details(x)
+    }
+    
+    # EXTRACT UNSTAINED CONTROL
+    NIL <- x[[which(grepl("unstained", pd[, "channel"], ignore.case = TRUE))]]
+    x <- x[-which(grepl("unstained", pd[, "channel"], ignore.case = TRUE))]
+    NIL <- rep(list(NIL), length(x))
+    
+    # NAMES
     nms <- cyto_names(x)
 
-    # Samples
+    # SAMPLES
     smp <- length(x)
 
-    # Remove NIL from pd
-    pd <- pd[!pd$channel == "Unstained", ]
+    # REMOVE NIL FROM CYTO DETAILS
+    pd <- pd[pd[, "name"] != cyto_names(NIL[[1]]), ]
 
-    # Gate positive populations
-    pops <- lapply(seq(1, smp, 1), function(z) {
+    # GATE POSITIVE POPULATIONS
+    neg_pops <- list()
+    pos_pops <- list()
+    lapply(seq_len(smp), function(z) {
 
-      # Extract flowFrame
+      # POSITIVE
       fr <- x[[z]]
 
+      # NEGATIVE
+      ref <- NIL[[z]]
+      
       # Channel
       chan <- pd$channel[z]
 
+      # INTERNAL TRANSFORMATIONS - GATED CHANNEL ONLY
+      if (.all_na(axes_trans)) {
+        POOL <- flowSet(list(ref, fr))
+        axes_trans <- cyto_transformer_biex(POOL,
+                                            channels = chan,
+                                            plot = FALSE
+        )
+        ref <- cyto_transform(ref,
+                              trans = axes_trans,
+                              plot = FALSE
+        )
+        fr <- cyto_transform(fr,
+                             trans = axes_trans,
+                             plot = FALSE
+        )
+      }
+      
       # Plot
-      cyto_plot(NIL,
+      cyto_plot(ref,
         channels = chan,
         overlay = fr,
         density_stack = 0,
@@ -707,28 +846,55 @@ cyto_spillover_compute.flowSet <- function(x,
       )
       fr <- Subset(fr, gt[[1]])
 
-      return(fr)
-    })
-    names(pops) <- nms
-    pops <- flowSet(pops)
+      # INVERSE TRANSFORMATIONS
+      fr <- cyto_transform(fr,
+                           trans = axes_trans,
+                           inverse = TRUE,
+                           plot = FALSE
+      )
+      ref <- cyto_transform(ref,
+                           trans = axes_trans,
+                           inverse = TRUE,
+                           plot = FALSE
+      )
 
-    # Calculate medFI for all channels unstained control
-    neg <- suppressMessages(cyto_stats_compute(NIL,
-      trans = axes_trans,
-      stat = "median",
-      channels = channels,
-      format = "wide"
-    ))
+      neg_pops[[z]] <<- ref
+      pos_pops[[z]] <<- fr
+
+    })
+    names(pos_pops) <- nms
+    pos_pops <- flowSet(pos_pops)
+    names(neg_pops) <- nms
+    neg_pops <- flowSet(neg_pops)
+    
+    # MEDFI ALL CHANNELS (LINEAR DATA)
+    neg <- list()
+    lapply(seq_along(neg_pops), function(z){
+      # CHECK PREVIOUS - PREVENT DUPLICATE COMPUTATION
+      if(z > 1 & any(LAPPLY(seq_len(z-1), function(y){
+        identical(neg_pops[[z]], neg_pops[[y]])
+      }))){
+        neg[[z]] <<- neg[[which(LAPPLY(seq_len(z-1), function(y){
+          identical(neg_pops[[z]], neg_pops[[y]])
+        }))[1]]]
+      }else{
+        neg[[z]] <<- suppressMessages(
+          cyto_stats_compute(neg_pops[[z]],
+                             stat = "median",
+                             channels = channels,
+                             format = "wide")
+        )
+      }
+    })
+    neg <- do.call("rbind", neg)
     neg <- neg[, -which(names(neg) %in% colnames(pd))]
     colnames(neg) <- channels
     neg <- neg[, channels]
-
-    # Repeat neg into matrix
-    neg <- do.call("rbind", rep(list(neg), length(nms)))
+    neg <- data.matrix(neg)
+    rownames(neg) <- nms
 
     # Calculate medFI for all channels in all stained controls
-    pos <- suppressMessages(cyto_stats_compute(pops,
-      trans = axes_trans,
+    pos <- suppressMessages(cyto_stats_compute(pos_pops,
       stat = "median",
       channels = channels,
       format = "wide"
@@ -740,7 +906,7 @@ cyto_spillover_compute.flowSet <- function(x,
     rownames(pos) <- nms
 
     # Internal reference population
-  } else if (!"Unstained" %in% pd$channel) {
+  } else if (!any(grepl("unstained", pd[, "channel"], ignore.case = TRUE))) {
 
     # Each control has its own positive and negative population
 
@@ -765,6 +931,18 @@ cyto_spillover_compute.flowSet <- function(x,
       # Channel
       chan <- pd$channel[z]
 
+      # INTERNAL TRANSFORMATIONS - GATED CHANNEL ONLY
+      if (.all_na(axes_trans)) {
+        axes_trans <- cyto_transformer_biex(fr,
+                                            channels = chan,
+                                            plot = FALSE
+        )
+        fr <- cyto_transform(fr,
+                             trans = axes_trans,
+                             plot = FALSE
+        )
+      }
+      
       # Plot
       cyto_plot(fr,
         channels = chan,
@@ -785,7 +963,7 @@ cyto_spillover_compute.flowSet <- function(x,
         type = "interval",
         plot = FALSE
       )
-      neg_pops[[z]] <<- Subset(fr, gt[[1]])
+      neg_pop <- Subset(fr, gt[[1]])
 
       # Gate positive population
       gt <- cyto_gate_draw(
@@ -795,7 +973,22 @@ cyto_spillover_compute.flowSet <- function(x,
         type = "interval",
         plot = FALSE
       )
-      pos_pops[[z]] <<- Subset(fr, gt[[1]])
+      pos_pop <- Subset(fr, gt[[1]])
+      
+      # INVERSE TRANSFORMATIONS
+      neg_pop <- cyto_transform(neg_pop,
+                                trans = axes_trans,
+                                inverse = TRUE,
+                                plot = FALSE
+      )
+      pos_pop <- cyto_transform(pos_pop,
+                                trans = axes_trans,
+                                inverse = TRUE,
+                                plot = FALSE
+      )
+      neg_pops[[z]] <<- neg_pop
+      pos_pops[[z]] <<- pos_pop
+      
     })
 
     # Add names to pops lists
@@ -808,7 +1001,6 @@ cyto_spillover_compute.flowSet <- function(x,
 
     # Calculate medFI for negative populations
     neg <- suppressMessages(cyto_stats_compute(neg_pops,
-      trans = axes_trans,
       stat = "median",
       channels = channels,
       format = "wide"
@@ -821,7 +1013,6 @@ cyto_spillover_compute.flowSet <- function(x,
 
     # Calculate medFI for all channels in all stained controls
     pos <- suppressMessages(cyto_stats_compute(pos_pops,
-      trans = axes_trans,
       stat = "median",
       channels = channels,
       format = "wide"
