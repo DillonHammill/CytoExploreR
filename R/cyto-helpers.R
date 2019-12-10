@@ -391,11 +391,12 @@ cyto_check <- function(x) {
 #' @param trans object of class
 #'   \code{\link[flowWorkspace:transformerList]{transformerList}} containing the
 #'   transformation definitions to apply to \code{x}.
-#' @param type type of transformation to apply when no trans object is
-#'   supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
+#' @param type type of transformation to apply when no trans object is supplied,
+#'   options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
 #'   \code{"logicle"}.
-#' @param channels names of the channels to transform. Only required when no
-#'   \code{trans} object is supplied.
+#' @param channels names of the channels to transform, set to all the
+#'   fluorescent channels by default. Only required when no \code{trans} object
+#'   is supplied.
 #' @param parent name of the parent population of \code{GatingHierarchy} or
 #'   \code{GatingSet} objects used to visualise the transformations.
 #' @param select list of selection criteria passed to \code{\link{cyto_select}}
@@ -444,7 +445,7 @@ cyto_check <- function(x) {
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -853,8 +854,13 @@ cyto_transform_extract <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_extract <- function(x, parent = "root", ...) {
+cyto_extract <- function(x, parent = NULL, ...) {
 
+  # PARENT - FIRST NODE (IN CASE ROOT RENAMED)
+  if(is.null(parent)){
+    parent <- cyto_nodes(x, path = "auto")[1]
+  }
+  
   # Extract data from GatingHierarchy
   if (is(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
@@ -1950,6 +1956,7 @@ cyto_save.flowFrame <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -2132,6 +2139,101 @@ cyto_sample.list <- function(x,
   return(x)
 }
 
+## CYTO_BEADS_SAMPLE -----------------------------------------------------------
+
+#' Sample GatingSet to bead count
+#'
+#' \code{cyto_beads_sample} can be used on samples containing beads, to
+#' downsamples each sample in a GatingSet based on a specific \code{bead_count}.
+#' For example, if Sample A contains 100 beads and 75000 events, and Sample B
+#' contains 50 beads and 5000 events. \code{cyto_beads_sample} will downsample
+#' each sample to contain 50 beads and therefore 5000 events for Sample A and
+#' 3750 events for Sample B.
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param beads name of the gated bead population to use for the calculation. If
+#'   not supplied internal checks will be made for populations named "Single
+#'   Beads" or "Beads".
+#' @param bead_count minimal bead count to down sample to, set to the minimum
+#'   bead count in samples by default. The bead count must be less than or equal
+#'   to the minimum bead count among the samples.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_beads_sample <- function(x,
+                              beads = NULL,
+                              bead_count = NULL){
+  
+  # GATINGSET
+  if(!is(x, "GatingSet")){
+    stop("'x' must be a Gatingset object.")
+  }
+  
+  # CLONE GATINGSET
+  gs_clone <- gs_clone(x)
+  
+  # NODES
+  nodes <- cyto_nodes(gs_clone, path = "auto")
+  
+  # BEADS
+  if(is.null(beads)){
+    # SINGLE BEADS
+    if(any(grepl("single beads", nodes, ignore.case = TRUE))){
+      beads <- nodes[which(grepl("single beads", nodes, ignore.case = TRUE))[1]]
+    # BEADS
+    }else if(any(grepl("beads", nodes, ignore.case = TRUE))){
+      beads <- nodes[which(grepl("beads", nodes, ignore.case = TRUE))[1]]
+    # BEADS MISSING
+    }else{
+      stop("Supply the name of the 'beads' population.")
+    }
+  }
+  
+  # BEAD COUNTS
+  bead_pops <- cyto_extract(gs_clone, beads)
+  bead_counts <- suppressMessages(
+    cyto_stats_compute(bead_pops,
+                       stat = "count",
+                       format = "wide")
+    )
+  
+  # BEAD COUNT
+  if(is.null(bead_count)){
+    bead_count <- min(bead_counts[, ncol(bead_counts)])
+  }else{
+    if(!bead_count <= min(bead_counts[, ncol(bead_counts)])){
+      bead_count <- min(bead_counts[, ncol(bead_counts)])
+    }
+  }
+  
+  # BEAD RATIOS
+  bead_ratios <- 1/(bead_counts[, ncol(bead_counts)]/bead_count)
+  
+  # BEADS MISSING
+  if(any(is.infinite(bead_ratios))){
+    stop(paste0("The following samples do not contain any beads:",
+                paste0("\n", cyto_names(gs_clone)[is.infinite(bead_ratios)])))
+  }
+  
+  # SAMPLING - ROOT POPULATION
+  pops <- list()
+  lapply(seq_along(bead_pops), function(z){
+    pops[[z]] <<- cyto_sample(cyto_extract(gs_clone),
+                              bead_ratios[[z]])
+  })
+  names(pops) <- cyto_names(pops)
+  pops <- flowSet(pops)
+  
+  # REPLACE DATA IN GATINGSET
+  gs_cyto_data(gs_clone) <- pops
+  
+  # RETURN SAMPLED GATINGSET
+  return(gs_clone)
+  
+}
+
 ## CYTO_BARCODE ----------------------------------------------------------------
 
 #' Barcode each file in a flowSet with a sample ID
@@ -2160,6 +2262,7 @@ cyto_sample.list <- function(x,
 #'
 #' # Barcode
 #' cyto_barcode(fs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -2834,7 +2937,7 @@ cyto_nodes <- function(x, ...) {
 #'
 #' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param channel_match name to use for the saved channel match csv file, set to
+#' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
 #'
 #' @return save constructed channel_match csv file.
@@ -2855,19 +2958,19 @@ cyto_nodes <- function(x, ...) {
 #'
 #' @export
 cyto_channel_match <- function(x,
-                               channel_match = NULL) {
+                               save_as = NULL) {
 
   # Set default name for channel_match file
-  if (is.null(channel_match)) {
-    channel_match <- paste0(
+  if (is.null(save_as)) {
+    save_as <- paste0(
       format(Sys.Date(), "%d%m%y"),
       "-", "Channel-Match.csv"
     )
-    # channel_match must contain csv file extension
+    # save_as must contain csv file extension
   } else {
     # File extension missing
-    if (file_ext(channel_match) != "csv") {
-      channel_match <- paste0(channel_match, ".csv")
+    if (file_ext(save_as) != "csv") {
+      save_as <- paste0(save_as, ".csv")
     }
   }
 
@@ -2875,23 +2978,23 @@ cyto_channel_match <- function(x,
   nms <- cyto_names(x)
 
   # Construct data.frame for editing
-  cm <- data.frame("name" = nms, "channel" = rep("NA", length(nms)))
-  colnames(cm) <- c("name", "channel")
-  rownames(cm) <- NULL
+  channel_match <- data.frame("name" = nms, "channel" = rep("NA", length(nms)))
+  colnames(channel_match) <- c("name", "channel")
+  rownames(channel_match) <- NULL
 
-  # Edit cm
-  cm <- suppressWarnings(edit(cm))
+  # Edit channel_match
+  channel_match <- suppressWarnings(edit(channel_match))
 
   # Check that all channels are valid or throw an error
-  if (!all(cm$channel %in% c("Unstained", cyto_fluor_channels(x)))) {
+  if (!all(channel_match$channel %in% c("Unstained", cyto_fluor_channels(x)))) {
     stop("Some inputs in the channel column are not valid.")
   }
 
   # Write edited channel match file to csv file
-  write.csv(cm, channel_match, row.names = FALSE)
+  write.csv(channel_match, save_as, row.names = FALSE)
 
   # Return edited channel match file
-  return(cm)
+  return(channel_match)
 }
 
 ## CYTO_EMPTY ------------------------------------------------------------------
