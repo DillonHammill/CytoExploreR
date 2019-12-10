@@ -4,13 +4,13 @@
 \alias{cyto_channel_match}
 \title{Table Editor for Channel Match File Construction}
 \usage{
-cyto_channel_match(x, channel_match = NULL)
+cyto_channel_match(x, save_as = NULL)
 }
 \arguments{
 \item{x}{object of \code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{channel_match}{name to use for the saved channel match csv file, set to
+\item{save_as}{name to use for the saved channel match csv file, set to
 \code{"date-Channel-Match.csv"}.}
 }
 \value{

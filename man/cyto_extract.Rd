@@ -4,7 +4,7 @@
 \alias{cyto_extract}
 \title{Extract a valid flowFrame or flowSet}
 \usage{
-cyto_extract(x, parent = "root", ...)
+cyto_extract(x, parent = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},

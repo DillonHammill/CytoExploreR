@@ -84,12 +84,13 @@ a \code{transformerList} object.
 }
 \description{
 CytoExploreR implementation of \code{flowWorkspace}
-\code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation which
-always returns a \code{\link[flowWorkspace:transformerList]{transformerList}}
-object and displays the result of the transformation(s) using
-\code{\link{cyto_plot}}. To combine different types of transformations have a
-look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
-should be used to apply the transformations to the data.
+\code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation
+which always returns a
+\code{\link[flowWorkspace:transformerList]{transformerList}} object and
+displays the result of the transformation(s) using \code{\link{cyto_plot}}.
+To combine different types of transformations have a look at
+\code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}} should
+be used to apply the transformations to the data.
 }
 \seealso{
 \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}}

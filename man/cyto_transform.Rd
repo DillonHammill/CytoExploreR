@@ -48,12 +48,13 @@ transformation definitions to apply to \code{x}.}
 or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
 supplied.}
 
-\item{type}{type of transformation to apply when no trans object is
-supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
+\item{type}{type of transformation to apply when no trans object is supplied,
+options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
 \code{"logicle"}.}
 
-\item{channels}{names of the channels to transform. Only required when no
-\code{trans} object is supplied.}
+\item{channels}{names of the channels to transform, set to all the
+fluorescent channels by default. Only required when no \code{trans} object
+is supplied.}
 
 \item{parent}{name of the parent population of \code{GatingHierarchy} or
 \code{GatingSet} objects used to visualise the transformations.}

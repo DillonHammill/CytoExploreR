@@ -77,7 +77,7 @@ pop-up window.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
-and \code{\link{cyto_plot}}.}
+ and \code{\link{cyto_plot}}.}
 }
 \value{
 a \code{transformerList} object.
