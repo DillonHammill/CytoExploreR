@@ -72,7 +72,9 @@ cyto_transformer_log.GatingSet <- function(x,
                                            display = 25000, ...){
   
   # Extract data
-  x <- cyto_extract(x, parent = parent)
+  x <- cyto_extract(x, 
+                    parent = parent, 
+                    copy = TRUE)
   
   # Select data
   x <- cyto_select(x, select)
@@ -105,7 +107,9 @@ cyto_transformer_log.GatingHierarchy <- function(x,
                                                  display = 25000, ...){
     
   # Extract data
-  x <- cyto_extract(x, parent = parent)
+  x <- cyto_extract(x, 
+                    parent = parent, 
+                    copy = TRUE)
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_log(x,
@@ -133,10 +137,13 @@ cyto_transformer_log.flowSet <- function(x,
                                          popup = FALSE, 
                                          display = 25000, ...){
   
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
   
-  # Coerce to flowFrame
+  # FLOWFRANE
   x <- cyto_convert(x, "flowFrame")
   
   # Call to flowFrame method
@@ -168,6 +175,9 @@ cyto_transformer_log.flowFrame <- function(x,
   
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
   
   # PREPARE CHANNELS
   if (is.null(channels)) {
@@ -296,13 +306,15 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
                                                popup = FALSE,
                                                display = 25000, ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent, 
+                    copy = TRUE)
 
-  # Select data
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -328,8 +340,10 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
                                                    popup = FALSE,
                                                    display = 25000, ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
   # Call to flowFrame method
   transformer_list <- cyto_transformer_arcsinh(x,
@@ -356,10 +370,13 @@ cyto_transformer_arcsinh.flowSet <- function(x,
                                            popup = FALSE,
                                            display = 25000, ...) {
 
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -390,6 +407,9 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
   
   # CHANNELS
   if (is.null(channels)) {
@@ -531,13 +551,15 @@ cyto_transformer_biex.GatingSet <- function(x,
                                           popup = FALSE,
                                           display = 25000, ...) {
   
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
-  # Select data
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -563,8 +585,10 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
                                                 popup = FALSE,
                                                 display = 25000, ...) {
   
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
   # Call to flowFrame method
   transformer_list <- cyto_transformer_biex(x,
@@ -591,10 +615,13 @@ cyto_transformer_biex.flowSet <- function(x,
                                         popup = FALSE,
                                         display = 25000, ...) {
   
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -624,6 +651,9 @@ cyto_transformer_biex.flowFrame <- function(x,
   
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
   
   # CHANNELS
   if (is.null(channels)) {
@@ -768,13 +798,15 @@ cyto_transformer_logicle.GatingSet <- function(x,
                                              popup = FALSE,
                                              display = 25000, ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
-  # Select data
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -801,8 +833,10 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
                                                    popup = FALSE,
                                                    display = 25000, ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
   # Call to flowFrame method
   transformer_list <- cyto_transformer_logicle(
@@ -830,10 +864,13 @@ cyto_transformer_logicle.flowSet <- function(x,
                                            popup = FALSE,
                                            display = 25000, ...) {
 
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -864,6 +901,9 @@ cyto_transformer_logicle.flowFrame <- function(x,
 
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
   
   # CHANNELS
   if (is.null(channels)) {

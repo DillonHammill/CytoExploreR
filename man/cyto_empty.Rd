@@ -21,6 +21,7 @@ Construct an empty flowFrame
 
 # Construct empty flowFrame
 cyto_empty(name = "Test.csv", channels = c("FSC-A", "SSC-A", "PE-A"))
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

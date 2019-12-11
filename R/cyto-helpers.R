@@ -887,23 +887,19 @@ cyto_extract <- function(x,
     parent <- cyto_nodes(x, path = "auto")[1]
   }
   
-  # EXTRACT & COPY DATA
+  # EXTRACT
   if (is(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
-    if(copy){
-      x <- realize_view(x)
-    }
   } else if (is(x, "GatingSet")) {
     x <- gs_pop_get_data(x, parent, ...)
-    if(copy){
-      x <- realize_view(x)
-    }
-  } else if(is(x, "cytoframe") | is(x, "cytoset")){
-    if(copy){
-      x <- realize_view(x)
-    }
   }
-
+  
+  # COPY
+  if(copy){
+    x <- cyto_copy(x)
+  }
+  
+  # RETURN EXTRACTED DATA
   return(x)
 }
 
@@ -3051,6 +3047,7 @@ cyto_channel_match <- function(x,
 #'
 #' # Construct empty flowFrame
 #' cyto_empty(name = "Test.csv", channels = c("FSC-A", "SSC-A", "PE-A"))
+#' 
 #' @export
 cyto_empty <- function(name = NULL,
                        channels = NULL, ...) {
@@ -3077,4 +3074,34 @@ cyto_empty <- function(name = NULL,
 
   # RETURN EMPTY FLOWFRAME
   return(empty_flowFrame)
+}
+
+## CYTO_COPY -------------------------------------------------------------------
+
+#' Copy a cytoset, cytoframe or GatingSet
+#' 
+#' @param x cytoframe, cytoset or GatingSet to be copied.
+#' 
+#' @return copied cytoframe, cytoset or GatingSet.
+#' 
+#' @importFrom flowWorkspace gs_clone realize_view
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @export
+cyto_copy <- function(x){
+  
+  # GatingSet
+  if(is(x, "GatingSet")){
+    x <- gs_clone(x)
+  }
+  
+  # cytoset
+  if(is(x, "cytoset") | is(x, "cyto_frame")){
+    x <- realize_view(x)
+  }
+  
+  # RETURN COPY
+  return(x)
+  
 }
