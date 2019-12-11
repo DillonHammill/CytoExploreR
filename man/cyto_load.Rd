@@ -29,19 +29,19 @@ files by name prior to loading, set to \code{TRUE} by default.}
 \item{barcode}{logical indicating whether the flowFrames should be barcoded
 using \code{cyto_barcode}, set to FALSE by default.}
 
-\item{...}{additional arguments passed to read.ncdfFlowSet.}
+\item{...}{additional arguments passed to \code{load_cytoset_from_fcs}.}
 }
 \value{
-object of class \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}
-  or \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \description{
 \code{cyto_load} is a convenient wrapper around
 \code{\link[base:list.files]{list.files}} and
-\code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also a wrapper
-around \code{\link[flowWorkspace:load_gs]{load_gs}} to load saved GatingSet
-objects.
+\code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}
+which makes it easy to load .fcs files into a cytoset. \code{cyto_load} is
+also a wrapper around \code{\link[flowWorkspace:load_gs]{load_gs}} to load
+saved GatingSet objects.
 }
 \examples{
 
@@ -53,10 +53,10 @@ datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
 # Load in .fcs files into ncdfFlowSet
-fs <- cyto_load(path)
+cs <- cyto_load(path)
 
-# fs is a ncdfFlowSet
-class(fs)
+# cs is a cytoset
+class(cs)
 
 }
 \author{

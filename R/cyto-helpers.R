@@ -4,10 +4,10 @@
 #'
 #' \code{cyto_load} is a convenient wrapper around
 #' \code{\link[base:list.files]{list.files}} and
-#' \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-#' to load .fcs files into a ncdfFlowSet. \code{cyto_load} is also a wrapper
-#' around \code{\link[flowWorkspace:load_gs]{load_gs}} to load saved GatingSet
-#' objects.
+#' \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}
+#' which makes it easy to load .fcs files into a cytoset. \code{cyto_load} is
+#' also a wrapper around \code{\link[flowWorkspace:load_gs]{load_gs}} to load
+#' saved GatingSet objects.
 #'
 #' @param path points to the location of the .fcs files to read in. Preferably
 #'   the name of folder in current working directory.
@@ -19,14 +19,13 @@
 #'   files by name prior to loading, set to \code{TRUE} by default.
 #' @param barcode logical indicating whether the flowFrames should be barcoded
 #'   using \code{cyto_barcode}, set to FALSE by default.
-#' @param ... additional arguments passed to read.ncdfFlowSet.
+#' @param ... additional arguments passed to \code{load_cytoset_from_fcs}.
 #'
-#' @return object of class \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}
-#'   or \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @importFrom flowCore identifier identifier<-
-#' @importFrom ncdfFlow read.ncdfFlowSet
-#' @importFrom flowWorkspace load_gs
+#' @importFrom flowWorkspace load_gs load_cytoset_from_fcs
 #' @importFrom gtools mixedsort
 #' @importFrom tools file_ext
 #'
@@ -40,10 +39,10 @@
 #' path <- paste0(datadir, "/Activation")
 #'
 #' # Load in .fcs files into ncdfFlowSet
-#' fs <- cyto_load(path)
+#' cs <- cyto_load(path)
 #'
-#' # fs is a ncdfFlowSet
-#' class(fs)
+#' # cs is a cytoset
+#' class(cs)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -87,7 +86,7 @@ cyto_load <- function(path = ".",
     # FCS FILES
   } else {
     # NCDFFLOWSET
-    x <- read.ncdfFlowSet(files = files, ...)
+    x <- load_cytoset_from_fcs(files = files, ...)
 
     # CORRECT GUID SLOTS
     nms <- cyto_names(x)
@@ -111,7 +110,7 @@ cyto_load <- function(path = ".",
 #'
 #' \code{cyto_setup} takes care of all the data loading and annotation steps to
 #' prepare your cytometry data for downstream analyses. The .fcs files are first
-#' read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
+#' read into a \code{\link[flowWorkspace:cytoset]{cytoset}} using
 #' \code{\link{cyto_load}} which is then added to a
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
 #' to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
@@ -126,7 +125,7 @@ cyto_load <- function(path = ".",
 #' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
 #'   saving.
 #' @param ... additional arguments passed to
-#'   \code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}}.
+#'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
 #'
 #' @return object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -138,7 +137,6 @@ cyto_load <- function(path = ".",
 #' @examples
 #'
 #' \dontrun{
-#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -147,7 +145,7 @@ cyto_load <- function(path = ".",
 #' path <- paste0(datadir, "/Activation")
 #'
 #' # Load in .fcs files into an annotated GatingSet
-#' fs <- cyto_setup(path)
+#' gs <- cyto_setup(path)
 #'
 #' # Markers have been assigned
 #' cyto_extract(gs, "root")[[1]]
@@ -162,44 +160,50 @@ cyto_load <- function(path = ".",
 cyto_setup <- function(path = ".",
                        gatingTemplate = NULL, ...) {
 
-  # Load in .fsc files to ncdfFlowSet
+  # CYTOSET/GATINGSET
+  message("Loading FCS files into a cytoset...")
   x <- cyto_load(path = path, ...)
 
   # FLOWSET LOADED
   if (is(x, "flowSet")) {
-    # Add flowSet to GatingSet
-    message("Adding samples to a GatingSet.")
+    # GATINGSET
+    message("Adding constructed cytoset into a GatingSet...")
     x <- GatingSet(x)
   }
 
-  # Markers
+  # MARKERS
   message("Associate markers with their respective channels.")
   x <- cyto_markers_edit(x)
 
-  # Annotate
+  # EXPERIMENT DETAILS
   message("Annotate samples with experiment details.")
   x <- cyto_details_edit(x)
 
-  # Check gatingTemplate
+  # gatingtemplate
   if (!is.null(gatingTemplate)) {
 
-    # Add file extension if missing
+    # FILE EXTENSION
     if (.empty(file_ext(gatingTemplate))) {
       gatingTemplate <- paste0(gatingTemplate, ".csv")
     }
 
-    # Assign globally
+    # ACTIVE GATINGTEMPLATE
     message(paste("Setting", gatingTemplate, "as the active gatingTemplate."))
     cyto_gatingTemplate_select(gatingTemplate)
 
-    # Write new csv file if not in current directory
+    # CREATE GATINGTEMPLATE
     if (.all_na(match(gatingTemplate, list.files()))) {
-      message(paste("Creating", gatingTemplate, "."))
+      message(paste("Creating", gatingTemplate, "..."))
       cyto_gatingTemplate_create(gatingTemplate)
     }
   }
 
+  # SETUP COMPLETE
+  message("Done!")
+  
+  # RETURN GATINGSET
   return(x)
+  
 }
 
 ## CYTO_DETAILS ----------------------------------------------------------------
@@ -3040,47 +3044,4 @@ cyto_empty <- function(name = NULL,
 
   # RETURN EMPTY FLOWFRAME
   return(empty_flowFrame)
-}
-
-## CYTO_COPY -------------------------------------------------------------------
-
-#' Copy a cytoset or cytoframe
-#'
-#' A wrapper around
-#' \code{\link[flowWorkspace:cytoframe_to_flowFrame]{cytoframe_to_flowFrame}}
-#' and \code{\link[flowWorkspace:cytoset_to_flowSet]{cytoset_to_flowSet}}.
-#'
-#' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:cytoset]{cytoset}} or
-#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}} object.
-#'
-#' @return flowFrame or flowSet object.
-#'
-#' @importFrom flowWorkspace cytoframe_to_flowFrame cytoset_to_flowSet
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @examples
-#'
-#' library(CytoExploreRData)
-#'
-#' # Activation flowSet
-#' fs <- Activation
-#'
-#' # Activation cytoset
-#' cs <- flowSet_to_cytoset(fs)
-#'
-#' # Activation flowSet
-#' fs <- cyto_copy(fs)
-#'
-#' @export
-cyto_copy <- function(x){
-  if(is(x, "cytoframe")){
-    return(cytoframe_to_flowFrame(x))
-  }else if(is(x, "cytoset")){
-    return(cytoset_to_flowSet(x))
-  }else{
-    return(x)
-  }
 }

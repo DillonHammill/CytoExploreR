@@ -14,7 +14,7 @@ a folder in current working directory).}
 saving.}
 
 \item{...}{additional arguments passed to
-\code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}}.}
+\code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}
 }
 \value{
 object of class
@@ -23,7 +23,7 @@ object of class
 \description{
 \code{cyto_setup} takes care of all the data loading and annotation steps to
 prepare your cytometry data for downstream analyses. The .fcs files are first
-read into a \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}} using
+read into a \code{\link[flowWorkspace:cytoset]{cytoset}} using
 \code{\link{cyto_load}} which is then added to a
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
 to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
@@ -36,7 +36,6 @@ assigned as the active gatingTemplate.
 \examples{
 
 \dontrun{
-
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -45,7 +44,7 @@ datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
 # Load in .fcs files into an annotated GatingSet
-fs <- cyto_setup(path)
+gs <- cyto_setup(path)
 
 # Markers have been assigned
 cyto_extract(gs, "root")[[1]]
