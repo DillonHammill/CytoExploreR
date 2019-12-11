@@ -3,8 +3,8 @@
 # Wrappers for flowCore/flowWorkspace transformation functions which return
 # transformerList objects and use cyto_plot to visualise the transformations.
 
-# All methods must have select as an argument to allowing passing of arguments
-# from cyto_transform.
+# All methods must have select as an argument to allow passing of arguments from
+# cyto_transform.
 
 ## CYTO_TRANSFORMER_LOG --------------------------------------------------------
 
