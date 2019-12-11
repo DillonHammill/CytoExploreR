@@ -117,3 +117,27 @@ test_that("cyto_channel_select", {
                                      "Unstained")))
   
 })
+
+# CYTO_CHANNEL_RESTRICT --------------------------------------------------------
+
+test_that("cyto_channels_restrict", {
+  
+  fs_restricted <- cyto_channels_restrict(fs)
+  expect_equal(cyto_channels(fs_restricted), 
+               c("FSC-A",
+                 "FSC-H",
+                 "FSC-W",
+                 "SSC-A",
+                 "SSC-H",
+                 "SSC-W",
+                 "Alexa Fluor 488-A",
+                 "PE-A",
+                 "7-AAD-A",
+                 "Alexa Fluor 405-A",
+                 "Alexa Fluor 430-A",
+                 "Alexa Fluor 647-A",
+                 "Alexa Fluor 700-A",
+                 "APC-Cy7-A",
+                 "Time"))
+  
+})

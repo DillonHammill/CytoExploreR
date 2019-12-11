@@ -19,13 +19,16 @@
 #'   files by name prior to loading, set to \code{TRUE} by default.
 #' @param barcode logical indicating whether the flowFrames should be barcoded
 #'   using \code{cyto_barcode}, set to FALSE by default.
+#' @param restrict logical indicating whether unassigned channels should be
+#'   dropped from the returned cytoset, set to FALSE by default. See
+#'   \code{\link{cyto_channels_restrict}}.
 #' @param ... additional arguments passed to \code{load_cytoset_from_fcs}.
 #'
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
-#' @importFrom flowCore identifier identifier<-
-#' @importFrom flowWorkspace load_gs load_cytoset_from_fcs
+#' @importFrom flowCore identifier identifier<- parameters
+#' @importFrom flowWorkspace load_gs load_cytoset_from_fcs pData
 #' @importFrom gtools mixedsort
 #' @importFrom tools file_ext
 #'
@@ -38,7 +41,7 @@
 #' datadir <- system.file("extdata", package = "CytoExploreRData")
 #' path <- paste0(datadir, "/Activation")
 #'
-#' # Load in .fcs files into ncdfFlowSet
+#' # Load in .fcs files into cytoset
 #' cs <- cyto_load(path)
 #'
 #' # cs is a cytoset
@@ -51,7 +54,8 @@ cyto_load <- function(path = ".",
                       select = NULL,
                       exclude = NULL,
                       sort = TRUE,
-                      barcode = FALSE, ...) {
+                      barcode = FALSE,
+                      restrict = FALSE, ...) {
 
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
@@ -75,7 +79,7 @@ cyto_load <- function(path = ".",
   }
   
   # SORTED FILE PATHS
-  if (sort == TRUE) {
+  if (sort) {
     files <- mixedsort(files)
   }
 
@@ -95,9 +99,15 @@ cyto_load <- function(path = ".",
     })
 
     # BARCODING
-    if (barcode == TRUE) {
+    if (barcode) {
       x <- cyto_barcode(x)
     }
+    
+    # CHANNEL RESTRICTION
+    if(restrict){
+      x <- cyto_channels_restrict(x)
+    }
+    
   }
 
   # RETURN NCDFFLOWSET
@@ -116,14 +126,17 @@ cyto_load <- function(path = ".",
 #' to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
 #' update the GatingSet with the details of the experiment. These details can be
 #' modified later with additional calls to \code{\link{cyto_markers_edit}}
-#' and/or \code{\link{cyto_details_edit}}. Users can optionally provide a
-#' name for a gatingTemplate csv file which will be created if necessary and
-#' assigned as the active gatingTemplate.
+#' and/or \code{\link{cyto_details_edit}}. Users can optionally provide a name
+#' for a gatingTemplate csv file which will be created if necessary and assigned
+#' as the active gatingTemplate.
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
 #'   a folder in current working directory).
 #' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
 #'   saving.
+#' @param restrict logical indicating whether unassigned channels should be
+#'   dropped from the returned cytoset, set to FALSE by default.  See
+#'   \code{\link{cyto_channels_restrict}}.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
 #'
@@ -158,27 +171,31 @@ cyto_load <- function(path = ".",
 #'
 #' @export
 cyto_setup <- function(path = ".",
-                       gatingTemplate = NULL, ...) {
+                       gatingTemplate = NULL,
+                       restrict = FALSE, ...) {
 
   # CYTOSET/GATINGSET
-  message("Loading FCS files into a cytoset...")
-  x <- cyto_load(path = path, ...)
-
-  # FLOWSET LOADED
-  if (is(x, "flowSet")) {
-    # GATINGSET
-    message("Adding constructed cytoset into a GatingSet...")
-    x <- GatingSet(x)
-  }
+  message("Loading FCS files into a GatingSet...")
+  x <- cyto_load(path = path, restrict = FALSE, ...)
 
   # MARKERS
-  message("Associate markers with their respective channels.")
+  message("Assigning markers to channels...")
   x <- cyto_markers_edit(x)
 
   # EXPERIMENT DETAILS
-  message("Annotate samples with experiment details.")
+  message("Updating experiment details...")
   x <- cyto_details_edit(x)
-
+  
+  # FLOWSET LOADED
+  if (is(x, "flowSet")) {
+    # DROP CHANNELS
+    if(drop){
+      x <- cyto_channels_restrict(x)
+    }
+    # GATINGSET
+    x <- GatingSet(x)
+  }
+  
   # gatingtemplate
   if (!is.null(gatingTemplate)) {
 
@@ -833,13 +850,15 @@ cyto_transform_extract <- function(x,
 #'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierarchy} or \code{GatingSet} objects.
+#' @param copy logical indicating whether a deep copy of the extracted data
+#'   should be returned.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gs_pop_get_data]{gh_pop_get_data}} or
 #'   \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}}.
 #'
-#' @return either a \code{flowFrame} or a \code{flowSet}.
+#' @return either a \code{flowFrame} or a \code{cytoset}.
 #'
-#' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data
+#' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data realize_view
 #' @importFrom methods is
 #'
 #' @examples
@@ -853,23 +872,36 @@ cyto_transform_extract <- function(x,
 #' # Extract flowFrame
 #' cyto_extract(gs[[1]], "root")
 #'
-#' # Extract flowSet
+#' # Extract cytoset
 #' cyto_extract(gs, "root")
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_extract <- function(x, parent = NULL, ...) {
+cyto_extract <- function(x, 
+                         parent = NULL, 
+                         copy = FALSE, ...) {
 
-  # PARENT - FIRST NODE (IN CASE ROOT RENAMED)
+  # DEFAULT PARENT
   if(is.null(parent)){
     parent <- cyto_nodes(x, path = "auto")[1]
   }
   
-  # Extract data from GatingHierarchy
+  # EXTRACT & COPY DATA
   if (is(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
+    if(copy){
+      x <- realize_view(x)
+    }
   } else if (is(x, "GatingSet")) {
     x <- gs_pop_get_data(x, parent, ...)
+    if(copy){
+      x <- realize_view(x)
+    }
+  } else if(is(x, "cytoframe") | is(x, "cytoset")){
+    if(copy){
+      x <- realize_view(x)
+    }
   }
 
   return(x)
@@ -1134,6 +1166,7 @@ cyto_convert.GatingSet <- function(x,
 #'   Activation,
 #'   Treatment %in% c("Stim-A", "Stim-C")
 #' )
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export

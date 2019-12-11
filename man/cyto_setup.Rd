@@ -4,7 +4,7 @@
 \alias{cyto_setup}
 \title{Load.fcs files into GatingSet and annotate with experiment details}
 \usage{
-cyto_setup(path = ".", gatingTemplate = NULL, ...)
+cyto_setup(path = ".", gatingTemplate = NULL, restrict = FALSE, ...)
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in (e.g. name of
@@ -12,6 +12,10 @@ a folder in current working directory).}
 
 \item{gatingTemplate}{name of a gatingTemplate csv file to be used for gate
 saving.}
+
+\item{restrict}{logical indicating whether unassigned channels should be
+dropped from the returned cytoset, set to FALSE by default.  See
+\code{\link{cyto_channels_restrict}}.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}
@@ -29,9 +33,9 @@ read into a \code{\link[flowWorkspace:cytoset]{cytoset}} using
 to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
 update the GatingSet with the details of the experiment. These details can be
 modified later with additional calls to \code{\link{cyto_markers_edit}}
-and/or \code{\link{cyto_details_edit}}. Users can optionally provide a
-name for a gatingTemplate csv file which will be created if necessary and
-assigned as the active gatingTemplate.
+and/or \code{\link{cyto_details_edit}}. Users can optionally provide a name
+for a gatingTemplate csv file which will be created if necessary and assigned
+as the active gatingTemplate.
 }
 \examples{
 

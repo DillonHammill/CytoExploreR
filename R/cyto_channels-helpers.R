@@ -459,3 +459,65 @@ cyto_channel_select <- function(x){
   
   return(chans)
 }
+
+
+## CYTO_CHANNELS_RESTRICT ------------------------------------------------------
+
+#' Remove channels of a flowFrame or flowSet
+#'
+#' \code{cyto_channels_restrict} removes channels from the flowFrame or flowSet
+#' which do not have markers assigned. The FSC, SSC and Time parameters are
+#' always retained irrespective of marker assignment.
+#'
+#' @param x object of class flowFrame or flowSet.
+#'
+#' @return flowFrame or flowSet object with unused channels removed.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#'
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Channels
+#' cyto_channels(fs)
+#'
+#' # Remove unused channels
+#' fs <- cyto_channels_restrict(fs)
+#'
+#' # Channels removed
+#' cyto_channels(fs)
+#'
+#' @export
+cyto_channels_restrict <- function(x){
+  
+  # CHANNELS
+  channels <- cyto_channels(x)
+  
+  # FLUOR CHANNELS
+  fluor_channels <- cyto_fluor_channels(x)
+  
+  # MARKERS
+  markers <- cyto_markers(x)
+  
+  # IGNORE FSC/SSC/Time
+  ignore_channels <- channels[!channels %in% fluor_channels]
+  
+  # CHANNELS USED
+  used_channels <- fluor_channels[which(fluor_channels %in% names(markers))]
+  
+  # CHANNELS TO KEEP
+  keep_channels <- c(ignore_channels, used_channels)
+  
+  # SORT CHANNELS AS BEFORE
+  ind <- match(channels, keep_channels)
+  ind <- ind[!is.na(ind)]
+  
+  # RETURN RESTRICTED FLOWFRAME/FLOWSET
+  x <- x[, keep_channels[ind]]
+  return(x)
+  
+}

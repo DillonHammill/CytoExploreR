@@ -29,13 +29,13 @@ datadir <- system.file("extdata", package = "CytoExploreRData")
 fs <- cyto_load(paste0(datadir, "/Activation"))
 
 # pData information -
-pData(fs)$OVAConc <- c(rep(c(0, 0, 0.005, 0.005, 0.05, 0.05, 0.5, 0.5), 4), 0)
+pData(fs)$OVAConc <- c(rep(c(0, 0, 0.005, 0.005, 0.05, 0.05, 0.5, 0.5), 4), 0
+                       )
 pData(fs)$Treatment <- c(
   rep("Stim-A", 8),
   rep("Stim-B", 8),
   rep("Stim-C", 8),
-  rep("Stim-D", 8),
-  "NA"
+  rep("Stim-D", 8),"NA"
 )
 pData(fs)$Treatment <- factor(pData(fs)$Treatment, levels = c(
   "Stim-A",
@@ -77,7 +77,7 @@ gs <- cyto_compensate(gs)
 
 # Transformation -
 trans <- cyto_transformer_logicle(gs, plot = FALSE)
-gs <- transform(gs, trans, plot = FALSE)
+gs <- transform(gs, trans)
 
 # gatingTemplate -
 gt <- gatingTemplate(paste0(datadir, "/Activation-gatingTemplate.csv"))

@@ -10,6 +10,7 @@ cyto_load(
   exclude = NULL,
   sort = TRUE,
   barcode = FALSE,
+  restrict = FALSE,
   ...
 )
 }
@@ -28,6 +29,10 @@ files by name prior to loading, set to \code{TRUE} by default.}
 
 \item{barcode}{logical indicating whether the flowFrames should be barcoded
 using \code{cyto_barcode}, set to FALSE by default.}
+
+\item{restrict}{logical indicating whether unassigned channels should be
+dropped from the returned cytoset, set to FALSE by default. See
+\code{\link{cyto_channels_restrict}}.}
 
 \item{...}{additional arguments passed to \code{load_cytoset_from_fcs}.}
 }
@@ -52,7 +57,7 @@ library(CytoExploreRData)
 datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
-# Load in .fcs files into ncdfFlowSet
+# Load in .fcs files into cytoset
 cs <- cyto_load(path)
 
 # cs is a cytoset
