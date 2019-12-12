@@ -189,7 +189,8 @@ cyto_setup <- function(path = ".",
   # FLOWSET LOADED
   if (is(x, "flowSet")) {
     # DROP CHANNELS
-    if(drop){
+    if(restrict){
+      message("Removing unassigned channels...")
       x <- cyto_channels_restrict(x)
     }
     # GATINGSET
@@ -2513,10 +2514,10 @@ cyto_markers_edit <- function(x, file = NULL) {
 
   # Edit dt - data.frame must have no rownames for editor
   dt <- suppressWarnings(edit(dt))
-
+  
   # Update channels
-  BiocGenerics::colnames(x) <- dt$Channel
-
+  BiocGenerics::colnames(x) <- as.character(dt$Channel)
+  
   # Write result to csv file -  file name manually supplied
   if (!is.null(file)) {
     write.csv(dt, file, row.names = FALSE)
