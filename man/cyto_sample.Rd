@@ -39,11 +39,6 @@ scaled per flowFrame to retain original ratios, as used in cyto_plot.}
 \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
 the percentage or number of events to retain.
 }
-\details{
-The list method expects a list of flowFrame objects and is used internally by
-\code{cyto_plot} to ensure that overlays are appropriately sampled relative
-to the base layer.
-}
 \examples{
 
 # Load in CytoExploreRData to access files

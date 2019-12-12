@@ -1645,7 +1645,7 @@ cyto_split <- function(x,
 #'   \code{save_as} directory not be manually created before running
 #'   \code{cyto_save}.
 #' @param inverse_transform logical indicating whether the data should be
-#'   inverse transformed prior to writing FCS files, set to TRUE by default.
+#'   inverse transformed prior to writing FCS files, set to FALSE by default.
 #'   Inverse transformations of \code{flowFrame} or \code{flowSet} objects
 #'   requires passing of transformers through the \code{trans} argument.
 #' @param trans object of class \code{transformerList} containing the
@@ -1674,6 +1674,7 @@ cyto_split <- function(x,
 #'
 #' # Save each flowFrame to file
 #' cyto_save(fs)
+#' 
 #' }
 #'
 #' @seealso \code{\link{cyto_split}}
@@ -1692,7 +1693,7 @@ cyto_save.GatingSet <- function(x,
                                 split = FALSE,
                                 names = NULL,
                                 save_as = NULL,
-                                inverse_transform = TRUE,
+                                inverse_transform = FALSE,
                                 trans = NULL, ...) {
 
   # SAVE GATINGSET
@@ -1705,7 +1706,9 @@ cyto_save.GatingSet <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingSet."))
-    fs <- cyto_extract(x, parent = parent)
+    fs <- cyto_extract(x, 
+                       parent = parent,
+                       copy = TRUE)
     # TRANSFORMATIONS
     trans <- x@transformation[[1]]
     # FLOWSET METHOD
@@ -1730,7 +1733,7 @@ cyto_save.GatingHierarchy <- function(x,
                                       split = FALSE,
                                       names = NULL,
                                       save_as = NULL,
-                                      inverse_transform = TRUE,
+                                      inverse_transform = FALSE,
                                       trans = NULL,
                                       ...) {
 
@@ -1744,7 +1747,9 @@ cyto_save.GatingHierarchy <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-    fr <- cyto_extract(x, parent = parent)
+    fr <- cyto_extract(x, 
+                       parent = parent,
+                       copy = TRUE)
     # TRANSFORMATIONS
     trans <- x@transformation[[1]]
     # FLOWSET METHOD
@@ -1768,10 +1773,13 @@ cyto_save.flowSet <- function(x,
                               split = FALSE,
                               names = NULL,
                               save_as = NULL,
-                              inverse_transform = TRUE,
+                              inverse_transform = FALSE,
                               trans = NULL,
                               ...) {
 
+  # COPY
+  x <- cyto_copy(x)
+  
   # LIST OF FLOWFRAMES
   fr_list <- cyto_convert(x, "list of flowFrames")
   
@@ -1873,10 +1881,13 @@ cyto_save.flowFrame <- function(x,
                                 split = FALSE,
                                 names = NULL,
                                 save_as = NULL,
-                                inverse_transform = TRUE,
+                                inverse_transform = FALSE,
                                 trans = NULL,
                                 ...) {
 
+  # COPY
+  x <- cyto_copy(x)
+  
   # SPLIT
   if (split == TRUE) {
     fr_list <- cyto_split(x,
@@ -1953,10 +1964,6 @@ cyto_save.flowFrame <- function(x,
 #'
 #' \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
 #' the percentage or number of events to retain.
-#'
-#' The list method expects a list of flowFrame objects and is used internally by
-#' \code{cyto_plot} to ensure that overlays are appropriately sampled relative
-#' to the base layer.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 #'   \code{\link[flowCore:flowSet-class]{flowSet}}.
@@ -2205,7 +2212,7 @@ cyto_beads_sample <- function(x,
   }
   
   # CLONE GATINGSET
-  gs_clone <- gs_clone(x)
+  gs_clone <- cyto_copy(x)
   
   # NODES
   nodes <- cyto_nodes(gs_clone, path = "auto")
@@ -2253,7 +2260,8 @@ cyto_beads_sample <- function(x,
   # SAMPLING - ROOT POPULATION
   pops <- list()
   lapply(seq_along(bead_pops), function(z){
-    pops[[z]] <<- cyto_sample(cyto_extract(gs_clone),
+    pops[[z]] <<- cyto_sample(cyto_extract(gs_clone[[z]],
+                                           copy = TRUE),
                               bead_ratios[[z]])
   })
   names(pops) <- cyto_names(pops)
