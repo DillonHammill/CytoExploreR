@@ -421,7 +421,7 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
   # ASINH_GML2 ARGUMENTS
   asinh_gml2_args <- formalArgs("asinh_Gml2")
   # REMOVE INVERSE ARGUMENT
-  asinh_gml2_args <- asinh_gml2_args[-match("inverse", names(asinh_gml2_args))]
+  asinh_gml2_args <- asinh_gml2_args[-match("inverse", asinh_gml2_args)]
   
   # TRANSFORMATIONS
   transform_list <- lapply(channels, function(z) {
@@ -665,9 +665,7 @@ cyto_transformer_biex.flowFrame <- function(x,
   # FLOWJO_BIEXP ARGUMENTS
   flowjo_biexp_args <- formalArgs("flowjo_biexp")
   # REMOVE INVERSE ARGUMENT
-  flowjo_biexp_args <- flowjo_biexp_args[-match("inverse", 
-                                                names(flowjo_biexp_args))]
-  
+  flowjo_biexp_args <- flowjo_biexp_args[-match("inverse", flowjo_biexp_args)]
   # TRANSFORMATIONS
   transform_list <- lapply(channels, function(z) {
     do.call("flowjo_biexp",
@@ -899,11 +897,11 @@ cyto_transformer_logicle.flowFrame <- function(x,
                                              popup = FALSE,
                                              display = 25000, ...) {
 
-  # PULL DOWN ALL ARGUMENTS
-  args <- as.list(match.call(expand.dots = TRUE))[-1]
-  
   # COPY
   x <- cyto_copy(x)
+  
+  # PULL DOWN ALL ARGUMENTS
+  args <- as.list(match.call(expand.dots = TRUE))[-1]  
   
   # CHANNELS
   if (is.null(channels)) {
@@ -913,12 +911,12 @@ cyto_transformer_logicle.flowFrame <- function(x,
   }
   args[["channels"]] <- channels
 
-  # ESTIMATELOGICLE ARGUMENTS
-  estimateLogicle_args <- formalArgs("CytoExploreR_.estimateLogicle")
-  
+  # ESTIMATELOGICLE ARGUMENTS - CANNOT USE FORMALARGS (CYTOEXPLORER WRAPPER)
+  estimateLogicle_args <- c("t","m","a","q")
   # TRANSFORMATIONS
   transform_list <- do.call("CytoExploreR_.estimateLogicle",
-                            args[names(args) %in% estimateLogicle_args])
+                            c(args[c("x","channels")],
+                              args[names(args) %in% estimateLogicle_args]))
   transformer_list <- lapply(transform_list, function(z) {
     inv <- inverseLogicleTransform(trans = z)
     flow_trans(
