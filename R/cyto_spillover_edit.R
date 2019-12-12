@@ -10,10 +10,8 @@
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
 #' compensation controls and/or samples. It is recommended that samples be
 #' pre-gated based on FSC and SSC parameters to obtain a homogeneous population
-#' for calculation of fluorescent spillover. The data should not be transformed
-#' prior to using \code{cyto_spillover_edit} as transformations will be applied
-#' internally when required. Users can supply their own custom transformers to
-#' \code{axes_trans} or the default biexponential transformers will be used.
+#' for calculation of fluorescent spillover. The compensation controls should
+#' also be transformed prior to using \code{cyto_spillover_edit}.
 #'
 #' Users begin by selecting the unstained control and a stained control from
 #' dropdown menus of sample names. \code{cyto_spillover_edit} leverages
@@ -51,10 +49,8 @@
 #'   in extraction of the spillover matrix directly from the supplied samples
 #'   (i.e. edit the spillover matrix constructed on the cytometer).
 #' @param axes_trans an object of class \code{transformerList} containing
-#'   transformers to used internally to transform the fluorescent channels of
-#'   the samples for visualisation. \code{cyto_spillover_edit} expects
-#'   un-transformed data and will automatically resort to using biexponential
-#'   transformers internally if no transformers are supplied to this argument.
+#'   transformers to used to transform the fluorescent channels of
+#'   the samples for visualisation.
 #' @param display numeric passed to \code{cyto_plot} to control the number of
 #'   events to be displayed in the plots, set to 2000 events by default.
 #' @param point_size integer passed to \code{cyto_plot} to control the size of
@@ -129,16 +125,17 @@ cyto_spillover_edit.GatingSet <- function(x,
   
   # Extract population for downstream plotting
   if (!is.null(parent)) {
-    fs <- cyto_extract(gs, parent)
+    fs <- cyto_extract(gs, 
+                       parent, 
+                       copy = TRUE)
   } else if (is.null(parent)) {
-    fs <- cyto_extract(gs, cyto_nodes(gs)[length(cyto_nodes(gs))])
+    fs <- cyto_extract(gs, 
+                       cyto_nodes(gs)[length(cyto_nodes(gs))], 
+                       copy = TRUE)
   }  
-
+  
   # Extract transformers from GatingSet
-  axes_trans <- x@transformation
-  if(length(axes_trans) != 0){
-    axes_trans <- axes_trans[[1]]
-  }
+  axes_trans <- cyto_transformer_extract(gs)
   
   # Reverse any applied transformations to get LINEAR data
   if(any(channels %in% names(axes_trans))){
@@ -169,6 +166,7 @@ cyto_spillover_edit.GatingSet <- function(x,
   
   return(spill)
   
+  
 }
 
 #' @rdname cyto_spillover_edit
@@ -186,6 +184,9 @@ cyto_spillover_edit.flowSet <- function(x,
   
   # Assign x to fs
   fs <- x
+  
+  # Copy fs (prevent transforming underlying data)
+  fs <- cyto_copy(fs)
   
   # Extract sample names
   nms <- cyto_names(fs)
@@ -310,7 +311,7 @@ cyto_spillover_edit.flowSet <- function(x,
   
   # Get complete transformerList
   axes_trans <- .cyto_transformer_complete(fs, axes_trans)
-  
+
   # Selected sample - unstained control supplied
   if(!.all_na(pd$channel)){
     # Unstained control included
@@ -502,12 +503,15 @@ cyto_spillover_edit.flowSet <- function(x,
       
       # Re-apply compensation and transformations
       fs.comp <- eventReactive(values$spill, {
+        # Make a copy
+        fs_copy <- cyto_copy(fs)
         # Data must be LINEAR at this step
-        fs <- compensate(fs, values$spill / 100)
+        fs_comp <- compensate(fs_copy, values$spill / 100)
         # Get transformed data
-        fs <- cyto_transform(fs, axes_trans, plot = FALSE)
-        
-        return(fs)
+        fs_trans <- cyto_transform(fs_comp, 
+                             trans = axes_trans, 
+                             plot = FALSE)
+        return(fs_trans)
       })
       
       # Turn off unstained aspects if no unstained control is supplied
@@ -1028,4 +1032,3 @@ cyto_spillover_edit.flowSet <- function(x,
   return(sp)
   
 }
-  
