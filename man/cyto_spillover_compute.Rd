@@ -128,6 +128,7 @@ gs <- cyto_compensate(gs, spill)
 # Return CytoExploreR_wd_check to default
 options("CytoExploreR_wd_check" = TRUE)
 }
+
 }
 \references{
 C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral

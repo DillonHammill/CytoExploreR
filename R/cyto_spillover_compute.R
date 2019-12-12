@@ -98,6 +98,7 @@
 #' # Return CytoExploreR_wd_check to default
 #' options("CytoExploreR_wd_check" = TRUE)
 #' }
+#' 
 #' @importFrom flowCore each_col fsApply sampleNames flowSet Subset
 #' @importFrom flowWorkspace pData GatingSet
 #' @importFrom methods as is
@@ -132,10 +133,7 @@ cyto_spillover_compute.GatingSet <- function(x,
                                              ...) {
 
   # PREPARE ARGUMENTS ----------------------------------------------------------
-
-  # GATINGHIERRACHY
-  gh <- x[[1]]
-
+  
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
 
@@ -156,12 +154,7 @@ cyto_spillover_compute.GatingSet <- function(x,
   channels <- cyto_fluor_channels(x)
 
   # TRANSFORMATIONS
-  axes_trans <- gh_get_transformations(gh, only.function = FALSE)
-  if (length(axes_trans) != 0) {
-    axes_trans <- cyto_transformer_combine(axes_trans)
-  } else {
-    axes_trans <- NA
-  }
+  axes_trans <- cyto_transformer_extract(x)
 
   # PREPARE CHANNEL_MATCH ------------------------------------------------------
 
@@ -267,7 +260,8 @@ cyto_spillover_compute.GatingSet <- function(x,
           fr_list <- lapply(seq_len(nrow(pd_chunk)), function(z) {
             cyto_extract(
               x[[pd_chunk$name[z]]],
-              pd_chunk$parent[z]
+              pd_chunk$parent[z],
+              copy = TRUE
             )
           })
           names(fr_list) <- cyto_names(fr_list)
@@ -317,7 +311,7 @@ cyto_spillover_compute.GatingSet <- function(x,
       ignore.case = TRUE
     ))]
     NIL <- lapply(unique(parent)[!is.na(unique(parent))], function(z) {
-      cyto_extract(NIL_gs[[1]], z)
+      cyto_extract(NIL_gs[[1]], z, copy = TRUE)
     })
     names(NIL) <- unique(parent)
 
@@ -328,7 +322,8 @@ cyto_spillover_compute.GatingSet <- function(x,
     POS <- lapply(seq_along(POS_gs), function(z) {
       cyto_extract(
         POS_gs[[z]],
-        pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, "name"])]
+        pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, "name"])],
+        copy = TRUE
       )
     })
     names(POS) <- cyto_names(POS_gs)
@@ -466,7 +461,8 @@ cyto_spillover_compute.GatingSet <- function(x,
     pops <- lapply(seq_along(x), function(z) {
       cyto_extract(
         x[[z]],
-        pd[, "parent"][match(cyto_names(x[[z]]), pd[, "name"])]
+        pd[, "parent"][match(cyto_names(x[[z]]), pd[, "name"])],
+        copy = TRUE
       )
     })
     names(pops) <- cyto_names(x)
@@ -630,9 +626,6 @@ cyto_spillover_compute.flowSet <- function(x,
 
   # PREPARE ARGUMENTS ---------------------------------------------------------
 
-  # CYTOSET NEGATIVE INDEXING ISSUE
-  x <- cyto_copy(x)
-  
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
 
@@ -715,6 +708,9 @@ cyto_spillover_compute.flowSet <- function(x,
   # CYTO_DETAILS
   cyto_details(x) <- pd
 
+  # COPY
+  x <- cyto_copy(x)
+  
   # REMOVE EXCESS CONTROLS -----------------------------------------------------
 
   # MULTIPLE CONTROLS PER CHANNEL (BYPASS UNSTAINED)
