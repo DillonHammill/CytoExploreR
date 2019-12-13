@@ -910,11 +910,8 @@ cyto_plot_record <- function(){
 #'   layout = c(1, 2)
 #' )
 #' 
-#' @seealso \code{\link[grDevices:pdf]{pdf}}
-#' @seealso \code{\link[grDevices:tiff]{tiff}}
-#' @seealso \code{\link[grDevices:jpeg]{jpeg}}
+#' @seealso \code{\link[grDevices:cairo]{cairo}}
 #' @seealso \code{\link[grDevices:png]{png}}
-#' @seealso \code{\link[grDevices:svg]{svg}}
 #' 
 #' @export
 cyto_plot_save <- function(file,

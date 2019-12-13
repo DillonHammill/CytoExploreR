@@ -12,6 +12,7 @@
   channel_match = NULL,
   spillover = NULL,
   axes_trans = NULL,
+  limits = "machine",
   display = 2000,
   point_size = 3,
   axes_text_size = 1.7,
@@ -26,6 +27,7 @@
   channel_match = NULL,
   spillover = NULL,
   axes_trans = NULL,
+  limits = "machine",
   display = 2000,
   point_size = 3,
   axes_text_size = 1.7,
@@ -55,6 +57,10 @@ in extraction of the spillover matrix directly from the supplied samples
 \item{axes_trans}{an object of class \code{transformerList} containing
 transformers to used to transform the fluorescent channels of
 the samples for visualisation.}
+
+\item{limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges.}
 
 \item{display}{numeric passed to \code{cyto_plot} to control the number of
 events to be displayed in the plots, set to 2000 events by default.}

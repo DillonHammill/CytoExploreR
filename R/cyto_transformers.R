@@ -757,9 +757,8 @@ cyto_transformer_biex.flowFrame <- function(x,
 #' @param display number or frequency of events to display in plots, set to
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+#'   \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
 #'    and \code{\link{cyto_plot}}.
-#'
 #'
 #' @return a \code{transformerList} object.
 #'
@@ -771,7 +770,7 @@ cyto_transformer_biex.flowFrame <- function(x,
 #'
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 #' @seealso
-#' \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+#' \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_combine}}

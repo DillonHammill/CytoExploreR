@@ -76,7 +76,7 @@ pop-up window.}
 25000 events by default. See \code{\link{cyto_plot}} for details.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
  and \code{\link{cyto_plot}}.}
 }
 \value{
@@ -94,7 +94,7 @@ data.
 \seealso{
 \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 
-\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
 
 \code{\link{cyto_transformer_arcsinh}}
 

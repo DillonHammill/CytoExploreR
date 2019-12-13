@@ -12,7 +12,7 @@ cyto_empty(name = NULL, channels = NULL, ...)
 \item{channels}{channels to include in the constructed flowFrame.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowCore:flowFrame]{flowFrame}}.}
+\code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 }
 \description{
 Construct an empty flowFrame

@@ -81,15 +81,9 @@ cyto_plot(gs,
 
 }
 \seealso{
-\code{\link[grDevices:pdf]{pdf}}
-
-\code{\link[grDevices:tiff]{tiff}}
-
-\code{\link[grDevices:jpeg]{jpeg}}
+\code{\link[grDevices:cairo]{cairo}}
 
 \code{\link[grDevices:png]{png}}
-
-\code{\link[grDevices:svg]{svg}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

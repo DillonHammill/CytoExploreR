@@ -24,12 +24,12 @@
 #'
 #' Following channel selection, \code{cyto_spillover_compute} runs through each
 #' compensation control and plots the density distribution in the associated
-#' channel. If an universal "Unstained" compensation control is supplied, the
+#' channel. If a universal "Unstained" compensation control is supplied, the
 #' unstained compensation control will be overlaid onto the plot as a reference
 #' for gating. Users can then gate the positive signal for spillover calculation
 #' using an interval gate. If no universal unstained compensation control is
 #' supplied, users are expected to gate the negative and then the positive
-#' signal for each compensation control.
+#' signal for each compensation control.0
 #'
 #' The percentage spillover is calculated based on the median fluorescent
 #' intensities (MedFI) of the positive populations relative to that of the

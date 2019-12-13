@@ -17,15 +17,15 @@ cyto_extract(x, parent = NULL, copy = FALSE, ...)
 should be returned.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:gs_pop_get_data]{gh_pop_get_data}} or
-\code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}}.}
+\code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
+\code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.}
 }
 \value{
 either a \code{flowFrame} or a \code{cytoset}.
 }
 \description{
 \code{cyto_extract} is essentially a wrapper for
-\code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}} which also
+\code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}} which also
 accepts \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 \code{\link[flowCore:flowSet-class]{flowSet}} objects. The \code{parent}
 population is extracted from

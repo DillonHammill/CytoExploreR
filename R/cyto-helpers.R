@@ -6,7 +6,7 @@
 #' \code{\link[base:list.files]{list.files}} and
 #' \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}
 #' which makes it easy to load .fcs files into a cytoset. \code{cyto_load} is
-#' also a wrapper around \code{\link[flowWorkspace:load_gs]{load_gs}} to load
+#' also a wrapper around \code{\link[flowWorkspace:save_gs]{load_gs}} to load
 #' saved GatingSet objects.
 #'
 #' @param path points to the location of the .fcs files to read in. Preferably
@@ -839,7 +839,7 @@ cyto_transform_extract <- function(x,
 #' Extract a valid flowFrame or flowSet
 #'
 #' \code{cyto_extract} is essentially a wrapper for
-#' \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}} which also
+#' \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}} which also
 #' accepts \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 #' \code{\link[flowCore:flowSet-class]{flowSet}} objects. The \code{parent}
 #' population is extracted from
@@ -854,8 +854,8 @@ cyto_transform_extract <- function(x,
 #' @param copy logical indicating whether a deep copy of the extracted data
 #'   should be returned.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:gs_pop_get_data]{gh_pop_get_data}} or
-#'   \code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}}.
+#'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
+#'   \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.
 #'
 #' @return either a \code{flowFrame} or a \code{cytoset}.
 #'
@@ -3046,7 +3046,7 @@ cyto_channel_match <- function(x,
 #' @param name name to add to the constructed flowFrame.
 #' @param channels channels to include in the constructed flowFrame.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowCore:flowFrame]{flowFrame}}.
+#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #'
 #' @importFrom flowCore identifier<- flowFrame
 #'

@@ -45,7 +45,7 @@ object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[base:list.files]{list.files}} and
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}
 which makes it easy to load .fcs files into a cytoset. \code{cyto_load} is
-also a wrapper around \code{\link[flowWorkspace:load_gs]{load_gs}} to load
+also a wrapper around \code{\link[flowWorkspace:save_gs]{load_gs}} to load
 saved GatingSet objects.
 }
 \examples{
