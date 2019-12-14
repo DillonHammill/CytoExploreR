@@ -34,6 +34,11 @@
 #'   pop-up window.
 #' @param display number or frequency of events to display in plots, set to
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} and
 #'   \code{\link{cyto_plot}}.
@@ -69,7 +74,8 @@ cyto_transformer_log.GatingSet <- function(x,
                                            select = NULL,
                                            plot = TRUE,
                                            popup = FALSE,
-                                           display = 25000, ...){
+                                           display = 25000,
+                                           axes_limits = "machine", ...){
   
   # Extract data
   x <- cyto_extract(x, 
@@ -88,6 +94,7 @@ cyto_transformer_log.GatingSet <- function(x,
                                            plot = plot,
                                            popup = popup,
                                            display = display,
+                                           axes_limits = axes_limits,
                                            ...
   )
   
@@ -104,7 +111,8 @@ cyto_transformer_log.GatingHierarchy <- function(x,
                                                  select = NULL,
                                                  plot = TRUE,
                                                  popup = FALSE,
-                                                 display = 25000, ...){
+                                                 display = 25000,
+                                                 axes_limits = "machine", ...){
     
   # Extract data
   x <- cyto_extract(x, 
@@ -117,6 +125,7 @@ cyto_transformer_log.GatingHierarchy <- function(x,
                                            plot = plot,
                                            popup = popup,
                                            display = display,
+                                           axes_limits = axes_limits,
                                            ...
   )
   
@@ -135,7 +144,8 @@ cyto_transformer_log.flowSet <- function(x,
                                          select = NULL,
                                          plot = TRUE,
                                          popup = FALSE, 
-                                         display = 25000, ...){
+                                         display = 25000,
+                                         axes_limits = "machine", ...){
   
   # COPY
   x <- cyto_copy(x)
@@ -153,6 +163,7 @@ cyto_transformer_log.flowSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
   
@@ -171,7 +182,8 @@ cyto_transformer_log.flowFrame <- function(x,
                                            select = NULL,
                                            plot = TRUE,
                                            popup = FALSE,
-                                           display = 25000, ...){
+                                           display = 25000,
+                                           axes_limits = "machine", ...){
   
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
@@ -210,6 +222,12 @@ cyto_transformer_log.flowFrame <- function(x,
     # CYTO_PLOT ARGUMENTS
     cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
     
+    # REMOVE DISPLAY/AXES_TRANS/TITLE ARGUMENTS
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
     # SAMPLING
     x <- cyto_sample(x, display = display, seed = 56)
     
@@ -232,7 +250,8 @@ cyto_transformer_log.flowFrame <- function(x,
       do.call("cyto_plot", 
               c(args[names(args) %in% cyto_plot_args],
                 list("axes_trans" = transformer_list,
-                     "title" = NA)))
+                     "title" = NA,
+                     "display" = 1)))
     })
     
   }
@@ -269,6 +288,11 @@ cyto_transformer_log.flowFrame <- function(x,
 #'   pop-up window.
 #' @param display number or frequency of events to display in plots, set to
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}} and
 #'   \code{\link{cyto_plot}}.
@@ -304,7 +328,8 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
                                                select = NULL,
                                                plot = TRUE,
                                                popup = FALSE,
-                                               display = 25000, ...) {
+                                               display = 25000,
+                                               axes_limits = "machine", ...) {
 
   # EXTRACT & COPY
   x <- cyto_extract(x, 
@@ -323,6 +348,7 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -338,7 +364,9 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
                                                    select = NULL,
                                                    plot = TRUE,
                                                    popup = FALSE,
-                                                   display = 25000, ...) {
+                                                   display = 25000,
+                                                   axes_limits = "machine", 
+                                                   ...) {
 
   # EXTRACT & COPY
   x <- cyto_extract(x, 
@@ -351,6 +379,7 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -368,7 +397,8 @@ cyto_transformer_arcsinh.flowSet <- function(x,
                                            select = NULL,
                                            plot = TRUE,
                                            popup = FALSE,
-                                           display = 25000, ...) {
+                                           display = 25000,
+                                           axes_limits = "machine", ...) {
 
   # COPY
   x <- cyto_copy(x)
@@ -386,6 +416,7 @@ cyto_transformer_arcsinh.flowSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -403,7 +434,8 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
                                                select = NULL,
                                                plot = TRUE,
                                                popup = FALSE,
-                                               display = 25000, ...) {
+                                               display = 25000,
+                                               axes_limits = "machine", ...) {
 
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
@@ -455,6 +487,12 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
     # CYTO_PLOT ARGUMENTS
     cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
     
+    # REMOVE DISPLAY/AXES_TRANS/TITLE ARGUMENT
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
     # SAMPLING
     x <- cyto_sample(x, display = display, seed = 56)
     
@@ -477,7 +515,8 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
       do.call("cyto_plot", 
               c(args[names(args) %in% cyto_plot_args],
                 list("axes_trans" = transformer_list,
-                     "title" = NA)))
+                     "title" = NA,
+                     "display" = 1)))
     })
     
   }
@@ -513,6 +552,11 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 #'   pop-up window.
 #' @param display number or frequency of events to display in plots, set to
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}} and
 #'   \code{\link{cyto_plot}}.
@@ -549,7 +593,8 @@ cyto_transformer_biex.GatingSet <- function(x,
                                           select = NULL,
                                           plot = TRUE,
                                           popup = FALSE,
-                                          display = 25000, ...) {
+                                          display = 25000,
+                                          axes_limits = "machine", ...) {
   
   # EXTRACT & COPY
   x <- cyto_extract(x, 
@@ -568,6 +613,7 @@ cyto_transformer_biex.GatingSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -583,7 +629,8 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
                                                 select = NULL,
                                                 plot = TRUE,
                                                 popup = FALSE,
-                                                display = 25000, ...) {
+                                                display = 25000,
+                                                axes_limits = "machine", ...) {
   
   # EXTRACT & COPY
   x <- cyto_extract(x, 
@@ -596,6 +643,7 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -613,7 +661,8 @@ cyto_transformer_biex.flowSet <- function(x,
                                         select = NULL,
                                         plot = TRUE,
                                         popup = FALSE,
-                                        display = 25000, ...) {
+                                        display = 25000,
+                                        axes_limits = "machine", ...) {
   
   # COPY
   x <- cyto_copy(x)
@@ -630,6 +679,7 @@ cyto_transformer_biex.flowSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -647,7 +697,8 @@ cyto_transformer_biex.flowFrame <- function(x,
                                           select = NULL,
                                           plot = TRUE,
                                           popup = FALSE,
-                                          display = 25000, ...) {
+                                          display = 25000,
+                                          axes_limits = "machine", ...) {
   
   # PULL DOWN ALL ARGUMENTS
   args <- as.list(match.call(expand.dots = TRUE))[-1]
@@ -698,6 +749,12 @@ cyto_transformer_biex.flowFrame <- function(x,
     # CYTO_PLOT ARGUMENTS
     cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
     
+    # REMOVE DISPLAY ARGUMENT
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
     # SAMPLING
     x <- cyto_sample(x, display = display, seed = 56)
     
@@ -720,7 +777,8 @@ cyto_transformer_biex.flowFrame <- function(x,
       do.call("cyto_plot", 
               c(args[names(args) %in% cyto_plot_args],
                 list("axes_trans" = transformer_list,
-                     "title" = NA)))
+                     "title" = NA,
+                     "display" = 1)))
     })
   
   }
@@ -756,6 +814,11 @@ cyto_transformer_biex.flowFrame <- function(x,
 #'   pop-up window.
 #' @param display number or frequency of events to display in plots, set to
 #'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
 #'    and \code{\link{cyto_plot}}.
@@ -793,7 +856,8 @@ cyto_transformer_logicle.GatingSet <- function(x,
                                              select = NULL,
                                              plot = TRUE,
                                              popup = FALSE,
-                                             display = 25000, ...) {
+                                             display = 25000,
+                                             axes_limits = "machine", ...) {
 
   # EXTRACT & COPY
   x <- cyto_extract(x, 
@@ -813,6 +877,7 @@ cyto_transformer_logicle.GatingSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -828,7 +893,9 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
                                                    select = NULL,
                                                    plot = TRUE,
                                                    popup = FALSE,
-                                                   display = 25000, ...) {
+                                                   display = 25000,
+                                                   axes_limits = "machine", 
+                                                   ...) {
 
   # EXTRACT
   x <- cyto_extract(x, 
@@ -842,6 +909,7 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -859,7 +927,8 @@ cyto_transformer_logicle.flowSet <- function(x,
                                            select = NULL,
                                            plot = TRUE,
                                            popup = FALSE,
-                                           display = 25000, ...) {
+                                           display = 25000,
+                                           axes_limits = "machine", ...) {
 
   # COPY
   x <- cyto_copy(x)
@@ -877,6 +946,7 @@ cyto_transformer_logicle.flowSet <- function(x,
     plot = plot,
     popup = popup,
     display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -894,7 +964,8 @@ cyto_transformer_logicle.flowFrame <- function(x,
                                              select = NULL,
                                              plot = TRUE,
                                              popup = FALSE,
-                                             display = 25000, ...) {
+                                             display = 25000,
+                                             axes_limits = "machine", ...) {
 
   # COPY
   x <- cyto_copy(x)
@@ -940,6 +1011,12 @@ cyto_transformer_logicle.flowFrame <- function(x,
     # CYTO_PLOT ARGUMENTS
     cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
     
+    # REMOVE DISPLAY/AXES_TRANS/TITLE ARGUMENTS
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
     # SAMPLING
     x <- cyto_sample(x, display = display, seed = 56)
     
@@ -962,7 +1039,8 @@ cyto_transformer_logicle.flowFrame <- function(x,
       do.call("cyto_plot", 
               c(args[names(args) %in% cyto_plot_args],
                 list("axes_trans" = transformer_list,
-                     "title" = NA)))
+                     "title" = NA,
+                     "display" = 1)))
     })
     
   }

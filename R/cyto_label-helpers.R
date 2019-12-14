@@ -361,7 +361,7 @@
                   rng <- suppressMessages(
                     .cyto_range(args[["pops"]][[y]],
                       channels = args[["channels"]],
-                      limits = args[["limits"]],
+                      axes_limits = args[["axes_limits"]],
                       buffer = 0,
                       anchor = FALSE
                     )[, args[["channels"]]]
@@ -399,7 +399,7 @@
                 rng <- suppressMessages(
                   .cyto_range(args[["pops"]][[y]],
                     channels = args[["channels"]],
-                    limits = args[["limits"]],
+                    axes_limits = args[["axes_limits"]],
                     buffer = 0,
                     anchor = FALSE
                   )[, args[["channels"]]]

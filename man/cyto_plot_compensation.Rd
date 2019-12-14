@@ -15,6 +15,7 @@
   compensate = FALSE,
   spillover = NULL,
   axes_trans = NA,
+  axes_limits = "machine",
   overlay = TRUE,
   layout,
   popup = FALSE,
@@ -36,6 +37,7 @@
   compensate = FALSE,
   spillover = NULL,
   axes_trans = NA,
+  axes_limits = "machine",
   layout,
   popup = FALSE,
   title = NA,
@@ -55,6 +57,7 @@
   compensate = FALSE,
   spillover = NULL,
   axes_trans = NA,
+  axes_limits = "machine",
   overlay = TRUE,
   layout,
   popup = FALSE,
@@ -75,6 +78,7 @@
   compensate = FALSE,
   spillover = NULL,
   axes_trans = NA,
+  axes_limits = "machine",
   layout,
   popup = FALSE,
   title = NA,
@@ -121,6 +125,10 @@ TRUE.}
 \code{cyto_transform} which contains the transformer definitions that were
 used to transform the channels of the supplied flowFrame, flowSet,
 GatingHierarchy or GatingSet.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges.}
 
 \item{overlay}{logical indicating whether the unstained control should be
 overlaid onto the plot if supplied in the flowSet or GatingSet, set to

@@ -804,12 +804,12 @@
 #' Calculate combined range of cytometry objects
 #'
 #' The lower limit is always set to zero unless there is data below this limit.
-#' The upper limit is determined by the limits argument.
+#' The upper limit is determined by the axes_limits argument.
 #'
 #' @param x cytometry object(s) which require range calculation.
 #' @param parent name of parent population to extract for range calculation.
 #' @param channels name(s) of channel(s).
-#' @param limits either "auto", "data" or "machine". "auto" use data limits but
+#' @param axes_limits either "auto", "data" or "machine". "auto" use data limits but
 #'   always includes zero.
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
@@ -832,15 +832,15 @@
 #' @noRd
 .cyto_range.flowFrame <- function(x, 
                                   channels = NA,
-                                  limits = "auto",
+                                  axes_limits = "auto",
                                   plot = FALSE,
                                   buffer = 0.03,
                                   anchor = TRUE,
                                   ...){
   
   # flowCore compatibility
-  if(limits == "instrument"){
-    limits <- "machine"
+  if(axes_limits == "instrument"){
+    axes_limits <- "machine"
   }
   
   # Convert markers to channels
@@ -852,7 +852,7 @@
   
   # Time parameter always uses data limits
   if("Time" %in% channels){
-    limits <- "data"
+    axes_limits <- "data"
   } 
   
   # Lower bound - use data limits
@@ -861,11 +861,11 @@
   )
   
   # Upper bound
-  if(limits %in% c("auto", "data")){
+  if(axes_limits %in% c("auto", "data")){
     mx <- suppressWarnings(
       range(x, type = "data")[, channels, drop = FALSE][2,]
     )
-  }else if(limits == "machine"){
+  }else if(axes_limits == "machine"){
     mx <- suppressWarnings(
       range(x, type = "instrument")[, channels, drop = FALSE][2,]
     )
@@ -873,7 +873,7 @@
   rng[2,] <- mx
   
   # Replace lower data limit if > 0 - AUTO
-  if(limits != "data" & anchor == TRUE){
+  if(axes_limits != "data" & anchor == TRUE){
     if(any(rng[1,] > 0)){
       rng[1, rng[1,] > 0] <- 0
     }
@@ -897,7 +897,7 @@
 #' @noRd
 .cyto_range.flowSet <- function(x,
                                 channels = NA,
-                                limits = "machine",
+                                axes_limits = "machine",
                                 plot = FALSE,
                                 buffer = 0.03,
                                 anchor = TRUE, ...){
@@ -906,7 +906,7 @@
   rng <- fsApply(x, function(z){
     .cyto_range(z,
                 channels = channels,
-                limits = limits,
+                axes_limits = axes_limits,
                 plot = plot,
                 buffer = buffer,
                 anchor = anchor)
@@ -932,7 +932,7 @@
 .cyto_range.GatingHierarchy <- function(x, 
                                         parent,
                                         channels = NA,
-                                        limits = "machine",
+                                        axes_limits = "machine",
                                         plot = FALSE,
                                         buffer = 0.03,
                                         anchor = TRUE, ...){
@@ -943,7 +943,7 @@
   # Make call to flowFrame method
   rng <- .cyto_range(x,
                      channels = channels,
-                     limits = limits,
+                     axes_limits = axes_limits,
                      plot = plot,
                      buffer = buffer,
                      anchor = anchor)
@@ -956,7 +956,7 @@
 .cyto_range.GatingSet <- function(x,
                                   parent,
                                   channels = NA,
-                                  limits = "machine",
+                                  axes_limits = "machine",
                                   plot = FALSE,
                                   buffer = 0.03,
                                   anchor = TRUE, ...){
@@ -967,7 +967,7 @@
   # Make call to flowSet method
   rng <- .cyto_range(x,
                      channels = channels,
-                     limits = limits,
+                     axes_limits = axes_limits,
                      plot = plot,
                      buffer = buffer,
                      anchor = anchor)
@@ -980,7 +980,7 @@
 .cyto_range.list <- function(x,
                              parent,
                              channels = NA,
-                             limits = "machine",
+                             axes_limits = "machine",
                              plot = FALSE,
                              buffer = 0.04,
                              anchor = TRUE){
@@ -990,7 +990,7 @@
     .cyto_range(z,
                 parent = parent,
                 channels = channels,
-                limits = limits,
+                axes_limits = axes_limits,
                 plot = plot,
                 buffer = buffer,
                 anchor = anchor)

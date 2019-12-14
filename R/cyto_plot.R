@@ -38,11 +38,6 @@
 #'   \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},
 #'   \code{quadGate} or \code{filters}. Lists of these supported gate objects
 #'   are also supported.
-#' @param limits options include \code{"auto"}, \code{"data"} or
-#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
-#'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
-#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
-#'   arguments.
 #' @param display numeric to control the number or percentage of events to
 #'   display. Values [0,1] indicate the percentage of events to display (i.e.
 #'   value of 1 will display all events), whilst values larger than 1 indicate
@@ -109,6 +104,11 @@
 #'   plots, set to \code{"black"} by default.
 #' @param contour_line_alpha numeric [0,1] to control the transparency of
 #'   contour lines, set to 1 by default to remove transparency.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
@@ -279,7 +279,6 @@ cyto_plot.GatingSet <- function(x,
                                 group_by = "name",
                                 overlay = NA,
                                 gate = NA,
-                                limits = "auto",
                                 display = 25000,
                                 layout,
                                 popup = FALSE,
@@ -310,6 +309,7 @@ cyto_plot.GatingSet <- function(x,
                                 contour_line_width = 1,
                                 contour_line_col = "black",
                                 contour_line_alpha = 1,
+                                axes_limits = "auto",
                                 axes_text = c(TRUE, TRUE),
                                 axes_text_font = 1,
                                 axes_text_size = 1,
@@ -750,7 +750,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       axes_trans = NA,
                                       overlay = NA,
                                       gate = NA,
-                                      limits = "auto",
+                                      axes_limits = "auto",
                                       display = 25000,
                                       popup = FALSE,
                                       xlim = NA,
@@ -1168,7 +1168,7 @@ cyto_plot.flowSet <- function(x,
                               group_by = "name",
                               overlay = NA,
                               gate = NA,
-                              limits = "auto",
+                              axes_limits = "auto",
                               display = 25000,
                               layout,
                               popup = FALSE,
@@ -1466,7 +1466,7 @@ cyto_plot.flowSet <- function(x,
   if (.all_na(xlim)) {
     xlim <- .cyto_range(fr_list,
       channels = channels[1],
-      limits = limits
+      axes_limits = axes_limits
     )[, channels[1]]
     # XLIM MANUALLY SUPPLIED
   } else {
@@ -1483,7 +1483,7 @@ cyto_plot.flowSet <- function(x,
     if (length(channels) == 2) {
       ylim <- .cyto_range(fr_list,
         channels = channels[2],
-        limits = limits
+        axes_limits = axes_limits
       )[, channels[2]]
     }
     # YLIM MANUALLY SUPPLIED
@@ -1508,7 +1508,7 @@ cyto_plot.flowSet <- function(x,
           length.out = 2
         )
       ),
-      limits = limits
+      axes_limits = axes_limits
     )[[1]]
   } else {
     axes_text_x <- FALSE
@@ -1525,7 +1525,7 @@ cyto_plot.flowSet <- function(x,
             length.out = 2
           )
         ),
-        limits = limits
+        axes_limits = axes_limits
       )[[1]]
     } else if (length(channels) == 1) {
       axes_text_y <- NA
@@ -1581,7 +1581,7 @@ cyto_plot.flowSet <- function(x,
     "channels",
     "overlay",
     "group_by",
-    "limits",
+    "axes_limits",
     "gate",
     "negate",
     "label",
@@ -1627,7 +1627,7 @@ cyto_plot.flowSet <- function(x,
   plots <- mapply(
     function(x,
                  gate,
-                 limits,
+                 axes_limits,
                  display,
                  xlab,
                  ylab,
@@ -1707,7 +1707,7 @@ cyto_plot.flowSet <- function(x,
         overlay = overlay,
         gate = gate,
         axes_trans = axes_trans, #
-        limits = limits, #
+        axes_limits = axes_limits, #
         display = display,
         popup = FALSE, #
         xlim = xlim, #
@@ -1805,7 +1805,7 @@ cyto_plot.flowSet <- function(x,
     },
     fr_list,
     gate,
-    limits,
+    axes_limits,
     display,
     xlab,
     ylab,
@@ -1899,7 +1899,7 @@ cyto_plot.flowFrame <- function(x,
                                 axes_trans = NA,
                                 overlay = NA,
                                 gate = NA,
-                                limits = "auto",
+                                axes_limits = "auto",
                                 display = 25000,
                                 popup = FALSE,
                                 xlim = NA,

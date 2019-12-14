@@ -19,10 +19,18 @@ cyto_transform(x, trans = NULL, ...)
   inverse = FALSE,
   plot = TRUE,
   popup = FALSE,
+  axes_limits = "machine",
   ...
 )
 
-\method{cyto_transform}{transformList}(x, trans = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transform}{transformList}(
+  x,
+  trans = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  axes_limits = "machine",
+  ...
+)
 
 \method{cyto_transform}{transformerList}(
   x,
@@ -30,6 +38,7 @@ cyto_transform(x, trans = NULL, ...)
   inverse = FALSE,
   plot = TRUE,
   popup = FALSE,
+  axes_limits = "machine",
   ...
 )
 }
@@ -71,6 +80,12 @@ should be plotted using \code{\link{cyto_plot}}.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 popup window, set to FALSE by default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control
+over axes limits can be obtained by altering the \code{xlim} and
+\code{ylim} arguments.}
 }
 \value{
 object of class \code{flowFrame}, \code{flowSet},

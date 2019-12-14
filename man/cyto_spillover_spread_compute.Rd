@@ -14,6 +14,7 @@
   compensated = FALSE,
   spillover = NULL,
   spillover_spread = NULL,
+  axes_limits = "machine",
   ...
 )
 
@@ -24,6 +25,7 @@
   compensated = FALSE,
   spillover = NULL,
   spillover_spread = NULL,
+  axes_limits = "machine",
   ...
 )
 }
@@ -63,6 +65,12 @@ attached to compensation controls will be applied.}
 \item{spillover_spread}{name of the csv file to which the spillover spreading
 matrix will be saved, set to \code{"date-Spillover-Spread-Matrix.csv"} by
 default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

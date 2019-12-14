@@ -81,7 +81,8 @@
   # UNSUPPORTED GATE TYPES
   if(!all(ind == TRUE)){
     if(length(ind[ind == FALSE]) == 1){
-      stop(paste(type[!is.na(match(ind, FALSE))], "is not a valid gate type for cyto_gate_draw."))
+      stop(paste(type[!is.na(match(ind, FALSE))], 
+                 "is not a valid gate type for cyto_gate_draw."))
     }else{
       stop(paste(paste(type[!is.na(match(ind, FALSE))], collapse = " & "),
                  "are not valid gate types for cyto_gate_draw."))

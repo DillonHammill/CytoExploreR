@@ -9,7 +9,7 @@
 #'   flowFrame.
 #' @param axes_range named list of axes limits for each each axis (i.e.
 #'   list(xlim,ylim)).
-#' @param limits either "data" or "machine".
+#' @param axes_limits either "auto", "data" or "machine".
 #'
 #' @return list containing axis labels and breaks.
 #' 
@@ -20,7 +20,7 @@
                                            channels,
                                            axes_trans = NA,
                                            axes_range = list(NA,NA),
-                                           limits = "data") {
+                                           axes_limits = "data") {
 
   # Return NA if axes_trans is missing
   if (.all_na(axes_trans)) {
@@ -60,7 +60,7 @@
     }else{
       rng <- inv_func(1.02 * .cyto_range(fr_list, 
                                          channels = chan, 
-                                         limits = limits)[,chan])
+                                         axes_limits = axes_limits)[,chan])
     }
     # RESTRICT tcks & lbls by rng
     tks <- tcks[tcks > rng[1] & tcks < rng[2]]
@@ -201,7 +201,7 @@
   # The following arguments are not repeated: 
   # - arguments used to prepare the data - x, overlay, display, density_modal,
   #   density_stack, density_smooth
-  # - arguments that MUST be the same in each plot - channels, limits, popup,
+  # - arguments that MUST be the same in each plot - channels, axes_limits, popup,
   #   xlim, ylim, negate, density_cols, point_col_scale, point_cols, legend
   # - arguments already prepared - gate
 
@@ -216,7 +216,7 @@
                         "display",
                         "channels",
                         "gate",
-                        "limits",
+                        "axes_limits",
                         "popup",
                         "xlim",
                         "ylim",

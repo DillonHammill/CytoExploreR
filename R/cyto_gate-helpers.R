@@ -400,6 +400,11 @@ cyto_gate_extract <- function(parent,
 #'   default.
 #' @param plot logical indicating whether a plot should be drawn, set to
 #'   \code{TRUE} by default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot.flowFrame}}.
 #'
 #' @return an object of class \code{GatingSet} with edited gate applied, as well
@@ -457,7 +462,8 @@ cyto_gate_edit <- function(x,
                            display = 25000,
                            axis = "x",
                            label = TRUE,
-                           plot = TRUE, ...) {
+                           plot = TRUE,
+                           axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -795,7 +801,8 @@ cyto_gate_edit <- function(x,
         label = FALSE,
         title = title,
         gate_line_width = 2.5,
-        popup = TRUE, ...
+        popup = TRUE,
+        axes_limits = axes_limits, ...
       )
       
     }

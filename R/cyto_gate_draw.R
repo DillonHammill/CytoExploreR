@@ -60,6 +60,11 @@
 #'   default.
 #' @param plot logical indicating whether a plot should be drawn, set to
 #'   \code{TRUE} by default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return \code{flowFrame} and \code{flowSet} methods return a list of flowCore
@@ -145,7 +150,8 @@ cyto_gate_draw.GatingSet <- function(x,
                                      display = 25000,
                                      axis = "x",
                                      label = TRUE,
-                                     plot = TRUE, ...) {
+                                     plot = TRUE,
+                                     axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -367,7 +373,8 @@ cyto_gate_draw.GatingSet <- function(x,
         popup = TRUE,
         legend = FALSE,
         title = title,
-        axes_trans = axes_trans, ...
+        axes_trans = axes_trans,
+        axes_limits = axes_limits, ...
       )
     }
 
@@ -502,7 +509,8 @@ cyto_gate_draw.flowSet <- function(x,
                                    display = 25000,
                                    axis = "x",
                                    label = TRUE,
-                                   plot = TRUE, ...) {
+                                   plot = TRUE,
+                                   axes_limits = axes_limits, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -612,6 +620,7 @@ cyto_gate_draw.flowSet <- function(x,
       axis = axis,
       label = label,
       plot = plot,
+      axes_limits = axes_limits,
       ...
     )
   })
@@ -724,6 +733,7 @@ cyto_gate_draw.flowFrame <- function(x,
       display = 1,
       popup = TRUE,
       legend = FALSE,
+      axes_limits = axes_limits,
       ...
     )
   }

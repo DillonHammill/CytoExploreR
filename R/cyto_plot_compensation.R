@@ -34,6 +34,9 @@
 #'   \code{cyto_transform} which contains the transformer definitions that were
 #'   used to transform the channels of the supplied flowFrame, flowSet,
 #'   GatingHierarchy or GatingSet.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges.
 #' @param overlay logical indicating whether the unstained control should be
 #'   overlaid onto the plot if supplied in the flowSet or GatingSet, set to
 #'   \code{TRUE} by default.
@@ -137,6 +140,7 @@ cyto_plot_compensation.GatingSet <- function(x,
                                              compensate = FALSE,
                                              spillover = NULL,
                                              axes_trans = NA,
+                                             axes_limits = "machine",
                                              overlay = TRUE,
                                              layout,
                                              popup = FALSE,
@@ -267,6 +271,7 @@ cyto_plot_compensation.GatingSet <- function(x,
     cyto_plot_compensation(
       x = pos_pops[[z]],
       axes_trans = axes_trans,
+      axes_limits = axes_limits,
       channel_match = channel_match,
       compensate = compensate,
       spillover = spillover,
@@ -310,6 +315,7 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
                                                    compensate = FALSE,
                                                    spillover = NULL,
                                                    axes_trans = NA,
+                                                   axes_limits = "machine",
                                                    layout,
                                                    popup = FALSE,
                                                    title = NA,
@@ -367,6 +373,7 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   cyto_plot_compensation(
     x = fr,
     axes_trans = axes_trans,
+    axes_limits = axes_limits,
     compensate = compensate,
     spillover = spillover,
     channel_match = channel_match,
@@ -405,6 +412,7 @@ cyto_plot_compensation.flowSet <- function(x,
                                            compensate = FALSE,
                                            spillover = NULL,
                                            axes_trans = NA,
+                                           axes_limits = "machine",
                                            overlay = TRUE,
                                            layout,
                                            popup = FALSE,
@@ -608,6 +616,7 @@ cyto_plot_compensation.flowSet <- function(x,
             channels = pd$channel[z],
             overlay = fs_list[[z]],
             axes_trans = axes_trans,
+            axes_limits = axes_limits,
             legend = FALSE,
             title = title,
             density_stack = density_stack,
@@ -620,6 +629,7 @@ cyto_plot_compensation.flowSet <- function(x,
             channels = c(pd$channel[z], channels[y]),
             overlay = NIL,
             axes_trans = axes_trans,
+            axes_limits = axes_limits,
             legend = FALSE,
             title = title, ...
           )
@@ -631,6 +641,7 @@ cyto_plot_compensation.flowSet <- function(x,
           cyto_plot(fs_list[[z]],
             channels = pd$channel[z],
             axes_trans = axes_trans,
+            axes_limits = axes_limits,
             legend = FALSE,
             title = title,
             density_stack = density_stack,
@@ -642,6 +653,7 @@ cyto_plot_compensation.flowSet <- function(x,
           cyto_plot(fs_list[[z]],
             channels = c(pd$channel[z], channels[y]),
             axes_trans = axes_trans,
+            axes_limits = axes_limits,
             legend = FALSE,
             title = title, ...
           )
@@ -725,6 +737,7 @@ cyto_plot_compensation.flowFrame <- function(x,
                                              compensate = FALSE,
                                              spillover = NULL,
                                              axes_trans = NA,
+                                             axes_limits = "machine",
                                              layout,
                                              popup = FALSE,
                                              title = NA,
@@ -750,11 +763,14 @@ cyto_plot_compensation.flowFrame <- function(x,
   pars <- par(c("mfrow", "oma"))
   on.exit(par(pars))
 
+  # COPY
+  fr <- cyto_copy(x)
+  
   # SAMPLES
-  nm <- cyto_names(x)
-
+  nm <- cyto_names(fr)
+  
   # CHANNELS
-  channels <- cyto_fluor_channels(x)
+  channels <- cyto_fluor_channels(fr)
 
   # APPLY COMPENSATION & TRANSFORMATIONS ---------------------------------------
 
@@ -762,35 +778,44 @@ cyto_plot_compensation.flowFrame <- function(x,
   if (compensate == TRUE) {
     # INVERSE TRANSFORMATIONS
     if (!.all_na(axes_trans)) {
-      x <- cyto_transform(x,
+      fr <- cyto_transform(fr,
         trans = axes_trans,
         inverse = TRUE,
         plot = FALSE
       )
     }
     # COMPENSATE
-    x <- cyto_compensate(x,
+    fr <- cyto_compensate(fr,
       spillover = spillover
     )
     # TRANSFORM
-    x <- cyto_transform(x,
+    fr <- cyto_transform(fr,
       trans = axes_trans,
       type = "biex",
       plot = FALSE
     )
+  }else{
+    # TRANSFORM
+    if(.all_na(axes_trans)){
+      fr <- cyto_transform(fr,
+                          trans = axes_trans,
+                          type = "biex",
+                          plot = FALSE
+      )
+    }
   }
 
   # CHANNEL MATCHING -----------------------------------------------------------
 
   # CHANNEL MATCH MISSING
   if (is.null(channel_match)) {
-    chan <- cyto_channel_select(x)
+    chan <- cyto_channel_select(fr)
     # CHANNEL MATCH SUPPLIED
   } else {
     # CHANNEL/MARKER
     if (is.character(channel_match) &
-      channel_match %in% c(channels, cyto_markers_extract(x, channels))) {
-      chan <- cyto_channels_extract(x, channel_match)
+      channel_match %in% c(channels, cyto_markers_extract(fr, channels))) {
+      chan <- cyto_channels_extract(fr, channel_match)
       # CHANNEL MATCH OBJECT/STRING
     } else {
       # CHANNEL MATCH OBJECT
@@ -800,7 +825,7 @@ cyto_plot_compensation.flowFrame <- function(x,
         if (!all(c("name", "channel") %in% colnames(channel_match))) {
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
-        ind <- match(cyto_names(x), rownames(channel_match))
+        ind <- match(cyto_names(fr), rownames(channel_match))
         chan <- channel_match$channel[ind]
       } else {
         if (getOption("CytoExploreR_wd_check") == TRUE) {
@@ -810,7 +835,7 @@ cyto_plot_compensation.flowFrame <- function(x,
               row.names = 1,
               stringsAsFactors = FALSE
             )
-            ind <- match(cyto_names(x), row.names(channel_match))
+            ind <- match(cyto_names(fr), row.names(channel_match))
             chan <- channel_match$channel[ind]
           } else {
             stop(paste(channel_match, "is not in this working directory."))
@@ -821,7 +846,7 @@ cyto_plot_compensation.flowFrame <- function(x,
             row.names = 1,
             stringsAsFactors = FALSE
           )
-          ind <- match(cyto_names(x), row.names(channel_match))
+          ind <- match(cyto_names(fr), row.names(channel_match))
           chan <- channel_match$channel[ind]
         }
       }
@@ -853,7 +878,7 @@ cyto_plot_compensation.flowFrame <- function(x,
 
   # TITLE
   if (missing(header)) {
-    header <- cyto_names(x)
+    header <- cyto_names(fr)
   }
 
   # TITLE SPACE
@@ -861,35 +886,41 @@ cyto_plot_compensation.flowFrame <- function(x,
     par(oma = c(0, 0, 3, 0))
   }
 
+  # SHEETS
+  sheets <- ceiling(length(channels)/prod(layout))
+  full_sheets <- seq_len(sheets)*prod(layout)
+  
   # CONSTRUCT PLOTS ------------------------------------------------------------
 
   # PLOTS
   plots <- lapply(seq_len(length(channels)), function(y) {
-
+    
     # DENSITY - MATCHING CHANNELS
     if (chan == channels[y]) {
-      cyto_plot(x,
+      cyto_plot(fr,
         channels = chan,
         axes_trans = axes_trans,
+        axes_limits = axes_limits,
         legend = FALSE,
         title = title,
         density_stack = density_stack,
         density_fill = rev(density_fill),
         density_fill_alpha = density_fill_alpha, ...
       )
-      # SCATTER - NON-MATCHING CHANNELS
+    # SCATTER - NON-MATCHING CHANNELS
     } else {
-      cyto_plot(x,
+      cyto_plot(fr,
         channels = c(chan, channels[y]),
         axes_trans = axes_trans,
+        axes_limits = axes_limits,
         legend = FALSE,
         title = title, ...
       )
     }
 
     # HEADER
-    if (y == length(channels) |
-      y == prod(layout)) {
+    if (y %in% c(full_sheets, 
+                 length(channels))) {
       if (!.all_na(header)) {
         mtext(header,
           outer = TRUE,
@@ -901,24 +932,37 @@ cyto_plot_compensation.flowFrame <- function(x,
     }
 
     # POPUP
-    if (popup & y == prod(layout) & y != length(channels)) {
-      cyto_plot_new(popup)
+    if (popup){
+      if(y %in% full_sheets){
+        if(y != length(channels)){
+          # SHEET
+          cyto_plot_new(popup)
+          # LAYOUT
+          par(mfrow = layout)
+          # HEADER
+          if (!.all_na(header)) {
+            par(oma = c(0, 0, 3, 0))
+          }
+        }
+      }
     }
 
     # RECORD PLOT
-    if (y == length(channels)) {
+    if (y %in% c(full_sheets, 
+                 length(channels))) {
       cyto_plot_record()
     } else {
       return(NA)
     }
   })
   plots <- plots[!LAPPLY(plots, ".all_na")]
+  names(plots) <- rep(chan, length(plots))
 
   # RECORD/SAVE ----------------------------------------------------------------
 
   # TURN OFF GRAPHICS DEVICE FOR SAVING
   if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
+    if (is(fr, basename(getOption("cyto_plot_method")))) {
 
       # CLOSE GRAPHICS DEVICE
       dev.off()
@@ -934,5 +978,5 @@ cyto_plot_compensation.flowFrame <- function(x,
   # RETURN RECORDED PLOTS ------------------------------------------------------
 
   # RECORDED PLOTS
-  return(plots)
+  invisible(plots)
 }

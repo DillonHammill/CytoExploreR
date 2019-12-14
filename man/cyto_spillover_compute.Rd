@@ -12,6 +12,7 @@
   axes_trans = NULL,
   channel_match = NULL,
   spillover = NULL,
+  axes_limits = "machine",
   ...
 )
 
@@ -20,6 +21,7 @@
   axes_trans = NULL,
   channel_match = NULL,
   spillover = NULL,
+  axes_limits = "machine",
   ...
 )
 }
@@ -52,6 +54,12 @@ directly to the samples using \code{cyto_details_edit}.}
 
 \item{spillover}{name of the output spillover csv file, set to
 \code{"Spillover-Matrix.csv"} by default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

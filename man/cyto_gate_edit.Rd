@@ -19,6 +19,7 @@ cyto_gate_edit(
   axis = "x",
   label = TRUE,
   plot = TRUE,
+  axes_limits = "machine",
   ...
 )
 }
@@ -76,6 +77,12 @@ default.}
 
 \item{plot}{logical indicating whether a plot should be drawn, set to
 \code{TRUE} by default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot.flowFrame}}.}
 }

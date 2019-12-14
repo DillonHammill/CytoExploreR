@@ -17,7 +17,6 @@
   group_by = "name",
   overlay = NA,
   gate = NA,
-  limits = "auto",
   display = 25000,
   layout,
   popup = FALSE,
@@ -48,6 +47,7 @@
   contour_line_width = 1,
   contour_line_col = "black",
   contour_line_alpha = 1,
+  axes_limits = "auto",
   axes_text = c(TRUE, TRUE),
   axes_text_font = 1,
   axes_text_size = 1,
@@ -100,7 +100,7 @@
   axes_trans = NA,
   overlay = NA,
   gate = NA,
-  limits = "auto",
+  axes_limits = "auto",
   display = 25000,
   popup = FALSE,
   xlim = NA,
@@ -180,7 +180,7 @@
   group_by = "name",
   overlay = NA,
   gate = NA,
-  limits = "auto",
+  axes_limits = "auto",
   display = 25000,
   layout,
   popup = FALSE,
@@ -261,7 +261,7 @@
   axes_trans = NA,
   overlay = NA,
   gate = NA,
-  limits = "auto",
+  axes_limits = "auto",
   display = 25000,
   popup = FALSE,
   xlim = NA,
@@ -377,12 +377,6 @@ the plot(s). This argument can be set to "children" or "descendants" when a
 \code{quadGate} or \code{filters}. Lists of these supported gate objects
 are also supported.}
 
-\item{limits}{options include \code{"auto"}, \code{"data"} or
-\code{"machine"} to use optimised, data or machine limits respectively. Set
-to \code{"auto"} by default to use optimised axes ranges. Fine control over
-axes limits can be obtained by altering the \code{xlim} and \code{ylim}
-arguments.}
-
 \item{display}{numeric to control the number or percentage of events to
 display. Values [0,1] indicate the percentage of events to display (i.e.
 value of 1 will display all events), whilst values larger than 1 indicate
@@ -478,6 +472,12 @@ plots, set to \code{"black"} by default.}
 
 \item{contour_line_alpha}{numeric [0,1] to control the transparency of
 contour lines, set to 1 by default to remove transparency.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"auto"} by default to use optimised axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{axes_text}{logical vector of length 2 indicating whether axis text
 should be included for the x and y axes respectively, set to

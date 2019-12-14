@@ -22,6 +22,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:polygonGate-class]{polygonGate}}
@@ -65,7 +70,8 @@
                                     alias = NULL,
                                     channels,
                                     plot = TRUE,
-                                    label = TRUE, ...) {
+                                    label = TRUE,
+                                    axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -88,7 +94,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -185,6 +192,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -230,7 +242,8 @@
                                       alias = NULL,
                                       channels,
                                       plot = TRUE,
-                                      label = TRUE, ...) {
+                                      label = TRUE,
+                                      axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -253,7 +266,8 @@
       channels = channels,
       popup = TRUE,
       legend = TRUE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -346,6 +360,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -402,7 +421,8 @@
                                      channels,
                                      plot = TRUE,
                                      axis = "x",
-                                     label = TRUE, ...) {
+                                     label = TRUE,
+                                     axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -425,7 +445,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -547,6 +568,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -600,7 +626,8 @@
                                       alias = NULL,
                                       channels,
                                       plot = TRUE,
-                                      label = TRUE, ...) {
+                                      label = TRUE,
+                                      axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -623,7 +650,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -723,6 +751,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -775,7 +808,8 @@
                                      alias = NULL,
                                      channels,
                                      plot = TRUE,
-                                     label = TRUE, ...) {
+                                     label = TRUE,
+                                     axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -798,7 +832,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -896,6 +931,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
@@ -941,7 +981,8 @@
                                     alias = NULL,
                                     channels,
                                     plot = TRUE,
-                                    label = TRUE, ...) {
+                                    label = TRUE,
+                                    axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -964,7 +1005,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -1112,6 +1154,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list containing the constructed
@@ -1155,7 +1202,8 @@
                                      alias = NULL,
                                      channels,
                                      plot = TRUE,
-                                     label = TRUE, ...) {
+                                     label = TRUE, 
+                                     axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -1183,7 +1231,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 
@@ -1272,6 +1321,11 @@
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:polygonGate-class]{polygonGate}}
@@ -1316,7 +1370,8 @@
                                 alias = NULL,
                                 channels,
                                 plot = TRUE,
-                                label = TRUE, ...) {
+                                label = TRUE,
+                                axes_limits = "machine", ...) {
 
   # WARNING
   message("Web gates are an experimental feature - use at your own risk!")
@@ -1342,7 +1397,8 @@
       channels = channels,
       popup = TRUE,
       legend = FALSE,
-      label = FALSE, ...
+      label = FALSE,
+      axes_limits = axes_limits, ...
     )
   }
 

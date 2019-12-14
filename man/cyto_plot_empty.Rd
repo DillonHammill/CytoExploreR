@@ -15,7 +15,7 @@ cyto_plot_empty(x, ...)
   gate = NA,
   xlim = NA,
   ylim = NA,
-  limits = "auto",
+  axes_limits = "auto",
   title,
   xlab,
   ylab,
@@ -91,7 +91,7 @@ gate co-ordinates are taken into account when computing axes limits.}
 
 \item{ylim}{lower and upper limits of y axis (e.g. c(0,5)).}
 
-\item{limits}{options include \code{"auto"}, \code{"data"} or
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
 to \code{"auto"} by default to use optimised axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}

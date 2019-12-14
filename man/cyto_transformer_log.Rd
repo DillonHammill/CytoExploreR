@@ -16,6 +16,7 @@
   plot = TRUE,
   popup = FALSE,
   display = 25000,
+  axes_limits = "machine",
   ...
 )
 
@@ -27,6 +28,7 @@
   plot = TRUE,
   popup = FALSE,
   display = 25000,
+  axes_limits = "machine",
   ...
 )
 
@@ -38,6 +40,7 @@
   plot = TRUE,
   popup = FALSE,
   display = 25000,
+  axes_limits = "machine",
   ...
 )
 
@@ -49,6 +52,7 @@
   plot = TRUE,
   popup = FALSE,
   display = 25000,
+  axes_limits = "machine",
   ...
 )
 }
@@ -74,6 +78,12 @@ pop-up window.}
 
 \item{display}{number or frequency of events to display in plots, set to
 25000 events by default. See \code{\link{cyto_plot}} for details.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} and

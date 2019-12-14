@@ -430,6 +430,11 @@ cyto_check <- function(x) {
 #'   should be plotted using \code{\link{cyto_plot}}.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   popup window, set to FALSE by default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control
+#'   over axes limits can be obtained by altering the \code{xlim} and
+#'   \code{ylim} arguments.
 #' @param ... additional arguments passed to \code{\link{cyto_transformer_log}},
 #'   \code{\link{cyto_transformer_arcsinh}}, \code{\link{cyto_transformer_biex}}
 #'   or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
@@ -494,10 +499,11 @@ cyto_transform.default <- function(x,
                                    inverse = FALSE,
                                    plot = TRUE,
                                    popup = FALSE,
+                                   axes_limits = "machine",
                                    ...) {
 
   # No transformations supplied - automatically obtain transform definitions
-  if (is.null(trans)) {
+  if (is.null(trans) | .all_na(trans)) {
 
     # Message not recommended to auto-transform flowFrame/flowSet objects
     if (is(x, "flowFrame") | is(x, "flowSet")) {
@@ -513,7 +519,8 @@ cyto_transform.default <- function(x,
         channels = channels,
         parent = parent,
         select = select,
-        plot = FALSE, ...
+        plot = FALSE, 
+        ...
       )
     } else if (type == "arcsinh") {
       transformer_list <- cyto_transformer_arcsinh(x,
@@ -599,12 +606,14 @@ cyto_transform.default <- function(x,
             cyto_plot(cyto_data,
               channels = chan,
               axes_trans = transformer_list,
-              title = NA
+              title = NA,
+              axes_limits = axes_limits
             )
           } else if (inverse == TRUE) {
             cyto_plot(cyto_data,
               channels = chan,
-              title = NA
+              title = NA,
+              axes_limits = axes_limits
             )
           }
         })
@@ -625,6 +634,7 @@ cyto_transform.transformList <- function(x,
                                          trans = NULL,
                                          plot = TRUE,
                                          popup = FALSE,
+                                         axes_limits = "machine",
                                          ...) {
 
   # Added for backwards compatibility - flowFrame/flowSet objects only
@@ -675,7 +685,8 @@ cyto_transform.transformList <- function(x,
         lapply(channels, function(chan) {
           cyto_plot(cyto_data,
             channels = chan,
-            title = NA
+            title = NA,
+            axes_limits = axes_limits
           )
         })
       },
@@ -696,6 +707,7 @@ cyto_transform.transformerList <- function(x,
                                            inverse = FALSE,
                                            plot = TRUE,
                                            popup = FALSE,
+                                           axes_limits = "machine",
                                            ...) {
 
   # Apply transformations to flowFrame/flowSet
@@ -758,12 +770,14 @@ cyto_transform.transformerList <- function(x,
             cyto_plot(cyto_data,
               channels = chan,
               axes_trans = trans,
-              title = NA
+              title = NA,
+              axes_limits = axes_limits
             )
           } else if (inverse == TRUE) {
             cyto_plot(cyto_data,
               channels = chan,
-              title = NA
+              title = NA,
+              axes_limits = axes_limits
             )
           }
         })
@@ -777,7 +791,6 @@ cyto_transform.transformerList <- function(x,
   # Return transformed data
   return(x)
 }
-
 
 ## CYTO_TRANSFORM_EXTRACT ------------------------------------------------------
 

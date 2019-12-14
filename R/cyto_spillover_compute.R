@@ -60,6 +60,11 @@
 #'   directly to the samples using \code{cyto_details_edit}.
 #' @param spillover name of the output spillover csv file, set to
 #'   \code{"Spillover-Matrix.csv"} by default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return spillover matrix and write spillover matrix to csv file named in
@@ -130,6 +135,7 @@ cyto_spillover_compute.GatingSet <- function(x,
                                              axes_trans = NULL,
                                              channel_match = NULL,
                                              spillover = NULL,
+                                             axes_limits = "machine",
                                              ...) {
 
   # PREPARE ARGUMENTS ----------------------------------------------------------
@@ -381,7 +387,8 @@ cyto_spillover_compute.GatingSet <- function(x,
         density_fill = c("red", "dodgerblue"),
         legend = FALSE,
         density_fill_alpha = 0.6,
-        title = nms[z], ...
+        title = nms[z],
+        axes_limits = axes_limits, ...
       )
 
       # cyto_gate_draw on each flowFrame using interval gate on selected channel
@@ -507,7 +514,8 @@ cyto_spillover_compute.GatingSet <- function(x,
         density_fill = "dodgerblue",
         legend = FALSE,
         density_fill_alpha = 0.6,
-        title = nms[z], ...
+        title = nms[z],
+        axes_limits = axes_limits, ...
       )
 
       # GATE NEGATIVE POPULATION
@@ -622,6 +630,7 @@ cyto_spillover_compute.flowSet <- function(x,
                                            axes_trans = NULL,
                                            channel_match = NULL,
                                            spillover = NULL,
+                                           axes_limits = "machine",
                                            ...) {
 
   # PREPARE ARGUMENTS ---------------------------------------------------------
@@ -829,7 +838,8 @@ cyto_spillover_compute.flowSet <- function(x,
         density_fill = c("red", "dodgerblue"),
         legend = FALSE,
         density_fill_alpha = 0.6,
-        title = nms[z], ...
+        title = nms[z],
+        axes_limits = axes_limits, ...
       )
 
       # cyto_gate_draw on each flowFrame using interval gate on selected channel
@@ -948,7 +958,8 @@ cyto_spillover_compute.flowSet <- function(x,
         density_fill = "dodgerblue",
         legend = FALSE,
         density_fill_alpha = 0.6,
-        title = nms[z], ...
+        title = nms[z],
+        axes_limits = axes_limits, ...
       )
 
       # Gate negative population

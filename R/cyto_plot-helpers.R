@@ -25,7 +25,7 @@
 #'   gate co-ordinates are taken into account when computing axes limits.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
-#' @param limits options include \code{"auto"}, \code{"data"} or
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
@@ -150,7 +150,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       gate = NA,
                                       xlim = NA,
                                       ylim = NA,
-                                      limits = "auto",
+                                      axes_limits = "auto",
                                       title,
                                       xlab,
                                       ylab,
@@ -254,7 +254,7 @@ cyto_plot_empty.flowFrame <- function(x,
     # XLIM
     xlim <- .cyto_range(fr_list,
       channels = channels[1],
-      limits = limits,
+      axes_limits = axes_limits,
       plot = TRUE
     )[, 1]
   }
@@ -279,7 +279,7 @@ cyto_plot_empty.flowFrame <- function(x,
       # YLIM
       ylim <- .cyto_range(fr_list,
         channels = channels[2],
-        limits = limits,
+        axes_limits = axes_limits,
         plot = TRUE
       )[, 1]
     }
@@ -342,7 +342,7 @@ cyto_plot_empty.flowFrame <- function(x,
         channels = channels[1],
         axes_trans = axes_trans,
         axes_range = lims,
-        limits = limits
+        axes_limits = axes_limits
       )[[1]]
     }
   }
@@ -359,7 +359,7 @@ cyto_plot_empty.flowFrame <- function(x,
           channels = channels[2],
           axes_trans = axes_trans,
           axes_range = lims,
-          limits = limits
+          axes_limits = axes_limits
         )[[1]]
       } else {
         axes_text[[2]] <- NA
@@ -642,7 +642,7 @@ cyto_plot_empty.list <- function(x,
                                  gate = NA,
                                  xlim = NA,
                                  ylim = NA,
-                                 limits = "auto",
+                                 axes_limits = "auto",
                                  title,
                                  xlab,
                                  ylab,
@@ -1232,7 +1232,7 @@ cyto_plot_theme_reset <- function() {
 #' @export
 cyto_plot_theme_args <- function() {
   c(
-    "limits",
+    "axes_limits",
     "popup",
     "density_modal",
     "density_smooth",
