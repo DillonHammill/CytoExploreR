@@ -439,14 +439,17 @@ cyto_plot_compensation.flowSet <- function(x,
   pars <- par(c("mfrow", "oma"))
   on.exit(par(pars))
 
+  # COPY
+  fs <- cyto_copy(x)
+  
   # SAMPLES
-  smp <- length(x)
+  smp <- length(fs)
 
   # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
+  pd <- cyto_details(fs)
 
   # CHANNELS
-  channels <- cyto_fluor_channels(x)
+  channels <- cyto_fluor_channels(fs)
 
   # APPLY COMPENSATION & TRANSFORMATIONS ---------------------------------------
 
@@ -470,19 +473,27 @@ cyto_plot_compensation.flowSet <- function(x,
       type = "biex",
       plot = FALSE
     )
+  }else{
+    # TRANSFORM
+    if(.all_na(axes_trans)){
+      fs <- cyto_transform(fs,
+                           trans = axes_trans,
+                           type = "biex",
+                           plot = FALSE)
+    }
   }
 
   # CHANNEL MATCHING -----------------------------------------------------------
 
   # CHANNEL MATCH MISSING
   if (is.null(channel_match)) {
-    chan <- cyto_channel_select(x)
+    chan <- cyto_channel_select(fs)
     # CHANNEL MATCH SUPPLIED
   } else {
     # CHANNEL/MARKER
     if (is.character(channel_match) &
-      channel_match %in% c(channels, cyto_markers_extract(fr, channels))) {
-      chan <- cyto_channels_extract(fr, channel_match)
+      channel_match %in% c(channels, cyto_markers_extract(fs, channels))) {
+      chan <- cyto_channels_extract(fs, channel_match)
       # CHANNEL MATCH OBJECT/STRING
     } else {
       # CHANNEL MATCH OBJECT
@@ -492,7 +503,7 @@ cyto_plot_compensation.flowSet <- function(x,
         if (!all(c("name", "channel") %in% colnames(channel_match))) {
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
-        ind <- match(cyto_names(x), rownames(channel_match))
+        ind <- match(cyto_names(fs), rownames(channel_match))
         chan <- channel_match$channel[ind]
       } else {
         if (getOption("CytoExploreR_wd_check") == TRUE) {
@@ -502,7 +513,7 @@ cyto_plot_compensation.flowSet <- function(x,
               row.names = 1,
               stringsAsFactors = FALSE
             )
-            ind <- match(cyto_names(x), row.names(channel_match))
+            ind <- match(cyto_names(fs), row.names(channel_match))
             chan <- channel_match$channel[ind]
           } else {
             stop(paste(channel_match, "is not in this working directory."))
@@ -513,199 +524,54 @@ cyto_plot_compensation.flowSet <- function(x,
             row.names = 1,
             stringsAsFactors = FALSE
           )
-          ind <- match(cyto_names(x), row.names(channel_match))
+          ind <- match(cyto_names(fs), row.names(channel_match))
           chan <- channel_match$channel[ind]
         }
       }
     }
   }
+  
+  # PREPARE DATA AND ARGUMENTS -------------------------------------------------
+  
+  # FLOWFRAME LIST
+  fr_list <- cyto_convert(fs, "list of flowFrames")
+  names(fr_list) <- cyto_names(fs)
 
-  # Channel match file
-  if (is.null(channel_match)) {
-
-    # No channel_match file supplied
-    message("Select a channel for each sample from the dropdown menu.")
-    pd$channel <- paste(cyto_channel_select(x))
-
-    # Save new channel_match csv file
-    message("Saving channel selections to 'Compensation-Channels.csv'.")
-    write.csv(pd, "Compensation-Channels.csv", row.names = FALSE)
-  } else if (!is.null(channel_match)) {
-    if (getOption("CytoExploreR_wd_check") == TRUE) {
-      if (file_wd_check(channel_match) == FALSE) {
-        message(paste(channel_match, "is not in this working directory."))
-        pd$channel <- paste(cyto_channel_select(x))
-      } else {
-        cm <- read.csv(channel_match,
-          header = TRUE,
-          row.names = 1,
-          stringsAsFactors = FALSE
-        )
-        chans <- cm$channel[match(cyto_names(x), row.names(cm))]
-        pd$channel <- paste(chans)
-      }
-    } else {
-      cm <- read.csv(channel_match,
-        header = TRUE,
-        row.names = 1,
-        stringsAsFactors = FALSE
-      )
-      chans <- cm$channel[match(cyto_names(x), row.names(cm))]
-      pd$channel <- paste(chans)
-    }
-  }
-
-  # Pull out unstained control if supplied
+  # UNSTAINED OVERLAY
   if ("Unstained" %in% pd$channel) {
-    unst <- TRUE
-    NIL <- x[[match("Unstained", pd$channel)]]
-    x <- x[-match("Unstained", pd$channel)]
-    smp <- smp - 1
-  } else {
-    unst <- FALSE
+    NIL <- fr_list[match("Unstained", pd$channel)]
+    fr_list <- fr_list[-match("Unstained", pd$channel)]
+    NIL <- rep(NIL, length.out = length(fr_list))
   }
+  
+  # PULL DOWN ARGUMENTS
+  args <- .args_list()
+  
+  # CONSTRUCT PLOTS ------------------------------------------------------------
 
-  # Sample names
-  nms <- cyto_names(x)
-
-  # Restrict pd to x
-  pd <- pd[!pd$channel == "Unstained", ]
-
-  # Convert x into list of flowFrames
-  fs_list <- lapply(seq(1, smp, 1), function(z) x[[z]])
-
-  # Pop-up
-  if (popup == TRUE) {
-    cyto_plot_new(popup)
-  }
-
-  # layout
-  if (missing(layout)) {
-    layout <- c(
-      n2mfrow(length(channels))[2],
-      n2mfrow(length(channels))[1]
-    )
-    par(mfrow = layout)
-  } else if (!missing(layout)) {
-    if (layout[1] == FALSE) {
-
-      # Do nothing
-    } else {
-      par(mfrow = layout)
+  plots <- lapply(seq_along(fr_list), function(z){
+    # DATA
+    args[["x"]] <<- fr_list[[z]]
+    # OVERLAY
+    if(args[["overlay"]] != FALSE &
+       "Unstained" %in% pd$channel){
+      args[["overlay"]] <- NIL[[z]]
     }
-  }
-
-  # Title
-  if (missing(header)) {
-    header <- pd$name
-  }
-
-  # Title space
-  if (!.all_na(header)) {
-    par(oma = c(0, 0, 3, 0))
-  }
-
-  # Loop through fs_list
-  lapply(seq_len(smp), function(z) {
-    lapply(seq_len(length(channels)), function(y) {
-      # Overlay unstained control
-      if (unst == TRUE & overlay == TRUE) {
-        # Density distribution if channels match
-        if (pd$channel[z] == channels[y]) {
-          cyto_plot(NIL,
-            channels = pd$channel[z],
-            overlay = fs_list[[z]],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            legend = FALSE,
-            title = title,
-            density_stack = density_stack,
-            density_fill = density_fill,
-            density_fill_alpha = density_fill_alpha, ...
-          )
-          # Scatter plot if channels are different
-        } else {
-          cyto_plot(fs_list[[z]],
-            channels = c(pd$channel[z], channels[y]),
-            overlay = NIL,
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            legend = FALSE,
-            title = title, ...
-          )
-        }
-        # No unstained control overlay
-      } else {
-        # Density distribution if channels match
-        if (pd$channel[z] == channels[y]) {
-          cyto_plot(fs_list[[z]],
-            channels = pd$channel[z],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            legend = FALSE,
-            title = title,
-            density_stack = density_stack,
-            density_fill = rev(density_fill),
-            density_fill_alpha = density_fill_alpha, ...
-          )
-          # Scatterplots if channels don't match
-        } else {
-          cyto_plot(fs_list[[z]],
-            channels = c(pd$channel[z], channels[y]),
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            legend = FALSE,
-            title = title, ...
-          )
-        }
-      }
-
-      # Custom layouts require headers
-      if (y == prod(layout)) {
-        if (!.all_na(header)) {
-          mtext(header[z],
-            outer = TRUE,
-            cex = header_text_size,
-            font = header_text_font,
-            col = header_text_col
-          )
-        }
-      }
-
-      # Call new plot
-      if (z != smp &
-        channels[y] == channels[length(channels)]) {
-        if (!.all_na(header)) {
-          mtext(header[z],
-            outer = TRUE,
-            cex = header_text_size,
-            font = header_text_font,
-            col = header_text_col
-          )
-        }
-
-        if (popup == TRUE) {
-          cyto_plot_new(popup)
-          par(mfrow = layout)
-          par(oma = c(0, 0, 3, 0))
-        } else {
-          plot.new()
-          par(mfrow = layout)
-          par(oma = c(0, 0, 3, 0))
-        }
-      } else if (z == smp &
-        channels[y] == channels[length(channels)]) {
-        if (!.all_na(header)) {
-          mtext(header[z],
-            outer = TRUE,
-            cex = header_text_size,
-            font = header_text_font,
-            col = header_text_col
-          )
-        }
-      }
-    })
+    # ARGUMENTS
+    cyto_plot_comp_args <- formalArgs("cyto_plot_compensation.flwoFrame")
+    # REMOVE CHANNEL_MATCH & COMPENSATE ARGUMENTS
+    cyto_plot_comp_args <- cyto_plot_comp_args[-match(c("channel_match",
+                                                        "compensate"),
+                                                      cyto_plot_comp_args)]
+    # CYTO_PLOT_COMPENSATION
+    do.call("cyto_plot_compensation",
+            c(args[cyto_plot_comp_args],
+              list("channel_match" = pd[pd[, "name"] == cyto_names(args[["x"]]),
+                                        "channel"],
+                   "compensate" = FALSE)))
+    
   })
+  names(plots) <- cyto_names(fr_list)
 
   # RECORD/SAVE ----------------------------------------------------------------
 
@@ -727,7 +593,7 @@ cyto_plot_compensation.flowSet <- function(x,
   # RETURN RECORDED PLOTS ------------------------------------------------------
 
   # RECORDED PLOTS
-  return(plots)
+  invisible(plots)
 }
 
 #' @rdname cyto_plot_compensation
