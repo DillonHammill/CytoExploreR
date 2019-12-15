@@ -457,43 +457,52 @@ cyto_plot_compensation.flowSet <- function(x,
   if (compensate == TRUE) {
     # INVERSE TRANSFORMATIONS
     if (!.all_na(axes_trans)) {
-      fr <- cyto_transform(fr,
+      fs <- cyto_transform(fs,
         trans = axes_trans,
         inverse = TRUE,
         plot = FALSE
       )
     }
     # COMPENSATE
-    fr <- cyto_compensate(fr,
+    fs <- cyto_compensate(fs,
       spillover = spillover
     )
     # TRANSFORM
-    fr <- cyto_transform(fr,
-      trans = axes_trans,
-      type = "biex",
-      plot = FALSE
-    )
+    if(!.all_na(axes_trans)){
+      fs <- cyto_transform(fs,
+                           trans = axes_trans,
+                           plot = FALSE
+      )
+    }else{
+      axes_trans <- cyto_transformer_biex(fs,
+                                        plot = FALSE)
+      fs <- cyto_transform(fs,
+        trans = axes_trans,
+        plot = FALSE
+      )
+    }
   }else{
     # TRANSFORM
     if(.all_na(axes_trans)){
+      axes_trans <- cyto_transformer_biex(fs,
+                                          plot = FALSE)
       fs <- cyto_transform(fs,
                            trans = axes_trans,
-                           type = "biex",
                            plot = FALSE)
     }
   }
-
+  
   # CHANNEL MATCHING -----------------------------------------------------------
 
   # CHANNEL MATCH MISSING
   if (is.null(channel_match)) {
-    chan <- cyto_channel_select(fs)
+    pd$channel <- cyto_channel_select(fs)
     # CHANNEL MATCH SUPPLIED
   } else {
     # CHANNEL/MARKER
     if (is.character(channel_match) &
       channel_match %in% c(channels, cyto_markers_extract(fs, channels))) {
-      chan <- cyto_channels_extract(fs, channel_match)
+      pd$channel <- cyto_channels_extract(fs, channel_match)
       # CHANNEL MATCH OBJECT/STRING
     } else {
       # CHANNEL MATCH OBJECT
@@ -504,7 +513,7 @@ cyto_plot_compensation.flowSet <- function(x,
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
         ind <- match(cyto_names(fs), rownames(channel_match))
-        chan <- channel_match$channel[ind]
+        pd$channel <- channel_match$channel[ind]
       } else {
         if (getOption("CytoExploreR_wd_check") == TRUE) {
           if (file_wd_check(channel_match)) {
@@ -514,7 +523,7 @@ cyto_plot_compensation.flowSet <- function(x,
               stringsAsFactors = FALSE
             )
             ind <- match(cyto_names(fs), row.names(channel_match))
-            chan <- channel_match$channel[ind]
+            pd$channel <- channel_match$channel[ind]
           } else {
             stop(paste(channel_match, "is not in this working directory."))
           }
@@ -525,7 +534,7 @@ cyto_plot_compensation.flowSet <- function(x,
             stringsAsFactors = FALSE
           )
           ind <- match(cyto_names(fs), row.names(channel_match))
-          chan <- channel_match$channel[ind]
+          pd$channel <- channel_match$channel[ind]
         }
       }
     }
@@ -553,21 +562,27 @@ cyto_plot_compensation.flowSet <- function(x,
     # DATA
     args[["x"]] <<- fr_list[[z]]
     # OVERLAY
-    if(args[["overlay"]] != FALSE &
-       "Unstained" %in% pd$channel){
-      args[["overlay"]] <- NIL[[z]]
+    if(args[["overlay"]]){
+      if("Unstained" %in% pd$channel){
+        args[["overlay"]] <- NIL[[z]]
+      }else{
+        args[["overlay"]] <- FALSE
+      }
     }
+    # CHANNEL_MATCH
+    chan <- pd[pd[, "name"] == cyto_names(args[["x"]]), "channel"]
     # ARGUMENTS
-    cyto_plot_comp_args <- formalArgs("cyto_plot_compensation.flwoFrame")
+    cyto_plot_comp_args <- formalArgs("cyto_plot_compensation.flowFrame")
     # REMOVE CHANNEL_MATCH & COMPENSATE ARGUMENTS
     cyto_plot_comp_args <- cyto_plot_comp_args[-match(c("channel_match",
                                                         "compensate"),
                                                       cyto_plot_comp_args)]
+    # ADD OVERLAY ARGUMENT
+    cyto_plot_comp_args <- c(cyto_plot_comp_args, "overlay")
     # CYTO_PLOT_COMPENSATION
     do.call("cyto_plot_compensation",
             c(args[cyto_plot_comp_args],
-              list("channel_match" = pd[pd[, "name"] == cyto_names(args[["x"]]),
-                                        "channel"],
+              list("channel_match" = chan,
                    "compensate" = FALSE)))
     
   })
@@ -617,7 +632,7 @@ cyto_plot_compensation.flowFrame <- function(x,
                                                "blue"
                                              ),
                                              density_fill_alpha = 0.5, ...) {
-
+  
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
   # SET PLOT METHOD
@@ -663,9 +678,10 @@ cyto_plot_compensation.flowFrame <- function(x,
   }else{
     # TRANSFORM
     if(.all_na(axes_trans)){
+      axes_trans <- cyto_transformer_biex(fr,
+                                          plot = FALSE)
       fr <- cyto_transform(fr,
                           trans = axes_trans,
-                          type = "biex",
                           plot = FALSE
       )
     }
@@ -726,14 +742,14 @@ cyto_plot_compensation.flowFrame <- function(x,
     cyto_plot_new(popup)
   }
 
-  # LAYOUT
-  if (missing(layout)) {
+  # LAYOUT - FLOWSET METHOD EMPTY
+  if (missing(layout) | .empty(layout)) {
     layout <- c(
       n2mfrow(length(channels))[2],
       n2mfrow(length(channels))[1]
     )
     par(mfrow = layout)
-  } else if (!missing(layout)) {
+  } else {
     if (layout[1] == FALSE) {
 
       # Do nothing
@@ -743,7 +759,7 @@ cyto_plot_compensation.flowFrame <- function(x,
   }
 
   # TITLE
-  if (missing(header)) {
+  if (missing(header) |.empty(header)) {
     header <- cyto_names(fr)
   }
 
