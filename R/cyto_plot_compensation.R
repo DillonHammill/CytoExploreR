@@ -556,6 +556,17 @@ cyto_plot_compensation.flowSet <- function(x,
   # PULL DOWN ARGUMENTS
   args <- .args_list()
   
+  # REMOVE UNNECESSARY ARGUMENTS
+  args <- args[-match(c("pars",
+                        "fs",
+                        "pd",
+                        "smp",
+                        "channels",
+                        "ind",
+                        "fr_list",
+                        "NIL"),
+                      names(args))]
+  
   # CONSTRUCT PLOTS ------------------------------------------------------------
 
   plots <- lapply(seq_along(fr_list), function(z){
@@ -570,21 +581,13 @@ cyto_plot_compensation.flowSet <- function(x,
       }
     }
     # CHANNEL_MATCH
-    chan <- pd[pd[, "name"] == cyto_names(args[["x"]]), "channel"]
-    # ARGUMENTS
-    cyto_plot_comp_args <- formalArgs("cyto_plot_compensation.flowFrame")
-    # REMOVE CHANNEL_MATCH & COMPENSATE ARGUMENTS
-    cyto_plot_comp_args <- cyto_plot_comp_args[-match(c("channel_match",
-                                                        "compensate"),
-                                                      cyto_plot_comp_args)]
-    # ADD OVERLAY ARGUMENT
-    cyto_plot_comp_args <- c(cyto_plot_comp_args, "overlay")
+    args[["channel_match"]] <- pd[pd[, "name"] == cyto_names(args[["x"]]),
+                                  "channel"]
+    # COMPENSATE
+    args[["compensate"]] <- FALSE
     # CYTO_PLOT_COMPENSATION
     do.call("cyto_plot_compensation",
-            c(args[cyto_plot_comp_args],
-              list("channel_match" = chan,
-                   "compensate" = FALSE)))
-    
+            args)
   })
   names(plots) <- cyto_names(fr_list)
 
