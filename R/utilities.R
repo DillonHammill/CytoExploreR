@@ -25,6 +25,15 @@
   
 }
 
+## MATCH_IND -------------------------------------------------------------------
+  
+#' Indices for matches excluding NA
+#' @noRd
+match_ind <- function(x, y, ...){
+  ind <- match(x, y, ...)
+  ind[!is.na(ind)]
+}
+
 ## ALL NA ----------------------------------------------------------------------
 
 #' Check all elements of vector are NA

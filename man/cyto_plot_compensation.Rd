@@ -17,10 +17,10 @@
   axes_trans = NA,
   axes_limits = "machine",
   overlay = TRUE,
-  layout,
+  layout = NULL,
   popup = FALSE,
   title = NA,
-  header,
+  header = NULL,
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
@@ -59,10 +59,10 @@
   axes_trans = NA,
   axes_limits = "machine",
   overlay = TRUE,
-  layout,
+  layout = NULL,
   popup = FALSE,
   title = NA,
-  header,
+  header = NULL,
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
@@ -79,10 +79,10 @@
   spillover = NULL,
   axes_trans = NA,
   axes_limits = "machine",
-  layout,
+  layout = NULL,
   popup = FALSE,
   title = NA,
-  header,
+  header = NULL,
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
@@ -221,6 +221,7 @@ cyto_plot_compensation(gs,
 
 # Return "CytoExploreR_wd_check" to default
 options("CytoExploreR_wd_check" = TRUE)
+
 }
 \seealso{
 \code{\link{cyto_spillover_compute}}
