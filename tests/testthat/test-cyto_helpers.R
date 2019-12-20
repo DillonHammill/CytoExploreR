@@ -17,11 +17,8 @@ test_that("cyto_details", {
                                    "NA"),
                    stringsAsFactors = FALSE)
   rownames(pd) <- paste0("Activation", "_", seq_len(33), ".fcs")
-  pd$Treatment <- factor(pd$Treatment,
-                         c(paste0("Stim", "-", c("A","B","C","D")), "NA"))
-  pd$name <- factor(pd$name, levels = pd$name)
-  expect_equal(cyto_details(gs),
-               pd)
+  pd$OVAConc <- as.character(pd$OVAConc)
+  expect_equal(cyto_details(gs), pd)
   
 })
 
@@ -54,7 +51,7 @@ test_that("cyto_check",{
   expect_true(cyto_check(fs))
   
   # ncdfFlowSet
-  expect_true(suppressMessages(cyto_check(ncdfFlowSet(fs))))
+  expect_true(suppressMessages(cyto_check(ncdfFlow::ncdfFlowSet(fs))))
   
   # GatingHierarchy
   expect_true(cyto_check(gs[[1]]))
@@ -239,16 +236,14 @@ test_that("cyto_group_by", {
                "OVA is not a valid variable for this flowSet.")
   
   # flowSet
-  exp <- list(fs[1:8],fs[9:16],fs[17:24],fs[25:32],fs[33])
-  names(exp) <- c(paste0("Stim-",c("A","B","C","D")), "NA")
-  expect_equal(cyto_group_by(fs,"Treatment"),
-               exp)
+  exp <- list( fs[33], fs[1:8], fs[9:16], fs[17:24], fs[25:32])
+  names(exp) <- c("NA", paste0("Stim-",c("A","B","C","D")))
+  expect_equal(cyto_group_by(fs,"Treatment"), exp)
   
   # GatingSet - different guid slot for subset
-  exp <- list(gs[1:8],gs[9:16],gs[17:24],gs[25:32],gs[33])
-  names(exp) <- c(paste0("Stim-",c("A","B","C","D")), "NA")
-  expect_equivalent(cyto_group_by(gs,"Treatment"),
-                    exp)
+  exp <- list(gs[33], gs[1:8], gs[9:16], gs[17:24], gs[25:32])
+  names(exp) <- c("NA", paste0("Stim-",c("A","B","C","D")))
+  expect_equivalent(cyto_group_by(gs,"Treatment"), exp)
   
 })
 
@@ -443,7 +438,7 @@ test_that("cyto_channel_match", {
   mock_edit <- mockery::mock(channel_match)
   mock_channel_match <- testthat::with_mock(
     edit = mock_edit,
-    cyto_channel_match(fs_comp,channel_match = "Channel-Match"))
+    cyto_channel_match(fs_comp, save_as = "Channel-Match"))
   expect_equal(read.csv("Channel-Match.csv"), channel_match)
   expect_equal(mock_channel_match, channel_match)
   

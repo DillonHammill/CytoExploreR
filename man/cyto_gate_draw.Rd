@@ -39,7 +39,7 @@
   axis = "x",
   label = TRUE,
   plot = TRUE,
-  axes_limits = axes_limits,
+  axes_limits = "machine",
   ...
 )
 
@@ -54,6 +54,7 @@
   axis = "x",
   label = TRUE,
   plot = TRUE,
+  axes_limits = "machine",
   ...
 )
 }

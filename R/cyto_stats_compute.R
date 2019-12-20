@@ -110,20 +110,7 @@ cyto_stats_compute.GatingSet <- function(x,
   gs <- x
   
   # Get trans if not supplied
-  if (.all_na(trans)) {
-    trans <- gs@transformation
-    if(length(trans) != 0){
-      trans <- trans[[1]]
-    }else{
-      trans <- NA
-    }
-    # Check transformerList is supplied
-  }else if(!.all_na(trans)){
-    # transformerLists only
-    if(!is(trans, "transformerList")){
-      stop("'trans' must be an object of class transformerList!")
-    }
-  }
+  trans <- cyto_transformer_extract(gs)
   
   # Alias must be supplied
   if (is.null(alias)) {
@@ -175,20 +162,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   gh <- x
   
   # Get trans if not supplied
-  if (.all_na(trans)) {
-    trans <- gh@transformation
-    if(length(trans) != 0){
-      trans <- trans[[1]]
-    }else{
-      trans <- NA
-    }
-    # Check transformerList is supplied
-  }else if(!.all_na(trans)){
-    # transformerLists only
-    if(!is(trans, "transformerList")){
-      stop("'trans' must be an object of class transformerList!")
-    }
-  }
+  trans <- cyto_transformer_extract(gh)
   
   # Alias must be supplied
   if (is.null(alias)) {

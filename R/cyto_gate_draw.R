@@ -510,7 +510,7 @@ cyto_gate_draw.flowSet <- function(x,
                                    axis = "x",
                                    label = TRUE,
                                    plot = TRUE,
-                                   axes_limits = axes_limits, ...) {
+                                   axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -641,7 +641,8 @@ cyto_gate_draw.flowFrame <- function(x,
                                      display = 25000,
                                      axis = "x",
                                      label = TRUE,
-                                     plot = TRUE, ...) {
+                                     plot = TRUE,
+                                     axes_limits = "machine", ...) {
 
   # CHECKS ---------------------------------------------------------------------
 

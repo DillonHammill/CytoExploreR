@@ -190,7 +190,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
+    x <- cyto_transform(cyto_copy(x), 
+                        trans = trans, 
+                        inverse = TRUE, 
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate mean directly - colMeans for speed
@@ -389,7 +392,7 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x,
+    x <- cyto_transform(cyto_copy(x),
                         trans = trans,
                         inverse = TRUE, 
                         plot = FALSE)
@@ -480,7 +483,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
+    x <- cyto_transform(cyto_copy(x), 
+                        trans = trans, 
+                        inverse = TRUE, 
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate mode directly
@@ -573,7 +579,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
+    x <- cyto_transform(cyto_copy(x), 
+                        trans = trans, 
+                        inverse = TRUE, 
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate CV directly

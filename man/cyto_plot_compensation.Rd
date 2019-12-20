@@ -38,7 +38,7 @@
   spillover = NULL,
   axes_trans = NA,
   axes_limits = "machine",
-  layout,
+  layout = NULL,
   popup = FALSE,
   title = NA,
   header,
