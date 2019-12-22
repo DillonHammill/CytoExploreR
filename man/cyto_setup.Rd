@@ -4,7 +4,13 @@
 \alias{cyto_setup}
 \title{Load.fcs files into GatingSet and annotate with experiment details}
 \usage{
-cyto_setup(path = ".", gatingTemplate = NULL, restrict = FALSE, ...)
+cyto_setup(
+  path = ".",
+  gatingTemplate = NULL,
+  restrict = FALSE,
+  clean = FALSE,
+  ...
+)
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in (e.g. name of
@@ -16,6 +22,9 @@ saving.}
 \item{restrict}{logical indicating whether unassigned channels should be
 dropped from the returned cytoset, set to FALSE by default.  See
 \code{\link{cyto_channels_restrict}}.}
+
+\item{clean}{logical indicating whether the loaded data should be cleaned
+using \code{cyto_clean}, set to FALSE by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}
@@ -29,13 +38,21 @@ object of class
 prepare your cytometry data for downstream analyses. The .fcs files are first
 read into a \code{\link[flowWorkspace:cytoset]{cytoset}} using
 \code{\link{cyto_load}} which is then added to a
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
-to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
-update the GatingSet with the details of the experiment. These details can be
-modified later with additional calls to \code{\link{cyto_markers_edit}}
-and/or \code{\link{cyto_details_edit}}. Users can optionally provide a name
-for a gatingTemplate csv file which will be created if necessary and assigned
-as the active gatingTemplate.
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+}
+\details{
+Calls are then made to \code{\link{cyto_markers_edit}} and
+\code{\link{cyto_details_edit}} to update the GatingSet with the details of
+the experiment. These details can be modified later with additional calls to
+\code{\link{cyto_markers_edit}} and/or \code{\link{cyto_details_edit}}.
+
+Through the \code{clean} argument, the data can then be optionally cleaned
+using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
+anomalies in the recorded data. 
+
+Users can optionally provide a name for a
+gatingTemplate csv file which will be created if necessary and assigned as
+the active gatingTemplate.
 }
 \examples{
 
@@ -60,4 +77,12 @@ cyto_details(gs)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+
+\code{\link{cyto_load}}
+\code{\link{cyto_markers_edit}}
+\code{\link{cyto_details_edit}}
+\code{\link{cyto_channels_restrict}}
+\code{\link{cyto_clean}}
+\code{\link{cyto_gatingTemplate_select}}
+\code{\link{cyto_gatingTemplate_create}}
 }

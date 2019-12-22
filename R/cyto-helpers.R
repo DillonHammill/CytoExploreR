@@ -114,6 +114,87 @@ cyto_load <- function(path = ".",
   return(x)
 }
 
+## CYTO_CLEAN ------------------------------------------------------------------
+
+#' Apply flowAI anomaly detection to clean cytometry data
+#'
+#' @param x object of class \code{flowFrame}, \code{flowSet},
+#'   \code{GatingHierarchy} or \code{GatingSet}. The \code{root} node extracted
+#'   when a \code{GatingSet} or \code{GatingHierachy} is supplied.
+#' @param ... additional arguments passed to
+#'   \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.
+#'
+#' @importFrom flowAI flow_auto_qc
+#' @importFrom flowWorkspace gs_cyto_data cytoset_to_flowSet flowSet_to_cytoset
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Clean Activation flowSet
+#' fs <- cyto_clean(fs)
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # Clean Activation GatingSet
+#' gs <- cyto_clean(gs)
+#'
+#' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
+#'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
+#'   15;32(16):2473-80.
+#'   
+#' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
+#'
+#' @export
+cyto_clean <- function(x, ...){
+  
+  # GATINGSET/GATINGHIERARCHY
+  if(is(x, "GatingSet") | is(x, "GatingHierarchy")){
+    # PARENT
+    parent <- cyto_nodes(x, path = "auto")[1]
+    # EXTRACT DATA
+    cyto_data <- cyto_extract(x, parent)
+    # flowAI REQUIRES FLOWSET
+    if(is(cyto_data, "cytoset")){
+      cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
+    }
+    # CLEAN DATA
+    cyto_data <- flow_auto_qc(cyto_data,
+                              html_report = FALSE,
+                              mini_report = FALSE,
+                              fcs_QC = FALSE,
+                              folder_results = FALSE,
+                              ...)
+    # RETURN CYTOSET
+    if(is(cyto_data, "flowSet")){
+      cyto_data <- flowSet_to_cytoset(cyto_data)
+    }
+    # REPLACE DATA
+    gs_cyto_data(x)<- cyto_data
+  }else{
+    # FLOWSET REQUIRED
+    if(is(x, "cytoset")){
+      x <- cytoset_to_flowSet(x)
+    }
+    x <- flow_auto_qc(x, 
+                      html_report = FALSE,
+                      mini_report = FALSE,
+                      fcs_QC = FALSE,
+                      folder_results = FALSE,
+                      ...)
+    # RETURN CYTOSET
+    if(is(x, "flowSet")){
+      x <- flowSet_to_cytoset(x)
+    }
+  }
+  return(x)
+}
+
 ## CYTO_SETUP ------------------------------------------------------------------
 
 #' Load.fcs files into GatingSet and annotate with experiment details
@@ -122,13 +203,20 @@ cyto_load <- function(path = ".",
 #' prepare your cytometry data for downstream analyses. The .fcs files are first
 #' read into a \code{\link[flowWorkspace:cytoset]{cytoset}} using
 #' \code{\link{cyto_load}} which is then added to a
-#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. Calls are then made
-#' to \code{\link{cyto_markers_edit}} and \code{\link{cyto_details_edit}} to
-#' update the GatingSet with the details of the experiment. These details can be
-#' modified later with additional calls to \code{\link{cyto_markers_edit}}
-#' and/or \code{\link{cyto_details_edit}}. Users can optionally provide a name
-#' for a gatingTemplate csv file which will be created if necessary and assigned
-#' as the active gatingTemplate.
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'
+#' Calls are then made to \code{\link{cyto_markers_edit}} and
+#' \code{\link{cyto_details_edit}} to update the GatingSet with the details of
+#' the experiment. These details can be modified later with additional calls to
+#' \code{\link{cyto_markers_edit}} and/or \code{\link{cyto_details_edit}}.
+#'
+#' Through the \code{clean} argument, the data can then be optionally cleaned
+#' using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
+#' anomalies in the recorded data. 
+#' 
+#' Users can optionally provide a name for a
+#' gatingTemplate csv file which will be created if necessary and assigned as
+#' the active gatingTemplate.
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
 #'   a folder in current working directory).
@@ -137,6 +225,8 @@ cyto_load <- function(path = ".",
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default.  See
 #'   \code{\link{cyto_channels_restrict}}.
+#' @param clean logical indicating whether the loaded data should be cleaned
+#'   using \code{cyto_clean}, set to FALSE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
 #'
@@ -169,10 +259,19 @@ cyto_load <- function(path = ".",
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' \code{\link{cyto_load}}
+#' \code{\link{cyto_markers_edit}}
+#' \code{\link{cyto_details_edit}}
+#' \code{\link{cyto_channels_restrict}}
+#' \code{\link{cyto_clean}}
+#' \code{\link{cyto_gatingTemplate_select}}
+#' \code{\link{cyto_gatingTemplate_create}}
+#'
 #' @export
 cyto_setup <- function(path = ".",
                        gatingTemplate = NULL,
-                       restrict = FALSE, ...) {
+                       restrict = FALSE,
+                       clean = FALSE, ...) {
 
   # CYTOSET/GATINGSET
   message("Loading FCS files into a GatingSet...")
@@ -188,10 +287,15 @@ cyto_setup <- function(path = ".",
   
   # FLOWSET LOADED
   if (is(x, "flowSet")) {
-    # DROP CHANNELS
+    # RESTRICT CHANNELS
     if(restrict){
       message("Removing unassigned channels...")
       x <- cyto_channels_restrict(x)
+    }
+    # CLEAN DATA
+    if(clean){
+      message("Cleaning data to remove anomalies...")
+      x <- cyto_clean(x)
     }
     # GATINGSET
     x <- GatingSet(x)
@@ -206,7 +310,7 @@ cyto_setup <- function(path = ".",
     }
 
     # ACTIVE GATINGTEMPLATE
-    message(paste("Setting", gatingTemplate, "as the active gatingTemplate."))
+    message(paste("Setting", gatingTemplate, "as the active gatingTemplate..."))
     cyto_gatingTemplate_select(gatingTemplate)
 
     # CREATE GATINGTEMPLATE

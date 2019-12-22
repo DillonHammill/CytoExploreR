@@ -45,7 +45,8 @@ Imports:
   visNetwork,
   Rtsne,
   umap,
-  EmbedSOM
+  EmbedSOM,
+  flowAI
 Suggests: 
   CytoExploreRData,
   RProtoBufLib,
