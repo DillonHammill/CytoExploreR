@@ -7,11 +7,12 @@
 cyto_plot_custom()
 }
 \description{
-Signal to cyto_plot that a custom plot is being created to ensure that plots
-are appropraitely saved with cyto_plot_save. \code{cyto_plot_custom} calls
-must be made before \code{cyto_plo_save} calls and \code{cyto_plot} calls
-should be followed by a call to \code{cyto_plot_complete} to indicate when
-the plot is complete and should be saved.
+Signal to \code{cyto_plot} that a custom plot is being created to ensure that
+plots are appropraitely saved with \code{cyto_plot_save}.
+\code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
+and \code{cyto_plot} calls should be followed by a call to
+\code{cyto_plot_complete} to indicate when the plot is complete and should be
+saved.
 }
 \examples{
 \dontrun{
