@@ -1081,6 +1081,49 @@ cyto_plot_layout <- function(nrow,
   }
 }
 
+## CYTO_PLOT_CUSTOM ------------------------------------------------------------
+
+#' Create custom cyto_plot
+#'
+#' Signal to \code{cyto_plot} that a custom plot is being created to ensure that
+#' plots are appropraitely saved with \code{cyto_plot_save}.
+#' \code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
+#' and \code{cyto_plot} calls should be followed by a call to
+#' \code{cyto_plot_complete} to indicate when the plot is complete and should be
+#' saved.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @examples
+#' \dontrun{
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Signal custom plot
+#' cyto_plot_custom()
+#'
+#' # Save plot
+#' cyto_plot_save("Test.png",
+#'                height = 7,
+#'                width = 14)
+#'
+#' # Create custom plot - 1D & 2D plot panels
+#' cyto_plot_layout(1,2)
+#' cyto_plot(fs[[32]],
+#'           channels = "FSC-A")
+#' cyto_plot(fs[[32]],
+#'           channels = c("FSC-A","SSC-A"))
+#'
+#' # Signal plot is complete and save
+#' cyto_plot_complete()
+#' }
+#' @export
+cyto_plot_custom <- function(){
+  options("cyto_plot_custom" = TRUE)
+}
+
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------
 
 #' Indicate Completion of Custom cyto_plot Layout for Saving
