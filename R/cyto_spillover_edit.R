@@ -119,7 +119,7 @@ cyto_spillover_edit.GatingSet <- function(x,
                                            header_text_size = 1.5, ...) {
   
   # Assign x to gs
-  gs <- x
+  gs <- cyto_copy(x)
   
   # Extract sample names
   nms <- cyto_names(gs)
@@ -140,20 +140,6 @@ cyto_spillover_edit.GatingSet <- function(x,
   
   # Extract transformers from GatingSet
   axes_trans <- cyto_transformer_extract(gs)
-  
-  # Reverse any applied transformations to get LINEAR data
-  if(any(channels %in% names(axes_trans))){
-    # Extract transformations that have been applied
-    trans <- cyto_transformer_combine(axes_trans[names(axes_trans) %in% channels])
-    # Inverse transformations
-    fs <- cyto_transform(fs, 
-                         trans,
-                         inverse = TRUE,
-                         plot = FALSE)
-  }
-  
-  # Get complete transformerList
-  axes_trans <- .cyto_transformer_complete(x, axes_trans)
   
   # Make call to cyto_spillover_edit flowSet method
   spill <- cyto_spillover_edit(
@@ -201,6 +187,23 @@ cyto_spillover_edit.flowSet <- function(x,
   
   # Extract cyto details to pd
   pd <- cyto_details(fs)
+  
+  # Inverse transformations
+  if(.all_na(axes_trans)){
+    fs_linear <- cyto_copy(fs)
+    axes_trans <- cyto_transformer_biex(fs,
+                                        channels = channels,
+                                        plot = FALSE)
+    fs <- cyto_transform(fs, 
+                         trans = axes_trans,
+                         inverse = TRUE,
+                         plot = FALSE)
+  }else{
+    fs_linear <- cyto_transform(cyto_copy(fs),
+                                trans = axes_trans,
+                                inverse = TRUE,
+                                plot = FALSE)
+  }
   
   # Channel match file supplied
   if(!is.null(channel_match)){
@@ -313,9 +316,6 @@ cyto_spillover_edit.flowSet <- function(x,
   }else{
     unstained_initial <- NA
   }
-  
-  # Get complete transformerList
-  axes_trans <- .cyto_transformer_complete(fs, axes_trans)
 
   # Selected sample - unstained control supplied
   if(!.all_na(pd$channel)){
@@ -509,13 +509,13 @@ cyto_spillover_edit.flowSet <- function(x,
       # Re-apply compensation and transformations
       fs.comp <- eventReactive(values$spill, {
         # Make a copy
-        fs_copy <- cyto_copy(fs)
+        fs_copy <- cyto_copy(fs_linear)
         # Data must be LINEAR at this step
         fs_comp <- compensate(fs_copy, values$spill / 100)
         # Get transformed data
         fs_trans <- cyto_transform(fs_comp, 
-                             trans = axes_trans, 
-                             plot = FALSE)
+                                   trans = axes_trans, 
+                                   plot = FALSE)
         return(fs_trans)
       })
       

@@ -713,7 +713,7 @@ cyto_plot_compensation.flowFrame <- function(x,
   channels <- cyto_fluor_channels(fr)
 
   # APPLY COMPENSATION & TRANSFORMATIONS ---------------------------------------
-
+  
   # COMPENSATION
   if (compensate == TRUE) {
     # INVERSE TRANSFORMATIONS
@@ -731,7 +731,6 @@ cyto_plot_compensation.flowFrame <- function(x,
     # TRANSFORM
     fr <- cyto_transform(fr,
       trans = axes_trans,
-      type = "biex",
       plot = FALSE
     )
   }else{
@@ -745,7 +744,7 @@ cyto_plot_compensation.flowFrame <- function(x,
       )
     }
   }
-
+  
   # CHANNEL MATCHING -----------------------------------------------------------
 
   # CHANNEL MATCH MISSING
