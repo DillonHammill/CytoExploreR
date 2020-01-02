@@ -835,15 +835,6 @@ cyto_gate_edit <- function(x,
       paste(z, collapse = ",")
     })
 
-    # PREPARE GATES FOR GATINGSET (QUADGATE -> RECTANGLES)
-    gate_prep <- lapply(gate_new, function(z) {
-      if (is(z, "quadGate")) {
-        z <- .cyto_gate_quad_convert(z, channels)
-      }
-      return(z)
-    })
-    names(gate_prep) <- unlist(alias)
-
     # MODIFY EXISTING GATES - GATINGSET
     gates_gs[[y]] <<- gate_prep
 
@@ -988,14 +979,14 @@ cyto_gate_type <- function(gates) {
 
   # One gate supplied
   if (length(gates) == 1) {
-    if (class(gates) %in% c("filters", "list")) {
+    if (is(gates)[1] %in% c("filters", "list")) {
       gates <- gates[[1]]
     }
     # ELLIPSE
-    if (class(gates) == "ellipsoidGate") {
+    if (is(gates, "ellipsoidGate")) {
       types <- "ellipse"
       # RECTANGLE/BOUNDARY/INTERVAL/THRESHOLD
-    } else if (class(gates) == "rectangleGate") {
+    } else if (is(gates, "rectangleGate")) {
       # Includes rectangle, interval, threshold and boundary gate_types
       if (length(parameters(gates)) == 1) {
 
@@ -1021,10 +1012,10 @@ cyto_gate_type <- function(gates) {
         }
       }
       # POLYGON
-    } else if (class(gates) == "polygonGate") {
+    } else if (is(gates, "polygonGate")) {
       types <- "polygon"
       # QUADRANT
-    } else if (class(gates) == "quadGate") {
+    } else if (is(gates, "quadGate")) {
       types <- "quadrant"
     }
     # Multiple gates supplied
@@ -1212,7 +1203,7 @@ cyto_gate_convert.default <- function(x,
                                       ...) {
 
   # Invalid gate object
-  if (!is(x) %in% c(
+  if (!is(x)[1] %in% c(
     "list",
     "filters",
     "rectangleGate",

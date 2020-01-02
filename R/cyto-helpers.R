@@ -126,6 +126,7 @@ cyto_load <- function(path = ".",
 #'
 #' @importFrom flowAI flow_auto_qc
 #' @importFrom flowWorkspace gs_cyto_data cytoset_to_flowSet flowSet_to_cytoset
+#' @importFrom utils capture.output
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -164,12 +165,12 @@ cyto_clean <- function(x, ...){
       cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
     }
     # CLEAN DATA
-    cyto_data <- flow_auto_qc(cyto_data,
-                              html_report = FALSE,
-                              mini_report = FALSE,
-                              fcs_QC = FALSE,
-                              folder_results = FALSE,
-                              ...)
+    invisible(capture.output(cyto_data <-  flow_auto_qc(cyto_data,
+                                                        html_report = FALSE,
+                                                        mini_report = FALSE,
+                                                        fcs_QC = FALSE,
+                                                        folder_results = FALSE,
+                                                        ...)))
     # RETURN CYTOSET
     if(is(cyto_data, "flowSet")){
       cyto_data <- flowSet_to_cytoset(cyto_data)
@@ -181,12 +182,12 @@ cyto_clean <- function(x, ...){
     if(is(x, "cytoset")){
       x <- cytoset_to_flowSet(x)
     }
-    x <- flow_auto_qc(x, 
-                      html_report = FALSE,
-                      mini_report = FALSE,
-                      fcs_QC = FALSE,
-                      folder_results = FALSE,
-                      ...)
+    invisible(capture.output(x <- flow_auto_qc(x, 
+                                               html_report = FALSE,
+                                               mini_report = FALSE,
+                                               fcs_QC = FALSE,
+                                               folder_results = FALSE,
+                                               ...)))
     # RETURN CYTOSET
     if(is(x, "flowSet")){
       x <- flowSet_to_cytoset(x)
