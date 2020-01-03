@@ -30,6 +30,8 @@
 #'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param axes_limits_buffer decimal indicating the percentage of buffering to
+#'   add to either end of the axes limits, set to 0.03 by default.
 #' @param title title to use for the plot, set to the name of the sample by
 #'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
@@ -151,6 +153,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       xlim = NA,
                                       ylim = NA,
                                       axes_limits = "auto",
+                                      axes_limits_buffer = 0.03,
                                       title,
                                       xlab,
                                       ylab,
@@ -255,6 +258,7 @@ cyto_plot_empty.flowFrame <- function(x,
     xlim <- .cyto_range(fr_list,
       channels = channels[1],
       axes_limits = axes_limits,
+      buffer = axes_limits_buffer,
       plot = TRUE
     )[, 1]
   }
@@ -280,6 +284,7 @@ cyto_plot_empty.flowFrame <- function(x,
       ylim <- .cyto_range(fr_list,
         channels = channels[2],
         axes_limits = axes_limits,
+        buffer = axes_limits_buffer,
         plot = TRUE
       )[, 1]
     }
@@ -661,6 +666,7 @@ cyto_plot_empty.list <- function(x,
                                  point_cols = NA,
                                  point_col = NA,
                                  point_col_alpha = 1,
+                                 axes_limits_buffer = 0.03,
                                  axes_text = c(TRUE, TRUE),
                                  axes_text_font = 1,
                                  axes_text_size = 1,
@@ -1276,6 +1282,7 @@ cyto_plot_theme_reset <- function() {
 cyto_plot_theme_args <- function() {
   c(
     "axes_limits",
+    "axes_limits_buffer",
     "popup",
     "density_modal",
     "density_smooth",

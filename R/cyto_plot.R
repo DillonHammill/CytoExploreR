@@ -109,6 +109,8 @@
 #'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param axes_limits_buffer decimal indicating the percentage of buffering to
+#'   add to either end of the axes limits, set to 0.03 by default.
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
@@ -310,6 +312,7 @@ cyto_plot.GatingSet <- function(x,
                                 contour_line_col = "black",
                                 contour_line_alpha = 1,
                                 axes_limits = "auto",
+                                axes_limits_buffer = 0.03,
                                 axes_text = c(TRUE, TRUE),
                                 axes_text_font = 1,
                                 axes_text_size = 1,
@@ -779,6 +782,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       contour_line_width = 1,
                                       contour_line_col = "black",
                                       contour_line_alpha = 1,
+                                      axes_limits_buffer = 0.03,
                                       axes_text = c(TRUE, TRUE),
                                       axes_text_font = 1,
                                       axes_text_size = 1,
@@ -1199,6 +1203,7 @@ cyto_plot.flowSet <- function(x,
                               contour_line_width = 1,
                               contour_line_col = "black",
                               contour_line_alpha = 1,
+                              axes_limits_buffer = 0.03,
                               axes_text = c(TRUE, TRUE),
                               axes_text_font = 1,
                               axes_text_size = 1,
@@ -1466,7 +1471,8 @@ cyto_plot.flowSet <- function(x,
   if (.all_na(xlim)) {
     xlim <- .cyto_range(fr_list,
       channels = channels[1],
-      axes_limits = axes_limits
+      axes_limits = axes_limits,
+      buffer = axes_limits_buffer
     )[, channels[1]]
     # XLIM MANUALLY SUPPLIED
   } else {
@@ -1483,7 +1489,8 @@ cyto_plot.flowSet <- function(x,
     if (length(channels) == 2) {
       ylim <- .cyto_range(fr_list,
         channels = channels[2],
-        axes_limits = axes_limits
+        axes_limits = axes_limits,
+        buffer = axes_limits_buffer
       )[, channels[2]]
     }
     # YLIM MANUALLY SUPPLIED
@@ -1934,6 +1941,7 @@ cyto_plot.flowFrame <- function(x,
                                 contour_line_width = 1,
                                 contour_line_col = "black",
                                 contour_line_alpha = 1,
+                                axes_limits_buffer = 0.03,
                                 axes_text = c(TRUE, TRUE),
                                 axes_text_font = 1,
                                 axes_text_size = 1,

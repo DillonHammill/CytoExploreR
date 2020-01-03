@@ -217,6 +217,7 @@
                         "channels",
                         "gate",
                         "axes_limits",
+                        "axes_limits_buffer",
                         "popup",
                         "xlim",
                         "ylim",

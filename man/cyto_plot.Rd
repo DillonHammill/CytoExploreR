@@ -48,6 +48,7 @@
   contour_line_col = "black",
   contour_line_alpha = 1,
   axes_limits = "auto",
+  axes_limits_buffer = 0.03,
   axes_text = c(TRUE, TRUE),
   axes_text_font = 1,
   axes_text_size = 1,
@@ -129,6 +130,7 @@
   contour_line_width = 1,
   contour_line_col = "black",
   contour_line_alpha = 1,
+  axes_limits_buffer = 0.03,
   axes_text = c(TRUE, TRUE),
   axes_text_font = 1,
   axes_text_size = 1,
@@ -211,6 +213,7 @@
   contour_line_width = 1,
   contour_line_col = "black",
   contour_line_alpha = 1,
+  axes_limits_buffer = 0.03,
   axes_text = c(TRUE, TRUE),
   axes_text_font = 1,
   axes_text_size = 1,
@@ -290,6 +293,7 @@
   contour_line_width = 1,
   contour_line_col = "black",
   contour_line_alpha = 1,
+  axes_limits_buffer = 0.03,
   axes_text = c(TRUE, TRUE),
   axes_text_font = 1,
   axes_text_size = 1,
@@ -478,6 +482,9 @@ contour lines, set to 1 by default to remove transparency.}
 to \code{"auto"} by default to use optimised axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
+
+\item{axes_limits_buffer}{decimal indicating the percentage of buffering to
+add to either end of the axes limits, set to 0.03 by default.}
 
 \item{axes_text}{logical vector of length 2 indicating whether axis text
 should be included for the x and y axes respectively, set to

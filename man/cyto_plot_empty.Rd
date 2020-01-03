@@ -16,6 +16,7 @@ cyto_plot_empty(x, ...)
   xlim = NA,
   ylim = NA,
   axes_limits = "auto",
+  axes_limits_buffer = 0.03,
   title,
   xlab,
   ylab,
@@ -96,6 +97,9 @@ gate co-ordinates are taken into account when computing axes limits.}
 to \code{"auto"} by default to use optimised axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
+
+\item{axes_limits_buffer}{decimal indicating the percentage of buffering to
+add to either end of the axes limits, set to 0.03 by default.}
 
 \item{title}{title to use for the plot, set to the name of the sample by
 default. Title can be removed by setting this argument to \code{NA}.}
