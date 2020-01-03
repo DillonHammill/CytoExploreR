@@ -1543,29 +1543,35 @@ cyto_plot.flowSet <- function(x,
     cyto_plot_new(popup)
   }
 
-  # LAYOUT MISSING
-  if (.empty(layout)) {
-    # LAYOUT DIMENSIONS
-    layout <- .cyto_plot_layout(fr_list,
-      layout = layout,
-      density_stack = density_stack,
-      density_layers = density_layers
-    )
-    par("mfrow" = layout)
-  # LAYOUT TURNED OFF
-  } else if (all(layout == FALSE) | .all_na(layout)) {
-    # USE CURRENT DIMENSIONS
-    if(getOption("cyto_plot_method") == "flowSet"){
-      layout <- par("mfrow")
+  # LAYOUT MISSING - SET FOR MULTIPLE PLOTS ONLY
+  if(length(fr_list) > 1){
+    if (.empty(layout)) {
+      # LAYOUT DIMENSIONS
+      layout <- .cyto_plot_layout(fr_list,
+        layout = layout,
+        density_stack = density_stack,
+        density_layers = density_layers
+      )
+      par("mfrow" = layout)
+    # LAYOUT TURNED OFF
+    } else if (all(layout == FALSE) | .all_na(layout)) {
+      # USE CURRENT DIMENSIONS
+      if(getOption("cyto_plot_method") == "flowSet"){
+        layout <- par("mfrow")
+        par("mfrow" = layout)
+      }
+    # LAYOUT SUPPLIED
+    }else{
       par("mfrow" = layout)
     }
-  # LAYOUT SUPPLIED
-  }else{
-    par("mfrow" = layout)
   }
   
   # NUMBER OF PLOTS PER PAGE
-  np <- layout[1] * layout[2]
+  if(length(fr_list) > 1){
+    np <- layout[1] * layout[2]
+  }else{
+    np <- 1
+  }
 
   # CYTO_PLOT_CALL -------------------------------------------------------------
 
