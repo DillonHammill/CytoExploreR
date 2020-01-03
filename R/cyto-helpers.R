@@ -971,13 +971,17 @@ cyto_transform_extract <- function(x,
 #'   \code{GatingHierarchy} or \code{GatingSet} objects.
 #' @param copy logical indicating whether a deep copy of the extracted data
 #'   should be returned.
+#' @param raw logical indicating whether a list of raw data matrices should be
+#'   returned instead of a flowFrame or flowSet.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.
 #'
-#' @return either a \code{flowFrame} or a \code{cytoset}.
+#' @return either a \code{flowFrame} or a \code{cytoset}  by default. A list of
+#'   raw data matrices when raw is set to TRUE.
 #'
 #' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data realize_view
+#' @importFrom flowCore exprs
 #' @importFrom methods is
 #'
 #' @examples
@@ -989,17 +993,21 @@ cyto_transform_extract <- function(x,
 #' gs <- GatingSet(Activation)
 #'
 #' # Extract flowFrame
-#' cyto_extract(gs[[1]], "root")
+#' cyto_extract(gs[[1]], parent = "root")
 #'
 #' # Extract cytoset
-#' cyto_extract(gs, "root")
+#' cyto_extract(gs, parent = "root")
+#' 
+#' # Extract raw data matrices
+#' cyto_extract(gs, parent = "root", raw = TRUE)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_extract <- function(x, 
                          parent = NULL, 
-                         copy = FALSE, ...) {
+                         copy = FALSE,
+                         raw = FALSE, ...) {
 
   # DEFAULT PARENT
   if(is.null(parent)){
@@ -1016,6 +1024,20 @@ cyto_extract <- function(x,
   # COPY
   if(copy){
     x <- cyto_copy(x)
+  }
+  
+  # RAW DATA MATRICES
+  if(raw){
+    nms <- cyto_names(x)
+    if(is(x, "flowFrame")){
+      x <- list(exprs(x))
+    }else if(is(x, "flowSet")){
+      y <- lapply(seq_along(x), function(z){
+        exprs(x[[z]])
+      })
+      x <- y
+    }
+    names(x) <- nms
   }
   
   # RETURN EXTRACTED DATA

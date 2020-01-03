@@ -4,7 +4,7 @@
 \alias{cyto_extract}
 \title{Extract a valid flowFrame or flowSet}
 \usage{
-cyto_extract(x, parent = NULL, copy = FALSE, ...)
+cyto_extract(x, parent = NULL, copy = FALSE, raw = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
@@ -16,12 +16,16 @@ cyto_extract(x, parent = NULL, copy = FALSE, ...)
 \item{copy}{logical indicating whether a deep copy of the extracted data
 should be returned.}
 
+\item{raw}{logical indicating whether a list of raw data matrices should be
+returned instead of a flowFrame or flowSet.}
+
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
 \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.}
 }
 \value{
-either a \code{flowFrame} or a \code{cytoset}.
+either a \code{flowFrame} or a \code{cytoset}  by default. A list of
+  raw data matrices when raw is set to TRUE.
 }
 \description{
 \code{cyto_extract} is essentially a wrapper for
@@ -42,10 +46,13 @@ library(CytoExploreRData)
 gs <- GatingSet(Activation)
 
 # Extract flowFrame
-cyto_extract(gs[[1]], "root")
+cyto_extract(gs[[1]], parent = "root")
 
 # Extract cytoset
-cyto_extract(gs, "root")
+cyto_extract(gs, parent = "root")
+
+# Extract raw data matrices
+cyto_extract(gs, parent = "root", raw = TRUE)
 
 }
 \author{
