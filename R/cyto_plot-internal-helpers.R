@@ -319,8 +319,12 @@
   
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
-      res <- rep(x[[arg]], length.out = TL)
-
+      if(arg %in% c("point_col", "density_fill")){  
+        res <- rep(c(x[[arg]], rep(NA, length.out = TL)), length.out = TL)
+      }else{
+        res <- rep(x[[arg]], length.out = TL)
+      }
+    
       if(N == 1 & MTD == "flowSet"){
         res <- list(res)
       }else if (N > 1){
@@ -1163,31 +1167,6 @@
     } else {
       point_col[[1]] <- point_col_scale[1]
     }
-  } else if (any(LAPPLY(point_col, ".all_na"))) {
-
-    # Get position of NAs in point_col - replace with density scale
-    ind <- which(LAPPLY(point_col, ".all_na"))
-
-    # Run through each ind and get density gradient colours
-    lapply(ind, function(z) {
-
-      # Extract data
-      fr_exprs <- exprs(x[[z]])[, channels]
-
-      # Too few events for density computation
-      if (!is.null(nrow(fr_exprs))) {
-        if (nrow(fr_exprs) >= 2) {
-          # Get density colour for each point
-          point_col[[z]] <<- suppressWarnings(
-            densCols(fr_exprs,
-                     colramp = col_scale
-                     )
-          )
-        }
-      } else {
-        point_col[[z]] <- point_col_scale[1]
-      }
-    })
   }
   
   # Remaining colours are selected one per layer from point_cols
