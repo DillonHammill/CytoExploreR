@@ -1253,26 +1253,37 @@ cyto_plot.flowSet <- function(x,
 
   # CHECKS ---------------------------------------------------------------------
 
+  # CUSTOM PLOT SIGNALLED
+  if(getOption("cyto_plot_custom")){
+    layout <- FALSE
+  }
+  
+  # LAYOUT TURNED OFF
+  if (!missing(layout)) {
+    if (all(layout == FALSE)) {
+      options("cyto_plot_custom" = TRUE)
+    }
+  }  
+  
   # METHOD & RESET
   if (is.null(getOption("cyto_plot_method"))) {
     # SET PLOT METHOD
     options("cyto_plot_method" = "flowSet")
     # RESET PLOT METHOD & GRAPHICAL PARAMETERS ON EXIT
     on.exit({
-      par(old_pars)
+      if(!getOption("cyto_plot_custom")){
+        par(old_pars)
+      }
       options("cyto_plot_method" = NULL)
     })
   } else {
     # RESET GRAPHICAL PARAMETERS ON EXIT
     if(getOption("cyto_plot_method") == "flowSet"){
-      on.exit(par(old_pars))
-    }
-  }
-
-  # CUSTOM PLOT - LAYOUT FALSE
-  if (!missing(layout)) {
-    if (all(layout == FALSE)) {
-      options("cyto_plot_custom" = TRUE)
+      on.exit({
+        if(!getOption("cyto_plot_custom")){
+          par(old_pars)
+        }
+      })
     }
   }
 

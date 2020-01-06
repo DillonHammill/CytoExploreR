@@ -856,9 +856,9 @@ cyto_plot_record <- function(){
 
 #' Save High Resolution cyto_plot Images
 #'
-#' @param file name of the file to which the plot should be saved (including the
-#'   file extension). Supported file formats include png, tiff, jpeg, svg and
-#'   pdf.
+#' @param save_as name of the file to which the plot should be saved (including
+#'   the file extension). Supported file formats include png, tiff, jpeg, svg
+#'   and pdf.
 #' @param width numeric indicating the width of exported plot in \code{units},
 #'   set to 7 by default for image with width of 7 inches.
 #' @param height numeric indicating the height of the exported plot in
@@ -915,12 +915,12 @@ cyto_plot_record <- function(){
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   layout = c(1, 2)
 #' )
-#' 
+#'
 #' @seealso \code{\link[grDevices:cairo]{cairo}}
 #' @seealso \code{\link[grDevices:png]{png}}
-#' 
+#'
 #' @export
-cyto_plot_save <- function(file,
+cyto_plot_save <- function(save_as,
                            width = 7,
                            height = 7,
                            units = "in",
@@ -929,24 +929,24 @@ cyto_plot_save <- function(file,
                            ...) {
 
   # File missing extension
-  if (file_ext(file) == "") {
+  if (file_ext(save_as) == "") {
     # Modify file name to export png by default
-    file <- paste0(file, ".png")
+    save_as <- paste0(save_as, ".png")
   }
 
   # Save separate pages to separate number files
-  if (multiple == TRUE & file_ext(file) != "pdf") {
-    file <- paste0(
-      file_path_sans_ext(file),
+  if (multiple == TRUE & file_ext(save_as) != "pdf") {
+    save_as <- paste0(
+      file_path_sans_ext(save_as),
       "%03d", ".",
-      file_ext(file)
+      file_ext(save_as)
     )
   }
 
   # PNG DEVICE
-  if (file_ext(file) == "png") {
+  if (file_ext(save_as) == "png") {
     png(
-      filename = file,
+      filename = save_as,
       width = width,
       height = height,
       units = units,
@@ -954,9 +954,9 @@ cyto_plot_save <- function(file,
       ...
     )
   # TIFF DEVICE
-  } else if (file_ext(file) == "tiff") {
+  } else if (file_ext(save_as) == "tiff") {
     tiff(
-      filename = file,
+      filename = save_as,
       width = width,
       height = height,
       units = units,
@@ -964,9 +964,9 @@ cyto_plot_save <- function(file,
       ...
     )
   # JPEG DEVICE
-  } else if (file_ext(file) == "jpeg") {
+  } else if (file_ext(save_as) == "jpeg") {
     jpeg(
-      filename = file,
+      filename = save_as,
       width = width,
       height = height,
       units = units,
@@ -974,23 +974,23 @@ cyto_plot_save <- function(file,
       ...
     )
   # PDF DEVICE
-  } else if (file_ext(file) == "pdf") {
+  } else if (file_ext(save_as) == "pdf") {
     pdf(
-      file = file,
+      file = save_as,
       width = width,
       height = height,
       onefile = multiple,
       ...
     )
-  } else if(file_ext(file) == "svg") {
+  } else if(file_ext(save_as) == "svg") {
     svg(
-      filename = file,
+      filename = save_as,
       width = width,
       height = height,
       ...
     )
   } else {
-    stop(paste("Can't save file to", file_ext(file), "format."))
+    stop(paste("Can't save file to", file_ext(save_as), "format."))
   }
 
   # Set global option to notify cyto_plot when dev.off() is required for saving
@@ -1098,6 +1098,13 @@ cyto_plot_layout <- function(nrow,
 #' \code{cyto_plot_complete} to indicate when the plot is complete and should be
 #' saved.
 #'
+#' @param nrow number of rows to include in the panel layout.
+#' @param ncol number of columns to include in the panel layout.
+#' @param by chracter string indicating whether the plot should be filled by
+#'   \code{"row"} or \code{"column"}, set to \code{"row"} by default.
+#'   
+#' @importFrom graphics par
+#'   
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
@@ -1126,13 +1133,34 @@ cyto_plot_layout <- function(nrow,
 #' cyto_plot_complete()
 #' }
 #' @export
-cyto_plot_custom <- function(){
+cyto_plot_custom <- function(nrow = NULL,
+                             ncol = NULL,
+                             by = "row"){
+  
+  # Tell CytoExploreR - cyto_plot_save and layout resets
   options("cyto_plot_custom" = TRUE)
+  
+  # Set layout
+  if(!is.null(nrow) & !is.null(ncol)){
+    if (by %in% c("r", "row")) {
+      par(mfrow = c(nrow, ncol))
+    } else if (by %in% c("c", "col", "column")) {
+      par(mfcol = c(nrow, ncol))
+    }
+  }
+  
 }
 
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------
 
 #' Indicate Completion of Custom cyto_plot Layout for Saving
+#'
+#' @param nrow number of rows to include in the panel layout.
+#' @param ncol number of columns to include in the panel layout.
+#' @param by chracter string indicating whether the plot should be filled by
+#'   \code{"row"} or \code{"column"}, set to \code{"row"} by default.
+#'
+#' @importFrom graphics par
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1183,13 +1211,25 @@ cyto_plot_custom <- function(){
 #' # Signal that the plot is complete
 #' cyto_plot_complete()
 #' @export
-cyto_plot_complete <- function() {
+cyto_plot_complete <- function(nrow = NULL,
+                               ncol = NULL,
+                               by = "row") {
 
   # Close graphics device
   dev.off()
 
-  # Rest cyto_plot_custom
+  # Reset cyto_plot_custom
   options("cyto_plot_custom" = FALSE)
+  
+  # Reset layout
+  if(!is.null(nrow) & !is.null(ncol)){
+    if (by %in% c("r", "row")) {
+      par(mfrow = c(nrow, ncol))
+    } else if (by %in% c("c", "col", "column")) {
+      par(mfcol = c(nrow, ncol))
+    }
+  }
+  
 }
 
 ## CYTO_PLOT_THEME -------------------------------------------------------------
