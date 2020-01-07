@@ -377,11 +377,13 @@ cyto_details <- function(x) {
   }
 }
 
-#' Replacement Method for cyto_details
 #' @importFrom flowWorkspace pData<-
 #' @noRd
+"cyto_details<-" <- `pData<-`
+
+#' @noRd
 #' @export
-`cyto_details<-` <- `pData<-`
+"cyto_details<-"
 
 ## CYTO_NAMES ------------------------------------------------------------------
 
