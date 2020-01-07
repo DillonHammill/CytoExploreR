@@ -83,7 +83,7 @@ knitr::include_graphics('Visualisations/Visualisations-11.png')
 
 <br>
 
-The **machine** option displays the entire axes range (i.e. complete range of values detectable by the cytometer). This setting is used through **CytoExploreR** to display complete axes ranges when visualising transformations or gating populations.
+The **machine** option displays the entire axes range (i.e. complete range of values detectable by the cytometer). This setting is used throughout **CytoExploreR** to display complete axes ranges when visualising expression profiles, transformations or gating populations.
 
 ```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-1.png",
@@ -137,7 +137,7 @@ cyto_plot_save("Visualisations-3.png",
 # Auto axes limits
 cyto_plot(gs[[32]],
           parent = "T Cells",
-          channels = c("Va2", "CD8"),
+          channels = c("Va2", "CD4"),
           axes_limits = "auto",
           title = "Auto Limits")
 ```
@@ -158,9 +158,9 @@ cyto_plot_save("Visualisations-4.png",
 # Custom axes limits
 cyto_plot(gs[[32]],
           parent = "T Cells",
-          channels = c("Va2", "CD8"),
+          channels = c("Va2", "CD4"),
           xlim = c(-10, 65000),
-          ylim = c(-100, 65000),
+          ylim = c(-500, 10000),
           title = "Custom Axes Limits")
 ```
 
@@ -250,7 +250,7 @@ cyto_plot(gs[[32]],
           contour_lines = 25,
           contour_line_type = 1,
           contour_line_width = 1.2,
-          contour_line_col = "magenta",
+          contour_line_col = "black",
           contour_line_alpha = 0.8,
           title = "Contour Lines")
 ```
@@ -331,7 +331,7 @@ cyto_plot(gs[[32]],
           point_shape = ".",
           point_size = 3,
           point_col = "red",
-          point_col_alpha = 0.8)
+          point_col_alpha = 0.4)
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '60%',}
@@ -342,7 +342,7 @@ knitr::include_graphics('Visualisations/Visualisations-8.png')
 
 `cyto_plot` contains a number of customisation options for 1D density distributions. Unlike 2D scatterplots, all samples are plotted onto the same plot. The degree of stacking can be controlled through `density_stack` and the number of layers to include per plot can be specified through `density_layers`. Note that each plot must contain the same number of layers (i.e. total layers must be divisible by the number of layers per plot). The density distributions are normalised to the mode by default to aid in appropriate visualisation when stacking samples. To plot the raw densities, users can set `density_modal` argument to FALSE. Both the line borders and fill colours of the density distributions are fully customisable through the set of `density_fill` and `density_line` arguments. As with 2D scatterplots, legends can be included by setting the `legend` argument to TRUE. The default legend will use the `fill` colour, but users can change this to use the `line` colours by setting the `legend` argument to `"line"`.
 
-```{r, eval = FALSE, ech0 = FALSE}
+```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-21.png",
                height = 6,
                width = 10)
@@ -381,14 +381,161 @@ knitr::include_graphics('Visualisations/Visualisations-21.png')
 
 ## Gates
 
+`cyto_plot` is capable of plotting all major flowCore gate classes including rectangleGates, polygonGates and ellipsoidGates. Gates applied to GatingSet objects can be plotted by passing the name of the gated population to the `alias` argument. Users can also set `alias` to an empty character string (i.e. "") to automatically plot any gates constructed in the specified channels. Alternatively, constructed flowCore gate objects can be passed through the `gate` argument for plotting. **CytoExploreR** now has the ability to plot statistics for negated populations (i.e. events outside gates) when the `negate` argument is set to TRUE. The default statistic for gated population is frequency, and the label is positioned in the center of the gate by default. Gate borders and fill are completely customisable through the set of `gate_line` and `gate_fill` arguments.
 
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-22.png",
+               height = 6,
+               width = 6)
+```
+
+```{r, eval = FALSE}
+# Plot gates
+cyto_plot(gs[[32]],
+          parent = "T Cells",
+          alias = "", # same as c("CD4 T Cells", "CD8 T Cells")
+          channels = c("CD4", "CD8"),
+          negate = TRUE, # statistic for events outside gates
+          gate_line_type = 1,
+          gate_line_width = 2,
+          gate_line_col = "red",
+          gate_fill = "white",
+          gate_fill_alpha = 0)
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '60%',}
+knitr::include_graphics('Visualisations/Visualisations-22.png')
+```
+
+`cyto_plot` can also plot any 2D gate object in a 1D plot, it simply uses the minimum and maximum coordinates for the gate in the specified channel. Since statistics are computed in-line, `cyto_plot` will re-compute statistics using the newly constructed 1D gate. With **CytoExploreR** it is also possible to gate stacked density distributions and display the specified statistic for each data layer.
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-23.png",
+               height = 6,
+               width = 6)
+```
+
+```{r, eval = FALSE}
+cyto_plot(gs[29:32],
+          parent = "CD4 T Cells",
+          alias = "CD69+ CD4 T Cells",
+          channels = "CD69",
+          density_stack = 0.7)
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '60%',}
+knitr::include_graphics('Visualisations/Visualisations-23.png')
+```
 
 ## Labels
 
+Perhaps one of the best features of `cyto_plot` is its ability to label data layers with text and statistics. Plotted gates are automatically labelled by default but labels can also be added without gates by supplying a vector text to `label_text`. Users can add statistics to labels by specifying a vector of desired statistics to the `label_stat` argument. Supported statistics include count, frequency, CV, mean, geometric mean and median. The location of the labels can be set by mouse click by setting `label_position` to `"manual"` or by specifying the label co-ordinates manually through the `label_text_x` and `label_text_y` arguments. The labels will automatically be positioned on the mode of each data layer when no coordinates are selected or supplied. `cyto_plot` will automatically position labels to minimise overlap.
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-26.png",
+               height = 6,
+               width = 6)
+```
+
+```{r, eval = FALSE}
+# Labels
+cyto_plot(gs[29:32], 
+          parent = "CD4 T Cells",
+          channels = "CD69",
+          density_stack = 0.5,
+          axes_limits = "machine",
+          label_text = c("Label A",
+                         "Label B",
+                         "Label C",
+                         "Label D"),
+          label_stat = rep("median", 4),
+          label_text_x = rep(75000, 4), 
+          label_text_font = 2,
+          label_text_size = 0.8,
+          label_text_col = "red",
+          label_fill = "white",
+          label_fill_alpha = 0.6,
+          title = "Custom Labels")
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '60%',}
+knitr::include_graphics('Visualisations/Visualisations-26.png')
+```
+
 ## Overlays
+
+`cyto_plot` makes it easy to overlay data or populations onto plots through the `overlay` argument. Simply supply the names of the populations to `overlay` to include them on the plot. The data is plotted in bottom-up order, it is easy to decipher which layer is which by setting the `legend` argument to TRUE. To make things a little easier, you can also set `overlay` to `"descendants"` or `"children"` to automatically overlay all descendant or child populations of the parent population.  
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-25.png",
+               height = 6,
+               width = 8)
+```
 
 ```{r, eval = FALSE}
 # Overlay 
+cyto_plot(gs[[32]],
+          parent = "T Cells",
+          overlay = "descendants",
+          channels = c("CD44", "CD69"),
+          legend = TRUE,
+          title = "Overlays")
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '60%',}
+knitr::include_graphics('Visualisations/Visualisations-25.png')
+```
+
+`cyto_plot` also allows the overlay of flowFrame or flowSet objects onto plots to easily make comparisons between samples. This feature is particulary useful in `cyto_gate_draw` as it allows users to overlay FMO controls and appropriate set gate co-ordinates.
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-26.png",
+               height = 6,
+               width = 6)
+```
+
+```{r, eval = FALSE}
+# Extract unactivated sample
+naive <- cyto_extract(gs, parent = "CD4 T Cells")[[27]]
+
+# Manual overlays
+cyto_plot(gs[32],
+          parent = "CD4 T Cells",
+          overlay = naive,
+          channels = c("CD44", "CD69"),
+          point_size = 3)
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '60%',}
+knitr::include_graphics('Visualisations/Visualisations-26.png')
+```
+
+## Grouping
+
+At time it can be challenging to succinctly display results of an experiment which contain a large number of samples. Traditionally, this issue has been overcome by selecting and plotting samples which best represent the trends observed in the data (optimistically speaking). Although this is fully supported in **CytoExploreR**, there is a much better way to do things using the enhanced capabilities of `cyto_plot`. With `cyto_plot` users can group and merge samples into experiment groups prior to plotting. This means that any displayed statistics are calculated using all the available data, and that these statistics represent the mean for each experimental group. This makes it easy to summarise a large amount of data in a succinct way that is easy interpret and understand. Of course, this grouping can also be applied to density distributions and overlays, go ahead and give it a try! The days of cherry-picking samples are over!
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-24.png",
+               height = 12,
+               width = 12)
+```
+
+```{r, eval = FALSE}
+# Experiment variables (if not entered in cyto_setup)
+cyto_details(gs)$Treatment <- c(rep("Stim-A", 8), rep("Stim-B", 8), rep("Stim-C", 8), rep("Stim-D", 8), NA)
+cyto_details(gs)$OVAConc <- c(rep(c(0, 0, 5, 5, 50, 50, 500, 500), 4), 0)
+# Grouping
+cyto_plot(gs[1:32],
+          parent = "CD4 T Cells",
+          alias = "",
+          channels = c("CD44","CD69"),
+          group_by = c("Treatment", "OVAConc"),
+          contour_lines = 15,
+          label_text_y = 39000)
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '98%',}
+knitr::include_graphics('Visualisations/Visualisations-24.png')
 ```
 
 ## Pop-up Window
@@ -722,3 +869,9 @@ cyto_plot_complete(1,1)
 ```{r echo = FALSE, fig.align="center", out.width = '98%'}
 knitr::include_graphics('Visualisations/Visualisations-20.png')
 ```
+
+<br>
+
+# Reporting Issues
+
+`cyto_plot` is an essential component of **CytoExploreR** and is used throughout the package. If you notice any instances where `cyto_plot` does not perform as expected, please create a new issue so that the problem may be addressed. If there is an issue with `cyto_plot` it is likely that it will affect other aspects of the package, so please don't hesitate to point out issues. Likewise, if you have any feature requests or suggestions for improvements, please let me know by creating a new issue so that we can implement new features. 
