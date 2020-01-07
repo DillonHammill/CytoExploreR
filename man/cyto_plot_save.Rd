@@ -5,7 +5,7 @@
 \title{Save High Resolution cyto_plot Images}
 \usage{
 cyto_plot_save(
-  file,
+  save_as,
   width = 7,
   height = 7,
   units = "in",
@@ -15,9 +15,9 @@ cyto_plot_save(
 )
 }
 \arguments{
-\item{file}{name of the file to which the plot should be saved (including the
-file extension). Supported file formats include png, tiff, jpeg, svg and
-pdf.}
+\item{save_as}{name of the file to which the plot should be saved (including
+the file extension). Supported file formats include png, tiff, jpeg, svg
+and pdf.}
 
 \item{width}{numeric indicating the width of exported plot in \code{units},
 set to 7 by default for image with width of 7 inches.}

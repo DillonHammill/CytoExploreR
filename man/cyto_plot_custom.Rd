@@ -4,7 +4,15 @@
 \alias{cyto_plot_custom}
 \title{Create custom cyto_plot}
 \usage{
-cyto_plot_custom()
+cyto_plot_custom(nrow = NULL, ncol = NULL, by = "row")
+}
+\arguments{
+\item{nrow}{number of rows to include in the panel layout.}
+
+\item{ncol}{number of columns to include in the panel layout.}
+
+\item{by}{chracter string indicating whether the plot should be filled by
+\code{"row"} or \code{"column"}, set to \code{"row"} by default.}
 }
 \description{
 Signal to \code{cyto_plot} that a custom plot is being created to ensure that

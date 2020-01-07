@@ -1140,6 +1140,9 @@ cyto_plot_custom <- function(nrow = NULL,
   # Tell CytoExploreR - cyto_plot_save and layout resets
   options("cyto_plot_custom" = TRUE)
   
+  # Set plot method
+  options("cyto_plot_method" = "custom")
+  
   # Set layout
   if(!is.null(nrow) & !is.null(ncol)){
     if (by %in% c("r", "row")) {
@@ -1220,6 +1223,9 @@ cyto_plot_complete <- function(nrow = NULL,
 
   # Reset cyto_plot_custom
   options("cyto_plot_custom" = FALSE)
+  
+  # Reset plot method
+  options("cyto_plot_method" = NULL)
   
   # Reset layout
   if(!is.null(nrow) & !is.null(ncol)){
