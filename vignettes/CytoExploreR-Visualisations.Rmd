@@ -143,34 +143,6 @@ knitr::include_graphics('Visualisations/Visualisations-6.png')
 
 <br>
 
-## Axes Text
-
-<div style="line-height: 1.8em;"> The `axes_text` arguments controls whether to include axes text for the x or y axes on the plot. The default is set to c(TRUE, TRUE) to display axes text on the x and y axes respectively. Setting either of these values to FALSE will remove the axes text from the respective axis. </div> 
-
-```{r, eval = FALSE, echo = FALSE}
-cyto_plot_save("Visualisations-14.png",
-               height = 6,
-               width = 6)
-```
-
-```{r, eval = FALSE}
-# Customise axes_text
-cyto_plot(gs[[32]],
-          parent = "T Cells",
-          channels = c("CD4","CD8"),
-          axes_text = c(TRUE, FALSE), # remove y axis text
-          axes_text_font = 1,
-          axes_text_size = 1.4,
-          axes_text_col = "purple",
-          title = "Custom Axes Text")
-```
-
-```{r echo = FALSE, fig.align="center", out.width = '60%',}
-knitr::include_graphics('Visualisations/Visualisations-14.png')
-```
-
-<br>
-
 ## Axes Transformations
 
 <div style="line-height: 1.8em;"> `cyto_plot` does not perform in-line transformations, this means that the data must be appropriately transformed prior to plotting. The list of applied transformers will be extracted directly from the GatingSet or GatingHierarchy to ensure that the axes are appropriately displayed. Since flowFrame and flowSet objects do not retain these transformation definitions, users will need to manually supply the list of transformers to the `axes_trans` argument when plotting these objects. </div>
@@ -210,13 +182,41 @@ knitr::include_graphics('Visualisations/Visualisations-5.png')
 
 <br>
 
+## Axes Text
+
+<div style="line-height: 1.8em;"> The `axes_text` arguments controls whether to include axes text for the x or y axes on the plot. The default is set to c(TRUE, TRUE) to display axes text on the x and y axes respectively. Setting either of these values to FALSE will remove the axes text from the respective axis. </div> 
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-14.png",
+               height = 6,
+               width = 6)
+```
+
+```{r, eval = FALSE}
+# Customise axes_text
+cyto_plot(gs[[32]],
+          parent = "T Cells",
+          channels = c("CD4","CD8"),
+          axes_text = c(TRUE, FALSE), # remove y axis text
+          axes_text_font = 1,
+          axes_text_size = 1.4,
+          axes_text_col = "purple",
+          title = "Custom Axes Text")
+```
+
+```{r echo = FALSE, fig.align="center", out.width = '60%',}
+knitr::include_graphics('Visualisations/Visualisations-14.png')
+```
+
+<br>
+
 ## Axes Limits
 
 <div style="line-height: 1.8em;"> In **CytoExploreR** you never have to worry about data being cut off in plots, as `cyto_plot` will automatically calculate axes limits that encompass all the plotted and gated data. `cyto_plot` comes with three preset `axes_limits` options which provide a quick way to optimise the axes limits of plots without manual adjustment. </div>
 
 <br>
 
-<div style="line-height: 1.8em;"> The **machine** option displays the entire axes range (i.e. complete range of values detectable by the cytometer). This setting is used throughout **CytoExploreR** to display complete axes ranges when visualising expression profiles, transformations or gating populations. </div>
+<div style="line-height: 1.8em;"> The **"machine"** option displays the entire axes range (i.e. complete range of values detectable by the cytometer). This setting is used throughout **CytoExploreR** to display complete axes ranges when visualising expression profiles, transformations or gating populations. </div>
 
 ```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-1.png",
@@ -239,7 +239,7 @@ knitr::include_graphics('Visualisations/Visualisations-1.png')
 
 <br>
 
-<div style="line-height: 1.8em;"> The **data** option restricts the axes to the range of values which are in the data. This means that if the data lacks negative events the axes limits will be set to remove this space on the plot. This setting is therefore best for minimising whitespace and zooming into populations when gating. </div>
+<div style="line-height: 1.8em;"> The **"data"** option restricts the axes to the range of values which are in the data. This means that if the data lacks negative events the axes limits will be set to remove this space on the plot. This setting is therefore best for minimising whitespace and zooming into populations when gating. </div>
 
 ```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-2.png",
@@ -262,7 +262,7 @@ knitr::include_graphics('Visualisations/Visualisations-2.png')
 
 <br>
 
-<div style="line-height: 1.8em;"> The **auto** option is a combination of the machine and data settings which sets the upper axes limit to that of the data and anchors the lower axes limit to zero. This setting provides the best overall visualisation of the data and has therefore been set as the default `axes_limits` setting in `cyto_plot`. </div>
+<div style="line-height: 1.8em;"> The **"auto"** option is a combination of the machine and data settings which sets the upper axes limit to that of the data and anchors the lower axes limit to zero. This setting provides the best overall visualisation of the data and has therefore been set as the default `axes_limits` setting in `cyto_plot`. </div>
 
 ```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-3.png",
@@ -708,7 +708,7 @@ knitr::include_graphics('Visualisations/Visualisations-26.png')
 ```
 
 <br>
- 
+
 ## Overlays
 
 <div style="line-height: 1.8em;"> `cyto_plot` makes it easy to overlay data or populations onto plots through the `overlay` argument. Simply supply the names of the populations to `overlay` to include them on the plot. The data is plotted in bottom-up order, it is easy to decipher which layer is which by setting the `legend` argument to TRUE. To make things a little easier, you can also set `overlay` to `"descendants"` or `"children"` to automatically overlay all descendant or child populations of the parent population. </div>
