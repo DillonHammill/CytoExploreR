@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 <br>
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Intro-1.png')
+knitr::include_graphics('Compensation/Compensation-1.png')
 ```
 
 <br>
@@ -36,7 +36,7 @@ knitr::include_graphics('Compensation/Compensation-Intro-1.png')
 <br>
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Intro-2.png')
+knitr::include_graphics('Compensation/Compensation-2.png')
 ```
 
 <br>
@@ -76,7 +76,7 @@ gs <- cyto_setup("Compensation-Samples",
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '40%'}
-knitr::include_graphics('Compensation/Compensation-Markers.png')
+knitr::include_graphics('Compensation/Compensation-3.png')
 ```
 
 <div style="line-height: 1.8em;"> It is recommended that the compensation controls be appropriately transformed before proceeding. **CytoExploreR** will detect if the data has not been transformed and automatically apply the biexponential transformation to each of the fluorescent channels. The default parameters for these transformations may not be perfect for all channels, so it recommended that these transformations be optimised manually by the user. For more information on data transformation types and implementation, refer to the Transformations vignette where this is explained in detail. For now, let's use the more robust logicle transformation and apply it to all the fluorescent channels using `cyto_transform`. All fluorescent channels be transformed by default unless specific channels or markers are passed through the channels argument. </div>
@@ -88,7 +88,7 @@ gs <- cyto_transform(gs,
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '75%'}
-knitr::include_graphics('Compensation/Compensation-Transformations.png')
+knitr::include_graphics('Compensation/Compensation-4.png')
 ```
 
 <div style="line-height: 1.8em;"> Next, we should gate the compensation controls to remove debris and doublets to yield the most accurate spillover values. Let's manually gate down to single cells using `cyto_gate_draw`. Back gating can prove extrmemely useful in cleaning up the data. For example, we could gate the dead cells using our Hoechst control and overly this population on our initial FSC/SSC gate to adjust the gate to avoid dead cells. For brevity this approach will not be demonstrated here, but I will document this process in an issue for those who are interested. </div>
@@ -101,7 +101,7 @@ cyto_gate_draw(gs,
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '60%'}
-knitr::include_graphics('Compensation/Compensation-Gating-1.png')
+knitr::include_graphics('Compensation/Compensation-5.png')
 ```
 
 ```{r, eval = FALSE}
@@ -112,7 +112,7 @@ cyto_gate_draw(gs,
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '60%'}
-knitr::include_graphics('Compensation/Compensation-Gating-2.png')
+knitr::include_graphics('Compensation/Compensation-6.png')
 ```
 
 ## Automated Computation of Spillover Matrix
@@ -131,13 +131,13 @@ spill <- cyto_spillover_compute(gs,
 - **Selection of a fluorescent channel for each compensation control from a drop menu.** Channel selection can also be bypassed by manually adding a "channel" column using `cyto_details_edit` as outlined above, or by supplying a `channel_match` csv file containing a "name" and "channel" column. Channel match files can be manually created using `cyto_channel_match` if desired.
 
 ```{r echo = FALSE, fig.align="center", out.width = '75%'}
-knitr::include_graphics('Compensation/Compensation-Auto-1.png')
+knitr::include_graphics('Compensation/Compensation-7.png')
 ```
 
 - **Gating of the positive (and negative) signal for each compensation control in the assigned channel.** In order to properly compute the spillover values, **CytoExploreR** requires an appropriate unstained reference population. This reference population can take the form of a universal unstained control (as demonstrated below) or unstained events within each compensation control. When using a universal unstained control, the unstained control will be overlaid onto the plot and users be asked to gate the positive signal for each of the compensation controls. Otherwise, users will be asked to gate the negative and then the positive signal for each compensation control. The accuracy of the spillover calculation is heavily dependant on where these gates are positioned, with practice it will become clear that it is best to retain the final peak and tail in the positive gates.
 
 ```{r echo = FALSE, fig.align="center", out.width = '60%'}
-knitr::include_graphics('Compensation/Compensation-Auto-2.png')
+knitr::include_graphics('Compensation/Compensation-8.png')
 ```
 
 - **Computation and saving of the computed spillover matrix.** It is that simple! `cyto_spillover_compute` will take of the computations internally, return the computed spillover matrix and save the matrix to a named csv file for downstream use. </div>
@@ -148,7 +148,7 @@ spill
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Auto-3.png')
+knitr::include_graphics('Compensation/Compensation-9.png')
 ```
 
 <div style="line-height: 1.8em;"> To aid in the calculation of accurate spillover values, `cyto_spillover_compute` also supports the use of different populations for each compensation control to ensure proper autofluorescence correction. For example, we compensating for a marker such as CD11b it would be desirable to isolate just the myeloid cells and use this population for the spillover computation. This can be important, as myeloid cells may have a distinct autofluorescence profile compared to other cell types in the sample, which will influence the computed spillover value. For this reason, try to make sure that the composition of the populations in negative and positive populations are the same. To use a different parent population for each compensation control, users can manually supply a vector of population names to the `parent` argument, or manually enter this information into a `parent` column of `cyto_details` using `cyto_details_edit`. </div>
@@ -167,19 +167,19 @@ spill <- cyto_spillover_edit(gs,
 <div style="line-height: 1.8em;"> In the **Editor** tab, users will encounter series of dropdown menus to select controls and channels, an interactive spillover matrix and some plots to track changes to the data in realtime as the spillover values are edited. In this case, we want to edit the computed spillover matrix saved to "Spillover-Matrix.csv" but it is also possible to edit the spillover matrix attached to each control by removing the `spillover` argument. In the 2D scatter plot, we can see a horizontal red line through the median of the unstained control as well as a purple line which tracks the median through the stained control. By definition, the correct spillover value is reached once these two lines cross in the positive population and the medFI of stained population matches that of the unstained population in secondary detectors. As you can see below it looks like we need to remove some more of the FITC signal from the PE detector. </div>
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Edit-1.png')
+knitr::include_graphics('Compensation/Compensation-10.png')
 ```
 
 <div style="line-height: 1.8em;"> Changing the spillover values is as easy as selecting and replacing the value that you would like to edit. The plots below the matrix will automatically update whenever changes are made to the matrix. The spillover values can then be fine tuned such that the medFI of the stained and unstained populations are the same. Compare the figure below to previous one to see how changing the spillover value of Alexa Fluor 488 into PE to 18.16 alters the plots and medFIs. Changing spillover values manually will affect other secondary detectors, so this must be repeated for all secondary detectors by changing the selected channel in the y axis dropdown menu. Remember, `cyto_spillover_edit` accepts all `cyto_plot` arguments so it is possible to make the points bigger or add contour lines to aid in setting accurate spillover values.  </div>
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Edit-2.png')
+knitr::include_graphics('Compensation/Compensation-11.png')
 ```
 
 <div style="line-height: 1.8em;"> Identifying compensation issues in large dataset can be an extremely tedious process, this where the the **Plots** tab can help. If you switch over to the plots tab, users can select a compensation control and display the signal in the primary detector against all secondary detectors. To highlight any compensation issues, the compensated and unstained data are overlaid onto the uncompensated data. Very quickly we can identify any lingering issues and return to the editor tab to make appropriate adjustments. Finally, the changes made to the spillover matrix can be saved by selecting the `save` button on the `editor` tab. The updated spillover matrix will be returned as an R object and updated in the csv file. </div>
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Edit-3.png')
+knitr::include_graphics('Compensation/Compensation-12.png')
 ```
 
 ## Visualise Compensation
@@ -192,7 +192,7 @@ cyto_plot_compensation(gs,
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Plots-1.png')
+knitr::include_graphics('Compensation/Compensation-13.png')
 ```
 
 ```{r, eval = FALSE}
@@ -203,7 +203,7 @@ cyto_plot_compensation(gs,
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
-knitr::include_graphics('Compensation/Compensation-Plots-2.png')
+knitr::include_graphics('Compensation/Compensation-14.png')
 ```
 
 <div style="line-height: 1.8em;"> As you can see from the above plots, **CytoExploreR** does a pretty great job at appropriately compensating the data. Now that we have our fine tuned spillover matrix, we are done with our compensation controls and all we need to do is apply the saved spillover matrix to our samples. </div>
