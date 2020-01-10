@@ -14,7 +14,7 @@
 #'   the GatingSet.
 #' @param group_by a vector of pData variables to sort and merge samples into
 #'   groups prior to plotting, set to "name" by default to plot each sample
-#'   separately. 
+#'   separately.
 #' @param back_gate names of the population(s) to back-gate, set to \code{FALSE}
 #'   by default to turn off back-gating. To back-gate all populations set this
 #'   argument to \code{"all"}.
@@ -59,6 +59,7 @@
 #'
 #' @importFrom graphics plot.new legend
 #' @importFrom flowWorkspace gh_pop_get_descendants gh_pop_is_negated
+#'   gh_pop_get_gate
 #' @importFrom openCyto gt_gating
 #' @importFrom methods is
 #'
@@ -664,7 +665,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     "title_text_col" = rep(title_text_col, pop_count),
     stringsAsFactors = FALSE
   )
-
+  
   # GATE TRACKING
   if (gate_track == TRUE) {
     pop_details[, "gate_line_col"] <- pop_cols
@@ -791,6 +792,8 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
     par(oma = c(0, 0, 3, 0))
   }
 
+  print(pop_details)
+  
   # PLOT CONSTRUCTION ----------------------------------------------------------
 
   # NEW PLOT PER PARENT
@@ -811,10 +814,20 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
         xchannel <- as.character(unique(gt_gates[, "xchannel"])[x])
         ychannel <- as.character(unique(gt_gates[, "ychannel"])[x])
         channels <- c(xchannel, ychannel)
+        
         # RETAIN BOOLEAN POPULATIONS
         alias <- as.vector(gt[gt$parent == parents &
           gt$xchannel %in% c(xchannel, "") &
           gt$ychannel %in% c(ychannel, ""), "alias"])
+        
+        # BOOLEAN ORDER
+        bool_gate <- LAPPLY(alias, function(z){
+          is(gh_pop_get_gate(gh, z), "booleanFilter")
+        })
+        if(any(bool_gate)){
+          alias <- c(alias[-which(bool_gate)], alias[which(bool_gate)])
+        }
+        
         # Histograms - stacked & gated
         if (channels[1] == channels[2] |
           (!.empty(channels[1]) & .empty(channels[2]))) {
@@ -861,7 +874,7 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
 
         # GATE_LINE_COL
         gate_line_col <- pop_details[, "gate_line_col"]
-        gate_line_col <- gate_line_col[match(alias, pops)]
+        gate_line_col <- gate_line_col[match(alias, pop_details[, "node"])]
 
         # DENSITY_FILL
         density_fill <- pop_details[, "density_fill"]

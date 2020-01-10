@@ -50,7 +50,8 @@
 #'
 #' @importFrom flowCore exprs keyword write.FCS
 #' @importFrom flowWorkspace GatingSet gs_cyto_data<- gh_pop_get_parent
-#'   gh_pop_get_gate gs_pop_add gs_clone
+#'   gh_pop_get_gate gs_pop_add gs_clone gh_get_compensations
+#'   gh_get_transformations
 #' @importFrom stats prcomp
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
@@ -98,10 +99,10 @@ cyto_map.GatingSet <- function(x,
   gh <- gs_clone[[1]]
   
   # COMPENSATION
-  gh_comp <- gh@compensation[[1]]
+  gh_comp <- gh_get_compensations(gh)@spillover
   
   # TRANSFORMATIONS
-  gh_trans <- gh@transformation[[1]]
+  gh_trans <- gh_get_transformations(gh, only.function = FALSE)
   
   # EXTRACT DATA
   fs <- cyto_extract(gs_clone, parent = parent)
@@ -210,10 +211,10 @@ cyto_map.GatingHierarchy <- function(x,
   fr <- cyto_extract(gh, parent = parent)
   
   # EXTRACT TRANSFORMATIONS
-  gh_trans <- gh@transformation[[1]]
+  gh_trans <- gh_get_transformations(gh, only.function = FALSE)
   
   # EXTRACT COMPENSATION (GH CONTAINS ALL MATRICES)
-  gh_comp <- gh@compensation[[match(cyto_names(gh), names(gh@compensation))]]
+  gh_comp <- gh_get_compensations(gh)@spillover
   
   # FLOWFRAME METHOD - FLOWFRAME/FLOWSET RETURN
   map_data <- cyto_map(fr,

@@ -258,6 +258,9 @@ cyto_gatingTemplate_apply <- function(x,
         stop("gatingTemplates can only be applied to GatingSet objects.")
       }
 
+      # Assign gatingTemplate to gt
+      gt <- gatingTemplate
+      
       # name of gatingTemplate csv file
     } else {
 

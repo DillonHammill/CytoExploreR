@@ -651,7 +651,11 @@ cyto_plot.GatingSet <- function(x,
   # LABEL_TEXT - ALIAS
   if (missing(label_text)) {
     if (!.all_na(alias)) {
-      label_text <- rep(alias, length.out = length(x))
+      if(density_stack == 0){
+        label_text <- alias
+      }else{
+        label_text <- rep(alias, length.out = length(x))
+      }
     } else {
       label_text <- NA
     }
