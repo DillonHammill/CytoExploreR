@@ -2870,6 +2870,7 @@ cyto_details_edit <- function(x, file = NULL) {
 #'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -2934,11 +2935,17 @@ cyto_compensate.GatingSet <- function(x,
     # Extract spillover matrix directly from fs
   } else if (is.null(spillover)) {
     if (!is.null(select)) {
-      spill <- rep(list(fs[[select]]@description$SPILL), length(fs))
+      spill <- tryCatch(fs[[select]]@description$SPILL, error = function(e){
+        stop("Unable to extract spillover matrix from selected sample.")
+      })
+      spill <- rep(list(spill), length(fs))
       names(spill) <- cyto_names(fs)
     } else {
       spill <- lapply(cyto_names(fs), function(y) {
-        fs[[y]]@description$SPILL
+        tryCatch(fs[[y]]@description$SPILL, error = function(e){
+          stop(paste0("Unable to extract spillover matrix from ",
+                     cyto_names(fs[[y]]), "."))
+        })
       })
     }
   }
@@ -3013,11 +3020,17 @@ cyto_compensate.flowSet <- function(x,
     # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
     if (!is.null(select)) {
-      spill <- rep(list(x[[select]]@description$SPILL), length(x))
+      spill <- tryCatch(x[[select]]@description$SPILL, error = function(e){
+        stop("Unable to extract spillover matrix from selected sample.")
+      })
+      spill <- rep(list(spill), length(x))
       names(spill) <- cyto_names(x)
     } else {
       spill <- lapply(cyto_names(x), function(y) {
-        x[[y]]@description$SPILL
+        tryCatch(x[[y]]@description$SPILL, function(e){
+          stop(paste0("Unable to extract spillover matrix from ",
+                      cyto_names(x[[y]]), "."))
+        })
       })
     }
   }
@@ -3085,7 +3098,10 @@ cyto_compensate.flowFrame <- function(x,
     }
     # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
-    spill <- x@description$SPILL
+    spill <- tryCatch(x@description$SPILL, function(e){
+      stop(paste0("Unable to extract spillover matrix from",
+                  cyto_names(x), "."))
+    })
   }
 
   # Channels
@@ -3271,4 +3287,70 @@ cyto_copy <- function(x){
   # RETURN COPY
   return(x)
   
+}
+
+## CYTO_SPILLOVER_EXTRACT ------------------------------------------------------
+
+#' Extract spillover matrix from cytometry object
+#' 
+#' @param x object of class flowFrame, flowSet, GatingHierachy or GatingSet.
+#' 
+#' @return list of spillover matrices or NULL.
+#' 
+#' @importFrom methods is
+#' @importFrom flowWorkspace gh_get_compensations gs_get_compensations
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#' 
+#' # Apply compensation
+#' gs <- cyto_compensate(gs)
+#' 
+#' # Extract spillover matrices
+#' spill <- cyto_spillover_extract(gs)
+#' 
+#' @export
+cyto_spillover_extract <- function(x){
+  
+  # GATINGSET
+  if(is(x, "GatingSet")){
+    spill <- gs_get_compensations(x)
+    if(all(LAPPLY(spill, "is.null"))){
+      spill <- NULL
+    }else{
+      spill <- LAPPLY(spill, function(z){z@spillover})
+    }
+  # GATINGHIERACHY  
+  }else if(is(x, "GatingHierarchy")){
+    spill <- gh_get_compensations(x)
+    if(!is.null(spill)){
+      spill <- list(spill@spillover)
+      names(spill) <- cyto_names(x)
+    }
+  # FLOWSET  
+  }else if(is(x, "flowSet")){
+    spill <- lapply(seq_along(x), function(z){
+      # CyTOF lacks spill slot (just in case)
+      tryCatch(x[[z]]@description$SPILL, error = function(e){NULL})
+    })
+    names(spill) <- cyto_names(x)
+    if(all(LAPPLY(spill, "is.null"))){
+      spill <- NULL
+    }
+  # FLOWFRAME  
+  }else if(is(x, "flowFrame")){
+    spill <- tryCatch(x@description$SPILL, error = function(e){NULL})
+    if(!is.null(spill)){
+      spill <- list(spill)
+      names(spill) <- cyto_names(x)
+    }
+  }
+  
+  # RETURN LIST OF SPILLOVER MATRICES
+  return(spill)
 }
