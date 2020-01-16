@@ -113,7 +113,7 @@ cyto_map.GatingSet <- function(x,
   }
   
   # MERGE BY
-  fr <- cyto_merge_by(fs, merge_by = "all")
+  fr <- cyto_merge_by(fs, merge_by = "all")[[1]]
   
   # NAMES
   if(is.null(names)){
@@ -390,6 +390,9 @@ cyto_map.flowFrame <- function(x,
   fr_exprs <- fr_exprs[, channels]
   
   # MAPPING --------------------------------------------------------------------
+  
+  # MESSAGE
+  message("Computing map co-ordinates...")
   
   # SET SEED - RETURN SAME MAP WITH EACH RUN
   if(!missing(seed)){
