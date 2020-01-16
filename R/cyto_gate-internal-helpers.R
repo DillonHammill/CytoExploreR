@@ -661,7 +661,7 @@
       }
     })
   })
-
+  
   # COORD MATRIX
   if(length(channels) == 1){
     coords <- matrix(coords[[1]], ncol = 1)

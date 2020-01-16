@@ -836,7 +836,7 @@ cyto_gate_edit <- function(x,
     })
 
     # MODIFY EXISTING GATES - GATINGSET
-    gates_gs[[y]] <<- gate_prep
+    gates_gs[[y]] <<- gate_new
 
     # MODIFY EXISTING GATES - GATINGTEMPLATE
     gates_gT[[y]] <<- gate_new
