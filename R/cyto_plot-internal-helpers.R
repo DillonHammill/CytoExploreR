@@ -646,11 +646,6 @@
   .args_update(args)
 
   # LEGEND_TEXT ----------------------------------------------------------------
-  if (legend != FALSE) {
-    if (.all_na(legend_text) | length(unique(legend_text)) == 1) {
-      legend_text <- cyto_names(x)
-    }
-  }
 
   # Estimate legend height using strheight
   lgnd <- paste(legend_text, collapse = " \n ")

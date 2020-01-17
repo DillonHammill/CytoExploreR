@@ -260,7 +260,7 @@ cyto_spillover_compute.GatingSet <- function(x,
           # MESSAGE
           message(paste0(
             "Selecting the control with best signal for the ",
-            z, "channel."
+            z, " channel."
           ))
           # EXTRACT DATA
           fr_list <- lapply(seq_len(nrow(pd_chunk)), function(z) {
@@ -735,7 +735,7 @@ cyto_spillover_compute.flowSet <- function(x,
           # MESSAGE
           message(paste0(
             "Selecting the control with best signal for the ",
-            z, "channel."
+            z, " channel."
           ))
           # EXTRACT DATA
           fr_list <- lapply(seq_len(nrow(pd_chunk)), function(z) {

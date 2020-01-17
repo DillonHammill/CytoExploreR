@@ -2264,7 +2264,7 @@ cyto_plot.flowFrame <- function(x,
   }
 
   # LEGEND_TEXT
-  if (.all_na(legend_text)) {
+  if (.all_na(legend_text) | length(unique(legend_text)) == 1) {
     legend_text <- cyto_names(fr_list)
   }
 

@@ -2944,11 +2944,12 @@ cyto_compensate.GatingSet <- function(x,
       if(is.null(spill)){
         stop("Unable to extract spillover matrix from selected sample.")
       }
-      spill <- rep(list(spill), length(fs))
+      spill <- rep(spill, length(fs))
       names(spill) <- cyto_names(fs)
     } else {
+      
       spill <- lapply(cyto_names(fs), function(y) {
-        sm <- cyto_spillover_extract(fs[[y]])
+        sm <- cyto_spillover_extract(fs[[y]])[[1]]
         if(is.null(sm)){
           stop(paste0("Unable to extract spillover matrix from ",
                       cyto_names(fs[[y]]), "."))
@@ -2958,6 +2959,8 @@ cyto_compensate.GatingSet <- function(x,
     }
   }
 
+  print(spill)
+  
   # Channels
   fluor_channels <- cyto_fluor_channels(fs)
   
@@ -3032,11 +3035,11 @@ cyto_compensate.flowSet <- function(x,
       if(is.null(spill)){
         stop("Unable to extract spillover matrix from selected sample.")
       }
-      spill <- rep(list(spill), length(x))
+      spill <- rep(spill, length(x))
       names(spill) <- cyto_names(x)
     } else {
       spill <- lapply(cyto_names(x), function(y) {
-        sm <- cyto_spillover_extract(x[[y]])
+        sm <- cyto_spillover_extract(x[[y]])[[1]]
         if(is.null(sm)){
           stop(paste0("Unable to extract spillover matrix from ",
                       cyto_names(x[[y]]), "."))
@@ -3046,6 +3049,8 @@ cyto_compensate.flowSet <- function(x,
     }
   }
 
+  print(spill)
+  
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
   
@@ -3109,13 +3114,13 @@ cyto_compensate.flowFrame <- function(x,
     }
     # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
-    spill <- cyto_spillover_extract(x)
+    spill <- cyto_spillover_extract(x)[[1]]
     if(is.null(spill)){
       stop(paste0("Unable to extract spillover matrix from", 
                   cyto_names(x), "."))
     }
   }
-
+  
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
   
