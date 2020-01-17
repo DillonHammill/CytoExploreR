@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-<div style="line-height: 1.8em;"> In conventional flow cytometry, cells are labelled with fluorophore-conjugated antibodies and interrogated with a series of lasers which emit light of specific wavelengths. Thes fluorophores are excited by these lasers to emit photons of multiple energies and wavelengths, which are sorted by a series of optical filters to direct photons of the same wavelength to a specific detector. As a result, photons emitted from the excited fluorophores will be mostly collected by a single detctor (primary detector) but will also be collected by other detectors (secondary detectors). For example, photons emitted by a sample stained with only a FITC-conjugated antibody (FITC single colour control) will mostly be collected by the Alexa Fluor 488 primary detector, but there will also be collection by the PE secondary detector. When we compare the signal of our FITC single colour control relative to our unstained control (black) in these channels, it becomes clear that a proportion of the FITC signal is being collected by the PE detector. Clearly, this fluorescent spillover is not desirable, if we stained cells with both FITC and PE-conjugated antibodies it would be difficult to determine which events were truely labelled with our PE-conjugated antibodies. </div>
+<div style="line-height: 1.8em;"> In conventional flow cytometry, cells are labelled with fluorophore-conjugated antibodies and interrogated with a series of lasers which emit light of specific wavelengths. These fluorophores are excited by these lasers to emit photons of multiple energies and wavelengths, which are sorted by a series of optical filters to direct photons of the same wavelength to a specific detector. As a result, photons emitted from the excited fluorophores will be mostly collected by a single detctor (primary detector) but will also be collected by other detectors (secondary detectors). For example, photons emitted by a sample stained with only a FITC-conjugated antibody (FITC single colour control) will mostly be collected by the Alexa Fluor 488 primary detector, but there will also be collection by the PE secondary detector. When we compare the signal of our FITC single colour control relative to our unstained control (black) in these channels, it becomes clear that a proportion of the FITC signal is being collected by the PE detector. Clearly, this fluorescent spillover is not desirable, if we stained cells with both FITC and PE-conjugated antibodies it would be difficult to determine which events were truely labelled with our PE-conjugated antibodies. </div>
 
 <br>
 
@@ -140,7 +140,7 @@ knitr::include_graphics('Compensation/Compensation-7.png')
 knitr::include_graphics('Compensation/Compensation-8.png')
 ```
 
-- **Computation and saving of the computed spillover matrix.** It is that simple! `cyto_spillover_compute` will take of the computations internally, return the computed spillover matrix and save the matrix to a named csv file for downstream use. </div>
+- **Computation and saving of the spillover matrix.** It is that simple! `cyto_spillover_compute` will take of the computations internally, return the computed spillover matrix and save the matrix to a named csv file for downstream use. </div>
 
 ```{r, eval = FALSE}
 # Computed spillover matrix

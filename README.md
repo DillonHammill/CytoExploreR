@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# CytoExploreR <img src="man/figures/logo.png" align="right" alt="" width="130"/>
+# CytoExploreR <img src="man/figures/logo.png" align="right" alt="" width="250"/>
 
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master)](htt
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2019--12--16-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--01--10-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoExploreR** is comprehensive collection of interactive exploratory
@@ -19,9 +19,9 @@ cytometry analysis tools designed under a unified framework.
 **CytoExploreR** has been specifically designed to integrate all
 existing cytometry analysis techniques (e.g. manual gating, automated
 gating and dimension reduction) in a format that makes these tools
-freely accessible to users with minimal coding experience. If you are
-new to **CytoExploreR** visit
-<https://dillonhammill.github.io/CytoExploreR/> to get started.
+freely accessible to users with no coding experience. If you are new to
+**CytoExploreR** visit <https://dillonhammill.github.io/CytoExploreR/>
+to get started.
 
 ## Install R and RStudio
 
@@ -72,10 +72,9 @@ platform-specific tools are required:
 ## CytoExploreR Dependencies
 
 Now that all the setup is complete, let’s install all the necssary
-dependencies of **CytoExploreR**.
-
-From within RStudio, run the following in the console to install the
-latest versions of [flowCore](https://github.com/RGLab/flowCore),
+dependencies of **CytoExploreR**. From within RStudio, run the following
+in the console to install the latest versions of
+[flowCore](https://github.com/RGLab/flowCore),
 [flowWorkspace](https://github.com/RGLab/flowWorkspace) and
 [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
 
@@ -106,11 +105,10 @@ install_github("RGLab/openCyto", ref = "trunk")
 ## CytoExploreR
 
 Now that all the dependencies are installed, let’s move on to installing
-**CytoExploreR**.
-
-To successfully install **CytoExploreR** users will first need to
-install **CytoExploreRData** which contains example datasets that will
-be used within **CytoExploreR** to demonstrate key features.
+**CytoExploreR**. To successfully install **CytoExploreR** users will
+first need to install **CytoExploreRData** which contains example
+datasets that will be used within **CytoExploreR** to demonstrate key
+features.
 
 ``` r
 # CytoExploreRData 
@@ -146,7 +144,7 @@ Some of the key features of **CytoExploreR** are outlined below:
   - visualise compensation in all channels using
     `cyto_plot_compensation`
   - customisable data transformations using `cyto_transform` which
-    includes support for log, arcsinh, logicle and biexponential
+    includes support for log, arcsinh, logicle and biexponential data
     transformations
   - manual gate drawing using `cyto_gate_draw`
   - ability to edit drawn gates using `cyto_gate_edit`
@@ -155,8 +153,8 @@ Some of the key features of **CytoExploreR** are outlined below:
   - gate saving directly to an openCyto `gatingTemplate` for future use
   - support for using both manual and automated gating approaches
     through linking to `openCyto`
-  - exploratory visualisation of flowFrames, flowSets, GatingHierarchies
-    and GatingSets using `cyto_plot`
+  - exploratory visualisations of all existing cytometry data classes
+    using `cyto_plot`
   - visualisation of complete gating strategies with back-gating and/or
     gate tracking using `cyto_plot_gating_scheme`
   - visualisation of gating trees using `cyto_plot_gating_tree`
@@ -172,22 +170,13 @@ Some of the key features of **CytoExploreR** are outlined below:
 
 ## Usage
 
-The full details of how **CytoExploreR** works will be tackled
-individually in the package vignettes, but a succinct usage outline is
-described below:
-
-**1. Create a new R project**
-
-  - Select File -\> New Project
-  - Select New Directory -\> New Project.
-  - Set Directory Name to CytoExploreR-Demo.
-  - Indicate where the project should be created and select Create
-    Project.
-
-**2. Save FCS files to new folders in the current working directory**
-
-For demonstration purposes, let’s download the Compensation and
-Activation FCS files shipped with CytoExploreRData:
+**CytoExploreR** is large package and we would not do it justice by
+demonstrating its usage here. Instead we will explore the use of
+**CytoExploreR** in a series of vignettes which tackle specific
+components of the cytometry data analysis pipeline. To work through
+these vignettes you will need to create a new R project (File -\> New
+Project) and download the example datasets shipped with
+**CytoExploreRData**.
 
 ``` r
 # Load required packages
@@ -203,141 +192,59 @@ cyto_save(Activation,
           save_as = "Activation-Samples")
 ```
 
-**3. Compensation of fluorescent spillover**
+These datasets will be used throughout the package vignettes to
+demonstrate the key features of **CytoExploreR**. A brief summary of
+each of the package vignettes is provided below:
 
-The basic steps to appropriate compensate for fluorescent spillover are
-outlined below. Refer to the Compensation vignette for a more detailed
-workflow.
+  - The `CytoExploreR` vignette outlines a basic flow cytometry data
+    analysis pipeline, which includes steps to compensate for
+    fluorescent spillover, transform data for visualisation and manually
+    gate populations to export population level statistics. This
+    vignette serves as a basic introduction to the package and users are
+    encouraged to explore other vignettes which explore these aspects in
+    a lot more detail.
 
-  - Load Compensation-Samples into a GatingSet and prepare
-    gatingTemplate
+  - The `Visualisations` vignette will demonstrate the use of
+    `cyto_plot`, a powerful data visualisation tool to explore cytometry
+    data.
 
-<!-- end list -->
+<img src="man/figures/README-2.png" width="98%" style="display: block; margin: auto;" />
 
-``` r
-gs <- cyto_setup("Compensation-Samples",
-                 gatingTemplate = "Compensation-gatingTemplate.csv")
-```
+  - Flow cytometry users will find the `Compensation` vignette useful in
+    describing the process of using compensation controls to correctly
+    compensate for fluorescent
+spillover.
 
-  - Gate compensation controls using `cyto_gate_draw`
+<img src="man/figures/README-3.png" width="98%" style="display: block; margin: auto;" />
 
-<!-- end list -->
+  - Data transformations are essential to appropriate visualisation of
+    cytometry data. In the `Transformations` vignette we will explore
+    the tools available in **CytoExploreR** to apply log, arcsinh,
+    biexponential and/or logicle transformations to the
+data.
 
-``` r
-# Cells
-cyto_gate_draw(gs,
-               parent = "root",
-               alias = "Cells",
-               channels = c("FSC-A","SSC-A"))
+<img src="man/figures/README-4.png" width="80%" style="display: block; margin: auto;" />
 
-# Single Cells
-cyto_gate_draw(gs,
-               parent = "Cells",
-               alias = "Single Cells",
-               channels = c("FSC-A", "FSC-H"))
-```
+  - In `Manual Gating` vignette we will demonstrate the use of
+    `cyto_gate_draw` to interactively draw gates around populations. In
+    particular, we will focus on the different gate types that are
+    supported and how they can be used to gate
+populations.
 
-<img src="man/figures/README-Compensation-Gating.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-1.png" width="98%" style="display: block; margin: auto;" />
 
-  - Automated computation of spillover matrix using
-    `cyto_spillover_compute`
-
-<!-- end list -->
-
-``` r
-spill <- cyto_spillover_compute(gs,
-                                parent = "Single Cells",
-                                spillover = "Spillover-Matrix.csv")
-```
-
-  - Interactively edit computed spillover matrix using
-    `cyto_spillover_edit`
-
-<!-- end list -->
-
-``` r
-spill <- cyto_spillover_edit(gs,
-                             parent = "Single Cells",
-                             spillover = "Spillover-Matrix.csv")
-```
-
-<img src="man/figures/README-Compensation-Editing.png" style="display: block; margin: auto;" />
-
-**4. Load and annotate Activation samples**
-
-The basic steps to appropriately compensate, transform and manually gate
-the Activation samples are outlined below. Refer to the Manual Gating
-vignette for a more detailed workflow.
-
-  - Load Activation-Samples into a GatingSet and prepare gatingTemplate
-
-<!-- end list -->
-
-``` r
-gs <- cyto_setup("Activation-Samples",
-                 gatingTemplate = "Activation-gatingTemplate.csv")
-```
-
-  - Apply compensation of fluorescent spillover using `cyto_compensate`
-
-<!-- end list -->
-
-``` r
-gs <- cyto_compensate(gs, "Spillover-Matrix.csv")
-```
-
-  - Transform fluorescent channels using `cyto_transform`
-
-<!-- end list -->
-
-``` r
-gs <- cyto_transform(gs, 
-                     type = "logicle")
-```
-
-  - Manually gate samples to build gating scheme using `cyto_gate_draw`
-
-<!-- end list -->
-
-``` r
-# Cells
-cyto_gate_draw(gs,
-               parent = "root",
-               alias = "Cells",
-               channels = c("FSC-A","SSC-A"))
-
-# Copy and paste above, modify parent and alias sequentially to add new populations
-```
-
-**5. Visualise gating scheme using `cyto_plot_gating_scheme`**
-
-``` r
-cyto_plot_gating_scheme(gs[[32]], back_gate = TRUE)
-```
-
-**6. Export population-level statistics using `cyto_stats_compute`**
-
-``` r
-cyto_stats_compute(gs,
-                   alias = c("CD4 T Cells", "CD8 T Cells"),
-                   channels = c("CD44", "CD69"),
-                   stat = "median")
-```
-
-**7. Save GatingSet for future analyses**
-
-``` r
-cyto_save(gs,
-          save_as = "Activation-GatingSet")
-```
+  - Dimensionality reduction is gaining popularity for analysis of high
+    dimensional cytometry data. In the `Dimension Reduction` vignette we
+    will demonstrate the use of `cyto_map` to produce PCA, tSNE, UMAP
+    and EmbedSOM maps of cytometry data.
 
 ## News
 
-There is a Changelog for the GitHub `master` branch which will reflect
+There is a changelog for the GitHub `master` branch which will reflect
 any updates made to improve the stability, usability or plenitude of the
 package. Users should refer to the
 [Changelog](https://dillonhammill.github.io/CytoExploreR/news/index.html)
-before installing new versions of the package.
+prior to installing new versions of the package.
 
 ## Credits
 
@@ -377,3 +284,28 @@ issues on the GitHub page if they have not already been addressed.
 Please note that the **CytoExploreR** project is released with a
 [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to
 this project, you agree to abide by its terms.
+
+## Citation
+
+A **CytoExploreR** publication is on the way, but in the meantime if you
+use **CytoExploreR** for your work please cite the package as follows:
+
+``` r
+citation("CytoExploreR")
+#> 
+#> To cite package 'CytoExploreR' in publications use:
+#> 
+#>   Dillon Hammill (2020). CytoExploreR: Interactive Analysis of
+#>   Cytometry Data. R package version 1.0.0.
+#>   https://github.com/DillonHammill/CytoExploreR
+#> 
+#> A BibTeX entry for LaTeX users is
+#> 
+#>   @Manual{,
+#>     title = {CytoExploreR: Interactive Analysis of Cytometry Data},
+#>     author = {Dillon Hammill},
+#>     year = {2020},
+#>     note = {R package version 1.0.0},
+#>     url = {https://github.com/DillonHammill/CytoExploreR},
+#>   }
+```

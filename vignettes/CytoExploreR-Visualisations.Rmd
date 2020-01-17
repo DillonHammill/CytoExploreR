@@ -579,7 +579,7 @@ knitr::include_graphics('Visualisations/Visualisations-7.png')
 
 ## Density Distributions
 
-<div style="line-height: 1.8em;"> `cyto_plot` contains a number of customisation options for 1D density distributions. Unlike 2D scatterplots, all samples are plotted onto the same plot. The degree of stacking can be controlled through `density_stack` and the number of layers to include per plot can be specified through `density_layers`. Note that each plot must contain the same number of layers (i.e. total layers must be divisible by the number of layers per plot). The density distributions are normalised to the mode by default to aid in appropriate visualisation when stacking samples. To plot the raw densities, users can set `density_modal` argument to FALSE. Both the line borders and fill colours of the density distributions are fully customisable through the set of `density_fill` and `density_line` arguments. As with 2D scatterplots, legends can be included by setting the `legend` argument to TRUE. The default legend will use the `fill` colour, but users can change this to use the `line` colours by setting the `legend` argument to `"line"`. </div>
+<div style="line-height: 1.8em;"> `cyto_plot` contains a number of customisation options for 1D density distributions. Unlike 2D scatterplots, all samples are plotted onto the same plot. The smoothness of the density distribution can be altered by modifying the `density_smooth` argument, which is set to 0.6 by default. The degree of stacking can be controlled through `density_stack` and the number of layers to include per plot can be specified through `density_layers`. Note that each plot must contain the same number of layers (i.e. total layers must be divisible by the number of layers per plot). The density distributions are normalised to the mode by default to aid in appropriate visualisation when stacking samples. To plot the raw densities, users can set `density_modal` argument to FALSE. Each plot will have it own calculated binwidth which will be used for all data layers. Both the line borders and fill colours of the density distributions are fully customisable through the set of `density_fill` and `density_line` arguments. As with 2D scatterplots, legends can be included by setting the `legend` argument to TRUE. The default legend will use the `fill` colour, but users can change this to use the `line` colours by setting the `legend` argument to `"line"`. </div>
 
 ```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-21.png",
@@ -592,6 +592,7 @@ cyto_plot_save("Visualisations-21.png",
 cyto_plot(gs[25:32],
           parent = "T Cells",
           channels = "CD8",
+          density_smooth = 0.4,
           density_layers = 4, # 4 samples per plot
           density_stack = 0.5, # 50% stacking
           density_modal = TRUE,
@@ -738,7 +739,7 @@ knitr::include_graphics('Visualisations/Visualisations-25.png')
 <div style="line-height: 1.8em;"> `cyto_plot` also allows the overlay of flowFrame or flowSet objects onto plots to easily make comparisons between samples. This feature is particulary useful in `cyto_gate_draw` as it allows users to overlay FMO controls and appropriate set gate co-ordinates. </div>
 
 ```{r, eval = FALSE, echo = FALSE}
-cyto_plot_save("Visualisations-26.png",
+cyto_plot_save("Visualisations-27.png",
                height = 6,
                width = 6)
 ```
@@ -756,14 +757,14 @@ cyto_plot(gs[32],
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '60%',}
-knitr::include_graphics('Visualisations/Visualisations-26.png')
+knitr::include_graphics('Visualisations/Visualisations-27.png')
 ```
 
 <br>
 
 ## Groupings
 
-<div style="line-height: 1.8em;"> At time it can be challenging to succinctly display results of an experiment which contain a large number of samples. Traditionally, this issue has been overcome by selecting and plotting samples which best represent the trends observed in the data (optimistically speaking). Although this is fully supported in **CytoExploreR**, there is a much better way to do things using the enhanced capabilities of `cyto_plot`. With `cyto_plot` users can group and merge samples into experiment groups prior to plotting. This means that any displayed statistics are calculated using all the available data, and that these statistics represent the mean for each experimental group. This makes it easy to summarise a large amount of data in a succinct way that is easy interpret and understand. Of course, this grouping can also be applied to density distributions and overlays, go ahead and give it a try! The days of cherry-picking samples are over! </div>
+<div style="line-height: 1.8em;"> As the dimensionality and size of cytometry datasets increases, it beomes increasingly difficult to succinctly display the results of experiments in a way that is palatable for readers. Traditionally, this issue has been overcome by selecting and plotting samples which best represent the trends observed in the data (optimistically speaking). Although this is fully supported in **CytoExploreR**, there is a much better way to do things using the enhanced capabilities of `cyto_plot`. With `cyto_plot` users can group and merge samples into experiment groups prior to plotting. This means that any displayed statistics are calculated using all the available data, and that these statistics represent the mean for each experimental group. This makes it easy to summarise a large amount of data in a succinct way that is easy interpret and understand. Of course, this grouping can also be applied to density distributions and overlays, go ahead and give it a try! The days of cherry-picking samples are over! </div>
 
 ```{r, eval = FALSE, echo = FALSE}
 cyto_plot_save("Visualisations-24.png",
@@ -934,15 +935,16 @@ knitr::include_graphics('Visualisations/Visualisations-20.png')
 
 <br>
 
-# Useful cyto_plot Wrappers
+# cyto_plot Wrappers
 
-<div style="line-height: 1.8em;"> To take `cyto_plot` to the next level, there are also a series of `cyto_plot` wrapper functions that can provide powerful visualisations of your data. The use of these function will be scattered throughout the package vignettes, but a brief description of each function is provided below:
+<div style="line-height: 1.8em;"> To take `cyto_plot` to the next level, there are also a series of `cyto_plot` wrapper functions that can provide powerful visualisations of your data. The use of these functions will be scattered throughout the package vignettes, but a brief description of each function is provided below:
 
 - `cyto_plot_compensation` to visualise compensation for flow cytometry data in all fluorescent channels.
 - `cyto_plot_explore` to plot 2D scatter plots of the data in all channels to quickly explore the data. 
 - `cyto_plot_profile` to plot 1D density distributions of the data in all channels to highlight expression profiles.
 - `cyto_plot_gating_scheme` to plot entire gating schemes in a grid for analysis summaries or reports.
-- `cyto_plot_gating_tree` to plot an interactive gating tree which shows relationships between gated populations. </div>
+- `cyto_plot_gating_tree` to plot an interactive gating tree which shows relationships between gated populations. 
+- `cyto_plot_grid` to arrange plots into a grid without excess white space. </div>
 
 <br>
 

@@ -166,10 +166,10 @@ knitr::include_graphics('man/figures/README-4.png')
 knitr::include_graphics('man/figures/README-1.png')
 ```
 
-+ Dimensionality reduction is gaining popularity for analysis of high dimensional cytometry data. In the `Dimension Reduction` vignette we will demonstrate the use of `cyto_map` to produce PCA, tSNE, UMAP and EmbedSOM maps of cytometry data.
++ Dimensionality reduction is gaining popularity for analysis of high dimensional cytometry data. In the `Dimensionality Reduction` vignette we will demonstrate the use of `cyto_map` to produce PCA, tSNE, UMAP and EmbedSOM maps of cytometry data.
 
 ```{r echo = FALSE, fig.align="center", out.width = '98%'}
-#knitr::include_graphics('man/figures/README-1.png')
+#knitr::include_graphics('man/figures/README-5.png')
 ```
 
 ## News
