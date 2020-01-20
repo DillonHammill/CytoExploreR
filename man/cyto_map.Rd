@@ -17,11 +17,10 @@ cyto_map(x, ...)
   channels,
   display = 1,
   type = "UMAP",
-  save = TRUE,
   split = TRUE,
   names = NULL,
-  save_as = "cyto_map",
-  inverse_transform = TRUE,
+  save_as = NULL,
+  inverse = FALSE,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -34,11 +33,10 @@ cyto_map(x, ...)
   channels,
   display = 1,
   type = "UMAP",
-  save = TRUE,
   split = TRUE,
   names = NULL,
-  save_as = "cyto_map",
-  inverse_transform = TRUE,
+  save_as = NULL,
+  inverse = FALSE,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -51,11 +49,10 @@ cyto_map(x, ...)
   channels,
   display = 1,
   type = "UMAP",
-  save = TRUE,
   split = TRUE,
   names = NULL,
-  save_as = "cyto_map",
-  inverse_transform = inverse_transform,
+  save_as = NULL,
+  inverse = inverse,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -67,11 +64,10 @@ cyto_map(x, ...)
   channels,
   display = 1,
   type = "UMAP",
-  save = TRUE,
   split = TRUE,
   names = NULL,
-  save_as = "cyto_map",
-  inverse_transform = inverse_transform,
+  save_as = NULL,
+  inverse = FALSE,
   trans = NULL,
   plot = TRUE,
   seed,
@@ -105,10 +101,6 @@ are mapped by default.}
 \item{type}{dimension reduction type to use to generate the map, supported
 options include "PCA", "tSNE", "UMAP" and "EmbedSOM".}
 
-\item{save}{logical indicating whether the mapped \code{flowFrame} or
-\code{flowSet} should be saved as .fcs files in a folder in the current
-working directory.}
-
 \item{split}{logical indicating whether samples merged using
 \code{cyto_merge_by} should be split prior to writing fcs files, set to
 FALSE by default.}
@@ -117,24 +109,21 @@ FALSE by default.}
 \code{cyto_merge_by}, only required when split is TRUE. These names will be
 re-assigned to each of split flowFrames and included in the file names.}
 
-\item{save_as}{name of the folder to save the .fcs files to when save is
-TRUE, set to "cyto_map" by default.}
+\item{inverse}{logical indicating whether the data should be inverse
+transformed prior to writing FCS files, set to FALSE by default. Inverse
+transformations of \code{flowFrame} or \code{flowSet} objects requires
+passing of transformers through the \code{trans} argument.}
 
-\item{inverse_transform}{logical indicating whether the data should be
-inverse transformed prior to writing FCS files, set to TRUE by default.
-Inverse transformations of \code{flowFrame} or \code{flowSet} objects
-requires passing of transformers through the \code{trans} argument.}
-
-\item{trans}{object of class \code{transformerList} containg the
-transformation definitions applied to the supplied data. If transformations
-are supplied, the data will be inverse transformed prior to saving to
-return the data on the original linear scale.}
+\item{trans}{object of class \code{transformerList} containing the
+transformation definitions applied to the supplied data. Used internally
+when \code{inverse_transform} is TRUE, to inverse the transformations prior
+to writing FCS files.}
 
 \item{plot}{logical indicating whether the constructed map should be plotted
 using \code{cyto_plot}.}
 
-\item{seed}{integer to set seed prior to mapping to ensure consistent results
-between runs.}
+\item{seed}{integer to set seed prior to mapping to ensure more consistent
+results between runs.}
 }
 \value{
 flowFrame, flowSet, GatingHierarchy or GatingSet containing the

@@ -18,29 +18,27 @@
 #'   are mapped by default.
 #' @param type dimension reduction type to use to generate the map, supported
 #'   options include "PCA", "tSNE", "UMAP" and "EmbedSOM".
-#' @param save logical indicating whether the mapped \code{flowFrame} or
-#'   \code{flowSet} should be saved as .fcs files in a folder in the current
-#'   working directory.
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing fcs files, set to
 #'   FALSE by default.
 #' @param names original names of the samples prior to merging using
 #'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
 #'   re-assigned to each of split flowFrames and included in the file names.
-#' @param save_as name of the folder to save the .fcs files to when save is
-#'   TRUE, set to "cyto_map" by default.
-#' @param inverse_transform logical indicating whether the data should be
-#'   inverse transformed prior to writing FCS files, set to TRUE by default.
-#'   Inverse transformations of \code{flowFrame} or \code{flowSet} objects
-#'   requires passing of transformers through the \code{trans} argument.
-#' @param trans object of class \code{transformerList} containg the
-#'   transformation definitions applied to the supplied data. If transformations
-#'   are supplied, the data will be inverse transformed prior to saving to
-#'   return the data on the original linear scale.
+#' @param save_as passed to \code{cyto_save) to indicate a folder where the
+#'   mapped FCS files should be saved, set to NULL by default to turn off saving
+#'   of FCS files.
+#' @param inverse logical indicating whether the data should be inverse
+#'   transformed prior to writing FCS files, set to FALSE by default. Inverse
+#'   transformations of \code{flowFrame} or \code{flowSet} objects requires
+#'   passing of transformers through the \code{trans} argument.
+#' @param trans object of class \code{transformerList} containing the
+#'   transformation definitions applied to the supplied data. Used internally
+#'   when \code{inverse_transform} is TRUE, to inverse the transformations prior
+#'   to writing FCS files.
 #' @param plot logical indicating whether the constructed map should be plotted
 #'   using \code{cyto_plot}.
-#' @param seed integer to set seed prior to mapping to ensure consistent results
-#'   between runs.
+#' @param seed integer to set seed prior to mapping to ensure more consistent
+#'   results between runs.
 #' @param ... additional arguments passed to the called dimension reduction
 #'   function. Links to the documentation for these functions can be found
 #'   below.
@@ -82,11 +80,10 @@ cyto_map.GatingSet <- function(x,
                                channels,
                                display = 1,
                                type = "UMAP",
-                               save = TRUE,
                                split = TRUE,
                                names = NULL,
-                               save_as = "cyto_map",
-                               inverse_transform = TRUE,
+                               save_as = NULL,
+                               inverse = FALSE,
                                trans = NULL,
                                plot = TRUE,
                                seed,
@@ -125,11 +122,10 @@ cyto_map.GatingSet <- function(x,
                        channels = channels,
                        display = display,
                        type = type,
-                       save = save,
                        split = split,
                        names = names,
                        save_as = save_as,
-                       inverse_transform = inverse_transform,
+                       inverse = inverse,
                        trans = trans,
                        plot = FALSE,
                        seed = seed, ...)
@@ -194,11 +190,10 @@ cyto_map.GatingHierarchy <- function(x,
                                      channels,
                                      display = 1,
                                      type = "UMAP",
-                                     save = TRUE,
                                      split = TRUE,
                                      names = NULL,
-                                     save_as = "cyto_map",
-                                     inverse_transform = TRUE,
+                                     save_as = NULL,
+                                     inverse = FALSE,
                                      trans = NULL,
                                      plot = TRUE,
                                      seed,
@@ -221,11 +216,10 @@ cyto_map.GatingHierarchy <- function(x,
                        channels = channels,
                        display = display,
                        type = type,
-                       save = save,
                        split = split,
                        names = names,
                        save_as = save_as,
-                       inverse_transform = inverse_transform,
+                       inverse = inverse,
                        trans = trans,
                        plot = FALSE,
                        seed = seed, ...)
@@ -296,11 +290,10 @@ cyto_map.flowSet <- function(x,
                              channels,
                              display = 1,
                              type = "UMAP",
-                             save = TRUE,
                              split = TRUE,
                              names = NULL,
-                             save_as = "cyto_map",
-                             inverse_transform = inverse_transform,
+                             save_as = NULL,
+                             inverse = inverse,
                              trans = NULL,
                              plot = TRUE,
                              seed,
@@ -325,11 +318,10 @@ cyto_map.flowSet <- function(x,
                 channels = channels,
                 display = display,
                 type = type,
-                save = save,
                 split = split,
                 names = names,
                 save_as = save_as,
-                inverse_transform = inverse_transform,
+                inverse = inverse,
                 trans = trans,
                 plot = plot,
                 seed = seed, ...)
@@ -345,11 +337,10 @@ cyto_map.flowFrame <- function(x,
                                channels,
                                display = 1,
                                type = "UMAP",
-                               save = TRUE,
                                split = TRUE,
                                names = NULL,
-                               save_as = "cyto_map",
-                               inverse_transform = inverse_transform,
+                               save_as = NULL,
+                               inverse = FALSE,
                                trans = NULL,
                                plot = TRUE,
                                seed,
@@ -462,12 +453,12 @@ cyto_map.flowFrame <- function(x,
   # SAVE MAPPED FLOWFRAME(S) ---------------------------------------------------
   
   # CYTO_SAVE
-  if(save == TRUE){
+  if(!is.null(save_as)){
     x <- cyto_save(x,
                    split = split,
                    names = names,
                    save_as = save_as,
-                   inverse_transform = inverse_transform,
+                   inverse = inverse,
                    trans = trans)
   }
   
