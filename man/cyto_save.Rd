@@ -16,7 +16,7 @@ cyto_save(x, ...)
   split = FALSE,
   names = NULL,
   save_as = NULL,
-  inverse_transform = FALSE,
+  inverse = FALSE,
   trans = NULL,
   ...
 )
@@ -27,7 +27,7 @@ cyto_save(x, ...)
   split = FALSE,
   names = NULL,
   save_as = NULL,
-  inverse_transform = FALSE,
+  inverse = FALSE,
   trans = NULL,
   ...
 )
@@ -37,7 +37,7 @@ cyto_save(x, ...)
   split = FALSE,
   names = NULL,
   save_as = NULL,
-  inverse_transform = FALSE,
+  inverse = FALSE,
   trans = NULL,
   ...
 )
@@ -47,7 +47,7 @@ cyto_save(x, ...)
   split = FALSE,
   names = NULL,
   save_as = NULL,
-  inverse_transform = FALSE,
+  inverse = FALSE,
   trans = NULL,
   ...
 )
@@ -79,7 +79,7 @@ directory. To prevent files being overwritten, it is recommended that
 \code{save_as} directory not be manually created before running
 \code{cyto_save}.}
 
-\item{inverse_transform}{logical indicating whether the data should be
+\item{inverse}{logical indicating whether the data should be
 inverse transformed prior to writing FCS files, set to FALSE by default.
 Inverse transformations of \code{flowFrame} or \code{flowSet} objects
 requires passing of transformers through the \code{trans} argument.}

@@ -1787,7 +1787,7 @@ cyto_split <- function(x,
 #'   directory. To prevent files being overwritten, it is recommended that
 #'   \code{save_as} directory not be manually created before running
 #'   \code{cyto_save}.
-#' @param inverse_transform logical indicating whether the data should be
+#' @param inverse logical indicating whether the data should be
 #'   inverse transformed prior to writing FCS files, set to FALSE by default.
 #'   Inverse transformations of \code{flowFrame} or \code{flowSet} objects
 #'   requires passing of transformers through the \code{trans} argument.
@@ -1836,7 +1836,7 @@ cyto_save.GatingSet <- function(x,
                                 split = FALSE,
                                 names = NULL,
                                 save_as = NULL,
-                                inverse_transform = FALSE,
+                                inverse = FALSE,
                                 trans = NULL, ...) {
 
   # SAVE GATINGSET
@@ -1860,7 +1860,7 @@ cyto_save.GatingSet <- function(x,
       split = split,
       names = names,
       save_as = save_as,
-      inverse_transform = inverse_transform,
+      inverse = inverse,
       trans = trans
     )
 
@@ -1876,7 +1876,7 @@ cyto_save.GatingHierarchy <- function(x,
                                       split = FALSE,
                                       names = NULL,
                                       save_as = NULL,
-                                      inverse_transform = FALSE,
+                                      inverse = FALSE,
                                       trans = NULL,
                                       ...) {
 
@@ -1901,7 +1901,7 @@ cyto_save.GatingHierarchy <- function(x,
       split = split,
       names = names,
       save_as = save_as,
-      inverse_transform = inverse_transform,
+      inverse = inverse,
       trans = trans
     )
 
@@ -1916,7 +1916,7 @@ cyto_save.flowSet <- function(x,
                               split = FALSE,
                               names = NULL,
                               save_as = NULL,
-                              inverse_transform = FALSE,
+                              inverse = FALSE,
                               trans = NULL,
                               ...) {
 
@@ -1980,9 +1980,9 @@ cyto_save.flowSet <- function(x,
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
     # INVERSE TRANSFORM
-    if (inverse_transform == TRUE){
+    if (inverse == TRUE){
       # TRANSFORMERS REQUIRED
-      if(is.null(trans)){
+      if(is.null(trans) | .all_na(trans)){
         stop("Supply transformerList to 'trans' to inverse transformations.")
       }
       # INVERSE TRANSFORM
@@ -2024,7 +2024,7 @@ cyto_save.flowFrame <- function(x,
                                 split = FALSE,
                                 names = NULL,
                                 save_as = NULL,
-                                inverse_transform = FALSE,
+                                inverse = FALSE,
                                 trans = NULL,
                                 ...) {
 
@@ -2063,9 +2063,9 @@ cyto_save.flowFrame <- function(x,
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
     # INVERSE TRANSFORM
-    if (inverse_transform == TRUE){
+    if (inverse == TRUE){
       #TRANSFORMERS REQUIRED
-      if(is.null(trans)){
+      if(is.null(trans) | .all_na(trans)){
         stop("Supply transformerList to 'trans' to inverse transformations.")
       }
       # INVERSE TRANSFORM
@@ -2958,8 +2958,6 @@ cyto_compensate.GatingSet <- function(x,
       })
     }
   }
-
-  print(spill)
   
   # Channels
   fluor_channels <- cyto_fluor_channels(fs)
@@ -3048,8 +3046,6 @@ cyto_compensate.flowSet <- function(x,
       })
     }
   }
-
-  print(spill)
   
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
