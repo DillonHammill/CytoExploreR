@@ -169,6 +169,10 @@ cyto_clean <- function(x, ...){
     if(is(cyto_data, "cytoset")){
       cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
     }
+    # flowAI messes with experiment details :(
+    if(is(cyto_data, "flowSet")){
+      pd <- cyto_details(cyto_data)
+    }
     # CLEAN DATA
     invisible(capture.output(cyto_data <-  flow_auto_qc(cyto_data,
                                                         html_report = FALSE,
@@ -176,9 +180,11 @@ cyto_clean <- function(x, ...){
                                                         fcs_QC = FALSE,
                                                         folder_results = FALSE,
                                                         ...)))
+    
     # RETURN CYTOSET
     if(is(cyto_data, "flowSet")){
       cyto_data <- flowSet_to_cytoset(cyto_data)
+      cyto_details(cyto_data) <- pd
     }
     # REPLACE DATA
     gs_cyto_data(x)<- cyto_data
@@ -186,6 +192,10 @@ cyto_clean <- function(x, ...){
     # FLOWSET REQUIRED
     if(is(x, "cytoset")){
       x <- cytoset_to_flowSet(x)
+    }
+    # flowAI messes with experiment details :(
+    if(is(x, "flowSet")){
+      pd <- cyto_details(x)
     }
     invisible(capture.output(x <- flow_auto_qc(x, 
                                                html_report = FALSE,
@@ -196,6 +206,7 @@ cyto_clean <- function(x, ...){
     # RETURN CYTOSET
     if(is(x, "flowSet")){
       x <- flowSet_to_cytoset(x)
+      cyto_details(x) <- pd
     }
   }
   return(x)
