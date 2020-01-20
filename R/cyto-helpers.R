@@ -57,6 +57,11 @@ cyto_load <- function(path = ".",
                       barcode = FALSE,
                       restrict = FALSE, ...) {
 
+  # DIRECTORY NOT FOUND
+  if(!dir.exists(path)){
+    stop("Specified path does not exist.")
+  }
+  
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
 
