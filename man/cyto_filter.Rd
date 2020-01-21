@@ -41,7 +41,6 @@ fs <- cyto_filter(
   Activation,
   Treatment \%in\% c("Stim-A", "Stim-C")
 )
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

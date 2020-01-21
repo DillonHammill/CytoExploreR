@@ -24,7 +24,7 @@
 #' @param names original names of the samples prior to merging using
 #'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
 #'   re-assigned to each of split flowFrames and included in the file names.
-#' @param save_as passed to \code{cyto_save) to indicate a folder where the
+#' @param save_as passed to \code{cyto_save} to indicate a folder where the
 #'   mapped FCS files should be saved, set to NULL by default to turn off saving
 #'   of FCS files.
 #' @param inverse logical indicating whether the data should be inverse

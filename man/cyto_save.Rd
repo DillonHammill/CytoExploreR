@@ -108,7 +108,6 @@ fs <- Activation
 
 # Save each flowFrame to file
 cyto_save(fs)
-
 }
 
 }

@@ -53,7 +53,6 @@ cyto_extract(gs, parent = "root")
 
 # Extract raw data matrices
 cyto_extract(gs, parent = "root", raw = TRUE)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -109,6 +109,10 @@ FALSE by default.}
 \code{cyto_merge_by}, only required when split is TRUE. These names will be
 re-assigned to each of split flowFrames and included in the file names.}
 
+\item{save_as}{passed to \code{cyto_save} to indicate a folder where the
+mapped FCS files should be saved, set to NULL by default to turn off saving
+of FCS files.}
+
 \item{inverse}{logical indicating whether the data should be inverse
 transformed prior to writing FCS files, set to FALSE by default. Inverse
 transformations of \code{flowFrame} or \code{flowSet} objects requires

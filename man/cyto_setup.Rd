@@ -48,7 +48,7 @@ the experiment. These details can be modified later with additional calls to
 
 Through the \code{clean} argument, the data can then be optionally cleaned
 using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
-anomalies in the recorded data. 
+anomalies in the recorded data.
 
 Users can optionally provide a name for a
 gatingTemplate csv file which will be created if necessary and assigned as

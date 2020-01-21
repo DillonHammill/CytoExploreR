@@ -46,7 +46,6 @@
 #'
 #' # cs is a cytoset
 #' class(cs)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -58,31 +57,31 @@ cyto_load <- function(path = ".",
                       restrict = FALSE, ...) {
 
   # DIRECTORY NOT FOUND
-  if(!dir.exists(path)){
+  if (!dir.exists(path)) {
     stop("Specified path does not exist.")
   }
-  
+
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
 
   # SELECT
-  if(!is.null(select)){
-    lapply(select, function(z){
-      if(any(grepl(z, files, ignore.case = TRUE))){
+  if (!is.null(select)) {
+    lapply(select, function(z) {
+      if (any(grepl(z, files, ignore.case = TRUE))) {
         files <<- files[which(grepl(z, files, ignore.case = TRUE))]
       }
     })
   }
-  
+
   # EXCLUDE
-  if(!is.null(exclude)){
-    lapply(exclude, function(z){
-      if(any(grepl(z, files, ignore.case = TRUE))){
+  if (!is.null(exclude)) {
+    lapply(exclude, function(z) {
+      if (any(grepl(z, files, ignore.case = TRUE))) {
         files <<- files[-which(grepl(z, files, ignore.case = TRUE))]
       }
     })
   }
-  
+
   # SORTED FILE PATHS
   if (sort) {
     files <- mixedsort(files)
@@ -107,12 +106,11 @@ cyto_load <- function(path = ".",
     if (barcode) {
       x <- cyto_barcode(x)
     }
-    
+
     # CHANNEL RESTRICTION
-    if(restrict){
+    if (restrict) {
       x <- cyto_channels_restrict(x)
     }
-    
   }
 
   # RETURN NCDFFLOWSET
@@ -149,62 +147,63 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
-#'
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
-#'   
+#'
 #' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
 #'
 #' @export
-cyto_clean <- function(x, ...){
-  
+cyto_clean <- function(x, ...) {
+
   # GATINGSET/GATINGHIERARCHY
-  if(is(x, "GatingSet") | is(x, "GatingHierarchy")){
+  if (is(x, "GatingSet") | is(x, "GatingHierarchy")) {
     # PARENT
     parent <- cyto_nodes(x, path = "auto")[1]
     # EXTRACT DATA
     cyto_data <- cyto_extract(x, parent)
     # flowAI REQUIRES FLOWSET
-    if(is(cyto_data, "cytoset")){
+    if (is(cyto_data, "cytoset")) {
       cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
     }
     # flowAI messes with experiment details :(
-    if(is(cyto_data, "flowSet")){
+    if (is(cyto_data, "flowSet")) {
       pd <- cyto_details(cyto_data)
     }
     # CLEAN DATA
-    invisible(capture.output(cyto_data <-  flow_auto_qc(cyto_data,
-                                                        html_report = FALSE,
-                                                        mini_report = FALSE,
-                                                        fcs_QC = FALSE,
-                                                        folder_results = FALSE,
-                                                        ...)))
-    
+    invisible(capture.output(cyto_data <- flow_auto_qc(cyto_data,
+      html_report = FALSE,
+      mini_report = FALSE,
+      fcs_QC = FALSE,
+      folder_results = FALSE,
+      ...
+    )))
+
     # RETURN CYTOSET
-    if(is(cyto_data, "flowSet")){
+    if (is(cyto_data, "flowSet")) {
       cyto_data <- flowSet_to_cytoset(cyto_data)
       cyto_details(cyto_data) <- pd
     }
     # REPLACE DATA
-    gs_cyto_data(x)<- cyto_data
-  }else{
+    gs_cyto_data(x) <- cyto_data
+  } else {
     # FLOWSET REQUIRED
-    if(is(x, "cytoset")){
+    if (is(x, "cytoset")) {
       x <- cytoset_to_flowSet(x)
     }
     # flowAI messes with experiment details :(
-    if(is(x, "flowSet")){
+    if (is(x, "flowSet")) {
       pd <- cyto_details(x)
     }
-    invisible(capture.output(x <- flow_auto_qc(x, 
-                                               html_report = FALSE,
-                                               mini_report = FALSE,
-                                               fcs_QC = FALSE,
-                                               folder_results = FALSE,
-                                               ...)))
+    invisible(capture.output(x <- flow_auto_qc(x,
+      html_report = FALSE,
+      mini_report = FALSE,
+      fcs_QC = FALSE,
+      folder_results = FALSE,
+      ...
+    )))
     # RETURN CYTOSET
-    if(is(x, "flowSet")){
+    if (is(x, "flowSet")) {
       x <- flowSet_to_cytoset(x)
       cyto_details(x) <- pd
     }
@@ -229,8 +228,8 @@ cyto_clean <- function(x, ...){
 #'
 #' Through the \code{clean} argument, the data can then be optionally cleaned
 #' using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
-#' anomalies in the recorded data. 
-#' 
+#' anomalies in the recorded data.
+#'
 #' Users can optionally provide a name for a
 #' gatingTemplate csv file which will be created if necessary and assigned as
 #' the active gatingTemplate.
@@ -301,23 +300,23 @@ cyto_setup <- function(path = ".",
   # EXPERIMENT DETAILS
   message("Updating experiment details...")
   x <- cyto_details_edit(x)
-  
+
   # FLOWSET LOADED
   if (is(x, "flowSet")) {
     # RESTRICT CHANNELS
-    if(restrict){
+    if (restrict) {
       message("Removing unassigned channels...")
       x <- cyto_channels_restrict(x)
     }
     # CLEAN DATA
-    if(clean){
+    if (clean) {
       message("Cleaning data to remove anomalies...")
       x <- cyto_clean(x)
     }
     # GATINGSET
     x <- GatingSet(x)
   }
-  
+
   # gatingtemplate
   if (!is.null(gatingTemplate)) {
 
@@ -339,10 +338,9 @@ cyto_setup <- function(path = ".",
 
   # SETUP COMPLETE
   message("Done!")
-  
+
   # RETURN GATINGSET
   return(x)
-  
 }
 
 ## CYTO_DETAILS ----------------------------------------------------------------
@@ -388,7 +386,7 @@ cyto_details <- function(x) {
   } else {
     # Fix AsIs for name column
     pd <- pData(x)
-    #pd$name <- factor(pd$name, levels = pd$name)
+    # pd$name <- factor(pd$name, levels = pd$name)
     return(pd)
   }
 }
@@ -444,7 +442,6 @@ cyto_details <- function(x) {
 #'
 #' # GatingSet
 #' cyto_names(gs)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_names
@@ -508,7 +505,6 @@ cyto_names.list <- function(x) {
 #'
 #' # Valid object
 #' cyto_check(Activation)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -595,7 +591,6 @@ cyto_check <- function(x) {
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -642,7 +637,7 @@ cyto_transform.default <- function(x,
         channels = channels,
         parent = parent,
         select = select,
-        plot = FALSE, 
+        plot = FALSE,
         ...
       )
     } else if (type == "arcsinh") {
@@ -1015,49 +1010,48 @@ cyto_transform_extract <- function(x,
 #'
 #' # Extract cytoset
 #' cyto_extract(gs, parent = "root")
-#' 
+#'
 #' # Extract raw data matrices
 #' cyto_extract(gs, parent = "root", raw = TRUE)
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_extract <- function(x, 
-                         parent = NULL, 
+cyto_extract <- function(x,
+                         parent = NULL,
                          copy = FALSE,
                          raw = FALSE, ...) {
 
   # DEFAULT PARENT
-  if(is.null(parent)){
+  if (is.null(parent)) {
     parent <- cyto_nodes(x, path = "auto")[1]
   }
-  
+
   # EXTRACT
   if (is(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
   } else if (is(x, "GatingSet")) {
     x <- gs_pop_get_data(x, parent, ...)
   }
-  
+
   # COPY
-  if(copy){
+  if (copy) {
     x <- cyto_copy(x)
   }
-  
+
   # RAW DATA MATRICES
-  if(raw){
+  if (raw) {
     nms <- cyto_names(x)
-    if(is(x, "flowFrame")){
+    if (is(x, "flowFrame")) {
       x <- list(exprs(x))
-    }else if(is(x, "flowSet")){
-      y <- lapply(seq_along(x), function(z){
+    } else if (is(x, "flowSet")) {
+      y <- lapply(seq_along(x), function(z) {
         exprs(x[[z]])
       })
       x <- y
     }
     names(x) <- nms
   }
-  
+
   # RETURN EXTRACTED DATA
   return(x)
 }
@@ -1321,7 +1315,6 @@ cyto_convert.GatingSet <- function(x,
 #'   Activation,
 #'   Treatment %in% c("Stim-A", "Stim-C")
 #' )
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1394,8 +1387,7 @@ cyto_filter <- function(x, ...) {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_select <- function(x,
-                        ...) {
+cyto_select <- function(x, ...) {
 
   # Check class of x
   if (!any(is(x, "flowSet") |
@@ -1419,44 +1411,52 @@ cyto_select <- function(x,
     exclude <- FALSE
   }
 
-  # Extract experiment details
-  pd <- cyto_details(x)
+  # INDICES SUPPLIED
+  if (length(args) == 1 &
+    (is.null(names(args)) | .empty(names(args))) &
+    is.numeric(unlist(args))) {
+    # INDICES TO SELECT
+    ind <- unlist(args)
+  } else {
+    # Extract experiment details
+    pd <- cyto_details(x)
 
-  # Check that all variables are valid
-  if (!all(names(args) %in% colnames(pd))) {
-    lapply(names(args), function(y) {
-      if (!y %in% names(pd)) {
-        stop(paste(y, "is not a valid variable in cyto_details(x)."))
-      }
-    })
-  }
-
-  # Check that all variable levels at least exist in pd
-  lapply(names(args), function(z) {
-    var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
-    lvls <- levels(var)
-    # some variable levels do not exist in pd
-    if (!all(args[[z]] %in% lvls)) {
-      lapply(args[[z]], function(v) {
-        if (!v %in% lvls) {
-          stop(paste0(v, " is not a valid level for ", z, "!"))
+    # Check that all variables are valid
+    if (!all(names(args) %in% colnames(pd))) {
+      lapply(names(args), function(y) {
+        if (!y %in% names(pd)) {
+          stop(paste(y, "is not a valid variable in cyto_details(x)."))
         }
       })
     }
-  })
 
-  # Get filtered pd
-  pd_filter <- pd
-  lapply(names(args), function(y) {
-    ind <- which(pd_filter[, y] %in% args[[y]])
-    # No filtering if variable level is missing
-    if (length(ind) != 0) {
-      pd_filter <<- pd_filter[ind, ]
-    }
-  })
-  
-  # Get indices for selected samples
-  ind <- match(pd_filter[, "name"], pd[, "name"])
+    # Check that all variable levels at least exist in pd
+    lapply(names(args), function(z) {
+      var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
+      lvls <- levels(var)
+      # some variable levels do not exist in pd
+      if (!all(args[[z]] %in% lvls)) {
+        lapply(args[[z]], function(v) {
+          if (!v %in% lvls) {
+            stop(paste0(v, " is not a valid level for ", z, "!"))
+          }
+        })
+      }
+    })
+
+    # Get filtered pd
+    pd_filter <- pd
+    lapply(names(args), function(y) {
+      ind <- which(pd_filter[, y] %in% args[[y]])
+      # No filtering if variable level is missing
+      if (length(ind) != 0) {
+        pd_filter <<- pd_filter[ind, ]
+      }
+    })
+
+    # Get indices for selected samples
+    ind <- match(pd_filter[, "name"], pd[, "name"])
+  }
 
   # Exclude
   if (exclude == TRUE) {
@@ -1464,7 +1464,6 @@ cyto_select <- function(x,
   } else {
     return(x[ind])
   }
-  
 }
 
 ## CYTO_GROUP_BY ---------------------------------------------------------------
@@ -1655,12 +1654,12 @@ cyto_merge_by.flowSet <- function(x,
 
   # GROUPS
   grps <- names(fs_list)
-  
+
   # COMBINED EVENTS
-  if("all" %in% grps){
+  if ("all" %in% grps) {
     grps[which("all" %in% grps)] <- "Combined Events"
   }
-  
+
   # SELECTION ------------------------------------------------------------------
 
   # ATTEMPT SELECTION OR RETURN ALL SAMPLES
@@ -1833,7 +1832,6 @@ cyto_split <- function(x,
 #'
 #' # Save each flowFrame to file
 #' cyto_save(fs)
-#' 
 #' }
 #'
 #' @seealso \code{\link{cyto_split}}
@@ -1865,9 +1863,10 @@ cyto_save.GatingSet <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingSet."))
-    fs <- cyto_extract(x, 
-                       parent = parent,
-                       copy = TRUE)
+    fs <- cyto_extract(x,
+      parent = parent,
+      copy = TRUE
+    )
     # TRANSFORMATIONS
     trans <- cyto_transformer_extract(x)
     # FLOWSET METHOD
@@ -1906,9 +1905,10 @@ cyto_save.GatingHierarchy <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-    fr <- cyto_extract(x, 
-                       parent = parent,
-                       copy = TRUE)
+    fr <- cyto_extract(x,
+      parent = parent,
+      copy = TRUE
+    )
     # TRANSFORMATIONS
     trans <- cyto_transformer_extract(x)
     # FLOWSET METHOD
@@ -1938,41 +1938,41 @@ cyto_save.flowSet <- function(x,
 
   # COPY
   x <- cyto_copy(x)
-  
+
   # LIST OF FLOWFRAMES
   fr_list <- cyto_convert(x, "list of flowFrames")
-  
+
   # LIST OF SPLIT FLOWFRAMES
-  if(split == TRUE){
+  if (split == TRUE) {
     # NAMES SUPPLIED - CHECK LENGTH
-    if(!is.null(names)){
+    if (!is.null(names)) {
       # SAMPLES PER FLOWFRAME
-      samples_per_file <- lapply(fr_list, function(z){
+      samples_per_file <- lapply(fr_list, function(z) {
         length(unique(exprs(z)[, "Sample ID"]))
       })
       # SPLIT NAMES SUPPLIED
       samples <- sum(unlist(samples_per_file))
-      if(length(names) != samples){
+      if (length(names) != samples) {
         stop(paste("Expecting", samples, "names for the split files."))
       }
       # PREPARE NAMES
-      ind <- LAPPLY(seq_along(fr_list), function(z){
+      ind <- LAPPLY(seq_along(fr_list), function(z) {
         rep(z, samples_per_file[[z]])
       })
       names <- split(names, ind)
       # SPLIT FR_LIST
-      fr_list <- mapply(function(z, name){
+      fr_list <- mapply(function(z, name) {
         cyto_split(z, names = name)
       }, fr_list, names)
       fr_list <- unlist(fr_list)
-    # NO NAMES SUPPLIED  
-    }else{
-      fr_list <- LAPPLY(fr_list, function(z){
+      # NO NAMES SUPPLIED
+    } else {
+      fr_list <- LAPPLY(fr_list, function(z) {
         cyto_split(z)
       })
     }
   }
-  
+
   # DIRECTORY CHECK
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
@@ -1996,9 +1996,9 @@ cyto_save.flowSet <- function(x,
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
     # INVERSE TRANSFORM
-    if (inverse == TRUE){
+    if (inverse == TRUE) {
       # TRANSFORMERS REQUIRED
-      if(is.null(trans) | .all_na(trans)){
+      if (is.null(trans) | .all_na(trans)) {
         stop("Supply transformerList to 'trans' to inverse transformations.")
       }
       # INVERSE TRANSFORM
@@ -2046,7 +2046,7 @@ cyto_save.flowFrame <- function(x,
 
   # COPY
   x <- cyto_copy(x)
-  
+
   # SPLIT
   if (split == TRUE) {
     fr_list <- cyto_split(x,
@@ -2079,9 +2079,9 @@ cyto_save.flowFrame <- function(x,
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
     # INVERSE TRANSFORM
-    if (inverse == TRUE){
-      #TRANSFORMERS REQUIRED
-      if(is.null(trans) | .all_na(trans)){
+    if (inverse == TRUE) {
+      # TRANSFORMERS REQUIRED
+      if (is.null(trans) | .all_na(trans)) {
         stop("Supply transformerList to 'trans' to inverse transformations.")
       }
       # INVERSE TRANSFORM
@@ -2155,7 +2155,6 @@ cyto_save.flowFrame <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -2331,7 +2330,6 @@ cyto_sample.list <- function(x,
     x <- mapply(function(x, display) {
       cyto_sample(x, display)
     }, x, display)
-    
   }
 
   # Return sampled list
@@ -2363,75 +2361,80 @@ cyto_sample.list <- function(x,
 #' @export
 cyto_beads_sample <- function(x,
                               beads = NULL,
-                              bead_count = NULL){
-  
+                              bead_count = NULL) {
+
   # GATINGSET
-  if(!is(x, "GatingSet")){
+  if (!is(x, "GatingSet")) {
     stop("'x' must be a Gatingset object.")
   }
-  
+
   # CLONE GATINGSET
   gs_clone <- cyto_copy(x)
-  
+
   # NODES
   nodes <- cyto_nodes(gs_clone, path = "auto")
-  
+
   # BEADS
-  if(is.null(beads)){
+  if (is.null(beads)) {
     # SINGLE BEADS
-    if(any(grepl("single beads", nodes, ignore.case = TRUE))){
+    if (any(grepl("single beads", nodes, ignore.case = TRUE))) {
       beads <- nodes[which(grepl("single beads", nodes, ignore.case = TRUE))[1]]
-    # BEADS
-    }else if(any(grepl("beads", nodes, ignore.case = TRUE))){
+      # BEADS
+    } else if (any(grepl("beads", nodes, ignore.case = TRUE))) {
       beads <- nodes[which(grepl("beads", nodes, ignore.case = TRUE))[1]]
-    # BEADS MISSING
-    }else{
+      # BEADS MISSING
+    } else {
       stop("Supply the name of the 'beads' population.")
     }
   }
-  
+
   # BEAD COUNTS
   bead_pops <- cyto_extract(gs_clone, beads)
   bead_counts <- suppressMessages(
     cyto_stats_compute(bead_pops,
-                       stat = "count",
-                       format = "wide")
+      stat = "count",
+      format = "wide"
     )
-  
+  )
+
   # BEAD COUNT
-  if(is.null(bead_count)){
+  if (is.null(bead_count)) {
     bead_count <- min(bead_counts[, ncol(bead_counts)])
-  }else{
-    if(!bead_count <= min(bead_counts[, ncol(bead_counts)])){
+  } else {
+    if (!bead_count <= min(bead_counts[, ncol(bead_counts)])) {
       bead_count <- min(bead_counts[, ncol(bead_counts)])
     }
   }
-  
+
   # BEAD RATIOS
-  bead_ratios <- 1/(bead_counts[, ncol(bead_counts)]/bead_count)
-  
+  bead_ratios <- 1 / (bead_counts[, ncol(bead_counts)] / bead_count)
+
   # BEADS MISSING
-  if(any(is.infinite(bead_ratios))){
-    stop(paste0("The following samples do not contain any beads:",
-                paste0("\n", cyto_names(gs_clone)[is.infinite(bead_ratios)])))
+  if (any(is.infinite(bead_ratios))) {
+    stop(paste0(
+      "The following samples do not contain any beads:",
+      paste0("\n", cyto_names(gs_clone)[is.infinite(bead_ratios)])
+    ))
   }
-  
+
   # SAMPLING - ROOT POPULATION
   pops <- list()
-  lapply(seq_along(bead_pops), function(z){
-    pops[[z]] <<- cyto_sample(cyto_extract(gs_clone[[z]],
-                                           copy = TRUE),
-                              bead_ratios[[z]])
+  lapply(seq_along(bead_pops), function(z) {
+    pops[[z]] <<- cyto_sample(
+      cyto_extract(gs_clone[[z]],
+        copy = TRUE
+      ),
+      bead_ratios[[z]]
+    )
   })
   names(pops) <- cyto_names(pops)
   pops <- flowSet(pops)
-  
+
   # REPLACE DATA IN GATINGSET
   gs_cyto_data(gs_clone) <- pops
-  
+
   # RETURN SAMPLED GATINGSET
   return(gs_clone)
-  
 }
 
 ## CYTO_BARCODE ----------------------------------------------------------------
@@ -2462,7 +2465,6 @@ cyto_beads_sample <- function(x,
 #'
 #' # Barcode
 #' cyto_barcode(fs)
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -2672,10 +2674,10 @@ cyto_markers_edit <- function(x, file = NULL) {
 
   # Edit dt - data.frame must have no rownames for editor
   dt <- suppressWarnings(edit(dt))
-  
+
   # Update channels
   BiocGenerics::colnames(x) <- as.character(dt$Channel)
-  
+
   # Write result to csv file -  file name manually supplied
   if (!is.null(file)) {
     write.csv(dt, file, row.names = FALSE)
@@ -2810,7 +2812,7 @@ cyto_details_edit <- function(x, file = NULL) {
   # Edit cyto_details
   pd <- suppressWarnings(edit(pd))
   rownames(pd) <- pd$name
-  
+
   # Update cyto_details
   cyto_details(x) <- pd
 
@@ -2886,7 +2888,6 @@ cyto_details_edit <- function(x, file = NULL) {
 #'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -2904,10 +2905,10 @@ cyto_compensate.GatingSet <- function(x,
                                       ...) {
 
   # Compensation already applied
-  if(!is.null(cyto_spillover_extract(x))){
+  if (!is.null(cyto_spillover_extract(x))) {
     stop("Looks like the data has already been compensated...")
   }
-  
+
   # Extract flowSet
   fs <- cyto_extract(x, parent = "root")
 
@@ -2957,38 +2958,39 @@ cyto_compensate.GatingSet <- function(x,
   } else if (is.null(spillover)) {
     if (!is.null(select)) {
       spill <- cyto_spillover_extract(fs[[select]])
-      if(is.null(spill)){
+      if (is.null(spill)) {
         stop("Unable to extract spillover matrix from selected sample.")
       }
       spill <- rep(spill, length(fs))
       names(spill) <- cyto_names(fs)
     } else {
-      
       spill <- lapply(cyto_names(fs), function(y) {
         sm <- cyto_spillover_extract(fs[[y]])[[1]]
-        if(is.null(sm)){
-          stop(paste0("Unable to extract spillover matrix from ",
-                      cyto_names(fs[[y]]), "."))
+        if (is.null(sm)) {
+          stop(paste0(
+            "Unable to extract spillover matrix from ",
+            cyto_names(fs[[y]]), "."
+          ))
         }
         return(sm)
       })
     }
   }
-  
+
   # Channels
   fluor_channels <- cyto_fluor_channels(fs)
-  
+
   # Spillover may contain more channels than in samples
-  spill <- lapply(spill, function(z){
+  spill <- lapply(spill, function(z) {
     # Select rows - square matrix
-    if(nrow(z) == ncol(z)){
+    if (nrow(z) == ncol(z)) {
       z <- z[match(fluor_channels, colnames(z)), ]
     }
     # Select columns
     z <- z[, fluor_channels]
     return(z)
   })
-  
+
   # Apply compensation
   flowWorkspace::compensate(x, spill)
 }
@@ -3046,7 +3048,7 @@ cyto_compensate.flowSet <- function(x,
   } else if (is.null(spillover)) {
     if (!is.null(select)) {
       spill <- cyto_spillover_extract(x[[select]])
-      if(is.null(spill)){
+      if (is.null(spill)) {
         stop("Unable to extract spillover matrix from selected sample.")
       }
       spill <- rep(spill, length(x))
@@ -3054,29 +3056,31 @@ cyto_compensate.flowSet <- function(x,
     } else {
       spill <- lapply(cyto_names(x), function(y) {
         sm <- cyto_spillover_extract(x[[y]])[[1]]
-        if(is.null(sm)){
-          stop(paste0("Unable to extract spillover matrix from ",
-                      cyto_names(x[[y]]), "."))
+        if (is.null(sm)) {
+          stop(paste0(
+            "Unable to extract spillover matrix from ",
+            cyto_names(x[[y]]), "."
+          ))
         }
         return(sm)
       })
     }
   }
-  
+
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
-  
+
   # Spillover may contain more channels than in samples
-  spill <- lapply(spill, function(z){
+  spill <- lapply(spill, function(z) {
     # Select rows - square matrix
-    if(nrow(z) == ncol(z)){
+    if (nrow(z) == ncol(z)) {
       z <- z[match(fluor_channels, colnames(z)), ]
     }
     # Select columns
     z <- z[, fluor_channels]
     return(z)
   })
-  
+
   # Apply compensation
   flowCore::compensate(x, spill)
 }
@@ -3127,22 +3131,24 @@ cyto_compensate.flowFrame <- function(x,
     # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
     spill <- cyto_spillover_extract(x)[[1]]
-    if(is.null(spill)){
-      stop(paste0("Unable to extract spillover matrix from", 
-                  cyto_names(x), "."))
+    if (is.null(spill)) {
+      stop(paste0(
+        "Unable to extract spillover matrix from",
+        cyto_names(x), "."
+      ))
     }
   }
-  
+
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
-  
+
   # Select rows - square matrix
-  if(nrow(spill) == ncol(spill)){
+  if (nrow(spill) == ncol(spill)) {
     spill <- spill[match(fluor_channels, colnames(spill)), ]
   }
   # Select columns
   spill <- spill[, fluor_channels]
-  
+
   # Apply compensation
   flowCore::compensate(x, spill)
 }
@@ -3259,7 +3265,6 @@ cyto_channel_match <- function(x,
 #'
 #' # Construct empty flowFrame
 #' cyto_empty(name = "Test.csv", channels = c("FSC-A", "SSC-A", "PE-A"))
-#' 
 #' @export
 cyto_empty <- function(name = NULL,
                        channels = NULL, ...) {
@@ -3291,95 +3296,99 @@ cyto_empty <- function(name = NULL,
 ## CYTO_COPY -------------------------------------------------------------------
 
 #' Copy a cytoset, cytoframe or GatingSet
-#' 
+#'
 #' @param x cytoframe, cytoset or GatingSet to be copied.
-#' 
+#'
 #' @return copied cytoframe, cytoset or GatingSet.
-#' 
+#'
 #' @importFrom flowWorkspace gs_clone realize_view
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @export
-cyto_copy <- function(x){
-  
+cyto_copy <- function(x) {
+
   # GatingSet
-  if(is(x, "GatingSet")){
+  if (is(x, "GatingSet")) {
     x <- gs_clone(x)
   }
-  
+
   # cytoset
-  if(is(x, "cytoset") | is(x, "cyto_frame")){
+  if (is(x, "cytoset") | is(x, "cyto_frame")) {
     x <- realize_view(x)
   }
-  
+
   # RETURN COPY
   return(x)
-  
 }
 
 ## CYTO_SPILLOVER_EXTRACT ------------------------------------------------------
 
 #' Extract spillover matrix from cytometry object
-#' 
+#'
 #' @param x object of class flowFrame, flowSet, GatingHierachy or GatingSet.
-#' 
+#'
 #' @return list of spillover matrices or NULL.
-#' 
+#'
 #' @importFrom methods is
 #' @importFrom flowWorkspace gh_get_compensations gs_get_compensations
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @examples 
+#'
+#' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation GatingSet
 #' gs <- GatingSet(Activation)
-#' 
+#'
 #' # Apply compensation
 #' gs <- cyto_compensate(gs)
-#' 
+#'
 #' # Extract spillover matrices
 #' spill <- cyto_spillover_extract(gs)
-#' 
 #' @export
-cyto_spillover_extract <- function(x){
-  
+cyto_spillover_extract <- function(x) {
+
   # GATINGSET
-  if(is(x, "GatingSet")){
+  if (is(x, "GatingSet")) {
     spill <- gs_get_compensations(x)
-    if(all(LAPPLY(spill, "is.null"))){
+    if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
-    }else{
-      spill <- LAPPLY(spill, function(z){z@spillover})
+    } else {
+      spill <- LAPPLY(spill, function(z) {
+        z@spillover
+      })
     }
-  # GATINGHIERACHY  
-  }else if(is(x, "GatingHierarchy")){
+    # GATINGHIERACHY
+  } else if (is(x, "GatingHierarchy")) {
     spill <- gh_get_compensations(x)
-    if(!is.null(spill)){
+    if (!is.null(spill)) {
       spill <- list(spill@spillover)
       names(spill) <- cyto_names(x)
     }
-  # FLOWSET  
-  }else if(is(x, "flowSet")){
-    spill <- lapply(seq_along(x), function(z){
+    # FLOWSET
+  } else if (is(x, "flowSet")) {
+    spill <- lapply(seq_along(x), function(z) {
       # CyTOF lacks spill slot (just in case)
-      tryCatch(x[[z]]@description$SPILL, error = function(e){NULL})
+      tryCatch(x[[z]]@description$SPILL, error = function(e) {
+        NULL
+      })
     })
     names(spill) <- cyto_names(x)
-    if(all(LAPPLY(spill, "is.null"))){
+    if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
     }
-  # FLOWFRAME  
-  }else if(is(x, "flowFrame")){
-    spill <- tryCatch(x@description$SPILL, error = function(e){NULL})
-    if(!is.null(spill)){
+    # FLOWFRAME
+  } else if (is(x, "flowFrame")) {
+    spill <- tryCatch(x@description$SPILL, error = function(e) {
+      NULL
+    })
+    if (!is.null(spill)) {
       spill <- list(spill)
       names(spill) <- cyto_names(x)
     }
   }
-  
+
   # RETURN LIST OF SPILLOVER MATRICES
   return(spill)
 }

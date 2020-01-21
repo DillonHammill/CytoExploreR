@@ -60,7 +60,6 @@ cyto_names(gs[[1]])
 
 # GatingSet
 cyto_names(gs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

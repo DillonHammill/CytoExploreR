@@ -30,7 +30,6 @@ fs <- Activation
 
 # Barcode
 cyto_barcode(fs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

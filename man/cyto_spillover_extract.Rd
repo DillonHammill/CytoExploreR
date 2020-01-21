@@ -26,7 +26,6 @@ gs <- cyto_compensate(gs)
 
 # Extract spillover matrices
 spill <- cyto_spillover_extract(gs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
