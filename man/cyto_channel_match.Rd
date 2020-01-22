@@ -14,7 +14,9 @@ cyto_channel_match(x, save_as = NULL)
 \code{"date-Channel-Match.csv"}.}
 }
 \value{
-save constructed channel_match csv file.
+update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
+  write channel matching to csv file and return channel matching as a
+  data.frame.
 }
 \description{
 Table Editor for Channel Match File Construction

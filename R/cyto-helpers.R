@@ -3191,7 +3191,9 @@ cyto_nodes <- function(x, ...) {
 #' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
 #'
-#' @return save constructed channel_match csv file.
+#' @return update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
+#'   write channel matching to csv file and return channel matching as a
+#'   data.frame.
 #'
 #' @importFrom utils write.csv edit
 #' @importFrom tools file_ext
@@ -3244,6 +3246,9 @@ cyto_channel_match <- function(x,
   # Write edited channel match file to csv file
   write.csv(channel_match, save_as, row.names = FALSE)
 
+  # Update cyto_details
+  cyto_details(x)$channel <- channel_match$channel
+  
   # Return edited channel match file
   return(channel_match)
 }
