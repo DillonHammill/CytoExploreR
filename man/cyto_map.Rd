@@ -3,7 +3,6 @@
 \name{cyto_map}
 \alias{cyto_map}
 \alias{cyto_map.GatingSet}
-\alias{cyto_map.GatingHierarchy}
 \alias{cyto_map.flowSet}
 \alias{cyto_map.flowFrame}
 \title{Create dimension-reduced maps of cytometry data}
@@ -14,7 +13,7 @@ cyto_map(x, ...)
   x,
   parent = "root",
   select = NULL,
-  channels,
+  channels = NULL,
   display = 1,
   type = "UMAP",
   split = TRUE,
@@ -23,45 +22,14 @@ cyto_map(x, ...)
   inverse = FALSE,
   trans = NULL,
   plot = TRUE,
-  seed,
-  ...
-)
-
-\method{cyto_map}{GatingHierarchy}(
-  x,
-  parent = "root",
-  channels,
-  display = 1,
-  type = "UMAP",
-  split = TRUE,
-  names = NULL,
-  save_as = NULL,
-  inverse = FALSE,
-  trans = NULL,
-  plot = TRUE,
-  seed,
+  seed = NULL,
   ...
 )
 
 \method{cyto_map}{flowSet}(
   x,
   select = NULL,
-  channels,
-  display = 1,
-  type = "UMAP",
-  split = TRUE,
-  names = NULL,
-  save_as = NULL,
-  inverse = inverse,
-  trans = NULL,
-  plot = TRUE,
-  seed,
-  ...
-)
-
-\method{cyto_map}{flowFrame}(
-  x,
-  channels,
+  channels = NULL,
   display = 1,
   type = "UMAP",
   split = TRUE,
@@ -70,7 +38,22 @@ cyto_map(x, ...)
   inverse = FALSE,
   trans = NULL,
   plot = TRUE,
-  seed,
+  seed = NULL,
+  ...
+)
+
+\method{cyto_map}{flowFrame}(
+  x,
+  channels = NULL,
+  display = 1,
+  type = "UMAP",
+  split = TRUE,
+  names = NULL,
+  save_as = NULL,
+  inverse = FALSE,
+  trans = NULL,
+  plot = TRUE,
+  seed = NULL,
   ...
 )
 }
@@ -92,8 +75,8 @@ should be comma separated and wrapped in a list. Refer to
 
 \item{channels}{vector of channels names indicating the channels that should
 be used by the dimension reduction algorithm to compute the 2-dimensional
-map, set to all channels by default. Restricting the number of channels can
-greatly improve processing speed.}
+map, set to all channels with assigned markers by default. Restricting the
+number of channels can greatly improve processing speed and resolution.}
 
 \item{display}{total number of events to map, all events in the combined data
 are mapped by default.}

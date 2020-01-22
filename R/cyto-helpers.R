@@ -1977,7 +1977,7 @@ cyto_save.flowSet <- function(x,
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
     if (any(list.files(save_as) %in% cyto_names(fr_list))) {
-      message(paste("Files will be overwritten in", save_as, "."))
+      message(paste0("Files will be overwritten in ", save_as, "."))
       opt <- readline("Do you want to continue? (Y/N)")
       if (grepl("n", opt, ignore.case = TRUE)) {
         invisible(NULL)
@@ -1991,7 +1991,7 @@ cyto_save.flowSet <- function(x,
   } else {
     location <- save_as
   }
-  message(paste("Writing FCS files to", location, "..."))
+  message(paste0("Writing FCS files to ", location, "..."))
 
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
@@ -2060,7 +2060,7 @@ cyto_save.flowFrame <- function(x,
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
     if (any(list.files(save_as) %in% cyto_names(fr_list))) {
-      message(paste("Files will be overwritten in", save_as, "."))
+      message(paste0("Files will be overwritten in ", save_as, "."))
       opt <- readline("Do you want to continue? (Y/N)")
       if (grepl("n", opt, ignore.case = TRUE)) {
         invisible(NULL)
@@ -2074,7 +2074,7 @@ cyto_save.flowFrame <- function(x,
   } else {
     location <- save_as
   }
-  message(paste("Writing FCS files to", location, "..."))
+  message(paste0("Writing FCS files to ", location, "..."))
 
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
@@ -3314,7 +3314,7 @@ cyto_copy <- function(x) {
   }
 
   # cytoset
-  if (is(x, "cytoset") | is(x, "cyto_frame")) {
+  if (is(x, "cytoset") | is(x, "cytoframe")) {
     x <- realize_view(x)
   }
 
