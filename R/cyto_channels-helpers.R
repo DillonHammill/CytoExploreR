@@ -460,6 +460,90 @@ cyto_channel_select <- function(x){
   return(chans)
 }
 
+## CYTO_CHANNEL_MATCH ----------------------------------------------------------
+
+#' Table Editor for Channel Match File Construction
+#'
+#' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param menu logical indicating whether channels should be selected from a
+#'   drop down menu instead of manually typing them in.
+#' @param save_as name to use for the saved channel match csv file, set to
+#'   \code{"date-Channel-Match.csv"}.
+#'
+#' @return update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
+#'   write channel matching to csv file and return channel matching as a
+#'   data.frame.
+#'
+#' @importFrom utils write.csv edit
+#' @importFrom tools file_ext
+#'
+#' @examples
+#' \dontrun{
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreR)
+#'
+#' # Generate channel match file for compensation controls
+#' cyto_channel_match(Compensation)
+#' }
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_channel_match <- function(x,
+                               menu = TRUE,
+                               save_as = NULL) {
+  
+  # Set default name for channel_match file
+  if (is.null(save_as)) {
+    save_as <- paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-", "Channel-Match.csv"
+    )
+    # save_as must contain csv file extension
+  } else {
+    # File extension missing
+    if (file_ext(save_as) != "csv") {
+      save_as <- paste0(save_as, ".csv")
+    }
+  }
+  
+  # Extract sample names
+  nms <- cyto_names(x)
+  
+  # Select channels from menu
+  if(menu == TRUE){
+    chans <- cyto_channel_select(x)
+    channel_match <- data.frame("name" = nms,
+                                "channel" = chans)
+    colnames(channel_match) <- c("name", "channel")
+    rownames(channel_match) <- NULL
+    # Manually type in channels
+  }else if(menu == FALSE){
+    # Construct data.frame for editing
+    channel_match <- data.frame("name" = nms, 
+                                "channel" = rep("NA", length(nms)))
+    colnames(channel_match) <- c("name", "channel")
+    rownames(channel_match) <- NULL
+    
+    # Edit channel_match
+    channel_match <- suppressWarnings(edit(channel_match))
+  }
+  
+  # Check that all channels are valid or throw an error
+  if (!all(channel_match$channel %in% c("Unstained", cyto_fluor_channels(x)))) {
+    stop("Some inputs in the channel column are not valid.")
+  }
+  
+  # Write edited channel match file to csv file
+  write.csv(channel_match, save_as, row.names = FALSE)
+  
+  # Update cyto_details
+  cyto_details(x)$channel <- channel_match$channel
+  
+  # Return edited channel match file
+  return(channel_match)
+}
 
 ## CYTO_CHANNELS_RESTRICT ------------------------------------------------------
 
