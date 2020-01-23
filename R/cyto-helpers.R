@@ -3188,6 +3188,8 @@ cyto_nodes <- function(x, ...) {
 #'
 #' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param menu logical indicating whether channels should be selected from a
+#'   drop down menu instead of manually typing them in.
 #' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
 #'
@@ -3211,6 +3213,7 @@ cyto_nodes <- function(x, ...) {
 #'
 #' @export
 cyto_channel_match <- function(x,
+                               menu = TRUE,
                                save_as = NULL) {
 
   # Set default name for channel_match file
@@ -3230,14 +3233,25 @@ cyto_channel_match <- function(x,
   # Extract sample names
   nms <- cyto_names(x)
 
-  # Construct data.frame for editing
-  channel_match <- data.frame("name" = nms, "channel" = rep("NA", length(nms)))
-  colnames(channel_match) <- c("name", "channel")
-  rownames(channel_match) <- NULL
+  # Select channels from menu
+  if(menu == TRUE){
+    chans <- cyto_channel_select(x)
+    channel_match <- data.frame("name" = nms,
+                                "channel" = chans)
+    colnames(channel_match) <- c("name", "channel")
+    rownames(channel_match) <- NULL
+  # Manually type in channels
+  }else if(menu == FALSE){
+    # Construct data.frame for editing
+    channel_match <- data.frame("name" = nms, 
+                                "channel" = rep("NA", length(nms)))
+    colnames(channel_match) <- c("name", "channel")
+    rownames(channel_match) <- NULL
 
-  # Edit channel_match
-  channel_match <- suppressWarnings(edit(channel_match))
-
+    # Edit channel_match
+    channel_match <- suppressWarnings(edit(channel_match))
+  }
+  
   # Check that all channels are valid or throw an error
   if (!all(channel_match$channel %in% c("Unstained", cyto_fluor_channels(x)))) {
     stop("Some inputs in the channel column are not valid.")
