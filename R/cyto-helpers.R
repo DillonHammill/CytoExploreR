@@ -391,6 +391,8 @@ cyto_details <- function(x) {
   }
 }
 
+# CYTO_DETAILS REPLACEMENT METHOD ----------------------------------------------
+
 #' @importFrom flowWorkspace pData<-
 #' @noRd
 "cyto_details<-" <- `pData<-`
@@ -483,6 +485,23 @@ cyto_names.GatingSet <- function(x) {
 #' @export
 cyto_names.list <- function(x) {
   LAPPLY(x, "cyto_names")
+}
+
+# CYTO_NAMES REPLACEMENT METHOD ------------------------------------------------
+
+#' @importFrom flowWorkspace sampleNames<-
+#' @importFrom flowCore identifier<-
+#' @noRd
+#' @export
+"cyto_names<-" <- function(x, value){
+  if(is(x, "flowSet") |
+     is(x, "GatingHierarchy") |
+     is(x, "GatingSet")){
+    sampleNames(x) <- value
+  }else if(is(x, "flowFrame")){
+    identifier(x) <- value
+  }
+  return(x)
 }
 
 ## CYTO_CHECK ------------------------------------------------------------------
