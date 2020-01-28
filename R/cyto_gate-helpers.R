@@ -787,7 +787,12 @@ cyto_gate_edit <- function(x,
       }
 
       # TITLE
-      title <- paste(GRPS[y], "\n", prnt)
+      if(GRPS[y] == "all"){
+        grp <- "Combined Events"
+      }else{
+        grp <- GRPS[y]
+      }
+      title <- paste(grp, "\n", prnt)
 
       # CYTO_PLOT
       cyto_plot(fr_list[[y]][[1]],

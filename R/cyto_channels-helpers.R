@@ -530,8 +530,18 @@ cyto_channel_match <- function(x,
     channel_match <- suppressWarnings(edit(channel_match))
   }
   
+  # Convert markers to channels
+  channel_match$channel <- LAPPLY(channel_match$channel, function(z){
+    if(!grepl(z, "unstained", ignore.case = TRUE)){
+      cyto_channels_extract(x, z)
+    }else{
+      z
+    }
+  })
+  
   # Check that all channels are valid or throw an error
-  if (!all(channel_match$channel %in% c("Unstained", cyto_fluor_channels(x)))) {
+  if (!all(channel_match$channel %in% c("Unstained", "unstained",
+                                        cyto_fluor_channels(x)))) {
     stop("Some inputs in the channel column are not valid.")
   }
   

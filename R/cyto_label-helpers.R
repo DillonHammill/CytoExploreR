@@ -14,7 +14,7 @@
 #'
 #' @return list of flowFrames
 #'
-#' @importFrom flowCore Subset split
+#' @importFrom flowCore Subset split quadGate
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -56,6 +56,31 @@
     gate <- list(gate)
   }
 
+  # List of RectangleGates to QuadGate
+  if(all(LAPPLY(gate, function(z){
+    is(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
+    }))){
+    # CHANNELS
+    chans <- lapply(gate, function(z){
+      as.character(parameters(z))
+    })
+    # CHANNELS MATCH
+    if(all(LAPPLY(chans, function(z){z == chans[[1]]})) &
+       length(chans[[1]]) == 2){
+      chans <- chans[[1]]
+      # COORDS
+      coords <- .cyto_gate_coords(gate, channels = chans)
+      # UNIQUE COORDS
+      coords <- LAPPLY(chans, function(z){
+        unique(coords[, z][is.finite(coords[, z])])
+      })
+      # QUADGATE
+      if(length(coords) == 2){
+        gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
+      }
+    }
+  }
+  
   # GATES ----------------------------------------------------------------------
 
   # NEGATED GATE - QUADGATES EXCLUDED
@@ -71,6 +96,8 @@
 
   # POPULATIONS ----------------------------------------------------------------
 
+  # CAREFUL CANNOT NEGATE INDIVIDUAL QUADRANTS EITHER
+  
   # GATING
   pops <- LAPPLY(seq_len(length(gate)), function(z) {
     # NEGATED POPULATION
@@ -83,7 +110,24 @@
         split(x, gate[[z]])[c(2, 1, 3, 4)] # FIX ORDER
         # SINGLE POPULATIONS
       } else {
-        Subset(x, gate[[z]])
+        # RECTANGLE BELONGS TO QUADGATE
+        if(is(gate[[z]], "rectangleGate") &
+           any(grepl("quad", names(attributes(gate[[z]]))))){
+          q <- names(attributes(gate[[z]])[["quadrants"]])
+          coords <- .cyto_gate_coords(gate[z])
+          chans <- names(coords)
+          coords <- lapply(colnames(coords), function(y){
+            unique(coords[, y][is.finite(coords[, y])])
+          })
+          names(coords) <- chans
+          qg <- quadGate(filterId = paste(q, collapse = "|"), 
+                         .gate = coords)
+          p <- split(x, qg)[c(2, 1, 3, 4)] # FIX ORDER
+          names(p) <- q
+          p[[match(gate[[z]]@filterId, names(p))]]
+        }else{
+          Subset(x, gate[[z]])
+        }
       }
     }
   })

@@ -562,7 +562,7 @@
 
 #' Convert between quadGate to rectangleGates 
 #' @return list of rectangleGates or a quadGate.
-#' @importFrom flowCore rectangleGate quadGate
+#' @importFrom flowCore rectangleGate quadGate parameters
 #' @importFrom methods is
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
@@ -570,26 +570,28 @@
                                     channels) {
   
   # RECTANGLEGATES SUPPLIED
-  if(class(gate) == "list") {
+  if(is(gate)[1] == "list") {
     # LIST OF RECTANGLEGATES
-    if(all(LAPPLY(gate, function(z){is(z, "rectangleGate")}))){
-    # FILTERID
-    FILTERID <- lapply(gate, function(z){z@filterId})
-    FILTERID <- paste(FILTERID, collapse = "|")
-    # EXTRACT SELECTED CO-ORDINATE
-    xcoords <- c(gate[[1]][channels[1]]@min, gate[[1]][channels[1]]@max)
-    xcoord <- xcoords[is.finite(xcoords)]
-    ycoords <- c(gate[[1]][channels[2]]@min, gate[[1]][channels[2]]@max)
-    ycoord <- ycoords[is.finite(ycoords)]
-    coords <- c(xcoord, ycoord)
-    # CONSTRUCT QUADGATE COORDS
-    coords <- matrix(coords, nrow = 1, ncol = 2)
-    colnames(coords) <- channels
-    # QUADGATE
-    return(quadGate(.gate = coords, filterId = FILTERID))
+    if(all(LAPPLY(gate, function(z){
+      is(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
+      }))){
+      # QUADRANTS
+      quads <- names(attributes(gate[[1]])[["quadrants"]])
+      # CHANNELS
+      chans <- as.character(parameters(gate[[1]]))
+      # CO-ORDINATES
+      coords <- .cyto_gate_coords(gate, channels = chans)
+      coords <- LAPPLY(chans, function(z){
+        unique(coords[, z][is.finite(coords[, z])])
+      })
+      names(coords) <- chans
+      # QUADGATE
+      qg <- quadGate(filterId = paste(quads, collapse = "|"),
+                     .gate = coords)
+      return(qg)
     }
     
-  }else{
+  }else if(is(gate, "quadGate")){
     # INPUT CO-ORDINATE
     xcoord <- gate@boundary[1]
     ycoord <- gate@boundary[2]
