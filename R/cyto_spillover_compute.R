@@ -29,7 +29,7 @@
 #' for gating. Users can then gate the positive signal for spillover calculation
 #' using an interval gate. If no universal unstained compensation control is
 #' supplied, users are expected to gate the negative and then the positive
-#' signal for each compensation control.0
+#' signal for each compensation control.
 #'
 #' The percentage spillover is calculated based on the median fluorescent
 #' intensities (MedFI) of the positive populations relative to that of the
@@ -143,7 +143,7 @@ cyto_spillover_compute.GatingSet <- function(x,
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
 
-  # PREPARE CHANNEL_MATCH VARIABLE
+  # PREPARE CHANNEL_MATCH VARIABLE (MARKERS TO CHANNELS)
   if (any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
     # MARKERS TO CHANNELS
     ind <- which(grepl("channel", colnames(pd), ignore.case = TRUE))
@@ -187,7 +187,7 @@ cyto_spillover_compute.GatingSet <- function(x,
               row.names = 1,
               stringsAsFactors = FALSE
             )
-            chans <- cm$channel[match(cyto_names(x), row.names(cm))]
+            chans <- cm$channel[match(cyto_names(x), rownames(cm))]
             pd$channel <- paste(chans)
           } else {
             stop(paste(channel_match, "is not in this working directory."))
@@ -198,7 +198,7 @@ cyto_spillover_compute.GatingSet <- function(x,
             row.names = 1,
             stringsAsFactors = FALSE
           )
-          chans <- cm$channel[match(cyto_names(x), row.names(cm))]
+          chans <- cm$channel[match(cyto_names(x), rownames(cm))]
           pd$channel <- paste(chans)
         }
       }
@@ -244,7 +244,7 @@ cyto_spillover_compute.GatingSet <- function(x,
 
   # CYTO_DETAILS
   cyto_details(x) <- pd
-
+  
   # REMOVE EXCESS CONTROLS -----------------------------------------------------
 
   # MULTIPLE CONTROLS PER CHANNEL (BYPASS UNSTAINED)
@@ -684,7 +684,7 @@ cyto_spillover_compute.flowSet <- function(x,
               row.names = 1,
               stringsAsFactors = FALSE
             )
-            chans <- cm$channel[match(cyto_names(x), row.names(cm))]
+            chans <- cm$channel[match(cyto_names(x), rownames(cm))]
             pd$channel <- paste(chans)
           } else {
             stop(paste(channel_match, "is not in this working directory."))
@@ -695,7 +695,7 @@ cyto_spillover_compute.flowSet <- function(x,
             row.names = 1,
             stringsAsFactors = FALSE
           )
-          chans <- cm$channel[match(cyto_names(x), row.names(cm))]
+          chans <- cm$channel[match(cyto_names(x), rownames(cm))]
           pd$channel <- paste(chans)
         }
       }

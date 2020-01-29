@@ -96,7 +96,7 @@ unstained compensation control will be overlaid onto the plot as a reference
 for gating. Users can then gate the positive signal for spillover calculation
 using an interval gate. If no universal unstained compensation control is
 supplied, users are expected to gate the negative and then the positive
-signal for each compensation control.0
+signal for each compensation control.
 
 The percentage spillover is calculated based on the median fluorescent
 intensities (MedFI) of the positive populations relative to that of the
