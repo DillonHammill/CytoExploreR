@@ -616,7 +616,9 @@
     coords <- list(c(-Inf, xcoord), c(-Inf, ycoord))
     names(coords) <- channels
     Q4 <- rectangleGate(coords, filterId = alias[4])
-    return(list(Q1, Q2, Q3, Q4))
+    Q <- list(Q1, Q2, Q3, Q4)
+    names(Q) <- alias
+    return(Q)
   }
 }
 

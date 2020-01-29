@@ -500,12 +500,7 @@ cyto_gate_edit <- function(x,
   gs <- x
 
   # TRANSFORMATIONS
-  axes_trans <- gs@transformation
-  if (length(axes_trans) != 0) {
-    axes_trans <- axes_trans[[1]]
-  } else {
-    axes_trans <- NA
-  }
+  axes_trans <- cyto_transformer_extract(gs)
 
   # NODES
   nds <- cyto_nodes(gs, path = "auto")
@@ -576,13 +571,16 @@ cyto_gate_edit <- function(x,
     return(gates)
   })
   names(gates_gs) <- names(gs_list)
-
+  
   # GATES FORMATTED FOR GATINGTEMPLATE (QUADGATES) - EXISTING GATES
-  gates_gT <- lapply(gates_gs, function(z) {
-    if (all(cyto_gate_type(z) == "quadrant")) {
-      z <- list(.cyto_gate_quad_convert(z, channels))
+  gates_gT <- lapply(gates_gs, function(z){
+    if(all(LAPPLY(z, function(y){
+      is(y, "rectangleGate") & any(grepl("quad", names(attributes(y))))
+    }))){
+      return(.cyto_gate_quad_convert(z, channels))
+    }else{
+      return(z)
     }
-    return(z)
   })
   
   # PREPARE TYPE & ALIAS -------------------------------------------------------
@@ -779,6 +777,8 @@ cyto_gate_edit <- function(x,
       # EXISTING GATES TO PLOT
       gate <- gates_gT[[y]]
 
+      print(gate)
+      
       # PARENT TITLE
       if (parent == "root") {
         prnt <- "All Events"
@@ -856,13 +856,15 @@ cyto_gate_edit <- function(x,
     gates <- lapply(seq_along(gates_gT_transposed[[z]]), function(y){
       if(!is(gates_gT_transposed[[z]][[y]], "quadGate")){
         filters(gates_gT_transposed[[z]][y])
+      }else{
+        gates_gT_transposed[[z]][[y]]
       }
     })
     names(gates) <- GRPS
     return(gates)
   })
   names(gates_gT_transposed) <- alias
-
+  
   # DATA.TABLE FRIENDLY NAMES
   prnt <- parent
   als <- alias
@@ -918,6 +920,15 @@ cyto_gate_edit <- function(x,
   # CONVERT ALIAS BACK TO VECTOR
   alias <- as.character(unlist(alias))
 
+  # CONVERT QUAD TO RECTANGLE FOR GATINGSET SAVING (EASIEST WAY)
+  gates_gs <- lapply(gates_gs, function(z){
+    if(is(z[[1]], "quadGate")){
+      .cyto_gate_quad_convert(z[[1]], channels)
+    }else{
+      z
+    }
+  })
+  
   # APPLY NEW GATES TO GATINGSET (INCLUDES NEGATED ALIAS)
   lapply(grps, function(z) {
     # MATCHING GROUPS
