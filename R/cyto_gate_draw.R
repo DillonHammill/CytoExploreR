@@ -188,12 +188,7 @@ cyto_gate_draw.GatingSet <- function(x,
   channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
 
   # TRANSFORMATIONS
-  axes_trans <- x@transformation
-  if (length(axes_trans) != 0) {
-    axes_trans <- axes_trans[[1]]
-  } else {
-    axes_trans <- NA
-  }
+  axes_trans <- cyto_transformer_extract(x)
 
   # NODES
   nds <- cyto_nodes(x, path = "auto")
@@ -394,19 +389,21 @@ cyto_gate_draw.GatingSet <- function(x,
 
   # TRANSPOSE GATE_LIST - LIST LENGTH ALIAS - EACH LENGTH GROUP
   gate_list <- transpose(gate_list)
-
+  
   # LIST OF FILTERS OF LENGTH ALIAS - NAMES IMPORTANT!
   gate_list <- lapply(seq_along(gate_list), function(z) {
     gates <- lapply(seq_along(gate_list[[z]]), function(y) {
       if (!is(gate_list[[z]][[y]], "quadGate")) {
         filters(gate_list[[z]][y])
+      }else{
+        gate_list[[z]][y]
       }
     })
     names(gates) <- GRPS
     return(gates)
   })
   names(gate_list) <- alias
-
+  
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
 
   # GROUP_BY
