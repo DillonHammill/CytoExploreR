@@ -590,42 +590,34 @@
                      .gate = coords)
       return(qg)
     }
-    
   }else if(is(gate, "quadGate")){
     # INPUT CO-ORDINATE
     xcoord <- gate@boundary[1]
     ycoord <- gate@boundary[2]
-    
     # ALIAS
     alias <- unlist(strsplit(gate@filterId, "|"))
     alias <- alias[alias != "|"]
     if(length(alias) != 4){
       alias <- c("Q1", "Q2", "Q3","Q4")
     }
-  
     # TOP LEFT
     coords <- list(c(-Inf, xcoord), c(ycoord, Inf))
     names(coords) <- channels
     Q1 <- rectangleGate(coords, filterId = alias[1])
-  
     # TOP RIGHT
     coords <- list(c(xcoord, Inf), c(ycoord, Inf))
     names(coords) <- channels
     Q2 <- rectangleGate(coords, filterId = alias[2])
-  
     # BOTTOM RIGHT
     coords <- list(c(xcoord, Inf), c(-Inf, ycoord))
     names(coords) <- channels
     Q3 <- rectangleGate(coords, filterId = alias[3])
-  
     # BOTTOM LEFT
     coords <- list(c(-Inf, xcoord), c(-Inf, ycoord))
     names(coords) <- channels
     Q4 <- rectangleGate(coords, filterId = alias[4])
-    
     return(list(Q1, Q2, Q3, Q4))
   }
-  
 }
 
 ## .CYTO_GATE_COORDS -----------------------------------------------------------

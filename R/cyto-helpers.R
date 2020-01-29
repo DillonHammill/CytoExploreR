@@ -3312,7 +3312,7 @@ cyto_spillover_extract <- function(x) {
         z@spillover
       })
     }
-    # GATINGHIERACHY
+    # GATINGHIERARCHY
   } else if (is(x, "GatingHierarchy")) {
     spill <- gh_get_compensations(x)
     if (!is.null(spill)) {

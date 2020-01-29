@@ -56,29 +56,14 @@
     gate <- list(gate)
   }
 
-  # List of RectangleGates to QuadGate
-  if(all(LAPPLY(gate, function(z){
+  # List of RectangleGates to QuadGate (MUST BE 4 RECTANGLES)
+  if(length(gate) == 4 & all(LAPPLY(gate, function(z){
     is(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
     }))){
-    # CHANNELS
-    chans <- lapply(gate, function(z){
-      as.character(parameters(z))
-    })
-    # CHANNELS MATCH
-    if(all(LAPPLY(chans, function(z){z == chans[[1]]})) &
-       length(chans[[1]]) == 2){
-      chans <- chans[[1]]
-      # COORDS
-      coords <- .cyto_gate_coords(gate, channels = chans)
-      # UNIQUE COORDS
-      coords <- LAPPLY(chans, function(z){
-        unique(coords[, z][is.finite(coords[, z])])
-      })
-      # QUADGATE
-      if(length(coords) == 2){
-        gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
-      }
-    }
+      # CHANNELS
+      chans <- as.character(parameters(gate[[1]]))
+      quad_order <- LAPPLY(gate, function(z){z@filterId})
+      gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
   }
   
   # GATES ----------------------------------------------------------------------
@@ -93,10 +78,13 @@
       gate <- c(gate, gate)
     }
   }
-
+  
   # POPULATIONS ----------------------------------------------------------------
 
   # CAREFUL CANNOT NEGATE INDIVIDUAL QUADRANTS EITHER
+  
+  # ARGUMENTS
+  args <- .args_list()
   
   # GATING
   pops <- LAPPLY(seq_len(length(gate)), function(z) {
@@ -107,15 +95,23 @@
     } else {
       # QUADGATES RETURN MULTIPLE POPULATIONS
       if (is(gate[[z]], "quadGate")) {
-        split(x, gate[[z]])[c(2, 1, 3, 4)] # FIX ORDER
+        if("quad_order" %in% names(args)){
+          quads <- unlist(strsplit(gate[[z]]@filterId, "|"))
+          quads <- quads[quads != "|"]
+          split(x, gate[[z]])[c(2, 1, 3, 4)][match(quad_order,
+                                                   quads)]# FIX ORDER
+        }else{
+          split(x, gate[[z]])[c(2, 1, 3, 4)]# FIX ORDER
+        }
         # SINGLE POPULATIONS
       } else {
         # RECTANGLE BELONGS TO QUADGATE
         if(is(gate[[z]], "rectangleGate") &
            any(grepl("quad", names(attributes(gate[[z]]))))){
           q <- names(attributes(gate[[z]])[["quadrants"]])
-          coords <- .cyto_gate_coords(gate[z])
-          chans <- names(coords)
+          coords <- .cyto_gate_coords(gate[z], 
+                                      channels = as.character(parameters(gate[[z]])))
+          chans <- colnames(coords)
           coords <- lapply(colnames(coords), function(y){
             unique(coords[, y][is.finite(coords[, y])])
           })
