@@ -394,7 +394,7 @@ cyto_spillover_compute.GatingSet <- function(x,
       # cyto_gate_draw on each flowFrame using interval gate on selected channel
       gt <- cyto_gate_draw(
         x = fr,
-        alias = paste(chan, "+"),
+        alias = paste0(chan, "+"),
         channels = chan,
         type = "interval",
         plot = FALSE
@@ -845,7 +845,7 @@ cyto_spillover_compute.flowSet <- function(x,
       # cyto_gate_draw on each flowFrame using interval gate on selected channel
       gt <- cyto_gate_draw(
         x = fr,
-        alias = paste(chan, "+"),
+        alias = paste0(chan, "+"),
         channels = chan,
         type = "interval",
         plot = FALSE
@@ -965,7 +965,7 @@ cyto_spillover_compute.flowSet <- function(x,
       # Gate negative population
       gt <- cyto_gate_draw(
         x = fr,
-        alias = paste(chan, "-"),
+        alias = paste0(chan, "-"),
         channels = chan,
         type = "interval",
         plot = FALSE
@@ -975,7 +975,7 @@ cyto_spillover_compute.flowSet <- function(x,
       # Gate positive population
       gt <- cyto_gate_draw(
         x = fr,
-        alias = paste(chan, "+"),
+        alias = paste0(chan, "+"),
         channels = chan,
         type = "interval",
         plot = FALSE

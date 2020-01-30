@@ -88,7 +88,7 @@ cyto_load <- function(path = ".",
   }
 
   # SAVED GATINGSET
-  if (all(c("pb", "rds") %in% file_ext(files))) {
+  if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
     x <- load_gs(path = path)
     # FCS FILES
@@ -2850,6 +2850,63 @@ cyto_details_edit <- function(x, file = NULL) {
   }
 
   return(x)
+}
+
+## CYTO_DETAILS_SAVE -----------------------------------------------------------
+
+#' Save experiment details to csv file
+#' 
+#' @param x object of class \code{flowSet} or \code{GatingSet} annotated with
+#'   experiment details.
+#' @param save_as name of csv file to which the experiment details shuld be
+#'   saved.
+#'   
+#' @return write experiment details to named csv file.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @examples 
+#' \dontrun{
+#' library(CytoExploreRData)
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#' 
+#' # Modify experiment details manually
+#' cyto_details(gs)$Treatment <- c(rep("A", 8),
+#'                                 rep("B", 8),
+#'                                 rep("C", 8),
+#'                                 rep("D", 8),
+#'                                 NA)
+#'                                 
+#' # Save experiment details to file
+#' cyto_details_save(gs)
+#' }
+#' 
+#' @importFrom utils write.csv
+#' 
+#' @export
+cyto_details_save <- function(x,
+                              save_as = NULL){
+  
+  # CHECKS
+  if(!is(x, "flowSet") | !is(x, "GatingSet")){
+    stop("'x' must be either a flowSet or GatingSet.")
+  }
+  
+  # SAVE AS
+  if(is.null(save_as)){
+    save_as <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Details.csv")
+  }
+  
+  # WRITE CSV FILE
+  pd <- cyto_details(x)
+  write.csv(pd,
+            save_as,
+            row.names = FALSE)
+  
+  return(pd)
+  
 }
 
 ## CYTO_COMPENSATE -------------------------------------------------------------

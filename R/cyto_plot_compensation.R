@@ -316,6 +316,12 @@ cyto_plot_compensation.GatingSet <- function(x,
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
+  # EXPAND DOTS
+  dots <- list(...)
+  
+  # UPDATE ARGUMENTS
+  .args_update(dots)
+  
   # ARGUMENTS
   args <- .args_list()
   
@@ -429,14 +435,18 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   # EXTRACT POPULATION
   x <- cyto_extract(x, parent, copy = TRUE)
   
+  # EXPAND DOTS
+  dots <- list(...)
+  
+  # UPDATE ARGUMENTS
+  .args_update(dots)
+  
   # ARGUMENTS
   args <- .args_list()
   
   # REMOVE UNNECESSARY ARGUMENTS
-  args <- args[-match_ind(c("pars",
-                        "parent"),
-                      names(args))]
-
+  args <- args[-match_ind(c("pars", "parent"), names(args))]
+  
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
   # CYTO_PLOT_COMPENSATION
@@ -611,6 +621,12 @@ cyto_plot_compensation.flowSet <- function(x,
     fr_list <- fr_list[-which(grepl("unstained", pd$channel, ignore.case = TRUE))]
     NIL <- rep(NIL, length.out = length(fr_list))
   }
+  
+  # EXPAND DOTS
+  dots <- list(...)
+  
+  # UPDATE ARGUMENTS
+  .args_update(dots)
   
   # PULL DOWN ARGUMENTS
   args <- .args_list()
