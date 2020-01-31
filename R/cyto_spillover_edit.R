@@ -330,6 +330,8 @@ cyto_spillover_edit.GatingSet <- function(x,
   # X CHANNEL
   if (!.all_na(pd$channel[pd$name == editor_initial_sample])) {
     editor_initial_xchannel <- pd$channel[pd$name == editor_initial_sample]
+  } else{
+    editor_initial_xchannel <- channels[1]
   }
 
   # SHINY SPILLOVER MATRIX EDITOR ----------------------------------------------
