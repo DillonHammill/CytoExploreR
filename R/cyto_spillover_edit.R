@@ -151,7 +151,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     if(any(channels %in% names(axes_trans))){
       cs_linear <- cyto_extract(gs_linear, "root")
       cs_linear <- cyto_transform(cs_linear,
-        trans = axes_trans[match_ind(channels, names(axes_trans))],
+        trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
         inverse = TRUE,
         plot = FALSE
       )
@@ -523,7 +523,7 @@ cyto_spillover_edit.GatingSet <- function(x,
         gs_linear_comp <- compensate(gs_linear_copy, values$spill / 100)
         # Get transformed data
         gs_trans <- cyto_transform(gs_linear_comp,
-          trans = axes_trans[match_ind(channels, names(axes_trans))],
+          trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
           plot = FALSE
         )
         return(gs_trans)
@@ -1174,7 +1174,7 @@ cyto_spillover_edit.flowSet <- function(x,
     )
   } else {
     fs_linear <- cyto_transform(cyto_copy(fs),
-      trans = axes_trans[match_ind(channels, names(axes_trans))],
+      trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
       inverse = TRUE,
       plot = FALSE
     )
@@ -1496,7 +1496,7 @@ cyto_spillover_edit.flowSet <- function(x,
         fs_comp <- compensate(fs_copy, values$spill / 100)
         # Get transformed data
         fs_trans <- cyto_transform(fs_comp,
-          trans = axes_trans[match_ind(channels, names(axes_trans))],
+          trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
           plot = FALSE
         )
         return(fs_trans)
