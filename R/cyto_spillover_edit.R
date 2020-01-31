@@ -2035,7 +2035,7 @@ cyto_spillover_edit.flowSet <- function(x,
     raw_data_chunks,
     function(z) {
       # ONLY COMPUTE IF SUFFICIENT EVENTS
-      if (nrow(z) > 50) {
+      if (nrow(z) > 30) {
         median(z[, channels[1]])
       } else {
         NA
@@ -2047,7 +2047,7 @@ cyto_spillover_edit.flowSet <- function(x,
     raw_data_chunks,
     function(z) {
       # ONLY COMPUTE IF SUFFICIENT EVENTS
-      if (nrow(z) > 50) {
+      if (nrow(z) > 30) {
         median(z[, channels[2]])
       } else {
         NA
