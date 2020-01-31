@@ -86,6 +86,7 @@
 #' @importFrom stats median
 #' @importFrom graphics lines layout
 #' @importFrom tools file_ext
+#' @importFrom flowWorkspace gs_cyto_data
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -147,11 +148,16 @@ cyto_spillover_edit.GatingSet <- function(x,
     )
   } else {
     gs_linear <- cyto_copy(gs)
-    gs_linear <- cyto_transform(gs_linear,
-      trans = axes_trans,
-      inverse = TRUE,
-      plot = FALSE
-    )
+    if(any(channels %in% names(axes_trans))){
+      cs_linear <- cyto_extract(gs_linear, "root")
+      cs_linear <- cyto_transform(cs_linear,
+        trans = axes_trans[match_ind(channels, names(axes_trans))],
+        inverse = TRUE,
+        plot = FALSE
+      )
+      gs_cyto_data(gs_linear) <- cs_linear
+    }
+
   }
 
   # PREPARE CHANNEL_MATCH ----------------------------------------------------
@@ -517,7 +523,7 @@ cyto_spillover_edit.GatingSet <- function(x,
         gs_linear_comp <- compensate(gs_linear_copy, values$spill / 100)
         # Get transformed data
         gs_trans <- cyto_transform(gs_linear_comp,
-          trans = axes_trans,
+          trans = axes_trans[match_ind(channels, names(axes_trans))],
           plot = FALSE
         )
         return(gs_trans)
@@ -1168,7 +1174,7 @@ cyto_spillover_edit.flowSet <- function(x,
     )
   } else {
     fs_linear <- cyto_transform(cyto_copy(fs),
-      trans = axes_trans,
+      trans = axes_trans[match_ind(channels, names(axes_trans))],
       inverse = TRUE,
       plot = FALSE
     )
@@ -1490,7 +1496,7 @@ cyto_spillover_edit.flowSet <- function(x,
         fs_comp <- compensate(fs_copy, values$spill / 100)
         # Get transformed data
         fs_trans <- cyto_transform(fs_comp,
-          trans = axes_trans,
+          trans = axes_trans[match_ind(channels, names(axes_trans))],
           plot = FALSE
         )
         return(fs_trans)
