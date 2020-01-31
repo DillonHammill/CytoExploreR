@@ -2889,11 +2889,6 @@ cyto_details_edit <- function(x, file = NULL) {
 cyto_details_save <- function(x,
                               save_as = NULL){
   
-  # CHECKS
-  if(!is(x, "flowSet") | !is(x, "GatingSet")){
-    stop("'x' must be either a flowSet or GatingSet.")
-  }
-  
   # SAVE AS
   if(is.null(save_as)){
     save_as <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Details.csv")
