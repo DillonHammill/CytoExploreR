@@ -72,7 +72,7 @@
 #'   file. Saved filename defaults to \code{date-Spillover-Matrix.csv} is not
 #'   specified.
 #'
-#' @importFrom flowCore compensate fsApply exprs Subset each_col decompensate
+#' @importFrom flowCore compensate fsApply exprs Subset each_col
 #' @importFrom utils read.csv write.csv
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
@@ -138,17 +138,41 @@ cyto_spillover_edit.GatingSet <- function(x,
   # COMPENSATION
   comp <- cyto_spillover_extract(gs)
   
+  # GS SHOULD NOT BE COMPENSATED (TRANSFORMED LATER IF REQUIRED)
+  if(!is.null(comp)){
+    cs <- cyto_extract(gs, "root")
+    # UNTRANSFORMED - REMOVE COMPENSATION
+    if(.all_na(axes_trans)){
+      cyto_compensate(cs, 
+                      spillover = comp, 
+                      remove = TRUE)
+    # TRANSFORMED - REMOVE COMPENSATION
+    }else{
+      # INVERSE TRANSFORM
+      cyto_transform(cs,
+                     trans = axes_trans,
+                     inverse = TRUE,
+                     plot = FALSE)
+      # DECOMPENSATE
+      cyto_compensate(cs,
+                      spillover = comp,
+                      remove = TRUE)
+      # TRANSFORM
+      cyto_transform(cs,
+                     trans = axes_trans,
+                     plot = FALSE)
+    }
+  }
+  
   # INVERSE TRANSFORMATIONS - GS_LINEAR
   if (.all_na(axes_trans)) {
     gs_linear <- cyto_copy(gs)
     # REVERSE COMPENSATION
     if(!is.null(comp)){
-      cs_linear <- cyto_extract(gs, "root")
-      # VALUES SHOULD BE ALTERED IN CS_LINEAR
-      lapply(seq_along(cs_linear), function(z){
-        decompensate(cs_linear[[z]], comp[[z]])
-      })
-      gs_cyto_data(gs_linear) <- cs_linear
+      cs_linear <- cyto_extract(gs_linear, "root")
+      cyto_compensate(cs_linear, 
+                      spillover = comp, 
+                      remove = TRUE)
     }
     axes_trans <- cyto_transformer_biex(gs_linear,
       channels = channels,
@@ -163,21 +187,20 @@ cyto_spillover_edit.GatingSet <- function(x,
     # INVERSE TRANSFORMATIONS
     if(any(channels %in% names(axes_trans))){
       cs_linear <- cyto_extract(gs_linear, "root")
-      cs_linear <- cyto_transform(cs_linear,
-        trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
+      trans <- axes_trans[match_ind(channels, names(axes_trans))]
+      trans <- cyto_transformer_combine(trans)
+      cyto_transform(cs_linear,
+        trans = trans,
         inverse = TRUE,
         plot = FALSE
       )
-      gs_cyto_data(gs_linear) <- cs_linear
     }
     # REVERSE COMPENSATION
     if(!is.null(comp)){
       cs_linear <- cyto_extract(gs_linear, "root")
-      # VALUES SHOULD BE ALTERED IN CS_LINEAR
-      lapply(seq_along(cs_linear), function(z){
-        decompensate(cs_linear[[z]], comp[[z]])
-      })
-      gs_cyto_data(gs_linear) <- cs_linear
+      cyto_compensate(cs_linear,
+                      spillover = comp,
+                      remove = TRUE)
     }
 
   }
@@ -546,8 +569,10 @@ cyto_spillover_edit.GatingSet <- function(x,
         # Data must be LINEAR at this step
         gs_linear_comp <- compensate(gs_linear_copy, values$spill / 100)
         # Get transformed data
+        trans <- axes_trans[match_ind(channels, names(axes_trans))]
+        trans <- cyto_transformer_combine(trans)
         gs_trans <- cyto_transform(gs_linear_comp,
-          trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
+          trans = trans,
           plot = FALSE
         )
         return(gs_trans)
@@ -1197,8 +1222,10 @@ cyto_spillover_edit.flowSet <- function(x,
       plot = FALSE
     )
   } else {
+    trans <- axes_trans[match_ind(channels, names(axes_trans))]
+    trans <- cyto_transformer_combine(trans)
     fs_linear <- cyto_transform(cyto_copy(fs),
-      trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
+      trans = trans,
       inverse = TRUE,
       plot = FALSE
     )
@@ -1519,8 +1546,10 @@ cyto_spillover_edit.flowSet <- function(x,
         # Data must be LINEAR at this step
         fs_comp <- compensate(fs_copy, values$spill / 100)
         # Get transformed data
+        trans <- axes_trans[match_ind(channels, names(axes_trans))]
+        trans <- cyto_transformer_combine(trans)
         fs_trans <- cyto_transform(fs_comp,
-          trans = cyto_transformer_combine(axes_trans[match_ind(channels, names(axes_trans))]),
+          trans = trans,
           plot = FALSE
         )
         return(fs_trans)
