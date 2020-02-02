@@ -2914,7 +2914,8 @@ cyto_details_save <- function(x,
 #' \code{spillover} csv file is supplied, the spillover matrix will be extracted
 #' directly from the first element of \code{x}. To select a different sample for
 #' spillover matrix extraction supply the index or name of the sample to the
-#' \code{select} argument.
+#' \code{select} argument. Compensation applied to samples can be easily removed
+#' by setting the \code{remove} argument to TRUE.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}} or
@@ -2925,6 +2926,8 @@ cyto_details_save <- function(x,
 #'   should be extracted when no spillover matrix file is supplied to
 #'   \code{spillover}. To compensate each sample individually using their stored
 #'   spillover matrix file, set \code{select} to NULL.
+#' @param remove logical indicating whether applied compensation should be
+#'   removed from the supplied samples, set to FALSE by default.
 #' @param ... not in use.
 #'
 #' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
@@ -2933,6 +2936,7 @@ cyto_details_save <- function(x,
 #' @importFrom utils read.csv
 #' @importFrom tools file_ext
 #' @importFrom methods is
+#' @importFrom flowCore decompensate
 #'
 #' @examples
 #'
@@ -2943,7 +2947,7 @@ cyto_details_save <- function(x,
 #' cyto_compensate(Activation)
 #'
 #' # Save spillover matrix in correct format
-#' spill <- Activation[[1]]@description$SPILL
+#' spill <- cyto_spillover_extract(Activation)[[1]]
 #' rownames(spill) <- colnames(spill)
 #' write.csv(
 #'   spill,
@@ -2957,8 +2961,12 @@ cyto_details_save <- function(x,
 #' gs <- GatingSet(Activation)
 #' cyto_compensate(gs)
 #'
+#' # Remove applied compensation
+#' cyto_compensate(gs, remove = TRUE)
+#'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -2973,6 +2981,7 @@ cyto_compensate <- function(x, ...) {
 cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
                                       select = 1,
+                                      remove = FALSE,
                                       ...) {
 
   # Compensation already applied
@@ -3062,8 +3071,17 @@ cyto_compensate.GatingSet <- function(x,
     return(z)
   })
 
-  # Apply compensation
-  flowWorkspace::compensate(x, spill)
+  # REMOVE COMPENSATION
+  if(remove == TRUE){
+    lapply(seq_along(fs), function(z){
+      decompensate(fs[[z]], spill[[z]])
+    })
+    return(fs)
+  # APPLY COMPENSATION  
+  }else if(remove == FALSE){
+    flowWorkspace::compensate(x, spill)
+  }
+  
 }
 
 #' @rdname cyto_compensate
@@ -3071,6 +3089,7 @@ cyto_compensate.GatingSet <- function(x,
 cyto_compensate.flowSet <- function(x,
                                     spillover = NULL,
                                     select = 1,
+                                    remove = FALSE,
                                     ...) {
 
   # Spillover matrix supplied - matrix, data.frame or csv file
@@ -3152,8 +3171,17 @@ cyto_compensate.flowSet <- function(x,
     return(z)
   })
 
-  # Apply compensation
-  flowCore::compensate(x, spill)
+  # REMOVE COMPENSATION
+  if(remove == TRUE){
+    lapply(seq_along(x), function(z){
+      decompensate(x[[z]], spill[[z]])
+    })
+    return(x)
+  # APPLY COMPENSATION 
+  }else if(remove == FALSE){
+    flowCore::compensate(x, spill)
+  }
+  
 }
 
 #' @rdname cyto_compensate
@@ -3161,6 +3189,7 @@ cyto_compensate.flowSet <- function(x,
 cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
                                       select = 1,
+                                      remove = FALSE,
                                       ...) {
 
   # Spillover matrix supplied - matrix, data.frame or csv file
@@ -3220,8 +3249,14 @@ cyto_compensate.flowFrame <- function(x,
   # Select columns
   spill <- spill[, fluor_channels]
 
-  # Apply compensation
-  flowCore::compensate(x, spill)
+  # REMOVE COMPENSATION
+  if(remove == TRUE){
+    decompensate(x, spill)
+  # APPLY COMPENSATION
+  }else if (remove == FALSE){
+    flowCore::compensate(x, spill)
+  }
+  
 }
 
 ## CYTO_NODES ------------------------------------------------------------------
