@@ -466,11 +466,11 @@ cyto_channel_select <- function(x){
 #'
 #' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param menu logical indicating whether channels should be selected from a
-#'   drop down menu instead of manually typing them in.
 #' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
-#'
+#' @param menu logical indicating whether channels should be selected from a
+#'   drop down menu instead of manually typing them in.
+#'   
 #' @return update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
 #'   write channel matching to csv file and return channel matching as a
 #'   data.frame.
@@ -491,8 +491,8 @@ cyto_channel_select <- function(x){
 #'
 #' @export
 cyto_channel_match <- function(x,
-                               menu = TRUE,
-                               save_as = NULL) {
+                               save_as = NULL,
+                               menu = TRUE) {
   
   # Set default name for channel_match file
   if (is.null(save_as)) {

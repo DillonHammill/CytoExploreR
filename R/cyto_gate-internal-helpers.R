@@ -573,10 +573,19 @@
   if(is(gate)[1] == "list") {
     # LIST OF RECTANGLEGATES
     if(all(LAPPLY(gate, function(z){
-      is(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
+      is(z, "rectangleGate")
+    }))){
+      # ORDER QUADRANTS - GATINGSET EXTRACTED GATES
+      if(all(LAPPLY(gate, function(z){
+        any(grepl("quad", names(attributes(z))))
       }))){
-      # QUADRANTS
-      quads <- names(attributes(gate[[1]])[["quadrants"]])
+        # QUADRANTS
+        quads <- names(attributes(gate[[1]])[["quadrants"]])
+      }else{
+        quads <- LAPPLY(gate, function(z){
+          z@filterId
+        })
+      }
       # CHANNELS
       chans <- as.character(parameters(gate[[1]]))
       # CO-ORDINATES

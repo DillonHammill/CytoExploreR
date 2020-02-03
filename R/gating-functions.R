@@ -1909,17 +1909,21 @@
   if (nrow(Q) != 0) {
     if (length(which(Q[, "Q"] >= gates[[length(alias)]][2, "Q"])) != 0) {
       g <- Q[which(Q[, "Q"] >= gates[[length(alias)]][2, "Q"]), ]
+    }else{
+      g <- NULL
     }
 
     if (length(which(Q[, "Q"] < gates[[length(alias)]][2, "Q"])) != 0) {
       r <- Q[which(Q[, "Q"] < gates[[length(alias)]][2, "Q"]), ]
+    }else{
+      r <- NULL
     }
 
-    if (exists("g") & exists("r")) {
+    if (!is.null(g) & !is.null(r)) {
       Q <- rbind(g, r)
-    } else if (exists("g") & !exists("r")) {
+    } else if (!is.null(g) & is.null(r)) {
       Q <- g
-    } else if (!exists("g") & exists("r")) {
+    } else if (is.null(g) & !is.null(r)) {
       Q <- r
     }
 

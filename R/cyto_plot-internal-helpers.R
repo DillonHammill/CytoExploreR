@@ -835,7 +835,7 @@
                              channels,
                              overlay = NA,
                              title = "") {
-
+  
   # x can be a list
   if (class(x) == "list") {
     if (length(x) > 1) {
