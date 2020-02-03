@@ -694,7 +694,7 @@ cyto_plot.GatingSet <- function(x,
         title <- names(pd_split)
       }
     }
-
+    
     # PARENT
     title <- LAPPLY(title, function(z) {
       if (parent == "root") {
@@ -715,20 +715,6 @@ cyto_plot.GatingSet <- function(x,
         # PASTE SAMPLNAME & PARENT
       } else {
         paste(z, pt, sep = "\n")
-      }
-      # Stacked 1D plots lack sampleNames in titles if no overlay
-      if (length(channels) == 1 &
-        .all_na(overlay) &
-        density_stack != 0) {
-        pt
-        # Stacked with overlay display sampleNames only
-      } else if (length(channels) == 1 &
-        !.all_na(overlay) &
-        density_stack != 0) {
-        z
-        # Paste together sampleName and parent name
-      } else {
-        paste(z, "\n", pt, sep = " ")
       }
     })
   }
@@ -1110,7 +1096,7 @@ cyto_plot.GatingHierarchy <- function(x,
       }
     }
   }
-
+  
   # TITLE
   if (missing(title)) {
     # SAMPLENAME
@@ -1135,20 +1121,6 @@ cyto_plot.GatingHierarchy <- function(x,
         # PASTE SAMPLNAME & PARENT
       } else {
         paste(z, pt, sep = "\n")
-      }
-      # Stacked 1D plots lack sampleNames in titles if no overlay
-      if (length(channels) == 1 &
-        .all_na(overlay) &
-        density_stack != 0) {
-        pt
-        # Stacked with overlay display sampleNames only
-      } else if (length(channels) == 1 &
-        !.all_na(overlay) &
-        density_stack != 0) {
-        z
-        # Paste together sampleName and parent name
-      } else {
-        paste(z, "\n", pt, sep = " ")
       }
     })
   }

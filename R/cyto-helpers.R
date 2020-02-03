@@ -3033,6 +3033,9 @@ cyto_compensate.GatingSet <- function(x,
       # Convert spill into a named list
       spill <- rep(list(spill), length(fs))
       names(spill) <- cyto_names(fs)
+    # spillover is a list
+    } else{
+      spill <- spillover
     }
     # Extract spillover matrix directly from fs
   } else if (is.null(spillover)) {
@@ -3133,7 +3136,10 @@ cyto_compensate.flowSet <- function(x,
       # Convert spill into a named list
       spill <- rep(list(spill), length(x))
       names(spill) <- cyto_names(x)
-    }
+      # SPILLOVER IS A LIST
+    }else{
+      spill <- spillover
+    } 
     # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
     if (!is.null(select)) {
@@ -3227,6 +3233,9 @@ cyto_compensate.flowFrame <- function(x,
       } else {
         spill <- spillover
       }
+    # spillover is a list
+    }else{
+      spill <- spillover[[1]]
     }
     # Extract spillover matrix directly from x
   } else if (is.null(spillover)) {
