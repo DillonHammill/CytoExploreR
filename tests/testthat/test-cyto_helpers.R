@@ -327,7 +327,7 @@ test_that("cyto_barcode", {
            dimnames = list(NULL, "Sample ID"))
   })
   fs_barcode <- fsApply(fs, function(x){
-    cbind(x, barcode[[match(cyto_names(x), cyto_names(fs))]])
+    fr_append_cols(x, barcode[[match(cyto_names(x), cyto_names(fs))]])
   })
   expect_equal(cyto_barcode(fs[1:2]),
                fs_barcode)
@@ -342,7 +342,7 @@ test_that("cyto_barcode", {
            dimnames = list(NULL, "Event ID"))
   })
   fs_barcode <- fsApply(fs, function(x){
-    cbind(x, barcode[[match(cyto_names(x), cyto_names(fs))]])
+    fr_append_cols(x, barcode[[match(cyto_names(x), cyto_names(fs))]])
   })
   expect_equal(cyto_barcode(fs[1:2],
                             type = "events"),
@@ -438,7 +438,9 @@ test_that("cyto_channel_match", {
   mock_edit <- mockery::mock(channel_match)
   mock_channel_match <- testthat::with_mock(
     edit = mock_edit,
-    cyto_channel_match(fs_comp, save_as = "Channel-Match"))
+    cyto_channel_match(fs_comp, 
+                       menu = FALSE,
+                       save_as = "Channel-Match"))
   expect_equal(read.csv("Channel-Match.csv"), channel_match)
   expect_equal(mock_channel_match, channel_match)
   
