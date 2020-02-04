@@ -662,8 +662,9 @@
         y <- as(y, "polygonGate")
         coords <- as.numeric(y@boundaries[, z])
       }else if(is(y, "quadGate")){
-        coords <- as.numeric(y@boundary)
+        coords <- as.numeric(y@boundary[z])
       }
+      return(coords)
     })
   })
   
