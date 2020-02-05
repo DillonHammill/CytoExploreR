@@ -88,6 +88,9 @@ cyto_plot_explore.GatingSet <- function(x,
     header <- "Combined Events"
   }
   
+  # Transformations
+  axes_trans <- cyto_transformer_extract(x)
+  
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
                     channels_x = channels_x,
@@ -147,6 +150,9 @@ cyto_plot_explore.GatingHierarchy <- function(x,
   
   # Extract parent population
   fr <- cyto_extract(x)
+  
+  # Transformations
+  axes_trans <- cyto_transformer_extract(x)
   
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
