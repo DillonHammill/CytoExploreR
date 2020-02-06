@@ -2,11 +2,9 @@
 % Please edit documentation in R/cyto_spillover_compute.R
 \name{cyto_spillover_compute}
 \alias{cyto_spillover_compute}
-\alias{cyto_spillover_compute.GatingSet}
-\alias{cyto_spillover_compute.flowSet}
 \title{Compute Spillover Matrix}
 \usage{
-\method{cyto_spillover_compute}{GatingSet}(
+cyto_spillover_compute(
   x,
   parent = NULL,
   axes_trans = NULL,
@@ -15,19 +13,11 @@
   axes_limits = "machine",
   ...
 )
-
-\method{cyto_spillover_compute}{flowSet}(
-  x,
-  axes_trans = NULL,
-  channel_match = NULL,
-  spillover = NULL,
-  axes_limits = "machine",
-  ...
-)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet} containing
-transformed and gated compensation controls.}
+\item{x}{object of class \code{flowFrame}, \code{flowSet},
+\code{GatingHierarchy} or \code{GatingSet} containing transformed and gated
+compensation controls.}
 
 \item{parent}{name of the population to use for the spillover calculation
 when a GatingSet object is supplied, set to the last node of the GatingSet
