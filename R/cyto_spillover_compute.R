@@ -132,18 +132,18 @@ cyto_spillover_compute <- function(x,
   # PREPARE DATA ---------------------------------------------------------------
   
   # COPY
-  x <- cyto_copy(x)
+  cyto_copy <- cyto_copy(x)
   
   # CHANNELS 
-  channels <- cyto_fluor_channels(x)
+  channels <- cyto_fluor_channels(cyto_copy)
   
   # TRANSFORMATIONS
   if(.all_na(axes_trans) | is.null(axes_trans)){
-    axes_trans <- cyto_transformer_biex(x,
+    axes_trans <- cyto_transformer_biex(cyto_copy,
                                         channels = channels,
                                         type = "biex",
                                         plot = FALSE)
-    cyto_transform(x,
+    cyto_transform(cyto_copy,
                    trans = axes_trans,
                    plot = FALSE)
   }
@@ -151,7 +151,7 @@ cyto_spillover_compute <- function(x,
   # SPILLOVER COMPUTATION ------------------------------------------------------
 
   # NEGATIVE AND POSITIVE POPULATIONS (TRANSFORMED)
-  pops <- .cyto_spillover_pops(x,
+  pops <- .cyto_spillover_pops(cyto_copy,
                                parent = parent,
                                channel_match = channel_match,
                                axes_trans = axes_trans,
@@ -159,6 +159,15 @@ cyto_spillover_compute <- function(x,
                                ...)
   neg_pops <- pops[["negative"]]
   pos_pops <- pops[["positive"]]
+  
+  # UPDATE DETAILS IN X
+  cyto_details(x) <- cyto_details(cyto_copy)
+  
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(pos_pops)
+  
+  # SAMPLE NAMES
+  nms <- cyto_names(pos_pops)
   
   # MEDFI ALL CHANNELS
   neg_stats <- list()
@@ -205,16 +214,18 @@ cyto_spillover_compute <- function(x,
   signal <- as.matrix(signal)
 
   # Construct spillover matrix - include values for which there is a control
-  spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
+  spill <- diag(x = 1, 
+                nrow = length(channels), 
+                ncol = length(channels))
   colnames(spill) <- channels
   rownames(spill) <- channels
 
   # Normalise each row to stained channel
-  lapply(seq(1, nrow(signal), 1), function(x) {
-    signal[x, ] <<- signal[x, ] /
-      signal[x, match(pd$channel[x], colnames(spill))]
+  lapply(seq(1, nrow(signal), 1), function(z) {
+    signal[z, ] <<- signal[z, ] /
+      signal[z, match(pd$channel[z], colnames(spill))]
   })
-
+  
   # Insert values into appropriate rows
   rws <- match(pd$channel, rownames(spill))
   spill[rws, ] <- signal

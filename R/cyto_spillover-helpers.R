@@ -2,6 +2,7 @@
 
 #' Return list of negative and positive populations using single stain controls
 #' @param ... additional arguments passed to \code{cyto_plot}.
+#' @importFrom flowWorkspace flowSet_to_cytoset
 #' @return list of negative and positive flowSets
 #' @noRd
 .cyto_spillover_pops <- function(x,
@@ -104,7 +105,7 @@
       pd[, "parent"] <- parent
     }
   }else{
-    pd[, "parent"] <- rep(NA, length.out = length(x))
+    pd[, "parent"] <- rep("root", length.out = length(x))
   }
 
   # UPDATE CHANNEL_MATCH FILE & CYTO_DETAILS -----------------------------------
@@ -346,12 +347,14 @@
   names(pos_pops) <- nms
 
   # Convert neg_pops and pos_pops to flowSets
-  neg_pops <- flowSet(neg_pops)
-  pos_pops <- flowSet(pos_pops)
+  neg_pops <- flowSet_to_cytoset(flowSet(neg_pops))
+  pos_pops <- flowSet_to_cytoset(flowSet(pos_pops))
+  
+  # cytoset required to retain details
+  cyto_details(pos_pops) <- pd[pd$name %in% cyto_names(pos_pops),]
 
   # Return list of negative and positive flowSets
-  return(list(
-    "negative" = neg_pops,
-    "positive" = pos_pops
-  ))
+  return(list("negative" = neg_pops,
+              "positive" = pos_pops))
+  
 }
