@@ -83,9 +83,9 @@ popup window, set to FALSE by default.}
 
 \item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
-to \code{"machine"} by default to use entire axes ranges. Fine control
-over axes limits can be obtained by altering the \code{xlim} and
-\code{ylim} arguments.}
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 }
 \value{
 object of class \code{flowFrame}, \code{flowSet},

@@ -1646,12 +1646,16 @@ cyto_gate_transform.rectangleGate <- function(x,
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
+        }else{
+          y
         }
       })
     }else{
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
+        }else{
+          y
         }
       })
     }
@@ -1695,12 +1699,16 @@ cyto_gate_transform.polygonGate <- function(x,
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
+        }else{
+          y
         }
       })
     }else{
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
+        }else{
+          y
         }
       })
     }
@@ -1767,12 +1775,16 @@ cyto_gate_transform.ellipsoidGate <- function(x,
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
+        }else{
+          y
         }
       })
     }else{
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
+        }else{
+          y
         }
       })
     }
@@ -1848,12 +1860,16 @@ cyto_gate_transform.quadGate <- function(x,
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$transform(y)
+        }else{
+          y
         }
       })
     }else{
       gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
         if(is.finite(y)){
           trans[[z]]$inverse(y)
+        }else{
+          y
         }
       })
     }

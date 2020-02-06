@@ -27,12 +27,14 @@ library(CytoExploreRData)
 gs <- GatingSet(Activation)
 
 # Modify experiment details manually
-cyto_details(gs)$Treatment <- c(rep("A", 8),
-                                rep("B", 8),
-                                rep("C", 8),
-                                rep("D", 8),
-                                NA)
-                                
+cyto_details(gs)$Treatment <- c(
+  rep("A", 8),
+  rep("B", 8),
+  rep("C", 8),
+  rep("D", 8),
+  NA
+)
+
 # Save experiment details to file
 cyto_details_save(gs)
 }
