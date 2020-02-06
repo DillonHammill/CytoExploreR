@@ -15,9 +15,9 @@ cyto_spillover_compute(
 )
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet} containing transformed and gated
-compensation controls.}
+\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+transformed and gated compensation controls.}
 
 \item{parent}{name of the population to use for the spillover calculation
 when a GatingSet object is supplied, set to the last node of the GatingSet

@@ -36,9 +36,9 @@
 #' reference negative population(s). The calculated spillover matrix is returned
 #' and written to a named csv file for future use.
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierarchy} or \code{GatingSet} containing transformed and gated
-#'   compensation controls.
+#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
+#'   transformed and gated compensation controls.
 #' @param parent name of the population to use for the spillover calculation
 #'   when a GatingSet object is supplied, set to the last node of the GatingSet
 #'   by default (e.g. "Single Cells"). For greater flexibility, users can
@@ -138,6 +138,9 @@ cyto_spillover_compute <- function(x,
   channels <- cyto_fluor_channels(cyto_copy)
   
   # TRANSFORMATIONS
+  axes_trans <- cyto_transformer_extract(cyto_copy)
+  
+  # DATA SHOULD BE TRANSFORMED FOR GATING
   if(.all_na(axes_trans) | is.null(axes_trans)){
     axes_trans <- cyto_transformer_biex(cyto_copy,
                                         channels = channels,
