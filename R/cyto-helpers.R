@@ -230,9 +230,8 @@ cyto_clean <- function(x, ...) {
 #' using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
 #' anomalies in the recorded data.
 #'
-#' Users can optionally provide a name for a
-#' gatingTemplate csv file which will be created if necessary and assigned as
-#' the active gatingTemplate.
+#' Users can optionally provide a name for a gatingTemplate csv file which will
+#' be created if necessary and assigned as the active gatingTemplate.
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
 #'   a folder in current working directory).
@@ -243,6 +242,12 @@ cyto_clean <- function(x, ...) {
 #'   \code{\link{cyto_channels_restrict}}.
 #' @param clean logical indicating whether the loaded data should be cleaned
 #'   using \code{cyto_clean}, set to FALSE by default.
+#' @param markers logical indicating whether a call should be made to
+#'   \code{cyto_markers_edit} to update the markers associated with channels in
+#'   the loaded sampes, set to TRUE by default.
+#' @param details logical indicating whether a call should be made to
+#'   \code{cyto_details_edit} to update the experimental details associated with
+#'   the loaded samples, set to TRUE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
 #'
@@ -275,31 +280,37 @@ cyto_clean <- function(x, ...) {
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' \code{\link{cyto_load}}
-#' \code{\link{cyto_markers_edit}}
-#' \code{\link{cyto_details_edit}}
-#' \code{\link{cyto_channels_restrict}}
-#' \code{\link{cyto_clean}}
-#' \code{\link{cyto_gatingTemplate_select}}
-#' \code{\link{cyto_gatingTemplate_create}}
+#' @seealso \code{\link{cyto_load}} 
+#' @seealso \code{\link{cyto_markers_edit}}
+#' @seealso \code{\link{cyto_details_edit}}
+#' @seealso \code{\link{cyto_channels_restrict}}
+#' @seealso \code{\link{cyto_clean}} 
+#' @seealso \code{\link{cyto_gatingTemplate_select}}
+#' @seealso \code{\link{cyto_gatingTemplate_create}}
 #'
 #' @export
 cyto_setup <- function(path = ".",
                        gatingTemplate = NULL,
                        restrict = FALSE,
-                       clean = FALSE, ...) {
+                       clean = FALSE,
+                       markers = TRUE,
+                       details = TRUE, ...) {
 
   # CYTOSET/GATINGSET
   message("Loading FCS files into a GatingSet...")
   x <- cyto_load(path = path, restrict = FALSE, ...)
 
   # MARKERS
-  message("Assigning markers to channels...")
-  x <- cyto_markers_edit(x)
+  if(markers){
+    message("Assigning markers to channels...")
+    x <- cyto_markers_edit(x)
+  }
 
   # EXPERIMENT DETAILS
-  message("Updating experiment details...")
-  x <- cyto_details_edit(x)
+  if(details){
+    message("Updating experiment details...")
+    x <- cyto_details_edit(x)
+  }
 
   # FLOWSET LOADED
   if (is(x, "flowSet")) {

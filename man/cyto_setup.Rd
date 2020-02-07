@@ -9,6 +9,8 @@ cyto_setup(
   gatingTemplate = NULL,
   restrict = FALSE,
   clean = FALSE,
+  markers = TRUE,
+  details = TRUE,
   ...
 )
 }
@@ -25,6 +27,14 @@ dropped from the returned cytoset, set to FALSE by default.  See
 
 \item{clean}{logical indicating whether the loaded data should be cleaned
 using \code{cyto_clean}, set to FALSE by default.}
+
+\item{markers}{logical indicating whether a call should be made to
+\code{cyto_markers_edit} to update the markers associated with channels in
+the loaded sampes, set to TRUE by default.}
+
+\item{details}{logical indicating whether a call should be made to
+\code{cyto_details_edit} to update the experimental details associated with
+the loaded samples, set to TRUE by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}
@@ -50,9 +60,8 @@ Through the \code{clean} argument, the data can then be optionally cleaned
 using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
 anomalies in the recorded data.
 
-Users can optionally provide a name for a
-gatingTemplate csv file which will be created if necessary and assigned as
-the active gatingTemplate.
+Users can optionally provide a name for a gatingTemplate csv file which will
+be created if necessary and assigned as the active gatingTemplate.
 }
 \examples{
 
@@ -75,14 +84,21 @@ cyto_details(gs)
 }
 
 }
+\seealso{
+\code{\link{cyto_load}}
+
+\code{\link{cyto_markers_edit}}
+
+\code{\link{cyto_details_edit}}
+
+\code{\link{cyto_channels_restrict}}
+
+\code{\link{cyto_clean}}
+
+\code{\link{cyto_gatingTemplate_select}}
+
+\code{\link{cyto_gatingTemplate_create}}
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-
-\code{\link{cyto_load}}
-\code{\link{cyto_markers_edit}}
-\code{\link{cyto_details_edit}}
-\code{\link{cyto_channels_restrict}}
-\code{\link{cyto_clean}}
-\code{\link{cyto_gatingTemplate_select}}
-\code{\link{cyto_gatingTemplate_create}}
 }
