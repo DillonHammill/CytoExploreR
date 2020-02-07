@@ -59,6 +59,7 @@
 #'
 #' @export
 cyto_spillover_spread_compute <- function(x,
+                                          parent = NULL,
                                           axes_trans = NULL,
                                           channel_match = NULL,
                                           compensated = FALSE,
@@ -78,6 +79,16 @@ cyto_spillover_spread_compute <- function(x,
   # TRANSFORMATIONS
   axes_trans <- cyto_transformer_extract(cyto_copy)
 
+  # GATINGSET COMPENSATION
+  if(is(cyto_copy, "GatingSet")){
+    spill <- cyto_spillover_extract(cyto_copy)
+    if(length(spill) == 0){
+      compensated <- FALSE
+    }else{
+      compensated <- TRUE
+    }
+  }
+  
   # DATA SHOULD BE COMPENSATED & TRANSFORMED
   if(compensated == FALSE){
     # UNTRANSFORMED DATA
@@ -87,22 +98,22 @@ cyto_spillover_spread_compute <- function(x,
                                           channels = channels,
                                           type = "biex",
                                           plot = FALSE)
-      cyto_copy <- cyto_transform(cyto_copy,
-                                  trans = axes_trans,
-                                  plot = FALSE)
+      cyto_copy <- suppressWarnings(cyto_transform(cyto_copy,
+                                                   trans = axes_trans,
+                                                   plot = FALSE))
     # TRANSFORMED DATA
     }else{
       # INVERSE TRANSFORM
-      cyto_transform(cyto_copy,
-                     trans = axes_trans,
-                     inverse = TRUE,
-                     plot = FALSE)
+      suppressWarnings(cyto_transform(cyto_copy,
+                                      trans = axes_trans,
+                                      inverse = TRUE,
+                                      plot = FALSE))
       # COMPENSATE
       cyto_compensate(cyto_copy, spillover = spillover)
       # TRANSFORM
-      cyto_transform(cyto_copy,
-                     trans = axes_trans,
-                     plot = FALSE)
+      suppressWarnings(cyto_transform(cyto_copy,
+                                      trans = axes_trans,
+                                      plot = FALSE))
     }
   }else if(compensated == TRUE){
     # TRANSFORMATIONS
@@ -111,9 +122,9 @@ cyto_spillover_spread_compute <- function(x,
                                           channels = channels,
                                           type = "biex",
                                           plot = FALSE)
-      cyto_transform(cyto_copy,
-                     trans = axes_trans,
-                     plot = FALSE)
+      suppressWarnings(cyto_transform(cyto_copy,
+                                      trans = axes_trans,
+                                      plot = FALSE))
     }
   }
   

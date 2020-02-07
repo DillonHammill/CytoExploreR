@@ -146,9 +146,9 @@ cyto_spillover_compute <- function(x,
                                         channels = channels,
                                         type = "biex",
                                         plot = FALSE)
-    cyto_transform(cyto_copy,
-                   trans = axes_trans,
-                   plot = FALSE)
+    suppressWarnings(cyto_transform(cyto_copy,
+                                    trans = axes_trans,
+                                    plot = FALSE))
   }
 
   # SPILLOVER COMPUTATION ------------------------------------------------------
