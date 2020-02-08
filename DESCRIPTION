@@ -2,18 +2,15 @@ Package: CytoExploreR
 Type: Package
 Title: Interactive Analysis of Cytometry Data
 Version: 1.0.0
-Date: 2020-01-10
+Date: 2020-02-08
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
   person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),
   person("Mike", "Jiang", role = "ctb", email = "wjiang2@fhcrc.org"))
-Description: An intuitive and interactive approach to cytometry analysis in R. 
-  CytoExploreR contains tools for every stage of the analysis pipeline including 
-  user-guided automatic compensation, realtime editing of spillover matrices, 
-  manual gate drawing, gate editing, visualisation of all existing cytometry 
-  objects and export of population level statistics for further analysis. Furthermore,
-  through linking to openCyto, CytoExploreR provides the tools necessary to easily combine 
-  manual and automated gating approaches in R.
+Description: An intuitive and interactive approach to analysing cytometry data
+  in R. This package has been developed under ROpenSci gudelines to integrate
+  conventional and cutting edge cytometry analysis tools under a unified 
+  open-source framework. 
 URL: https://github.com/DillonHammill/CytoExploreR
 BugReports: https://github.com/DillonHammill/CytoExploreR/issues
 Depends: 
