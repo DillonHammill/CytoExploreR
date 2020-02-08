@@ -43,7 +43,7 @@ test_that("cyto_spillover_spread_compute universal reference", {
                                     compensated = FALSE,
                                     spillover = "Reference-Universal-Spillover-Matrix.csv",
                                     spillover_spread = "Spillover-Spread-Matrix.csv"),
-      SPREAD)
+      SPREAD, tolerance = 0.01)
   })
   
   expect_true(file.exists("Spillover-Spread-Matrix.csv"))
@@ -65,11 +65,11 @@ test_that("cyto_spillover_spread_compute universal reference", {
 })
 
 # INTERNAL UNSTAINED CONTROL
-test_that("cyto_spillover_spread_compute universal reference", {
-  
+test_that("cyto_spillover_spread_compute internal reference", {
+
   # CHANNELS
   mock_menu <- mock(4, 10, 11, 9, 1, 2, cycle = TRUE)
-  
+
   # GATES
   mock_locator <- mock(list("x" = c(-850, 525),
                             "y" = c(50,50)),
@@ -96,7 +96,7 @@ test_that("cyto_spillover_spread_compute universal reference", {
                        list("x" = c(2600, 3900),
                             "y" = c(50, 50)),
                        cycle = TRUE)
-  
+
   # SPILLOVER SPREAD
   SPREAD <- read.csv("Reference-Internal-Spillover-Spread-Matrix.csv",
                      header = TRUE,
@@ -109,7 +109,7 @@ test_that("cyto_spillover_spread_compute universal reference", {
                         "7-AAD-A",
                         "Alexa Fluor 647-A",
                         "Alexa Fluor 700-A",
-                        "APC-Cy7-A")    
+                        "APC-Cy7-A")
 
   # GATINGSET
   testthat::with_mock(locator = mock_locator,{
@@ -119,24 +119,25 @@ test_that("cyto_spillover_spread_compute universal reference", {
                                     channel_match = "Reference-Compensation-Channels.csv",
                                     compensated = FALSE,
                                     spillover_spread = "Spillover-Spread-Matrix.csv"),
-      SPREAD)
+      SPREAD, tolerance = 0.01)
+
   })
-  
+
   expect_true(file.exists("Spillover-Spread-Matrix.csv"))
-  
+
   # SAVED MATRIX
   spread <- read.csv("Spillover-Spread-Matrix.csv",
                      header = TRUE,
                      row.names = 1,
                      stringsAsFactors = FALSE)
-  spread <- as.matrix(spread)  
+  spread <- as.matrix(spread)
   colnames(spread) <- cyto_fluor_channels(gs_comp)
   rownames(spread) <- c("Alexa Fluor 488-A",
                         "PE-A",
                         "7-AAD-A",
                         "Alexa Fluor 647-A",
                         "Alexa Fluor 700-A",
-                        "APC-Cy7-A")    
+                        "APC-Cy7-A")
 
 })
 
