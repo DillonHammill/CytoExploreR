@@ -54,10 +54,10 @@ test_that("cyto_spillover_compute universal reference", {
 
 # INTERNAL UNSTAINED REFERENCE
 test_that("cyto_spillover_compute internal reference", {
-  
+
   # CHANNELS
   mock_menu <- mock(4, 10, 11, 9, 1, 2, cycle = TRUE)
-  
+
   # GATES
   mock_locator <- mock(list("x" = c(-850, 525),
                             "y" = c(50,50)),
@@ -84,7 +84,7 @@ test_that("cyto_spillover_compute internal reference", {
                        list("x" = c(2600, 3900),
                             "y" = c(50, 50)),
                        cycle = TRUE)
-  
+
   # SPILL
   SPILL <- read.csv("Reference-Internal-Spillover-Matrix.csv",
                     header = TRUE,
@@ -96,16 +96,16 @@ test_that("cyto_spillover_compute internal reference", {
 
   # TRANSFORMED GATINGSET
   testthat::with_mock(menu = mock_menu,
-                      locator = mock_locator,{
+                      locator = mock_locator, {
                         expect_equal(
                           cyto_spillover_compute(gs_comp_trans[seq_len(length(gs_comp)-1)],
                                                  parent = "Single Cells",
                                                  spillover = "Spillover-Matrix.csv"),
                           SPILL)
                       })
-  
+
   expect_true(file.exists("Spillover-Matrix.csv"))
-  
+
   # SAVED MATRIX
   spill <- read.csv("Spillover-Matrix.csv",
                     header = TRUE,
