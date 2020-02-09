@@ -831,7 +831,6 @@ cyto_plot.GatingHierarchy <- function(x,
 
   # TRANSFORMATIONS
   axes_trans <- cyto_transformer_extract(gh)
-  print(axes_trans)
 
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
 
