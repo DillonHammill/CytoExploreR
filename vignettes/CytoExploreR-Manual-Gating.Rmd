@@ -175,10 +175,23 @@ knitr::include_graphics('Gating/Manual-Gating-9.gif')
 
 ## Quadrant Gates
 
+```{r, eval = FALSE}
+# Threshold gate
+cyto_gate_draw(cs,
+               alias = c("A","B","C","D"),
+               channels = "Va2",
+               type = "threshold",
+               axes_trans = trans)
+```
 
+```{r, echo=FALSE, fig.align="center", out.width = '60%'}
+knitr::include_graphics('Gating/Manual-Gating-9.gif')
+```
 
 ## Web Gates (Experimental)
 
 ## Multiple Gates
 
 ## Mixed Gates
+
+## Negated Gates

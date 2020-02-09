@@ -20,9 +20,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Overview
+# Introduction
 
-<div style="line-height: 1.8em;"> **CytoExploreR** is a comprehensive collection of interactive analysis tools for cytometry data. The full capabilities of this package have been documented in the "Compensation", "Transformations", "Manual Gating", "Visualisation" and "Dimension Reduction" vignettes. Before we dive into the details, let's see how easy it can be to analyse some in vitro T cell activation flow cytometry data using **CytoExploreR**. This **Activation** dataset and associated **Compensation** controls have been shipped with **CytoExploreRData** for demonstration purposes. This in vitro assay involves stimulating dendritic cells (DCs) with different immune stimulators (referred to as Stim-A, Stim-B, Stim-C and Stim-D) under increasing concentrations of the surrogate antigen ovalbumin (includes 0 nM, 5 nM, 50 nM and 500 nM OVA) and co-culturing these activated DCs with antigen-specific OT-I (CD8+) and OT-II (CD4+) T Cells. The ability of each of the immune stimulators to promote T cell activation was then assessed by measuring the expression of T cell activation markers (CD44 and CD69) by flow cytometry. Although **CytoExploreR** has full support for automated gating through **openCyto**, for simplicity in this vignette we will describe a manual gating analysis pipeline to analyse this dataset. </div>
+<div style="line-height: 1.8em;"> **CytoExploreR** is a comprehensive collection of interactive analysis tools for cytometry data. The full capabilities of this package have been documented in the "Compensation", "Transformations", "Manual Gating", "Visualisation" and "Dimensionality Reduction" vignettes. Before we dive into the details, let's see how easy it can be to analyse some *in vitro* T cell activation flow cytometry data using **CytoExploreR**. This **Activation** dataset and associated **Compensation** controls have been shipped with **CytoExploreRData** for demonstration purposes. This *in vitro* assay involves stimulating dendritic cells (DCs) with different immune stimulators (referred to as Stim-A, Stim-B, Stim-C and Stim-D) under increasing concentrations of the surrogate antigen ovalbumin (includes 0 nM, 5 nM, 50 nM and 500 nM OVA) and co-culturing these activated DCs with antigen-specific OT-I (CD8+) and OT-II (CD4+) T Cells. The ability of each of the immune stimulators to promote T cell activation was then assessed by measuring the expression of T cell activation markers (CD44 and CD69) by flow cytometry. Although **CytoExploreR** has full support for automated gating through **openCyto**, for simplicity in this vignette we will describe a manual gating analysis pipeline to analyse this dataset. </div>
 
 <br>
 
@@ -31,9 +31,9 @@ knitr::opts_chunk$set(
 <div style="line-height: 1.8em;"> Before we begin, we will need to create a new R project by following these steps:
 
 + Select File -> New Project
-+ Select New Directory -> New Project. 
-+ Set Directory Name to CytoExploreR-Demo. 
-+ Indicate where the project should be created and select Create Project.
++ Select New Directory -> New Project 
++ Set Directory Name to "CytoExploreR-Demo"
++ Indicate where the project should be created and select Create Project
 
 </div>
 
@@ -69,7 +69,7 @@ cyto_save(Activation,
 
 # 4. Compensation of Fluorescent Spillover
 
-<div style="line-height: 1.8em;"> The basic steps required to compute and refine the spillover matrix are outlined below. Refer to the Compensation vignette for a more details. </div>
+<div style="line-height: 1.8em;"> Flow cytometry users will need to compensate their data for fluorescent spillover prior to analyses. The basic steps required to compute and refine the spillover matrix are outlined below. Refer to the Compensation vignette for a more details. </div>
 
 ## 4.1 Prepare compensation controls
 
@@ -97,42 +97,73 @@ cyto_gate_draw(gs,
 ```
 
 ```{r, echo=FALSE, fig.align="center", out.width = '98%'}
-    knitr::include_graphics('CytoExploreR/CytoExploreR-1.png')
+knitr::include_graphics('CytoExploreR/CytoExploreR-1.png')
 ```
 
 <br>
 
 ## 4.2 Compute Spillover Matrix
 
-<div style="line-height: 1.8em;"> The spillover matrix can be automatically calculated using `cyto_spillover_compute`. Users are asked to assign a channel to compensation control and then gate the positive signal for each control in the indicated channel. The spillover matrix will be calculated using the method described by Bagwell & Adams 1993. </div>
+<div style="line-height: 1.8em;"> The spillover matrix can be automatically calculated using `cyto_spillover_compute`. Users are asked to assign a channel to compensation control and then gate the positive signal for each control in the indicated channel. **CytoExploreR** supports the either the use of a universal unstained control or requires that each single colour control contain its own unstained reference population. The spillover matrix will be calculated using the method described by Bagwell & Adams 1993. </div>
 
 ```{r, eval = FALSE}
 # Compute spillover matrix
 spill <- cyto_spillover_compute(gs,
-                                parent = "root",
+                                parent = "Single Cells",
                                 spillover = "Spillover-Matrix.csv")
 ```
 
 ```{r, echo=FALSE, fig.align="center", out.width = '98%'}
-knitr::include_graphics('Compensation/Compensation-Auto-3.png')
+# knitr::include_graphics('Compensation/Compensation-Auto-3.png')
 ```
 
 ## 4.3 Edit Spillover Matrix
 
-<div style="line-height: 1.8em;"> The computed spillover matrix can be interactively edited in realtime using `cyto_spillover_edit`. </div>
+<div style="line-height: 1.8em;"> The computed spillover matrix can be interactively edited in realtime using `cyto_spillover_edit`. Users should refer to the **Plots** to identify any lingering compensation issues and return to the **Editor** tab to refine the spillover matrix. By definition, the data is correctly compensated when the MedFI of the stained control is equal to that of the reference unstained control in all secondary detectors. The updated spillover matrix will be saved to a CSV file for downstream use. </div>
 
 ```{r, eval = FALSE}
 # Edit spillover matrix
 spill <- cyto_spillover_edit(gs,
-                             parent = "root",
+                             parent = "Single Cells",
                              spillover = "Spillover-Matrix.csv")
 ```
 
 ```{r, echo=FALSE, fig.align="center", out.width = '98%'}
-knitr::include_graphics('Compensation/Compensation-Auto-3.png')
+# knitr::include_graphics('Compensation/Compensation-Auto-3.png')
 ```
 
 <br>
+
+## 4.4 Visualise Compensation
+
+<div style="line-height: 1.8em;"> After editing the spillover matrix manually, it is a good idea to check that all compensation issues have been addressed. The easiest way to do this without having to launch the spillover matrix editor is through `cyto_plot_compensation`. `cyto_plot_compensation` will plot uncompensated and compensated data in all fluorescent channels to check the compensation. The unstained control will automatically be overlaid onto the plots as areference if supplied. </div>
+
+```{r, eval = FALSE}
+# Visualise uncompensated data
+cyto_plot_compensation(gs,
+                       parent = "Single Cells")
+
+# Visualise compensated data
+cyto_plot_compensation(gs,
+                       parent = "Single Cells",
+                       spillover = "Spillover-Matrix.csv",
+                       compensate = TRUE)
+```
+
+```{r, echo=FALSE, fig.align="center", out.width = '98%'}
+# knitr::include_graphics('Compensation/Compensation-Auto-3.png')
+```
+
+# 5. Analyse Samples
+
+## 5.1 
+
+
+
+
+
+
+
 
 
 
