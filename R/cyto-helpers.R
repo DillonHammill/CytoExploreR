@@ -46,6 +46,7 @@
 #'
 #' # cs is a cytoset
 #' class(cs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -113,7 +114,7 @@ cyto_load <- function(path = ".",
     }
   }
 
-  # RETURN NCDFFLOWSET
+  # RETURN CYTOSET
   return(x)
 }
 
@@ -134,6 +135,7 @@ cyto_load <- function(path = ".",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
+#' 
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
@@ -147,6 +149,7 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
+#' 
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
@@ -500,9 +503,38 @@ cyto_names.list <- function(x) {
 
 # CYTO_NAMES REPLACEMENT METHOD ------------------------------------------------
 
+#' Replacement method for cyto_names
+#' 
+#' @param x object of class flowFrame, flowSet, GatingHierarchy or GatingSet.
+#' @param value vector of replacement names.
+#' 
 #' @importFrom flowWorkspace sampleNames<-
 #' @importFrom flowCore identifier<-
-#' @noRd
+#' 
+#' @examples 
+#' 
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Sample names
+#' cyto_names(fs)
+#' 
+#' # Change first sample name 
+#' cyto_names(fs)[1] <- "first_sample"
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#' 
+#' # Change last sample name
+#' cyto_names(gs)[length(gs)] <- "last_sample"
+#' 
+#' # Updated sample names
+#' cyto_names(gs)
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
 "cyto_names<-" <- function(x, value) {
   if (is(x, "flowSet") |
@@ -709,61 +741,16 @@ cyto_transform.default <- function(x,
 
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
-
-    # EXTRACT TRANSFORMLIST
-    transform_list <- cyto_transform_extract(transformer_list,
-      inverse = inverse
-    )
-
-    # TRANSFORM ROOT CYTOSET - SHOULD UPDATE IN GATINGSET
-    suppressMessages(transform(cyto_extract(x), transform_list))
-
-    # TRANSFORM GATE CO-ORDINATES
-    if (length(cyto_nodes(x)) > 1) {
-      lapply(seq_along(x), function(z) {
-        # GATINGHIERARCHY
-        if (is(x, "GatingHierarchy")) {
-          gh <- x
-        } else {
-          gh <- x[[z]]
-        }
-        # POPULATIONS
-        pops <- gh_get_pop_paths(gh)
-        # REMOVE ROOT NODE
-        pops <- pops[pops != "root"]
-        # GATES
-        gates <- lapply(pops, function(pop) {
-          list(
-            "parent" = gh_pop_get_parent(gh, pop),
-            "gate" = gh_pop_get_gate(gh, pop)
-          )
-        })
-        # TRANSFORM GATES
-        lapply(seq_along(gates), function(z) {
-          gate <- gates[[z]]$gate
-          if (is(gate, "rectangleGate") |
-            is(gate, "polygonGate") |
-            is(gate, "ellipsoidGate")) {
-            gate <- cyto_gate_transform(gate,
-              trans = axes_trans,
-              inverse = inverse
-            )
-          }
-          gates[[z]]$gate <- gate
-        })
-        # REPLACE GATES
-        lapply(gates, function(z) {
-          gh_pop_set_gate(
-            gh,
-            z$parent,
-            z$gate
-          )
-        })
-      })
-
-      # RECOMPUTE
-      recompute(x)
+    
+    # Inverse transformations not yet supported
+    if(inverse == TRUE){
+      stop(paste("Inverse transformations are not yet supported for",
+                 "GatingHierarchy/GatingSet objects."))
     }
+    
+    # Apply transformations
+    x <- suppressMessages(transform(x, transformer_list))
+    
   }
 
   # Construct the plots
@@ -916,61 +903,15 @@ cyto_transform.transformerList <- function(x,
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
 
-    # EXTRACT TRANSFORMLIST
-    transform_list <- cyto_transform_extract(trans,
-      inverse = inverse
-    )
-
-    # TRANSFORM ROOT CYTOSET - SHOULD UPDATE IN GATINGSET
-    suppressMessages(transform(cyto_extract(x), transform_list))
-
-    # TRANSFORM GATE CO-ORDINATES
-    if (length(cyto_nodes(x)) > 1) {
-      warning("Transformed gates will not be updated in the gatingTemplate!")
-      lapply(seq_along(x), function(z) {
-        # GATINGHIERARCHY
-        if (is(x, "GatingHierarchy")) {
-          gh <- x
-        } else {
-          gh <- x[[z]]
-        }
-        # POPULATIONS
-        pops <- gh_get_pop_paths(gh)
-        # REMOVE ROOT NODE
-        pops <- pops[pops != "root"]
-        # GATES
-        gates <- lapply(pops, function(pop) {
-          list(
-            "parent" = gh_pop_get_parent(gh, pop),
-            "gate" = gh_pop_get_gate(gh, pop)
-          )
-        })
-        # TRANSFORM GATES
-        lapply(seq_along(gates), function(z) {
-          gate <- gates[[z]]$gate
-          if (is(gate, "rectangleGate") |
-            is(gate, "polygonGate") |
-            is(gate, "ellipsoidGate")) {
-            gate <- cyto_gate_transform(gate,
-              trans = trans,
-              inverse = inverse
-            )
-          }
-          gates[[z]]$gate <<- gate
-        })
-        # REPLACE GATES
-        lapply(gates, function(z) {
-          gh_pop_set_gate(
-            gh,
-            z$parent,
-            z$gate
-          )
-        })
-      })
-
-      # RECOMPUTE
-      recompute(x)
+    # Inverse transformations not yet supported
+    if(inverse == TRUE){
+      stop(paste("Inverse transformations are not yet supported for",
+                 "GatingHierarchy/GatingSet objects."))
     }
+    
+    # Apply transformations
+    x <- suppressMessages(transform(x, trans))
+    
   }
 
   # Construct plots
@@ -2687,7 +2628,8 @@ cyto_barcode <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_markers_edit <- function(x, file = NULL) {
+cyto_markers_edit <- function(x, 
+                              file = NULL) {
 
   # check class of x
   cyto_check(x)
@@ -2734,7 +2676,7 @@ cyto_markers_edit <- function(x, file = NULL) {
         )
         rownames(mrks) <- NULL
         # SampleNames match those of x
-        if (identical(mrks$Channel, colnames(x))) {
+        if (identical(mrks$channel, colnames(x))) {
           return(mrks)
         } else {
           return(NULL)
@@ -2747,7 +2689,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 
         # Make data.frame with channel and marker columns
         dt <- pd[, c("name", "desc")]
-        colnames(dt) <- c("Channel", "Marker")
+        colnames(dt) <- c("channel", "marker")
         rownames(dt) <- NULL
       } else {
 
@@ -2760,7 +2702,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 
       # Make data.frame with channel and marker columns
       dt <- pd[, c("name", "desc")]
-      colnames(dt) <- c("Channel", "Marker")
+      colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
     }
 
@@ -2785,7 +2727,7 @@ cyto_markers_edit <- function(x, file = NULL) {
 
       # Make data.frame with channel and marker columns
       dt <- dt[, c("name", "desc")]
-      colnames(dt) <- c("Channel", "Marker")
+      colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
     }
   }
@@ -2794,25 +2736,25 @@ cyto_markers_edit <- function(x, file = NULL) {
   dt <- suppressWarnings(edit(dt))
 
   # Update channels
-  BiocGenerics::colnames(x) <- as.character(dt$Channel)
+  BiocGenerics::colnames(x) <- as.character(dt$channel)
 
-  # Write result to csv file -  file name manually supplied
-  if (!is.null(file)) {
-    write.csv(dt, file, row.names = FALSE)
-
-    # Write result to csv file - no file name supplied
-  } else {
-
-    # Save file with date and experiment markers
-    write.csv(dt, paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-Experiment-Markers.csv"
-    ), row.names = FALSE)
+  # File name not supplied
+  if(is.null(file)){
+    file <- paste0(format(Sys.Date(), "%d%m%y"),"-Experiment-Markers.csv")
   }
+  
+  # # TODO - CHECK IF FILE EXISTS WITH DIFFERENT CHANNELS - NEED NEW FILE NAME
+  # if(length(grep(file, list.files())) != 0){
+  #   # Check if file contains the same  
+  #   
+  # }
+  
+  # Write result to csv file
+  write.csv(dt, file, row.names = FALSE)
 
   # Markers and channels
-  cyto_channels <- dt$Channel
-  cyto_markers <- dt$Marker
+  cyto_channels <- dt$channel
+  cyto_markers <- dt$marker
   names(cyto_markers) <- cyto_channels
 
   # Only modify markers if supplied
@@ -3067,6 +3009,7 @@ cyto_details_save <- function(x,
 #'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -3083,11 +3026,6 @@ cyto_compensate.GatingSet <- function(x,
                                       select = 1,
                                       remove = FALSE,
                                       ...) {
-
-  # Compensation already applied
-  if (!is.null(cyto_spillover_extract(x))) {
-    stop("Looks like the data has already been compensated...")
-  }
 
   # Extract flowSet
   fs <- cyto_extract(x, parent = "root")
@@ -3179,11 +3117,13 @@ cyto_compensate.GatingSet <- function(x,
     lapply(seq_along(fs), function(z) {
       decompensate(fs[[z]], spill[[z]])
     })
-    return(fs)
     # APPLY COMPENSATION
   } else if (remove == FALSE) {
     flowWorkspace::compensate(x, spill)
   }
+  
+  # RETURN GATINGSET
+  return(x)
 }
 
 #' @rdname cyto_compensate

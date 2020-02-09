@@ -75,6 +75,7 @@ cyto_compensate(gs, remove = TRUE)
 
 # Apply saved spillover matrix csv file to GatingSet
 cyto_compensate(gs, "Spillover-Matrix.csv")
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

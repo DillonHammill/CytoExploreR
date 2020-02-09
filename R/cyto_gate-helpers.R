@@ -776,8 +776,6 @@ cyto_gate_edit <- function(x,
       
       # EXISTING GATES TO PLOT
       gate <- gates_gT[[y]]
-
-      print(gate)
       
       # PARENT TITLE
       if (parent == "root") {
@@ -1605,6 +1603,7 @@ cyto_gate_prepare <- function(x,
 #'
 #' @importFrom flowCore parameters rectangleGate polygonGate ellipsoidGate
 #'   quadGate
+#' @importFrom stats dist
 #'
 #' @name cyto_gate_transform
 NULL

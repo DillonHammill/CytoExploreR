@@ -42,6 +42,7 @@ separate numbered files, set to \code{TRUE} by default.}
 Save High Resolution cyto_plot Images
 }
 \examples{
+
 library(CytoExploreRData)
 
 # Load samples into GatingSet
@@ -49,15 +50,13 @@ fs <- Activation
 gs <- GatingSet(fs)
 
 # Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
 # Apply gatingTemplate
-gt <- Activation_gatingTemplate
-gt_gating(gt, gs)
+cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 
 # Save png image of gating scheme after plotting
 cyto_plot_save("Gating-Scheme.png",

@@ -4,7 +4,7 @@
 # 
 # # UNIVERSAL UNSTAINED CONTROL
 # test_that("cyto_spillover_spread_compute universal reference", {
-#   
+# 
 #   # GATES
 #   mock_locator <- mock(list("x" = c(1740, 4265),
 #                             "y" = c(50,50)),
@@ -19,7 +19,7 @@
 #                        list("x" = c(2350, 4120),
 #                             "y" = c(50, 50)),
 #                        cycle = TRUE)
-#   
+# 
 #   # SPILLOVER SPREAD
 #   SPREAD <- read.csv("Reference-Universal-Spillover-Spread-Matrix.csv",
 #                      header = TRUE,
@@ -45,15 +45,15 @@
 #                                     spillover_spread = "Spillover-Spread-Matrix.csv"),
 #       SPREAD, tolerance = 0.01)
 #   })
-#   
+# 
 #   expect_true(file.exists("Spillover-Spread-Matrix.csv"))
-#   
+# 
 #   # SAVED MATRIX
 #   spread <- read.csv("Spillover-Spread-Matrix.csv",
 #                     header = TRUE,
 #                     row.names = 1,
 #                     stringsAsFactors = FALSE)
-#   spread <- as.matrix(spread)  
+#   spread <- as.matrix(spread)
 #   colnames(spread) <- cyto_fluor_channels(gs_comp)
 #   rownames(spread) <- c("Alexa Fluor 488-A",
 #                         "PE-A",
@@ -112,11 +112,11 @@
 #                         "APC-Cy7-A")
 # 
 #   # GATINGSET
-#   testthat::with_mock(locator = mock_locator,{
+#   testthat::with_mock(menu = mock_menu,
+#                       locator = mock_locator,{
 #     expect_equal(
 #       cyto_spillover_spread_compute(gs_comp[seq_len(length(gs_comp)-1)],
 #                                     parent = "Single Cells",
-#                                     channel_match = "Reference-Compensation-Channels.csv",
 #                                     compensated = FALSE,
 #                                     spillover_spread = "Spillover-Spread-Matrix.csv"),
 #       SPREAD, tolerance = 0.01)
@@ -138,8 +138,8 @@
 #                         "Alexa Fluor 647-A",
 #                         "Alexa Fluor 700-A",
 #                         "APC-Cy7-A")
-# 
 # })
 # 
 # # DELETE FILES
 # base::unlink("Spillover-Spread-Matrix.csv")
+# base::unlink(paste0(format(Sys.Date(), "%d%m%y"),"-Compensation-Channels.csv"))

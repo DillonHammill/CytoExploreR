@@ -879,6 +879,7 @@ cyto_plot_record <- function(){
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
+#' 
 #' library(CytoExploreRData)
 #'
 #' # Load samples into GatingSet
@@ -886,15 +887,13 @@ cyto_plot_record <- function(){
 #' gs <- GatingSet(fs)
 #'
 #' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' gs <- cyto_compensate(gs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #'
 #' # Apply gatingTemplate
-#' gt <- Activation_gatingTemplate
-#' gt_gating(gt, gs)
+#' cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 #'
 #' # Save png image of gating scheme after plotting
 #' cyto_plot_save("Gating-Scheme.png",
@@ -1010,6 +1009,7 @@ cyto_plot_save <- function(save_as,
 #'
 #' # Revert unwanted cyto_plot_save call
 #' cyto_plot_save_reset()
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export

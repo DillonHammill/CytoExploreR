@@ -107,7 +107,7 @@
   }else{
     pd[, "parent"] <- rep("root", length.out = length(x))
   }
-
+  
   # UPDATE CHANNEL_MATCH FILE & CYTO_DETAILS -----------------------------------
 
   # SAVE CHANNEL_MATCH
@@ -117,7 +117,9 @@
       "-", "Compensation-Channels.csv"
     ), row.names = FALSE)
   } else {
-    write.csv(pd, channel_match, row.names = FALSE)
+    write.csv(pd, 
+              channel_match, 
+              row.names = FALSE)
   }
 
   # CYTO_DETAILS

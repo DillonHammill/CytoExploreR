@@ -791,8 +791,6 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   if (!is.null(header)) {
     par(oma = c(0, 0, 3, 0))
   }
-
-  print(pop_details)
   
   # PLOT CONSTRUCTION ----------------------------------------------------------
 

@@ -62,6 +62,7 @@ cs <- cyto_load(path)
 
 # cs is a cytoset
 class(cs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

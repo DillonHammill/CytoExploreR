@@ -104,14 +104,14 @@ cyto_spillover_spread_compute <- function(x,
     # TRANSFORMED DATA
     }else{
       # INVERSE TRANSFORM
-      suppressWarnings(cyto_transform(cyto_copy,
+      suppressWarnings(cyto_transform(cyto_extract(cyto_copy),
                                       trans = axes_trans,
                                       inverse = TRUE,
                                       plot = FALSE))
       # COMPENSATE
       cyto_compensate(cyto_copy, spillover = spillover)
       # TRANSFORM
-      suppressWarnings(cyto_transform(cyto_copy,
+      suppressWarnings(cyto_transform(cyto_extract(cyto_copy),
                                       trans = axes_trans,
                                       plot = FALSE))
     }

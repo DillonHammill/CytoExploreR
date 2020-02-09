@@ -377,13 +377,8 @@ cyto_plot.GatingSet <- function(x,
   # GATINGHIERARCHY
   gh <- gs[[1]]
 
-  # TRANSFORMATIONS
-  axes_trans <- gh_get_transformations(gh, only.function = FALSE)
-  if (length(axes_trans) != 0) {
-    axes_trans <- cyto_transformer_combine(axes_trans)
-  } else {
-    axes_trans <- NA
-  }
+  # TRANSFORMATIONS 
+  axes_trans <- cyto_transformer_extract(gs)
 
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
 
@@ -835,12 +830,8 @@ cyto_plot.GatingHierarchy <- function(x,
   gh <- x
 
   # TRANSFORMATIONS
-  axes_trans <- gh_get_transformations(gh, only.function = FALSE)
-  if (length(axes_trans) != 0) {
-    axes_trans <- cyto_transformer_combine(axes_trans)
-  } else {
-    axes_trans <- NA
-  }
+  axes_trans <- cyto_transformer_extract(gh)
+  print(axes_trans)
 
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
 

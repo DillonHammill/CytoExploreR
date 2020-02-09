@@ -51,7 +51,7 @@ test_that("cyto_check",{
   expect_true(cyto_check(fs))
   
   # ncdfFlowSet
-  expect_true(suppressMessages(cyto_check(ncdfFlow::ncdfFlowSet(fs))))
+  expect_true(suppressMessages(cyto_check(flowSet_to_cytoset(fs))))
   
   # GatingHierarchy
   expect_true(cyto_check(gs[[1]]))
@@ -354,8 +354,8 @@ test_that("cyto_barcode", {
 
 test_that("cyto_markers_edit", {
   
-  mock_edit <- mock(data.frame("Channel" = cyto_channels(fs),
-                               "Marker" = pData(parameters(fs[[1]]))$desc,
+  mock_edit <- mock(data.frame("channel" = cyto_channels(fs),
+                               "marker" = pData(parameters(fs[[1]]))$desc,
                                stringsAsFactors = FALSE,
                                row.names = NULL))
   testthat::with_mock(edit = mock_edit,
