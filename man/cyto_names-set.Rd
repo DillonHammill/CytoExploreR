@@ -24,7 +24,7 @@ fs <- Activation
 # Sample names
 cyto_names(fs)
 
-# Change first sample name 
+# Change first sample name
 cyto_names(fs)[1] <- "first_sample"
 
 # Activation GatingSet
@@ -35,7 +35,6 @@ cyto_names(gs)[length(gs)] <- "last_sample"
 
 # Updated sample names
 cyto_names(gs)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -678,13 +678,24 @@ cyto_plot.GatingSet <- function(x,
       title <- cyto_names(x)
       # GROUP_BY
     } else {
-      if (group_by[1] == "all") {
-        title <- "Combined Events"
-      } else {
+      if(length(group_by) == 1){
+        if (group_by == "all") {
+          title <- "Combined Events"
+        }else if(group_by == "name"){
+          title <- cyto_names(x)
+        }else{
+          pd_split <- split(pd, pd[, group_by],
+                            sep = " ",
+                            lex.order = TRUE,
+                            drop = TRUE
+          )
+          title <- names(pd_split)
+        }
+      }else{
         pd_split <- split(pd, pd[, group_by],
-          sep = " ",
-          lex.order = TRUE,
-          drop = TRUE
+                          sep = " ",
+                          lex.order = TRUE,
+                          drop = TRUE
         )
         title <- names(pd_split)
       }
