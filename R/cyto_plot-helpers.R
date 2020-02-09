@@ -879,7 +879,7 @@ cyto_plot_record <- function(){
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
-#' 
+#' \dontrun{
 #' library(CytoExploreRData)
 #'
 #' # Load samples into GatingSet
@@ -914,7 +914,7 @@ cyto_plot_record <- function(){
 #'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
 #'   layout = c(1, 2)
 #' )
-#'
+#' }
 #' @seealso \code{\link[grDevices:cairo]{cairo}}
 #' @seealso \code{\link[grDevices:png]{png}}
 #'

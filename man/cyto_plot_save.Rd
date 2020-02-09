@@ -42,7 +42,7 @@ separate numbered files, set to \code{TRUE} by default.}
 Save High Resolution cyto_plot Images
 }
 \examples{
-
+\dontrun{
 library(CytoExploreRData)
 
 # Load samples into GatingSet
@@ -77,7 +77,7 @@ cyto_plot(gs,
   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
   layout = c(1, 2)
 )
-
+}
 }
 \seealso{
 \code{\link[grDevices:cairo]{cairo}}
