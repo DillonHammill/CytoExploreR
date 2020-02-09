@@ -65,10 +65,10 @@ tryCatch(library(devtools), error = function(e){
   library(devtools)
 })
 # Install flowCore, flowWorkspace & openCyto from GitHub
-install_github("RGLab/flowCore", ref = "trunk")
-install_github("RGLab/flowWorkspace", ref = "trunk")
+install_github("RGLab/flowCore")
+install_github("RGLab/flowWorkspace")
 install_github("RGLab/flowStats", ref = "trunk")
-install_github("RGLab/openCyto", ref = "trunk")
+install_github("RGLab/openCyto")
 ```
 
 ## CytoExploreR
