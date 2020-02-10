@@ -400,7 +400,7 @@ cyto_plot.GatingSet <- function(x,
       pd$group_by <- do.call("paste", pd[, group_by])
     }
   }
-
+  
   # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
   if(!.all_na(alias)){
     gt <- gh_generate_template(gh)
@@ -538,7 +538,8 @@ cyto_plot.GatingSet <- function(x,
     alias <- unique(alias)
     # GROUPING
     if (!.all_na(group_by)) {
-      gate <- lapply(unique(pd$group_by), function(nm) {
+      gs_groups <- cyto_group_by(gs, group_by)
+      gate <- lapply(names(gs_groups), function(nm) {
         gt <- lapply(alias, function(z) {
           ind <- pd$name[match(nm, pd$group_by)[1]]
           ind <- which(pd$name == ind)
