@@ -149,6 +149,16 @@ cyto_spillover_spread_compute <- function(x,
   # SAMPLE NAMES
   nms <- cyto_names(pos_pops)
   
+  # INVERSE TRANSFORMATIONS
+  neg_pops <- cyto_transform(neg_pops,
+                             trans = axes_trans,
+                             inverse = TRUE,
+                             plot = FALSE)
+  pos_pops <- cyto_transform(pos_pops,
+                             trans = axes_trans,
+                             inverse = TRUE,
+                             plot = FALSE)
+  
   # Calculate spillover spread for each compensation control
   SSM <- lapply(seq_along(neg_pops), function(z){
       
