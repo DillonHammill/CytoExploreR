@@ -3453,7 +3453,7 @@ cyto_spillover_extract <- function(x) {
     if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
     } else {
-      spill <- LAPPLY(spill, function(z) {
+      spill <- lapply(spill, function(z) {
         z@spillover
       })
     }

@@ -137,7 +137,7 @@ cyto_spillover_edit.GatingSet <- function(x,
 
   # COMPENSATION
   comp <- cyto_spillover_extract(gs)
-  
+
   # GS SHOULD NOT BE COMPENSATED (TRANSFORMED LATER IF REQUIRED)
   if(!is.null(comp)){
     cs <- cyto_extract(gs, "root")
