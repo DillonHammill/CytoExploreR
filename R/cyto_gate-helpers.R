@@ -751,8 +751,12 @@ cyto_gate_edit <- function(x,
   # SKIP MENU IF GROUPING ADDED HERE
   }else if(is.na(gtf_groupBy) & group_by[1] != "all"){
     grps <- names(fr_list)
+  # SKIP MENU IF GROUPING HAS CHANGED  
+  }else if(!is.na(gtf_groupBy) & 
+           !identical(group_by, unlist(strsplit(gtf_groupBy, ":")))){  
+    grps <- names(fr_list)
+  # GROUPING REMAINS THE SAME
   } else {
-    # GROUPED SAMPLES
     grps <- select.list(names(fr_list),
       multiple = TRUE,
       graphics = TRUE,
