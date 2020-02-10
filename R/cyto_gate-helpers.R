@@ -544,7 +544,7 @@ cyto_gate_edit <- function(x,
 
   # EXTRACT GROUPBY
   gtf_groupBy <- unique(gtf_chunk[, "groupBy"])
-
+  
   # EXTRACT GATING METHOD
   gtf_gating_method <- unique(as.character(gtf_chunk[, "gating_method"]))
 
@@ -748,6 +748,9 @@ cyto_gate_edit <- function(x,
   # MENU - SELECT GROUPS TO EDIT
   if (group_by[1] == "all") {
     grps <- "all"
+  # SKIP MENU IF GROUPING ADDED HERE
+  }else if(is.na(gtf_groupBy) & group_by[1] != "all"){
+    grps <- names(fr_list)
   } else {
     # GROUPED SAMPLES
     grps <- select.list(names(fr_list),
