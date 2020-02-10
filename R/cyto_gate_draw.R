@@ -409,12 +409,12 @@ cyto_gate_draw.GatingSet <- function(x,
   # GROUP_BY
   if (all(is.character(group_by))) {
     if (group_by[1] == "all") {
-      group_by <- NA
+      group_by <- "NA"
     } else {
       group_by <- paste(group_by, collapse = ":")
     }
   } else if (all(is.na(group_by))) {
-    group_by <- NA
+    group_by <- "NA"
   }
 
   # GATINGTEMPLATE NOT CREATED YET

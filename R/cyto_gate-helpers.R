@@ -556,7 +556,8 @@ cyto_gate_edit <- function(x,
   # EXTRACT EXISTING GATES FROM GATINGSET DIRECTLY -----------------------------
 
   # GATINGSET LIST - NEW GROUPING - EXTRACT EXISTING GATES FROM EACH GROUP
-  gs_list <- cyto_group_by(gs, group_by = group_by)
+  gs_list <- cyto_group_by(gs, 
+                           group_by = group_by)
 
   # GROUPS
   N <- length(gs_list)
@@ -892,7 +893,7 @@ cyto_gate_edit <- function(x,
 
   # GROUP_BY
   if (group_by[1] == "all") {
-    group_by <- NA
+    group_by <- "NA"
   } else {
     group_by <- paste(group_by, collapse = ":")
   }
@@ -907,6 +908,8 @@ cyto_gate_edit <- function(x,
       ))
     ]
     gt[parent == prnt & alias == als[i], collapseDataForGating := TRUE]
+    # groupBy must be character class
+    gt[, groupBy := lapply(.SD, as.character), .SDcols = "groupBy"]
     gt[parent == prnt & alias == als[i], groupBy := group_by]
     gt[parent == prnt & alias == als[i], preprocessing_method := ppmd]
     gt[parent == prnt & alias == als[i], preprocessing_args := as.logical(NA)]
