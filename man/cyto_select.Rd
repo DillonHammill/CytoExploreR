@@ -30,10 +30,10 @@ library(CytoExploreRData)
 # Look at experiment details
 cyto_details(Activation)
 
-# Select Stim-C samples with 0 and 0.5 OVA concentrations
+# Select Stim-C samples with 0 and 500 nM OVA concentrations
 fs <- cyto_select(Activation,
   Treatment = "Stim-C",
-  OVAConc = c(0, 0.5)
+  OVAConc = c(0, 500)
 )
 
 # Select Stim-A and Stim-C treatment groups

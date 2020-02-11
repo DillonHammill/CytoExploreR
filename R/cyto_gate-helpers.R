@@ -897,6 +897,7 @@ cyto_gate_edit <- function(x,
   groupBy <- NULL
   preprocessing_method <- NULL
   preprocessing_args <- NULL
+  .SD <- NULL
 
   # GROUP_BY
   if (group_by[1] == "all") {
