@@ -9,7 +9,7 @@ context("cyto-helpers")
 test_that("cyto_details", {
   
   pd <- data.frame("name" = paste0("Activation", "_", seq_len(33), ".fcs"),
-                   "OVAConc" = c(rep(c(0,0,0.005,0.005,0.05,0.05,0.5,0.5), 4), 0),
+                   "OVAConc" = c(rep(c(0,0,5,5,50,50,500,500), 4), 0),
                    "Treatment" = c(rep("Stim-A", 8),
                                    rep("Stim-B", 8),
                                    rep("Stim-C", 8),
@@ -173,7 +173,7 @@ test_that("cyto_filter", {
   expect_equal(cyto_filter(fs, Treatment == "Stim-C"), 
                fs[c(17,18,19,20,21,22,23,24)])
   
-  expect_equal(cyto_filter(fs, Treatment == "Stim-A", OVAConc %in% c(0,0.5)),
+  expect_equal(cyto_filter(fs, Treatment == "Stim-A", OVAConc %in% c(0,500)),
                fs[c(1,2,7,8)])
   
   # Filtered GatingSet will have different guid slot
@@ -182,7 +182,7 @@ test_that("cyto_filter", {
   
   expect_equivalent(cyto_filter(gs, 
                                 Treatment == "Stim-A", 
-                                OVAConc %in% c(0,0.5)),
+                                OVAConc %in% c(0,500)),
                     gs[c(1, 2, 7, 8)])
   
 })
@@ -207,11 +207,11 @@ test_that("cyto_select", {
   expect_equal(cyto_select(fs, Treatment = "Stim-C"), 
                fs[c(17,18,19,20,21,22,23,24)])
   
-  expect_equal(cyto_select(fs, Treatment = "Stim-A", OVAConc = c(0,0.5)),
+  expect_equal(cyto_select(fs, Treatment = "Stim-A", OVAConc = c(0,500)),
                fs[c(1,2,7,8)])
   
   expect_equal(cyto_select(fs, 
-                           list("Treatment" = "Stim-A", "OVAConc" = c(0,0.5))),
+                           list("Treatment" = "Stim-A", "OVAConc" = c(0,500))),
                fs[c(1,2,7,8)])
   
   # Filtered GatingSet will have different guid slot
@@ -220,7 +220,7 @@ test_that("cyto_select", {
   
   expect_equivalent(cyto_select(gs, 
                                 list("Treatment" = "Stim-A", 
-                                     "OVAConc" = c(0,0.5))),
+                                     "OVAConc" = c(0,500))),
                     gs[c(1, 2, 7, 8)])
   
 })

@@ -22,7 +22,11 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-<div style="line-height: 1.8em;"> **CytoExploreR** is a comprehensive collection of interactive analysis tools for cytometry data. The full capabilities of this package have been documented in the "Compensation", "Transformations", "Manual Gating", "Visualisation" and "Dimensionality Reduction" vignettes. Before we dive into the details, let's see how easy it can be to analyse some *in vitro* T cell activation flow cytometry data using **CytoExploreR**. This **Activation** dataset and associated **Compensation** controls have been shipped with **CytoExploreRData** for demonstration purposes. This *in vitro* assay involves stimulating dendritic cells (DCs) with different immune stimulators (referred to as Stim-A, Stim-B, Stim-C and Stim-D) under increasing concentrations of the surrogate antigen ovalbumin (includes 0 nM, 5 nM, 50 nM and 500 nM OVA) and co-culturing these activated DCs with antigen-specific OT-I (CD8+) and OT-II (CD4+) T Cells. The ability of each of the immune stimulators to promote T cell activation was then assessed by measuring the expression of T cell activation markers (CD44 and CD69) by flow cytometry. Although **CytoExploreR** has full support for automated gating through **openCyto**, for simplicity in this vignette we will describe a manual gating analysis pipeline to analyse this dataset. </div>
+<div style="line-height: 1.8em;"> The full capabilities of **CytoExploreR** will be documented in series of vignettes which address specific aspects of the data analysis pipeline. Before we dive into the details, let's walk through the basic steps to analyse some *in vitro* T cell activation data using **CytoExploreR**. 
+
+This **Activation** dataset and associated **Compensation** controls have been shipped with **CytoExploreRData** for demonstration purposes. This *in vitro* assay involves stimulating dendritic cells (DCs) with different immune stimulators (referred to as Stim-A, Stim-B, Stim-C and Stim-D) under increasing concentrations of the surrogate antigen ovalbumin (0 nM, 5 nM, 50 nM or 500 nM OVA). These activated DCs are then co-cultured with antigen-specific OT-I (CD8+) and OT-II (CD4+) T cells. The ability of each of the immune stimulators to promote T cell activation was then assessed by measuring the expression of T cell activation markers (CD44 and CD69) by flow cytometry.
+
+Although **CytoExploreR** has full support for automated gating through **openCyto**, for simplicity in this vignette we will describe a manual gating analysis pipeline to analyse this dataset. </div>
 
 <br>
 
@@ -69,7 +73,7 @@ cyto_save(Activation,
 
 # 4. Compensation of Fluorescent Spillover
 
-<div style="line-height: 1.8em;"> Flow cytometry users will need to compensate their data for fluorescent spillover prior to analyses. The basic steps required to compute and refine the spillover matrix are outlined below. Refer to the Compensation vignette for a more details. </div>
+<div style="line-height: 1.8em;"> Flow cytometry users will need to compensate their data for fluorescent spillover prior to downstream analyses. The basic steps required to compute and refine the spillover matrix are outlined below. Refer to the Compensation vignette for a more details. </div>
 
 ## 4.1 Prepare compensation controls
 
@@ -80,7 +84,7 @@ cyto_save(Activation,
 gs <- cyto_setup("Compensation-Samples",
                  gatingTemplate = "Compensation-gatingTemplate.csv")
 
-# Transform fluorescent channels
+# Transform fluorescent channels - default logicle transformations
 gs <- cyto_transform(gs)
 
 # Gate Cells
@@ -104,7 +108,7 @@ knitr::include_graphics('CytoExploreR/CytoExploreR-1.png')
 
 ## 4.2 Compute Spillover Matrix
 
-<div style="line-height: 1.8em;"> The spillover matrix can be automatically calculated using `cyto_spillover_compute`. Users are asked to assign a channel to compensation control and then gate the positive signal for each control in the indicated channel. **CytoExploreR** supports the either the use of a universal unstained control or requires that each single colour control contain its own unstained reference population. The spillover matrix will be calculated using the method described by Bagwell & Adams 1993. </div>
+<div style="line-height: 1.8em;"> The spillover matrix can be automatically calculated using `cyto_spillover_compute`. Users are asked to assign a channel to compensation control and then gate the positive signal for each control in the indicated channel. **CytoExploreR** supports the use of either a universal unstained control or requires that each single colour control contain its own internal unstained reference population. The spillover matrix will be calculated using the method described by Bagwell & Adams 1993. </div>
 
 ```{r, eval = FALSE}
 # Compute spillover matrix

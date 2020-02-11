@@ -29,7 +29,7 @@ datadir <- system.file("extdata", package = "CytoExploreRData")
 fs <- cyto_load(paste0(datadir, "/Activation"))
 
 # pData information -
-pData(fs)$OVAConc <- c(rep(c(0, 0, 0.005, 0.005, 0.05, 0.05, 0.5, 0.5), 4), 0)
+pData(fs)$OVAConc <- c(rep(c(0, 0, 5, 5, 50, 50, 500, 500), 4), 0)
 class(pData(fs)$OVAConc) <- "numeric"
 pData(fs)$Treatment <- c(
   rep("Stim-A", 8),

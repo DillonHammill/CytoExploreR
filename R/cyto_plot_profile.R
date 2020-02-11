@@ -73,7 +73,7 @@
 #'  cyto_plot_profile(gs[1:9],
 #'   parent = "CD4 T Cells",
 #'   group_by = "Treatment",
-#'   select = list("OVAConc" = 0.5),
+#'   select = list("OVAConc" = 500),
 #' )
 #' 
 #' @name cyto_plot_profile
