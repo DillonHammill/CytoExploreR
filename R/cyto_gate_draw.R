@@ -181,9 +181,10 @@ cyto_gate_draw.GatingSet <- function(x,
   # GATE TYPES (REPEAT BASED ON INPUT ALIAS)
   type <- .cyto_gate_type(type, channels, alias, negate)
 
+
   # ALIAS (LENGTH AS EXPECTED BASED ON GATE TYPES)
   alias <- .cyto_alias(alias, type)
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
 
@@ -402,7 +403,13 @@ cyto_gate_draw.GatingSet <- function(x,
     names(gates) <- GRPS
     return(gates)
   })
-  names(gate_list) <- alias
+
+  # GATE NAMES - IMPORTANT
+  if(negate == TRUE){
+    names(gate_list) <- unlist(alias)[-length(alias)]
+  }else{
+    names(gate_list) <- unlist(alias)
+  }
   
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
 
@@ -649,7 +656,7 @@ cyto_gate_draw.flowFrame <- function(x,
   }
 
   # GATE TYPE
-  type <- .cyto_gate_type(type, channels, alias)
+  type <- .cyto_gate_type(type, channels, alias, negate)
 
   # ALIAS
   alias <- .cyto_alias(alias, type)

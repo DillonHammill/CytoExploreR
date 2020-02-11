@@ -16,7 +16,10 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_gate_type <- function(type = NULL, channels, alias, negate = FALSE) {
+.cyto_gate_type <- function(type = NULL, 
+                            channels, 
+                            alias, 
+                            negate = FALSE) {
   
   # DEFAULT GATE TYPES ---------------------------------------------------------
   
@@ -30,7 +33,7 @@
       type <- "polygon"
     }
   }
-  
+
   # SPLIT GATE TYPES
   split_gate_types <- .split_gate_types()
   
@@ -72,6 +75,9 @@
     }else if(grepl("web", type[z], ignore.case = TRUE) |
              (nchar(type[z]) == 1 & grepl("w", type[z], ignore.case = TRUE))){
       type[z] <<- "web"
+      return(TRUE)
+    # flowSet method passes NA to flowFrame method negate
+    }else if(z == length(type) & is.na(type[z])){ 
       return(TRUE)
     }else{
       return(FALSE)
