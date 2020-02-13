@@ -944,7 +944,7 @@ knitr::include_graphics('Visualisations/Visualisations-20.png')
 - `cyto_plot_profile` to plot 1D density distributions of the data in all channels to highlight expression profiles.
 - `cyto_plot_gating_scheme` to plot entire gating schemes in a grid for analysis summaries or reports.
 - `cyto_plot_gating_tree` to plot an interactive gating tree which shows relationships between gated populations. 
-- `cyto_plot_grid` to arrange plots into a grid without excess white space. </div>
+- `cyto_plot_grid` to arrange plots into a grid without excess white space (coming soon). </div>
 
 <br>
 

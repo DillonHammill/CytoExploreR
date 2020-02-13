@@ -4,20 +4,20 @@
     "http://schema.org"
   ],
   "@type": "SoftwareSourceCode",
-  "identifier": "CytoRSuite",
-  "description": "An intuitive and interactive approach to flow cytometry analysis in R. \n  CytoRSuite contains tools for every stage of the analysis pipeline including \n  user-guided automatic compensation, realtime editing of spillover matrices, \n  manual gate drawing, gate editing, visualisation of all existing flow cytometry \n  objects and export of population level statistics for further analysis. Furthermore,\n  through linking to openCyto, CytoRSuite provides the tools necessary to easily combine \n  manual and automated gating approaches in R.",
-  "name": "CytoRSuite: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data",
-  "codeRepository": "https://github.com/DillonHammill/CytoRSuite",
-  "issueTracker": "https://github.com/DillonHammill/CytoRSuite/issues",
+  "identifier": "CytoExploreR",
+  "description": "An intuitive and interactive approach to analysing cytometry data\n  in R. This package has been developed under ROpenSci gudelines to integrate\n  conventional and cutting edge cytometry analysis tools under a unified \n  open-source framework. ",
+  "name": "CytoExploreR: Interactive Analysis of Cytometry Data",
+  "codeRepository": "https://github.com/DillonHammill/CytoExploreR",
+  "issueTracker": "https://github.com/DillonHammill/CytoExploreR/issues",
   "license": "https://spdx.org/licenses/GPL-2.0",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
-    "version": "3.5.0",
+    "version": "3.6.1",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 3.5.0 (2018-04-23)",
+  "runtimePlatform": "R version 3.6.1 (2019-07-05)",
   "author": [
     {
       "@type": "Person",
@@ -37,8 +37,9 @@
   "softwareSuggestions": [
     {
       "@type": "SoftwareApplication",
-      "identifier": "CytoRSuiteData",
-      "name": "CytoRSuiteData"
+      "identifier": "CytoExploreRData",
+      "name": "CytoExploreRData",
+      "sameAs": "https://github.com/DillonHammill/CytoExploreRData"
     },
     {
       "@type": "SoftwareApplication",
@@ -138,18 +139,6 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "robustbase",
-      "name": "robustbase",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=robustbase"
-    },
-    {
-      "@type": "SoftwareApplication",
       "identifier": "pkgdown",
       "name": "pkgdown",
       "provider": {
@@ -159,6 +148,30 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=pkgdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "mockr",
+      "name": "mockr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=mockr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "mockery",
+      "name": "mockery",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=mockery"
     }
   ],
   "softwareRequirements": [
@@ -166,39 +179,13 @@
       "@type": "SoftwareApplication",
       "identifier": "R",
       "name": "R",
-      "version": ">= 2.10"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "openCyto",
-      "name": "openCyto",
-      "version": ">= 1.21.1",
-      "provider": {
-        "@id": "https://www.bioconductor.org",
-        "@type": "Organization",
-        "name": "BioConductor",
-        "url": "https://www.bioconductor.org"
-      },
-      "sameAs": "https://bioconductor.org/packages/release/bioc/html/openCyto.html"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "identifier": "flowWorkspace",
-      "name": "flowWorkspace",
-      "version": ">= 3.28.2",
-      "provider": {
-        "@id": "https://www.bioconductor.org",
-        "@type": "Organization",
-        "name": "BioConductor",
-        "url": "https://www.bioconductor.org"
-      },
-      "sameAs": "https://bioconductor.org/packages/release/bioc/html/flowWorkspace.html"
+      "version": ">= 3.5.0"
     },
     {
       "@type": "SoftwareApplication",
       "identifier": "flowCore",
       "name": "flowCore",
-      "version": ">= 1.49.4",
+      "version": ">= 1.53.8",
       "provider": {
         "@id": "https://www.bioconductor.org",
         "@type": "Organization",
@@ -209,15 +196,29 @@
     },
     {
       "@type": "SoftwareApplication",
-      "identifier": "ncdfFlow",
-      "name": "ncdfFlow",
+      "identifier": "flowWorkspace",
+      "name": "flowWorkspace",
+      "version": ">= 3.35.8",
       "provider": {
         "@id": "https://www.bioconductor.org",
         "@type": "Organization",
         "name": "BioConductor",
         "url": "https://www.bioconductor.org"
       },
-      "sameAs": "https://bioconductor.org/packages/release/bioc/html/ncdfFlow.html"
+      "sameAs": "https://bioconductor.org/packages/release/bioc/html/flowWorkspace.html"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "openCyto",
+      "name": "openCyto",
+      "version": ">= 1.25.0",
+      "provider": {
+        "@id": "https://www.bioconductor.org",
+        "@type": "Organization",
+        "name": "BioConductor",
+        "url": "https://www.bioconductor.org"
+      },
+      "sameAs": "https://bioconductor.org/packages/release/bioc/html/openCyto.html"
     },
     {
       "@type": "SoftwareApplication",
@@ -235,7 +236,6 @@
       "@type": "SoftwareApplication",
       "identifier": "BiocGenerics",
       "name": "BiocGenerics",
-      "version": ">= 0.29",
       "provider": {
         "@id": "https://www.bioconductor.org",
         "@type": "Organization",
@@ -272,6 +272,7 @@
       "@type": "SoftwareApplication",
       "identifier": "rhandsontable",
       "name": "rhandsontable",
+      "version": ">= 0.3.7",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -279,6 +280,19 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=rhandsontable"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "superheat",
+      "name": "superheat",
+      "version": ">= 1.0.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=superheat"
     },
     {
       "@type": "SoftwareApplication",
@@ -333,10 +347,146 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=magrittr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "purrr",
+      "name": "purrr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=purrr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "parallel",
+      "name": "parallel"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "tibble",
+      "name": "tibble",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tibble"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "tidyr",
+      "name": "tidyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tidyr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "dplyr",
+      "name": "dplyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dplyr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "robustbase",
+      "name": "robustbase",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=robustbase"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "gtools",
+      "name": "gtools",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=gtools"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "visNetwork",
+      "name": "visNetwork",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=visNetwork"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "Rtsne",
+      "name": "Rtsne",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=Rtsne"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "umap",
+      "name": "umap",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=umap"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "EmbedSOM",
+      "name": "EmbedSOM",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=EmbedSOM"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "flowAI",
+      "name": "flowAI",
+      "provider": {
+        "@id": "https://www.bioconductor.org",
+        "@type": "Organization",
+        "name": "BioConductor",
+        "url": "https://www.bioconductor.org"
+      },
+      "sameAs": "https://bioconductor.org/packages/release/bioc/html/flowAI.html"
     }
   ],
-  "releaseNotes": "https://github.com/DillonHammill/CytoRSuite/blob/master/NEWS.md",
-  "readme": "https://github.com/DillonHammill/CytoRSuite/blob/master/README.md",
+  "releaseNotes": "https://github.com/DillonHammill/CytoExploreR/blob/master/NEWS.md",
   "contIntegration": [
     "https://travis-ci.org/DillonHammill/CytoRSuite",
     "https://ci.appveyor.com/project/DillonHammill/CytoRSuite",
@@ -363,5 +513,8 @@
       "familyName": "Jiang",
       "email": "wjiang2@fhcrc.org"
     }
-  ]
+  ],
+  "copyrightHolder": {},
+  "funder": {},
+  "fileSize": "15270.706KB"
 }

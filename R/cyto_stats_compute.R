@@ -1,5 +1,7 @@
 ## CYTO_STATS_COMPUTE ----------------------------------------------------------
 
+# bind_rows warnings - columns converted to character class
+
 #' Compute, export and save statistics
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -130,7 +132,7 @@ cyto_stats_compute.GatingSet <- function(x,
                        density_smooth = density_smooth
     )
   })
-  res <- do.call("bind_rows", res)
+  res <- suppressWarnings(do.call("bind_rows", res))
   
   # Save results to csv file
   if (!is.null(save_as)) {
@@ -192,13 +194,13 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   pd$name <- as.factor(pd$name) # remove weird <I(chr)> class
   
   # Repeat row alias times - add stats as columns
-  pd <- do.call(
+  pd <- suppressWarnings(do.call(
     "bind_rows",
     replicate(length(alias),
               pd,
               simplify = FALSE
     )
-  )
+  ))
   
   # Add Population column
   pd <- add_column(pd, Population = alias)
@@ -215,17 +217,17 @@ cyto_stats_compute.GatingHierarchy <- function(x,
       )
       
       # Repeat row alias times
-      cnt <- do.call(
+      cnt <- suppressWarnings(do.call(
         "bind_rows",
         replicate(length(alias),
                   cnt,
                   simplify = FALSE
         )
-      )[, 2]
+      )[, 2])
       
       return(cnt)
     })
-    parent_counts <- do.call("bind_cols", parent_counts)
+    parent_counts <- suppressWarnings(do.call("bind_cols", parent_counts))
     colnames(parent_counts) <- parent
     
     # Add parent counts to pd
@@ -241,7 +243,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
       
       return(cnt)
     })
-    alias_counts <- do.call("bind_rows", alias_counts)
+    alias_counts <- suppressWarnings(do.call("bind_rows", alias_counts))
     
     # Repeat alias_counts column parent times
     alias_counts <- alias_counts[, rep(1, length(parent))]
@@ -274,7 +276,7 @@ cyto_stats_compute.GatingHierarchy <- function(x,
                                 density_smooth = density_smooth
       )
     })
-    res <- do.call("bind_rows", res)
+    res <- suppressWarnings(do.call("bind_rows", res))
     
     # Cbind with pd
     res <- bind_cols(pd, res[, -1])
@@ -341,7 +343,7 @@ cyto_stats_compute.flowSet <- function(x,
       format = "wide"
     )
   })
-  res <- do.call("bind_rows", res)
+  res <- suppressWarnings(do.call("bind_rows", res))
 
   # Extract pData -> tibble
   pd <- cyto_details(fs)

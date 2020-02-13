@@ -1,5 +1,10 @@
 pandoc: '2.6'
 pkgdown: 1.4.1
 pkgdown_sha: ~
-articles: []
+articles:
+  CytoExploreR-Compensation: CytoExploreR-Compensation.html
+  CytoExploreR-Manual-Gating: CytoExploreR-Manual-Gating.html
+  CytoExploreR-Transformations: CytoExploreR-Transformations.html
+  CytoExploreR-Visualisations: CytoExploreR-Visualisations.html
+  CytoExploreR: CytoExploreR.html
 

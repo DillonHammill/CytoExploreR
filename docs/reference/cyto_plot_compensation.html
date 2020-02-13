@@ -93,7 +93,31 @@ refernce if supplied." />
   </a>
 </li>
 <li>
+  <a href="../articles/CytoExploreR.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/CytoExploreR-Compensation.html">Compensation of Fluorescent Spillover</a>
+    </li>
+    <li>
+      <a href="../articles/CytoExploreR-Manual-Gating.html">Manual Gating</a>
+    </li>
+    <li>
+      <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
+    </li>
+    <li>
+      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -139,11 +163,12 @@ refernce if supplied.</p>
   <span class='kw'>compensate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>spillover</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
   <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='no'>layout</span>,
+  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
+  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
   <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
@@ -161,7 +186,8 @@ refernce if supplied.</p>
   <span class='kw'>compensate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>spillover</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>layout</span>,
+  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
+  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='no'>header</span>,
@@ -181,11 +207,12 @@ refernce if supplied.</p>
   <span class='kw'>compensate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>spillover</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
   <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='no'>layout</span>,
+  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
+  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
   <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
@@ -202,10 +229,11 @@ refernce if supplied.</p>
   <span class='kw'>compensate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>spillover</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>layout</span>,
+  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
+  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
+  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
   <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
@@ -228,8 +256,10 @@ compensation controls.</p></td>
     </tr>
     <tr>
       <th>parent</th>
-      <td><p>indicates the name of the population to plot for GatingSet
-objects..</p></td>
+      <td><p>indicates the name of the parent population to extract fro
+plotting to plot for GatingSet objects. Users can specify a parent for each
+compensation control either as a vector or by adding a parent column to
+<code><a href='cyto_details.html'>cyto_details(x)</a></code>.</p></td>
     </tr>
     <tr>
       <th>channel_match</th>
@@ -242,7 +272,7 @@ the channel from a dropdown menu.</p></td>
       <th>compensate</th>
       <td><p>logical indicating whether the samples should be
 compensated prior to plotting, set to FALSE by default. If no spillover
-matrix is supplied to the spillover_file argument the spillover matrix will
+matrix is supplied to the spillover argument the spillover matrix will
 extracted from the samples.</p></td>
     </tr>
     <tr>
@@ -250,16 +280,22 @@ extracted from the samples.</p></td>
       <td><p>name of spillover matrix csv file including .csv file
 extension to apply to sample when <code>compensate</code> is TRUE. If no
 <code>spillover</code> is supplied the spillover matrix will be extracted
-directly from the <code>flowFrame</code> and applied to the sample when
-<code>compensate</code> is TRUE.</p></td>
+directly from the data and applied to the sample when <code>compensate</code> is
+TRUE.</p></td>
     </tr>
     <tr>
       <th>axes_trans</th>
       <td><p>object of class
-<code><a href='https://rdrr.io/pkg/flowWorkspace/man/transformerList.html'>transformerList</a></code>
-generated by a <code>cyto_transformer</code> which contains the transformer
-definitions to be used internally to transform the fluorescent channels of
-the samples.</p></td>
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/transformerList.html'>transformerList</a></code> generated by a
+<code>cyto_transform</code> which contains the transformer definitions that were
+used to transform the channels of the supplied flowFrame, flowSet,
+GatingHierarchy or GatingSet.</p></td>
+    </tr>
+    <tr>
+      <th>axes_limits</th>
+      <td><p>options include <code>"auto"</code>, <code>"data"</code> or
+<code>"machine"</code> to use optimised, data or machine limits respectively. Set
+to <code>"machine"</code> by default to use entire axes ranges.</p></td>
     </tr>
     <tr>
       <th>overlay</th>
@@ -307,8 +343,7 @@ stacking for density distributions, set to 0 by default.</p></td>
     <tr>
       <th>density_fill</th>
       <td><p>vector of colours passed to cyto_plot to control the fill
-colours of density distributions, set to c("grey","blue") by
-default.</p></td>
+colours of density distributions, set to c("grey","blue") by default.</p></td>
     </tr>
     <tr>
       <th>density_fill_alpha</th>
@@ -335,12 +370,11 @@ transparency of density distributions, set to 0.5 by default.</p></td>
 <span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span>(<span class='st'>"CytoExploreR_wd_check"</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='co'># Load in compensation controls</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>Compensation</span>)</div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>.</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='input'>
+<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>Compensation</span>)
+
 <span class='co'># Gate single cells using cyto_gate_draw</span>
 <span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Compensation_gatingTemplate</span>
-<span class='fu'>gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: 'gating' is deprecated.</span>
-#&gt; <span class='warning'>Use 'gt_gating' instead.</span>
-#&gt; <span class='warning'>See help("Deprecated")</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'nonDebris'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'nonDebris'</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
+<span class='fu'>gt_gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Extract flowSet for plotting</span>
 <span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_extract.html'>cyto_extract</a></span>(<span class='no'>gs</span>, <span class='st'>"Single Cells"</span>)
 

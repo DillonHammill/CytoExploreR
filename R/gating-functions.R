@@ -1425,7 +1425,7 @@
   xmax <- round(par("usr")[2], 2)
   ymin <- round(par("usr")[3], 2)
   ymax <- round(par("usr")[4], 2)
-
+  
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
     options("show.error.messages" = FALSE)
@@ -1450,9 +1450,9 @@
   coords <- as.data.frame(do.call(rbind, coords))
   colnames(coords) <- c("x", "y")
   coords <- rbind(center, coords)
-
+  
   # Determine which quadrants the points are in
-  # bottom left anti-clockwise to top right (relative to center)
+  # bottom left anti-clockwise to top left (relative to center)
   quads <- c(0, rep(NA, length(alias)))
   for (i in seq_len(length(coords$x))[-1]) {
 
@@ -1593,7 +1593,7 @@
     }
     coords[coords$Q == 4, ] <- q4
   }
-
+  
   # If multiple points in same quadrant order anticlockwise Q1-Q4
   if (anyDuplicated(coords$Q) != 0) {
 

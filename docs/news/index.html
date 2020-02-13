@@ -89,7 +89,31 @@
   </a>
 </li>
 <li>
+  <a href="../articles/CytoExploreR.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/CytoExploreR-Compensation.html">Compensation of Fluorescent Spillover</a>
+    </li>
+    <li>
+      <a href="../articles/CytoExploreR-Manual-Gating.html">Manual Gating</a>
+    </li>
+    <li>
+      <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
+    </li>
+    <li>
+      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -119,76 +143,9 @@
       <small>Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="cytorsuite-100" class="section level1">
+    <div id="cytoexplorer-100" class="section level1">
 <h1 class="page-header">
-<a href="#cytorsuite-100" class="anchor"></a>CytoRSuite 1.0.0</h1>
-<ul>
-<li>Improved handling of lower axes limits to display negative values.</li>
-<li>Improved support for handling samples with few events.</li>
-<li>Updated <code>gate_draw</code>, <code>gate_edit</code> and <code>gate_remove</code> to allow easier switching between these functions. Users can now replace <code>draw</code> in their <code>gate_draw</code> code with <code>edit</code> or <code>remove</code> to modify drawn gates without any additional code.</li>
-<li>Supplying an empty character string to the <code>alias</code> argument of <code>cyto_plot</code> (e.g. alias = "") will automatically plot all gates constructed in the supplied channels. This way users don’t have to specify each gate by name.</li>
-<li>Added support for spillover matrices has been added through <code>spillover_spread_compute</code> which utilises a similar API to <code>spillover_compute</code>.</li>
-<li>Modified colour scheme in <code>spillover_edit</code> to improve visibility.</li>
-<li>Improved layout for <code>cyto_plot_gating_scheme</code> when there isn’t a <code>legend</code>.</li>
-<li>Updated <code>cyto_plot</code> to allow plotting of all 2-D gate objects in a single dimension. The minimum and maximum gate co-ordinates in the supplied channel will be used to construct a 1-D rectangleGate for plotting.</li>
-<li>Labels are now adjusted to prevent overlap in <code>cyto_plot_label</code> and <code>cyto_plot</code> when multiple gates are supplied.</li>
-<li>
-<code>gate_draw</code> now restricts large flowSet or GatingSet objects to 20 random samples to improve processing speed.</li>
-<li>New function <code>cyto_plot_save</code> provides a simpler method for saving high resolution images. <code>cyto_plot_save</code> should be called prior to plotting.</li>
-<li>
-<code>gate_rename</code> provides an easy way to update gate names in the GatingHierarchy/GatingSet and associated gatingTemplate.</li>
-<li><p><code>cyto_stats_compute</code> has been completely revamped to improve speed and to return tidyverse-friendly tibbles in either wide or long formats.</p></li>
-<li>cyto_plot 1D - center legend, return smoothing functionality, no longer require modal normalisation for overlays, now adds empty space for samples with missing data (NaN%), fix behavior of titles when overlays are present.</li>
-<li><p>interactively position labels :)</p></li>
-</ul>
-</div>
-    <div id="cytorsuite-099" class="section level1">
-<h1 class="page-header">
-<a href="#cytorsuite-099" class="anchor"></a>CytoRSuite 0.9.9</h1>
-<ul>
-<li>
-<code>cyto_plot_label</code> now accepts stat <code>freq</code> instead of <code>percent</code> for consistency with <code>cyto_stats_compute</code>.</li>
-<li>
-<code>density_layers</code> argument for <code>cyto_plot</code> is now operational. This argument designates the number of layers to include per plot for stacked density distributions.</li>
-<li>
-<code>cyto_markers</code> has been updated to allow editing of channel names as well.</li>
-<li>
-<code>cyto_stats_compute</code> now calculates the robust CV for stat = “CV”.</li>
-<li>New function <code>gatingTemplate_edit</code> to facilitate interactive editing of the gatingTemplate. The feature is designed for adding boolean, reference or automated gates to existing gatingTemplates.</li>
-<li>Improved support for editing gates constructed with multiple grouping variables using <code>gate_edit</code>.</li>
-<li>
-<code>cyto_annotate</code> to save pData information to a csv file (“Experiment-Details.csv”) for future use.</li>
-<li>
-<code>cyto_annotate</code> can now accept a csv file containing experiment details instead of manually re-entering this information.</li>
-<li>
-<code>cyto_markers</code> updated to save markers to csv file (“Experiment-Markers.csv”) for future use.</li>
-<li>Added Contributors Code of Conduct.</li>
-<li>New ‘Manual &amp; Automated Gating’ vignette.</li>
-</ul>
-</div>
-    <div id="cytorsuite-098" class="section level1">
-<h1 class="page-header">
-<a href="#cytorsuite-098" class="anchor"></a>CytoRSuite 0.9.8</h1>
-<ul>
-<li>Completely updated CytoRSuite to comply with rOpenSci naming requirements.</li>
-<li>Users can now draw gates per sample or group using <code>group_by</code> in <code>gate_draw</code>. To facilitate this change major changes were made to the way the gatingTemplate is handled and manipulated in the package. Users of 0.9.5 should use <code>gatingTemplate_convert</code> to convert their old gatingTemplates to this new format.</li>
-<li>Full support for back-gating is now supported in <code>cyto_plot</code> and <code>cyto_plot_gating_scheme</code> through <code>overlay</code> and <code>back_gate</code> arguments.</li>
-<li>New gate tracking feature added to <code>cyto_plot_gating_scheme</code> to colour gates and plot borders based on population.</li>
-<li>
-<code>spillover_edit</code> has been updated to include density histograms with statistics for unstained and stained controls. Statistics automatically update as spillover matrix is edited.</li>
-<li>
-<code>cyto_plot_compensation</code> is now incorporated directly into <code>spillover_edit</code> in the plots tab.</li>
-<li>
-<code>cyto_markers</code> provides an interactive editable table to assign marker names to channels.</li>
-<li>
-<code>cyto_annotate</code> provides an interactive editable table to annotate samples with experimental details.</li>
-<li>New <code>cyto_plot</code> functions have been added to layer overlays (<code>cyto_plot_overlay</code>), gates (<code>cyto_plot_gate</code>), labels (<code>cyto_plot_label</code>) or contour lines (<code>cyto_plot_contour</code>) onto existing plots.</li>
-<li>Many more changes to improve the stability of the package. Refer to the documentation for additional changes.</li>
-</ul>
-</div>
-    <div id="cytorsuite-095" class="section level1">
-<h1 class="page-header">
-<a href="#cytorsuite-095" class="anchor"></a>CytoRSuite 0.9.5</h1>
+<a href="#cytoexplorer-100" class="anchor"></a>CytoExploreR 1.0.0</h1>
 <ul>
 <li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
 </ul>
@@ -199,10 +156,7 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-        <li><a href="#cytorsuite-100">1.0.0</a></li>
-        <li><a href="#cytorsuite-099">0.9.9</a></li>
-        <li><a href="#cytorsuite-098">0.9.8</a></li>
-        <li><a href="#cytorsuite-095">0.9.5</a></li>
+        <li><a href="#cytoexplorer-100">1.0.0</a></li>
       </ul>
     </div>
   </div>
