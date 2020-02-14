@@ -168,7 +168,7 @@ knitr::include_graphics('Compensation/Compensation-14.png')
 
 <div style="line-height: 1.8em;"> To load the samples directly into a GatingSet and annotate them with experimental details, we use `cyto_setup`. This function will open inteactive table editors to allow entry of experimenta markers and experiment details. For the purpose of demonstration, the details of this experiment have already been added. </div>
 
-```{r, eval = TRUE, echo = FALSE, message = FALSE, warn = FALSE}
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
 library(CytoExploreR)
 library(CytoExploreRData)
 
@@ -455,7 +455,7 @@ knitr::include_graphics('CytoExploreR/CytoExploreR-11.png')
 
 <div style="line-height: 1.8em;"> At the end of any analysis pipeline, we want to export population-level statistics for reporting. This is easily acheived using `cyto_stats_compute` which will compute the desired statistics for the specified populations and return a tidyverse friendly output that retains all the experiment details. This makes it easy to plot the exported statistics using other R packages, such as ggplot2. </div>
 
-```{r, eval = TRUE, warn = FALSE}
+```{r, eval = TRUE, warning = FALSE}
 # Compute medFI - exclude unstained control
 cyto_stats_compute(gs[1:32],
                    alias = c("CD69+ CD4 T Cells",
