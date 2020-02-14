@@ -9,7 +9,7 @@
 
 # Gates are applied to flowFrame prior to statistics computation.
 
-# COUNT ------------------------------------------------------------------------
+## COUNT -----------------------------------------------------------------------
 
 #' Calculate Number of Events
 #' 
@@ -21,6 +21,7 @@
 #'
 #' @importFrom flowCore Subset
 #' @importFrom tibble tibble
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
@@ -29,15 +30,15 @@
                         gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
@@ -57,7 +58,7 @@
   
 }
 
-# FREQUENCY --------------------------------------------------------------------
+## FREQUENCY -------------------------------------------------------------------
 
 #' Calculate frequency of gated population
 #'
@@ -69,6 +70,7 @@
 #'
 #' @importFrom flowCore Subset
 #' @importFrom tibble tibble
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -77,7 +79,7 @@
                        gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -88,16 +90,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -118,7 +120,7 @@
 }
 
 
-# MEAN -------------------------------------------------------------------------
+## MEAN ------------------------------------------------------------------------
 
 #' Calculate Arithmetic Mean Fluorescent Intensity
 #'
@@ -135,6 +137,7 @@
 #'
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -145,7 +148,7 @@
                        gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -164,16 +167,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -187,7 +190,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
+    x <- cyto_transform(cyto_copy(x), 
+                        trans = trans, 
+                        inverse = TRUE, 
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate mean directly - colMeans for speed
@@ -202,7 +208,7 @@
   
 }
 
-# GEOMETRIC MEAN ---------------------------------------------------------------
+## GEOMETRIC MEAN --------------------------------------------------------------
 
 #' Calculate Geometric Mean Fluorescent Intensity
 #'
@@ -220,6 +226,7 @@
 #'
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -230,7 +237,7 @@
                                  gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
 
@@ -239,16 +246,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -315,7 +322,7 @@
   
 }
 
-# MEDIAN -----------------------------------------------------------------------
+## MEDIAN ----------------------------------------------------------------------
 
 #' Calculate Median Fluorescent Intensity
 #'
@@ -333,6 +340,7 @@
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' @importFrom robustbase colMedians
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -343,7 +351,7 @@
                         gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -362,21 +370,20 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
   }
-  
   
   # Gate flowFrame
   if(!.all_na(gate)){
@@ -385,10 +392,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x,
+    x <- cyto_transform(cyto_copy(x),
                         trans = trans,
                         inverse = TRUE, 
-                         plot = FALSE)
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate median directly - colMedians for speed
@@ -403,7 +410,7 @@
   
 }
 
-# MODE -------------------------------------------------------------------------
+## MODE ------------------------------------------------------------------------
 
 #' Calculate Mode Fluorescent Intensity
 #'
@@ -423,6 +430,7 @@
 #'
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
+#' @importFrom methods is
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -434,7 +442,7 @@
                        density_smooth = 0.6){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -453,16 +461,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -475,7 +483,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
+    x <- cyto_transform(cyto_copy(x), 
+                        trans = trans, 
+                        inverse = TRUE, 
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate mode directly
@@ -496,7 +507,7 @@
   
 }
 
-# COEFFICIENT OF VARIATION -----------------------------------------------------
+## COEFFICIENT OF VARIATION ----------------------------------------------------
 
 #' Calculate Robust Coefficient of Variation
 #'
@@ -515,6 +526,7 @@
 #' @importFrom flowCore exprs Subset
 #' @importFrom tibble as_tibble
 #' @importFrom robustbase colMedians
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -525,7 +537,7 @@
                     gate = NA){
   
   # Throw error for invalid object
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' should be a flowFrame object.")
   }
   
@@ -544,16 +556,16 @@
   
   # Only single gate objects are supported - calculate stats separately
   if(!.all_na(gate)){
-    if(!any(c(inherits(gate, "rectangleGate"),
-              inherits(gate, "polygonGate"),
-              inherits(gate, "ellipsoidGate")))){
+    if(!any(c(is(gate, "rectangleGate"),
+              is(gate, "polygonGate"),
+              is(gate, "ellipsoidGate")))){
       stop(
         paste("Only rectangleGate, polygonGate and ellipsoidGate objects are",
               "supported.")
       )
     }else{
       # Gating with rectangleGate objects is slow ...
-      if(inherits(gate, "rectangleGate")){
+      if(is(gate, "rectangleGate")){
         gate <- as(gate, "polygonGate")
       }
     }
@@ -567,7 +579,10 @@
   
   # Get raw data
   if(!.all_na(trans)){
-    x <- cyto_transform(x, trans = trans, inverse = TRUE, plot = FALSE)
+    x <- cyto_transform(cyto_copy(x), 
+                        trans = trans, 
+                        inverse = TRUE, 
+                        plot = FALSE)
   }
   
   # Extract raw data and calculate CV directly
@@ -587,7 +602,7 @@
   
 }
 
-# DENSITY ----------------------------------------------------------------------
+## DENSITY ---------------------------------------------------------------------
 
 #' Calculate Kernel Density
 #'
@@ -647,6 +662,7 @@
 
 #' Save y range to each layer
 #' Easy to get ylim & label y co-ordinates
+#' @importFrom stats bw.nrd0
 #' @noRd
 .cyto_density.list <- function(x,
                                channel = NULL,
@@ -761,7 +777,7 @@
   
 }
 
-# DENSITY RANGES ---------------------------------------------------------------
+## DENSITY RANGES --------------------------------------------------------------
 
 #' Calculate range of density objects
 #' 
@@ -792,17 +808,18 @@
   return(rng)
 }
 
-# RANGE ------------------------------------------------------------------------
+## RANGE -----------------------------------------------------------------------
 
 #' Calculate combined range of cytometry objects
 #'
 #' The lower limit is always set to zero unless there is data below this limit.
-#' The upper limit is determined by the limits argument.
+#' The upper limit is determined by the axes_limits argument.
 #'
 #' @param x cytometry object(s) which require range calculation.
 #' @param parent name of parent population to extract for range calculation.
 #' @param channels name(s) of channel(s).
-#' @param limits either "data" or "machine".
+#' @param axes_limits either "auto", "data" or "machine". "auto" use data limits but
+#'   always includes zero.
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
 #' @param buffer fraction indcating the amount of buffering to be added on top
@@ -813,7 +830,6 @@
 #' @return vector containing minimum and maximum values.
 #'
 #' @importFrom flowCore flowSet fsApply
-#' @importFrom flowWorkspace getData
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -825,27 +841,27 @@
 #' @noRd
 .cyto_range.flowFrame <- function(x, 
                                   channels = NA,
-                                  limits = "machine",
+                                  axes_limits = "auto",
                                   plot = FALSE,
                                   buffer = 0.03,
                                   anchor = TRUE,
                                   ...){
   
   # flowCore compatibility
-  if(limits == "instrument"){
-    limits <- "machine"
+  if(axes_limits == "instrument"){
+    axes_limits <- "machine"
   }
   
   # Convert markers to channels
   if(!.all_na(channels)){
     channels <- cyto_channels_extract(x, channels, plot)
   }else{
-    channels <- BiocGenerics::colnames(x)
+    channels <- cyto_channels(x)
   }
   
   # Time parameter always uses data limits
   if("Time" %in% channels){
-    limits <- "data"
+    axes_limits <- "data"
   } 
   
   # Lower bound - use data limits
@@ -854,19 +870,19 @@
   )
   
   # Upper bound
-  if(limits == "data"){
+  if(axes_limits %in% c("auto", "data")){
     mx <- suppressWarnings(
       range(x, type = "data")[, channels, drop = FALSE][2,]
     )
-  }else if(limits == "machine"){
+  }else if(axes_limits == "machine"){
     mx <- suppressWarnings(
       range(x, type = "instrument")[, channels, drop = FALSE][2,]
     )
   }
   rng[2,] <- mx
   
-  # Replace lower data limit if > 0
-  if(anchor == TRUE){
+  # Replace lower data limit if > 0 - AUTO
+  if(axes_limits != "data" & anchor == TRUE){
     if(any(rng[1,] > 0)){
       rng[1, rng[1,] > 0] <- 0
     }
@@ -890,7 +906,7 @@
 #' @noRd
 .cyto_range.flowSet <- function(x,
                                 channels = NA,
-                                limits = "machine",
+                                axes_limits = "machine",
                                 plot = FALSE,
                                 buffer = 0.03,
                                 anchor = TRUE, ...){
@@ -899,7 +915,7 @@
   rng <- fsApply(x, function(z){
     .cyto_range(z,
                 channels = channels,
-                limits = limits,
+                axes_limits = axes_limits,
                 plot = plot,
                 buffer = buffer,
                 anchor = anchor)
@@ -925,7 +941,7 @@
 .cyto_range.GatingHierarchy <- function(x, 
                                         parent,
                                         channels = NA,
-                                        limits = "machine",
+                                        axes_limits = "machine",
                                         plot = FALSE,
                                         buffer = 0.03,
                                         anchor = TRUE, ...){
@@ -936,7 +952,7 @@
   # Make call to flowFrame method
   rng <- .cyto_range(x,
                      channels = channels,
-                     limits = limits,
+                     axes_limits = axes_limits,
                      plot = plot,
                      buffer = buffer,
                      anchor = anchor)
@@ -949,7 +965,7 @@
 .cyto_range.GatingSet <- function(x,
                                   parent,
                                   channels = NA,
-                                  limits = "machine",
+                                  axes_limits = "machine",
                                   plot = FALSE,
                                   buffer = 0.03,
                                   anchor = TRUE, ...){
@@ -960,7 +976,7 @@
   # Make call to flowSet method
   rng <- .cyto_range(x,
                      channels = channels,
-                     limits = limits,
+                     axes_limits = axes_limits,
                      plot = plot,
                      buffer = buffer,
                      anchor = anchor)
@@ -973,7 +989,7 @@
 .cyto_range.list <- function(x,
                              parent,
                              channels = NA,
-                             limits = "machine",
+                             axes_limits = "machine",
                              plot = FALSE,
                              buffer = 0.04,
                              anchor = TRUE){
@@ -983,7 +999,7 @@
     .cyto_range(z,
                 parent = parent,
                 channels = channels,
-                limits = limits,
+                axes_limits = axes_limits,
                 plot = plot,
                 buffer = buffer,
                 anchor = anchor)

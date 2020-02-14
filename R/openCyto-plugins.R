@@ -1,10 +1,13 @@
+## CYTO_GATE_DRAW --------------------------------------------------------------
+
 #' Manual Gate Drawing Plugin for openCyto
 #'
 #' \code{gate_manual} if a wrapper for gate_draw which allows the user to manual
 #' draw gates using the \code{openCyto} gating pipeline. This plugin lacks the
 #' ability to save drawn gates to the gatingTemplate, this feature is however
-#' included in /code{gate_draw} which invisibly returns these gatingTemplate
-#' entries but operates independently of the openCyto gating pipeline.
+#' included in \code{cyto_gate_draw} which invisibly returns these
+#' gatingTemplate entries but operates independently of the openCyto gating
+#' pipeline.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for gating.
@@ -20,34 +23,33 @@
 #'
 #' @importFrom openCyto registerPlugins
 #'
-#' @seealso \code{\link{cyto_plot,flowFrame-method}}
+#' @seealso \code{\link{cyto_plot}}
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' fs <- Activation # load in .fcs files
-#' 
+#'
 #' gs <- GatingSet(fs) # add flowSet to GatingSet
-#' 
+#'
 #' template <- add_pop(
 #'   gs,
 #'   alias = "Lymphocytes", pop = "+", parent = "root",
-#'   dims = "FSC-A,SSC-A", gating_method = "gate_manual",
+#'   dims = "FSC-A,SSC-A", gating_method = "cyto_gate_manual",
 #'   gating_args = "display=0.5,alias='Lymphocytes',type='ellipse'",
 #'   collapseDataForGating = TRUE, groupBy = 2
 #' )
-#' 
+#'
 #' # gating window will open to construct gate left click vertices on plot
-#' # and close gate by right click and selecting "stop".
 #' cyto_plot(gs[[1]],
 #'   parent = "root",
 #'   alias = "Lymphocytes",
 #'   channels = c("FSC-A", "SSC-A")
 #' )
 #' }
-#' 
+#'
 #' @noRd
 .cyto_gate_manual <- function(fr,
                          pp_res,
@@ -55,21 +57,25 @@
                          alias, ...) {
 
   # Determine vertices of polygon using gate_draw
-  gates <- cyto_gate_draw(x = fr, channels = channels, alias = alias, ...)
+  gates <- cyto_gate_draw(x = fr, 
+                          channels = channels, 
+                          alias = alias, ...)
 
   return(gates)
 }
 
 #' Apply Manually Drawn Gates to GatingSet
 #'
-#' This \code{openCyto} plugin for \code{cyto_gate_draw} is required to extract gates
-#' stored in the gatingTemplate and appropraitely apply them to the GatingSet.
+#' This \code{openCyto} plugin for \code{cyto_gate_draw} is required to extract
+#' gates stored in the gatingTemplate and appropraitely apply them to the
+#' GatingSet.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for gating.
 #' @param pp_res output of preprocessing function.
 #' @param channels fluorescent channel(s) to use for gating.
-#' @param gate stored \code{cyto_gate_draw} gate in csv file for passing to openCyto.
+#' @param gate stored \code{cyto_gate_draw} gate in csv file for passing to
+#'   openCyto.
 #'
 #' @return pass saved gate to openCyto to apply to all samples.
 #'
@@ -115,7 +121,7 @@
 #'   numeric or vector of pData column names.
 #' @param isCollapse logical indicating when the data should be collapsed prior
 #'   to gating, not used.
-#' @param ... additional arguments (not used).
+#' @param ... not in use.
 #'
 #' @return index of gate to apply to samples.
 #'

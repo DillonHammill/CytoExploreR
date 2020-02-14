@@ -1,4 +1,4 @@
-# GATINGTEMPLATE SELECT ---------------------------------------------------------
+## GATINGTEMPLATE SELECT -------------------------------------------------------
 
 #' Select a gatingTemplate for downstream analyses
 #'
@@ -41,7 +41,7 @@ cyto_gatingTemplate_select <- function(x) {
   options("CytoExploreR_gatingTemplate" = x)
 }
 
-# GATINGTEMPLATE ACTIVE --------------------------------------------------------
+## GATINGTEMPLATE ACTIVE -------------------------------------------------------
 
 #' Active gatingTemplate
 #'
@@ -57,7 +57,7 @@ cyto_gatingTemplate_active <- function() {
   getOption("CytoExploreR_gatingTemplate")
 }
 
-# GATINGTEMPLATE CREATE --------------------------------------------------------
+## GATINGTEMPLATE CREATE -------------------------------------------------------
 
 #' Create an empty gatingTemplate csv file
 #'
@@ -99,7 +99,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
   }
 }
 
-# GATINGTEMPLATE EDIT ----------------------------------------------------------
+## GATINGTEMPLATE EDIT ---------------------------------------------------------
 
 #' Interactively Edit a gatingTemplate
 #'
@@ -120,10 +120,11 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #' @importFrom flowWorkspace recompute
 #' @importFrom utils edit read.csv write.csv
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuite)
+#' library(CytoExploreR)
 #'
 #' # gs is a GatingSet object
 #' cyto_gatingTemplate_edit(gs, "gatingTemplate.csv")
@@ -133,7 +134,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 
   # x of wrong class
-  if (!inherits(x, "GatingSet")) {
+  if (!is(x, "GatingSet")) {
     stop("'x' should be either a GatingSet object.")
   }
 
@@ -189,7 +190,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
   invisible(return(gt))
 }
 
-# GATINGTEMPLATE APPLY ---------------------------------------------------------
+## GATINGTEMPLATE_APPLY ---------------------------------------------------------
 
 #' Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet
 #'
@@ -209,10 +210,11 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -238,10 +240,10 @@ cyto_gatingTemplate_apply <- function(x,
     stop("Supply a GatingHierarchy or GatingSet to 'x'.")
   } else {
     if (!any(c(
-      inherits(x, "GatingSet"),
-      inherits(x, "gatinghierarchy")
+      is(x, "GatingSet"),
+      is(x, "GatingHierarchy")
     ))) {
-      stop("'x' must be an object of class GtaingHierarchy or GatingSet.")
+      stop("'x' must be an object of class GatingHierarchy or GatingSet.")
     }
   }
 
@@ -249,13 +251,16 @@ cyto_gatingTemplate_apply <- function(x,
   if (!is.null(gatingTemplate)) {
 
     # gatingTemplate object
-    if (inherits(gatingTemplate, "gatingTemplate")) {
+    if (is(gatingTemplate, "gatingTemplate")) {
 
       # Apply gatingTemplates to GatingSets only
-      if (!inherits(x, "GatingSet")) {
+      if (!is(x, "GatingSet")) {
         stop("gatingTemplates can only be applied to GatingSet objects.")
       }
 
+      # Assign gatingTemplate to gt
+      gt <- gatingTemplate
+      
       # name of gatingTemplate csv file
     } else {
 
@@ -311,11 +316,15 @@ cyto_gatingTemplate_apply <- function(x,
 
   # Apply gatingTemplate to GatingHierarchy/GatingSet
   suppressWarnings(gt_gating(gt, x, ...))
+  
+  # Return GatingSet
+  return(x)
+  
 }
 
-# GATINGTEMPLATE UPDATE -------------------------------------------------------
+## GATINGTEMPLATE UPDATE ------------------------------------------------------
 
-#' Convert CytoRSuite gatingTemplate to be compatible with  CytoExoloreR
+#' Convert CytoRSuite gatingTemplate to be compatible with CytoExoloreR
 #'
 #' @param gatingTemplate name of the gatingTemplate csv file to convert.
 #' @param save_as name for the updated gatingTemplate csv file, set to "Updated
@@ -332,20 +341,22 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
                                        save_as = "Updated-gatingTemplate.csv") {
 
   # READ IN GATINGTEMPLATE
-  gt <- read.csv(gatingTemplate, header = TRUE)
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE,
+                 stringsAsFactors = FALSE)
   
   # CONVERT OLD GATING METHOD
   gt[gt$gating_method == "gate_draw", "gating_method"] <- "cyto_gate_draw" 
   
   # CONVERT OLD PREPROCESSING  METHOD
-  gt[gt$preprocessing_method == "gate_draw",
+  gt[gt$preprocessing_method == "pp_gate_draw",
      "preprocessing_method"] <- "pp_cyto_gate_draw" 
 
   # SAVE UPDATED GATINGTEMPLATE
   write.csv(gt, save_as, row.names = FALSE)
 }
 
-# GATINGTEMPLATE CHECK ---------------------------------------------------------
+## GATINGTEMPLATE CHECK --------------------------------------------------------
 
 #' Check gatingTemplate for Existing Entry
 #'

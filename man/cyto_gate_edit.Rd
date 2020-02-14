@@ -4,10 +4,24 @@
 \alias{cyto_gate_edit}
 \title{Edit Existing Gate(s).}
 \usage{
-cyto_gate_edit(x, parent = NULL, alias = NULL, channels = NULL,
-  type = NULL, gatingTemplate = NULL, overlay = NA,
-  group_by = "all", select = NULL, negate = FALSE, display = 25000,
-  axis = "x", label = TRUE, ...)
+cyto_gate_edit(
+  x,
+  parent = NULL,
+  alias = NULL,
+  channels = NULL,
+  type = NULL,
+  gatingTemplate = NULL,
+  overlay = NA,
+  group_by = "all",
+  select = NULL,
+  negate = FALSE,
+  display = 25000,
+  axis = "x",
+  label = TRUE,
+  plot = TRUE,
+  axes_limits = "machine",
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{GatingSet}.}
@@ -43,7 +57,7 @@ prior to gating, set to the length of x by default to construct a single
 gate for all samples. If group_by is supplied a different gate will be
 constructed for each group.}
 
-\item{select}{vector containing the indicies of samples within gs to use for
+\item{select}{vector containing the indices of samples within gs to use for
 plotting.}
 
 \item{negate}{logical indicating whether a gatingTemplate entry should be
@@ -60,6 +74,15 @@ gated for 2-D interval gates.}
 \item{label}{logical indicating whether to include
 \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 default.}
+
+\item{plot}{logical indicating whether a plot should be drawn, set to
+\code{TRUE} by default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot.flowFrame}}.}
 }
@@ -79,18 +102,17 @@ fs <- Activation
 gs <- GatingSet(fs)
 
 # Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
 # Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Edit CD4 T Cells Gate - replace gatingTemplate name
-gate_edit(gs,
+cyto_gate_edit(gs,
   parent = "T Cells",
   alias = "CD4 T Cells",
   gatingTemplate = "gatingTemplate.csv"

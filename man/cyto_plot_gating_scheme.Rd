@@ -2,26 +2,58 @@
 % Please edit documentation in R/cyto_plot_gating_scheme.R
 \name{cyto_plot_gating_scheme}
 \alias{cyto_plot_gating_scheme}
-\alias{cyto_plot_gating_scheme.GatingHierarchy}
 \alias{cyto_plot_gating_scheme.GatingSet}
+\alias{cyto_plot_gating_scheme.GatingHierarchy}
 \title{Plot Cytometry Gating Strategies}
 \usage{
-\method{cyto_plot_gating_scheme}{GatingHierarchy}(x,
-  gatingTemplate = NULL, back_gate = FALSE, gate_track = FALSE,
-  show_all = FALSE, header, title, popup = FALSE, layout, point_col,
-  density_stack = 0.5, density_fill, gate_line_col,
-  border_line_col = NA, border_line_width, legend = TRUE, legend_text,
-  legend_text_size = 1.2, title_text_col = NA, label_text_size = 0.8,
-  ...)
+\method{cyto_plot_gating_scheme}{GatingSet}(
+  x,
+  gatingTemplate = NULL,
+  group_by = "name",
+  back_gate = FALSE,
+  gate_track = FALSE,
+  show_all = FALSE,
+  header,
+  popup = FALSE,
+  layout = NULL,
+  point_col = NA,
+  label_text_size = 0.8,
+  gate_line_col = "red",
+  legend = TRUE,
+  legend_text = NULL,
+  legend_text_size = 1.2,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  border_line_width = NULL,
+  border_line_col = "black",
+  title_text_col = "black",
+  ...
+)
 
-\method{cyto_plot_gating_scheme}{GatingSet}(x, gatingTemplate = NULL,
-  group_by, back_gate = FALSE, gate_track = FALSE, show_all = FALSE,
-  display = NULL, header = NA, title = NULL, popup = FALSE,
-  layout = NULL, point_col = NULL, density_stack = 0.5,
-  density_fill = NULL, gate_line_col = NULL, border_line_col = NULL,
-  border_line_width = NULL, legend = TRUE, legend_text = NULL,
-  legend_text_size = 1.2, title_text_col = NULL,
-  label_text_size = 0.8, ...)
+\method{cyto_plot_gating_scheme}{GatingHierarchy}(
+  x,
+  gatingTemplate = NULL,
+  back_gate = FALSE,
+  gate_track = FALSE,
+  show_all = FALSE,
+  header,
+  popup = FALSE,
+  layout,
+  point_col = NA,
+  label_text_size = 0.8,
+  gate_line_col = "red",
+  legend = TRUE,
+  legend_text,
+  legend_text_size = 1.2,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  border_line_width,
+  border_line_col = "black",
+  title_text_col = "black",
+  ...
+)
 }
 \arguments{
 \item{x}{object of class
@@ -31,6 +63,10 @@
 \item{gatingTemplate}{name of the gatingTemplate csv file used to gate
 \code{x}. If not supplied the gating scheme will be obtained directly from
 the GatingSet.}
+
+\item{group_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to plot each sample
+separately.}
 
 \item{back_gate}{names of the population(s) to back-gate, set to \code{FALSE}
 by default to turn off back-gating. To back-gate all populations set this
@@ -46,8 +82,6 @@ default.}
 \item{header}{character string to use as the header for the plot layout, set
 to "Gating Scheme" by default.}
 
-\item{title}{vector of titles to use above each plot.}
-
 \item{popup}{logical indicating whether the gating scheme should be plotted
 in a pop-up window, set to FALSE by default.}
 
@@ -58,21 +92,10 @@ for plotting \code{c(#rows, #columns)}.}
 red-blue colour scale. Control the colour of overlays by supplying multiple
 colours to this argument (e.g. c("blue","red")).}
 
-\item{density_stack}{numeric [0,1] indicating the degree of offset for 1-D
-density distributions with overlay, set to 0.5 by default.}
+\item{label_text_size}{numeric to control the size of text in the plot
+labels, set to 0.8 by default.}
 
-\item{density_fill}{fill colour for 1D density distributions. Control the
-colour of overlays by supplying multiple colours to this argument (e.g.
-c(NA,"red")).}
-
-\item{gate_line_col}{vector of colours to use for gates. Individual gate
-colours can only be controlled when \code{gate_track} is set to TRUE.}
-
-\item{border_line_col}{line colour for plot border, set to "black" by
-default.}
-
-\item{border_line_width}{line width for plot border, set to 3 when gate_track
-is TRUE.}
+\item{gate_line_col}{colour to use for gate borders, set to "red" by default.}
 
 \item{legend}{logical indicating whether a legend should be included when an
 overlay is supplied.}
@@ -83,10 +106,23 @@ overlay is supplied.}
 \item{legend_text_size}{character expansion for legend text, set to 1.2 by
 default.}
 
-\item{title_text_col}{colour for plot title.}
+\item{header_text_font}{numeric to control the font of the header, set to 2
+by default for bold font.}
 
-\item{label_text_size}{numeric to control the size of text in the plot
-labels, set to 0.8 by default.}
+\item{header_text_size}{numeric to control the size of the header text, set
+to 1 by default.}
+
+\item{header_text_col}{colour to use for header text, set to "black" by
+default.}
+
+\item{border_line_width}{line width for plot border, set to 3 when gate_track
+is TRUE.}
+
+\item{border_line_col}{line colour for plot border, set to "black" by
+default.}
+
+\item{title_text_col}{colour to use for title text, set to "black" by
+default.}
 
 \item{...}{extra arguments passed to \code{\link{cyto_plot}}.}
 }
@@ -96,22 +132,21 @@ and has full support for gate tracking and back-gating through
 \code{gate_track} and \code{back_gate}.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation
 gs <- GatingSet(fs)
 
 # Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
-# Gate using gate_draw
+# Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Gating scheme
 cyto_plot_gating_scheme(gs[[4]])
@@ -122,7 +157,7 @@ cyto_plot_gating_scheme(gs[[32]],
 )
 
 # Gate-tracking
-cyto_plot_gating_scheme(gs[1:4],
+cyto_plot_gating_scheme(gs[1:2],
   gate_track = TRUE
 )
 

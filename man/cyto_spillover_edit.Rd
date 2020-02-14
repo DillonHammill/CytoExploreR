@@ -6,16 +6,36 @@
 \alias{cyto_spillover_edit.flowSet}
 \title{Interactively Edit Spillover Matrices in Real-Time}
 \usage{
-\method{cyto_spillover_edit}{GatingSet}(x, parent = NULL,
-  channel_match = NULL, spillover = NULL, axes_trans = NULL,
-  display = 2000, point_size = 3, axes_text_size = 1.7,
-  axes_label_text_size = 2, title_text_size = 2,
-  header_text_size = 1.5, ...)
+\method{cyto_spillover_edit}{GatingSet}(
+  x,
+  parent = NULL,
+  channel_match = NULL,
+  spillover = NULL,
+  axes_trans = NULL,
+  axes_limits = "machine",
+  display = 2000,
+  point_size = 3,
+  axes_text_size = 1.7,
+  axes_label_text_size = 2,
+  title_text_size = 2,
+  header_text_size = 1.5,
+  ...
+)
 
-\method{cyto_spillover_edit}{flowSet}(x, channel_match = NULL,
-  spillover = NULL, axes_trans = NULL, display = 2000,
-  point_size = 3, axes_text_size = 1.7, axes_label_text_size = 2,
-  title_text_size = 2, header_text_size = 1.5, ...)
+\method{cyto_spillover_edit}{flowSet}(
+  x,
+  channel_match = NULL,
+  spillover = NULL,
+  axes_trans = NULL,
+  axes_limits = "machine",
+  display = 2000,
+  point_size = 3,
+  axes_text_size = 1.7,
+  axes_label_text_size = 2,
+  title_text_size = 2,
+  header_text_size = 1.5,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowSet} or \code{GatingSet}.}
@@ -35,10 +55,12 @@ in extraction of the spillover matrix directly from the supplied samples
 (i.e. edit the spillover matrix constructed on the cytometer).}
 
 \item{axes_trans}{an object of class \code{transformerList} containing
-transformers to used internally to transform the fluorescent channels of
-the samples for visualisation. \code{cyto_spillover_edit} expects
-un-transformed data and will automatically resort to using biexponential
-transformers internally if no transformers are supplied to this argument.}
+transformers to used to transform the fluorescent channels of
+the samples for visualisation.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges.}
 
 \item{display}{numeric passed to \code{cyto_plot} to control the number of
 events to be displayed in the plots, set to 2000 events by default.}
@@ -75,10 +97,8 @@ editing fluorescent spillover matrices.
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
 compensation controls and/or samples. It is recommended that samples be
 pre-gated based on FSC and SSC parameters to obtain a homogeneous population
-for calculation of fluorescent spillover. The data should not be transformed
-prior to using \code{cyto_spillover_edit} as transformations will be applied
-internally when required. Users can supply their own custom transformers to
-\code{axes_trans} or the default biexponential transformers will be used.
+for calculation of fluorescent spillover. The compensation controls should
+also be transformed prior to using \code{cyto_spillover_edit}.
 
 Users begin by selecting the unstained control and a stained control from
 dropdown menus of sample names. \code{cyto_spillover_edit} leverages

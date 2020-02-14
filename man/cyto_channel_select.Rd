@@ -19,6 +19,7 @@ vector of channels in order of compensation Control samples.
 Select Fluorescent Channel for Compensation Controls
 }
 \examples{
+\dontrun{
 library(CytoExploreRData)
 
 # Load in samples
@@ -26,6 +27,7 @@ fs <- Compensation
 
 # Select a channel for each control from dropdown menu
 cyto_channel_select(fs)
+}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

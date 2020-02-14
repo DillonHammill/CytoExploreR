@@ -30,15 +30,14 @@ fs <- Activation
 gs <- GatingSet(fs)
 
 # Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
 # Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # gatingTemplate
 gtfile <- system.file("extdata",
@@ -47,7 +46,7 @@ gtfile <- system.file("extdata",
 )
 
 # Extract T Cells gate
-gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
+cyto_gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
 
 # Reset CytoExploreR_wd_check to default
 options("CytoExploreR_wd_check" = TRUE)

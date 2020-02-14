@@ -8,22 +8,48 @@
 \usage{
 cyto_plot_point(x, ...)
 
-\method{cyto_plot_point}{flowFrame}(x, channels, overlay = NA,
-  display = 1, point_shape = ".", point_size = 2,
-  point_col_scale = NA, point_cols = NA, point_col = NA,
-  point_col_alpha = 1, contour_lines = 0, contour_line_type = 1,
-  contour_line_width = 1, contour_line_col = "black",
-  contour_line_alpha = 1, ...)
+\method{cyto_plot_point}{flowFrame}(
+  x,
+  channels,
+  overlay = NA,
+  display = 1,
+  point_shape = ".",
+  point_size = 2,
+  point_col_scale = NA,
+  point_cols = NA,
+  point_col = NA,
+  point_col_alpha = 1,
+  contour_lines = 0,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1,
+  ...
+)
 
-\method{cyto_plot_point}{list}(x, channels, display = 1,
-  point_shape = ".", point_size = 2, point_col_scale = NA,
-  point_cols = NA, point_col = NA, point_col_alpha = 1,
-  contour_lines = 0, contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1, ...)
+\method{cyto_plot_point}{list}(
+  x,
+  channels,
+  display = 1,
+  point_shape = ".",
+  point_size = 2,
+  point_col_scale = NA,
+  point_cols = NA,
+  point_col = NA,
+  point_col_alpha = 1,
+  contour_lines = 0,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or a list of \code{flowFrame}
 onjects.}
+
+\item{...}{not in use.}
 
 \item{channels}{names of the channels used to construct the plot.}
 

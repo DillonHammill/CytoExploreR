@@ -24,20 +24,19 @@ fs <- Activation
 gs <- GatingSet(fs)
 
 # Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
 # Gate using cyto_gate_draw
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Get gate type used for T Cells gate
-gate_type(getGate(gs, "Cells")[[1]])
-gate_type(getGate(gs, "T Cells")[[1]])
-gate_type(getGate(gs, "CD69+ CD4 T Cells")[[1]])
+cyto_gate_type(gs_pop_get_gate(gs, "Cells")[[1]])
+cyto_gate_type(gs_pop_get_gate(gs, "T Cells")[[1]])
+cyto_gate_type(gs_pop_get_gate(gs, "CD69+ CD4 T Cells")[[1]])
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

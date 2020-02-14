@@ -23,7 +23,7 @@ Extract Transformations from TransformerList
 }
 \examples{
 
-# Load CytoExploreRData to acess data
+# Load CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Load in samples to flowSet
@@ -38,7 +38,6 @@ trans_list <- cyto_transform_extract(trans)
 
 # Convert transformerList into inverse transformList
 inv <- cyto_transform_extract(trans, inverse = TRUE)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

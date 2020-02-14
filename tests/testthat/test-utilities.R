@@ -43,7 +43,7 @@ test_that("args_list", {
 
 test_that("file_wd_check", {
   
-  expect_true(file_wd_check("Activation-gatingTemplate.csv"))
+  expect_true(file_wd_check("Reference-Activation-gatingTemplate.csv"))
   expect_false(file_wd_check("Test.csv"))
   
 })

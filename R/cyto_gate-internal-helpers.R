@@ -1,8 +1,8 @@
-# CYTO_GATE INTERNAL HELPERS
+## CYTO_GATE INTERNAL HELPERS --------------------------------------------------
 
 # A coolection of internal functions to compute gate centers and counts.
 
-# .CYTO_GATE_CENTER -------------------------------------------------------
+## .CYTO_GATE_CENTER -----------------------------------------------------------
 
 #' Compute gate centers
 #'
@@ -16,6 +16,7 @@
 #'
 #' @importFrom graphics par
 #' @importFrom flowCore rectangleGate
+#' @importFrom methods is
 #'
 #' @noRd
 .cyto_gate_center <- function(x, ...) {
@@ -188,7 +189,7 @@
         }
         # Inf
         if(coords[is.infinite(coords)] > 0){
-          coords[is.inifinte(coords)] <- xmax
+          coords[is.infinite(coords)] <- xmax
         }
       }
       text_x <- sum(coords) / length(coords)
@@ -227,7 +228,7 @@
         }
         # Inf
         if(coords[is.infinite(coords)] > 0){
-          coords[is.inifinte(coords)] <- ymax
+          coords[is.infinite(coords)] <- ymax
         }
       }
       text_y <- sum(coords) / length(coords)
@@ -510,13 +511,15 @@
   return(text_xy)
 }
 
-# .CYTO_GATE_COUNT -------------------------------------------------------------
+## .CYTO_GATE_COUNT ------------------------------------------------------------
 
 #' Compute number of gated populations
 #'
 #' @param gate list of gate objects.
 #' @param negate logical indicating if the negated population should be
 #'   included.
+#'
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -554,75 +557,81 @@
   
 }
 
-# .CYTO_GATE_QUAD_CONVERT ------------------------------------------------------
+## .CYTO_GATE_QUAD_CONVERT -----------------------------------------------------
 
 
 #' Convert between quadGate to rectangleGates 
 #' @return list of rectangleGates or a quadGate.
-#' @importFrom flowCore rectangleGate quadGate
+#' @importFrom flowCore rectangleGate quadGate parameters
+#' @importFrom methods is
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
 .cyto_gate_quad_convert <- function(gate,
                                     channels) {
   
   # RECTANGLEGATES SUPPLIED
-  if(class(gate) == "list") {
+  if(is(gate)[1] == "list") {
     # LIST OF RECTANGLEGATES
-    if(all(LAPPLY(gate, function(z){is(z, "rectangleGate")}))){
-    # FILTERID
-    FILTERID <- lapply(gate, function(z){z@filterId})
-    FILTERID <- paste(FILTERID, collapse = "|")
-    # EXTRACT SELECTED CO-ORDINATE
-    xcoords <- c(gate[[1]][channels[1]]@min, gate[[1]][channels[1]]@max)
-    xcoord <- xcoords[is.finite(xcoords)]
-    ycoords <- c(gate[[1]][channels[2]]@min, gate[[1]][channels[2]]@max)
-    ycoord <- ycoords[is.finite(ycoords)]
-    coords <- c(xcoord, ycoord)
-    # CONSTRUCT QUADGATE COORDS
-    coords <- matrix(coords, nrow = 1, ncol = 2)
-    colnames(coords) <- channels
-    # QUADGATE
-    return(quadGate(.gate = coords, filterId = FILTERID))
+    if(all(LAPPLY(gate, function(z){
+      is(z, "rectangleGate")
+    }))){
+      # ORDER QUADRANTS - GATINGSET EXTRACTED GATES
+      if(all(LAPPLY(gate, function(z){
+        any(grepl("quad", names(attributes(z))))
+      }))){
+        # QUADRANTS
+        quads <- names(attributes(gate[[1]])[["quadrants"]])
+      }else{
+        quads <- LAPPLY(gate, function(z){
+          z@filterId
+        })
+      }
+      # CHANNELS
+      chans <- as.character(parameters(gate[[1]]))
+      # CO-ORDINATES
+      coords <- .cyto_gate_coords(gate, channels = chans)
+      coords <- LAPPLY(chans, function(z){
+        unique(coords[, z][is.finite(coords[, z])])
+      })
+      names(coords) <- chans
+      # QUADGATE
+      qg <- quadGate(filterId = paste(quads, collapse = "|"),
+                     .gate = coords)
+      return(qg)
     }
-    
-  }else{
+  }else if(is(gate, "quadGate")){
     # INPUT CO-ORDINATE
     xcoord <- gate@boundary[1]
     ycoord <- gate@boundary[2]
-    
     # ALIAS
     alias <- unlist(strsplit(gate@filterId, "|"))
     alias <- alias[alias != "|"]
     if(length(alias) != 4){
       alias <- c("Q1", "Q2", "Q3","Q4")
     }
-  
     # TOP LEFT
     coords <- list(c(-Inf, xcoord), c(ycoord, Inf))
     names(coords) <- channels
     Q1 <- rectangleGate(coords, filterId = alias[1])
-  
     # TOP RIGHT
     coords <- list(c(xcoord, Inf), c(ycoord, Inf))
     names(coords) <- channels
     Q2 <- rectangleGate(coords, filterId = alias[2])
-  
     # BOTTOM RIGHT
     coords <- list(c(xcoord, Inf), c(-Inf, ycoord))
     names(coords) <- channels
     Q3 <- rectangleGate(coords, filterId = alias[3])
-  
     # BOTTOM LEFT
     coords <- list(c(-Inf, xcoord), c(-Inf, ycoord))
     names(coords) <- channels
     Q4 <- rectangleGate(coords, filterId = alias[4])
-    
-    return(list(Q1, Q2, Q3, Q4))
+    Q <- list(Q1, Q2, Q3, Q4)
+    names(Q) <- alias
+    return(Q)
   }
-  
 }
 
-# .CYTO_GATE_COORDS ------------------------------------------------------------
+## .CYTO_GATE_COORDS -----------------------------------------------------------
 
 #' Extract gate co-ordinates from a list of gate objects
 #' 
@@ -630,7 +639,7 @@
 #' @param channels vector of channel names used to construct the plot.
 #' 
 #' @importFrom flowCore parameters
-#' @importFrom methods as
+#' @importFrom methods as is
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
@@ -653,11 +662,12 @@
         y <- as(y, "polygonGate")
         coords <- as.numeric(y@boundaries[, z])
       }else if(is(y, "quadGate")){
-        coords <- as.numeric(y@boundary)
+        coords <- as.numeric(y@boundary[z])
       }
+      return(coords)
     })
   })
-
+  
   # COORD MATRIX
   if(length(channels) == 1){
     coords <- matrix(coords[[1]], ncol = 1)

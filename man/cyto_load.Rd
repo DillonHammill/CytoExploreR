@@ -4,23 +4,49 @@
 \alias{cyto_load}
 \title{Load .fcs files into ncdfFlowSet}
 \usage{
-cyto_load(path = ".", ...)
+cyto_load(
+  path = ".",
+  select = NULL,
+  exclude = NULL,
+  sort = TRUE,
+  barcode = FALSE,
+  restrict = FALSE,
+  ...
+)
 }
 \arguments{
-\item{path}{points to the location of the .fcs files to read in (e.g. name of
-folder in current working directory).}
+\item{path}{points to the location of the .fcs files to read in. Preferably
+the name of folder in current working directory.}
 
-\item{...}{additional arguments passed to read.ncdfFlowSet.}
+\item{select}{vector of file names to select when loading files, set to NULL
+be default to select all files in the specified directory.}
+
+\item{exclude}{vector of file names to exclude when loading files, set to
+NULL by default to load all files in the specified directory.}
+
+\item{sort}{logical indicating whether attempts should be made to sort the
+files by name prior to loading, set to \code{TRUE} by default.}
+
+\item{barcode}{logical indicating whether the flowFrames should be barcoded
+using \code{cyto_barcode}, set to FALSE by default.}
+
+\item{restrict}{logical indicating whether unassigned channels should be
+dropped from the returned cytoset, set to FALSE by default. See
+\code{\link{cyto_channels_restrict}}.}
+
+\item{...}{additional arguments passed to \code{load_cytoset_from_fcs}.}
 }
 \value{
-object of class
-  \code{\link[ncdfFlow:ncdfFlowSet-class]{ncdfFlowSet}}.
+object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \description{
 \code{cyto_load} is a convenient wrapper around
 \code{\link[base:list.files]{list.files}} and
-\code{\link[ncdfFlow:read.ncdfFlowSet]{read.ncdfFlowSet}} which makes it easy
-to load .fcs files into a ncdfFlowSet.
+\code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}
+which makes it easy to load .fcs files into a cytoset. \code{cyto_load} is
+also a wrapper around \code{\link[flowWorkspace:save_gs]{load_gs}} to load
+saved GatingSet objects.
 }
 \examples{
 
@@ -31,12 +57,11 @@ library(CytoExploreRData)
 datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
-# Load in .fcs files into ncdfFlowSet
-fs <- cyto_load(path)
+# Load in .fcs files into cytoset
+cs <- cyto_load(path)
 
-# fs is a ncdfFlowSet
-class(fs)
-
+# cs is a cytoset
+class(cs)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

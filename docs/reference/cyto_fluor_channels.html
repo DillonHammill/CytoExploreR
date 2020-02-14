@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extract Fluorescent Channels — cyto_fluor_channels • CytoRSuite</title>
+<title>Extract Fluorescent Channels — cyto_fluor_channels • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -15,21 +15,25 @@
 <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png" />
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png" />
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -37,12 +41,12 @@
 
 
 
+
 <meta property="og:title" content="Extract Fluorescent Channels — cyto_fluor_channels" />
-
 <meta property="og:description" content="Extract Fluorescent Channels" />
-
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -54,6 +58,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
 
 
   </head>
@@ -71,7 +76,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">CytoRSuite</a>
+        <a class="navbar-link" href="../index.html">CytoExploreR</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
@@ -80,12 +85,12 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/CytoRSuite.html">Get started</a>
+  <a href="../articles/CytoExploreR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -98,19 +103,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/CytoRSuite-Compensation.html">CytoRSuite: Compensation of Fluorescent Spillover</a>
+      <a href="../articles/CytoExploreR-Compensation.html">Compensation of Fluorescent Spillover</a>
     </li>
     <li>
-      <a href="../articles/CytoRSuite-Gate-Manipulation.html">CytoRSuite: Gate Manipulation</a>
+      <a href="../articles/CytoExploreR-Manual-Gating.html">Manual Gating</a>
     </li>
     <li>
-      <a href="../articles/CytoRSuite-Gating-Functions.html">CytoRSuite: Gating Functions</a>
+      <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoRSuite-Manual-Automated-Gating.html">CytoRSuite: Manual and Automated Gating</a>
-    </li>
-    <li>
-      <a href="../articles/CytoRSuite-Visualisation.html">CytoRSuite: Visualisation Using cyto_plot</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -118,11 +120,10 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/DillonHammill/CytoRSuite">
-    <span class="fa fa-github fa-lg"></span>
+  <a href="https://github.com/DillonHammill/CytoExploreR">
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -133,55 +134,78 @@
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Extract Fluorescent Channels</h1>
-    <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoRSuite/blob/master/R/helper-functions.R'><code>R/helper-functions.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_channels-helpers.R'><code>R/cyto_channels-helpers.R</code></a></small>
     <div class="hidden name"><code>cyto_fluor_channels.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    
     <p>Extract Fluorescent Channels</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>cyto_fluor_channels</span>(<span class='no'>x</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code><a href='https://www.rdocumentation.org/packages/flowCore/topics/flowFrame-class'>flowFrame</a></code>,
-<code><a href='https://www.rdocumentation.org/packages/flowCore/topics/flowSet-class'>flowSet</a></code> or
-<code><a href='https://www.rdocumentation.org/packages/flowWorkspace/topics/GatingSet-class'>GatingSet</a></code>.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
+<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     </table>
-    
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='cyto_fluor_channels-flowFrame-method.html'>cyto_fluor_channels,flowFrame-method</a></code></p>
-<p><code><a href='cyto_fluor_channels-flowSet-method.html'>cyto_fluor_channels,flowSet-method</a></code></p>
-<p><code><a href='cyto_fluor_channels-GatingSet-method.html'>cyto_fluor_channels,GatingSet-method</a></code></p></div>
-    
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+
+<span class='co'># Load in samples</span>
+<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+
+<span class='co'># Add samples to GatingSet</span>
+<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+
+<span class='co'># Fluorescent channels of flowFrame</span>
+<span class='fu'>cyto_fluor_channels</span>(<span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]])</div><div class='output co'>#&gt;  [1] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
+#&gt;  [4] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
+#&gt;  [7] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
+#&gt; [10] "Alexa Fluor 700-A" "APC-Cy7-A"        </div><div class='input'>
+<span class='co'># Fluorescent channels for a flowSet</span>
+<span class='fu'>cyto_fluor_channels</span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt;  [1] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
+#&gt;  [4] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
+#&gt;  [7] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
+#&gt; [10] "Alexa Fluor 700-A" "APC-Cy7-A"        </div><div class='input'>
+<span class='co'># Fluorescent channels for GatingHierarchy</span>
+<span class='fu'>cyto_fluor_channels</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>1</span>]])</div><div class='output co'>#&gt;  [1] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
+#&gt;  [4] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
+#&gt;  [7] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
+#&gt; [10] "Alexa Fluor 700-A" "APC-Cy7-A"        </div><div class='input'>
+<span class='co'># Fluorescent channels for GatingSet</span>
+<span class='fu'>cyto_fluor_channels</span>(<span class='no'>gs</span>)</div><div class='output co'>#&gt;  [1] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
+#&gt;  [4] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
+#&gt;  [7] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
+#&gt; [10] "Alexa Fluor 700-A" "APC-Cy7-A"        </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#see-also">See also</a></li>
-          </ul>
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
     <h2>Author</h2>
     <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -189,13 +213,16 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

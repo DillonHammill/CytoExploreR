@@ -1,4 +1,4 @@
-# CYTO_PLOT_GATING_TREE --------------------------------------------------------
+## CYTO_PLOT_GATING_TREE -------------------------------------------------------
 
 #' Plot Gating Trees
 #'
@@ -12,15 +12,17 @@
 #' @param stat used in \code{GatingHierachy} method to add either "percent" or
 #'   "count" statistics onto the gating tree, set to NULL by default to exclude
 #'   statistics.
+#' @param ... not in use.
 #'
-#' @importFrom openCyto templateGen
+#' @importFrom openCyto gh_generate_template CytoExploreR_.preprocess_csv
 #' @importFrom magrittr %>%
 #' @importFrom visNetwork visNetwork visEdges
+#' @importFrom data.table as.data.table
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
 #' @examples 
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #' 
 #' # Load in samples
 #' fs <- Activation
@@ -60,10 +62,11 @@ cyto_plot_gating_tree <- function(x, ...){
 #' @rdname cyto_plot_gating_tree
 #' @export
 cyto_plot_gating_tree.GatingHierarchy <- function(x,
-                                                  stat = NULL) {
+                                                  stat = NULL,
+                                                  ...) {
   
   # Extract gatingTemplate from GatingHierarchy
-  gt <- templateGen(x)
+  gt <- gh_generate_template(x)
   
   # Extract nodes
   nodes <- rbind("root", gt[, c("alias","alias"), drop = FALSE])
@@ -99,7 +102,7 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
     }
     
     # Normalise as a percentage of parent
-    if(stat == "percent"){
+    if(stat %in% c("percent","freq")){
       
       # Order counts based on parent names
       stats <- node_counts$Count/
@@ -126,10 +129,10 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
 
 #' @rdname cyto_plot_gating_tree
 #' @export
-cyto_plot_gating_tree.GatingSet <- function(x) {
+cyto_plot_gating_tree.GatingSet <- function(x, ...) {
   
   # Generate template based on first sample
-  gt <- templateGen(x[[1]])
+  gt <- gh_generate_template(x[[1]])
   
   # Extract nodes
   nodes <- rbind("root", gt[, c("alias","alias"), drop = FALSE])
@@ -155,13 +158,13 @@ cyto_plot_gating_tree.GatingSet <- function(x) {
 
 #' @rdname cyto_plot_gating_tree
 #' @export
-cyto_plot_gating_tree.gatingTemplate <- function(x){
+cyto_plot_gating_tree.gatingTemplate <- function(x, ...){
   
   # Convert gatingTemplate to data.table
-  gt <- as.data.table.gatingTemplate(x)
+  gt <- as.data.table(x)
   
   # Preprocess gatingTemplate 
-  gt <- openCyto:::.preprocess_csv(gt)
+  gt <- CytoExploreR_.preprocess_csv(gt)
   
   # Convert preprocessed gt to data.frame
   gt <- as.data.frame(gt[, c("alias","parent"), with = FALSE])

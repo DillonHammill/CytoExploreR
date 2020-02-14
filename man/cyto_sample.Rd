@@ -9,21 +9,26 @@
 \usage{
 cyto_sample(x, ...)
 
-\method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL)
+\method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL, ...)
 
-\method{cyto_sample}{flowSet}(x, display = 1, seed = NULL)
+\method{cyto_sample}{flowSet}(x, display = 1, seed = NULL, ...)
 
-\method{cyto_sample}{list}(x, display = 1, seed = NULL)
+\method{cyto_sample}{list}(x, display = 1, seed = NULL, plot = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 \code{\link[flowCore:flowSet-class]{flowSet}}.}
+
+\item{...}{not in use.}
 
 \item{display}{can be either a numeric [0,1] or integer to indicate the
 percentage or number of events to keep respectively.}
 
 \item{seed}{value used to \code{set.seed()} internally. Setting a value for
 seed will return the same result with each run.}
+
+\item{plot}{logical required for lists to indicate whether sampling should be
+scaled per flowFrame to retain original ratios, as used in cyto_plot.}
 }
 \value{
 \code{\link[flowCore:flowFrame-class]{flowFrame}} or
@@ -33,11 +38,6 @@ seed will return the same result with each run.}
 \description{
 \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
 the percentage or number of events to retain.
-}
-\details{
-The list method expects a list of flowFrame objects and is used internally by
-\code{cyto_plot} to ensure that overlays are appropriately sampled relative
-to the base layer.
 }
 \examples{
 
@@ -52,7 +52,6 @@ cyto_sample(fs[[1]], 0.5)
 
 # Restrict first sample to 10000 events
 cyto_sample(fs[[1]], 10000)
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

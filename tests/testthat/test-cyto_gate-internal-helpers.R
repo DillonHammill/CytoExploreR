@@ -4,69 +4,17 @@ context("cyto_gate-internal-helpers")
 
 test_that(".cyto_gate_center", {
   
-  # 1D PLOT
-  cyto_plot(Va2[[1]], 
-          channels = c("FSC-A"), 
-          xlim = c(0, 250000),
-          density_modal = TRUE)
+  # REACTNGLE GATES
   
-  # 1D RECTANGLEGATE - 1D PLOT
-  expect_equal(.cyto_gate_center(rg1,
-                                 channels = "FSC-A"),
-               matrix(c(25000, 50), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))))
-  # 2D RECTANGLEGATE - 1D PLOT
-  expect_equal(.cyto_gate_center(rg2,
-                                 channels = "FSC-A"),
-               matrix(c(25000, 50), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))))
-  # POLYGONGATE - 1D PLOT
-  expect_equal(.cyto_gate_center(pg,
-                                 channels = "FSC-A"),
-               matrix(c(25000, 50), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))))
-  # ELLIPSOIDGATE - 1D PLOT
-  expect_equal(.cyto_gate_center(eg,
-                                 channels = "FSC-A"),
-               matrix(c(65031, 50), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))),
-               tolerance = 0.2)
+  # POLYGON GATES
   
-  # 1D PLOT
-  cyto_plot(Va2[[1]], 
-            channels = c("FSC-A","SSC-A"), 
-            xlim = c(0, 250000),
-            ylim = c(0, 250000))
+  # ELLIPSOID GATES
   
-  # 1D RECTANGLEGATE 2D PLOT
-  expect_equal(.cyto_gate_center(rg1,
-                                 channels = c("FSC-A","SSC-A")),
-               matrix(c(25000,125000), ncol = 2, 
-                      dimnames = list(NULL, c("x","y"))))
-  # 2D RECTANGLEGATE 2D PLOT
-  expect_equal(.cyto_gate_center(rg2,
-                                 channels = c("FSC-A","SSC-A")),
-               matrix(c(25000,25000), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))))
-  # 2D POLYGONGATE 2D PLOT
-  expect_equal(.cyto_gate_center(pg,
-                                 channels = c("FSC-A","SSC-A")),
-               matrix(c(25000,25000), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))))
-  # 2D POLYGONGATE 2D PLOT
-  expect_equal(.cyto_gate_center(eg,
-                                 channels = c("FSC-A","SSC-A")),
-               matrix(c(65000,51250), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))))
-  # QUADGATE 2D PLOT
-  expect_equal(.cyto_gate_center(qg,
-                                 channels = c("FSC-A","SSC-A")),
-               matrix(c(21298, 153702, 
-                        153702, 21298,
-                        153702, 153702, 
-                        21298, 21298), ncol = 2,
-                      dimnames = list(NULL, c("x","y"))),
-               tolerance = 0.1)
+  # QUADRANT GATES
+  
+  # FILTERS
+  
+  # LIST
   
 })
 
@@ -74,37 +22,15 @@ test_that(".cyto_gate_center", {
 
 test_that(".cyto_gate_count", {
   
-  # GATES ONLY - VECTOR
-  expect_equal(.cyto_gate_count(list(rg1,
-                                     pg,
-                                     eg,
-                                     qg),
-                                total = FALSE), 
-  c(1,1,1,4))
+  expect_equal(.cyto_gate_count(list(rg1, rg2, pg, eg, qg),
+                                negate = FALSE,
+                                total = FALSE),
+               c(1,1,1,1,4))
   
-  # GATES ONLY - TOTAL
-  expect_equal(.cyto_gate_count(list(rg1,
-                                     pg,
-                                     eg,
-                                     qg),
-                                total = TRUE), 
-               7)
-  
-  # NEGATE - VECTOR
-  expect_equal(.cyto_gate_count(list(rg1,
-                                     pg,
-                                     eg),
-                                total = FALSE,
-                                negate = TRUE), 
-               c(1,1,1,1))
-  
-  # NEGATE - TOTAL
-  expect_equal(.cyto_gate_count(list(rg1,
-                                     pg,
-                                     eg),
-                                total = TRUE,
-                                negate = TRUE), 
-               4)
+  expect_equal(.cyto_gate_count(list(rg1, rg2, pg, eg),
+                                negate = TRUE,
+                                total = TRUE),
+               5)
   
 })
 
@@ -112,57 +38,113 @@ test_that(".cyto_gate_count", {
 
 test_that(".cyto_gate_quad_convert", {
   
-  # Q1
-  coords <- list(c(-Inf, 50000), c(50000, Inf))
-  names(coords) <- c("FSC-A","SSC-A")
-  Q1 <- rectangleGate(coords, filterId = "A")
+  r1 <- rectangleGate(list("FSC-A" = c(-Inf, 50000),
+                           "SSC-A" = c(50000, Inf)),
+                      filterId = "H")
+  r2 <- rectangleGate(list("FSC-A" = c(50000, Inf),
+                           "SSC-A" = c(50000, Inf)),
+                      filterId = "I")
+  r3 <- rectangleGate(list("FSC-A" = c(50000, Inf),
+                           "SSC-A" = c(-Inf, 50000)),
+                      filterId = "J")
+  r4 <- rectangleGate(list("FSC-A" = c(-Inf, 50000),
+                           "SSC-A" = c(-Inf, 50000)),
+                      filterId = "K")
+  r <- list("H" = r1,
+            "I" = r2,
+            "J" = r3,
+            "K" = r4)
   
-  # Q2
-  coords <- list(c(50000, Inf), c(50000, Inf))
-  names(coords) <- c("FSC-A","SSC-A")
-  Q2 <- rectangleGate(coords, filterId = "B")
-  
-  # Q3
-  coords <- list(c(50000, Inf), c(-Inf, 50000))
-  names(coords) <- c("FSC-A","SSC-A")
-  Q3 <- rectangleGate(coords, filterId = "C")
-  
-  # Q4
-  coords <- list(c(-Inf, 50000), c(-Inf, 50000))
-  names(coords) <- c("FSC-A","SSC-A")
-  Q4 <- rectangleGate(coords, filterId = "D")
-  
-  # QUADGATE TO RECTANGLE GATES
   expect_equal(.cyto_gate_quad_convert(qg, 
                                        channels = c("FSC-A","SSC-A")),
-               list(Q1,Q2,Q3,Q4))
+               r)
   
-  # RECTANGLEGATES TO QUADGATES
-  expect_equal(.cyto_gate_quad_convert(list(Q1,Q2,Q3,Q4), 
-                                       channels = c("FSC-A","SSC-A")),
-               qg)
+  expect_equal(.cyto_gate_quad_convert(r,
+                                       channels = c("FSC-A", "SSC-A")), qg)
   
 })
 
-# CLOSE GARPHICS DEVICE
-dev.off()
-# . CYTO_GATE_COORDS -----------------------------------------------------------
+# .CYTO_GATE_COORDS ------------------------------------------------------------
 
 test_that(".cyto_gate_coords", {
   
-  # RECTANGLEGATE & POLYGONGATE & QUADGATE
-  expect_equal(.cyto_gate_coords(list(rg2,pg, qg), 
-                                 channels = c("FSC-A","SSC-A")),
-               matrix(c(0,50000,
-                        0,50000,
-                        50000, 0,
-                        50000, 50000,
-                        0, 50000,
-                        0,0,
-                        50000, 50000,
-                        50000,50000),
-                      ncol = 2,
-                      byrow = FALSE,
-                      dimnames = list(NULL, c("FSC-A","SSC-A"))))
+  coords <- matrix(c(0.00, 0.00,
+                     50000.00, 50000.00,
+                     0.00, 0.00,
+                     50000.00, 50000.00,
+                     0.00, 0.00,
+                     50000.00, 0.00,
+                     50000.00, 50000.00,
+                     0.00, 50000.00,
+                     75005.00, 50250.00,
+                     74799.71, 53574.81,
+                     74187.21, 56845.02,
+                     73177.55, 60006.94,
+                     71787.32, 63008.66,
+                     70039.35, 65800.87,
+                     67962.33, 68337.75,
+                     65590.36, 70577.62,
+                     62962.41, 72483.71,
+                     60121.61, 74024.73,
+                     57114.61, 75175.36,
+                     53990.80, 75916.73,
+                     50801.45, 76236.64,
+                     47598.94, 76129.86,
+                     44435.86, 75598.13,
+                     41364.15, 74650.18,
+                     38434.23, 73301.58,
+                     35694.22, 71574.48,
+                     33189.12, 69497.23,
+                     30960.04, 67103.94,
+                     29043.61, 64433.91,
+                     27471.27, 61530.98,
+                     26268.86, 58442.81,
+                     25456.11, 55220.12,
+                     25046.38, 51915.83,
+                     25046.38, 48584.17,
+                     25456.11, 45279.88,
+                     26268.86, 42057.19,
+                     27471.27, 38969.02,
+                     29043.61, 36066.09,
+                     30960.04, 33396.06,
+                     33189.12, 31002.77,
+                     35694.22, 28925.52,
+                     38434.23, 27198.42,
+                     41364.15, 25849.82,
+                     44435.86, 24901.87,
+                     47598.94, 24370.14,
+                     50801.45, 24263.36,
+                     53990.80, 24583.27,
+                     57114.61, 25324.64,
+                     60121.61, 26475.27,
+                     62962.41, 28016.29,
+                     65590.36, 29922.38,
+                     67962.33, 32162.25,
+                     70039.35, 34699.13,
+                     71787.32, 37491.34,
+                     73177.55, 40493.06,
+                     74187.21, 43654.98,
+                     74799.71, 46925.19,
+                     75005.00, 50250.00,
+                     50000.00, 50000.00), 
+                   ncol = 2, 
+                   byrow = TRUE)
+  colnames(coords) <- c("FSC-A", "SSC-A")
+  
+  expect_equal(.cyto_gate_coords(list(rg1,
+                                      rg2,
+                                      pg,
+                                      eg,
+                                      qg),
+                                 channels = "FSC-A"),
+               coords[, 1, drop = FALSE], tolerance = 0.01)
+  
+  expect_equal(.cyto_gate_coords(list(rg1,
+                                      rg2,
+                                      pg,
+                                      eg,
+                                      qg),
+                                 channels = c("FSC-A", "SSC-A")),
+               coords, tolerance = 0.01)
   
 })

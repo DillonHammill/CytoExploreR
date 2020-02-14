@@ -12,8 +12,6 @@ cyto_group_by(x, group_by = "all")
 
 \item{group_by}{names of cyto_details variables to use for merging. Set to
 "all" to merge all samples in \code{x}.}
-
-\item{parent}{name of the parent population to extract from GatingSet object.}
 }
 \value{
 a named list of \code{flowSet} or \code{GatingSet} objects

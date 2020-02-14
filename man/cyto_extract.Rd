@@ -4,21 +4,32 @@
 \alias{cyto_extract}
 \title{Extract a valid flowFrame or flowSet}
 \usage{
-cyto_extract(x, parent = "root", ...)
+cyto_extract(x, parent = NULL, copy = FALSE, raw = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{parent}{name of the parent population to extract from
-\code{GatingHierachy} or \code{GatingSet} objects.}
+\code{GatingHierarchy} or \code{GatingSet} objects.}
+
+\item{copy}{logical indicating whether a deep copy of the extracted data
+should be returned.}
+
+\item{raw}{logical indicating whether a list of raw data matrices should be
+returned instead of a flowFrame or flowSet.}
+
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
+\code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.}
 }
 \value{
-either a \code{flowFrame} or a \code{flowSet}.
+either a \code{flowFrame} or a \code{cytoset}  by default. A list of
+  raw data matrices when raw is set to TRUE.
 }
 \description{
 \code{cyto_extract} is essentially a wrapper for
-\code{\link[flowWorkspace:gs_pop_get_data]{gs_pop_get_data}} which also
+\code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}} which also
 accepts \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 \code{\link[flowCore:flowSet-class]{flowSet}} objects. The \code{parent}
 population is extracted from
@@ -34,9 +45,14 @@ library(CytoExploreRData)
 # GatingSet
 gs <- GatingSet(Activation)
 
-# Extract root population
-cyto_extract(gs, "root")
+# Extract flowFrame
+cyto_extract(gs[[1]], parent = "root")
 
+# Extract cytoset
+cyto_extract(gs, parent = "root")
+
+# Extract raw data matrices
+cyto_extract(gs, parent = "root", raw = TRUE)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

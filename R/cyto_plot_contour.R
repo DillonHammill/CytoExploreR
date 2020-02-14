@@ -1,4 +1,4 @@
-# CYTO_PLOT_CONTOUR ------------------------------------------------------------
+## CYTO_PLOT_CONTOUR -----------------------------------------------------------
 
 #' Add contour lines to cyto_plot
 #'
@@ -16,6 +16,7 @@
 #'   default.
 #' @param contour_line_alpha numeric [0,1] to control transparency of contour
 #'   lines, set to 1 by default to remove transparency.
+#' @param ... not in use.
 #'
 #' @importFrom MASS kde2d
 #' @importFrom graphics contour par
@@ -23,17 +24,17 @@
 #' @importFrom grDevices adjustcolor
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in Samples
 #' fs <- Activation
 #'
 #' # Apply compensation
-#' fs <- compensate(fs, fs[[32]]@description$SPILL)
+#' fs <- cyto_compensate(fs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
-#' fs <- transform(fs, trans)
+#' trans <- cyto_transformer_logicle(fs)
+#' fs <- cyto_transform(fs, trans)
 #'
 #' # Plot
 #' cyto_plot(fs[[32]],
@@ -66,7 +67,8 @@ cyto_plot_contour.flowFrame <- function(x,
                                         contour_line_type = 1,
                                         contour_line_width = 1,
                                         contour_line_col = "black",
-                                        contour_line_alpha = 1){
+                                        contour_line_alpha = 1,
+                                        ...){
   
   # CHECKS -------------------------------------------------------------------
   
@@ -113,7 +115,8 @@ cyto_plot_contour.flowSet <- function(x,
                                       contour_line_type = 1,
                                       contour_line_width = 1,
                                       contour_line_col = "black",
-                                      contour_line_alpha = 1){
+                                      contour_line_alpha = 1,
+                                      ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -160,7 +163,8 @@ cyto_plot_contour.list <- function(x,
                                    contour_line_type = 1,
                                    contour_line_width = 1,
                                    contour_line_col = "black",
-                                   contour_line_alpha = 1){
+                                   contour_line_alpha = 1,
+                                   ...){
   
   # CHECKS ---------------------------------------------------------------------
   

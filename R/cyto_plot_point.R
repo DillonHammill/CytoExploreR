@@ -1,4 +1,4 @@
-# CYTO_PLOT_POINT --------------------------------------------------------------
+## CYTO_PLOT_POINT -------------------------------------------------------------
 
 #' Add points and contour lines to empty cyto_plot
 #'
@@ -31,9 +31,11 @@
 #'   default.
 #' @param contour_line_alpha numeric [0,1] to control transparency of contour
 #'   lines, set to 1 by default to remove transparency.
+#' @param ... not in use.
 #'
 #' @importFrom flowCore exprs
 #' @importFrom graphics points
+#' @importFrom stats rnorm
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -71,7 +73,7 @@ cyto_plot_point.flowFrame <- function(x,
   
   # Combine x and overlay into a list
   if(!.all_na(overlay)){
-    fr_list <- c(list(x), .cyto_convert(overlay, "flowFrame list"))
+    fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
   }else{
     fr_list <- list(x)
   }
@@ -136,6 +138,18 @@ cyto_plot_point.flowFrame <- function(x,
       
       # POINTS
       if(nrow(fr_exprs) != 0){
+        
+        # JITTER BARCODES
+        if(any(channels %in% "Sample ID")){
+          ind <- which(channels %in% "Sample ID")
+          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z){
+            rnorm(n = length(fr_exprs[,ind][fr_exprs[, ind] == z]),
+                  mean = z,
+                  sd = 0.1)
+          })
+        }
+        
+        # PLOT POINTS
         points(x = fr_exprs[,channels[1]],
                y = fr_exprs[,channels[2]],
                pch = point_shape[z],
@@ -240,6 +254,18 @@ cyto_plot_point.list <- function(x,
       
       # POINTS
       if(nrow(fr_exprs) != 0){
+        
+        # JITTER BARCODES
+        if(any(channels %in% "Sample ID")){
+          ind <- which(channels %in% "Sample ID")
+          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z){
+            rnorm(n = length(fr_exprs[,ind][fr_exprs[, ind] == z]),
+                  mean = z,
+                  sd = 0.1)
+          })
+        }
+        
+        # PLOT POINTS
         points(x = fr_exprs[,channels[1]],
                y = fr_exprs[,channels[2]],
                pch = point_shape[z],

@@ -6,19 +6,46 @@
 \alias{cyto_plot_label.flowFrame}
 \title{Add labels to cyto_plot}
 \usage{
-\method{cyto_plot_label}{GatingHierarchy}(x, parent, alias = NA,
-  channels = NULL, display = 1, gate = NA, negate = NA, label_text,
-  label_stat, label_text_x = NA, label_text_y = NA,
-  label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6, ...)
+\method{cyto_plot_label}{GatingHierarchy}(
+  x,
+  parent,
+  alias = NA,
+  channels = NULL,
+  display = 1,
+  gate = NA,
+  negate = NA,
+  label_text,
+  label_stat,
+  label_text_x = NA,
+  label_text_y = NA,
+  label_text_font = 2,
+  label_text_size = 0.8,
+  label_text_col = "black",
+  label_fill = "white",
+  label_fill_alpha = 0.6,
+  density_smooth = 0.6,
+  ...
+)
 
-\method{cyto_plot_label}{flowFrame}(x, channels = NULL, trans = NA,
-  display = 1, gate = NA, negate = FALSE, label_text = NA,
-  label_stat = NA, label_text_x = NA, label_text_y = NA,
-  label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_fill = "white",
-  label_fill_alpha = 0.6, density_smooth = 0.6, ...)
+\method{cyto_plot_label}{flowFrame}(
+  x,
+  channels = NULL,
+  trans = NA,
+  display = 1,
+  gate = NA,
+  negate = FALSE,
+  label_text = NA,
+  label_stat = NA,
+  label_text_x = NA,
+  label_text_y = NA,
+  label_text_font = 2,
+  label_text_size = 0.8,
+  label_text_col = "black",
+  label_fill = "white",
+  label_fill_alpha = 0.6,
+  density_smooth = 0.6,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}.}
@@ -83,6 +110,8 @@ colour, set to \code{0.6} by default.}
 \code{\link[stats:density]{density}} to adjust kernel density for mode
 calculation.}
 
+\item{...}{not in use.}
+
 \item{trans}{object of class \code{\link[flowWorkspace]{transformerList}}
 which was used to transform the fluorescent channels of the supplied
 flowFrame.}
@@ -98,7 +127,7 @@ label must be manually selected. More complex labelling can be acheived
 directly through \code{cyto_plot}.
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation
@@ -112,7 +141,7 @@ trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
 gs <- transform(gs, trans)
 
 # Gate using gate_draw
-gating(Activation_gatingTemplate, gs)
+gt_gating(Activation_gatingTemplate, gs)
 
 # Plot
 cyto_plot(gs[[32]],
@@ -121,21 +150,13 @@ cyto_plot(gs[[32]],
 )
 
 # Label - median fluorescent intensity
-cyto_plot_label(getData(gs, "CD4 T Cells")[[32]],
+cyto_plot_label(cyto_extract(gs, "CD4 T Cells")[[32]],
   channels = "CD69",
   label_stat = "median",
   label_text = "MedFI",
   trans = trans,
   label_text_x = 3,
   label_text_y = 50
-)
-
-# Label - no statistic
-cyto_plot_label(
-  label_text = "Activated \\n Cells",
-  label_text_x = 3,
-  label_text_y = 25,
-  label_fill = "red"
 )
 
 }

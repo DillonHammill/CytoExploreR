@@ -4,7 +4,15 @@
 \alias{cyto_plot_complete}
 \title{Indicate Completion of Custom cyto_plot Layout for Saving}
 \usage{
-cyto_plot_complete()
+cyto_plot_complete(nrow = NULL, ncol = NULL, by = "row")
+}
+\arguments{
+\item{nrow}{number of rows to include in the panel layout.}
+
+\item{ncol}{number of columns to include in the panel layout.}
+
+\item{by}{chracter string indicating whether the plot should be filled by
+\code{"row"} or \code{"column"}, set to \code{"row"} by default.}
 }
 \description{
 Indicate Completion of Custom cyto_plot Layout for Saving
@@ -25,7 +33,7 @@ gs <- transform(gs, trans)
 
 # Apply gatingTemplate
 gt <- Activation_gatingTemplate
-gating(gt, gs)
+gt_gating(gt, gs)
 
 # Save custom plot
 cyto_plot_save("Custom.png",

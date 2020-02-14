@@ -1,4 +1,4 @@
-# CYTO_PLOT_LABEL --------------------------------------------------------------
+## CYTO_PLOT_LABEL -------------------------------------------------------------
 
 #' Add labels to cyto_plot
 #'
@@ -56,13 +56,17 @@
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density for mode
 #'   calculation.
+#' @param ... not in use.
 #'
 #' @return add a boxed text label to an existing cyto_plot.
 #'
 #' @importFrom flowCore Subset
+#' @importFrom methods is
+#' @importFrom flowWorkspace gh_pop_get_gate gh_pop_is_negated
+#' @importFrom openCyto gh_generate_template
 #'
 #' @examples
-#' library(CytoRSuiteData)
+#' library(CytoExploreRData)
 #'
 #' # Load in samples
 #' fs <- Activation
@@ -76,7 +80,7 @@
 #' gs <- transform(gs, trans)
 #'
 #' # Gate using gate_draw
-#' gating(Activation_gatingTemplate, gs)
+#' gt_gating(Activation_gatingTemplate, gs)
 #'
 #' # Plot
 #' cyto_plot(gs[[32]],
@@ -85,21 +89,13 @@
 #' )
 #'
 #' # Label - median fluorescent intensity
-#' cyto_plot_label(getData(gs, "CD4 T Cells")[[32]],
+#' cyto_plot_label(cyto_extract(gs, "CD4 T Cells")[[32]],
 #'   channels = "CD69",
 #'   label_stat = "median",
 #'   label_text = "MedFI",
 #'   trans = trans,
 #'   label_text_x = 3,
 #'   label_text_y = 50
-#' )
-#'
-#' # Label - no statistic
-#' cyto_plot_label(
-#'   label_text = "Activated \n Cells",
-#'   label_text_x = 3,
-#'   label_text_y = 25,
-#'   label_fill = "red"
 #' )
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -151,11 +147,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   fr <- cyto_extract(x, parent)
   
   # TRANSFORMATIONS
-  if(length(x@transformation) != 0){
-    trans <- x@transformation
-  }else{
-    trans <- NA
-  }
+  trans <- cyto_transformer_extract(x)
   
   # EXTRACT GATE(S) ------------------------------------------------------------
   
@@ -163,7 +155,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   if (.empty(alias)) {
     # Plot all appropriate gates if alias is an empty character string
     if (all(alias == "")) {
-      gt <- templateGen(x)
+      gt <- gh_generate_template(x)
       gt <- gt[basename(gt$parent) == parent, ]
       
       # Match both channels for 2D plots
@@ -202,7 +194,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
     # EXTRACT GATE
     gate <- LAPPLY(seq_len(PNS), function(z) {
       # GATE
-      gt <- getGate(x, paste(parent, alias[z], sep = "/"))
+      gt <- gh_pop_get_gate(x, paste(parent, alias[z], sep = "/"))
       # BOOLEANFILTER - SUPPORT NEGATED & FILTERS
       if(is(gt, "booleanFilter")){
         # BOOLEAN LOGIC -  !ALIAS1&!ALIAS2&!ALIAS3
@@ -217,7 +209,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                       alias[z])
           # GATE
           gt <- LAPPLY(alias[-length(alias)], function(z){
-            getGate(x, paste(parent, z, spe = "/"))
+            gh_pop_get_gate(x, paste(parent, z, spe = "/"))
           })
           # SET NEGATE TO TRUE
           negate <<- TRUE
@@ -239,7 +231,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   # NEGATE
   if(!.all_na(gate)){
     # ALL NEGATED GATES - SET NEGATE TO TRUE
-    if(all(lapply(gate, function(z){flowWorkspace:::isNegated(z)})))
+    if(all(lapply(gate, function(z){gh_pop_is_negated(z)})))
       # NEGATE NOT SPECIFIED
       if(missing(negate)){
         negate <- TRUE
@@ -317,7 +309,7 @@ cyto_plot_label.flowFrame <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # FLOWFRAME
-  if(!inherits(x, "flowFrame")){
+  if(!is(x, "flowFrame")){
     stop("'x' must be a flowFrame object.")
   }
   
@@ -407,13 +399,15 @@ cyto_plot_label.flowFrame <- function(x,
   label_stat <- .cyto_label_stat(list(x), 
                                  pops = pops,
                                  channels = channels,
-                                 label_stat = label_stat)
+                                 label_stat = label_stat,
+                                 axes_trans = trans)
   
   # PREPARE LABEL_TEXT ---------------------------------------------------------
   
   # MERGE LABEL_TEXT & LABEL_STAT
   label_text <- .cyto_label_text(label_text,
                                  label_stat)
+  
   
   # LABEL CONSTRUCTION ---------------------------------------------------------
   
@@ -482,9 +476,7 @@ cyto_plot_label.flowFrame <- function(x,
   
 }
 
-
-# CYTO_PLOT_LABELLER -----------------------------------------------------------
-
+## CYTO_PLOT_LABELLER ----------------------------------------------------------
 
 #' Add labels to existing cyto_plot
 #'

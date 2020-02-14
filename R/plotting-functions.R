@@ -1,3 +1,5 @@
+## .BOXED.LABELS ---------------------------------------------------------------
+
 #' Boxed Labels - Modified plotrix
 #'
 #' @param x,y  x and y position of the centers of the labels. \code{x} can be a
@@ -96,6 +98,8 @@
   par(cex = oldpars)
 }
 
+## .SPREAD.LABELS --------------------------------------------------------------
+
 #' spread.labs from TeachingDemos
 #' 
 #' Used internally in cyto_plot to offset overlapping labels in y direction.
@@ -118,6 +122,7 @@
                         stepsize=1/10,
                         min=-Inf, 
                         max=Inf) {
+  
   unsort <- order(order(x))
   x <- sort(x)
   df <- x[-1] - x[ -length(x) ]

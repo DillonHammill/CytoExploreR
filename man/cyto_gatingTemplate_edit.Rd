@@ -23,7 +23,7 @@ existing entries in the gatingTemplate.
 }
 \examples{
 \dontrun{
-library(CytoRSuite)
+library(CytoExploreR)
 
 # gs is a GatingSet object
 cyto_gatingTemplate_edit(gs, "gatingTemplate.csv")

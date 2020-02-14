@@ -9,23 +9,46 @@
 \usage{
 cyto_plot_contour(x, ...)
 
-\method{cyto_plot_contour}{flowFrame}(x, channels, contour_lines = 15,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1)
+\method{cyto_plot_contour}{flowFrame}(
+  x,
+  channels,
+  contour_lines = 15,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1,
+  ...
+)
 
-\method{cyto_plot_contour}{flowSet}(x, channels, contour_lines = 15,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1)
+\method{cyto_plot_contour}{flowSet}(
+  x,
+  channels,
+  contour_lines = 15,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1,
+  ...
+)
 
-\method{cyto_plot_contour}{list}(x, channels, contour_lines = 15,
-  contour_line_type = 1, contour_line_width = 1,
-  contour_line_col = "black", contour_line_alpha = 1)
+\method{cyto_plot_contour}{list}(
+  x,
+  channels,
+  contour_lines = 15,
+  contour_line_type = 1,
+  contour_line_width = 1,
+  contour_line_col = "black",
+  contour_line_alpha = 1,
+  ...
+)
 }
 \arguments{
 \item{x}{either an object of class
 \code{\link[flowCore:flowFrame-class]{flowFrame}}, or
 \code{\link[flowCore:flowSet-class]{flowSet}} or a list of
 \code{\link[flowCore:flowFrame-class]{flowFrame}} objects.}
+
+\item{...}{not in use.}
 
 \item{channels}{channels used to construct the existing cyto_plot.}
 
@@ -47,17 +70,17 @@ lines, set to 1 by default to remove transparency.}
 Add contour lines to cyto_plot
 }
 \examples{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in Samples
 fs <- Activation
 
 # Apply compensation
-fs <- compensate(fs, fs[[32]]@description$SPILL)
+fs <- cyto_compensate(fs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(fs[[32]], cyto_fluor_channels(fs))
-fs <- transform(fs, trans)
+trans <- cyto_transformer_logicle(fs)
+fs <- cyto_transform(fs, trans)
 
 # Plot
 cyto_plot(fs[[32]],

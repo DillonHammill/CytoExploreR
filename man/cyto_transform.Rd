@@ -9,15 +9,38 @@
 \usage{
 cyto_transform(x, trans = NULL, ...)
 
-\method{cyto_transform}{default}(x, trans = NULL,
-  trans_type = "logicle", channels = NULL, parent = "root",
-  select = NULL, inverse = FALSE, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transform}{default}(
+  x,
+  trans = NULL,
+  type = "logicle",
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  inverse = FALSE,
+  plot = TRUE,
+  popup = FALSE,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transform}{transformList}(x, trans = NULL, plot = TRUE,
-  popup = FALSE, ...)
+\method{cyto_transform}{transformList}(
+  x,
+  trans = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transform}{transformerList}(x, trans = NULL,
-  inverse = FALSE, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transform}{transformerList}(
+  x,
+  trans = NULL,
+  inverse = FALSE,
+  plot = TRUE,
+  popup = FALSE,
+  axes_limits = "machine",
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -34,12 +57,13 @@ transformation definitions to apply to \code{x}.}
 or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
 supplied.}
 
-\item{trans_type}{type of transformation to apply when no trans object is
-supplied, options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
+\item{type}{type of transformation to apply when no trans object is supplied,
+options include \code{"log"}, \code{"arcsinh"}, \code{"biex"} and
 \code{"logicle"}.}
 
-\item{channels}{names of the channels to transform. Only required when no
-\code{trans} object is supplied.}
+\item{channels}{names of the channels to transform, set to all the
+fluorescent channels by default. Only required when no \code{trans} object
+is supplied.}
 
 \item{parent}{name of the parent population of \code{GatingHierarchy} or
 \code{GatingSet} objects used to visualise the transformations.}
@@ -56,6 +80,16 @@ should be plotted using \code{\link{cyto_plot}}.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 popup window, set to FALSE by default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
+}
+\value{
+object of class \code{flowFrame}, \code{flowSet},
+  \code{GatingHierarchy} or \code{GatingSet} with transformations applied.
 }
 \description{
 Apply Transformations to Cytometry Data
@@ -63,13 +97,13 @@ Apply Transformations to Cytometry Data
 \examples{
 
 # Load in CytoExploreRData to access data
-library(CytoExploreR)
+library(CytoExploreRData)
 
-# Use Activation flowSet
+# Activation flowSet
 fs <- Activation
 
 # Automatically transform flowSet
-fs_trans <- cyto_transform(fs, trans_type = "arcsinh")
+fs_trans <- cyto_transform(fs, type = "arcsinh")
 
 # Manually construct & apply transformations
 trans <- cyto_transformer_biex(fs)
@@ -79,12 +113,11 @@ fs_trans <- cyto_transform(fs, trans)
 gs <- GatingSet(fs)
 
 # Automatically transform GatingSet
-gs_trans <- cyto_transform(gs, trans_type = "logicle")
+gs_trans <- cyto_transform(gs, type = "logicle")
 
 # Manually construct & apply transformations
 trans <- cyto_transformer_logicle(gs)
 gs_trans <- cyto_transform(gs, trans)
-
 }
 \seealso{
 \code{\link{cyto_transformer_log}}

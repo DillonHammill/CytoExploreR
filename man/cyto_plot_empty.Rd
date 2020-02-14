@@ -7,28 +7,71 @@
 \usage{
 cyto_plot_empty(x, ...)
 
-\method{cyto_plot_empty}{flowFrame}(x, channels, axes_trans = NA,
-  overlay = NA, gate = NA, xlim = NA, ylim = NA,
-  limits = "machine", title, xlab, ylab, density_modal = TRUE,
-  density_smooth = 1.5, density_stack = 0.5, density_cols = NA,
-  density_fill = NA, density_fill_alpha = 1, density_line_type = 1,
-  density_line_width = 1, density_line_col = "black",
-  point_shape = ".", point_size = 2, point_col_scale = NA,
-  point_cols = NA, point_col = NA, point_col_alpha = 1,
-  axes_text = c(TRUE, TRUE), axes_text_font = 1, axes_text_size = 1,
-  axes_text_col = "black", axes_label_text_font = 1,
-  axes_label_text_size = 1.1, axes_label_text_col = "black",
-  title_text_font = 2, title_text_size = 1.1,
-  title_text_col = "black", border_line_type = 1,
-  border_line_width = 1, border_line_col = "black",
-  border_fill = "white", border_fill_alpha = 1, legend = FALSE,
-  legend_text, legend_text_font = 1, legend_text_size = 1,
-  legend_text_col = "black", legend_line_type = NA,
-  legend_line_width = NA, legend_line_col = NA, legend_box_fill = NA,
-  legend_point_col = NA)
+\method{cyto_plot_empty}{flowFrame}(
+  x,
+  channels,
+  axes_trans = NA,
+  overlay = NA,
+  gate = NA,
+  xlim = NA,
+  ylim = NA,
+  axes_limits = "auto",
+  axes_limits_buffer = 0.03,
+  title,
+  xlab,
+  ylab,
+  density_modal = TRUE,
+  density_smooth = 1.5,
+  density_stack = 0.5,
+  density_cols = NA,
+  density_fill = NA,
+  density_fill_alpha = 1,
+  density_line_type = 1,
+  density_line_width = 1,
+  density_line_col = "black",
+  point_shape = ".",
+  point_size = 2,
+  point_col_scale = NA,
+  point_cols = NA,
+  point_col = NA,
+  point_col_alpha = 1,
+  axes_text = c(TRUE, TRUE),
+  axes_text_font = 1,
+  axes_text_size = 1,
+  axes_text_col = "black",
+  axes_label_text_font = 1,
+  axes_label_text_size = 1.1,
+  axes_label_text_col = "black",
+  title_text_font = 2,
+  title_text_size = 1.1,
+  title_text_col = "black",
+  border_line_type = 1,
+  border_line_width = 1,
+  border_line_col = "black",
+  border_fill = "white",
+  border_fill_alpha = 1,
+  legend = FALSE,
+  legend_text,
+  legend_text_font = 1,
+  legend_text_size = 1,
+  legend_text_col = "black",
+  legend_line_type = NA,
+  legend_line_width = NA,
+  legend_line_col = NA,
+  legend_box_fill = NA,
+  legend_point_col = NA,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
+
+\item{...}{not in use.}
+
+\item{channels}{name of the channel(s) or marker(s) to be used to construct
+the plot. The length of channels determines the type of plot to be
+constructed, either a 1-D density distribution for a single channel or a
+2-D scatterplot with blue-red colour scale for two channels.}
 
 \item{axes_trans}{object of class
 \code{\link[flowCore:transformList-class]{transformList}} or
@@ -49,10 +92,14 @@ gate co-ordinates are taken into account when computing axes limits.}
 
 \item{ylim}{lower and upper limits of y axis (e.g. c(0,5)).}
 
-\item{limits}{indicates whether the axes limits should be based on the
-\code{"data"} or \code{"machine"}, set to "machine" by default to show
-complete axes ranges. This argument will only alter the upper axis limits,
-to modify the lower limits use \code{xlim} and \code{ylim}.}
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"auto"} by default to use optimised axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
+
+\item{axes_limits_buffer}{decimal indicating the percentage of buffering to
+add to either end of the axes limits, set to 0.03 by default.}
 
 \item{title}{title to use for the plot, set to the name of the sample by
 default. Title can be removed by setting this argument to \code{NA}.}
@@ -71,6 +118,9 @@ to mode and presented as a percentage. Set to \code{TRUE} by default.}
 overlaid populations, set to 0.5 by default. #' @param density_cols vector
 colours to draw from when selecting density fill colours if none are
 supplied to density_fill.}
+
+\item{density_cols}{vector colours to draw from when selecting density fill
+colours if none are supplied to density_fill.}
 
 \item{density_fill}{colour(s) used to fill polygons.}
 
@@ -143,6 +193,39 @@ default.}
 
 \item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
 by default to add no transparency.}
+
+\item{legend}{can be either \code{"line"} or \code{"fill"} to indicate
+whether a legend should be constructed based on the density \code{"line"}
+or \code{"fill"}, set to FALSE by default to remove the legend.}
+
+\item{legend_text}{vector of labels to use in the legend.}
+
+\item{legend_text_font}{numeric to control the font of legend text, set to 1
+for plain font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
+\item{legend_text_size}{numeric to control the size of text in the legend,
+set to 1 by default.}
+
+\item{legend_text_col}{colour(s) to use for text in legend, set to
+\code{"black"} by default.}
+
+\item{legend_line_type}{numeric to control the line type for line legends,
+set to 1 by default. Refer to \code{lty} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{legend_line_width}{numeric to control the line width in line legend,
+set to 1 by default. Refer to \code{lwd} in \code{\link[graphics:par]{par}}
+for alternatives.}
+
+\item{legend_line_col}{colour(s) to use for the lines in 1-D plot legends
+when legend is set to \code{"line"}.}
+
+\item{legend_box_fill}{fill colour(s) to use for the boxes in 1-D plot
+legends when legend is set to \code{"fill"}.}
+
+\item{legend_point_col}{colour(s) to use for points in 2-D scatter plot
+legend.}
 }
 \description{
 \code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
@@ -153,15 +236,15 @@ this base layer with \code{cyto_plot_point} or \code{cyto_plot_density}.
 library(CytoExploreRData)
 
 # Construct an empty 2D plot with black background
-cyto_plot_empty(Activation[1],
+cyto_plot_empty(Activation[[32]],
   channels = c("FSC-A", "SSC-A"),
   border_fill = "black"
 )
 
 # Construct an empty 1D plot
-cyto_plot_empty(Activation[1],
+cyto_plot_empty(Activation[[32]],
   channels = c("FSC-A"),
-  overlay = Activation[2:4]
+  overlay = Activation[1:2]
 )
 }
 \author{

@@ -2,14 +2,60 @@
 % Please edit documentation in R/cyto_map.R
 \name{cyto_map}
 \alias{cyto_map}
+\alias{cyto_map.GatingSet}
+\alias{cyto_map.flowSet}
 \alias{cyto_map.flowFrame}
 \title{Create dimension-reduced maps of cytometry data}
 \usage{
 cyto_map(x, ...)
 
-\method{cyto_map}{flowFrame}(x, channels, sample = 50000,
-  method = "tSNE", save = FALSE, save_as = "cyto_map", plot = TRUE,
-  seed, ...)
+\method{cyto_map}{GatingSet}(
+  x,
+  parent = "root",
+  select = NULL,
+  channels = NULL,
+  display = 1,
+  type = "UMAP",
+  split = TRUE,
+  names = NULL,
+  save_as = NULL,
+  inverse = FALSE,
+  trans = NULL,
+  plot = TRUE,
+  seed = NULL,
+  ...
+)
+
+\method{cyto_map}{flowSet}(
+  x,
+  select = NULL,
+  channels = NULL,
+  display = 1,
+  type = "UMAP",
+  split = TRUE,
+  names = NULL,
+  save_as = NULL,
+  inverse = FALSE,
+  trans = NULL,
+  plot = TRUE,
+  seed = NULL,
+  ...
+)
+
+\method{cyto_map}{flowFrame}(
+  x,
+  channels = NULL,
+  display = 1,
+  type = "UMAP",
+  split = TRUE,
+  names = NULL,
+  save_as = NULL,
+  inverse = FALSE,
+  trans = NULL,
+  plot = TRUE,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame} or \code{flowSet}.}
@@ -18,28 +64,57 @@ cyto_map(x, ...)
 function. Links to the documentation for these functions can be found
 below.}
 
+\item{parent}{name of the parent population to extract from
+\code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
+\code{"root"} node by default.}
+
+\item{select}{designates which samples should be used for mapping when a
+\code{flowSet} or \code{GatingSet} object is supplied. Filtering steps
+should be comma separated and wrapped in a list. Refer to
+\code{\link{cyto_select}}.}
+
 \item{channels}{vector of channels names indicating the channels that should
 be used by the dimension reduction algorithm to compute the 2-dimensional
-map, set to all channels by default. Restricting the number of channels can
-greatly improved processing speed but may result in poorer resolution.}
+map, set to all channels with assigned markers by default. Restricting the
+number of channels can greatly improve processing speed and resolution.}
 
-\item{sample}{number of events to map, set to 50 000 events by default.}
+\item{display}{total number of events to map, all events in the combined data
+are mapped by default.}
 
-\item{method}{direction reduction method to use to generate the map,
-supported options include "PCA", "tSNE" and "UMAP".}
+\item{type}{dimension reduction type to use to generate the map, supported
+options include "PCA", "tSNE", "UMAP" and "EmbedSOM".}
 
-\item{save}{logical indicating whether the mapped \code{flowFrame} or
-\code{flowSet} should be saved as .fcs file(s) in a folder in the  current
-working directory.}
+\item{split}{logical indicating whether samples merged using
+\code{cyto_merge_by} should be split prior to writing fcs files, set to
+FALSE by default.}
 
-\item{save_as}{name of the folder to save the .fcs files to when save is
-TRUE, set to "cyto_map" by default.}
+\item{names}{original names of the samples prior to merging using
+\code{cyto_merge_by}, only required when split is TRUE. These names will be
+re-assigned to each of split flowFrames and included in the file names.}
+
+\item{save_as}{passed to \code{cyto_save} to indicate a folder where the
+mapped FCS files should be saved, set to NULL by default to turn off saving
+of FCS files.}
+
+\item{inverse}{logical indicating whether the data should be inverse
+transformed prior to writing FCS files, set to FALSE by default. Inverse
+transformations of \code{flowFrame} or \code{flowSet} objects requires
+passing of transformers through the \code{trans} argument.}
+
+\item{trans}{object of class \code{transformerList} containing the
+transformation definitions applied to the supplied data. Used internally
+when \code{inverse_transform} is TRUE, to inverse the transformations prior
+to writing FCS files.}
 
 \item{plot}{logical indicating whether the constructed map should be plotted
 using \code{cyto_plot}.}
 
-\item{seed}{integer to set seed prior to mapping to ensure consistent results
-between runs.}
+\item{seed}{integer to set seed prior to mapping to ensure more consistent
+results between runs.}
+}
+\value{
+flowFrame, flowSet, GatingHierarchy or GatingSet containing the
+  mapped projection parameters.
 }
 \description{
 Create dimension-reduced maps of cytometry data
@@ -50,6 +125,10 @@ Create dimension-reduced maps of cytometry data
 \code{\link[Rtsne:Rtsne]{tSNE}}
 
 \code{\link[umap:umap]{UMAP}}
+
+\code{\link[EmbedSOM:SOM]{SOM}}
+
+\code{\link[EmbedSOM:EmbedSOM]{EmbedSOM}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

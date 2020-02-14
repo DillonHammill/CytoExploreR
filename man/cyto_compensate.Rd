@@ -2,23 +2,25 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_compensate}
 \alias{cyto_compensate}
-\alias{cyto_compensate.flowFrame}
-\alias{cyto_compensate.flowSet}
 \alias{cyto_compensate.GatingSet}
+\alias{cyto_compensate.flowSet}
+\alias{cyto_compensate.flowFrame}
 \title{Apply fluorescence compensation to samples}
 \usage{
 cyto_compensate(x, ...)
 
-\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1)
+\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1, remove = FALSE, ...)
 
-\method{cyto_compensate}{flowSet}(x, spillover = NULL, select = 1)
+\method{cyto_compensate}{flowSet}(x, spillover = NULL, select = 1, remove = FALSE, ...)
 
-\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1)
+\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1, remove = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{...}{not in use.}
 
 \item{spillover}{name of the spillover matrix csv file (e.g.
 "Spillover-Matrix.csv") saved in the current working directory.}
@@ -27,6 +29,9 @@ cyto_compensate(x, ...)
 should be extracted when no spillover matrix file is supplied to
 \code{spillover}. To compensate each sample individually using their stored
 spillover matrix file, set \code{select} to NULL.}
+
+\item{remove}{logical indicating whether applied compensation should be
+removed from the supplied samples, set to FALSE by default.}
 }
 \value{
 a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
@@ -39,7 +44,8 @@ colnames (i.e. first row) and rownames (i.e. first column). If no
 \code{spillover} csv file is supplied, the spillover matrix will be extracted
 directly from the first element of \code{x}. To select a different sample for
 spillover matrix extraction supply the index or name of the sample to the
-\code{select} argument.
+\code{select} argument. Compensation applied to samples can be easily removed
+by setting the \code{remove} argument to TRUE.
 }
 \examples{
 
@@ -50,7 +56,7 @@ library(CytoExploreRData)
 cyto_compensate(Activation)
 
 # Save spillover matrix in correct format
-spill <- Activation[[1]]@description$SPILL
+spill <- cyto_spillover_extract(Activation)[[1]]
 rownames(spill) <- colnames(spill)
 write.csv(
   spill,
@@ -64,9 +70,11 @@ cyto_compensate(Activation, "Spillover-Matrix.csv")
 gs <- GatingSet(Activation)
 cyto_compensate(gs)
 
+# Remove applied compensation
+cyto_compensate(gs, remove = TRUE)
+
 # Apply saved spillover matrix csv file to GatingSet
 cyto_compensate(gs, "Spillover-Matrix.csv")
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

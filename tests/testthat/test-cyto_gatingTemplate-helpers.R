@@ -64,7 +64,7 @@ test_that(".cyto_gatingTemplate_check", {
   # ENTRY EXISTS ALREADY 
   expect_error(.cyto_gatingTemplate_check(parent = "T Cells",
                                           alias = "CD4 T Cells",
-                                         "Activation-gatingTemplate.csv"),
+                                         "Reference-Activation-gatingTemplate.csv"),
       "Supply another gatingTemplate or edit gate(s) using cyto_gate_edit.",
       fixed = TRUE)
   

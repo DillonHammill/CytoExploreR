@@ -8,26 +8,57 @@
 \alias{cyto_transformer_log.flowFrame}
 \title{Definition(s) of Log Transformation(s)}
 \usage{
-cyto_transformer_log(x, ...)
+\method{cyto_transformer_log}{GatingSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transformer_log}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{GatingHierarchy}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transformer_log}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{flowSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transformer_log}{flowSet}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
-
-\method{cyto_transformer_log}{flowFrame}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_log}{flowFrame}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
-
-\item{...}{additional arguments passed to
-\code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
@@ -44,14 +75,27 @@ be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether the plots should be constructed in a
 pop-up window.}
+
+\item{display}{number or frequency of events to display in plots, set to
+25000 events by default. See \code{\link{cyto_plot}} for details.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
+
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} and
+\code{\link{cyto_plot}}.}
 }
 \value{
 a \code{transformerList} object.
 }
 \description{
 CytoExploreR implementation of \code{flowWorkspace}
-\code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
-always returns a
+\code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation
+which always returns a
 \code{\link[flowWorkspace:transformerList]{transformerList}} object and
 displays the result of the transformation(s) using \code{\link{cyto_plot}}.
 To combine different types of transformations have a look at
@@ -59,7 +103,7 @@ To combine different types of transformations have a look at
 be used to apply the transformations to the data.
 }
 \seealso{
-\code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}
+\code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}}
 
 \code{\link{cyto_transformer_arcsinh}}
 

@@ -1,18 +1,18 @@
-# CytoExploreR Implementation of Transformations
+## CytoExploreR Implementation of Transformations ------------------------------
 
 # Wrappers for flowCore/flowWorkspace transformation functions which return
 # transformerList objects and use cyto_plot to visualise the transformations.
 
-# All methods must have select as an argument to allowing passing of arguments
-# from cyto_transform.
+# All methods must have select as an argument to allow passing of arguments from
+# cyto_transform.
 
-# CYTO_TRANSFORMER_LOG ---------------------------------------------------------
+## CYTO_TRANSFORMER_LOG --------------------------------------------------------
 
 #' Definition(s) of Log Transformation(s)
 #'
 #' CytoExploreR implementation of \code{flowWorkspace}
-#' \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}} transformation which
-#' always returns a
+#' \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} transformation
+#' which always returns a
 #' \code{\link[flowWorkspace:transformerList]{transformerList}} object and
 #' displays the result of the transformation(s) using \code{\link{cyto_plot}}.
 #' To combine different types of transformations have a look at
@@ -32,24 +32,35 @@
 #'   be plotted using \code{cyto_plot}.
 #' @param popup logical indicating whether the plots should be constructed in a
 #'   pop-up window.
+#' @param display number or frequency of events to display in plots, set to
+#'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}.
+#'   \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}} and
+#'   \code{\link{cyto_plot}}.
 #'
 #' @return a \code{transformerList} object.
 #'
-#' @importFrom flowWorkspace flowjo_flog flow_trans transformerList
+#' @importFrom flowWorkspace flowjo_log_trans flow_trans transformerList
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @seealso \code{\link[flowWorkspace:flowjo_flog]{flowjo_flog}}
+#'
+#' @seealso \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_logicle}}
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
-#' 
-#' @rdname cyto_transformer_log
+#'
+#' @name cyto_transformer_log
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_log <- function(x, ...){
   UseMethod("cyto_transformer_log")
@@ -62,10 +73,14 @@ cyto_transformer_log.GatingSet <- function(x,
                                            parent = "root",
                                            select = NULL,
                                            plot = TRUE,
-                                           popup = FALSE, ...){
+                                           popup = FALSE,
+                                           display = 25000,
+                                           axes_limits = "machine", ...){
   
   # Extract data
-  x <- cyto_extract(x, parent = parent)
+  x <- cyto_extract(x, 
+                    parent = parent, 
+                    copy = TRUE)
   
   # Select data
   x <- cyto_select(x, select)
@@ -78,6 +93,8 @@ cyto_transformer_log.GatingSet <- function(x,
                                            channels = channels,
                                            plot = plot,
                                            popup = popup,
+                                           display = display,
+                                           axes_limits = axes_limits,
                                            ...
   )
   
@@ -93,16 +110,22 @@ cyto_transformer_log.GatingHierarchy <- function(x,
                                                  parent = "root",
                                                  select = NULL,
                                                  plot = TRUE,
-                                                 popup = FALSE, ...){
+                                                 popup = FALSE,
+                                                 display = 25000,
+                                                 axes_limits = "machine", ...){
     
   # Extract data
-  x <- cyto_extract(x, parent = parent)
+  x <- cyto_extract(x, 
+                    parent = parent, 
+                    copy = TRUE)
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_log(x,
                                            channels = channels,
                                            plot = plot,
                                            popup = popup,
+                                           display = display,
+                                           axes_limits = axes_limits,
                                            ...
   )
   
@@ -111,18 +134,26 @@ cyto_transformer_log.GatingHierarchy <- function(x,
   
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_log
 #' @export
 cyto_transformer_log.flowSet <- function(x,
                                          channels = NULL,
+                                         parent = "root",
                                          select = NULL,
                                          plot = TRUE,
-                                         popup = FALSE, ...){
+                                         popup = FALSE, 
+                                         display = 25000,
+                                         axes_limits = "machine", ...){
   
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
   
-  # Coerce to flowFrame
+  # FLOWFRANE
   x <- cyto_convert(x, "flowFrame")
   
   # Call to flowFrame method
@@ -131,6 +162,8 @@ cyto_transformer_log.flowSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
   
@@ -139,38 +172,39 @@ cyto_transformer_log.flowSet <- function(x,
   
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_log
 #' @export
 cyto_transformer_log.flowFrame <- function(x,
                                            channels = NULL,
+                                           parent = "root",
                                            select = NULL,
                                            plot = TRUE,
-                                           popup = FALSE, ...){
+                                           popup = FALSE,
+                                           display = 25000,
+                                           axes_limits = "machine", ...){
   
-  # Prepare Channels
+  # PULL DOWN ALL ARGUMENTS
+  args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
+  
+  # PREPARE CHANNELS
   if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
   }
   
-  # Sort out transformations
-  transform_list <- lapply(channels, function(z) {
-    flowjo_flog(
-      inverse = FALSE,
-      ...
-    )
-  })
-  transformer_list <- lapply(transform_list, function(z) {
-    inv <- flowjo_flog(
-      inverse = TRUE,
-      ...
-    )
-    flow_trans(
-      "log",
-      z@.Data,
-      inv@.Data
-    )
+  # FLOWJO_LOG ARGUMENTS
+  flowjo_log_args <- formalArgs("flowjo_log_trans")
+  
+  # TRANSFORMATIONS
+  transformer_list <- lapply(channels, function(z) {
+    do.call("flowjo_log_trans", 
+            args[names(args) %in% flowjo_log_args])
   })
   names(transformer_list) <- channels
   transformer_list <- transformerList(
@@ -178,20 +212,31 @@ cyto_transformer_log.flowFrame <- function(x,
     trans = transformer_list
   )
   
-  # Construct plots
+  # PLOTS
   if(plot == TRUE){
     
-    # Sample for speed
-    x <- cyto_sample(x, display = 25000, seed = 56)
+    # GRAPHICAL PARAMETERS
+    old_pars <- .par("mfrow")
+    on.exit(par(old_pars))
     
-    # Apply transformations to data for visualisation
+    # CYTO_PLOT ARGUMENTS
+    cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
+    
+    # REMOVE DISPLAY/AXES_TRANS/TITLE ARGUMENTS
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
+    # SAMPLING
+    x <- cyto_sample(x, display = display, seed = 56)
+    
+    # APPLY TRANSFORMATIONS
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
+    args[["x"]] <- x
     
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
-    
-    # Set up plotting area
+    # PLOTTING AREA
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
@@ -199,17 +244,15 @@ cyto_transformer_log.flowFrame <- function(x,
       n2mfrow(n)[2]
     )
     
-    # Generate plot for each channel
+    # PLOT PER CHANNEL
     lapply(channels, function(chan) {
-      cyto_plot(x,
-                channels = chan,
-                axes_trans = transformer_list,
-                title = NA
-      )
+      args[["channels"]] <- chan
+      do.call("cyto_plot", 
+              c(args[names(args) %in% cyto_plot_args],
+                list("axes_trans" = transformer_list,
+                     "title" = NA,
+                     "display" = 1)))
     })
-    
-    # Reset graphics parameters
-    par(old_pars)
     
   }
   
@@ -218,7 +261,7 @@ cyto_transformer_log.flowFrame <- function(x,
   
 }
 
-# CYTO_TRANSFORMER_ARCSINH -------------------------------------------------------
+## CYTO_TRANSFORMER_ARCSINH ----------------------------------------------------
 
 #' Definition(s) of arcsinh transformation(s)
 #'
@@ -243,8 +286,16 @@ cyto_transformer_log.flowFrame <- function(x,
 #'   be plotted using \code{cyto_plot}.
 #' @param popup logical indicating whether the plots should be constructed in a
 #'   pop-up window.
+#' @param display number or frequency of events to display in plots, set to
+#'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}}.
+#'   \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}} and
+#'   \code{\link{cyto_plot}}.
 #'
 #' @return a \code{transformerList} object.
 #'
@@ -260,7 +311,10 @@ cyto_transformer_log.flowFrame <- function(x,
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transformer_arcsinh
+#' @name cyto_transformer_arcsinh
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_arcsinh <- function(x, ...) {
   UseMethod("cyto_transformer_arcsinh")
@@ -273,15 +327,19 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
                                                parent = "root",
                                                select = NULL,
                                                plot = TRUE,
-                                               popup = FALSE, ...) {
+                                               popup = FALSE,
+                                               display = 25000,
+                                               axes_limits = "machine", ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent, 
+                    copy = TRUE)
 
-  # Select data
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -289,6 +347,8 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -303,16 +363,23 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
                                                    parent = "root",
                                                    select = NULL,
                                                    plot = TRUE,
-                                                   popup = FALSE, ...) {
+                                                   popup = FALSE,
+                                                   display = 25000,
+                                                   axes_limits = "machine", 
+                                                   ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
   # Call to flowFrame method
   transformer_list <- cyto_transformer_arcsinh(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -320,18 +387,26 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_arcsinh
 #' @export
 cyto_transformer_arcsinh.flowSet <- function(x,
                                            channels = NULL,
+                                           parent = "root",
                                            select = NULL,
                                            plot = TRUE,
-                                           popup = FALSE,...) {
+                                           popup = FALSE,
+                                           display = 25000,
+                                           axes_limits = "machine", ...) {
 
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -340,6 +415,8 @@ cyto_transformer_arcsinh.flowSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -347,33 +424,47 @@ cyto_transformer_arcsinh.flowSet <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_arcsinh
 #' @export
 cyto_transformer_arcsinh.flowFrame <- function(x,
                                                channels = NULL,
+                                               parent = "root",
                                                select = NULL,
                                                plot = TRUE,
-                                               popup = FALSE, ...) {
+                                               popup = FALSE,
+                                               display = 25000,
+                                               axes_limits = "machine", ...) {
 
-  # Prepare Channels
+  # PULL DOWN ALL ARGUMENTS
+  args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
+  
+  # CHANNELS
   if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
   }
 
-  # Sort out transformations
+  # ASINH_GML2 ARGUMENTS
+  asinh_gml2_args <- formalArgs("asinh_Gml2")
+  # REMOVE INVERSE ARGUMENT
+  asinh_gml2_args <- asinh_gml2_args[-match("inverse", asinh_gml2_args)]
+  
+  # TRANSFORMATIONS
   transform_list <- lapply(channels, function(z) {
-    asinh_Gml2(
-      inverse = FALSE,
-      ...
-    )
+    do.call("asinh_Gml2",
+            c(args[names(args) %in% asinh_gml2_args],
+              list("inverse" = FALSE)))
   })
   transformer_list <- lapply(transform_list, function(z) {
-    inv <- asinh_Gml2(
-      inverse = TRUE,
-      ...
-    )
+    inv <- do.call("asinh_Gml2",
+                   c(args[names(args) %in% asinh_gml2_args],
+                     list("inverse" = TRUE)))
     flow_trans(
       "arcsinh",
       z@.Data,
@@ -386,20 +477,31 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
     trans = transformer_list
   )
   
-  # Construct plots
+  # PLOTS
   if(plot == TRUE){
       
-    # Sample for speed
-    x <- cyto_sample(x, display = 25000, seed = 56)
+    # GRAPHICAL PARAMETERS
+    old_pars <- .par("mfrow")
+    on.exit(par(old_pars))
+    
+    # CYTO_PLOT ARGUMENTS
+    cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
+    
+    # REMOVE DISPLAY/AXES_TRANS/TITLE ARGUMENT
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
+    # SAMPLING
+    x <- cyto_sample(x, display = display, seed = 56)
     
     # Apply transformations to data for visualisation
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
+    args[["x"]] <- x
 
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
-    
-    # Set up plotting area
+    # PLOTTING AREA
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
@@ -407,17 +509,15 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
       n2mfrow(n)[2]
     )
     
-    # Generate plot for each channel
+    # PLOT PER CHANNEL
     lapply(channels, function(chan) {
-      cyto_plot(x,
-        channels = chan,
-        axes_trans = transformer_list,
-        title = NA
-      )
+      args[["channels"]] <- chan
+      do.call("cyto_plot", 
+              c(args[names(args) %in% cyto_plot_args],
+                list("axes_trans" = transformer_list,
+                     "title" = NA,
+                     "display" = 1)))
     })
-    
-    # Reset graphics parameters
-    par(old_pars)
     
   }
 
@@ -425,13 +525,13 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORMER_BIEX ----------------------------------------------------------
+## CYTO_TRANSFORMER_BIEX -------------------------------------------------------
 
 #' Definition(s) of biexponential transformation(s)
 #'
 #' CytoExploreR implementation of \code{flowWorkspace} flowJo biexponential
 #' transformation which always returns a
-#' \code{\code{\link[flowWorkspace:transformerList]{transformerList}} object and
+#' \code{\link[flowWorkspace:transformerList]{transformerList}} object and
 #' displays in the result of the transformation(s) using
 #' \code{\link{cyto_plot}}. To combine different types of transformations have a
 #' look at \code{\link{cyto_transformer_combine}}. \code{\link{cyto_transform}}
@@ -450,8 +550,16 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 #'   be plotted using \code{cyto_plot}.
 #' @param popup logical indicating whether the plots should be constructed in a
 #'   pop-up window.
+#' @param display number or frequency of events to display in plots, set to
+#'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}.
+#'   \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}} and
+#'   \code{\link{cyto_plot}}.
 #'
 #' @return a \code{transformerList} object.
 #'
@@ -459,7 +567,7 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link[flowWorkspace:flowjo_biexp]{flowjo_biexp}}
 #' @seealso \code{\link[flowWorkspace:flowJo_biexp_trans]{flowJo_biexp_trans}}
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -467,8 +575,11 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
 #' @seealso \code{\link{cyto_transformer_logicle}}
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
-#' 
-#' @rdname cyto_transformer_biex
+#'
+#' @name cyto_transformer_biex
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_biex <- function(x, ...) {
   UseMethod("cyto_transformer_biex")
@@ -481,15 +592,19 @@ cyto_transformer_biex.GatingSet <- function(x,
                                           parent = "root",
                                           select = NULL,
                                           plot = TRUE,
-                                          popup = FALSE, ...) {
+                                          popup = FALSE,
+                                          display = 25000,
+                                          axes_limits = "machine", ...) {
   
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
-  # Select data
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -497,6 +612,8 @@ cyto_transformer_biex.GatingSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -511,16 +628,22 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
                                                 parent = "root",
                                                 select = NULL,
                                                 plot = TRUE,
-                                                popup = FALSE) {
+                                                popup = FALSE,
+                                                display = 25000,
+                                                axes_limits = "machine", ...) {
   
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
   # Call to flowFrame method
   transformer_list <- cyto_transformer_biex(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -528,18 +651,26 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_biex
 #' @export
 cyto_transformer_biex.flowSet <- function(x,
                                         channels = NULL,
+                                        parent = "root",
                                         select = NULL,
                                         plot = TRUE,
-                                        popup = FALSE, ...) {
+                                        popup = FALSE,
+                                        display = 25000,
+                                        axes_limits = "machine", ...) {
   
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -547,6 +678,8 @@ cyto_transformer_biex.flowSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -554,33 +687,46 @@ cyto_transformer_biex.flowSet <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_biex
 #' @export
 cyto_transformer_biex.flowFrame <- function(x,
                                           channels = NULL,
+                                          parent = "root",
                                           select = NULL,
                                           plot = TRUE,
-                                          popup = FALSE, ...) {
+                                          popup = FALSE,
+                                          display = 25000,
+                                          axes_limits = "machine", ...) {
   
-  # Prepare Channels
+  # PULL DOWN ALL ARGUMENTS
+  args <- as.list(match.call(expand.dots = TRUE))[-1]
+  
+  # COPY
+  x <- cyto_copy(x)
+  
+  # CHANNELS
   if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
   }
 
-  # Sort out transformations
+  # FLOWJO_BIEXP ARGUMENTS
+  flowjo_biexp_args <- formalArgs("flowjo_biexp")
+  # REMOVE INVERSE ARGUMENT
+  flowjo_biexp_args <- flowjo_biexp_args[-match("inverse", flowjo_biexp_args)]
+  # TRANSFORMATIONS
   transform_list <- lapply(channels, function(z) {
-    flowjo_biexp(
-      inverse = FALSE,
-      ...
-    )
+    do.call("flowjo_biexp",
+            c(args[names(args) %in% flowjo_biexp_args],
+              list("inverse" = FALSE)))
   })
   transformer_list <- lapply(transform_list, function(z) {
-    inv <- flowjo_biexp(
-      inverse = TRUE,
-      ...
-    )
+    inv <-  do.call("flowjo_biexp",
+                    c(args[names(args) %in% flowjo_biexp_args],
+                      list("inverse" = TRUE)))
     flow_trans(
       "biexponential",
       z@.Data,
@@ -593,20 +739,31 @@ cyto_transformer_biex.flowFrame <- function(x,
     trans = transformer_list
   )
 
-  # Construct plots
+  # PLOTS
   if(plot == TRUE){
     
-    # Sample for speed
-    x <- cyto_sample(x, display = 25000, seed = 56)
+    # GRAPHICAL PARAMETERS
+    old_pars <- .par("mfrow")
+    on.exit(par(old_pars))
     
-    # Apply transformations to data for visualisation
+    # CYTO_PLOT ARGUMENTS
+    cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
+    
+    # REMOVE DISPLAY ARGUMENT
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
+    # SAMPLING
+    x <- cyto_sample(x, display = display, seed = 56)
+    
+    # APPLY TRANSFORMATIONS
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
-
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
+    args[["x"]] <- x
      
-    # Set up plotting area
+    # PLOTTING AREA
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
@@ -614,17 +771,15 @@ cyto_transformer_biex.flowFrame <- function(x,
       n2mfrow(n)[2]
     )
 
-    # Generate plot for each channel
+    # PLOT PER CHANNEL
     lapply(channels, function(chan) {
-      cyto_plot(x,
-        channels = chan,
-        axes_trans = transformer_list,
-        title = NA
-      )
+      args[["channels"]] <- chan
+      do.call("cyto_plot", 
+              c(args[names(args) %in% cyto_plot_args],
+                list("axes_trans" = transformer_list,
+                     "title" = NA,
+                     "display" = 1)))
     })
-    
-    # Reset graphics parameters
-    par(old_pars)
   
   }
 
@@ -632,7 +787,7 @@ cyto_transformer_biex.flowFrame <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORMER_LOGICLE -----------------------------------------------------
+## CYTO_TRANSFORMER_LOGICLE ----------------------------------------------------
 
 #' Definition(s) of logicle transformation(s)
 #'
@@ -657,25 +812,37 @@ cyto_transformer_biex.flowFrame <- function(x,
 #'   be plotted using \code{cyto_plot}.
 #' @param popup logical indicating whether the plots should be constructed in a
 #'   pop-up window.
+#' @param display number or frequency of events to display in plots, set to
+#'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to use entire axes ranges. Fine control over
+#'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+#'   arguments.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}.
+#'   \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+#'    and \code{\link{cyto_plot}}.
 #'
 #' @return a \code{transformerList} object.
 #'
-#' @importFrom flowCore inverseLogicleTransform
+#' @importFrom flowCore inverseLogicleTransform CytoExploreR_.estimateLogicle
 #' @importFrom flowWorkspace flow_trans transformerList
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link[flowCore:logicleTransform]{estimateLogicle}}
-#' @seealso \code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+#' @seealso
+#' \code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
 #' @seealso \code{\link{cyto_transformer_arcsinh}}
 #' @seealso \code{\link{cyto_transformer_biex}}
 #' @seealso \code{\link{cyto_transformer_combine}}
 #' @seealso \code{\link{cyto_transform}}
 #'
-#' @rdname cyto_transformer_logicle
+#' @name cyto_transformer_logicle
+NULL
+
+#' @noRd
 #' @export
 cyto_transformer_logicle <- function(x, ...) {
   UseMethod("cyto_transformer_logicle")
@@ -688,15 +855,19 @@ cyto_transformer_logicle.GatingSet <- function(x,
                                              parent = "root",
                                              select = NULL,
                                              plot = TRUE,
-                                             popup = FALSE, ...) {
+                                             popup = FALSE,
+                                             display = 25000,
+                                             axes_limits = "machine", ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT & COPY
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
-  # Select data
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -705,6 +876,8 @@ cyto_transformer_logicle.GatingSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -719,10 +892,15 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
                                                    parent = "root",
                                                    select = NULL,
                                                    plot = TRUE,
-                                                   popup = FALSE, ...) {
+                                                   popup = FALSE,
+                                                   display = 25000,
+                                                   axes_limits = "machine", 
+                                                   ...) {
 
-  # Extract data
-  x <- cyto_extract(x, parent = parent)
+  # EXTRACT
+  x <- cyto_extract(x, 
+                    parent = parent,
+                    copy = TRUE)
 
   # Call to flowFrame method
   transformer_list <- cyto_transformer_logicle(
@@ -730,6 +908,8 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -737,18 +917,26 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_logicle
 #' @export
 cyto_transformer_logicle.flowSet <- function(x,
                                            channels = NULL,
+                                           parent = "root",
                                            select = NULL,
-                                           plot = FALSE,
-                                           popup = FALSE, ...) {
+                                           plot = TRUE,
+                                           popup = FALSE,
+                                           display = 25000,
+                                           axes_limits = "machine", ...) {
 
-  # Select data
+  # COPY
+  x <- cyto_copy(x)
+  
+  # SELECT
   x <- cyto_select(x, select)
 
-  # Coerce to flowFrame
+  # FLOWFRAME
   x <- cyto_convert(x, "flowFrame")
 
   # Call to flowFrame method
@@ -757,6 +945,8 @@ cyto_transformer_logicle.flowSet <- function(x,
     channels = channels,
     plot = plot,
     popup = popup,
+    display = display,
+    axes_limits = axes_limits,
     ...
   )
 
@@ -764,27 +954,39 @@ cyto_transformer_logicle.flowSet <- function(x,
   return(transformer_list)
 }
 
+# Requires parent argument to allow passing from cyto_transform
+
 #' @rdname cyto_transformer_logicle
 #' @export
 cyto_transformer_logicle.flowFrame <- function(x,
                                              channels = NULL,
+                                             parent = "root",
                                              select = NULL,
                                              plot = TRUE,
-                                             popup = FALSE, ...) {
+                                             popup = FALSE,
+                                             display = 25000,
+                                             axes_limits = "machine", ...) {
 
-  # Prepare Channels
+  # COPY
+  x <- cyto_copy(x)
+  
+  # PULL DOWN ALL ARGUMENTS
+  args <- as.list(match.call(expand.dots = TRUE))[-1]  
+  
+  # CHANNELS
   if (is.null(channels)) {
     channels <- cyto_fluor_channels(x)
   } else {
     channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
   }
+  args[["channels"]] <- channels
 
-  # Sort out transformations
-  transform_list <- flowCore:::.estimateLogicle(
-    x,
-    channels = channels,
-    ...
-  )
+  # ESTIMATELOGICLE ARGUMENTS - CANNOT USE FORMALARGS (CYTOEXPLORER WRAPPER)
+  estimateLogicle_args <- c("t","m","a","q")
+  # TRANSFORMATIONS
+  transform_list <- do.call("CytoExploreR_.estimateLogicle",
+                            c(args[c("x","channels")],
+                              args[names(args) %in% estimateLogicle_args]))
   transformer_list <- lapply(transform_list, function(z) {
     inv <- inverseLogicleTransform(trans = z)
     flow_trans(
@@ -799,20 +1001,31 @@ cyto_transformer_logicle.flowFrame <- function(x,
     trans = transformer_list
   )
 
-  # Construct plots
+  # PLOTS
   if(plot == TRUE){
     
-    # Sample for speed
-    x <- cyto_sample(x, display = 25000, seed = 56)
+    # GRAPHICAL APAREMETERS
+    old_pars <- .par("mfrow")
+    on.exit(par(old_pars))
     
-    # Apply transformations to data for visualisation
+    # CYTO_PLOT ARGUMENTS
+    cyto_plot_args <- formalArgs("cyto_plot.flowFrame")
+    
+    # REMOVE DISPLAY/AXES_TRANS/TITLE ARGUMENTS
+    cyto_plot_args <- cyto_plot_args[-match(c("display",
+                                              "axes_trans",
+                                              "title"), 
+                                            cyto_plot_args)]
+    
+    # SAMPLING
+    x <- cyto_sample(x, display = display, seed = 56)
+    
+    # APPLY TRANSFORMATIONS
     transform_list <- cyto_transform_extract(transformer_list, inverse = FALSE)
     x <- transform(x, transform_list)
+    args[["x"]] <- x
 
-    # Old graphics parameters
-    old_pars <- .par("mfrow")
-    
-    # Set up plotting area
+    # PLOTTING AREA
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
@@ -820,17 +1033,15 @@ cyto_transformer_logicle.flowFrame <- function(x,
       n2mfrow(n)[2]
     )
 
-    # Generate plot for each channel
+    # PLOT PER CHANNEL
     lapply(channels, function(chan) {
-      cyto_plot(x,
-        channels = chan,
-        axes_trans = transformer_list,
-        title = NA
-      )
+      args[["channels"]] <- chan
+      do.call("cyto_plot", 
+              c(args[names(args) %in% cyto_plot_args],
+                list("axes_trans" = transformer_list,
+                     "title" = NA,
+                     "display" = 1)))
     })
-    
-    # Reset graphic parameters
-    par(old_pars)
     
   }
 
@@ -838,7 +1049,7 @@ cyto_transformer_logicle.flowFrame <- function(x,
   return(transformer_list)
 }
 
-# CYTO_TRANSFORMER_COMBINE -------------------------------------------------------
+## CYTO_TRANSFORMER_COMBINE ----------------------------------------------------
 
 #' Combine cyto_transformer definitions
 #'
@@ -877,9 +1088,10 @@ cyto_transformer_combine <- function(...) {
   
 }
 
-# .CYTO_TRANSFORMER_COMPLETE ---------------------------------------------------
+## .CYTO_TRANSFORMER_COMPLETE --------------------------------------------------
 
 #' Get complete transformerList for compensation functions
+#' @importFrom methods is
 #' @noRd
 .cyto_transformer_complete <- function(x, ...){
   UseMethod(".cyto_transformer_complete")
@@ -900,7 +1112,7 @@ cyto_transformer_combine <- function(...) {
   # Transformations supplied
   if(!.all_na(axes_trans)){
     # Must be transformerList
-    if(!inherits(axes_trans, "transformerList")){
+    if(!is(axes_trans, "transformerList")){
       stop("'axes_trans' must be an object of class transformerList.")
     }
     # Some transformations are missing
@@ -945,7 +1157,7 @@ cyto_transformer_combine <- function(...) {
   # Transformations supplied
   if(!.all_na(axes_trans)){
     # Must be transformerList
-    if(!inherits(axes_trans, "transformerList")){
+    if(!is(axes_trans, "transformerList")){
       stop("'axes_trans' must be an object of class transformerList.")
     }
     # Some stranformations are missing
@@ -982,7 +1194,11 @@ cyto_transformer_combine <- function(...) {
   channels <- cyto_fluor_channels(x)
   
   # Extract transformations from GatingHierarchy
-  gh_trans <- x@transformation
+  gh_trans <- gh_get_transformations(x,
+                                     only.function = FALSE)
+  if(length(gh_trans) != 0){
+    gh_trans <- cyto_transformer_combine(gh_trans)
+  }
   
   # In case NULL axes_trans
   if(is.null(axes_trans)){
@@ -1124,4 +1340,60 @@ cyto_transformer_combine <- function(...) {
   # Return complete transformerList
   return(axes_trans)
   
+}
+
+## CYTO_TRANSFORMER_EXTRACT ----------------------------------------------------
+
+#' Extract transformers from a GatingHierarchy or GatingSet
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}}
+#'   or \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'
+#' @return transformerList or NA.
+#'
+#' @importFrom flowWorkspace gh_get_transformations
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' 
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#' 
+#' # Apply transformations
+#' gs <- cyto_transform(gs, channels = c("CD4", "CD8"))
+#'
+#' # Extract transformations
+#' trans <- cyto_transformer_extract(gs)
+#'
+#' @export
+cyto_transformer_extract <- function(x){
+  
+  # GATINGSET
+  if(is(x, "GatingSet")){
+    x <- x[[1]]
+  }
+  
+  # GATINGHIERARCHY
+  if(is(x, "GatingHierarchy")){
+    transformers <- gh_get_transformations(x, 
+                                           only.function = FALSE)
+    if(length(transformers) != 0){
+      transformers <- cyto_transformer_combine(transformers)
+    }else{
+      transformers <- NA
+    }
+  # FLOWFRAME/FLOWSET
+  }else{
+    transformers <- NA
+  }
+  
+  # RETURN TRANSFORMERLIST
+  return(transformers)
 }

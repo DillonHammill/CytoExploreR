@@ -8,26 +8,57 @@
 \alias{cyto_transformer_logicle.flowFrame}
 \title{Definition(s) of logicle transformation(s)}
 \usage{
-cyto_transformer_logicle(x, ...)
+\method{cyto_transformer_logicle}{GatingSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transformer_logicle}{GatingSet}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{GatingHierarchy}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transformer_logicle}{GatingHierarchy}(x, channels = NULL,
-  parent = "root", select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{flowSet}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 
-\method{cyto_transformer_logicle}{flowSet}(x, channels = NULL,
-  select = NULL, plot = FALSE, popup = FALSE, ...)
-
-\method{cyto_transformer_logicle}{flowFrame}(x, channels = NULL,
-  select = NULL, plot = TRUE, popup = FALSE, ...)
+\method{cyto_transformer_logicle}{flowFrame}(
+  x,
+  channels = NULL,
+  parent = "root",
+  select = NULL,
+  plot = TRUE,
+  popup = FALSE,
+  display = 25000,
+  axes_limits = "machine",
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},
 \code{GatingHierarchy} or \code{GatingSet}.}
-
-\item{...}{additional arguments passed to
-\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}.}
 
 \item{channels}{name(s) of channel(s)/marker(s) for which transformation
 functions must be generated. Set to all the fluorescent channels by default
@@ -44,6 +75,19 @@ be plotted using \code{cyto_plot}.}
 
 \item{popup}{logical indicating whether the plots should be constructed in a
 pop-up window.}
+
+\item{display}{number or frequency of events to display in plots, set to
+25000 events by default. See \code{\link{cyto_plot}} for details.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to use entire axes ranges. Fine control over
+axes limits can be obtained by altering the \code{xlim} and \code{ylim}
+arguments.}
+
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
+ and \code{\link{cyto_plot}}.}
 }
 \value{
 a \code{transformerList} object.
@@ -60,7 +104,7 @@ data.
 \seealso{
 \code{\link[flowCore:logicleTransform]{estimateLogicle}}
 
-\code{\link[flowWorkspace:estimateLogicle.GatingHierarchy]{estimateLogicle}}
+\code{\link[flowWorkspace:estimateLogicle]{estimateLogicle}}
 
 \code{\link{cyto_transformer_arcsinh}}
 

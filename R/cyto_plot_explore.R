@@ -1,4 +1,4 @@
-# CYTO_PLOT_EXPLORE ------------------------------------------------------------
+## CYTO_PLOT_EXPLORE -----------------------------------------------------------
 
 #' Explore Cytometry Data in Bivariate Plots
 #'
@@ -37,7 +37,8 @@
 #' @param ... additional arguments passed to \code{cyto_plot}.
 #'
 #' @importFrom grDevices n2mfrow
-#' @importFrom graphics mtext
+#' @importFrom graphics mtext plot.new
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -87,6 +88,9 @@ cyto_plot_explore.GatingSet <- function(x,
     header <- "Combined Events"
   }
   
+  # Transformations
+  axes_trans <- cyto_transformer_extract(x)
+  
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
                     channels_x = channels_x,
@@ -103,7 +107,7 @@ cyto_plot_explore.GatingSet <- function(x,
   
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
@@ -147,6 +151,9 @@ cyto_plot_explore.GatingHierarchy <- function(x,
   # Extract parent population
   fr <- cyto_extract(x)
   
+  # Transformations
+  axes_trans <- cyto_transformer_extract(x)
+  
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
                     channels_x = channels_x,
@@ -163,7 +170,7 @@ cyto_plot_explore.GatingHierarchy <- function(x,
   
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
@@ -222,7 +229,7 @@ cyto_plot_explore.flowSet <- function(x,
   
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()
@@ -362,7 +369,7 @@ cyto_plot_explore.flowFrame <- function(x,
   
   # Turn off graphics device for saving
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       
       # Close graphics device
       dev.off()

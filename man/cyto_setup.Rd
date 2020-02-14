@@ -4,7 +4,15 @@
 \alias{cyto_setup}
 \title{Load.fcs files into GatingSet and annotate with experiment details}
 \usage{
-cyto_setup(path = ".", gatingTemplate = NULL, ...)
+cyto_setup(
+  path = ".",
+  gatingTemplate = NULL,
+  restrict = FALSE,
+  clean = FALSE,
+  markers = TRUE,
+  details = TRUE,
+  ...
+)
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in (e.g. name of
@@ -12,17 +20,53 @@ a folder in current working directory).}
 
 \item{gatingTemplate}{name of a gatingTemplate csv file to be used for gate
 saving.}
+
+\item{restrict}{logical indicating whether unassigned channels should be
+dropped from the returned cytoset, set to FALSE by default.  See
+\code{\link{cyto_channels_restrict}}.}
+
+\item{clean}{logical indicating whether the loaded data should be cleaned
+using \code{cyto_clean}, set to FALSE by default.}
+
+\item{markers}{logical indicating whether a call should be made to
+\code{cyto_markers_edit} to update the markers associated with channels in
+the loaded sampes, set to TRUE by default.}
+
+\item{details}{logical indicating whether a call should be made to
+\code{cyto_details_edit} to update the experimental details associated with
+the loaded samples, set to TRUE by default.}
+
+\item{...}{additional arguments passed to
+\code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}
 }
 \value{
 object of class
   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \description{
-Load.fcs files into GatingSet and annotate with experiment details
+\code{cyto_setup} takes care of all the data loading and annotation steps to
+prepare your cytometry data for downstream analyses. The .fcs files are first
+read into a \code{\link[flowWorkspace:cytoset]{cytoset}} using
+\code{\link{cyto_load}} which is then added to a
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+}
+\details{
+Calls are then made to \code{\link{cyto_markers_edit}} and
+\code{\link{cyto_details_edit}} to update the GatingSet with the details of
+the experiment. These details can be modified later with additional calls to
+\code{\link{cyto_markers_edit}} and/or \code{\link{cyto_details_edit}}.
+
+Through the \code{clean} argument, the data can then be optionally cleaned
+using \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}} to automatically remove
+anomalies in the recorded data.
+
+Users can optionally provide a name for a gatingTemplate csv file which will
+be created if necessary and assigned as the active gatingTemplate.
 }
 \examples{
 
-# Load in CytoExploreRData to acces data
+\dontrun{
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Get path to Activation .fcs files in CytoExploreRData
@@ -30,14 +74,30 @@ datadir <- system.file("extdata", package = "CytoExploreRData")
 path <- paste0(datadir, "/Activation")
 
 # Load in .fcs files into an annotated GatingSet
-fs <- cyto_setup(path)
+gs <- cyto_setup(path)
 
 # Markers have been assigned
 cyto_extract(gs, "root")[[1]]
 
 # Experiment details have been updated
 cyto_details(gs)
+}
 
+}
+\seealso{
+\code{\link{cyto_load}}
+
+\code{\link{cyto_markers_edit}}
+
+\code{\link{cyto_details_edit}}
+
+\code{\link{cyto_channels_restrict}}
+
+\code{\link{cyto_clean}}
+
+\code{\link{cyto_gatingTemplate_select}}
+
+\code{\link{cyto_gatingTemplate_create}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

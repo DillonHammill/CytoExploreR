@@ -8,12 +8,13 @@ test_that("cyto_gate_manual", {
                             "y" = c(0, 50000)))
   testthat::with_mock(
     locator = mock_locator,
-      expect_equal(unname(.cyto_gate_manual(fs[[1]], 
+      expect_equal(.cyto_gate_manual(fs[[1]], 
                                    channels = c("FSC-A","SSC-A"), 
-                                   alias = "Cells", 
+                                   alias = "A", 
                                    type = "r",
-                                   plot = FALSE)), 
-               filters(list(rg2)))
+                                   plot = TRUE,
+                                   display = 100), 
+               list("A" = rg2))
   )
 
 })

@@ -7,7 +7,7 @@
 cyto_details(x)
 }
 \arguments{
-\item{object}{of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
@@ -20,4 +20,20 @@ Simply an autocomplete-friendly wrapper around
 \code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
 \code{\link{cyto_names}} if a
 \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
+}
+\examples{
+\dontrun{
+# Load in CytoExploreRData to access data
+library(CytoExploreRData)
+
+# Activation flowSet
+fs <- Activation
+
+# Experiment details
+cyto_details(fs)
+}
+
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

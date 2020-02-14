@@ -22,7 +22,7 @@ cyto_names(x)
 \method{cyto_names}{list}(x)
 }
 \arguments{
-\item{object}{of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
@@ -34,7 +34,33 @@ names associated with the supplied object.
 Simply a convenient and autocomplete-friendly wrapper around
 \code{\link[flowCore:identifier-methods]{identifier}}
 \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
-names from flowFrame, flowSet GatingHierarchy or GatingSet. Anynonymous
+names from flowFrame, flowSet GatingHierarchy or GatingSet. Anonymous
 \code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
 converted to \code{"Combined Events"}.
+}
+\examples{
+
+# Load in CytoExploreRData to access data
+library(CytoExploreRData)
+
+# Activation flowSet
+fs <- Activation
+
+# Activation GatingSet
+gs <- GatingSet(fs)
+
+# flowFrame
+cyto_names(fs[[1]])
+
+# flowSet
+cyto_names(fs)
+
+# GatingHierarchy
+cyto_names(gs[[1]])
+
+# GatingSet
+cyto_names(gs)
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

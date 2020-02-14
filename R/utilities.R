@@ -1,4 +1,4 @@
-# EMPTY CHARACTER STRINGS ------------------------------------------------------
+## EMPTY CHARACTER STRINGS -----------------------------------------------------
 
 #' Check if vector contains only empty chracter strings
 #'
@@ -25,7 +25,16 @@
   
 }
 
-# ALL NA -----------------------------------------------------------------------
+## MATCH_IND -------------------------------------------------------------------
+  
+#' Indices for matches excluding NA
+#' @noRd
+match_ind <- function(x, y, ...){
+  ind <- match(x, y, ...)
+  ind[!is.na(ind)]
+}
+
+## ALL NA ----------------------------------------------------------------------
 
 #' Check all elements of vector are NA
 #' 
@@ -40,11 +49,11 @@
   if(is.null(x)){
     return(FALSE)
   }else{
-    return(all(suppressWarnings(is.na(x))))
+    return(all(suppressWarnings(is.na(unlist(x)))))
   }
 }
 
-# ARGUMENT LIST ----------------------------------------------------------------
+## ARGUMENT LIST ---------------------------------------------------------------
 
 #' Pull down arguments from environment into list
 #' 
@@ -74,7 +83,7 @@
   
 }
 
-# ARGUMENT UPDATE --------------------------------------------------------------
+## ARGUMENT UPDATE -------------------------------------------------------------
 
 #' Update arguments of function using a named list of arguments
 #' 
@@ -94,7 +103,7 @@
   
 }
 
-# FILE WD CHECK ----------------------------------------------------------------
+## FILE WD CHECK ---------------------------------------------------------------
 
 #' Check if a file exists in the current working directory
 #'
@@ -120,14 +129,14 @@ file_wd_check <- function(name) {
   }
 }
 
-# ROUND ------------------------------------------------------------------------
+## ROUND -----------------------------------------------------------------------
 
 #' @noRd
 .round <- function(x, k = 2){
   trimws(format(round(x, k), nsmall = k))
 } 
 
-# LAPPLY -----------------------------------------------------------------------
+## LAPPLY ----------------------------------------------------------------------
 
 #' Automatically flatten lapply results
 #' @noRd
@@ -135,7 +144,7 @@ LAPPLY <- function(...){
   unlist(lapply(...))
 }
 
-# PAR --------------------------------------------------------------------------
+## PAR -------------------------------------------------------------------------
 
 #' Extract graphical parameters as list
 #' @importFrom graphics par
@@ -148,4 +157,12 @@ LAPPLY <- function(...){
     pars <- par(x)
   }
   return(pars)
+}
+
+# SUPPRESS WARNINGS & MESSAGES -------------------------------------------------
+
+#' Suppress warnings and messages
+#' @noRd
+.suppress_all_messages <- function(...){
+  suppressWarnings(suppressMessages(...))
 }

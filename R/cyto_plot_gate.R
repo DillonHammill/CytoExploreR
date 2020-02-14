@@ -1,4 +1,4 @@
-# CYTO_PLOT_GATE ---------------------------------------------------------------
+## CYTO_PLOT_GATE --------------------------------------------------------------
 
 #' Plot Gate Objects onto an Existing cyto_plot
 #'
@@ -18,11 +18,13 @@
 #' @param gate_fill_alpha numeric [0,1] to control gate fill colour
 #'   transparency, set to 0 by default to make gate fill colour completely
 #'   transparent.
+#' @param ... not in use.
 #'
 #' @importFrom graphics par rect polygon abline
 #' @importFrom grDevices adjustcolor
 #' @importFrom flowCore parameters
 #' @importFrom tools file_ext
+#' @importFrom methods is
 #'
 #' @return invisibly return modified gate objects with dimensions appropriate
 #'   for the constructed plot.
@@ -52,7 +54,8 @@ cyto_plot_gate.rectangleGate <- function(gate,
                                          gate_line_width = 2.5,
                                          gate_line_col = "red",
                                          gate_fill = "white",
-                                         gate_fill_alpha = 0){
+                                         gate_fill_alpha = 0,
+                                         ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -60,8 +63,8 @@ cyto_plot_gate.rectangleGate <- function(gate,
   lims <- par("usr")
   
   # X LIMITS
-  xmin <- lims[3]
-  xmax <- lims[4]
+  xmin <- lims[1]
+  xmax <- lims[2]
   xrng <- xmax - xmin
   xpad <- (xrng - xrng / 1.04) / 2
   xmin <- xmin + 0.5 * xpad # 1% BUFFER
@@ -96,21 +99,21 @@ cyto_plot_gate.rectangleGate <- function(gate,
   }else{
     channels <- parameters(gate)
   }
-
+  
   # PLOT GATE ------------------------------------------------------------------
   
   # 1D PLOT
   if(length(channels) == 1){
     # REPLACE INFINITE X COORDS
-    if(is.infinite(gate@min[channels[1]])){
-      gate@min[channels[1]] <- xmin
+    if(is.infinite(gate@min)){
+      gate@min <- xmin
     }
-    if(is.infinite(gate@max[channels[1]])){
-      gate@max[channels[1]] <- xmax
+    if(is.infinite(gate@max)){
+      gate@max <- xmax
     }
     # PLOT GATE
-    rect(xleft = gate@min[channels[1]],
-         xright = gate@max[channels[1]],
+    rect(xleft = gate@min,
+         xright = gate@max,
          ybottom = ymin,
          ytop = ymax,
          lty = gate_line_type,
@@ -159,7 +162,8 @@ cyto_plot_gate.polygonGate <- function(gate,
                                         gate_line_width = 2.5,
                                         gate_line_col = "red",
                                         gate_fill = "white",
-                                        gate_fill_alpha = 0){
+                                        gate_fill_alpha = 0,
+                                       ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -168,8 +172,8 @@ cyto_plot_gate.polygonGate <- function(gate,
   lims <- par("usr")
   
   # X LIMITS
-  xmin <- lims[3]
-  xmax <- lims[4]
+  xmin <- lims[1]
+  xmax <- lims[2]
   xrng <- xmax - xmin
   xpad <- (xrng - xrng / 1.04) / 2
   xmin <- xmin + 0.5 * xpad # 1% BUFFER
@@ -307,7 +311,8 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
                                           gate_line_width = 2.5,
                                           gate_line_col = "red",
                                           gate_fill = "white",
-                                          gate_fill_alpha = 0){
+                                          gate_fill_alpha = 0,
+                                         ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -316,8 +321,8 @@ cyto_plot_gate.ellipsoidGate <- function(gate,
   lims <- par("usr")
   
   # X LIMITS
-  xmin <- lims[3]
-  xmax <- lims[4]
+  xmin <- lims[1]
+  xmax <- lims[2]
   xrng <- xmax - xmin
   xpad <- (xrng - xrng / 1.04) / 2
   xmin <- xmin + 0.5 * xpad # 1% BUFFER
@@ -458,7 +463,8 @@ cyto_plot_gate.quadGate <- function(gate,
                                      gate_line_width = 2.5,
                                      gate_line_col = "red",
                                      gate_fill = "white",
-                                     gate_fill_alpha = 0){
+                                     gate_fill_alpha = 0,
+                                    ...){
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
@@ -565,7 +571,8 @@ cyto_plot_gate.filters <- function(gate,
                                     gate_line_width = 2.5,
                                     gate_line_col = "red",
                                     gate_fill = "white",
-                                    gate_fill_alpha = 0){
+                                    gate_fill_alpha = 0,
+                                   ...){
   
   # PREPARE GATE ---------------------------------------------------------------
   
@@ -598,7 +605,8 @@ cyto_plot_gate.list <- function(gate,
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
                                 gate_fill = "white",
-                                gate_fill_alpha = 0){
+                                gate_fill_alpha = 0,
+                                ...){
 
   # PREPARE GATE ---------------------------------------------------------------
   

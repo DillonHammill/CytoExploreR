@@ -1,6 +1,5 @@
 library(testthat)
-library(mockery)
-library(CytoRSuite)
-library(CytoRSuiteData)
+library(CytoExploreR)
+library(CytoExploreRData)
 
-test_check("CytoRSuite")
+test_check("CytoExploreR")

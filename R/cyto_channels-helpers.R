@@ -1,4 +1,4 @@
-# CYTO_CHANNELS ----------------------------------------------------------------
+## CYTO_CHANNELS ---------------------------------------------------------------
 
 #' Extract channel names
 #'
@@ -10,6 +10,7 @@
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select vector of channel names to select.
 #' @param exclude vector of channel names to exclude.
 #'
 #' @return vector of channel names.
@@ -34,20 +35,29 @@
 #' # flowFrame
 #' cyto_channels(fs[[1]])
 #'
-#' # flowset
+#' # flowSet
 #' cyto_channels(fs)
 #'
-#' # GatingHierachy
+#' # GatingHierarchy
 #' cyto_channels(gs[[1]])
 #'
 #' # GatingSet - exclude FSC & SSC channels
 #' cyto_channels(gs, exclude = c("FSC","SSC"))
 #'
-#' @name cyto_channels
-cyto_channels <- function(x, exclude = NULL){
+#' @export
+cyto_channels <- function(x, 
+                          select = NULL,
+                          exclude = NULL){
   
   # CHANNELS
   channels <- colnames(x)
+  
+  # SELECT
+  if(!is.null(select)){
+    lapply(select, function(z){
+      channels <<- channels[grepl(z, channels, ignore.case = TRUE)]
+    })
+  }
   
   # EXCLUDE
   if(!is.null(exclude)){
@@ -61,7 +71,103 @@ cyto_channels <- function(x, exclude = NULL){
   
 }
 
-# CYTO_FLUOR_CHANNELS ----------------------------------------------------------
+## CYTO_MARKERS ----------------------------------------------------------------
+
+#' Extract marker names
+#' 
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   
+#' @return vector of marker names or NULL if no markers have been assigned.
+#' 
+#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace pData
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_channels}}
+#' @seealso \code{\link{cyto_fluor_channels}}
+#'
+#' @examples
+#'
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # flowFrame
+#' cyto_markers(fs[[1]])
+#'
+#' # flowSet
+#' cyto_markers(fs)
+#'
+#' # GatingHierarchy
+#' cyto_markers(gs[[1]])
+#'
+#' # GatingSet
+#' cyto_markers(gs)
+#' 
+#' @name cyto_markers
+NULL
+
+#' @noRd
+#' @export
+cyto_markers <- function(x){
+  UseMethod("cyto_markers")
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.GatingSet <- function(x){
+  # Extract data
+  fs <- cyto_extract(x, "root")
+  # flowFrame
+  fr <- fs[[1]]
+  # flowFrame method call
+  cyto_markers(fr)
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.GatingHierarchy <- function(x){
+  # Extract data
+  fr <- cyto_extract(x, "root")
+  # flowFrame method call
+  cyto_markers(fr)
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.flowSet <- function(x){
+  # flowFrame
+  fr <- x[[1]]
+  # flowFrame method call
+  cyto_markers(fr)
+}
+
+#' @rdname cyto_markers
+#' @export
+cyto_markers.flowFrame <- function(x){
+  # Extract marker information
+  markers <- as.character(pData(parameters(x))$desc)
+  # Add channels as names
+  names(markers) <- as.character(pData(parameters(x))$name)
+  # Remove NA entries
+  if(.all_na(markers)){
+    return(NULL)
+  }else{
+    markers <- markers[!is.na(markers)]
+    return(markers)
+  }
+}
+
+## CYTO_FLUOR_CHANNELS ---------------------------------------------------------
 
 #' Extract Fluorescent Channels
 #'
@@ -79,7 +185,7 @@ cyto_channels <- function(x, exclude = NULL){
 #' fs <- Activation
 #'
 #' # Add samples to GatingSet
-#' gs <- GtaingSet(fs)
+#' gs <- GatingSet(fs)
 #'
 #' # Fluorescent channels of flowFrame
 #' cyto_fluor_channels(fs[[1]])
@@ -96,17 +202,26 @@ cyto_channels <- function(x, exclude = NULL){
 #'
 #' @export
 cyto_fluor_channels <- function(x){
-  cyto_channels(x, exclude = c("FSC","SSC","Time","Original"))
+  cyto_channels(x, exclude = c("FSC",
+                               "SSC",
+                               "Time",
+                               "Original",
+                               "Sample ID",
+                               "Event ID",
+                               "UMAP",
+                               "tSNE",
+                               "PCA",
+                               "EmbedSOM"))
 }
 
-# CYTO_CHANNELS_EXTRACT --------------------------------------------------------
+## CYTO_CHANNELS_EXTRACT -------------------------------------------------------
 
 #' Extract channels associated with certain markers
 #'
 #' \code{cyto_channels_extract} will check whether the supplied channels or
 #' marker names are valid for the
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowset}},
+#' \code{\link[flowCore:flowSet-class]{flowSet}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' valid channel names. \code{cyto_channels_extract} is particularly useful for
@@ -114,7 +229,7 @@ cyto_fluor_channels <- function(x){
 #'
 #' @param x an object of class
 #'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowset}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
@@ -125,10 +240,24 @@ cyto_fluor_channels <- function(x){
 #'
 #' @return  A vector of valid channel names.
 #'
-#' @importFrom flowWorkspace pData getData
+#' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' 
+#' library(CytoExploreRData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#'
+#' # Add samples to GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # Extract channels used for CD4 & CD8
+#' cyto_channels_extract(gs, c("CD4", "CD8"))
 #'
 #' @rdname cyto_channels_extract
 #'
@@ -161,37 +290,33 @@ cyto_channels_extract <- function(x,
     channels <- chans[channels]
   }
   
-  # Check if channels match colnames of flowFrame
-  if (all(channels %in% chans)) {
-    
-    # Supplied channels are valid
-  } else if (!all(channels %in% chans)) {
-    lapply(channels, function(channel) {
-      if (channel %in% chans) {
-        
-        
-      } else if (channel %in% fr_data$desc) {
-        channels[channels %in% channel] <<- as.character(
-          fr_data$name[match(channel, fr_data$desc)]
-        )
-      } else if (!channel %in% chans & !channel %in% fr_data$desc) {
-        stop(paste(channel, "is not a valid channel/marker."))
-      }
-    })
-  }
+  # Extract channels
+  LAPPLY(channels, function(z){
+    if(.all_na(z)){
+      
+    }else if(z %in% chans){
+      
+    } else if (z %in% fr_data$desc) {
+      channels[channels %in% z] <<- as.character(
+        fr_data$name[match(z, fr_data$desc)]
+      )
+    } else if (!z %in% chans & !z %in% fr_data$desc) {
+      stop(paste(z, "is not a valid channel/marker."))
+    }
+  })
   
   return(channels)
   
 }
 
-# CYTO_MARKERS_EXTRACT ---------------------------------------------------------
+## CYTO_MARKERS_EXTRACT --------------------------------------------------------
 
 #' Extract marker names for certain channels
 #'
 #' \code{cyto_markers_extract} will check whether the supplied channels or
 #' marker names are valid for the
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowset}},
+#' \code{\link[flowCore:flowSet-class]{flowSet}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' marker names. The name of the channel will be returned if there is no
@@ -199,7 +324,7 @@ cyto_channels_extract <- function(x,
 #'
 #' @param x an object of class
 #'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowset}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
@@ -212,8 +337,22 @@ cyto_channels_extract <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#'
+#' library(CytoExploreRData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#'
+#' # Add samples to GatingSet
+#' gs <- GatingSet(fs)
+#'
+#' # Extract markers used for PE-A and Alexa Fluor 488-A
+#' cyto_markers_extract(gs, c("Alexa Fluor 488-A","PE-A"))
 #'
 #' @rdname cyto_markers_extract
 #'
@@ -268,7 +407,7 @@ cyto_markers_extract <- function(x,
   return(channels)
 }
 
-# CYTO_CHANNEL_SELECT ----------------------------------------------------------
+## CYTO_CHANNEL_SELECT ---------------------------------------------------------
 
 #' Select Fluorescent Channel for Compensation Controls
 #'
@@ -279,9 +418,12 @@ cyto_markers_extract <- function(x,
 #'
 #' @return vector of channels in order of compensation Control samples.
 #'
+#' @importFrom utils menu
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
+#' \dontrun{
 #' library(CytoExploreRData)
 #'
 #' # Load in samples
@@ -289,7 +431,8 @@ cyto_markers_extract <- function(x,
 #'
 #' # Select a channel for each control from dropdown menu
 #' cyto_channel_select(fs)
-#' @name cyto_channel_select
+#' }
+#' @export
 cyto_channel_select <- function(x){
 
   # Extract data
@@ -306,9 +449,169 @@ cyto_channel_select <- function(x){
   
   # Run through list of flowFrames
   chans <- LAPPLY(seq_len(length(x)), function(z){
-    message(cyto_names(x))
-    opts[menu(choices = opts, graphics = TRUE)]
+    message(cyto_names(x[[z]]))
+    ind <- menu(choices = opts, graphics = TRUE)
+    if(ind == 0){
+      stop(paste0("No channel selected for ", cyto_names(x[[z]]), "."))
+    }
+    opts[ind]
   })
   
   return(chans)
+}
+
+## CYTO_CHANNEL_MATCH ----------------------------------------------------------
+
+#' Table Editor for Channel Match File Construction
+#'
+#' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param save_as name to use for the saved channel match csv file, set to
+#'   \code{"date-Channel-Match.csv"}.
+#' @param menu logical indicating whether channels should be selected from a
+#'   drop down menu instead of manually typing them in.
+#'   
+#' @return update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
+#'   write channel matching to csv file and return channel matching as a
+#'   data.frame.
+#'
+#' @importFrom utils write.csv edit
+#' @importFrom tools file_ext
+#'
+#' @examples
+#' \dontrun{
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreR)
+#'
+#' # Generate channel match file for compensation controls
+#' cyto_channel_match(Compensation)
+#' }
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_channel_match <- function(x,
+                               save_as = NULL,
+                               menu = TRUE) {
+  
+  # Set default name for channel_match file
+  if (is.null(save_as)) {
+    save_as <- paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-", "Channel-Match.csv"
+    )
+    # save_as must contain csv file extension
+  } else {
+    # File extension missing
+    if (file_ext(save_as) != "csv") {
+      save_as <- paste0(save_as, ".csv")
+    }
+  }
+  
+  # Extract sample names
+  nms <- cyto_names(x)
+  
+  # Select channels from menu
+  if(menu == TRUE){
+    chans <- cyto_channel_select(x)
+    channel_match <- data.frame("name" = nms,
+                                "channel" = chans)
+    colnames(channel_match) <- c("name", "channel")
+    rownames(channel_match) <- NULL
+    # Manually type in channels
+  }else if(menu == FALSE){
+    # Construct data.frame for editing
+    channel_match <- data.frame("name" = nms, 
+                                "channel" = rep("NA", length(nms)))
+    colnames(channel_match) <- c("name", "channel")
+    rownames(channel_match) <- NULL
+    
+    # Edit channel_match
+    channel_match <- suppressWarnings(edit(channel_match))
+  }
+  
+  # Convert markers to channels
+  channel_match$channel <- LAPPLY(channel_match$channel, function(z){
+    if(!grepl(z, "unstained", ignore.case = TRUE)){
+      cyto_channels_extract(x, z)
+    }else{
+      z
+    }
+  })
+  
+  # Check that all channels are valid or throw an error
+  if (!all(channel_match$channel %in% c("Unstained", "unstained",
+                                        cyto_fluor_channels(x)))) {
+    stop("Some inputs in the channel column are not valid.")
+  }
+  
+  # Write edited channel match file to csv file
+  write.csv(channel_match, save_as, row.names = FALSE)
+  
+  # Update cyto_details
+  cyto_details(x)$channel <- channel_match$channel
+  
+  # Return edited channel match file
+  return(channel_match)
+}
+
+## CYTO_CHANNELS_RESTRICT ------------------------------------------------------
+
+#' Remove channels of a flowFrame or flowSet
+#'
+#' \code{cyto_channels_restrict} removes channels from the flowFrame or flowSet
+#' which do not have markers assigned. The FSC, SSC and Time parameters are
+#' always retained irrespective of marker assignment.
+#'
+#' @param x object of class flowFrame or flowSet.
+#'
+#' @return flowFrame or flowSet object with unused channels removed.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#'
+#' library(CytoExploreRData)
+#'
+#' # Activation flowSet
+#' fs <- Activation
+#'
+#' # Channels
+#' cyto_channels(fs)
+#'
+#' # Remove unused channels
+#' fs <- cyto_channels_restrict(fs)
+#'
+#' # Channels removed
+#' cyto_channels(fs)
+#'
+#' @export
+cyto_channels_restrict <- function(x){
+  
+  # CHANNELS
+  channels <- cyto_channels(x)
+  
+  # FLUOR CHANNELS
+  fluor_channels <- cyto_fluor_channels(x)
+  
+  # MARKERS
+  markers <- cyto_markers(x)
+  
+  # IGNORE FSC/SSC/Time
+  ignore_channels <- channels[!channels %in% fluor_channels]
+  
+  # CHANNELS USED
+  used_channels <- fluor_channels[which(fluor_channels %in% names(markers))]
+  
+  # CHANNELS TO KEEP
+  keep_channels <- c(ignore_channels, used_channels)
+  
+  # SORT CHANNELS AS BEFORE
+  ind <- match(channels, keep_channels)
+  ind <- ind[!is.na(ind)]
+  
+  # RETURN RESTRICTED FLOWFRAME/FLOWSET
+  x <- x[, keep_channels[ind]]
+  return(x)
+  
 }

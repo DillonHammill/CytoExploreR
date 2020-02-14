@@ -12,27 +12,28 @@ cyto_select(x, ...)
 
 \item{...}{named list containing experimental variables to be used to select
 samples or named arguments containing the levels of the variables to
-select. See below examples for use cases.}
+select. See below examples for use cases. Selected samples can be excluded
+by setting \code{exclude} to TRUE.}
 }
 \value{
 \code{flowSet} or \code{GatingSet} restricted to samples which meet
-  the selection criteria.
+  the designated selection criteria.
 }
 \description{
 Select samples based on experiment variables
 }
 \examples{
 
-3 Load in CytoExploreRData to access data
-library(CytoExploreR)
+# Load in CytoExploreRData to access data
+library(CytoExploreRData)
 
 # Look at experiment details
 cyto_details(Activation)
 
-# Select Stim-C samples with 0 and 0.5 OVA concentrations
+# Select Stim-C samples with 0 and 500 nM OVA concentrations
 fs <- cyto_select(Activation,
   Treatment = "Stim-C",
-  OVAConc = c(0, 0.5)
+  OVAConc = c(0, 500)
 )
 
 # Select Stim-A and Stim-C treatment groups
@@ -41,6 +42,11 @@ fs <- cyto_select(
   list("Treatment" = c("Stim-A", "Stim-C"))
 )
 
+# Exclude Stim-D treatment group
+fs <- cyto_select(Activation,
+  Treatment = "Stim-D",
+  exclude = TRUE
+)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

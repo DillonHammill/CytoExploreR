@@ -1,4 +1,4 @@
-# .CYTO_GATE_TYPE_CHECK --------------------------------------------------------
+## .CYTO_GATE_TYPE_CHECK -------------------------------------------------------
 
 #' Check gate types supplied to cyto_gate_draw.
 #'
@@ -16,12 +16,15 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_gate_type <- function(type, channels, alias, negate = FALSE) {
+.cyto_gate_type <- function(type = NULL, 
+                            channels, 
+                            alias, 
+                            negate = FALSE) {
   
   # DEFAULT GATE TYPES ---------------------------------------------------------
   
   # NO GATE TYPE SUPPLIED
-  if(missing(type)){
+  if(is.null(type)){
     # 1D PLOT - INTERVAL
     if(length(channels) == 1){
       type <- "interval"
@@ -30,7 +33,7 @@
       type <- "polygon"
     }
   }
-  
+
   # SPLIT GATE TYPES
   split_gate_types <- .split_gate_types()
   
@@ -73,6 +76,9 @@
              (nchar(type[z]) == 1 & grepl("w", type[z], ignore.case = TRUE))){
       type[z] <<- "web"
       return(TRUE)
+    # flowSet method passes NA to flowFrame method negate
+    }else if(z == length(type) & is.na(type[z])){ 
+      return(TRUE)
     }else{
       return(FALSE)
     }
@@ -81,7 +87,8 @@
   # UNSUPPORTED GATE TYPES
   if(!all(ind == TRUE)){
     if(length(ind[ind == FALSE]) == 1){
-      stop(paste(type[!is.na(match(ind, FALSE))], "is not a valid gate type for cyto_gate_draw."))
+      stop(paste(type[!is.na(match(ind, FALSE))], 
+                 "is not a valid gate type for cyto_gate_draw."))
     }else{
       stop(paste(paste(type[!is.na(match(ind, FALSE))], collapse = " & "),
                  "are not valid gate types for cyto_gate_draw."))
@@ -113,7 +120,7 @@
       }
     })
   }
-
+  
   # UNSUPPORTED GATE TYPES 1D PLOTS --------------------------------------------
   
   # INTERVAL - BOUNDARY - THRESHOLD 
@@ -137,7 +144,7 @@
   return(type)
 }
 
-# .CYTO_ALIAS ------------------------------------------------------------------
+## .CYTO_ALIAS -----------------------------------------------------------------
 
 #' Check supplied alias
 #'

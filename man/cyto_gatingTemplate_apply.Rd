@@ -27,7 +27,7 @@ file to a GatingSet.
 }
 \examples{
 \dontrun{
-library(CytoRSuiteData)
+library(CytoExploreRData)
 
 # Load in samples
 fs <- Activation

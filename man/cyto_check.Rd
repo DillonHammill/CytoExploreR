@@ -20,15 +20,11 @@ Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
 }
 \examples{
 
-# Load in CytoExploreRData to acess data
+# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
 # Valid object
 cyto_check(Activation)
-
-# Invalid list object
-cyto_check(list(Activation))
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

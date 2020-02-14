@@ -8,25 +8,67 @@
 \alias{cyto_plot_explore.flowFrame}
 \title{Explore Cytometry Data in Bivariate Plots}
 \usage{
-\method{cyto_plot_explore}{GatingSet}(x, parent = NULL,
-  channels_x = NULL, channels_y = NULL, axes_trans = NA, layout,
-  popup = FALSE, title = NA, header, header_text_font = 2,
-  header_text_size = 1, header_text_col = "black", ...)
+\method{cyto_plot_explore}{GatingSet}(
+  x,
+  parent = NULL,
+  channels_x = NULL,
+  channels_y = NULL,
+  axes_trans = NA,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  ...
+)
 
-\method{cyto_plot_explore}{GatingHierarchy}(x, parent = NULL,
-  channels_x = NULL, channels_y = NULL, axes_trans = NA, layout,
-  popup = FALSE, title = NA, header, header_text_font = 2,
-  header_text_size = 1, header_text_col = "black", ...)
+\method{cyto_plot_explore}{GatingHierarchy}(
+  x,
+  parent = NULL,
+  channels_x = NULL,
+  channels_y = NULL,
+  axes_trans = NA,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  ...
+)
 
-\method{cyto_plot_explore}{flowSet}(x, channels_x = NULL,
-  channels_y = NULL, axes_trans = NA, layout, popup = FALSE,
-  title = NA, header, header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", ...)
+\method{cyto_plot_explore}{flowSet}(
+  x,
+  channels_x = NULL,
+  channels_y = NULL,
+  axes_trans = NA,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  ...
+)
 
-\method{cyto_plot_explore}{flowFrame}(x, channels_x = NULL,
-  channels_y = NULL, axes_trans = NA, layout, popup = FALSE,
-  title = NA, header, header_text_font = 2, header_text_size = 1,
-  header_text_col = "black", ...)
+\method{cyto_plot_explore}{flowFrame}(
+  x,
+  channels_x = NULL,
+  channels_y = NULL,
+  axes_trans = NA,
+  layout,
+  popup = FALSE,
+  title = NA,
+  header,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{flowFrame}, \code{flowSet},

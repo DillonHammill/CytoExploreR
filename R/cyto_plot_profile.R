@@ -1,4 +1,4 @@
-# CYTO_PLOT_PROFILE ------------------------------------------------------------
+## CYTO_PLOT_PROFILE -----------------------------------------------------------
 
 #' Plot expression profile in all channels
 #'
@@ -39,6 +39,7 @@
 #'
 #' @importFrom grDevices n2mfrow recordPlot
 #' @importFrom graphics par mtext
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -64,15 +65,15 @@
 #' gt_gating(gt, gs)
 #'
 #' # Plot expression profile of T Cells in all channels
-#' cyto_plot_profile(gs,
+#' cyto_plot_profile(gs[1:9],
 #'   parent = "T Cells"
 #' )
 #' 
 #' # Group samples by Treatment & select highest OVAConc
-#'  cyto_plot_profile(gs,
+#'  cyto_plot_profile(gs[1:9],
 #'   parent = "CD4 T Cells",
 #'   group_by = "Treatment",
-#'   select = list("OVAConc" = 0.5),
+#'   select = list("OVAConc" = 500),
 #' )
 #' 
 #' @name cyto_plot_profile
@@ -111,11 +112,7 @@ cyto_plot_profile.GatingSet <- function(x,
   }
 
   # TRANSFORMATIONS
-  if(length(x@transformation) == 0){
-    axes_trans <- NA
-  }else{
-    axes_trans <- x@transformation[[1]]
-  }
+  axes_trans <- cyto_transformer_extract(x)
   
   # PREPARE DATA ---------------------------------------------------------------
 
@@ -123,7 +120,7 @@ cyto_plot_profile.GatingSet <- function(x,
   fs <- cyto_extract(x, parent)
 
   # Plots
-  cyto_plot_profile(
+  p <- cyto_plot_profile(
     fs,
     channels = channels,
     group_by = group_by,
@@ -140,17 +137,18 @@ cyto_plot_profile.GatingSet <- function(x,
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       # CLOSE GRAPHICS DEVICE
       dev.off()
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
       # RESET CYTO_PLOT_METHOD
       options("cyto_plot_method" = NULL)
-      # RETURN RECORDED PLOT
-      invisible(recordPlot())
     }
   }
+  
+  # RETURN RECORDED PLOTS
+  invisible(p)
   
 }
 
@@ -177,11 +175,7 @@ cyto_plot_profile.GatingHierarchy <- function(x,
   }
 
   # TRANSFORMATIONS
-  if(length(x@transformation) == 0){
-    axes_trans <- NA
-  }else{
-    axes_trans <- x@transformation[[1]]
-  }
+  axes_trans <- cyto_transformer_extract(x)
   
   # PREPARE DATA ---------------------------------------------------------------
 
@@ -189,7 +183,7 @@ cyto_plot_profile.GatingHierarchy <- function(x,
   fr <- cyto_extract(x, parent)
 
   # Plots
-  cyto_plot_profile(
+  p <- cyto_plot_profile(
     fr,
     channels = channels,
     axes_trans = axes_trans,
@@ -197,22 +191,23 @@ cyto_plot_profile.GatingHierarchy <- function(x,
     header_text_font = header_text_font,
     header_text_size = header_text_size, ...
   )
-
+  
   # RECORD/SAVE ----------------------------------------------------------------
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       # CLOSE GRAPHICS DEVICE
       dev.off()
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
       # RESET CYTO_PLOT_METHOD
       options("cyto_plot_method" = NULL)
-      # RETURN RECORDED PLOT
-      invisible(recordPlot())
     }
   }
+  
+  # RETURN RECORDED PLOTS
+  invisible(p)
   
 }
 
@@ -277,7 +272,7 @@ cyto_plot_profile.flowSet <- function(x,
   
   # CYTO_PLOT_PROFILE
   if (length(fr_list) == 1) {
-    cyto_plot_profile(
+    p <- cyto_plot_profile(
       x = fr_list[[1]],
       channels = channels,
       axes_trans = axes_trans,
@@ -287,7 +282,7 @@ cyto_plot_profile.flowSet <- function(x,
       header_text_size = header_text_size, ...
     )
   } else {
-    cyto_plot_profile(
+    p <- cyto_plot_profile(
       x = fr_list[[1]],
       overlay = fr_list[2:length(fr_list)],
       channels = channels,
@@ -299,22 +294,23 @@ cyto_plot_profile.flowSet <- function(x,
       density_stack = density_stack, ...
     )
   }
-
+  
   # RECORD/SAVE ----------------------------------------------------------------
   
   # TURN OFF GRAPHICES DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       # CLOSE GRAPHICS DEVICE
       dev.off()
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
       # RESET CYTO_PLOT_METHOD
       options("cyto_plot_method" = NULL)
-      # RETURN RECORDED PLOT
-      invisible(recordPlot())
     }
   }
+  
+  # RETURN RECORDED PLOT
+  invisible(p)
   
 }
 
@@ -384,7 +380,7 @@ cyto_plot_profile.flowFrame <- function(x,
   } 
   
   # CONSTRUCT PLOTS
-  lapply(seq_len(length(channels)), function(z) {
+  p <- lapply(seq_len(length(channels)), function(z) {
     
     # PLOT
     cyto_plot(x,
@@ -395,7 +391,6 @@ cyto_plot_profile.flowFrame <- function(x,
     
     # HEADER
     if(z %in% NP){
-        
       # ADD HEADER
       if (!.all_na(header)) {
         mtext(header, 
@@ -403,22 +398,25 @@ cyto_plot_profile.flowFrame <- function(x,
               font = header_text_font,
               cex = header_text_size)
       }
+      # RECORD PLOT
+      cyto_plot_record()
     }
   })
-
+  
   # RECORD/SAVE ----------------------------------------------------------------
 
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save")) {
-    if (inherits(x, basename(getOption("cyto_plot_method")))) {
+    if (is(x, basename(getOption("cyto_plot_method")))) {
       # CLOSE GARPHICS DEVICE
       dev.off()
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
       # RESET CYTO_PLOT_METHOD
       options("cyto_plot_method" = NULL)
-      # RETURN RECORDED PLOT
-      invisible(recordPlot())
     }
   }
+  
+  # RETURN RECORDED PLOTS
+  invisible(p)
 }
