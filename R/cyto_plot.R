@@ -402,9 +402,11 @@ cyto_plot.GatingSet <- function(x,
   }
   
   # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
-  gt <- gh_generate_template(gh)
-  gt <- gt[basename(gt$parent) == parent, ]
- 
+  if(!.all_na(alias)){
+    gt <- gh_generate_template(gh)
+    gt <- gt[basename(gt$parent) == parent, ]
+  }
+
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
     # 2D PLOT - BOTH CHANNELS MATCH
@@ -848,8 +850,11 @@ cyto_plot.GatingHierarchy <- function(x,
   x <- cyto_extract(gh, parent)
 
   # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
-  gt <- gh_generate_template(gh)
-  gt <- gt[basename(gt$parent) == parent, ]
+  if(!.all_na(alias)){
+    gt <- gh_generate_template(gh)
+    gt <- gt[basename(gt$parent) == parent, ]
+  }
+
   
   # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
   if (.empty(alias)) {
