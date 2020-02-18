@@ -65,6 +65,8 @@ tryCatch(library(devtools), error = function(e){
   library(devtools)
 })
 # Install flowCore, flowWorkspace & openCyto from GitHub
+install_github("RGLab/RProtoBufLib", ref = "trunk")
+install_gtihub("RGLab/cytolib")
 install_github("RGLab/flowCore")
 install_github("RGLab/flowWorkspace")
 install_github("RGLab/flowStats", ref = "trunk")

@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master)](htt
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--18-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--19-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoExploreR** is comprehensive collection of interactive exploratory
@@ -96,6 +96,8 @@ tryCatch(library(devtools), error = function(e){
   library(devtools)
 })
 # Install flowCore, flowWorkspace & openCyto from GitHub
+install_github("RGLab/RProtoBufLib", ref = "trunk")
+install_gtihub("RGLab/cytolib")
 install_github("RGLab/flowCore")
 install_github("RGLab/flowWorkspace")
 install_github("RGLab/flowStats", ref = "trunk")
