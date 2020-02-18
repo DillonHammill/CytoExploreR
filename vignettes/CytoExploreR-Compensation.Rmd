@@ -19,6 +19,14 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r, echo = FALSE, eval = FALSE}
+img <- htmltools::img(src = knitr::image_uri("logo.png"), 
+                      alt = 'logo', 
+                      style = 'float:right; width:150px')
+html <- htmltools::doRenderTags(img)
+readr::write_lines(html, path = "logo.html")
+```
+
 # Introduction
 
 <div style="line-height: 1.8em;"> In conventional flow cytometry, cells are labelled with fluorophore-conjugated antibodies and interrogated with a series of lasers which emit light of specific wavelengths. These fluorophores are excited by these lasers to emit photons of multiple energies and wavelengths, which are sorted by a series of optical filters to direct photons of the same wavelength to a specific detector. As a result, photons emitted from the excited fluorophores will be mostly collected by a single detctor (primary detector) but will also be collected by other detectors (secondary detectors). For example, photons emitted by a sample stained with only a FITC-conjugated antibody (FITC single colour control) will mostly be collected by the Alexa Fluor 488 primary detector, but there will also be collection by the PE secondary detector. When we compare the signal of our FITC single colour control relative to our unstained control (black) in these channels, it becomes clear that a proportion of the FITC signal is being collected by the PE detector. Clearly, this fluorescent spillover is not desirable, if we stained cells with both FITC and PE-conjugated antibodies it would be difficult to determine which events were truely labelled with our PE-conjugated antibodies. </div>

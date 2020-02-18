@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# CytoExploreR <img src="man/figures/logo.png" align="right" alt="" width="250"/>
+# CytoExploreR <img src="man/figures/logo.png" align="right" alt="" width="240"/>
 
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master)](htt
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--14-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--18-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoExploreR** is comprehensive collection of interactive exploratory
@@ -127,8 +127,7 @@ to change (e.g. `cyto_gate_`) and finally the action that you would like
 to perform (e.g. `cyto_gate_draw`). To see all available functions
 simply start typing `cyto_` and you will be greeted with a complete list
 of exported functions that can be selected from the auto-complete
-dropdown
-list:
+dropdown list:
 
 <img src="man/figures/README-CytoExploreR-Design.gif" width="95%" style="display: block; margin: auto;" />
 
@@ -212,24 +211,21 @@ each of the package vignettes is provided below:
 
   - Flow cytometry users will find the `Compensation` vignette useful in
     describing the process of using compensation controls to correctly
-    compensate for fluorescent
-spillover.
+    compensate for fluorescent spillover.
 
 <img src="man/figures/README-3.png" width="98%" style="display: block; margin: auto;" />
 
   - Data transformations are essential to appropriate visualisation of
     cytometry data. In the `Transformations` vignette we will explore
     the tools available in **CytoExploreR** to apply log, arcsinh,
-    biexponential and/or logicle transformations to the
-data.
+    biexponential and/or logicle transformations to the data.
 
 <img src="man/figures/README-4.png" width="80%" style="display: block; margin: auto;" />
 
   - In `Manual Gating` vignette we will demonstrate the use of
     `cyto_gate_draw` to interactively draw gates around populations. In
     particular, we will focus on the different gate types that are
-    supported and how they can be used to gate
-populations.
+    supported and how they can be used to gate populations.
 
 <img src="man/figures/README-1.png" width="98%" style="display: block; margin: auto;" />
 
