@@ -1589,7 +1589,7 @@ cyto_group_by <- function(x,
       pd_split <- list("all" = pd)
     } else if (group_by == "name") {
       pd_split <- lapply(nms, function(z){
-        pd[pd$name == z, ]
+        pd[pd$name == z, , drop = FALSE]
       })
       names(pd_split) <- nms
     }else{
