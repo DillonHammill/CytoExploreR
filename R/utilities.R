@@ -64,10 +64,23 @@ match_ind <- function(x, y, ...){
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
 #' @noRd
-.args_list <- function(){
+.args_list <- function(...){
+  
+  # Pull down ... arguments
+  dot_args <- list(...)
   
   # Get arguments from parental environment
   args <- as.list(parent.frame())
+  
+  # Combine ... args with args
+  if(length(dot_args) != 0){
+    args <- c(args, dot_args)
+  }
+  
+  # Remove duplicate args
+  arg_names <- unique(names(args))
+  args <- unique(args)
+  names(args) <- arg_names
   
   # Replace any elements with class "name" with ""
   lapply(names(args), function(x){
@@ -79,6 +92,7 @@ match_ind <- function(x, y, ...){
   # Convert to alist
   class(args) <- "alist"
   
+  # Return argument list
   return(args)
   
 }

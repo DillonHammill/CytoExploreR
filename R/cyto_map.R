@@ -46,7 +46,7 @@
 #' @return flowFrame, flowSet, GatingHierarchy or GatingSet containing the
 #'   mapped projection parameters.
 #'
-#' @importFrom flowCore exprs keyword write.FCS flowSet
+#' @importFrom flowCore exprs keyword write.FCS flowSet fr_append_cols
 #' @importFrom flowWorkspace GatingSet gs_cyto_data<- flowSet_to_cytoset
 #'   recompute
 #' @importFrom stats prcomp
@@ -235,18 +235,16 @@ cyto_map.flowFrame <- function(x,
   
   # PREPARE CHANNELS
   if(is.null(channels)){
-    channels <- names(cyto_markers(x))
-    if(is.null(channels)){
-        channels <- cyto_channels(x, 
-                                  exclude = c("Time",
-                                              "Original",
-                                              "Sample ID",
-                                              "Event ID",
-                                              "PCA",
-                                              "tSNE",
-                                              "UMAP",
-                                              "EmbedSOM"))
-    }
+    channels <- cyto_channels(x, 
+                              exclude = c("Time",
+                                          "Original",
+                                          "Sample ID",
+                                          "Event ID",
+                                          "PCA",
+                                          "tSNE",
+                                          "UMAP",
+                                          "EmbedSOM"))
+    channels <- channels[channels %in% names(cyto_markers(x))]
   }
   
   # CONVERT CHANNELS
@@ -258,11 +256,11 @@ cyto_map.flowFrame <- function(x,
   
   # PREPARE DATA - SAMPLING
   x <- cyto_sample(x, 
-                  display = display, 
-                  seed = 56)
+                   display = display, 
+                   seed = 56)
   
   # EXTRACT RAW DATA MATRIX
-  fr_exprs <- exprs(x)
+  fr_exprs <- cyto_extract(x, raw = TRUE)[[1]]
     
   # RESTRICT MATRIX BY CHANNELS
   fr_exprs <- fr_exprs[, channels]
@@ -303,7 +301,7 @@ cyto_map.flowFrame <- function(x,
     # DATA
     data <- fr_exprs
     # PULL DOWN ARGUMENTS
-    args <- .args_list()
+    args <- .args_list(...)
     # CREATE SOM - FLOWSOM NOT SUPPLIED (fsom)
     if(!"fsom" %in% names(args)){
       # SOM
@@ -324,7 +322,7 @@ cyto_map.flowFrame <- function(x,
   }
   
   # ADD MAPPING COORDS TO FLOWFRAME
-  x <- cbind(x, coords)
+  x <- fr_append_cols(x, coords)
   
   # VISUALISATION --------------------------------------------------------------
   
