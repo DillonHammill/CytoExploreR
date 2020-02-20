@@ -41,7 +41,7 @@ After successfully installing R and RStudio, the following additional platform-s
 ## Windows OS
 - Install the appropriate [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for your R installation.
 - Follow these [instructions](https://github.com/RGLab/RProtoBufLib/blob/trunk/INSTALL) to download protobuf Windows binary and set appropriate environment variable. Ignore the section to build protobuf from source.
-- Follow these [instructions](https://github.com/RGLab/flowWorkspace/blob/trunk/INSTALL) to install and setup the additional C++ libraries required to successfully build flowWorkspace.
+- Follow these [instructions](https://github.com/RGLab/flowWorkspace/blob/master/INSTALL) to install and setup the additional C++ libraries required to successfully build flowWorkspace.
 - Restart your computer.
 
 ## CytoExploreR Dependencies
@@ -66,7 +66,7 @@ tryCatch(library(devtools), error = function(e){
 })
 # Install flowCore, flowWorkspace & openCyto from GitHub
 install_github("RGLab/RProtoBufLib", ref = "trunk")
-install_gtihub("RGLab/cytolib")
+install_github("RGLab/cytolib")
 install_github("RGLab/flowCore")
 install_github("RGLab/flowWorkspace")
 install_github("RGLab/flowStats", ref = "trunk")
