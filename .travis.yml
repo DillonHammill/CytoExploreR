@@ -34,6 +34,7 @@ install:
   - R -e 'devtools::install_github("RGLab/flowWorkspace")'
   - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
   - R -e 'devtools::install_github("RGLab/openCyto")'
+  - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
   - R -e 'devtools::install_deps(upgrade = "always")'
   
 r_packages:
@@ -71,7 +72,6 @@ r_github_packages:
   - r-lib/pkgdown
   - datastorm-open/visNetwork
   - rstudio/shinytest
-  - DillonHammill/CytoExploreRData
   
 warnings_are_errors: false
 
