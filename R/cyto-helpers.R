@@ -2429,6 +2429,9 @@ cyto_sample.list <- function(x,
 #'   to the minimum bead count among the samples.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom flowCore flowSet
+#' @importFrom flowWorkspace flowSet_to_cytoset gs_cyto_data
 #'
 #' @export
 cyto_beads_sample <- function(x,
@@ -2468,27 +2471,31 @@ cyto_beads_sample <- function(x,
       format = "wide"
     )
   )
-
-  # BEAD COUNT
-  if (is.null(bead_count)) {
-    bead_count <- min(bead_counts[, ncol(bead_counts)])
-  } else {
-    if (!bead_count <= min(bead_counts[, ncol(bead_counts)])) {
-      bead_count <- min(bead_counts[, ncol(bead_counts)])
-    }
-  }
-
-  # BEAD RATIOS
-  bead_ratios <- 1 / (bead_counts[, ncol(bead_counts)] / bead_count)
-
+  bead_counts <- bead_counts[, ncol(bead_counts), drop = TRUE]
+  
   # BEADS MISSING
-  if (any(is.infinite(bead_ratios))) {
+  if (any(bead_counts == 0)) {
+    ind <- which(bead_counts == 0)
     stop(paste0(
       "The following samples do not contain any beads:",
-      paste0("\n", cyto_names(gs_clone)[is.infinite(bead_ratios)])
+      paste0("\n", cyto_names(gs_clone)[ind])
     ))
+  }  
+  
+  # BEAD COUNT
+  if (is.null(bead_count)) {
+    bead_count <- min(bead_counts)
+  } else {
+    if (!bead_count <= min(bead_counts)) {
+      bead_count <- min(bead_counts)
+    }
   }
-
+  
+  # BEAD RATIOS
+  bead_ratios <- lapply(seq_len(length(bead_counts)), function(z){
+    1 / (bead_counts[z] / bead_count)
+  })
+  
   # SAMPLING - ROOT POPULATION
   pops <- list()
   lapply(seq_along(bead_pops), function(z) {
@@ -2500,7 +2507,7 @@ cyto_beads_sample <- function(x,
     )
   })
   names(pops) <- cyto_names(pops)
-  pops <- flowSet(pops)
+  pops <- flowSet_to_cytoset(flowSet(pops))
 
   # REPLACE DATA IN GATINGSET
   gs_cyto_data(gs_clone) <- pops
