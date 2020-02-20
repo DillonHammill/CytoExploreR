@@ -37,7 +37,7 @@ install:
   - R -e 'devtools::install_github("RGLab/flowWorkspace")'
   - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
   - R -e 'devtools::install_github("RGLab/openCyto")'
-  - R -e 'devtools::install_deps(upgrade = "Always")'
+  - R -e 'devtools::install_deps(upgrade = "always")'
   
 r_packages:
   - data.table
