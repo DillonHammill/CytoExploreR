@@ -25,18 +25,17 @@ before_install:
   - R -e 'devtools::install_github("Bioconductor/BiocGenerics", ref = "master")'
   
 install:
-  # - R -e 'BiocManager::install("Rhdf5lib")'
-  # - R -e 'BiocManager::install("flowCore")'
-  # - R -e 'BiocManager::install("flowWorkspace")'
-  # - R -e 'BiocManager::install("openCyto")'
+  - R -e 'BiocManager::install("Rhdf5lib")'
+  - R -e 'BiocManager::install("flowCore")'
+  - R -e 'BiocManager::install("flowWorkspace")'
+  - R -e 'BiocManager::install("openCyto")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel", ref="master")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/cytolib", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/flowCore", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/ncdfFlow", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspace", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
+  - R -e 'devtools::install_github("RGLab/cytolib")'
+  - R -e 'devtools::install_github("RGLab/flowCore")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspace", dependencies = TRUE)'
+  - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
+  - R -e 'devtools::install_github("RGLab/openCyto")'
   - R -e 'devtools::install_deps(upgrade = "Always")'
   
 r_packages:
@@ -60,6 +59,8 @@ r_packages:
   - Rtsne
   - umap    
   - gtools
+  - flowAI
+  - EmbedSOM
 
 r_github_packages:
   - jrowen/rhandsontable

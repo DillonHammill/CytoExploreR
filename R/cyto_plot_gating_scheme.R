@@ -251,7 +251,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   
   # HEADER
   if (missing(header)) {
-    header <- cyto_names(gh)
+    header <- cyto_names(x)
   }
   
   # GATING SCHEME --------------------------------------------------------------
