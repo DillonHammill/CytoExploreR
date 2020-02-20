@@ -266,6 +266,7 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     }
   })
   chans <- do.call("rbind", chans)
+  
   # EXTRACT GATING SCHEME INFORMATION
   gts <- data.frame(
     parent = basename(gt$parent),
@@ -311,6 +312,11 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   # GROUP_BY
   gs_list <- cyto_group_by(x, group_by)
   
+  # HEADER
+  if(missing(header)){
+    header <- names(gs_list)
+  }
+  
   # PLOT CONSTRUCTION ----------------------------------------------------------
 
   # GATING SCHEME FOR EACH GATINGSET
@@ -320,8 +326,8 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     gs <- gs_list[[z]]
     
     # HEADER
-    if(missing(header)){
-      header <- names(gs_list[[z]])
+    if(!is.null(header)){
+      header <- header[[z]]
     }
     
     # POPUP
