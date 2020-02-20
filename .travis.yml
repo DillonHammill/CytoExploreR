@@ -26,9 +26,6 @@ before_install:
   
 install:
   - R -e 'BiocManager::install("Rhdf5lib")'
-  - R -e 'BiocManager::install("flowCore")'
-  - R -e 'BiocManager::install("flowWorkspace")'
-  - R -e 'BiocManager::install("openCyto")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel", ref="master")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
   - R -e 'devtools::install_github("RGLab/cytolib")'
