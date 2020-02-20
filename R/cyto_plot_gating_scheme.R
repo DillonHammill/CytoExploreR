@@ -249,11 +249,6 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
     }
   }
   
-  # HEADER
-  if (missing(header)) {
-    header <- cyto_names(x)
-  }
-  
   # GATING SCHEME --------------------------------------------------------------
   
   # GATING SCHEME FROM GATINGHIERARCHY
@@ -319,8 +314,16 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   # PLOT CONSTRUCTION ----------------------------------------------------------
 
   # GATING SCHEME FOR EACH GATINGSET
-  plots <- lapply(gs_list, function(gs) {
+  plots <- lapply(seq_along(gs_list), function(z) {
 
+    # GatingSet
+    gs <- gs_list[[z]]
+    
+    # HEADER
+    if(missing(header)){
+      header <- names(gs_list[[z]])
+    }
+    
     # POPUP
     if(popup == TRUE){
       cyto_plot_new(popup = popup)
