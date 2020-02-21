@@ -57,7 +57,8 @@ Suggests:
   covr,
   pkgdown,
   mockr,
-  mockery
+  mockery,
+  tic
 Remotes: 
   DillonHammill/CytoExploreRData
 biocViews:
