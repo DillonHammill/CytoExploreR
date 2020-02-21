@@ -37,42 +37,6 @@ install:
   - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
   - R -e 'devtools::install_deps(upgrade = "always")'
   
-r_packages:
-  - data.table
-  - shiny
-  - shinythemes
-  - MASS
-  - methods
-  - stats
-  - utils
-  - graphics
-  - grDevices
-  - tools
-  - magrittr
-  - purrr
-  - parallel
-  - tibble
-  - tidyr
-  - dplyr
-  - robustbase
-  - Rtsne
-  - umap    
-  - gtools
-  - flowAI
-  - EmbedSOM
-
-r_github_packages:
-  - jrowen/rhandsontable
-  - rlbarter/superheat
-  - rstudio/rmarkdown
-  - yihui/knitr
-  - r-lib/covr
-  - r-lib/testthat
-  - r-lib/vdiffr
-  - r-lib/pkgdown
-  - datastorm-open/visNetwork
-  - rstudio/shinytest
-  
 warnings_are_errors: false
 
 after_success:
