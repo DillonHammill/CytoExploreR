@@ -22,22 +22,22 @@ bioc_required: true
 before_install:
   - R -e 'install.packages("devtools")'
   - R -e 'install.packages("BiocManager")'
-  - R -e 'devtools::install_github("Bioconductor/BiocGenerics", ref = "master")'
+  - R -e 'devtools::install_github("Bioconductor/BiocGenerics")'
   
 install:
-  # - R -e 'BiocManager::install("Rhdf5lib")'
-  # - R -e 'BiocManager::install("flowCore")'
-  # - R -e 'BiocManager::install("flowWorkspace")'
-  # - R -e 'BiocManager::install("openCyto")'
-  - R -e 'devtools::install_github("RcppCore/RcppParallel", ref="master")'
+  - R -e 'BiocManager::install("Rhdf5lib")'
+  - R -e 'BiocManager::install("flowAI")'
+  - R -e 'devtools::install_github("rlbarter/superheat")'
+  - R -e 'devtools::install_github("datastorm-open/visNetwork")'
+  - R -e 'devtools::install_github("RcppCore/RcppParallel")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/cytolib", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/flowCore", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/ncdfFlow", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/cytolib")'
+  - R -e 'devtools::install_github("RGLab/flowCore")'
   - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspace", ref = "trunk")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspace")'
   - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
-  - R -e 'devtools::install_deps(upgrade = "Always")'
+  - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
+  - R -e 'devtools::install_deps(upgrade = "always")'
   
 r_packages:
   - data.table
@@ -60,19 +60,18 @@ r_packages:
   - Rtsne
   - umap    
   - gtools
+  - rhandsontable
+  - EmbedSOM
 
 r_github_packages:
-  - jrowen/rhandsontable
-  - rlbarter/superheat
   - rstudio/rmarkdown
   - yihui/knitr
   - r-lib/covr
   - r-lib/testthat
   - r-lib/vdiffr
   - r-lib/pkgdown
-  - datastorm-open/visNetwork
   - rstudio/shinytest
-  - DillonHammill/CytoExploreRData
+  - mockery/mockery
   
 warnings_are_errors: false
 
