@@ -26,7 +26,6 @@ before_install:
   
 install:
   - R -e 'BiocManager::install("Rhdf5lib")'
-  - R -e 'BiocManager::install("flowAI")'
   - R -e 'devtools::install_github("rlbarter/superheat")'
   - R -e 'devtools::install_github("datastorm-open/visNetwork")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel")'
@@ -35,7 +34,9 @@ install:
   - R -e 'devtools::install_github("RGLab/flowCore")'
   - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
   - R -e 'devtools::install_github("RGLab/flowWorkspace")'
+  - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
   - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
+  - R -e 'BiocManager::install("flowAI")'
   - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
   - R -e 'devtools::install_deps(upgrade = "always")'
   
