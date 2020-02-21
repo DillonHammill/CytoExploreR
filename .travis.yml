@@ -71,7 +71,7 @@ r_github_packages:
   - r-lib/vdiffr
   - r-lib/pkgdown
   - rstudio/shinytest
-  - mockery/mockery
+  - r-lib/mockery
   
 warnings_are_errors: false
 
