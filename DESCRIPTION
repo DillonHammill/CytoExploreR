@@ -56,7 +56,6 @@ Suggests:
   shinytest,
   covr,
   pkgdown,
-  mockr,
   mockery
 Remotes: 
   DillonHammill/CytoExploreRData

@@ -15,7 +15,7 @@ matrix:
      osx_image: xcode9.3
 
 cache: 
-  packages: TRUE
+  packages: true
 
 bioc_required: true
 
@@ -38,12 +38,13 @@ install:
   - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
   - R -e 'BiocManager::install("flowAI")'
   - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
-  - R -e 'devtools::install_deps(upgrade = "always")'
+  # - R -e 'devtools::install_deps(upgrade = "always")'
   
 r_packages:
   - data.table
   - shiny
   - shinythemes
+  - shinytest
   - MASS
   - methods
   - stats
@@ -63,16 +64,15 @@ r_packages:
   - gtools
   - rhandsontable
   - EmbedSOM
+  - mockery
+  - pkgdown
+  - vdiffr
 
 r_github_packages:
   - rstudio/rmarkdown
   - yihui/knitr
   - r-lib/covr
   - r-lib/testthat
-  - r-lib/vdiffr
-  - r-lib/pkgdown
-  - rstudio/shinytest
-  - r-lib/mockery
   
 warnings_are_errors: false
 
