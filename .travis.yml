@@ -38,7 +38,7 @@ install:
   - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
   - R -e 'BiocManager::install("flowAI")'
   - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
-  # - R -e 'devtools::install_deps(upgrade = "always")'
+  - R -e 'devtools::install_deps(upgrade = "always")'
   
 r_packages:
   - data.table
