@@ -41,7 +41,7 @@ install:
   - R -e 'devtools::install_github("jrowen/rhandsontable")'
   - R -e 'devtools::install_github("rlbarter/superheat")'
   - R -e 'devtools::install_github("datastorm-open/visNetwork")'
-  - R -e 'devtools::insatll_github("tidyverse/tidyr")'
+  - R -e 'devtools::install_github("tidyverse/tidyr")'
   
 warnings_are_errors: false
 
