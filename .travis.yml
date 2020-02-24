@@ -23,6 +23,8 @@ before_install:
   - R -e 'install.packages("devtools")'
   - R -e 'install.packages("BiocManager")'
   - R -e 'devtools::install_github("Bioconductor/BiocGenerics")'
+
+install:
   - R -e 'BiocManager::install("Rhdf5lib")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
@@ -35,42 +37,6 @@ before_install:
   - R -e 'BiocManager::install("flowAI")'
   - R -e 'utils::install.packages("EmbedSOM")'
   - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
-  
-r_packages:
-  - data.table
-  - dplyr
-  - graphics  
-  - grDevices
-  - gtools
-  - magrittr
-  - methods
-  - mockery
-  - parallel
-  - pkgdown
-  - purrr
-  - rhandsontable
-  - robustbase
-  - Rtsne
-  - shiny
-  - shinythemes
-  - shinytest
-  - stats  
-  - tibble    
-  - tidyr
-  - tools
-  - umap
-  - utils
-  - vdiffr
-
-r_github_packages:
-  - r-lib/covr
-  - yihui/knitr
-  - r-lib/mockery
-  - r-lib/pkgdown
-  - rstudio/rmarkdown
-  - rlbarter/superheat
-  - r-lib/testthat
-  - datastom-open/visNetwork
   
 warnings_are_errors: false
 
