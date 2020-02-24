@@ -19,31 +19,6 @@ cache:
 
 bioc_required: true
 
-before_install:
-  - R -e 'install.packages("devtools")'
-  - R -e 'install.packages("BiocManager")'
-  - R -e 'devtools::install_github("Bioconductor/BiocGenerics")'
-  
-install:
-  - R -e 'BiocManager::install("Rhdf5lib")'
-  - R -e 'devtools::install_github("rlbarter/superheat")'
-  - R -e 'devtools::install_github("datastorm-open/visNetwork")'
-  - R -e 'devtools::install_github("RcppCore/RcppParallel")'
-  - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/cytolib")'
-  - R -e 'devtools::install_github("RGLab/flowCore")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspace")'
-  - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
-  - R -e 'BiocManager::install("flowAI")'
-  - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
-  - R -e 'devtools::install_github("r-lib/vdiffr")'
-  - R -e 'devtools::install_github("r-lib/pkgdown")'
-  - R -e 'devtools::install_github("r-lib/mockery")'
-  - R -e 'devtools::install_github("rstudio/shinytest")'
-  # - R -e 'devtools::install_deps(upgrade = "always")'
-  
 r_packages:
   - data.table
   - shiny
@@ -77,6 +52,31 @@ r_github_packages:
   - yihui/knitr
   - r-lib/covr
   - r-lib/testthat
+  
+before_install:
+  - R -e 'install.packages("devtools")'
+  - R -e 'install.packages("BiocManager")'
+  - R -e 'devtools::install_github("Bioconductor/BiocGenerics")'
+  
+install:
+  - R -e 'devtools::install_deps(upgrade = "always")'
+  - R -e 'BiocManager::install("Rhdf5lib")'
+  - R -e 'devtools::install_github("rlbarter/superheat")'
+  - R -e 'devtools::install_github("datastorm-open/visNetwork")'
+  - R -e 'devtools::install_github("RcppCore/RcppParallel")'
+  - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/cytolib")'
+  - R -e 'devtools::install_github("RGLab/flowCore")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspace")'
+  - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
+  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
+  - R -e 'BiocManager::install("flowAI")'
+  - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
+  - R -e 'devtools::install_github("r-lib/vdiffr")'
+  - R -e 'devtools::install_github("r-lib/pkgdown")'
+  - R -e 'devtools::install_github("r-lib/mockery")'
+  - R -e 'devtools::install_github("rstudio/shinytest")'
   
 warnings_are_errors: false
 
