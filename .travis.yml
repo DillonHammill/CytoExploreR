@@ -42,7 +42,7 @@ install:
   - R -e 'devtools::install_github("r-lib/pkgdown")'
   - R -e 'devtools::install_github("r-lib/mockery")'
   - R -e 'devtools::install_github("rstudio/shinytest")'
-  - R -e 'devtools::install_deps(upgrade = "always")'
+  # - R -e 'devtools::install_deps(upgrade = "always")'
   
 r_packages:
   - data.table
