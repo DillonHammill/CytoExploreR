@@ -23,6 +23,18 @@ before_install:
   - R -e 'install.packages("devtools")'
   - R -e 'install.packages("BiocManager")'
   - R -e 'devtools::install_github("Bioconductor/BiocGenerics")'
+  - R -e 'BiocManager::install("Rhdf5lib")'
+  - R -e 'devtools::install_github("RcppCore/RcppParallel")'
+  - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/cytolib")'
+  - R -e 'devtools::install_github("RGLab/flowCore")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspace")'
+  - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
+  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
+  - R -e 'BiocManager::install("flowAI")'
+  - R -e 'utils::install.packages("EmbedSOM")'
+  - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
   
 r_packages:
   - data.table
@@ -59,20 +71,6 @@ r_github_packages:
   - rlbarter/superheat
   - r-lib/testthat
   - datastom-open/visNetwork
-  
-install:
-  - R -e 'BiocManager::install("Rhdf5lib")'
-  - R -e 'devtools::install_github("RcppCore/RcppParallel")'
-  - R -e 'devtools::install_github("RGLab/RProtoBufLib", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/cytolib")'
-  - R -e 'devtools::install_github("RGLab/flowCore")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspace")'
-  - R -e 'devtools::install_github("RGLab/flowStats", ref = "trunk")'
-  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
-  - R -e 'BiocManager::install("flowAI")'
-  - R -e 'utils::install.packages("EmbedSOM")'
-  - R -e 'devtools::install_github("DillonHammill/CytoExploreRData")'
   
 warnings_are_errors: false
 
