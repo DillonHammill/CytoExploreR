@@ -47,7 +47,7 @@ install:
   
 # Turn off slow processes to allow package caching on build success
 r_build_args: --no-build-vignettes --no-manual
-r_check_args: --no-build-vignettes --no-tests --no-vignettes --no-manual
+r_check_args: --no-build-vignettes --no-tests --no-vignettes --no-manual --no-examples
 
 warnings_are_errors: false
 
