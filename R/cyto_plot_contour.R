@@ -84,7 +84,7 @@ cyto_plot_contour.flowFrame <- function(x,
     # BYPASS INSUFFICIENT EVENTS
     if (nrow(fr_exprs) > 2) {
       # 2D KERNEL DENSITY
-      z <- MASS::kde2d(
+      z <- kde2d(
         x = fr_exprs[, 1],
         y = fr_exprs[, 2],
         n = 75,

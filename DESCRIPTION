@@ -27,6 +27,7 @@ Imports:
   graphics,
   grDevices,
   gtools,
+  MASS,
   magrittr,
   methods,
   parallel,
