@@ -5,7 +5,7 @@ library(CytoExploreRData)
 library(mockery)
 
 # Load in vdiffr for image comparison -
-library(vdiffr)
+# library(vdiffr)
 
 # Load in grDevices for recordPlot() -
 library(grDevices)

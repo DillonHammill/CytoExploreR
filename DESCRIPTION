@@ -51,12 +51,9 @@ Suggests:
   cytolib,
   knitr,
   mockery, 
-  pkgdown,
   rmarkdown,
   RProtoBufLib,
-  shinytest,
-  testthat,
-  vdiffr
+  testthat
 Remotes: 
   DillonHammill/CytoExploreRData
 biocViews:

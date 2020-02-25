@@ -42,9 +42,6 @@ install:
   - R -e 'devtools::install_github("rlbarter/superheat")'
   - R -e 'devtools::install_github("datastorm-open/visNetwork")'
   - R -e 'devtools::install_github("tidyverse/tidyr")'
-  - R -e 'devtools::install_github("rstudio/shinytest")'
-  - R -e 'devtools::install_github("r-lib/vdiffr")'
-  - R -e 'devtools::install_github("r-lib/pkgdown")'
   - R -e 'devtools::install_github("r-lib/mockery")'
   - R -e 'devtools::install_github("r-lib/covr")'
   
