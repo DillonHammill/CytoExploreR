@@ -78,9 +78,7 @@ match_ind <- function(x, y, ...){
   }
   
   # Remove duplicate args
-  arg_names <- unique(names(args))
-  args <- unique(args)
-  names(args) <- arg_names
+  args <- args[which(!duplicated(names(args)))]
   
   # Replace any elements with class "name" with ""
   lapply(names(args), function(x){
