@@ -2,7 +2,7 @@ Package: CytoExploreR
 Type: Package
 Title: Interactive Analysis of Cytometry Data
 Version: 1.0.2
-Date: 2020-02-08
+Date: 2020-02-27
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
   person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),
@@ -30,7 +30,6 @@ Imports:
   MASS,
   magrittr,
   methods,
-  parallel,
   purrr,
   robustbase,
   rhandsontable (>= 0.3.7), 
