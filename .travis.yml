@@ -4,6 +4,7 @@ language: r
 dist: trusty
 sudo: required
 
+# only run examples on linux (mac build stalls)
 matrix:
   include:
    - os: linux
@@ -14,9 +15,11 @@ matrix:
    - os: osx
      osx_image: xcode9.4
      r: release
+     r_check_args: --no-examples
    - os: osx
      osx_image: xcode9.4
      r: devel
+     r_check_args: --no-examples
 
 cache: 
   packages: true
