@@ -17,7 +17,7 @@
 #' @param display total number of events to map, all events in the combined data
 #'   are mapped by default.
 #' @param type dimension reduction type to use to generate the map, supported
-#'   options include "PCA", "tSNE", "UMAP" and "EmbedSOM".
+#'   options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing fcs files, set to
 #'   FALSE by default.
@@ -56,10 +56,24 @@
 #'
 #' @seealso \code{\link[stats:prcomp]{PCA}}
 #' @seealso \code{\link[Rtsne:Rtsne]{tSNE}}
+#' @seealso \code{\link{fftRtsne}}
 #' @seealso \code{\link[umap:umap]{UMAP}}
 #' @seealso \code{\link[EmbedSOM:SOM]{SOM}}
 #' @seealso \code{\link[EmbedSOM:EmbedSOM]{EmbedSOM}}
 #'
+#' @references Maaten, L. van der, & Hinton, G. (2008). Visualizing Data using
+#'   t-SNE. Journal of Machine Learning Research 9, 2579–2605.
+#' @references Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
+#'   Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
+#'   visualization of single-cell RNA-seq data. Nature Methods.
+#' @references McInnes, L., & Healy, J. (2018). UMAP: uniform manifold
+#'   approximation and projection for dimension reduction. Preprint at
+#'   \url{https://arxiv.org/abs/1802.03426}.
+#' @references Kratochvíl, M., Koladiya, A., Balounova, J., Novosadova, V.,
+#'   Fišer, K., Sedlacek, R., Vondrášek, J., and Drbal, K. (2018). Rapid
+#'   single-cell cytometry data visualization with EmbedSOM. Preprint at
+#'   \url{https://www.biorxiv.org/content/10.1101/496869v1}.
+
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @name cyto_map
@@ -289,6 +303,13 @@ cyto_map.flowFrame <- function(x,
     # MAPPING CO-ORDINATES
     coords <- mp$Y
     colnames(coords) <- c("tSNE-1","tSNE-2")
+  # FIt-SNE
+  }else if(grepl(type, "FIt-SNE", ignore.case = TRUE) |
+           grepl(type, "FItSNE", ignore.case = TRUE, fixed = TRUE)){  
+    mp <- fftRtsne(fr_exprs, ...)
+    # MAPPING CO-ORDINATES
+    coords <- mp
+    colnames(coords) <- c("FIt-SNE-1", "FIt-SNE-2")  
   # UMAP 
   }else if(grepl(type, "UMAP", ignore.case = TRUE)){
     # MAPPING
