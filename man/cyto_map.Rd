@@ -16,6 +16,7 @@ cyto_map(x, ...)
   channels = NULL,
   display = 1,
   type = "UMAP",
+  merge = TRUE,
   split = TRUE,
   names = NULL,
   save_as = NULL,
@@ -32,6 +33,7 @@ cyto_map(x, ...)
   channels = NULL,
   display = 1,
   type = "UMAP",
+  merge = TRUE,
   split = TRUE,
   names = NULL,
   save_as = NULL,
@@ -84,6 +86,9 @@ are mapped by default.}
 \item{type}{dimension reduction type to use to generate the map, supported
 options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".}
 
+\item{merge}{logical indicating whether the samples should be merged prior to
+mapping to generate a consensus map, set to TRUE by default.}
+
 \item{split}{logical indicating whether samples merged using
 \code{cyto_merge_by} should be split prior to writing fcs files, set to
 FALSE by default.}
@@ -117,11 +122,21 @@ flowFrame, flowSet, GatingHierarchy or GatingSet containing the
   mapped projection parameters.
 }
 \description{
-Create dimension-reduced maps of cytometry data
+\code{cyto_map} is a convenient wrapper to produce dimension-reduced maps of
+cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
+dimensionality reduction functions are called using the default settings, but
+can be altered by passing relvant arguments through \code{cyto_map}. To see a
+full list of customisable parameters refer to the documentation for each of
+these functions by clicking on the links below.
 }
 \references{
+Gabriel K. (1971). The biplot graphical display of matrices with
+  application to principal component analysis. Biometrika 58, 453–467.
+  \url{doi:10.1093/biomet/58.3.453}.
+
 Maaten, L. van der, & Hinton, G. (2008). Visualizing Data using
   t-SNE. Journal of Machine Learning Research 9, 2579–2605.
+  \url{http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf}.
 
 Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
   Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
