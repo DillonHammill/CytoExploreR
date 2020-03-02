@@ -864,6 +864,11 @@
     axes_limits <- "data"
   } 
   
+  # No data use machine limits
+  if(.cyto_count(x) == 0){
+    axes_limits <- "machine"
+  }
+  
   # Lower bound - use data limits
   rng <- suppressWarnings(
     range(x, type = "data")[, channels, drop = FALSE]
