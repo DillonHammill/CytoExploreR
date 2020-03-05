@@ -16,7 +16,7 @@
 #' @param fft_not_bh if theta is nonzero, this determins whether to use FIt-SNE
 #'   or Barnes Hut approximation. Default is FIt-SNE. set to be True for FIt-SNE
 #' @param ann_not_vptree use vp-trees (as in bhtsne) or approximate nearest
-#'   neighbors (default). set to be True for approximate nearest neighbors
+#'   neighbors (default). Set to be TRUE for approximate nearest neighbors.
 #' @param exaggeration_factor coefficient for early exaggeration (>1). Default
 #'   12.
 #' @param no_momentum_during_exag set to 0 to use momentum and other
@@ -27,7 +27,14 @@
 #' @param start_late_exag_iter when to start late exaggeration. set to -1 to not
 #'   use late exaggeration. Default -1.
 #' @param late_exag_coeff late exaggeration coefficient. Set to -1 to not use
-#'   late exaggeration. Default -1
+#'   late exaggeration. Default -1.
+#' @param mom_switch_iter unknown.
+#' @param momentum unknown.
+#' @param final_momentum unkown.
+#' @param learning_rate unknown.
+#' @param n_trees unknown.
+#' @param search_k unknown.
+#' @param rand_seed unknown.
 #' @param nterms - If using FIt-SNE, this is the number of interpolation points
 #'   per sub-interval.
 #' @param intervals_per_integer see min_num_intervals
@@ -57,6 +64,7 @@
 #'   embedding. See Kobak et al. (2019) for details. Default is 1.0.
 #' @param get_costs unknown
 #' @param df unknown
+#' 
 #' @importFrom utils file_test
 #'
 #' @seealso \code{\link{cyto_map}}

@@ -58,7 +58,7 @@ accuracy of BH approximation. Default 0.5.}
 or Barnes Hut approximation. Default is FIt-SNE. set to be True for FIt-SNE}
 
 \item{ann_not_vptree}{use vp-trees (as in bhtsne) or approximate nearest
-neighbors (default). set to be True for approximate nearest neighbors}
+neighbors (default). Set to be TRUE for approximate nearest neighbors.}
 
 \item{stop_early_exag_iter}{when to switch off early exaggeration. Default
 250.}
@@ -74,7 +74,21 @@ testing large exaggeration coefficients)}
 use late exaggeration. Default -1.}
 
 \item{late_exag_coeff}{late exaggeration coefficient. Set to -1 to not use
-late exaggeration. Default -1}
+late exaggeration. Default -1.}
+
+\item{mom_switch_iter}{unknown.}
+
+\item{momentum}{unknown.}
+
+\item{final_momentum}{unkown.}
+
+\item{learning_rate}{unknown.}
+
+\item{n_trees}{unknown.}
+
+\item{search_k}{unknown.}
+
+\item{rand_seed}{unknown.}
 
 \item{nterms}{- If using FIt-SNE, this is the number of interpolation points
 per sub-interval.}

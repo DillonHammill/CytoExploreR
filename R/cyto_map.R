@@ -70,7 +70,7 @@
 #' @seealso \code{\link[EmbedSOM:SOM]{SOM}}
 #' @seealso \code{\link[EmbedSOM:EmbedSOM]{EmbedSOM}}
 #'
-#' @references  Gabriel K. (1971). The biplot graphical display of matrices with
+#' @references Gabriel K. (1971). The biplot graphical display of matrices with
 #'   application to principal component analysis. Biometrika 58, 453–467.
 #'   \url{doi:10.1093/biomet/58.3.453}.
 #' @references Maaten, L. van der, & Hinton, G. (2008). Visualizing Data using
@@ -134,7 +134,7 @@ cyto_map.GatingSet <- function(x,
   }  
   
   # MERGE
-  if(length(fs) > 1 & merge == TRUE){
+  if(merge == TRUE){
     fr_list <- cyto_merge_by(fs, 
                              merge_by = "all")
   }else{
@@ -146,7 +146,7 @@ cyto_map.GatingSet <- function(x,
   }
   
   # FLOWFRAME METHOD - FLOWFRAME/FLOWSET RETURN (DEPENDS ON MERGE/SPLIT)
-  map_data <- lapply(seq_along(fr_list), function(z){
+  map_data <- lapply(fr_list, function(fr){
     cyto_map(fr,
              channels = channels,
              display = display,
@@ -199,7 +199,8 @@ cyto_map.GatingSet <- function(x,
                        group_by = "all",
                        display = display,
                        title = paste0("Combined Events", "\n", type),
-                       legend = legend),
+                       legend = legend,
+                       point_col = "grey"), # fade base layer
              error = function(e){
                message("Insufficient plotting space, data mapped successfully.")
              })
@@ -253,8 +254,8 @@ cyto_map.flowSet <- function(x,
   }
   
   # FLOWFRAME METHOD - EACH LIST ELEMENT
-  x <- lapply(fr_list, function(z){
-    cyto_map(z,
+  x <- lapply(fr_list, function(fr){
+    cyto_map(fr,
              channels = channels,
              display = display,
              type = type,
@@ -412,7 +413,7 @@ cyto_map.flowFrame <- function(x,
     colnames(coords) <- c("tSNE-1","tSNE-2")
     # FIt-SNE
   }else if(grepl(type, "FIt-SNE", ignore.case = TRUE) |
-           grepl(type, "FItSNE", ignore.case = TRUE, fixed = TRUE)){  
+           grepl(type, "FItSNE", ignore.case = TRUE)){  
     mp <- fftRtsne(x, ...)
     # MAPPING CO-ORDINATES
     coords <- mp

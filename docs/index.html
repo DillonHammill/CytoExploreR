@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -136,7 +136,7 @@
 <a href="#windows-os" class="anchor"></a>Windows OS</h2>
 <ul>
 <li>Install the appropriate <a href="https://cran.r-project.org/bin/windows/Rtools/">Rtools</a> for your R installation.</li>
-<li>Follow these <a href="https://github.com/RGLab/RProtoBufLib/blob/trunk/INSTALL">instructions</a> to download protobuf Windows binary and set appropriate environment variable. Ignore the section to build protobuf from source.</li>
+<li>Follow these <a href="https://github.com/RGLab/RProtoBufLib/blob/master/INSTALL">instructions</a> to download protobuf Windows binary and set appropriate environment variable. Ignore the section to build protobuf from source.</li>
 <li>Follow these <a href="https://github.com/RGLab/flowWorkspace/blob/master/INSTALL">instructions</a> to install and setup the additional C++ libraries required to successfully build flowWorkspace.</li>
 <li>Restart your computer.</li>
 </ul>
@@ -157,11 +157,11 @@
 <span id="cb2-4"><a href="#cb2-4"></a>  <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(devtools)</span>
 <span id="cb2-5"><a href="#cb2-5"></a>})</span>
 <span id="cb2-6"><a href="#cb2-6"></a><span class="co"># Install flowCore, flowWorkspace &amp; openCyto from GitHub</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">install_github</span>(<span class="st">"RGLab/RProtoBufLib"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">install_github</span>(<span class="st">"RGLab/RProtoBufLib"</span>)</span>
 <span id="cb2-8"><a href="#cb2-8"></a><span class="kw">install_github</span>(<span class="st">"RGLab/cytolib"</span>)</span>
 <span id="cb2-9"><a href="#cb2-9"></a><span class="kw">install_github</span>(<span class="st">"RGLab/flowCore"</span>)</span>
 <span id="cb2-10"><a href="#cb2-10"></a><span class="kw">install_github</span>(<span class="st">"RGLab/flowWorkspace"</span>)</span>
-<span id="cb2-11"><a href="#cb2-11"></a><span class="kw">install_github</span>(<span class="st">"RGLab/flowStats"</span>, <span class="dt">ref =</span> <span class="st">"trunk"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="kw">install_github</span>(<span class="st">"RGLab/flowStats"</span>)</span>
 <span id="cb2-12"><a href="#cb2-12"></a><span class="kw">install_github</span>(<span class="st">"RGLab/openCyto"</span>)</span></code></pre></div>
 </div>
 <div id="cytoexplorer" class="section level2">
@@ -258,7 +258,7 @@
 </ul>
 <p><img src="reference/figures/README-1.png" width="98%" style="display: block; margin: auto;"></p>
 <ul>
-<li>Dimensionality reduction is gaining popularity for analysis of high dimensional cytometry data. In the <code>Dimensionality Reduction</code> vignette we will demonstrate the use of <code>cyto_map</code> to produce PCA, tSNE, UMAP and EmbedSOM maps of cytometry data (coming soon).</li>
+<li>Dimensionality reduction is gaining popularity for analysis of high dimensional cytometry data. In the <code>Dimensionality Reduction</code> vignette we will demonstrate the use of <code>cyto_map</code> to produce PCA, tSNE, FIt-SNE, UMAP and EmbedSOM maps of cytometry data (coming soon).</li>
 </ul>
 </div>
 <div id="news" class="section level2">
@@ -295,7 +295,7 @@
 <span id="cb5-3"><a href="#cb5-3"></a><span class="co">#&gt; To cite package 'CytoExploreR' in publications use:</span></span>
 <span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt; </span></span>
 <span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt;   Dillon Hammill (2020). CytoExploreR: Interactive Analysis of</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt;   Cytometry Data. R package version 1.0.1.</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt;   Cytometry Data. R package version 1.0.2.</span></span>
 <span id="cb5-7"><a href="#cb5-7"></a><span class="co">#&gt;   https://github.com/DillonHammill/CytoExploreR</span></span>
 <span id="cb5-8"><a href="#cb5-8"></a><span class="co">#&gt; </span></span>
 <span id="cb5-9"><a href="#cb5-9"></a><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
@@ -304,7 +304,7 @@
 <span id="cb5-12"><a href="#cb5-12"></a><span class="co">#&gt;     title = {CytoExploreR: Interactive Analysis of Cytometry Data},</span></span>
 <span id="cb5-13"><a href="#cb5-13"></a><span class="co">#&gt;     author = {Dillon Hammill},</span></span>
 <span id="cb5-14"><a href="#cb5-14"></a><span class="co">#&gt;     year = {2020},</span></span>
-<span id="cb5-15"><a href="#cb5-15"></a><span class="co">#&gt;     note = {R package version 1.0.1},</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="co">#&gt;     note = {R package version 1.0.2},</span></span>
 <span id="cb5-16"><a href="#cb5-16"></a><span class="co">#&gt;     url = {https://github.com/DillonHammill/CytoExploreR},</span></span>
 <span id="cb5-17"><a href="#cb5-17"></a><span class="co">#&gt;   }</span></span></code></pre></div>
 </div>
@@ -348,7 +348,7 @@
 <li><a href="https://travis-ci.org/DillonHammill/CytoExploreR"><img src="https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master" alt="Travis build status"></a></li>
 <li><a href="https://codecov.io/github/DillonHammill/CytoExploreR?branch=master"><img src="https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
 <li><a href="https://www.tidyverse.org/lifecycle/#maturing"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="lifecycle"></a></li>
-<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2020--02--20-yellowgreen.svg" alt="Last-changedate"></a></li>
+<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2020--03--05-yellowgreen.svg" alt="Last-changedate"></a></li>
 <li><a href="https://github.com/ropensci/software-review/issues/281"><img src="https://badges.ropensci.org/281_status.svg"></a></li>
 </ul>
 </div>

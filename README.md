@@ -11,7 +11,7 @@ status](https://travis-ci.org/DillonHammill/CytoExploreR.svg?branch=master)](htt
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--02--20-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--03--05-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoExploreR** is comprehensive collection of interactive exploratory
@@ -60,7 +60,7 @@ platform-specific tools are required:
     [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for your R
     installation.
   - Follow these
-    [instructions](https://github.com/RGLab/RProtoBufLib/blob/trunk/INSTALL)
+    [instructions](https://github.com/RGLab/RProtoBufLib/blob/master/INSTALL)
     to download protobuf Windows binary and set appropriate environment
     variable. Ignore the section to build protobuf from source.
   - Follow these
@@ -96,11 +96,11 @@ tryCatch(library(devtools), error = function(e){
   library(devtools)
 })
 # Install flowCore, flowWorkspace & openCyto from GitHub
-install_github("RGLab/RProtoBufLib", ref = "trunk")
+install_github("RGLab/RProtoBufLib")
 install_github("RGLab/cytolib")
 install_github("RGLab/flowCore")
 install_github("RGLab/flowWorkspace")
-install_github("RGLab/flowStats", ref = "trunk")
+install_github("RGLab/flowStats")
 install_github("RGLab/openCyto")
 ```
 
@@ -234,7 +234,8 @@ each of the package vignettes is provided below:
   - Dimensionality reduction is gaining popularity for analysis of high
     dimensional cytometry data. In the `Dimensionality Reduction`
     vignette we will demonstrate the use of `cyto_map` to produce PCA,
-    tSNE, UMAP and EmbedSOM maps of cytometry data (coming soon).
+    tSNE, FIt-SNE, UMAP and EmbedSOM maps of cytometry data (coming
+    soon).
 
 ## News
 
@@ -294,7 +295,7 @@ citation("CytoExploreR")
 #> To cite package 'CytoExploreR' in publications use:
 #> 
 #>   Dillon Hammill (2020). CytoExploreR: Interactive Analysis of
-#>   Cytometry Data. R package version 1.0.1.
+#>   Cytometry Data. R package version 1.0.2.
 #>   https://github.com/DillonHammill/CytoExploreR
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -303,7 +304,7 @@ citation("CytoExploreR")
 #>     title = {CytoExploreR: Interactive Analysis of Cytometry Data},
 #>     author = {Dillon Hammill},
 #>     year = {2020},
-#>     note = {R package version 1.0.1},
+#>     note = {R package version 1.0.2},
 #>     url = {https://github.com/DillonHammill/CytoExploreR},
 #>   }
 ```
