@@ -130,7 +130,8 @@ freedom of t-distribution, must be greater than 0. Values smaller than 1
 correspond to heavier tails, which can often resolve substructure in the
 embedding. See Kobak et al. (2019) for details. Default is 1.0.}
 
-\item{get_costs}{unknown.}
+\item{get_costs}{logical indicating whether the KL-divergence costs computed
+every 50 iterations should be returned, set to FALSE by default.}
 
 \item{df}{positive numeric that controls the degree of freedom of
 t-distribution. The actual degree of freedom is 2*df-1. The standard t-SNE
