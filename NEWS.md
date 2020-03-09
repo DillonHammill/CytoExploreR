@@ -7,6 +7,7 @@
 * Add support to `cyto_map()` for FIt-SNE dimensionality reduction. Update `cyto_map()` documentation to include references for each of the supported dimensionality reduction algorithms.
 * Fix gating of empty populations to prevent dummy gates being returned by openCyto.
 * Frequency statistics for empty populations are now displayed as zero instead of NaN.
+* Improve handling of arguments within cyto_plot for better user experience.
 
 # CytoExploreR 1.0.0
 
