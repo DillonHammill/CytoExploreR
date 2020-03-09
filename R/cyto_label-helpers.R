@@ -203,6 +203,9 @@
           }else{
             st <- .cyto_count(pops[[y]]) / .cyto_count(x[[z]]) * 100
           }
+          if(is.nan(as.numeric(st))){
+            st <- 0
+          }
           st <- paste(.round(st, 2), "%")
           # CV STATISTIC
         } else if (grepl("CV", label_stat[y], ignore.case = TRUE)) {
@@ -212,6 +215,9 @@
               trans = axes_trans
             )
           )
+          if(is.nan(as.numeric(st))){
+            st <- 0
+          }
           st <- paste(.round(st, 2), "%")
           # OTHER STATISTIC
         } else {

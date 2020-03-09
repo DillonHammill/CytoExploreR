@@ -6,6 +6,7 @@
 * Improve handling of multiple compensation controls for the same channel in `cyto_spillover_compute()`. Now the control with the best signal will be used for the calculation.
 * Add support to `cyto_map()` for FIt-SNE dimensionality reduction. Update `cyto_map()` documentation to include references for each of the supported dimensionality reduction algorithms.
 * Fix gating of empty populations to prevent dummy gates being returned by openCyto.
+* Frequency statistics for empty populations are now displayed as zero instead of NaN.
 
 # CytoExploreR 1.0.0
 
