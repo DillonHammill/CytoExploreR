@@ -912,7 +912,8 @@ cyto_gate_edit <- function(x,
     gt[
       parent == prnt & alias == als[i],
       gating_args := CytoExploreR_.argDeparser(list(
-        gate = gates_gT_transposed[[i]]
+        gate = gates_gT_transposed[[i]],
+        openCyto.minEvents = -1
       ))
     ]
     gt[parent == prnt & alias == als[i], collapseDataForGating := TRUE]
