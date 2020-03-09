@@ -30,8 +30,6 @@ fftRtsne(
   K = -1,
   sigma = -30,
   initialization = NULL,
-  data_path = NULL,
-  result_path = NULL,
   load_affinities = NULL,
   fast_tsne_path = NULL,
   nthreads = 0,
@@ -43,57 +41,63 @@ fftRtsne(
 \arguments{
 \item{X}{a matrix containing the data to be mapped.}
 
-\item{dims}{dimensionality of the embedding. Default 2.}
+\item{dims}{dimensionality of the embedding, set to 2 by default.}
 
-\item{perplexity}{perplexity is used to determine the bandwidth of the
-Gaussian kernel in the input space.  Default 30.}
+\item{perplexity}{used to determine the bandwidth of the Gaussian kernel in
+the input space, set to 30 by default.}
 
-\item{theta}{set to 0 for exact.  If non-zero, then will use either Barnes
-Hut or FIt-SNE based on nbody_algo.  If Barnes Hut, then this determins the
-accuracy of BH approximation. Default 0.5.}
+\item{theta}{set to 0 for exact t-SNE. If non-zero, then will use either
+Barnes Hut or FIt-SNE based on nbody_algo. If Barnes Hut, then this
+determins the accuracy of BH approximation. Set to 0.5 by default.}
 
-\item{max_iter}{number of iterations of t-SNE to run. Default 1000.}
+\item{max_iter}{number of iterations of t-SNE to run, set to 1000 by default.}
 
 \item{fft_not_bh}{if theta is nonzero, this determins whether to use FIt-SNE
-or Barnes Hut approximation. Default is FIt-SNE. set to be True for FIt-SNE}
+or Barnes Hut approximation, set to TRUE by default for FIt-SNE.}
 
 \item{ann_not_vptree}{use vp-trees (as in bhtsne) or approximate nearest
 neighbors (default). Set to be TRUE for approximate nearest neighbors.}
 
-\item{stop_early_exag_iter}{when to switch off early exaggeration. Default
-250.}
+\item{stop_early_exag_iter}{when to switch off early exaggeration, set to 250
+by default.}
 
-\item{exaggeration_factor}{coefficient for early exaggeration (>1). Default
-12.}
+\item{exaggeration_factor}{coefficient for early exaggeration (>1), set to 12
+by default.}
 
 \item{no_momentum_during_exag}{set to 0 to use momentum and other
-optimization tricks. 1 to do plain,vanilla gradient descent (useful for
-testing large exaggeration coefficients)}
+optimization tricks. Can be set to 1 to do plain, vanilla gradient descent
+(useful for testing large exaggeration coefficients).}
 
-\item{start_late_exag_iter}{when to start late exaggeration. set to -1 to not
-use late exaggeration. Default -1.}
+\item{start_late_exag_iter}{when to start late exaggeration, set to -1 by
+default to not use late exaggeration.}
 
-\item{late_exag_coeff}{late exaggeration coefficient. Set to -1 to not use
-late exaggeration. Default -1.}
+\item{late_exag_coeff}{late exaggeration coefficient, set to -1 by default to
+not use late exaggeration.}
 
-\item{mom_switch_iter}{unknown.}
+\item{mom_switch_iter}{iteration number to switch from momentum to
+final_momentum, set to 250 by default.}
 
-\item{momentum}{unknown.}
+\item{momentum}{initial value of momentum, set to 0.5 by default.}
 
-\item{final_momentum}{unkown.}
+\item{final_momentum}{value of momentum to use later in the optimisation, set
+to 0.8 by default.}
 
-\item{learning_rate}{unknown.}
+\item{learning_rate}{set to 200 by default.}
 
-\item{n_trees}{unknown.}
+\item{n_trees}{when using Annoy, the number of search trees to use, set to 50
+by default.}
 
-\item{search_k}{unknown.}
+\item{search_k}{When using Annoy, the number of nodes to inspect during
+search. Default is 3*perplexity*n_trees (or K*n_trees when using fixed
+sigma).}
 
-\item{rand_seed}{unknown.}
+\item{rand_seed}{seed for random initialisation, set to -1 by default to
+initialise random number generator with current time.}
 
-\item{nterms}{- If using FIt-SNE, this is the number of interpolation points
+\item{nterms}{if using FIt-SNE, this is the number of interpolation points
 per sub-interval.}
 
-\item{intervals_per_integer}{see min_num_intervals}
+\item{intervals_per_integer}{see min_num_intervals.}
 
 \item{min_num_intervals}{let maxloc = ceil(max(max(X))) and minloc =
 floor(min(min(X))). i.e. the points are in a [minloc]^no_dims by
@@ -103,25 +107,22 @@ minloc)/intervals_per_integer), whichever is larger. min_num_intervals must
 be an integer >0, and intervals_per_integer must be >0. Defaults are
 min_num_intervals=50 and intervals_per_integer = 1.}
 
-\item{K}{number of nearest neighbours to get when using fixed sigma. Default
--30 (None).}
+\item{K}{number of nearest neighbours to get when using fixed sigma, set to
+-30 by default.}
 
-\item{sigma}{fixed sigma value to use when perplexity==-1. Default -1 (None).}
+\item{sigma}{fixed sigma value to use when perplexity==-1, set to -1 by
+default.}
 
-\item{initialization}{N x no_dims array to intialize the solution. Default:
-None.}
+\item{initialization}{N x no_dims array to intialize the solution.}
 
-\item{data_path}{unknown}
-
-\item{result_path}{unknown}
-
-\item{load_affinities}{- If 1, input similarities are loaded from a file and
-not computed If 2, input similarities are saved into a file. If 0,
+\item{load_affinities}{if 1, input similarities are loaded from a file and
+not computed. If 2, input similarities are saved into a file. If 0,
 affinities are neither saved nor loaded.}
 
-\item{fast_tsne_path}{unknown}
+\item{fast_tsne_path}{path to FItSNE executable.}
 
-\item{nthreads}{unknown}
+\item{nthreads}{number of threads to use, set to use all available threads by
+default.}
 
 \item{perplexity_list}{if perplexity==0 then perplexity combination will be
 used with values taken from perplexity_list. Default: NULL df - Degree of
@@ -129,15 +130,26 @@ freedom of t-distribution, must be greater than 0. Values smaller than 1
 correspond to heavier tails, which can often resolve substructure in the
 embedding. See Kobak et al. (2019) for details. Default is 1.0.}
 
-\item{get_costs}{unknown}
+\item{get_costs}{unknown.}
 
-\item{df}{unknown}
+\item{df}{positive numeric that controls the degree of freedom of
+t-distribution. The actual degree of freedom is 2*df-1. The standard t-SNE
+choice of 1 degree of freedom corresponds to df=1. Large df approximates
+Gaussian kernel. df<1 corresponds to heavier tails, which can often resolve
+substructure in the embedding. See Kobak et al. (2019) for details. Default
+is 1.0.}
 }
 \description{
 Modified version of \url{https://github.com/KlugerLab/FIt-SNE/}
 implementation to expose argument names and defaults within CytoExploreR.
 This function should not be used directly, data should instead be mapped
 using \code{\link{cyto_map}}.
+}
+\references{
+Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
+  Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
+  visualization of single-cell RNA-seq data. Nature Methods.
+  \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/}.
 }
 \seealso{
 \code{\link{cyto_map}}

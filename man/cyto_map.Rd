@@ -129,6 +129,12 @@ can be altered by passing relvant arguments through \code{cyto_map}. To see a
 full list of customisable parameters refer to the documentation for each of
 these functions by clicking on the links below.
 }
+\details{
+If you use \code{cyto_map} to map your cytometry data, be sure to cite the
+publication that describes the dimensionality reduction algorithm that you
+have chosen to use. References to these publications can be found in the
+references section of this document.
+}
 \references{
 Gabriel K. (1971). The biplot graphical display of matrices with
   application to principal component analysis. Biometrika 58, 453–467.
@@ -141,6 +147,7 @@ Maaten, L. van der, & Hinton, G. (2008). Visualizing Data using
 Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
   Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
   visualization of single-cell RNA-seq data. Nature Methods.
+  \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/}.
 
 McInnes, L., & Healy, J. (2018). UMAP: uniform manifold
   approximation and projection for dimension reduction. Preprint at

@@ -9,6 +9,11 @@
 #' full list of customisable parameters refer to the documentation for each of
 #' these functions by clicking on the links below.
 #'
+#' If you use \code{cyto_map} to map your cytometry data, be sure to cite the
+#' publication that describes the dimensionality reduction algorithm that you
+#' have chosen to use. References to these publications can be found in the
+#' references section of this document.
+#'
 #' @param x object of class \code{flowFrame} or \code{flowSet}.
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
@@ -76,9 +81,11 @@
 #' @references Maaten, L. van der, & Hinton, G. (2008). Visualizing Data using
 #'   t-SNE. Journal of Machine Learning Research 9, 2579–2605.
 #'   \url{http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf}.
+#'
 #' @references Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
 #'   Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
 #'   visualization of single-cell RNA-seq data. Nature Methods.
+#'   \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/}.
 #' @references McInnes, L., & Healy, J. (2018). UMAP: uniform manifold
 #'   approximation and projection for dimension reduction. Preprint at
 #'   \url{https://arxiv.org/abs/1802.03426}.
@@ -86,7 +93,7 @@
 #'   Fišer, K., Sedlacek, R., Vondrášek, J., and Drbal, K. (2018). Rapid
 #'   single-cell cytometry data visualization with EmbedSOM. Preprint at
 #'   \url{https://www.biorxiv.org/content/10.1101/496869v1}.
-#'   
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @name cyto_map
