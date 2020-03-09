@@ -5,7 +5,7 @@
 #' This function should not be used directly, data should instead be mapped
 #' using \code{\link{cyto_map}}.
 #'
-#' @param X a matrix contain ing the data to be mapped.
+#' @param X a matrix containing the data to be mapped.
 #' @param dims dimensionality of the embedding. Default 2.
 #' @param perplexity perplexity is used to determine the bandwidth of the
 #'   Gaussian kernel in the input space.  Default 30.

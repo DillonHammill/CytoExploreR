@@ -268,6 +268,8 @@ cyto_map.flowSet <- function(x,
              seed = seed, ...)
   })
   
+  print(x)
+  
   # FLOWFRAME LIST TO FLOWSET
   if(length(x) > 1){
     x <- flowSet_to_cytoset(flowSet(x))
@@ -319,7 +321,7 @@ cyto_map.flowFrame <- function(x,
                                     plot = FALSE)
 
   # PREPARE DATA ---------------------------------------------------------------
-  
+
   # PREPARE DATA - SAMPLING
   x <- cyto_sample(x, 
                    display = display, 
@@ -357,7 +359,8 @@ cyto_map.flowFrame <- function(x,
   # SPLIT MAPPED FLOWFRAME -----------------------------------------------------
   
   # SPLIT -> FLOWSET (ELSE MERGED FLOWFRAME)
-  if(split == TRUE & "Sample ID" %in% cyto_channels(x)){
+  if(split == TRUE 
+     & "Sample ID" %in% cyto_channels(x)){
     x <- cyto_split(x, names = names)
     x <- flowSet_to_cytoset(flowSet(x))
   }
@@ -416,7 +419,7 @@ cyto_map.flowFrame <- function(x,
            grepl(type, "FItSNE", ignore.case = TRUE)){  
     mp <- fftRtsne(x, ...)
     # MAPPING CO-ORDINATES
-    coords <- mp
+    coords <- mp[, 1:2, drop = FALSE]
     colnames(coords) <- c("FIt-SNE-1", "FIt-SNE-2")  
     # UMAP 
   }else if(grepl(type, "UMAP", ignore.case = TRUE)){

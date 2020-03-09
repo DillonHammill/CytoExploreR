@@ -41,7 +41,7 @@ fftRtsne(
 )
 }
 \arguments{
-\item{X}{a matrix contain ing the data to be mapped.}
+\item{X}{a matrix containing the data to be mapped.}
 
 \item{dims}{dimensionality of the embedding. Default 2.}
 
