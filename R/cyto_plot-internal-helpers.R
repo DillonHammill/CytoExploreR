@@ -1178,11 +1178,9 @@
     
   }
   
-  # Adjust colors by point_fill_alpha
+  # Adjust colors by point_fill_alpha - REMOVE CHECK FOR ALPHA != 1
   lapply(seq_len(SMP), function(z){
-    if(point_col_alpha[z] != 1){
       point_col[[z]] <<- adjustcolor(point_col[[z]], point_col_alpha[z])
-    }
   })
   
   return(point_col)
