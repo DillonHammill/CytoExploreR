@@ -34,7 +34,6 @@
 #' @param ... not in use.
 #'
 #' @importFrom flowCore exprs
-#' @importFrom scattermore scattermore
 #' @importFrom graphics par rasterImage points
 #' @importFrom grDevices col2rgb dev.size
 #' @importFrom stats rnorm
