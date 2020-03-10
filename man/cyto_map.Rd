@@ -16,7 +16,7 @@ cyto_map(x, ...)
   channels = NULL,
   display = 1,
   type = "UMAP",
-  merge = TRUE,
+  merge_by = "all",
   split = TRUE,
   names = NULL,
   save_as = NULL,
@@ -33,7 +33,7 @@ cyto_map(x, ...)
   channels = NULL,
   display = 1,
   type = "UMAP",
-  merge = TRUE,
+  merge_by = "all",
   split = TRUE,
   names = NULL,
   save_as = NULL,
@@ -86,8 +86,9 @@ are mapped by default.}
 \item{type}{dimension reduction type to use to generate the map, supported
 options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".}
 
-\item{merge}{logical indicating whether the samples should be merged prior to
-mapping to generate a consensus map, set to TRUE by default.}
+\item{merge_by}{vector of experimental variables to split and merge samples
+into groups prior to mapping, set to "all" by default to create a single
+consensus map.}
 
 \item{split}{logical indicating whether samples merged using
 \code{cyto_merge_by} should be split prior to writing fcs files, set to
@@ -142,7 +143,7 @@ Gabriel K. (1971). The biplot graphical display of matrices with
 
 Maaten, L. van der, & Hinton, G. (2008). Visualizing Data using
   t-SNE. Journal of Machine Learning Research 9, 2579–2605.
-  \url{http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf}.
+  \url{http://www.jmlr.org/papers/volume9/vandermaaten08a/}.
 
 Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
   Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
