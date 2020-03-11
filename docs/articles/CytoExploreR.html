@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -105,7 +105,7 @@
       <h1>Getting Started</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2020-02-18</h4>
+            <h4 class="date">2020-03-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoExploreR/blob/master/vignettes/CytoExploreR.Rmd"><code>vignettes/CytoExploreR.Rmd</code></a></small>
       <div class="hidden name"><code>CytoExploreR.Rmd</code></div>
@@ -370,8 +370,8 @@ Adding contour lines to the plot can also be helpful in deciding where gates sho
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># Gating Tree</span></span>
 <span id="cb16-2"><a href="#cb16-2"></a><span class="kw"><a href="../reference/cyto_plot_gating_tree.html">cyto_plot_gating_tree</a></span>(gs[[<span class="dv">32</span>]],</span>
 <span id="cb16-3"><a href="#cb16-3"></a>                      <span class="dt">stat =</span> <span class="st">"freq"</span>)</span></code></pre></div>
-<div id="htmlwidget-698860879cdcc67ab6cf" style="width:100%;height:432.632880098888px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-698860879cdcc67ab6cf">{"x":{"nodes":{"id":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"label":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"group":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"value":[1,0.6466,0.58924,0.35244,0.01968,0.12822,0.04028,0.00904,0.07594,0.00832,0.2368]},"edges":{"to":["Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"from":["root","Cells","Single Cells","Live Cells","Live Cells","T Cells","CD4 T Cells","T Cells","CD8 T Cells","Single Cells"],"label":["64.66 %","91.13 %","59.81 %","5.58 %","36.38 %","31.41 %","22.44 %","59.23 %","10.96 %","40.19 %"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false},"edges":{"arrows":"to","color":"black"}},"groups":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script><div style="line-height: 1.8em;">
+<div id="htmlwidget-f48453080de91fef6bad" style="width:100%;height:432.632880098888px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f48453080de91fef6bad">{"x":{"nodes":{"id":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"label":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"group":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"value":[1,0.6466,0.58924,0.35244,0.01968,0.12822,0.04028,0.00904,0.07594,0.00832,0.2368]},"edges":{"to":["Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"from":["root","Cells","Single Cells","Live Cells","Live Cells","T Cells","CD4 T Cells","T Cells","CD8 T Cells","Single Cells"],"label":["64.66 %","91.13 %","59.81 %","5.58 %","36.38 %","31.41 %","22.44 %","59.23 %","10.96 %","40.19 %"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false},"edges":{"arrows":"to","color":"black"}},"groups":["root","Cells","Single Cells","Live Cells","Dendritic Cells","T Cells","CD4 T Cells","CD69+ CD4 T Cells","CD8 T Cells","CD69+ CD8 T Cells","Dead Cells"],"width":null,"height":null,"idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)"},"evals":[],"jsHooks":[]}</script><div style="line-height: 1.8em;">
 It is also easy to plot entire gating schemes using <code>cyto_plot_gating_scheme</code>. This is an extremely powerful function that can plot gating schemes for all samples, and has full support for back gating and gate tracking.
 </div>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="co"># Gating scheme</span></span>

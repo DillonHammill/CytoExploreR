@@ -89,7 +89,7 @@ gt_file <- read.csv(system.file("extdata",
 ))
 
 # Gating -
-suppressWarnings(gt_gating(gt, gs))
+gt_gating(gt, gs)
 
 # Compensation GatingSet -------------------------------------------------------
 fs_comp <- cyto_load(paste0(datadir,"/Compensation"))

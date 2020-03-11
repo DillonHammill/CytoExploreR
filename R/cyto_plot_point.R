@@ -34,7 +34,8 @@
 #' @param ... not in use.
 #'
 #' @importFrom flowCore exprs
-#' @importFrom graphics points
+#' @importFrom graphics par rasterImage points
+#' @importFrom grDevices col2rgb dev.size
 #' @importFrom stats rnorm
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -125,6 +126,14 @@ cyto_plot_point.flowFrame <- function(x,
   # UPDATE ARGUMENTS
   .args_update(args)
   
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # PLOT LIMITS
+  usr <- par("usr")
+  
+  # DEVICE SIZE
+  size <- as.integer(dev.size('px') / dev.size('in') * par('pin'))
+  
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
   
   # LAYERS
@@ -155,6 +164,24 @@ cyto_plot_point.flowFrame <- function(x,
                pch = point_shape[z],
                cex = point_size[z],
                col = point_col[[z]])
+        
+        # # SCATTERMORE POINTS - SHAPE & ALPHA CONTROL
+        # rasterImage(
+        #   scattermore(
+        #     x = cbind(fr_exprs[, channels[1]], fr_exprs[, channels[2]]),
+        #     size = size,
+        #     xlim = usr[1:2],
+        #     ylim = usr[3:4],
+        #     cex = point_size[[z]],
+        #     rgba = col2rgb(point_col[[z]], alpha = TRUE),
+        #     output.raster = TRUE
+        #   ),
+        #   xleft = usr[1],
+        #   xright = usr[2],
+        #   ybottom = usr[3],
+        #   ytop = usr[4]
+        # )
+        
       }
       
     }
@@ -241,6 +268,14 @@ cyto_plot_point.list <- function(x,
   # UPDATE ARGUMENTS
   .args_update(args)
   
+  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  
+  # PLOT LIMITS
+  usr <- par("usr")
+  
+  # DEVICE SIZE
+  size <- as.integer(dev.size('px') / dev.size('in') * par('pin'))
+  
   # POINTS & CONTOUR LINES LAYERS ----------------------------------------------
   
   # LAYERS
@@ -271,6 +306,24 @@ cyto_plot_point.list <- function(x,
                pch = point_shape[z],
                cex = point_size[z],
                col = point_col[[z]])
+
+        # # SCATTERMORE POINTS - SHAPE & ALPHA CONTROL
+        # rasterImage(
+        #   scattermore(
+        #     x = cbind(fr_exprs[, channels[1]], fr_exprs[, channels[2]]),
+        #     size = size,
+        #     xlim = usr[1:2],
+        #     ylim = usr[3:4],
+        #     cex = point_size[[z]],
+        #     rgba = col2rgb(point_col[[z]], alpha = TRUE),
+        #     output.raster = TRUE
+        #   ),
+        #   xleft = usr[1],
+        #   xright = usr[2],
+        #   ybottom = usr[3],
+        #   ytop = usr[4]
+        # )
+        
       }
       
     }

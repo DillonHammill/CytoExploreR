@@ -76,7 +76,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -143,6 +143,21 @@
       <small>Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="cytoexplorer-103" class="section level1">
+<h1 class="page-header">
+<a href="#cytoexplorer-103" class="anchor"></a>CytoExploreR 1.0.3</h1>
+<ul>
+<li>Update installation instructions on website following in changes in RGLab default branches.</li>
+<li>Fix sample grouping when no experiment details are added to samples.</li>
+<li>Resort to machine axes limits when no events are present for plotting.</li>
+<li>Improve handling of multiple compensation controls for the same channel in <code><a href="../reference/cyto_spillover_compute.html">cyto_spillover_compute()</a></code>. Now the control with the best signal will be used for the calculation.</li>
+<li>Add support to <code><a href="../reference/cyto_map.html">cyto_map()</a></code> for FIt-SNE dimensionality reduction. Update <code><a href="../reference/cyto_map.html">cyto_map()</a></code> documentation to include references for each of the supported dimensionality reduction algorithms.</li>
+<li>Fix gating of empty populations to prevent dummy gates being returned by openCyto.</li>
+<li>Frequency statistics for empty populations are now displayed as zero instead of NaN.</li>
+<li>Improve handling of arguments within cyto_plot for better user experience.</li>
+<li>Fix errors for cyto_spillover_compute and cyto_spillover_spread_compute on mac OS.</li>
+</ul>
+</div>
     <div id="cytoexplorer-100" class="section level1">
 <h1 class="page-header">
 <a href="#cytoexplorer-100" class="anchor"></a>CytoExploreR 1.0.0</h1>
@@ -156,6 +171,7 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
+        <li><a href="#cytoexplorer-103">1.0.3</a></li>
         <li><a href="#cytoexplorer-100">1.0.0</a></li>
       </ul>
     </div>

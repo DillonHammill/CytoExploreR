@@ -11,12 +11,12 @@
                                  channel_match = NULL,
                                  axes_limits = "machine",
                                  ...) {
-
+  
   # PREPARE ARGUMENTS ----------------------------------------------------------
-
+  
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
-
+  
   # PREPARE CHANNEL_MATCH VARIABLE (MARKERS TO CHANNELS)
   if (any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
     # MARKERS TO CHANNELS
@@ -29,15 +29,15 @@
       }
     })
   }
-
+  
   # CHANNELS
   channels <- cyto_fluor_channels(x)
-
+  
   # TRANSFORMATIONS
   axes_trans <- cyto_transformer_extract(x)
-
+  
   # PREPARE CHANNEL_MATCH ------------------------------------------------------
-
+  
   # CHANNEL MATCH MISSING
   if (!"channel" %in% colnames(pd)) {
     # TRY CHANNEL_MATCH
@@ -45,8 +45,8 @@
       pd$channel <- paste(cyto_channel_select(x))
     } else {
       if (is(channel_match, "data.frame") |
-        is(channel_match, "matrix") |
-        is(channel_match, "tibble")) {
+          is(channel_match, "matrix") |
+          is(channel_match, "tibble")) {
         if (!all(c("name", "channel") %in% colnames(channel_match))) {
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
@@ -57,9 +57,9 @@
         if (getOption("CytoExploreR_wd_check") == TRUE) {
           if (file_wd_check(channel_match)) {
             cm <- read.csv(channel_match,
-              header = TRUE,
-              row.names = 1,
-              stringsAsFactors = FALSE
+                           header = TRUE,
+                           row.names = 1,
+                           stringsAsFactors = FALSE
             )
             chans <- cm$channel[match(cyto_names(x), rownames(cm))]
             pd$channel <- paste(chans)
@@ -68,9 +68,9 @@
           }
         } else {
           cm <- read.csv(channel_match,
-            header = TRUE,
-            row.names = 1,
-            stringsAsFactors = FALSE
+                         header = TRUE,
+                         row.names = 1,
+                         stringsAsFactors = FALSE
           )
           chans <- cm$channel[match(cyto_names(x), rownames(cm))]
           pd$channel <- paste(chans)
@@ -78,9 +78,9 @@
       }
     }
   }
-
+  
   # PREPARE PARENTS ------------------------------------------------------------
-
+  
   # PARENT PER CONTROL
   if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
     if (is.null(parent)) {
@@ -109,7 +109,7 @@
   }
   
   # UPDATE CHANNEL_MATCH FILE & CYTO_DETAILS -----------------------------------
-
+  
   # SAVE CHANNEL_MATCH
   if (is.null(channel_match)) {
     write.csv(pd, paste0(
@@ -121,14 +121,21 @@
               channel_match, 
               row.names = FALSE)
   }
-
-  # CYTO_DETAILS
-  cyto_details(x) <- pd
-
+  
+  # CYTO_DETAILS - MAC ORDERING ISSUE
+  lapply(colnames(pd), function(z){
+    cyto_details(x)[, z] <<- pd[,z]
+  })
+  
+  # SAMPLE NAME COLUMN (AVOID INDEXING USING "NAME")
+  pd_name_index <- which(LAPPLY(colnames(pd), function(z){
+    all(cyto_names(x) %in% pd[, z])
+  }))
+  
   # REMOVE EXCESS CONTROLS -----------------------------------------------------
-
+  
   # MULTIPLE CONTROLS PER CHANNEL (BYPASS UNSTAINED)
-  if (length(unique(pd[, "channel"])) < length(pd[, "name"])) {
+  if (length(unique(pd[, "channel"])) < length(pd[, pd_name_index])) {
     chans <- unique(pd[, "channel"])
     lapply(chans, function(z) {
       # RESTRICT CYTO_DETAILS
@@ -155,46 +162,54 @@
           # CALCULATE MEDFI
           MEDFI <- suppressMessages(
             cyto_stats_compute(fs,
-              channels = z,
-              stat = "median",
-              trans = axes_trans
+                               channels = z,
+                               stat = "median",
+                               trans = axes_trans
             )
           )
           # MAXIMUM SIGNAL
           max_MEDFI <- max(MEDFI[, ncol(MEDFI)])
           ind <- which(MEDFI[, ncol(MEDFI)] != max_MEDFI)
-          remove_names <- MEDFI[ind, "name", drop = TRUE]
-          droplevels(remove_names)
+          remove_names <- MEDFI[ind, pd_name_index, drop = TRUE]
+          # REMOVE MISSING FACTOR LEVELS
+          if(is.factor(remove_names)){
+            droplevels(remove_names)
+          }
           # REMOVE SAMPLES - LOW SIGNAL
-          x <<- x[-match(remove_names, pd[, "name"])]
-          cyto_details(x)[, "name"] <<- droplevels(cyto_details(x)[, "name"])
+          x <<- x[-match(remove_names, cyto_details(x)[, pd_name_index])]
+          # REMOVE MISSING FACTOR LEVELS
+          if(is.factor(cyto_details(x)[, pd_name_index])){
+            cyto_details(x)[, pd_name_index] <<- droplevels(
+              cyto_details(x)[, pd_name_index]
+            )
+          }
         }
       }
     })
   }
-
+  
   # RESTRICT CYTO_DETAILS
   pd <- cyto_details(x)
-
+  
   # SPILLOVER POPULATIONS ------------------------------------------------------
-
+  
   # UNIVERSAL REFERENCE
   if (any(grepl("unstained", pd[, "channel"], ignore.case = TRUE))) {
-
+    
     # REMOVE EXCESS UNSTAINED CONTROLS - SELECT FIRST INSTANCE
     if (length(which(grepl("unstained", pd[, "channel"],
-      ignore.case = TRUE
+                           ignore.case = TRUE
     ))) > 1) {
       message("Removing excess unstained controls...")
       x <- x[-which(grepl("unstained", pd[, "channel"],
-        ignore.case = TRUE
+                          ignore.case = TRUE
       ))[-1]]
       pd <- cyto_details(x)
     }
-
+    
     # EXTRACT UNSTAINED POPULATIONS - LIST OF FLOWFRAMES
     NIL_data <- x[which(grepl("unstained", pd[, "channel"],
-      ignore.case = TRUE
+                              ignore.case = TRUE
     ))]
     NIL <- lapply(unique(parent)[!is.na(unique(parent))], function(z) {
       # EITHER FLOWFRAME OR GATINGHIERARCHY
@@ -203,60 +218,60 @@
                    copy = TRUE)
     })
     names(NIL) <- unique(parent)
-
+    
     # EXTRACT STAINED POPULATIONS - LIST OF FLOWFRAMES
     POS_gs <- x[-which(grepl("unstained", pd[, "channel"],
-      ignore.case = TRUE
+                             ignore.case = TRUE
     ))]
     POS <- lapply(seq_along(POS_gs), function(z) {
       cyto_extract(
         POS_gs[[z]],
-        pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, "name"])],
+        pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, pd_name_index])],
         copy = TRUE
       )
     })
     names(POS) <- cyto_names(POS_gs)
-
+    
     # RESTRICT CYTO_DETAILS
-    pd <- pd[pd[, "name"] != cyto_names(NIL_data), ]
-
+    pd <- pd[pd[, pd_name_index] != cyto_names(NIL_data), ]
+    
     # NAMES
     nms <- names(POS)
-
+    
     # SAMPLES
     smp <- length(POS)
-
+    
     # GATE POSITIVE SIGNAL
     pos_pops <- list()
     neg_pops <- list()
     pops <- lapply(seq_len(smp), function(z) {
-
+      
       # Extract flowFrame
       fr <- POS[[z]]
-
+      
       # Parent
-      parent <- pd[pd[, "name"] == cyto_names(fr), "parent"]
-
+      parent <- pd[pd[, pd_name_index] == cyto_names(fr), "parent"]
+      
       # Channel
       chan <- pd$channel[z]
-
+      
       # Reference
       ref <- NIL[[parent]]
-
+      
       # Plot
       cyto_plot(ref,
-        channels = chan,
-        overlay = fr,
-        density_stack = 0,
-        axes_trans = axes_trans,
-        popup = TRUE,
-        density_fill = c("red", "dodgerblue"),
-        legend = FALSE,
-        density_fill_alpha = 0.6,
-        title = nms[z],
-        axes_limits = axes_limits, ...
+                channels = chan,
+                overlay = fr,
+                density_stack = 0,
+                axes_trans = axes_trans,
+                popup = TRUE,
+                density_fill = c("red", "dodgerblue"),
+                legend = FALSE,
+                density_fill_alpha = 0.6,
+                title = nms[z],
+                axes_limits = axes_limits, ...
       )
-
+      
       # cyto_gate_draw on each flowFrame using interval gate on selected channel
       gt <- cyto_gate_draw(
         x = fr,
@@ -266,59 +281,59 @@
         plot = FALSE
       )
       fr <- Subset(fr, gt[[1]])
-
+      
       # SAVE GATED POPULATIONS
       pos_pops[[z]] <<- fr
       neg_pops[[z]] <<- ref
     })
-
+    
     # INTERNAL REFERENCE - POSITIVE & NEGATIVE WITHIN CONTROL
   } else if (!any(grepl("unstained", pd[, "channel"], ignore.case = TRUE))) {
-
+    
     # EXTRACT POPULATIONS
     pops <- lapply(seq_along(x), function(z) {
       cyto_extract(
         x[[z]],
-        pd[, "parent"][match(cyto_names(x[[z]]), pd[, "name"])],
+        pd[, "parent"][match(cyto_names(x[[z]]), pd[, pd_name_index])],
         copy = TRUE
       )
     })
     names(pops) <- cyto_names(x)
-
+    
     # NAMES
     nms <- names(pops)
-
+    
     # SAMPLES
     smp <- length(pops)
-
+    
     # NEGATIVE POPULATIONS
     neg_pops <- list()
-
+    
     # POSITIVE POPULATIONS
     pos_pops <- list()
-
+    
     # GATE NEGATIVE & POSITIVE SIGNAL PER CONTROL
     lapply(seq_len(smp), function(z) {
-
+      
       # CONTROL
       fr <- pops[[z]]
-
+      
       # CHANNEL
       chan <- pd$channel[z]
-
+      
       # PLOT
       cyto_plot(fr,
-        channels = chan,
-        density_stack = 0,
-        axes_trans = axes_trans,
-        popup = TRUE,
-        density_fill = "dodgerblue",
-        legend = FALSE,
-        density_fill_alpha = 0.6,
-        title = nms[z],
-        axes_limits = axes_limits, ...
+                channels = chan,
+                density_stack = 0,
+                axes_trans = axes_trans,
+                popup = TRUE,
+                density_fill = "dodgerblue",
+                legend = FALSE,
+                density_fill_alpha = 0.6,
+                title = nms[z],
+                axes_limits = axes_limits, ...
       )
-
+      
       # GATE NEGATIVE POPULATION
       gt <- cyto_gate_draw(
         x = fr,
@@ -328,7 +343,7 @@
         plot = FALSE
       )
       neg_pop <- Subset(fr, gt[[1]])
-
+      
       # GaATE POSITIVE POPULATION
       gt <- cyto_gate_draw(
         x = fr,
@@ -338,23 +353,23 @@
         plot = FALSE
       )
       pos_pop <- Subset(fr, gt[[1]])
-
+      
       neg_pops[[z]] <<- neg_pop
       pos_pops[[z]] <<- pos_pop
     })
   }
-
+  
   # Add names to pops lists
   names(neg_pops) <- nms
   names(pos_pops) <- nms
-
+  
   # Convert neg_pops and pos_pops to flowSets
   neg_pops <- flowSet_to_cytoset(flowSet(neg_pops))
   pos_pops <- flowSet_to_cytoset(flowSet(pos_pops))
   
   # cytoset required to retain details
   cyto_details(pos_pops) <- pd[pd$name %in% cyto_names(pos_pops),]
-
+  
   # Return list of negative and positive flowSets
   return(list("negative" = neg_pops,
               "positive" = pos_pops))

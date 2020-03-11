@@ -43,7 +43,12 @@
 
 
 <meta property="og:title" content="Create dimension-reduced maps of cytometry data — cyto_map" />
-<meta property="og:description" content="Create dimension-reduced maps of cytometry data" />
+<meta property="og:description" content="cyto_map is a convenient wrapper to produce dimension-reduced maps of
+cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
+dimensionality reduction functions are called using the default settings, but
+can be altered by passing relvant arguments through cyto_map. To see a
+full list of customisable parameters refer to the documentation for each of
+these functions by clicking on the links below." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -77,7 +82,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -146,7 +151,12 @@
     </div>
 
     <div class="ref-description">
-    <p>Create dimension-reduced maps of cytometry data</p>
+    <p><code>cyto_map</code> is a convenient wrapper to produce dimension-reduced maps of
+cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
+dimensionality reduction functions are called using the default settings, but
+can be altered by passing relvant arguments through <code>cyto_map</code>. To see a
+full list of customisable parameters refer to the documentation for each of
+these functions by clicking on the links below.</p>
     </div>
 
     <pre class="usage"><span class='fu'>cyto_map</span>(<span class='no'>x</span>, <span class='no'>...</span>)
@@ -159,6 +169,7 @@
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
+  <span class='kw'>merge</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -176,6 +187,7 @@
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
+  <span class='kw'>merge</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -243,7 +255,12 @@ are mapped by default.</p></td>
     <tr>
       <th>type</th>
       <td><p>dimension reduction type to use to generate the map, supported
-options include "PCA", "tSNE", "UMAP" and "EmbedSOM".</p></td>
+options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".</p></td>
+    </tr>
+    <tr>
+      <th>merge</th>
+      <td><p>logical indicating whether the samples should be merged prior to
+mapping to generate a consensus map, set to TRUE by default.</p></td>
     </tr>
     <tr>
       <th>split</th>
@@ -293,10 +310,29 @@ results between runs.</p></td>
 
     <p>flowFrame, flowSet, GatingHierarchy or GatingSet containing the
   mapped projection parameters.</p>
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Gabriel K. (1971). The biplot graphical display of matrices with
+  application to principal component analysis. Biometrika 58, 453–467.
+  <a href='doi:10.1093/biomet/58.3.453'>doi:10.1093/biomet/58.3.453</a>.</p>
+<p>Maaten, L. van der, &amp; Hinton, G. (2008). Visualizing Data using
+  t-SNE. Journal of Machine Learning Research 9, 2579–2605.
+  <a href='http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf'>http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf</a>.</p>
+<p>Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
+  Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
+  visualization of single-cell RNA-seq data. Nature Methods.</p>
+<p>McInnes, L., &amp; Healy, J. (2018). UMAP: uniform manifold
+  approximation and projection for dimension reduction. Preprint at
+  <a href='https://arxiv.org/abs/1802.03426'>https://arxiv.org/abs/1802.03426</a>.</p>
+<p>Kratochvíl, M., Koladiya, A., Balounova, J., Novosadova, V.,
+  Fišer, K., Sedlacek, R., Vondrášek, J., and Drbal, K. (2018). Rapid
+  single-cell cytometry data visualization with EmbedSOM. Preprint at
+  <a href='https://www.biorxiv.org/content/10.1101/496869v1'>https://www.biorxiv.org/content/10.1101/496869v1</a>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='https://rdrr.io/r/stats/prcomp.html'>PCA</a></code></p>
 <p><code><a href='https://rdrr.io/pkg/Rtsne/man/Rtsne.html'>tSNE</a></code></p>
+<p><code><a href='fftRtsne.html'>fftRtsne</a></code></p>
 <p><code><a href='https://rdrr.io/pkg/umap/man/umap.html'>UMAP</a></code></p>
 <p><code><a href='https://rdrr.io/pkg/EmbedSOM/man/SOM.html'>SOM</a></code></p>
 <p><code><a href='https://rdrr.io/pkg/EmbedSOM/man/EmbedSOM.html'>EmbedSOM</a></code></p></div>
@@ -307,6 +343,7 @@ results between runs.</p></td>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
+      <li><a href="#references">References</a></li>
       <li><a href="#see-also">See also</a></li>
     </ul>
 

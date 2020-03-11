@@ -130,7 +130,7 @@
     L <- length(x[["fr_list"]][[1]])
   }
   
-  # TOTAL LAYERS PER PLOT - TL -------------------------------------------------
+  # TOTAL LAYERS TO PLOT - TL -------------------------------------------------
   TL <- N * L
   
   # GATE COUNT PER LAYER - GC --------------------------------------------------
@@ -248,13 +248,11 @@
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
       res <- rep_len(x[[arg]], N)
-
       if(N == 1 & MTD == "flowSet"){
         res <- list(res)
       }else if (N > 1) {
         res <- split(res, rep_len(seq_len(N), N))
       }
-
       x[[arg]] <<- res
     }
   })
@@ -268,13 +266,11 @@
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
       res <- rep_len(x[[arg]], N * 2)
-
       if(N == 1 & MTD == "flowSet"){
         res <- list(res)
       }else if (N > 1){
         res <- split(res, rep(seq_len(N), length.out = N * 2, each = 2))
       }
-
       x[[arg]] <<- res
     }
   })
@@ -296,13 +292,11 @@
       }else{
         res <- rep(x[[arg]], length.out = TL)
       }
-
       if(N == 1 & MTD == "flowSet"){
         res <- list(res)
       }else if (N > 1){
         res <- split(res, rep(seq_len(N), length.out = TL, each = L))
       }
-
       x[[arg]] <<- res
     }
   })  
@@ -319,22 +313,22 @@
   
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
-      if(arg %in% c("point_col", "density_fill")){  
-        res <- rep(c(x[[arg]], rep(NA, length.out = TL)), length.out = TL)
+      if(arg %in% c("point_col", "density_fill") &
+         length(x[[arg]]) < L){  
+        res <- rep(c(x[[arg]], rep(NA, length.out = L)), length.out = L)
+        res <- rep(res, N)
       }else{
         res <- rep(x[[arg]], length.out = TL)
       }
-    
       if(N == 1 & MTD == "flowSet"){
         res <- list(res)
       }else if (N > 1){
         res <- split(res, rep(seq_len(N), length.out = TL, each = L))
       }
-
       x[[arg]] <<- res
     }
   })
-
+  
   # ARGUMENTS PER GATE ---------------------------------------------------------
   
   # ARGUMENTS
@@ -347,7 +341,6 @@
     lapply(args, function(arg) {
       if (arg %in% names(x)) {
         res <- rep(x[[arg]], length.out = GC * N)
-        
         if(N == 1 & MTD == "flowSet"){
           res <- list(res)
         }else if (N > 1){
@@ -356,7 +349,6 @@
                                 each = GC
           ))
         }
-        
         x[[arg]] <<- res
       }
     })
@@ -380,7 +372,6 @@
         }else if(arg == "gate_fill_alpha"){
           res <- rep(c(x[[arg]], rep(0, TGP * N)), length.out = TGP * N)
         }
-        
         if(N == 1 & MTD == "flowSet"){
           res <- list(res)
         }else if (N > 1){
@@ -388,7 +379,6 @@
                                 length.out = TGP * N,
                                 each = TGP))
         }
-
         x[[arg]] <<- res
       }
     })
@@ -412,7 +402,6 @@
       }else{
         res <- rep(x[[arg]], length.out = TL * TP)
       }
-      
       if(N == 1 & MTD == "flowSet"){
         res <- list(res)
       }else if(N > 1){
@@ -1178,11 +1167,9 @@
     
   }
   
-  # Adjust colors by point_fill_alpha
+  # Adjust colors by point_fill_alpha - REMOVE CHECK FOR ALPHA != 1
   lapply(seq_len(SMP), function(z){
-    if(point_col_alpha[z] != 1){
       point_col[[z]] <<- adjustcolor(point_col[[z]], point_col_alpha[z])
-    }
   })
   
   return(point_col)
