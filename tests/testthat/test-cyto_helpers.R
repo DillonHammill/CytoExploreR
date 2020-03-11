@@ -18,8 +18,13 @@ test_that("cyto_details", {
                    stringsAsFactors = FALSE)
   rownames(pd) <- paste0("Activation", "_", seq_len(33), ".fcs")
   pd$OVAConc <- as.character(pd$OVAConc)
-  expect_equal(cyto_details(gs), pd)
   
+  # mac columns different order - test individually
+  expect_true(all(colnames(cyto_details(gs)) %in% colnames(pd)))
+  expect_equal(cyto_details(gs)$name, pd$name)
+  expect_equal(cyto_details(gs)$OVAConc, pd$OVAConc)
+  expect_equal(cyto_details(gs)$Treatment, pd$Treatment)
+
 })
 
 # CYTO_NAMES -------------------------------------------------------------------
