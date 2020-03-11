@@ -8,6 +8,7 @@
 * Fix gating of empty populations to prevent dummy gates being returned by openCyto.
 * Frequency statistics for empty populations are now displayed as zero instead of NaN.
 * Improve handling of arguments within cyto_plot for better user experience.
+* Fix errors for cyto_spillover_compute and cyto_spillover_spread_compute on mac OS.
 
 # CytoExploreR 1.0.0
 
