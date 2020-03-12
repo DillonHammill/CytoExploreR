@@ -2695,8 +2695,8 @@ cyto_markers_edit <- function(x,
           stringsAsFactors = FALSE
         )
         rownames(mrks) <- NULL
-        # SampleNames match those of x
-        if (identical(mrks$channel, colnames(x))) {
+        # Channels must match
+        if (all(cyto_channels(x) %in% mrks$channel)) {
           return(mrks)
         } else {
           return(NULL)
