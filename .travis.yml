@@ -53,7 +53,7 @@ install:
   - R -e 'devtools::install_github("r-lib/mockery")'
   - R -e 'devtools::install_github("r-lib/covr")'
   
-Turn off slow processes to allow package caching on build success (speed)
+# Turn off slow processes to allow package caching on build success (speed)
 r_build_args: --no-build-vignettes --no-manual
 r_check_args: --no-build-vignettes --no-tests --no-vignettes --no-manual --no-examples
 
