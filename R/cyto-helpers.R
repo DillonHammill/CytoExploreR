@@ -245,10 +245,12 @@ cyto_clean <- function(x, ...) {
 #'   using \code{cyto_clean}, set to FALSE by default.
 #' @param markers logical indicating whether a call should be made to
 #'   \code{cyto_markers_edit} to update the markers associated with channels in
-#'   the loaded sampes, set to TRUE by default.
+#'   the loaded sampes, set to TRUE by default. The name of the csv to which
+#'   these details will be supplied can also be passed to this argument.
 #' @param details logical indicating whether a call should be made to
 #'   \code{cyto_details_edit} to update the experimental details associated with
-#'   the loaded samples, set to TRUE by default.
+#'   the loaded samples, set to TRUE by default. The name of the csv to which
+#'   these details will be supplied can also be passed to this argument.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
 #'
@@ -302,15 +304,26 @@ cyto_setup <- function(path = ".",
   x <- cyto_load(path = path, restrict = FALSE, ...)
 
   # MARKERS
-  if (markers) {
+  if (markers != FALSE) {
     message("Assigning markers to channels...")
-    x <- cyto_markers_edit(x)
+    # DEFAULT FILE NAME
+    if(markers == TRUE){
+      x <- cyto_markers_edit(x)
+    }else{
+      x <- cyto_markers_edit(x, 
+                             file = markers)
+    }
   }
 
   # EXPERIMENT DETAILS
-  if (details) {
+  if (details != FALSE) {
     message("Updating experiment details...")
-    x <- cyto_details_edit(x)
+    if(details == TRUE){
+      x <- cyto_details_edit(x)
+    }else{
+      x <- cyto_details_edit(x, 
+                             file = details)
+    }
   }
 
   # FLOWSET LOADED

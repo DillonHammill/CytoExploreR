@@ -30,11 +30,13 @@ using \code{cyto_clean}, set to FALSE by default.}
 
 \item{markers}{logical indicating whether a call should be made to
 \code{cyto_markers_edit} to update the markers associated with channels in
-the loaded sampes, set to TRUE by default.}
+the loaded sampes, set to TRUE by default. The name of the csv to which
+these details will be supplied can also be passed to this argument.}
 
 \item{details}{logical indicating whether a call should be made to
 \code{cyto_details_edit} to update the experimental details associated with
-the loaded samples, set to TRUE by default.}
+the loaded samples, set to TRUE by default. The name of the csv to which
+these details will be supplied can also be passed to this argument.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}
