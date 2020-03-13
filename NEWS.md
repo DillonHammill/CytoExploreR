@@ -9,6 +9,7 @@
 * Frequency statistics for empty populations are now displayed as zero instead of NaN.
 * Improve handling of arguments within cyto_plot for better user experience.
 * Fix errors for cyto_spillover_compute and cyto_spillover_spread_compute on mac OS.
+* `cyto_setup()` now accepts filenames through markers and details arguments.
 
 # CytoExploreR 1.0.0
 
