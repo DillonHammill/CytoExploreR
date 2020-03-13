@@ -33,7 +33,7 @@ before_install:
 
 install:
   - R -e 'BiocManager::install("Rhdf5lib")'
-  - R -e 'devtools::install_github("RcppCore/RccpArmadillo")'
+  - R -e 'devtools::install_github("RcppCore/RcppArmadillo"")'
   - R -e 'devtools::install_github("RcppCore/RcppParallel")'
   - R -e 'devtools::install_github("RGLab/RProtoBufLib")'
   - R -e 'devtools::install_github("RGLab/cytolib")'
