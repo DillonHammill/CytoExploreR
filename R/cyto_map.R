@@ -211,6 +211,12 @@ cyto_map.GatingSet <- function(x,
       } else {
         title <- paste0(names(gs_list)[z], "\n", type)
       }
+      # POINT_COL - FADE BASE LAYER (OVERLAY)
+      if(!.all_na(overlay)){
+        point_col <- "grey"
+      }else{
+        point_col <- NA
+      }
       # CYTO_PLOT DESCENDANTS
       tryCatch(cyto_plot(gs,
         parent = parent,
@@ -220,7 +226,7 @@ cyto_map.GatingSet <- function(x,
         display = display,
         title = title,
         legend = legend,
-        point_col = "grey"  # FADE BASE LAYER
+        point_col = point_col
       ), 
       error = function(e) {
         if(e$message == "figure margins too large"){
