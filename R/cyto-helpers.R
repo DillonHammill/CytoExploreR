@@ -2065,7 +2065,7 @@ cyto_save.flowSet <- function(x,
       message(paste0("Files will be overwritten in ", save_as, "."))
       opt <- readline("Do you want to continue? (Y/N)")
       if (grepl("n", opt, ignore.case = TRUE)) {
-        invisible(NULL)
+        return(NULL)
       }
     }
   }
@@ -2148,7 +2148,7 @@ cyto_save.flowFrame <- function(x,
       message(paste0("Files will be overwritten in ", save_as, "."))
       opt <- readline("Do you want to continue? (Y/N)")
       if (grepl("n", opt, ignore.case = TRUE)) {
-        invisible(NULL)
+        return(NULL)
       }
     }
   }
