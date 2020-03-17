@@ -208,7 +208,7 @@ SysExec <- function(
     missing.exe <- file_ext(x = progs) != 'exe'
     progs[missing.exe] <- paste0(progs[missing.exe], '.exe')
   }
-  paths <- sapply(
+  paths <- LAPPLY(
     X = progs,
     FUN = function(x) {
       return(tryCatch(
