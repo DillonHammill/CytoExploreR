@@ -10,3 +10,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\_pkgdown\.yml$
+Dockerfile
+Makefile
