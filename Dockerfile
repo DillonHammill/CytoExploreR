@@ -1,10 +1,12 @@
 FROM ubuntu:16.04
 
+# R and RStudio
 FROM rocker/verse:devel
 
 RUN apt-get update
 RUN apt-get install libprotobuf-dev -y
 
+# install dependencies
 RUN apt-get update && apt-get install -y\
     autoconf \
     automake \
