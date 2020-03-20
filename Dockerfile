@@ -6,20 +6,24 @@ FROM rocker/verse:devel
 RUN apt-get update
 RUN apt-get install libprotobuf-dev -y
 
-# install dependencies - includes X11
+# install dependencies
 RUN apt-get update && apt-get install -y\
     autoconf \
     automake \
     libtool \
     libxml2 \
-    libhdf5-dev \
+    libhdf5-dev
+
+# Install X11 dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libx11-6 \
     libxss1 \
     libxt6 \
     libxext6 \
     libsm6 \
     libice6 \
-    xdg-utils
+    xdg-utils \
+  && rm -rf /var/lib/apt/lists/*
 
 # install packages
 RUN R -e "install.packages('BiocManager')" 
