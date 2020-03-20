@@ -1,8 +1,6 @@
 FROM ubuntu:16.04
 
-# R and RStudio
-FROM rocker/verse:devel
-
+# liprotobuf version 2.6.0
 RUN apt-get update
 RUN apt-get install libprotobuf-dev -y
 
@@ -13,6 +11,9 @@ RUN apt-get update && apt-get install -y\
     libtool \
     libxml2 \
     libhdf5-dev
+
+# R 
+FROM rocker/r-devel
 
 # Install X11 dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -25,8 +26,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 
+# RStudio
+FROM rocker/rstudio
+
+# Tidyverse & devtools (for speed)
+FROM rocker/tidyverse
+
 # install packages
-RUN R -e "install.packages('BiocManager')" 
 RUN R -e "BiocManager::install(version = 'devel')" 
 RUN R -e "BiocManager::install('flowCore')" 
 RUN R -e "BiocManager::install('flowWorkspace')" 
