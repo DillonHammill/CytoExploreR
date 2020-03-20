@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y\
     libhdf5-dev
 
 # R 
-FROM rocker/r-devel
+FROM rocker/r-ver:devel
 
 # Install X11 dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -27,10 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # RStudio
-FROM rocker/rstudio
+FROM rocker/rstudio:devel
 
 # Tidyverse & devtools (for speed)
-FROM rocker/tidyverse
+FROM rocker/tidyverse:devel
 
 # install packages
 RUN R -e "BiocManager::install(version = 'devel')" 
