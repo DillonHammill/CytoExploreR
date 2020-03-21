@@ -17,7 +17,7 @@ Depends:
   R (>= 3.5.0),
   flowCore (>= 1.53.8),
   flowWorkspace (>= 3.35.8),
-  openCyto (>= 1.25.0)
+  openCyto (>= 1.25.2)
 Imports: 
   BiocGenerics, 
   data.table,
