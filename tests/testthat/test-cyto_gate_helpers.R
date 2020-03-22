@@ -31,11 +31,15 @@ test_that("cyto_gate_edit", {
                fixed = TRUE)
   
   # EDIT CD4 T Cells & CD8 T Cells Gates
-  gate <- list("CD4 T Cells" = CD4,
-               "CD8 T Cells" = CD8)
-  names(gate) <- "all"
-  mock_cyto_gate_draw <- mock(gate)
-  testthat::with_mock(cyto_gate_draw = mock_cyto_gate_draw,
+  mock_locator <- mock(list("x" = 1.824,
+                            "y" = -0.227),
+                       list("x" = 3.190,
+                            "y" = 2.111),
+                       list("x" = -0.3134,
+                            "y" = 2.2221),
+                       list("x" = 1.8687,
+                            "y" = 4.1452), cycle = TRUE)
+  testthat::with_mock(locator = mock_locator,
                       cyto_gate_edit(gs_clone,
                                      parent = "T Cells",
                                      alias = c("CD4 T Cells",

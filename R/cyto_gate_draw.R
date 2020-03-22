@@ -791,7 +791,7 @@ cyto_gate_draw.flowFrame <- function(x,
       }
     })
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
 
   # CYTO_PLOT

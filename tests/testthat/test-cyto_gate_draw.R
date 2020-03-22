@@ -41,32 +41,49 @@ test_that("cyto_gate_draw", {
   # GATE COORDS
   gate_coords <- list(
     list(
-      "x" = c(0, 50000),
-      "y" = c(0, 50000)
+      list("x" = 0,
+           "y" = 0),
+      list("x" = 50000,
+           "y" = 50000)
     ),
     list(
-      "x" = c(25000, 150000),
-      "y" = c(50000, 50000) # IRRELEVANT
+      list("x" = 25000,
+           "y" = 50000),
+      list("x" = 150000,
+           "y" = 50000)
     ), 
     list(
-      "x" = c(50000, 50000), # IRRELEVANT
-      "y" = c(25000, 150000)
+      list("x" = 50000,
+           "y" = 25000),
+      list("x" = 50000,
+           "y" = 150000)
     ),
     list(
       "x" = c(25000),
       "y" = c(50000)
     ),
-    list(
-      "x" = c(200000),
-      "y" = c(200000)
+    list("x" = c(200000),
+         "y" = c(200000)
     ),
     list(
-      "x" = c(0, 50000, 50000, 0),
-      "y" = c(0, 0, 50000, 50000)
+      list("x" = 0,
+           "y" = 0),
+      list("x" = 50000,
+           "y" = 0),
+      list("x" = 50000,
+           "y" = 50000),
+      list("x" = 0,
+           "y" = 50000)
     ),
     list(
-      "x" = c(25000, 50000, 75000, 50000),
-      "y" = c(49000, 25000, 50000, 77000)
+      list("x" = 25000,
+           "y" = 49000),
+      list("x" = 50000,
+           "y" = 25000),
+      list("x" = 75000,
+           "y" = 50000),
+      list("x" = 50000,
+           "y" = 77000)
     ),
     list(
       "x" = c(50000),
@@ -85,16 +102,18 @@ test_that("cyto_gate_draw", {
            "y" = c(250000))
     ),
     list(
-      "x" = c(0, 50000),
-      "y" = c(50, 50) # IRRELEVANT
+      list("x" = 0,
+           "y" = 50),
+      list("x" = 50000,
+           "y" = 50)
     ),
     list(
       "x" = c(25000),
       "y" = c(50)
     ),
     list(
-      "x" = c(200000),
-      "y" = c(50)
+       "x" = c(200000),
+       "y" = c(50)
     )
   )
 
@@ -148,14 +167,22 @@ test_that("cyto_gate_draw", {
              gate_axis,
              gate) {
       # INPUT COORDS
-      if(gate_type == "web"){
+      if(gate_type %in% c("threshold","boundary", "quadrant")){
+        mock_locator <- mock(gate_coord)
+      }else if(gate_type %in% c("interval", "rectangle")){
+        mock_locator <- mock(gate_coord[[1]],
+                             gate_coord[[2]])
+      }else if(gate_type %in% c("polygon", "ellipse")){
+        mock_locator <- mock(gate_coord[[1]],
+                             gate_coord[[2]],
+                             gate_coord[[3]],
+                             gate_coord[[4]], cycle = TRUE)
+      }else if(gate_type == "web"){
         mock_locator <- mock(gate_coord[[1]],
                              gate_coord[[2]],
                              gate_coord[[3]],
                              gate_coord[[4]],
                              gate_coord[[5]])
-      }else{
-        mock_locator <- mock(gate_coord)
       }
       # GATE
       gate <- list(gate)

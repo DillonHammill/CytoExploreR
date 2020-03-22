@@ -858,7 +858,7 @@ cyto_gate_edit <- function(x,
         axis <- "y"
       }
     }
-
+    
     # DRAW NEW GATES - FILTERS OBJECT OF LENGTH ALIAS (NEGATE LABEL)
     gate_new <- cyto_gate_draw(fr_list[[y]][[1]],
       alias = unlist(alias),
