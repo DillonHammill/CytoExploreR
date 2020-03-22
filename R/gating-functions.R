@@ -19,6 +19,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -27,6 +29,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:polygonGate-class]{polygonGate}}
@@ -36,6 +55,7 @@
 #'
 #' @importFrom flowCore polygonGate filters Subset
 #' @importFrom graphics locator lines
+#' @importFrom grDevices adjustcolor
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -70,8 +90,17 @@
                                     alias = NULL,
                                     channels,
                                     plot = TRUE,
+                                    popup = TRUE,
                                     label = TRUE,
-                                    axes_limits = "machine", ...) {
+                                    axes_limits = "machine",
+                                    gate_point_shape = 16,
+                                    gate_point_size = 1,
+                                    gate_point_col = "red",
+                                    gate_point_col_alpha = 1,
+                                    gate_line_type = 1,
+                                    gate_line_width = 2.5,
+                                    gate_line_col = "red",
+                                    gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -92,7 +121,7 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
@@ -101,6 +130,19 @@
 
   # CONSTRUCT GATES ------------------------------------------------------------
 
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)
+    
   # GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -110,32 +152,50 @@
       )
     )
 
-    # GATE CO-ORDINATES
+    # HIDE ERROR MESSAGE ON CLOSE
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
-    coords <- locator(
-      type = "o",
-      lwd = 2,
-      pch = 16,
-      col = "red"
-    )
-
-    # TOO FEW SELECTED POINTS
-    if (length(coords$x) < 3) {
-      stop("A minimum of 3 points is required to construct a polygon gate.")
+    
+    # COORDS - POINT BY POINT - SET 100 POINT LIMIT
+    coords <- list()
+    for(z in seq_len(100)){
+      # SELECT POINT
+      pt <- locator(n = 1,
+                    type = "p",
+                    pch = gate_point_shape,
+                    cex = gate_point_size,
+                    col = gate_point_col)
+      # POINT SELECTED ADD TO COORDS
+      if(!is.null(pt)){
+        pt <- do.call("cbind", pt)
+      }
+      # ADD POINT TO COORDS
+      coords[[z]] <- pt
+      # JOIN TO PREVIOUS POINT
+      if(!is.null(pt) & length(coords) > 1){
+        # ADD LINE BETWEEN POINTS
+        lines(x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+              y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
+              lty = gate_line_type,
+              lwd = gate_line_width,
+              col = gate_line_col)
+      # CLOSE GATE
+      }else if(is.null(pt)){
+        if(length(coords) < 3){
+          stop("A minimum of 3 points is required to construct a polygon gate.")
+        }else{
+          # JOIN FIRST & LAST POINTS
+          lines(x = c(coords[[1]][, "x"], coords[[z-1]][, "x"]),
+                y = c(coords[[1]][, "y"], coords[[z-1]][, "y"]),
+                lty = gate_line_type,
+                lwd = gate_line_width,
+                col = gate_line_col)
+          # TERMINATE LOOP
+          break()
+        }
+      }
     }
-
-    # ADD GATE TO PLOT
-    lines(
-      x = coords$x[c(1, length(coords$x))],
-      y = coords$y[c(1, length(coords$x))],
-      lwd = 2.5,
-      col = "red"
-    )
-
-    # TIDY COORDS
-    coords <- as.data.frame(coords)
-    coords <- as.matrix(coords)
+    coords <- do.call("rbind", coords)
     colnames(coords) <- channels
 
     # CONSTRUCT GATE
@@ -189,6 +249,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -197,6 +259,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -208,7 +287,8 @@
 #'
 #' @importFrom flowCore rectangleGate filters Subset
 #' @importFrom flowCore exprs
-#' @importFrom graphics locator rect
+#' @importFrom graphics locator
+#' @importFrom grDevices adjustcolor
 #'
 #' @seealso \code{\link{cyto_plot}}
 #' @seealso \code{\link{cyto_gate_draw}}
@@ -242,8 +322,17 @@
                                       alias = NULL,
                                       channels,
                                       plot = TRUE,
+                                      popup = TRUE,
                                       label = TRUE,
-                                      axes_limits = "machine", ...) {
+                                      axes_limits = "machine",
+                                      gate_point_shape = 16,
+                                      gate_point_size = 1,
+                                      gate_point_col = "red",
+                                      gate_point_col_alpha = 1,
+                                      gate_line_type = 1,
+                                      gate_line_width = 2.5,
+                                      gate_line_col = "red",
+                                      gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -264,7 +353,7 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = TRUE,
       label = FALSE,
       axes_limits = axes_limits, ...
@@ -273,6 +362,19 @@
 
   # CONSTRUCT GATES ------------------------------------------------------------
 
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
+    
   # GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -282,20 +384,35 @@
       )
     )
 
-    # GATE COORDS
+    # HIDE ERROR MESSAGES
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
-    coords <- locator(
-      n = 2,
-      type = "p",
-      lwd = 2,
-      pch = 16,
-      col = "red"
-    )
-
-    # TIDY GATE COORDS
-    coords <- data.frame(coords)
-    coords <- as.matrix(coords)
+    
+    # COORDS - POINT BY POINT - SET 2 POINT LIMIT
+    coords <- list()
+    for(z in seq_len(2)){
+      # SELECT POINT
+      pt <- locator(n = 1,
+                    type = "p",
+                    pch = gate_point_shape,
+                    cex = gate_point_size,
+                    col = gate_point_col)
+      # POINT SELECTED ADD TO COORDS
+      if(!is.null(pt)){
+        pt <- do.call("cbind", pt)
+      }
+      # ADD POINT TO COORDS
+      coords[[z]] <- pt
+      # TERMINATE LOOP
+      if(is.null(pt)){
+        if(length(coords) < 2){
+          stop("A minimum of 2 points is required to construct a rectangle gate.")
+        }else{
+          break()
+        }
+      }
+    }
+    coords <- do.call("rbind", coords)
     colnames(coords) <- channels
 
     # CONSTRUCT GATE
@@ -303,7 +420,10 @@
 
     # PLOT GATE
     cyto_plot_gate(gate,
-      channels = channels
+      channels = channels,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col
     )
 
     # LABEL GATED POPULATION
@@ -357,6 +477,8 @@
 #'   plots which may already contain a different gate type.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'   gated for 2-D interval gates.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -365,6 +487,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -373,7 +512,8 @@
 #' @keywords manual, gating, draw, rectangleGate, openCyto, interval
 #'
 #' @importFrom flowCore rectangleGate filters Subset
-#' @importFrom graphics locator abline
+#' @importFrom graphics locator lines
+#' @importFrom grDevices adjustcolor
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -421,8 +561,17 @@
                                      channels,
                                      plot = TRUE,
                                      axis = "x",
+                                     popup = TRUE,
                                      label = TRUE,
-                                     axes_limits = "machine", ...) {
+                                     axes_limits = "machine", 
+                                     gate_point_shape = 16,
+                                     gate_point_size = 1,
+                                     gate_point_col = "red",
+                                     gate_point_col_alpha = 1,
+                                     gate_line_type = 1,
+                                     gate_line_width = 2.5,
+                                     gate_line_col = "red",
+                                     gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -443,13 +592,43 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
     )
   }
 
+  # PLOT LIMITS
+  par_usr <- par("usr")
+  
+  # X LIMITS + BUFFER
+  par_xlim <- par_usr[1:2]
+  par_xrng <- par_xlim[2] - par_xlim[1]
+  par_xpad <- (par_xrng - par_xrng / 1.04) / 2
+  par_xmin <- par_xlim[1] + 0.5 * par_xpad
+  par_xmax <- par_xlim[2] - 0.5 * par_xpad
+  
+  # Y LIMITS + BUFFER
+  par_ylim <- par_usr[3:4]
+  par_yrng <- par_ylim[2] - par_ylim[1]
+  par_ypad <- (par_yrng - par_yrng / 1.04) / 2
+  par_ymin <- par_ylim[1] + 0.5 * par_ypad
+  par_ymax <- par_ylim[2] - 0.5 * par_ypad
+  
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
+    
   # CONSTRUCT GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -459,39 +638,73 @@
       )
     )
 
-    # GATE COORDS
-    options("show.error.messages" = FALSE)
-    on.exit(options("show.error.messages" = TRUE))
-    coords <- locator(
-      n = 2,
-      type = "o",
-      lwd = 2.5,
-      pch = 16,
-      col = "red"
-    )
-    coords <- data.frame(coords)
-    coords <- as.matrix(coords)
-
-    if (length(channels) == 1) {
-      colnames(coords) <- c(channels[1], "Density")
-    } else {
-      colnames(coords) <- channels
+    # HIDE ERROR MESSAGES
+    #options("show.error.messages" = FALSE)
+    #on.exit(options("show.error.messages" = TRUE))
+    
+    # COORDS - POINT BY POINT - SET 2 POINT LIMIT
+    coords <- list()
+    for(z in seq_len(2)){
+      # SELECT POINT
+      pt <- locator(n = 1,
+                    type = "p",
+                    pch = gate_point_shape,
+                    cex = gate_point_size,
+                    col = gate_point_col)
+      # POINT SELECTED ADD TO COORDS
+      if(!is.null(pt)){
+        pt <- do.call("cbind", pt)
+      }
+      # ADD POINT TO COORDS
+      coords[[z]] <- pt
+      # ADD LINES - X COORS + PAR_YMIN & PAR_YMAX
+      if(length(channels) == 1 | axis == "x"){
+        lines(x = c(coords[[z]][, "x"], coords[[z]][, "x"]),
+              y = c(par_ymin, par_ymax),
+              lty = gate_line_type,
+              lwd = gate_line_width,
+              col = gate_line_col)
+      }else{
+        lines(x = c(par_xmin, par_xmax),
+              y = c(coords[[z]][, "y"], coords[[z]][, "y"]),
+              lty = gate_line_type,
+              lwd = gate_line_width,
+              col = gate_line_col)
+      }
+      # CLOSE GATE
+      if(z == 2){
+        if(length(channels) == 1 | axis == "x"){
+          # BOTTOM LINE
+          lines(x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+                y = c(par_ymin, par_ymin),
+                lty = gate_line_type,
+                lwd = gate_line_width,
+                col = gate_line_col)
+          # TOP LINE
+          lines(x = c(coords[[z-1]][, "x"], coords[[z]][, "x"]),
+                y = c(par_ymax, par_ymax),
+                lty = gate_line_type,
+                lwd = gate_line_width,
+                col = gate_line_col)
+        }else{
+          # LOWER LINE
+          lines(x = c(par_xmin, par_xmin),
+                y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
+                lty = gate_line_type,
+                lwd = gate_line_width,
+                col = gate_line_col)
+          # UPPER LINE
+          lines(x = c(par_xmax, par_xmax),
+                y = c(coords[[z-1]][, "y"], coords[[z]][, "y"]),
+                lty = gate_line_type,
+                lwd = gate_line_width,
+                col = gate_line_col)
+        }
+      }
     }
-
-    if (axis == "x") {
-      abline(
-        v = coords[, 1],
-        lwd = 2.5,
-        col = "red"
-      )
-    } else if (axis == "y") {
-      abline(
-        h = coords[, 2],
-        lwd = 2.5,
-        col = "red"
-      )
-    }
-
+    coords <- do.call("rbind", coords)
+    
+    # PREPARE COORDS
     if (axis == "x") {
       if (length(channels) == 1) {
         coords <- data.frame(x = coords[, 1])
@@ -516,7 +729,7 @@
 
       gate <- rectangleGate(.gate = coords, filterId = alias)
     }
-
+    
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
@@ -565,6 +778,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -573,6 +788,24 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -581,7 +814,8 @@
 #' @keywords manual, gating, draw, rectangleGate, openCyto, threshold
 #'
 #' @importFrom flowCore rectangleGate filters Subset
-#' @importFrom graphics locator rect abline
+#' @importFrom graphics locator
+#' @importFrom grDevices adjustcolor
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -626,8 +860,17 @@
                                       alias = NULL,
                                       channels,
                                       plot = TRUE,
+                                      popup = TRUE,
                                       label = TRUE,
-                                      axes_limits = "machine", ...) {
+                                      axes_limits = "machine",
+                                      gate_point_shape = 16,
+                                      gate_point_size = 1,
+                                      gate_point_col = "red",
+                                      gate_point_col_alpha = 1,
+                                      gate_line_type = 1,
+                                      gate_line_width = 2.5,
+                                      gate_line_col = "red",
+                                      gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -648,7 +891,7 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
@@ -656,7 +899,20 @@
   }
 
   # CONSTRUCT GATES ------------------------------------------------------------
-
+  
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
+  
   # INSTRUCTIONS
   message(
     paste(
@@ -665,19 +921,22 @@
     )
   )
 
+  # MULTIPLE GATES NOT SUPPORTED
   if (length(alias) > 1) {
     stop("Multiple threshold gates are not supported.")
   }
 
-  # GATE COORDS
+  # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
+  
+  # COORDS - 1 POINT ONLY
   coords <- locator(
     n = 1,
     type = "p",
-    lwd = 2.5,
-    pch = 16,
-    col = "red"
+    pch = gate_point_shape,
+    cex = gate_point_size,
+    col = gate_point_col
   )
 
   # TIDY GATE COORDS
@@ -699,7 +958,10 @@
   # PLOT GATE
   cyto_plot_gate(
     gate = gate,
-    channels = channels
+    channels = channels,
+    gate_line_type = gate_line_type,
+    gate_line_width = gate_line_width,
+    gate_line_col = gate_line_col
   )
 
   # LABEL GATED POPULATION
@@ -748,6 +1010,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -756,6 +1020,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
@@ -764,7 +1045,8 @@
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, boundary
 #'
 #' @importFrom flowCore rectangleGate filters Subset
-#' @importFrom graphics locator rect abline
+#' @importFrom graphics locator
+#' @importFrom grDevices adjustcolor
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -808,8 +1090,17 @@
                                      alias = NULL,
                                      channels,
                                      plot = TRUE,
+                                     popup = TRUE,
                                      label = TRUE,
-                                     axes_limits = "machine", ...) {
+                                     axes_limits = "machine",
+                                     gate_point_shape = 16,
+                                     gate_point_size = 1,
+                                     gate_point_col = "red",
+                                     gate_point_col_alpha = 1,
+                                     gate_line_type = 1,
+                                     gate_line_width = 2.5,
+                                     gate_line_col = "red",
+                                     gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -830,7 +1121,7 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
@@ -839,6 +1130,19 @@
 
   # CONSTRUCT GATES ------------------------------------------------------------
 
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
+  
   # INSTRUCTIONS
   message(
     paste(
@@ -847,19 +1151,22 @@
     )
   )
 
+  # MULTIPLE BOUNDARY GATES NOT SUPPORTED
   if (length(alias) > 1) {
     stop("Multiple boundary gates are not supported.")
   }
 
-  # GATE COORDS
+  # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
+  
+  # GATE COORD 1 POINT
   coords <- locator(
     n = 1,
     type = "p",
-    lwd = 2.5,
-    pch = 16,
-    col = "red"
+    pch = gate_point_shape,
+    cex = gate_point_size,
+    col = gate_point_col
   )
 
   # TIDY GATE COORDS
@@ -881,7 +1188,10 @@
   # PLOT GATE
   cyto_plot_gate(
     gate = gate,
-    channels = channels
+    channels = channels,
+    gate_line_type = gate_line_type,
+    gate_line_width = gate_line_width,
+    gate_line_col = gate_line_col
   )
 
   # LABEL GATED POPULATION
@@ -928,6 +1238,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -936,6 +1248,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
@@ -981,8 +1310,17 @@
                                     alias = NULL,
                                     channels,
                                     plot = TRUE,
+                                    popup = TRUE,
                                     label = TRUE,
-                                    axes_limits = "machine", ...) {
+                                    axes_limits = "machine",
+                                    gate_point_shape = 16,
+                                    gate_point_size = 1,
+                                    gate_point_col = "red",
+                                    gate_point_col_alpha = 1,
+                                    gate_line_type = 1,
+                                    gate_line_width = 2.5,
+                                    gate_line_col = "red",
+                                    gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -1003,7 +1341,7 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
@@ -1012,8 +1350,22 @@
 
   # CONSTRUCT GATES ------------------------------------------------------------
 
-  # INSTRUCTIONS
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
+  
+  # COMSTRUCT GATES
   gates <- lapply(alias, function(alias) {
+    # INSTRUCTIONS
     message(
       paste(
         "Select 4 points to define the limits of the",
@@ -1021,17 +1373,27 @@
       )
     )
 
-    # GATE COORDS
+    # HIDE ERROR MESSAGES
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
-    coords <- locator(
-      n = 4,
-      type = "p",
-      lwd = 2,
-      pch = 16,
-      col = "red"
-    )
-
+    
+    # COORDS - POINT BY POINT - SET 4 POINT LIMIT
+    coords <- list()
+    for(z in seq_len(4)){
+      # SELECT POINT
+      pt <- locator(n = 1,
+                    type = "p",
+                    pch = gate_point_shape,
+                    cex = gate_point_size,
+                    col = gate_point_col)
+      # POINT SELECTED ADD TO COORDS
+      if(!is.null(pt)){
+        pt <- do.call("cbind", pt)
+      }
+      # ADD POINT TO COORDS
+      coords[[z]] <- pt
+    }
+    coords <- do.call("rbind", coords)
     coords <- data.frame(coords)
 
     # Find which points are on major axis
@@ -1066,20 +1428,18 @@
 
     # Angle between horizontal line through center and max.pt
     if (max.pt[1] > center[1]) { # angle < pi/2
-
       mj.pt.ct <- cbind(max.pt[1], center[2])
       colnames(mj.pt.ct) <- c("x", "y")
       adj <- stats::dist(rbind(center, mj.pt.ct))
       angle <- acos(adj / a)
     } else if (max.pt[1] <= center[1]) { # angle >= pi/2
-
       mj.pt.ct <- cbind(center[1], max.pt[2])
       colnames(mj.pt.ct) <- c("x", "y")
       opp <- stats::dist(as.matrix(rbind(max.pt, mj.pt.ct)))
       angle <- pi / 2 + asin(opp / a)
     }
 
-    # Covariance matrix
+    # COVARIANCE MATRIX
     cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
     cinv[1, 1] <- (((cos(angle) * cos(angle)) /
       (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
@@ -1087,11 +1447,10 @@
     cinv[1, 2] <- cinv[2, 1]
     cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
       ((cos(angle) * cos(angle)) / (b^2)))
-
     cvm <- solve(cinv)
-
     dimnames(cvm) <- list(channels, channels)
 
+    # CONSTRUCT GATE
     gate <- ellipsoidGate(
       .gate = cvm,
       mean = center,
@@ -1100,7 +1459,10 @@
 
     # PLOT GATE
     cyto_plot_gate(gate,
-      channels = channels
+      channels = channels,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col
     )
 
     # LABEL GATED POPULATION
@@ -1151,6 +1513,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -1159,6 +1523,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list containing the constructed
@@ -1168,6 +1549,7 @@
 #'
 #' @importFrom flowCore quadGate filters split
 #' @importFrom graphics locator lines abline
+#' @importFrom grDevices adjustcolor
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1202,8 +1584,17 @@
                                      alias = NULL,
                                      channels,
                                      plot = TRUE,
+                                     popup = TRUE,
                                      label = TRUE, 
-                                     axes_limits = "machine", ...) {
+                                     axes_limits = "machine",
+                                     gate_point_shape = 16,
+                                     gate_point_size = 1,
+                                     gate_point_col = "red",
+                                     gate_point_col_alpha = 1,
+                                     gate_line_type = 1,
+                                     gate_line_width = 2.5,
+                                     gate_line_col = "red",
+                                     gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -1229,31 +1620,47 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
     )
   }
 
+  # ALIAS CHECK
   if (!length(alias) == 4) {
     stop("'alias' must contain 4 population names for quadrant gates.")
   }
+  
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha) 
 
   # INSTRUCTIONS
   message(
     paste("Select the center point to construct quadrant gates. \n")
   )
 
-  # GATE COORDS
+  # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
+  
+  # GATE COORDS
   pts <- locator(
     n = 1,
-    type = "o",
-    lwd = 2,
-    pch = 16,
-    col = "red"
+    type = "p",
+    pch = gate_point_shape,
+    cex = gate_point_size,
+    col = gate_point_col
   )
 
   # CO-ORDINATES MATRIX
@@ -1264,7 +1671,11 @@
   gate <- quadGate(.gate = pts, filterId = paste(alias, collapse = "|"))
 
   # PLOT GATE
-  cyto_plot_gate(gate, channels = channels)
+  cyto_plot_gate(gate, 
+                 channels = channels,
+                 gate_line_type = gate_line_type,
+                 gate_line_width = gate_line_width,
+                 gate_line_col = gate_line_col)
 
   # LABEL GATED POPULATION
   if (label == TRUE) {
@@ -1318,6 +1729,8 @@
 #' @param plot logical indicating whether the data should be plotted. This
 #'   feature allows for constructing gates of different types over existing
 #'   plots which may already contain a different gate type.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param label logical indicating whether to include
 #'   \code{\link{cyto_plot_label}} for the gated population(s), \code{TRUE} by
 #'   default.
@@ -1326,6 +1739,23 @@
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return a list of \code{\link[flowCore:polygonGate-class]{polygonGate}}
@@ -1370,8 +1800,17 @@
                                 alias = NULL,
                                 channels,
                                 plot = TRUE,
+                                popup = TRUE,
                                 label = TRUE,
-                                axes_limits = "machine", ...) {
+                                axes_limits = "machine",
+                                gate_point_shape = 16,
+                                gate_point_size = 1,
+                                gate_point_col = "red",
+                                gate_point_col_alpha = 1,
+                                gate_line_type = 1,
+                                gate_line_width = 2.5,
+                                gate_line_col = "red",
+                                gate_line_col_alpha = 1, ...) {
 
   # WARNING
   message("Web gates are an experimental feature - use at your own risk!")
@@ -1395,7 +1834,7 @@
   if (plot == TRUE) {
     cyto_plot(fr,
       channels = channels,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       label = FALSE,
       axes_limits = axes_limits, ...
@@ -1404,17 +1843,33 @@
 
   # CONSTRUCT GATES ------------------------------------------------------------
 
+  # SAME COLOUR FOR POINTS AND LINES
+  if(any(c(gate_line_col, gate_point_col) != "red")){
+    if(gate_line_col != "red" & gate_point_col == "red"){
+      gate_point_col <- gate_line_col
+    }else if(gate_point_col != "red" & gate_line_col == "red"){
+      gate_line_col <- gate_point_col
+    }
+  }
+  
+  # POINT & LINE COLOURS
+  gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
+  gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha) 
+  
   # Select center of the web gate
   message("Select the center of the web gate.")
 
+  # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
+  
+  # GATE CENTER
   center <- locator(
     n = 1,
     type = "p",
-    lwd = 2,
-    pch = 16,
-    col = "red"
+    pch = gate_point_shape,
+    cex = gate_point_size,
+    col = gate_point_col
   )
 
   # User Prompt
@@ -1428,21 +1883,26 @@
   
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq_len(length(alias)), function(x) {
+    # HIDE ERROR MESSAGES
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
+    
+    # GATE COORDS
     pt <- locator(
       n = 1,
       type = "p",
-      lwd = 2.5,
-      pch = 16,
-      col = "red"
+      pch = gate_point_shape,
+      cex = gate_point_size,
+      col = gate_point_col
     )
 
+    # LINE TO CENTER
     lines(
       x = c(center$x, pt$x),
       y = c(center$y, pt$y),
-      lwd = 2.5,
-      col = "red"
+      lty = gate_line_type,
+      lwd = gate_line_width,
+      col = gate_line_col
     )
 
     return(c(pt$x, pt$y))
@@ -1944,7 +2404,11 @@
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
     # PLOT GATE
-    cyto_plot_gate(gate, channels = channels)
+    cyto_plot_gate(gate, 
+                   channels = channels,
+                   gate_line_type = gate_line_type,
+                   gate_line_width = gate_line_width,
+                   gate_line_col = gate_line_col)
 
     # LABEL GATED POPULATION
     if (label == TRUE) {
