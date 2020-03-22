@@ -60,11 +60,30 @@
 #'   default.
 #' @param plot logical indicating whether a plot should be drawn, set to
 #'   \code{TRUE} by default.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return \code{flowFrame} and \code{flowSet} methods return a list of flowCore
@@ -151,7 +170,16 @@ cyto_gate_draw.GatingSet <- function(x,
                                      axis = "x",
                                      label = TRUE,
                                      plot = TRUE,
-                                     axes_limits = "machine", ...) {
+                                     popup = TRUE,
+                                     axes_limits = "machine",
+                                     gate_point_shape = 16,
+                                     gate_point_size = 1,
+                                     gate_point_col = "red",
+                                     gate_point_col_alpha = 1,
+                                     gate_line_type = 1,
+                                     gate_line_width = 2.5,
+                                     gate_line_col = "red",
+                                     gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -366,7 +394,7 @@ cyto_gate_draw.GatingSet <- function(x,
         channels = channels,
         overlay = fr_list[[z]][seq_along(fr_list[[z]])[-1]],
         display = 1,
-        popup = TRUE,
+        popup = popup,
         legend = FALSE,
         title = title,
         axes_trans = axes_trans,
@@ -383,7 +411,15 @@ cyto_gate_draw.GatingSet <- function(x,
       display = 1,
       axis = axis,
       label = label,
-      plot = FALSE
+      plot = FALSE,
+      gate_point_shape = gate_point_shape,
+      gate_point_size = gate_point_size,
+      gate_point_col = gate_point_col,
+      gate_point_col_alpha = gate_point_col_alpha,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col,
+      gate_line_col_alpha = gate_line_col_alpha,
     )
   })
   names(gate_list) <- names(fr_list)
@@ -515,7 +551,16 @@ cyto_gate_draw.flowSet <- function(x,
                                    axis = "x",
                                    label = TRUE,
                                    plot = TRUE,
-                                   axes_limits = "machine", ...) {
+                                   popup = TRUE,
+                                   axes_limits = "machine",
+                                   gate_point_shape = 16,
+                                   gate_point_size = 1,
+                                   gate_point_col = "red",
+                                   gate_point_col_alpha = 1,
+                                   gate_line_type = 1,
+                                   gate_line_width = 2.5,
+                                   gate_line_col = "red",
+                                   gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -625,7 +670,16 @@ cyto_gate_draw.flowSet <- function(x,
       axis = axis,
       label = label,
       plot = plot,
+      popup = popup,
       axes_limits = axes_limits,
+      gate_point_shape = gate_point_shape,
+      gate_point_size = gate_point_size,
+      gate_point_col = gate_point_col,
+      gate_point_col_alpha = gate_point_col_alpha,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col,
+      gate_line_col_alpha = gate_line_col_alpha,
       ...
     )
   })
@@ -647,7 +701,16 @@ cyto_gate_draw.flowFrame <- function(x,
                                      axis = "x",
                                      label = TRUE,
                                      plot = TRUE,
-                                     axes_limits = "machine", ...) {
+                                     popup = TRUE,
+                                     axes_limits = "machine",
+                                     gate_point_shape = 16,
+                                     gate_point_size = 1,
+                                     gate_point_col = "red",
+                                     gate_point_col_alpha = 1,
+                                     gate_line_type = 1,
+                                     gate_line_width = 2.5,
+                                     gate_line_col = "red",
+                                     gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -737,7 +800,7 @@ cyto_gate_draw.flowFrame <- function(x,
       channels = channels,
       overlay = fr_list[seq(2, length(fr_list))],
       display = 1,
-      popup = TRUE,
+      popup = popup,
       legend = FALSE,
       axes_limits = axes_limits,
       ...
@@ -755,7 +818,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "rectangle") {
       .cyto_gate_rectangle_draw(
@@ -763,7 +834,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "interval") {
       .cyto_gate_interval_draw(
@@ -772,7 +851,15 @@ cyto_gate_draw.flowFrame <- function(x,
         alias = alias,
         plot = FALSE,
         axis = axis,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "threshold") {
       .cyto_gate_threshold_draw(
@@ -780,7 +867,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "boundary") {
       .cyto_gate_boundary_draw(
@@ -788,7 +883,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "ellipse") {
       .cyto_gate_ellipse_draw(
@@ -796,7 +899,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "quadrant") {
       .cyto_gate_quadrant_draw(
@@ -804,7 +915,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     } else if (type == "web") {
       .cyto_gate_web_draw(
@@ -812,7 +931,15 @@ cyto_gate_draw.flowFrame <- function(x,
         channels = channels,
         alias = alias,
         plot = FALSE,
-        label = label, ...
+        label = label,
+        gate_point_shape = gate_point_shape,
+        gate_point_size = gate_point_size,
+        gate_point_col = gate_point_col,
+        gate_point_col_alpha = gate_point_col_alpha,
+        gate_line_type = gate_line_type,
+        gate_line_width = gate_line_width,
+        gate_line_col = gate_line_col,
+        gate_line_col_alpha = gate_line_col_alpha
       )
     }
   }, type[!is.na(type)], alias[!is.na(type)], USE.NAMES = FALSE)
