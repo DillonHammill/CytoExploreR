@@ -133,11 +133,11 @@ cyto_map.GatingSet <- function(x,
 
   # TRANSFORMERS
   if (is.null(trans)) {
-    trans <- cyto_transformer_extract(gs)
+    trans <- cyto_transformer_extract(gs_clone)
   }
 
   # GROUP_BY
-  gs_list <- cyto_group_by(gs, group_by = merge_by)
+  gs_list <- cyto_group_by(gs_clone, group_by = merge_by)
 
   # NAMES
   if (is.null(names)) {
