@@ -16,15 +16,15 @@ RUN apt-get update && apt-get install -y\
 FROM rocker/verse:devel
 
 # Install X11 dependencies
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#    libx11-6 \
-#    libxss1 \
-#    libxt6 \
-#    libxext6 \
-#    libsm6 \
-#    libice6 \
-#    xdg-utils \
-#  && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libx11-6 \
+    libxss1 \
+    libxt6 \
+    libxext6 \
+    libsm6 \
+    libice6 \
+    xdg-utils \
+  && rm -rf /var/lib/apt/lists/*
 
 # install packages
 RUN R -e "BiocManager::install(version = 'devel')" 
