@@ -758,13 +758,29 @@ cyto_plot_new <- function(popup = FALSE, ...) {
   # Open popup window - either windows/X11/xquartz
   if (popup == TRUE & getOption("CytoExploreR_interactive")) {
     if (.Platform$OS.type == "windows") {
+      # ALWAYS GUI
       dev.new(...)
     } else if (.Platform$OS.type == "unix") {
       if (Sys.info()["sysname"] == "Linux") {
-        # Cairo needed for semi-transparency
-        dev.new(type = "cairo", ...)
+        # CHECK CAPABILITIES - DO NOTHING IF X11 MISSING
+        if(capabilities()["X11"]){
+          if(capabilities()["cairo"] == FALSE){
+            message("cairo capabilities are required to plot in pop-up windows.")
+            # DO NOTHING
+          }else{
+            # Cairo needed for semi-transparency
+            dev.new(type = "cairo", ...)
+          }
+        }else{
+          # DO NOTHING
+        }
       } else if (Sys.info()["sysname"] == "Darwin") {
-        dev.new(...)
+        # CHECK CAPABILITIES - DO NOTHING IF X11 MISSING
+        if(capabilities()["X11"]){
+          dev.new(...)
+        }else{
+          # DO NOTHING
+        }
       }
     }
   }
