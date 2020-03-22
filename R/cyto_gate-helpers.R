@@ -400,11 +400,30 @@ cyto_gate_extract <- function(parent,
 #'   default.
 #' @param plot logical indicating whether a plot should be drawn, set to
 #'   \code{TRUE} by default.
+#' @param popup logical indicating whether the plot should be constructed in a
+#'   pop-up window, set to TRUE by default.
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param gate_point_shape shape to use for selected gate points, set to
+#'   \code{16} by default to use filled circles. See
+#'   \code{\link[graphics:par]{pch}} for alternatives.
+#' @param gate_point_size numeric to control the size of the selected gate
+#'   points, set to 1 by default.
+#' @param gate_point_col colour to use for the selected gate points, set to
+#'   "red" by default.
+#' @param gate_point_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate points, set to 1 by default to use solid colours.
+#' @param gate_line_type integer [0,6] to control the line type of gates, set to
+#'   \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param gate_line_width numeric to control the line width(s) of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
+#' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
+#'   selected gate lines, set to 1 by default to use solid colours.
 #' @param ... additional arguments for \code{\link{cyto_plot.flowFrame}}.
 #'
 #' @return an object of class \code{GatingSet} with edited gate applied, as well
@@ -463,7 +482,16 @@ cyto_gate_edit <- function(x,
                            axis = "x",
                            label = TRUE,
                            plot = TRUE,
-                           axes_limits = "machine", ...) {
+                           popup = TRUE,
+                           axes_limits = "machine",
+                           gate_point_shape = 16,
+                           gate_point_size = 1,
+                           gate_point_col = "red",
+                           gate_point_col_alpha = 1,
+                           gate_line_type = 1,
+                           gate_line_width = 2.5,
+                           gate_line_col = "red",
+                           gate_line_col_alpha = 1, ...) {
 
   # CHECKS ---------------------------------------------------------------------
 
@@ -812,7 +840,7 @@ cyto_gate_edit <- function(x,
         label = FALSE,
         title = title,
         gate_line_width = 2.5,
-        popup = TRUE,
+        popup = popup,
         axes_limits = axes_limits, ...
       )
       
@@ -838,7 +866,15 @@ cyto_gate_edit <- function(x,
       type = type,
       negate = negate,
       axis = axis,
-      plot = FALSE
+      plot = FALSE,
+      gate_point_shape = gate_point_shape,
+      gate_point_size = gate_point_size,
+      gate_point_col = gate_point_col,
+      gate_point_col_alpha = gate_point_col_alpha,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col,
+      gate_line_col_alpha = gate_line_col_alpha,
     )
     
     # NAME GATES
