@@ -1622,8 +1622,9 @@ cyto_group_by <- function(x,
       }
       # Update factor levels in pd
       if(!all(var_levels %in% group_by[[z]])){
+        missing_levels <- as.vector(var_levels[!var_levels %in% group_by[[z]]])
         group_by[[z]] <<- c(group_by[[z]],
-                            var_levels[which(!var_levels %in% group_by[[z]])])
+                            missing_levels)
       }
       # Convert pd variable to factor and set levels
       pd[, var] <<- factor(pd[, var], levels = group_by[[z]])
