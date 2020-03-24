@@ -1543,8 +1543,10 @@ cyto_select <- function(x, ...) {
 #'
 #' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param group_by names of cyto_details variables to use for merging. Set to
-#'   "all" to merge all samples in \code{x}.
+#' @param group_by names of cyto_details variables to use for merging, set to
+#'   "all" to group all samples in \code{x}. The order of the grouping can be
+#'   controlled by specifying the factor levels in a list (e.g. list(Treatment =
+#'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
 #'
 #' @return a named list of \code{flowSet} or \code{GatingSet} objects
 #'   respectively.
@@ -1562,7 +1564,7 @@ cyto_select <- function(x, ...) {
 #' # Group GatingSet by Treatment and OVAConc
 #' gs <- GatingSet(Activation)
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -1587,15 +1589,59 @@ cyto_group_by <- function(x,
   # Extract sample names
   nms <- cyto_names(x)
 
-  # Check group_by
-  if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
-    lapply(group_by, function(y) {
-      if (!y %in% colnames(pd)) {
-        stop(paste0(y, " is not a valid variable for this ", class(x), "."))
+  # group_by is a list with factor levels - should not be "all"
+  if(is(group_by, "list")){
+    # Check variables and factor levels
+    lapply(seq_along(group_by), function(z){
+      # Variable
+      var <- names(group_by)[z]
+      # Expected variable levels
+      var_levels <- unique(pd[, var])
+      # Watch out for NA
+      if(any(LAPPLY(group_by[[z]], "is.na"))){
+        ind <- which(LAPPLY(group_by[[z]], "is.na"))
+        group_by[[z]][ind] <- "NA"
       }
+      # Check variables
+      if(!var %in% colnames(pd)){
+        stop(paste0(var, 
+                    " is not a valid variable for this ", 
+                    class(x), "."))
+      }
+      # Incorrect factor levels
+      if(!all(group_by[[z]] %in% unique(pd[, var]))){
+        lapply(group_by[[z]], function(y){
+          if(!y %in% unique(pd[, var])){
+            stop(paste0(
+              y, " is not a valid factor level for ",
+              group_by[[z]], 
+              "."
+            ))
+          }
+        })
+      }
+      # Update factor levels in pd
+      if(!all(var_levels %in% group_by[[z]])){
+        group_by[[z]] <<- c(group_by[[z]],
+                            var_levels[which(!var_levels %in% group_by[[z]])])
+      }
+      # Convert pd variable to factor and set levels
+      pd[, var] <<- factor(pd[, var], levels = group_by[[z]])
     })
+    # Convert group_by to vector
+    group_by <- names(group_by)
+  # group_by is a vector of variable names
+  }else{
+    # Check variables
+    if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
+      lapply(group_by, function(y) {
+        if (!y %in% colnames(pd)) {
+          stop(paste0(y, " is not a valid variable for this ", class(x), "."))
+        }
+      })
+    }
   }
-
+  
   # Split pd based on group_by into a named list
   if (length(group_by) == 1) {
     if (group_by == "all") {

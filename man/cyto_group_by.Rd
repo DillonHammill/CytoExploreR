@@ -10,8 +10,10 @@ cyto_group_by(x, group_by = "all")
 \item{x}{an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{group_by}{names of cyto_details variables to use for merging. Set to
-"all" to merge all samples in \code{x}.}
+\item{group_by}{names of cyto_details variables to use for merging, set to
+"all" to group all samples in \code{x}. The order of the grouping can be
+controlled by specifying the factor levels in a list (e.g. list(Treatment =
+c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
 }
 \value{
 a named list of \code{flowSet} or \code{GatingSet} objects
