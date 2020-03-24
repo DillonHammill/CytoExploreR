@@ -1165,7 +1165,7 @@ cyto_spillover_edit.GatingSet <- function(x,
         write.csv(spill.mat, spillover)
       })
 
-      # Return edited matrix on application cloase
+      # Return edited matrix on application close
       onStop(function() {
         spill.mat <- read.csv(spillover, header = TRUE, row.names = 1)
         colnames(spill.mat) <- rownames(spill.mat)
