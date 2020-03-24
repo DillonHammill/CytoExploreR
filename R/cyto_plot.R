@@ -390,14 +390,21 @@ cyto_plot.GatingSet <- function(x,
 
   # EXPERIMENT DETAILS & GROUP_BY (FOR GATE EXTRACTION)
   if (!.all_na(group_by)) {
-    if (length(group_by) == 1) {
-      if (group_by == "all") {
+    # group_by may be list
+    if(is(group_by, "list")){
+      vars <- names(group_by)
+    }else{
+      vars <- group_by
+    }
+    # Add grouping column to pd
+    if (length(vars) == 1) {
+      if (vars == "all") {
         pd$group_by <- rep("all", nrow(pd))
       } else {
-        pd$group_by <- pd[, group_by]
+        pd$group_by <- pd[, vars]
       }
     } else {
-      pd$group_by <- do.call("paste", pd[, group_by])
+      pd$group_by <- do.call("paste", pd[, vars])
     }
   }
   
@@ -674,34 +681,10 @@ cyto_plot.GatingSet <- function(x,
 
   # TITLE
   if (missing(title)) {
-    # SAMPLENAME
-    if (.all_na(group_by)) {
-      title <- cyto_names(x)
-      # GROUP_BY
-    } else {
-      if(length(group_by) == 1){
-        if (group_by == "all") {
-          title <- "Combined Events"
-        }else if(group_by == "name"){
-          title <- cyto_names(x)
-        }else{
-          pd_split <- split(pd, pd[, group_by],
-                            sep = " ",
-                            lex.order = TRUE,
-                            drop = TRUE
-          )
-          title <- names(pd_split)
-        }
-      }else{
-        pd_split <- split(pd, pd[, group_by],
-                          sep = " ",
-                          lex.order = TRUE,
-                          drop = TRUE
-        )
-        title <- names(pd_split)
-      }
+    title <- names(gs_groups)
+    if(all(title == "all")){
+      title <- "Combined Events"
     }
-    
     # PARENT
     title <- LAPPLY(title, function(z) {
       if (parent == "root") {
