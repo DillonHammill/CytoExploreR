@@ -29,7 +29,7 @@ data_editor <- function(x,
                         menu = FALSE,
                         options = NULL,
                         save_as = NULL,
-                        viewer = TRUE){
+                        viewer = TRUE) {
   
   # DATA FRAME
   if (is(x, "matrix")) {
@@ -39,6 +39,15 @@ data_editor <- function(x,
   # SAVE_AS
   if (is.null(save_as)) {
     stop("Supply a file name to save_as.")
+  }
+  
+  # WATCH OUT - ASIS
+  if(any(LAPPLY(colnames(x), function(z){is(x[, z], "AsIs")}))){
+    lapply(colnames(x), function(z){
+      if(is(x[, z], "AsIs")){
+        x[, z] <<- as.character(x[, z])
+      }
+    })
   }
   
   # ASSIGN X TO DATA_MATRIX
@@ -56,19 +65,17 @@ data_editor <- function(x,
     ui <- fluidPage(
       theme = shinytheme("yeti"),
       titlePanel(div(img(src = logo, width = 100), title)),
-      mainPanel(
-        rHandsontableOutput("data_matrix")
-      ),
+      mainPanel(rHandsontableOutput("data_matrix")),
       actionButton("save_and_close", "Save & Close")
     ),
     
     # SERVER
-    server <- function(input, output, session){
+    server <- function(input, output, session) {
       
       # VALUES
       values <- reactiveValues()
       
-      # EDITING
+      # DATA EDITS
       observe({
         if (!is.null(input$data_matrix)) {
           values[["data_matrix"]] <- hot_to_r(input$data_matrix)
@@ -81,20 +88,38 @@ data_editor <- function(x,
         )
       })
       
+      # ADD COLUMNS
+      
+      
       # TABLE
       output$data_matrix <- renderRHandsontable({
         if (menu == FALSE) {
-          rhandsontable(values[["data_matrix"]], readOnly = FALSE)
+          suppressWarnings(rhandsontable(values[["data_matrix"]],
+                        contextMenu = TRUE,
+                        useTypes = FALSE,
+                        rowHeaders = NULL # remove row names
+          ) %>% hot_cols(readOnly = FALSE,
+                         halign = "htCenter"))
         } else if (menu == TRUE) {
           if (is.null(options)) {
             stop("Supply a vector of options for dropdown menus.")
           }
-          rhandsontable(values[["data_matrix"]], readOnly = FALSE) %>%
+          suppressWarnings(rhandsontable(values[["data_matrix"]],
+                                         contextMenu = TRUE,
+                                         useTypes = FALSE,
+                                         rowHeaders = NULL # remove row names
+          ) %>%
+            hot_col(colnames(x)[-length(colnames(x))],
+                    halign = "htCenter",
+                    readOnly = TRUE
+            ) %>%
             hot_col(
               col = colnames(x)[length(colnames(x))],
               type = "dropdown",
-              source = options
-            )
+              source = options,
+              halign = "htCenter",
+              readOnly = FALSE
+            ))
         }
       })
       
@@ -107,9 +132,7 @@ data_editor <- function(x,
       session$onSessionEnded(function() {
         stopApp(read.csv(save_as, header = TRUE, stringsAsFactors = FALSE))
       })
-      
     }
-    
   )
   
   # RUN DATA EDITOR
@@ -117,6 +140,5 @@ data_editor <- function(x,
     runApp(app, launch.browser = paneViewer())
   } else {
     runApp(app)
-  }  
-  
+  }
 }
