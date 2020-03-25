@@ -25,7 +25,7 @@
 #'
 #' @noRd
 data_editor <- function(x,
-                        title = NULL,
+                        title = "Data Editor",
                         menu = FALSE,
                         options = NULL,
                         save_as = NULL,
@@ -38,7 +38,8 @@ data_editor <- function(x,
   
   # SAVE_AS
   if (is.null(save_as)) {
-    stop("Supply a file name to save_as.")
+    # SAVE TO TEMPORARY FILE
+    save_as <- temfile(fileext = "csv")
   }
   
   # WATCH OUT - ASIS
