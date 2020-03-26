@@ -2,8 +2,8 @@
 
 #' Interactive data editor
 #'
-#' @param x object of class matrix or data.frame, matrices will be coerced to
-#'   data.frames.
+#' @param x object of class matrix or data.frame will colnames specified,
+#'   matrices will be coerced to data.frames.
 #' @param title title to include in above the table.
 #' @param menu logical indicating whether the last column should contain
 #'   dropdown menus, set to FALSE by default.
@@ -31,19 +31,14 @@ data_editor <- function(x,
                         save_as = NULL,
                         viewer = TRUE) {
   
-  # DATA FRAME
-  if (is(x, "matrix")) {
-    x <- as.data.frame(x)
-  }
-  
   # SAVE_AS
   if (is.null(save_as)) {
     # SAVE TO TEMPORARY FILE
-    save_as <- temfile(fileext = "csv")
+    save_as <- tempfile(fileext = "csv")
   }
   
   # WATCH OUT - ASIS
-  if(any(LAPPLY(colnames(x), function(z){is(x[, z], "AsIs")}))){
+  if(any(CytoExploreR:::LAPPLY(colnames(x), function(z){is(x[, z], "AsIs")}))){
     lapply(colnames(x), function(z){
       if(is(x[, z], "AsIs")){
         x[, z] <<- as.character(x[, z])
@@ -53,6 +48,25 @@ data_editor <- function(x,
   
   # ASSIGN X TO DATA_MATRIX
   data_matrix <- x
+  
+  # PULL DOWN ROW NAMES
+  row_names <- rownames(data_matrix)
+  
+  # CONVERT TO CHRACTER MATRIX
+  if(is(data_matrix, "data.frame")){
+    data_matrix <- as.matrix(data_matrix)
+  }
+  
+  # ADD COLNAMES TO DATA MATRIX
+  if(is.null(colnames(data_matrix))){
+    stop("colnames must be assigned!")
+  }else{
+    data_matrix <- rbind(colnames(data_matrix), 
+                         data_matrix)
+  }
+  
+  # CONVERT TO DATA FRAME
+  data_matrix <- data.frame(data_matrix)
   
   # CytoExploreR logo from GitHub man folder
   logo <- paste0(
@@ -89,16 +103,14 @@ data_editor <- function(x,
         )
       })
       
-      # ADD COLUMNS
-      
-      
       # TABLE
       output$data_matrix <- renderRHandsontable({
         if (menu == FALSE) {
           suppressWarnings(rhandsontable(values[["data_matrix"]],
-                        contextMenu = TRUE,
-                        useTypes = FALSE,
-                        rowHeaders = NULL # remove row names
+                                         contextMenu = TRUE,
+                                         useTypes = FALSE,
+                                         colHeaders = NULL, # cannot edit headers
+                                         rowHeaders = NULL # remove row names
           ) %>% hot_cols(readOnly = FALSE,
                          halign = "htCenter"))
         } else if (menu == TRUE) {
@@ -108,6 +120,7 @@ data_editor <- function(x,
           suppressWarnings(rhandsontable(values[["data_matrix"]],
                                          contextMenu = TRUE,
                                          useTypes = FALSE,
+                                         colHeaders = NULL, # cannot edit 
                                          rowHeaders = NULL # remove row names
           ) %>%
             hot_col(colnames(x)[-length(colnames(x))],
@@ -138,8 +151,35 @@ data_editor <- function(x,
   
   # RUN DATA EDITOR
   if (viewer == TRUE) {
-    runApp(app, launch.browser = paneViewer())
+    data_matrix <- runApp(app, launch.browser = paneViewer())
   } else {
-    runApp(app)
+    data_matrix <- runApp(app)
   }
+  
+  # UPDATE COLUMN NAMES
+  colnames(data_matrix) <- data_matrix[1,]
+  
+  # REMOVE COLNAMES
+  data_matrix <- data_matrix[-1, ]
+  
+  # ADD BACK ROW NAMES
+  rownames(data_matrix) <- row_names
+  
+  # CONVERT NUMERIC CHARACTERS
+  lapply(seq_len(ncol(data_matrix)), function(z){
+    # NUMBERS TO NUMERIC
+    if(!.all_na(as.numeric(data_matrix[, z]))){
+      data_matrix[, z] <<- as.numeric(data_matrix[, z])
+    }
+    # NUMERIC TO INTEGER
+    if(all(LAPPLY(data_matrix[, z], function(z){
+      z%%1 == 0
+    }))){
+      data_matrix[, z] <<- as.integer(data_matrix[, z])
+    }
+  })
+  
+  # RETURN UPDATED DATA MATRIX
+  return(data_matrix)
+  
 }
