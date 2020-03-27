@@ -2682,7 +2682,8 @@ cyto_barcode <- function(x,
 #'   \code{flowSet},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{GatingSet}.
-#' @param file name of csv file containing columns 'Channel' and 'Marker'.
+#' @param file name of csv file containing columns 'channel' and 'marker'.
+#' @param ... additional arguments passed to \code{data_editor}.
 #'
 #' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
 #'
@@ -2709,7 +2710,8 @@ cyto_barcode <- function(x,
 #'
 #' @export
 cyto_markers_edit <- function(x,
-                              file = NULL) {
+                              file = NULL,
+                              ...) {
 
   # check class of x
   cyto_check(x)
@@ -2812,25 +2814,25 @@ cyto_markers_edit <- function(x,
     }
   }
 
-  # Edit dt - data.frame must have no rownames for editor
-  dt <- suppressWarnings(edit(dt))
-
-  # Update channels
-  BiocGenerics::colnames(x) <- as.character(dt$channel)
-
   # File name not supplied
   if (is.null(file)) {
     file <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv")
-  }
+  } 
+  
+  # Edit dt using data_editor
+  dt <- data_editor(dt,
+                    title = "Experiment Markers Editor", 
+                    save_as = file,
+                    ...)
+
+  # Update channels
+  BiocGenerics::colnames(x) <- as.character(dt$channel)
 
   # # TODO - CHECK IF FILE EXISTS WITH DIFFERENT CHANNELS - NEED NEW FILE NAME
   # if(length(grep(file, list.files())) != 0){
   #   # Check if file contains the same
   #
   # }
-
-  # Write result to csv file
-  write.csv(dt, file, row.names = FALSE)
 
   # Markers and channels
   cyto_channels <- dt$channel
@@ -2842,6 +2844,7 @@ cyto_markers_edit <- function(x,
     markernames(x) <- cyto_markers[!is.na(cyto_markers)]
   }
 
+  # Return updated samples
   return(x)
 }
 
@@ -2852,6 +2855,7 @@ cyto_markers_edit <- function(x,
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param file name of csv file containing experimental information.
+#' @param ... additional arguments passed to \code{data_editor}.
 #'
 #' @return NULL and return \code{flowSet} or \code{GatingSet} with updated
 #'   experimental details.
@@ -2876,7 +2880,9 @@ cyto_markers_edit <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' @export
-cyto_details_edit <- function(x, file = NULL) {
+cyto_details_edit <- function(x, 
+                              file = NULL,
+                              ...) {
 
   # x should be a flowSet or GatingSet
   if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
@@ -2949,27 +2955,25 @@ cyto_details_edit <- function(x, file = NULL) {
     }
   }
 
+  # FILE
+  if (is.null(file)) {
+    file <- paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-Experiment-Details.csv"
+    )
+  }
+  
   # Edit cyto_details
-  pd <- suppressWarnings(edit(pd))
+  pd <- data_editor(pd,
+                    title = "Experiment Details Editor",
+                    save_as = file,
+                    ...)
   rownames(pd) <- pd$name
 
   # Update cyto_details
   cyto_details(x) <- pd
-
-  # Write result to csv file - file name manually supplied
-  if (!is.null(file)) {
-    write.csv(cyto_details(x), file, row.names = FALSE)
-
-    # Write result to csv file - no file name supplied
-  } else {
-
-    # Save file with date and experiment markers
-    write.csv(cyto_details(x), paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-Experiment-Details.csv"
-    ), row.names = FALSE)
-  }
-
+  
+  # Return updated samples
   return(x)
 }
 

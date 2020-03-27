@@ -4,13 +4,15 @@
 \alias{cyto_details_edit}
 \title{Interactively edit cyto_details for a flowSet or GatingSet}
 \usage{
-cyto_details_edit(x, file = NULL)
+cyto_details_edit(x, file = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{file}{name of csv file containing experimental information.}
+
+\item{...}{additional arguments passed to \code{data_editor}.}
 }
 \value{
 NULL and return \code{flowSet} or \code{GatingSet} with updated

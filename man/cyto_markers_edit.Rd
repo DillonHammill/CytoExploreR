@@ -4,7 +4,7 @@
 \alias{cyto_markers_edit}
 \title{Assign marker names to flowFrame or flowSet}
 \usage{
-cyto_markers_edit(x, file = NULL)
+cyto_markers_edit(x, file = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -12,7 +12,9 @@ cyto_markers_edit(x, file = NULL)
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 \code{GatingSet}.}
 
-\item{file}{name of csv file containing columns 'Channel' and 'Marker'.}
+\item{file}{name of csv file containing columns 'channel' and 'marker'.}
+
+\item{...}{additional arguments passed to \code{data_editor}.}
 }
 \value{
 save inputs to "Experiment-Markers.csv" and returns updated samples.

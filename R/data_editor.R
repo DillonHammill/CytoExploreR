@@ -23,19 +23,13 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @noRd
+#' @export
 data_editor <- function(x,
                         title = "Data Editor",
                         menu = FALSE,
                         options = NULL,
                         save_as = NULL,
                         viewer = TRUE) {
-  
-  # SAVE_AS
-  if (is.null(save_as)) {
-    # SAVE TO TEMPORARY FILE
-    save_as <- tempfile(fileext = "csv")
-  }
   
   # WATCH OUT - ASIS
   if(any(CytoExploreR:::LAPPLY(colnames(x), function(z){is(x[, z], "AsIs")}))){
@@ -74,6 +68,10 @@ data_editor <- function(x,
     "/master/man/figures/logo.png"
   )
   
+  # ENVIRONMENT
+  env <- environment()
+  
+  # DATA EDITOR
   app <- shinyApp(
     
     # USER INTERFACE
@@ -98,9 +96,8 @@ data_editor <- function(x,
           values[["data_matrix"]] <- data_matrix
         }
         write.csv(values[["data_matrix"]],
-                  save_as,
-                  row.names = FALSE
-        )
+                  temp_file,
+                  row.names = FALSE)
       })
       
       # TABLE
@@ -139,19 +136,26 @@ data_editor <- function(x,
       
       # MANUAL CLOSE
       observeEvent(input$save_and_close, {
-        stopApp(read.csv(save_as, header = TRUE, stringsAsFactors = FALSE))
+        stopApp({
+          dm <- read.csv(temp_file, 
+                         header = TRUE, 
+                         stringsAsFactors = FALSE)})
+          unlink(temp_file)
+          return(dm)
       })
       
-      # SESSION ENDS
-      session$onSessionEnded(function() {
-        stopApp(read.csv(save_as, header = TRUE, stringsAsFactors = FALSE))
-      })
+    },
+    
+    # CREATE TEMP FILE
+    onStart <- function(){
+      temp_file <<- tempfile(fileext = ".csv")
     }
   )
-  
+
   # RUN DATA EDITOR
   if (viewer == TRUE) {
-    data_matrix <- runApp(app, launch.browser = paneViewer())
+    data_matrix <- runApp(app, 
+                          launch.browser = paneViewer())
   } else {
     data_matrix <- runApp(app)
   }
@@ -160,7 +164,7 @@ data_editor <- function(x,
   colnames(data_matrix) <- data_matrix[1,]
   
   # REMOVE COLNAMES
-  data_matrix <- data_matrix[-1, ]
+  data_matrix <- data_matrix[-1, , drop = FALSE]
   
   # ADD BACK ROW NAMES
   rownames(data_matrix) <- row_names
@@ -168,16 +172,17 @@ data_editor <- function(x,
   # CONVERT NUMERIC CHARACTERS
   lapply(seq_len(ncol(data_matrix)), function(z){
     # NUMBERS TO NUMERIC
-    if(!.all_na(as.numeric(data_matrix[, z]))){
+    if(all(grepl("^[0-9 ]+$", data_matrix[, z]))){
       data_matrix[, z] <<- as.numeric(data_matrix[, z])
     }
-    # NUMERIC TO INTEGER
-    if(all(LAPPLY(data_matrix[, z], function(z){
-      z%%1 == 0
-    }))){
-      data_matrix[, z] <<- as.integer(data_matrix[, z])
-    }
   })
+  
+  # WRITE TO FILE
+  if(!is.null(save_as)){
+    write.csv(data_matrix,
+              save_as,
+              row.names = FALSE)
+  }
   
   # RETURN UPDATED DATA MATRIX
   return(data_matrix)
