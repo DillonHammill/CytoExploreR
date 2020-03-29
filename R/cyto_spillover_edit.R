@@ -49,8 +49,8 @@
 #'   in extraction of the spillover matrix directly from the supplied samples
 #'   (i.e. edit the spillover matrix constructed on the cytometer).
 #' @param axes_trans an object of class \code{transformerList} containing
-#'   transformers to used to transform the fluorescent channels of
-#'   the samples for visualisation.
+#'   transformers to used to transform the fluorescent channels of the samples
+#'   for visualisation.
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to use entire axes ranges.
@@ -66,6 +66,8 @@
 #'   size of titles above each plot, set to 2 by default.
 #' @param header_text_size numeric passed to \code{cyto_plot_compensation} to
 #'   control size of the header text, set to 1.5 by default.
+#' @param viewer logical indicating whether the spillover matrix editor should
+#'   be launched in the RStudio viewer pane, set to FALSE by default.
 #' @param ... additional arguments passed to \code{cyto_plot}.
 #'
 #' @return edited spillover matrix and save to designated \code{spillover} csv
@@ -77,7 +79,7 @@
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
 #'   eventReactive renderPlot tabsetPanel tabPanel sidebarLayout fluidRow
-#'   updateSelectInput onStop stopApp runApp updateCheckboxInput
+#'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme
@@ -116,7 +118,9 @@ cyto_spillover_edit.GatingSet <- function(x,
                                           axes_text_size = 1.7,
                                           axes_label_text_size = 2,
                                           title_text_size = 2,
-                                          header_text_size = 1.5, ...) {
+                                          header_text_size = 1.5,
+                                          viewer = FALSE,
+                                          ...) {
 
   # PREPARE ARGUMENTS ----------------------------------------------------------
 
@@ -1175,7 +1179,12 @@ cyto_spillover_edit.GatingSet <- function(x,
   )
 
   # Run the shiny application
-  sp <- runApp(app)
+  if(viewer){
+    sp <- runApp(app, 
+                 launch.browser = paneViewer())
+  }else{
+    sp <- runApp(app)
+  }
 
   # RETURN UPDATED SPILLOVER MATRIX
   return(sp)
@@ -1193,7 +1202,9 @@ cyto_spillover_edit.flowSet <- function(x,
                                         axes_text_size = 1.7,
                                         axes_label_text_size = 2,
                                         title_text_size = 2,
-                                        header_text_size = 1.5, ...) {
+                                        header_text_size = 1.5,
+                                        viewer = FALSE,
+                                        ...) {
 
   # Assign x to fs
   fs <- x
@@ -2039,7 +2050,12 @@ cyto_spillover_edit.flowSet <- function(x,
   )
 
   # Run the shiny application
-  sp <- runApp(app)
+  if(viewer){
+    sp <- runApp(app, 
+                 launch.browser = paneViewer())
+  }else{
+    sp <- runApp(app)
+  }
 
   # Return updated spillover matrix
   return(sp)

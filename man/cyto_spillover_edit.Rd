@@ -19,6 +19,7 @@
   axes_label_text_size = 2,
   title_text_size = 2,
   header_text_size = 1.5,
+  viewer = FALSE,
   ...
 )
 
@@ -34,6 +35,7 @@
   axes_label_text_size = 2,
   title_text_size = 2,
   header_text_size = 1.5,
+  viewer = FALSE,
   ...
 )
 }
@@ -55,8 +57,8 @@ in extraction of the spillover matrix directly from the supplied samples
 (i.e. edit the spillover matrix constructed on the cytometer).}
 
 \item{axes_trans}{an object of class \code{transformerList} containing
-transformers to used to transform the fluorescent channels of
-the samples for visualisation.}
+transformers to used to transform the fluorescent channels of the samples
+for visualisation.}
 
 \item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
@@ -79,6 +81,9 @@ size of titles above each plot, set to 2 by default.}
 
 \item{header_text_size}{numeric passed to \code{cyto_plot_compensation} to
 control size of the header text, set to 1.5 by default.}
+
+\item{viewer}{logical indicating whether the spillover matrix editor should
+be launched in the RStudio viewer pane, set to FALSE by default.}
 
 \item{...}{additional arguments passed to \code{cyto_plot}.}
 }
