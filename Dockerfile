@@ -10,7 +10,13 @@ RUN apt-get update && apt-get install -y\
     automake \
     libtool \
     libxml2 \
-    libhdf5-dev
+    libhdf5-dev \
+    pkg-config \
+    fftw3 \
+    fftw3-dev
+
+# Fit-SNE
+RUN g++ -std=c++11 -O3 src/sptree.cpp src/tsne.cpp src/nbodyfft.cpp -I ~/fftw-3.3.8/api/ -L ~/fftw-3.3.8/.libs/ -o bin/fast_tsne -pthread -lfftw3 -lm
 
 # R 
 FROM rocker/verse:devel

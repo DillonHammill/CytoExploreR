@@ -1,7 +1,14 @@
+# CytoExploreR 1.0.5
+
+* Add ability to control plotting order in `cyto_plot` when using the `group_by` argument.
+* Add new `data_editor` function to bring excel-like features to all context menus and data editors.
+* Add viewer argument to `cyto_spillover_edit` to allow it to be launched in the RStudio viewer pane (if desired).
+
 # CytoExploreR 1.0.4
 
 * Remove requirement for GUI device in `cyto_gate_draw` and `cyto_gate_edit`. Users can now draw gates directly on the RStudio graphics device.
 * Add support for changing gate point and lines colours within `cyto_gate_draw` and `cyto_gate_edit`.
+* improve appearance of 1-D interval gates in `cyto_gate_draw`.
 * Add dependency for openCyto >= 1.25.2 to support gating of empty populations.
 * Add Dockerfile and Makefile to build **CytoExploreR** docker images for reproducible data analysis. Docker images can be pulled from [docker hub](https://hub.docker.com/) at `dhammill/cytoexplorer`.
 
