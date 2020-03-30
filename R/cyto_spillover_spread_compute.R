@@ -305,6 +305,6 @@ cyto_spillover_spread_compute <- function(x,
     }
     write.csv(SSM, spillover_spread)
   }
-  
+
   return(SSM)
 }

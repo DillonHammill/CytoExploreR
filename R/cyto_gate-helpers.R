@@ -785,11 +785,12 @@ cyto_gate_edit <- function(x,
     grps <- names(fr_list)
   # GROUPING REMAINS THE SAME
   } else {
-    grps <- select.list(names(fr_list),
-      multiple = TRUE,
-      graphics = TRUE,
-      title = "Select the group(s) to edit:"
-    )
+    message("Select the group(s) to edit:")
+    grps <- data_editor(data.frame("group" = names(fr_list),
+                                   "select" = NA,
+                                   stringsAsFactors = FALSE),
+                        title = "Group Selection")
+    grps <- grps[, "group"][which(grps[, "select"] == 1)]
   }
 
   # EXPERIMENT DETAILS

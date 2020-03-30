@@ -169,10 +169,11 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
   # Edit gatingTemplate
   message("Do not modify existing gatingTemplate entries!")
   message("Add new rows to add boolean or reference gates to the GatingSet.")
-  gt <- suppressMessages(edit(gt))
-
-  # Write updated template to csv file
-  write.csv(gt, gatingTemplate, row.names = FALSE)
+  gt <- suppressMessages(
+    data_editor(gt, 
+                title = "gatingTemplate Editor",
+                save_as = gatingTemplate)
+    )
 
   # Read in updated template to gatingTemplate object
   gt <- gatingTemplate(gatingTemplate)

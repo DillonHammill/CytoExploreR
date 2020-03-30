@@ -105,8 +105,17 @@ test_that("cyto_markers_extract", {
 
 test_that("cyto_channel_select", {
   
-  mock_menu <- mock(4, 10, 11, 9, 1, 2, 12, cycle = TRUE)
-  testthat::with_mock(menu = mock_menu,
+  # DATA EDITOR
+  mock_data_editor <- mock(data.frame("name" = cyto_names(gs_comp),
+                                      "channel" = c("7-AAD-A",
+                                                    "Alexa Fluor 700-A",
+                                                    "APC-Cy7-A",
+                                                    "Alexa Fluor 647-A",
+                                                    "Alexa Fluor 488-A",
+                                                    "PE-A",
+                                                    "Unstained"),
+                                      stringsAsFactors = FALSE))
+  testthat::with_mock(data_editor = mock_data_editor,
                       expect_equal(cyto_channel_select(gs_comp),
                                    c("7-AAD-A",
                                      "Alexa Fluor 700-A",

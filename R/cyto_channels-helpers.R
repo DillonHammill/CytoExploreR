@@ -434,29 +434,33 @@ cyto_markers_extract <- function(x,
 #' }
 #' @export
 cyto_channel_select <- function(x){
-
-  # Extract data
-  x <- cyto_extract(x)
-  
-  # Convert to list of flowFrames
-  x <- cyto_convert(x, "list of flowFrames")
-  
-  # Channels
-  opts <- c(cyto_fluor_channels(x[[1]]), "Unstained")
   
   # Message
-  message("Select a fluorescent channel for the following sample:")
+  message("Select a fluorescent channel for each of the samples:")
   
-  # Run through list of flowFrames
-  chans <- LAPPLY(seq_len(length(x)), function(z){
-    message(cyto_names(x[[z]]))
-    ind <- menu(choices = opts, graphics = TRUE)
-    if(ind == 0){
-      stop(paste0("No channel selected for ", cyto_names(x[[z]]), "."))
+  # Channels
+  opts <- c(cyto_fluor_channels(x), "Unstained")
+  
+  # Samples
+  nms <- cyto_names(x)
+  
+  # Channel selection
+  chans <- data_editor(data.frame("name" = nms,
+                                  "channel" = NA,
+                                  stringsAsFactors = FALSE),
+                       title = "Channel Selector",
+                       type = "selector",
+                       options = opts)
+  
+  # Missing channels
+  lapply(seq_along(chans[, "channel"]), function(z){
+    if(is.na(chans[z, "channel"])){
+      stop(paste0("No channel selected for ", chans[z, "name"], "."))
     }
-    opts[ind]
   })
   
+  # RETURN VECTOR OF CHANNELS
+  chans <- chans[, "channel"]
   return(chans)
 }
 
