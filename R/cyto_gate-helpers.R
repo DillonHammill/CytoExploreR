@@ -789,10 +789,15 @@ cyto_gate_edit <- function(x,
     grps <- data_editor(data.frame("group" = names(fr_list),
                                    "select" = NA,
                                    stringsAsFactors = FALSE),
-                        title = "Group Selection")
+                        title = "Group Selection",
+                        type = "menu")
     grps <- grps[, "group"][which(grps[, "select"] == 1)]
+    # NA TO CHARCTERS
+    if(any(is.na(grps))){
+      grps[is.na(grps)] <- "NA"
+    }
   }
-
+  
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
 
@@ -820,9 +825,9 @@ cyto_gate_edit <- function(x,
       } else {
         prnt <- parent
       }
-
+      
       # TITLE
-      if(GRPS[y] == "all"){
+      if(!is.na(GRPS[y]) & GRPS[y] == "all"){
         grp <- "Combined Events"
       }else{
         grp <- GRPS[y]
