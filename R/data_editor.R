@@ -2,17 +2,22 @@
 
 #' Interactive data editor
 #'
-#' @param x object of class matrix or data.frame will colnames specified,
-#'   matrices will be coerced to data.frames.
+#' @param x object of class matrix or data.frame with colnames specified.
 #' @param title title to include in above the table.
-#' @param menu logical indicating whether the last column should contain
-#'   dropdown menus, set to FALSE by default.
-#' @param options vector of options to use in dropdpwn menus when menu is TRUE.
+#' @param type can be either "editor", "menu" or "selector", set to "editor" by
+#'   default. The editor option allows complete editing of the data_matrix with
+#'   text input. The menu option converts the entries in the last column to
+#'   checkboxes for logical inputs. The selector option converts entries in the
+#'   last column to dropdown menus that contain choices supplied to the
+#'   \code{options} argument.
+#' @param options vector of options to use in dropdown menus in the last column.
 #' @param save_as name of a csv file to which the edited table should be saved.
 #' @param viewer logical indicating whether the table editor should be launched
-#'   in the RStudio viewer pane, set to TRUE by default. Mke sure to use the
+#'   in the RStudio viewer pane, set to TRUE by default. Make sure to use the
 #'   "Save & Close" to close the data editor or else the changes will not be
 #'   saved.
+#' @param logo path to image to include a logo in data editor title panel, set
+#'   to CytoExploreR by default.
 #'
 #' @importFrom shiny shinyApp fluidPage titlePanel mainPanel runApp onStop img
 #'   div paneViewer
@@ -26,50 +31,56 @@
 #' @export
 data_editor <- function(x,
                         title = "Data Editor",
-                        menu = FALSE,
+                        type = "editor",
                         options = NULL,
                         save_as = NULL,
-                        viewer = TRUE) {
+                        viewer = TRUE,
+                        logo = "CytoExploreR") {
   
-  # WATCH OUT - ASIS
-  if(any(CytoExploreR:::LAPPLY(colnames(x), function(z){is(x[, z], "AsIs")}))){
-    lapply(colnames(x), function(z){
-      if(is(x[, z], "AsIs")){
-        x[, z] <<- as.character(x[, z])
-      }
-    })
+  # SELECTOR OPTIONS
+  if(type == "selector" & is.null(options)){
+    stop("options required to use slector type.")
+  }else if(type == "selector" & !is.null(options)){
+    # EMPTY DEFAULT
+    if(!any(LAPPLY(options, ".empty"))){
+      options <- c(options, "")
+    }
   }
-  
-  # ASSIGN X TO DATA_MATRIX
-  data_matrix <- x
   
   # PULL DOWN ROW NAMES
-  row_names <- rownames(data_matrix)
+  row_names <- rownames(x)
   
   # CONVERT TO CHRACTER MATRIX
-  if(is(data_matrix, "data.frame")){
-    data_matrix <- as.matrix(data_matrix)
+  if(is(x, "data.frame")){
+    x <- as.matrix(x)
   }
   
-  # ADD COLNAMES TO DATA MATRIX
-  if(is.null(colnames(data_matrix))){
-    stop("colnames must be assigned!")
-  }else{
-    data_matrix <- rbind(colnames(data_matrix), 
-                         data_matrix)
+  # EDITOR DATA
+  if(type == "editor"){
+    # MOVE COLNAMES INTO MATRIX
+    if(is.null(colnames)){
+      stop("colnames must be assigned!")
+    }else{
+      x <- rbind(colnames(x), x)
+    }
+  # MENU DATA
+  }else if(type %in% "menu"){
+    x[, ncol(x)] <- rep(NA, nrow(x))
+  # SELECTOR DATA
+  }else if(type == "selector"){
+    x[, ncol(x)] <- rep("", nrow(x))
   }
   
   # CONVERT TO DATA FRAME
-  data_matrix <- data.frame(data_matrix)
+  x <- data.frame(x, stringsAsFactors = FALSE)
   
   # CytoExploreR logo from GitHub man folder
-  logo <- paste0(
-    "https://raw.githubusercontent.com/DillonHammill/CytoExploreR",
-    "/master/man/figures/logo.png"
-  )
-  
-  # ENVIRONMENT
-  env <- environment()
+  if(logo == "CytoExploreR"){
+    logo <- paste0(
+      "https://raw.githubusercontent.com/DillonHammill/CytoExploreR",
+      "/master/man/figures/logo.png"
+    )
+  }
   
   # DATA EDITOR
   app <- shinyApp(
@@ -78,7 +89,7 @@ data_editor <- function(x,
     ui <- fluidPage(
       theme = shinytheme("yeti"),
       titlePanel(div(img(src = logo, width = 100), title)),
-      mainPanel(rHandsontableOutput("data_matrix")),
+      mainPanel(rHandsontableOutput("x")),
       actionButton("save_and_close", "Save & Close")
     ),
     
@@ -90,55 +101,67 @@ data_editor <- function(x,
       
       # DATA EDITS
       observe({
-        if (!is.null(input$data_matrix)) {
-          values[["data_matrix"]] <- hot_to_r(input$data_matrix)
+        if (!is.null(input$x)) {
+          values[["x"]] <- hot_to_r(input$x)
         } else {
-          values[["data_matrix"]] <- data_matrix
+          values[["x"]] <- x
         }
-        write.csv(values[["data_matrix"]],
+        write.csv(values[["x"]],
                   temp_file,
                   row.names = FALSE)
       })
       
       # TABLE
-      output$data_matrix <- renderRHandsontable({
-        if (menu == FALSE) {
-          suppressWarnings(rhandsontable(values[["data_matrix"]],
-                                         contextMenu = TRUE,
-                                         useTypes = FALSE,
-                                         colHeaders = NULL, # cannot edit headers
-                                         rowHeaders = NULL # remove row names
-          ) %>% hot_cols(readOnly = FALSE,
-                         halign = "htCenter"))
-        } else if (menu == TRUE) {
-          if (is.null(options)) {
-            stop("Supply a vector of options for dropdown menus.")
-          }
-          suppressWarnings(rhandsontable(values[["data_matrix"]],
-                                         contextMenu = TRUE,
-                                         useTypes = FALSE,
-                                         colHeaders = NULL, # cannot edit 
-                                         rowHeaders = NULL # remove row names
-          ) %>%
+
+      output$x <- renderRHandsontable({
+        # EDITOR
+        if(type == "editor"){
+          suppressWarnings(
+            rhandsontable(values[["x"]],
+                          contextMenu = TRUE,
+                          useTypes = FALSE,
+                          colHeaders = NULL,
+                          rowHeaders = NULL,
+                          readOnly = FALSE,
+                          halign = "htCenter")
+          )
+        # MENU
+        }else if(type == "menu"){
+          suppressWarnings(
+            rhandsontable(values[["x"]],
+                          contextMenu = TRUE,
+                          rowHeaders = NULL,
+                          useTypes = FALSE) %>%
             hot_col(colnames(x)[-length(colnames(x))],
                     halign = "htCenter",
-                    readOnly = TRUE
-            ) %>%
-            hot_col(
-              col = colnames(x)[length(colnames(x))],
-              type = "dropdown",
-              source = options,
-              halign = "htCenter",
-              readOnly = FALSE
-            ))
+                    readOnly = TRUE) %>%
+            hot_col(col = colnames(x)[length(colnames(x))],
+                    type = "checkbox",
+                    halign = "htCenter",
+                    readOnly = FALSE,
+                    allowInvalid = FALSE)
+          )
+        # SELECTOR
+        }else if(type == "selector"){
+          suppressWarnings(
+            rhandsontable(values[["x"]],
+                          contextMenu = TRUE,
+                          rowHeaders = NULL) %>%
+            hot_col(col = colnames(x)[length(colnames(x))],
+                    type = "dropdown",
+                    source = options,
+                    halign = "htCenter",
+                    readOnly = FALSE)
+          )
         }
+
       })
-      
+
       # MANUAL CLOSE
       observeEvent(input$save_and_close, {
         stopApp({
-          dm <- read.csv(temp_file, 
-                         header = TRUE, 
+          dm <- read.csv(temp_file,
+                         header = TRUE,
                          stringsAsFactors = FALSE)})
           unlink(temp_file)
           return(dm)
@@ -154,37 +177,50 @@ data_editor <- function(x,
 
   # RUN DATA EDITOR
   if (viewer == TRUE) {
-    data_matrix <- runApp(app, 
-                          launch.browser = paneViewer())
+    x <- runApp(app, launch.browser = paneViewer())
   } else {
-    data_matrix <- runApp(app)
+    x <- runApp(app)
   }
-  
-  # UPDATE COLUMN NAMES
-  colnames(data_matrix) <- data_matrix[1,]
-  
-  # REMOVE COLNAMES
-  data_matrix <- data_matrix[-1, , drop = FALSE]
-  
-  # ADD BACK ROW NAMES
-  rownames(data_matrix) <- row_names
-  
-  # CONVERT NUMERIC CHARACTERS
-  lapply(seq_len(ncol(data_matrix)), function(z){
-    # NUMBERS TO NUMERIC
-    if(all(grepl("^[0-9 ]+$", data_matrix[, z]))){
-      data_matrix[, z] <<- as.numeric(data_matrix[, z])
-    }
-  })
+
+  # EDITOR DATA
+  if(type == "editor"){
+    # UPDATE COLUMN NAMES
+    colnames(x) <- x[1, ]
+    # REMOVE COLNAMES FROM MATRIX
+    x <- x[-1, , drop = FALSE]
+    # CONVERT NUMERIC CHARACTERS
+    lapply(seq_len(ncol(x)), function(z){
+      # NUMBERS TO NUMERIC
+      if(all(grepl("^[0-9 ]+$", x[, z]))){
+        x[, z] <<- as.numeric(x[, z])
+     }
+    })
+    # CONVERT EMPTY CHARACTERS TO NA
+    lapply(seq_len(ncol(x)), function(z){
+      if(any(LAPPLY(x[, z], ".empty"))){
+        x[,z][which(LAPPLY(x[, z], ".empty"))] <<- NA
+      }
+    })
+    # ADD BACK ROW NAMES
+    rownames(x) <- row_names
+  # SELECTOR DATA
+  }else if(type == "selector"){
+    # CONVERT EMPTY CHARACTERS TO NA
+    lapply(seq_len(ncol(x)), function(z){
+      if(any(LAPPLY(x[, z], ".empty"))){
+        x[,z][which(LAPPLY(x[, z], ".empty"))] <<- NA
+      }
+    })
+  }
   
   # WRITE TO FILE
   if(!is.null(save_as)){
-    write.csv(data_matrix,
+    write.csv(x,
               save_as,
               row.names = FALSE)
   }
   
   # RETURN UPDATED DATA MATRIX
-  return(data_matrix)
+  return(x)
   
 }

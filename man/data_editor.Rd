@@ -7,29 +7,36 @@
 data_editor(
   x,
   title = "Data Editor",
-  menu = FALSE,
+  type = "editor",
   options = NULL,
   save_as = NULL,
-  viewer = TRUE
+  viewer = TRUE,
+  logo = "CytoExploreR"
 )
 }
 \arguments{
-\item{x}{object of class matrix or data.frame will colnames specified,
-matrices will be coerced to data.frames.}
+\item{x}{object of class matrix or data.frame with colnames specified.}
 
 \item{title}{title to include in above the table.}
 
-\item{menu}{logical indicating whether the last column should contain
-dropdown menus, set to FALSE by default.}
+\item{type}{can be either "editor", "menu" or "selector", set to "editor" by
+default. The editor option allows complete editing of the data_matrix with
+text input. The menu option converts the entries in the last column to
+checkboxes for logical inputs. The selector option converts entries in the
+last column to dropdown menus that contain choices supplied to the
+\code{options} argument.}
 
-\item{options}{vector of options to use in dropdpwn menus when menu is TRUE.}
+\item{options}{vector of options to use in dropdown menus in the last column.}
 
 \item{save_as}{name of a csv file to which the edited table should be saved.}
 
 \item{viewer}{logical indicating whether the table editor should be launched
-in the RStudio viewer pane, set to TRUE by default. Mke sure to use the
+in the RStudio viewer pane, set to TRUE by default. Make sure to use the
 "Save & Close" to close the data editor or else the changes will not be
 saved.}
+
+\item{logo}{path to image to include a logo in data editor title panel, set
+to CytoExploreR by default.}
 }
 \description{
 Interactive data editor
