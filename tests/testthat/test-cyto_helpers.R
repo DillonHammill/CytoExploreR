@@ -359,11 +359,11 @@ test_that("cyto_barcode", {
 
 test_that("cyto_markers_edit", {
   
-  mock_edit <- mock(data.frame("channel" = cyto_channels(fs),
-                               "marker" = pData(parameters(fs[[1]]))$desc,
-                               stringsAsFactors = FALSE,
-                               row.names = NULL))
-  testthat::with_mock(edit = mock_edit,
+  mock_data_editor <- mock(data.frame("channel" = cyto_channels(fs),
+                                      "marker" = pData(parameters(fs[[1]]))$desc,
+                                      stringsAsFactors = FALSE,
+                                      row.names = NULL))
+  testthat::with_mock(data_editor = mock_data_editor,
                       expect_equal(cyto_markers_edit(fs),
                                    fs))
   
@@ -375,8 +375,8 @@ test_that("cyto_details_edit", {
   
   pd <- cyto_details(fs)
   rownames(pd) <- NULL
-  mock_edit <- mock(cyto_details(fs))
-  testthat::with_mock(edit = mock_edit,
+  mock_data_editor <- mock(cyto_details(fs))
+  testthat::with_mock(data_editor = mock_data_editor,
                       expect_equivalent(cyto_details_edit(fs),
                                    fs))
   
