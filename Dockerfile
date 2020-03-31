@@ -1,12 +1,9 @@
 # UBUNTU OS IMAGE
 FROM ubuntu:16.04
 
-# REQUIRE LIBPROTOBUF 2.6.0
-RUN apt-get update \
-    apt-get install libprotobuf-dev -y
-
 # INSTALL DEPENDENCIES
 RUN apt-get update && apt-get install -y\
+    libprotobuf-dev \
     autoconf \
     automake \
     libtool \
