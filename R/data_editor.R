@@ -20,7 +20,7 @@
 #'   to CytoExploreR by default.
 #'
 #' @importFrom shiny shinyApp fluidPage titlePanel mainPanel runApp onStop img
-#'   div paneViewer
+#'   div paneViewer observeEvent
 #' @importFrom shinythemes shinytheme
 #' @importFrom rhandsontable rHandsontableOutput renderRHandsontable
 #'   rhandsontable hot_col hot_to_r
@@ -81,6 +81,9 @@ data_editor <- function(x,
       "/master/man/figures/logo.png"
     )
   }
+  
+  # TEMP_FILE
+  temp_file <- NULL
   
   # DATA EDITOR
   app <- shinyApp(
