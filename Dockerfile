@@ -23,7 +23,7 @@ RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz && \
 
 # FIT-SNE - (path to fast_tsne -> FIt-SNE-master/fast_tsne.R)
 RUN cd /. && \
-    wget -O FIt-SNE.zip https://github.com/KlugerLab/FIt-SNE/archive/master.zip && \
+    wget --no-check-certificate -O FIt-SNE.zip https://github.com/KlugerLab/FIt-SNE/archive/master.zip && \
     unzip FIt-SNE.zip && \
     rm -rf FIt-SNE.zip && \
     cd FIt-SNE-master && \
