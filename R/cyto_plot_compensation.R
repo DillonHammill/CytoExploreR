@@ -318,9 +318,11 @@ cyto_plot_compensation.GatingSet <- function(x,
   
   # EXPAND DOTS
   dots <- list(...)
-  
+
   # UPDATE ARGUMENTS
-  .args_update(dots)
+  if(length(dots) != 0){
+    .args_update(dots)
+  }
   
   # ARGUMENTS
   args <- .args_list()
@@ -439,7 +441,9 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   dots <- list(...)
   
   # UPDATE ARGUMENTS
-  .args_update(dots)
+  if(length(dots) != 0){
+    .args_update(dots)
+  }
   
   # ARGUMENTS
   args <- .args_list()
@@ -626,7 +630,9 @@ cyto_plot_compensation.flowSet <- function(x,
   dots <- list(...)
   
   # UPDATE ARGUMENTS
-  .args_update(dots)
+  if(length(dots) != 0){
+    .args_update(dots)
+  }
   
   # PULL DOWN ARGUMENTS
   args <- .args_list()
