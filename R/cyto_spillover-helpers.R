@@ -128,14 +128,14 @@
   })
   
   # SAMPLE NAME COLUMN (AVOID INDEXING USING "NAME")
-  pd_name_index <- which(LAPPLY(colnames(pd), function(z){
+  pd_name <- colnames(pd)[which(LAPPLY(colnames(pd), function(z){
     all(cyto_names(x) %in% pd[, z])
-  }))
+  }))]
   
   # REMOVE EXCESS CONTROLS -----------------------------------------------------
   
   # MULTIPLE CONTROLS PER CHANNEL (BYPASS UNSTAINED)
-  if (length(unique(pd[, "channel"])) < length(pd[, pd_name_index])) {
+  if (length(unique(pd[, "channel"])) < length(pd[, pd_name])) {
     chans <- unique(pd[, "channel"])
     lapply(chans, function(z) {
       # RESTRICT CYTO_DETAILS
@@ -170,17 +170,17 @@
           # MAXIMUM SIGNAL
           max_MEDFI <- max(MEDFI[, ncol(MEDFI)])
           ind <- which(MEDFI[, ncol(MEDFI)] != max_MEDFI)
-          remove_names <- MEDFI[ind, pd_name_index, drop = TRUE]
+          remove_names <- MEDFI[ind, pd_name, drop = TRUE]
           # REMOVE MISSING FACTOR LEVELS
           if(is.factor(remove_names)){
             droplevels(remove_names)
           }
           # REMOVE SAMPLES - LOW SIGNAL
-          x <<- x[-match(remove_names, cyto_details(x)[, pd_name_index])]
+          x <<- x[-match(remove_names, cyto_details(x)[, pd_name])]
           # REMOVE MISSING FACTOR LEVELS
-          if(is.factor(cyto_details(x)[, pd_name_index])){
-            cyto_details(x)[, pd_name_index] <<- droplevels(
-              cyto_details(x)[, pd_name_index]
+          if(is.factor(cyto_details(x)[, pd_name])){
+            cyto_details(x)[, pd_name] <<- droplevels(
+              cyto_details(x)[, pd_name]
             )
           }
         }
@@ -190,6 +190,8 @@
   
   # RESTRICT CYTO_DETAILS
   pd <- cyto_details(x)
+  
+  print(pd)
   
   # SPILLOVER POPULATIONS ------------------------------------------------------
   
@@ -224,16 +226,18 @@
                              ignore.case = TRUE
     ))]
     POS <- lapply(seq_along(POS_gs), function(z) {
+      print(cyto_names(POS_gs[[z]]))
+      print(pd[, pd_name])
       cyto_extract(
         POS_gs[[z]],
-        pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, pd_name_index])],
+        pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, pd_name])],
         copy = TRUE
       )
     })
     names(POS) <- cyto_names(POS_gs)
     
     # RESTRICT CYTO_DETAILS
-    pd <- pd[pd[, pd_name_index] != cyto_names(NIL_data), ]
+    pd <- pd[pd[, pd_name] != cyto_names(NIL_data), ]
     
     # NAMES
     nms <- names(POS)
@@ -250,7 +254,7 @@
       fr <- POS[[z]]
       
       # Parent
-      parent <- pd[pd[, pd_name_index] == cyto_names(fr), "parent"]
+      parent <- pd[pd[, pd_name] == cyto_names(fr), "parent"]
       
       # Channel
       chan <- pd$channel[z]
@@ -294,7 +298,7 @@
     pops <- lapply(seq_along(x), function(z) {
       cyto_extract(
         x[[z]],
-        pd[, "parent"][match(cyto_names(x[[z]]), pd[, pd_name_index])],
+        pd[, "parent"][match(cyto_names(x[[z]]), pd[, pd_name])],
         copy = TRUE
       )
     })
