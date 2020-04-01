@@ -1,14 +1,20 @@
 # UBUNTU OS IMAGE
 FROM ubuntu:16.04
 
+# RSTUDIO 
+FROM rocker/rstudio:devel
+
 # INSTALL DEPENDENCIES
 RUN apt-get update && apt-get install --no-install-recommends -y\
     libprotobuf-dev \
     autoconf \
     automake \
     libtool \
-    libxml2 \
+    libxml2-dev \
     libhdf5-dev \
+    zlib1g-dev \
+    libpng-dev \
+    tcl \
     wget \
     unzip \
     make \
@@ -19,7 +25,9 @@ RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz && \
     tar -zxvf fftw-3.3.8.tar.gz && \
     rm -rf fftw-3.3.8.tar.gz && \
     cd fftw-3.3.8 && \
-    ./configure && make && make install
+    ./configure && \
+    make && \
+    make install
 
 # FIT-SNE - (path to fast_tsne -> FIt-SNE-master/fast_tsne.R)
 RUN cd /. && \
@@ -30,24 +38,14 @@ RUN cd /. && \
     g++ -std=c++11 -O3  src/sptree.cpp src/tsne.cpp src/nbodyfft.cpp  -o bin/fast_tsne -pthread -lfftw3 -lm -Wno-address-of-packed-member && \
     cd /.
 
-# R 
-FROM rocker/verse:devel
-
-# INSTALL REQUIRED PACKAGES
-RUN R -e "BiocManager::install(version = 'devel')" && \
+# INSTALL DEPENDENCIES
+RUN R -e "install.packages('remotes')" && \
+    R -e "install.packages('latticeExtra')" && \
+    R -e "install.packages('XML')" && \
+    R -e "install.packages('BiocManager')" && \
+    R -e "BiocManager::install(version = 'devel')" && \
     R -e "BiocManager::install('flowCore')" && \
     R -e "BiocManager::install('flowWorkspace')" && \
     R -e "BiocManager::install('openCyto')" && \
-    R -e "devtools::install_github('DillonHammill/CytoExploreRData')" && \
-    R -e "devtools::install_github('DillonHammill/CytoExploreR')"
-
-# INSTALL X11 DEPENDENCIES
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#    libx11-6 \
-#    libxss1 \apt 
-#    libxt6 \
-#    libxext6 \
-#    libsm6 \
-#    libice6 \
-#    xdg-utils \
-#  && rm -rf /var/lib/apt/lists/*
+    R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
+    R -e "remotes::install_github('DillonHammill/CytoExploreR')"
