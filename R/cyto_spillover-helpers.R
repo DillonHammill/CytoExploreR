@@ -191,8 +191,6 @@
   # RESTRICT CYTO_DETAILS
   pd <- cyto_details(x)
   
-  print(pd)
-  
   # SPILLOVER POPULATIONS ------------------------------------------------------
   
   # UNIVERSAL REFERENCE
@@ -226,8 +224,6 @@
                              ignore.case = TRUE
     ))]
     POS <- lapply(seq_along(POS_gs), function(z) {
-      print(cyto_names(POS_gs[[z]]))
-      print(pd[, pd_name])
       cyto_extract(
         POS_gs[[z]],
         pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, pd_name])],
