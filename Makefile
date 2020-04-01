@@ -1,2 +1,2 @@
-v1.0.5:
+latest:
 		docker build -t dhammill/cytoexplorer .
