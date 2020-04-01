@@ -2,7 +2,7 @@
 FROM ubuntu:16.04
 
 # INSTALL DEPENDENCIES
-RUN apt-get update && apt-get install -y\
+RUN apt-get update && apt-get install --no-install-recommends -y\
     libprotobuf-dev \
     autoconf \
     automake \
@@ -34,12 +34,12 @@ RUN cd /. && \
 FROM rocker/verse:devel
 
 # INSTALL REQUIRED PACKAGES
-RUN R -e "BiocManager::install(version = 'devel')" 
-RUN R -e "BiocManager::install('flowCore')" 
-RUN R -e "BiocManager::install('flowWorkspace')" 
-RUN R -e "BiocManager::install('openCyto')" 
-RUN R -e "devtools::install_github('DillonHammill/CytoExploreRData')" 
-RUN R -e "devtools::install_github('DillonHammill/CytoExploreR')"
+RUN R -e "BiocManager::install(version = 'devel')" && \
+    R -e "BiocManager::install('flowCore')" && \
+    R -e "BiocManager::install('flowWorkspace')" && \
+    R -e "BiocManager::install('openCyto')" && \
+    R -e "devtools::install_github('DillonHammill/CytoExploreRData')" && \
+    R -e "devtools::install_github('DillonHammill/CytoExploreR')"
 
 # INSTALL X11 DEPENDENCIES
 #RUN apt-get update && apt-get install -y --no-install-recommends \
