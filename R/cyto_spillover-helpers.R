@@ -132,9 +132,6 @@
     all(cyto_names(x) %in% pd[, z])
   }))]
   
-  print(pd)
-  print(pd_name)
-  
   # REMOVE EXCESS CONTROLS -----------------------------------------------------
   
   # MULTIPLE CONTROLS PER CHANNEL (BYPASS UNSTAINED)
@@ -227,8 +224,6 @@
                              ignore.case = TRUE
     ))]
     POS <- lapply(seq_along(POS_gs), function(z) {
-      print(cyto_names(POS_gs[[z]]))
-      print(pd[, pd_name])
       cyto_extract(
         POS_gs[[z]],
         pd[, "parent"][match(cyto_names(POS_gs[[z]]), pd[, pd_name])],
