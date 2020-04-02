@@ -44,7 +44,7 @@ RUN R -e "install.packages('remotes')" && \
     R -e "install.packages('XML')" && \
     R -e "install.packages('BiocManager')" && \
     R -e "BiocManager::install('flowCore')" && \
-    R -e "BiocManager::install('CytoML') && \
+    R -e "BiocManager::install('CytoML')" && \
     R -e "BiocManager::install('flowWorkspace')" && \
     R -e "BiocManager::install('openCyto')" && \
     R -e "remotes::install_github('RGLab/RProtoBufLib@ce730aaf6613694aaff06df19dbee8448d379a73')" && \
