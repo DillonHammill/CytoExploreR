@@ -52,7 +52,7 @@ RUN R -e "install.packages('remotes')" && \
     R -e "remotes::install_github('RGLab/flowCore@cd4446e9cf3c4e567829dc42773e323a18243b92')" && \
     R -e "remotes::install_github('RGLab/flowWorkspace@7a72eed6d90d67098be3676378c241a411267557')" && \
     R -e "remotes::install_github('RGLab/flowStats@f4e2acdd8a6bfab06d372529a6f79fd8ec6b3085')" && \
-    R -e "remotes::install_github('RGLab/openCyto@5f7cf813369cf619f218231394d651042954e643')" && \
+    R -e "remotes::install_github('RGLab/openCyto@c4afb3ad5109d27a382a06d7d3be3e463399c0f3')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreR')"
 
