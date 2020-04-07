@@ -17,23 +17,27 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -50,7 +54,6 @@ can be altered by passing relvant arguments through cyto_map. To see a
 full list of customisable parameters refer to the documentation for each of
 these functions by clicking on the links below." />
 <meta property="og:image" content="/logo.png" />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -68,7 +71,7 @@ these functions by clicking on the links below." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -82,7 +85,7 @@ these functions by clicking on the links below." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
       </span>
     </div>
 
@@ -127,7 +130,7 @@ these functions by clicking on the links below." />
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/DillonHammill/CytoExploreR">
+  <a href="https://github.com/DillonHammill/CytoExploreR/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -169,7 +172,7 @@ these functions by clicking on the links below.</p>
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
-  <span class='kw'>merge</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>merge_by</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
   <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -187,7 +190,7 @@ these functions by clicking on the links below.</p>
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
-  <span class='kw'>merge</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>merge_by</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
   <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -258,9 +261,10 @@ are mapped by default.</p></td>
 options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".</p></td>
     </tr>
     <tr>
-      <th>merge</th>
-      <td><p>logical indicating whether the samples should be merged prior to
-mapping to generate a consensus map, set to TRUE by default.</p></td>
+      <th>merge_by</th>
+      <td><p>vector of experimental variables to split and merge samples
+into groups prior to mapping, set to "all" by default to create a single
+consensus map.</p></td>
     </tr>
     <tr>
       <th>split</th>
@@ -310,6 +314,12 @@ results between runs.</p></td>
 
     <p>flowFrame, flowSet, GatingHierarchy or GatingSet containing the
   mapped projection parameters.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>If you use <code>cyto_map</code> to map your cytometry data, be sure to cite the
+publication that describes the dimensionality reduction algorithm that you
+have chosen to use. References to these publications can be found in the
+references section of this document.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Gabriel K. (1971). The biplot graphical display of matrices with
@@ -317,10 +327,11 @@ results between runs.</p></td>
   <a href='doi:10.1093/biomet/58.3.453'>doi:10.1093/biomet/58.3.453</a>.</p>
 <p>Maaten, L. van der, &amp; Hinton, G. (2008). Visualizing Data using
   t-SNE. Journal of Machine Learning Research 9, 2579–2605.
-  <a href='http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf'>http://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf</a>.</p>
+  <a href='http://www.jmlr.org/papers/volume9/vandermaaten08a/'>http://www.jmlr.org/papers/volume9/vandermaaten08a/</a>.</p>
 <p>Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
   Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
-  visualization of single-cell RNA-seq data. Nature Methods.</p>
+  visualization of single-cell RNA-seq data. Nature Methods.
+  <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/</a>.</p>
 <p>McInnes, L., &amp; Healy, J. (2018). UMAP: uniform manifold
   approximation and projection for dimension reduction. Preprint at
   <a href='https://arxiv.org/abs/1802.03426'>https://arxiv.org/abs/1802.03426</a>.</p>
@@ -338,17 +349,10 @@ results between runs.</p></td>
 <p><code><a href='https://rdrr.io/pkg/EmbedSOM/man/EmbedSOM.html'>EmbedSOM</a></code></p></div>
 
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#references">References</a></li>
-      <li><a href="#see-also">See also</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -359,7 +363,7 @@ results between runs.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>

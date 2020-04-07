@@ -4,15 +4,14 @@
 \alias{cyto_plot_complete}
 \title{Indicate Completion of Custom cyto_plot Layout for Saving}
 \usage{
-cyto_plot_complete(nrow = NULL, ncol = NULL, by = "row")
+cyto_plot_complete(layout = NULL)
 }
 \arguments{
-\item{nrow}{number of rows to include in the panel layout.}
-
-\item{ncol}{number of columns to include in the panel layout.}
-
-\item{by}{chracter string indicating whether the plot should be filled by
-\code{"row"} or \code{"column"}, set to \code{"row"} by default.}
+\item{layout}{either a vector of the form c(nrow, ncol) defining the
+dimensions of the plot or a matrix defining a more sophisticated layout
+(see \code{\link[graphics]{layout}}). Vectors can optionally contain a
+third element to indicate whether plots should be placed in row (1) or
+column (2) order, set to row order by default.}
 }
 \description{
 Indicate Completion of Custom cyto_plot Layout for Saving
@@ -42,7 +41,7 @@ cyto_plot_save("Custom.png",
 )
 
 # Set out plot layout
-cyto_plot_layout(1, 2)
+cyto_plot_layout(c(1,2))
 
 # Add 2D plot
 cyto_plot(gs[[4]],

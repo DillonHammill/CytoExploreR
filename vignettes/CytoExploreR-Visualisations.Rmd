@@ -885,8 +885,8 @@ knitr::include_graphics('Visualisations/Visualisations-19.png')
 # Call cyto_plot_save
 cyto_plot_save("Plot2.png")
 
-# Tell CytoExploreR we are going rogue and set custom layout
-cyto_plot_custom(2,2)
+# Create custom layout
+cyto_plot_custom(layout = c(2,2))
 
 # cyto_plot calls
 cyto_plot(gs[[32]],
@@ -926,7 +926,7 @@ cyto_plot(gs[29:32],
           label_text = NA) # remove text in labels
 
 # Tell CytoExploreR plot is complete for saving & turn off custom plotting
-cyto_plot_complete(1,1)
+cyto_plot_complete()
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '98%'}

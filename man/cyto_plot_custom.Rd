@@ -4,15 +4,14 @@
 \alias{cyto_plot_custom}
 \title{Create custom cyto_plot}
 \usage{
-cyto_plot_custom(nrow = NULL, ncol = NULL, by = "row")
+cyto_plot_custom(layout = NULL)
 }
 \arguments{
-\item{nrow}{number of rows to include in the panel layout.}
-
-\item{ncol}{number of columns to include in the panel layout.}
-
-\item{by}{chracter string indicating whether the plot should be filled by
-\code{"row"} or \code{"column"}, set to \code{"row"} by default.}
+\item{layout}{either a vector of the form c(nrow, ncol) defining the
+dimensions of the plot or a matrix defining a more sophisticated layout
+(see \code{\link[graphics]{layout}}). Vectors can optionally contain a
+third element to indicate whether plots should be placed in row (1) or
+column (2) order, set to row order by default.}
 }
 \description{
 Signal to \code{cyto_plot} that a custom plot is being created to ensure that
@@ -29,16 +28,13 @@ library(CytoExploreRData)
 # Activation flowSet
 fs <- Activation
 
-# Signal custom plot
-cyto_plot_custom()
-
 # Save plot
 cyto_plot_save("Test.png",
                height = 7,
                width = 14)
 
 # Create custom plot - 1D & 2D plot panels
-cyto_plot_layout(1,2)
+cyto_plot_custom(layout = c(1,2))
 cyto_plot(fs[[32]],
           channels = "FSC-A")
 cyto_plot(fs[[32]],

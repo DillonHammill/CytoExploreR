@@ -17,23 +17,27 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -48,7 +52,6 @@ implementation to expose argument names and defaults within CytoExploreR.
 This function should not be used directly, data should instead be mapped
 using cyto_map." />
 <meta property="og:image" content="/logo.png" />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -66,7 +69,7 @@ using cyto_map." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -80,7 +83,7 @@ using cyto_map." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
       </span>
     </div>
 
@@ -125,7 +128,7 @@ using cyto_map." />
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/DillonHammill/CytoExploreR">
+  <a href="https://github.com/DillonHammill/CytoExploreR/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -181,8 +184,6 @@ using <code><a href='cyto_map.html'>cyto_map</a></code>.</p>
   <span class='kw'>K</span> <span class='kw'>=</span> -<span class='fl'>1</span>,
   <span class='kw'>sigma</span> <span class='kw'>=</span> -<span class='fl'>30</span>,
   <span class='kw'>initialization</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>data_path</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>result_path</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>load_affinities</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>fast_tsne_path</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>nthreads</span> <span class='kw'>=</span> <span class='fl'>0</span>,
@@ -196,31 +197,31 @@ using <code><a href='cyto_map.html'>cyto_map</a></code>.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>X</th>
-      <td><p>a matrix contain ing the data to be mapped.</p></td>
+      <td><p>a matrix containing the data to be mapped.</p></td>
     </tr>
     <tr>
       <th>dims</th>
-      <td><p>dimensionality of the embedding. Default 2.</p></td>
+      <td><p>dimensionality of the embedding, set to 2 by default.</p></td>
     </tr>
     <tr>
       <th>perplexity</th>
-      <td><p>perplexity is used to determine the bandwidth of the
-Gaussian kernel in the input space.  Default 30.</p></td>
+      <td><p>used to determine the bandwidth of the Gaussian kernel in
+the input space, set to 30 by default.</p></td>
     </tr>
     <tr>
       <th>theta</th>
-      <td><p>set to 0 for exact.  If non-zero, then will use either Barnes
-Hut or FIt-SNE based on nbody_algo.  If Barnes Hut, then this determins the
-accuracy of BH approximation. Default 0.5.</p></td>
+      <td><p>set to 0 for exact t-SNE. If non-zero, then will use either
+Barnes Hut or FIt-SNE based on nbody_algo. If Barnes Hut, then this
+determins the accuracy of BH approximation. Set to 0.5 by default.</p></td>
     </tr>
     <tr>
       <th>max_iter</th>
-      <td><p>number of iterations of t-SNE to run. Default 1000.</p></td>
+      <td><p>number of iterations of t-SNE to run, set to 1000 by default.</p></td>
     </tr>
     <tr>
       <th>fft_not_bh</th>
       <td><p>if theta is nonzero, this determins whether to use FIt-SNE
-or Barnes Hut approximation. Default is FIt-SNE. set to be True for FIt-SNE</p></td>
+or Barnes Hut approximation, set to TRUE by default for FIt-SNE.</p></td>
     </tr>
     <tr>
       <th>ann_not_vptree</th>
@@ -229,66 +230,72 @@ neighbors (default). Set to be TRUE for approximate nearest neighbors.</p></td>
     </tr>
     <tr>
       <th>stop_early_exag_iter</th>
-      <td><p>when to switch off early exaggeration. Default
-250.</p></td>
+      <td><p>when to switch off early exaggeration, set to 250
+by default.</p></td>
     </tr>
     <tr>
       <th>exaggeration_factor</th>
-      <td><p>coefficient for early exaggeration (&gt;1). Default
-12.</p></td>
+      <td><p>coefficient for early exaggeration (&gt;1), set to 12
+by default.</p></td>
     </tr>
     <tr>
       <th>no_momentum_during_exag</th>
       <td><p>set to 0 to use momentum and other
-optimization tricks. 1 to do plain,vanilla gradient descent (useful for
-testing large exaggeration coefficients)</p></td>
+optimization tricks. Can be set to 1 to do plain, vanilla gradient descent
+(useful for testing large exaggeration coefficients).</p></td>
     </tr>
     <tr>
       <th>start_late_exag_iter</th>
-      <td><p>when to start late exaggeration. set to -1 to not
-use late exaggeration. Default -1.</p></td>
+      <td><p>when to start late exaggeration, set to -1 by
+default to not use late exaggeration.</p></td>
     </tr>
     <tr>
       <th>late_exag_coeff</th>
-      <td><p>late exaggeration coefficient. Set to -1 to not use
-late exaggeration. Default -1.</p></td>
+      <td><p>late exaggeration coefficient, set to -1 by default to
+not use late exaggeration.</p></td>
     </tr>
     <tr>
       <th>mom_switch_iter</th>
-      <td><p>unknown.</p></td>
+      <td><p>iteration number to switch from momentum to
+final_momentum, set to 250 by default.</p></td>
     </tr>
     <tr>
       <th>momentum</th>
-      <td><p>unknown.</p></td>
+      <td><p>initial value of momentum, set to 0.5 by default.</p></td>
     </tr>
     <tr>
       <th>final_momentum</th>
-      <td><p>unkown.</p></td>
+      <td><p>value of momentum to use later in the optimisation, set
+to 0.8 by default.</p></td>
     </tr>
     <tr>
       <th>learning_rate</th>
-      <td><p>unknown.</p></td>
+      <td><p>set to 200 by default.</p></td>
     </tr>
     <tr>
       <th>n_trees</th>
-      <td><p>unknown.</p></td>
+      <td><p>when using Annoy, the number of search trees to use, set to 50
+by default.</p></td>
     </tr>
     <tr>
       <th>search_k</th>
-      <td><p>unknown.</p></td>
+      <td><p>When using Annoy, the number of nodes to inspect during
+search. Default is 3*perplexity*n_trees (or K*n_trees when using fixed
+sigma).</p></td>
     </tr>
     <tr>
       <th>rand_seed</th>
-      <td><p>unknown.</p></td>
+      <td><p>seed for random initialisation, set to -1 by default to
+initialise random number generator with current time.</p></td>
     </tr>
     <tr>
       <th>nterms</th>
-      <td><p>- If using FIt-SNE, this is the number of interpolation points
+      <td><p>if using FIt-SNE, this is the number of interpolation points
 per sub-interval.</p></td>
     </tr>
     <tr>
       <th>intervals_per_integer</th>
-      <td><p>see min_num_intervals</p></td>
+      <td><p>see min_num_intervals.</p></td>
     </tr>
     <tr>
       <th>min_num_intervals</th>
@@ -302,39 +309,32 @@ min_num_intervals=50 and intervals_per_integer = 1.</p></td>
     </tr>
     <tr>
       <th>K</th>
-      <td><p>number of nearest neighbours to get when using fixed sigma. Default
--30 (None).</p></td>
+      <td><p>number of nearest neighbours to get when using fixed sigma, set to
+-30 by default.</p></td>
     </tr>
     <tr>
       <th>sigma</th>
-      <td><p>fixed sigma value to use when perplexity==-1. Default -1 (None).</p></td>
+      <td><p>fixed sigma value to use when perplexity==-1, set to -1 by
+default.</p></td>
     </tr>
     <tr>
       <th>initialization</th>
-      <td><p>N x no_dims array to intialize the solution. Default:
-None.</p></td>
-    </tr>
-    <tr>
-      <th>data_path</th>
-      <td><p>unknown</p></td>
-    </tr>
-    <tr>
-      <th>result_path</th>
-      <td><p>unknown</p></td>
+      <td><p>N x no_dims array to intialize the solution.</p></td>
     </tr>
     <tr>
       <th>load_affinities</th>
-      <td><p>- If 1, input similarities are loaded from a file and
-not computed If 2, input similarities are saved into a file. If 0,
+      <td><p>if 1, input similarities are loaded from a file and
+not computed. If 2, input similarities are saved into a file. If 0,
 affinities are neither saved nor loaded.</p></td>
     </tr>
     <tr>
       <th>fast_tsne_path</th>
-      <td><p>unknown</p></td>
+      <td><p>path to FItSNE executable.</p></td>
     </tr>
     <tr>
       <th>nthreads</th>
-      <td><p>unknown</p></td>
+      <td><p>number of threads to use, set to use all available threads by
+default.</p></td>
     </tr>
     <tr>
       <th>perplexity_list</th>
@@ -346,26 +346,35 @@ embedding. See Kobak et al. (2019) for details. Default is 1.0.</p></td>
     </tr>
     <tr>
       <th>get_costs</th>
-      <td><p>unknown</p></td>
+      <td><p>logical indicating whether the KL-divergence costs computed
+every 50 iterations should be returned, set to FALSE by default.</p></td>
     </tr>
     <tr>
       <th>df</th>
-      <td><p>unknown</p></td>
+      <td><p>positive numeric that controls the degree of freedom of
+t-distribution. The actual degree of freedom is 2*df-1. The standard t-SNE
+choice of 1 degree of freedom corresponds to df=1. Large df approximates
+Gaussian kernel. df&lt;1 corresponds to heavier tails, which can often resolve
+substructure in the embedding. See Kobak et al. (2019) for details. Default
+is 1.0.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Linderman, G., Rachh, M., Hoskins, J., Steinerberger, S.,
+  Kluger., Y. (2019). Fast interpolation-based t-SNE for improved
+  visualization of single-cell RNA-seq data. Nature Methods.
+  <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6402590/</a>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='cyto_map.html'>cyto_map</a></code></p></div>
 
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#see-also">See also</a></li>
-    </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -376,7 +385,7 @@ embedding. See Kobak et al. (2019) for details. Default is 1.0.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>

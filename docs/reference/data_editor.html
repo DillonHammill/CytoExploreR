@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Transform gates objects — cyto_gate_transform • CytoExploreR</title>
+<title>Interactive data editor — data_editor • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,8 +46,8 @@
 
 
 
-<meta property="og:title" content="Transform gates objects — cyto_gate_transform" />
-<meta property="og:description" content="Transform gates objects" />
+<meta property="og:title" content="Interactive data editor — data_editor" />
+<meta property="og:description" content="Interactive data editor" />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -143,59 +143,67 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Transform gates objects</h1>
-    <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_gate-helpers.R'><code>R/cyto_gate-helpers.R</code></a></small>
-    <div class="hidden name"><code>cyto_gate_transform.Rd</code></div>
+    <h1>Interactive data editor</h1>
+    <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/data_editor.R'><code>R/data_editor.R</code></a></small>
+    <div class="hidden name"><code>data_editor.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Transform gates objects</p>
+    <p>Interactive data editor</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for rectangleGate</span>
-<span class='fu'>cyto_gate_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for polygonGate</span>
-<span class='fu'>cyto_gate_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for ellipsoidGate</span>
-<span class='fu'>cyto_gate_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for quadGate</span>
-<span class='fu'>cyto_gate_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for filters</span>
-<span class='fu'>cyto_gate_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for list</span>
-<span class='fu'>cyto_gate_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>data_editor</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>title</span> <span class='kw'>=</span> <span class='st'>"Data Editor"</span>,
+  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"editor"</span>,
+  <span class='kw'>options</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>viewer</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>logo</span> <span class='kw'>=</span> <span class='st'>"CytoExploreR"</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class rectangleGate, polygonGate, ellipsoidGate, quadGate,
-filters or a list of these gate objects.</p></td>
+      <td><p>object of class matrix or data.frame with colnames specified.</p></td>
     </tr>
     <tr>
-      <th>trans</th>
-      <td><p>list of transformers to apply to the gate co-ordinates.</p></td>
+      <th>title</th>
+      <td><p>title to include in above the table.</p></td>
     </tr>
     <tr>
-      <th>inverse</th>
-      <td><p>logical indicating whether the inverse transformations should
-be applied, set to FALSE by default.</p></td>
+      <th>type</th>
+      <td><p>can be either "editor", "menu" or "selector", set to "editor" by
+default. The editor option allows complete editing of the data_matrix with
+text input. The menu option converts the entries in the last column to
+checkboxes for logical inputs. The selector option converts entries in the
+last column to dropdown menus that contain choices supplied to the
+<code>options</code> argument.</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>not in use.</p></td>
+      <th>options</th>
+      <td><p>vector of options to use in dropdown menus in the last column.</p></td>
+    </tr>
+    <tr>
+      <th>save_as</th>
+      <td><p>name of a csv file to which the edited table should be saved.</p></td>
+    </tr>
+    <tr>
+      <th>viewer</th>
+      <td><p>logical indicating whether the table editor should be launched
+in the RStudio viewer pane, set to TRUE by default. Make sure to use the
+"Save &amp; Close" to close the data editor or else the changes will not be
+saved.</p></td>
+    </tr>
+    <tr>
+      <th>logo</th>
+      <td><p>path to image to include a logo in data editor title panel, set
+to CytoExploreR by default.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>transformed gate object.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -870,6 +870,10 @@ cyto_plot_record <- function(){
 #' @param res resolution in ppi, set to 300 by default.
 #' @param multiple logical indicating whether multiple pages should be saved to
 #'   separate numbered files, set to \code{TRUE} by default.
+#' @param layout a vector or matrix defining the custom layout of the plot to be
+#'   created using `cyto_plot_layout`, set to NULL by default to use standard
+#'   `cyto_plot` layout. Custom layouts are required when making multiple
+#'   `cyto_plot` calls in the same image.
 #' @param ... additional arguments for the appropriate \code{png()},
 #'   \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.
 #'
@@ -925,6 +929,7 @@ cyto_plot_save <- function(save_as,
                            units = "in",
                            res = 300,
                            multiple = FALSE,
+                           layout = NULL,
                            ...) {
 
   # File missing extension
@@ -994,6 +999,12 @@ cyto_plot_save <- function(save_as,
 
   # Set global option to notify cyto_plot when dev.off() is required for saving
   options("cyto_plot_save" = TRUE)
+  
+  # CYTO_PLOT_CUSTOM
+  if(!is.null(layout)){
+    cyto_plot_custom(layout = layout)
+  }
+  
 }
 
 ## CYTO_PLOT_SAVE_RESET --------------------------------------------------------
@@ -1028,10 +1039,13 @@ cyto_plot_save_reset <- function() {
 #' different types of cyto_plot plots. Make a call to \code{cyto_plot_layout()}
 #' prior to making multiple calls to \code{cyto_plot()}.
 #'
-#' @param nrow number of rows to include in the panel layout.
-#' @param ncol number of columns to include in the panel layout.
-#' @param by chracter string indicating whether the plot should be filled by
-#'   \code{"row"} or \code{"column"}, set to \code{"row"} by default.
+#' @param layout either a vector of the form c(nrow, ncol) defining the
+#'   dimensions of the plot or a matrix defining a more sophisticated layout
+#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
+#'   third element to indicate whether plots should be placed in row (1) or
+#'   column (2) order, set to row order by default.
+#'
+#' @importFrom graphics par layout
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1054,7 +1068,7 @@ cyto_plot_save_reset <- function() {
 #' gt_gating(gt, gs)
 #'
 #' # Set out plot layout
-#' cyto_plot_layout(1, 2)
+#' cyto_plot_layout(c(1,2))
 #'
 #' # Add 2D plot
 #' cyto_plot(gs[[4]],
@@ -1073,18 +1087,31 @@ cyto_plot_save_reset <- function() {
 #'   layout = FALSE
 #' )
 #' @export
-cyto_plot_layout <- function(nrow,
-                             ncol,
-                             by = "row") {
+cyto_plot_layout <- function(layout = NULL) {
 
-  # Use mfrow
-  if (by %in% c("r", "row")) {
-    par(mfrow = c(nrow, ncol))
-
-    # Use mfcol
-  } else if (by %in% c("c", "col", "column")) {
-    par(mfcol = c(nrow, ncol))
+  # MESSAGE
+  if(is.null(layout)){
+    stop("Supply either a vector or matrix to construct a custom layout.")
   }
+  
+  # MATRIX
+  if(is.matrix(layout)){
+    layout(layout)
+  # VECTOR  
+  }else{
+    # ROW ORDER
+    if(length(layout) == 2){
+      layout <- c(layout, 1)
+    }
+    # ROWS
+    if (layout[3] == 1) {
+      par(mfrow = c(layout[1], layout[2]))
+    # COLUMNS
+    } else if (layout[3] == 2) {
+      par(mfcol = c(layout[1], layout[2]))
+    }
+  }
+
 }
 
 ## CYTO_PLOT_CUSTOM ------------------------------------------------------------
@@ -1098,10 +1125,11 @@ cyto_plot_layout <- function(nrow,
 #' \code{cyto_plot_complete} to indicate when the plot is complete and should be
 #' saved.
 #'
-#' @param nrow number of rows to include in the panel layout.
-#' @param ncol number of columns to include in the panel layout.
-#' @param by chracter string indicating whether the plot should be filled by
-#'   \code{"row"} or \code{"column"}, set to \code{"row"} by default.
+#' @param layout either a vector of the form c(nrow, ncol) defining the
+#'   dimensions of the plot or a matrix defining a more sophisticated layout
+#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
+#'   third element to indicate whether plots should be placed in row (1) or
+#'   column (2) order, set to row order by default.
 #'   
 #' @importFrom graphics par
 #'   
@@ -1113,17 +1141,14 @@ cyto_plot_layout <- function(nrow,
 #'
 #' # Activation flowSet
 #' fs <- Activation
-#'
-#' # Signal custom plot
-#' cyto_plot_custom()
-#'
+#' 
 #' # Save plot
 #' cyto_plot_save("Test.png",
 #'                height = 7,
 #'                width = 14)
 #'
 #' # Create custom plot - 1D & 2D plot panels
-#' cyto_plot_layout(1,2)
+#' cyto_plot_custom(layout = c(1,2))
 #' cyto_plot(fs[[32]],
 #'           channels = "FSC-A")
 #' cyto_plot(fs[[32]],
@@ -1133,9 +1158,7 @@ cyto_plot_layout <- function(nrow,
 #' cyto_plot_complete()
 #' }
 #' @export
-cyto_plot_custom <- function(nrow = NULL,
-                             ncol = NULL,
-                             by = "row"){
+cyto_plot_custom <- function(layout = NULL){
   
   # Tell CytoExploreR - cyto_plot_save and layout resets
   options("cyto_plot_custom" = TRUE)
@@ -1144,13 +1167,7 @@ cyto_plot_custom <- function(nrow = NULL,
   options("cyto_plot_method" = "custom")
   
   # Set layout
-  if(!is.null(nrow) & !is.null(ncol)){
-    if (by %in% c("r", "row")) {
-      par(mfrow = c(nrow, ncol))
-    } else if (by %in% c("c", "col", "column")) {
-      par(mfcol = c(nrow, ncol))
-    }
-  }
+  cyto_plot_layout(layout)
   
 }
 
@@ -1158,10 +1175,11 @@ cyto_plot_custom <- function(nrow = NULL,
 
 #' Indicate Completion of Custom cyto_plot Layout for Saving
 #'
-#' @param nrow number of rows to include in the panel layout.
-#' @param ncol number of columns to include in the panel layout.
-#' @param by chracter string indicating whether the plot should be filled by
-#'   \code{"row"} or \code{"column"}, set to \code{"row"} by default.
+#' @param layout either a vector of the form c(nrow, ncol) defining the
+#'   dimensions of the plot or a matrix defining a more sophisticated layout
+#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
+#'   third element to indicate whether plots should be placed in row (1) or
+#'   column (2) order, set to row order by default.
 #'
 #' @importFrom graphics par
 #'
@@ -1192,7 +1210,7 @@ cyto_plot_custom <- function(nrow = NULL,
 #' )
 #'
 #' # Set out plot layout
-#' cyto_plot_layout(1, 2)
+#' cyto_plot_layout(c(1,2))
 #'
 #' # Add 2D plot
 #' cyto_plot(gs[[4]],
@@ -1214,12 +1232,12 @@ cyto_plot_custom <- function(nrow = NULL,
 #' # Signal that the plot is complete
 #' cyto_plot_complete()
 #' @export
-cyto_plot_complete <- function(nrow = NULL,
-                               ncol = NULL,
-                               by = "row") {
+cyto_plot_complete <- function(layout = NULL) {
 
-  # Close graphics device
-  dev.off()
+  # Close graphics device (not RStudioGD or X11)
+  if(!names(dev.cur()) %in% c("RStudioGD", "windows", "X11", "x11", "quartz")){
+    dev.off()
+  }
 
   # Reset cyto_plot_custom
   options("cyto_plot_custom" = FALSE)
@@ -1227,12 +1245,30 @@ cyto_plot_complete <- function(nrow = NULL,
   # Reset plot method
   options("cyto_plot_method" = NULL)
   
-  # Reset layout
-  if(!is.null(nrow) & !is.null(ncol)){
-    if (by %in% c("r", "row")) {
-      par(mfrow = c(nrow, ncol))
-    } else if (by %in% c("c", "col", "column")) {
-      par(mfcol = c(nrow, ncol))
+  # Turn off saving
+  options("cyto_plot_save" = FALSE)
+  
+  # Reset layout - 1 x 1
+  if(is.null(layout)){
+    par("mfrow" = c(1,1))
+    par("mfcol" = c(1,1))
+  # Reset layout as supplied
+  }else{
+    # MATRIX
+    if(is.matrix(layout)){
+      layout(layout)
+    # VECTOR
+    }else{
+      if(length(layout) == 2){
+        layout <- c(layout, 1)
+      }
+    }
+    # ROWS
+    if (layout[3] == 1) {
+      par(mfrow = c(layout[1], layout[2]))
+    # COLUMNS
+    } else if (layout[3] == 2) {
+      par(mfcol = c(layout[1], layout[2]))
     }
   }
   

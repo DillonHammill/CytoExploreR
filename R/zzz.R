@@ -55,7 +55,7 @@
   
 }
 
-# Docker Message
-.onAttach <- function(libname, pkgname){
-  packageStartupMessage("CytoExploreR Docker v1.0.5")
-}
+# # Docker Message
+# .onAttach <- function(libname, pkgname){
+#   packageStartupMessage("CytoExploreR Docker v1.0.5")
+# }
