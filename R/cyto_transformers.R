@@ -240,8 +240,8 @@ cyto_transformer_log.flowFrame <- function(x,
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
+     c(n2mfrow(n)[1],
+      n2mfrow(n)[2])
     )
     
     # PLOT PER CHANNEL
@@ -505,8 +505,8 @@ cyto_transformer_arcsinh.flowFrame <- function(x,
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
+      c(n2mfrow(n)[1],
+      n2mfrow(n)[2])
     )
     
     # PLOT PER CHANNEL
@@ -767,8 +767,8 @@ cyto_transformer_biex.flowFrame <- function(x,
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
+      c(n2mfrow(n)[1],
+      n2mfrow(n)[2])
     )
 
     # PLOT PER CHANNEL
@@ -1029,8 +1029,8 @@ cyto_transformer_logicle.flowFrame <- function(x,
     cyto_plot_new(popup = popup)
     n <- length(channels)
     cyto_plot_layout(
-      n2mfrow(n)[1],
-      n2mfrow(n)[2]
+      c(n2mfrow(n)[1],
+      n2mfrow(n)[2])
     )
 
     # PLOT PER CHANNEL
