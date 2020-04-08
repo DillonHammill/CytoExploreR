@@ -93,10 +93,10 @@ cyto_load <- function(path = ".",
     x <- load_gs(path = path)
     # FCS FILES
   } else {
-    # NCDFFLOWSET
+    # CYTOSET
     x <- load_cytoset_from_fcs(files = files, ...)
-
-    # CORRECT GUID SLOTS
+    
+    # CORRECT GUID SLOTS - NECESSARY?
     nms <- cyto_names(x)
     lapply(seq_len(length(nms)), function(z) {
       suppressMessages(identifier(x[[z]]) <<- nms[z])

@@ -38,7 +38,7 @@ install:
   - R -e 'devtools::install_github("RGLab/RProtoBufLib")'
   - R -e 'devtools::install_github("RGLab/cytolib")'
   - R -e 'devtools::install_github("RGLab/flowCore")'
-  - R -e 'devtools::install_github("RGLab/flowWorkspaceData", ref="trunk")'
+  - R -e 'devtools::install_github("RGLab/flowWorkspaceData")'
   - R -e 'devtools::install_github("RGLab/flowWorkspace")'
   - R -e 'devtools::install_github("RGLab/flowStats")'
   - R -e 'devtools::install_github("RGLab/openCyto")'
