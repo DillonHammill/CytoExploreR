@@ -788,8 +788,8 @@ cyto_transform.default <- function(x,
         cyto_plot_new(popup = popup)
         n <- length(channels)
         cyto_plot_layout(
-          n2mfrow(n)[1],
-          n2mfrow(n)[2]
+          c(n2mfrow(n)[1],
+          n2mfrow(n)[2])
         )
 
         # Generate plot for each channel
@@ -868,8 +868,8 @@ cyto_transform.transformList <- function(x,
         cyto_plot_new(popup = popup)
         n <- length(channels)
         cyto_plot_layout(
-          n2mfrow(n)[1],
-          n2mfrow(n)[2]
+          c(n2mfrow(n)[1],
+          n2mfrow(n)[2])
         )
 
         # Generate plot for each channel - axes will not be transformed correctly
@@ -949,8 +949,8 @@ cyto_transform.transformerList <- function(x,
         cyto_plot_new(popup = popup)
         n <- length(channels)
         cyto_plot_layout(
-          n2mfrow(n)[1],
-          n2mfrow(n)[2]
+          c(n2mfrow(n)[1],
+          n2mfrow(n)[2])
         )
 
         # Generate plot for each channel
