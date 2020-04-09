@@ -36,6 +36,9 @@
 #'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
+#' @param margins a vector of length 4 to control the margins around the bottom,
+#'   left, top and right of the plot, set to NULL by default to let `cyto_plot`
+#'   compute optimal margins.
 #' @param density_modal logical indicating whether density should be normalised
 #'   to mode and presented as a percentage. Set to \code{TRUE} by default.
 #' @param density_smooth smoothing parameter passed to
@@ -157,6 +160,7 @@ cyto_plot_empty.flowFrame <- function(x,
                                       title,
                                       xlab,
                                       ylab,
+                                      margins = NULL,
                                       density_modal = TRUE,
                                       density_smooth = 1.5,
                                       density_stack = 0.5,
@@ -408,7 +412,8 @@ cyto_plot_empty.flowFrame <- function(x,
     legend_text = legend_text,
     legend_text_size = legend_text_size,
     title = title,
-    axes_text = axes_text
+    axes_text = axes_text,
+    margins = margins
   )
 
   # PLOT CONSTRUCTION ----------------------------------------------------------
@@ -651,6 +656,7 @@ cyto_plot_empty.list <- function(x,
                                  title,
                                  xlab,
                                  ylab,
+                                 margins = NULL,
                                  density_modal = TRUE,
                                  density_smooth = 1.5,
                                  density_stack = 0.5,
@@ -1235,7 +1241,11 @@ cyto_plot_custom <- function(layout = NULL){
 cyto_plot_complete <- function(layout = NULL) {
 
   # Close graphics device (not RStudioGD or X11)
-  if(!names(dev.cur()) %in% c("RStudioGD", "windows", "X11", "x11", "quartz")){
+  if(!names(dev.cur()) %in% c("RStudioGD", 
+                              "windows", 
+                              "X11", 
+                              "x11", 
+                              "quartz")){
     dev.off()
   }
 
@@ -1365,6 +1375,7 @@ cyto_plot_theme_args <- function() {
   c(
     "axes_limits",
     "axes_limits_buffer",
+    "margins",
     "popup",
     "density_modal",
     "density_smooth",

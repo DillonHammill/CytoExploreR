@@ -19,6 +19,7 @@
   gate = NA,
   display = 25000,
   layout,
+  margins = NULL,
   popup = FALSE,
   xlim = NA,
   ylim = NA,
@@ -103,6 +104,7 @@
   gate = NA,
   axes_limits = "auto",
   display = 25000,
+  margins = NULL,
   popup = FALSE,
   xlim = NA,
   ylim = NA,
@@ -185,6 +187,7 @@
   axes_limits = "auto",
   display = 25000,
   layout,
+  margins = NULL,
   popup = FALSE,
   xlim = NA,
   ylim = NA,
@@ -266,6 +269,7 @@
   gate = NA,
   axes_limits = "auto",
   display = 25000,
+  margins = NULL,
   popup = FALSE,
   xlim = NA,
   ylim = NA,
@@ -389,6 +393,10 @@ set to 25000 to display 25000 events only.}
 
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}
+
+\item{margins}{a vector of length 4 to control the margins around the bottom,
+left, top and right of the plot, set to NULL by default to let `cyto_plot`
+compute optimal margins.}
 
 \item{popup}{logical indicating whether the plot should be constructed in a
 pop-up window, set to FALSE by default. \code{popup} will open OS-specific

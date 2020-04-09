@@ -45,6 +45,9 @@
 #'   set to 25000 to display 25000 events only.
 #' @param layout a vector of the length 2 indicating the dimensions of the grid
 #'   for plotting \code{c(#rows, #columns)}.
+#' @param margins a vector of length 4 to control the margins around the bottom,
+#'   left, top and right of the plot, set to NULL by default to let `cyto_plot`
+#'   compute optimal margins.
 #' @param popup logical indicating whether the plot should be constructed in a
 #'   pop-up window, set to FALSE by default. \code{popup} will open OS-specific
 #'   graphic device prior to plotting. Mac users will need to install
@@ -283,6 +286,7 @@ cyto_plot.GatingSet <- function(x,
                                 gate = NA,
                                 display = 25000,
                                 layout,
+                                margins = NULL,
                                 popup = FALSE,
                                 xlim = NA,
                                 ylim = NA,
@@ -626,7 +630,7 @@ cyto_plot.GatingSet <- function(x,
                             error = function(e){NA}) 
       # OVERLAY CHILDREN  
       }else if(any(grepl("children", overlay))){
-        overlay <- tryCatch(gs_pop_get_children(gs, 
+        overlay <- tryCatch(gh_pop_get_children(gs[[1]], 
                                                 parent,
                                                 path = "auto"),
                             error = function(e){NA})
@@ -741,6 +745,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       gate = NA,
                                       axes_limits = "auto",
                                       display = 25000,
+                                      margins = NULL,
                                       popup = FALSE,
                                       xlim = NA,
                                       ylim = NA,
@@ -1143,6 +1148,7 @@ cyto_plot.flowSet <- function(x,
                               axes_limits = "auto",
                               display = 25000,
                               layout,
+                              margins = NULL,
                               popup = FALSE,
                               xlim = NA,
                               ylim = NA,
@@ -1701,6 +1707,7 @@ cyto_plot.flowSet <- function(x,
         axes_trans = axes_trans, #
         axes_limits = axes_limits, #
         display = display,
+        margins = margins, #
         popup = FALSE, #
         xlim = xlim, #
         ylim = ylim, #
@@ -1893,6 +1900,7 @@ cyto_plot.flowFrame <- function(x,
                                 gate = NA,
                                 axes_limits = "auto",
                                 display = 25000,
+                                margins = NULL,
                                 popup = FALSE,
                                 xlim = NA,
                                 ylim = NA,

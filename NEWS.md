@@ -1,3 +1,10 @@
+# CytoExploreR 1.0.6
+
+* Update custom plotting functions (`cyto_plot_save`, `cyto_plot_layout`, `cyto_plot_custom` and `cyto_plot_complete`) to allow complex layouts. Layouts must now be supplied to these functions either as a vector or matrix.
+* `cyto_plot_complete` no longer closes the RStudio or X11 graphics devices.
+* Add new `margins` argument to `cyto_plot` to allow customization of plot margins.
+* Fix `overlay = "children"` when plotting GatingSet objects with `cyto_plot`.
+
 # CytoExploreR 1.0.5
 
 * Add ability to control plotting order in `cyto_plot` when using the `group_by` argument.

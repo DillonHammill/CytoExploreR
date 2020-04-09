@@ -20,6 +20,7 @@ cyto_plot_empty(x, ...)
   title,
   xlab,
   ylab,
+  margins = NULL,
   density_modal = TRUE,
   density_smooth = 1.5,
   density_stack = 0.5,
@@ -107,6 +108,10 @@ default. Title can be removed by setting this argument to \code{NA}.}
 \item{xlab}{x axis label.}
 
 \item{ylab}{y axis label.}
+
+\item{margins}{a vector of length 4 to control the margins around the bottom,
+left, top and right of the plot, set to NULL by default to let `cyto_plot`
+compute optimal margins.}
 
 \item{density_modal}{logical indicating whether density should be normalised
 to mode and presented as a percentage. Set to \code{TRUE} by default.}

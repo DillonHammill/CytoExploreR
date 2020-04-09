@@ -12,15 +12,15 @@
 #' @param axes_limits either "auto", "data" or "machine".
 #'
 #' @return list containing axis labels and breaks.
-#' 
+#'
 #' @importFrom methods is
 #'
 #' @noRd
 .cyto_plot_axes_text <- function(x,
-                                           channels,
-                                           axes_trans = NA,
-                                           axes_range = list(NA,NA),
-                                           axes_limits = "data") {
+                                 channels,
+                                 axes_trans = NA,
+                                 axes_range = list(NA, NA),
+                                 axes_limits = "data") {
 
   # Return NA if axes_trans is missing
   if (.all_na(axes_trans)) {
@@ -36,31 +36,42 @@
   fr_list <- x
 
   # TICKS - 10^-5 -> 10^5
-  tcks <- c(sort(LAPPLY(c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000), 
-                   function(z){-seq(90, 10, -10)*z})),
-            seq(-9, 9, 1),
-            LAPPLY(c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000),
-                   function(z){seq(10, 90, 10) * z}))
-  
+  tcks <- c(
+    sort(LAPPLY(
+      c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000),
+      function(z) {
+        -seq(90, 10, -10) * z
+      }
+    )),
+    seq(-9, 9, 1),
+    LAPPLY(
+      c(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000),
+      function(z) {
+        seq(10, 90, 10) * z
+      }
+    )
+  )
+
   # LABELS - 10^-5 -> 10^5
   lbls <- .cyto_plot_axes_labels(tcks)
-  
+
   # PER CHANNEL
-  axs <- lapply(channels, function(chan){
+  axs <- lapply(channels, function(chan) {
     # LINEAR CHANNEL - NA
-    if(!chan %in% names(axes_trans)){
+    if (!chan %in% names(axes_trans)) {
       return(NA)
     }
     # TRANSFORMED CHANNEL - TRANSFORMATIONS
     trans_func <- axes_trans[[chan]]$transform
     inv_func <- axes_trans[[chan]]$inverse
     # AXIS RANGE - LINEAR SCALE
-    if(!.all_na(axes_range[[chan]])){
+    if (!.all_na(axes_range[[chan]])) {
       rng <- inv_func(1.02 * axes_range[[chan]])
-    }else{
-      rng <- inv_func(1.02 * .cyto_range(fr_list, 
-                                         channels = chan, 
-                                         axes_limits = axes_limits)[,chan])
+    } else {
+      rng <- inv_func(1.02 * .cyto_range(fr_list,
+        channels = chan,
+        axes_limits = axes_limits
+      )[, chan])
     }
     # RESTRICT tcks & lbls by rng
     tks <- tcks[tcks > rng[1] & tcks < rng[2]]
@@ -76,22 +87,22 @@
 }
 
 #' Convert Ticks to Labels - Expressions
-#'@noRd
-.cyto_plot_axes_labels <- function(x){
-  res <- lapply(x, function(z){
-    if(z != 0){
+#' @noRd
+.cyto_plot_axes_labels <- function(x) {
+  res <- lapply(x, function(z) {
+    if (z != 0) {
       pwr <- log10(abs(z))
-      if(z < 0){
+      if (z < 0) {
         pwr <- -pwr
       }
     }
-    if(z == 0){
+    if (z == 0) {
       quote(0)
-    }else if(pwr == 0){
+    } else if (pwr == 0) {
       quote("")
-    }else if(abs(pwr)%%1 == 0){
+    } else if (abs(pwr) %% 1 == 0) {
       substitute(10^pwr)
-    }else{
+    } else {
       quote("")
     }
   })
@@ -112,93 +123,100 @@
 #'
 #' @noRd
 .cyto_plot_args_split <- function(x) {
-  
+
   # NUMBER OF PLOTS - N --------------------------------------------------------
-  if(all(LAPPLY(x[["fr_list"]], "class") == "flowFrame")){
+  if (all(LAPPLY(x[["fr_list"]], "class") == "flowFrame")) {
     N <- 1
     MTD <- "flowFrame"
-  }else if(all(LAPPLY(x[["fr_list"]], function(z){
-    LAPPLY(z, function(y){is(y, "flowFrame")})}))){
+  } else if (all(LAPPLY(x[["fr_list"]], function(z) {
+    LAPPLY(z, function(y) {
+      is(y, "flowFrame")
+    })
+  }))) {
     N <- length(x[["fr_list"]])
     MTD <- "flowSet"
   }
-  
+
   # LAYERS PER PLOT - L --------------------------------------------------------
-  if(MTD == "flowFrame"){
+  if (MTD == "flowFrame") {
     L <- length(x[["fr_list"]])
-  }else if(MTD == "flowSet"){
+  } else if (MTD == "flowSet") {
     L <- length(x[["fr_list"]][[1]])
   }
-  
+
   # TOTAL LAYERS TO PLOT - TL -------------------------------------------------
   TL <- N * L
-  
+
   # GATE COUNT PER LAYER - GC --------------------------------------------------
-  if(MTD == "flowFrame"){
-    if(all(LAPPLY(x[["gate"]], function(z){.all_na(z)}))){
+  if (MTD == "flowFrame") {
+    if (all(LAPPLY(x[["gate"]], function(z) {
+      .all_na(z)
+    }))) {
       GC <- 0
-    }else{
+    } else {
       GC <- length(x[["gate"]])
     }
-  }else if(MTD == "flowSet"){
-    if(all(LAPPLY(x[["gate"]][[1]], function(z){.all_na(z)}))){
+  } else if (MTD == "flowSet") {
+    if (all(LAPPLY(x[["gate"]][[1]], function(z) {
+      .all_na(z)
+    }))) {
       GC <- 0
-    }else{
+    } else {
       GC <- length(x[["gate"]][[1]])
     }
   }
-  
+
   # GATED POPULATIONS PER LAYER - GP -------------------------------------------
   GP <- c()
-  if(MTD == "flowFrame"){
-    if(GC != 0) {
-      lapply(x[["gate"]], function(z){
-        if(class(z) == "quadGate"){
+  if (MTD == "flowFrame") {
+    if (GC != 0) {
+      lapply(x[["gate"]], function(z) {
+        if (class(z) == "quadGate") {
           GP <<- c(GP, 4)
-        }else{
+        } else {
           GP <<- c(GP, 1)
         }
       })
-    }else{
+    } else {
       GP <- 1
     }
-  }else if(MTD =="flowSet"){
-    if(GC != 0){
-      lapply(x[["gate"]][[1]], function(z){
-        if(class(z) == "quadGate"){
+  } else if (MTD == "flowSet") {
+    if (GC != 0) {
+      lapply(x[["gate"]][[1]], function(z) {
+        if (class(z) == "quadGate") {
           GP <<- c(GP, 4)
-        }else{
+        } else {
           GP <<- c(GP, 1)
         }
       })
-    }else{
+    } else {
       GP <- 1
     }
   }
-  
+
   # TOTAL GATED POPULATIONS PER LAYER - TGP ------------------------------------
   TGP <- sum(GP)
-  
+
   # TOTAL POPULATIONS PER LAYER - TP -------------------------------------------
-  if(GC != 0 & x[["negate"]] == TRUE){
-    if(MTD == "flowFrame"){
+  if (GC != 0 & x[["negate"]] == TRUE) {
+    if (MTD == "flowFrame") {
       # WATCH OUT FOR QUADGATES
-      if(!"quadGate" %in% LAPPLY(x[["gate"]], "is")){
+      if (!"quadGate" %in% LAPPLY(x[["gate"]], "is")) {
         TP <- TGP + 1
       }
-    }else if(MTD == "flowSet"){
+    } else if (MTD == "flowSet") {
       # WATCH OUT FOR QUADGATES
-      if(!"quadGate" %in% LAPPLY(x[["gate"]][[1]], "is")){
+      if (!"quadGate" %in% LAPPLY(x[["gate"]][[1]], "is")) {
         TP <- TGP + 1
       }
     }
-  }else{
+  } else {
     TP <- TGP
   }
-  
+
   # ARGUMENTS NOT REPEATED -----------------------------------------------------
-  
-  # The following arguments are not repeated: 
+
+  # The following arguments are not repeated:
   # - arguments used to prepare the data - x, overlay, display, density_modal,
   #   density_stack, density_smooth
   # - arguments that MUST be the same in each plot - channels, axes_limits, popup,
@@ -206,51 +224,55 @@
   # - arguments already prepared - gate
 
   # CYTO_PLOT ARGUMENTS --------------------------------------------------------
-  
+
   # AVAILABLE ARGUMENTS
   ARGS <- formalArgs(cyto_plot.flowSet)
-  
+
   # REMOVE ARGUMENTS (SAME PER PLOT)
-  ARGS <- ARGS[-match(c("x",
-                        "overlay",
-                        "display",
-                        "channels",
-                        "gate",
-                        "axes_limits",
-                        "axes_limits_buffer",
-                        "popup",
-                        "xlim",
-                        "ylim",
-                        "negate",
-                        "density_modal",
-                        "density_stack",
-                        "density_smooth",
-                        "density_cols",
-                        "point_cols",
-                        "point_col_scale"), ARGS)]
-  
+  ARGS <- ARGS[-match(c(
+    "x",
+    "overlay",
+    "display",
+    "channels",
+    "gate",
+    "axes_limits",
+    "axes_limits_buffer",
+    "popup",
+    "xlim",
+    "ylim",
+    "negate",
+    "density_modal",
+    "density_stack",
+    "density_smooth",
+    "density_cols",
+    "point_cols",
+    "point_col_scale"
+  ), ARGS)]
+
   # ARGUMENTS PER PLOT ---------------------------------------------------------
-  
+
   # SINGLE LENGTH ARGUMENTS
-  args <- c("xlab",
-            "ylab",
-            ARGS[grepl("title", ARGS)],
-            ARGS[grepl("axes_text_", ARGS)],
-            ARGS[grepl("axes_label_", ARGS)],
-            "label",
-            "label_position",
-            "legend",
-            ARGS[grepl("border_", ARGS)])
-  
+  args <- c(
+    "xlab",
+    "ylab",
+    ARGS[grepl("title", ARGS)],
+    ARGS[grepl("axes_text_", ARGS)],
+    ARGS[grepl("axes_label_", ARGS)],
+    "label",
+    "label_position",
+    "legend",
+    ARGS[grepl("border_", ARGS)]
+  )
+
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
 
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
       res <- rep_len(x[[arg]], N)
-      if(N == 1 & MTD == "flowSet"){
+      if (N == 1 & MTD == "flowSet") {
         res <- list(res)
-      }else if (N > 1) {
+      } else if (N > 1) {
         res <- split(res, rep_len(seq_len(N), N))
       }
       x[[arg]] <<- res
@@ -262,13 +284,13 @@
 
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
-  
+
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
       res <- rep_len(x[[arg]], N * 2)
-      if(N == 1 & MTD == "flowSet"){
+      if (N == 1 & MTD == "flowSet") {
         res <- list(res)
-      }else if (N > 1){
+      } else if (N > 1) {
         res <- split(res, rep(seq_len(N), length.out = N * 2, each = 2))
       }
       x[[arg]] <<- res
@@ -276,89 +298,91 @@
   })
 
   # ARGUMENTS PER LAYER --------------------------------------------------------
-  
+
   # CONTOUR_LINES (ADD ZEROS)
   args <- c("contour_lines")
 
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
-  
+
   lapply(args, function(arg) {
     if (arg %in% names(x)) {
       # FILL WITH ZEROS
       if (length(x[[arg]]) < L) {
         res <- rep(c(x[[arg]], rep(0, L)), length.out = L)
         res <- rep(res, N)
-      }else{
+      } else {
         res <- rep(x[[arg]], length.out = TL)
       }
-      if(N == 1 & MTD == "flowSet"){
+      if (N == 1 & MTD == "flowSet") {
         res <- list(res)
-      }else if (N > 1){
-        res <- split(res, rep(seq_len(N), length.out = TL, each = L))
-      }
-      x[[arg]] <<- res
-    }
-  })  
-  
-  # ARGUMENTS/LAYER
-  args <- c(ARGS[grepl("density_fill", ARGS)],
-            ARGS[grepl("density_line", ARGS)],
-            ARGS[grepl("legend_", ARGS)],
-            ARGS[grepl("point_", ARGS)],
-            ARGS[grepl("contour_", ARGS)])
-
-  # UPDATE AVAILABLE ARGUMENTS
-  ARGS <- ARGS[-match(args, ARGS)]
-  
-  lapply(args, function(arg) {
-    if (arg %in% names(x)) {
-      if(arg %in% c("point_col", "density_fill") &
-         length(x[[arg]]) < L){  
-        res <- rep(c(x[[arg]], rep(NA, length.out = L)), length.out = L)
-        res <- rep(res, N)
-      }else{
-        res <- rep(x[[arg]], length.out = TL)
-      }
-      if(N == 1 & MTD == "flowSet"){
-        res <- list(res)
-      }else if (N > 1){
+      } else if (N > 1) {
         res <- split(res, rep(seq_len(N), length.out = TL, each = L))
       }
       x[[arg]] <<- res
     }
   })
-  
-  # ARGUMENTS PER GATE ---------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- ARGS[grepl("gate_line", ARGS)]
-  
+
+  # ARGUMENTS/LAYER
+  args <- c(
+    ARGS[grepl("density_fill", ARGS)],
+    ARGS[grepl("density_line", ARGS)],
+    ARGS[grepl("legend_", ARGS)],
+    ARGS[grepl("point_", ARGS)],
+    ARGS[grepl("contour_", ARGS)]
+  )
+
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
-  
+
+  lapply(args, function(arg) {
+    if (arg %in% names(x)) {
+      if (arg %in% c("point_col", "density_fill") &
+        length(x[[arg]]) < L) {
+        res <- rep(c(x[[arg]], rep(NA, length.out = L)), length.out = L)
+        res <- rep(res, N)
+      } else {
+        res <- rep(x[[arg]], length.out = TL)
+      }
+      if (N == 1 & MTD == "flowSet") {
+        res <- list(res)
+      } else if (N > 1) {
+        res <- split(res, rep(seq_len(N), length.out = TL, each = L))
+      }
+      x[[arg]] <<- res
+    }
+  })
+
+  # ARGUMENTS PER GATE ---------------------------------------------------------
+
+  # ARGUMENTS
+  args <- ARGS[grepl("gate_line", ARGS)]
+
+  # UPDATE AVAILABLE ARGUMENTS
+  ARGS <- ARGS[-match(args, ARGS)]
+
   if (GC != 0) {
     lapply(args, function(arg) {
       if (arg %in% names(x)) {
         res <- rep(x[[arg]], length.out = GC * N)
-        if(N == 1 & MTD == "flowSet"){
+        if (N == 1 & MTD == "flowSet") {
           res <- list(res)
-        }else if (N > 1){
+        } else if (N > 1) {
           res <- split(res, rep(seq_len(N),
-                                length.out = GC * N,
-                                each = GC
+            length.out = GC * N,
+            each = GC
           ))
         }
         x[[arg]] <<- res
       }
     })
   }
-  
+
   # ARGUMENTS PER POPULATION ---------------------------------------------------
-  
+
   # GATE_FILL ARGUMENTS
   args <- ARGS[grepl("gate_fill", ARGS)]
-  
+
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
 
@@ -366,18 +390,19 @@
     lapply(args, function(arg) {
       if (arg %in% names(x)) {
         # GATE_FILL - WHITE
-        if(arg == "gate_fill"){
+        if (arg == "gate_fill") {
           res <- rep(c(x[[arg]], rep("white", TGP * N)), length.out = TGP * N)
-        # GATE_FILL_APLHA - ZERO
-        }else if(arg == "gate_fill_alpha"){
+          # GATE_FILL_APLHA - ZERO
+        } else if (arg == "gate_fill_alpha") {
           res <- rep(c(x[[arg]], rep(0, TGP * N)), length.out = TGP * N)
         }
-        if(N == 1 & MTD == "flowSet"){
+        if (N == 1 & MTD == "flowSet") {
           res <- list(res)
-        }else if (N > 1){
+        } else if (N > 1) {
           res <- split(res, rep(seq_len(N),
-                                length.out = TGP * N,
-                                each = TGP))
+            length.out = TGP * N,
+            each = TGP
+          ))
         }
         x[[arg]] <<- res
       }
@@ -386,28 +411,31 @@
 
   # LABEL ARGUMENTS
   args <- ARGS[grepl("label_", ARGS)]
-  
+
   # UPDATE AVAILABLE ARGUMENTS
   ARGS <- ARGS[-match(args, ARGS)]
-  
-  lapply(args, function(arg){
-    if(arg %in% names(x)){
-      if(arg %in% c("label_text_x", 
-                    "label_text_y")){
+
+  lapply(args, function(arg) {
+    if (arg %in% names(x)) {
+      if (arg %in% c(
+        "label_text_x",
+        "label_text_y"
+      )) {
         res <- rep(c(x[[arg]], rep(NA, L * TP)), length.out = L * TP)
         res <- rep(res, N)
-      }else if(MTD == "flowSet" & arg == "label_text"){
+      } else if (MTD == "flowSet" & arg == "label_text") {
         res <- rep(c(x[[arg]], rep(NA, L * TP)), length.out = L * TP)
         res <- rep(res, N)
-      }else{
+      } else {
         res <- rep(x[[arg]], length.out = TL * TP)
       }
-      if(N == 1 & MTD == "flowSet"){
+      if (N == 1 & MTD == "flowSet") {
         res <- list(res)
-      }else if(N > 1){
+      } else if (N > 1) {
         res <- split(res, rep(seq_len(N),
-                              length.out = TL * TP,
-                              each = L * TP))
+          length.out = TL * TP,
+          each = L * TP
+        ))
       }
       x[[arg]] <<- res
     }
@@ -438,7 +466,7 @@
 
   # Use default colour scale
   if (.all_na(args[["point_col_scale"]])) {
-    args[["point_col_scale"]] <- .cyto_plot_colour_palette(type = "point_col_scale") 
+    args[["point_col_scale"]] <- .cyto_plot_colour_palette(type = "point_col_scale")
   }
 
   return(args[["point_col_scale"]])
@@ -493,7 +521,10 @@
 #' @param title if NULL remove excess space above plot.
 #' @param axes_text vector of logicals indicating whether the x and y axes
 #'   should be included on the plot.
-#'   
+#' @param margins a vector of length 4 to control the margins around the bottom,
+#'   left, top and right of the plot, set to NULL by default to let `cyto_plot`
+#'   compute optimal margins.
+#'
 #' @importFrom methods is
 #'
 #' @noRd
@@ -502,7 +533,8 @@
                                legend_text = NA,
                                legend_text_size = 1,
                                title,
-                               axes_text = list(TRUE, TRUE)) {
+                               axes_text = list(TRUE, TRUE),
+                               margins = NULL) {
 
   # Bypass setting margins on cyto_plot_grid
   if (!getOption("cyto_plot_grid")) {
@@ -511,36 +543,45 @@
     args <- .args_list()
 
     # Default margins
-    mar <- c(5.1, 5.1, 4.1, 2.1)
+    if (is.null(margins)) {
 
-    # Make space for legend text on right
-    if (length(x) > 1 &
-      legend != FALSE &
-      !.all_na(legend_text)) {
-      mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * mean(legend_text_size)
-    }
+      # Default starting point
+      mar <- c(5.1, 5.1, 4.1, 2.1)
 
-    # Remove space above plot if no title
-    if (.all_na(title)) {
-      mar[3] <- 2.1
-    }
-
-    # Remove space below plot if x axis is missing
-    if (!all(is(axes_text[[1]], "list"))) {
-      if (.all_na(axes_text[[1]])) {
-        # NA == FALSE returns NA not T/F
-      } else if (all(axes_text[[1]] == FALSE)) {
-        mar[1] <- 4.1
+      # Make space for legend text on right
+      if (length(x) > 1 &
+        legend != FALSE &
+        !.all_na(legend_text)) {
+        mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * mean(legend_text_size)
       }
-    }
 
-    # Remove space below plot if y axis is missing
-    if (!all(is(axes_text[[2]], "list"))) {
-      if (.all_na(axes_text[[2]])) {
-        # NA == FALSE return NA not T/F
-      } else if (all(axes_text[[2]] == FALSE)) {
-        mar[2] <- 4.1
+      # Remove space above plot if no title
+      if (.all_na(title)) {
+        mar[3] <- 2.1
       }
+
+      # Remove space below plot if x axis is missing
+      if (!all(is(axes_text[[1]], "list"))) {
+        if (.all_na(axes_text[[1]])) {
+          # NA == FALSE returns NA not T/F
+        } else if (all(axes_text[[1]] == FALSE)) {
+          mar[1] <- 4.1
+        }
+      }
+
+      # Remove space below plot if y axis is missing
+      if (!all(is(axes_text[[2]], "list"))) {
+        if (.all_na(axes_text[[2]])) {
+          # NA == FALSE return NA not T/F
+        } else if (all(axes_text[[2]] == FALSE)) {
+          mar[2] <- 4.1
+        }
+      }
+    } else {
+      if (length(margins) != 4) {
+        stop("'margins' must be a vector with 4 elements.")
+      }
+      mar <- margins
     }
 
     # Set update graphics parameter
@@ -622,7 +663,7 @@
                               point_cols = NA,
                               point_col = NA,
                               point_col_alpha = 1) {
-  
+
   # ARGUMENTS ------------------------------------------------------------------
 
   # ARGUMENTS
@@ -692,7 +733,7 @@
         bty = "n",
         x.intersp = 0.5
       )
-    # Fill legend
+      # Fill legend
     } else if (legend == "fill") {
 
       # COLOURS
@@ -701,7 +742,7 @@
         density_cols = density_cols,
         density_fill_alpha = 1
       )
-      
+
       # Revert to density_fill if no legend fill colours supplied
       if (.all_na(legend_box_fill)) {
         legend_box_fill <- density_fill
@@ -711,7 +752,7 @@
         !all(density_fill_alpha == 1)) {
         legend_box_fill <- mapply(
           function(legend_box_fill,
-                             density_fill_alpha) {
+                   density_fill_alpha) {
             adjustcolor(legend_box_fill, density_fill_alpha)
           }, legend_box_fill, density_fill_alpha
         )
@@ -734,10 +775,10 @@
 
     # Legend for 2D scatter plot
   } else if (length(channels) == 2) {
-    
+
     # CYTO_PLOT_POINT_COL_SCALE
     point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
-    
+
     # Prepare point_col - alpha adjust later
     point_col <- .cyto_plot_point_col(x,
       channels = channels,
@@ -746,7 +787,7 @@
       point_col = point_col,
       point_col_alpha = 1
     )
-    
+
     # Prepare point col - use first density colour
     point_col <- LAPPLY(point_col, function(z) {
       if (length(z) > 1) {
@@ -755,7 +796,7 @@
         return(z)
       }
     })
-    
+
     # Revert to point_col if no legend point cols supplied
     if (.all_na(legend_point_col)) {
       legend_point_col <- point_col
@@ -768,7 +809,7 @@
         adjustcolor(col, alpha)
       }, legend_point_col, point_col_alpha)
     }
-    
+
     legend(
       x = 1.08 * par("usr")[2],
       y = cnt + 0.6 * lgnd_height,
@@ -824,7 +865,7 @@
                              channels,
                              overlay = NA,
                              title = "") {
-  
+
   # x can be a list
   if (class(x) == "list") {
     if (length(x) > 1) {
@@ -899,9 +940,9 @@
       # Marker assigned to channel
       if (!is.na(fr_data$desc[which(fr_channels == channels)])) {
         # Channel only if marker is identical
-        if(fr_data$desc[which(fr_channels == channels)] == channels){
+        if (fr_data$desc[which(fr_channels == channels)] == channels) {
           xlab <- paste(channels)
-        }else{
+        } else {
           xlab <- paste(fr_data$desc[which(fr_channels == channels)],
             channels,
             sep = " "
@@ -934,9 +975,9 @@
       # Marker assigned to channel
       if (!is.na(fr_data$desc[which(fr_channels == channels[1])])) {
         # Channel only if marker is identical
-        if(fr_data$desc[which(fr_channels == channels[1])] == channels[1]){
+        if (fr_data$desc[which(fr_channels == channels[1])] == channels[1]) {
           xlab <- paste(channels[1])
-        }else{
+        } else {
           xlab <- paste(fr_data$desc[which(fr_channels == channels[1])],
             channels[1],
             sep = " "
@@ -955,9 +996,9 @@
       # Marker assigned to channel
       if (!is.na(fr_data$desc[which(fr_channels == channels[2])])) {
         # Channel only if marker matches
-        if(fr_data$desc[which(fr_channels == channels[2])] == channels[2]){
+        if (fr_data$desc[which(fr_channels == channels[2])] == channels[2]) {
           ylab <- paste(channels[2])
-        }else{
+        } else {
           ylab <- paste(fr_data$desc[which(fr_channels == channels[2])],
             channels[2],
             sep = " "
@@ -1001,17 +1042,17 @@
 
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # Update arguments
   .args_update(args)
-  
+
   # GENERAL --------------------------------------------------------------------
-  
+
   # Expected number of colours
   SMP <- length(x)
-  
+
   # DENSITY_FILL ---------------------------------------------------------------
-  
+
   # No density_cols supplied
   if (.all_na(density_cols)) {
     density_cols <- .cyto_plot_colour_palette(type = "density_cols")
@@ -1026,7 +1067,7 @@
 
   # No colours supplied to density_fill either
   if (.all_na(density_fill)) {
-    
+
     # Pull out a single colour per layer
     density_fill <- cols(SMP)
 
@@ -1096,7 +1137,7 @@
 
   # Update arguments
   .args_update(args)
-  
+
   # No colours supplied for density gradient
   if (.all_na(point_col_scale)) {
     point_col_scale <- .cyto_plot_colour_palette(type = "point_col_scale")
@@ -1111,9 +1152,9 @@
 
   # No colours supplied for selection
   if (.all_na(point_cols)) {
-    point_cols <- .cyto_plot_colour_palette(type = "point_cols") 
+    point_cols <- .cyto_plot_colour_palette(type = "point_cols")
   }
-  
+
   # Make colorRampPalette
   if (class(point_cols) != "function") {
     cols <- colorRampPalette(point_cols)
@@ -1131,7 +1172,7 @@
       point_col[z]
     })
   }
-  
+
   # First layer contains density gradient if no other colour is designated
   if (all(LAPPLY(point_col, ".all_na"))) {
 
@@ -1144,34 +1185,33 @@
         # Get density colour for each point
         point_col[[1]] <- suppressWarnings(
           densCols(fr_exprs,
-                   colramp = col_scale
-                   )
+            colramp = col_scale
+          )
         )
       }
     } else {
       point_col[[1]] <- point_col_scale[1]
     }
   }
-  
+
   # Remaining colours are selected one per layer from point_cols
   if (any(LAPPLY(point_col, ".all_na"))) {
 
     # Number of layers missing colours
     n <- length(point_col[LAPPLY(point_col, ".all_na")])
-    
+
     # Pull colours out of point_cols
     clrs <- cols(n)
-    
+
     # Replace NA values in point_col with selected colours
     point_col[LAPPLY(point_col, ".all_na")] <- clrs
-    
   }
-  
+
   # Adjust colors by point_fill_alpha - REMOVE CHECK FOR ALPHA != 1
-  lapply(seq_len(SMP), function(z){
-      point_col[[z]] <<- adjustcolor(point_col[[z]], point_col_alpha[z])
+  lapply(seq_len(SMP), function(z) {
+    point_col[[z]] <<- adjustcolor(point_col[[z]], point_col_alpha[z])
   })
-  
+
   return(point_col)
 }
 
@@ -1185,34 +1225,35 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_plot_colour_palette <- function(type = "point_cols"){
+.cyto_plot_colour_palette <- function(type = "point_cols") {
   # POINT COLOUR PALETTE
-  if(type == "point_cols"){
-    
-    pal <- c("grey25",
-                 "bisque4",
-                 "brown1",
-                 "red",
-                 "darkred",
-                 "chocolate",
-                 "orange",
-                 "yellow",
-                 "yellowgreen",
-                 "green",
-                 "limegreen",
-                 "turquoise",
-                 "aquamarine",
-                 "cyan",
-                 "cornflowerblue",
-                 "blue",
-                 "blueviolet",
-                 "purple4",
-                 "purple",
-                 "magenta",
-                 "deeppink")
+  if (type == "point_cols") {
+    pal <- c(
+      "grey25",
+      "bisque4",
+      "brown1",
+      "red",
+      "darkred",
+      "chocolate",
+      "orange",
+      "yellow",
+      "yellowgreen",
+      "green",
+      "limegreen",
+      "turquoise",
+      "aquamarine",
+      "cyan",
+      "cornflowerblue",
+      "blue",
+      "blueviolet",
+      "purple4",
+      "purple",
+      "magenta",
+      "deeppink"
+    )
 
-  # POINT COLOUR SCALE
-  }else if(type == "point_col_scale"){
+    # POINT COLOUR SCALE
+  } else if (type == "point_col_scale") {
     pal <- c(
       "blue",
       "turquoise",
@@ -1222,29 +1263,31 @@
       "red",
       "darkred"
     )
-  # DENSITY COLOUR PALETTE
-  }else if(type == "density_cols"){
-    pal <- c("grey50",
-             "bisque4",
-             "brown1",
-             "red",
-             "darkred",
-             "chocolate",
-             "orange",
-             "yellow",
-             "yellowgreen",
-             "green",
-             "limegreen",
-             "turquoise",
-             "aquamarine",
-             "cyan",
-             "cornflowerblue",
-             "blue",
-             "blueviolet",
-             "purple4",
-             "purple",
-             "magenta",
-             "deeppink")
+    # DENSITY COLOUR PALETTE
+  } else if (type == "density_cols") {
+    pal <- c(
+      "grey50",
+      "bisque4",
+      "brown1",
+      "red",
+      "darkred",
+      "chocolate",
+      "orange",
+      "yellow",
+      "yellowgreen",
+      "green",
+      "limegreen",
+      "turquoise",
+      "aquamarine",
+      "cyan",
+      "cornflowerblue",
+      "blue",
+      "blueviolet",
+      "purple4",
+      "purple",
+      "magenta",
+      "deeppink"
+    )
   }
 
   return(pal)
