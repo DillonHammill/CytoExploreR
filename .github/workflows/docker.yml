@@ -19,6 +19,7 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
     - name: CytoExploreR Version
       run: |
+        find | grep DESCRIPTION | xargs rm -f
         apt-get update && apt-get install -y wget
         wget https://raw.githubusercontent.com/DillonHammill/CytoExploreR/master/DESCRIPTION
         export VERSION=$(grep Version DESCRIPTION | awk '{print $2}')
