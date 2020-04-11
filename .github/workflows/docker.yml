@@ -27,5 +27,6 @@ jobs:
         rm DESCRIPTION
     - name: CytoExploreR Docker Build & Push
       run: |
-        docker build ./ -t dhammill/cytoexplorer:$VERSION 
+        echo $VERSION
+        docker build -t dhammill/cytoexplorer:$VERSION .
         docker push dhammill/cytoexplorer:$VERSION 
