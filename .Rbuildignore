@@ -10,5 +10,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\_pkgdown\.yml$
+^.github$
 Dockerfile
 Makefile
