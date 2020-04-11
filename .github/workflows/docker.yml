@@ -17,7 +17,7 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    - name: CytoExploreR Version
+    - name: CytoExploreR Docker Build & Push
       run: |
         find | grep DESCRIPTION | xargs rm -f
         apt-get update && apt-get install -y wget
@@ -25,8 +25,5 @@ jobs:
         export VERSION=$(grep Version DESCRIPTION | awk '{print $2}')
         export VERSION="v$VERSION"
         rm DESCRIPTION
-    - name: CytoExploreR Docker Build & Push
-      run: |
-        printenv
         docker build -t dhammill/cytoexplorer:$VERSION .
         docker push dhammill/cytoexplorer:$VERSION 
