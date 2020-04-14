@@ -16,10 +16,6 @@ matrix:
      osx_image: xcode9.4
      r: release
      r_check_args: --no-examples
-   - os: osx
-     osx_image: xcode9.4
-     r: devel
-     r_check_args: --no-examples
 
 cache: 
   packages: true
@@ -54,8 +50,8 @@ install:
   - R -e 'devtools::install_github("r-lib/covr")'
   
 # Turn off slow processes to allow package caching on build success (speed)
-r_build_args: --no-build-vignettes --no-manual
-r_check_args: --no-build-vignettes --no-tests --no-vignettes --no-manual --no-examples
+# r_build_args: --no-build-vignettes --no-manual
+# r_check_args: --no-build-vignettes --no-tests --no-vignettes --no-manual --no-examples
 
 warnings_are_errors: false
 
