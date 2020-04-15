@@ -10,19 +10,20 @@ install:
 cache:
   - C:\RLibrary
 
+
 environment:
-  NOT_CRAN: true
-  USE_RTOOLS: true
-  # R_REMOTES_STANDALONE: true
+  global:
+    USE_RTOOLS: true
+    NOT_CRAN: true
+    # R_REMOTES_STANDALONE: true
 
   matrix:
     - R_VERSION: devel
       BIOC_USE_DEVEL: TRUE      
 
 build_script:
-  - travis-tool.sh install_github r-lib/devtools
-  - travis-tool.sh install_bioc_deps
   - travis-tool.sh install_deps
+  - travis-tool.sh install_bioc_deps  
   
 test_script:
   - travis-tool.sh run_tests
