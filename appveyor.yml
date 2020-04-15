@@ -13,6 +13,7 @@ cache:
 environment:
   global:
     USE_RTOOLS: true
+    PKGTYPE: both
 
   matrix:
     - R_VERSION: devel
