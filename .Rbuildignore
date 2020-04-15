@@ -13,3 +13,4 @@
 ^.github$
 Dockerfile
 Makefile
+^appveyor\.yml$
