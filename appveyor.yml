@@ -8,21 +8,17 @@ install:
   ps: Bootstrap
 
 cache:
-  - C:\RLibrary
-
+  # - C:\RLibrary
 
 environment:
   global:
     USE_RTOOLS: true
-    NOT_CRAN: true
-    # R_REMOTES_STANDALONE: true
 
   matrix:
     - R_VERSION: devel
-      BIOC_USE_DEVEL: TRUE      
+      BIOC_USE_DEVEL: true      
 
 build_script:
-  - travis-tool.sh install_github krlmlr/devtools
   - travis-tool.sh install_deps
   - travis-tool.sh install_bioc_deps  
   
