@@ -20,7 +20,7 @@ environment:
       BIOC_USE_DEVEL: TRUE      
 
 build_script:
-  - travis-tool.sh install_r devtools
+  - travis-tool.sh install_github r-lib/devtools
   - travis-tool.sh install_bioc_deps
   - travis-tool.sh install_deps
   
