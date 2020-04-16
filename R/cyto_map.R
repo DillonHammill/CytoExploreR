@@ -145,7 +145,7 @@ cyto_map.GatingSet <- function(x,
   } else {
     names <- split(names, rep(seq_along(gs_list), LAPPLY(gs_list, "length")))
   }
-
+  
   # LOOP THROUGH GATINGSETS - RETURN LIST OF FLOWSETS
   cyto_data <- lapply(seq_along(gs_list), function(z) {
     # GATINGSET

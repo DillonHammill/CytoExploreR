@@ -439,12 +439,16 @@ cyto_gate_draw.GatingSet <- function(x,
     names(gates) <- GRPS
     return(gates)
   })
-
+  
   # GATE NAMES - IMPORTANT
   if(negate == TRUE){
     names(gate_list) <- unlist(alias)[-length(alias)]
   }else{
-    names(gate_list) <- unlist(alias)
+    if(all(type %in% "quadrant")){
+      names(gate_list) <- paste(unlist(alias), collapse = "|")
+    }else{
+      names(gate_list) <- unlist(alias)
+    }
   }
   
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------

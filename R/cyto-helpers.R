@@ -1889,7 +1889,7 @@ cyto_split <- function(x,
 
   # SPLIT BY SAMPLE ID
   fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
-
+    
   # NAMES
   if (!is.null(names)) {
     # INSUFFICIENT NAMES
