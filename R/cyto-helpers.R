@@ -134,7 +134,7 @@ cyto_load <- function(path = ".",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#'
+#' \dontrun{
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
@@ -148,10 +148,11 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
+#' }
+#' 
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
-#'
 #' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
 #'
 #' @export
@@ -1955,7 +1956,6 @@ cyto_split <- function(x,
 #' @examples
 #'
 #' \dontrun{
-#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -1963,7 +1963,7 @@ cyto_split <- function(x,
 #' fs <- Activation
 #'
 #' # Save each flowFrame to file
-#' cyto_save(fs)
+#' cyto_save(fs, save_as = "Samples")
 #' }
 #'
 #' @seealso \code{\link{cyto_split}}

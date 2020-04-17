@@ -99,7 +99,6 @@ Write samples to FCS files in new folder or save GatingSet
 \examples{
 
 \dontrun{
-
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -107,7 +106,7 @@ library(CytoExploreRData)
 fs <- Activation
 
 # Save each flowFrame to file
-cyto_save(fs)
+cyto_save(fs, save_as = "Samples")
 }
 
 }

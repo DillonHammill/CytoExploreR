@@ -18,7 +18,7 @@ when a \code{GatingSet} or \code{GatingHierachy} is supplied.}
 Apply flowAI anomaly detection to clean cytometry data
 }
 \examples{
-
+\dontrun{
 library(CytoExploreRData)
 
 # Activation flowSet
@@ -32,6 +32,8 @@ gs <- GatingSet(fs)
 
 # Clean Activation GatingSet
 gs <- cyto_clean(gs)
+}
+
 }
 \references{
 Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
