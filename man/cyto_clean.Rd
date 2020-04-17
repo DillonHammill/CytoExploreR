@@ -39,6 +39,7 @@ gs <- cyto_clean(gs)
 Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
   15;32(16):2473-80.
+  \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}
 }
 \seealso{
 \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
