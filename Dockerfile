@@ -57,4 +57,4 @@ RUN R -e "install.packages('remotes')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreR')"
 
 # COPY FIT-SNE FILES
-COPY ./CytoExploreR /FIt-SNE-master/fast_tsne.R
+COPY ./FIt-SNE-master /home/CytoExploreR
