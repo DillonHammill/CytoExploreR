@@ -36,7 +36,8 @@ RUN cd /. && \
     rm -rf FIt-SNE.zip && \
     cd FIt-SNE-master && \
     g++ -std=c++11 -O3  src/sptree.cpp src/tsne.cpp src/nbodyfft.cpp  -o bin/fast_tsne -pthread -lfftw3 -lm -Wno-address-of-packed-member && \
-    cd /.
+    cd /. && ^
+    mv /FIt-SNE-master /usr/local/lib/R/site-library/FIt-SNE
 
 # INSTALL DEPENDENCIES
 RUN R -e "install.packages('remotes')" && \
@@ -54,7 +55,5 @@ RUN R -e "install.packages('remotes')" && \
     R -e "remotes::install_github('RGLab/flowStats')" && \
     R -e "remotes::install_github('RGLab/openCyto')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
+    R -e "remotes::install_github('DillonHammill/flowAI')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreR')"
-
-# COPY FIT-SNE FILES
-COPY ./FIt-SNE-master /home/CytoExploreR
