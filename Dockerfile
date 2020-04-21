@@ -36,7 +36,7 @@ RUN cd /. && \
     rm -rf FIt-SNE.zip && \
     cd FIt-SNE-master && \
     g++ -std=c++11 -O3  src/sptree.cpp src/tsne.cpp src/nbodyfft.cpp  -o bin/fast_tsne -pthread -lfftw3 -lm -Wno-address-of-packed-member && \
-    cd /. && ^
+    cd /. && \
     mv /FIt-SNE-master /usr/local/lib/R/site-library/FIt-SNE
 
 # INSTALL DEPENDENCIES
