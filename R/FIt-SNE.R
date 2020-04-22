@@ -143,11 +143,12 @@ fftRtsne <- function(X,
   if (is.null(fast_tsne_path)) {
     # RStudio Server look in home/rstudio/ directory (hidden)
     if(dir.exists("/home/rstudio")){
-      if(".FIt-SNE" %in% list.files("/home/rstudio")){
+      if(".FIt-SNE" %in% list.files("/home/rstudio", all.files = TRUE)){
           fast_tsne_path <- "/home/rstudio/.FIt-SNE/bin/fast_tsne"
       }
+    }else{
+      fast_tsne_path <- system2('which', 'fast_tsne', stdout = TRUE)
     }
-    fast_tsne_path <- system2('which', 'fast_tsne', stdout = TRUE)
   }
   fast_tsne_path <- normalizePath(fast_tsne_path)
   if (!file_test('-x', fast_tsne_path)) {
