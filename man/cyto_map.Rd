@@ -137,6 +137,15 @@ have chosen to use. References to these publications can be found in the
 references section of this document.
 }
 \references{
+N. B. Erichson, S. Voronin, S. L. Brunton and J. N. Kutz. 2019.
+  Randomized Matrix Decompositions Using {R}. Journal of Statistical
+  Software, 89(11), 1-48. \url{http://doi.org/10.18637/jss.v089.i11}.
+
+N. Halko, P. Martinsson, and J. Tropp. "Finding structure with
+  randomness: probabilistic algorithms for constructing approximate matrix
+  decompositions" (2009). (available at arXiv
+  \url{http://arxiv.org/abs/0909.4061}).
+
 Gabriel K. (1971). The biplot graphical display of matrices with
   application to principal component analysis. Biometrika 58, 453–467.
   \url{doi:10.1093/biomet/58.3.453}.
@@ -160,7 +169,7 @@ Kratochvíl, M., Koladiya, A., Balounova, J., Novosadova, V.,
   \url{https://www.biorxiv.org/content/10.1101/496869v1}.
 }
 \seealso{
-\code{\link[stats:prcomp]{PCA}}
+\code{\link[rsvd:rpca]{PCA}}
 
 \code{\link[Rtsne:Rtsne]{tSNE}}
 

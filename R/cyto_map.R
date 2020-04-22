@@ -64,18 +64,25 @@
 #' @importFrom flowCore exprs keyword write.FCS flowSet fr_append_cols
 #' @importFrom flowWorkspace GatingSet gs_cyto_data<- flowSet_to_cytoset
 #'   recompute
-#' @importFrom stats prcomp
+#' @importFrom rsvd rpca
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
 #' @importFrom EmbedSOM SOM EmbedSOM
 #'
-#' @seealso \code{\link[stats:prcomp]{PCA}}
+#' @seealso \code{\link[rsvd:rpca]{PCA}}
 #' @seealso \code{\link[Rtsne:Rtsne]{tSNE}}
 #' @seealso \code{\link{fftRtsne}}
 #' @seealso \code{\link[umap:umap]{UMAP}}
 #' @seealso \code{\link[EmbedSOM:SOM]{SOM}}
 #' @seealso \code{\link[EmbedSOM:EmbedSOM]{EmbedSOM}}
 #'
+#' @references N. B. Erichson, S. Voronin, S. L. Brunton and J. N. Kutz. 2019.
+#'   Randomized Matrix Decompositions Using {R}. Journal of Statistical
+#'   Software, 89(11), 1-48. \url{http://doi.org/10.18637/jss.v089.i11}.
+#' @references N. Halko, P. Martinsson, and J. Tropp. "Finding structure with
+#'   randomness: probabilistic algorithms for constructing approximate matrix
+#'   decompositions" (2009). (available at arXiv
+#'   \url{http://arxiv.org/abs/0909.4061}).
 #' @references Gabriel K. (1971). The biplot graphical display of matrices with
 #'   application to principal component analysis. Biometrika 58, 453–467.
 #'   \url{doi:10.1093/biomet/58.3.453}.
@@ -427,7 +434,7 @@ cyto_map.flowFrame <- function(x,
   # PCA
   if (grepl(type, "PCA", ignore.case = TRUE)) {
     # MAPPING
-    mp <- prcomp(x, ...)
+    mp <- rpca(x, ...)
     # MAPPING CO-ORDINATES
     coords <- mp$x[, 1:2, drop = FALSE]
     colnames(coords) <- c("PCA-1", "PCA-2")

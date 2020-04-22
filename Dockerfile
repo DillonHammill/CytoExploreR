@@ -37,7 +37,7 @@ RUN cd /. && \
     cd FIt-SNE-master && \
     g++ -std=c++11 -O3  src/sptree.cpp src/tsne.cpp src/nbodyfft.cpp  -o bin/fast_tsne -pthread -lfftw3 -lm -Wno-address-of-packed-member && \
     cd /. && \
-    mv /FIt-SNE-master home/rstudio/FIt-SNE
+    mv /FIt-SNE-master home/rstudio/.FIt-SNE
 
 # INSTALL DEPENDENCIES
 RUN R -e "install.packages('remotes')" && \

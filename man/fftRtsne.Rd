@@ -9,7 +9,7 @@ fftRtsne(
   dims = 2,
   perplexity = 30,
   theta = 0.5,
-  max_iter = 1000,
+  max_iter = 750,
   fft_not_bh = TRUE,
   ann_not_vptree = TRUE,
   stop_early_exag_iter = 250,
@@ -20,7 +20,7 @@ fftRtsne(
   mom_switch_iter = 250,
   momentum = 0.5,
   final_momentum = 0.8,
-  learning_rate = 200,
+  learning_rate = "auto",
   n_trees = 50,
   search_k = -1,
   rand_seed = -1,
@@ -29,7 +29,8 @@ fftRtsne(
   min_num_intervals = 50,
   K = -1,
   sigma = -30,
-  initialization = NULL,
+  initialization = "pca",
+  max_step_norm = 5,
   load_affinities = NULL,
   fast_tsne_path = NULL,
   nthreads = 0,
@@ -50,7 +51,7 @@ the input space, set to 30 by default.}
 Barnes Hut or FIt-SNE based on nbody_algo. If Barnes Hut, then this
 determins the accuracy of BH approximation. Set to 0.5 by default.}
 
-\item{max_iter}{number of iterations of t-SNE to run, set to 1000 by default.}
+\item{max_iter}{number of iterations of t-SNE to run, set to 750 by default.}
 
 \item{fft_not_bh}{if theta is nonzero, this determins whether to use FIt-SNE
 or Barnes Hut approximation, set to TRUE by default for FIt-SNE.}
@@ -71,7 +72,7 @@ optimization tricks. Can be set to 1 to do plain, vanilla gradient descent
 \item{start_late_exag_iter}{when to start late exaggeration, set to -1 by
 default to not use late exaggeration.}
 
-\item{late_exag_coeff}{late exaggeration coefficient, set to -1 by default to
+\item{late_exag_coeff}{late exaggeration coefficient, set to 1 by default to
 not use late exaggeration.}
 
 \item{mom_switch_iter}{iteration number to switch from momentum to
@@ -82,7 +83,9 @@ final_momentum, set to 250 by default.}
 \item{final_momentum}{value of momentum to use later in the optimisation, set
 to 0.8 by default.}
 
-\item{learning_rate}{set to 200 by default.}
+\item{learning_rate}{set to desired learning rate or 'auto', which sets
+learning rate to N/exaggeration_factor where N is the sample size, or to
+200 if N/exaggeration_factor < 200.}
 
 \item{n_trees}{when using Annoy, the number of search trees to use, set to 50
 by default.}
@@ -95,7 +98,7 @@ sigma).}
 initialise random number generator with current time.}
 
 \item{nterms}{if using FIt-SNE, this is the number of interpolation points
-per sub-interval.}
+per sub-interval, set to 3 by default.}
 
 \item{intervals_per_integer}{see min_num_intervals.}
 
@@ -108,12 +111,18 @@ be an integer >0, and intervals_per_integer must be >0. Defaults are
 min_num_intervals=50 and intervals_per_integer = 1.}
 
 \item{K}{number of nearest neighbours to get when using fixed sigma, set to
--30 by default.}
+-1 by default.}
 
-\item{sigma}{fixed sigma value to use when perplexity==-1, set to -1 by
+\item{sigma}{fixed sigma value to use when perplexity==-1, set to -30 by
 default.}
 
-\item{initialization}{N x no_dims array to intialize the solution.}
+\item{initialization}{'pca', 'random', or N x no_dims array to intialize the
+solution, set to 'pca' by default.}
+
+\item{max_step_norm}{maximum distance that a point is allowed to move on one
+iteration. Larger steps are clipped to this value. This prevents possible
+instabilities during gradient descent. Set to -1 to switch it off.
+Set to 5 by default.}
 
 \item{load_affinities}{if 1, input similarities are loaded from a file and
 not computed. If 2, input similarities are saved into a file. If 0,

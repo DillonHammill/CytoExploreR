@@ -13,7 +13,7 @@ status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoExp
 [![Coverage
 status](https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoExploreR?branch=master)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2020--04--15-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2020--04--22-yellowgreen.svg)](/commits/master)
 [![](https://badges.ropensci.org/281_status.svg)](https://github.com/ropensci/software-review/issues/281)
 
 **CytoExploreR** is comprehensive collection of interactive exploratory
@@ -120,6 +120,9 @@ devtools::install_github("DillonHammill/CytoExploreRData")
 # CytoExploreR 
 devtools::install_github("DillonHammill/CytoExploreR")
 ```
+
+    #> Warning: multiple methods tables found for 'plot'
+    #> Warning: multiple methods tables found for 'spillover_match'
 
 ## Design
 
@@ -297,7 +300,7 @@ citation("CytoExploreR")
 #> To cite package 'CytoExploreR' in publications use:
 #> 
 #>   Dillon Hammill (2020). CytoExploreR: Interactive Analysis of
-#>   Cytometry Data. R package version 1.0.6.
+#>   Cytometry Data. R package version 1.0.7.
 #>   https://github.com/DillonHammill/CytoExploreR
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -306,7 +309,7 @@ citation("CytoExploreR")
 #>     title = {CytoExploreR: Interactive Analysis of Cytometry Data},
 #>     author = {Dillon Hammill},
 #>     year = {2020},
-#>     note = {R package version 1.0.6},
+#>     note = {R package version 1.0.7},
 #>     url = {https://github.com/DillonHammill/CytoExploreR},
 #>   }
 ```

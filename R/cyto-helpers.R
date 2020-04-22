@@ -134,7 +134,6 @@ cyto_load <- function(path = ".",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' \dontrun{
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
@@ -148,7 +147,6 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
-#' }
 #'
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug

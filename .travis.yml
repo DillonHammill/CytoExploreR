@@ -48,6 +48,7 @@ install:
   - R -e 'devtools::install_github("tidyverse/tidyr")'
   - R -e 'devtools::install_github("r-lib/mockery")'
   - R -e 'devtools::install_github("r-lib/covr")'
+  - R -e 'devtools::install_github("erichson/rSVD")'
   
 # Turn off slow processes to allow package caching on build success (speed)
 # r_build_args: --no-build-vignettes --no-manual
