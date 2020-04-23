@@ -130,24 +130,24 @@ fftRtsne <- function(X,
   version_number <- '1.2.1'
   
   if (is.null(fast_tsne_path)) {
-    fast_tsne_path <- SysExec(progs = ifelse(
-      test = .Platform$OS.type == "windows",
-      yes = "FItSNE.exe",
-      no = "fast_tsne"
-    ))
-    if (length(fast_tsne_path) == 0) {
-      stop("fast_tsne binary is not in the search path.")
-    }
-  }
-  
-  if (is.null(fast_tsne_path)) {
-    # RStudio Server look in home/rstudio/ directory (hidden)
-    if(dir.exists("/home/rstudio")){
-      if(".FIt-SNE" %in% list.files("/home/rstudio", all.files = TRUE)){
-          fast_tsne_path <- "/home/rstudio/.FIt-SNE/bin/fast_tsne"
+    if(.Platform$OS.type == "windows"){
+      fast_tsne_path <- SysExec(progs = ifelse(
+        test = .Platform$OS.type == "windows",
+        yes = "FItSNE.exe",
+        no = "fast_tsne"
+      ))
+      if (length(fast_tsne_path) == 0) {
+        stop("fast_tsne binary is not in the search path.")
       }
     }else{
-      fast_tsne_path <- system2('which', 'fast_tsne', stdout = TRUE)
+      # RStudio Server look in home/rstudio/ directory (hidden)
+      if(dir.exists("/home/rstudio")){
+        if(".FIt-SNE" %in% list.files("/home/rstudio", all.files = TRUE)){
+          fast_tsne_path <- "/home/rstudio/.FIt-SNE/bin/fast_tsne"
+        }
+      }else{
+        fast_tsne_path <- system2('which', 'fast_tsne', stdout = TRUE)
+      }
     }
   }
   fast_tsne_path <- normalizePath(fast_tsne_path)

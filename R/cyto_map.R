@@ -63,7 +63,7 @@
 #'
 #' @importFrom flowCore exprs keyword write.FCS flowSet fr_append_cols
 #' @importFrom flowWorkspace GatingSet gs_cyto_data<- flowSet_to_cytoset
-#'   recompute
+#'   recompute flowFrame_to_cytoframe cytoset gs_cyto_data
 #' @importFrom rsvd rpca
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
@@ -136,13 +136,22 @@ cyto_map.GatingSet <- function(x,
   }
 
   # CLONE GATINGSET VIEW
-  gs_clone <- cyto_copy(x)
+  gs_copy <- cyto_copy(x)
 
   # TRANSFORMERS
   if (is.null(trans)) {
-    trans <- cyto_transformer_extract(gs_clone)
+    trans <- cyto_transformer_extract(gs_copy)
   }
 
+  # NAMES - ALL NAMES INCLUDING EMPTY PARENT
+  gs_names <- cyto_names(gs_copy)
+  
+  # REMOVE EMPTY PARENTS
+  gs_counts <- cyto_stats_compute(gs_copy,
+                                  alias = parent,
+                                  stat = "count")
+  gs_clone <- gs_copy[which(gs_counts[, ncol(gs_counts)] != 0)]
+  
   # GROUP_BY
   gs_list <- cyto_group_by(gs_clone, group_by = merge_by)
 
@@ -182,15 +191,43 @@ cyto_map.GatingSet <- function(x,
 
   # COMBINE FLOWSETS
   cyto_data <- do.call("rbind2", cyto_data)
+  
+  # MAPPED CHANNELS
+  cyto_data_channels <- cyto_channels(cyto_data)
+  
+  # MAPPED FILE NAMES
+  cyto_data_names <- cyto_names(cyto_data)
 
-  # UPDATE CYTO_DATA IN GS_CLONE
-  gs_cyto_data(gs_clone) <- cyto_data
+  # COMPLETE CYTO_DATA
+  gs_cyto_data <- as.list(cyto_names(gs_copy))
+  names(gs_cyto_data) <- cyto_names(gs_copy)
+  lapply(seq_along(gs_cyto_data), function(z){
+    if(names(gs_cyto_data)[z] %in% cyto_data_names){
+      ind <- match(names(gs_cyto_data)[z], cyto_data_names)
+      gs_cyto_data[[z]] <<- cyto_data[[ind]]
+    }else{
+      # EMPTY FILE
+      gs_cyto_data[[z]] <<- cyto_empty(names(gs_cyto_data)[z],
+                                       cyto_data_channels)
+    }
+  })
+  lapply(seq_along(gs_cyto_data), function(z){
+    if(class(gs_cyto_data[[z]]) == "flowFrame"){
+      cf <- flowFrame_to_cytoframe(gs_cyto_data[[z]])
+    }
+    cyto_names(cf) <- names(gs_cyto_data)[z]
+    gs_cyto_data[[z]] <<- cf
+  })
+  gs_cyto_data <- cytoset(gs_cyto_data)
+  cyto_details(gs_cyto_data) <- cyto_details(gs_copy)
+  gs_cyto_data(gs_copy) <- gs_cyto_data
 
   # RECOMPUTE STATISTICS
-  suppressMessages(recompute(gs_clone))
+  suppressMessages(recompute(gs_copy))
 
   # UPDATE GROUPING
-  gs_list <- cyto_group_by(gs_clone, group_by = merge_by)
+  gs_list <- cyto_group_by(gs_copy, 
+                           group_by = merge_by)
 
   # PLOT MAPPING PER GROUP (ONE PLOT PER PAGE)
   if (plot == TRUE) {
@@ -245,7 +282,7 @@ cyto_map.GatingSet <- function(x,
   }
 
   # RETURN SPLIT MAPPED FLOWFRAMES
-  return(gs_clone)
+  return(gs_copy)
 }
 
 #' @rdname cyto_map
@@ -265,14 +302,22 @@ cyto_map.flowSet <- function(x,
                              seed = NULL,
                              ...) {
 
-  # COPY
-  x <- cyto_copy(x)
-
   # SELECT SAMPLES
   if (!is.null(select)) {
     x <- cyto_select(x, select)
-  }
+  } 
+  
+  # COPY
+  fs_copy <- cyto_copy(x)
 
+  # NAMES - ALL NAMES NCLUDING EMPTY
+  fs_names <- cyto_names(fs_copy)
+  
+  # REMOVE EMPTY FLOWFRAMES
+  fs_counts <- cyto_stats_compute(fs_copy,
+                                  stat = "count")
+  fs_clone <- fs_copy[which(fs_counts[, ncol(fs_counts)] != 0)]
+  
   # GROUP_BY
   fs_list <- cyto_group_by(x, group_by = merge_by)
 
@@ -308,8 +353,41 @@ cyto_map.flowSet <- function(x,
     return(flowSet_to_cytoset(flowSet(cyto_data)))
   })
 
+  # COMBINE FLOWSETS
+  cyto_data <- do.call("rbind2", cyto_data)
+  
+  # MAPPED FILE NAMES
+  cyto_data_names <- cyto_names(cyto_data)
+  
+  # MAPPED CHANNELS
+  cyto_data_channels <- cyto_channels(cyto_data)
+  
+  # COMPLETE CYTO_DATA
+  fs_cyto_data <- as.list(cyto_names(fs_copy))
+  names(fs_cyto_data) <- cyto_names(fs_copy)
+  lapply(seq_along(fs_cyto_data), function(z){
+    if(names(fs_cyto_data)[z] %in% cyto_data_names){
+      ind <- match(names(fs_cyto_data)[z], cyto_data_names)
+      fs_cyto_data[[z]] <<- cyto_data[[ind]]
+    }else{
+      # EMPTY FILE
+      fs_cyto_data[[z]] <<- cyto_empty(names(fs_cyto_data)[z],
+                                       cyto_data_channels)
+    }
+  })
+  lapply(seq_along(fs_cyto_data), function(z){
+    if(class(fs_cyto_data[[z]]) == "flowFrame"){
+      cf <- flowFrame_to_cytoframe(fs_cyto_data[[z]])
+    }
+    cyto_names(cf) <- names(fs_cyto_data)[z]
+    fs_cyto_data[[z]] <<- cf
+  })
+  fs_cyto_data <- cytoset(fs_cyto_data)
+  cyto_details(fs_cyto_data) <- cyto_details(fs_copy)
+  cyto_names(fs_cyto_data) <- cyto_names(fs_copy)
+  
   # RETURN MAPPED DATA
-  return(do.call("rbind2", cyto_data))
+  return(fs_cyto_data)
 }
 
 #' @rdname cyto_map

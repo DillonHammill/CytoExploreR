@@ -1,6 +1,7 @@
 # CytoExploreR 1.0.7
 
 * Fix quadrant gating bug in `cyto_gate_draw()`.
+* `cyto_map()` can now appropriately handle empty flowFrames/cytoframes.
 * Switch to using `rsvd::rpca()` for faster PCA computation in `cyto_map()`.
 * Add versioned and latest tags to CytoExploreR Docker images for reproducibility. Docker images are always built against the most recent RGLab packages at the time. Versioned Docker images allow users to go back in time should they need to.
 * Update FIt-SNE to version `1.2.1`. This change requires updated installation of FIt-SNE and now requires the `rsvd` package. FIt-SNE now uses PCA initialization by default.
