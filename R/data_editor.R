@@ -23,7 +23,7 @@
 #'   div paneViewer observeEvent
 #' @importFrom shinythemes shinytheme
 #' @importFrom rhandsontable rHandsontableOutput renderRHandsontable
-#'   rhandsontable hot_col hot_to_r
+#'   rhandsontable hot_col hot_to_r hot_cols
 #' @importFrom utils read.csv write.csv
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -122,27 +122,38 @@ data_editor <- function(x,
           suppressWarnings(
             rhandsontable(values[["x"]],
                           contextMenu = TRUE,
-                          useTypes = FALSE,
+                          type = "text", # UseTypes = FALSE breaks highlighting
                           colHeaders = NULL,
-                          rowHeaders = NULL,
                           readOnly = FALSE,
-                          halign = "htCenter")
+                          halign = "htCenter",
+                          myindex = 0) %>%
+              hot_cols(renderer = "function(instance, 
+                                            td, 
+                                            row, 
+                                            col, 
+                                            prop, 
+                                            value, 
+                                            cellProperties) {
+                    Handsontable.renderers.TextRenderer.apply(this, arguments);
+                    if (instance.params && instance.params.myindex == row){
+                      td.style.background = 'whitesmoke';
+                    }}", manualColumnResize = TRUE)
           )
         # MENU
         }else if(type == "menu"){
           suppressWarnings(
             rhandsontable(values[["x"]],
                           contextMenu = TRUE,
-                          rowHeaders = NULL,
-                          useTypes = FALSE) %>%
+                          rowHeaders = NULL) %>%
             hot_col(colnames(x)[-length(colnames(x))],
                     halign = "htCenter",
-                    readOnly = TRUE) %>%
+                    readOnly = TRUE,
+                    type = "text") %>%
             hot_col(col = colnames(x)[length(colnames(x))],
                     type = "checkbox",
                     halign = "htCenter",
                     readOnly = FALSE,
-                    allowInvalid = FALSE)
+                    allowInvalid = FALSE) 
           )
         # SELECTOR
         }else if(type == "selector"){
