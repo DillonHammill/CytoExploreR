@@ -568,7 +568,6 @@
 #' @noRd
 .cyto_gate_quad_convert <- function(gate,
                                     channels) {
-  
   # RECTANGLEGATES SUPPLIED
   if(is(gate)[1] == "list") {
     # LIST OF RECTANGLEGATES
@@ -604,8 +603,7 @@
     xcoord <- gate@boundary[1]
     ycoord <- gate@boundary[2]
     # ALIAS
-    alias <- unlist(strsplit(gate@filterId, "|"))
-    alias <- alias[alias != "|"]
+    alias <- unlist(strsplit(gate@filterId, "\\|"))
     if(length(alias) != 4){
       alias <- c("Q1", "Q2", "Q3","Q4")
     }

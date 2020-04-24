@@ -570,6 +570,9 @@ cyto_gate_edit <- function(x,
     )
   }
 
+  # EXTRACT CHANNELS - REQUIRED FOR QUADGATES
+  channels <- cyto_channels_extract(gs, channels)
+  
   # EXTRACT GROUPBY
   gtf_groupBy <- unique(gtf_chunk[, "groupBy"])
   
