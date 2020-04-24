@@ -180,9 +180,9 @@ data_editor <- function(x,
 
   # RUN DATA EDITOR
   if (viewer == TRUE) {
-    x <- runApp(app, launch.browser = paneViewer())
+    x <- suppressMessages(runApp(app, launch.browser = paneViewer()))
   } else {
-    x <- runApp(app)
+    x <- suppressMessages(runApp(app))
   }
 
   # EDITOR DATA
