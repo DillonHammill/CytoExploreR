@@ -23,7 +23,7 @@
 #'   div paneViewer observeEvent
 #' @importFrom shinythemes shinytheme
 #' @importFrom rhandsontable rHandsontableOutput renderRHandsontable
-#'   rhandsontable hot_col hot_to_r hot_cols
+#'   rhandsontable hot_col hot_to_r
 #' @importFrom utils read.csv write.csv
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -122,22 +122,11 @@ data_editor <- function(x,
           suppressWarnings(
             rhandsontable(values[["x"]],
                           contextMenu = TRUE,
-                          type = "text", # UseTypes = FALSE breaks highlighting
+                          useTypes = FALSE,
                           colHeaders = NULL,
+                          rowHeaders = NULL,
                           readOnly = FALSE,
-                          halign = "htCenter",
-                          myindex = 0) %>%
-              hot_cols(renderer = "function(instance, 
-                                            td, 
-                                            row, 
-                                            col, 
-                                            prop, 
-                                            value, 
-                                            cellProperties) {
-                    Handsontable.renderers.TextRenderer.apply(this, arguments);
-                    if (instance.params && instance.params.myindex == row){
-                      td.style.background = 'whitesmoke';
-                    }}", manualColumnResize = TRUE)
+                          halign = "htCenter")
           )
         # MENU
         }else if(type == "menu"){
@@ -148,7 +137,7 @@ data_editor <- function(x,
             hot_col(colnames(x)[-length(colnames(x))],
                     halign = "htCenter",
                     readOnly = TRUE,
-                    type = "text") %>%
+                    useTypes = FALSE) %>%
             hot_col(col = colnames(x)[length(colnames(x))],
                     type = "checkbox",
                     halign = "htCenter",
