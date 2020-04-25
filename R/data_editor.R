@@ -178,11 +178,13 @@ data_editor <- function(x,
     }
   )
 
-  # RUN DATA EDITOR
-  if (viewer == TRUE) {
-    x <- suppressMessages(runApp(app, launch.browser = paneViewer()))
-  } else {
-    x <- suppressMessages(runApp(app))
+  # RUN DATA EDITOR - INTERACTIVE MODE ONLY
+  if(getOption("CytoExploreR_interactive")){
+    if (viewer == TRUE) {
+      x <- suppressMessages(runApp(app, launch.browser = paneViewer()))
+    } else {
+      x <- suppressMessages(runApp(app))
+    }
   }
 
   # EDITOR DATA
