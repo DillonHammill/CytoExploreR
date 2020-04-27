@@ -1638,7 +1638,7 @@ cyto_gate_prepare <- function(x,
 
   # DIMENSIONS
   x <- cyto_gate_convert(x, channels = channels)
-
+  
   # RETURN PREPARED GATE LIST
   return(x)
 }

@@ -593,6 +593,10 @@
         unique(coords[, z][is.finite(coords[, z])])
       })
       names(coords) <- chans
+      # NORMAL GATES
+      if(length(coords) > 2){
+        return(gate)
+      }
       # QUADGATE
       qg <- quadGate(filterId = paste(quads, collapse = "|"),
                      .gate = coords)
@@ -627,6 +631,7 @@
     names(Q) <- alias
     return(Q)
   }
+  return(gate)
 }
 
 ## .CYTO_GATE_COORDS -----------------------------------------------------------

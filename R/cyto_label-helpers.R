@@ -96,8 +96,7 @@
       # QUADGATES RETURN MULTIPLE POPULATIONS
       if (is(gate[[z]], "quadGate")) {
         if("quad_order" %in% names(args)){
-          quads <- unlist(strsplit(gate[[z]]@filterId, "|"))
-          quads <- quads[quads != "|"]
+          quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
           split(x, gate[[z]])[c(2, 1, 3, 4)][match(quad_order,
                                                    quads)]# FIX ORDER
         }else{
@@ -127,7 +126,7 @@
       }
     }
   })
-
+  
   # RETURN LIST OF GATED POPULATIONS
   return(pops)
 }
@@ -185,7 +184,7 @@
 
   # SPLIT TNP
   TNP <- split(TNP, rep(seq_len(SMP), each = NP))
-
+  
   # COMPUTE LABEL_STAT ---------------------------------------------------------
 
   # STATISTICS

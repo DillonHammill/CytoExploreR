@@ -124,17 +124,37 @@ cyto_plot_gate.rectangleGate <- function(gate,
   }else if(length(channels) == 2){
     # REPLACE INFINITE X COORDS
     if(is.infinite(gate@min[channels[1]])){
-      gate@min[channels[1]] <- xmin
+      # Quadrant
+      if(any(grepl("quad", names(attributes(gate))))){
+        gate@min[channels[1]] <- lims[1] - 0.025*(lims[2] - lims[1]) # off plot
+      }else{
+        gate@min[channels[1]] <- xmin
+      }
     }
     if(is.infinite(gate@max[channels[1]])){
-      gate@max[channels[1]] <- xmax
+      # Quadrant
+      if(any(grepl("quad", names(attributes(gate))))){
+        gate@max[channels[1]] <- lims[2] + 0.025*(lims[2] - lims[1]) # off plot
+      }else{
+        gate@max[channels[1]] <- xmax
+      }
     }
     # REPLACE INFINITE Y COORDS
     if(is.infinite(gate@min[channels[2]])){
-      gate@min[channels[2]] <- ymin
+      # Quadrant
+      if(any(grepl("quad", names(attributes(gate))))){
+        gate@min[channels[2]] <- lims[3] - 0.025*(lims[4] - lims[3]) # off plot
+      }else{
+        gate@min[channels[2]] <- ymin
+      }
     }
     if(is.infinite(gate@max[channels[2]])){
-      gate@max[channels[2]] <- ymax
+      # Quadrant
+      if(any(grepl("quad", names(attributes(gate))))){
+        gate@max[channels[2]] <- lims[4] + 0.025*(lims[4] - lims[3]) # off plot
+      }else{
+        gate@max[channels[2]] <- ymax
+      }
     }
     # PLOT GATE
     rect(xleft = gate@min[channels[1]],
@@ -607,7 +627,7 @@ cyto_plot_gate.list <- function(gate,
                                 gate_fill = "white",
                                 gate_fill_alpha = 0,
                                 ...){
-
+  
   # PREPARE GATE ---------------------------------------------------------------
   
   # LIST OF GATE OBJECTS - WATCH OUT FOR FILTERS & DUPLICATES

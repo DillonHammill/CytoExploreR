@@ -183,7 +183,7 @@
 
   # GATE ARGUMENTS
   gate_args <- args[names(args) %in% gate_args]
-
+  
   # LABEL ARGUMENTS
   label_args <- args[names(args) %in% label_args]
   
