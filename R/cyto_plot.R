@@ -454,7 +454,8 @@ cyto_plot.GatingSet <- function(x,
         # ADD VALID BOOL GATES TO ALIAS
         valid_bool_gate <- LAPPLY(empty_alias, function(z) {
           # EXTRACT GATE
-          g <- gh_pop_get_gate(gh, z)
+          g <- gh_pop_get_gate(gh, 
+                               cyto_nodes_check(gh, z, parent))
           # BOOL GATE
           if (is(g, "booleanFilter")) {
             # BOOLEAN LOGIC
@@ -505,7 +506,8 @@ cyto_plot.GatingSet <- function(x,
       # VALID BOOL GATE - ALIAS CORRECT
       lapply(empty_alias, function(z){
         # EXTRACT GATE
-        g <- gh_pop_get_gate(gh, z)
+        g <- gh_pop_get_gate(gh, 
+                             cyto_nodes_check(gh, z, parent))
         # BOOL GATE
         if(is(g, "booleanFilter")){
           # BOOLEAN LOGIC
@@ -560,7 +562,8 @@ cyto_plot.GatingSet <- function(x,
         gt <- lapply(alias, function(z) {
           ind <- pd$name[match(nm, pd$group_by)[1]]
           ind <- which(pd$name == ind)
-          gh_pop_get_gate(gs[[ind]], z)
+          gh_pop_get_gate(gs[[ind]], 
+                          cyto_nodes_check(gs[[ind]], z, parent))
         })
         names(gt) <- alias
         return(gt)
@@ -570,7 +573,8 @@ cyto_plot.GatingSet <- function(x,
     } else {
       gate <- lapply(seq_len(length(gs)), function(z) {
         gt <- lapply(alias, function(y) {
-          gh_pop_get_gate(gs[[z]], y)
+          gh_pop_get_gate(gs[[z]], 
+                          cyto_nodes_check(gs[[z]], z, parent))
         })
         names(gt) <- alias
         return(gt)
@@ -582,7 +586,9 @@ cyto_plot.GatingSet <- function(x,
       return(z)
     })
     # NEGATED GATES - SINGLE NEGATED GATE
-    if(all(LAPPLY(alias, function(z){gh_pop_is_negated(gh, z)}))){
+    if(all(LAPPLY(alias, function(z){
+      gh_pop_is_negated(gh, cyto_nodes_check(gh, z, parent))
+      }))){
       # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
       alias <- c(NA, alias)
     }
@@ -614,7 +620,7 @@ cyto_plot.GatingSet <- function(x,
       gate <- list(gate)
     }
   }
-
+  
   # CAPTURE OVERLAY POPULATION NAMES
   nms <- NA
 
@@ -637,19 +643,12 @@ cyto_plot.GatingSet <- function(x,
       }
       # CHECK OVERLAY - MAY BE NA ABOVE
       if(!.all_na(overlay)){
-        # VALID OVERLAY NODES
-        if (all(overlay %in% cyto_nodes(gs, path = "auto"))) {
-          # EXTRACT POPULATIONS
-          nms <- overlay
-          overlay <- lapply(overlay, function(z) {
-            cyto_extract(gs, z)
-          })
-          names(overlay) <- nms
-        } else {
-          stop(paste(overlay[!overlay %in% cyto_nodes(gs, path = "auto")],
-            collapse = " & "
-          ), " do not exist in the GatingSet.")
-        }
+        # EXTRACT POPULATIONS
+        nms <- overlay
+        overlay <- lapply(overlay, function(z) {
+          cyto_extract(gs, cyto_nodes_check(gs, z, parent))
+        })
+        names(overlay) <- nms
       }
     }
   }
@@ -879,7 +878,8 @@ cyto_plot.GatingHierarchy <- function(x,
         # ADD VALID BOOL GATES TO ALIAS
         valid_bool_gate <- LAPPLY(empty_alias, function(z) {
           # EXTRACT GATE
-          g <- gh_pop_get_gate(gh, z)
+          g <- gh_pop_get_gate(gh, 
+                               cyto_nodes_check(gh, z, parent))
           # BOOL GATE
           if (is(g, "booleanFilter")) {
             # BOOLEAN LOGIC
@@ -932,7 +932,8 @@ cyto_plot.GatingHierarchy <- function(x,
       # VALID BOOL GATE - ALIAS CORRECT
       lapply(empty_alias, function(z){
         # EXTRACT GATE
-        g <- gh_pop_get_gate(gh, z)
+        g <- gh_pop_get_gate(gh, 
+                             cyto_nodes_check(gh, z, parent))
         # BOOL GATE
         if(is(g, "booleanFilter")){
           # BOOLEAN LOGIC
@@ -983,14 +984,18 @@ cyto_plot.GatingHierarchy <- function(x,
     alias <- unique(alias)
     # GATES
     gate <- lapply(alias, function(y) {
-      gh_pop_get_gate(gh, y)
+      gh_pop_get_gate(gh, 
+                      cyto_nodes_check(gh, y, parent))
     })
     names(gate) <- alias
     # REMOVE BOOLEAN GATES
     ind <- which(LAPPLY(gate, function(z){is(z, "booleanFilter")}))
     gate[ind] <- NULL
     # NEGATED GATES - SINGLE NEGATED GATE
-    if(all(LAPPLY(alias, function(z){gh_pop_is_negated(gh, z)}))){
+    if(all(LAPPLY(alias, function(z){
+      gh_pop_is_negated(gh, 
+                        cyto_nodes_check(gh, z, parent))
+      }))){
       # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
       alias <- c(NA, alias)
     }
@@ -1045,19 +1050,13 @@ cyto_plot.GatingHierarchy <- function(x,
       }
       # CHECK OVERLAY - MAY BE NA ABOVE
       if(!.all_na(overlay)){
-        # VALID OVERLAY
-        if (all(overlay %in% cyto_nodes(gh, path = "auto"))) {
-          # EXTRACT POPULATIONS
-          nms <- overlay
-          overlay <- lapply(overlay, function(z) {
-            cyto_extract(gh, z)
-          })
-          names(overlay) <- nms
-        } else {
-          stop(paste(overlay[!overlay %in% cyto_nodes(gh, path = "auto")],
-            collapse = " & "
-          ), " do not exist in the GatingHierarchy.")
-        }
+        # EXTRACT POPULATIONS
+        nms <- overlay
+        overlay <- lapply(overlay, function(z) {
+          cyto_extract(gh,
+                       cyto_nodes_check(gh, z, parent))
+        })
+        names(overlay) <- nms
       }
     }
   }
@@ -1449,7 +1448,7 @@ cyto_plot.flowSet <- function(x,
     # USE FIRST SET OF GATES
     gate <- list(gate[[1]])
   }
-
+  
   # ARGUMENT PREPARATION -------------------------------------------------------
 
   # XLIM
@@ -2110,12 +2109,12 @@ cyto_plot.flowFrame <- function(x,
   }
 
   # GATES PREPARATION ----------------------------------------------------------
-
+  
   # LIST OF GATE OBJECTS
   if (!.all_na(gate)) {
     gate <- cyto_gate_prepare(gate, channels)
   }
-
+  
   # POPULATIONS ----------------------------------------------------------------
 
   # POPULATIONS PER LAYER
@@ -2307,7 +2306,7 @@ cyto_plot.flowFrame <- function(x,
       return(POPS)
     })
   }
-
+  
   # COMPUTE LABEL STATISTICS ---------------------------------------------------
 
   # STATISTICS

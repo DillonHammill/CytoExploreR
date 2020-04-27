@@ -3416,6 +3416,88 @@ cyto_nodes <- function(x, ...) {
   }
 }
 
+## CYTO_NODES_CHECK ------------------------------------------------------------
+
+#' Check for ambiguous nodes
+#'
+#' \code{cyto_nodes_check} checks if the supplied nodes are ambiguous within the
+#' \code{GatingHierarchy} or \code{GatingSet} and attempts to anchor the node to
+#' a parental node to obtain a unique node path.
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param nodes vector of nodes to check.
+#' @param anchor parental node to anchor to if node is ambiguous.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_nodes_check <- function(x,
+                             nodes = NULL,
+                             anchor = NULL){
+  
+  # NODE PATHS FULL & UNIQUE
+  nodes_full_paths <- cyto_nodes(x, path = "full")
+  nodes_unique_paths <- cyto_nodes(x, path = "auto")
+  
+  # SPLIT UNIQUE PATHS
+  nodes_unique_paths_split <- as.list(nodes_unique_paths)
+  nodes_unique_paths_split <- lapply(nodes_unique_paths_split, function(z){
+    unlist(strsplit(z, "\\/"))
+  })
+  names(nodes_unique_paths_split) <- nodes_unique_paths
+  
+  # CHECK NODES
+  nodes <- LAPPLY(nodes, function(node){
+    if(node %in% nodes_unique_paths){
+      return(node)
+    # AMBIGUOUS NODE
+    }else{
+      # SPLIT NODE
+      node_split <- unlist(strsplit(node, "\\/"))
+      node_split <- node_split[!LAPPLY(node_split, ".empty")]
+      # NODE DOES NOT EXIST
+      if(!all(node_split %in% unique(unlist(nodes_unique_paths_split)))){
+        stop(paste0(node, " does not exist in this ", class(x), "!"))
+      # AMBIGUOUS NODE
+      }else{
+        # REQUIRE VALID ANCHOR
+        if(is.null(anchor)){
+          stop(paste0(node, " is ambiguous in this ", class(x), "!"))
+        }else if(!is.null(anchor)){
+          # ANCHOR MAY BE PREFIXED
+          anchor_split <- unlist(strsplit(anchor, "\\/"))
+          anchor_split <- anchor_split[!LAPPLY(anchor_split, ".empty")]
+          # UNIQUE NODE EXISTS
+          ind <- which(LAPPLY(nodes_unique_paths_split, function(z){
+            all(c(node_split, anchor_split) %in% z)
+          }))
+          # CANNOT FIND UNIQUE NODE PATH
+          if(length(ind) == 0){
+            stop(paste0("Failed to generate unique path for ", node, 
+                        " relative to ", anchor, "."))
+          # UNIQUE NODE PATH EXISTS
+          }else{
+            if(length(ind) == 1){
+              node <- names(nodes_unique_paths_split[ind])
+              return(node)
+            }else if(length(ind) > 1){
+              # USE SHORTEST PATH (REMOVE DESCENDANTS)
+              nodes_unique <- nodes_unique_paths_split[ind]
+              nodes_lengths <- LAPPLY(nodes_unique, "length")
+              node <- names(nodes_unique[which.min(nodes_lengths)[1]])
+              return(node)
+            }
+          }
+        }
+      }
+    }
+  })
+  return(nodes)
+  
+}
+
 ## CYTO_EMPTY ------------------------------------------------------------------
 
 #' Construct an empty flowFrame
