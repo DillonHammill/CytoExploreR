@@ -3416,85 +3416,159 @@ cyto_nodes <- function(x, ...) {
   }
 }
 
-## CYTO_NODES_CHECK ------------------------------------------------------------
+## CYTO_NODES_CONVERT ----------------------------------------------------------
 
-#' Check for ambiguous nodes
+#' Convert to unique node paths
 #'
-#' \code{cyto_nodes_check} checks if the supplied nodes are ambiguous within the
-#' \code{GatingHierarchy} or \code{GatingSet} and attempts to anchor the node to
-#' a parental node to obtain a unique node path.
+#' \code{cyto_nodes_convert} checks whether the supplied nodes exist in the
+#' supplied \code{GatingHierarchy} or \code{GatingSet} and returns unique node
+#' paths for each of the supplied nodes. In the case of ambiguous nodes,
+#' \code{cyto_nodes_convert} will attempt to anchor the node path to a known
+#' unique parental node.
 #'
-#' @param x object of class
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param nodes vector of nodes to check.
-#' @param anchor parental node to anchor to if node is ambiguous.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
+#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param nodes vectors of nodes to check and convert.
+#' @param anchor unique path to parental node to use as an anchor for ambiguous
+#'   nodes.
+#' @param path specifies whether the returned nodes should be in the "full" or
+#'   "auto" format, set to "auto" by default
+#'   
+#' @return vector of unique paths for each of the supplied nodes.
+#' 
+#' @author @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
-cyto_nodes_check <- function(x,
-                             nodes = NULL,
-                             anchor = NULL){
+cyto_nodes_convert <- function(x,
+                               nodes = NULL,
+                               anchor = NULL,
+                               path = "auto"){
   
-  # NODE PATHS FULL & UNIQUE
-  nodes_full_paths <- cyto_nodes(x, path = "full")
-  nodes_unique_paths <- cyto_nodes(x, path = "auto")
+  # PATHS
+  nodes_full <- cyto_nodes(x, path = "full")
+  nodes_auto <- cyto_nodes(x, path = "auto")
+  nodes_terminal <- basename(nodes_full)
   
-  # SPLIT UNIQUE PATHS
-  nodes_unique_paths_split <- as.list(nodes_unique_paths)
-  nodes_unique_paths_split <- lapply(nodes_unique_paths_split, function(z){
-    unlist(strsplit(z, "\\/"))
-  })
-  names(nodes_unique_paths_split) <- nodes_unique_paths
+  # ANCHOR
+  if(!is.null(anchor)){
+    # INVALID ANCHOR
+    if(!anchor %in% c(nodes_full, nodes_auto, nodes_terminal)){
+      stop(paste0(anchor, " does not exist in this ", class(x), "!"))
+    }
+    # TERMINAL ANCHOR
+    if(anchor %in% nodes_terminal){
+      anchor_match <- which(LAPPLY(nodes_terminal, function(node_terminal){
+        anchor == node_terminal
+      }))
+    # AUTO NODE
+    }else if(anchor %in% nodes_auto){
+      anchor_match <- which(LAPPLY(nodes_auto, function(node_auto){
+        anchor == node_auto
+      }))
+    # FULL NODE
+    }else if(anchor %in% nodes_full){
+      anchor_match <- which(LAPPLY(nodes_full, function(node_full){
+        anchor == node_full
+      }))
+    }
+    # ANCHOR MUST BE UNIQUE
+    if(length(anchor_match) > 1){
+      stop(paste0(anchor, " is not unique within this ", class(x), "!"))
+    }
+    # AUTO ANCHOR
+    anchor <- nodes_auto[anchor_match]
+  }
   
-  # CHECK NODES
+  # CONVERT NODES
   nodes <- LAPPLY(nodes, function(node){
-    if(node %in% nodes_unique_paths){
-      return(node)
-    # AMBIGUOUS NODE
+    # TERMINAL NODE
+    if(node %in% nodes_terminal){
+      nodes_match <- which(LAPPLY(nodes_terminal, function(node_terminal){
+        node == node_terminal
+      }))
+    # AUTO NODE
+    }else if(node %in% nodes_auto){
+      nodes_match <- which(LAPPLY(nodes_auto, function(node_auto){
+        node == node_auto
+      }))
+    # FULL NODE
+    }else if(node %in% nodes_full){
+      nodes_match <- which(LAPPLY(nodes_full, function(node_full){
+        node == node_full
+      }))
+    # NODE DOES NOT EXIST  
     }else{
-      # SPLIT NODE
-      node_split <- unlist(strsplit(node, "\\/"))
-      node_split <- node_split[!LAPPLY(node_split, ".empty")]
-      # NODE DOES NOT EXIST
-      if(!all(node_split %in% unique(unlist(nodes_unique_paths_split)))){
-        stop(paste0(node, " does not exist in this ", class(x), "!"))
-      # AMBIGUOUS NODE
-      }else{
-        # REQUIRE VALID ANCHOR
-        if(is.null(anchor)){
-          stop(paste0(node, " is ambiguous in this ", class(x), "!"))
-        }else if(!is.null(anchor)){
-          # ANCHOR MAY BE PREFIXED
-          anchor_split <- unlist(strsplit(anchor, "\\/"))
-          anchor_split <- anchor_split[!LAPPLY(anchor_split, ".empty")]
-          # UNIQUE NODE EXISTS
-          ind <- which(LAPPLY(nodes_unique_paths_split, function(z){
-            all(c(node_split, anchor_split) %in% z)
-          }))
-          # CANNOT FIND UNIQUE NODE PATH
-          if(length(ind) == 0){
-            stop(paste0("Failed to generate unique path for ", node, 
-                        " relative to ", anchor, "."))
+      stop(paste0(node, " does not exist in this ", class(x), "!"))
+    }
+    # RETURN NODE
+    if(length(nodes_match) == 1){
+      nodes <- cyto_nodes(x, path = path)[nodes_match]
+      return(nodes)
+    # AMBIGUOUS NODE - ANCHOR TO PARENTAL NODE
+    }else if(length(nodes_match) > 1){
+      # NO ANCHOR
+      if(is.null(anchor)){
+        stop(paste0(node, " is ambiguous in this ", class(x), "!"))
+      # ANCHOR
+      }else if(!is.null(anchor)){
+        # SPLIT NODE 
+        node_split <- .cyto_nodes_split(node)
+        # SPLIT NODES FULL
+        nodes_full_split <- .cyto_nodes_split(nodes_full)
+        # SPLIT ANCHOR
+        anchor_split <- .cyto_nodes_split(anchor)
+        # ROOT ANCHOR
+        if(anchor_split == "root"){
+          anchor_split <- NULL
+        }
+        # UNIQUE NODE EXISTS
+        ind <- which(LAPPLY(nodes_full_split, function(z){
+          all(unique(c(node_split, anchor_split)) %in% z)
+        }))
+        # CANNOT FIND UNIQUE NODE PATH
+        if(length(ind) == 0){
+          stop(paste0("Failed to generate unique path for ", node, 
+                      " relative to ", anchor, "."))
           # UNIQUE NODE PATH EXISTS
-          }else{
-            if(length(ind) == 1){
-              node <- names(nodes_unique_paths_split[ind])
-              return(node)
-            }else if(length(ind) > 1){
-              # USE SHORTEST PATH (REMOVE DESCENDANTS)
-              nodes_unique <- nodes_unique_paths_split[ind]
-              nodes_lengths <- LAPPLY(nodes_unique, "length")
-              node <- names(nodes_unique[which.min(nodes_lengths)[1]])
-              return(node)
+        }else{
+          if(length(ind) == 1){
+            node <- cyto_nodes(x, path = path)[ind]
+            return(node)
+          }else if(length(ind) > 1){
+            # USE SHORTEST PATH (REMOVE DESCENDANTS)
+            nodes_unique <- nodes_full_split[ind]
+            nodes_lengths <- LAPPLY(nodes_unique, "length")
+            nodes_length_min <- min(nodes_lengths)
+            if(length(nodes_lengths[nodes_lengths == nodes_length_min]) > 1){
+              stop(paste0("Failed to generate unique path for ", node, 
+                          " relative to ", anchor, "."))
             }
+            ind <- which(nodes_lengths == nodes_length_min)
+            node <- cyto_nodes(x, path = path)[ind]
+            return(node)
           }
         }
       }
     }
+    
   })
+
+  # RETURN UNIQUE NODES
   return(nodes)
+  
+}
+
+#' Split node paths into fragments
+#' @noRd
+.cyto_nodes_split <- function(nodes = NULL){
+  
+  nodes_split <- lapply(nodes, function(node){
+    node <- unlist(strsplit(node, "\\/"))
+    node <- node[!LAPPLY(node, ".empty")]
+    return(node)
+  })
+  names(nodes_split) <- nodes
+  
+  return(nodes_split)
   
 }
 

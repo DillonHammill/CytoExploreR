@@ -57,15 +57,17 @@
   }
 
   # List of RectangleGates to QuadGate (MUST BE 4 RECTANGLES)
-  if(length(gate) == 4 & all(LAPPLY(gate, function(z){
+  if (length(gate) == 4 & all(LAPPLY(gate, function(z) {
     is(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
-    }))){
-      # CHANNELS
-      chans <- as.character(parameters(gate[[1]]))
-      quad_order <- LAPPLY(gate, function(z){z@filterId})
-      gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
+  }))) {
+    # CHANNELS
+    chans <- as.character(parameters(gate[[1]]))
+    quad_order <- LAPPLY(gate, function(z) {
+      z@filterId
+    })
+    gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
   }
-  
+
   # GATES ----------------------------------------------------------------------
 
   # NEGATED GATE - QUADGATES EXCLUDED
@@ -82,12 +84,16 @@
   # POPULATIONS ----------------------------------------------------------------
 
   # CAREFUL CANNOT NEGATE INDIVIDUAL QUADRANTS EITHER
-  
+
   # ARGUMENTS
   args <- .args_list()
   
   # GATING
   pops <- LAPPLY(seq_len(length(gate)), function(z) {
+    # NO GATE
+    if (.all_na(gate[[z]])) {
+      return(x)
+    }
     # NEGATED POPULATION
     if (negate == TRUE & z == length(gate)) {
       split(x, gate[[z]])[[2]]
@@ -95,38 +101,49 @@
     } else {
       # QUADGATES RETURN MULTIPLE POPULATIONS
       if (is(gate[[z]], "quadGate")) {
-        if("quad_order" %in% names(args)){
+        if ("quad_order" %in% names(args)) {
           quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
-          split(x, gate[[z]])[c(2, 1, 3, 4)][match(quad_order,
-                                                   quads)]# FIX ORDER
-        }else{
-          split(x, gate[[z]])[c(2, 1, 3, 4)]# FIX ORDER
+          split(x, gate[[z]])[c(2, 1, 3, 4)][match(
+            quad_order,
+            quads
+          )] # FIX ORDER
+        } else {
+          split(x, gate[[z]])[c(2, 1, 3, 4)] # FIX ORDER
         }
         # SINGLE POPULATIONS
       } else {
         # RECTANGLE BELONGS TO QUADGATE
-        if(is(gate[[z]], "rectangleGate") &
-           any(grepl("quad", names(attributes(gate[[z]]))))){
+        if (is(gate[[z]], "rectangleGate") &
+          any(grepl("quad", names(attributes(gate[[z]]))))) {
           q <- names(attributes(gate[[z]])[["quadrants"]])
-          coords <- .cyto_gate_coords(gate[z], 
-                                      channels = as.character(parameters(gate[[z]])))
+          coords <- .cyto_gate_coords(gate[z],
+            channels = as.character(parameters(gate[[z]]))
+          )
           chans <- colnames(coords)
-          coords <- lapply(colnames(coords), function(y){
+          coords <- lapply(colnames(coords), function(y) {
             unique(coords[, y][is.finite(coords[, y])])
           })
           names(coords) <- chans
-          qg <- quadGate(filterId = paste(q, collapse = "|"), 
-                         .gate = coords)
+          qg <- quadGate(
+            filterId = paste(q, collapse = "|"),
+            .gate = coords
+          )
           p <- split(x, qg)[c(2, 1, 3, 4)] # FIX ORDER
           names(p) <- q
           p[[match(gate[[z]]@filterId, names(p))]]
-        }else{
+        } else {
           Subset(x, gate[[z]])
         }
       }
     }
   })
-  
+  # SIGNAL IF GATE PRESENT
+  if(!.all_na(gate)){
+    names(pops) <- rep("gated", length(pops))
+  }else{
+    names(pops) <- rep("ungated", length(pops))
+  }
+
   # RETURN LIST OF GATED POPULATIONS
   return(pops)
 }
@@ -152,6 +169,7 @@
                              channels,
                              axes_trans = NA,
                              label_stat,
+                             gate = NA,
                              density_smooth) {
 
   # CHECKS ---------------------------------------------------------------------
@@ -184,9 +202,14 @@
 
   # SPLIT TNP
   TNP <- split(TNP, rep(seq_len(SMP), each = NP))
-  
+
   # COMPUTE LABEL_STAT ---------------------------------------------------------
 
+  # COMPUTE STAT AGAINST BASE LAYER (NO GATES)
+  if(.all_na(gate)){
+    x <- rep(x[1], length(x))
+  }
+  
   # STATISTICS
   LABEL_STAT <- LAPPLY(seq_len(SMP), function(z) {
     # LABEL_STAT
@@ -195,14 +218,9 @@
       if (!.all_na(label_stat[y])) {
         # FREQUENCY STATISTIC
         if (grepl("freq", label_stat[y], ignore.case = TRUE)) {
-          # PERCENT OF BASE LAYER (WITHOUT GATES)
-          if(length(pops) == length(x)){
-            st <- .cyto_count(pops[[y]]) / .cyto_count(x[[1]]) * 100
-          # PERCENT GATED PER LAYER
-          }else{
-            st <- .cyto_count(pops[[y]]) / .cyto_count(x[[z]]) * 100
-          }
-          if(is.nan(as.numeric(st))){
+          # PERCENT OF PARENT OR BASE
+          st <- .cyto_count(pops[[y]]) / .cyto_count(x[[z]]) * 100
+          if (is.nan(as.numeric(st))) {
             st <- 0
           }
           st <- paste(.round(st, 2), "%")
@@ -214,7 +232,7 @@
               trans = axes_trans
             )
           )
-          if(is.nan(as.numeric(st))){
+          if (is.nan(as.numeric(st))) {
             st <- 0
           }
           st <- paste(.round(st, 2), "%")
@@ -364,7 +382,7 @@
       text_y = rep(NA, .cyto_gate_count(args[["gate"]], total = TRUE))
     )
   }
-  
+
   # LABEL_TEXT_XY - MATRIX
   label_text_xy <- lapply(seq_len(args[["SMP"]]), function(z) {
 
@@ -384,9 +402,9 @@
             # GATED POPULATION
             if (ind <= nrow(gate_centers)) {
               # X COORD - GATE CENTER
-              if(.all_na(args[["label_text_x"]][y])){
+              if (.all_na(args[["label_text_x"]][y])) {
                 text_x[ind] <<- gate_centers[ind, "x"]
-              }else{
+              } else {
                 text_x[ind] <<- args[["label_text_x"]][y]
               }
               # Y COORD - STACKS/LIMITS
@@ -476,15 +494,15 @@
             # GATED POPULATION
             if (ind <= nrow(gate_centers)) {
               # X COORD - GATE CENTER
-              if(.all_na(args[["label_text_x"]][y])){
+              if (.all_na(args[["label_text_x"]][y])) {
                 text_x[ind] <<- gate_centers[ind, "x"]
-              }else{
+              } else {
                 text_x[ind] <<- args[["label_text_x"]][y]
               }
               # Y COORD - GATE CENTER
-              if(.all_na(args[["label_text_y"]][y])){
+              if (.all_na(args[["label_text_y"]][y])) {
                 text_y[ind] <<- gate_centers[ind, "y"]
-              }else{
+              } else {
                 text_y[ind] <<- args[["label_text_y"]][y]
               }
               # NEGATED POPULATION
@@ -608,7 +626,7 @@
       )
     }
   })
-  
+
   # OFFSET BY LAYER
   if (length(args[["channels"]]) == 1 & args[["density_stack"]] != 0) {
     # SPLIT LABEL_DIMS BY LAYER
@@ -629,17 +647,20 @@
         # Y COORDS TO OFFSET
         text_y <- args[["label_text_y"]][label_ind[[z]]]
         # OFFSET Y CO-ORDINATES (EXCLUDE NA)
-        args[["label_text_y"]][label_ind[[z]]][!is.na(text_y)] <<- tryCatch({
-          .suppress_all_messages(
-            .spread.labels(text_y[!is.na(text_y)],
-              mindiff = label_height,
-              min = ymin,
-              max = ymax
+        args[["label_text_y"]][label_ind[[z]]][!is.na(text_y)] <<- tryCatch(
+          {
+            .suppress_all_messages(
+              .spread.labels(text_y[!is.na(text_y)],
+                mindiff = label_height,
+                min = ymin,
+                max = ymax
+              )
             )
-          )
-        }, error = function(e) {
-          return(text_y[!is.na(text_y)])
-        })
+          },
+          error = function(e) {
+            return(text_y[!is.na(text_y)])
+          }
+        )
       }
     })
     # OFFSET ALL LABELS

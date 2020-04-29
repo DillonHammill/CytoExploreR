@@ -400,7 +400,9 @@ cyto_plot_label.flowFrame <- function(x,
                                  pops = pops,
                                  channels = channels,
                                  label_stat = label_stat,
-                                 axes_trans = trans)
+                                 axes_trans = trans,
+                                 gate = gate,
+                                 density_smooth = density_smooth)
   
   # PREPARE LABEL_TEXT ---------------------------------------------------------
   

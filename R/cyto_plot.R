@@ -455,7 +455,9 @@ cyto_plot.GatingSet <- function(x,
         valid_bool_gate <- LAPPLY(empty_alias, function(z) {
           # EXTRACT GATE
           g <- gh_pop_get_gate(gh, 
-                               cyto_nodes_check(gh, z, parent))
+                               cyto_nodes_convert(gh, 
+                                                  nodes = z, 
+                                                  anchor = parent))
           # BOOL GATE
           if (is(g, "booleanFilter")) {
             # BOOLEAN LOGIC
@@ -507,7 +509,9 @@ cyto_plot.GatingSet <- function(x,
       lapply(empty_alias, function(z){
         # EXTRACT GATE
         g <- gh_pop_get_gate(gh, 
-                             cyto_nodes_check(gh, z, parent))
+                             cyto_nodes_convert(gh, 
+                                                nodes = z, 
+                                                anchor = parent))
         # BOOL GATE
         if(is(g, "booleanFilter")){
           # BOOLEAN LOGIC
@@ -563,7 +567,9 @@ cyto_plot.GatingSet <- function(x,
           ind <- pd$name[match(nm, pd$group_by)[1]]
           ind <- which(pd$name == ind)
           gh_pop_get_gate(gs[[ind]], 
-                          cyto_nodes_check(gs[[ind]], z, parent))
+                          cyto_nodes_convert(gs[[ind]], 
+                                             nodes = z, 
+                                             anchor = parent))
         })
         names(gt) <- alias
         return(gt)
@@ -574,7 +580,9 @@ cyto_plot.GatingSet <- function(x,
       gate <- lapply(seq_len(length(gs)), function(z) {
         gt <- lapply(alias, function(y) {
           gh_pop_get_gate(gs[[z]], 
-                          cyto_nodes_check(gs[[z]], z, parent))
+                          cyto_nodes_convert(gs[[z]], 
+                                             nodes = z, 
+                                             anchor = parent))
         })
         names(gt) <- alias
         return(gt)
@@ -587,7 +595,9 @@ cyto_plot.GatingSet <- function(x,
     })
     # NEGATED GATES - SINGLE NEGATED GATE
     if(all(LAPPLY(alias, function(z){
-      gh_pop_is_negated(gh, cyto_nodes_check(gh, z, parent))
+      gh_pop_is_negated(gh, cyto_nodes_convert(gh, 
+                                               nodes = z, 
+                                               anchor = parent))
       }))){
       # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
       alias <- c(NA, alias)
@@ -646,7 +656,9 @@ cyto_plot.GatingSet <- function(x,
         # EXTRACT POPULATIONS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
-          cyto_extract(gs, cyto_nodes_check(gs, z, parent))
+          cyto_extract(gs, cyto_nodes_convert(gs, 
+                                              nodes = z, 
+                                              anchor = parent))
         })
         names(overlay) <- nms
       }
@@ -666,13 +678,13 @@ cyto_plot.GatingSet <- function(x,
       if(density_stack == 0){
         label_text <- alias
       }else{
-        label_text <- rep(alias, length.out = length(x))
+        label_text <- rep(alias, length.out = length(alias) * length(x))
       }
     } else {
       label_text <- NA
     }
   }
-
+  
   # LEGEND_TEXT
   if (.all_na(legend_text)) {
     # PARENT ONLY
@@ -879,7 +891,9 @@ cyto_plot.GatingHierarchy <- function(x,
         valid_bool_gate <- LAPPLY(empty_alias, function(z) {
           # EXTRACT GATE
           g <- gh_pop_get_gate(gh, 
-                               cyto_nodes_check(gh, z, parent))
+                               cyto_nodes_convert(gh, 
+                                                  nodes = z, 
+                                                  anchor = parent))
           # BOOL GATE
           if (is(g, "booleanFilter")) {
             # BOOLEAN LOGIC
@@ -933,7 +947,9 @@ cyto_plot.GatingHierarchy <- function(x,
       lapply(empty_alias, function(z){
         # EXTRACT GATE
         g <- gh_pop_get_gate(gh, 
-                             cyto_nodes_check(gh, z, parent))
+                             cyto_nodes_convert(gh, 
+                                                nodes = z, 
+                                                anchor = parent))
         # BOOL GATE
         if(is(g, "booleanFilter")){
           # BOOLEAN LOGIC
@@ -985,7 +1001,9 @@ cyto_plot.GatingHierarchy <- function(x,
     # GATES
     gate <- lapply(alias, function(y) {
       gh_pop_get_gate(gh, 
-                      cyto_nodes_check(gh, y, parent))
+                      cyto_nodes_convert(gh, 
+                                         nodes = y, 
+                                         anchor = parent))
     })
     names(gate) <- alias
     # REMOVE BOOLEAN GATES
@@ -994,7 +1012,9 @@ cyto_plot.GatingHierarchy <- function(x,
     # NEGATED GATES - SINGLE NEGATED GATE
     if(all(LAPPLY(alias, function(z){
       gh_pop_is_negated(gh, 
-                        cyto_nodes_check(gh, z, parent))
+                        cyto_nodes_convert(gh, 
+                                           nodes = z, 
+                                           anchor = parent))
       }))){
       # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
       alias <- c(NA, alias)
@@ -1054,7 +1074,9 @@ cyto_plot.GatingHierarchy <- function(x,
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
           cyto_extract(gh,
-                       cyto_nodes_check(gh, z, parent))
+                       cyto_nodes_convert(gh, 
+                                          nodes = z, 
+                                          anchor = parent))
         })
         names(overlay) <- nms
       }
@@ -1072,12 +1094,18 @@ cyto_plot.GatingHierarchy <- function(x,
   if (missing(label_text)) {
     # ALIAS
     if (!.all_na(alias)) {
-      label_text <- alias
-    } else {
-      label_text <- NA
+      if(density_stack == 0){
+        label_text <- alias
+      }else{
+        if(.all_na(overlay)){
+          label_text <- alias
+        }else{
+          label_text <- rep(alias, 1 + length(overlay))
+        }
+      }
     }
   }
-
+  
   # LEGEND_TEXT
   if (.all_na(legend_text)) {
     # PARENT ONLY
@@ -2114,11 +2142,13 @@ cyto_plot.flowFrame <- function(x,
   if (!.all_na(gate)) {
     gate <- cyto_gate_prepare(gate, channels)
   }
+  # REPEAT GATE PER LAYER - LIST OF GATE LISTS
+  gate <- rep(list(unique(gate)), length(fr_list))
   
   # POPULATIONS ----------------------------------------------------------------
 
   # POPULATIONS PER LAYER
-  NP <- .cyto_gate_count(gate, negate = negate)
+  NP <- .cyto_gate_count(gate[[1]], negate = negate)
 
   # TOTAL POPULATIONS
   TNP <- NP * SMP
@@ -2132,7 +2162,7 @@ cyto_plot.flowFrame <- function(x,
   } else {
     label_text <- rep(c(label_text, rep(NA, TNP)), length.out = TNP)
   }
-
+  
   # LABEL_STAT
   # 1D PLOT NO STACK
   if (length(channels) == 1 & density_stack == 0) {
@@ -2284,31 +2314,30 @@ cyto_plot.flowFrame <- function(x,
       }
     }
   }
-
+  
   # POPULATIONS TO LABEL -------------------------------------------------------
 
   # LIST OF POPULATIONS - NEEDED FOR POSITION & STATISTICS
   if (label == TRUE) {
     pops <- LAPPLY(seq_len(SMP), function(z) {
-      # INDICES
-      ind <- TNP_split[[z]]
+      # POPS 
+      POPS <- fr_list[z] # list of flowFrames
+      # LABEL INDICES
+      label_ind <- TNP_split[[z]]
       # LAYER LABELLED - APPLY GATES
-      if (!.all_na(label_text[ind]) | !.all_na(label_stat[ind])) {
+      if (!.all_na(label_text[label_ind]) | !.all_na(label_stat[label_ind])) {
         # GET ALL POPULATIONS (NOT JUST LABELLED ONES - CAN BE IMPROVED?)
         POPS <- .cyto_label_pops(fr_list[[z]],
-          gate = gate,
+          gate = gate[[z]],
           negate = negate
         )
-        # LAYER NOT LABELLED
-      } else {
-        POPS <- rep(list(NA), NP)
       }
       return(POPS)
     })
   }
   
   # COMPUTE LABEL STATISTICS ---------------------------------------------------
-
+  
   # STATISTICS
   if (label == TRUE) {
     label_stat <- .cyto_label_stat(fr_list,
@@ -2316,6 +2345,7 @@ cyto_plot.flowFrame <- function(x,
       channels = channels,
       axes_trans = axes_trans,
       label_stat = label_stat,
+      gate = gate,
       density_smooth = density_smooth
     )
 
@@ -2325,7 +2355,10 @@ cyto_plot.flowFrame <- function(x,
       label_stat
     )
   }
-
+  
+  # GATE
+  gate <- gate[[1]]
+  
   # ARGUMENT SPLITTING ---------------------------------------------------------
 
   # ARGUMENTS
