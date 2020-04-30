@@ -2737,7 +2737,7 @@ cyto_markers_edit <- function(x,
     fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
   }
-
+  
   # file missing
   if (is.null(file)) {
 
@@ -2785,6 +2785,7 @@ cyto_markers_edit <- function(x,
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
+      
     }
 
     # File manually supplied
@@ -2797,6 +2798,7 @@ cyto_markers_edit <- function(x,
 
     # File already exists
     if (length(grep(file, list.files())) != 0) {
+      
       message(file, "found in working directory.")
       dt <- read.csv(file,
         header = TRUE,
@@ -2807,9 +2809,10 @@ cyto_markers_edit <- function(x,
     } else {
 
       # Make data.frame with channel and marker columns
-      dt <- dt[, c("name", "desc")]
+      dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
+      
     }
   }
 
