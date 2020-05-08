@@ -852,23 +852,15 @@
     x <- unlist(x) 
   # GatingSet/GatingHierarchy
   }else{
-    x <- cyto_extract(x, 
-                      parent = parent)
+    x <- list(cyto_extract(x, 
+                           parent = parent))
   }
    
   # Convert markers to channels
   if(!.all_na(channels)){
-    if(class(x) == "list"){
-      channels <- cyto_channels_extract(x[[1]], channels, plot)
-    }else{
-      channels <- cyto_channels_extract(x, channels, plot)
-    }
+    channels <- cyto_channels_extract(x[[1]], channels, plot)
   }else{
-    if(class(x) == "list"){
-      channels <- cyto_channels(x[[1]])
-    }else{
-      channels <- cyto_channels(x)
-    }
+    channels <- cyto_channels(x[[1]])
   }
   
   # Time parameter always uses data limits
