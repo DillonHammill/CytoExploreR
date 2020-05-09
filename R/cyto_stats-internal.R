@@ -846,10 +846,17 @@
   if(axes_limits == "instrument"){
     axes_limits <- "machine"
   }
-  
+
   # Flatten to list of flowFrames/flowSets
   if(class(x) == "list"){
     x <- unlist(x) 
+    x <- lapply(x, function(z){
+      if(is(z, "GatingHierarchy") | is(z, "GatingSet")){
+        z <- cyto_extract(z, 
+                          parent = parent)
+      }
+      return(z)
+    })
   # GatingSet/GatingHierarchy
   }else{
     x <- list(cyto_extract(x, 
