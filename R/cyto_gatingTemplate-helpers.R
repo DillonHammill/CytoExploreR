@@ -56,7 +56,7 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   
   # GENERATE GATINGTEMPLATE - DATA FRAME
   gt <- gh_generate_template(x)
-
+  
   # BOOLEAN ENTRIES EXIST
   if(any(LAPPLY(gt$dims, ".empty"))){
     # PREPARE BOOLEAN ENTRIES
@@ -79,9 +79,6 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   }else{
     gt_bool_chunk <- NULL
   }
-  
-  # SORT ENTRIES BASED ON PARENT
-  gt <- gt[order(nchar(gt$parent)), ]
   
   # GATINGTEMPLATE INFO
   gt_parents <- unique(gt$parent)
@@ -189,6 +186,10 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   })
   gt_entries <- do.call("rbind", gt_entries)
 
+  # SORT GATINGTEMPLATE ENTRIES
+  gt_entries <- gt_entries[
+    order(match(gt_entries$parent, cyto_nodes(x, path = "auto"))), ]
+  
   # ADD BOOLEAN ENTRIES
   if(!is.null(gt_bool_chunk)){
     lapply(seq_len(nrow(gt_bool_chunk)), function(z){
