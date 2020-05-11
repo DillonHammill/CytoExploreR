@@ -56,4 +56,5 @@ RUN R -e "install.packages('remotes')" && \
     R -e "remotes::install_github('RGLab/openCyto')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreRData')" && \
     R -e "remotes::install_github('DillonHammill/flowAI')" && \
+    R -e "remotes::install_github('exaexa/scattermore')" && \
     R -e "remotes::install_github('DillonHammill/CytoExploreR')"
