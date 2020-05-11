@@ -43,7 +43,7 @@
 #' @rdname cyto_plot_point
 #'
 #' @export
-cyto_plot_point <- function(x, ...){
+cyto_plot_point <- function(x, ...) {
   UseMethod("cyto_plot_point")
 }
 
@@ -63,143 +63,167 @@ cyto_plot_point.flowFrame <- function(x,
                                       contour_line_type = 1,
                                       contour_line_width = 1,
                                       contour_line_col = "black",
-                                      contour_line_alpha = 1, ...){
- 
+                                      contour_line_alpha = 1, ...) {
+
   # CHECKS ---------------------------------------------------------------------
-  
+
   # CHANNELS
   channels <- cyto_channels_extract(x, channels)
-  
+
   # PREPARE DATA ---------------------------------------------------------------
-  
+
   # Combine x and overlay into a list
-  if(!.all_na(overlay)){
+  if (!.all_na(overlay)) {
     fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
-  }else{
+  } else {
     fr_list <- list(x)
   }
-   
+
   # SAMPLE DATA ----------------------------------------------------------------
-  
+
   # DISPLAY
-  if(display != 1){
-    fr_list <- cyto_sample(fr_list, 
-                           display = display, 
-                           seed = 56)
+  if (display != 1) {
+    fr_list <- cyto_sample(fr_list,
+      display = display,
+      seed = 56
+    )
   }
-  
+
   # ARGUMENTS ------------------------------------------------------------------
-  
+
   # ARGUMENTS
   args <- .args_list()
-  
+
   # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # UPDATE
   .args_update(args)
-  
+
   # POINT_COL ------------------------------------------------------------------
   point_col <- .cyto_plot_point_col(fr_list,
-                                    channels = channels,
-                                    point_col_scale = point_col_scale,
-                                    point_cols = point_cols,
-                                    point_col = point_col,
-                                    point_col_alpha = point_col_alpha)
-  
+    channels = channels,
+    point_col_scale = point_col_scale,
+    point_cols = point_cols,
+    point_col = point_col,
+    point_col_alpha = point_col_alpha
+  )
+
   # REPEAT ARGUMENTS -----------------------------------------------------------
-  
+
   # ARGUMENTS TO REPEAT
-  args <- .args_list()[c("point_shape",
-                         "point_size",
-                         "contour_lines",
-                         "contour_line_type",
-                         "contour_line_width",
-                         "contour_line_col",
-                         "contour_line_alpha")]
-  
+  args <- .args_list()[c(
+    "point_shape",
+    "point_size",
+    "contour_lines",
+    "contour_line_type",
+    "contour_line_width",
+    "contour_line_col",
+    "contour_line_alpha"
+  )]
+
   # REPEAT ARGUMENTS
-  args <- lapply(args, function(arg){
+  args <- lapply(args, function(arg) {
     rep(arg, length.out = length(fr_list))
   })
-  
+
   # UPDATE ARGUMENTS
   .args_update(args)
-  
+
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
+
   # PLOT LIMITS
   usr <- par("usr")
-  
-  # DEVICE SIZE
-  size <- as.integer(dev.size('px') / dev.size('in') * par('pin'))
-  
+
+  # FAST PLOTTING --------------------------------------------------------------
+
+  # GLOBAL OPTION
+  if (getOption("cyto_plot_fast")) {
+    if (requireNamespace("scattermore")) {
+      # DEVICE SIZE
+      size <- as.integer(dev.size("px") / dev.size("in") * par("pin"))
+      cyto_plot_fast <- TRUE
+    } else {
+      message("Fast plotting requires the 'scattermore' package.")
+      message("Please install it using install.packages('scattermore').")
+      message("Resorting to conventional plotting...")
+      cyto_plot_fast <- FALSE
+    }
+  } else {
+    cyto_plot_fast <- FALSE
+  }
+
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
-  
+
   # LAYERS
-  lapply(seq_len(length(fr_list)), function(z){
-    
+  lapply(seq_len(length(fr_list)), function(z) {
+
     # EXTRACT DATA
     fr_exprs <- exprs(fr_list[[z]])[, channels]
-    
+
     # POINTS - SKIP NO EVENTS
-    if(!is.null(nrow(fr_exprs))){
-      
+    if (!is.null(nrow(fr_exprs))) {
+
       # POINTS
-      if(nrow(fr_exprs) != 0){
-        
+      if (nrow(fr_exprs) != 0) {
+
         # JITTER BARCODES
-        if(any(channels %in% "Sample ID")){
+        if (any(channels %in% "Sample ID")) {
           ind <- which(channels %in% "Sample ID")
-          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z){
-            rnorm(n = length(fr_exprs[,ind][fr_exprs[, ind] == z]),
-                  mean = z,
-                  sd = 0.1)
+          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z) {
+            rnorm(
+              n = length(fr_exprs[, ind][fr_exprs[, ind] == z]),
+              mean = z,
+              sd = 0.1
+            )
           })
         }
-        
-        # PLOT POINTS
-        points(x = fr_exprs[,channels[1]],
-               y = fr_exprs[,channels[2]],
-               pch = point_shape[z],
-               cex = point_size[z],
-               col = point_col[[z]])
-        
-        # # SCATTERMORE POINTS - SHAPE & ALPHA CONTROL
-        # rasterImage(
-        #   scattermore(
-        #     x = cbind(fr_exprs[, channels[1]], fr_exprs[, channels[2]]),
-        #     size = size,
-        #     xlim = usr[1:2],
-        #     ylim = usr[3:4],
-        #     cex = point_size[[z]],
-        #     rgba = col2rgb(point_col[[z]], alpha = TRUE),
-        #     output.raster = TRUE
-        #   ),
-        #   xleft = usr[1],
-        #   xright = usr[2],
-        #   ybottom = usr[3],
-        #   ytop = usr[4]
-        # )
-        
+
+        # PLOT DEFAULT POINTS
+        if (cyto_plot_fast == FALSE) {
+          # CONVENTIONAL PLOTTING
+          points(
+            x = fr_exprs[, channels[1]],
+            y = fr_exprs[, channels[2]],
+            pch = point_shape[z],
+            cex = point_size[z],
+            col = point_col[[z]]
+          )
+          # SCATTERMORE POINTS - LACK PCH CONTROL
+        } else {
+          # RASTER
+          rasterImage(
+            scattermore::scattermore(
+              xy = cbind(fr_exprs[, channels[1]], fr_exprs[, channels[2]]),
+              size = size,
+              xlim = usr[1:2],
+              ylim = usr[3:4],
+              cex = 0.5 * point_size[[z]],
+              rgba = col2rgb(point_col[[z]], alpha = TRUE),
+              output.raster = TRUE
+            ),
+            xleft = usr[1],
+            xright = usr[2],
+            ybottom = usr[3],
+            ytop = usr[4]
+          )
+        }
       }
-      
     }
-    
+
     # CONTOUR_LINES
-    if(contour_lines[z] != 0){
+    if (contour_lines[z] != 0) {
       cyto_plot_contour(fr_list[[z]],
-                        channels = channels,
-                        contour_lines = contour_lines[z],
-                        contour_line_type = contour_line_type[z],
-                        contour_line_width = contour_line_width[z],
-                        contour_line_col = contour_line_col[z],
-                        contour_line_alpha = contour_line_alpha[z])
-      
+        channels = channels,
+        contour_lines = contour_lines[z],
+        contour_line_type = contour_line_type[z],
+        contour_line_width = contour_line_width[z],
+        contour_line_col = contour_line_col[z],
+        contour_line_alpha = contour_line_alpha[z]
+      )
     }
-    
   })
-  
+
   # INVISIBLE NULL RETURN
   invisible(NULL)
 }
@@ -218,131 +242,154 @@ cyto_plot_point.list <- function(x,
                                  contour_lines = 0,
                                  contour_line_type = 1,
                                  contour_line_width = 1,
-                                 contour_line_col = "black", 
-                                 contour_line_alpha = 1, ...){
-  
+                                 contour_line_col = "black",
+                                 contour_line_alpha = 1, ...) {
+
   # SAMPLE DATA ----------------------------------------------------------------
-  
+
   # DISPLAY
-  if(display != 1){
-    x <- cyto_sample(x, 
-                     display = display, 
-                     seed = 56)
+  if (display != 1) {
+    x <- cyto_sample(x,
+      display = display,
+      seed = 56
+    )
   }
-  
+
   # ARGUMENTS ------------------------------------------------------------------
-  
+
   # Pull down arguments to named list
   args <- .args_list()
-  
+
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # Update arguments
   .args_update(args)
-  
+
   # POINT_COL ------------------------------------------------------------------
   point_col <- .cyto_plot_point_col(x,
-                                    channels = channels,
-                                    point_col_scale = point_col_scale,
-                                    point_cols = point_cols,
-                                    point_col = point_col,
-                                    point_col_alpha = point_col_alpha)
+    channels = channels,
+    point_col_scale = point_col_scale,
+    point_cols = point_cols,
+    point_col = point_col,
+    point_col_alpha = point_col_alpha
+  )
 
   # REPEAT ARGUMENTS -----------------------------------------------------------
-  
+
   # ARGUMENTS
-  args <- .args_list()[c("point_shape",
-                         "point_size",
-                         "contour_lines",
-                         "contour_line_type",
-                         "contour_line_width",
-                         "contour_line_col",
-                         "contour_line_alpha")]
-  
+  args <- .args_list()[c(
+    "point_shape",
+    "point_size",
+    "contour_lines",
+    "contour_line_type",
+    "contour_line_width",
+    "contour_line_col",
+    "contour_line_alpha"
+  )]
+
   # REPEAT ARGUMENTS
-  args <- lapply(args, function(arg){
+  args <- lapply(args, function(arg) {
     rep(arg, length.out = length(x))
   })
-  
+
   # UPDATE ARGUMENTS
   .args_update(args)
-  
+
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
+
   # PLOT LIMITS
   usr <- par("usr")
-  
-  # DEVICE SIZE
-  size <- as.integer(dev.size('px') / dev.size('in') * par('pin'))
-  
+
+  # FAST PLOTTING --------------------------------------------------------------
+
+  # GLOBAL OPTION
+  if (getOption("cyto_plot_fast")) {
+    if (requireNamespace("scattermore")) {
+      # DEVICE SIZE
+      size <- as.integer(dev.size("px") / dev.size("in") * par("pin"))
+      cyto_plot_fast <- TRUE
+    } else {
+      message("Fast plotting requires the 'scattermore' package.")
+      message("Please install it using install.packages('scattermore').")
+      message("Resorting to conventional plotting...")
+      cyto_plot_fast <- FALSE
+    }
+  } else {
+    cyto_plot_fast <- FALSE
+  }
+
   # POINTS & CONTOUR LINES LAYERS ----------------------------------------------
-  
+
   # LAYERS
-  lapply(seq_len(length(x)), function(z){
-    
+  lapply(seq_len(length(x)), function(z) {
+
     # EXTRACT DATA
     fr_exprs <- exprs(x[[z]])[, channels]
-    
+
     # POINTS - SKIP NO EVENTS
-    if(!is.null(nrow(fr_exprs))){
-      
+    if (!is.null(nrow(fr_exprs))) {
+
       # POINTS
-      if(nrow(fr_exprs) != 0){
-        
+      if (nrow(fr_exprs) != 0) {
+
         # JITTER BARCODES
-        if(any(channels %in% "Sample ID")){
+        if (any(channels %in% "Sample ID")) {
           ind <- which(channels %in% "Sample ID")
-          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z){
-            rnorm(n = length(fr_exprs[,ind][fr_exprs[, ind] == z]),
-                  mean = z,
-                  sd = 0.1)
+          fr_exprs[, ind] <- LAPPLY(unique(fr_exprs[, ind]), function(z) {
+            rnorm(
+              n = length(fr_exprs[, ind][fr_exprs[, ind] == z]),
+              mean = z,
+              sd = 0.1
+            )
           })
         }
-        
-        # PLOT POINTS
-        points(x = fr_exprs[,channels[1]],
-               y = fr_exprs[,channels[2]],
-               pch = point_shape[z],
-               cex = point_size[z],
-               col = point_col[[z]])
 
-        # # SCATTERMORE POINTS - SHAPE & ALPHA CONTROL
-        # rasterImage(
-        #   scattermore(
-        #     x = cbind(fr_exprs[, channels[1]], fr_exprs[, channels[2]]),
-        #     size = size,
-        #     xlim = usr[1:2],
-        #     ylim = usr[3:4],
-        #     cex = point_size[[z]],
-        #     rgba = col2rgb(point_col[[z]], alpha = TRUE),
-        #     output.raster = TRUE
-        #   ),
-        #   xleft = usr[1],
-        #   xright = usr[2],
-        #   ybottom = usr[3],
-        #   ytop = usr[4]
-        # )
-        
+        # PLOT DEFAULT POINTS
+        if (cyto_plot_fast == FALSE) {
+          # CONVENTIONAL PLOTTING
+          points(
+            x = fr_exprs[, channels[1]],
+            y = fr_exprs[, channels[2]],
+            pch = point_shape[z],
+            cex = point_size[z],
+            col = point_col[[z]]
+          )
+          # SCATTERMORE POINTS - LACK PCH CONTROL
+        } else {
+          # RASTER
+          rasterImage(
+            scattermore::scattermore(
+              xy = cbind(fr_exprs[, channels[1]], fr_exprs[, channels[2]]),
+              size = size,
+              xlim = usr[1:2],
+              ylim = usr[3:4],
+              cex = 0.5 * point_size[[z]],
+              rgba = col2rgb(point_col[[z]], alpha = TRUE),
+              output.raster = TRUE
+            ),
+            xleft = usr[1],
+            xright = usr[2],
+            ybottom = usr[3],
+            ytop = usr[4]
+          )
+        }
       }
-      
     }
-    
+
     # CONTOUR_LINES
-    if(contour_lines[z] != 0){
+    if (contour_lines[z] != 0) {
       cyto_plot_contour(x[[z]],
-                        channels = channels,
-                        contour_lines = contour_lines[z],
-                        contour_line_type = contour_line_type[z],
-                        contour_line_width = contour_line_width[z],
-                        contour_line_col = contour_line_col[z],
-                        contour_line_alpha = contour_line_alpha[z])
-      
+        channels = channels,
+        contour_lines = contour_lines[z],
+        contour_line_type = contour_line_type[z],
+        contour_line_width = contour_line_width[z],
+        contour_line_col = contour_line_col[z],
+        contour_line_alpha = contour_line_alpha[z]
+      )
     }
-    
   })
-  
+
   # INVISIBLE NULL RETURN
   invisible(NULL)
-  
 }

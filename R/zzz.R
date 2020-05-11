@@ -42,17 +42,20 @@
   # Save label co-ordinates as list
   options("cyto_plot_label_coords" = NULL)
   
-  # Register gating and preprocessing functions with openCyto
-  suppressMessages(
-    {openCyto::register_plugins(fun = .cyto_gate_manual, 
-                             methodName = "cyto_gate_manual")
-    openCyto::register_plugins(fun = .cyto_gate_draw, 
-                             methodName = "cyto_gate_draw")
-    openCyto::register_plugins(fun = .pp_cyto_gate_draw, 
-                             methodName = "pp_cyto_gate_draw", 
-                             dep = NA, "preprocessing")
-    })
+  # Use scattermore in cyto_plot
+  options("cyto_plot_fast" = FALSE)  
   
+  # Register gating and preprocessing functions with openCyto
+  suppressMessages({
+    openCyto::register_plugins(fun = .cyto_gate_manual, 
+                               methodName = "cyto_gate_manual")
+    openCyto::register_plugins(fun = .cyto_gate_draw, 
+                               methodName = "cyto_gate_draw")
+    openCyto::register_plugins(fun = .pp_cyto_gate_draw, 
+                               methodName = "pp_cyto_gate_draw", 
+                               dep = NA, "preprocessing")
+  })
+
 }
 
 # # Docker Message
