@@ -84,7 +84,8 @@ number of channels can greatly improve processing speed and resolution.}
 are mapped by default.}
 
 \item{type}{dimension reduction type to use to generate the map, supported
-options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".}
+options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM". Users can
+also supply the name of a function to perform custom mappings.}
 
 \item{merge_by}{vector of experimental variables to split and merge samples
 into groups prior to mapping, set to "all" by default to create a single

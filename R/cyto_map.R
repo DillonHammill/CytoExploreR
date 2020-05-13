@@ -32,7 +32,8 @@
 #'   into groups prior to mapping, set to "all" by default to create a single
 #'   consensus map.
 #' @param type dimension reduction type to use to generate the map, supported
-#'   options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM".
+#'   options include "PCA", "tSNE", "FIt-SNE", "UMAP" and "EmbedSOM". Users can
+#'   also supply the name of a function to perform custom mappings.
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing fcs files, set to
 #'   FALSE by default.
@@ -145,13 +146,14 @@ cyto_map.GatingSet <- function(x,
 
   # NAMES - ALL NAMES INCLUDING EMPTY PARENT
   gs_names <- cyto_names(gs_copy)
-  
+
   # REMOVE EMPTY PARENTS
   gs_counts <- cyto_stats_compute(gs_copy,
-                                  alias = parent,
-                                  stat = "count")
+    alias = parent,
+    stat = "count"
+  )
   gs_clone <- gs_copy[which(gs_counts[, ncol(gs_counts)] != 0)]
-  
+
   # GROUP_BY
   gs_list <- cyto_group_by(gs_clone, group_by = merge_by)
 
@@ -160,6 +162,14 @@ cyto_map.GatingSet <- function(x,
     names <- lapply(gs_list, "cyto_names")
   } else {
     names <- split(names, rep(seq_along(gs_list), LAPPLY(gs_list, "length")))
+  }
+
+  # MAPPING FUNCTION
+  if(is.function(type)){
+    cyto_map_fun <- as.character(substitute(type))
+    cyto_map_fun <- cyto_map_fun[length(cyto_map_fun)]
+  }else{
+    cyto_map_fun <- type
   }
   
   # LOOP THROUGH GATINGSETS - RETURN LIST OF FLOWSETS
@@ -181,7 +191,8 @@ cyto_map.GatingSet <- function(x,
       inverse = inverse,
       trans = trans,
       plot = FALSE,
-      seed = seed, ...
+      seed = seed, 
+      cyto_map_fun = cyto_map_fun, ...
     )
     # SPLIT - LIST OF FLOWFRAMES
     cyto_data <- cyto_split(cyto_data, names = names[[z]])
@@ -191,28 +202,30 @@ cyto_map.GatingSet <- function(x,
 
   # COMBINE FLOWSETS
   cyto_data <- do.call("rbind2", cyto_data)
-  
+
   # MAPPED CHANNELS
   cyto_data_channels <- cyto_channels(cyto_data)
-  
+
   # MAPPED FILE NAMES
   cyto_data_names <- cyto_names(cyto_data)
 
   # COMPLETE CYTO_DATA
   gs_cyto_data <- as.list(cyto_names(gs_copy))
   names(gs_cyto_data) <- cyto_names(gs_copy)
-  lapply(seq_along(gs_cyto_data), function(z){
-    if(names(gs_cyto_data)[z] %in% cyto_data_names){
+  lapply(seq_along(gs_cyto_data), function(z) {
+    if (names(gs_cyto_data)[z] %in% cyto_data_names) {
       ind <- match(names(gs_cyto_data)[z], cyto_data_names)
       gs_cyto_data[[z]] <<- cyto_data[[ind]]
-    }else{
+    } else {
       # EMPTY FILE
-      gs_cyto_data[[z]] <<- cyto_empty(names(gs_cyto_data)[z],
-                                       cyto_data_channels)
+      gs_cyto_data[[z]] <<- cyto_empty(
+        names(gs_cyto_data)[z],
+        cyto_data_channels
+      )
     }
   })
-  lapply(seq_along(gs_cyto_data), function(z){
-    if(class(gs_cyto_data[[z]]) == "flowFrame"){
+  lapply(seq_along(gs_cyto_data), function(z) {
+    if (class(gs_cyto_data[[z]]) == "flowFrame") {
       cf <- flowFrame_to_cytoframe(gs_cyto_data[[z]])
     }
     cyto_names(cf) <- names(gs_cyto_data)[z]
@@ -226,9 +239,10 @@ cyto_map.GatingSet <- function(x,
   suppressMessages(recompute(gs_copy))
 
   # UPDATE GROUPING
-  gs_list <- cyto_group_by(gs_copy, 
-                           group_by = merge_by)
-
+  gs_list <- cyto_group_by(gs_copy,
+    group_by = merge_by
+  )
+  
   # PLOT MAPPING PER GROUP (ONE PLOT PER PAGE)
   if (plot == TRUE) {
     lapply(seq_along(gs_list), function(z) {
@@ -251,36 +265,36 @@ cyto_map.GatingSet <- function(x,
       }
       # TITLE
       if (names(gs_list)[z] == "all") {
-        title <- paste0("Combined Events", "\n", type)
+        title <- paste0("Combined Events", "\n", cyto_map_fun)
       } else {
-        title <- paste0(names(gs_list)[z], "\n", type)
+        title <- paste0(names(gs_list)[z], "\n", cyto_map_fun)
       }
       # POINT_COL - FADE BASE LAYER (OVERLAY)
-      if(!.all_na(overlay)){
+      if (!.all_na(overlay)) {
         point_col <- "grey"
-      }else{
+      } else {
         point_col <- NA
       }
       # CYTO_PLOT DESCENDANTS
       tryCatch(cyto_plot(gs,
         parent = parent,
-        channels = cyto_channels(gs, select = type),
+        channels = cyto_channels(gs, select = cyto_map_fun),
         overlay = overlay,
         group_by = "all",
         display = display,
         title = title,
         legend = legend,
         point_col = point_col
-      ), 
+      ),
       error = function(e) {
-        if(e$message == "figure margins too large"){
+        if (e$message == "figure margins too large") {
           message("Insufficient plotting space, data mapped successfully.")
         }
       }
       )
     })
   }
-
+  
   # RETURN SPLIT MAPPED FLOWFRAMES
   return(gs_copy)
 }
@@ -305,19 +319,20 @@ cyto_map.flowSet <- function(x,
   # SELECT SAMPLES
   if (!is.null(select)) {
     x <- cyto_select(x, select)
-  } 
-  
+  }
+
   # COPY
   fs_copy <- cyto_copy(x)
 
   # NAMES - ALL NAMES NCLUDING EMPTY
   fs_names <- cyto_names(fs_copy)
-  
+
   # REMOVE EMPTY FLOWFRAMES
   fs_counts <- cyto_stats_compute(fs_copy,
-                                  stat = "count")
+    stat = "count"
+  )
   fs_clone <- fs_copy[which(fs_counts[, ncol(fs_counts)] != 0)]
-  
+
   # GROUP_BY
   fs_list <- cyto_group_by(x, group_by = merge_by)
 
@@ -328,6 +343,14 @@ cyto_map.flowSet <- function(x,
     names <- split(names, rep(seq_along(fs_list), LAPPLY(fs_list, "length")))
   }
 
+  # MAPPING FUNCTION
+  if(is.function(type)){
+    cyto_map_fun <- as.character(substitute(type))
+    cyto_map_fun <- cyto_map_fun[length(cyto_map_fun)]
+  }else{
+    cyto_map_fun <- type
+  }
+  
   # LOOP THROUGH FLOWSETS - RETURN LIST OF FLOWSETS
   cyto_data <- lapply(seq_along(fs_list), function(z) {
     # FLOWSET
@@ -345,7 +368,9 @@ cyto_map.flowSet <- function(x,
       inverse = inverse,
       trans = trans,
       plot = plot,
-      seed = seed, ...
+      seed = seed,
+      cyto_map_fun = cyto_map_fun,
+      ...
     )
     # SPLIT - LIST OF FLOWFRAMES
     cyto_data <- cyto_split(cyto_data, names = names[[z]])
@@ -355,28 +380,30 @@ cyto_map.flowSet <- function(x,
 
   # COMBINE FLOWSETS
   cyto_data <- do.call("rbind2", cyto_data)
-  
+
   # MAPPED FILE NAMES
   cyto_data_names <- cyto_names(cyto_data)
-  
+
   # MAPPED CHANNELS
   cyto_data_channels <- cyto_channels(cyto_data)
-  
+
   # COMPLETE CYTO_DATA
   fs_cyto_data <- as.list(cyto_names(fs_copy))
   names(fs_cyto_data) <- cyto_names(fs_copy)
-  lapply(seq_along(fs_cyto_data), function(z){
-    if(names(fs_cyto_data)[z] %in% cyto_data_names){
+  lapply(seq_along(fs_cyto_data), function(z) {
+    if (names(fs_cyto_data)[z] %in% cyto_data_names) {
       ind <- match(names(fs_cyto_data)[z], cyto_data_names)
       fs_cyto_data[[z]] <<- cyto_data[[ind]]
-    }else{
+    } else {
       # EMPTY FILE
-      fs_cyto_data[[z]] <<- cyto_empty(names(fs_cyto_data)[z],
-                                       cyto_data_channels)
+      fs_cyto_data[[z]] <<- cyto_empty(
+        names(fs_cyto_data)[z],
+        cyto_data_channels
+      )
     }
   })
-  lapply(seq_along(fs_cyto_data), function(z){
-    if(class(fs_cyto_data[[z]]) == "flowFrame"){
+  lapply(seq_along(fs_cyto_data), function(z) {
+    if (class(fs_cyto_data[[z]]) == "flowFrame") {
       cf <- flowFrame_to_cytoframe(fs_cyto_data[[z]])
     }
     cyto_names(cf) <- names(fs_cyto_data)[z]
@@ -404,8 +431,7 @@ cyto_map.flowFrame <- function(x,
                                plot = TRUE,
                                seed = NULL,
                                ...) {
-
-
+  
   # CHANNELS -------------------------------------------------------------------
 
   # PREPARE CHANNELS
@@ -446,28 +472,54 @@ cyto_map.flowFrame <- function(x,
   # RESTRICT MATRIX BY CHANNELS
   fr_exprs <- fr_exprs[, channels]
 
+  # PREPARE ARGUMENTS ----------------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list(...)
+  
+  # MAPPING FUNCTION
+  if("cyto_map_fun" %in% names(args)){
+    cyto_map_fun <- args[["cyto_map_fun"]]
+  }else{
+    if(is.function(type)){
+      cyto_map_fun <- as.character(substitute(type))
+      cyto_map_fun <- cyto_map_fun[length(cyto_map_fun)]
+    }else{
+      cyto_map_fun <- type
+    }
+  }
+  
+  # ADD CYTO_MAP_FUN TO ARGS
+  args[["cyto_map_fun"]] <- cyto_map_fun
+  
+  # REMOVE EXCESS ARGUMENTS
+  cyto_map_args <- formalArgs(cyto_map.flowFrame)
+  cyto_map_args <- cyto_map_args[!cyto_map_args %in% c("type",
+                                                       "seed",
+                                                       "cyto_map_fun")]
+  args <- args[!names(args) %in% cyto_map_args]
+  
+  # RENAME FR_EXPRS TO X
+  names(args)[match("fr_exprs", names(args))] <- "x"
+  
   # MAPPING --------------------------------------------------------------------
 
   # MAPPPING COORDS
-  coords <- .cyto_map(fr_exprs,
-    type = type,
-    seed = seed,
-    ...
-  )
+  coords <- do.call(".cyto_map", args)
 
   # ADD MAPPING COORDS TO FLOWFRAME
   x <- fr_append_cols(x, coords)
 
   # VISUALISATION --------------------------------------------------------------
-
+  
   # CYTO_PLOT - MAP
   if (plot == TRUE) {
     tryCatch(cyto_plot(x,
       channels = colnames(coords),
-      title = paste0("Combined Events", "\n", type)
+      title = paste0("Combined Events", "\n", cyto_map_fun)
     ),
     error = function(e) {
-      if(e$message == "figure margins too large"){
+      if (e$message == "figure margins too large") {
         message("Insufficient plotting space, data mapped successfully.")
       }
     }
@@ -487,6 +539,9 @@ cyto_map.flowFrame <- function(x,
     )
   }
 
+  # RESET CYTO_PLOT_MAP
+  options("cyto_plot_map" = NULL)
+  
   # RETURN MAPPED FLOWFRAME ----------------------------------------------------
   return(x)
 }
@@ -499,73 +554,116 @@ cyto_map.flowFrame <- function(x,
 .cyto_map <- function(x,
                       type = "UMAP",
                       seed = NULL,
+                      cyto_map_fun = NULL,
                       ...) {
-
-  # MESSAGE
-  message(paste0("Computing ", type, " co-ordinates..."))
 
   # SET SEED - RETURN SAME MAP WITH EACH RUN
   if (!is.null(seed)) {
     set.seed(seed)
   }
-
-  # PCA
-  if (grepl(type, "PCA", ignore.case = TRUE)) {
-    # MAPPING
-    mp <- rpca(x, ...)
-    # MAPPING CO-ORDINATES
-    coords <- mp$x[, 1:2, drop = FALSE]
-    colnames(coords) <- c("PCA-1", "PCA-2")
-    # tSNE
-  } else if (grepl(type, "tSNE", ignore.case = TRUE)) {
-    # MAPPING
-    mp <- Rtsne(x, ...)
-    # MAPPING CO-ORDINATES
-    coords <- mp$Y
-    colnames(coords) <- c("tSNE-1", "tSNE-2")
-    # FIt-SNE
-  } else if (grepl(type, "FIt-SNE", ignore.case = TRUE) |
-    grepl(type, "FItSNE", ignore.case = TRUE)) {
-    mp <- fftRtsne(x, ...)
-    # MAPPING CO-ORDINATES
-    coords <- mp[, 1:2, drop = FALSE]
-    colnames(coords) <- c("FIt-SNE-1", "FIt-SNE-2")
-    # UMAP
-  } else if (grepl(type, "UMAP", ignore.case = TRUE)) {
-    # MAPPING
-    mp <- umap(x, ...)
-    # MAPPING CO-ORDINATES
-    coords <- mp$layout
-    colnames(coords) <- c("UMAP-1", "UMAP-2")
-    # EmbedSOM
-  } else if (grepl(type, "EmbedSOM", ignore.case = TRUE)) {
-    # DATA
-    data <- x
-    # PULL DOWN ARGUMENTS
-    args <- .args_list(...)
-    # CREATE SOM - FLOWSOM NOT SUPPLIED (fsom)
-    if (!"fsom" %in% names(args)) {
-      # SOM
-      mp <- do.call(
-        "SOM",
-        args[names(args) %in% formalArgs(EmbedSOM::SOM)]
-      )
-      # SOM ARGUMENTS
-      args[["map"]] <- mp
+  
+  # ARGUMENTS
+  args <- .args_list(...)
+  args <- args[-match(c("type", "seed", "cyto_map_fun"), names(args))]
+  
+  # MAPPING FUNCTION
+  if(is.null(cyto_map_fun)){
+    if(is.function(type)){
+      cyto_map_fun <- as.character(substitute(type))
+      cyto_map_fun <- cyto_map_fun[length(cyto_map_fun)]
+    }else{
+      cyto_map_fun <- type
     }
-    # EMBEDSOM
-    mp <- do.call(
-      "EmbedSOM",
-      args[names(args) %in% formalArgs(EmbedSOM::EmbedSOM)]
-    )
-    # MAPPING CO-ORDINATES
-    coords <- mp
-    colnames(coords) <- c("EmbedSOM-1", "EmbedSOM-2")
-    # UNSUPPORTED TYPE
-  } else {
-    stop(paste(type, "is not a supported mapping type."))
   }
-
+  
+  # CHARACTER
+  if (is.character(type)) {
+    # MESSAGE
+    message(paste0("Computing ", type, " co-ordinates..."))
+    # PCA
+    if (grepl(type, "PCA", ignore.case = TRUE)) {
+      # MAPPING
+      mp <- rpca(x, ...)
+      # MAPPING CO-ORDINATES
+      coords <- mp$x[, 1:2, drop = FALSE]
+      colnames(coords) <- c("PCA-1", "PCA-2")
+      # tSNE
+    } else if (grepl(type, "tSNE", ignore.case = TRUE)) {
+      # MAPPING
+      mp <- Rtsne(x, ...)
+      # MAPPING CO-ORDINATES
+      coords <- mp$Y
+      colnames(coords) <- c("tSNE-1", "tSNE-2")
+      # FIt-SNE
+    } else if (grepl(type, "FIt-SNE", ignore.case = TRUE) |
+      grepl(type, "FItSNE", ignore.case = TRUE)) {
+      mp <- fftRtsne(x, ...)
+      # MAPPING CO-ORDINATES
+      coords <- mp[, 1:2, drop = FALSE]
+      colnames(coords) <- c("FIt-SNE-1", "FIt-SNE-2")
+      # UMAP
+    } else if (grepl(type, "UMAP", ignore.case = TRUE)) {
+      # MAPPING
+      mp <- umap(x, ...)
+      # MAPPING CO-ORDINATES
+      coords <- mp$layout
+      colnames(coords) <- c("UMAP-1", "UMAP-2")
+      # EmbedSOM
+    } else if (grepl(type, "EmbedSOM", ignore.case = TRUE)) {
+      # DATA
+      names(args)[1] <- "data"
+      # CREATE SOM - FLOWSOM NOT SUPPLIED (fsom)
+      if (!"fsom" %in% names(args)) {
+        # SOM
+        mp <- do.call(
+          "SOM",
+          args[names(args) %in% formalArgs(EmbedSOM::SOM)]
+        )
+        # SOM ARGUMENTS
+        args[["map"]] <- mp
+      }
+      # EMBEDSOM
+      mp <- do.call(
+        "EmbedSOM",
+        args[names(args) %in% formalArgs(EmbedSOM::EmbedSOM)]
+      )
+      # MAPPING CO-ORDINATES
+      coords <- mp
+      colnames(coords) <- c("EmbedSOM-1", "EmbedSOM-2")
+      # UNSUPPORTED TYPE
+    } else {
+      stop(paste(type, "is not a supported mapping type."))
+    }
+    # CUSTOM FUNCTION
+  } else if(is.function(type)) {
+    # MESSAGE
+    message(paste0("Computing ", 
+                   cyto_map_fun, 
+                   " co-ordinates..."))
+    # RENAME FIRST ARGUMENT
+    names(args)[1] <- formalArgs(type)[1]
+    # MAPPING
+    mp <- do.call(type, args)
+    # MAPPING COORDS
+    if(is(mp, "matrix")){
+      coords <- mp[, c(1,2)]
+    }else{
+      # LOOOK FOR COORDS
+      coords <- NULL
+      lapply(seq_len(mp), function(z){
+        if(class(mp[z]) == "matrix"){
+          if(nrow(mp[z]) == nrow(x)){
+            coords <<- cbind(coords, mp[z])
+          }
+        }
+      })
+      coords <- coords[, c(1,2)]
+    }
+    # COLNAMES
+    colnames(coords) <- c(paste0(cyto_map_fun, "-1"), 
+                          paste0(cyto_map_fun, "-2"))
+  }
+  
   # RETURN MAPPED COORDS
   return(coords)
 }
