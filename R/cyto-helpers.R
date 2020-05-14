@@ -1,3 +1,205 @@
+## CYTO_IMPORT -----------------------------------------------------------------
+
+#' Import cytometry data analyzed using other platforms
+#' @param path path to xml or wsp file and associated fcs files.
+#' @noRd
+cyto_import <- function(path = ".",
+                        type = "flowJo",
+                        select = NULL,
+                        exclude = NULL,
+                        sort = TRUE,
+                        barcode = FALSE,
+                        restrict = FALSE,
+                        markers = TRUE,
+                        details = TRUE,
+                        gatingTemplate = NULL, ...) {
+  
+  # CytoML EXISTS
+  if (requireNamespace("CytoML")) {
+    
+    # FILES IN DIRECTORY
+    file_paths <- list.files(path,
+                             full.names = TRUE)
+    
+    # FILE NAMES
+    file_names <- basename(file_paths)
+    
+    # FILE EXTENSIONS
+    file_ext <- file_ext(file_names)
+    
+    # FCS FILES
+    fcs_files <- file_paths[!file_ext %in% c("", "fcs", "FCS")]
+    
+    # IMPORT CYTOBANK TO GATINGSET
+    if(grepl("cytobank", type, ignore.case = TRUE)){
+      # ACS
+      if(any(grepl("acs", file_ext, ignore.case = TRUE))) {
+        acs_file <- file_paths[which(file_ext == "acs")]
+        cytobank_exp <- CytoML::open_cytobank_experiment(acs_file)
+        gs <- CytoML::cytobank_to_gatingset(cytobank_exp)
+      # XML 
+      }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
+        xml_file <- file_paths[which(grepl(file_ext, 
+                                           "xml", 
+                                           ignore.case = TRUE))]
+        gs <- CytoML::cytobank_to_gatingset(xml_file, fcs_files)
+      }
+    # IMPORT DIVA TO GATINGSET
+    }else if(grepl("diva", type, ignore.case = TRUE)){
+      xml_file <- file_paths[which(grepl(file_ext, 
+                                         "xml", 
+                                         ignore.case = TRUE))]
+      diva_ws <- CytoML::open_diva_xml(xml_file)
+      gs <- CytoML::diva_to_gatingset(diva_ws, fcs_files)
+    # IMPORT FLOWJO TO GATINGSET
+    }else if(grepl("flowjo", type, ignore.case = TRUE)){
+      # WPS
+      if(any(grepl("wsp", file_ext, ignore.case = TRUE))){
+        wps_file <- file_paths[which(grepl(file_ext, 
+                                           "wps", 
+                                           ignore.case = TRUE))]
+        gs <- CytoML::flowjo_to_gatingset(wps_file, path = path)
+      # XML
+      }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
+        xml_file <- file_paths[which(grepl(file_ext, 
+                                           "xml", 
+                                           ignore.case = TRUE))]
+        flowjo_ws <- CytoML::open_flowjo_xml(xml_file)
+        gs <- CytoML::flowjo_to_gatingset(flowjo_ws, fcs_files)
+      }
+    }
+    
+    # MARKERS
+    if (markers != FALSE) {
+      message("Assigning markers to channels...")
+      # DEFAULT FILE NAME
+      if (markers == TRUE) {
+        gs <- cyto_markers_edit(gs)
+      } else {
+        gs <- cyto_markers_edit(gs,
+                                file = markers
+        )
+      }
+    }
+    
+    # EXPERIMENT DETAILS
+    if (details != FALSE) {
+      message("Updating experiment details...")
+      if (details == TRUE) {
+        gs <- cyto_details_edit(gs)
+      } else {
+        gs <- cyto_details_edit(gs,
+                                file = details
+        )
+      }
+    }
+    
+    # GENERATE GATINGTEMPLATE
+    if(!is.null(gatingTemplate)){
+      # FILE EXTENSION
+      if(file_ext(gatingTemplate) != "csv"){
+        gatingTemplate <- paste0(gatingTemplate, ".csv")
+      }
+      # CREATE GATINGTEMPLATE
+      message("Creating CytoExploreR gatingTemplate...")
+      cyto_gatingTemplate_generate(gs, gatingTemplate)
+    }
+    
+    # RETURN GATINGSET
+    return(gs)
+    
+  # CytoML MISSING
+  } else {
+    stop(paste0(
+      "cyto_import requires the CytoML package ",
+      "- BiocManager::install('CytoML')"
+    ))
+  }
+}
+
+## CYTO_EXPORT -----------------------------------------------------------------
+
+#' Export cytometry data for use in flowJo or Cytobank
+#'
+#' Simply a wrapper around CytoML \code{gatingset_to_cytobank} and
+#' \code{gatingset_to _flowjo} to export your CytoExploreR analyses in a format
+#' accepted by these platforms. Users will need to have \code{docker} running on
+#' their computers to export flowJo workspace files.
+#'
+#' @param x object of class GatingSet to export.
+#' @param save_as the name of a flowJo workspace file with .wsp extension or a
+#'   Cytobank xml file with .xml extension.
+#' @param ... additional arguments passed to \code{gatingset_to_cytobank} or
+#'   \code{gatingset_to_flowjo}.
+#'
+#' @importFrom tools file_ext
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' \dontrun{
+#' library(CytoExploreRData)
+#' library(CytoML)
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#'
+#' # Compensation
+#' gs <- cyto_compensate(gs)
+#'
+#' # Transformations
+#' gs <- cyto_transform(gs)
+#'
+#' # Gating
+#' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+#'
+#' # Export to cytobank xml
+#' cyto_export(gs, "cytobank.xml")
+#'
+#' # Export to flowjo workspace
+#' cyto_export(gs, "flowjo.wsp")
+#' }
+#'
+#' @export
+cyto_export <- function(x,
+                        save_as = NULL,
+                        ...) {
+  
+  # CytoML
+  if (requireNamespace("CytoML")) {
+    
+    # FILE NAME
+    if (is.null(save_as)) {
+      stop("Supply either a wsp or xml file name to 'save_as'.")
+    } else {
+      # FLOWJO EXPORT BY DEFAULT
+      if (.empty(file_ext(save_as))) {
+        save_as <- paste0(save_as, ".wsp")
+      }
+    }
+    
+    # SAVE
+    if (file_ext(save_as) == "xml") {
+      message("Saving GatingSet to Cytobank XML file...")
+      CytoML::gatingset_to_cytobank(x, 
+                                    save_as,
+                                    ...)
+    } else if (file_ext(save_as) == "wsp") {
+      message("Saving GatingSet to flowJo workspace file...")
+      CytoML::gatingset_to_flowjo(x, 
+                                  save_as,
+                                  ...)
+    }
+    
+    # CytoML MISSING
+  } else {
+    stop(paste0(
+      "cyto_export requires the CytoML package ",
+      "- BiocManager::install('CytoML')"
+    ))
+  }
+}
+
 ## CYTO_LOAD -------------------------------------------------------------------
 
 #' Load .fcs files into ncdfFlowSet
@@ -95,7 +297,7 @@ cyto_load <- function(path = ".",
   } else {
     # CYTOSET
     x <- load_cytoset_from_fcs(files = files, ...)
-    
+
     # CORRECT GUID SLOTS - NECESSARY?
     nms <- cyto_names(x)
     lapply(seq_len(length(nms)), function(z) {
@@ -147,7 +349,6 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
-#'
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
@@ -307,22 +508,24 @@ cyto_setup <- function(path = ".",
   if (markers != FALSE) {
     message("Assigning markers to channels...")
     # DEFAULT FILE NAME
-    if(markers == TRUE){
+    if (markers == TRUE) {
       x <- cyto_markers_edit(x)
-    }else{
-      x <- cyto_markers_edit(x, 
-                             file = markers)
+    } else {
+      x <- cyto_markers_edit(x,
+        file = markers
+      )
     }
   }
 
   # EXPERIMENT DETAILS
   if (details != FALSE) {
     message("Updating experiment details...")
-    if(details == TRUE){
+    if (details == TRUE) {
       x <- cyto_details_edit(x)
-    }else{
-      x <- cyto_details_edit(x, 
-                             file = details)
+    } else {
+      x <- cyto_details_edit(x,
+        file = details
+      )
     }
   }
 
@@ -788,8 +991,10 @@ cyto_transform.default <- function(x,
         cyto_plot_new(popup = popup)
         n <- length(channels)
         cyto_plot_layout(
-          c(n2mfrow(n)[1],
-          n2mfrow(n)[2])
+          c(
+            n2mfrow(n)[1],
+            n2mfrow(n)[2]
+          )
         )
 
         # Generate plot for each channel
@@ -868,8 +1073,10 @@ cyto_transform.transformList <- function(x,
         cyto_plot_new(popup = popup)
         n <- length(channels)
         cyto_plot_layout(
-          c(n2mfrow(n)[1],
-          n2mfrow(n)[2])
+          c(
+            n2mfrow(n)[1],
+            n2mfrow(n)[2]
+          )
         )
 
         # Generate plot for each channel - axes will not be transformed correctly
@@ -949,8 +1156,10 @@ cyto_transform.transformerList <- function(x,
         cyto_plot_new(popup = popup)
         n <- length(channels)
         cyto_plot_layout(
-          c(n2mfrow(n)[1],
-          n2mfrow(n)[2])
+          c(
+            n2mfrow(n)[1],
+            n2mfrow(n)[2]
+          )
         )
 
         # Generate plot for each channel
@@ -1564,7 +1773,6 @@ cyto_select <- function(x, ...) {
 #' # Group GatingSet by Treatment and OVAConc
 #' gs <- GatingSet(Activation)
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -1590,49 +1798,53 @@ cyto_group_by <- function(x,
   nms <- cyto_names(x)
 
   # group_by is a list with factor levels - should not be "all"
-  if(is(group_by, "list")){
+  if (is(group_by, "list")) {
     # Check variables and factor levels
-    lapply(seq_along(group_by), function(z){
+    lapply(seq_along(group_by), function(z) {
       # Variable
       var <- names(group_by)[z]
       # Expected variable levels
       var_levels <- unique(pd[, var])
       # Watch out for NA
-      if(any(LAPPLY(group_by[[z]], "is.na"))){
+      if (any(LAPPLY(group_by[[z]], "is.na"))) {
         ind <- which(LAPPLY(group_by[[z]], "is.na"))
         group_by[[z]][ind] <- "NA"
       }
       # Check variables
-      if(!var %in% colnames(pd)){
-        stop(paste0(var, 
-                    " is not a valid variable for this ", 
-                    class(x), "."))
+      if (!var %in% colnames(pd)) {
+        stop(paste0(
+          var,
+          " is not a valid variable for this ",
+          class(x), "."
+        ))
       }
       # Incorrect factor levels
-      if(!all(group_by[[z]] %in% unique(pd[, var]))){
-        lapply(group_by[[z]], function(y){
-          if(!y %in% unique(pd[, var])){
+      if (!all(group_by[[z]] %in% unique(pd[, var]))) {
+        lapply(group_by[[z]], function(y) {
+          if (!y %in% unique(pd[, var])) {
             stop(paste0(
               y, " is not a valid factor level for ",
-              group_by[[z]], 
+              group_by[[z]],
               "."
             ))
           }
         })
       }
       # Update factor levels in pd
-      if(!all(var_levels %in% group_by[[z]])){
+      if (!all(var_levels %in% group_by[[z]])) {
         missing_levels <- as.vector(var_levels[!var_levels %in% group_by[[z]]])
-        group_by[[z]] <<- c(group_by[[z]],
-                            missing_levels)
+        group_by[[z]] <<- c(
+          group_by[[z]],
+          missing_levels
+        )
       }
       # Convert pd variable to factor and set levels
       pd[, var] <<- factor(pd[, var], levels = group_by[[z]])
     })
     # Convert group_by to vector
     group_by <- names(group_by)
-  # group_by is a vector of variable names
-  }else{
+    # group_by is a vector of variable names
+  } else {
     # Check variables
     if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
       lapply(group_by, function(y) {
@@ -1642,21 +1854,21 @@ cyto_group_by <- function(x,
       })
     }
   }
-  
+
   # Split pd based on group_by into a named list
   if (length(group_by) == 1) {
     if (group_by == "all") {
       pd_split <- list("all" = pd)
     } else if (group_by == "name") {
-      pd_split <- lapply(nms, function(z){
+      pd_split <- lapply(nms, function(z) {
         pd[pd$name == z, , drop = FALSE]
       })
       names(pd_split) <- nms
-    }else{
+    } else {
       pd_split <- split(pd, pd[, group_by],
-                        sep = " ",
-                        lex.order = TRUE,
-                        drop = TRUE
+        sep = " ",
+        lex.order = TRUE,
+        drop = TRUE
       )
     }
   } else {
@@ -1666,7 +1878,7 @@ cyto_group_by <- function(x,
       drop = TRUE
     )
   }
-  
+
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z) {
     ind <- match(pd_split[[z]][, "name"], cyto_names(x))
@@ -1889,7 +2101,7 @@ cyto_split <- function(x,
 
   # SPLIT BY SAMPLE ID
   fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
-    
+
   # NAMES
   if (!is.null(names)) {
     # INSUFFICIENT NAMES
@@ -2488,7 +2700,7 @@ cyto_sample.list <- function(x,
 #'   to the minimum bead count among the samples.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @importFrom flowCore flowSet
 #' @importFrom flowWorkspace flowSet_to_cytoset gs_cyto_data
 #'
@@ -2531,7 +2743,7 @@ cyto_beads_sample <- function(x,
     )
   )
   bead_counts <- bead_counts[, ncol(bead_counts), drop = TRUE]
-  
+
   # BEADS MISSING
   if (any(bead_counts == 0)) {
     ind <- which(bead_counts == 0)
@@ -2539,8 +2751,8 @@ cyto_beads_sample <- function(x,
       "The following samples do not contain any beads:",
       paste0("\n", cyto_names(gs_clone)[ind])
     ))
-  }  
-  
+  }
+
   # BEAD COUNT
   if (is.null(bead_count)) {
     bead_count <- min(bead_counts)
@@ -2549,12 +2761,12 @@ cyto_beads_sample <- function(x,
       bead_count <- min(bead_counts)
     }
   }
-  
+
   # BEAD RATIOS
-  bead_ratios <- lapply(seq_len(length(bead_counts)), function(z){
+  bead_ratios <- lapply(seq_len(length(bead_counts)), function(z) {
     1 / (bead_counts[z] / bead_count)
   })
-  
+
   # SAMPLING - ROOT POPULATION
   pops <- list()
   lapply(seq_along(bead_pops), function(z) {
@@ -2737,7 +2949,7 @@ cyto_markers_edit <- function(x,
     fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
   }
-  
+
   # file missing
   if (is.null(file)) {
 
@@ -2785,7 +2997,6 @@ cyto_markers_edit <- function(x,
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
-      
     }
 
     # File manually supplied
@@ -2798,7 +3009,6 @@ cyto_markers_edit <- function(x,
 
     # File already exists
     if (length(grep(file, list.files())) != 0) {
-      
       message(file, "found in working directory.")
       dt <- read.csv(file,
         header = TRUE,
@@ -2812,20 +3022,20 @@ cyto_markers_edit <- function(x,
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
-      
     }
   }
 
   # File name not supplied
   if (is.null(file)) {
     file <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv")
-  } 
-  
+  }
+
   # Edit dt using data_editor
   dt <- data_editor(dt,
-                    title = "Experiment Markers Editor", 
-                    save_as = file,
-                    ...)
+    title = "Experiment Markers Editor",
+    save_as = file,
+    ...
+  )
 
   # Update channels
   BiocGenerics::colnames(x) <- as.character(dt$channel)
@@ -2882,7 +3092,7 @@ cyto_markers_edit <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' @export
-cyto_details_edit <- function(x, 
+cyto_details_edit <- function(x,
                               file = NULL,
                               ...) {
 
@@ -2964,17 +3174,18 @@ cyto_details_edit <- function(x,
       "-Experiment-Details.csv"
     )
   }
-  
+
   # Edit cyto_details
   pd <- data_editor(pd,
-                    title = "Experiment Details Editor",
-                    save_as = file,
-                    ...)
+    title = "Experiment Details Editor",
+    save_as = file,
+    ...
+  )
   rownames(pd) <- pd$name
 
   # Update cyto_details
   cyto_details(x) <- pd
-  
+
   # Return updated samples
   return(x)
 }
@@ -3435,115 +3646,119 @@ cyto_nodes <- function(x, ...) {
 #'   nodes.
 #' @param path specifies whether the returned nodes should be in the "full" or
 #'   "auto" format, set to "auto" by default
-#'   
+#'
 #' @return vector of unique paths for each of the supplied nodes.
-#' 
+#'
 #' @author @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @export
 cyto_nodes_convert <- function(x,
                                nodes = NULL,
                                anchor = NULL,
-                               path = "auto"){
-  
+                               path = "auto") {
+
   # PATHS
   nodes_full <- cyto_nodes(x, path = "full")
   nodes_auto <- cyto_nodes(x, path = "auto")
   nodes_terminal <- basename(nodes_full)
-  
+
   # ANCHOR
-  if(!is.null(anchor)){
+  if (!is.null(anchor)) {
     # INVALID ANCHOR
-    if(!anchor %in% c(nodes_full, nodes_auto, nodes_terminal)){
+    if (!anchor %in% c(nodes_full, nodes_auto, nodes_terminal)) {
       stop(paste0(anchor, " does not exist in this ", class(x), "!"))
     }
     # TERMINAL ANCHOR
-    if(anchor %in% nodes_terminal){
-      anchor_match <- which(LAPPLY(nodes_terminal, function(node_terminal){
+    if (anchor %in% nodes_terminal) {
+      anchor_match <- which(LAPPLY(nodes_terminal, function(node_terminal) {
         anchor == node_terminal
       }))
-    # AUTO NODE
-    }else if(anchor %in% nodes_auto){
-      anchor_match <- which(LAPPLY(nodes_auto, function(node_auto){
+      # AUTO NODE
+    } else if (anchor %in% nodes_auto) {
+      anchor_match <- which(LAPPLY(nodes_auto, function(node_auto) {
         anchor == node_auto
       }))
-    # FULL NODE
-    }else if(anchor %in% nodes_full){
-      anchor_match <- which(LAPPLY(nodes_full, function(node_full){
+      # FULL NODE
+    } else if (anchor %in% nodes_full) {
+      anchor_match <- which(LAPPLY(nodes_full, function(node_full) {
         anchor == node_full
       }))
     }
     # ANCHOR MUST BE UNIQUE
-    if(length(anchor_match) > 1){
+    if (length(anchor_match) > 1) {
       stop(paste0(anchor, " is not unique within this ", class(x), "!"))
     }
     # AUTO ANCHOR
     anchor <- nodes_auto[anchor_match]
   }
-  
+
   # CONVERT NODES
-  nodes <- LAPPLY(nodes, function(node){
+  nodes <- LAPPLY(nodes, function(node) {
     # TERMINAL NODE
-    if(node %in% nodes_terminal){
-      nodes_match <- which(LAPPLY(nodes_terminal, function(node_terminal){
+    if (node %in% nodes_terminal) {
+      nodes_match <- which(LAPPLY(nodes_terminal, function(node_terminal) {
         node == node_terminal
       }))
-    # AUTO NODE
-    }else if(node %in% nodes_auto){
-      nodes_match <- which(LAPPLY(nodes_auto, function(node_auto){
+      # AUTO NODE
+    } else if (node %in% nodes_auto) {
+      nodes_match <- which(LAPPLY(nodes_auto, function(node_auto) {
         node == node_auto
       }))
-    # FULL NODE
-    }else if(node %in% nodes_full){
-      nodes_match <- which(LAPPLY(nodes_full, function(node_full){
+      # FULL NODE
+    } else if (node %in% nodes_full) {
+      nodes_match <- which(LAPPLY(nodes_full, function(node_full) {
         node == node_full
       }))
-    # NODE DOES NOT EXIST  
-    }else{
+      # NODE DOES NOT EXIST
+    } else {
       stop(paste0(node, " does not exist in this ", class(x), "!"))
     }
     # RETURN NODE
-    if(length(nodes_match) == 1){
+    if (length(nodes_match) == 1) {
       nodes <- cyto_nodes(x, path = path)[nodes_match]
       return(nodes)
-    # AMBIGUOUS NODE - ANCHOR TO PARENTAL NODE
-    }else if(length(nodes_match) > 1){
+      # AMBIGUOUS NODE - ANCHOR TO PARENTAL NODE
+    } else if (length(nodes_match) > 1) {
       # NO ANCHOR
-      if(is.null(anchor)){
+      if (is.null(anchor)) {
         stop(paste0(node, " is ambiguous in this ", class(x), "!"))
-      # ANCHOR
-      }else if(!is.null(anchor)){
-        # SPLIT NODE 
+        # ANCHOR
+      } else if (!is.null(anchor)) {
+        # SPLIT NODE
         node_split <- .cyto_nodes_split(node)
         # SPLIT NODES FULL
         nodes_full_split <- .cyto_nodes_split(nodes_full)
         # SPLIT ANCHOR
         anchor_split <- .cyto_nodes_split(anchor)
         # ROOT ANCHOR
-        if(anchor_split == "root"){
+        if (anchor_split == "root") {
           anchor_split <- NULL
         }
         # UNIQUE NODE EXISTS
-        ind <- which(LAPPLY(nodes_full_split, function(z){
+        ind <- which(LAPPLY(nodes_full_split, function(z) {
           all(unique(c(node_split, anchor_split)) %in% z)
         }))
         # CANNOT FIND UNIQUE NODE PATH
-        if(length(ind) == 0){
-          stop(paste0("Failed to generate unique path for ", node, 
-                      " relative to ", anchor, "."))
+        if (length(ind) == 0) {
+          stop(paste0(
+            "Failed to generate unique path for ", node,
+            " relative to ", anchor, "."
+          ))
           # UNIQUE NODE PATH EXISTS
-        }else{
-          if(length(ind) == 1){
+        } else {
+          if (length(ind) == 1) {
             node <- cyto_nodes(x, path = path)[ind]
             return(node)
-          }else if(length(ind) > 1){
+          } else if (length(ind) > 1) {
             # USE SHORTEST PATH (REMOVE DESCENDANTS)
             nodes_unique <- nodes_full_split[ind]
             nodes_lengths <- LAPPLY(nodes_unique, "length")
             nodes_length_min <- min(nodes_lengths)
-            if(length(nodes_lengths[nodes_lengths == nodes_length_min]) > 1){
-              stop(paste0("Failed to generate unique path for ", node, 
-                          " relative to ", anchor, "."))
+            if (length(nodes_lengths[nodes_lengths == nodes_length_min]) > 1) {
+              stop(paste0(
+                "Failed to generate unique path for ", node,
+                " relative to ", anchor, "."
+              ))
             }
             ind <- which(nodes_lengths == nodes_length_min)
             node <- cyto_nodes(x, path = path)[ind]
@@ -3552,27 +3767,23 @@ cyto_nodes_convert <- function(x,
         }
       }
     }
-    
   })
 
   # RETURN UNIQUE NODES
   return(nodes)
-  
 }
 
 #' Split node paths into fragments
 #' @noRd
-.cyto_nodes_split <- function(nodes = NULL){
-  
-  nodes_split <- lapply(nodes, function(node){
+.cyto_nodes_split <- function(nodes = NULL) {
+  nodes_split <- lapply(nodes, function(node) {
     node <- unlist(strsplit(node, "\\/"))
     node <- node[!LAPPLY(node, ".empty")]
     return(node)
   })
   names(nodes_split) <- nodes
-  
+
   return(nodes_split)
-  
 }
 
 ## CYTO_EMPTY ------------------------------------------------------------------

@@ -54,7 +54,8 @@ Suggests:
   rmarkdown,
   RProtoBufLib,
   testthat,
-  scattermore
+  scattermore,
+  CytoML
 Remotes: 
   DillonHammill/CytoExploreRData
 biocViews:
