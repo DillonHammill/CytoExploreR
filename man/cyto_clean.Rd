@@ -31,7 +31,6 @@ gs <- GatingSet(fs)
 
 # Clean Activation GatingSet
 gs <- cyto_clean(gs)
-
 }
 \references{
 Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly

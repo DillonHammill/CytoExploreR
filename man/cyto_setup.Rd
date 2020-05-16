@@ -10,6 +10,7 @@ cyto_setup(
   restrict = FALSE,
   clean = FALSE,
   markers = TRUE,
+  parse_names = FALSE,
   details = TRUE,
   ...
 )
@@ -32,6 +33,11 @@ using \code{cyto_clean}, set to FALSE by default.}
 \code{cyto_markers_edit} to update the markers associated with channels in
 the loaded sampes, set to TRUE by default. The name of the csv to which
 these details will be supplied can also be passed to this argument.}
+
+\item{parse_names}{logical indicating whether the file names should be parsed
+into experiment details using \code{cyto_names_parse}, set to FALSE by
+default. If you need to parse the names using a different dlimiter, supply
+the delimiter to this argument instead of TRUE.}
 
 \item{details}{logical indicating whether a call should be made to
 \code{cyto_details_edit} to update the experimental details associated with
@@ -90,6 +96,8 @@ cyto_details(gs)
 \code{\link{cyto_load}}
 
 \code{\link{cyto_markers_edit}}
+
+\code{\link{cyto_names_parse}}
 
 \code{\link{cyto_details_edit}}
 

@@ -448,6 +448,10 @@ cyto_clean <- function(x, ...) {
 #'   \code{cyto_markers_edit} to update the markers associated with channels in
 #'   the loaded sampes, set to TRUE by default. The name of the csv to which
 #'   these details will be supplied can also be passed to this argument.
+#' @param parse_names logical indicating whether the file names should be parsed
+#'   into experiment details using \code{cyto_names_parse}, set to FALSE by
+#'   default. If you need to parse the names using a different dlimiter, supply
+#'   the delimiter to this argument instead of TRUE.
 #' @param details logical indicating whether a call should be made to
 #'   \code{cyto_details_edit} to update the experimental details associated with
 #'   the loaded samples, set to TRUE by default. The name of the csv to which
@@ -486,6 +490,7 @@ cyto_clean <- function(x, ...) {
 #'
 #' @seealso \code{\link{cyto_load}}
 #' @seealso \code{\link{cyto_markers_edit}}
+#' @seealso \code{\link{cyto_names_parse}}
 #' @seealso \code{\link{cyto_details_edit}}
 #' @seealso \code{\link{cyto_channels_restrict}}
 #' @seealso \code{\link{cyto_clean}}
@@ -498,6 +503,7 @@ cyto_setup <- function(path = ".",
                        restrict = FALSE,
                        clean = FALSE,
                        markers = TRUE,
+                       parse_names = FALSE,
                        details = TRUE, ...) {
 
   # CYTOSET/GATINGSET
@@ -517,6 +523,17 @@ cyto_setup <- function(path = ".",
     }
   }
 
+  # PARSE NAMES
+  if(parse_names != FALSE){
+    message("Parsing file names into experiment details...")
+    if(parse_names == TRUE){
+      x <- cyto_names_parse(x)
+    }else{
+      x <- cyto_names_parse(x,
+                            split = parse_names)
+    }
+  }
+  
   # EXPERIMENT DETAILS
   if (details != FALSE) {
     message("Updating experiment details...")
@@ -758,6 +775,93 @@ cyto_names.list <- function(x) {
     identifier(x) <- value
   }
   return(x)
+}
+
+## CYTO_NAMES_PARSE ------------------------------------------------------------
+
+#' Parse file names into experiment details
+#'
+#' Reward users that use consistent names for files by parsing file names into
+#' new variables and adding them to \code{cyto_details}. Variable construction
+#' may not be perfect if certain files are named differently, but it will give a
+#' starting point for editing these values using \code{cyto_details_edit}
+#' without having to manually enter a lot of these details.
+#'
+#' @param x object of class flowSet or GatingSet.
+#' @param vars vector containing the names of the variables to be added to
+#'   \code{cyto_details}, set to var_1, var_2 ... by default.
+#' @param split delimiter to split the file name into fragments, set to "_" by
+#'   default.
+#' @param ... additional arguments passed to
+#'   \code{\link[base:strsplit]{strsplit}}.
+#'
+#' @return flowSet or GatingSet with \code{cyto_details} updated with new
+#'   variables extracted from the file names.
+#'
+#' @importFrom tools file_path_sans_ext
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Parse file names to variables
+#' fs <- cyto_names_parse(Activation,
+#' vars = c("sample_type", "sample_id"),
+#' split = "_")
+#' 
+#' # Updated experiment details
+#' cyto_details(fs)
+#'
+#' @export
+cyto_names_parse <- function(x,
+                            vars = NULL,
+                            split = "_",
+                            ...) {
+  
+  # NAMES
+  cyto_names <- cyto_names(x)
+  
+  # STRIP EXTENSION
+  cyto_names <- file_path_sans_ext(cyto_names)
+  
+  # SPLIT
+  cyto_names_split <- strsplit(cyto_names, 
+                               split,
+                               ...)
+  
+  # REQUIRED VARIABLE LENGTH
+  var_length <- max(LAPPLY(cyto_names_split, "length"))
+  
+  # VARIABLES
+  if(is.null(vars)){
+    vars <- paste0("var_", seq_len(var_length))
+  }else{
+    if(length(vars) != var_length){
+      stop(paste0("Require ",
+                  var_length, 
+                  " variable names to 'vars' to update cyto_details."))
+    }
+  }  
+  
+  # FILL WITH NA
+  cyto_names_split <- lapply(cyto_names_split, function(z){
+    if(length(z) < var_length){
+      z <- rep(c(z, rep(NA, var_length)), length.out = var_length)
+      return(z)
+    }else{
+      return(z)
+    }
+  })
+  cyto_names_split <- do.call("rbind", cyto_names_split)
+  colnames(cyto_names_split) <- vars
+  
+  # UPDATE CYTO_DETAILS
+  cyto_details(x) <- cbind(cyto_details(x), cyto_names_split)
+  
+  # RETURN FLOWSET/GATINGSET
+  return(x)
+  
 }
 
 ## CYTO_CHECK ------------------------------------------------------------------
