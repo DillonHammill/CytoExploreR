@@ -146,10 +146,12 @@ data_editor <- function(x,
           )
         # SELECTOR
         }else if(type == "selector"){
+          # SELECTOR
           suppressWarnings(
             rhandsontable(values[["x"]],
                           contextMenu = TRUE,
-                          rowHeaders = NULL) %>%
+                          rowHeaders = NULL,
+                          manualColumnResize = TRUE) %>%
             hot_col(col = colnames(x)[length(colnames(x))],
                     type = "dropdown",
                     source = options,
