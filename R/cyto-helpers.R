@@ -3766,6 +3766,15 @@ cyto_nodes_convert <- function(x,
   nodes_auto <- cyto_nodes(x, path = "auto")
   nodes_terminal <- basename(nodes_full)
 
+  # STRIP REFERENCE TO ROOT
+  nodes <- LAPPLY(nodes, function(node){
+    if(grepl("root/", node)){
+      node <- gsub("root/", "/", test)
+      return(node)
+    }
+    return(node)
+  })
+  
   # ANCHOR
   if (!is.null(anchor)) {
     # INVALID ANCHOR
