@@ -268,20 +268,26 @@ cyto_load <- function(path = ".",
 
   # SELECT
   if (!is.null(select)) {
+    file_ind <- c()
     lapply(select, function(z) {
       if (any(grepl(z, files, ignore.case = TRUE))) {
-        files <<- files[which(grepl(z, files, ignore.case = TRUE))]
+        file_ind <<- c(file_ind,
+                       which(grepl(z, files, ignore.case = TRUE)))
       }
     })
+    file <- files[unique(file_ind)]
   }
 
   # EXCLUDE
   if (!is.null(exclude)) {
+    file_ind <- c()
     lapply(exclude, function(z) {
       if (any(grepl(z, files, ignore.case = TRUE))) {
-        files <<- files[-which(grepl(z, files, ignore.case = TRUE))]
+        file_ind <<- c(file_ind,
+                       which(grepl(z, files, ignore.case = TRUE)))
       }
     })
+    files <- files[-unique(file_ind)]
   }
 
   # SORTED FILE PATHS
