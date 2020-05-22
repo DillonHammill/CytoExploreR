@@ -275,7 +275,7 @@ cyto_load <- function(path = ".",
                        which(grepl(z, files, ignore.case = TRUE)))
       }
     })
-    file <- files[unique(file_ind)]
+    files <- files[unique(file_ind)]
   }
 
   # EXCLUDE
