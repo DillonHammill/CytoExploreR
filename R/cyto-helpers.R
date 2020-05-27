@@ -302,7 +302,7 @@ cyto_load <- function(path = ".",
     # FCS FILES
   } else {
     # CYTOSET
-    x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
+    x <- load_cytoset_from_fcs(files = files, ...)
 
     # CORRECT GUID SLOTS - NECESSARY?
     nms <- cyto_names(x)
