@@ -798,6 +798,8 @@ cyto_names.list <- function(x) {
 #'   \code{cyto_details}, set to var_1, var_2 ... by default.
 #' @param split delimiter to split the file name into fragments, set to "_" by
 #'   default.
+#' @param exclude vector of indices indicating which text fragments should not be
+#'   included in the experiment details, set to NULL by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[base:strsplit]{strsplit}}.
 #'
@@ -815,7 +817,7 @@ cyto_names.list <- function(x) {
 #' fs <- cyto_names_parse(Activation,
 #' vars = c("sample_type", "sample_id"),
 #' split = "_")
-#' 
+#'
 #' # Updated experiment details
 #' cyto_details(fs)
 #'
@@ -823,6 +825,7 @@ cyto_names.list <- function(x) {
 cyto_names_parse <- function(x,
                             vars = NULL,
                             split = "_",
+                            exclude = NULL,
                             ...) {
   
   # NAMES
@@ -835,6 +838,13 @@ cyto_names_parse <- function(x,
   cyto_names_split <- strsplit(cyto_names, 
                                split,
                                ...)
+  
+  # SKIP
+  if(!is.null(exclude)){
+    cyto_names_split <- lapply(cyto_names_split, function(z){
+      z[-exclude]
+    })
+  }
   
   # REQUIRED VARIABLE LENGTH
   var_length <- max(LAPPLY(cyto_names_split, "length"))

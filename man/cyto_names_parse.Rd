@@ -4,7 +4,7 @@
 \alias{cyto_names_parse}
 \title{Parse file names into experiment details}
 \usage{
-cyto_names_parse(x, vars = NULL, split = "_", ...)
+cyto_names_parse(x, vars = NULL, split = "_", exclude = NULL, ...)
 }
 \arguments{
 \item{x}{object of class flowSet or GatingSet.}
@@ -14,6 +14,9 @@ cyto_names_parse(x, vars = NULL, split = "_", ...)
 
 \item{split}{delimiter to split the file name into fragments, set to "_" by
 default.}
+
+\item{exclude}{vector of indices indicating which text fragments should not be
+included in the experiment details, set to NULL by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[base:strsplit]{strsplit}}.}
