@@ -1386,6 +1386,8 @@ cyto_transform_extract <- function(x,
 #'   should be returned.
 #' @param raw logical indicating whether a list of raw data matrices should be
 #'   returned instead of a flowFrame or flowSet.
+#' @param channels names of the channels for which data should be extracted, set
+#'   to all channels by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.
@@ -1419,8 +1421,10 @@ cyto_transform_extract <- function(x,
 cyto_extract <- function(x,
                          parent = NULL,
                          copy = FALSE,
-                         raw = FALSE, ...) {
-
+                         raw = FALSE,
+                         channels = NULL,
+                         ...) {
+  
   # DEFAULT PARENT
   if (is.null(parent)) {
     parent <- cyto_nodes(x, path = "auto")[1]
@@ -1438,6 +1442,12 @@ cyto_extract <- function(x,
     x <- cyto_copy(x)
   }
 
+  # RESTRICT
+  if(!is.null(channels)){
+    channels <- cyto_channels_extract(x, channels = channels)
+    x <- x[, channels]
+  }
+  
   # RAW DATA MATRICES
   if (raw) {
     nms <- cyto_names(x)
