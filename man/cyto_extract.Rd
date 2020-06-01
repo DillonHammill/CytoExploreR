@@ -19,8 +19,8 @@ should be returned.}
 \item{raw}{logical indicating whether a list of raw data matrices should be
 returned instead of a flowFrame or flowSet.}
 
-\item{channels}{names of the channels for which data should be extracted, set
-to all channels by default.}
+\item{channels}{names of the markers or channels for which data should be
+extracted, set to all channels by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or

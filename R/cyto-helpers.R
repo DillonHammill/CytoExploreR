@@ -1386,8 +1386,8 @@ cyto_transform_extract <- function(x,
 #'   should be returned.
 #' @param raw logical indicating whether a list of raw data matrices should be
 #'   returned instead of a flowFrame or flowSet.
-#' @param channels names of the channels for which data should be extracted, set
-#'   to all channels by default.
+#' @param channels names of the markers or channels for which data should be
+#'   extracted, set to all channels by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.
