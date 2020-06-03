@@ -12,6 +12,8 @@
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param select vector of channel names to select.
 #' @param exclude vector of channel names to exclude.
+#' @param ... additional arguments passed to \code{\link[base:grepl]{grepl}} for
+#'   character matching.
 #'
 #' @return vector of channel names.
 #'
@@ -47,22 +49,29 @@
 #' @export
 cyto_channels <- function(x, 
                           select = NULL,
-                          exclude = NULL){
+                          exclude = NULL,
+                          ...){
   
   # CHANNELS
   channels <- colnames(x)
   
   # SELECT
   if(!is.null(select)){
-    lapply(select, function(z){
-      channels <<- channels[grepl(z, channels, ignore.case = TRUE)]
-    })
+    ind <- unique(LAPPLY(select, function(z){
+      which(
+        grepl(z, 
+              channels, 
+              ...))
+    }))
+    channels <- channels[ind]
   }
   
   # EXCLUDE
   if(!is.null(exclude)){
     lapply(exclude, function(z){
-      channels <<- channels[!grepl(z, channels, ignore.case = TRUE)]
+      channels <<- channels[!grepl(z, 
+                                   channels, 
+                                   ...)]
     })
   }
   

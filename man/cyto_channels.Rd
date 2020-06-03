@@ -4,7 +4,7 @@
 \alias{cyto_channels}
 \title{Extract channel names}
 \usage{
-cyto_channels(x, select = NULL, exclude = NULL)
+cyto_channels(x, select = NULL, exclude = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -15,6 +15,9 @@ cyto_channels(x, select = NULL, exclude = NULL)
 \item{select}{vector of channel names to select.}
 
 \item{exclude}{vector of channel names to exclude.}
+
+\item{...}{additional arguments passed to \code{\link[base:grepl]{grepl}} for
+character matching.}
 }
 \value{
 vector of channel names.
