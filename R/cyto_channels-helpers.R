@@ -74,17 +74,23 @@ cyto_channels <- function(x,
 ## CYTO_MARKERS ----------------------------------------------------------------
 
 #' Extract marker names
-#' 
+#'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#'   
+#' @param select vector of channels or markers for which the channel/marker
+#'   combinations should be returned.
+#' @param exclude vector of channels or markers for which the channel/marker
+#'   combinations should not be returned.
+#' @param ... additional arguments passed to \code{\link[base:grepl]{grepl}} for
+#'   character matching.
+#'
 #' @return vector of marker names or NULL if no markers have been assigned.
-#' 
+#'
 #' @importFrom flowCore parameters
 #' @importFrom flowWorkspace pData
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_channels}}
@@ -112,48 +118,69 @@ cyto_channels <- function(x,
 #'
 #' # GatingSet
 #' cyto_markers(gs)
-#' 
+#'
 #' @name cyto_markers
 NULL
 
 #' @noRd
 #' @export
-cyto_markers <- function(x){
+cyto_markers <- function(x, ...){
   UseMethod("cyto_markers")
 }
 
 #' @rdname cyto_markers
 #' @export
-cyto_markers.GatingSet <- function(x){
+cyto_markers.GatingSet <- function(x,
+                                   select = NULL,
+                                   exclude = NULL,
+                                   ...){
   # Extract data
   fs <- cyto_extract(x, "root")
   # flowFrame
   fr <- fs[[1]]
   # flowFrame method call
-  cyto_markers(fr)
+  cyto_markers(fr,
+               select = select,
+               exclude = exclude,
+               ...)
 }
 
 #' @rdname cyto_markers
 #' @export
-cyto_markers.GatingHierarchy <- function(x){
+cyto_markers.GatingHierarchy <- function(x,
+                                         select = NULL,
+                                         exclude = NULL,
+                                         ...){
   # Extract data
   fr <- cyto_extract(x, "root")
   # flowFrame method call
-  cyto_markers(fr)
+  cyto_markers(fr,
+               select = select,
+               exclude = exclude,
+               ...)
 }
 
 #' @rdname cyto_markers
 #' @export
-cyto_markers.flowSet <- function(x){
+cyto_markers.flowSet <- function(x,
+                                 select = NULL,
+                                 exclude = NULL,
+                                 ...){
   # flowFrame
   fr <- x[[1]]
   # flowFrame method call
-  cyto_markers(fr)
+  cyto_markers(fr,
+               select = select,
+               exclude = exclude,
+               ...)
 }
 
 #' @rdname cyto_markers
 #' @export
-cyto_markers.flowFrame <- function(x){
+cyto_markers.flowFrame <- function(x,
+                                   select = NULL,
+                                   exclude = NULL,
+                                   ...){
   # Extract marker information
   markers <- as.character(pData(parameters(x))$desc)
   # Add channels as names
@@ -162,7 +189,32 @@ cyto_markers.flowFrame <- function(x){
   if(.all_na(markers)){
     return(NULL)
   }else{
+    # MARKERS
     markers <- markers[!is.na(markers)]
+    # SELECT
+    if(!is.null(select)){
+      ind <- unique(LAPPLY(select, function(z){
+        which(grepl(z,
+                    markers,
+                    ...) |
+              grepl(z, 
+                    names(markers),
+                    ...))
+      }))
+      markers <- markers[ind]
+    }
+    # EXCLUDE
+    if(!is.null(exclude)){
+      # EXCLUDE
+      lapply(exclude, function(z){
+        markers <<- markers[!(grepl(z, 
+                                   markers,
+                                   ...) |
+                              grepl(z,
+                                    names(markers),
+                                    ...))]
+      })
+    }
     return(markers)
   }
 }

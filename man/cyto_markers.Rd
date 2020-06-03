@@ -8,19 +8,28 @@
 \alias{cyto_markers.flowFrame}
 \title{Extract marker names}
 \usage{
-\method{cyto_markers}{GatingSet}(x)
+\method{cyto_markers}{GatingSet}(x, select = NULL, exclude = NULL, ...)
 
-\method{cyto_markers}{GatingHierarchy}(x)
+\method{cyto_markers}{GatingHierarchy}(x, select = NULL, exclude = NULL, ...)
 
-\method{cyto_markers}{flowSet}(x)
+\method{cyto_markers}{flowSet}(x, select = NULL, exclude = NULL, ...)
 
-\method{cyto_markers}{flowFrame}(x)
+\method{cyto_markers}{flowFrame}(x, select = NULL, exclude = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{select}{vector of channels or markers for which the channel/marker
+combinations should be returned.}
+
+\item{exclude}{vector of channels or markers for which the channel/marker
+combinations should not be returned.}
+
+\item{...}{additional arguments passed to \code{\link[base:grepl]{grepl}} for
+character matching.}
 }
 \value{
 vector of marker names or NULL if no markers have been assigned.
