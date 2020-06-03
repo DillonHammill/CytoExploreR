@@ -968,3 +968,108 @@
   return(data_range)
   
 }
+
+## QUANTILE --------------------------------------------------------------------
+
+# Quantiles are computed on a per flowFrame basis first to prevent erroneous
+# computation when merging samples (rare populations will be missed). The
+# minimum across samples for the lowest quantile and the maximum across samples
+# for the highest quantile are used. The values for all other quantiles in
+# between this range are calculated as the average across samples.
+
+#' Compute lower and upper quantiles for channels
+#'
+#' @param x object of class \code{cytoframe}, \code{cytoset},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
+#' @param parent name of the parent population for which quantiles should be
+#'   calculated.
+#' @param channels names of the channels for which quantiles should be computed.
+#' @param probs vector of probabilities, set to compute 0.01 and 0.99 quantiles
+#'   by default.
+#' @param ... additional arguments passed to stats:quantile.
+#'
+#' @return data.frame containing the calculated quantiles for the indicated
+#'   channels.
+#'
+#' @importFrom stats quantile
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_quantile <- function(x,
+                           parent = "root",
+                           channels = NULL,
+                           probs = c(0.01, 0.99),
+                           ...){
+  
+  # CHANNELS
+  if(is.null(channels)){
+    channels <- cyto_channels(x)
+  }else{
+    channels <- cyto_channels_extract(x, channels = channels)
+  }
+  
+  # EXTRACT RAW DATA
+  cyto_data <- cyto_extract(x,
+                            parent = parent,
+                            raw = TRUE,
+                            channels = channels)
+  
+  # COMPUTE QUANTILES FOR EACH FLOWFRAME
+  cyto_quant <- lapply(cyto_data, function(z){
+    quant <- lapply(seq_len(ncol(z)), function(y){
+      quantile(z[, y],
+               probs = sort(probs),
+               ...)
+    })
+    names(quant) <- colnames(z)
+    quant <- do.call("cbind", quant)
+    return(quant)
+  })
+  
+  # QUANTILES
+  cyto_quant <- lapply(unique(rownames(cyto_quant[[1]])), function(z){
+    quant <- lapply(cyto_quant, function(y){
+      y[rownames(y) == z, ]
+    })
+    quant <- do.call("rbind", quant)
+    return(quant)
+  })
+  names(cyto_quant) <- probs
+  
+  # MIN/MAX QUANTILES
+  if(length(probs) == 1){
+    cyto_quant <- lapply(seq_len(ncol(cyto_quant[[1]])), function(z){
+      mean(cyto_quant[[1]][, z], na.rm = TRUE)
+    })
+    cyto_quant <- do.call("cbind", cyto_quant)
+  }else{
+    cyto_quant <- lapply(seq_len(length(probs)), function(z){
+      # LOWER QUANTILE
+      if(z == 1){
+        quant <- lapply(seq_len(ncol(cyto_quant[[z]])), function(y){
+          min(cyto_quant[[z]][, y], na.rm = TRUE)
+        })
+      # UPPER QUANTILE  
+      }else if(z == length(probs)){
+        quant <- lapply(seq_len(ncol(cyto_quant[[z]])), function(y){
+          max(cyto_quant[[z]][, y], na.rm = TRUE)
+        })
+      # INTERMEDIATE QUANTILE 
+      }else{
+        quant <- lapply(seq_len(ncol(cyto_quant[[z]])), function(y){
+          mean(cyto_quant[[z]][, y], na.rm = TRUE)
+        })
+      }
+      quant <- do.call("cbind", quant)
+      return(quant)
+    })
+    cyto_quant <- do.call("rbind", cyto_quant)
+  }
+  colnames(cyto_quant) <- channels
+  rownames(cyto_quant) <- paste0(probs * 100, "%")
+  
+  # RETURN QUANTILES
+  return(cyto_quant)
+  
+}

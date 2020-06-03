@@ -4069,3 +4069,130 @@ cyto_spillover_extract <- function(x) {
   # RETURN LIST OF SPILLOVER MATRICES
   return(spill)
 }
+
+
+## CYTO_CALIBRATE --------------------------------------------------------------
+
+#' Calibrate channel ranges for cyto_plot
+#'
+#' The density colour scale for points in \code{cyto_plot} can now be made to
+#' represent fluorescent intensity of a third channel, instead of local density
+#' in the 2D plotting space. In order for this feature to work properly, the
+#' full range for the channel/marker of interest is required to appropriately
+#' set the colour scale. \code{cyto_calibrate} performs this range calibration,
+#' so that this information can be used in all downstream \code{cyto_plot}
+#' calls.
+#'
+#' @param x object of class \code{cytoframe}, \code{cytoset},
+#'   \code{GatingHierarchy} or \code{GatingSet} to use for the calibration. For
+#'   the best calibration is recommended that users supply samples containing
+#'   both negative and positive events in each channel.
+#' @param name of the parent population to use for channel calibration when a
+#'   \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
+#'   \code{"root"} node by default.
+#' @param type indicates the type of calibration to perform, options include
+#'   \code{"range"} or \code{"quantile"}. Range calibration simply uses the full
+#'   range of values across samples for the calibration. Quantile calibration
+#'   computes an lower and upper quantile for each channel, values falling
+#'   outside the calibration range are assigned the bottom or top colour.
+#' @param probs vector of lower and upper probabilities passed to
+#'   \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
+#'   default.
+#' @param ... not in use.
+#'
+#' @return saves calibration settings for use by \code{\link{cyto_plot}}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Calibration
+#' cyto_calibrate(fs)
+#'
+#' # Colour based on Hoechst-405 staining
+#' cyto_plot(fs,
+#' channels = c("FSC-A", "SSC-A"),
+#' point_col = "Hoechst-405")
+#'
+#' @export
+cyto_calibrate <- function(x,
+                           parent = "root",
+                           type = "range",
+                           probs = c(0.01, 0.99),
+                           ...){
+  
+  # COMPUTE CHANNEL RANGES
+  if(grepl("^r", type, ignore.case = TRUE)){
+    cyto_cal <- .cyto_range(x,
+                            parent = parent,
+                            axes_limits = "data",
+                            buffer = 0,
+                            ...)
+  # COMPUTE CHANNEL QUANTILES
+  }else if(grepl("^q", type, ignore.case = TRUE)){
+    cyto_cal<- .cyto_quantile(x,
+                              parent = parent,
+                              probs = probs,
+                              ...)
+  }
+  
+  # SAVE RDS TO TEMPFILE
+  tempfile <- paste0(tempdir(),
+                     .Platform$file.sep,
+                     "cyto_calibrate.rds")
+  saveRDS(cyto_cal,
+          tempfile)
+  
+}
+
+## CYTO_CALIBRATE_RESET --------------------------------------------------------
+
+#' Remove current calibration settings
+#' 
+#' @return remove current calibration settings created by \code{cyto_calibrate}.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @export
+cyto_calibrate_reset <- function(){
+  
+  # TEMP FILES
+  temp_dir <- tempdir()
+  temp_files <- list.files(temp_dir)
+  
+  # REMOVE CALIBRATION SETTINGS
+  if(any(grepl("cyto_calibrate.rds", temp_files, ignore.case = TRUE))){
+    files <- temp_files[grepl("cyto_calibrate.rds", 
+                              temp_files,
+                              ignore.case = TRUE)]
+    file.remove(paste0(temp_dir,
+                       .Platform$file.sep,
+                       files))
+  }
+  
+}
+
+## CYTO_CALIBRATE_RECALL -------------------------------------------------------
+
+#' Recall saved calibration settings
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+.cyto_calibrate_recall <- function(){
+  
+  # TEMPFILES
+  temp_dir <- tempdir()
+  temp_files <- list.files(temp_dir)
+  
+  # CALIBRATION
+  if(any(grepl("cyto_calibrate.rds", temp_files))){
+    return(readRDS(paste0(temp_dir,
+                          .Platform$file.sep,
+                          "cyto_calibrate.rds")))
+  }else{
+    return(NULL)
+  }
+  
+}
