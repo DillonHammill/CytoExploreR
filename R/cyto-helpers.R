@@ -3166,7 +3166,7 @@ cyto_markers_edit <- function(x,
     save_as = file,
     ...
   )
-
+  
   # Update channels
   BiocGenerics::colnames(x) <- as.character(dt$channel)
 
@@ -3183,7 +3183,7 @@ cyto_markers_edit <- function(x,
 
   # Only modify markers if supplied
   if (!all(is.na(cyto_markers))) {
-    markernames(x) <- cyto_markers[!is.na(cyto_markers)]
+    markernames(x) <- cyto_markers
   }
 
   # Return updated samples
