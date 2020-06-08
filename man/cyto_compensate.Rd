@@ -23,7 +23,10 @@ cyto_compensate(x, ...)
 \item{...}{not in use.}
 
 \item{spillover}{name of the spillover matrix csv file (e.g.
-"Spillover-Matrix.csv") saved in the current working directory.}
+"Spillover-Matrix.csv") saved in the current working directory or spillover
+matrix object of class \code{matrix} or \code{data.frame} with channel
+names assigned to each column. If supplied, \code{spillover} will be
+applied to all samples.}
 
 \item{select}{index or name of the sample from which the spillover matrix
 should be extracted when no spillover matrix file is supplied to

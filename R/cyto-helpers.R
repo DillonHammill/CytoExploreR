@@ -3391,7 +3391,10 @@ cyto_details_save <- function(x,
 #'   \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param spillover name of the spillover matrix csv file (e.g.
-#'   "Spillover-Matrix.csv") saved in the current working directory.
+#'   "Spillover-Matrix.csv") saved in the current working directory or spillover
+#'   matrix object of class \code{matrix} or \code{data.frame} with channel
+#'   names assigned to each column. If supplied, \code{spillover} will be
+#'   applied to all samples.
 #' @param select index or name of the sample from which the spillover matrix
 #'   should be extracted when no spillover matrix file is supplied to
 #'   \code{spillover}. To compensate each sample individually using their stored
