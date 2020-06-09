@@ -266,6 +266,21 @@ cyto_load <- function(path = ".",
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
 
+  # VALID FILES
+  files_ext <- file_ext(files)
+  files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
+  
+  # NO VALID FILES
+  if(length(files_ind) == length(files)){
+    stop(paste0(path,
+                " does not contain any valid FCS files."))
+  }
+  
+  # EXCLUDE IRRELEVANT FILES
+  if(length(files_ind) > 0){
+    files <- files[-files_ind]
+  }
+  
   # SELECT
   if (!is.null(select)) {
     file_ind <- c()
