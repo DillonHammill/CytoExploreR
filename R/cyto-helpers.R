@@ -3044,7 +3044,7 @@ cyto_barcode <- function(x,
 #' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
 #'
 #' @importFrom flowWorkspace pData
-#' @importFrom flowCore parameters markernames markernames<-
+#' @importFrom flowCore parameters
 #' @importFrom utils edit write.csv read.csv
 #' @importFrom tools file_ext
 #' @importFrom methods is
@@ -3195,12 +3195,16 @@ cyto_markers_edit <- function(x,
   cyto_channels <- dt$channel
   cyto_markers <- dt$marker
   names(cyto_markers) <- cyto_channels
-
+  
   # Only modify markers if supplied
   if (!all(is.na(cyto_markers))) {
-    markernames(x) <- cyto_markers
+    if(class(x) %in% c("flowFrame", "flowSet")){
+      flowCore::markernames(x) <- cyto_markers
+    }else{
+      flowWorkspace::markernames(x) <- cyto_markers
+    }
   }
-
+  
   # Return updated samples
   return(x)
 }
@@ -3813,7 +3817,7 @@ cyto_nodes_convert <- function(x,
   # STRIP REFERENCE TO ROOT
   nodes <- LAPPLY(nodes, function(node){
     if(grepl("root/", node)){
-      node <- gsub("root/", "/", test)
+      node <- gsub("root/", "/", node)
       return(node)
     }
     return(node)
