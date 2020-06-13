@@ -13,7 +13,8 @@
 #' @param select vector of channel names to select.
 #' @param exclude vector of channel names to exclude.
 #' @param ... additional arguments passed to \code{\link[base:grepl]{grepl}} for
-#'   character matching.
+#'   character matching. For exact character string matching to override the
+#'   default which ignores character case, set \code{fixed} to TRUE.
 #'
 #' @return vector of channel names.
 #'
@@ -59,9 +60,12 @@ cyto_channels <- function(x,
   if(!is.null(select)){
     ind <- unique(LAPPLY(select, function(z){
       which(
-        grepl(z, 
+        suppressWarnings(
+          grepl(z, 
               channels, 
+              ignore.case = TRUE,
               ...))
+        )
     }))
     channels <- channels[ind]
   }
@@ -69,9 +73,12 @@ cyto_channels <- function(x,
   # EXCLUDE
   if(!is.null(exclude)){
     lapply(exclude, function(z){
-      channels <<- channels[!grepl(z, 
-                                   channels, 
-                                   ...)]
+      channels <<- channels[!suppressWarnings(
+        grepl(z, 
+              channels, 
+              ignore.case = TRUE,
+              ...)
+        )]
     })
   }
   
@@ -93,7 +100,8 @@ cyto_channels <- function(x,
 #' @param exclude vector of channels or markers for which the channel/marker
 #'   combinations should not be returned.
 #' @param ... additional arguments passed to \code{\link[base:grepl]{grepl}} for
-#'   character matching.
+#'   character matching. For exact character string matching to override the
+#'   default which ignores character case, set \code{fixed} to TRUE.
 #'
 #' @return vector of marker names or NULL if no markers have been assigned.
 #'
@@ -203,12 +211,14 @@ cyto_markers.flowFrame <- function(x,
     # SELECT
     if(!is.null(select)){
       ind <- unique(LAPPLY(select, function(z){
-        which(grepl(z,
+        which(suppressWarnings(grepl(z,
                     markers,
-                    ...) |
-              grepl(z, 
+                    ignore.case = TRUE,
+                    ...)) |
+              suppressWarnings(grepl(z, 
                     names(markers),
-                    ...))
+                    ignore.case = TRUE,
+                    ...)))
       }))
       markers <- markers[ind]
     }
@@ -216,12 +226,14 @@ cyto_markers.flowFrame <- function(x,
     if(!is.null(exclude)){
       # EXCLUDE
       lapply(exclude, function(z){
-        markers <<- markers[!(grepl(z, 
+        markers <<- markers[!(suppressWarnings(grepl(z, 
                                    markers,
-                                   ...) |
-                              grepl(z,
+                                   ignore.case = TRUE,
+                                   ...)) |
+                              suppressWarnings(grepl(z,
                                     names(markers),
-                                    ...))]
+                                    ignore.case = TRUE,
+                                    ...)))]
       })
     }
     return(markers)

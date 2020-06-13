@@ -17,7 +17,8 @@ cyto_channels(x, select = NULL, exclude = NULL, ...)
 \item{exclude}{vector of channel names to exclude.}
 
 \item{...}{additional arguments passed to \code{\link[base:grepl]{grepl}} for
-character matching.}
+character matching. For exact character string matching to override the
+default which ignores character case, set \code{fixed} to TRUE.}
 }
 \value{
 vector of channel names.

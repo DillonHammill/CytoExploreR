@@ -29,7 +29,8 @@ combinations should be returned.}
 combinations should not be returned.}
 
 \item{...}{additional arguments passed to \code{\link[base:grepl]{grepl}} for
-character matching.}
+character matching. For exact character string matching to override the
+default which ignores character case, set \code{fixed} to TRUE.}
 }
 \value{
 vector of marker names or NULL if no markers have been assigned.
