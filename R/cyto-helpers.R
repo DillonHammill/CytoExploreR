@@ -464,7 +464,9 @@ cyto_clean <- function(x, ...) {
 #'   dropped from the returned cytoset, set to FALSE by default.  See
 #'   \code{\link{cyto_channels_restrict}}.
 #' @param clean logical indicating whether the loaded data should be cleaned
-#'   using \code{cyto_clean}, set to FALSE by default.
+#'   using \code{cyto_clean}, set to FALSE by default. Alternatively, users can
+#'   indicate which types of anomalies should be checked as expected by
+#'   \code{remove_from} in \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.
 #' @param markers logical indicating whether a call should be made to
 #'   \code{cyto_markers_edit} to update the markers associated with channels in
 #'   the loaded sampes, set to TRUE by default. The name of the csv to which
@@ -575,9 +577,13 @@ cyto_setup <- function(path = ".",
       x <- cyto_channels_restrict(x)
     }
     # CLEAN DATA
-    if (clean) {
+    if (clean != FALSE) {
+      if(clean == TRUE){
+        clean <- "all"
+      }
       message("Cleaning data to remove anomalies...")
-      x <- cyto_clean(x)
+      x <- cyto_clean(x,
+                      remove_from = clean)
     }
     # GATINGSET
     x <- GatingSet(x)

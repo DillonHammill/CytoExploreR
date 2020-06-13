@@ -27,7 +27,9 @@ dropped from the returned cytoset, set to FALSE by default.  See
 \code{\link{cyto_channels_restrict}}.}
 
 \item{clean}{logical indicating whether the loaded data should be cleaned
-using \code{cyto_clean}, set to FALSE by default.}
+using \code{cyto_clean}, set to FALSE by default. Alternatively, users can
+indicate which types of anomalies should be checked as expected by
+\code{remove_from} in \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.}
 
 \item{markers}{logical indicating whether a call should be made to
 \code{cyto_markers_edit} to update the markers associated with channels in
