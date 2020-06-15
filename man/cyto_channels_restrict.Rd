@@ -2,20 +2,38 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channels_restrict}
 \alias{cyto_channels_restrict}
-\title{Remove channels of a flowFrame or flowSet}
+\alias{cyto_channels_restrict.flowFrame}
+\alias{cyto_channels_restrict.flowSet}
+\alias{cyto_channels_restrict.GatingSet}
+\title{Restrict the channels of a cytometry object}
 \usage{
-cyto_channels_restrict(x)
+\method{cyto_channels_restrict}{flowFrame}(x, exclude = NULL, ...)
+
+\method{cyto_channels_restrict}{flowSet}(x, exclude = NULL, ...)
+
+\method{cyto_channels_restrict}{GatingSet}(x, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class flowFrame or flowSet.}
+\item{x}{object of class \code{flowFrame}, \code{flowSet}or \code{GatingSet}.}
+
+\item{exclude}{vector of privileged channels or markers to remove in addition
+to the channels removed by default, set to NULL by default.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_channels}} to
+control character matching for the exclude argument.}
 }
 \value{
-flowFrame or flowSet object with unused channels removed.
+an object of class \code{flowFrame}, \code{flowSet},
+  \code{GatingHierarchy} or \code{GatingSet} with unused channels removed.
 }
 \description{
-\code{cyto_channels_restrict} removes channels from the flowFrame or flowSet
-which do not have markers assigned. The FSC, SSC and Time parameters are
-always retained irrespective of marker assignment.
+\code{cyto_channels_restrict} removes any unused channels (channels lacking
+marker assignments) from a \code{flowFrame}, \code{flowSet},
+\code{GatingHierarchy} or \code{GatingSet}. By default,
+\code{cyto_channels_restrict} will always retain any FSC, SSC or Time
+channels irrespective of marker assignment. Removal of channels that contain
+marker assignments or channels that are privileged channels (FSC/SSC/Time)
+can be forced through use of the \code{exclude} argument.
 }
 \examples{
 

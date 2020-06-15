@@ -23,8 +23,9 @@ a folder in current working directory).}
 saving.}
 
 \item{restrict}{logical indicating whether unassigned channels should be
-dropped from the returned cytoset, set to FALSE by default.  See
-\code{\link{cyto_channels_restrict}}.}
+dropped from the returned cytoset, set to FALSE by default. Alternatvely,
+users can supply a vector of channels to remove, see
+\code{\link{cyto_channels_restrict}} for details.}
 
 \item{clean}{logical indicating whether the loaded data should be cleaned
 using \code{cyto_clean}, set to FALSE by default. Alternatively, users can

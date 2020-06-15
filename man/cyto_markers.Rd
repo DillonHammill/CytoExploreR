@@ -28,7 +28,7 @@ combinations should be returned.}
 \item{exclude}{vector of channels or markers for which the channel/marker
 combinations should not be returned.}
 
-\item{...}{additional arguments passed to \code{\link[base:grepl]{grepl}} for
+\item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the
 default which ignores character case, set \code{fixed} to TRUE.}
 }

@@ -4,13 +4,15 @@
 \alias{cyto_fluor_channels}
 \title{Extract Fluorescent Channels}
 \usage{
-cyto_fluor_channels(x)
+cyto_fluor_channels(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_channels}}.}
 }
 \description{
 Extract Fluorescent Channels

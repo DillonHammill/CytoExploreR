@@ -16,7 +16,7 @@ cyto_channels(x, select = NULL, exclude = NULL, ...)
 
 \item{exclude}{vector of channel names to exclude.}
 
-\item{...}{additional arguments passed to \code{\link[base:grepl]{grepl}} for
+\item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the
 default which ignores character case, set \code{fixed} to TRUE.}
 }
@@ -25,8 +25,7 @@ vector of channel names.
 }
 \description{
 Simply a wrapper around \code{colnames} to extract the channels associated
-with a \code{flowFrame}, \code{flowSet}, \code{GatingHierarchy} or
-\code{GatingSet}.
+with a \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
 }
 \examples{
 
