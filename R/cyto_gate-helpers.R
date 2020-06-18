@@ -250,6 +250,171 @@ cyto_gate_rename <- function(x,
   write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
 }
 
+## CYTO_GATE_BOOL --------------------------------------------------------------
+
+#' Add boolean gate to GatingSet and gatingTemplate
+#'
+#' @param x object of class \code{GatingSet}.
+#' @param parent name of the parent population to which the boolean gates should
+#'   be added, set to the most recent common ancestor by default.
+#' @param alias vector of names for the boolean populations.
+#' @param logic vector of logic to define each of the boolean populations.
+#' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
+#'   "gatingTemplate.csv") where the new entries should be saved.
+#'
+#' @return object of class \code{GatingSet} with new boolean gates and updated
+#'   gatingTemplate csv file with appropriate entries.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' \dontrun{
+#' library(CytoExploreRData)
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#'
+#' # Compensation
+#' gs <- cyto_compensate(gs)
+#'
+#' # Transformations
+#' gs <- cyto_transform(gs)
+#'
+#' # Gating
+#' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+#'
+#' # Add boolean gate
+#' gs <- cyto_gate_bool(gs,
+#' alias = "CD4+CD8",
+#' logic = "CD4 T Cells|CD8 T Cells")
+#' }
+#'
+#' @export
+cyto_gate_bool <- function(x,
+                           parent = NULL,
+                           alias = NULL,
+                           logic = NULL,
+                           gatingTemplate = NULL){
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # GATINGSET
+  if(!is(x, "GatingSet")){
+    stop("'x' must be an object of class GatingSet.")
+  }
+  
+  # ALIAS
+  if(is.null(alias)){
+    stop("Supply name(s) for the boolean populations to 'alias'.")
+  }
+  
+  # LOGIC
+  if(is.null(logic)){
+    stop("Supply boolean logic to 'logic' to gate boolean populations.")
+  }
+  
+  # ALIAS & LOGIC
+  if(length(alias) != length(logic)){
+    stop("'alias' and 'logic' must be the same length.")
+  }
+  
+  # NODES
+  nodes_full <- cyto_nodes(x, path = "full")
+  nodes_auto <- cyto_nodes(x, path = "auto")
+  
+  # LOGIC - POPULATIONS
+  pops <- lapply(logic, function(z){
+    p <- unlist(strsplit(z, "\\||\\&|\\!"))
+    p <- p[!LAPPLY(p, ".empty")]
+    LAPPLY(p, function(y){
+      if(!y %in% c(nodes_full, nodes_auto)){
+        stop(paste(y, "does not exist or is not unique in the GatingSet."))
+      }
+    })
+    return(p)
+  })
+  
+  # PARENT
+  if(is.null(parent)){
+    # COMMON ANCESTOR
+    parent <- cyto_nodes_ancestor(x,
+                                  nodes = pops)
+  }  
+  
+  # MISSING GATINGTEMPLATE
+  if (is.null(gatingTemplate)) {
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # GATINGTEMPLATE STILL MISSING
+  if (is.null(gatingTemplate)) {
+    stop("Supply the name of the gatingTemplate to edit gate(s).")
+  }
+  
+  # GATINGTEMPLATE FILE EXTENSION
+  if (.empty(file_ext(gatingTemplate))) {
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
+  # CHECK GATINGTEMPLATE
+  tryCatch(.cyto_gatingTemplate_check(parent,
+                                      alias,
+                                      gatingTemplate),
+           error = function(e){
+             stop(
+               paste("Boolean populations already exist in gatingTemplate.",
+                     "Remove them with cyto_gate_remove first to update them.")
+             )
+           })
+  
+  # GATINGTEMPLATE ENTRIES -----------------------------------------------------
+  
+  # GATINGTEMPLATE
+  gt <- read.csv(gatingTemplate,
+                 header = TRUE)
+  
+  # ENTRY
+  gt_entry <- gt[1, , drop = FALSE]
+  gt_entry[1, ] <- rep(NA, ncol(gt_entry))
+  
+  # ADD BOOLEAN ENTRIES
+  gt_entries <- lapply(seq_along(alias), function(z){
+    gt_pop <- gt_entry
+    gt_pop[, "alias"] <- alias[z]
+    gt_pop[, "pop"] <- "+"
+    gt_pop[, "parent"] <- parent
+    gt_pop[, "gating_method"] <- "boolGate"
+    gt_pop[, "gating_args"] <- logic[z]
+    return(gt_pop)
+  })
+  gt_entries <- do.call("rbind", gt_entries)
+  
+  # UPDATE GATINGTEMPLATE
+  gt <- rbind(gt, gt_entries)
+  write.csv(gt,
+            gatingTemplate, 
+            row.names = FALSE)
+  
+  # CREATE BOOLEAN GATES
+  gates <- lapply(seq_along(alias), function(z){
+    call <- substitute(flowWorkspace::booleanFilter(v,
+                                                    filterId = alias[z]), 
+                       list(v = as.symbol(logic[z])))
+    eval(call)
+  })
+  names(gates) <- alias
+  
+  # APPLY BOOLEAN GATES
+  lapply(seq_along(gates), function(z){
+    gs_pop_add(x, 
+               gate = gates[[z]])
+  })
+  
+  # RETURN GATINGSET
+  return(x)
+  
+}
+
 ## CYTO_GATE_EXTRACT -----------------------------------------------------------
 
 #' Extract Saved Gate(s) from gatingTemplate.
