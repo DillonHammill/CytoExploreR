@@ -3958,6 +3958,88 @@ cyto_nodes_convert <- function(x,
   return(nodes_split)
 }
 
+## CYTO_NODES_ANCESTOR ---------------------------------------------------------
+
+#' Get name of most recent common ancestor shared by nodes
+#'
+#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param nodes vector of nodes for which the most recent common ancestor should
+#'   be returned.
+#' @param ... additional arguments passed to \code{\link{cyto_nodes_convert}} to
+#'   control the format of the returned ancestral node.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#' 
+#' # Compensation
+#' gs <- cyto_compensate(gs)
+#' 
+#' # Transformations
+#' gs <- cyto_transform(gs)
+#' 
+#' # Gating
+#' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+#' 
+#' # Ancestral node of CD4 T Cells & CD8 T Cells
+#' cyto_nodes_ancestor(gs, nodes = c("CD4 T Cells", "CD8 T Cells"))
+#'
+#' @export
+cyto_nodes_ancestor <- function(x,
+                                nodes = NULL, 
+                                ...){
+  
+  # GATINHIERARCHY OR GATINGSET
+  if(!is(x, "GatingHierarchy") &
+     !is(x, "GatingSet")) {
+    stop("'x' must be a GatingHierarchy or GatingSet object.")
+  }
+  
+  # MISSING NODES
+  if(is.null(nodes)){
+    stop("Supply the name of the nodes to 'nodes'.")
+  }
+  
+  # GET FULL NODES
+  nodes_full <- cyto_nodes_convert(x,
+                                   nodes = nodes,
+                                   path = "full")
+  
+  # GET SPLIT NODES
+  nodes_split <- .cyto_nodes_split(nodes_full)
+  
+  # GET COMMON ANCESTOR - SHORTEST SHARED PATH WITH FIRST NODE
+  ancestor <- c()
+  for(i in rev(seq_len(length(nodes_split[[1]])))){
+    if(all(LAPPLY(nodes_split[-1], function(z){
+      all(nodes_split[[1]][seq_len(i)] %in% z)
+    }))){
+      ancestor <- c(ancestor, 
+                    paste0("/", paste0(nodes_split[[1]][seq_len(i)],
+                                       collapse = "/")))
+      break()
+    }
+  }
+  
+  # NO COMMON ANCESTOR
+  if(length(ancestor) == 0){
+    ancestor  <- "root"
+  }
+
+  # CONVERT ANCESTRAL NODE
+  ancestor <- cyto_nodes_convert(x,
+                                 nodes = ancestor,
+                                 ...)
+  
+  # RETURN COMMON ANCESTOR
+  return(ancestor)
+  
+}
+
 ## CYTO_EMPTY ------------------------------------------------------------------
 
 #' Construct an empty flowFrame
