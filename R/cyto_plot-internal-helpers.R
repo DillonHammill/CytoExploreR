@@ -1255,6 +1255,7 @@
     # POINT COLOUR SCALE
   } else if (type == "point_col_scale") {
     pal <- c(
+      "blue3",
       "blue",
       "turquoise",
       "green",
