@@ -10,14 +10,14 @@
   "codeRepository": "https://github.com/DillonHammill/CytoExploreR",
   "issueTracker": "https://github.com/DillonHammill/CytoExploreR/issues",
   "license": "https://spdx.org/licenses/GPL-2.0",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "version": "4.0.0",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.0.0 RC (2020-04-19 r78255)",
+  "runtimePlatform": "R version 4.0.0 (2020-04-24)",
   "author": [
     {
       "@type": "Person",
@@ -124,6 +124,30 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=testthat"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "scattermore",
+      "name": "scattermore",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=scattermore"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "CytoML",
+      "name": "CytoML",
+      "provider": {
+        "@id": "https://www.bioconductor.org",
+        "@type": "Organization",
+        "name": "BioConductor",
+        "url": "https://www.bioconductor.org"
+      },
+      "sameAs": "https://bioconductor.org/packages/release/bioc/html/CytoML.html"
     }
   ],
   "softwareRequirements": [
@@ -475,6 +499,6 @@
   ],
   "copyrightHolder": {},
   "funder": {},
-  "fileSize": "14536.683KB",
+  "fileSize": "14552.445KB",
   "readme": "https://github.com/DillonHammill/CytoExploreR/blob/master/README.md"
 }
