@@ -1112,7 +1112,7 @@
 #'   If NA set to default density gradient.
 #' @param point_col_alpha transparency to use for point colours.
 #'
-#' @importFrom grDevices densCols colorRampPalette adjustcolor
+#' @importFrom grDevices densCols colorRampPalette adjustcolor colorRamp rgb
 #' @importFrom flowCore exprs
 #' @importFrom methods is
 #'
@@ -1125,67 +1125,67 @@
                                  point_cols,
                                  point_col,
                                  point_col_alpha = 1) {
-
+  
   # Expected number of colours
   SMP <- length(x)
-
+  
   # Pull down arguments to named list
   args <- .args_list()
-
+  
   # Inherit arguments from cyto_plot_theme - possibly remove?
   args <- .cyto_plot_theme_inherit(args)
-
+  
   # Update arguments
   .args_update(args)
-
+  
   # No colours supplied for density gradient
   if (.all_na(point_col_scale)) {
     point_col_scale <- .cyto_plot_colour_palette(type = "point_col_scale")
   }
-
+  
   # Make colorRampPalette
   if (class(point_col_scale) != "function") {
     col_scale <- colorRampPalette(point_col_scale)
   } else {
     col_scale <- point_col_scale
   }
-
+  
   # No colours supplied for selection
   if (.all_na(point_cols)) {
     point_cols <- .cyto_plot_colour_palette(type = "point_cols")
   }
-
+  
   # Make colorRampPalette
   if (class(point_cols) != "function") {
     cols <- colorRampPalette(point_cols)
   } else {
     cols <- point_cols
   }
-
+  
   # Repeat point_col arguments SMP times
   point_col <- rep(point_col, length.out = SMP)
   point_col_alpha <- rep(point_col_alpha, length.out = SMP)
-
+  
   # Convert point_col to list
   if (!is(point_col, "list")) {
     point_col <- lapply(seq(1, SMP), function(z) {
       point_col[z]
     })
   }
-
+  
   # First layer contains density gradient if no other colour is designated
   if (all(LAPPLY(point_col, ".all_na"))) {
-
+    
     # Extract data
     fr_exprs <- exprs(x[[1]])[, channels]
-
+    
     # Too few events for density computation
     if (!is.null(nrow(fr_exprs))) {
       if (nrow(fr_exprs) >= 2) {
         # Get density colour for each point
         point_col[[1]] <- suppressWarnings(
           densCols(fr_exprs,
-            colramp = col_scale
+                   colramp = col_scale
           )
         )
       }
@@ -1193,25 +1193,86 @@
       point_col[[1]] <- point_col_scale[1]
     }
   }
-
+  
   # Remaining colours are selected one per layer from point_cols
   if (any(LAPPLY(point_col, ".all_na"))) {
-
+    
     # Number of layers missing colours
     n <- length(point_col[LAPPLY(point_col, ".all_na")])
-
+    
     # Pull colours out of point_cols
     clrs <- cols(n)
-
+    
     # Replace NA values in point_col with selected colours
     point_col[LAPPLY(point_col, ".all_na")] <- clrs
   }
-
+  
+  # RANGE CALIBRATION
+  cyto_cal <- .cyto_calibrate_recall()
+  
+  # 1D COLOUR SCALE
+  point_col <- lapply(point_col, function(z) {
+    if (length(z) == 1) {
+      # NAME OF CHANNEL/MARKER
+      if (z %in% c(
+        cyto_channels(x[[1]]),
+        cyto_markers(x[[1]])
+      )) {
+        # CONVERT TO CHANNEL
+        z <- cyto_channels_extract(
+          x[[1]],
+          z
+        )
+        # MATRIX
+        fr_exprs <- exprs(x[[1]])
+        # CALIBRATION
+        if (!is.null(cyto_cal)) {
+          if (z %in% colnames(cyto_cal)) {
+            cyto_range <- c(
+              min(cyto_cal[, z]),
+              max(cyto_cal[, z])
+            )
+          } else {
+            cyto_range <- c(
+              min(fr_exprs[, z]),
+              max(fr_exprs[, z])
+            )
+          }
+        } else {
+          cyto_range <- c(
+            min(fr_exprs[, z]),
+            max(fr_exprs[, z])
+          )
+        }
+        # RESCALE
+        rescale <- (fr_exprs[, z] - cyto_range[1]) /
+          (cyto_range[2] - cyto_range[1])
+        rescale[rescale > 1] <- 1
+        rescale[rescale < 0] <- 0
+        # POINT_COLOUR_SCALE
+        col_scale <- colorRamp(point_col_scale)
+        # POINT COLOURS
+        col <- col_scale(rescale)
+        col <- rgb(col[, 1],
+                   col[, 2],
+                   col[, 3],
+                   maxColorValue = 255
+        )
+        return(col)
+        # NAME OF A COLOUR
+      } else {
+        return(z)
+      }
+    } else {
+      return(z)
+    }
+  })
+  
   # Adjust colors by point_fill_alpha - REMOVE CHECK FOR ALPHA != 1
   lapply(seq_len(SMP), function(z) {
     point_col[[z]] <<- adjustcolor(point_col[[z]], point_col_alpha[z])
   })
-
+  
   return(point_col)
 }
 

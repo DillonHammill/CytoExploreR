@@ -64,53 +64,63 @@ cyto_plot_point.flowFrame <- function(x,
                                       contour_line_width = 1,
                                       contour_line_col = "black",
                                       contour_line_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(x, channels)
-
+  
   # PREPARE DATA ---------------------------------------------------------------
-
+  
   # Combine x and overlay into a list
   if (!.all_na(overlay)) {
     fr_list <- c(list(x), cyto_convert(overlay, "flowFrame list"))
   } else {
     fr_list <- list(x)
   }
-
+  
   # SAMPLE DATA ----------------------------------------------------------------
-
+  
   # DISPLAY
   if (display != 1) {
     fr_list <- cyto_sample(fr_list,
-      display = display,
-      seed = 56
+                           display = display,
+                           seed = 56
     )
   }
-
+  
   # ARGUMENTS ------------------------------------------------------------------
-
+  
   # ARGUMENTS
   args <- .args_list()
-
+  
   # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
-
+  
   # UPDATE
   .args_update(args)
-
+  
+  # SORT - PLOT POINTS IN EXPRESSION ORDER (3rd dimension)
+  fr_list <- lapply(seq_along(fr_list), function(z){
+    if(point_col[z] %in% c(cyto_channels(fr_list[[z]]),
+                           cyto_markers(fr_list[[z]]))){
+      chan <- cyto_channels_extract(fr_list[[z]], point_col[z])
+      fr_list[[z]] <- fr_list[[z]][order(exprs(fr_list[[z]][, chan])),]
+    }
+    return(fr_list[[z]])
+  })
+  
   # POINT_COL ------------------------------------------------------------------
   point_col <- .cyto_plot_point_col(fr_list,
-    channels = channels,
-    point_col_scale = point_col_scale,
-    point_cols = point_cols,
-    point_col = point_col,
-    point_col_alpha = point_col_alpha
+                                    channels = channels,
+                                    point_col_scale = point_col_scale,
+                                    point_cols = point_cols,
+                                    point_col = point_col,
+                                    point_col_alpha = point_col_alpha
   )
-
+  
   # REPEAT ARGUMENTS -----------------------------------------------------------
-
+  
   # ARGUMENTS TO REPEAT
   args <- .args_list()[c(
     "point_shape",
@@ -121,22 +131,22 @@ cyto_plot_point.flowFrame <- function(x,
     "contour_line_col",
     "contour_line_alpha"
   )]
-
+  
   # REPEAT ARGUMENTS
   args <- lapply(args, function(arg) {
     rep(arg, length.out = length(fr_list))
   })
-
+  
   # UPDATE ARGUMENTS
   .args_update(args)
-
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-
+  
   # PLOT LIMITS
   usr <- par("usr")
-
+  
   # FAST PLOTTING --------------------------------------------------------------
-
+  
   # GLOBAL OPTION
   if (getOption("cyto_plot_fast")) {
     if (requireNamespace("scattermore")) {
@@ -152,21 +162,21 @@ cyto_plot_point.flowFrame <- function(x,
   } else {
     cyto_plot_fast <- FALSE
   }
-
+  
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
-
+  
   # LAYERS
   lapply(seq_len(length(fr_list)), function(z) {
-
+    
     # EXTRACT DATA
     fr_exprs <- exprs(fr_list[[z]])[, channels]
-
+    
     # POINTS - SKIP NO EVENTS
     if (!is.null(nrow(fr_exprs))) {
-
+      
       # POINTS
       if (nrow(fr_exprs) != 0) {
-
+        
         # JITTER BARCODES
         if (any(channels %in% "Sample ID")) {
           ind <- which(channels %in% "Sample ID")
@@ -178,7 +188,7 @@ cyto_plot_point.flowFrame <- function(x,
             )
           })
         }
-
+        
         # PLOT DEFAULT POINTS
         if (cyto_plot_fast == FALSE) {
           # CONVENTIONAL PLOTTING
@@ -210,20 +220,20 @@ cyto_plot_point.flowFrame <- function(x,
         }
       }
     }
-
+    
     # CONTOUR_LINES
     if (contour_lines[z] != 0) {
       cyto_plot_contour(fr_list[[z]],
-        channels = channels,
-        contour_lines = contour_lines[z],
-        contour_line_type = contour_line_type[z],
-        contour_line_width = contour_line_width[z],
-        contour_line_col = contour_line_col[z],
-        contour_line_alpha = contour_line_alpha[z]
+                        channels = channels,
+                        contour_lines = contour_lines[z],
+                        contour_line_type = contour_line_type[z],
+                        contour_line_width = contour_line_width[z],
+                        contour_line_col = contour_line_col[z],
+                        contour_line_alpha = contour_line_alpha[z]
       )
     }
   })
-
+  
   # INVISIBLE NULL RETURN
   invisible(NULL)
 }
@@ -244,39 +254,51 @@ cyto_plot_point.list <- function(x,
                                  contour_line_width = 1,
                                  contour_line_col = "black",
                                  contour_line_alpha = 1, ...) {
-
+  
   # SAMPLE DATA ----------------------------------------------------------------
-
+  
   # DISPLAY
   if (display != 1) {
     x <- cyto_sample(x,
-      display = display,
-      seed = 56
+                     display = display,
+                     seed = 56
     )
   }
-
+  
   # ARGUMENTS ------------------------------------------------------------------
-
+  
   # Pull down arguments to named list
   args <- .args_list()
-
+  
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-
+  
   # Update arguments
   .args_update(args)
-
+  
+  # SORT -----------------------------------------------------------------------
+  
+  # SORT DATA - PLOT POINTS IN EXPRESSION ORDER (3rd dimension)
+  x <- lapply(seq_along(x), function(z){
+    if(point_col[z] %in% c(cyto_channels(x[[z]]),
+                           cyto_markers(x[[z]]))){
+      chan <- cyto_channels_extract(x[[z]], point_col[z])
+      x[[z]] <- x[[z]][order(exprs(x[[z]][, chan])),]
+    }
+    return(x[[z]])
+  })
+  
   # POINT_COL ------------------------------------------------------------------
   point_col <- .cyto_plot_point_col(x,
-    channels = channels,
-    point_col_scale = point_col_scale,
-    point_cols = point_cols,
-    point_col = point_col,
-    point_col_alpha = point_col_alpha
+                                    channels = channels,
+                                    point_col_scale = point_col_scale,
+                                    point_cols = point_cols,
+                                    point_col = point_col,
+                                    point_col_alpha = point_col_alpha
   )
-
+  
   # REPEAT ARGUMENTS -----------------------------------------------------------
-
+  
   # ARGUMENTS
   args <- .args_list()[c(
     "point_shape",
@@ -287,22 +309,22 @@ cyto_plot_point.list <- function(x,
     "contour_line_col",
     "contour_line_alpha"
   )]
-
+  
   # REPEAT ARGUMENTS
   args <- lapply(args, function(arg) {
     rep(arg, length.out = length(x))
   })
-
+  
   # UPDATE ARGUMENTS
   .args_update(args)
-
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-
+  
   # PLOT LIMITS
   usr <- par("usr")
-
+  
   # FAST PLOTTING --------------------------------------------------------------
-
+  
   # GLOBAL OPTION
   if (getOption("cyto_plot_fast")) {
     if (requireNamespace("scattermore")) {
@@ -318,21 +340,21 @@ cyto_plot_point.list <- function(x,
   } else {
     cyto_plot_fast <- FALSE
   }
-
+  
   # POINTS & CONTOUR LINES LAYERS ----------------------------------------------
-
+  
   # LAYERS
   lapply(seq_len(length(x)), function(z) {
-
+    
     # EXTRACT DATA
     fr_exprs <- exprs(x[[z]])[, channels]
-
+    
     # POINTS - SKIP NO EVENTS
     if (!is.null(nrow(fr_exprs))) {
-
+      
       # POINTS
       if (nrow(fr_exprs) != 0) {
-
+        
         # JITTER BARCODES
         if (any(channels %in% "Sample ID")) {
           ind <- which(channels %in% "Sample ID")
@@ -344,7 +366,7 @@ cyto_plot_point.list <- function(x,
             )
           })
         }
-
+        
         # PLOT DEFAULT POINTS
         if (cyto_plot_fast == FALSE) {
           # CONVENTIONAL PLOTTING
@@ -376,20 +398,20 @@ cyto_plot_point.list <- function(x,
         }
       }
     }
-
+    
     # CONTOUR_LINES
     if (contour_lines[z] != 0) {
       cyto_plot_contour(x[[z]],
-        channels = channels,
-        contour_lines = contour_lines[z],
-        contour_line_type = contour_line_type[z],
-        contour_line_width = contour_line_width[z],
-        contour_line_col = contour_line_col[z],
-        contour_line_alpha = contour_line_alpha[z]
+                        channels = channels,
+                        contour_lines = contour_lines[z],
+                        contour_line_type = contour_line_type[z],
+                        contour_line_width = contour_line_width[z],
+                        contour_line_col = contour_line_col[z],
+                        contour_line_alpha = contour_line_alpha[z]
       )
     }
   })
-
+  
   # INVISIBLE NULL RETURN
   invisible(NULL)
 }
