@@ -25,13 +25,17 @@
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
 #'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.
 #' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
-#'   \code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet}
-#'   objects prior to computing statistics.
+#'   \code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet} objects
+#'   prior to computing statistics.
 #' @param format indicates whether the data should be returned in the
 #'   \code{"wide"} or \code{"long"} format, set to the \code{"long"} format by
 #'   default.
 #' @param save_as name of a csv file to which the statistical results should be
 #'   saved.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details.
 #' @param density_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 #'   default.
@@ -76,6 +80,15 @@
 #'   save = FALSE
 #' )
 #'
+#' # Compute statistics for experimental group
+#' cyto_stats_compute(gs,
+#'   alias = "T Cells",
+#'   channels = c("Alexa Fluor 488-A", "PE-A"),
+#'   stat = "median",
+#'   save = FALSE,
+#'   select = list(Treatment = "Stim-A")
+#' )
+#'
 #' # Compute population frequencies and save to csv file
 #' cyto_stats_compute(gs,
 #'   alias = c("CD4 T Cells", "CD8 T Cells"),
@@ -103,6 +116,7 @@ cyto_stats_compute.GatingSet <- function(x,
                                          stat = "median",
                                          format = "long",
                                          save_as = NULL,
+                                         select = NULL,
                                          density_smooth = 0.6, ...) {
   
   # Check statistic
@@ -110,6 +124,11 @@ cyto_stats_compute.GatingSet <- function(x,
   
   # Assign x to gs
   gs <- x
+  
+  # Select
+  if(!is.null(select)){
+    gs <- cyto_select(gs, select)
+  }
   
   # Get trans if not supplied
   trans <- cyto_transformer_extract(gs)
@@ -324,6 +343,7 @@ cyto_stats_compute.flowSet <- function(x,
                                        stat = "median",
                                        gate = NA,
                                        format = "long",
+                                       select = NULL,
                                        density_smooth = 0.6, ...) {
 
   # Check statistic
@@ -332,6 +352,11 @@ cyto_stats_compute.flowSet <- function(x,
   # Assign x to fs
   fs <- x
 
+  # Select
+  if(!is.null(select)){
+    fs <- cyto_select(fs, select)
+  }
+  
   # cyto_stats_compute
   res <- fsApply(fs, function(fr) {
     cyto_stats_compute(fr,

@@ -17,6 +17,7 @@
   stat = "median",
   format = "long",
   save_as = NULL,
+  select = NULL,
   density_smooth = 0.6,
   ...
 )
@@ -41,6 +42,7 @@
   stat = "median",
   gate = NA,
   format = "long",
+  select = NULL,
   density_smooth = 0.6,
   ...
 )
@@ -90,6 +92,11 @@ default.}
 \item{save_as}{name of a csv file to which the statistical results should be
 saved.}
 
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details.}
+
 \item{density_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} when calculating mode, set to 1.5 by
 default.}
@@ -97,8 +104,8 @@ default.}
 \item{...}{not in use.}
 
 \item{gate}{object of class \code{rectangleGate}, \code{polygonGate} or
-\code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet}
-objects prior to computing statistics.}
+\code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet} objects
+prior to computing statistics.}
 }
 \value{
 a tibble containing the computed statistics in the wide or long
@@ -131,6 +138,15 @@ cyto_stats_compute(gs,
   channels = c("Alexa Fluor 488-A", "PE-A"),
   stat = "median",
   save = FALSE
+)
+
+# Compute statistics for experimental group
+cyto_stats_compute(gs,
+  alias = "T Cells",
+  channels = c("Alexa Fluor 488-A", "PE-A"),
+  stat = "median",
+  save = FALSE,
+  select = list(Treatment = "Stim-A")
 )
 
 # Compute population frequencies and save to csv file
