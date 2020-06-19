@@ -4185,7 +4185,6 @@ cyto_spillover_extract <- function(x) {
   return(spill)
 }
 
-
 ## CYTO_CALIBRATE --------------------------------------------------------------
 
 #' Calibrate channel ranges for cyto_plot
@@ -4202,8 +4201,8 @@ cyto_spillover_extract <- function(x) {
 #'   \code{GatingHierarchy} or \code{GatingSet} to use for the calibration. For
 #'   the best calibration is recommended that users supply samples containing
 #'   both negative and positive events in each channel.
-#' @param name of the parent population to use for channel calibration when a
-#'   \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
+#' @param parent name of the parent population to use for channel calibration
+#'   when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
 #'   \code{"root"} node by default.
 #' @param type indicates the type of calibration to perform, options include
 #'   \code{"range"} or \code{"quantile"}. Range calibration simply uses the full
@@ -4222,11 +4221,14 @@ cyto_spillover_extract <- function(x) {
 #' @examples
 #' library(CytoExploreRData)
 #'
+#' # Activation flowSet
+#' fs <- Activation
+#'
 #' # Calibration
 #' cyto_calibrate(fs)
 #'
 #' # Colour based on Hoechst-405 staining
-#' cyto_plot(fs,
+#' cyto_plot(fs[1],
 #' channels = c("FSC-A", "SSC-A"),
 #' point_col = "Hoechst-405")
 #'
