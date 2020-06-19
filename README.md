@@ -297,7 +297,7 @@ citation("CytoExploreR")
 #> To cite package 'CytoExploreR' in publications use:
 #> 
 #>   Dillon Hammill (2020). CytoExploreR: Interactive Analysis of
-#>   Cytometry Data. R package version 1.0.7.
+#>   Cytometry Data. R package version 1.0.8.
 #>   https://github.com/DillonHammill/CytoExploreR
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -306,7 +306,7 @@ citation("CytoExploreR")
 #>     title = {CytoExploreR: Interactive Analysis of Cytometry Data},
 #>     author = {Dillon Hammill},
 #>     year = {2020},
-#>     note = {R package version 1.0.7},
+#>     note = {R package version 1.0.8},
 #>     url = {https://github.com/DillonHammill/CytoExploreR},
 #>   }
 ```

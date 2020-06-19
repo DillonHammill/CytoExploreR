@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -298,20 +298,20 @@ density distributions with overlay, set to 0.5 by default.</p></td>
 <span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span>(<span class='no'>gs</span>, <span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]]@<span class='kw'>description</span>$<span class='no'>SPILL</span>)
 
 <span class='co'># Transform fluorescent channels</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span>(<span class='no'>gs</span>, <span class='kw'>trans_type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>)</div><div class='output co'>#&gt; <span class='message'>Insufficient plotting space, transformations have been applied.</span></div><div class='input'>
+<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span>(<span class='no'>gs</span>, <span class='kw'>trans_type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>)</div><div class='img'><img src='cyto_plot_profile-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Apply gates</span>
 <span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Activation_gatingTemplate</span>
 <span class='fu'>gt_gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Plot expression profile of T Cells in all channels</span>
 <span class='fu'>cyto_plot_profile</span>(<span class='no'>gs</span>[<span class='fl'>1</span>:<span class='fl'>9</span>],
   <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"T Cells"</span>
-)</div><div class='img'><img src='cyto_plot_profile-1.png' alt='' width='700' height='433' /></div><div class='input'>
+)</div><div class='img'><img src='cyto_plot_profile-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Group samples by Treatment &amp; select highest OVAConc</span>
  <span class='fu'>cyto_plot_profile</span>(<span class='no'>gs</span>[<span class='fl'>1</span>:<span class='fl'>9</span>],
   <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"CD4 T Cells"</span>,
   <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='st'>"Treatment"</span>,
   <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"OVAConc"</span> <span class='kw'>=</span> <span class='fl'>500</span>),
-)</div><div class='img'><img src='cyto_plot_profile-2.png' alt='' width='700' height='433' /></div><div class='input'>
+)</div><div class='img'><img src='cyto_plot_profile-3.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -328,7 +328,7 @@ density distributions with overlay, set to 0.5 by default.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

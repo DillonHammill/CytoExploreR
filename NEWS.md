@@ -1,3 +1,23 @@
+# CytoExploreR 1.0.8
+
+* Add `select` argument to `cyto_stats_compute()` to allow computation of statistics for a subset of samples based on experimental variables.
+* Add new `cyto_gate_bool()` function to add boolean gates to the GatingSet and gatingTemplate.
+* Improve `cyto_channels_restrict()` to drop unused channels in cytometry objects. Add an `exclude` argument to forcibly remove FSC, SSC or Time parameters. The `restrict` argument in `cyto_setup()` now accepts a vector of channels to be passed internally to the `exclude` argument of `cyto_channels_restrict()`.
+* Add support for forward gating by colouring points based on the expression of a particular marker in `cyto_plot()`, simply pass the name of the marker to the `point_col` argument. 
+* Update default density colour scale for points to include a darker blue at the lower end of the scale. This provides better resolution at the lower end of the scale and balances the colour gradient.
+* Add channels argument to `cyto_extract()` to restrict data to certain channels when it is extracted from a GatingHierarchy or GatingSet.
+* Add new function `cyto_names_parse()` to split file names into experiment variables in `cyto_details()`. Files should be named with each variable separated by a delimiter. For example, file named 160520-Exp1-StimA.fcs can be separated into variables date, experiment and treatment. `parse_names` argument has been added to `cyto_setup()` to allow name parsing when files are loaded in.
+* Custom functions can now be supplied by name to the `type` argument in `cyto_map()`. This means that you can use any available dimensionality reduction technique or create your own one to map your data.
+* Add `cyto_gatingTemplate_generate()` to obtain a CytoExploreR-ready gatingTemplate from any GatingHierarchy or GatingSet.
+* Improve speed of plotting using `cyto_plot()` by increasing computation speed of axes ranges.
+* Add support for `scattermore` to further improve `cyto_plot()` plotting speed. To use this feature, users will need to manually install `scattermore` and set `options("cyto_plot_fast" = TRUE)`. Setting `options("cyto_plot_fast" = FALSE)` will return to using conventional plotting. It is recommended to use conventional plotting when saving images with `cyto_plot_save()` to obtain high resolution images.
+* Fix quadrant gate bug in `cyto_gate_edit()` to allow editing of quadrant gates.
+* Fix computation of statistics for stacked density distributions in `cyto_plot()`.
+* Fix `cyto_marker_edit()` to accept custom file name for saving and add support for marker removal.
+* Hide messages when opening data editors and only open data editors in interactive mode.
+* Improve visualization of quadrant gates to distinguish them from traditional rectangleGates. Quadrant gates can now be individually visualized (i.e. users can indicate which quadrants to display).
+* Added new function `cyto_nodes_convert()` to anchor ambiguous nodes to a known parental node within `cyto_plot()`. 
+
 # CytoExploreR 1.0.7
 
 * Fix quadrant gating bug in `cyto_gate_draw()`.

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Remove channels of a flowFrame or flowSet — cyto_channels_restrict • CytoExploreR</title>
+<title>Restrict the channels of a cytometry object — cyto_channels_restrict • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,10 +46,14 @@
 
 
 
-<meta property="og:title" content="Remove channels of a flowFrame or flowSet — cyto_channels_restrict" />
-<meta property="og:description" content="cyto_channels_restrict removes channels from the flowFrame or flowSet
-which do not have markers assigned. The FSC, SSC and Time parameters are
-always retained irrespective of marker assignment." />
+<meta property="og:title" content="Restrict the channels of a cytometry object — cyto_channels_restrict" />
+<meta property="og:description" content="cyto_channels_restrict removes any unused channels (channels lacking
+marker assignments) from a flowFrame, flowSet,
+GatingHierarchy or GatingSet. By default,
+cyto_channels_restrict will always retain any FSC, SSC or Time
+channels irrespective of marker assignment. Removal of channels that contain
+marker assignments or channels that are privileged channels (FSC/SSC/Time)
+can be forced through use of the exclude argument." />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -82,7 +86,7 @@ always retained irrespective of marker assignment." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -145,31 +149,53 @@ always retained irrespective of marker assignment." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Remove channels of a flowFrame or flowSet</h1>
+    <h1>Restrict the channels of a cytometry object</h1>
     <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_channels-helpers.R'><code>R/cyto_channels-helpers.R</code></a></small>
     <div class="hidden name"><code>cyto_channels_restrict.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>cyto_channels_restrict</code> removes channels from the flowFrame or flowSet
-which do not have markers assigned. The FSC, SSC and Time parameters are
-always retained irrespective of marker assignment.</p>
+    <p><code>cyto_channels_restrict</code> removes any unused channels (channels lacking
+marker assignments) from a <code>flowFrame</code>, <code>flowSet</code>,
+<code>GatingHierarchy</code> or <code>GatingSet</code>. By default,
+<code>cyto_channels_restrict</code> will always retain any FSC, SSC or Time
+channels irrespective of marker assignment. Removal of channels that contain
+marker assignments or channels that are privileged channels (FSC/SSC/Time)
+can be forced through use of the <code>exclude</code> argument.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>)</pre>
+    <pre class="usage"><span class='co'># S3 method for flowFrame</span>
+<span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for flowSet</span>
+<span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for GatingSet</span>
+<span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class flowFrame or flowSet.</p></td>
+      <td><p>object of class <code>flowFrame</code>, <code>flowSet</code>or <code>GatingSet</code>.</p></td>
+    </tr>
+    <tr>
+      <th>exclude</th>
+      <td><p>vector of privileged channels or markers to remove in addition
+to the channels removed by default, set to NULL by default.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional arguments passed to <code><a href='cyto_channels.html'>cyto_channels</a></code> to
+control character matching for the exclude argument.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>flowFrame or flowSet object with unused channels removed.</p>
+    <p>an object of class <code>flowFrame</code>, <code>flowSet</code>,
+  <code>GatingHierarchy</code> or <code>GatingSet</code> with unused channels removed.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -210,7 +236,7 @@ always retained irrespective of marker assignment.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

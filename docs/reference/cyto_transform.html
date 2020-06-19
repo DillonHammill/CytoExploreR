@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -282,16 +282,16 @@ arguments.</p></td>
 <span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
 
 <span class='co'># Automatically transform flowSet</span>
-<span class='no'>fs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>fs</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"arcsinh"</span>)</div><div class='output co'>#&gt; <span class='message'>Automatically transforming flowFrame/flowSet objects is not recommended as transformation definitions will be lost.</span></div><div class='output co'>#&gt; <span class='message'>Insufficient plotting space, transformations have been applied.</span></div><div class='input'>
+<span class='no'>fs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>fs</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"arcsinh"</span>)</div><div class='output co'>#&gt; <span class='message'>Automatically transforming flowFrame/flowSet objects is not recommended as transformation definitions will be lost.</span></div><div class='img'><img src='cyto_transform-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Manually construct &amp; apply transformations</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transformer_biex.html'>cyto_transformer_biex</a></span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt; <span class='error'>Error in cyto_plot_layout(n2mfrow(n)[1], n2mfrow(n)[2]): unused argument (n2mfrow(n)[2])</span></div><div class='input'><span class='no'>fs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>fs</span>, <span class='no'>trans</span>)</div><div class='output co'>#&gt; <span class='error'>Error in cyto_transform(fs, trans): object 'trans' not found</span></div><div class='input'>
+<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transformer_biex.html'>cyto_transformer_biex</a></span>(<span class='no'>fs</span>)</div><div class='input'><span class='no'>fs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>fs</span>, <span class='no'>trans</span>)</div><div class='img'><img src='cyto_transform-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Add fs to GatingSet</span>
 <span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
 
 <span class='co'># Automatically transform GatingSet</span>
-<span class='no'>gs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>gs</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>)</div><div class='output co'>#&gt; <span class='message'>Insufficient plotting space, transformations have been applied.</span></div><div class='input'>
+<span class='no'>gs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>gs</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>)</div><div class='img'><img src='cyto_transform-3.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Manually construct &amp; apply transformations</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transformer_logicle.html'>cyto_transformer_logicle</a></span>(<span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='error'>Error in cyto_plot_layout(n2mfrow(n)[1], n2mfrow(n)[2]): unused argument (n2mfrow(n)[2])</span></div><div class='input'><span class='no'>gs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>gs</span>, <span class='no'>trans</span>)</div><div class='output co'>#&gt; <span class='error'>Error in cyto_transform(gs, trans): object 'trans' not found</span></div></pre>
+<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transformer_logicle.html'>cyto_transformer_logicle</a></span>(<span class='no'>gs</span>)</div><div class='img'><img src='cyto_transform-4.png' alt='' width='700' height='433' /></div><div class='input'><span class='no'>gs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>gs</span>, <span class='no'>trans</span>)</div><div class='img'><img src='cyto_transform-5.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -307,7 +307,7 @@ arguments.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

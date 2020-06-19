@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -268,7 +268,6 @@ to writing FCS files.</p></td>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-
 <span class='co'># Load in CytoExploreRData to access data</span>
 <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
 
@@ -276,7 +275,7 @@ to writing FCS files.</p></td>
 <span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
 
 <span class='co'># Save each flowFrame to file</span>
-<span class='fu'>cyto_save</span>(<span class='no'>fs</span>)
+<span class='fu'>cyto_save</span>(<span class='no'>fs</span>, <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='st'>"Samples"</span>)
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -293,7 +292,7 @@ to writing FCS files.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

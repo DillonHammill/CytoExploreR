@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -164,6 +164,7 @@
   <span class='kw'>gate</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
   <span class='no'>layout</span>,
+  <span class='kw'>margins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
@@ -249,6 +250,7 @@
   <span class='kw'>gate</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
+  <span class='kw'>margins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
@@ -332,6 +334,7 @@
   <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
   <span class='no'>layout</span>,
+  <span class='kw'>margins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
@@ -414,6 +417,7 @@
   <span class='kw'>gate</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
+  <span class='kw'>margins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
@@ -559,6 +563,12 @@ set to 25000 to display 25000 events only.</p></td>
       <th>layout</th>
       <td><p>a vector of the length 2 indicating the dimensions of the grid
 for plotting <code>c(#rows, #columns)</code>.</p></td>
+    </tr>
+    <tr>
+      <th>margins</th>
+      <td><p>a vector of length 4 to control the margins around the bottom,
+left, top and right of the plot, set to NULL by default to let `cyto_plot`
+compute optimal margins.</p></td>
     </tr>
     <tr>
       <th>popup</th>
@@ -980,7 +990,7 @@ by default for no transparency.</p></td>
   <span class='kw'>alias</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CD4 T Cells"</span>, <span class='st'>"CD8 T Cells"</span>),
   <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"Alexa Fluor 700-A"</span>),
   <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CD69+ CD4 T Cells"</span>, <span class='st'>"CD69+ CD8 T Cells"</span>)
-)</div><div class='img'><img src='cyto_plot-2.png' alt='' width='700' height='433' /></div></pre>
+)</div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='img'><img src='cyto_plot-2.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -996,7 +1006,7 @@ by default for no transparency.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

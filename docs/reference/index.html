@@ -79,7 +79,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -180,6 +180,18 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_calibrate.html">cyto_calibrate()</a></code> </p>
+        </td>
+        <td><p>Calibrate channel ranges for cyto_plot</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_calibrate_reset.html">cyto_calibrate_reset()</a></code> </p>
+        </td>
+        <td><p>Remove current calibration settings</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_channels.html">cyto_channels()</a></code> </p>
         </td>
         <td><p>Extract channel names</p></td>
@@ -192,9 +204,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_channels_restrict.html">cyto_channels_restrict()</a></code> </p>
+          <p><code><a href="cyto_channels_restrict.html">cyto_channels_restrict(<i>&lt;flowFrame&gt;</i>)</a></code> <code><a href="cyto_channels_restrict.html">cyto_channels_restrict(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_channels_restrict.html">cyto_channels_restrict(<i>&lt;GatingSet&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Remove channels of a flowFrame or flowSet</p></td>
+        <td><p>Restrict the channels of a cytometry object</p></td>
       </tr><tr>
         
         <td>
@@ -264,6 +276,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_export.html">cyto_export()</a></code> </p>
+        </td>
+        <td><p>Export cytometry data for use in flowJo or Cytobank</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_extract.html">cyto_extract()</a></code> </p>
         </td>
         <td><p>Extract a valid flowFrame or flowSet</p></td>
@@ -279,6 +297,12 @@
           <p><code><a href="cyto_fluor_channels.html">cyto_fluor_channels()</a></code> </p>
         </td>
         <td><p>Extract Fluorescent Channels</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_gate_bool.html">cyto_gate_bool()</a></code> </p>
+        </td>
+        <td><p>Add boolean gate to GatingSet and gatingTemplate</p></td>
       </tr><tr>
         
         <td>
@@ -354,6 +378,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_gatingTemplate_generate.html">cyto_gatingTemplate_generate(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_gatingTemplate_generate.html">cyto_gatingTemplate_generate(<i>&lt;GatingSet&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Generate a CytoExploreR gatingTemplate for a GatingHierarchy or GatingSet</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_gatingTemplate_select.html">cyto_gatingTemplate_select()</a></code> </p>
         </td>
         <td><p>Select a gatingTemplate for downstream analyses</p></td>
@@ -420,9 +450,27 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_names_parse.html">cyto_names_parse()</a></code> </p>
+        </td>
+        <td><p>Parse file names into experiment details</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_nodes.html">cyto_nodes()</a></code> </p>
         </td>
         <td><p>Extract Names of Gated Populations in GatingHierarchy or GatingSet</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_nodes_ancestor.html">cyto_nodes_ancestor()</a></code> </p>
+        </td>
+        <td><p>Get name of most recent common ancestor shared by nodes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_nodes_convert.html">cyto_nodes_convert()</a></code> </p>
+        </td>
+        <td><p>Convert to unique node paths</p></td>
       </tr><tr>
         
         <td>
@@ -712,7 +760,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

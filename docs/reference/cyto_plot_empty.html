@@ -82,7 +82,7 @@ this base layer with cyto_plot_point or cyto_plot_density." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -172,6 +172,7 @@ this base layer with <code>cyto_plot_point</code> or <code>cyto_plot_density</co
   <span class='no'>title</span>,
   <span class='no'>xlab</span>,
   <span class='no'>ylab</span>,
+  <span class='kw'>margins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>density_modal</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>1.5</span>,
   <span class='kw'>density_stack</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
@@ -287,6 +288,12 @@ default. Title can be removed by setting this argument to <code>NA</code>.</p></
     <tr>
       <th>ylab</th>
       <td><p>y axis label.</p></td>
+    </tr>
+    <tr>
+      <th>margins</th>
+      <td><p>a vector of length 4 to control the margins around the bottom,
+left, top and right of the plot, set to NULL by default to let `cyto_plot`
+compute optimal margins.</p></td>
     </tr>
     <tr>
       <th>density_modal</th>
@@ -518,7 +525,7 @@ legend.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

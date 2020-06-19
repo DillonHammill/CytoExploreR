@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -144,7 +144,7 @@
 <div id="cytoexplorer-dependencies" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cytoexplorer-dependencies" class="anchor"></a>CytoExploreR Dependencies</h2>
-<p>Now that all the setup is complete, let’s install all the necssary dependencies of <strong>CytoExploreR</strong>. From within RStudio, run the following in the console to install the latest versions of <a href="https://github.com/RGLab/flowCore">flowCore</a>, <a href="https://github.com/RGLab/flowWorkspace">flowWorkspace</a> and <a href="https://github.com/RGLab/openCyto">openCyto</a> from Bioconductor.</p>
+<p>Now that all the setup is complete, let’s install all the necessary dependencies of <strong>CytoExploreR</strong>. From within RStudio, run the following in the console to install the latest versions of <a href="https://github.com/RGLab/flowCore">flowCore</a>, <a href="https://github.com/RGLab/flowWorkspace">flowWorkspace</a> and <a href="https://github.com/RGLab/openCyto">openCyto</a> from Bioconductor.</p>
 <div class="sourceCode" id="cb1"><pre class="r"><span class="co"># Bioconductor</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"BiocManager"</span>)
 <span class="co"># Install flowCore, flowWorkspace and openCyto</span>
@@ -172,8 +172,6 @@
 <span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"DillonHammill/CytoExploreRData"</span>)
 <span class="co"># CytoExploreR </span>
 <span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"DillonHammill/CytoExploreR"</span>)</pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">#&gt; Warning: multiple methods tables found for 'plot'</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="co">#&gt; Warning: multiple methods tables found for 'spillover_match'</span></span></code></pre></div>
 </div>
 <div id="design" class="section level2">
 <h2 class="hasAnchor">
@@ -230,7 +228,7 @@
 <h2 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h2>
 <p><strong>CytoExploreR</strong> is large package and we would not do it justice by demonstrating its usage here. Instead we will explore the use of <strong>CytoExploreR</strong> in a series of vignettes which tackle specific components of the cytometry data analysis pipeline. To work through these vignettes you will need to create a new R project (File -&gt; New Project) and download the example datasets shipped with <strong>CytoExploreRData</strong>.</p>
-<div class="sourceCode" id="cb5"><pre class="r"><span class="co"># Load required packages</span>
+<div class="sourceCode" id="cb4"><pre class="r"><span class="co"># Load required packages</span>
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreR</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreRData</span>)
 
@@ -292,12 +290,12 @@
 <h2 class="hasAnchor">
 <a href="#citation" class="anchor"></a>Citation</h2>
 <p>A <strong>CytoExploreR</strong> publication is on the way, but in the meantime if you use <strong>CytoExploreR</strong> for your work please cite the package as follows:</p>
-<div class="sourceCode" id="cb6"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"CytoExploreR"</span>)
+<div class="sourceCode" id="cb5"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/citation.html">citation</a></span>(<span class="st">"CytoExploreR"</span>)
 <span class="co">#&gt; </span>
 <span class="co">#&gt; To cite package 'CytoExploreR' in publications use:</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   Dillon Hammill (2020). CytoExploreR: Interactive Analysis of</span>
-<span class="co">#&gt;   Cytometry Data. R package version 1.0.7.</span>
+<span class="co">#&gt;   Cytometry Data. R package version 1.0.8.</span>
 <span class="co">#&gt;   https://github.com/DillonHammill/CytoExploreR</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; A BibTeX entry for LaTeX users is</span>
@@ -306,7 +304,7 @@
 <span class="co">#&gt;     title = {CytoExploreR: Interactive Analysis of Cytometry Data},</span>
 <span class="co">#&gt;     author = {Dillon Hammill},</span>
 <span class="co">#&gt;     year = {2020},</span>
-<span class="co">#&gt;     note = {R package version 1.0.7},</span>
+<span class="co">#&gt;     note = {R package version 1.0.8},</span>
 <span class="co">#&gt;     url = {https://github.com/DillonHammill/CytoExploreR},</span>
 <span class="co">#&gt;   }</span></pre></div>
 </div>
@@ -351,7 +349,7 @@
 <li><a href="https://ci.appveyor.com/project/DillonHammill/CytoExploreR"><img src="https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoExploreR?branch=master&amp;svg=true" alt="AppVeyor build status"></a></li>
 <li><a href="https://codecov.io/github/DillonHammill/CytoExploreR?branch=master"><img src="https://codecov.io/gh/DillonHammill/CytoExploreR/branch/master/graph/badge.svg" alt="Coverage status"></a></li>
 <li><a href="https://www.tidyverse.org/lifecycle/#maturing"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="lifecycle"></a></li>
-<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2020--04--22-yellowgreen.svg" alt="Last-changedate"></a></li>
+<li><a href="/commits/master"><img src="https://img.shields.io/badge/last%20change-2020--06--19-yellowgreen.svg" alt="Last-changedate"></a></li>
 <li><a href="https://github.com/ropensci/software-review/issues/281"><img src="https://badges.ropensci.org/281_status.svg"></a></li>
 </ul>
 </div>
