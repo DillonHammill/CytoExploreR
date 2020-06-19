@@ -265,6 +265,8 @@ cyto_gate_rename <- function(x,
 #' @return object of class \code{GatingSet} with new boolean gates and updated
 #'   gatingTemplate csv file with appropriate entries.
 #'
+#' @importFrom flowWorkspace booleanFilter gs_pop_add
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
@@ -322,8 +324,77 @@ cyto_gate_bool <- function(x,
   nodes_full <- cyto_nodes(x, path = "full")
   nodes_auto <- cyto_nodes(x, path = "auto")
   
+  # LOGIC - STRIP WHITE SPACE
+  logic <- lapply(seq_along(logic), function(z){
+    logic_to_clean <- logic[z]
+    logic_vector <- LAPPLY(seq_len(nchar(logic_to_clean)), function(z){
+      substr(logic_to_clean, z, z)
+    })
+    logic_match <- which(grepl("\\||\\&|\\!", logic_vector))
+    # NO LEADING BOOLEAN OPERATOR
+    if(logic_match[1] != 1){
+      logic_match <- c(0, logic_match)
+    }
+    logic_split <- LAPPLY(seq_along(logic_match), function(z){
+      # FIRST CHUNK NO OPERATOR
+      if(logic_match[z] == 0){
+        return(
+          trimws(
+            substr(logic_to_clean,
+                   1,
+                   logic_match[z + 1] - 1)
+          )
+        )
+      }
+      # CHUNK BOUND BY OPERATORS
+      if(length(logic_match) > z){
+        # ADJACENT OPERATORS
+        if(logic_match[z + 1] - logic_match[z] == 1){
+          return(
+            substr(logic_to_clean,
+                   logic_match[z],
+                   logic_match[z])
+          )
+          # OPERATOR - CHUNK - OPERATOR  
+        }else{
+          return(
+            paste0(
+              c(substr(logic_to_clean,
+                       logic_match[z],
+                       logic_match[z]),
+                trimws(
+                  substr(logic_to_clean,
+                         logic_match[z] + 1,
+                         logic_match[z + 1] - 1)
+                )), collapse = ""
+            )
+          )
+        }
+      }
+      # LAST OPERATOR
+      if(length(logic_match) == z){
+        return(
+          paste0(
+            c(substr(logic_to_clean,
+                     logic_match[z],
+                     logic_match[z]),
+              trimws(
+                substr(logic_to_clean,
+                       logic_match[z] + 1,
+                       nchar(logic_to_clean))
+              )), collapse = ""
+          )
+        )
+      }
+    })
+    return(logic_split)
+  })
+  logic <- LAPPLY(logic, function(z){
+    paste0(z, collapse = "")
+  })
+  
   # LOGIC - POPULATIONS
-  pops <- lapply(logic, function(z){
+  logic_pop_list <- lapply(logic, function(z){
     p <- unlist(strsplit(z, "\\||\\&|\\!"))
     p <- p[!LAPPLY(p, ".empty")]
     LAPPLY(p, function(y){
@@ -337,8 +408,12 @@ cyto_gate_bool <- function(x,
   # PARENT
   if(is.null(parent)){
     # COMMON ANCESTOR
-    parent <- cyto_nodes_ancestor(x,
-                                  nodes = pops)
+    parent <- LAPPLY(logic_pop_list, function(pops){
+      cyto_nodes_ancestor(x,
+                          nodes = pops)
+    })
+  }else{
+    parent <- rep(parent, length.out = length(alias))
   }  
   
   # MISSING GATINGTEMPLATE
@@ -382,7 +457,7 @@ cyto_gate_bool <- function(x,
     gt_pop <- gt_entry
     gt_pop[, "alias"] <- alias[z]
     gt_pop[, "pop"] <- "+"
-    gt_pop[, "parent"] <- parent
+    gt_pop[, "parent"] <- parent[z]
     gt_pop[, "gating_method"] <- "boolGate"
     gt_pop[, "gating_args"] <- logic[z]
     return(gt_pop)
@@ -397,8 +472,7 @@ cyto_gate_bool <- function(x,
   
   # CREATE BOOLEAN GATES
   gates <- lapply(seq_along(alias), function(z){
-    call <- substitute(flowWorkspace::booleanFilter(v,
-                                                    filterId = alias[z]), 
+    call <- substitute(booleanFilter(v, filterId = alias[z]), 
                        list(v = as.symbol(logic[z])))
     eval(call)
   })
