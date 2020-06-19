@@ -47,7 +47,7 @@ After successfully installing R and RStudio, the following additional platform-s
 
 ## CytoExploreR Dependencies
 
-Now that all the setup is complete, let's install all the necssary dependencies of **CytoExploreR**. From within RStudio, run the following in the console to install the latest versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
+Now that all the setup is complete, let's install all the necessary dependencies of **CytoExploreR**. From within RStudio, run the following in the console to install the latest versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
 
 ```{r, eval = FALSE}
 # Bioconductor
@@ -85,7 +85,7 @@ devtools::install_github("DillonHammill/CytoExploreRData")
 devtools::install_github("DillonHammill/CytoExploreR")
 ```
 
-```{r, eval = TRUE, echo = FALSE, message = FALSE}
+```{r, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
 library(CytoExploreR)
 library(CytoExploreRData)
 ```
