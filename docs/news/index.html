@@ -79,7 +79,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -146,6 +146,29 @@
       <small>Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="cytoexplorer-108" class="section level1">
+<h1 class="page-header" data-toc-text="1.0.8">
+<a href="#cytoexplorer-108" class="anchor"></a>CytoExploreR 1.0.8</h1>
+<ul>
+<li>Add <code>select</code> argument to <code><a href="../reference/cyto_stats_compute.html">cyto_stats_compute()</a></code> to allow computation of statistics for a subset of samples based on experimental variables.</li>
+<li>Add new <code><a href="../reference/cyto_gate_bool.html">cyto_gate_bool()</a></code> function to add boolean gates to the GatingSet and gatingTemplate.</li>
+<li>Improve <code><a href="../reference/cyto_channels_restrict.html">cyto_channels_restrict()</a></code> to drop unused channels in cytometry objects. Add an <code>exclude</code> argument to forcibly remove FSC, SSC or Time parameters. The <code>restrict</code> argument in <code><a href="../reference/cyto_setup.html">cyto_setup()</a></code> now accepts a vector of channels to be passed internally to the <code>exclude</code> argument of <code><a href="../reference/cyto_channels_restrict.html">cyto_channels_restrict()</a></code>.</li>
+<li>Add support for forward gating by colouring points based on the expression of a particular marker in <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code>, simply pass the name of the marker to the <code>point_col</code> argument.</li>
+<li>Update default density colour scale for points to include a darker blue at the lower end of the scale. This provides better resolution at the lower end of the scale and balances the colour gradient.</li>
+<li>Add channels argument to <code><a href="../reference/cyto_extract.html">cyto_extract()</a></code> to restrict data to certain channels when it is extracted from a GatingHierarchy or GatingSet.</li>
+<li>Add new function <code><a href="../reference/cyto_names_parse.html">cyto_names_parse()</a></code> to split file names into experiment variables in <code><a href="../reference/cyto_details.html">cyto_details()</a></code>. Files should be named with each variable separated by a delimiter. For example, file named 160520-Exp1-StimA.fcs can be separated into variables date, experiment and treatment. <code>parse_names</code> argument has been added to <code><a href="../reference/cyto_setup.html">cyto_setup()</a></code> to allow name parsing when files are loaded in.</li>
+<li>Custom functions can now be supplied by name to the <code>type</code> argument in <code><a href="../reference/cyto_map.html">cyto_map()</a></code>. This means that you can use any available dimensionality reduction technique or create your own one to map your data.</li>
+<li>Add <code><a href="../reference/cyto_gatingTemplate_generate.html">cyto_gatingTemplate_generate()</a></code> to obtain a CytoExploreR-ready gatingTemplate from any GatingHierarchy or GatingSet.</li>
+<li>Improve speed of plotting using <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code> by increasing computation speed of axes ranges.</li>
+<li>Add support for <code>scattermore</code> to further improve <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code> plotting speed. To use this feature, users will need to manually install <code>scattermore</code> and set <code><a href="https://rdrr.io/r/base/options.html">options("cyto_plot_fast" = TRUE)</a></code>. Setting <code><a href="https://rdrr.io/r/base/options.html">options("cyto_plot_fast" = FALSE)</a></code> will return to using conventional plotting. It is recommended to use conventional plotting when saving images with <code><a href="../reference/cyto_plot_save.html">cyto_plot_save()</a></code> to obtain high resolution images.</li>
+<li>Fix quadrant gate bug in <code><a href="../reference/cyto_gate_edit.html">cyto_gate_edit()</a></code> to allow editing of quadrant gates.</li>
+<li>Fix computation of statistics for stacked density distributions in <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code>.</li>
+<li>Fix <code>cyto_marker_edit()</code> to accept custom file name for saving and add support for marker removal.</li>
+<li>Hide messages when opening data editors and only open data editors in interactive mode.</li>
+<li>Improve visualization of quadrant gates to distinguish them from traditional rectangleGates. Quadrant gates can now be individually visualized (i.e. users can indicate which quadrants to display).</li>
+<li>Added new function <code><a href="../reference/cyto_nodes_convert.html">cyto_nodes_convert()</a></code> to anchor ambiguous nodes to a known parental node within <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code>.</li>
+</ul>
+</div>
     <div id="cytoexplorer-107" class="section level1">
 <h1 class="page-header" data-toc-text="1.0.7">
 <a href="#cytoexplorer-107" class="anchor"></a>CytoExploreR 1.0.7</h1>
