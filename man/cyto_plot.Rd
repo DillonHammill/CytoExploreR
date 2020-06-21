@@ -21,6 +21,7 @@
   layout,
   margins = NULL,
   popup = FALSE,
+  select = NULL,
   xlim = NA,
   ylim = NA,
   xlab,
@@ -189,6 +190,7 @@
   layout,
   margins = NULL,
   popup = FALSE,
+  select = NULL,
   xlim = NA,
   ylim = NA,
   xlab,
@@ -402,6 +404,11 @@ compute optimal margins.}
 pop-up window, set to FALSE by default. \code{popup} will open OS-specific
 graphic device prior to plotting. Mac users will need to install
 \href{https://www.xquartz.org/}{XQuartz} for this functionality.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details.}
 
 \item{xlim}{lower and upper limits of x axis (e.g. c(0,250000)).}
 

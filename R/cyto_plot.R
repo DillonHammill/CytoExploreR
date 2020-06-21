@@ -52,6 +52,10 @@
 #'   pop-up window, set to FALSE by default. \code{popup} will open OS-specific
 #'   graphic device prior to plotting. Mac users will need to install
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,250000)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,250000)).
 #' @param xlab x axis label.
@@ -288,6 +292,7 @@ cyto_plot.GatingSet <- function(x,
                                 layout,
                                 margins = NULL,
                                 popup = FALSE,
+                                select = NULL,
                                 xlim = NA,
                                 ylim = NA,
                                 xlab,
@@ -378,6 +383,11 @@ cyto_plot.GatingSet <- function(x,
   # GATINGSET - gs (x available for flowSet method call)
   gs <- x
 
+  # SELECT
+  if(!is.null(select)){
+    gs <- cyto_select(gs, select)
+  }
+  
   # GATINGHIERARCHY
   gh <- gs[[1]]
 
@@ -1177,6 +1187,7 @@ cyto_plot.flowSet <- function(x,
                               layout,
                               margins = NULL,
                               popup = FALSE,
+                              select = NULL,
                               xlim = NA,
                               ylim = NA,
                               xlab,
@@ -1315,6 +1326,11 @@ cyto_plot.flowSet <- function(x,
 
   # SAMPLE PREPARATION - BASE LAYERS & OVERLAYS --------------------------------
 
+  # SELECT
+  if(!is.null(select)){
+    x <- cyto_select(x, select)
+  }
+  
   # DATA TO LIST & GROUP - CONVERT GROUPS TO FLOWFRAMES
   fr_list <- cyto_merge_by(x, group_by)
 
