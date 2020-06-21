@@ -4,11 +4,11 @@
 \alias{cyto_plot_new}
 \title{Open new graphics device for cyto_plot}
 \usage{
-cyto_plot_new(popup = FALSE, ...)
+cyto_plot_new(popup = TRUE, ...)
 }
 \arguments{
 \item{popup}{logical indicating whether a popup graphics device should be
-opened.}
+opened, set to TRUE by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[grDevices:dev]{dev.new}}:}

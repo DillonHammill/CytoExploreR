@@ -741,7 +741,7 @@ cyto_plot_empty.list <- function(x,
 #' functionality.
 #'
 #' @param popup logical indicating whether a popup graphics device should be
-#'   opened.
+#'   opened, set to TRUE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[grDevices:dev]{dev.new}}:
 #'
@@ -756,7 +756,7 @@ cyto_plot_empty.list <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup = FALSE, ...){
+cyto_plot_new <- function(popup = TRUE, ...){
   # Null graphics device -> RStudioGD
   if(dev.cur() == 1) {
     dev.new()
