@@ -2,8 +2,9 @@
 
 #' Compute Spillover Spreading Matrix
 #'
-#' \code{spillover_spread} computes the spillover spreading matrix as described
-#' by Nguyen et al. (2013) using gated and compensated compensation controls.
+#' \code{cyto_spillover_spread_compute} computes the spillover spreading matrix
+#' as described by Nguyen et al. (2013) using gated and compensated compensation
+#' controls.
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
@@ -24,7 +25,7 @@
 #'   following the channel selection process.
 #' @param compensated logical indicating whether the supplied compensation
 #'   controls have been compensated. Compensation controls must be compensated
-#'   prior tro calculation of spillover spreading matrix. If \code{compensated}
+#'   prior to calculation of spillover spreading matrix. If \code{compensated}
 #'   is set to FALSE, the compensation controls will be compensated internally
 #'   using the supplied \code{spillover} matrix.
 #' @param spillover name of the output spillover matrix csv file to be used
@@ -300,9 +301,7 @@ cyto_spillover_spread_compute <- function(x,
   if (!is(spillover_spread, "character")) {
     stop("'spillover_spread' should be the name of a csv file.")
   } else {
-    if (!file_ext(spillover_spread) == "csv") {
-      paste0(spillover_spread, ".csv")
-    }
+    spillover_spread <- file_ext_append(spillover_spread, ".csv")
     write.csv(SSM, spillover_spread)
   }
 

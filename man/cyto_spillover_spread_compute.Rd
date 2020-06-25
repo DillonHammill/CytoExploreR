@@ -40,7 +40,7 @@ following the channel selection process.}
 
 \item{compensated}{logical indicating whether the supplied compensation
 controls have been compensated. Compensation controls must be compensated
-prior tro calculation of spillover spreading matrix. If \code{compensated}
+prior to calculation of spillover spreading matrix. If \code{compensated}
 is set to FALSE, the compensation controls will be compensated internally
 using the supplied \code{spillover} matrix.}
 
@@ -62,8 +62,9 @@ arguments.}
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
 \description{
-\code{spillover_spread} computes the spillover spreading matrix as described
-by Nguyen et al. (2013) using gated and compensated compensation controls.
+\code{cyto_spillover_spread_compute} computes the spillover spreading matrix
+as described by Nguyen et al. (2013) using gated and compensated compensation
+controls.
 }
 \references{
 Nguyen R, Perfetto S, Mahnke YD, Chattopadhyay P & Roederer M,
