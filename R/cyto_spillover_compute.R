@@ -242,9 +242,7 @@ cyto_spillover_compute <- function(x,
   if (!is(spillover, "character")) {
     stop("'spillover' should be the name of a csv file.")
   } else {
-    if (!file_ext(spillover) == "csv") {
-      paste0(spillover, ".csv")
-    }
+    spillover <- file_ext_append(spillover, ".csv")
     write.csv(spill, spillover)
   }
 
