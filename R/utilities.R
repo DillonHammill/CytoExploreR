@@ -179,7 +179,7 @@ LAPPLY <- function(...){
   suppressWarnings(suppressMessages(...))
 }
 
-# SEURAT HELPER ----------------------------------------------------------------
+## SEURAT HELPER ---------------------------------------------------------------
 
 # Helper function from seurat to get program paths.
 
@@ -227,4 +227,38 @@ SysExec <- function(
     )
   }
   return(paths)
+}
+
+## FILE_EXT_APPEND -------------------------------------------------------------
+
+#' Append file name with an extension
+#' 
+#' @param x vector of filenames.
+#' @param ext vector of extensions to append.
+#' 
+#' @importFrom tools file_ext
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @export
+file_ext_append <- function(x, 
+                            ext = "csv"){
+  
+  # REPEAT EXTENSION
+  ext <- rep(ext, length(x))
+  
+  # ADD EXTENSIONS TO FILE NAMES WITHOUT EXTENSIONS
+  LAPPLY(seq_along(x), function(z){
+    # PREPARE EXTENSION
+    if(!grepl(".", ext[z])){
+      ext[z] <- paste0(".", ext[z])
+    }
+    # APPEND EXTENSION
+    if(.empty(file_ext(x[z]))){
+      paste0(x[z], ext)
+    }else{
+      x[z]
+    }
+  })
+  
 }

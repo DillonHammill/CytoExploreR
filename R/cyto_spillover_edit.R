@@ -47,7 +47,10 @@
 #' @param spillover name of a square spillover matrix csv file or spillover
 #'   matrix to edit. Setting \code{spillover} to NULL (the default) will result
 #'   in extraction of the spillover matrix directly from the supplied samples
-#'   (i.e. edit the spillover matrix constructed on the cytometer).
+#'   (i.e. edit the spillover matrix constructed on the cytometer). Similarly,
+#'   if the supplied file name does not exist the spillover matrix from the
+#'   first sample will be used and the edited matrix will be saved to the
+#'   specified file.
 #' @param axes_trans an object of class \code{transformerList} containing
 #'   transformers to used to transform the fluorescent channels of the samples
 #'   for visualisation.
@@ -206,7 +209,6 @@ cyto_spillover_edit.GatingSet <- function(x,
                       spillover = comp,
                       remove = TRUE)
     }
-
   }
 
   # PREPARE CHANNEL_MATCH ----------------------------------------------------
@@ -234,22 +236,18 @@ cyto_spillover_edit.GatingSet <- function(x,
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
       } else {
-        if (getOption("CytoExploreR_wd_check") == TRUE) {
-          if (file_wd_check(channel_match)) {
-            channel_match <- read.csv(channel_match,
-              header = TRUE,
-              row.names = 1,
-              stringsAsFactors = FALSE
-            )
-          } else {
-            stop(paste(channel_match, "is not in this working directory."))
-          }
-        } else {
+        # File extension
+        channel_match <- file_ext_append(channel_match, ".csv")
+        # File exists
+        if(file.exists(channel_match)){
           channel_match <- read.csv(channel_match,
-            header = TRUE,
-            row.names = 1,
-            stringsAsFactors = FALSE
-          )
+                                    header = TRUE,
+                                    row.names = 1,
+                                    stringsAsFactors = FALSE)
+        # file does not exist
+        }else{
+          stop(paste(channel_match, 
+                     "does not exist or lacks required permissions."))
         }
       }
       # Names of samples don't match any listed in channel_match
@@ -318,24 +316,21 @@ cyto_spillover_edit.GatingSet <- function(x,
       # spillover is the name of csv file
     } else {
       # File extension missing
-      if (!file_ext(spillover) == "csv") {
-        spillover <- paste0(spillover, ".csv")
-      }
-      # Working directory checks
-      if (getOption("CytoExploreR_wd_check") == TRUE) {
-        if (file_wd_check(spillover)) {
-          spill <- read.csv(spillover, header = TRUE, row.names = 1)
-          spill <- as.matrix(spill)
-        } else {
-          stop(paste(spillover, "is not in this working directory."))
-        }
-        # Bypass working directory checks
-      } else {
-        spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      spillover <- file_ext_append(spillover, ".csv")
+      # File does not exist
+      if(!file.exists(spillover)){
+        # Use first spillover matrix
+        spill <- cyto_spillover_extract(
+          cyto_extract(gs)
+          )[[1]]
+      # Use matrix from file
+      }else{
+        spill <- read.csv(spillover,
+                          header = TRUE,
+                          row.names = 1)
         spill <- as.matrix(spill)
       }
     }
-
     # No spillover matrix supplied
   } else {
     spillover <- paste0(
@@ -343,7 +338,9 @@ cyto_spillover_edit.GatingSet <- function(x,
       "-", "Spillover-Matrix.csv"
     )
     # Use spillover matrix attached to first sample
-    spill <- cyto_extract(gs)[[1]]@description$SPILL
+    spill <- cyto_spillover_extract(
+      cyto_extract(gs)
+      )[[1]]
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
@@ -1171,7 +1168,9 @@ cyto_spillover_edit.GatingSet <- function(x,
 
       # Return edited matrix on application close
       onStop(function() {
-        spill.mat <- read.csv(spillover, header = TRUE, row.names = 1)
+        spill.mat <- read.csv(spillover, 
+                              header = TRUE, 
+                              row.names = 1)
         colnames(spill.mat) <- rownames(spill.mat)
         stopApp(spill.mat)
       })
@@ -1181,9 +1180,11 @@ cyto_spillover_edit.GatingSet <- function(x,
   # Run the shiny application
   if(viewer){
     sp <- runApp(app, 
-                 launch.browser = paneViewer())
+                 launch.browser = paneViewer(),
+                 quiet = TRUE)
   }else{
-    sp <- runApp(app)
+    sp <- runApp(app,
+                 quiet = TRUE)
   }
 
   # RETURN UPDATED SPILLOVER MATRIX
@@ -1254,29 +1255,18 @@ cyto_spillover_edit.flowSet <- function(x,
       }
       # channel_match is the name of a csv file
     } else {
-      # channel_match muct contain csv file extension
-      if (!file_ext(channel_match) == "csv") {
-        channel_match <- paste0(channel_match, ".csv")
-      }
-      # Working directory check
-      if (getOption("CytoExploreR_wd_check") == TRUE) {
-        # channel_match exists in working directory
-        if (file_wd_check(channel_match)) {
-          channel_match <- read.csv(channel_match,
-            header = TRUE,
-            row.names = 1,
-            stringsAsFactors = FALSE
-          )
-        } else {
-          stop(paste(channel_match, " is not in this working directory."))
-        }
-        # Bypass working directory checks
-      } else {
+      # channel_match must contain csv file extension
+      channel_match <- file_ext_append(channel_match, ".csv")
+      # file exists
+      if(file.exists(channel_match)){
         channel_match <- read.csv(channel_match,
-          header = TRUE,
-          row.names = 1,
-          stringsAsFactors = FALSE
-        )
+                                  header = TRUE,
+                                  row.names = 1,
+                                  stringsAsFactors = FALSE)
+      # file does not exist
+      }else{
+        stop(paste(channel_match, 
+                   "does not exist or lacks required permissions."))
       }
     }
 
@@ -1320,24 +1310,19 @@ cyto_spillover_edit.flowSet <- function(x,
       # spillover is the name of csv file
     } else {
       # File extension missing
-      if (!file_ext(spillover) == "csv") {
-        spillover <- paste0(spillover, ".csv")
-      }
-      # Working directory checks
-      if (getOption("CytoExploreR_wd_check") == TRUE) {
-        if (file_wd_check(spillover)) {
-          spill <- read.csv(spillover, header = TRUE, row.names = 1)
-          spill <- as.matrix(spill)
-        } else {
-          stop(paste(spillover, "is not in this working directory."))
-        }
-        # Bypass working directory checks
-      } else {
-        spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      spillover <- file_ext_append(spillover, ".csv")
+      # File does not exist
+      if(!file.exists(spillover)){
+        # Use first spillover matrix
+        spill <- cyto_spillover_extract(fs)[[1]]
+        # Use matrix from file
+      }else{
+        spill <- read.csv(spillover,
+                          header = TRUE,
+                          row.names = 1)
         spill <- as.matrix(spill)
       }
     }
-
     # No spillover matrix supplied
   } else {
     spillover <- paste0(
@@ -1345,7 +1330,7 @@ cyto_spillover_edit.flowSet <- function(x,
       "-", "Spillover-Matrix.csv"
     )
     # Use spillover matrix attached to first sample
-    spill <- fs[[1]]@description$SPILL
+    spill <- cyto_spillover_extract(fs)[[1]]
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
@@ -2042,7 +2027,9 @@ cyto_spillover_edit.flowSet <- function(x,
 
       # Return edited matrix on application cloase
       onStop(function() {
-        spill.mat <- read.csv(spillover, header = TRUE, row.names = 1)
+        spill.mat <- read.csv(spillover, 
+                              header = TRUE, 
+                              row.names = 1)
         colnames(spill.mat) <- rownames(spill.mat)
         stopApp(spill.mat)
       })
@@ -2052,9 +2039,11 @@ cyto_spillover_edit.flowSet <- function(x,
   # Run the shiny application
   if(viewer){
     sp <- runApp(app, 
-                 launch.browser = paneViewer())
+                 launch.browser = paneViewer(),
+                 quiet = TRUE)
   }else{
-    sp <- runApp(app)
+    sp <- runApp(app,
+                 quiet = TRUE)
   }
 
   # Return updated spillover matrix

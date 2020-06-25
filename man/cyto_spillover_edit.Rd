@@ -54,7 +54,10 @@ channels associated with the selcted samples.}
 \item{spillover}{name of a square spillover matrix csv file or spillover
 matrix to edit. Setting \code{spillover} to NULL (the default) will result
 in extraction of the spillover matrix directly from the supplied samples
-(i.e. edit the spillover matrix constructed on the cytometer).}
+(i.e. edit the spillover matrix constructed on the cytometer). Similarly,
+if the supplied file name does not exist the spillover matrix from the
+first sample will be used and the edited matrix will be saved to the
+specified file.}
 
 \item{axes_trans}{an object of class \code{transformerList} containing
 transformers to used to transform the fluorescent channels of the samples
