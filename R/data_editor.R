@@ -183,9 +183,12 @@ data_editor <- function(x,
   # RUN DATA EDITOR - INTERACTIVE MODE ONLY
   if(getOption("CytoExploreR_interactive")){
     if (viewer == TRUE) {
-      x <- suppressMessages(runApp(app, launch.browser = paneViewer()))
+      x <- runApp(app,
+                  launch.browser = paneViewer(),
+                  quiet = TRUE)
     } else {
-      x <- suppressMessages(runApp(app))
+      x <- runApp(app,
+                  quiet = TRUE)
     }
   }
 
