@@ -3493,21 +3493,23 @@ cyto_compensate.GatingSet <- function(x,
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
     if (is(spillover, "character")) {
-      # No file extension
-      if (file_ext(spillover) == "") {
-        spillover <- paste0(spillover, ".csv")
+      # file extension
+      spillover <- file_ext_append(spillover, ".csv")
+      # file does not exist
+      if(!file.exists(spillover)){
+        stop(
+          paste(spillover, 
+                "does not exist or does not have required permissions.")
+          )
       }
-      # Check working directory for csv file
-      if (getOption("CytoExploreR_wd_check")) {
-        if (!file_wd_check(spillover)) {
-          stop(paste(spillover, "does not exist in this working directory."))
-        }
-      }
-      spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      # read in spillover matrix
+      spill <- read.csv(spillover, 
+                        header = TRUE, 
+                        row.names = 1)
       colnames(spill) <- rownames(spill)
       # column/row names must be valid channels
-      if (!all(rownames(spill) %in% BiocGenerics::colnames(fs)) |
-        !all(rownames(spill) %in% BiocGenerics::colnames(fs))) {
+      if (!all(rownames(spill) %in% cyto_channels(fs)) |
+        !all(rownames(spill) %in% cyto_channels(fs))) {
         stop(
           paste(
             "'spillover' must have valid fluorescent channels as rownames",
@@ -3522,7 +3524,7 @@ cyto_compensate.GatingSet <- function(x,
     } else if (is(spillover, "matrix") |
       is(spillover, "data.frame")) {
       # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% BiocGenerics::colnames(fs))) {
+      if (!all(colnames(spillover) %in% cyto_channels(fs))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
       } else {
         spill <- spillover
@@ -3597,21 +3599,23 @@ cyto_compensate.flowSet <- function(x,
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
     if (is(spillover, "character")) {
-      # No file extension
-      if (file_ext(spillover) == "") {
-        spillover <- paste0(spillover, ".csv")
+      # file extension
+      spillover <- file_ext_append(spillover, ".csv")
+      # file does not exist
+      if(!file.exists(spillover)){
+        stop(
+          paste(spillover, 
+                "does not exist or does not have the required permissions.")
+          )
       }
-      # Check working directory for csv file
-      if (getOption("CytoExploreR_wd_check")) {
-        if (!file_wd_check(spillover)) {
-          stop(paste(spillover, "does not exist in this working directory."))
-        }
-      }
-      spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      # read in spillover matrix
+      spill <- read.csv(spillover, 
+                        header = TRUE, 
+                        row.names = 1)
       colnames(spill) <- rownames(spill)
       # column/row names must be valid channels
-      if (!all(rownames(spill) %in% BiocGenerics::colnames(x)) |
-        !all(rownames(spill) %in% BiocGenerics::colnames(x))) {
+      if (!all(rownames(spill) %in% cyto_channels(x)) |
+        !all(rownames(spill) %in% cyto_channels(x))) {
         stop(
           paste(
             "'spillover' must have valid fluorescent channels as rownames",
@@ -3626,7 +3630,7 @@ cyto_compensate.flowSet <- function(x,
     } else if (is(spillover, "matrix") |
       is(spillover, "data.frame")) {
       # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% BiocGenerics::colnames(x))) {
+      if (!all(colnames(spillover) %in% cyto_channels(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
       } else {
         spill <- spillover
@@ -3699,21 +3703,23 @@ cyto_compensate.flowFrame <- function(x,
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
     if (is(spillover, "character")) {
-      # No file extension
-      if (file_ext(spillover) == "") {
-        spillover <- paste0(spillover, ".csv")
+      # file extension
+      spillover <- file_ext_append(spillover, ".csv")
+      # file does not exist
+      if(!file.exists(spillover)){
+        stop(
+          paste(spillover,
+                "does not exist or does not have the required permissions.")
+        )
       }
-      # Check working directory for csv file
-      if (getOption("CytoExploreR_wd_check")) {
-        if (!file_wd_check(spillover)) {
-          stop(paste(spillover, "does not exist in this working directory."))
-        }
-      }
-      spill <- read.csv(spillover, header = TRUE, row.names = 1)
+      # read in spillover matrix
+      spill <- read.csv(spillover, 
+                        header = TRUE, 
+                        row.names = 1)
       colnames(spill) <- rownames(spill)
       # column/row names must be valid channels
-      if (!all(rownames(spill) %in% BiocGenerics::colnames(x)) |
-        !all(rownames(spill) %in% BiocGenerics::colnames(x))) {
+      if (!all(rownames(spill) %in% cyto_channels(x)) |
+        !all(rownames(spill) %in% cyto_channels(x))) {
         stop(
           paste(
             "'spillover' must have valid fluorescent channels as rownames",
@@ -3725,7 +3731,7 @@ cyto_compensate.flowFrame <- function(x,
     } else if (is(spillover, "matrix") |
       is(spillover, "data.frame")) {
       # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% BiocGenerics::colnames(x))) {
+      if (!all(colnames(spillover) %in% cyto_channels(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
       } else {
         spill <- spillover
