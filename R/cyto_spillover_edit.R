@@ -144,71 +144,77 @@ cyto_spillover_edit.GatingSet <- function(x,
 
   # COMPENSATION
   comp <- cyto_spillover_extract(gs)
-
-  # GS SHOULD NOT BE COMPENSATED (TRANSFORMED LATER IF REQUIRED)
-  if(!is.null(comp)){
-    cs <- cyto_extract(gs, "root")
-    # UNTRANSFORMED - REMOVE COMPENSATION
-    if(.all_na(axes_trans)){
-      cyto_compensate(cs, 
-                      spillover = comp, 
-                      remove = TRUE)
-    # TRANSFORMED - REMOVE COMPENSATION
-    }else{
-      # INVERSE TRANSFORM
-      cyto_transform(cs,
-                     trans = axes_trans,
-                     inverse = TRUE,
-                     plot = FALSE)
-      # DECOMPENSATE
-      cyto_compensate(cs,
-                      spillover = comp,
-                      remove = TRUE)
-      # TRANSFORM
-      cyto_transform(cs,
-                     trans = axes_trans,
-                     plot = FALSE)
-    }
+  
+  # DEFAULT TRANSFORMERS
+  if(.all_na(axes_trans)){
+    axes_trans_default <- cyto_transformer_biex(gs,
+                                                channels = channels,
+                                                plot = FALSE)
   }
   
-  # INVERSE TRANSFORMATIONS - GS_LINEAR
-  if (.all_na(axes_trans)) {
-    gs_linear <- cyto_copy(gs)
-    # REVERSE COMPENSATION
-    if(!is.null(comp)){
-      cs_linear <- cyto_extract(gs_linear, "root")
-      cyto_compensate(cs_linear, 
-                      spillover = comp, 
-                      remove = TRUE)
-    }
-    axes_trans <- cyto_transformer_biex(gs_linear,
-      channels = channels,
-      plot = FALSE
-    )
-    gs <- cyto_transform(gs,
-      trans = axes_trans,
-      plot = FALSE
-    )
-  } else {
-    gs_linear <- cyto_copy(gs)
-    # INVERSE TRANSFORMATIONS
-    if(any(channels %in% names(axes_trans))){
-      cs_linear <- cyto_extract(gs_linear, "root")
+  # COMPENSATED GATINGSET
+  if(!is.null(comp)){
+    # EXTRACT DATA
+    cs <- cyto_extract(gs, 
+                       "root", 
+                       copy = TRUE)
+    # REVERSE TRANSFORMATIONS
+    if(!.all_na(axes_trans)){
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
-      cyto_transform(cs_linear,
-        trans = trans,
-        inverse = TRUE,
-        plot = FALSE
-      )
+      cs <- cyto_transform(cs,
+                           trans = axes_trans,
+                           inverse = TRUE,
+                           plot = FALSE)
     }
-    # REVERSE COMPENSATION
-    if(!is.null(comp)){
-      cs_linear <- cyto_extract(gs_linear, "root")
-      cyto_compensate(cs_linear,
-                      spillover = comp,
-                      remove = TRUE)
+    # REMOVE COMPENSATION
+    cs <- cyto_compensate(cs,
+                          spillover = comp,
+                          remove = TRUE)
+    # GET DEFAULT TRANSFORMERS
+    if(.all_na(axes_trans)){
+      axes_trans <- axes_trans_default
     }
+    # RE-APPLY TRANSFORMATIONS
+    trans <- axes_trans[match_ind(channels, names(axes_trans))]
+    trans <- cyto_transformer_combine(trans)
+    cs <- cyto_transform(cs,
+                         trans = axes_trans,
+                         plot = FALSE)
+    # REPLACE DATA
+    gs_cyto_data(gs) <- cs
+  # UNCOMPENSATED GATINGSET
+  }else{
+    # UNTRANSFOMED GATINGSET
+    if(.all_na(axes_trans)){
+      # GET DEFAULT TRANSFORMERS
+      axes_trans <- axes_trans_default
+      # RE-APPLY TRANSFORMATIONS
+      trans <- axes_trans[match_ind(channels, names(axes_trans))]
+      trans <- cyto_transformer_combine(trans)
+      cs <- cyto_transform(cs,
+                           trans = axes_trans,
+                           plot = FALSE)
+      # REPLACE DATA
+      gs_cyto_data(gs) <- cs
+    }
+  }
+
+  # GS TRANSORMED UNCOMPENSATED - GET GS_LINEAR
+  if(!.all_na(axes_trans)){
+    # GS TRANSFORMED & UNCOMPENSATED
+    gs_linear <- cyto_copy(gs)
+    cs <- cyto_extract(gs_linear, "root")
+    # INVERSE TRANSFORMATIONS
+    axes_trans <- cyto_transformer_extract(gs)
+    trans <- axes_trans[match_ind(channels, names(axes_trans))]
+    trans <- cyto_transformer_combine(trans)
+    cs <- cyto_transform(cs,
+                         trans = axes_trans,
+                         inverse = TRUE,
+                         plot = FALSE)
+    # REPLACE DATA
+    gs_cyto_data(gs_linear) <- cs
   }
 
   # PREPARE CHANNEL_MATCH ----------------------------------------------------
@@ -568,11 +574,11 @@ cyto_spillover_edit.GatingSet <- function(x,
         # COPY
         gs_linear_copy <- cyto_copy(gs_linear)
         # Data must be LINEAR at this step
-        gs_linear_comp <- compensate(gs_linear_copy, values$spill / 100)
+        gs_linear_copy_comp <- compensate(gs_linear_copy, values$spill / 100)
         # Get transformed data
         trans <- axes_trans[match_ind(channels, names(axes_trans))]
         trans <- cyto_transformer_combine(trans)
-        gs_trans <- cyto_transform(gs_linear_comp,
+        gs_trans <- cyto_transform(gs_linear_copy_comp,
           trans = trans,
           plot = FALSE
         )

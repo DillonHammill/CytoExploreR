@@ -3440,6 +3440,7 @@ cyto_details_save <- function(x,
 #' @importFrom tools file_ext
 #' @importFrom methods is
 #' @importFrom flowCore decompensate
+#' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe gs_cyto_data
 #'
 #' @examples
 #'
@@ -3575,9 +3576,16 @@ cyto_compensate.GatingSet <- function(x,
 
   # REMOVE COMPENSATION
   if (remove == TRUE) {
-    lapply(seq_along(fs), function(z) {
-      decompensate(fs[[z]], spill[[z]])
+    cf_list <- lapply(seq_along(fs), function(z) {
+      cf <- decompensate(fs[[z]], spill[[z]])
+      if(!is(cf, "cytoframe")){
+        cf <- flowFrame_to_cytoframe(cf)
+      }
+      return(cf)
     })
+    names(cf_list) <- cyto_names(fs)
+    cs <- cytoset(cf_list)
+    gs_cyto_data(x) <- cs
     # APPLY COMPENSATION
   } else if (remove == FALSE) {
     flowWorkspace::compensate(x, spill)
@@ -3681,9 +3689,15 @@ cyto_compensate.flowSet <- function(x,
 
   # REMOVE COMPENSATION
   if (remove == TRUE) {
-    lapply(seq_along(x), function(z) {
-      decompensate(x[[z]], spill[[z]])
+    cf_list <- lapply(seq_along(x), function(z) {
+      cf <- decompensate(x[[z]], spill[[z]])
+      if(!is(cf, "cytoset")){
+        cf <- flowFrame_to_cytoframe(cf)
+      }
+      return(cf)
     })
+    names(cf_list) <- cyto_names(x)
+    x <- cytoset(cf_list)
     return(x)
     # APPLY COMPENSATION
   } else if (remove == FALSE) {
