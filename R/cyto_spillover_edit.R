@@ -187,6 +187,10 @@ cyto_spillover_edit.GatingSet <- function(x,
   }else{
     # UNTRANSFOMED GATINGSET
     if(.all_na(axes_trans)){
+      # EXTRACT DATA
+      cs <- cyto_extract(gs, 
+                         "root", 
+                         copy = TRUE)
       # GET DEFAULT TRANSFORMERS
       axes_trans <- axes_trans_default
       # RE-APPLY TRANSFORMATIONS
