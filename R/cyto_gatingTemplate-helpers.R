@@ -687,16 +687,16 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
     if(is.null(gatingTemplate)){
       stop("Supply the name of the gatingTemplate csv file to read in.")
     }
-    # GATINGTEMPLATE FILE EXTENSION
-  }else{
-    if(is(gatingTemplate, "character")){
-      gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-      if(!file.exists(gatingTemplate)){
-        stop(
-          paste(gatingTemplate, 
-                "does not exist or does not have the required permissions")
-        )
-      }
+  }
+  
+  # GATINGTEMPLATE FILE EXTENSION
+  if(is(gatingTemplate, "character")){
+    gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+    if(!file.exists(gatingTemplate)){
+      stop(
+        paste(gatingTemplate, 
+              "does not exist or does not have the required permissions")
+      )
     }
   }
   
