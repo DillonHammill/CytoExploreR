@@ -644,3 +644,126 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
     }
   }
 }
+
+## CYTO_GATINGTEMPLATE_READ ----------------------------------------------------
+
+#' Read in a gatingTemplate object or gatingTemplate csv file
+#'
+#' @param gatingTemplate gatingTemplate object or the name of a gatingTemplate
+#'   csv file to read in.
+#' @param data.table logical indicating whether the gatingTemplate should be
+#'   read into a \code{data.table}, set to FALSE by default to use
+#'   \code{data.frame}.
+#' @param ... additional arguments passed to
+#'   \code{\link[data.table:fread]{fread}}.
+#'
+#' @importFrom data.table fread as.data.table
+#' @importFrom methods is
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#' library(CytoExploreRData)
+#' 
+#' # gatingTemplate
+#' gt <- cyto_gatingTemplate_read(Activation_gatingTemplate)
+#' 
+#' # write gatingTemplate
+#' cyto_gatingTemplate_write(gt, "gatingTemplate.csv")
+#' 
+#' # gatingTemplate csv file
+#' gt <- cyto_gatingTemplate_read("gatingTemplate.csv")
+#' }
+#'
+#' @export
+cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
+                                     data.table = FALSE, 
+                                     ...){
+  
+  # NO GATINGTEMPLATE
+  if(is.null(gatingTemplate)){
+    gatingTemplate <- cyto_gatingTemplate_active()
+    if(is.null(gatingTemplate)){
+      stop("Supply the name of the gatingTemplate csv file to read in.")
+    }
+    # GATINGTEMPLATE FILE EXTENSION
+  }else{
+    if(is(gatingTemplate, "character")){
+      gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+      if(!file.exists(gatingTemplate)){
+        stop(
+          paste(gatingTemplate, 
+                "does not exist or does not have the required permissions")
+        )
+      }
+    }
+  }
+  
+  # GATINGTEMPLATE
+  if(is(gatingTemplate, "gatingTemplate")){
+    gt <- as.data.table(gatingTemplate)
+    # DATA.FRAME
+    if(!data.table){
+      gt <- as.data.frame(gt)
+    }
+  }else{
+    gt <- fread(gatingTemplate,
+                data.table = data.table,
+                ...)
+  }
+  
+  # RETURN GATINGTEMPLATE
+  return(gt)
+  
+}
+
+## CYTO_GATINGTEMPALTE_WRITE ---------------------------------------------------
+
+#' Write gatingTemplate to csv file
+#'
+#' @param gatingTemplate data.frame, data.table, gatingTemplate object or the
+#'   name of a gatingTemplate csv file.
+#' @param save_as name of the csv file to write the gatingtemplate to.
+#' @param ... additional arguments passed to
+#'   \code{\link[data.table:fwrite]{fwrite}}.
+#'
+#' @importFrom data.table fwrite
+#' @importFrom methods is
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' \dontrun{
+#' library(CytoExploreRData)
+#'
+#' # gatingTemplate
+#' gt <- cyto_gatingTemplate_write(Activation_gatingTemplate)
+#'
+#' # write gatingTemplate
+#' cyto_gatingTemplate_write(gt, "gatingTemplate.csv")
+#' }
+#'
+#' @export
+cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
+                                      save_as = NULL,
+                                      ...){
+  
+  # SAVE_AS
+  if(is.null(save_as)){
+    stop("Supply the name of the csv file to 'save_as'.")
+  }else{
+    save_as <- file_ext_append(save_as, ".csv")
+  }
+  
+  # READ GATINGTEMPLATE
+  if(is(gatingTemplate, "character") | is(gatingTemplate, "gatingTemplate")){
+    gatingTemplate <- cyto_gatingTemplate_read(gatingTemplate)
+  }
+  
+  # WRITE GATINGTEMPLATE
+  fwrite(gatingTemplate,
+         file = save_as,
+         ...)
+  
+}
