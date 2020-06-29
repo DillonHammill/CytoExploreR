@@ -2,12 +2,18 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_sample}
 \alias{cyto_sample}
+\alias{cyto_sample.GatingHierarchy}
+\alias{cyto_sample.GatingSet}
 \alias{cyto_sample.flowFrame}
 \alias{cyto_sample.flowSet}
 \alias{cyto_sample.list}
 \title{Sample a flowFrame or flowSet}
 \usage{
 cyto_sample(x, ...)
+
+\method{cyto_sample}{GatingHierarchy}(x, display = 1, seed = NULL, ...)
+
+\method{cyto_sample}{GatingSet}(x, display = 1, seed = NULL, ...)
 
 \method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL, ...)
 
@@ -16,8 +22,10 @@ cyto_sample(x, ...)
 \method{cyto_sample}{list}(x, display = 1, seed = NULL, plot = FALSE, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-\code{\link[flowCore:flowSet-class]{flowSet}}.}
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{...}{not in use.}
 
@@ -31,16 +39,17 @@ seed will return the same result with each run.}
 scaled per flowFrame to retain original ratios, as used in cyto_plot.}
 }
 \value{
-\code{\link[flowCore:flowFrame-class]{flowFrame}} or
-  \code{\link[flowCore:flowSet-class]{flowSet}} restricted to \code{display}
-  percentage events.
+object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+  \code{\link[flowCore:flowSet-class]{flowSet}},
+  \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
+  \code{display} events.
 }
 \description{
 \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
 the percentage or number of events to retain.
 }
 \examples{
-
 # Load in CytoExploreRData to access files
 library(CytoExploreRData)
 
@@ -52,6 +61,7 @@ cyto_sample(fs[[1]], 0.5)
 
 # Restrict first sample to 10000 events
 cyto_sample(fs[[1]], 10000)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

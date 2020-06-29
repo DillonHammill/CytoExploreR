@@ -12,6 +12,7 @@ cyto_setup(
   markers = TRUE,
   parse_names = FALSE,
   details = TRUE,
+  sample = FALSE,
   ...
 )
 }
@@ -23,7 +24,7 @@ a folder in current working directory).}
 saving.}
 
 \item{restrict}{logical indicating whether unassigned channels should be
-dropped from the returned cytoset, set to FALSE by default. Alternatvely,
+dropped from the returned cytoset, set to FALSE by default. Alternatively,
 users can supply a vector of channels to remove, see
 \code{\link{cyto_channels_restrict}} for details.}
 
@@ -46,6 +47,11 @@ the delimiter to this argument instead of TRUE.}
 \code{cyto_details_edit} to update the experimental details associated with
 the loaded samples, set to TRUE by default. The name of the csv to which
 these details will be supplied can also be passed to this argument.}
+
+\item{sample}{logical indicating whether all samples should be downsampled to
+the minimum number of events in a sample, set to FALSE by default.
+Alternatively, users can supply a numeric to indicate the desired number of
+events to keep in each sample.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.}

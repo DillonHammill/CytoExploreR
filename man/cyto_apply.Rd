@@ -2,12 +2,9 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_apply}
 \alias{cyto_apply}
-\alias{cyto_apply.flowSet}
 \title{Apply a function over cytometry objects}
 \usage{
-cyto_apply(x, FUN, ...)
-
-\method{cyto_apply}{flowSet}(x, FUN, ...)
+cyto_apply(x, FUN, ..., simplify = TRUE, use.exprs = FALSE)
 }
 \arguments{
 \item{x}{object of class \code{flowSet} or \code{cytoset}.}
@@ -15,8 +12,14 @@ cyto_apply(x, FUN, ...)
 \item{FUN}{function to apply to each \code{flowFrame} or \code{cytoframe} in
 the supplied \code{flowSet} or \code{cytoset}.}
 
-\item{...}{additional arguments passed to
-\code{\link[flowCore:fsApply]{fsApply}}.}
+\item{...}{optional arguments to \code{FUN}.}
+
+\item{simplify}{logical indicating whether the resulting list should be
+simplified into a flowSet or bound into a matrix or data.frame using
+\code{rbind}, set to TRUE by default.}
+
+\item{use.exprs}{logical indicating whether the function should be applied to
+the raw data in each flowFrame, set to FALSE by default.}
 }
 \description{
 Apply a function over cytometry objects
@@ -30,6 +33,9 @@ fs <- Activation
 # Sample each flowFrame
 fs <- cyto_apply(fs, cyto_sample)
 
+}
+\seealso{
+\code{\link[flowCore:fsApply]{fsApply}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -461,7 +461,7 @@ cyto_clean <- function(x, ...) {
 #' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
 #'   saving.
 #' @param restrict logical indicating whether unassigned channels should be
-#'   dropped from the returned cytoset, set to FALSE by default. Alternatvely,
+#'   dropped from the returned cytoset, set to FALSE by default. Alternatively,
 #'   users can supply a vector of channels to remove, see
 #'   \code{\link{cyto_channels_restrict}} for details.
 #' @param clean logical indicating whether the loaded data should be cleaned
@@ -480,6 +480,10 @@ cyto_clean <- function(x, ...) {
 #'   \code{cyto_details_edit} to update the experimental details associated with
 #'   the loaded samples, set to TRUE by default. The name of the csv to which
 #'   these details will be supplied can also be passed to this argument.
+#' @param sample logical indicating whether all samples should be downsampled to
+#'   the minimum number of events in a sample, set to FALSE by default.
+#'   Alternatively, users can supply a numeric to indicate the desired number of
+#'   events to keep in each sample.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
 #'
@@ -528,12 +532,13 @@ cyto_setup <- function(path = ".",
                        clean = FALSE,
                        markers = TRUE,
                        parse_names = FALSE,
-                       details = TRUE, ...) {
-
+                       details = TRUE,
+                       sample = FALSE, ...) {
+  
   # CYTOSET/GATINGSET
   message("Loading FCS files into a GatingSet...")
   x <- cyto_load(path = path, restrict = FALSE, ...)
-
+  
   # MARKERS
   if (markers != FALSE) {
     message("Assigning markers to channels...")
@@ -542,11 +547,11 @@ cyto_setup <- function(path = ".",
       x <- cyto_markers_edit(x)
     } else {
       x <- cyto_markers_edit(x,
-        file = markers
+                             file = markers
       )
     }
   }
-
+  
   # PARSE NAMES
   if(parse_names != FALSE){
     message("Parsing file names into experiment details...")
@@ -565,11 +570,11 @@ cyto_setup <- function(path = ".",
       x <- cyto_details_edit(x)
     } else {
       x <- cyto_details_edit(x,
-        file = details
+                             file = details
       )
     }
   }
-
+  
   # FLOWSET LOADED
   if (is(x, "flowSet")) {
     # RESTRICT CHANNELS
@@ -590,34 +595,51 @@ cyto_setup <- function(path = ".",
       x <- cyto_clean(x,
                       remove_from = clean)
     }
+    # SAMPLING
+    if(sample != FALSE){
+      if(sample == TRUE){
+        sample <- min(
+          cyto_apply(x, 
+                     .cyto_count)
+        )
+      }
+      message(
+        paste("Downsampling each sample to",
+              sample, "events.")
+      )
+      x <- cyto_sample(x, 
+                       display = sample,
+                       seed = 56)
+    }
     # GATINGSET
     x <- GatingSet(x)
   }
-
+  
   # gatingtemplate
   if (!is.null(gatingTemplate)) {
-
+    
     # FILE EXTENSION
     if (.empty(file_ext(gatingTemplate))) {
       gatingTemplate <- paste0(gatingTemplate, ".csv")
     }
-
+    
     # ACTIVE GATINGTEMPLATE
     message(paste("Setting", gatingTemplate, "as the active gatingTemplate..."))
     cyto_gatingTemplate_select(gatingTemplate)
-
+    
     # CREATE GATINGTEMPLATE
     if (.all_na(match(gatingTemplate, list.files()))) {
       message(paste("Creating", gatingTemplate, "..."))
       cyto_gatingTemplate_create(gatingTemplate)
     }
   }
-
+  
   # SETUP COMPLETE
   message("Done!")
-
+  
   # RETURN GATINGSET
   return(x)
+  
 }
 
 ## CYTO_DETAILS ----------------------------------------------------------------
@@ -2623,8 +2645,10 @@ cyto_save.flowFrame <- function(x,
 #' \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
 #' the percentage or number of events to retain.
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-#'   \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param display can be either a numeric [0,1] or integer to indicate the
 #'   percentage or number of events to keep respectively.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
@@ -2633,16 +2657,19 @@ cyto_save.flowFrame <- function(x,
 #'   scaled per flowFrame to retain original ratios, as used in cyto_plot.
 #' @param ... not in use.
 #'
-#' @return \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-#'   \code{\link[flowCore:flowSet-class]{flowSet}} restricted to \code{display}
-#'   percentage events.
+#' @return object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
+#'   \code{display} events.
 #'
 #' @importFrom BiocGenerics nrow
-#' @importFrom flowCore sampleFilter Subset fsApply exprs
+#' @importFrom flowCore sampleFilter Subset flowSet exprs
 #' @importFrom methods is
+#' @importFrom flowWorkspace gs_cyto_data gs_cyto_data<- cytoset
+#'   flowFrame_to_cytoframe flowSet_to_cytoset recompute
 #'
 #' @examples
-#'
 #' # Load in CytoExploreRData to access files
 #' library(CytoExploreRData)
 #'
@@ -2654,6 +2681,7 @@ cyto_save.flowFrame <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -2665,25 +2693,79 @@ cyto_sample <- function(x, ...) {
 
 #' @rdname cyto_sample
 #' @export
+cyto_sample.GatingHierarchy <- function(x,
+                                        display = 1,
+                                        seed = NULL,
+                                        ...) {
+  
+  # EXTRACT CYTOSET
+  cs <- gs_cyto_data(x)
+  
+  # SAMPLING
+  cs <- cyto_sample(cs,
+                    display = display,
+                    seed = seed,
+                    ...)
+  
+  # REPLACE DATA
+  gs_cyto_data(x) <- cs
+  
+  # RECOMPUTE
+  suppressMessages(recompute(x))
+  
+  # RETURN GATINGHIERACHY
+  return(x)
+  
+}
+
+#' @rdname cyto_sample
+#' @export
+cyto_sample.GatingSet <- function(x,
+                                  display = 1,
+                                  seed = NULL,
+                                  ...){
+  
+  # EXTRACT CYTOSET
+  cs <- gs_cyto_data(x)
+  
+  # SAMPLING
+  cs <- cyto_sample(cs,
+                    display = display,
+                    seed = seed,
+                    ...)
+  
+  # REPLACE DATA
+  gs_cyto_data(x) <- cs
+  
+  # RECOMPUTE
+  suppressMessages(recompute(x))
+  
+  # RETURN GATINGSET
+  return(x)
+  
+}
+
+#' @rdname cyto_sample
+#' @export
 cyto_sample.flowFrame <- function(x,
                                   display = 1,
                                   seed = NULL,
                                   ...) {
-
+  
   # NO SAMPLING - EMPTY FLOWFRAME
   if (nrow(x@exprs) == 0) {
     return(x)
   }
-
+  
   # Do nothing if no sampling required
   if (display != 1) {
-
+    
     # Number of events
     events <- nrow(x)
-
+    
     # display is the number of events to keep
     if (display > 1) {
-
+      
       # display is too large - retain all events
       if (display > events) {
         return(x)
@@ -2691,24 +2773,24 @@ cyto_sample.flowFrame <- function(x,
       } else {
         size <- display
       }
-
+      
       # display is a proportion of events to keep
     } else {
-
+      
       # Size
       size <- display * events
     }
-
+    
     # Set seed
     if (!is.null(seed)) {
       set.seed(seed)
     }
-
+    
     # Sample
     smp <- sampleFilter(size = size)
     x <- Subset(x, smp)
   }
-
+  
   return(x)
 }
 
@@ -2718,8 +2800,17 @@ cyto_sample.flowSet <- function(x,
                                 display = 1,
                                 seed = NULL,
                                 ...) {
-  # Apply same degree of sampling to each flowFrame in the flowSet
-  fsApply(x, cyto_sample, display = display, seed = seed)
+  
+  # FLOWSET/CYTOSET
+  cs <- cyto_apply(x, 
+                   cyto_sample, 
+                   display = display, 
+                   seed = seed, 
+                   ...)
+  
+  # RETURN FLOWSET/CYTOSET
+  return(cs)
+  
 }
 
 #' @rdname cyto_sample
@@ -2729,10 +2820,10 @@ cyto_sample.list <- function(x,
                              seed = NULL,
                              plot = FALSE,
                              ...) {
-
+  
   # CYTO_PLOT SAMPLING - RATIOS
   if (plot == TRUE) {
-
+    
     # LIST OF FLOWSETS
     if (all(LAPPLY(x, function(z) {
       is(z, "flowSet")
@@ -2752,9 +2843,9 @@ cyto_sample.list <- function(x,
         # SAMPLES PER FLOWFRAME - ASSUME FLOWFRAME IF NO BARCODE
         samples <- LAPPLY(x, function(z) {
           tryCatch(length(unique(exprs(z)[, "Sample ID"])),
-            error = function(e) {
-              1
-            }
+                   error = function(e) {
+                     1
+                   }
           )
         })
         # EVENTS PER SAMPLE - EACH LAYER
@@ -2774,8 +2865,8 @@ cyto_sample.list <- function(x,
         # SAMPLING
         lapply(seq_len(length(x)), function(z) {
           x[[z]] <<- cyto_sample(x[[z]],
-            display = events_to_sample[z],
-            seed = seed
+                                 display = events_to_sample[z],
+                                 seed = seed
           )
         })
         # NO BARCODING - RELY ON IDENTIFIERS
@@ -2820,17 +2911,17 @@ cyto_sample.list <- function(x,
         }
       }
     }
-
+    
     # GENERIC SAMPLING
   } else {
-
+    
     # ALLOW DIFFERENT SAMPLING PER ELEMENT
     display <- rep(display, length(x))
     x <- mapply(function(x, display) {
       cyto_sample(x, display)
     }, x, display)
   }
-
+  
   # Return sampled list
   return(x)
 }
@@ -4336,16 +4427,23 @@ cyto_calibrate_reset <- function(){
 
 ## CYTO_APPLY ------------------------------------------------------------------
 
+# Modified version of flowCore fsApply which simplifies tibbles and
+# appropriately handles cytosets.
+
 #' Apply a function over cytometry objects
 #'
 #' @param x object of class \code{flowSet} or \code{cytoset}.
 #' @param FUN function to apply to each \code{flowFrame} or \code{cytoframe} in
 #'   the supplied \code{flowSet} or \code{cytoset}.
-#' @param ... additional arguments passed to
-#'   \code{\link[flowCore:fsApply]{fsApply}}.
+#' @param ... optional arguments to \code{FUN}.
+#' @param simplify logical indicating whether the resulting list should be
+#'   simplified into a flowSet or bound into a matrix or data.frame using
+#'   \code{rbind}, set to TRUE by default.
+#' @param use.exprs logical indicating whether the function should be applied to
+#'   the raw data in each flowFrame, set to FALSE by default.
 #'
 #' @importFrom methods is
-#' @importFrom flowCore fsApply
+#' @importFrom flowCore fsApply phenoData phenoData<-
 #' @importFrom flowWorkspace flowSet_to_cytoset
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -4359,25 +4457,48 @@ cyto_calibrate_reset <- function(){
 #' # Sample each flowFrame
 #' fs <- cyto_apply(fs, cyto_sample)
 #'
-#' @name cyto_apply
-NULL
-
-#' @rdname cyto_apply
+#' @seealso \code{\link[flowCore:fsApply]{fsApply}}
+#'
 #' @export
-cyto_apply <- function(x,
+cyto_apply <- function(x, 
                        FUN,
-                       ...){
-  UseMethod("cyto_apply")
-}
-
-#' @rdname cyto_apply
-#' @export
-cyto_apply.flowSet <- function(x, 
-                               FUN,
-                               ...){
+                       ...,
+                       simplify = TRUE,
+                       use.exprs = FALSE){
+  
+  # FUNCTION MISSING
+  if(missing(FUN)) {
+    stop("Supply a function to 'FUN'.")
+  }
+  
+  # PREPARE FUNCTION
+  FUN <- match.fun(FUN)
+  
+  # INVALID FUNCTION
+  if(!is.function(FUN)){
+    stop("'FUN' is not a function.")
+  }
   
   # APPLY FUNCTION
-  res <- fsApply(x, FUN = FUN, ...)
+  res <- structure(lapply(cyto_names(x), function(z) {
+    y <- x[[z]]
+    FUN(if(use.exprs){
+      cyto_extract(y, raw = TRUE)[[1]]
+    }else{
+      y
+    }, ...)
+  }), names = cyto_names(x))
+  
+  # SIMPLIFY OUTPUT
+  if(simplify) {
+    if(all(LAPPLY(res, is, "flowFrame"))) {
+      res <- as(res,"flowSet")
+      phenoData(res) <- phenoData(x)[cyto_names(x),]
+    # CHECK LENGTHS
+    } else if(diff(range(LAPPLY(res, length))) == 0) {
+      res <- do.call(rbind, res)
+    }
+  }
   
   # FLOWSET RETURNED
   if(is(res, "flowSet")){
