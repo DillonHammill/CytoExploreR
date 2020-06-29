@@ -631,7 +631,7 @@ cyto_setup <- function(path = ".",
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @return experiment details as data.frame.
@@ -4330,6 +4330,64 @@ cyto_calibrate_reset <- function(){
                           "cyto_calibrate.rds")))
   }else{
     return(NULL)
+  }
+  
+}
+
+## CYTO_APPLY ------------------------------------------------------------------
+
+#' Apply a function over cytometry objects
+#'
+#' @param x object of class \code{flowSet} or \code{cytoset}.
+#' @param FUN function to apply to each \code{flowFrame} or \code{cytoframe} in
+#'   the supplied \code{flowSet} or \code{cytoset}.
+#' @param ... additional arguments passed to
+#'   \code{\link[flowCore:fsApply]{fsApply}}.
+#'
+#' @importFrom methods is
+#' @importFrom flowCore fsApply
+#' @importFrom flowWorkspace flowSet_to_cytoset
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation dataset
+#' fs <- Activation
+#'
+#' # Sample each flowFrame
+#' fs <- cyto_apply(fs, cyto_sample)
+#'
+#' @name cyto_apply
+NULL
+
+#' @rdname cyto_apply
+#' @export
+cyto_apply <- function(x,
+                       FUN,
+                       ...){
+  UseMethod("cyto_apply")
+}
+
+#' @rdname cyto_apply
+#' @export
+cyto_apply.flowSet <- function(x, 
+                               FUN,
+                               ...){
+  
+  # APPLY FUNCTION
+  res <- fsApply(x, FUN = FUN, ...)
+  
+  # FLOWSET RETURNED
+  if(is(res, "flowSet")){
+    if(is(x, "cytoset")){
+      return(flowSet_to_cytoset(res))
+    }else{
+      return(res)
+    }
+  }else{
+    return(res)
   }
   
 }
