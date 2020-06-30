@@ -114,7 +114,7 @@ cyto_spillover_edit.GatingSet <- function(x,
                                           parent = NULL,
                                           channel_match = NULL,
                                           spillover = NULL,
-                                          axes_trans = NULL,
+                                          axes_trans = NA,
                                           axes_limits = "machine",
                                           display = 2000,
                                           point_size = 3,
@@ -144,68 +144,70 @@ cyto_spillover_edit.GatingSet <- function(x,
 
   # COMPENSATION
   comp <- cyto_spillover_extract(gs)
-  
+
   # DEFAULT TRANSFORMERS
-  if(.all_na(axes_trans)){
+  if (.all_na(axes_trans)) {
     axes_trans_default <- cyto_transformer_biex(gs,
-                                                channels = channels,
-                                                plot = FALSE)
+      channels = channels,
+      plot = FALSE
+    )
   }
-  
+
   # COMPENSATED GATINGSET
-  if(!is.null(comp)){
+  if (!is.null(comp)) {
     # EXTRACT DATA
-    cs <- cyto_extract(gs, 
-                       "root", 
-                       copy = TRUE)
+    cs <- cyto_extract(gs,
+      "root",
+      copy = TRUE
+    )
     # REVERSE TRANSFORMATIONS
-    if(!.all_na(axes_trans)){
+    if (!.all_na(axes_trans)) {
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
       cs <- cyto_transform(cs,
-                           trans = axes_trans,
-                           inverse = TRUE,
-                           plot = FALSE)
+        trans = axes_trans,
+        inverse = TRUE,
+        plot = FALSE
+      )
     }
     # REMOVE COMPENSATION
     cs <- cyto_compensate(cs,
-                          spillover = comp,
-                          remove = TRUE)
+      spillover = comp,
+      remove = TRUE
+    )
     # GET DEFAULT TRANSFORMERS
-    if(.all_na(axes_trans)){
+    if (.all_na(axes_trans)) {
       axes_trans <- axes_trans_default
     }
     # RE-APPLY TRANSFORMATIONS
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     cs <- cyto_transform(cs,
-                         trans = axes_trans,
-                         plot = FALSE)
+      trans = axes_trans,
+      plot = FALSE
+    )
     # REPLACE DATA
     gs_cyto_data(gs) <- cs
-  # UNCOMPENSATED GATINGSET
-  }else{
+    # UNCOMPENSATED GATINGSET
+  } else {
     # UNTRANSFOMED GATINGSET
-    if(.all_na(axes_trans)){
-      # EXTRACT DATA
-      cs <- cyto_extract(gs, 
-                         "root", 
-                         copy = TRUE)
+    if (.all_na(axes_trans)) {
       # GET DEFAULT TRANSFORMERS
       axes_trans <- axes_trans_default
       # RE-APPLY TRANSFORMATIONS
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
       cs <- cyto_transform(cs,
-                           trans = axes_trans,
-                           plot = FALSE)
+        trans = axes_trans,
+        plot = FALSE
+      )
       # REPLACE DATA
       gs_cyto_data(gs) <- cs
     }
   }
 
   # GS TRANSORMED UNCOMPENSATED - GET GS_LINEAR
-  if(!.all_na(axes_trans)){
+  if (!.all_na(axes_trans)) {
     # GS TRANSFORMED & UNCOMPENSATED
     gs_linear <- cyto_copy(gs)
     cs <- cyto_extract(gs_linear, "root")
@@ -214,9 +216,10 @@ cyto_spillover_edit.GatingSet <- function(x,
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     cs <- cyto_transform(cs,
-                         trans = axes_trans,
-                         inverse = TRUE,
-                         plot = FALSE)
+      trans = axes_trans,
+      inverse = TRUE,
+      plot = FALSE
+    )
     # REPLACE DATA
     gs_cyto_data(gs_linear) <- cs
   }
@@ -249,15 +252,18 @@ cyto_spillover_edit.GatingSet <- function(x,
         # File extension
         channel_match <- file_ext_append(channel_match, ".csv")
         # File exists
-        if(file.exists(channel_match)){
+        if (file.exists(channel_match)) {
           channel_match <- read.csv(channel_match,
-                                    header = TRUE,
-                                    row.names = 1,
-                                    stringsAsFactors = FALSE)
-        # file does not exist
-        }else{
-          stop(paste(channel_match, 
-                     "does not exist or lacks required permissions."))
+            header = TRUE,
+            row.names = 1,
+            stringsAsFactors = FALSE
+          )
+          # file does not exist
+        } else {
+          stop(paste(
+            channel_match,
+            "does not exist or lacks required permissions."
+          ))
         }
       }
       # Names of samples don't match any listed in channel_match
@@ -328,16 +334,17 @@ cyto_spillover_edit.GatingSet <- function(x,
       # File extension missing
       spillover <- file_ext_append(spillover, ".csv")
       # File does not exist
-      if(!file.exists(spillover)){
+      if (!file.exists(spillover)) {
         # Use first spillover matrix
         spill <- cyto_spillover_extract(
           cyto_extract(gs)
-          )[[1]]
-      # Use matrix from file
-      }else{
+        )[[1]]
+        # Use matrix from file
+      } else {
         spill <- read.csv(spillover,
-                          header = TRUE,
-                          row.names = 1)
+          header = TRUE,
+          row.names = 1
+        )
         spill <- as.matrix(spill)
       }
     }
@@ -350,7 +357,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     # Use spillover matrix attached to first sample
     spill <- cyto_spillover_extract(
       cyto_extract(gs)
-      )[[1]]
+    )[[1]]
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
@@ -386,7 +393,7 @@ cyto_spillover_edit.GatingSet <- function(x,
   # X CHANNEL
   if (!.all_na(pd$channel[pd$name == editor_initial_sample])) {
     editor_initial_xchannel <- pd$channel[pd$name == editor_initial_sample]
-  } else{
+  } else {
     editor_initial_xchannel <- channels[1]
   }
 
@@ -1178,9 +1185,10 @@ cyto_spillover_edit.GatingSet <- function(x,
 
       # Return edited matrix on application close
       onStop(function() {
-        spill.mat <- read.csv(spillover, 
-                              header = TRUE, 
-                              row.names = 1)
+        spill.mat <- read.csv(spillover,
+          header = TRUE,
+          row.names = 1
+        )
         colnames(spill.mat) <- rownames(spill.mat)
         stopApp(spill.mat)
       })
@@ -1188,13 +1196,15 @@ cyto_spillover_edit.GatingSet <- function(x,
   )
 
   # Run the shiny application
-  if(viewer){
-    sp <- runApp(app, 
-                 launch.browser = paneViewer(),
-                 quiet = TRUE)
-  }else{
+  if (viewer) {
     sp <- runApp(app,
-                 quiet = TRUE)
+      launch.browser = paneViewer(),
+      quiet = TRUE
+    )
+  } else {
+    sp <- runApp(app,
+      quiet = TRUE
+    )
   }
 
   # RETURN UPDATED SPILLOVER MATRIX
@@ -1206,7 +1216,7 @@ cyto_spillover_edit.GatingSet <- function(x,
 cyto_spillover_edit.flowSet <- function(x,
                                         channel_match = NULL,
                                         spillover = NULL,
-                                        axes_trans = NULL,
+                                        axes_trans = NA,
                                         axes_limits = "machine",
                                         display = 2000,
                                         point_size = 3,
@@ -1268,15 +1278,18 @@ cyto_spillover_edit.flowSet <- function(x,
       # channel_match must contain csv file extension
       channel_match <- file_ext_append(channel_match, ".csv")
       # file exists
-      if(file.exists(channel_match)){
+      if (file.exists(channel_match)) {
         channel_match <- read.csv(channel_match,
-                                  header = TRUE,
-                                  row.names = 1,
-                                  stringsAsFactors = FALSE)
-      # file does not exist
-      }else{
-        stop(paste(channel_match, 
-                   "does not exist or lacks required permissions."))
+          header = TRUE,
+          row.names = 1,
+          stringsAsFactors = FALSE
+        )
+        # file does not exist
+      } else {
+        stop(paste(
+          channel_match,
+          "does not exist or lacks required permissions."
+        ))
       }
     }
 
@@ -1322,14 +1335,15 @@ cyto_spillover_edit.flowSet <- function(x,
       # File extension missing
       spillover <- file_ext_append(spillover, ".csv")
       # File does not exist
-      if(!file.exists(spillover)){
+      if (!file.exists(spillover)) {
         # Use first spillover matrix
         spill <- cyto_spillover_extract(fs)[[1]]
         # Use matrix from file
-      }else{
+      } else {
         spill <- read.csv(spillover,
-                          header = TRUE,
-                          row.names = 1)
+          header = TRUE,
+          row.names = 1
+        )
         spill <- as.matrix(spill)
       }
     }
@@ -2037,9 +2051,10 @@ cyto_spillover_edit.flowSet <- function(x,
 
       # Return edited matrix on application cloase
       onStop(function() {
-        spill.mat <- read.csv(spillover, 
-                              header = TRUE, 
-                              row.names = 1)
+        spill.mat <- read.csv(spillover,
+          header = TRUE,
+          row.names = 1
+        )
         colnames(spill.mat) <- rownames(spill.mat)
         stopApp(spill.mat)
       })
@@ -2047,13 +2062,15 @@ cyto_spillover_edit.flowSet <- function(x,
   )
 
   # Run the shiny application
-  if(viewer){
-    sp <- runApp(app, 
-                 launch.browser = paneViewer(),
-                 quiet = TRUE)
-  }else{
+  if (viewer) {
     sp <- runApp(app,
-                 quiet = TRUE)
+      launch.browser = paneViewer(),
+      quiet = TRUE
+    )
+  } else {
+    sp <- runApp(app,
+      quiet = TRUE
+    )
   }
 
   # Return updated spillover matrix
