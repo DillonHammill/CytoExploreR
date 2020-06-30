@@ -342,32 +342,20 @@ cyto_gate_draw.GatingSet <- function(x,
     return(c(fr_list[z], overlay[[z]]))
   })
   names(fr_list) <- GRPS
-
-  # SAMPLING
+  
+  # SAMPLING - APPLY SAME SAMPLING PER LAYER
   fr_list <- lapply(seq_along(fr_list), function(z) {
-    # NO OVERLAY
-    if (!all(LAPPLY(fr_list[[z]], function(w) {
-      is(w, "flowFrame")
-    }))) {
-      lapply(seq_along(fr_list[[z]]), function(y) {
-        if (is(fr_list[[z]][[y]], "flowFrame")) {
-          cyto_sample(fr_list[[z]][[y]],
-            display = display,
-            seed = 56,
-            plot = FALSE
-          )
-        } else {
-          fr_list[[z]][[y]]
-        }
-      })
-      # OVERLAY - SCALED SAMPLING
-    } else {
-      cyto_sample(fr_list[[z]],
-        display = display,
-        seed = 56,
-        plot = TRUE
-      ) # use scaled sampling
-    }
+    lapply(seq_along(fr_list[[z]]), function(y){
+      # WATCH OUT NA OVERLAY
+      if(!is.logical(fr_list[[z]][[y]])){
+        cyto_sample(fr_list[[z]][[y]],
+                    display = display,
+                    seed = 56,
+                    plot = FALSE)
+      }else{
+        return(fr_list[[z]][[y]])
+      }
+    })
   })
   names(fr_list) <- GRPS
 
@@ -773,28 +761,18 @@ cyto_gate_draw.flowFrame <- function(x,
   # COMBINE FR_LIST & OVERLAY
   fr_list <- c(fr_list, overlay_list)
 
-  # SAMPLING
-  if (all(LAPPLY(fr_list, function(z) {
-    is(z, "flowFrame")
-  }))) {
-    fr_list <- cyto_sample(fr_list,
-      display = display,
-      seed = 56,
-      plot = TRUE
-    ) # use scaled sampling
-  } else {
-    fr_list <- lapply(seq_along(fr_list), function(z) {
-      if (!is(fr_list[[z]], "flowFrame")) {
-        fr_list[[z]]
-      } else {
-        cyto_sample(fr_list[[z]],
-          display = display,
-          seed = 56,
-          plot = FALSE
-        )
-      }
-    })
-  }
+  # SAMPLING - SAME SAMPLING PER LAYER
+  fr_list <- lapply(seq_along(fr_list), function(z){
+    # WATCH OUT NA OVERLAY
+    if(!is.logical(fr_list[[z]])){
+      cyto_sample(fr_list[[z]],
+                  display = display,
+                  seed = 56,
+                  plot = FALSE)
+    }else{
+      return(fr_list[[z]])
+    }
+  })
   
   # CONSTRUCT PLOT -------------------------------------------------------------
 

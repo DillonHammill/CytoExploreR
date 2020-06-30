@@ -250,6 +250,110 @@ cyto_gate_rename <- function(x,
   write.csv(as.data.frame(gt), gatingTemplate, row.names = FALSE)
 }
 
+## CYTO_GATE_COPY --------------------------------------------------------------
+
+#' Copy gates to other nodes in GatingSet and update gatingTemplate
+#'
+#' @param x object of class \code{GatingSet}.
+#' @param parent name of the parental node to which the gates should be copied.
+#' @param alias vector of names for the copied gates, must be the same length as
+#'   copy.
+#' @param copy vector of names to copy to new parent.
+#' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
+#'   "gatingTemplate.csv") where the new entries should be saved.
+#' @param ... not in use.
+#'
+#' @return object of class \code{GatingSet} with copied gates applied and update
+#'   gatingTemplate csv file with appropriate entries.
+#'
+#' @importFrom openCyto gs_add_gating_method
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+cyto_gate_copy <- function(x,
+                           parent = NULL,
+                           alias = NULL,
+                           copy = NULL,
+                           gatingTemplate = NULL){
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # GATINGSET
+  if(!is(x, "GatingSet")){
+    stop("'x' must be an object of class GatingSet.")
+  }
+  
+  # NODES
+  nodes_full <- cyto_nodes(x, path = "full")
+  nodes_auto <- cyto_nodes(x, path = "auto")
+  
+  # PARENT
+  if (is.null(parent)) {
+    stop("Supply the name of the parent population.")
+  } else if (!parent %in% c(nodes_full, nodes_auto)) {
+    stop("Supplied parent does not exist in the GatingSet.")
+  }
+  
+  # ALIAS
+  if (is.null(alias)) {
+    stop("Supply the name(s) of the gates to edit to 'alias'.")
+  } else if (!all(alias %in% c(nodes_full, nodes_auto))) {
+    stop("Supplied alias does not exist in the GatingSet.")
+  }
+  
+  # MISSING GATINGTEMPLATE
+  if (is.null(gatingTemplate)) {
+    gatingTemplate <- cyto_gatingTemplate_active()
+  }
+  
+  # GATINGTEMPLATE STILL MISSING
+  if (is.null(gatingTemplate)) {
+    stop("Supply the name of the gatingTemplate to edit gate(s).")
+  }
+  
+  # GATINGTEMPLATE FILE EXTENSION
+  if (.empty(file_ext(gatingTemplate))) {
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
+  # UPDATE GATINGTEMPLATE ------------------------------------------------------
+  
+  # NEW ENTRIES
+  gt_entries <- lapply(seq_along(alias), function(z){
+    suppressMessages(
+      gs_add_gating_method(
+        gs = x,
+        parent = parent,
+        alias = alias[z],
+        gating_method = "refGate",
+        gating_args = copy[z]
+      )
+    )
+  })
+  
+  # COMBINE GATINGTEMPLATE ENTRIES
+  gt_entries <- do.call("rbind", 
+                        gt_entries)
+  
+  # LOAD GATINGTEMPLATE
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE)
+  
+  # UPDATE GATINGTEMPLATE
+  gt <- rbind(gt, 
+              gt_entries)
+  
+  # WRITE UPDATED GATINGTEMPLATE
+  write.csv(gt, 
+            gatingTemplate, 
+            row.names = FALSE)
+  
+  # RETURN UPDATED GATINGSET 
+  return(x)
+  
+}
+
 ## CYTO_GATE_BOOL --------------------------------------------------------------
 
 #' Add boolean gate to GatingSet and gatingTemplate
@@ -985,31 +1089,19 @@ cyto_gate_edit <- function(x,
   })
   names(fr_list) <- GRPS
 
-  # SAMPLING
+  # SAMPLING - SAME SAMPLING PER LAYER
   fr_list <- lapply(seq_along(fr_list), function(z) {
-    # NO OVERLAY
-    if (!all(LAPPLY(fr_list[[z]], function(w) {
-      is(w, "flowFrame")
-    }))) {
-      lapply(seq_along(fr_list[[z]]), function(y) {
-        if (is(fr_list[[z]][[y]], "flowFrame")) {
-          cyto_sample(fr_list[[z]][[y]],
-                      display = display,
-                      seed = 56,
-                      plot = FALSE
-          )
-        } else {
-          fr_list[[z]][[y]]
-        }
-      })
-      # OVERLAY - SCALED SAMPLING
-    } else {
-      cyto_sample(fr_list[[z]],
-                  display = display,
-                  seed = 56,
-                  plot = TRUE
-      ) # use scaled sampling
-    }
+    lapply(seq_along(fr_list[[z]]), function(y){
+      # WATCH OUT NA OVERLAY
+      if(!is.logical(fr_list[[z]][[y]])){
+        cyto_sample(fr_list[[z]][[y]],
+                    display = display,
+                    seed = 56,
+                    plot = FALSE)
+      }else{
+        return(fr_list[[z]][[y]])
+      }
+    })
   })
   names(fr_list) <- GRPS
   
@@ -1080,6 +1172,7 @@ cyto_gate_edit <- function(x,
       cyto_plot(fr_list[[y]][[1]],
         channels = channels,
         overlay = fr_list[[y]][seq_along(fr_list[[y]])[-1]],
+        display = 1,
         legend = FALSE,
         gate = gate,
         gate_line_col = "magenta",
