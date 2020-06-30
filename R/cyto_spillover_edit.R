@@ -153,19 +153,19 @@ cyto_spillover_edit.GatingSet <- function(x,
     )
   }
 
+  # EXTRACT DATA
+  cs <- cyto_extract(gs,
+                     parent = "root",
+                     copy = TRUE)
+  
   # COMPENSATED GATINGSET
   if (!is.null(comp)) {
-    # EXTRACT DATA
-    cs <- cyto_extract(gs,
-      "root",
-      copy = TRUE
-    )
     # REVERSE TRANSFORMATIONS
     if (!.all_na(axes_trans)) {
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
       cs <- cyto_transform(cs,
-        trans = axes_trans,
+        trans = trans,
         inverse = TRUE,
         plot = FALSE
       )
@@ -183,7 +183,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     cs <- cyto_transform(cs,
-      trans = axes_trans,
+      trans = trans,
       plot = FALSE
     )
     # REPLACE DATA
@@ -198,7 +198,7 @@ cyto_spillover_edit.GatingSet <- function(x,
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
       cs <- cyto_transform(cs,
-        trans = axes_trans,
+        trans = trans,
         plot = FALSE
       )
       # REPLACE DATA
@@ -212,11 +212,10 @@ cyto_spillover_edit.GatingSet <- function(x,
     gs_linear <- cyto_copy(gs)
     cs <- cyto_extract(gs_linear, "root")
     # INVERSE TRANSFORMATIONS
-    axes_trans <- cyto_transformer_extract(gs)
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     cs <- cyto_transform(cs,
-      trans = axes_trans,
+      trans = trans,
       inverse = TRUE,
       plot = FALSE
     )
