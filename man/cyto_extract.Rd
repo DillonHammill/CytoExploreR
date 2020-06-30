@@ -4,7 +4,15 @@
 \alias{cyto_extract}
 \title{Extract a valid flowFrame or flowSet}
 \usage{
-cyto_extract(x, parent = NULL, copy = FALSE, raw = FALSE, channels = NULL, ...)
+cyto_extract(
+  x,
+  parent = NULL,
+  select = NULL,
+  copy = FALSE,
+  raw = FALSE,
+  channels = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{flowFrame}, \code{flowSet},
@@ -12,6 +20,9 @@ cyto_extract(x, parent = NULL, copy = FALSE, raw = FALSE, channels = NULL, ...)
 
 \item{parent}{name of the parent population to extract from
 \code{GatingHierarchy} or \code{GatingSet} objects.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}}.}
 
 \item{copy}{logical indicating whether a deep copy of the extracted data
 should be returned.}

@@ -1430,6 +1430,8 @@ cyto_transform_extract <- function(x,
 #'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierarchy} or \code{GatingSet} objects.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}}.
 #' @param copy logical indicating whether a deep copy of the extracted data
 #'   should be returned.
 #' @param raw logical indicating whether a list of raw data matrices should be
@@ -1468,6 +1470,7 @@ cyto_transform_extract <- function(x,
 #' @export
 cyto_extract <- function(x,
                          parent = NULL,
+                         select = NULL,
                          copy = FALSE,
                          raw = FALSE,
                          channels = NULL,
@@ -1490,6 +1493,11 @@ cyto_extract <- function(x,
     x <- cyto_copy(x)
   }
 
+  # SELECT
+  if(!is.null(select)){
+    x <- cyto_select(x, select)
+  }
+  
   # RESTRICT
   if(!is.null(channels)){
     channels <- cyto_channels_extract(x, channels = channels)
@@ -1908,7 +1916,7 @@ cyto_select <- function(x, ...) {
       ind <- which(pd_filter[, y] %in% args[[y]])
       # No filtering if variable level is missing
       if (length(ind) != 0) {
-        pd_filter <<- pd_filter[ind, ]
+        pd_filter <<- pd_filter[ind, , drop = FALSE]
       }
     })
 
