@@ -1604,7 +1604,7 @@ cyto_gate_convert <- function(x, ...) {
 cyto_gate_convert.default <- function(x,
                                       channels = NULL,
                                       ...) {
-
+  
   # Invalid gate object
   if (!is(x)[1] %in% c(
     "list",
@@ -1626,19 +1626,19 @@ cyto_gate_convert.default <- function(x,
 cyto_gate_convert.rectangleGate <- function(x,
                                             channels = NULL,
                                             ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   if (is.null(channels)) {
     stop("Supply the channels in which the gate will be plotted.")
   }
-
+  
   # GATE CHANNELS
   chans <- parameters(x)
-
+  
   # PREPARE GATE ---------------------------------------------------------------
-
+  
   # 1D PLOT
   if (length(channels) == 1) {
     # 1D GATE IN 1D PLOT - CORRECT CHANNEL
@@ -1664,12 +1664,12 @@ cyto_gate_convert.rectangleGate <- function(x,
       # FITERID
       ID <- x@filterId
       # CHANNEL INDEX
-      ind <- which(chans %in% channels)
+      ind <- match_ind(chans, channels)
       # COORDS - MISSING CHANNEL
       coords <- matrix(c(x@min[channels[ind]], x@max[channels[ind]], -Inf, Inf),
-        ncol = 2,
-        nrow = 2,
-        byrow = FALSE
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE
       )
       colnames(coords) <- c(channels[ind], channels[-ind])
       x <- rectangleGate(.gate = coords)
@@ -1682,12 +1682,12 @@ cyto_gate_convert.rectangleGate <- function(x,
       # FITERID
       ID <- x@filterId
       # CHANNEL INDEX
-      ind <- which(chans %in% channels)
+      ind <- match_ind(chans, channels)
       # COORDS - MISSING CHANNEL
       coords <- matrix(c(x@min, x@max, -Inf, Inf),
-        ncol = 2,
-        nrow = 2,
-        byrow = FALSE
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE
       )
       colnames(coords) <- c(channels[ind], channels[-ind])
       x <- rectangleGate(.gate = coords)
@@ -1704,19 +1704,19 @@ cyto_gate_convert.rectangleGate <- function(x,
 cyto_gate_convert.polygonGate <- function(x,
                                           channels = NULL,
                                           ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   if (is.null(channels)) {
     stop("Supply the channels in which the gate will be plotted.")
   }
-
+  
   # GATE CHANNELS
   chans <- parameters(x)
-
+  
   # PREPARE GATE ---------------------------------------------------------------
-
+  
   # 1D PLOT - CONVERT TO RECTANGLEGATE
   if (length(channels) == 1) {
     # 2D GATE IN 1D PLOT - CORERCT CHANNEL
@@ -1728,8 +1728,8 @@ cyto_gate_convert.polygonGate <- function(x,
       coords <- c(min(coords), max(coords))
       # RECTANGLEGATE
       coords <- matrix(coords,
-        ncol = 1,
-        nrow = 2
+                       ncol = 1,
+                       nrow = 2
       )
       colnames(coords) <- channels[channels %in% chans]
       x <- rectangleGate(.gate = coords, filterId = ID)
@@ -1755,9 +1755,9 @@ cyto_gate_convert.polygonGate <- function(x,
       coords <- c(coords, -Inf, Inf)
       # RECTANGLEGATE
       coords <- matrix(coords,
-        ncol = 2,
-        nrow = 2,
-        byrow = FALSE
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE
       )
       colnames(coords) <- c(
         channels[channels %in% chans],
@@ -1778,19 +1778,19 @@ cyto_gate_convert.polygonGate <- function(x,
 cyto_gate_convert.ellipsoidGate <- function(x,
                                             channels = NULL,
                                             ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   if (is.null(channels)) {
     stop("Supply the channels in which the gate will be plotted.")
   }
-
+  
   # GATE CHANNELS
   chans <- parameters(x)
-
+  
   # PREPARE GATE ---------------------------------------------------------------
-
+  
   # 1D PLOT
   if (length(channels) == 1) {
     # 2D GATE IN 1D PLOT - CHANNEL MATCH
@@ -1804,8 +1804,8 @@ cyto_gate_convert.ellipsoidGate <- function(x,
       coords <- c(min(coords), max(coords))
       # RECTANGLEGATE
       coords <- matrix(coords,
-        ncol = 1,
-        nrow = 2
+                       ncol = 1,
+                       nrow = 2
       )
       colnames(coords) <- channels[channels %in% chans]
       x <- rectangleGate(.gate = coords, filterId = ID)
@@ -1833,9 +1833,9 @@ cyto_gate_convert.ellipsoidGate <- function(x,
       coords <- c(coords, -Inf, Inf)
       # RECTANGLEGATE
       coords <- matrix(coords,
-        ncol = 2,
-        nrow = 2,
-        byrow = FALSE
+                       ncol = 2,
+                       nrow = 2,
+                       byrow = FALSE
       )
       colnames(coords) <- c(
         channels[channels %in% chans],
@@ -1856,19 +1856,19 @@ cyto_gate_convert.ellipsoidGate <- function(x,
 cyto_gate_convert.quadGate <- function(x,
                                        channels = NULL,
                                        ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   if (is.null(channels)) {
     stop("Supply the channels in which the gate will be plotted.")
   }
-
+  
   # GATE CHANNELS
   chans <- parameters(x)
-
+  
   # PREPARE GATES --------------------------------------------------------------
-
+  
   # 1D PLOT
   if (length(channels) == 1) {
     stop("Quadrant gates cannot be converted into 1D gate objects.")
@@ -1889,16 +1889,16 @@ cyto_gate_convert.quadGate <- function(x,
 cyto_gate_convert.filters <- function(x,
                                       channels = NULL,
                                       ...) {
-
+  
   # GATE OBJECT LIST -----------------------------------------------------------
   x <- unlist(x)
-
+  
   # LIST METHOD CALL -----------------------------------------------------------
   x <- cyto_gate_convert(
     x,
     channels
   )
-
+  
   # RETURN CONVERTED GATES -----------------------------------------------------
   return(x)
 }
@@ -1908,15 +1908,15 @@ cyto_gate_convert.filters <- function(x,
 cyto_gate_convert.list <- function(x,
                                    channels = NULL,
                                    ...) {
-
+  
   # GATE OBJECT LIST -----------------------------------------------------------
   x <- unlist(x)
-
+  
   # CONVERT GATES --------------------------------------------------------------
   x <- lapply(x, function(z) {
     cyto_gate_convert(z, channels)
   })
-
+  
   # RETURN CONVERTED GATES -----------------------------------------------------
   return(x)
 }
