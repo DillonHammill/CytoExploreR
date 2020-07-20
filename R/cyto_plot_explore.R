@@ -2,10 +2,10 @@
 
 #' Explore Cytometry Data in Bivariate Plots
 #'
-#' \code{cyto_plot_explore} is an extremely useful tool to explore all aspectes
+#' \code{cyto_plot_explore} is an extremely useful tool to explore all aspects
 #' of your cytometry data. \code{cyto_plot_explore} constructs a faceted plot
 #' for each of the supplied \code{channels_x} by plotting them against all the
-#' supplied \code{channels_y}. Thus providing a rapid means tro explore the data
+#' supplied \code{channels_y}. Thus providing a rapid means to explore the data
 #' in all available channels.
 #'
 #' @param x an object of class \code{flowFrame}, \code{flowSet},
@@ -312,26 +312,28 @@ cyto_plot_explore.flowFrame <- function(x,
     par(oma = c(0, 0, 3, 0))
   }
   
-  # Plots - loop through channels_x
-  lapply(seq_len(length(channels_x)), function(z){
-    lapply(seq_len(length(channels_y)), function(y){
-      # Construct plot for each channels_y
-      if(channels_x[z] == channels_y[y]){
+  # channel_y is constant on each page
+  lapply(seq_along(channels_y), function(z){
+    lapply(seq_along(channels_x), function(w){
+      # CONSTRUCT PLOT
+      if(channels_x[w] == channels_y[z]){
+        # 1D PLOT
         cyto_plot(x,
-                  channels = channels_x[z],
+                  channels = channels_x[w],
                   axes_trans = axes_trans,
                   title = title,
-                  legend = FALSE, ...)
+                  legend = FALSE,
+                  ...)
       }else{
+        # 2D PLOT
         cyto_plot(x,
-                  channels = c(channels_x[z], channels_y[y]),
+                  channels = c(channels_x[w], channels_y[z]),
                   axes_trans = axes_trans,
                   title = title,
                   legend = FALSE, ...)
       }
-
-      # Add header & call new plot
-      if(channels_y[y] == channels_y[length(channels_y)]){
+      # Add header and call new plot after all channels_x
+      if(w == length(channels_x) | w %% prod(layout) == 0){
         # Add header
         if(!.all_na(header)){
           mtext(header,
@@ -340,30 +342,19 @@ cyto_plot_explore.flowFrame <- function(x,
                 cex = header_text_size,
                 col = header_text_col)
         }
-        # Call new plot
-        if(popup == TRUE){
-          cyto_plot_new(popup)
-          par(mfrow = layout)
-          par(oma = c(0, 0, 3, 0))
-        }else{
-          plot.new()
-          par(mfrow = layout)
-          par(oma = c(0, 0, 3, 0))
+        # Call new plot if new pages required (i.e. more channels_x/y to come)
+        if(w < length(channels_x) | z < length(channels_y)){
+          if(popup == TRUE) {
+            cyto_plot_new(popup)
+            par(mfrow = layout)
+            par(oma = c(0, 0, 3, 0))
+          } else {
+            plot.new()
+            par(mfrow = layout)
+            par(oma = c(0, 0, 3, 0))
+          }
         }
       }
-      
-      # Custom layouts require headers
-      if(channels_y[y] == prod(layout)){
-        if (!.all_na(header)) {
-          mtext(header,
-                outer = TRUE,
-                cex = header_text_size,
-                font = header_text_font,
-                col = header_text_col
-          )
-        }
-      }
-      
     })
   })
   
@@ -374,7 +365,7 @@ cyto_plot_explore.flowFrame <- function(x,
       # Close graphics device
       dev.off()
       
-      # Reset Ccyto_plot_save
+      # Reset cyto_plot_save
       options("cyto_plot_save" = FALSE)
       
       # Reset cyto_plot_method
