@@ -108,9 +108,7 @@
 #' @importFrom flowCore each_col fsApply sampleNames flowSet Subset
 #' @importFrom flowWorkspace pData GatingSet
 #' @importFrom methods as is
-#' @importFrom utils read.csv write.csv
 #' @importFrom stats median
-#' @importFrom tools file_ext
 #'
 #' @seealso \code{\link{cyto_spillover_edit}}
 #'
@@ -128,7 +126,7 @@ cyto_spillover_compute <- function(x,
                                    spillover = NULL,
                                    axes_limits = "machine",
                                    ...) {
-
+  
   # PREPARE DATA ---------------------------------------------------------------
   
   # COPY
@@ -150,9 +148,9 @@ cyto_spillover_compute <- function(x,
                                     trans = axes_trans,
                                     plot = FALSE))
   }
-
+  
   # SPILLOVER COMPUTATION ------------------------------------------------------
-
+  
   # NEGATIVE AND POSITIVE POPULATIONS (TRANSFORMED)
   pops <- .cyto_spillover_pops(cyto_copy,
                                parent = parent,
@@ -201,10 +199,10 @@ cyto_spillover_compute <- function(x,
   
   # Calculate medFI for all channels in all stained controls
   pos_stats <- suppressMessages(cyto_stats_compute(pos_pops,
-                                             stat = "median",
-                                             channels = channels,
-                                             format = "wide",
-                                             trans = axes_trans
+                                                   stat = "median",
+                                                   channels = channels,
+                                                   format = "wide",
+                                                   trans = axes_trans
   ))
   pos_stats <- pos_stats[, -which(names(pos_stats) %in% colnames(pd))]
   colnames(pos_stats) <- channels
@@ -215,14 +213,14 @@ cyto_spillover_compute <- function(x,
   # Subtract background fluorescence
   signal <- pos_stats - neg_stats
   signal <- as.matrix(signal)
-
+  
   # Construct spillover matrix - include values for which there is a control
   spill <- diag(x = 1, 
                 nrow = length(channels), 
                 ncol = length(channels))
   colnames(spill) <- channels
   rownames(spill) <- channels
-
+  
   # Normalise each row to stained channel
   lapply(seq(1, nrow(signal), 1), function(z) {
     signal[z, ] <<- signal[z, ] /
@@ -232,19 +230,18 @@ cyto_spillover_compute <- function(x,
   # Insert values into appropriate rows
   rws <- match(pd$channel, rownames(spill))
   spill[rws, ] <- signal
-
+  
   # No name specified for spillover default to date-Spillover-Matrix.csv
   if (is.null(spillover)) {
     spillover <- paste0(format(Sys.Date(), "%d%m%y"), "-Spillover-Matrix.csv")
   }
-
+  
   # write spillover matrix to csv file
   if (!is(spillover, "character")) {
     stop("'spillover' should be the name of a csv file.")
   } else {
-    spillover <- file_ext_append(spillover, ".csv")
-    write.csv(spill, spillover)
+    write_to_csv(spill, spillover)
   }
-
+  
   return(spill)
 }

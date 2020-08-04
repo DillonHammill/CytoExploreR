@@ -54,27 +54,9 @@
         chans <- cm$channel[match(cyto_names(x), rownames(cm))]
         pd$channel <- paste(chans)
       } else {
-        if (getOption("CytoExploreR_wd_check") == TRUE) {
-          if (file_wd_check(channel_match)) {
-            cm <- read.csv(channel_match,
-                           header = TRUE,
-                           row.names = 1,
-                           stringsAsFactors = FALSE
-            )
-            chans <- cm$channel[match(cyto_names(x), rownames(cm))]
-            pd$channel <- paste(chans)
-          } else {
-            stop(paste(channel_match, "is not in this working directory."))
-          }
-        } else {
-          cm <- read.csv(channel_match,
-                         header = TRUE,
-                         row.names = 1,
-                         stringsAsFactors = FALSE
-          )
-          chans <- cm$channel[match(cyto_names(x), rownames(cm))]
-          pd$channel <- paste(chans)
-        }
+        cm <- read_from_csv(channel_match)
+        chans <- cm$channel[match(cyto_names(x), rownames(cm))]
+        pd$channel <- paste(chans)
       }
     }
   }
@@ -104,7 +86,7 @@
       parent <- rep(parent, length.out = length(x))
       pd[, "parent"] <- parent
     }
-  }else{
+  } else {
     pd[, "parent"] <- rep("root", length.out = length(x))
   }
   
@@ -112,23 +94,23 @@
   
   # SAVE CHANNEL_MATCH
   if (is.null(channel_match)) {
-    write.csv(pd, paste0(
+    channel_match <- paste0(
       format(Sys.Date(), "%d%m%y"),
       "-", "Compensation-Channels.csv"
-    ), row.names = FALSE)
-  } else {
-    write.csv(pd, 
-              channel_match, 
-              row.names = FALSE)
+    )
   }
   
+  # WRITE TO CSV
+  write_to_csv(pd,
+               channel_match)
+  
   # CYTO_DETAILS - MAC ORDERING ISSUE
-  lapply(colnames(pd), function(z){
-    cyto_details(x)[, z] <<- pd[,z]
+  lapply(colnames(pd), function(z) {
+    cyto_details(x)[, z] <<- pd[, z]
   })
   
   # SAMPLE NAME COLUMN (AVOID INDEXING USING "NAME")
-  pd_name <- colnames(pd)[which(LAPPLY(colnames(pd), function(z){
+  pd_name <- colnames(pd)[which(LAPPLY(colnames(pd), function(z) {
     all(cyto_names(x) %in% pd[, z])
   }))]
   
@@ -172,13 +154,13 @@
           ind <- which(MEDFI[, ncol(MEDFI)] != max_MEDFI)
           remove_names <- MEDFI[ind, pd_name, drop = TRUE]
           # REMOVE MISSING FACTOR LEVELS
-          if(is.factor(remove_names)){
+          if (is.factor(remove_names)) {
             droplevels(remove_names)
           }
           # REMOVE SAMPLES - LOW SIGNAL
           x <<- x[-match(remove_names, cyto_details(x)[, pd_name])]
           # REMOVE MISSING FACTOR LEVELS
-          if(is.factor(cyto_details(x)[, pd_name])){
+          if (is.factor(cyto_details(x)[, pd_name])) {
             cyto_details(x)[, pd_name] <<- droplevels(
               cyto_details(x)[, pd_name]
             )
@@ -213,9 +195,10 @@
     ))]
     NIL <- lapply(unique(parent)[!is.na(unique(parent))], function(z) {
       # EITHER FLOWFRAME OR GATINGHIERARCHY
-      cyto_extract(NIL_data[[1]], 
-                   z, 
-                   copy = TRUE)
+      cyto_extract(NIL_data[[1]],
+                   z,
+                   copy = TRUE
+      )
     })
     names(NIL) <- unique(parent)
     
@@ -368,10 +351,11 @@
   pos_pops <- flowSet_to_cytoset(flowSet(pos_pops))
   
   # cytoset required to retain details
-  cyto_details(pos_pops) <- pd[pd$name %in% cyto_names(pos_pops),]
+  cyto_details(pos_pops) <- pd[pd$name %in% cyto_names(pos_pops), ]
   
   # Return list of negative and positive flowSets
-  return(list("negative" = neg_pops,
-              "positive" = pos_pops))
-  
+  return(list(
+    "negative" = neg_pops,
+    "positive" = pos_pops
+  ))
 }
