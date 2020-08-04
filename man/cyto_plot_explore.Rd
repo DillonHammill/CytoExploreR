@@ -112,10 +112,10 @@ default. Turn off the header by setting this argument to NA.}
 \item{...}{additional arguments passed to \code{cyto_plot}.}
 }
 \description{
-\code{cyto_plot_explore} is an extremely useful tool to explore all aspectes
+\code{cyto_plot_explore} is an extremely useful tool to explore all aspects
 of your cytometry data. \code{cyto_plot_explore} constructs a faceted plot
 for each of the supplied \code{channels_x} by plotting them against all the
-supplied \code{channels_y}. Thus providing a rapid means tro explore the data
+supplied \code{channels_y}. Thus providing a rapid means to explore the data
 in all available channels.
 }
 \author{
