@@ -10,8 +10,6 @@
 #' @return write generated gatingTemplate to designated CSV file and return the
 #'   gatingTemplate object.
 #'
-#' @importFrom tools file_ext
-#' @importFrom utils write.csv
 #' @importFrom data.table as.data.table
 #' @importFrom openCyto gh_generate_template gatingTemplate
 #' 
@@ -37,11 +35,6 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   # GATINGTEMPLATE MISSING
   if(is.null(gatingTemplate)){
     stop("Supply the name of a csv file to 'gatingTemplate'.")
-  }else{
-    # FILE EXTENSION MISSING
-    if(file_ext(gatingTemplate) != "csv"){
-      gatingTemplate <- paste0(gatingTemplate, ".csv")
-    }
   }
   
   # DATA.TABLE R CMD CHECK NOTE
@@ -66,8 +59,8 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
                                                path = "auto")
     gt_bool_chunk$gating_args <- LAPPLY(
       seq_len(nrow(gt_bool_chunk)), function(z){
-         gate <- gh_pop_get_gate(x,
-                                 gt_bool_chunk$alias[z])
+        gate <- gh_pop_get_gate(x,
+                                gt_bool_chunk$alias[z])
         return(gate@deparse)
       }
     )
@@ -75,7 +68,7 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
     gt_bool_chunk <- as.data.table(gt_bool_chunk)
     # RESTRICT GATINGTEMPLATE
     gt <- gt[!LAPPLY(gt$dims, ".empty"), ]
-  # NO BOOLEAN ENTRIES EXIST
+    # NO BOOLEAN ENTRIES EXIST
   }else{
     gt_bool_chunk <- NULL
   }
@@ -149,7 +142,7 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
           gt_entry[, groupBy := "NA"]
           # PREPROCESSING METHOD
           gt_entry[, preprocessing_method := "pp_cyto_gate_draw"]
-        # OTHER GATE
+          # OTHER GATE
         }else{
           # GATINGTEMPLATE ENTRY
           gt_entry <- gt_chunk_dt[gt_chunk_dt$alias == names(gates)[q], ]
@@ -185,7 +178,7 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
     return(gt_entries)
   })
   gt_entries <- do.call("rbind", gt_entries)
-
+  
   # SORT GATINGTEMPLATE ENTRIES
   gt_entries <- gt_entries[
     order(match(gt_entries$parent, cyto_nodes(x, path = "auto"))), ]
@@ -210,7 +203,8 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   }), ]
   
   # SAVE GATINGTEMPLATE
-  write.csv(gt_entries, gatingTemplate, row.names = FALSE)
+  write_to_csv(gt_entries,
+               gatingTemplate)
   
   # GATINGTEMPLATE OBJECT
   gt <- gatingTemplate(gatingTemplate, ...)
@@ -254,8 +248,6 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
 #' @return select a gatingTemplate as the active gatingTemplate for downstream
 #'   analyses.
 #'
-#' @importFrom tools file_ext
-#'
 #' @examples
 #' cyto_gatingTemplate_select("Activation_gatingTemplate")
 #' @seealso \code{\link{cyto_gatingTemplate_edit}}
@@ -264,17 +256,10 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
 #'
 #' @export
 cyto_gatingTemplate_select <- function(x) {
-
-  # Name does not include a file extension
-  if (.empty(file_ext(x))) {
-    x <- paste0(x, ".csv")
-  }
-
-  # Name does not include a csv file extension
-  if (file_ext(x) != "csv") {
-    x <- paste0(x, ".csv")
-  }
-
+  
+  # APPEND FILE EXTENSION
+  x <- file_ext_append(x, ".csv")
+  
   # Set new gatingTemplate as active
   options("CytoExploreR_gatingTemplate" = x)
 }
@@ -308,12 +293,12 @@ cyto_gatingTemplate_active <- function() {
 #'
 #' @export
 cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
-
+  
   # Inherit global option
   if (is.null(gatingTemplate)) {
     gatingTemplate <- cyto_gatingTemplate_active()
   }
-
+  
   # Create gatingTemplate for saving
   if (!is.null(gatingTemplate)) {
     cols <- c(
@@ -328,12 +313,13 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
       "preprocessing_method",
       "preprocessing_args"
     )
-
+    
     # Make empty gatingTemplate
     gt <- setNames(data.frame(matrix(ncol = length(cols), nrow = 0)), cols)
-
+    
     # Write to csv file
-    write.csv(gt, gatingTemplate, row.names = FALSE)
+    write_to_csv(gt,
+                 gatingTemplate)
   }
 }
 
@@ -349,6 +335,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #' @param x object of class \code{GatingSet} which has been gated with the
 #'   supplied gatingTemplate.
 #' @param gatingTemplate name of the gatingTemplate csv file to be edited.
+#' @param ... not in use.
 #'
 #' @return update gatingTemplate csv file and update the GatingSet accordingly.
 #'
@@ -356,9 +343,8 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
 #' @importFrom flowWorkspace recompute
-#' @importFrom utils edit read.csv write.csv
-#' @importFrom tools file_ext
 #' @importFrom methods is
+#' @importFrom DataEditR data_edit
 #'
 #' @examples
 #' \dontrun{
@@ -369,62 +355,58 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #' }
 #'
 #' @export
-cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
-
+cyto_gatingTemplate_edit <- function(x, 
+                                     gatingTemplate = NULL,
+                                     ...) {
+  
   # x of wrong class
   if (!is(x, "GatingSet")) {
     stop("'x' should be either a GatingSet object.")
   }
-
+  
   # Assign x to gs
   gs <- x
-
+  
   # Missing gatingTemplate - check global ooption
   if (is.null(gatingTemplate)) {
     gatingTemplate <- cyto_gatingTemplate_active()
   }
-
+  
   # gatingTemplate still missing
   if (is.null(gatingTemplate)) {
     stop("Supply the name of the gatingTemplate csv file to edit.")
   }
-
-  # File extension
-  if (.empty(file_ext(gatingTemplate))) {
-    gatingTemplate <- paste0(gatingTemplate, ".csv")
-  }
-
-  # Working directory check
-  if (getOption("CytoExploreR_wd_check") == TRUE) {
-    if (file_wd_check(gatingTemplate) == FALSE) {
-      stop(paste(gatingTemplate, "is not in this working directory."))
-    }
-  }
-
+  
   # Read in gatingTemplate
-  gt <- read.csv(gatingTemplate, header = TRUE)
-
+  gt <- read_from_csv(gatingTemplate)
+  
   # Edit gatingTemplate
   message("Do not modify existing gatingTemplate entries!")
   message("Add new rows to add boolean or reference gates to the GatingSet.")
-  gt <- suppressMessages(
-    data_editor(gt, 
-                title = "gatingTemplate Editor",
-                save_as = gatingTemplate)
-    )
-
+  
+  # Edit gatingTemplate
+  gt <- data_edit(gt, 
+                  title = "gatingTemplate Editor",
+                  logo = CytoExploreR_logo(),
+                  save_as = gatingTemplate,
+                  write_fun  = "write_to_csv",
+                  col_edit = FALSE,
+                  col_names = colnames(gt),
+                  quiet = TRUE,
+                  ...)
+  
   # Read in updated template to gatingTemplate object
   gt <- gatingTemplate(gatingTemplate)
-
+  
   # Re-apply template to GatingSet
   suppressMessages(gt_gating(gt, gs))
-
+  
   # Recompute statistics
   suppressMessages(recompute(gs))
-
+  
   # Update GatingSet globally
   assign(deparse(substitute(x)), gs, envir = globalenv())
-
+  
   # Return gatingTemplate object
   invisible(return(gt))
 }
@@ -448,7 +430,6 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #'   environment with the gates in the gatingTemplate.
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
-#' @importFrom tools file_ext
 #' @importFrom methods is
 #'
 #' @examples
@@ -473,7 +454,7 @@ cyto_gatingTemplate_edit <- function(x, gatingTemplate = NULL) {
 #' @export
 cyto_gatingTemplate_apply <- function(x,
                                       gatingTemplate = NULL, ...) {
-
+  
   # No GatingSet supplied
   if (missing(x)) {
     stop("Supply a GatingHierarchy or GatingSet to 'x'.")
@@ -485,74 +466,57 @@ cyto_gatingTemplate_apply <- function(x,
       stop("'x' must be an object of class GatingHierarchy or GatingSet.")
     }
   }
-
+  
   # gatingTemplate supplied
   if (!is.null(gatingTemplate)) {
-
+    
     # gatingTemplate object
     if (is(gatingTemplate, "gatingTemplate")) {
-
-      # Apply gatingTemplates to GatingSets only
-      if (!is(x, "GatingSet")) {
-        stop("gatingTemplates can only be applied to GatingSet objects.")
-      }
-
+      
       # Assign gatingTemplate to gt
       gt <- gatingTemplate
       
       # name of gatingTemplate csv file
     } else {
-
+      
       # File extension if missing
-      if (.empty(file_ext(gatingTemplate))) {
-        gatingTemplate <- paste0(gatingTemplate, ".csv")
-      }
-
+      gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+      
       # Working directory check
-      if (getOption("CytoExploreR_wd_check") == TRUE) {
-        if (file_wd_check(gatingTemplate) == FALSE) {
-          stop(paste(gatingTemplate, "is not in this working directory."))
-        }
-      }
-
+      file_exists(gatingTemplate)
+      
       # Message to indicate which gatingTemplate is being applied
       message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-
+      
       # Read in gatingTemplate csv file to gatingTemplate object
       gt <- suppressMessages(gatingTemplate(gatingTemplate))
     }
     # no gatingTemplate supplied
   } else if (is.null(gatingTemplate)) {
-
+    
     # Missing gatingTemplate - check global option
     if (is.null(gatingTemplate)) {
       gatingTemplate <- cyto_gatingTemplate_active()
     }
-
+    
     # gatingTemplate still missing
     if (is.null(gatingTemplate)) {
       stop("Supply the name of the gatingTemplate csv file to apply.")
     }
-
+    
     # File extension if missing
-    if (.empty(file_ext(gatingTemplate))) {
-      gatingTemplate <- paste0(gatingTemplate, ".csv")
-    }
-
+    gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+    
     # Working directory check
-    if (getOption("CytoExploreR_wd_check") == TRUE) {
-      if (file_wd_check(gatingTemplate) == FALSE) {
-        stop(paste(gatingTemplate, "is not in this working directory."))
-      }
-    }
-
+    file_exists(gatingTemplate)
+    
     # Message to indicate which gatingTemplate is being applied
     message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-
+    
     # Read in gatingTemplate csv file to gatingTemplate object
     gt <- suppressMessages(gatingTemplate(gatingTemplate))
   }
-
+  
   # Apply gatingTemplate to GatingHierarchy/GatingSet
   suppressWarnings(gt_gating(gt, x, ...))
   
@@ -573,16 +537,12 @@ cyto_gatingTemplate_apply <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom utils read.csv write.csv
-#'
 #' @export
 cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
                                        save_as = "Updated-gatingTemplate.csv") {
-
+  
   # READ IN GATINGTEMPLATE
-  gt <- read.csv(gatingTemplate, 
-                 header = TRUE,
-                 stringsAsFactors = FALSE)
+  gt <- read_from_csv(gatingTemplate)
   
   # CONVERT OLD GATING METHOD
   gt[gt$gating_method == "gate_draw", "gating_method"] <- "cyto_gate_draw" 
@@ -590,9 +550,10 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
   # CONVERT OLD PREPROCESSING  METHOD
   gt[gt$preprocessing_method == "pp_gate_draw",
      "preprocessing_method"] <- "pp_cyto_gate_draw" 
-
+  
   # SAVE UPDATED GATINGTEMPLATE
-  write.csv(gt, save_as, row.names = FALSE)
+  write_to_csv(gt,
+               save_as)
 }
 
 ## GATINGTEMPLATE CHECK --------------------------------------------------------
@@ -608,18 +569,16 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom utils read.csv
-#'
 #' @noRd
 .cyto_gatingTemplate_check <- function(parent,
                                        alias,
                                        gatingTemplate = NULL) {
-
+  
   # BYPASS CHECKS - GATINGTEMPLATE DOES NOT EXIST
-  gt <- tryCatch(suppressWarnings(read.csv(gatingTemplate, header = TRUE)),
-    error = function(e) {
-      NULL
-    }
+  gt <- tryCatch(suppressWarnings(read_from_csv(gatingTemplate)),
+                 error = function(e) {
+                   NULL
+                 }
   )
   # MATCHING PARENT & ALIAS
   if (!is.null(gt)) {
@@ -643,6 +602,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
       })
     }
   }
+  return(gt)
 }
 
 ## CYTO_GATINGTEMPLATE_READ ----------------------------------------------------
@@ -657,7 +617,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #' @param ... additional arguments passed to
 #'   \code{\link[data.table:fread]{fread}}.
 #'
-#' @importFrom data.table fread as.data.table
+#' @importFrom data.table as.data.table
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -708,9 +668,9 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
       gt <- as.data.frame(gt)
     }
   }else{
-    gt <- fread(gatingTemplate,
-                data.table = data.table,
-                ...)
+    gt <- read_from_csv(gatingTemplate,
+                        data.table = FALSE,
+                        ...)
   }
   
   # RETURN GATINGTEMPLATE
@@ -728,7 +688,6 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
 #' @param ... additional arguments passed to
 #'   \code{\link[data.table:fwrite]{fwrite}}.
 #'
-#' @importFrom data.table fwrite
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -762,8 +721,8 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
   }
   
   # WRITE GATINGTEMPLATE
-  fwrite(gatingTemplate,
-         file = save_as,
-         ...)
+  write_to_csv(gatingTemplate,
+               file = save_as, 
+               ...)
   
 }

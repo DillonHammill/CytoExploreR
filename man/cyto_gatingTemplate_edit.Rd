@@ -4,13 +4,15 @@
 \alias{cyto_gatingTemplate_edit}
 \title{Interactively Edit a gatingTemplate}
 \usage{
-cyto_gatingTemplate_edit(x, gatingTemplate = NULL)
+cyto_gatingTemplate_edit(x, gatingTemplate = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingSet} which has been gated with the
 supplied gatingTemplate.}
 
 \item{gatingTemplate}{name of the gatingTemplate csv file to be edited.}
+
+\item{...}{not in use.}
 }
 \value{
 update gatingTemplate csv file and update the GatingSet accordingly.
