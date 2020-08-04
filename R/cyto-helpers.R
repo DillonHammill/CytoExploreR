@@ -845,8 +845,6 @@ cyto_names.list <- function(x) {
 #' @return flowSet or GatingSet with \code{cyto_details} updated with new
 #'   variables extracted from the file names.
 #'
-#' @importFrom tools file_path_sans_ext
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
@@ -871,7 +869,7 @@ cyto_names_parse <- function(x,
   cyto_names <- cyto_names(x)
   
   # STRIP EXTENSION
-  cyto_names <- file_path_sans_ext(cyto_names)
+  cyto_names <- file_ext_remove(cyto_names)
   
   # SPLIT
   cyto_names_split <- strsplit(cyto_names, 
