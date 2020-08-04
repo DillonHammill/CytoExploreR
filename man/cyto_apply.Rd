@@ -2,40 +2,143 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_apply}
 \alias{cyto_apply}
-\title{Apply a function over cytometry objects}
+\alias{cyto_apply.list}
+\alias{cyto_apply.GatingSet}
+\alias{cyto_apply.GatingHierarchy}
+\alias{cyto_apply.flowSet}
+\alias{cyto_apply.flowFrame}
+\title{Apply a function to elements of cytoframe, cytoset, GatingHierarchy or
+GatingSet}
 \usage{
-cyto_apply(x, FUN, ..., simplify = TRUE, use.exprs = FALSE)
+\method{cyto_apply}{list}(
+  x,
+  FUN,
+  ...,
+  simplify = TRUE,
+  input = "cytoframe",
+  parent = NULL,
+  copy = TRUE,
+  channels = NULL,
+  trans = NA,
+  inverse = FALSE
+)
+
+\method{cyto_apply}{GatingSet}(
+  x,
+  FUN,
+  ...,
+  simplify = TRUE,
+  input = "cytoframe",
+  parent = NULL,
+  copy = TRUE,
+  channels = NULL,
+  trans = NA,
+  inverse = FALSE
+)
+
+\method{cyto_apply}{GatingHierarchy}(
+  x,
+  FUN,
+  ...,
+  simplify = TRUE,
+  input = "cytoframe",
+  parent = NULL,
+  copy = TRUE,
+  channels = NULL,
+  trans = NA,
+  inverse = FALSE
+)
+
+\method{cyto_apply}{flowSet}(
+  x,
+  FUN,
+  ...,
+  simplify = TRUE,
+  input = "cytoframe",
+  copy = TRUE,
+  channels = NULL,
+  trans = NA,
+  inverse = FALSE
+)
+
+\method{cyto_apply}{flowFrame}(
+  x,
+  FUN,
+  ...,
+  simplify = TRUE,
+  input = "cytoframe",
+  copy = TRUE,
+  channels = NULL,
+  trans = NA,
+  inverse = FALSE
+)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{cytoset}.}
+\item{x}{object of class \code{cytoframe}, \code{cytoset},
+\code{GatingHierarchy}, \code{GatingSet} or a list of these objects.}
 
-\item{FUN}{function to apply to each \code{flowFrame} or \code{cytoframe} in
-the supplied \code{flowSet} or \code{cytoset}.}
+\item{FUN}{name of a function to apply to each element of \code{x}.}
 
-\item{...}{optional arguments to \code{FUN}.}
+\item{...}{additional arguments passed to \code{FUN}. Multiple arguments are
+supported but must be named, see examples below.}
 
-\item{simplify}{logical indicating whether the resulting list should be
-simplified into a flowSet or bound into a matrix or data.frame using
-\code{rbind}, set to TRUE by default.}
+\item{simplify}{logical indicating whether attempts should be made to coerce
+the output to a \code{cytoset} or \code{matrix}, set to TRUE by default. A
+\code{cytoframe} or \code{cytoset} will be returned for
+\code{GatingHierarchy} and \code{GatingSet} objects respectively.}
 
-\item{use.exprs}{logical indicating whether the function should be applied to
-the raw data in each flowFrame, set to FALSE by default.}
+\item{input}{indicates the data input format as required by \code{FUN} can be
+either 1 - "cytoframe", 2 - "matrix", 3 - "column" or 4 - "row", set to
+"cytoframe" by default. \code{cyto_apply} will take care of all the data
+formatting prior to passing it \code{FUN}. The \code{"column"} and
+\code{"row"} options are for functions that expect vectors as the input.}
+
+\item{parent}{name of the parent population to extract from
+\code{GatingHierarchy} or \code{GatingSet} objects, set to \code{"root"} by
+default.}
+
+\item{copy}{logical indicating whether the indicated function should be
+applied to a copy of each \code{cytoframe}, set to TRUE by default. Apply
+the function to a copy of each \code{cytoframe} ensures that the underlying
+data remains unchanged.}
+
+\item{channels}{vector of channels which should be included in the data
+passed to \code{FUN}, set to all channels by default.}
+
+\item{trans}{object of class \code{transformerList} containing the
+definitions of the transformers applied to the supplied data. These
+transformers are required to inverse transformations when \code{inverse =
+TRUE}.}
+
+\item{inverse}{logical indicating whether each \code{cytoframe} should be
+inverse transformed prior to applying \code{FUN}.}
 }
 \description{
-Apply a function over cytometry objects
+\code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}
+to apply a function to a \code{cytoframe}, \code{GatingHierarchy} or over
+elements of a \code{cytoset}, \code{GatingSet} or list of \code{cytoframes}.
+\code{cyto_apply} is extremely flexible by supporting functions that accept
+the data in either \code{cytoframe}, \code{matrix} or \code{vector} formats.
+All the data processing steps are handled internally prior to passing the
+data to the specified function. It is important that the arguments in
+\code{FUN} do not conflict with the arguments of \code{cyto_apply} and they
+should be supplied to \code{cyto_apply} by name.
 }
 \examples{
 library(CytoExploreRData)
+library(flowWorkspace)
 
-# Activation dataset
+# Activation cytoset
 fs <- Activation
+cs <- flowSet_to_cytoset(fs)
 
-# Sample each flowFrame
-fs <- cyto_apply(fs, cyto_sample)
+# Compute quantiles
+cyto_apply(cs,
+cyto_quantile,
+probs = c(0.05, 0.95),
+na.rm = TRUE,
+input = 3)
 
-}
-\seealso{
-\code{\link[flowCore:fsApply]{fsApply}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
