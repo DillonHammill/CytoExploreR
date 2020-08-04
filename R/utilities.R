@@ -180,7 +180,6 @@ LAPPLY <- function(...){
 # @return A named vector of program paths; missing programs are returned as
 # \code{NA} if \code{error = FALSE}
 #
-#' @importFrom tools file_ext
 #  @noRd
 SysExec <- function(
   progs,
