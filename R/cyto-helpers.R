@@ -4097,6 +4097,77 @@ cyto_nodes <- function(x, ...) {
   }
 }
 
+## CYTO_NODES_CHECK ------------------------------------------------------------
+
+#' Check if nodes are unique and exist in GatingSet or GatingHierarchy
+#'
+#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param nodes vector of node paths to check.
+#'
+#' @return supplied nodes or throw an error if any nodes do not exist or are not
+#'   unique within the \code{GatingHierarchy} or \code{GatingSet}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_nodes_check <- function(x,
+                             nodes = NULL){
+  
+  # NO NODES SUPPLIED
+  if(is.null(nodes)){
+    stop("Supply a vector of nodes to check to the 'nodes' argument.")
+  }
+  
+  # REFERENCE NODE PATHS
+  nodes_auto <- cyto_nodes(x, path = "auto")
+  nodes_auto_split <- .cyto_nodes_split(nodes_auto)
+  
+  # SPLIT NODES
+  nodes_split <- .cyto_nodes_split(nodes)
+  
+  # CHECK NODES
+  lapply(seq_along(nodes), function(z){
+    node <- nodes[z]
+    node_split <- nodes_split[[z]]
+    # CHECK AGAINST AUTO PATHS
+    ind <- which(LAPPLY(nodes_auto_split, function(y){
+      # SHORT NODE PATH
+      if(length(node_split) < length(y)){
+        # PARTIAL
+        if(any(node_split %in% y)){
+          return(TRUE)
+        }else{
+          return(FALSE)
+        }
+        # LONGER NODE PATH
+      }else{
+        check <- rev(rev(seq_len(length(node_split)))[seq_len(length(y))])
+        # PARTIAL OR EXACT
+        if(any(node_split[check] %in% y)){
+          return(TRUE)
+        }else{
+          return(FALSE)
+        }
+      }
+    }))
+    # PARTIAL MATCHES
+    if(length(ind) > 1){
+      stop(paste0(node, " is not unique in this ", class(x), ".",
+                  " Use either ", paste0(nodes_auto[ind], 
+                                         collapse = " or "),
+                  "."))
+    }
+    # NO MATCH
+    if(length(ind) == 0){
+      stop(paste0(node, " does not exist in this ", class(x), "."))
+    }
+  })
+  
+  # RETURN NODES
+  return(nodes)
+  
+}
+
 ## CYTO_NODES_CONVERT ----------------------------------------------------------
 
 #' Convert to unique node paths

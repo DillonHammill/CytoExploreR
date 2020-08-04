@@ -1,3 +1,25 @@
+# CytoExploreR 1.0.9
+
+* `cyto_sample()` can now sample GatingHierarchy and GatingSet objects as well.
+* Add new `cyto_sort()` function to sort samples based on experimental variables.
+* Add new `cyto_groups()` function to get experimental details per experimental group.
+* `cyto_transform()` has been updated to allow transformations of subsetted data as well.
+* Add new `cyto_list()` helper function to convert cytoframes or cytosets to a list of cytoframes.
+* Add new `cyto_cbind()` function to add new channels to cytoframes and cytosets.
+* All local working directory checks have been removed to allow the use of files existing outside the current working directory.
+* Internal csv reading and writing functions now use `data.table` for improved speed.
+* Remove `tools` and `gtools` as dependencies.
+* Fix plotting of 1D gates in 2D scatter plots.
+* Add `select` argument to `cyto_extract()` to extract the data from a subset of samples based on experimental variables. Fix `cyto_select()` to handle sample selection based on file names.
+* Improve sampling of overlays in `cyto_gate_draw()` and `cyto_gate_edit()` to applied the same degree of sampling to each layer.
+* Add new `cyto_apply()` function to apply a function to each flowFrame/cytoframe element of a flowSet/cytoset.
+* Add new `cyto_gatingTemplate_read()` and `cyto_gatingTemplate_write()` to simplify and speed up reading and writing of gatingTemplates.
+* `cyto_spillover_edit()` can now appropriately handle samples that may have been compensated and/or transformed prior to loading into the spillover editor.
+* Remove working directory checks in `cyto_compensate()`.
+* Remove working directory checks `cyto_spillover_edit()` and resort to using first spillover matrix if the supplied filename does not exist - the edited matrix will be written to the specified filename. Shiny startup messages are now suppressed.
+* Change `cyto_plot_new()`to open pop-up graphics device by default.
+* Add `select` argument to `cyto_plot()` to allow plotting of a subset of samples based on experimental variables.
+
 # CytoExploreR 1.0.8
 
 * Add `select` argument to `cyto_stats_compute()` to allow computation of statistics for a subset of samples based on experimental variables.
