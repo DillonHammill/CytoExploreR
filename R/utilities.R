@@ -1,17 +1,3 @@
-## CYTOEXPLORER LOGO -----------------------------------------------------------
-
-#' Path to CytoExploreR logo 
-#' 
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au) 
-#' 
-#' @noRd
-CytoExploreR_logo <- function(){
-  paste0(
-    "https://raw.githubusercontent.com/DillonHammill/CytoExploreR",
-    "/master/man/figures/logo.png"
-  )
-}
-
 ## EMPTY CHARACTER STRINGS -----------------------------------------------------
 
 #' Check if vector contains only empty chracter strings
@@ -24,7 +10,7 @@ CytoExploreR_logo <- function(){
 #'
 #' @noRd
 .empty <- function(x){
-  
+
   if(.all_na(x)){
     return(FALSE)
   }else if(is.character(x)){
@@ -40,7 +26,7 @@ CytoExploreR_logo <- function(){
 }
 
 ## MATCH_IND -------------------------------------------------------------------
-
+  
 #' Indices for matches excluding NA
 #' @noRd
 match_ind <- function(x, y, ...){
@@ -127,6 +113,32 @@ match_ind <- function(x, y, ...){
            x[[z]], envir = parent.frame(n = 3))
   })
   
+}
+
+## FILE WD CHECK ---------------------------------------------------------------
+
+#' Check if a file exists in the current working directory
+#'
+#' @param name filename including file extension to be checked.
+#'
+#' @return TRUE/FALSE if file exists in the current working directory.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' file_wd_check("gatingTemplate.csv")
+#' 
+#' @export
+file_wd_check <- function(name) {
+  if (length(which(list.files() == name)) != 0) {
+    
+    # File exists in working directory
+    return(TRUE)
+  } else if (length(which(list.files() == name)) == 0) {
+    
+    # File does not exist in working directory
+    return(FALSE)
+  }
 }
 
 ## ROUND -----------------------------------------------------------------------
@@ -217,48 +229,36 @@ SysExec <- function(
   return(paths)
 }
 
-# READ_FROM_CSV ----------------------------------------------------------------
+## FILE_EXT_APPEND -------------------------------------------------------------
 
-#' Use data.table to read in a csv file
-#' @importFrom data.table fread
-#' @noRd
-read_from_csv <- function(x,
-                          data.table = FALSE,
-                          ...){
-  x <- file_ext_append(x, ".csv")
-  ind <- which(!file.exists(x))
-  if(length(ind) > 0){
-    stop(
-      paste(
-        paste(x[ind], collapse = " & "),
-        "do not exist or lack the required permissions."
-      )
-    )
-  }
-  suppressMessages(
-    fread(x, 
-          data.table = FALSE,
-          ...)
-  )
-}
-
-# WRITE_TO_CSV -----------------------------------------------------------------
-
-#' Use data.table to write data to a csv file
-#' @importFrom data.table fwrite
-#' @noRd
-write_to_csv <- function(x,
-                         file = NULL,
-                         ...){
+#' Append file name with an extension
+#' 
+#' @param x vector of filenames.
+#' @param ext vector of extensions to append.
+#' 
+#' @importFrom tools file_ext
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @export
+file_ext_append <- function(x, 
+                            ext = "csv"){
   
-  if(is.null(file)){
-    stop("Supply a name for the csv file to 'file'.")
-  }
-  file <- file_ext_append(file, ".csv")
-  suppressMessages(
-    fwrite(x,
-           file = file,
-           ...)
-  )
+  # REPEAT EXTENSION
+  ext <- rep(ext, length(x))
+  
+  # ADD EXTENSIONS TO FILE NAMES WITHOUT EXTENSIONS
+  LAPPLY(seq_along(x), function(z){
+    # PREPARE EXTENSION
+    if(!grepl(".", ext[z])){
+      ext[z] <- paste0(".", ext[z])
+    }
+    # APPEND EXTENSION
+    if(.empty(file_ext(x[z]))){
+      paste0(x[z], ext)
+    }else{
+      x[z]
+    }
+  })
   
 }
