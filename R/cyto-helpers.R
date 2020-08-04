@@ -2000,57 +2000,60 @@ cyto_select <- function(x, ...) {
   }
 }
 
-## CYTO_GROUP_BY ---------------------------------------------------------------
+## CYTO_GROUPS -----------------------------------------------------------------
 
-#' Group a flowSet or GatingSet by experiment variables
+#' Retrieve details about experimental groups
 #'
-#' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param group_by names of cyto_details variables to use for merging, set to
-#'   "all" to group all samples in \code{x}. The order of the grouping can be
-#'   controlled by specifying the factor levels in a list (e.g. list(Treatment =
-#'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param group_by names of cyto_details variables to use for grouping For more
+#'   control over the group order, specify the factor levels for each variable
+#'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#' @param details logical indicating whether the split experimental details
+#'   should be returned instead of the group names, set to FALSE by default.
 #'
-#' @return a named list of \code{flowSet} or \code{GatingSet} objects
-#'   respectively.
+#' @return names of experimental groups or a list of experiment details per
+#'   experimental group.
 #'
-#' @importFrom methods is
-#'
-#' @examples
-#'
-#' # Load in CytoExploreRData to access data
-#' library(CytoExploreRData)
-#'
-#' # Group flowSet by Treatment
-#' cyto_group_by(Activation, "Treatment")
-#'
-#' # Group GatingSet by Treatment and OVAConc
-#' gs <- GatingSet(Activation)
-#' cyto_group_by(gs, c("Treatment", "OVAConc"))
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @rdname cyto_group_by
+#' 
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Treatment & OVAConc group names
+#' cyto_groups(fs, 
+#' group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
+#' OVAConc = c(0, 5, 50, 500)))
+#' 
+#' # Treatment & OVAConc group details
+#' cyto_groups(fs, 
+#' group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
+#' OVAConc = c(0, 5, 50, 500)),
+#' details = TRUE)
 #'
 #' @export
-cyto_group_by <- function(x,
-                          group_by = "all") {
-
+cyto_groups <- function(x, 
+                        group_by = "all",
+                        details = FALSE){
+  
   # Check class of x
   if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
-
+  
   # Extract experiment details
   pd <- cyto_details(x)
-
+  
   # Replace any NA with "NA" to avoid missing rows
   if (any(is.na(pd))) {
     pd[is.na(pd)] <- "NA"
   }
-
+  
   # Extract sample names
   nms <- cyto_names(x)
-
+  
   # group_by is a list with factor levels - should not be "all"
   if (is(group_by, "list")) {
     # Check variables and factor levels
@@ -2108,7 +2111,7 @@ cyto_group_by <- function(x,
       })
     }
   }
-
+  
   # Split pd based on group_by into a named list
   if (length(group_by) == 1) {
     if (group_by == "all") {
@@ -2120,26 +2123,121 @@ cyto_group_by <- function(x,
       names(pd_split) <- nms
     } else {
       pd_split <- split(pd, pd[, group_by],
-        sep = " ",
-        lex.order = TRUE,
-        drop = TRUE
+                        sep = " ",
+                        lex.order = TRUE,
+                        drop = TRUE
       )
     }
   } else {
     pd_split <- split(pd, pd[, group_by],
-      sep = " ",
-      lex.order = TRUE,
-      drop = TRUE
+                      sep = " ",
+                      lex.order = TRUE,
+                      drop = TRUE
     )
   }
+  
+  # RETURN SPLIT DETAILS
+  if(details == TRUE){
+    return(pd_split)
+    # RETURN GROUP NAMES
+  }else{
+    return(names(pd_split))
+  }
+  
+}
 
+## CYTO_SORT -------------------------------------------------------------------
+
+#' Sort a flowSet or GatingSet by experiment variables
+#'
+#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param sort_by names of cyto_details variables to use for sorting. For more
+#'   control over the sorting order, specify the factor levels for each variable
+#'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#'
+#' @return \code{flowSet} or \code{GatingSet} object sorted based on experiment
+#'   variables.
+#'   
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Sort by Treatment and OVAConc
+#' fs <- cyto_sort(fs,
+#' list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
+#' OVAConc = c(0, 5, 50, 500)))
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_sort <- function(x,
+                      sort_by = NULL) {
+  
+  # Experiment details per group
+  pd_split <- cyto_groups(x,
+                          group_by = sort_by,
+                          details = TRUE)
+  
+  # Combine pd
+  pd <- do.call("rbind", pd_split)
+  
+  # Sorting indices
+  ind <- match_ind(cyto_names(x), pd[, "name"])
+  
+  # Return sorted object
+  return(x[ind])
+  
+}
+
+## CYTO_GROUP_BY ---------------------------------------------------------------
+
+#' Group a flowSet or GatingSet by experiment variables
+#'
+#' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param group_by names of cyto_details variables to use for merging, set to
+#'   "all" to group all samples in \code{x}. The order of the grouping can be
+#'   controlled by specifying the factor levels in a list (e.g. list(Treatment =
+#'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#'
+#' @return a named list of \code{flowSet} or \code{GatingSet} objects
+#'   respectively.
+#'
+#' @importFrom methods is
+#'
+#' @examples
+#' # Load in CytoExploreRData to access data
+#' library(CytoExploreRData)
+#'
+#' # Group flowSet by Treatment
+#' cyto_group_by(Activation, "Treatment")
+#'
+#' # Group GatingSet by Treatment and OVAConc
+#' gs <- GatingSet(Activation)
+#' cyto_group_by(gs, c("Treatment", "OVAConc"))
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @rdname cyto_group_by
+#'
+#' @export
+cyto_group_by <- function(x,
+                          group_by = "all") {
+  
+  # Experiment details per group
+  pd_split <- cyto_groups(x, 
+                          group_by = group_by,
+                          details = TRUE)
+  
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z) {
     ind <- match(pd_split[[z]][, "name"], cyto_names(x))
     x[ind]
   })
   names(x_list) <- names(pd_split)
-
+  
   return(x_list)
 }
 
@@ -2219,16 +2317,16 @@ cyto_merge_by.GatingSet <- function(x,
                                     select = NULL,
                                     barcode = TRUE,
                                     ...) {
-
+  
   # EXTRACT POPULATON
   fs <- cyto_extract(x, parent)
-
+  
   # CALL FLOWSET METHOD
   cyto_merge_by(fs,
-    merge_by = merge_by,
-    select = select,
-    barcode = barcode,
-    ...
+                merge_by = merge_by,
+                select = select,
+                barcode = barcode,
+                ...
   )
 }
 
@@ -2239,27 +2337,27 @@ cyto_merge_by.flowSet <- function(x,
                                   select = NULL,
                                   barcode = TRUE,
                                   ...) {
-
+  
   # BARCODING ------------------------------------------------------------------
-
+  
   # SAMPLE ID
   x <- cyto_barcode(x, ...)
-
+  
   # GROUPING -------------------------------------------------------------------
-
+  
   # CYTO_GROUP_BY
   fs_list <- cyto_group_by(x, group_by = merge_by)
-
+  
   # GROUPS
   grps <- names(fs_list)
-
+  
   # COMBINED EVENTS
   if ("all" %in% grps) {
     grps[which("all" %in% grps)] <- "Combined Events"
   }
-
+  
   # SELECTION ------------------------------------------------------------------
-
+  
   # ATTEMPT SELECTION OR RETURN ALL SAMPLES
   if (!is.null(select)) {
     fs_list <- lapply(fs_list, function(z) {
@@ -2269,9 +2367,9 @@ cyto_merge_by.flowSet <- function(x,
       })
     })
   }
-
+  
   # MERGING --------------------------------------------------------------------
-
+  
   # CONVERT EACH GROUP TO FLOWFRAME
   fr_list <- lapply(fs_list, function(fs) {
     if (!is(fs, "flowFrame")) {
@@ -2281,14 +2379,14 @@ cyto_merge_by.flowSet <- function(x,
     }
   })
   names(fr_list) <- grps
-
+  
   # REPLACE SAMPLENAMES WITH GROUPS
   if (!all(cyto_names(fr_list) %in% grps)) {
     lapply(seq_len(length(fr_list)), function(z) {
       identifier(fr_list[[z]]) <<- grps[z]
     })
   }
-
+  
   # RETURN PREPARED FLOWFRAME LIST
   return(fr_list)
 }
