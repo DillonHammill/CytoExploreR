@@ -2831,10 +2831,11 @@ cyto_save.flowFrame <- function(x,
 
 ## CYTO_SAMPLE -----------------------------------------------------------------
 
-#' Sample a flowFrame or flowSet
+#' Sample a cytoframe, cytoset, GatingHierarchy or GatingSet
 #'
-#' \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
-#' the percentage or number of events to retain.
+#' \code{cyto_sample} allows restriction of a \code{cytoframe}, \code{cytoset},
+#' \code{GatingHierarchy} or \code{GatingSet} by indicating the percentage or
+#' number of events to retain.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
@@ -2994,9 +2995,10 @@ cyto_sample.flowSet <- function(x,
   
   # FLOWSET/CYTOSET
   cs <- cyto_apply(x, 
-                   cyto_sample, 
+                   "cyto_sample", 
                    display = display, 
                    seed = seed, 
+                   copy = FALSE,
                    ...)
   
   # RETURN FLOWSET/CYTOSET
