@@ -101,35 +101,35 @@
                                     gate_line_width = 2.5,
                                     gate_line_col = "red",
                                     gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # CONSTRUCT GATES ------------------------------------------------------------
-
+  
   # SAME COLOUR FOR POINTS AND LINES
   if(any(c(gate_line_col, gate_point_col) != "red")){
     if(gate_line_col != "red" & gate_point_col == "red"){
@@ -142,7 +142,7 @@
   # POINT & LINE COLOURS
   gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
   gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)
-    
+  
   # GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -151,7 +151,7 @@
         alias, "population. \n"
       )
     )
-
+    
     # HIDE ERROR MESSAGE ON CLOSE
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
@@ -179,7 +179,7 @@
               lty = gate_line_type,
               lwd = gate_line_width,
               col = gate_line_col)
-      # CLOSE GATE
+        # CLOSE GATE
       }else if(is.null(pt)){
         if(length(coords) < 3){
           stop("A minimum of 3 points is required to construct a polygon gate.")
@@ -197,15 +197,15 @@
     }
     coords <- do.call("rbind", coords)
     colnames(coords) <- channels
-
+    
     # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias)
-
+    
     # LABEL GATED POPULATION - MANUAL FOR SPEED
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-        channels = channels
+                                       channels = channels
       )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -218,7 +218,7 @@
         label_text_y = gate_center[, "y"]
       )
     }
-
+    
     return(gate)
   })
   
@@ -333,35 +333,35 @@
                                       gate_line_width = 2.5,
                                       gate_line_col = "red",
                                       gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = TRUE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = TRUE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # CONSTRUCT GATES ------------------------------------------------------------
-
+  
   # SAME COLOUR FOR POINTS AND LINES
   if(any(c(gate_line_col, gate_point_col) != "red")){
     if(gate_line_col != "red" & gate_point_col == "red"){
@@ -374,7 +374,7 @@
   # POINT & LINE COLOURS
   gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
   gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
-    
+  
   # GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -383,7 +383,7 @@
         alias, "population. \n"
       )
     )
-
+    
     # HIDE ERROR MESSAGES
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
@@ -414,23 +414,23 @@
     }
     coords <- do.call("rbind", coords)
     colnames(coords) <- channels
-
+    
     # CONSTRUCT GATE
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
-
+    
     # PLOT GATE
     cyto_plot_gate(gate,
-      channels = channels,
-      gate_line_type = gate_line_type,
-      gate_line_width = gate_line_width,
-      gate_line_col = gate_line_col
+                   channels = channels,
+                   gate_line_type = gate_line_type,
+                   gate_line_width = gate_line_width,
+                   gate_line_col = gate_line_col
     )
-
+    
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-        channels = channels
+                                       channels = channels
       )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -443,10 +443,10 @@
         label_text_y = gate_center[, "y"]
       )
     }
-
+    
     return(gate)
   })
-
+  
   # RETURN CONSTRUCTED GATES
   names(gates) <- alias
   return(gates)
@@ -572,33 +572,33 @@
                                      gate_line_width = 2.5,
                                      gate_line_col = "red",
                                      gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # PLOT LIMITS
   par_usr <- par("usr")
   
@@ -628,7 +628,7 @@
   # POINT & LINE COLOURS
   gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
   gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha)  
-    
+  
   # CONSTRUCT GATES
   gates <- lapply(alias, function(alias) {
     message(
@@ -637,7 +637,7 @@
         alias, "population to construct an interval gate. \n"
       )
     )
-
+    
     # HIDE ERROR MESSAGES
     #options("show.error.messages" = FALSE)
     #on.exit(options("show.error.messages" = TRUE))
@@ -726,7 +726,7 @@
       coords <- as.matrix(coords)
       colnames(coords) <- channels
       rownames(coords) <- c("min", "max")
-
+      
       gate <- rectangleGate(.gate = coords, filterId = alias)
     }
     
@@ -734,7 +734,7 @@
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-        channels = channels
+                                       channels = channels
       )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -747,10 +747,10 @@
         label_text_y = gate_center[, "y"]
       )
     }
-
+    
     return(gate)
   })
-
+  
   # RETURN CONSTRUCTED GATES
   names(gates) <- alias
   return(gates)
@@ -871,33 +871,33 @@
                                       gate_line_width = 2.5,
                                       gate_line_col = "red",
                                       gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # CONSTRUCT GATES ------------------------------------------------------------
   
   # SAME COLOUR FOR POINTS AND LINES
@@ -920,12 +920,12 @@
       alias, "population to construct a threshold gate. \n"
     )
   )
-
+  
   # MULTIPLE GATES NOT SUPPORTED
   if (length(alias) > 1) {
     stop("Multiple threshold gates are not supported.")
   }
-
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -938,7 +938,7 @@
     cex = gate_point_size,
     col = gate_point_col
   )
-
+  
   # TIDY GATE COORDS
   if (length(channels) == 1) {
     pts <- data.frame(x = c(coords$x, Inf))
@@ -951,10 +951,10 @@
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")
   }
-
+  
   # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
-
+  
   # PLOT GATE
   cyto_plot_gate(
     gate = gate,
@@ -963,12 +963,12 @@
     gate_line_width = gate_line_width,
     gate_line_col = gate_line_col
   )
-
+  
   # LABEL GATED POPULATION
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
-      channels = channels
+                                     channels = channels
     )
     # GATE STAT
     gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -981,7 +981,7 @@
       label_text_y = gate_center[, "y"]
     )
   }
-
+  
   # RETURN CONSTRUCTED GATES
   gates <- list(gate)
   names(gates) <- alias
@@ -1101,35 +1101,35 @@
                                      gate_line_width = 2.5,
                                      gate_line_col = "red",
                                      gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # CONSTRUCT GATES ------------------------------------------------------------
-
+  
   # SAME COLOUR FOR POINTS AND LINES
   if(any(c(gate_line_col, gate_point_col) != "red")){
     if(gate_line_col != "red" & gate_point_col == "red"){
@@ -1150,12 +1150,12 @@
       alias, "population to construct a boundary gate. \n"
     )
   )
-
+  
   # MULTIPLE BOUNDARY GATES NOT SUPPORTED
   if (length(alias) > 1) {
     stop("Multiple boundary gates are not supported.")
   }
-
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -1168,7 +1168,7 @@
     cex = gate_point_size,
     col = gate_point_col
   )
-
+  
   # TIDY GATE COORDS
   if (length(channels) == 1) {
     pts <- data.frame(x = c(-Inf, coords$x))
@@ -1181,10 +1181,10 @@
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")
   }
-
+  
   # CONSTRUCT GATE
   gate <- rectangleGate(.gate = pts, filterId = alias)
-
+  
   # PLOT GATE
   cyto_plot_gate(
     gate = gate,
@@ -1193,12 +1193,12 @@
     gate_line_width = gate_line_width,
     gate_line_col = gate_line_col
   )
-
+  
   # LABEL GATED POPULATION
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
-      channels = channels
+                                     channels = channels
     )
     # GATE STAT
     gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -1211,7 +1211,7 @@
       label_text_y = gate_center[, "y"]
     )
   }
-
+  
   # RETURN CONSTRUCTED GATES
   gates <- list(gate)
   names(gates) <- alias
@@ -1321,35 +1321,35 @@
                                     gate_line_width = 2.5,
                                     gate_line_col = "red",
                                     gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # CONSTRUCT GATES ------------------------------------------------------------
-
+  
   # SAME COLOUR FOR POINTS AND LINES
   if(any(c(gate_line_col, gate_point_col) != "red")){
     if(gate_line_col != "red" & gate_point_col == "red"){
@@ -1372,7 +1372,7 @@
         alias, "population to construct an ellipsoid gate. \n"
       )
     )
-
+    
     # HIDE ERROR MESSAGES
     options("show.error.messages" = FALSE)
     on.exit(options("show.error.messages" = TRUE))
@@ -1395,37 +1395,37 @@
     }
     coords <- do.call("rbind", coords)
     coords <- data.frame(coords)
-
+    
     # Find which points are on major axis
     dst <- as.matrix(stats::dist(coords))
     mj.pts <- coords[which(dst == max(dst), arr.ind = TRUE)[1, ], ]
-
+    
     # Find which points are on minor axis
     mr.pts <- coords[!coords$x %in% mj.pts$x & !coords$y %in% mj.pts$y, ]
-
+    
     # Find center of the major axis
     mj.center <- c(
       (sum(mj.pts$x) / nrow(mj.pts)),
       (sum(mj.pts$y) / nrow(mj.pts))
     )
-
+    
     # Find center of all points
     center <- c(sum(c(mj.pts$x, mr.pts$x)) / 4, sum(c(mj.pts$y, mr.pts$y)) / 4)
-
+    
     # Adjust mj.pts to fall on center
     adj <- c((mj.center[1] - center[1]), (mj.center[2] - center[2]))
     mj.pts$x <- mj.pts$x - adj[1]
     mj.pts$y <- mj.pts$y - adj[2]
-
+    
     # Find major point which lies above center
     max.pt <- mj.pts[mj.pts$y > center[2], ]
-
+    
     # Radius of the major axis
     a <- stats::dist(mj.pts) / 2
-
+    
     # Radius of the minor axis
     b <- stats::dist(mr.pts) / 2
-
+    
     # Angle between horizontal line through center and max.pt
     if (max.pt[1] > center[1]) { # angle < pi/2
       mj.pt.ct <- cbind(max.pt[1], center[2])
@@ -1438,38 +1438,38 @@
       opp <- stats::dist(as.matrix(rbind(max.pt, mj.pt.ct)))
       angle <- pi / 2 + asin(opp / a)
     }
-
+    
     # COVARIANCE MATRIX
     cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
     cinv[1, 1] <- (((cos(angle) * cos(angle)) /
-      (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
+                      (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
     cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a^2)) - (1 / (b^2)))
     cinv[1, 2] <- cinv[2, 1]
     cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
-      ((cos(angle) * cos(angle)) / (b^2)))
+                     ((cos(angle) * cos(angle)) / (b^2)))
     cvm <- solve(cinv)
     dimnames(cvm) <- list(channels, channels)
-
+    
     # CONSTRUCT GATE
     gate <- ellipsoidGate(
       .gate = cvm,
       mean = center,
       filterId = alias
     )
-
+    
     # PLOT GATE
     cyto_plot_gate(gate,
-      channels = channels,
-      gate_line_type = gate_line_type,
-      gate_line_width = gate_line_width,
-      gate_line_col = gate_line_col
+                   channels = channels,
+                   gate_line_type = gate_line_type,
+                   gate_line_width = gate_line_width,
+                   gate_line_col = gate_line_col
     )
-
+    
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-        channels = channels
+                                       channels = channels
       )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -1482,10 +1482,10 @@
         label_text_y = gate_center[, "y"]
       )
     }
-
+    
     return(gate)
   })
-
+  
   # RETURN CONSTRUCTED GATES
   names(gates) <- alias
   return(gates)
@@ -1595,15 +1595,15 @@
                                      gate_line_width = 2.5,
                                      gate_line_col = "red",
                                      gate_line_col_alpha = 1, ...) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     alias <- c(
@@ -1613,20 +1613,20 @@
       paste0(channels[1], "-", channels[2], "-")
     )
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # ALIAS CHECK
   if (!length(alias) == 4) {
     stop("'alias' must contain 4 population names for quadrant gates.")
@@ -1644,12 +1644,12 @@
   # POINT & LINE COLOURS
   gate_point_col <- adjustcolor(gate_point_col, gate_point_col_alpha)
   gate_line_col <- adjustcolor(gate_line_col, gate_line_col_alpha) 
-
+  
   # INSTRUCTIONS
   message(
     paste("Select the center point to construct quadrant gates. \n")
   )
-
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -1662,29 +1662,29 @@
     cex = gate_point_size,
     col = gate_point_col
   )
-
+  
   # CO-ORDINATES MATRIX
   pts <- matrix(unlist(pts), ncol = 2)
   colnames(pts) <- channels
-
+  
   # QUADGATE CONSTRUCTION
   gate <- quadGate(.gate = pts, filterId = paste(alias, collapse = "|"))
-
+  
   # PLOT GATE
   cyto_plot_gate(gate, 
                  channels = channels,
                  gate_line_type = gate_line_type,
                  gate_line_width = gate_line_width,
                  gate_line_col = gate_line_col)
-
+  
   # LABEL GATED POPULATION
   if (label == TRUE) {
     # GATE CENTER - LABEL POSITION
     gate_center <- .cyto_gate_center(gate,
-      channels = channels
+                                     channels = channels
     )
     # GATE STAT
-    gate_pops <- .cyto_label_pops(fr, gate)
+    gate_pops <- .cyto_label_pops(list(fr), gate)[[1]]
     gate_stat <- LAPPLY(gate_pops, function(pop) {
       .cyto_count(pop) / .cyto_count(fr) * 100
     })
@@ -1699,7 +1699,7 @@
       label_text_y = gate_center[, "y"]
     )
   }
-
+  
   # RETURN CONSTRUCTED GATE
   gate <- list(gate)
   names(gate) <- paste(alias, collapse = "|")
@@ -1811,38 +1811,38 @@
                                 gate_line_width = 2.5,
                                 gate_line_col = "red",
                                 gate_line_col_alpha = 1, ...) {
-
+  
   # WARNING
   message("Web gates are an experimental feature - use at your own risk!")
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # CHANNELS
   channels <- cyto_channels_extract(fr,
-    channels = channels,
-    plot = TRUE
+                                    channels = channels,
+                                    plot = TRUE
   )
-
+  
   # ALIAS
   if (is.null(alias)) {
     stop("Supply a name for the gated population(s) to the 'alias' argument.")
   }
-
+  
   # CONSTRUCT PLOT -------------------------------------------------------------
-
+  
   # PLOT
   if (plot == TRUE) {
     cyto_plot(fr,
-      channels = channels,
-      popup = popup,
-      legend = FALSE,
-      label = FALSE,
-      axes_limits = axes_limits, ...
+              channels = channels,
+              popup = popup,
+              legend = FALSE,
+              label = FALSE,
+              axes_limits = axes_limits, ...
     )
   }
-
+  
   # CONSTRUCT GATES ------------------------------------------------------------
-
+  
   # SAME COLOUR FOR POINTS AND LINES
   if(any(c(gate_line_col, gate_point_col) != "red")){
     if(gate_line_col != "red" & gate_point_col == "red"){
@@ -1858,7 +1858,7 @@
   
   # Select center of the web gate
   message("Select the center of the web gate.")
-
+  
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
   on.exit(options("show.error.messages" = TRUE))
@@ -1871,10 +1871,10 @@
     cex = gate_point_size,
     col = gate_point_col
   )
-
+  
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
-
+  
   # Minimum and maximum limits of plot
   xmin <- round(par("usr")[1], 2)
   xmax <- round(par("usr")[2], 2)
@@ -1895,7 +1895,7 @@
       cex = gate_point_size,
       col = gate_point_col
     )
-
+    
     # LINE TO CENTER
     lines(
       x = c(center$x, pt$x),
@@ -1904,7 +1904,7 @@
       lwd = gate_line_width,
       col = gate_line_col
     )
-
+    
     return(c(pt$x, pt$y))
   })
   coords <- as.data.frame(do.call(rbind, coords))
@@ -1915,19 +1915,19 @@
   # bottom left anti-clockwise to top left (relative to center)
   quads <- c(0, rep(NA, length(alias)))
   for (i in seq_len(length(coords$x))[-1]) {
-
+    
     # Bottom left Q1
     if (coords[i, ]$x < center$x & coords[i, ]$y <= center$y) {
       quads[i] <- 1
-
+      
       # Bottom right Q2
     } else if (coords[i, ]$x >= center$x & coords[i, ]$y < center$y) {
       quads[i] <- 2
-
+      
       # Top right Q3
     } else if (coords[i, ]$x > center$x & coords[i, ]$y >= center$y) {
       quads[i] <- 3
-
+      
       # Top left Q4
     } else if (coords[i, ]$x <= center$x & coords[i, ]$y > center$y) {
       quads[i] <- 4
@@ -1935,14 +1935,14 @@
   }
   coords[, "Q"] <- quads
   coords <- coords[with(coords, order(coords$Q)), ]
-
+  
   # Push points to plot limits (intersection with plot limits)
-
+  
   # Quadrant 1: find limit intercept and modify point co-ordinates
   if (1 %in% coords$Q) {
     q1 <- coords[coords$Q == 1, ]
     for (x in seq_len(length(q1$Q))) {
-
+      
       # Calculate intersection with horizontal and vertical axes
       vint <- linesIntercept(
         c(center$x, center$y),
@@ -1956,7 +1956,7 @@
         c(center$x, ymin),
         c(xmin, ymin)
       )
-
+      
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymin) {
         q1[x, c("x", "y")] <- vint
@@ -1966,12 +1966,12 @@
     }
     coords[coords$Q == 1, ] <- q1
   }
-
+  
   # Quadrant 2: find limit intercept and modify point co-ordinates
   if (2 %in% coords$Q) {
     q2 <- coords[coords$Q == 2, ]
     for (x in seq_len(length(q2$Q))) {
-
+      
       # Calculate intersection with horizontal and vertical axes
       vint <- linesIntercept(
         c(center$x, center$y),
@@ -1985,7 +1985,7 @@
         c(center$x, ymin),
         c(xmax, ymin)
       )
-
+      
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymin) {
         q2[x, c("x", "y")] <- vint
@@ -1995,12 +1995,12 @@
     }
     coords[coords$Q == 2, ] <- q2
   }
-
+  
   # Quadrant 3: find limit intercept and modify point co-ordinates
   if (3 %in% coords$Q) {
     q3 <- coords[coords$Q == 3, ]
     for (x in seq_len(length(q3$Q))) {
-
+      
       # Calculate intersection with horizontal and vertical axes
       vint <- linesIntercept(
         c(center$x, center$y),
@@ -2014,7 +2014,7 @@
         c(center$x, ymax),
         c(xmax, ymax)
       )
-
+      
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymax) {
         q3[x, c("x", "y")] <- hint
@@ -2024,12 +2024,12 @@
     }
     coords[coords$Q == 3, ] <- q3
   }
-
+  
   # Quadrant 4: find limit intercept and modify point co-ordinates
   if (4 %in% coords$Q) {
     q4 <- coords[coords$Q == 4, ]
     for (x in seq_len(length(q4$Q))) {
-
+      
       # Calculate intersection with horizontal and vertical axes
       vint <- linesIntercept(
         c(center$x, center$y),
@@ -2043,7 +2043,7 @@
         c(xmin, ymax),
         c(center$x, ymax)
       )
-
+      
       # Check which axis the point should be pushed onto
       if (vint[2] >= ymax) {
         q4[x, c("x", "y")] <- hint
@@ -2056,55 +2056,55 @@
   
   # If multiple points in same quadrant order anticlockwise Q1-Q4
   if (anyDuplicated(coords$Q) != 0) {
-
+    
     # Quadrant 1
     if (1 %in% coords$Q[duplicated(coords$Q)]) {
-
+      
       # Multiple points in Q1 - sort by -y then +x
       q1 <- coords[coords$Q == 1, ]
       q1 <- q1[with(q1, order(-q1$y, q1$x)), ]
       coords[coords$Q == 1, c("x", "y")] <- q1[, c("x", "y")]
     }
-
+    
     # Quadrant 2
     if (2 %in% coords$Q[duplicated(coords$Q)]) {
-
+      
       # Multiple points in Q2 - sort by +x then +y
       q2 <- coords[coords$Q == 2, ]
       q2 <- q2[with(q2, order(q2$x, q2$y)), ]
       coords[coords$Q == 2, c("x", "y")] <- q2[, c("x", "y")]
     }
-
+    
     # Quadrant 3
     if (3 %in% coords$Q[duplicated(coords$Q)]) {
-
+      
       # Multiple points in Q3 - sort by +y then -x
       q3 <- coords[coords$Q == 3, ]
       q3 <- q3[with(q3, order(q3$y, -q3$x)), ]
       coords[coords$Q == 3, c("x", "y")] <- q3[, c("x", "y")]
     }
-
+    
     # Quadrant 4
     if (4 %in% coords$Q[duplicated(coords$Q)]) {
-
+      
       # Multiple points in Q4 - sort by -x then -y
       q4 <- coords[coords$Q == 4, ]
       q4 <- q4[with(q4, order(-q4$x, -q4$y)), ]
       coords[coords$Q == 4, c("x", "y")] <- q4[, c("x", "y")]
     }
   }
-
+  
   # Construct gates using input points
   # Duplicate first point after last point
   coords[(length(coords$Q) + 1), ] <- coords[2, ]
   coords[] <- lapply(coords, round, 4)
-
+  
   # Gate coordinates using input points
   gates <- list()
   for (i in 2:(length(coords$Q) - 1)) {
     gates[[i - 1]] <- rbind(coords[1, ], coords[i, ], coords[i + 1, ])
   }
-
+  
   # Check if a corner lies between the points - add as gate co-ordinate
   # Calculate corner points using min & max values
   Q1 <- c(xmin, ymin, 1)
@@ -2114,246 +2114,246 @@
   Q <- matrix(c(Q1, Q2, Q3, Q4), byrow = TRUE, nrow = 4)
   colnames(Q) <- c("x", "y", "Q")
   Q <- data.frame(Q)
-
+  
   # LAST GATE INHERITS REMAINING CORNERS
   indx <- seq_len(length(alias) - 1)
-
+  
   # Add corners to appropriate gates step-wise
   gates[indx] <- lapply(gates[indx], function(x) {
-
+    
     # DUPLICATION - points in same quadrant
     if (any(duplicated(x$Q))) {
-
+      
       # Quadrant 1
       if (1 %in% x$Q[duplicated(x$Q)]) {
         if (x[2, "x"] == xmin & x[3, "x"] != xmin) {
-
+          
           # Include Q1 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, x[3, ])
-
+          
           # Remove Q1 from Q
           if (1 %in% Q[, "Q"]) {
             Q <<- Q[-match(1, Q[, "Q"]), ]
           }
         }
       }
-
+      
       # Quadrant 2
       if (2 %in% x$Q[duplicated(x$Q)]) {
         if (x[2, "y"] == ymin & x[3, "y"] != ymin) {
-
+          
           # Include Q2 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, x[3, ])
-
+          
           # Remove Q2 from Q
           if (2 %in% Q[, "Q"]) {
             Q <<- Q[-match(2, Q[, "Q"]), ]
           }
         }
       }
-
+      
       # Quadrant 3
       if (3 %in% x$Q[duplicated(x$Q)]) {
         if (x[2, "x"] == xmax & x[3, "x"] != xmax) {
-
+          
           # Include Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q3, x[3, ])
-
+          
           # Remove Q3 from Q
           if (3 %in% Q[, "Q"]) {
             Q <<- Q[-match(3, Q[, "Q"]), ]
           }
         }
       }
-
+      
       # Quadrant 4
       if (4 %in% x$Q[duplicated(x$Q)]) {
         if (x[2, "y"] == ymax & x[3, "y"] != ymax) {
-
+          
           # Include Q4 corner in gate
           x <- rbind(x[c(1, 2), ], Q4, x[3, ])
-
+          
           # Remove Q4 from Q
           if (4 %in% Q[, "Q"]) {
             Q <<- Q[-match(4, Q[, "Q"]), ]
           }
         }
       }
-
+      
       # ADJACENT - points in adjacent quadrants
     } else if ((x[3, "Q"] - x[2, "Q"]) %in% c(0, 1)) {
-
+      
       # Q1-Q2
       if (x[2, "Q"] == 1 & x[3, "Q"] == 2) {
         if (x[2, "x"] == xmin & x[3, "x"] == xmax) {
-
+          
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, Q2, x[3, ])
-
+          
           # Remove Q1 and Q2 from Q
           if (any(c(1, 2) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(1, 2), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] == xmin & x[3, "x"] != xmax) {
-
+          
           # Include Q1 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, x[3, ])
-
+          
           # Remove Q1 from Q
           if (any(1 %in% Q[, "Q"])) {
             Q <<- Q[-match(1, Q[, "Q"]), ]
           }
         } else if (x[2, "x"] != xmin & x[3, "x"] == xmax) {
-
+          
           # Include Q2 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, x[3, ])
-
+          
           # Remove Q2 from Q
           if (any(2 %in% Q[, "Q"])) {
             Q <<- Q[-match(2, Q[, "Q"]), ]
           }
         }
-
+        
         # Q2-Q3
       } else if (x[2, "Q"] == 2 & x[3, "Q"] == 3) {
         if (x[2, "y"] == ymin & x[3, "y"] == ymax) {
-
+          
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, Q3, x[3, ])
-
+          
           # Remove Q2 and Q3 from Q
           if (any(c(2, 3) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(2, 3), Q[, "Q"]), ]
           }
         } else if (x[2, "y"] == ymin & x[3, "y"] != ymax) {
-
+          
           # Include Q2 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, x[3, ])
-
+          
           # Remove Q2 from Q
           if (any(2 %in% Q[, "Q"])) {
             Q <<- Q[-match(2, Q[, "Q"]), ]
           }
         } else if (x[2, "y"] != ymin & x[3, "y"] == ymax) {
-
+          
           # Include Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q3, x[3, ])
-
+          
           # Remove Q3 from Q
           if (any(3 %in% Q[, "Q"])) {
             Q <<- Q[-match(3, Q[, "Q"]), ]
           }
         }
-
+        
         # Q3-Q4
       } else if (x[2, "Q"] == 3 & x[3, "Q"] == 4) {
         if (x[2, "x"] == xmax & x[3, "x"] == xmin) {
-
+          
           # Include Q3 & Q4 corner in gate
           x <- rbind(x[c(1, 2), ], Q3, Q4, x[3, ])
-
+          
           # Remove Q3 and Q4 from Q
           if (any(c(3, 4) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(3, 4), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] == xmax & x[3, "x"] != xmin) {
-
+          
           # Include Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q3, x[3, ])
-
+          
           # Remove Q3 from Q
           if (any(3 %in% Q[, "Q"])) {
             Q <<- Q[-match(3, Q[, "Q"]), ]
           }
         } else if (x[2, "x"] != xmax & x[3, "x"] == xmin) {
-
+          
           # Include Q4 corner in gate
           x <- rbind(x[c(1, 2), ], Q4, x[3, ])
-
+          
           # Remove Q4 from Q
           if (any(4 %in% Q[, "Q"])) {
             Q <<- Q[-match(4, Q[, "Q"]), ]
           }
         }
       }
-
+      
       # SEPARATED - points separated by a quadrant
     } else if (x[3, "Q"] - x[2, "Q"] == 2) {
-
+      
       # Q1-Q3
       if (x[2, "Q"] == 1 & x[3, "Q"] == 3) {
         if (x[2, "x"] == xmin & x[3, "y"] == ymax) {
-
+          
           # Include Q1, Q2 & Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, Q2, Q3, x[3, ])
-
+          
           # Remove Q1, Q2 and Q3 from Q
           if (any(c(1, 2, 3) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(1, 2, 3), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] == xmin & x[3, "y"] != ymax) {
-
+          
           # Include Q1 & Q2 corner in gate
           x <- rbind(x[c(1, 2), ], Q1, Q2, x[3, ])
-
+          
           # Remove Q1 and Q2 from Q
           if (any(c(1, 2) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(1, 2), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] != xmin & x[3, "y"] == ymax) {
-
+          
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, Q3, x[3, ])
-
+          
           # Remove Q2 and Q3 from Q
           if (any(c(2, 3) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(2, 3), Q[, "Q"]), ]
           }
         } else if (x[2, "x"] != xmin & x[3, "y"] != ymax) {
-
+          
           # Include Q2 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, x[3, ])
-
+          
           # Remove Q2 from Q
           if (any(2 %in% Q[, "Q"])) {
             Q <<- Q[-match(2, Q[, "Q"]), ]
           }
         }
-
+        
         # Q2-Q4
       } else if (x[2, "Q"] == 2 & x[3, "Q"] == 4) {
         if (x[2, "y"] == ymin & x[3, "x"] == xmin) {
-
+          
           # Include Q2, Q3 & Q4 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, Q3, Q4, x[3, ])
-
+          
           # Remove Q2, Q3 and Q4 from Q
           if (any(c(2, 3, 4) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(2, 3, 4), Q[, "Q"]), ]
           }
         } else if (x[2, "y"] == ymin & x[3, "x"] != xmin) {
-
+          
           # Include Q2 & Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q2, Q3, x[3, ])
-
+          
           # Remove Q2 and Q3 from Q
           if (any(c(2, 3) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(2, 3), Q[, "Q"]), ]
           }
         } else if (x[2, "y"] != ymin & x[3, "x"] == xmin) {
-
+          
           # Include Q3 & Q4 corner in gate
           x <- rbind(x[c(1, 2), ], Q3, Q4, x[3, ])
-
+          
           # Remove Q3 and Q4
           if (any(c(3, 4) %in% Q[, "Q"])) {
             Q <<- Q[-match(c(3, 4), Q[, "Q"]), ]
           }
         } else if (x[2, "y"] != ymin & x[3, "x"] != xmin) {
-
+          
           # Include Q3 corner in gate
           x <- rbind(x[c(1, 2), ], Q3, x[3, ])
-
+          
           # Remove Q3 from Q
           if (any(3 %in% Q[, "Q"])) {
             Q <<- Q[-match(3, Q[, "Q"]), ]
@@ -2361,10 +2361,10 @@
         }
       }
     }
-
+    
     return(x)
   })
-
+  
   # Last gate inherits remaining corners
   if (nrow(Q) != 0) {
     if (length(which(Q[, "Q"] >= gates[[length(alias)]][2, "Q"])) != 0) {
@@ -2372,13 +2372,13 @@
     }else{
       g <- NULL
     }
-
+    
     if (length(which(Q[, "Q"] < gates[[length(alias)]][2, "Q"])) != 0) {
       r <- Q[which(Q[, "Q"] < gates[[length(alias)]][2, "Q"]), ]
     }else{
       r <- NULL
     }
-
+    
     if (!is.null(g) & !is.null(r)) {
       Q <- rbind(g, r)
     } else if (!is.null(g) & is.null(r)) {
@@ -2386,35 +2386,35 @@
     } else if (is.null(g) & !is.null(r)) {
       Q <- r
     }
-
+    
     gates[[length(alias)]] <- rbind(
       gates[[length(alias)]][c(1, 2), ],
       Q,
       gates[[length(alias)]][3, ]
     )
   }
-
+  
   # CONSTRUCT GATES
   gates <- lapply(seq(1, length(gates), 1), function(x) {
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
     rownames(coords) <- NULL
-
+    
     # CONSTRUCT GATE
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
-
+    
     # PLOT GATE
     cyto_plot_gate(gate, 
                    channels = channels,
                    gate_line_type = gate_line_type,
                    gate_line_width = gate_line_width,
                    gate_line_col = gate_line_col)
-
+    
     # LABEL GATED POPULATION
     if (label == TRUE) {
       # GATE CENTER - LABEL POSITION
       gate_center <- .cyto_gate_center(gate,
-        channels = channels
+                                       channels = channels
       )
       # GATE STAT
       gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
@@ -2427,10 +2427,10 @@
         label_text_y = gate_center[, "y"]
       )
     }
-
+    
     return(gate)
   })
-
+  
   # RETURN CONSTRUCTED GATES
   names(gates) <- alias
   return(gates)
