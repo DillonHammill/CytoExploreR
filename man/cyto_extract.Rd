@@ -11,6 +11,7 @@ cyto_extract(
   copy = FALSE,
   raw = FALSE,
   channels = NULL,
+  markers = FALSE,
   ...
 )
 }
@@ -32,6 +33,10 @@ returned instead of a flowFrame or flowSet.}
 
 \item{channels}{names of the markers or channels for which data should be
 extracted, set to all channels by default.}
+
+\item{markers}{logical indicating whether the column names of the raw data
+matrices should be replaced with the marker names where possible, set to
+FALSE by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or

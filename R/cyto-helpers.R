@@ -1506,6 +1506,9 @@ cyto_transform_extract <- function(x,
 #'   returned instead of a flowFrame or flowSet.
 #' @param channels names of the markers or channels for which data should be
 #'   extracted, set to all channels by default.
+#' @param markers logical indicating whether the column names of the raw data
+#'   matrices should be replaced with the marker names where possible, set to
+#'   FALSE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
 #'   \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.
@@ -1542,25 +1545,26 @@ cyto_extract <- function(x,
                          copy = FALSE,
                          raw = FALSE,
                          channels = NULL,
+                         markers = FALSE,
                          ...) {
   
   # DEFAULT PARENT
   if (is.null(parent)) {
     parent <- cyto_nodes(x, path = "auto")[1]
   }
-
+  
   # EXTRACT
   if (is(x, "GatingHierarchy")) {
     x <- gh_pop_get_data(x, parent, ...)
   } else if (is(x, "GatingSet")) {
     x <- gs_pop_get_data(x, parent, ...)
   }
-
+  
   # COPY
   if (copy) {
     x <- cyto_copy(x)
   }
-
+  
   # SELECT
   if(!is.null(select)){
     x <- cyto_select(x, select)
@@ -1569,23 +1573,36 @@ cyto_extract <- function(x,
   # RESTRICT
   if(!is.null(channels)){
     channels <- cyto_channels_extract(x, channels = channels)
-    x <- x[, channels]
+    x <- x[, channels, drop = FALSE]
+  }
+  
+  # MARKERS
+  if(markers == TRUE){
+    col_names <- cyto_markers_extract(x, cyto_channels(x))
   }
   
   # RAW DATA MATRICES
-  if (raw) {
+  if (raw == TRUE) {
     nms <- cyto_names(x)
     if (is(x, "flowFrame")) {
-      x <- list(exprs(x))
+      raw <- exprs(x)
+      if(markers == TRUE){
+        colnames(raw) <- col_names
+      }
+      x <- list(raw)
     } else if (is(x, "flowSet")) {
       y <- lapply(seq_along(x), function(z) {
-        exprs(x[[z]])
+        raw <- exprs(x[[z]])
+        if(markers == TRUE){
+          colnames(raw) <- col_names
+        }
+        return(raw)
       })
       x <- y
     }
     names(x) <- nms
   }
-
+  
   # RETURN EXTRACTED DATA
   return(x)
 }
