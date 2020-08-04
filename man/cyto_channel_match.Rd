@@ -2,9 +2,9 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channel_match}
 \alias{cyto_channel_match}
-\title{Table Editor for Channel Match File Construction}
+\title{Create a csv file assigning a channel to each compensation control}
 \usage{
-cyto_channel_match(x, save_as = NULL, menu = TRUE)
+cyto_channel_match(x, save_as = NULL)
 }
 \arguments{
 \item{x}{object of \code{\link[flowCore:flowSet-class]{flowSet}} or
@@ -12,9 +12,6 @@ cyto_channel_match(x, save_as = NULL, menu = TRUE)
 
 \item{save_as}{name to use for the saved channel match csv file, set to
 \code{"date-Channel-Match.csv"}.}
-
-\item{menu}{logical indicating whether channels should be selected from a
-drop down menu instead of manually typing them in.}
 }
 \value{
 update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
@@ -22,7 +19,7 @@ update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
   data.frame.
 }
 \description{
-Table Editor for Channel Match File Construction
+Create a csv file assigning a channel to each compensation control
 }
 \examples{
 \dontrun{

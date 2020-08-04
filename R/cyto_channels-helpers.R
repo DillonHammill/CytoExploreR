@@ -61,10 +61,10 @@ cyto_channels <- function(x,
       which(
         suppressWarnings(
           grepl(z, 
-              channels, 
-              ignore.case = TRUE,
-              ...))
-        )
+                channels, 
+                ignore.case = TRUE,
+                ...))
+      )
     }))
     channels <- channels[ind]
   }
@@ -77,7 +77,7 @@ cyto_channels <- function(x,
               channels, 
               ignore.case = TRUE,
               ...)
-        )]
+      )]
     })
   }
   
@@ -211,13 +211,13 @@ cyto_markers.flowFrame <- function(x,
     if(!is.null(select)){
       ind <- unique(LAPPLY(select, function(z){
         which(suppressWarnings(grepl(z,
-                    markers,
-                    ignore.case = TRUE,
-                    ...)) |
-              suppressWarnings(grepl(z, 
-                    names(markers),
-                    ignore.case = TRUE,
-                    ...)))
+                                     markers,
+                                     ignore.case = TRUE,
+                                     ...)) |
+                suppressWarnings(grepl(z, 
+                                       names(markers),
+                                       ignore.case = TRUE,
+                                       ...)))
       }))
       markers <- markers[ind]
     }
@@ -226,13 +226,13 @@ cyto_markers.flowFrame <- function(x,
       # EXCLUDE
       lapply(exclude, function(z){
         markers <<- markers[!(suppressWarnings(grepl(z, 
-                                   markers,
-                                   ignore.case = TRUE,
-                                   ...)) |
-                              suppressWarnings(grepl(z,
-                                    names(markers),
-                                    ignore.case = TRUE,
-                                    ...)))]
+                                                     markers,
+                                                     ignore.case = TRUE,
+                                                     ...)) |
+                                suppressWarnings(grepl(z,
+                                                       names(markers),
+                                                       ignore.case = TRUE,
+                                                       ...)))]
       })
     }
     return(markers)
@@ -340,7 +340,7 @@ cyto_fluor_channels <- function(x,
 cyto_channels_extract <- function(x,
                                   channels, 
                                   plot = FALSE) {
-
+  
   # Incorrect channels length
   if (plot == TRUE) {
     if (!length(channels) %in% c(1, 2)) {
@@ -436,13 +436,13 @@ cyto_markers_extract <- function(x,
                                  channels,
                                  plot = FALSE) {
   
-   # Incorrect channels length
+  # Incorrect channels length
   if (plot == TRUE) {
     if (!length(channels) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
   }
-
+  
   # Extract data 
   x <- cyto_extract(x)
   
@@ -459,7 +459,7 @@ cyto_markers_extract <- function(x,
   if (is.numeric(channels)) {
     channels <- chans[channels]
   }
-      
+  
   # Invalid channels or markers
   if(!all(channels %in% c(fr_data$name, fr_data$desc))) {
     stop("'channels' contains invalid channel or marker names.")
@@ -493,7 +493,7 @@ cyto_markers_extract <- function(x,
 #'
 #' @return vector of channels in order of compensation Control samples.
 #'
-#' @importFrom utils menu
+#' @importFrom DataEditR data_edit
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -520,12 +520,17 @@ cyto_channel_select <- function(x){
   nms <- cyto_names(x)
   
   # Channel selection
-  chans <- data_editor(data.frame("name" = nms,
-                                  "channel" = NA,
-                                  stringsAsFactors = FALSE),
-                       title = "Channel Selector",
-                       type = "selector",
-                       options = opts)
+  chans <- data_edit(data.frame("name" = nms,
+                                "channel" = NA,
+                                stringsAsFactors = FALSE),
+                     title = "Channel Selector",
+                     logo = CytoExploreR_logo(),
+                     col_edit = FALSE,
+                     row_edit = FALSE,
+                     col_options = list("channel" = opts),
+                     col_names = "channel",
+                     col_readonly = "name",
+                     quiet = TRUE)
   
   # Missing channels
   lapply(seq_along(chans[, "channel"]), function(z){
@@ -535,27 +540,21 @@ cyto_channel_select <- function(x){
   })
   
   # RETURN VECTOR OF CHANNELS
-  chans <- chans[, "channel"]
-  return(chans)
+  return(chans[, "channel"])
 }
 
 ## CYTO_CHANNEL_MATCH ----------------------------------------------------------
 
-#' Table Editor for Channel Match File Construction
+#' Create a csv file assigning a channel to each compensation control
 #'
 #' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
-#' @param menu logical indicating whether channels should be selected from a
-#'   drop down menu instead of manually typing them in.
 #'   
 #' @return update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
 #'   write channel matching to csv file and return channel matching as a
 #'   data.frame.
-#'
-#' @importFrom utils write.csv edit
-#' @importFrom tools file_ext
 #'
 #' @examples
 #' \dontrun{
@@ -570,8 +569,7 @@ cyto_channel_select <- function(x){
 #'
 #' @export
 cyto_channel_match <- function(x,
-                               save_as = NULL,
-                               menu = TRUE) {
+                               save_as = NULL) {
   
   # Set default name for channel_match file
   if (is.null(save_as)) {
@@ -579,53 +577,20 @@ cyto_channel_match <- function(x,
       format(Sys.Date(), "%d%m%y"),
       "-", "Channel-Match.csv"
     )
-    # save_as must contain csv file extension
-  } else {
-    # File extension missing
-    if (file_ext(save_as) != "csv") {
-      save_as <- paste0(save_as, ".csv")
-    }
   }
   
   # Extract sample names
   nms <- cyto_names(x)
   
-  # Select channels from menu
-  if(menu == TRUE){
-    chans <- cyto_channel_select(x)
-    channel_match <- data.frame("name" = nms,
-                                "channel" = chans)
-    colnames(channel_match) <- c("name", "channel")
-    rownames(channel_match) <- NULL
-    # Manually type in channels
-  }else if(menu == FALSE){
-    # Construct data.frame for editing
-    channel_match <- data.frame("name" = nms, 
-                                "channel" = rep("NA", length(nms)))
-    colnames(channel_match) <- c("name", "channel")
-    rownames(channel_match) <- NULL
-    
-    # Edit channel_match
-    channel_match <- suppressWarnings(edit(channel_match))
-  }
-  
-  # Convert markers to channels
-  channel_match$channel <- LAPPLY(channel_match$channel, function(z){
-    if(!grepl(z, "unstained", ignore.case = TRUE)){
-      cyto_channels_extract(x, z)
-    }else{
-      z
-    }
-  })
-  
-  # Check that all channels are valid or throw an error
-  if (!all(channel_match$channel %in% c("Unstained", "unstained",
-                                        cyto_fluor_channels(x)))) {
-    stop("Some inputs in the channel column are not valid.")
-  }
+  # Channels data to edit
+  chans <- cyto_channel_select(x)
+  channel_match <- data.frame("name" = nms,
+                              "channel" = chans)
+  colnames(channel_match) <- c("name", "channel")
+  rownames(channel_match) <- NULL
   
   # Write edited channel match file to csv file
-  write.csv(channel_match, save_as, row.names = FALSE)
+  write_to_csv(channel_match, save_as)
   
   # Update cyto_details
   cyto_details(x)$channel <- channel_match$channel
@@ -753,7 +718,7 @@ cyto_channels_restrict.flowFrame <- function(x,
   # RETURN RESTRICTED FLOWFRAME/FLOWSET
   x <- x[, channels_to_keep[ind]]
   return(x)
-
+  
 }
 
 #' @rdname cyto_channels_restrict
