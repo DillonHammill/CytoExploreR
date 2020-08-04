@@ -172,9 +172,6 @@ refernce if supplied.
 \examples{
 library(CytoExploreRData)
 
-# Bypass directory check for external files
-options("CytoExploreR_wd_check" = FALSE)
-
 # Load in compensation controls
 gs <- GatingSet(Compensation)
 
@@ -218,9 +215,6 @@ cyto_plot_compensation(gs,
   channel_match = cmfile,
   display = 1000
 )
-
-# Return "CytoExploreR_wd_check" to default
-options("CytoExploreR_wd_check" = TRUE)
 
 }
 \seealso{
