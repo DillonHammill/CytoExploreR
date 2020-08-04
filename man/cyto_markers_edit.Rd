@@ -14,7 +14,7 @@ cyto_markers_edit(x, file = NULL, ...)
 
 \item{file}{name of csv file containing columns 'channel' and 'marker'.}
 
-\item{...}{additional arguments passed to \code{data_editor}.}
+\item{...}{not in use.}
 }
 \value{
 save inputs to "Experiment-Markers.csv" and returns updated samples.

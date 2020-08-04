@@ -12,7 +12,7 @@ cyto_details_edit(x, file = NULL, ...)
 
 \item{file}{name of csv file containing experimental information.}
 
-\item{...}{additional arguments passed to \code{data_editor}.}
+\item{...}{not in use.}
 }
 \value{
 NULL and return \code{flowSet} or \code{GatingSet} with updated

@@ -12,10 +12,6 @@ cyto_calibrate(x, parent = "root", type = "range", probs = c(0.01, 0.99), ...)
 the best calibration is recommended that users supply samples containing
 both negative and positive events in each channel.}
 
-\item{parent}{name of the parent population to use for channel calibration
-when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
-\code{"root"} node by default.}
-
 \item{type}{indicates the type of calibration to perform, options include
 \code{"range"} or \code{"quantile"}. Range calibration simply uses the full
 range of values across samples for the calibration. Quantile calibration
@@ -27,6 +23,10 @@ outside the calibration range are assigned the bottom or top colour.}
 default.}
 
 \item{...}{not in use.}
+
+\item{name}{of the parent population to use for channel calibration when a
+\code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
+\code{"root"} node by default.}
 }
 \value{
 saves calibration settings for use by \code{\link{cyto_plot}}.
