@@ -4242,6 +4242,7 @@ cyto_copy <- function(x) {
 #' @return list of spillover matrices or NULL.
 #'
 #' @importFrom methods is
+#' @importFrom flowCore keyword
 #' @importFrom flowWorkspace gh_get_compensations gs_get_compensations
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -4259,7 +4260,7 @@ cyto_copy <- function(x) {
 #' spill <- cyto_spillover_extract(gs)
 #' @export
 cyto_spillover_extract <- function(x) {
-
+  
   # GATINGSET
   if (is(x, "GatingSet")) {
     spill <- gs_get_compensations(x)
@@ -4281,9 +4282,12 @@ cyto_spillover_extract <- function(x) {
   } else if (is(x, "flowSet")) {
     spill <- lapply(seq_along(x), function(z) {
       # CyTOF lacks spill slot (just in case)
-      tryCatch(x[[z]]@description$SPILL, error = function(e) {
+      sp <- tryCatch(keyword(x[[z]], "SPILL"), error = function(e) {
         NULL
       })
+      if(!is.null(sp)) {
+        sp <- sp[[1]]
+      }
     })
     names(spill) <- cyto_names(x)
     if (all(LAPPLY(spill, "is.null"))) {
@@ -4291,15 +4295,14 @@ cyto_spillover_extract <- function(x) {
     }
     # FLOWFRAME
   } else if (is(x, "flowFrame")) {
-    spill <- tryCatch(x@description$SPILL, error = function(e) {
+    spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
       NULL
     })
     if (!is.null(spill)) {
-      spill <- list(spill)
       names(spill) <- cyto_names(x)
     }
   }
-
+  
   # RETURN LIST OF SPILLOVER MATRICES
   return(spill)
 }
