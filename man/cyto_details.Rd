@@ -4,21 +4,34 @@
 \alias{cyto_details}
 \title{Extract experiment details}
 \usage{
-cyto_details(x)
+cyto_details(x, convert = FALSE, drop = FALSE, factor = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{convert}{logical indicating whether
+\code{\link[utils:type.convert]{type.convert}} should be called on each
+column.}
+
+\item{drop}{logical indicating whether row names should be dropped, set to
+FALSE by default.}
+
+\item{factor}{logical indicating whether characters should be converted to
+factors when convert is TRUE, set to FALSE by default.}
+
+\item{...}{additional arguments passed to
+\code{\link[utils:type.convert]{type.convert}}.}
 }
 \value{
 experiment details as data.frame.
 }
 \description{
 Simply an autocomplete-friendly wrapper around
-\code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
-\code{\link{cyto_names}} if a
+\code{\link[flowWorkspace:pData-methods]{pData}} with some additional
+formatting options. A call is made to \code{\link{cyto_names}} if a
 \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 }
 \examples{

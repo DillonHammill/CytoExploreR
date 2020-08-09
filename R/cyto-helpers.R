@@ -638,19 +638,29 @@ cyto_setup <- function(path = ".",
 #' Extract experiment details
 #'
 #' Simply an autocomplete-friendly wrapper around
-#' \code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
-#' \code{\link{cyto_names}} if a
+#' \code{\link[flowWorkspace:pData-methods]{pData}} with some additional
+#' formatting options. A call is made to \code{\link{cyto_names}} if a
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param convert logical indicating whether
+#'   \code{\link[utils:type.convert]{type.convert}} should be called on each
+#'   column.
+#' @param drop logical indicating whether row names should be dropped, set to
+#'   FALSE by default.
+#' @param factor logical indicating whether characters should be converted to
+#'   factors when convert is TRUE, set to FALSE by default.
+#' @param ... additional arguments passed to
+#'   \code{\link[utils:type.convert]{type.convert}}.
 #'
 #' @return experiment details as data.frame.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom methods is
+#' @importFrom utils type.convert
 #'
 #' @examples
 #' \dontrun{
@@ -667,16 +677,28 @@ cyto_setup <- function(path = ".",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_details <- function(x) {
+cyto_details <- function(x,
+                         convert = FALSE,
+                         drop = FALSE,
+                         factor = FALSE, 
+                         ...) {
   
   # Return identifier for flowFrame
   if (is(x, "flowFrame")) {
     return(cyto_names(x))
     # Return experiment details for other objects
   } else {
-    # Fix AsIs for name column
     pd <- pData(x)
-    # pd$name <- factor(pd$name, levels = pd$name)
+    # ROWNAMES
+    if(drop) {
+      rownames(pd) <- NULL
+    }
+    # DATA.FRAME
+    if(convert){
+      pd <- type.convert(pd, 
+                         as.is = !factor,
+                         ...)
+    }
     return(pd)
   }
 }
@@ -4441,6 +4463,7 @@ cyto_copy <- function(x) {
 #' @return list of spillover matrices or NULL.
 #'
 #' @importFrom methods is
+#' @importFrom flowCore keyword
 #' @importFrom flowWorkspace gh_get_compensations gs_get_compensations
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -4480,9 +4503,12 @@ cyto_spillover_extract <- function(x) {
   } else if (is(x, "flowSet")) {
     spill <- lapply(seq_along(x), function(z) {
       # CyTOF lacks spill slot (just in case)
-      tryCatch(x[[z]]@description$SPILL, error = function(e) {
+      sp <- tryCatch(keyword(x[[z]], "SPILL"), error = function(e) {
         NULL
       })
+      if(!is.null(sp)) {
+        sp <- sp[[1]]
+      }
     })
     names(spill) <- cyto_names(x)
     if (all(LAPPLY(spill, "is.null"))) {
@@ -4490,11 +4516,10 @@ cyto_spillover_extract <- function(x) {
     }
     # FLOWFRAME
   } else if (is(x, "flowFrame")) {
-    spill <- tryCatch(x@description$SPILL, error = function(e) {
+    spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
       NULL
     })
     if (!is.null(spill)) {
-      spill <- list(spill)
       names(spill) <- cyto_names(x)
     }
   }
