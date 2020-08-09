@@ -240,14 +240,14 @@ cyto_stats_compute.GatingSet <- function(x,
   res <- do.call("rbind", res)
   rownames(res) <- NULL
 
-  # TIBBLE
-  if (tibble) {
-    class(res) <- c("tbl_df", "tbl", "data.frame")
-  }
-
   # SAVE
   if (!is.null(save_as)) {
     write_to_csv(res, save_as)
+  }  
+  
+  # TIBBLE
+  if (tibble) {
+    class(res) <- c("tbl_df", "tbl", "data.frame")
   }
 
   # STATISTICS
@@ -406,16 +406,16 @@ cyto_stats_compute.GatingHierarchy <- function(x,
     res <- cbind(new_cols, res[, -match("name", colnames(res)), drop = FALSE])
   }
 
-  # TIBBLE
-  if (tibble) {
-    class(res) <- c("tbl_df", "tbl", "data.frame")
-  }
-
   # SAVE
   if (!is.null(save_as)) {
     write_to_csv(res, save_as)
   }
 
+  # TIBBLE
+  if (tibble) {
+    class(res) <- c("tbl_df", "tbl", "data.frame")
+  }  
+  
   # STATISTICS
   return(res)
 }
@@ -502,15 +502,15 @@ cyto_stats_compute.flowSet <- function(x,
     res <- cbind(new_cols, res[, -match("name", colnames(res)), drop = FALSE])
   }
 
-  # TIBBLE
-  if (tibble) {
-    class(res) <- c("tbl_df", "tbl", "data.frame")
-  }
-
   # SAVE
   if (!is.null(save_as)) {
     write_to_csv(res, save_as)
   }
+  
+  # TIBBLE
+  if (tibble) {
+    class(res) <- c("tbl_df", "tbl", "data.frame")
+  }  
 
   # STATISTICS
   return(res)
@@ -775,17 +775,13 @@ cyto_stats_compute.flowFrame <- function(x,
     }
   }
 
-  # STRIP CYTO_STAT
-  if (grepl("cyto_stat_", stat)) {
-    stat <- gsub("cyto_stat_", "", stat)
-  }
-
   # ABSORB ROWNAMES
   new_cols <- do.call(
     "rbind",
     strsplit(rownames(res), "\\|")
   )
-  colnames(new_cols) <- c("name", stat)[seq_len(ncol(new_cols))]
+  colnames(new_cols) <- c("name",
+                          gsub("cyto_stat_", "", stat))[seq_len(ncol(new_cols))]
   res <- cbind(new_cols, res)
   rownames(res) <- NULL
   
@@ -794,7 +790,7 @@ cyto_stats_compute.flowFrame <- function(x,
     # LONG FORMAT REQUIRES MULTIPLE COLUMNS
     cols <- colnames(res)[!colnames(res) %in% c("name", stat, "FUN"), 
                           drop = FALSE]
-    if (length(cols)) {
+    if (length(cols) > 1) {
       res <- gather(res,
         key = "input",
         value = "output",
@@ -803,16 +799,16 @@ cyto_stats_compute.flowFrame <- function(x,
     }
   }
 
-  # TIBBLE
-  if (tibble) {
-    class(res) <- c("tbl_df", "tbl", "data.frame")
-  }
-
   # SAVE
   if (!is.null(save_as)) {
     write_to_csv(res, save_as)
   }
 
+  # TIBBLE
+  if (tibble) {
+    class(res) <- c("tbl_df", "tbl", "data.frame")
+  }  
+  
   # STATISTICS
   return(res)
 }
