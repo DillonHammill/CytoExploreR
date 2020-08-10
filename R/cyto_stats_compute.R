@@ -647,8 +647,10 @@ cyto_stats_compute.flowFrame <- function(x,
           ) * 100, round
       )
       if(any(is.nan(res))) {
-        is.nan(res) <- 0
+        res[is.nan(res)] <- 0
       }
+      colnames(res) <- "freq"
+      rownames(res) <- cyto_names(x)
       # GEOMEMTRIC MEAN
     } else if (grepl("^geomean$", stat_strip)) {
       # EXTRACT DATA
