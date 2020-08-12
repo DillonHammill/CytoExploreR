@@ -23,7 +23,7 @@
 #'   statistics.
 #' @param stat name of the statistic to calculate, options include
 #'   \code{"count"}, \code{"freq"}, \code{"median"}, \code{"mode"},
-#'   \code{"mean"}, \code{"geo mean"}, \code{"CV"}, or \code{"freq"}.
+#'   \code{"mean"}, \code{"geo mean"}, or \code{"CV"}.
 #' @param gate object of class \code{rectangleGate}, \code{polygonGate} or
 #'   \code{ellipsoidGate} to apply to \code{flowFrame} or \code{flowSet} objects
 #'   prior to computing statistics.
