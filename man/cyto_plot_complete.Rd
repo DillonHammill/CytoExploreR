@@ -41,7 +41,7 @@ cyto_plot_save("Custom.png",
 )
 
 # Set out plot layout
-cyto_plot_layout(c(1,2))
+cyto_plot_layout(c(1, 2))
 
 # Add 2D plot
 cyto_plot(gs[[4]],
@@ -56,7 +56,7 @@ cyto_plot(gs,
   parent = "CD4 T Cells",
   alias = "",
   channels = "7-AAD-A",
-  density_stack = 0.6,
+  hist_stack = 0.6,
   layout = FALSE
 )
 

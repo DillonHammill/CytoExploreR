@@ -21,14 +21,14 @@ fs <- Activation
 
 # Construct cyto_plot
 cyto_plot(fs[[1]],
-          channels = c("FSC-A", "SSC-A"))
-          
+  channels = c("FSC-A", "SSC-A")
+)
+
 # Record plot and save to object called p
 p <- cyto_plot_record()
 
 # Calling p will bring back the recorded plot
 p
-
 }
 
 }

@@ -30,15 +30,18 @@ fs <- Activation
 
 # Save plot
 cyto_plot_save("Test.png",
-               height = 7,
-               width = 14)
+  height = 7,
+  width = 14
+)
 
 # Create custom plot - 1D & 2D plot panels
-cyto_plot_custom(layout = c(1,2))
+cyto_plot_custom(layout = c(1, 2))
 cyto_plot(fs[[32]],
-          channels = "FSC-A")
+  channels = "FSC-A"
+)
 cyto_plot(fs[[32]],
-          channels = c("FSC-A","SSC-A"))
+  channels = c("FSC-A", "SSC-A")
+)
 
 # Signal plot is complete and save
 cyto_plot_complete()

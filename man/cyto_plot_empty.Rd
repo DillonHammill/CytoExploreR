@@ -2,34 +2,31 @@
 % Please edit documentation in R/cyto_plot-helpers.R
 \name{cyto_plot_empty}
 \alias{cyto_plot_empty}
-\alias{cyto_plot_empty.flowFrame}
 \title{Create an empty cyto_plot}
 \usage{
-cyto_plot_empty(x, ...)
-
-\method{cyto_plot_empty}{flowFrame}(
+cyto_plot_empty(
   x,
   channels,
   axes_trans = NA,
   overlay = NA,
   gate = NA,
-  xlim = NA,
-  ylim = NA,
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
   axes_limits = "auto",
   axes_limits_buffer = 0.03,
   title,
   xlab,
   ylab,
-  margins = NULL,
-  density_modal = TRUE,
-  density_smooth = 1.5,
-  density_stack = 0.5,
-  density_cols = NA,
-  density_fill = NA,
-  density_fill_alpha = 1,
-  density_line_type = 1,
-  density_line_width = 1,
-  density_line_col = "black",
+  margins = c(NA, NA, NA, NA),
+  hist_stat = "count",
+  hist_smooth = 1.5,
+  hist_stack = 0.5,
+  hist_cols = NA,
+  hist_fill = NA,
+  hist_fill_alpha = 1,
+  hist_line_type = 1,
+  hist_line_width = 1,
+  hist_line_col = "black",
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
@@ -66,8 +63,6 @@ cyto_plot_empty(x, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
-
-\item{...}{not in use.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
@@ -110,34 +105,39 @@ default. Title can be removed by setting this argument to \code{NA}.}
 \item{ylab}{y axis label.}
 
 \item{margins}{a vector of length 4 to control the margins around the bottom,
-left, top and right of the plot, set to NULL by default to let `cyto_plot`
-compute optimal margins.}
+left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
+`cyto_plot` compute optimal margins.}
 
-\item{density_modal}{logical indicating whether density should be normalised
-to mode and presented as a percentage. Set to \code{TRUE} by default.}
+\item{hist_stat}{can be either \code{"count"}, \code{"percent"} or
+\code{"density"} to indicate the statistic to display on histograms, set to
+\code{"percent"} by default. The \code{"percent"} option applies modal
+normalisation and expresses the result as a percentage.}
 
-\item{density_smooth}{smoothing parameter passed to
-\code{\link[stats:density]{density}} to adjust kernel density.}
+\item{hist_smooth}{smoothing parameter passed to
+\code{\link[stats:density]{density}} to adjust the smoothness of the kernel
+density for histograms, set to \code{0.6} by default.}
 
-\item{density_stack}{numeric [0,1] indicating the degree of offset for
-overlaid populations, set to 0.5 by default. #' @param density_cols vector
-colours to draw from when selecting density fill colours if none are
-supplied to density_fill.}
+\item{hist_stack}{numeric [0,1] indicating the degree of stacking for
+histograms, set to \code{0} by default.}
 
-\item{density_cols}{vector colours to draw from when selecting density fill
-colours if none are supplied to density_fill.}
+\item{hist_cols}{vector colours to draw from when selecting histogram fill
+colours if none are supplied to \code{hist_fill}.}
 
-\item{density_fill}{colour(s) used to fill polygons.}
+\item{hist_fill}{fill colour(s) for histograms, select from \code{hist_cols}
+if not supplied.}
 
-\item{density_fill_alpha}{numeric [0,1] used to control fill transparency,
-set to 1 by default to remove transparency.}
+\item{hist_fill_alpha}{numeric [0,1] used to control histogram fill colour
+transparency, set to \code{1} by default for solid colours.}
 
-\item{density_line_type}{line type(s) to use for border(s), set to solid
-lines by default.}
+\item{hist_line_type}{line type(s) to use for histogram borders, set to 1 by
+default to use solid lines. See \code{\link[graphics:par]{lty}} for
+alternatives.}
 
-\item{density_line_width}{line width for border.}
+\item{hist_line_width}{numeric to control line width(s) for histogram borders
+lines, set to 1 by default.}
 
-\item{density_line_col}{colour(s) for border line, set to "black" by default.}
+\item{hist_line_col}{colour(s) for histogram borders, set to \code{"black"}
+by default.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
 \code{"."} by default to maximise plotting speed.  See
@@ -231,11 +231,17 @@ legends when legend is set to \code{"fill"}.}
 
 \item{legend_point_col}{colour(s) to use for points in 2-D scatter plot
 legend.}
+
+\item{...}{not in use.}
+
+\item{hist_layers}{numeric indicating the number of histograms to stack in
+each plot, set to all samples by default. Each plot must contain the same
+number of histograms.}
 }
 \description{
 \code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
 plot with border, axes, axes_text and titles. Data is subsequently added to
-this base layer with \code{cyto_plot_point} or \code{cyto_plot_density}.
+this base layer with \code{cyto_plot_point} or \code{cyto_plot_hist}.
 }
 \examples{
 library(CytoExploreRData)

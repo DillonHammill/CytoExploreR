@@ -8,7 +8,7 @@ cyto_plot_new(popup = TRUE, ...)
 }
 \arguments{
 \item{popup}{logical indicating whether a popup graphics device should be
-opened, set to TRUE by default.}
+opened.}
 
 \item{...}{additional arguments passed to
 \code{\link[grDevices:dev]{dev.new}}:}

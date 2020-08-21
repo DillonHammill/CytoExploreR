@@ -4,7 +4,7 @@
 #'
 #' \code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
 #' plot with border, axes, axes_text and titles. Data is subsequently added to
-#' this base layer with \code{cyto_plot_point} or \code{cyto_plot_density}.
+#' this base layer with \code{cyto_plot_point} or \code{cyto_plot_hist}.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
@@ -37,25 +37,33 @@
 #' @param xlab x axis label.
 #' @param ylab y axis label.
 #' @param margins a vector of length 4 to control the margins around the bottom,
-#'   left, top and right of the plot, set to NULL by default to let `cyto_plot`
-#'   compute optimal margins.
-#' @param density_modal logical indicating whether density should be normalised
-#'   to mode and presented as a percentage. Set to \code{TRUE} by default.
-#' @param density_smooth smoothing parameter passed to
-#'   \code{\link[stats:density]{density}} to adjust kernel density.
-#' @param density_stack numeric [0,1] indicating the degree of offset for
-#'   overlaid populations, set to 0.5 by default. #' @param density_cols vector
-#'   colours to draw from when selecting density fill colours if none are
-#'   supplied to density_fill.
-#' @param density_cols vector colours to draw from when selecting density fill
-#'   colours if none are supplied to density_fill.
-#' @param density_fill colour(s) used to fill polygons.
-#' @param density_fill_alpha numeric [0,1] used to control fill transparency,
-#'   set to 1 by default to remove transparency.
-#' @param density_line_type line type(s) to use for border(s), set to solid
-#'   lines by default.
-#' @param density_line_width line width for border.
-#' @param density_line_col colour(s) for border line, set to "black" by default.
+#'   left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
+#'   `cyto_plot` compute optimal margins.
+#' @param hist_stat can be either \code{"count"}, \code{"percent"} or
+#'   \code{"density"} to indicate the statistic to display on histograms, set to
+#'   \code{"percent"} by default. The \code{"percent"} option applies modal
+#'   normalisation and expresses the result as a percentage.
+#' @param hist_smooth smoothing parameter passed to
+#'   \code{\link[stats:density]{density}} to adjust the smoothness of the kernel
+#'   density for histograms, set to \code{0.6} by default.
+#' @param hist_stack numeric [0,1] indicating the degree of stacking for
+#'   histograms, set to \code{0} by default.
+#' @param hist_layers numeric indicating the number of histograms to stack in
+#'   each plot, set to all samples by default. Each plot must contain the same
+#'   number of histograms.
+#' @param hist_cols vector colours to draw from when selecting histogram fill
+#'   colours if none are supplied to \code{hist_fill}.
+#' @param hist_fill fill colour(s) for histograms, select from \code{hist_cols}
+#'   if not supplied.
+#' @param hist_fill_alpha numeric [0,1] used to control histogram fill colour
+#'   transparency, set to \code{1} by default for solid colours.
+#' @param hist_line_type line type(s) to use for histogram borders, set to 1 by
+#'   default to use solid lines. See \code{\link[graphics:par]{lty}} for
+#'   alternatives.
+#' @param hist_line_width numeric to control line width(s) for histogram borders
+#'   lines, set to 1 by default.
+#' @param hist_line_col colour(s) for histogram borders, set to \code{"black"}
+#'   by default.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
 #'   \code{"."} by default to maximise plotting speed.  See
 #'   \code{\link[graphics:par]{pch}} for alternatives.
@@ -120,8 +128,8 @@
 #'   legend.
 #' @param ... not in use.
 #'
-#' @importFrom grDevices adjustcolor
-#' @importFrom graphics plot box axis title par
+#' @importFrom grDevices adjustcolor rgb colorRamp
+#' @importFrom graphics plot box axis title par rect
 #' @importFrom methods formalArgs is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -140,68 +148,82 @@
 #'   channels = c("FSC-A"),
 #'   overlay = Activation[1:2]
 #' )
-#' @rdname cyto_plot_empty
 #' @export
-cyto_plot_empty <- function(x, ...) {
-  UseMethod("cyto_plot_empty")
-}
+cyto_plot_empty <- function(x,
+                            channels,
+                            axes_trans = NA,
+                            overlay = NA,
+                            gate = NA,
+                            xlim = c(NA, NA),
+                            ylim = c(NA, NA),
+                            axes_limits = "auto",
+                            axes_limits_buffer = 0.03,
+                            title,
+                            xlab,
+                            ylab,
+                            margins = c(NA, NA, NA, NA),
+                            hist_stat = "count",
+                            hist_smooth = 1.5,
+                            hist_stack = 0.5,
+                            hist_cols = NA,
+                            hist_fill = NA,
+                            hist_fill_alpha = 1,
+                            hist_line_type = 1,
+                            hist_line_width = 1,
+                            hist_line_col = "black",
+                            point_shape = ".",
+                            point_size = 2,
+                            point_col_scale = NA,
+                            point_cols = NA,
+                            point_col = NA,
+                            point_col_alpha = 1,
+                            axes_text = c(TRUE, TRUE),
+                            axes_text_font = 1,
+                            axes_text_size = 1,
+                            axes_text_col = "black",
+                            axes_label_text_font = 1,
+                            axes_label_text_size = 1.1,
+                            axes_label_text_col = "black",
+                            title_text_font = 2,
+                            title_text_size = 1.1,
+                            title_text_col = "black",
+                            border_line_type = 1,
+                            border_line_width = 1,
+                            border_line_col = "black",
+                            border_fill = "white",
+                            border_fill_alpha = 1,
+                            legend = FALSE,
+                            legend_text,
+                            legend_text_font = 1,
+                            legend_text_size = 1,
+                            legend_text_col = "black",
+                            legend_line_type = NA,
+                            legend_line_width = NA,
+                            legend_line_col = NA,
+                            legend_box_fill = NA,
+                            legend_point_col = NA,
+                            ...) {
 
-#' @rdname cyto_plot_empty
-#' @export
-cyto_plot_empty.flowFrame <- function(x,
-                                      channels,
-                                      axes_trans = NA,
-                                      overlay = NA,
-                                      gate = NA,
-                                      xlim = NA,
-                                      ylim = NA,
-                                      axes_limits = "auto",
-                                      axes_limits_buffer = 0.03,
-                                      title,
-                                      xlab,
-                                      ylab,
-                                      margins = NULL,
-                                      density_modal = TRUE,
-                                      density_smooth = 1.5,
-                                      density_stack = 0.5,
-                                      density_cols = NA,
-                                      density_fill = NA,
-                                      density_fill_alpha = 1,
-                                      density_line_type = 1,
-                                      density_line_width = 1,
-                                      density_line_col = "black",
-                                      point_shape = ".",
-                                      point_size = 2,
-                                      point_col_scale = NA,
-                                      point_cols = NA,
-                                      point_col = NA,
-                                      point_col_alpha = 1,
-                                      axes_text = c(TRUE, TRUE),
-                                      axes_text_font = 1,
-                                      axes_text_size = 1,
-                                      axes_text_col = "black",
-                                      axes_label_text_font = 1,
-                                      axes_label_text_size = 1.1,
-                                      axes_label_text_col = "black",
-                                      title_text_font = 2,
-                                      title_text_size = 1.1,
-                                      title_text_col = "black",
-                                      border_line_type = 1,
-                                      border_line_width = 1,
-                                      border_line_col = "black",
-                                      border_fill = "white",
-                                      border_fill_alpha = 1,
-                                      legend = FALSE,
-                                      legend_text,
-                                      legend_text_font = 1,
-                                      legend_text_size = 1,
-                                      legend_text_col = "black",
-                                      legend_line_type = NA,
-                                      legend_line_width = NA,
-                                      legend_line_col = NA,
-                                      legend_box_fill = NA,
-                                      legend_point_col = NA,
-                                      ...) {
+  # PREPARE X ------------------------------------------------------------------
+
+  # X CAN BE EITHER FLOWFRAME/FLOWFRAME LIST/CYTO_PLOT ARGUMENTS
+
+  # HISTOGRAMS - CYTO_PLOT ARGUMENTS
+  d <- NULL
+
+  # FLOWFRAME
+  if (is(x, "flowFrame")) {
+    overlay <- cyto_list(overlay)
+    if (!.all_na(overlay)) {
+      x <- c(
+        structure(list(x), names = cyto_names(x)),
+        overlay
+      )
+    }
+    # CYTO_PLOT ARGUMENTS
+  } else if (class(x) == "cyto_plot") {
+    .args_update(x)
+  }
 
   # GRAPHICAL PARAMETERS -------------------------------------------------------
 
@@ -231,115 +253,103 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # Check channels
   channels <- cyto_channels_extract(
-    x,
+    x[[1]],
     channels
   )
-
-  # LIST OF FLOWFRAMES ---------------------------------------------------------
-
-  # Convert overlay to list of flowFrames
-  if (!.all_na(overlay) &
-    any(is(overlay, "flowFrame") |
-      is(overlay, "flowSet"))) {
-    overlay <- cyto_convert(overlay, "list of flowFrames")
-  }
-
-  # Combine x and overlay into list
-  if (!.all_na(overlay)) {
-    fr_list <- c(list(x), overlay)
-  } else {
-    fr_list <- list(x)
-  }
-
-  # SAMPLES
-  smp <- length(fr_list)
 
   # AXES LIMITS ----------------------------------------------------------------
 
   # XLIM
-  if (.all_na(xlim)) {
+  if (any(is.na(xlim))) {
     # XLIM
-    xlim <- .cyto_range(fr_list,
+    xlim[is.na(xlim)] <- .cyto_plot_axes_limits(x,
       channels = channels[1],
       axes_limits = axes_limits,
       buffer = axes_limits_buffer,
       plot = TRUE
-    )[, 1]
+    )[, 1][is.na(xlim)]
   }
-  
+
   # YLIM
-  if (.all_na(ylim)) {
+  if (any(is.na(ylim))) {
     # 1D PLOT
     if (length(channels) == 1) {
-      # DENSITY
-      fr_dens <- .cyto_density(fr_list,
-        channel = channels,
-        smooth = density_smooth,
-        stack = density_stack,
-        modal = density_modal
-      )
+      if (is.null(d)) {
+        d <- .cyto_plot_hist(x,
+          hist_stat = hist_stat,
+          hist_smooth = hist_smooth,
+          hist_bandwidth = hist_bandwidth,
+          hist_stack = hist_stack
+        )
+      }
       # YLIM
-      ymin <- as.numeric(unlist(strsplit(names(fr_dens)[1], "-"))[1])
-      ymax <- as.numeric(unlist(strsplit(names(fr_dens)[smp], "-"))[2])
-      ylim <- c(ymin, ymax)
+      ymin <- as.numeric(unlist(strsplit(names(d)[1], "-"))[1])
+      ymax <- max(
+        LAPPLY(names(d), function(z){
+          as.numeric(unlist(strsplit(z, "-"))[2])
+        }),
+        na.rm = TRUE
+      )
+      yrng <- c(ymin, ymax)
+      ylim[is.na(ylim)] <- yrng[is.na(ylim)]
       # 2D PLOT
     } else if (length(channels) == 2) {
       # YLIM
-      ylim <- .cyto_range(fr_list,
+      ylim[is.na(ylim)] <- .cyto_plot_axes_limits(x,
         channels = channels[2],
         axes_limits = axes_limits,
         buffer = axes_limits_buffer,
         plot = TRUE
-      )[, 1]
+      )[, 1][is.na(ylim)]
     }
   }
-  
+
   # GATE COORDS MUST BE WITHIN AXES LIMITS
-  if(!.all_na(gate)){
+  if (!.all_na(gate)) {
     # GATE COORDS
     gate_coords <- .cyto_gate_coords(gate, channels)
   }
-  
+
   # XLIM GATE COORD ADJUSTMENT
-  if(!.all_na(gate)){
+  if (!.all_na(gate)) {
     # MIN & MAX GATE COORDS
     gate_xcoords <- gate_coords[, channels[1]]
     gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
     # GATE COORDS BELOW XMIN
-    if(is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]){
+    if (is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]) {
       xlim[1] <- gate_xcoords[1]
     }
     # GATE COORDS ABOVE XMAX
-    if(is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]){
+    if (is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]) {
       xlim[2] <- gate_xcoords[2]
     }
   }
-  
+
   # YLIM GATE COORD ADJUSTMENT
-  if(length(channels) == 2){
+  if (length(channels) == 2) {
     # GATE COORDS
-    if(!.all_na(gate)){
+    if (!.all_na(gate)) {
       # MIN & MAX GATE COORDS
       gate_ycoords <- gate_coords[, channels[2]]
       gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
       # GATE COORDS BELOW YMIN
-      if(is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]){
+      if (is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]) {
         ylim[1] <- gate_ycoords[1]
       }
       # GATE COORDS ABOVE YMAX
-      if(is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]){
+      if (is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]) {
         ylim[2] <- gate_ycoords[2]
       }
     }
   }
-  
-  # AXES TEXT ------------------------------------------------------------------
 
+  # AXES TEXT ------------------------------------------------------------------
+  
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!is(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
-
+  
   # X axis breaks and labels -  can be inherited from cyto_plot
   if (!is(axes_text[[1]], "list")) {
     if (.all_na(axes_text[[1]])) {
@@ -347,7 +357,7 @@ cyto_plot_empty.flowFrame <- function(x,
     } else if (axes_text[[1]] == TRUE) {
       lims <- list(xlim)
       names(lims) <- channels[1]
-      axes_text[[1]] <- .cyto_plot_axes_text(fr_list,
+      axes_text[[1]] <- .cyto_plot_axes_text(x,
         channels = channels[1],
         axes_trans = axes_trans,
         axes_range = lims,
@@ -364,7 +374,7 @@ cyto_plot_empty.flowFrame <- function(x,
       if (length(channels) == 2) {
         lims <- list(ylim)
         names(lims) <- channels[2]
-        axes_text[[2]] <- .cyto_plot_axes_text(fr_list,
+        axes_text[[2]] <- .cyto_plot_axes_text(x,
           channels = channels[2],
           axes_trans = axes_trans,
           axes_range = lims,
@@ -377,8 +387,8 @@ cyto_plot_empty.flowFrame <- function(x,
   }
 
   # Turn off y axis labels for stacked overlays
-  if (!.all_na(overlay) &
-    density_stack != 0 &
+  if (length(x) > 1 &
+    hist_stack != 0 &
     length(channels) == 1) {
     axes_text <- list(axes_text[[1]], FALSE)
   }
@@ -390,7 +400,7 @@ cyto_plot_empty.flowFrame <- function(x,
     channels = channels,
     xlab = xlab,
     ylab = ylab,
-    density_modal = density_modal
+    hist_stat
   )
   xlab <- axes_labels[[1]]
   ylab <- axes_labels[[2]]
@@ -400,20 +410,21 @@ cyto_plot_empty.flowFrame <- function(x,
   # TITLE - missing replaced - NA removed
   title <- .cyto_plot_title(x,
     channels = channels,
-    overlay = overlay,
     title = title
   )
 
   # MARGINS --------------------------------------------------------------------
 
   # Set plot margins - set par("mar")
-  .cyto_plot_margins(c(list(x), overlay),
+  .cyto_plot_margins(x,
+                     channels = channels,
     legend = legend,
     legend_text = legend_text,
     legend_text_size = legend_text_size,
     title = title,
     axes_text = axes_text,
-    margins = margins
+    margins = margins,
+    point_col = point_col
   )
 
   # PLOT CONSTRUCTION ----------------------------------------------------------
@@ -461,7 +472,7 @@ cyto_plot_empty.flowFrame <- function(x,
     } else {
       mjr_ind <- seq_len(length(mjr$label))
     }
-
+    
     axis(1,
       at = mjr$at[mjr_ind],
       labels = mjr$label[mjr_ind],
@@ -539,7 +550,6 @@ cyto_plot_empty.flowFrame <- function(x,
     col = border_line_col
   )
 
-
   # BORDER_FILL
   if (border_fill != "white") {
     rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
@@ -614,9 +624,53 @@ cyto_plot_empty.flowFrame <- function(x,
 
   # LEGEND ---------------------------------------------------------------------
 
+  # POINT_COL_SCALE
+  if(length(channels) == 2 & 
+     (any(is.na(point_col)) | 
+      any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
+    # LEGEND
+    point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
+    legend_col_ramp <- colorRamp(point_col_scale)
+    legend_cols <- seq(0, 1, 1/50) # 50 boxes
+    legend_cols <- legend_col_ramp(legend_cols)
+    legend_cols <- rgb(legend_cols[, 1],
+                       legend_cols[, 2],
+                       legend_cols[, 3],
+                       maxColorValue = 255)
+    legend_cols <- adjustcolor(legend_cols, point_col_alpha)
+    
+    # LEGEND LOCATION
+    legend_x <- c(par("usr")[2] + 0.005 * (par("usr")[2] - par("usr")[1]),
+                  par("usr")[2] + 0.035 * (par("usr")[2] - par("usr")[1]))
+    legend_y <- c(par("usr")[3], par("usr")[4])
+    
+    # LEGEND BORDER
+    rect(legend_x[1],
+         legend_y[1],
+         legend_x[2],
+         legend_y[2],
+         xpd = TRUE,
+         lwd = 1)
+    
+    # LEGEND BOXES
+    legend_box_x <- legend_x
+    legend_box_y <- seq(par("usr")[3], 
+                        par("usr")[4], 
+                        (par("usr")[4] - par("usr")[3])/50)
+    lapply(seq_len(50), function(z){
+      rect(legend_box_x[1],
+           legend_box_y[z],
+           legend_box_x[2],
+           legend_box_y[z + 1],
+           xpd = TRUE,
+           col = legend_cols[z],
+           border = NA)
+    })
+  }
+  
   # LEGEND - FALSE/"fill"/"line"
   if (legend != FALSE) {
-    .cyto_plot_legend(fr_list,
+    .cyto_plot_legend(x,
       channels = channels,
       legend = legend,
       legend_text = legend_text,
@@ -628,12 +682,12 @@ cyto_plot_empty.flowFrame <- function(x,
       legend_line_col = legend_line_col,
       legend_box_fill = legend_box_fill,
       legend_point_col = legend_point_col,
-      density_cols = density_cols,
-      density_fill = density_fill,
-      density_fill_alpha = density_fill_alpha,
-      density_line_type = density_line_type,
-      density_line_width = density_line_width,
-      density_line_col = density_line_col,
+      hist_cols = hist_cols,
+      hist_fill = hist_fill,
+      hist_fill_alpha = hist_fill_alpha,
+      hist_line_type = hist_line_type,
+      hist_line_width = hist_line_width,
+      hist_line_col = hist_line_col,
       point_shape = point_shape,
       point_size = point_size,
       point_col_scale = point_col_scale,
@@ -642,93 +696,6 @@ cyto_plot_empty.flowFrame <- function(x,
       point_col_alpha = point_col_alpha
     )
   }
-}
-
-#' @noRd
-#' @export
-cyto_plot_empty.list <- function(x,
-                                 channels,
-                                 axes_trans = NA,
-                                 gate = NA,
-                                 xlim = NA,
-                                 ylim = NA,
-                                 axes_limits = "auto",
-                                 title,
-                                 xlab,
-                                 ylab,
-                                 margins = NULL,
-                                 density_modal = TRUE,
-                                 density_smooth = 1.5,
-                                 density_stack = 0.5,
-                                 density_cols = NA,
-                                 density_fill = NA,
-                                 density_fill_alpha = 1,
-                                 density_line_type = 1,
-                                 density_line_width = 1,
-                                 density_line_col = "black",
-                                 point_shape = ".",
-                                 point_size = 2,
-                                 point_col_scale = NA,
-                                 point_cols = NA,
-                                 point_col = NA,
-                                 point_col_alpha = 1,
-                                 axes_limits_buffer = 0.03,
-                                 axes_text = c(TRUE, TRUE),
-                                 axes_text_font = 1,
-                                 axes_text_size = 1,
-                                 axes_text_col = "black",
-                                 axes_label_text_font = 1,
-                                 axes_label_text_size = 1.1,
-                                 axes_label_text_col = "black",
-                                 title_text_font = 2,
-                                 title_text_size = 1.1,
-                                 title_text_col = "black",
-                                 border_line_type = 1,
-                                 border_line_width = 1,
-                                 border_line_col = "black",
-                                 border_fill = "white",
-                                 border_fill_alpha = 1,
-                                 legend = FALSE,
-                                 legend_text,
-                                 legend_text_font = 1,
-                                 legend_text_size = 1,
-                                 legend_text_col = "black",
-                                 legend_line_type = NA,
-                                 legend_line_width = NA,
-                                 legend_line_col = NA,
-                                 legend_box_fill = NA,
-                                 legend_point_col = NA,
-                                 ...) {
-
-  # CHECKS ---------------------------------------------------------------------
-
-  # LIST OF FLOWFRAMES
-  if (!all(LAPPLY(x, "is") == "flowFrame")) {
-    stop("'x' must be a list of flowFrame objects.")
-  }
-
-  # OVERLAY
-  if (length(x) > 1) {
-    overlay <- x[seq(2, length(x), 1)]
-  } else {
-    overlay <- NA
-  }
-
-  # X
-  x <- x[[1]]
-
-  # ARGUMENTS ------------------------------------------------------------------
-
-  # ARGUMENT LIST
-  args <- .args_list()
-
-  # CALL FLOWFRAME METHOD ------------------------------------------------------
-
-  # CYTO_PLOT_EMPTY ARGUMENTS
-  ARGS <- formalArgs("cyto_plot_empty.flowFrame")
-
-  # CALL FLOWFRAME METHOD
-  do.call("cyto_plot_empty.flowFrame", args[names(args) %in% ARGS])
 }
 
 ## CYTO_PLOT_NEW ---------------------------------------------------------------
@@ -741,7 +708,7 @@ cyto_plot_empty.list <- function(x,
 #' functionality.
 #'
 #' @param popup logical indicating whether a popup graphics device should be
-#'   opened, set to TRUE by default.
+#'   opened.
 #' @param ... additional arguments passed to
 #'   \code{\link[grDevices:dev]{dev.new}}:
 #'
@@ -756,20 +723,20 @@ cyto_plot_empty.list <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup = TRUE, ...){
+cyto_plot_new <- function(popup = TRUE, ...) {
   # Null graphics device -> RStudioGD
-  if(dev.cur() == 1) {
+  if (dev.cur() == 1) {
     dev.new()
   }
   # Open popup window - either windows/X11/xquartz
-  if(popup == TRUE & interactive() & getOption("CytoExploreR_interactive")){
-    if(.Platform$OS.type == "windows"){
+  if (popup == TRUE & interactive() & getOption("CytoExploreR_interactive")) {
+    if (.Platform$OS.type == "windows") {
       suppressWarnings(dev.new(...))
-    }else if (.Platform$OS.type == "unix") {
+    } else if (.Platform$OS.type == "unix") {
       if (Sys.info()["sysname"] == "Linux") {
         # Cairo needed for semi-transparency
         suppressWarnings(dev.new(type = "cairo", ...))
-      }else if(Sys.info()["sysname"] == "Darwin"){
+      } else if (Sys.info()["sysname"] == "Darwin") {
         suppressWarnings(dev.new(...))
       }
     }
@@ -786,12 +753,6 @@ cyto_plot_new <- function(popup = TRUE, ...){
 #' @export
 cyto_plot_reset <- function() {
 
-  # Signals args called to cyto_plot - check if call is made twice
-  options("cyto_plot_call" = NULL)
-
-  # Signals if plots match in flowSet method
-  options("cyto_plot_match" = NULL)
-
   # Create custom theme for cyto_plot
   options("cyto_plot_theme" = NULL)
 
@@ -807,17 +768,22 @@ cyto_plot_reset <- function() {
   # Signal when cyto_plot_grid method is being called
   options("cyto_plot_grid" = FALSE)
 
-  # Signal previous call to cyto_plot (same plot?)
-  options("cyto_plot_call" = NULL)
+  # REMOVE CYTO_PLOT TEMPFILES
+  lapply(list.files(tempdir()), function(file) {
+    if (grepl("cyto_plot", file)) {
+      file.remove(paste0(
+        tempdir(),
+        .Platform$file.sep,
+        file
+      ))
+    }
+  })
 
-  # Save label co-ordinates as list
-  options("cyto_plot_label_coords" = NULL)
-  
   # Turn off graphics device
-  if(dev.cur() != 1){
+  if (dev.cur() != 1) {
     dev.off()
   }
-  
+
   invisible(NULL)
 }
 
@@ -831,30 +797,30 @@ cyto_plot_reset <- function() {
 #' @importFrom grDevices recordPlot
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
-#' 
+#'
 #' # Load CytoExploreRData to acces data
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Construct cyto_plot
 #' cyto_plot(fs[[1]],
-#'           channels = c("FSC-A", "SSC-A"))
-#'           
+#'   channels = c("FSC-A", "SSC-A")
+#' )
+#'
 #' # Record plot and save to object called p
 #' p <- cyto_plot_record()
-#' 
+#'
 #' # Calling p will bring back the recorded plot
 #' p
-#' 
 #' }
 #'
 #' @export
-cyto_plot_record <- function(){
+cyto_plot_record <- function() {
   recordPlot()
 }
 
@@ -883,7 +849,6 @@ cyto_plot_record <- function(){
 #' @param ... additional arguments for the appropriate \code{png()},
 #'   \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.
 #'
-#' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom grDevices png tiff jpeg pdf svg
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -938,16 +903,13 @@ cyto_plot_save <- function(save_as,
                            layout = NULL,
                            ...) {
 
-  # File missing extension
-  if (file_ext(save_as) == "") {
-    # Modify file name to export png by default
-    save_as <- paste0(save_as, ".png")
-  }
+  # APPEND FILE EXTENSION
+  save_as <- file_ext_append(save_as, ".png")
 
   # Save separate pages to separate number files
   if (multiple == TRUE & file_ext(save_as) != "pdf") {
     save_as <- paste0(
-      file_path_sans_ext(save_as),
+      file_ext_remove(save_as),
       "%03d", ".",
       file_ext(save_as)
     )
@@ -963,7 +925,7 @@ cyto_plot_save <- function(save_as,
       res = res,
       ...
     )
-  # TIFF DEVICE
+    # TIFF DEVICE
   } else if (file_ext(save_as) == "tiff") {
     tiff(
       filename = save_as,
@@ -973,7 +935,7 @@ cyto_plot_save <- function(save_as,
       res = res,
       ...
     )
-  # JPEG DEVICE
+    # JPEG DEVICE
   } else if (file_ext(save_as) == "jpeg") {
     jpeg(
       filename = save_as,
@@ -983,7 +945,7 @@ cyto_plot_save <- function(save_as,
       res = res,
       ...
     )
-  # PDF DEVICE
+    # PDF DEVICE
   } else if (file_ext(save_as) == "pdf") {
     pdf(
       file = save_as,
@@ -992,7 +954,7 @@ cyto_plot_save <- function(save_as,
       onefile = multiple,
       ...
     )
-  } else if(file_ext(save_as) == "svg") {
+  } else if (file_ext(save_as) == "svg") {
     svg(
       filename = save_as,
       width = width,
@@ -1005,12 +967,11 @@ cyto_plot_save <- function(save_as,
 
   # Set global option to notify cyto_plot when dev.off() is required for saving
   options("cyto_plot_save" = TRUE)
-  
+
   # CYTO_PLOT_CUSTOM
-  if(!is.null(layout)){
+  if (!is.null(layout)) {
     cyto_plot_custom(layout = layout)
   }
-  
 }
 
 ## CYTO_PLOT_SAVE_RESET --------------------------------------------------------
@@ -1026,7 +987,6 @@ cyto_plot_save <- function(save_as,
 #'
 #' # Revert unwanted cyto_plot_save call
 #' cyto_plot_save_reset()
-#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
@@ -1074,7 +1034,7 @@ cyto_plot_save_reset <- function() {
 #' gt_gating(gt, gs)
 #'
 #' # Set out plot layout
-#' cyto_plot_layout(c(1,2))
+#' cyto_plot_layout(c(1, 2))
 #'
 #' # Add 2D plot
 #' cyto_plot(gs[[4]],
@@ -1089,35 +1049,34 @@ cyto_plot_save_reset <- function() {
 #'   parent = "CD4 T Cells",
 #'   alias = "",
 #'   channels = "7-AAD-A",
-#'   density_stack = 0.6,
+#'   hist_stack = 0.6,
 #'   layout = FALSE
 #' )
 #' @export
 cyto_plot_layout <- function(layout = NULL) {
 
   # MESSAGE
-  if(is.null(layout)){
+  if (is.null(layout)) {
     stop("Supply either a vector or matrix to construct a custom layout.")
   }
-  
+
   # MATRIX
-  if(is.matrix(layout)){
+  if (is.matrix(layout)) {
     layout(layout)
-  # VECTOR  
-  }else{
+    # VECTOR
+  } else {
     # ROW ORDER
-    if(length(layout) == 2){
+    if (length(layout) == 2) {
       layout <- c(layout, 1)
     }
     # ROWS
     if (layout[3] == 1) {
       par(mfrow = c(layout[1], layout[2]))
-    # COLUMNS
+      # COLUMNS
     } else if (layout[3] == 2) {
       par(mfcol = c(layout[1], layout[2]))
     }
   }
-
 }
 
 ## CYTO_PLOT_CUSTOM ------------------------------------------------------------
@@ -1136,9 +1095,9 @@ cyto_plot_layout <- function(layout = NULL) {
 #'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 #'   third element to indicate whether plots should be placed in row (1) or
 #'   column (2) order, set to row order by default.
-#'   
+#'
 #' @importFrom graphics par
-#'   
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
@@ -1147,34 +1106,36 @@ cyto_plot_layout <- function(layout = NULL) {
 #'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Save plot
 #' cyto_plot_save("Test.png",
-#'                height = 7,
-#'                width = 14)
+#'   height = 7,
+#'   width = 14
+#' )
 #'
 #' # Create custom plot - 1D & 2D plot panels
-#' cyto_plot_custom(layout = c(1,2))
+#' cyto_plot_custom(layout = c(1, 2))
 #' cyto_plot(fs[[32]],
-#'           channels = "FSC-A")
+#'   channels = "FSC-A"
+#' )
 #' cyto_plot(fs[[32]],
-#'           channels = c("FSC-A","SSC-A"))
+#'   channels = c("FSC-A", "SSC-A")
+#' )
 #'
 #' # Signal plot is complete and save
 #' cyto_plot_complete()
 #' }
 #' @export
-cyto_plot_custom <- function(layout = NULL){
-  
+cyto_plot_custom <- function(layout = NULL) {
+
   # Tell CytoExploreR - cyto_plot_save and layout resets
   options("cyto_plot_custom" = TRUE)
-  
+
   # Set plot method
   options("cyto_plot_method" = "custom")
-  
+
   # Set layout
   cyto_plot_layout(layout)
-  
 }
 
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------
@@ -1216,7 +1177,7 @@ cyto_plot_custom <- function(layout = NULL){
 #' )
 #'
 #' # Set out plot layout
-#' cyto_plot_layout(c(1,2))
+#' cyto_plot_layout(c(1, 2))
 #'
 #' # Add 2D plot
 #' cyto_plot(gs[[4]],
@@ -1231,7 +1192,7 @@ cyto_plot_custom <- function(layout = NULL){
 #'   parent = "CD4 T Cells",
 #'   alias = "",
 #'   channels = "7-AAD-A",
-#'   density_stack = 0.6,
+#'   hist_stack = 0.6,
 #'   layout = FALSE
 #' )
 #'
@@ -1241,47 +1202,48 @@ cyto_plot_custom <- function(layout = NULL){
 cyto_plot_complete <- function(layout = NULL) {
 
   # Close graphics device (not RStudioGD or X11)
-  if(!names(dev.cur()) %in% c("RStudioGD", 
-                              "windows", 
-                              "X11", 
-                              "x11", 
-                              "quartz")){
+  if (!names(dev.cur()) %in% c(
+    "RStudioGD",
+    "windows",
+    "X11",
+    "x11",
+    "quartz"
+  )) {
     dev.off()
   }
 
   # Reset cyto_plot_custom
   options("cyto_plot_custom" = FALSE)
-  
+
   # Reset plot method
   options("cyto_plot_method" = NULL)
-  
+
   # Turn off saving
   options("cyto_plot_save" = FALSE)
-  
+
   # Reset layout - 1 x 1
-  if(is.null(layout)){
-    par("mfrow" = c(1,1))
-    par("mfcol" = c(1,1))
-  # Reset layout as supplied
-  }else{
+  if (is.null(layout)) {
+    par("mfrow" = c(1, 1))
+    par("mfcol" = c(1, 1))
+    # Reset layout as supplied
+  } else {
     # MATRIX
-    if(is.matrix(layout)){
+    if (is.matrix(layout)) {
       layout(layout)
-    # VECTOR
-    }else{
-      if(length(layout) == 2){
+      # VECTOR
+    } else {
+      if (length(layout) == 2) {
         layout <- c(layout, 1)
       }
     }
     # ROWS
     if (layout[3] == 1) {
       par(mfrow = c(layout[1], layout[2]))
-    # COLUMNS
+      # COLUMNS
     } else if (layout[3] == 2) {
       par(mfcol = c(layout[1], layout[2]))
     }
   }
-  
 }
 
 ## CYTO_PLOT_THEME -------------------------------------------------------------
@@ -1377,14 +1339,15 @@ cyto_plot_theme_args <- function() {
     "axes_limits_buffer",
     "margins",
     "popup",
-    "density_modal",
-    "density_smooth",
-    "density_stack",
-    "density_cols",
-    "density_fill_alpha",
-    "density_line_type",
-    "density_line_width",
-    "density_line_col",
+    "hist_stat",
+    "hist_bins",
+    "hist_smooth",
+    "hist_stack",
+    "hist_cols",
+    "hist_fill_alpha",
+    "hist_line_type",
+    "hist_line_width",
+    "hist_line_col",
     "axes_text",
     "axes_text_font",
     "axes_text_size",
@@ -1423,6 +1386,7 @@ cyto_plot_theme_args <- function() {
     "point_col_scale",
     "point_cols",
     "point_col_alpha",
+    "point_fast",
     "contour_lines",
     "contour_line_type",
     "contour_line_width",
