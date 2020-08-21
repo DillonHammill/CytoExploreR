@@ -230,6 +230,8 @@ cyto_stat_auc <- function(x,
                           smooth = 0.6,
                           bandwidth = NULL,
                           method = "natural",
+                          min = NULL,
+                          max = NULL,
                           ...) {
   
   # DENSITY - LIST
@@ -245,8 +247,12 @@ cyto_stat_auc <- function(x,
         splinefun(z$x, 
                   z$y, 
                   method = method),
-        lower = min(z$x),
-        upper = max(z$x),
+        lower = switch(as.charcater(is.null(min)), 
+                       "TRUE" = min(z$x), 
+                       "FALSE" = min),
+        upper = switch(as.character(is.null(max)),
+                       "TRUE" = max(z$x),
+                       "FALSE" = max),
         subdivisions = 2000,
         ...
       )$value, round)
@@ -289,13 +295,14 @@ cyto_stat_bandwidth <- function(x,
 #' @param x a matrix
 #' @param stat "percent", "density" or "count"
 #' @param smooth numeric set to 0.6
-#' @param bandwidth NULL
+#' @param bins 256
 #' @importFrom stats density
 #' @noRd
 cyto_stat_density <- function(x,
                               stat = "density",
                               smooth = 0.6,
-                              bandwidth = NULL,
+                              bandwidth = NA,
+                              bins = 256,
                               ...) {
   
   # TOO FEW EVENTS
@@ -306,16 +313,35 @@ cyto_stat_density <- function(x,
     return(res)
   }
   
-  # BANDWIDTH
-  if(is.null(bandwidth)){
-    bandwidth <- rep("nrd0", ncol(x))
-    names(bandwidth) <- colnames(x)
-  }else{
-    bandwidth <- rep(bandwidth, ncol(x))
-    names(bandwidth) <- colnames(x)
-  }
+  # BINS
+  bins <- rep(bins, length.out = ncol(x))
+  names(bins) <- colnames(x)
   
+  # CONVERT BINS TO BANDWIDTH
+  if(.all_na(bandwidth)) {
+    cnt <- 0
+    bandwidth <- apply(x, 2, function(z){
+      # COUNTER
+      assign("cnt", cnt + 1, envir = parent.frame(2))
+      # BANDWIDTH
+      if(length(z) == 0) {
+        return(0)
+      } else {
+        rng <- range(z)
+        return((rng[2] - rng[1])/bins)
+      }
+    })
+  } else {
+    if(length(bandwidth) != ncol(x)) {
+      stop("A bandwidth is required for each channel!")
+    }
+  }
+
   # SMOOTH
+  if(smooth < 1) {
+    # SMOOTH < 1 RESULTS IN INACCURATE COUNTS
+    stop("'smooth' must be greater than or equal to 1!")
+  }
   smooth <- rep(smooth, ncol(x))
   names(smooth) <- colnames(x)
   
@@ -324,6 +350,7 @@ cyto_stat_density <- function(x,
   res <- apply(x, 2, function(z,
                               st = stat,
                               sm = smooth,
+                              bn = bins,
                               bw = bandwidth,
                               ...){
     
@@ -342,17 +369,19 @@ cyto_stat_density <- function(x,
       # MODAL
       kd$y <- (kd$y / max(kd$y)) * 100
       # ATTACH RANGE
-      attributes(kd)$range <- c(0, 100)
+      kd$range <- c(0, 100)
       # COUNT
     }else if(grepl("count", st, ignore.case = TRUE)){
-      # COUNT
-      kd$y <- kd$y * kd$n
+      # HIST METHOD
+      # h <- hist(z, breaks = bins[cnt], plot = FALSE) 
+      # kd$y <- kd$y/max(h$density) * max(h$counts)
+      kd$y <- kd$y * kd$n * kd$bw
       # ATTACH RANGE
-      attributes(kd)$range <- c(0, max(kd$y))
+      kd$range <- c(0, max(kd$y))
       # DENSITY  
     }else{
       # ATTACH RANGE
-      attributes(kd)$range <- c(0, max(kd$y))
+      kd$range <- c(0, max(kd$y))
     }
     return(kd)
   })
