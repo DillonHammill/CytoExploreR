@@ -2,59 +2,19 @@
 % Please edit documentation in R/cyto_plot_profile.R
 \name{cyto_plot_profile}
 \alias{cyto_plot_profile}
-\alias{cyto_plot_profile.GatingSet}
-\alias{cyto_plot_profile.GatingHierarchy}
-\alias{cyto_plot_profile.flowSet}
-\alias{cyto_plot_profile.flowFrame}
 \title{Plot expression profile in all channels}
 \usage{
-\method{cyto_plot_profile}{GatingSet}(
+cyto_plot_profile(
   x,
-  parent = NULL,
+  parent = "root",
   channels = NULL,
-  group_by = NA,
-  select = NULL,
-  axes_trans = NA,
   layout = NULL,
+  hist_stack = 0.5,
+  axes_limits = "machine",
   header = NULL,
   header_text_font = 2,
   header_text_size = 1,
-  ...
-)
-
-\method{cyto_plot_profile}{GatingHierarchy}(
-  x,
-  parent = NULL,
-  channels = NULL,
-  axes_trans = NA,
-  header = NULL,
-  header_text_font = 2,
-  header_text_size = 1,
-  ...
-)
-
-\method{cyto_plot_profile}{flowSet}(
-  x,
-  channels = NULL,
-  group_by = NA,
-  select = NA,
-  axes_trans = NULL,
-  layout = NULL,
-  header = NULL,
-  header_text_font = 2,
-  header_text_size = 1,
-  density_stack = 0.5,
-  ...
-)
-
-\method{cyto_plot_profile}{flowFrame}(
-  x,
-  channels = NULL,
-  axes_trans = NA,
-  layout = NULL,
-  header = NULL,
-  header_text_font = 2,
-  header_text_size = 1,
+  header_text_col = "black",
   ...
 )
 }
@@ -70,40 +30,30 @@
 \item{channels}{a vector channels to use to construct the plots, set to all
 channels by default.}
 
-\item{group_by}{a vector of experiment variables to sort and merge samples
-into groups prior to plotting, set to NA by default to prevent merging.
-To merge all samples set this argument to \code{"all"}.}
-
-\item{select}{designates which samples will be plotted and used for
-determining the best location to set the drawn gate(s). Filtering steps
-should be comma separated and wrapped in a list. Refer to
-\code{\link{cyto_select}}.}
-
-\item{axes_trans}{object of class
-\code{\link[flowWorkspace:transformerList]{transformerList}} which
-was used to transform the channels of the supplied flowFrame.
-\code{cyto_plot} does not support in-line transformations and as such the
-transformations should be applied to the data prior to plotting. The
-transformerList is used internally to ensure that the axes on the
-constructed plots are appropriately labelled.}
-
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}
 
+\item{hist_stack}{numeric [0,1] indicating the degree of offset for 1-D
+density distributions with overlay, set to 0.5 by default.}
+
+\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
+\code{"machine"} to use optimised, data or machine limits respectively. Set
+to \code{"machine"} by default to complete axes ranges.}
+
 \item{header}{character string to include in the plot header, set to the
-sample names by deafult. The header can be removed by setting this argument
+sample names by default. The header can be removed by setting this argument
 to NA.}
 
 \item{header_text_font}{numeric indicating the font to use for the header,
 set to 2 by default for bold font.}
 
 \item{header_text_size}{numeric to control the text size of the header, set
-to 1 by deafult.}
+to 1 by default.}
+
+\item{header_text_col}{colour to use for the header, set to "black" by
+default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
-
-\item{density_stack}{numeric [0,1] indicating the degree of offset for 1-D
-density distributions with overlay, set to 0.5 by default.}
 }
 \description{
 Plot expression profile in all channels
@@ -135,8 +85,8 @@ cyto_plot_profile(gs[1:9],
 # Group samples by Treatment & select highest OVAConc
  cyto_plot_profile(gs[1:9],
   parent = "CD4 T Cells",
-  group_by = "Treatment",
-  select = list("OVAConc" = 500),
+  merge_by = "Treatment",
+  select = list("OVAConc" = 500)
 )
 
 }
