@@ -60,7 +60,7 @@
   channels_x = NULL,
   channels_y = NULL,
   axes_trans = NA,
-  layout,
+  layout = NULL,
   popup = FALSE,
   title = NA,
   header,
