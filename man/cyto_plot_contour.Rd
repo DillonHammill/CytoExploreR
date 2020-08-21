@@ -2,38 +2,13 @@
 % Please edit documentation in R/cyto_plot_contour.R
 \name{cyto_plot_contour}
 \alias{cyto_plot_contour}
-\alias{cyto_plot_contour.flowFrame}
-\alias{cyto_plot_contour.flowSet}
-\alias{cyto_plot_contour.list}
 \title{Add contour lines to cyto_plot}
 \usage{
-cyto_plot_contour(x, ...)
-
-\method{cyto_plot_contour}{flowFrame}(
+cyto_plot_contour(
   x,
   channels,
-  contour_lines = 15,
-  contour_line_type = 1,
-  contour_line_width = 1,
-  contour_line_col = "black",
-  contour_line_alpha = 1,
-  ...
-)
-
-\method{cyto_plot_contour}{flowSet}(
-  x,
-  channels,
-  contour_lines = 15,
-  contour_line_type = 1,
-  contour_line_width = 1,
-  contour_line_col = "black",
-  contour_line_alpha = 1,
-  ...
-)
-
-\method{cyto_plot_contour}{list}(
-  x,
-  channels,
+  overlay = NA,
+  display = 1,
   contour_lines = 15,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -44,13 +19,17 @@ cyto_plot_contour(x, ...)
 }
 \arguments{
 \item{x}{either an object of class
-\code{\link[flowCore:flowFrame-class]{flowFrame}}, or
-\code{\link[flowCore:flowSet-class]{flowSet}} or a list of
-\code{\link[flowCore:flowFrame-class]{flowFrame}} objects.}
-
-\item{...}{not in use.}
+\code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}} or a list of
+\code{\link[flowWorkspace:cytoframe]{cytoframe}} objects.}
 
 \item{channels}{channels used to construct the existing cyto_plot.}
+
+\item{overlay}{optional argument if x is a cytoframe to overlay a list of
+cytoframe objects.}
+
+\item{display}{controls the number or percentage of events to display, set to
+1 by default to display all events.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines, set to 15 by default.}
@@ -65,6 +44,8 @@ default.}
 
 \item{contour_line_alpha}{numeric [0,1] to control transparency of contour
 lines, set to 1 by default to remove transparency.}
+
+\item{...}{not in use.}
 }
 \description{
 Add contour lines to cyto_plot
@@ -93,7 +74,6 @@ cyto_plot_contour(fs[[32]],
   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
   contour_lines = 20
 )
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
