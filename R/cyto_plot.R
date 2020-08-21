@@ -841,7 +841,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       gate_fill_alpha = 0,
                                       label,
                                       label_text,
-                                      label_stat,
+                                      label_stat = "",
                                       label_position = "auto",
                                       label_text_x = NA,
                                       label_text_y = NA,
@@ -1656,10 +1656,8 @@ cyto_plot.flowSet <- function(x,
       # LAYOUT TURNED OFF
     } else if (all(layout == FALSE) | .all_na(layout)) {
       # USE CURRENT DIMENSIONS
-      if (getOption("cyto_plot_method") == "flowSet") {
-        layout <- par("mfrow")
-        par("mfrow" = layout)
-      }
+      layout <- par("mfrow")
+      par("mfrow" = layout)
       # LAYOUT SUPPLIED
     } else {
       par("mfrow" = layout)
@@ -1668,7 +1666,7 @@ cyto_plot.flowSet <- function(x,
   
   # NUMBER OF PLOTS PER PAGE
   if (length(args$x) > 1) {
-    np <- layout[1] * layout[2]
+    np <- prod(layout)
   } else {
     np <- 1
   }
@@ -1790,8 +1788,7 @@ cyto_plot.flowSet <- function(x,
       cyto_plot_memory <<- cyto_plot_memory[[length(cyto_plot_memory)]]
     }
     # RECORD PLOT (FULL PAGE OR ALL SAMPLES)
-    if (cnt %% np == 0 |
-        cnt == length(args)) {
+    if (cnt %% np == 0 | cnt == length(args)) {
       if (getOption("cyto_plot_method") == "flowSet") {
         p <- cyto_plot_record()
       } else {
@@ -1802,9 +1799,7 @@ cyto_plot.flowSet <- function(x,
     }
     
     # NEW PLOT PAGE
-    if (popup == TRUE &
-        cnt %% np == 0 &
-        length(args) > cnt) {
+    if (popup == TRUE & cnt %% np == 0 & length(args) > cnt) {
       cyto_plot_new(popup = TRUE)
       par("mfrow" = layout)
     }

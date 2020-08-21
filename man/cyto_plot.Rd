@@ -165,7 +165,7 @@
   gate_fill_alpha = 0,
   label,
   label_text,
-  label_stat,
+  label_stat = "",
   label_position = "auto",
   label_text_x = NA,
   label_text_y = NA,
