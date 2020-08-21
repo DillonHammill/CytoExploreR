@@ -7,8 +7,8 @@
 cyto_channel_select(x)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
 compensation controls.}
 }

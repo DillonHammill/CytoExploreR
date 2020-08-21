@@ -8,8 +8,8 @@ cyto_markers_extract(x, channels, plot = FALSE)
 }
 \arguments{
 \item{x}{an object of class
-\code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -26,8 +26,8 @@ A vector of marker names.
 \description{
 \code{cyto_markers_extract} will check whether the supplied channels or
 marker names are valid for the
-\code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 marker names. The name of the channel will be returned if there is no

@@ -7,8 +7,8 @@
 cyto_channels(x, select = NULL, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -25,7 +25,8 @@ vector of channel names.
 }
 \description{
 Simply a wrapper around \code{colnames} to extract the channels associated
-with a \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
+with a \code{cytoframe}, \code{cytoset} \code{GatingHierarchy} or
+\code{GatingSet}.
 }
 \examples{
 

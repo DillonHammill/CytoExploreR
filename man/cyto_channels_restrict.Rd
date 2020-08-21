@@ -14,7 +14,9 @@
 \method{cyto_channels_restrict}{GatingSet}(x, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet}or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}}or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{exclude}{vector of privileged channels or markers to remove in addition
 to the channels removed by default, set to NULL by default.}
@@ -28,7 +30,7 @@ an object of class \code{flowFrame}, \code{flowSet},
 }
 \description{
 \code{cyto_channels_restrict} removes any unused channels (channels lacking
-marker assignments) from a \code{flowFrame}, \code{flowSet},
+marker assignments) from a \code{cytoframe}, \code{cytoset},
 \code{GatingHierarchy} or \code{GatingSet}. By default,
 \code{cyto_channels_restrict} will always retain any FSC, SSC or Time
 channels irrespective of marker assignment. Removal of channels that contain

@@ -3,10 +3,11 @@
 #' Extract channel names
 #'
 #' Simply a wrapper around \code{colnames} to extract the channels associated
-#' with a \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
+#' with a \code{cytoframe}, \code{cytoset} \code{GatingHierarchy} or
+#' \code{GatingSet}.
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param select vector of channel names to select.
@@ -18,6 +19,7 @@
 #' @return vector of channel names.
 #'
 #' @importFrom BiocGenerics colnames
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -51,6 +53,11 @@ cyto_channels <- function(x,
                           select = NULL,
                           exclude = NULL,
                           ...){
+  
+  # LIST
+  if(is(x, "list")) {
+    x <- x[[1]]
+  }
   
   # CHANNELS
   channels <- colnames(x)
@@ -90,10 +97,11 @@ cyto_channels <- function(x,
 
 #' Extract marker names
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list of these
+#'   objects.
 #' @param select vector of channels or markers for which the channel/marker
 #'   combinations should be returned.
 #' @param exclude vector of channels or markers for which the channel/marker
@@ -239,12 +247,26 @@ cyto_markers.flowFrame <- function(x,
   }
 }
 
+#' @rdname cyto_markers
+#' @export
+cyto_markers.list <- function(x,
+                              select = NULL,
+                              exclude = NULL,
+                              ...) {
+  
+  cyto_markers(x[[1]],
+               select = select,
+               exclude = exclude,
+               ...)
+  
+}
+
 ## CYTO_FLUOR_CHANNELS ---------------------------------------------------------
 
 #' Extract Fluorescent Channels
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param ... additional arguments passed to \code{\link{cyto_channels}}.
@@ -295,16 +317,16 @@ cyto_fluor_channels <- function(x,
 #'
 #' \code{cyto_channels_extract} will check whether the supplied channels or
 #' marker names are valid for the
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowSet}},
+#' \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#' \code{\link[flowWorkspace:cytoset]{cytoset}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' valid channel names. \code{cyto_channels_extract} is particularly useful for
 #' determining which channel(s) are associated with particular marker(s).
 #'
 #' @param x an object of class
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
@@ -390,16 +412,16 @@ cyto_channels_extract <- function(x,
 #'
 #' \code{cyto_markers_extract} will check whether the supplied channels or
 #' marker names are valid for the
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowSet}},
+#' \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#' \code{\link[flowWorkspace:cytoset]{cytoset}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' marker names. The name of the channel will be returned if there is no
 #' associated marker found.
 #'
 #' @param x an object of class
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
@@ -486,8 +508,8 @@ cyto_markers_extract <- function(x,
 
 #' Select Fluorescent Channel for Compensation Controls
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
 #'   compensation controls.
 #'
@@ -547,7 +569,7 @@ cyto_channel_select <- function(x){
 
 #' Create a csv file assigning a channel to each compensation control
 #'
-#' @param x object of \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
@@ -604,14 +626,16 @@ cyto_channel_match <- function(x,
 #' Restrict the channels of a cytometry object
 #'
 #' \code{cyto_channels_restrict} removes any unused channels (channels lacking
-#' marker assignments) from a \code{flowFrame}, \code{flowSet},
+#' marker assignments) from a \code{cytoframe}, \code{cytoset},
 #' \code{GatingHierarchy} or \code{GatingSet}. By default,
 #' \code{cyto_channels_restrict} will always retain any FSC, SSC or Time
 #' channels irrespective of marker assignment. Removal of channels that contain
 #' marker assignments or channels that are privileged channels (FSC/SSC/Time)
 #' can be forced through use of the \code{exclude} argument.
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet}or \code{GatingSet}.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param exclude vector of privileged channels or markers to remove in addition
 #'   to the channels removed by default, set to NULL by default.
 #' @param ... additional arguments passed to \code{\link{cyto_channels}} to

@@ -6,6 +6,7 @@
 \alias{cyto_markers.GatingHierarchy}
 \alias{cyto_markers.flowSet}
 \alias{cyto_markers.flowFrame}
+\alias{cyto_markers.list}
 \title{Extract marker names}
 \usage{
 \method{cyto_markers}{GatingSet}(x, select = NULL, exclude = NULL, ...)
@@ -15,12 +16,15 @@
 \method{cyto_markers}{flowSet}(x, select = NULL, exclude = NULL, ...)
 
 \method{cyto_markers}{flowFrame}(x, select = NULL, exclude = NULL, ...)
+
+\method{cyto_markers}{list}(x, select = NULL, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list of these
+objects.}
 
 \item{select}{vector of channels or markers for which the channel/marker
 combinations should be returned.}
