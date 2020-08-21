@@ -23,7 +23,7 @@
   label_text_col = "black",
   label_fill = "white",
   label_fill_alpha = 0.6,
-  density_smooth = 0.6,
+  hist_smooth = 1,
   ...
 )
 
@@ -43,7 +43,7 @@
   label_text_col = "black",
   label_fill = "white",
   label_fill_alpha = 0.6,
-  density_smooth = 0.6,
+  hist_smooth = 1,
   ...
 )
 }
@@ -106,7 +106,7 @@ for details.}
 \item{label_fill_alpha}{numeric [0,1] controls the transparency of the fill
 colour, set to \code{0.6} by default.}
 
-\item{density_smooth}{smoothing parameter passed to
+\item{hist_smooth}{smoothing parameter passed to
 \code{\link[stats:density]{density}} to adjust kernel density for mode
 calculation.}
 
@@ -123,7 +123,7 @@ add a boxed text label to an existing cyto_plot.
 Interactively label existing plots with boxed labels containing text and
 statistics. \code{cyto_plot_label} can only label the last plot and can only
 add labels on a per sample basis (i.e. single layer only). Locations for each
-label must be manually selected. More complex labelling can be acheived
+label must be manually selected. More complex labelling can be achieved
 directly through \code{cyto_plot}.
 }
 \examples{

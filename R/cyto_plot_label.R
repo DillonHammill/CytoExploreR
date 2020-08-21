@@ -5,7 +5,7 @@
 #' Interactively label existing plots with boxed labels containing text and
 #' statistics. \code{cyto_plot_label} can only label the last plot and can only
 #' add labels on a per sample basis (i.e. single layer only). Locations for each
-#' label must be manually selected. More complex labelling can be acheived
+#' label must be manually selected. More complex labelling can be achieved
 #' directly through \code{cyto_plot}.
 #'
 #' @param x object of class \code{flowFrame}.
@@ -53,7 +53,7 @@
 #' @param display numeric [0,1] to control the percentage of events to be
 #'   plotted. Specifying a value for \code{display} can substantial improve
 #'   plotting speed for less powerful machines.
-#' @param density_smooth smoothing parameter passed to
+#' @param hist_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density for mode
 #'   calculation.
 #' @param ... not in use.
@@ -127,7 +127,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                                             label_text_col = "black",
                                             label_fill = "white",
                                             label_fill_alpha = 0.6,
-                                            density_smooth = 0.6, ...){
+                                            hist_smooth = 1, ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -162,7 +162,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
       if (length(channels) == 2) {
         alias <- gt$alias[gt$dims == paste(channels, collapse = ",")]
         
-      # At least 1 channel match
+        # At least 1 channel match
       } else if (length(channels) == 1) {
         ind <- lapply(gt$dims, function(z) {
           grep(channels, z)
@@ -222,12 +222,12 @@ cyto_plot_label.GatingHierarchy <- function(x,
     })
     names(gate) <- alias
   }
-
+  
   # LIST OF UNIQUE GATE OBJECTS
   if(!.all_na(gate)){
     cyto_gate_prepare(gate, channels)
   }
-
+  
   # NEGATE
   if(!.all_na(gate)){
     # ALL NEGATED GATES - SET NEGATE TO TRUE
@@ -245,7 +245,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
     # GATE FILTERID - ALIAS & FILTERID SHOULD MATCH
     if(!.all_na(gate)){
       label_text <- LAPPLY(gate, function(z){z@filterId})
-    # NO LABEL_TEXT
+      # NO LABEL_TEXT
     }else{
       label_text <- NA
     }
@@ -256,7 +256,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
     # GATE
     if(!.all_na(gate)){
       label_stat <- rep("freq", length(alias))
-    # NO GATE
+      # NO GATE
     }else{
       label_stat <- NA
     }
@@ -280,7 +280,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                                    label_text_col = label_text_col,
                                    label_fill = label_fill,
                                    label_fill_alpha = label_fill_alpha,
-                                   density_smooth = density_smooth)
+                                   hist_smooth = hist_smooth)
   
   # RETURN LABEL CO-ORDINATES
   invisible(label_text_xy)
@@ -304,7 +304,7 @@ cyto_plot_label.flowFrame <- function(x,
                                       label_text_col = "black",
                                       label_fill = "white",
                                       label_fill_alpha = 0.6,
-                                      density_smooth = 0.6, ...){
+                                      hist_smooth = 1, ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -361,10 +361,10 @@ cyto_plot_label.flowFrame <- function(x,
   
   # REPEAT ARGUMENTS - GATE
   if(!.all_na(gate)){
-   
+    
     # REPEAT LABEL ARGS PER POPULATION
     args[["label_text"]] <- rep(c(label_text, rep(NA, PNS)), 
-                              length.out = PNS)
+                                length.out = PNS)
     label_args <- formalArgs(cyto_plot_labeller)
     label_args <- label_args[grepl("label_", label_args)]
     label_args <- label_args[-match("label_text", label_args)]
@@ -372,7 +372,7 @@ cyto_plot_label.flowFrame <- function(x,
       args[[z]] <<- rep(args[[z]], length.out = PNS)
     })
     
-  # REPEAT ARGUMENTS - WITHOUT GATE
+    # REPEAT ARGUMENTS - WITHOUT GATE
   }else{
     
     # REPEAT LABEL ARGS PER LABEL_TEXT
@@ -391,7 +391,7 @@ cyto_plot_label.flowFrame <- function(x,
   # STATISTICS PER POPULATION --------------------------------------------------
   
   # POPULATIONS
-  pops <- .cyto_label_pops(x,
+  pops <- .cyto_label_pops(list(x),
                            gate = gate,
                            negate = negate)
   
@@ -402,7 +402,7 @@ cyto_plot_label.flowFrame <- function(x,
                                  label_stat = label_stat,
                                  axes_trans = trans,
                                  gate = gate,
-                                 density_smooth = density_smooth)
+                                 hist_smooth = hist_smooth)
   
   # PREPARE LABEL_TEXT ---------------------------------------------------------
   
@@ -432,7 +432,7 @@ cyto_plot_label.flowFrame <- function(x,
           txt <- label_text
         }
         message(paste("Select a location on the plot the position the",
-                txt, "label."))
+                      txt, "label."))
         label_text_xy <- locator(n = 1)
         label_text_x <- label_text_xy[[1]]
         label_text_y <- label_text_xy[[2]]
@@ -502,6 +502,7 @@ cyto_plot_label.flowFrame <- function(x,
 #' @param label_fill fill colour to use for labels, set to "white" by default.
 #' @param label_fill_alpha numeric [0,1] controls the transparency of the fill
 #'   colour, set to \code{0.6} by default.
+#' @param ... not in use.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -513,7 +514,8 @@ cyto_plot_labeller <- function(label_text = NA,
                                label_text_size = 0.8,
                                label_text_col = "black",
                                label_fill = "white",
-                               label_fill_alpha = 0.6){
+                               label_fill_alpha = 0.6,
+                               ...){
   
   # LABEL CONSTRUCTION ---------------------------------------------------------
   

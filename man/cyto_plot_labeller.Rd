@@ -12,7 +12,8 @@ cyto_plot_labeller(
   label_text_size = 0.8,
   label_text_col = "black",
   label_fill = "white",
-  label_fill_alpha = 0.6
+  label_fill_alpha = 0.6,
+  ...
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ for details.}
 
 \item{label_fill_alpha}{numeric [0,1] controls the transparency of the fill
 colour, set to \code{0.6} by default.}
+
+\item{...}{not in use.}
 }
 \description{
 Convenient labelling function to add prepared text labels to an existing
