@@ -2193,14 +2193,14 @@ cyto_groups <- function(x,
 #' fs <- Activation
 #' 
 #' # Sort by Treatment and OVAConc
-#' fs <- cyto_sort(fs,
+#' fs <- cyto_sort_by(fs,
 #' list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
 #' OVAConc = c(0, 5, 50, 500)))
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_sort <- function(x,
+cyto_sort_by <- function(x,
                       sort_by = NULL) {
   
   # Experiment details per group
@@ -3294,7 +3294,7 @@ cyto_barcode <- function(x,
       !"Sample ID" %in% cyto_channels(x)) {
     x <- fsApply(x, function(fr) {
       ind <- match(cyto_names(fr), nms)
-      mat <- matrix(rep(ind, .cyto_count(fr)),
+      mat <- matrix(rep(ind, cyto_stat_count(fr)),
                     ncol = 1
       )
       colnames(mat) <- "Sample ID"
@@ -4540,18 +4540,21 @@ cyto_spillover_extract <- function(x) {
 #' so that this information can be used in all downstream \code{cyto_plot}
 #' calls.
 #'
-#' @param x object of class \code{cytoframe}, \code{cytoset},
-#'   \code{GatingHierarchy} or \code{GatingSet} to use for the calibration. For
-#'   the best calibration is recommended that users supply samples containing
-#'   both negative and positive events in each channel.
-#' @param name of the parent population to use for channel calibration when a
-#'   \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to use for the
+#'   calibration. For the best calibration is recommended that users supply
+#'   samples containing both negative and positive events in each channel.
+#' @param parent name of the parent population to use for channel calibration
+#'   when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
 #'   \code{"root"} node by default.
 #' @param type indicates the type of calibration to perform, options include
-#'   \code{"range"} or \code{"quantile"}. Range calibration simply uses the full
-#'   range of values across samples for the calibration. Quantile calibration
-#'   computes an lower and upper quantile for each channel, values falling
-#'   outside the calibration range are assigned the bottom or top colour.
+#'   \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
+#'   Range calibration simply uses the full range of values across samples for
+#'   the calibration. Quantile calibration computes an lower and upper quantile
+#'   for each channel, values falling outside the calibration range are assigned
+#'   the bottom or top colour.
 #' @param probs vector of lower and upper probabilities passed to
 #'   \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
 #'   default.
@@ -4578,24 +4581,38 @@ cyto_spillover_extract <- function(x) {
 #' @export
 cyto_calibrate <- function(x,
                            parent = "root",
-                           type = "range",
-                           probs = c(0.01, 0.99),
+                           type = "quantile",
+                           probs = c(0.01, 0.95),
                            ...){
   
   # COMPUTE CHANNEL RANGES
   if(grepl("^r", type, ignore.case = TRUE)){
-    cyto_cal <- .cyto_range(x,
-                            parent = parent,
-                            axes_limits = "data",
-                            buffer = 0,
-                            ...)
+    cyto_cal <- cyto_apply(x,
+                           "cyto_stat_range",
+                           parent = parent,
+                           input = "matrix",
+                           inverse = FALSE,
+                           copy = FALSE,
+                           ...)
     # COMPUTE CHANNEL QUANTILES
   }else if(grepl("^q", type, ignore.case = TRUE)){
-    cyto_cal<- .cyto_quantile(x,
-                              parent = parent,
-                              probs = probs,
-                              ...)
+    if(length(probs) != 2) {
+      stop("A lower and upper quantile probability must be supplied.")
+    }
+    cyto_cal <- cyto_apply(x,
+                           "cyto_stat_quantile",
+                           parent = parent,
+                           input = "matrix",
+                           inverse = FALSE,
+                           copy = FALSE,
+                           probs = probs,
+                           ...)
   }
+  
+  # MIN/MAX
+  cyto_cal <- apply(cyto_cal, 2, function(x){
+    c("min" = min(x), "max" = max(x))
+  })
   
   # SAVE RDS TO TEMPFILE
   tempfile <- paste0(tempdir(),
@@ -4658,6 +4675,9 @@ cyto_calibrate_reset <- function(){
 }
 
 ## CYTO_APPLY ------------------------------------------------------------------
+
+# flowFrame/flowSet methods require parent argument (not used) otherwise parent
+# gets passed to FUN.
 
 #' Apply a function to elements of cytoframe, cytoset, GatingHierarchy or
 #' GatingSet
@@ -4758,12 +4778,11 @@ cyto_apply.list <- function(x,
   
   # APPLY FUNCTION
   res <- lapply(x, function(z) {
-    cyto_apply(z,
+    cyto_apply(cyto_extract(z, parent),
                FUN = FUN,
                ...,
                simplify = simplify,
                input = input,
-               parent = parent,
                copy = copy,
                channels = channels,
                trans = trans,
@@ -4873,6 +4892,7 @@ cyto_apply.flowSet <- function(x,
                                ..., 
                                simplify = TRUE,
                                input = "cytoframe", 
+                               parent = NULL,
                                copy = TRUE,
                                channels = NULL,
                                trans = NA,
@@ -4929,6 +4949,7 @@ cyto_apply.flowFrame <- function(x,
                                  ...,
                                  simplify = TRUE,
                                  input = "cytoframe",
+                                 parent = NULL,
                                  copy = TRUE,
                                  channels = NULL,
                                  trans = NA,
@@ -5214,5 +5235,7 @@ cyto_list <- function(x){
     structure(list(x), names = cyto_names(x))
   } else if(is(x, "flowSet")) {
     cyto_apply(x, function(z){return(z)}, simplify = FALSE)
+  }else{
+    return(x)
   }
 }

@@ -4,29 +4,38 @@
 \alias{cyto_calibrate}
 \title{Calibrate channel ranges for cyto_plot}
 \usage{
-cyto_calibrate(x, parent = "root", type = "range", probs = c(0.01, 0.99), ...)
+cyto_calibrate(
+  x,
+  parent = "root",
+  type = "quantile",
+  probs = c(0.01, 0.95),
+  ...
+)
 }
 \arguments{
-\item{x}{object of class \code{cytoframe}, \code{cytoset},
-\code{GatingHierarchy} or \code{GatingSet} to use for the calibration. For
-the best calibration is recommended that users supply samples containing
-both negative and positive events in each channel.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to use for the
+calibration. For the best calibration is recommended that users supply
+samples containing both negative and positive events in each channel.}
+
+\item{parent}{name of the parent population to use for channel calibration
+when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
+\code{"root"} node by default.}
 
 \item{type}{indicates the type of calibration to perform, options include
-\code{"range"} or \code{"quantile"}. Range calibration simply uses the full
-range of values across samples for the calibration. Quantile calibration
-computes an lower and upper quantile for each channel, values falling
-outside the calibration range are assigned the bottom or top colour.}
+\code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
+Range calibration simply uses the full range of values across samples for
+the calibration. Quantile calibration computes an lower and upper quantile
+for each channel, values falling outside the calibration range are assigned
+the bottom or top colour.}
 
 \item{probs}{vector of lower and upper probabilities passed to
 \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
 default.}
 
 \item{...}{not in use.}
-
-\item{name}{of the parent population to use for channel calibration when a
-\code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
-\code{"root"} node by default.}
 }
 \value{
 saves calibration settings for use by \code{\link{cyto_plot}}.
