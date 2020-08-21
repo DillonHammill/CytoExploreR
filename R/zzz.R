@@ -33,9 +33,6 @@
   # Signal when cyto_plot_grid method is being called
   options("cyto_plot_grid" = FALSE)
   
-  # Use scattermore in cyto_plot
-  options("cyto_plot_fast" = FALSE)  
-  
   # Register gating and preprocessing functions with openCyto
   suppressMessages({
     openCyto::register_plugins(fun = .cyto_gate_manual, 
