@@ -17,6 +17,8 @@
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to complete axes ranges.
+#' @param popup logical indicating whether a pop-up window should be opened
+#'   prior to plotting, set to \code{FALSE} by default.
 #' @param header character string to include in the plot header, set to the
 #'   sample names by default. The header can be removed by setting this argument
 #'   to NA.
@@ -74,6 +76,7 @@ cyto_plot_profile <- function(x,
                               layout = NULL,
                               hist_stack = 0.5,
                               axes_limits = "machine",
+                              popup = FALSE,
                               header = NULL,
                               header_text_font = 2,
                               header_text_size = 1,
@@ -99,6 +102,9 @@ cyto_plot_profile <- function(x,
   if(is.null(channels)) {
     channels <- cyto_channels(x)
   }
+  
+  # POPUP
+  cyto_plot_new(popup)
   
   # LAYOUT DIMENSIONS
   layout <- .cyto_plot_layout(channels, layout)
@@ -130,6 +136,7 @@ cyto_plot_profile <- function(x,
               hist_layers = NA,
               hist_stack = hist_stack,
               axes_limits = axes_limits,
+              popup = FALSE,
               ...
     )
     # HEADER

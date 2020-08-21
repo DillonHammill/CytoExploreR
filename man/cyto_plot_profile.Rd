@@ -11,6 +11,7 @@ cyto_plot_profile(
   layout = NULL,
   hist_stack = 0.5,
   axes_limits = "machine",
+  popup = FALSE,
   header = NULL,
   header_text_font = 2,
   header_text_size = 1,
@@ -39,6 +40,9 @@ density distributions with overlay, set to 0.5 by default.}
 \item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
 to \code{"machine"} by default to complete axes ranges.}
+
+\item{popup}{logical indicating whether a pop-up window should be opened
+prior to plotting, set to \code{FALSE} by default.}
 
 \item{header}{character string to include in the plot header, set to the
 sample names by default. The header can be removed by setting this argument
