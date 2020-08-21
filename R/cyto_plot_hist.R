@@ -2,14 +2,17 @@
 
 #' Add histograms to empty plots
 #'
-#' @param x object of class flowFrame or a list of density objects.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}, list of
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframes}} or a list of
+#'   \code{\link[stats:density]{density}} objects.
 #' @param channel name of the channels to be used to construct the plot.
-#' @param overlay list of flowFRame objects to overlay.
+#' @param overlay list of cytoframe objects to overlay.
 #' @param display controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
 #' @param hist_stat can be either \code{"count"}, \code{"percent"} or
 #'   \code{"density"} to indicate the statistic to display on histograms, set to
-#'   \code{"percent"} by default. The \code{"percent"} option applies modal
+#'   \code{"count"} by default. The \code{"percent"} option applies modal
 #'   normalisation and expresses the result as a percentage.
 #' @param hist_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust the smoothness kernel
@@ -31,107 +34,127 @@
 #'   by default.
 #' @param ... not in use.
 #'
-#' @importFrom methods formalArgs
+#' @importFrom methods is
 #' @importFrom graphics abline polygon
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @rdname cyto_plot_hist
-#'
 #' @export
-cyto_plot_hist <- function(x, ...) {
-  UseMethod("cyto_plot_hist")
-}
+cyto_plot_hist <- function(x,
+                           channel,
+                           overlay = NA,
+                           display = 1,
+                           hist_stat = "count",
+                           hist_smooth = 0.6,
+                           hist_stack = 0.5,
+                           hist_cols = NA,
+                           hist_fill = NA,
+                           hist_fill_alpha = 1,
+                           hist_line_type = 1,
+                           hist_line_width = 1,
+                           hist_line_col = "black",
+                           ...) {
 
-#' @rdname cyto_plot_hist
-#' @export
-cyto_plot_hist.flowFrame <- function(x,
-                                     channel,
-                                     overlay = NA,
-                                     display = 1,
-                                     hist_stat = "percent",
-                                     hist_smooth = 0.6,
-                                     hist_stack = 0.5,
-                                     hist_cols = NA,
-                                     hist_fill = NA,
-                                     hist_fill_alpha = 1,
-                                     hist_line_type = 1,
-                                     hist_line_width = 1,
-                                     hist_line_col = "black",
-                                     ...) {
-  
   # CHECKS ---------------------------------------------------------------------
-  
-  # CHANNELS
-  channels <- cyto_channels_extract(x, channels)
-  
-  # PREPARE DATA ---------------------------------------------------------------
-  
-  # LIST OF FLOWFRAMES
-  if (!.all_na(overlay)) {
-    fr_list <- c(list(x), cyto_convert(overlay, "list of flowFrames"))
-  } else {
-    fr_list <- list(x)
+
+  # DENSITY LIST
+  d <- NULL
+
+  # X - FLOWFRAME/FLOWFRAME LIST/DENSITY LIST/CYTO_PLOT ARGS
+  if (is(x, "flowFrame")) {
+    # FLOWFRAME LIST
+    overlay <- cyto_list(overlay)
+    if (!.all_na(overlay)) {
+      x <- c(
+        structure(list(x), names = cyto_names(x)),
+        overlay
+      )
+    } else {
+      x <- cyto_list(x)
+    }
+    # SAMPLING
+    if (display != 1) {
+      x <- cyto_sample(x,
+        display = display,
+        seed = 56
+      )
+    }
+    # HISTOGRAMS
+    args <- .args_list(...)
+    args$channels <- cyto_channels_extract(x[[1]], channel)
+    d <- do.call(".cyto_plot_hist", args)
+  } else if (class(x) == "list") {
+    # FLOWFRAME LIST -> DENSITY LIST
+    if (all(LAPPLY(x, is, "flowFrame"))) {
+      # SAMPLING
+      if (display != 1) {
+        x <- cyto_sample(x,
+          display = display,
+          seed = 56
+        )
+      }
+      # HISTOGRAMS
+      args <- .args_list(...)
+      args$channels <- cyto_channels_extract(x[[1]], channel)
+      d <- do.call(".cyto_plot_hist", args)
+      # AS IS
+    } else if (all(LAPPLY(x, is, "density"))) {
+      d <- x
+    } else {
+      stop("'x' must be a list of cytoframe or density objects.")
+    }
+  } else if (class(x) == "cyto_plot") {
+    .args_update(x)
   }
-  
-  # SAMPLE DATA ----------------------------------------------------------------
-  
-  # DISPLAY
-  if(display != 1){
-    fr_list <- cyto_sample(fr_list,
-                           display = display,
-                           seed = 56)
+
+  # STACKING
+  if (length(d) == 1) {
+    hist_stack <- 0
   }
-  
+
   # ARGUMENTS ------------------------------------------------------------------
-  
+
   # ARGUMENTS
-  args <- .args_list()
-  
+  args <- .args_list(...)[-match("args", names(args))]
+
   # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
-  
+
   # UPDATE ARGUMENTS
   .args_update(args)
-  
-  # DENSITY --------------------------------------------------------------------
-  
-  # KERNEL DENSITY
-  fr_dens <- .cyto_density(fr_list,
-                           channel = channel,
-                           smooth = hist_smooth,
-                           stat = hist_stat,
-                           stack = hist_stack)
-  
-  # DENSITY_FILL ---------------------------------------------------------------
-  
-  # DENSITY_FILL COLOURS
-  hist_fill <- .cyto_plot_density_fill(fr_dens,
-                                       hist_fill = hist_fill,
-                                       hist_cols = hist_cols,
-                                       hist_fill_alpha = hist_fill_alpha)
-  
-  # REPEAT ARGUMENTS ------------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list()[c("hist_line_type",
-                         "hist_line_width",
-                         "hist_line_col")]
-  
+
+  # HIST_FILL ------------------------------------------------------------------
+
+  # HIST_FILL COLOURS
+  hist_fill <- .cyto_plot_hist_fill(x,
+    hist_fill = hist_fill,
+    hist_cols = hist_cols,
+    hist_fill_alpha = hist_fill_alpha
+  )
+
+  # REPEAT ARGUMENTS -----------------------------------------------------------
+
+  # ARGUMENTS TO REPEAT
+  args <- .args_list()[c(
+    "hist_line_type",
+    "hist_line_width",
+    "hist_line_col"
+  )]
+
   # REPEAT ARGUMENTS
-  args <- lapply(args, function(arg){
-    rep(arg, length.out = length(fr_list))
+  args <- lapply(args, function(arg) {
+    rep(arg, length.out = length(x))
   })
-  
+
   # UPDATE ARGUMENTS
   .args_update(args)
-  
+
   # HORIZONTAL LINES -----------------------------------------------------------
-  
+
   # YMIN PER LAYER
-  ylim <- strsplit(names(fr_dens), "-")
+  ylim <- strsplit(names(d), "-")
   ymin <- as.numeric(lapply(ylim, `[[`, 1))
-  
+
   # LINES UNDER DENSITY
   abline(
     h = ymin,
@@ -139,165 +162,58 @@ cyto_plot_hist.flowFrame <- function(x,
     lwd = hist_line_width,
     lty = hist_line_type
   )
-  
+
   # PLOT DENSITY ---------------------------------------------------------------
-  
-  # Add density distributions - reverse plot order and colours
-  if (!.all_na(overlay) & 
-      hist_stack == 0) {
-    
-    mapply(
-      function(fr_dens,
-               hist_fill,
-               hist_line_col,
-               hist_line_width,
-               hist_line_type) {
-        if(!.all_na(fr_dens)){
-          polygon(fr_dens,
-                  col = hist_fill,
-                  border = hist_line_col,
-                  lwd = hist_line_width,
-                  lty = hist_line_type)
-        }
-      }, fr_dens,
-      hist_fill,
-      hist_line_col,
-      hist_line_width,
-      hist_line_type)
-    
-  } else {
-    
-    mapply(
-      function(fr_dens,
-               hist_fill,
-               hist_line_col,
-               hist_line_width,
-               hist_line_type) {
-        if(!.all_na(fr_dens)){
-          polygon(fr_dens,
-                  col = hist_fill,
-                  border = hist_line_col,
-                  lwd = hist_line_width,
-                  lty = hist_line_type)
-        }
-        
-      }, rev(fr_dens),
-      rev(hist_fill),
-      rev(hist_line_col),
-      rev(hist_line_width),
-      rev(hist_line_type))
-    
+
+  # REVERSE PLOTTING ORDER - STACKS
+  if (length(d) > 1 & hist_stack > 0) {
+    d <- rev(d)
+    hist_fill <- rev(hist_fill)
+    hist_line_col <- rev(hist_line_col)
+    hist_line_width <- rev(hist_line_width)
+    hist_line_type <- rev(hist_line_type)
   }
-}
 
-
-#' @param x list of density objects for plotting
-#' @rdname cyto_plot_hist
-#' @export
-cyto_plot_hist.list <- function(x,
-                                hist_cols = NA,
-                                hist_fill = NA,
-                                hist_fill_alpha = 1,
-                                hist_line_type = 1,
-                                hist_line_width = 1,
-                                hist_line_col = "black", 
-                                ...){
-  
-  # ARGUMENTS ------------------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list()
-  
-  # CYTO_PLOT_THEME
-  args <- .cyto_plot_theme_inherit(args)
-  
-  # UPDATE ARGUMENTS
-  .args_update(args)
-  
-  # DENSITY_FILL ---------------------------------------------------------------
-  
-  # DENSITY_FILL COLOURS
-  hist_fill <- .cyto_plot_hist_fill(x,
-                                    hist_fill = hist_fill,
-                                    hist_cols = hist_cols,
-                                    hist_fill_alpha = hist_fill_alpha)
-  
-  # REPEAT ARGUMENTS -----------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list()[c("hist_line_type",
-                         "hist_line_width",
-                         "hist_line_col")]
-  
-  # REPEAT ARGUMENTS
-  args <- lapply(args, function(arg){
-    rep(arg, length.out = length(x))
-  })
-  
-  # UPDATE ARGUMENTS
-  .args_update(args)
-  
-  # HORIZONTAL LINES -----------------------------------------------------------
-  
-  # YMIN PER LAYER
-  ylim <- strsplit(names(x), "-")
-  ymin <- as.numeric(lapply(ylim, `[[`, 1))
-  
-  # LINES UNDER DENSITY
-  abline(
-    h = ymin,
-    col = hist_line_col,
-    lwd = hist_line_width,
-    lty = hist_line_type,
-    xpd = FALSE
+  # HISTOGRAMS
+  cnt <- 0
+  mapply(
+    function(D,
+             hist_fill,
+             hist_line_col,
+             hist_line_width,
+             hist_line_type) {
+      # COUNTER
+      assign("cnt", cnt + 1, envir = parent.frame(2))
+      # BYPASS NA
+      if(!.all_na(D)) {
+        # RANGES
+        xrng <- c(D$x[1], D$x[length(D$x)]) # x values are sorted
+        yrng <- as.numeric(unlist(strsplit(names(d)[cnt], "-"))) # y values name
+        # PLOT - ANCHOR POLYGON
+        if (!.all_na(d)) {
+          polygon(
+            x = c(
+              xrng[1] - 0.0001 * (xrng[2] - xrng[1]),
+              D$x,
+              xrng[2] + 0.0001 * (xrng[2] - xrng[1])
+            ),
+            y = c(
+              yrng[1] - 0.0001 * (yrng[2] - yrng[1]),
+              D$y,
+              yrng[1] - 0.0001 * (yrng[2] - yrng[1])
+            ),
+            col = hist_fill,
+            border = hist_line_col,
+            lwd = hist_line_width,
+            lty = hist_line_type
+          )
+        }
+      }
+    },
+    d,
+    hist_fill,
+    hist_line_col,
+    hist_line_width,
+    hist_line_type
   )
-  
-  # PLOT DENSITY ---------------------------------------------------------------
-  
-  # Add density distributions - reverse plot order and colours
-  if (length(x) > 1 & 
-      all(floor(ymin) == 0)) {
-    
-    mapply(
-      function(x,
-               hist_fill,
-               hist_line_col,
-               hist_line_width,
-               hist_line_type) {
-        if(!.all_na(x)){
-          polygon(x,
-                  col = hist_fill,
-                  border = hist_line_col,
-                  lwd = hist_line_width,
-                  lty = hist_line_type)
-        }
-      }, x,
-      hist_fill,
-      hist_line_col,
-      hist_line_width,
-      hist_line_type)
-    
-  } else {
-    
-    mapply(
-      function(x,
-               hist_fill,
-               hist_line_col,
-               hist_line_width,
-               hist_line_type) {
-        if(!.all_na(x)){
-          polygon(x,
-                  col = hist_fill,
-                  border = hist_line_col,
-                  lwd = hist_line_width,
-                  lty = hist_line_type)
-        }
-      }, rev(x),
-      rev(hist_fill),
-      rev(hist_line_col),
-      rev(hist_line_width),
-      rev(hist_line_type))
-    
-  }
-  
 }

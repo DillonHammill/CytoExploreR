@@ -2,18 +2,14 @@
 % Please edit documentation in R/cyto_plot_hist.R
 \name{cyto_plot_hist}
 \alias{cyto_plot_hist}
-\alias{cyto_plot_hist.flowFrame}
-\alias{cyto_plot_hist.list}
 \title{Add histograms to empty plots}
 \usage{
-cyto_plot_hist(x, ...)
-
-\method{cyto_plot_hist}{flowFrame}(
+cyto_plot_hist(
   x,
   channel,
   overlay = NA,
   display = 1,
-  hist_stat = "percent",
+  hist_stat = "count",
   hist_smooth = 0.6,
   hist_stack = 0.5,
   hist_cols = NA,
@@ -24,33 +20,23 @@ cyto_plot_hist(x, ...)
   hist_line_col = "black",
   ...
 )
-
-\method{cyto_plot_hist}{list}(
-  x,
-  hist_cols = NA,
-  hist_fill = NA,
-  hist_fill_alpha = 1,
-  hist_line_type = 1,
-  hist_line_width = 1,
-  hist_line_col = "black",
-  ...
-)
 }
 \arguments{
-\item{x}{list of density objects for plotting}
-
-\item{...}{not in use.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}}, list of
+\code{\link[flowWorkspace:cytoframe]{cytoframes}} or a list of
+\code{\link[stats:density]{density}} objects.}
 
 \item{channel}{name of the channels to be used to construct the plot.}
 
-\item{overlay}{list of flowFRame objects to overlay.}
+\item{overlay}{list of cytoframe objects to overlay.}
 
 \item{display}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
 
 \item{hist_stat}{can be either \code{"count"}, \code{"percent"} or
 \code{"density"} to indicate the statistic to display on histograms, set to
-\code{"percent"} by default. The \code{"percent"} option applies modal
+\code{"count"} by default. The \code{"percent"} option applies modal
 normalisation and expresses the result as a percentage.}
 
 \item{hist_smooth}{smoothing parameter passed to
@@ -78,6 +64,8 @@ lines, set to 1 by default.}
 
 \item{hist_line_col}{colour(s) for histogram borders, set to \code{"black"}
 by default.}
+
+\item{...}{not in use.}
 }
 \description{
 Add histograms to empty plots
