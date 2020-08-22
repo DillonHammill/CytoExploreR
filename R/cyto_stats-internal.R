@@ -663,6 +663,7 @@
 #' Save y range to each layer
 #' Easy to get ylim & label y co-ordinates
 #' @importFrom stats bw.nrd0
+#' @importFrom methods is
 #' @noRd
 .cyto_density.list <- function(x,
                                channel = NULL,
@@ -672,9 +673,9 @@
                                layers = length(x)) {
   
   # CHECKS ---------------------------------------------------------------------
-  
+
   # LIST OF FLOWFRAMES
-  if(!all(LAPPLY(x, "class") == "flowFrame")){
+  if(!all(LAPPLY(x, is, "flowFrame"))){
     stop("'x' must be a list of flowFrame objects.")
   }
   

@@ -125,7 +125,7 @@
 .cyto_plot_args_split <- function(x) {
 
   # NUMBER OF PLOTS - N --------------------------------------------------------
-  if (all(LAPPLY(x[["fr_list"]], "class") == "flowFrame")) {
+  if (all(LAPPLY(x[["fr_list"]], is, "flowFrame"))) {
     N <- 1
     MTD <- "flowFrame"
   } else if (all(LAPPLY(x[["fr_list"]], function(z) {

@@ -22,6 +22,7 @@
 #' @importFrom graphics contour par
 #' @importFrom flowCore exprs
 #' @importFrom grDevices adjustcolor
+#' @importFrom methods is
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -169,7 +170,7 @@ cyto_plot_contour.list <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # CLASS
-  if (!all(lapply(x, "class") == "flowFrame")) {
+  if (!all(lapply(x, is, "flowFrame"))) {
     stop("x should be a list of flowFrame objects.")
   }
   

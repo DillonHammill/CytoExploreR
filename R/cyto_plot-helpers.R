@@ -703,7 +703,7 @@ cyto_plot_empty.list <- function(x,
   # CHECKS ---------------------------------------------------------------------
 
   # LIST OF FLOWFRAMES
-  if (!all(LAPPLY(x, "is") == "flowFrame")) {
+  if (!all(LAPPLY(x, is, "flowFrame"))) {
     stop("'x' must be a list of flowFrame objects.")
   }
 
