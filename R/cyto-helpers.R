@@ -633,6 +633,88 @@ cyto_setup <- function(path = ".",
   
 }
 
+## CYTO_CLASS ------------------------------------------------------------------
+
+#' Get class of a cytometry object
+#'
+#' @param x either a \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} for which the class
+#'   should be checked or returned.
+#' @param expect a class of object supplied as a character string, if supplied a
+#'   logical value will be returned indicating whether \code{x} is of the
+#'   expected class.
+#' @param class indicates whether the class of \code{x} should be matched based
+#'   on the objects class (exact class match) or based on its reference class.
+#'   This argument is set to TRUE by default if no class expectation is
+#'   supplied, otherwise it is set to FALSE if not specified manually. See
+#'   examples for more details.
+#'
+#' @return class of \code{x} or a logical indicating whether \code{x} matches
+#'   the expected class.
+#'
+#' @importFrom methods is
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # flowSet
+#' fs <- Activation
+#' cyto_class(fs)
+#' cyto_class(fs, expect = "flowSet")
+#'
+#' # GatingSet
+#' gs <- GatingSet(fs)
+#' cyto_class(gs)
+#' cyto_class(gs, expect = "GatingSet")
+#'
+#' # cytoset
+#' cs <- cyto_extract(gs, "root")
+#' cyto_class(cs)
+#' cyto_class(cs, expect = "flowSet", class = FALSE) # reference class
+#'
+#' # cytoframe
+#' cf <- cs[[1]]
+#' cyto_class(cf)
+#' cyto_class(cf, expect = "flowFrame", class = FALSE) # reference class
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_class <- function(x,
+                       expect = NULL,
+                       class) {
+  
+  # EXACT CLASS
+  if(missing(class)) {
+    if(is.null(expect)) {
+      class <- TRUE
+    } else {
+      class <- FALSE
+    }
+  }
+  
+  # CLASS
+  if(is.null(expect)) {
+    if(class){
+      return(class(x))
+    } else {
+      return(is(x))
+    }
+    # CLASS CHECK
+  } else {
+    if(class) {
+      return(class(x) %in% expect)
+    } else {
+      return(any(is(x) %in% expect))
+    }
+  }
+  
+}
+
 ## CYTO_DETAILS ----------------------------------------------------------------
 
 #' Extract experiment details
@@ -3294,9 +3376,7 @@ cyto_barcode <- function(x,
       !"Sample ID" %in% cyto_channels(x)) {
     x <- fsApply(x, function(fr) {
       ind <- match(cyto_names(fr), nms)
-      mat <- matrix(rep(ind, cyto_stat_count(fr)),
-                    ncol = 1
-      )
+      mat <- matrix(rep(ind, cyto_stat_count(fr)), ncol = 1)
       colnames(mat) <- "Sample ID"
       suppressWarnings(fr_append_cols(fr, mat))
     })
