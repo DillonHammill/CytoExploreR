@@ -1539,7 +1539,7 @@ cyto_extract <- function(x,
 #'
 #' @return object specified by 'return' argument.
 #'
-#' @importFrom flowCore flowSet
+#' @importFrom flowCore flowSet exprs
 #' @importFrom flowWorkspace GatingSet sampleNames
 #' @importFrom methods as
 #'
@@ -1620,7 +1620,7 @@ cyto_convert.flowSet <- function(x,
       # CANNOT BE EMPTY FLOWFRAME
       if (nrow(x) == 0) {
         # ADD EVENT
-        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
@@ -1638,7 +1638,7 @@ cyto_convert.flowSet <- function(x,
       # CANNOT BE EMPTY FLOWFRAME
       if (nrow(x) == 0) {
         # ADD EVENT
-        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
@@ -1666,7 +1666,7 @@ cyto_convert.flowSet <- function(x,
       # CANNOT BE EMPTY FLOWFRAME
       if (nrow(x) == 0) {
         # ADD EVENT
-        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
@@ -2761,7 +2761,7 @@ cyto_sample.flowFrame <- function(x,
                                   ...) {
   
   # NO SAMPLING - EMPTY FLOWFRAME
-  if (nrow(x@exprs) == 0) {
+  if (nrow(exprs(x)) == 0) {
     return(x)
   }
   

@@ -265,6 +265,7 @@
 #' @importFrom methods formalArgs is
 #' @importFrom flowWorkspace gh_pop_is_negated gs_pop_get_children
 #'   gh_pop_get_descendants gh_pop_get_children
+#' @importFrom flowCore exprs
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -1413,7 +1414,7 @@ cyto_plot.flowSet <- function(x,
       fr_list <<- lapply(fr_list, function(y) {
         # LIST OF FLOWFRAMES
         lapply(y, function(w) {
-          if(nrow(w@exprs) > 0){
+          if(nrow(exprs(w)) > 0){
             if (min(range(w, type = "data")[, channels[z]]) < 0) {
               coords <- matrix(c(0, Inf), ncol = 1, nrow = 2)
               rownames(coords) <- c("min", "max")
