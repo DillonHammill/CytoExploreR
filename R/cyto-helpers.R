@@ -372,18 +372,14 @@ cyto_load <- function(path = ".",
 cyto_clean <- function(x, ...) {
   
   # GATINGSET/GATINGHIERARCHY
-  if (is(x, "GatingSet") | is(x, "GatingHierarchy")) {
+  if (cyto_class(x, c("GatingHierarchy", "GatingSet"), TRUE)) {
     # PARENT
     parent <- cyto_nodes(x, path = "auto")[1]
     # EXTRACT DATA
     cyto_data <- cyto_extract(x, parent)
     # flowAI REQUIRES FLOWSET
-    if (is(cyto_data, "cytoset")) {
+    if (cyto_class(cyto_data, "cytoset", TRUE)) {
       cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
-    }
-    # flowAI messes with experiment details :(
-    if (is(cyto_data, "flowSet")) {
-      pd <- cyto_details(cyto_data)
     }
     # CLEAN DATA
     invisible(capture.output(cyto_data <- flow_auto_qc(cyto_data,
@@ -393,22 +389,16 @@ cyto_clean <- function(x, ...) {
                                                        folder_results = FALSE,
                                                        ...
     )))
-    
     # RETURN CYTOSET
-    if (is(cyto_data, "flowSet")) {
+    if (cyto_class(cyto_data, "flowSet", TRUE)) {
       cyto_data <- flowSet_to_cytoset(cyto_data)
-      cyto_details(cyto_data) <- pd
     }
     # REPLACE DATA
     gs_cyto_data(x) <- cyto_data
   } else {
     # FLOWSET REQUIRED
-    if (is(x, "cytoset")) {
+    if (cyto_class(x, "cytoset", TRUE)) {
       x <- cytoset_to_flowSet(x)
-    }
-    # flowAI messes with experiment details :(
-    if (is(x, "flowSet")) {
-      pd <- cyto_details(x)
     }
     invisible(capture.output(x <- flow_auto_qc(x,
                                                html_report = FALSE,
@@ -418,9 +408,8 @@ cyto_clean <- function(x, ...) {
                                                ...
     )))
     # RETURN CYTOSET
-    if (is(x, "flowSet")) {
+    if (cyto_class(x, "flowSet", TRUE)) {
       x <- flowSet_to_cytoset(x)
-      cyto_details(x) <- pd
     }
   }
   return(x)
@@ -483,7 +472,6 @@ cyto_clean <- function(x, ...) {
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @importFrom flowWorkspace GatingSet
-#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -567,7 +555,7 @@ cyto_setup <- function(path = ".",
   }
   
   # FLOWSET LOADED
-  if (is(x, "flowSet")) {
+  if (cyto_class(x, "flowSet")) {
     # RESTRICT CHANNELS
     if (restrict != FALSE) {
       if(restrict == TRUE){
@@ -608,7 +596,7 @@ cyto_setup <- function(path = ".",
     x <- GatingSet(x)
   }
   
-  # gatingtemplate
+  # gatingTemplate
   if (!is.null(gatingTemplate)) {
     
     # FILE EXTENSION APPEND
@@ -707,7 +695,7 @@ cyto_class <- function(x,
     # CLASS CHECK
   } else {
     if(class) {
-      return(class(x) %in% expect)
+      return(any(class(x) %in% expect))
     } else {
       return(any(is(x) %in% expect))
     }
@@ -741,7 +729,6 @@ cyto_class <- function(x,
 #' @return experiment details as data.frame.
 #'
 #' @importFrom flowWorkspace pData
-#' @importFrom methods is
 #' @importFrom utils type.convert
 #'
 #' @examples
@@ -766,7 +753,7 @@ cyto_details <- function(x,
                          ...) {
   
   # Return identifier for flowFrame
-  if (is(x, "flowFrame")) {
+  if (cyto_class(x, "flowFrame")) {
     return(cyto_names(x))
     # Return experiment details for other objects
   } else {
@@ -916,11 +903,9 @@ cyto_names.list <- function(x) {
 #'
 #' @export
 "cyto_names<-" <- function(x, value) {
-  if (is(x, "flowSet") |
-      is(x, "GatingHierarchy") |
-      is(x, "GatingSet")) {
+  if (cyto_class(x, c("flowSet", "GatingHierarchy", "GatingSet"))) {
     sampleNames(x) <- value
-  } else if (is(x, "flowFrame")) {
+  } else if (cyto_class(x, "flowFrame")) {
     identifier(x) <- value
   }
   return(x)
@@ -1021,42 +1006,6 @@ cyto_names_parse <- function(x,
   
 }
 
-## CYTO_CHECK ------------------------------------------------------------------
-
-#' Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
-#'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be checked.
-#'
-#' @return TRUE or FALSE if object meets this class criteria.
-#'
-#' @importFrom methods is
-#'
-#' @examples
-#'
-#' # Load in CytoExploreRData to access data
-#' library(CytoExploreRData)
-#'
-#' # Valid object
-#' cyto_check(Activation)
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @export
-cyto_check <- function(x) {
-  
-  # Check for valid class of object
-  if (!any(is(x, "flowFrame") |
-           is(x, "flowSet") |
-           is(x, "GatingHierarchy") |
-           is(x, "GatingSet"))) {
-    stop("'x' should be a flowFrame, flowSet, GatingHierarchy or GatingSet.")
-  }
-  
-  return(TRUE)
-}
-
 ## CYTO_TRANSFORM --------------------------------------------------------------
 
 #' Apply Transformations to Cytometry Data
@@ -1103,7 +1052,7 @@ cyto_check <- function(x) {
 #' @importFrom flowCore transform transformList
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par
-#' @importFrom methods is as
+#' @importFrom methods as
 #'
 #' @examples
 #'
@@ -1203,7 +1152,7 @@ cyto_transform.default <- function(x,
   }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (is(x, "flowFrame") | is(x, "flowSet")) {
+  if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
     # Extract transformations from transformerList to transformList
     transform_list <- cyto_transform_extract(transformer_list,
@@ -1214,7 +1163,7 @@ cyto_transform.default <- function(x,
     x <- suppressMessages(transform(x, transform_list))
     
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
-  } else if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
+  } else if (cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
     
     # Inverse transformations not yet supported
     if (inverse == TRUE) {
@@ -1296,8 +1245,7 @@ cyto_transform.transformList <- function(x,
                                          ...) {
   
   # Added for backwards compatibility - flowFrame/flowSet objects only
-  if (is(x, "GatingHierarchy") |
-      is(x, "GatingSet")) {
+  if (cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
     stop(paste(
       "GatingHierarchy and GatingSet objects require transformerList",
       "objects to apply transformations."
@@ -1305,7 +1253,7 @@ cyto_transform.transformList <- function(x,
   }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (is(x, "flowFrame") | is(x, "flowSet")) {
+  if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
     # Restrict (subsetted data may lack channels)
     trans <- trans@transforms[names(trans) %in% cyto_channels(x)]
@@ -1377,7 +1325,7 @@ cyto_transform.transformerList <- function(x,
                                            ...) {
   
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (is(x, "flowFrame") | is(x, "flowSet")) {
+  if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
     # Restrict transformers
     trans <- cyto_transformer_combine(trans[names(trans) %in% cyto_channels(x)])
@@ -1390,7 +1338,7 @@ cyto_transform.transformerList <- function(x,
     
     
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
-  } else if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
+  } else if (cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
     
     # Inverse transformations not yet supported
     if (inverse == TRUE) {
@@ -1533,7 +1481,6 @@ cyto_transform.transformerList <- function(x,
 #'   containing the desired transformations.
 #'
 #' @importFrom flowCore transformList
-#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -1559,10 +1506,10 @@ cyto_transform_extract <- function(x,
                                    inverse = FALSE) {
   
   # TransformLists are returned unaltered
-  if (is(x, "transformList")) {
+  if (cyto_class(x, "transformList")) {
     return(x)
     # TransformList extracted from transformerList
-  } else if (is(x, "transformerList")) {
+  } else if (cyto_class(x, "transformerList")) {
     # Extract transformations into transformList
     if (inverse == TRUE) {
       x <- transformList(names(x), lapply(x, `[[`, "inverse"))
@@ -1611,7 +1558,6 @@ cyto_transform_extract <- function(x,
 #'
 #' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data realize_view
 #' @importFrom flowCore exprs
-#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -1647,9 +1593,9 @@ cyto_extract <- function(x,
   }
   
   # EXTRACT
-  if (is(x, "GatingHierarchy")) {
+  if (cyto_class(x, "GatingHierarchy", TRUE)) {
     x <- gh_pop_get_data(x, parent, ...)
-  } else if (is(x, "GatingSet")) {
+  } else if (cyto_class(x, "GatingSet", TRUE)) {
     x <- gs_pop_get_data(x, parent, ...)
   }
   
@@ -1677,13 +1623,13 @@ cyto_extract <- function(x,
   # RAW DATA MATRICES
   if (raw == TRUE) {
     nms <- cyto_names(x)
-    if (is(x, "flowFrame")) {
+    if (cyto_class(x, "flowFrame")) {
       raw <- exprs(x)
       if(markers == TRUE){
         colnames(raw) <- col_names
       }
       x <- list(raw)
-    } else if (is(x, "flowSet")) {
+    } else if (cyto_class(x, "flowSet")) {
       y <- lapply(seq_along(x), function(z) {
         raw <- exprs(x[[z]])
         if(markers == TRUE){
@@ -1717,7 +1663,7 @@ cyto_extract <- function(x,
 #'
 #' @return object specified by 'return' argument.
 #'
-#' @importFrom flowCore flowSet
+#' @importFrom flowCore flowSet exprs
 #' @importFrom flowWorkspace GatingSet sampleNames
 #' @importFrom methods as
 #'
@@ -1798,7 +1744,7 @@ cyto_convert.flowSet <- function(x,
       # CANNOT BE EMPTY FLOWFRAME
       if (nrow(x) == 0) {
         # ADD EVENT
-        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
@@ -1816,7 +1762,7 @@ cyto_convert.flowSet <- function(x,
       # CANNOT BE EMPTY FLOWFRAME
       if (nrow(x) == 0) {
         # ADD EVENT
-        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
@@ -1844,7 +1790,7 @@ cyto_convert.flowSet <- function(x,
       # CANNOT BE EMPTY FLOWFRAME
       if (nrow(x) == 0) {
         # ADD EVENT
-        x@exprs <- rbind(rep(0, length(colnames(x))), x@exprs)
+        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
         # REMOVE ORIGINAL PARAMETER & ADDED EVENT
         x <- suppressWarnings(
           x[-1, -match("Original", cyto_channels(x))]
@@ -1937,7 +1883,6 @@ cyto_convert.GatingSet <- function(x,
 #'   the filtering criteria.
 #'
 #' @importFrom dplyr filter
-#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -1965,8 +1910,7 @@ cyto_convert.GatingSet <- function(x,
 cyto_filter <- function(x, ...) {
   
   # Check class of x
-  if (!any(is(x, "flowSet") |
-           is(x, "GatingSet"))) {
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
   
@@ -2034,8 +1978,7 @@ cyto_filter <- function(x, ...) {
 cyto_select <- function(x, ...) {
   
   # Check class of x
-  if (!any(is(x, "flowSet") |
-           is(x, "GatingSet"))) {
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
   
@@ -2149,7 +2092,7 @@ cyto_groups <- function(x,
                         details = FALSE){
   
   # Check class of x
-  if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
     stop("'x' should be an object of class flowSet or GatingSet.")
   }
   
@@ -2256,24 +2199,25 @@ cyto_groups <- function(x,
   
 }
 
-## CYTO_SORT -------------------------------------------------------------------
+## CYTO_SORT_BY ----------------------------------------------------------------
 
 #' Sort a flowSet or GatingSet by experiment variables
 #'
-#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param sort_by names of cyto_details variables to use for sorting. For more
 #'   control over the sorting order, specify the factor levels for each variable
 #'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
 #'
 #' @return \code{flowSet} or \code{GatingSet} object sorted based on experiment
 #'   variables.
-#'   
-#' @examples 
+#'
+#' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Sort by Treatment and OVAConc
 #' fs <- cyto_sort_by(fs,
 #' list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
@@ -2315,8 +2259,6 @@ cyto_sort_by <- function(x,
 #' @return a named list of \code{flowSet} or \code{GatingSet} objects
 #'   respectively.
 #'
-#' @importFrom methods is
-#'
 #' @examples
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
@@ -2353,7 +2295,7 @@ cyto_group_by <- function(x,
 
 ## CYTO_MERGE_BY ---------------------------------------------------------------
 
-#' Merge a flowSet by experiment variables
+#' Merge a cytoset by experiment variables
 #'
 #' \code{cyto_merge_by} makes a call to \code{cyto_group_by} to split samples
 #' into groups based on experiment variables. The resulting groups are then
@@ -2361,9 +2303,10 @@ cyto_group_by <- function(x,
 #' the preferred way to merge samples in CytoExploreR as it will ensure
 #' appropriate sampling in \code{cyto_plot}.
 #'
-#' @param x object of class \code{flowSet}.
-#' @param parent name of the parent population to merge when a \code{GatingSet}
-#'   object is supplied, set to the \code{"root"} node by default.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param parent name of the parent population to merge when a
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} object is supplied,
+#'   set to the \code{"root"} node by default.
 #' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
 #'   prior to merging.
@@ -2382,7 +2325,6 @@ cyto_group_by <- function(x,
 #'   \code{merge_by}.
 #'
 #' @importFrom flowCore `identifier<-`
-#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -2482,7 +2424,7 @@ cyto_merge_by.flowSet <- function(x,
   
   # CONVERT EACH GROUP TO FLOWFRAME
   fr_list <- lapply(fs_list, function(fs) {
-    if (!is(fs, "flowFrame")) {
+    if (!cyto_class(fs, "flowFrame")) {
       cyto_convert(fs, "flowFrame")
     } else {
       fs
@@ -2516,7 +2458,6 @@ cyto_merge_by.flowSet <- function(x,
 #' @return list of split flowFrames.
 #'
 #' @importFrom flowCore flowFrame exprs identifier keyword split
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2543,7 +2484,7 @@ cyto_split <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # FLOWFRAME
-  if (!is(x, "flowFrame")) {
+  if (!cyto_class(x, "flowFrame")) {
     stop("cyto_split() expects a flowFrame object.")
   }
   
@@ -2948,9 +2889,7 @@ cyto_save.flowFrame <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
 #'   \code{display} events.
 #'
-#' @importFrom BiocGenerics nrow
 #' @importFrom flowCore sampleFilter Subset flowSet exprs
-#' @importFrom methods is
 #' @importFrom flowWorkspace gs_cyto_data gs_cyto_data<- cytoset
 #'   flowFrame_to_cytoframe flowSet_to_cytoset recompute
 #'
@@ -3038,7 +2977,7 @@ cyto_sample.flowFrame <- function(x,
                                   ...) {
   
   # NO SAMPLING - EMPTY FLOWFRAME
-  if (nrow(x@exprs) == 0) {
+  if (nrow(exprs(x)) == 0) {
     return(x)
   }
   
@@ -3112,7 +3051,7 @@ cyto_sample.list <- function(x,
     
     # LIST OF FLOWSETS
     if (all(LAPPLY(x, function(z) {
-      is(z, "flowSet")
+      cyto_class(z, "flowSet")
     }))) {
       # Same sampling applied to all samples
       x <- lapply(x, function(z) {
@@ -3120,7 +3059,7 @@ cyto_sample.list <- function(x,
       })
       # LIST OF FLOWFRAMES
     } else if (all(LAPPLY(x, function(z) {
-      is(z, "flowFrame")
+      cyto_class(z, "flowFrame")
     }))) {
       # BARCODED FLOWFRAMES
       if (any(LAPPLY(x, function(z) {
@@ -3212,38 +3151,39 @@ cyto_sample.list <- function(x,
   return(x)
 }
 
-## CYTO_BEADS_SAMPLE -----------------------------------------------------------
+## CYTO_SAMPLE_TO_NODE ---------------------------------------------------------
 
-#' Sample GatingSet to bead count
+#' Sample GatingSet to node
 #'
-#' \code{cyto_beads_sample} can be used on samples containing beads, to
-#' downsamples each sample in a GatingSet based on a specific \code{bead_count}.
-#' For example, if Sample A contains 100 beads and 75000 events, and Sample B
-#' contains 50 beads and 5000 events. \code{cyto_beads_sample} will downsample
-#' each sample to contain 50 beads and therefore 5000 events for Sample A and
-#' 3750 events for Sample B.
+#' \code{cyto_sample_to_node} can be used to downsample the root node of a
+#' GatingSet based on the number of events in a particular node. A classic
+#' example is downsampling to a bead population to give an indication of the
+#' relative number of events per sample. For example, if Sample A contains 100
+#' beads and 75000 events, and Sample B contains 50 beads and 5000 events.
+#' \code{cyto_sample_to_node} will downsample each sample to contain 50 beads
+#' and therefore 5000 events for Sample A and 3750 events for Sample B.
 #'
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param beads name of the gated bead population to use for the calculation. If
+#' @param node name of the gated bead population to use for the calculation. If
 #'   not supplied internal checks will be made for populations named "Single
 #'   Beads" or "Beads".
-#' @param bead_count minimal bead count to down sample to, set to the minimum
-#'   bead count in samples by default. The bead count must be less than or equal
-#'   to the minimum bead count among the samples.
+#' @param count minimum number of events to downsample to, set to the minimum
+#'   count for the specified node across samples by default. \code{count} must
+#'   be less than or equal to the minimum count across the samples.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom flowCore flowSet
-#' @importFrom flowWorkspace flowSet_to_cytoset gs_cyto_data
+#' @importFrom flowWorkspace cytoset flowSet_to_cytoset gs_cyto_data recompute
 #'
 #' @export
-cyto_beads_sample <- function(x,
-                              beads = NULL,
-                              bead_count = NULL) {
+cyto_sample_to_node <- function(x,
+                                node = NULL,
+                                count = NULL) {
   
   # GATINGSET
-  if (!is(x, "GatingSet")) {
+  if (!cyto_class(x, "GatingSet", TRUE)) {
     stop("'x' must be a Gatingset object.")
   }
   
@@ -3254,67 +3194,71 @@ cyto_beads_sample <- function(x,
   nodes <- cyto_nodes(gs_clone, path = "auto")
   
   # BEADS
-  if (is.null(beads)) {
+  if (is.null(node)) {
     # SINGLE BEADS
     if (any(grepl("single beads", nodes, ignore.case = TRUE))) {
-      beads <- nodes[which(grepl("single beads", nodes, ignore.case = TRUE))[1]]
+      node <- nodes[which(grepl("single beads", nodes, ignore.case = TRUE))[1]]
       # BEADS
     } else if (any(grepl("beads", nodes, ignore.case = TRUE))) {
-      beads <- nodes[which(grepl("beads", nodes, ignore.case = TRUE))[1]]
+      node <- nodes[which(grepl("beads", nodes, ignore.case = TRUE))[1]]
       # BEADS MISSING
     } else {
-      stop("Supply the name of the 'beads' population.")
+      stop("Supply the name of the 'node' to downsample the GatingSet.")
     }
   }
   
   # BEAD COUNTS
-  bead_pops <- cyto_extract(gs_clone, beads)
-  bead_counts <- suppressMessages(
-    cyto_stats_compute(bead_pops,
+  node_pops <- cyto_extract(gs_clone, node)
+  node_counts <- suppressMessages(
+    cyto_stats_compute(node_pops,
                        stat = "count",
-                       format = "wide"
-    )
+                       format = "wide",
+                       details = FALSE)
   )
-  bead_counts <- bead_counts[, ncol(bead_counts), drop = TRUE]
+  node_counts <- node_counts[, ncol(node_counts), drop = TRUE]
   
-  # BEADS MISSING
-  if (any(bead_counts == 0)) {
-    ind <- which(bead_counts == 0)
+  # NODE MISSING EVENTS
+  if (any(node_counts == 0)) {
+    ind <- which(node_counts == 0)
     stop(paste0(
-      "The following samples do not contain any beads:",
+      "The following samples do not contain any events in the specified node:",
       paste0("\n", cyto_names(gs_clone)[ind])
     ))
   }
   
-  # BEAD COUNT
-  if (is.null(bead_count)) {
-    bead_count <- min(bead_counts)
+  # NODE COUNT
+  if (is.null(count)) {
+    count <- min(node_counts)
   } else {
-    if (!bead_count <= min(bead_counts)) {
-      bead_count <- min(bead_counts)
+    if (!count <= min(node_counts)) {
+      count <- min(node_counts)
     }
   }
   
   # BEAD RATIOS
-  bead_ratios <- lapply(seq_len(length(bead_counts)), function(z) {
-    1 / (bead_counts[z] / bead_count)
+  node_ratios <- lapply(seq_len(length(node_counts)), function(z) {
+    1 / (node_counts[z] / count)
   })
   
   # SAMPLING - ROOT POPULATION
-  pops <- list()
-  lapply(seq_along(bead_pops), function(z) {
-    pops[[z]] <<- cyto_sample(
-      cyto_extract(gs_clone[[z]],
-                   copy = TRUE
-      ),
-      bead_ratios[[z]]
+  pops <- lapply(seq_along(node_pops), function(z) {
+    cyto_sample(
+      cyto_extract(gs_clone[[z]]),
+      node_ratios[[z]]
     )
   })
-  names(pops) <- cyto_names(pops)
-  pops <- flowSet_to_cytoset(flowSet(pops))
+  names(pops) <- cyto_names(node_pops)
+  
+  # CYTOSET
+  if(cyto_class(pops[[1]], "cytoframe", TRUE)) {
+    pops <- cytoset(pops)
+  } else {
+    pops <- flowSet_to_cytoset(flowSet(pops))
+  }
   
   # REPLACE DATA IN GATINGSET
   gs_cyto_data(gs_clone) <- pops
+  recompute(gs_clone)
   
   # RETURN SAMPLED GATINGSET
   return(gs_clone)
@@ -3322,16 +3266,17 @@ cyto_beads_sample <- function(x,
 
 ## CYTO_BARCODE ----------------------------------------------------------------
 
-#' Barcode each file in a flowSet with a sample ID
+#' Barcode each file in a cytoset with a sample ID
 #'
-#' Adds a new parameter to each of the flowFrames in the flowSet called
-#' \code{"Sample ID"} to barcode events from each flowFrame.
+#' Adds a new parameter to each of the cytoframes in the cytoset called
+#' \code{"Sample ID"} to barcode events from each cytoframe
 #'
-#' @param x object of class \code{flowSet} to be barcoded.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} to
+#'   be barcoded.
 #' @param type indicates whether the \code{"samples"}, \code{"events"} or
 #'   \code{"both"} should be barcoded, set \code{"samples"} by default.
 #'
-#' @return barcoded flowSet with \code{"Sample ID"} and/or \code{"Event ID"}
+#' @return barcoded cytoset with \code{"Sample ID"} and/or \code{"Event ID"}
 #'   column added and annotated.
 #'
 #' @importFrom methods is as
@@ -3357,7 +3302,7 @@ cyto_barcode <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # FLOWSET
-  if (!is(x, "flowSet")) {
+  if (!cyto_class(x, "flowSet")) {
     stop("'cyto_barcode' expects objects of class flowSet.")
   }
   
@@ -3374,18 +3319,18 @@ cyto_barcode <- function(x,
   # SAMPLE ID COLUMN - ONLY IF NOT PRESENT
   if ("samples" %in% type &
       !"Sample ID" %in% cyto_channels(x)) {
-    x <- fsApply(x, function(fr) {
+    x <- cyto_apply(x, function(fr) {
       ind <- match(cyto_names(fr), nms)
       mat <- matrix(rep(ind, cyto_stat_count(fr)), ncol = 1)
       colnames(mat) <- "Sample ID"
-      suppressWarnings(fr_append_cols(fr, mat))
+      suppressWarnings(cyto_cbind(fr, mat))
     })
   }
   
   # EVENT ID COLUMN - ONLY IF NOT PRESENT
   if ("events" %in% type &
       !"Event ID" %in% cyto_channels(x)) {
-    total_events <- fsApply(x, "nrow")
+    total_events <- cyto_apply(x, "cyto_stat_count")
     total_events <- split(
       seq_len(sum(total_events)),
       rep(seq_len(length(x)),
@@ -3393,13 +3338,13 @@ cyto_barcode <- function(x,
       )
     )
     names(total_events) <- cyto_names(x)
-    x <- fsApply(x, function(fr) {
+    x <- cyto_apply(x, function(fr) {
       events <- total_events[[cyto_names(fr)]]
       mat <- matrix(events,
                     ncol = 1
       )
       colnames(mat) <- "Event ID"
-      suppressWarnings(fr_append_cols(fr, mat))
+      suppressWarnings(cyto_cbind(fr, mat))
     })
   }
   
@@ -3409,7 +3354,7 @@ cyto_barcode <- function(x,
 
 ## CYTO_MARKERS_EDIT -----------------------------------------------------------
 
-#' Assign marker names to flowFrame or flowSet
+#' Assign marker names to cytoframe or cytoset
 #'
 #' \code{cyto_markers_edit} opens an editable table containing a list of
 #' channels and markers for a \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -3431,7 +3376,6 @@ cyto_barcode <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
-#' @importFrom methods is
 #' @importFrom DataEditR data_edit
 #'
 #' @examples
@@ -3458,24 +3402,24 @@ cyto_markers_edit <- function(x,
   cyto_check(x)
   
   # flowFrame
-  if (is(x, "flowFrame")) {
+  if (cyto_class(x, "flowFrame")) {
     
     # Extract details of parameters
     pd <- cyto_details(parameters(x))
     
     # flowSet
-  } else if (is(x, "flowSet")) {
+  } else if (cyto_class(x, "flowSet")) {
     
     # Extract details of parameters
     pd <- cyto_details(parameters(x[[1]]))
     
     # GatingHierarchy
-  } else if (is(x, "GatingHierarchy")) {
+  } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
     fr <- cyto_extract(x, "root")
     pd <- cyto_details(parameters(fr))
     
     # GatingSet
-  } else if (is(x, "GatingSet")) {
+  } else if (cyto_class(x, "GatingSet", TRUE)) {
     fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
   }
@@ -3582,7 +3526,7 @@ cyto_markers_edit <- function(x,
   
   # Only modify markers if supplied
   if (!all(is.na(cyto_markers))) {
-    if(class(x) %in% c("flowFrame", "flowSet")){
+    if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
       flowCore::markernames(x) <- cyto_markers
     }else{
       flowWorkspace::markernames(x) <- cyto_markers
@@ -3595,9 +3539,9 @@ cyto_markers_edit <- function(x,
 
 ## CYTO_DETAILS_EDIT -----------------------------------------------------------
 
-#' Interactively edit cyto_details for a flowSet or GatingSet
+#' Interactively edit cyto_details for a cytoset or GatingSet
 #'
-#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param file name of csv file containing experimental information.
 #' @param ... not in use.
@@ -3607,7 +3551,6 @@ cyto_markers_edit <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore pData<-
-#' @importFrom methods is
 #' @importFrom DataEditR data_edit
 #'
 #' @examples
@@ -3629,7 +3572,7 @@ cyto_details_edit <- function(x,
                               ...) {
   
   # x should be a flowSet or GatingSet
-  if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
     stop("Please supply either a flowSet or a GatingSet")
   }
   
@@ -3730,7 +3673,8 @@ cyto_details_edit <- function(x,
 
 #' Save experiment details to csv file
 #'
-#' @param x object of class \code{flowSet} or \code{GatingSet} annotated with
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} annotated with
 #'   experiment details.
 #' @param save_as name of csv file to which the experiment details shuld be
 #'   saved.
@@ -3808,7 +3752,6 @@ cyto_details_save <- function(x,
 #' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
 #'   object.
 #'
-#' @importFrom methods is
 #' @importFrom flowCore decompensate
 #' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe gs_cyto_data
 #'
@@ -3863,7 +3806,7 @@ cyto_compensate.GatingSet <- function(x,
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
-    if (is(spillover, "character")) {
+    if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
       spill <- read_from_csv(spilllover)
       # column names must be valid channels
@@ -3878,8 +3821,7 @@ cyto_compensate.GatingSet <- function(x,
       spill <- rep(list(spill), length(fs))
       names(spill) <- cyto_names(fs)
       # spillover is a matrix/data.frame
-    } else if (is(spillover, "matrix") |
-               is(spillover, "data.frame")) {
+    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% cyto_channels(fs))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
@@ -3934,7 +3876,7 @@ cyto_compensate.GatingSet <- function(x,
   if (remove == TRUE) {
     cf_list <- lapply(seq_along(fs), function(z) {
       cf <- decompensate(fs[[z]], spill[[z]])
-      if(!is(cf, "cytoframe")){
+      if(!cyto_class(cf, "cytoframe", TRUE)){
         cf <- flowFrame_to_cytoframe(cf)
       }
       return(cf)
@@ -3962,7 +3904,7 @@ cyto_compensate.flowSet <- function(x,
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
-    if (is(spillover, "character")) {
+    if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
       spill <- read_from_csv(spillover)
       # column/row names must be valid channels
@@ -3977,8 +3919,7 @@ cyto_compensate.flowSet <- function(x,
       spill <- rep(list(spill), length(x))
       names(spill) <- cyto_names(x)
       # spillover is a matrix/data.frame
-    } else if (is(spillover, "matrix") |
-               is(spillover, "data.frame")) {
+    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% cyto_channels(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
@@ -4033,7 +3974,7 @@ cyto_compensate.flowSet <- function(x,
   if (remove == TRUE) {
     cf_list <- lapply(seq_along(x), function(z) {
       cf <- decompensate(x[[z]], spill[[z]])
-      if(!is(cf, "cytoset")){
+      if(!cyto_class(cf, "cytoset", TRUE)){
         cf <- flowFrame_to_cytoframe(cf)
       }
       return(cf)
@@ -4058,7 +3999,7 @@ cyto_compensate.flowFrame <- function(x,
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
-    if (is(spillover, "character")) {
+    if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
       spill <- read_from_csv(spillover)
       # column/row names must be valid channels
@@ -4071,8 +4012,7 @@ cyto_compensate.flowFrame <- function(x,
         )
       }
       # spillover is a matrix/data.frame
-    } else if (is(spillover, "matrix") |
-               is(spillover, "data.frame")) {
+    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% cyto_channels(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
@@ -4129,15 +4069,14 @@ cyto_compensate.flowFrame <- function(x,
 #' @return character vector of gated node/population names.
 #'
 #' @importFrom flowWorkspace gh_get_pop_paths gs_get_pop_paths
-#' @importFrom methods is
 #'
 #' @export
 cyto_nodes <- function(x, ...) {
   
   # Make call to gh/gs_get_pop_paths
-  if (is(x, "GatingHierarchy")) {
+  if (cyto_class(x, "GatingHierarchy", TRUE)) {
     gh_get_pop_paths(x, ...)
-  } else if (is(x, "GatingSet")) {
+  } else if (cyto_class(x, "GatingSet", TRUE)) {
     gs_get_pop_paths(x, ...)
   }
 }
@@ -4414,8 +4353,7 @@ cyto_nodes_ancestor <- function(x,
                                 ...){
   
   # GATINHIERARCHY OR GATINGSET
-  if(!is(x, "GatingHierarchy") &
-     !is(x, "GatingSet")) {
+  if(!cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
     stop("'x' must be a GatingHierarchy or GatingSet object.")
   }
   
@@ -4521,12 +4459,12 @@ cyto_empty <- function(name = NULL,
 cyto_copy <- function(x) {
   
   # GatingSet
-  if (is(x, "GatingSet")) {
+  if (cyto_class(x, "GatingSet", TRUE)) {
     x <- gs_clone(x)
   }
   
   # cytoset
-  if (is(x, "cytoset") | is(x, "cytoframe")) {
+  if (cyto_class(x, c("cytoframe", "cytoset"), TRUE)) {
     x <- realize_view(x)
   }
   
@@ -4542,7 +4480,6 @@ cyto_copy <- function(x) {
 #'
 #' @return list of spillover matrices or NULL.
 #'
-#' @importFrom methods is
 #' @importFrom flowCore keyword
 #' @importFrom flowWorkspace gh_get_compensations gs_get_compensations
 #'
@@ -4563,7 +4500,7 @@ cyto_copy <- function(x) {
 cyto_spillover_extract <- function(x) {
   
   # GATINGSET
-  if (is(x, "GatingSet")) {
+  if (cyto_class(x, "GatingSet", TRUE)) {
     spill <- gs_get_compensations(x)
     if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
@@ -4573,14 +4510,14 @@ cyto_spillover_extract <- function(x) {
       })
     }
     # GATINGHIERARCHY
-  } else if (is(x, "GatingHierarchy")) {
+  } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
     spill <- gh_get_compensations(x)
     if (!is.null(spill)) {
       spill <- list(spill@spillover)
       names(spill) <- cyto_names(x)
     }
     # FLOWSET
-  } else if (is(x, "flowSet")) {
+  } else if (cyto_class(x, "flowSet")) {
     spill <- lapply(seq_along(x), function(z) {
       # CyTOF lacks spill slot (just in case)
       sp <- tryCatch(keyword(x[[z]], "SPILL"), error = function(e) {
@@ -4595,7 +4532,7 @@ cyto_spillover_extract <- function(x) {
       spill <- NULL
     }
     # FLOWFRAME
-  } else if (is(x, "flowFrame")) {
+  } else if (cyto_class(x, "flowFrame")) {
     spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
       NULL
     })
@@ -4873,7 +4810,8 @@ cyto_apply.list <- function(x,
   # SIMPLIFY
   if(simplify == TRUE){
     # DON'T COERCE TO CYTOSET
-    if(!all(LAPPLY(res, is, "flowFrame"))){
+    if(!all(LAPPLY(res, cyto_class, "flowFrame"))){
+      # SIMPLIFY MATRIX
       res <- do.call("rbind", res)
     }
   }
@@ -5005,8 +4943,8 @@ cyto_apply.flowSet <- function(x,
   # SIMPLIFY
   if(simplify){
     # CYTOFRAMES TO CYTOSET
-    if(all(LAPPLY(res, is, "flowFrame"))){
-      if(is(res[[1]], "cytoframe")){
+    if(all(LAPPLY(res, cyto_class, "flowFrame"))){
+      if(cyto_class(res[[1]], "cytoframe", TRUE)){
         res <- cytoset(res)
       }else{
         res <- flowSet(res)
@@ -5184,7 +5122,7 @@ cyto_cbind.flowFrame <- function(x,
   }
   
   # CYTOFRAME
-  if(is(x, "cytoframe")){
+  if(cyto_class(x, "cytoframe", TRUE)){
     cf_append_cols(x, cols)
     # FLOWFRAME  
   }else{
@@ -5233,7 +5171,7 @@ cyto_cbind.flowSet <- function(x,
   names(cf_list) <- cyto_names(x)
   
   # RETURN FLOWSET/CYTOSET
-  if(is(cf_list[[1]], "cytoframe")){
+  if(cyto_class(cf_list[[1]], "cytoframe", TRUE)){
     return(cytoset(cf_list))
   }else{
     return(flowSet(cf_list))
@@ -5296,8 +5234,6 @@ cyto_cbind.list <- function(x,
 #' 
 #' @return list of \code{cytoframe} objects.
 #' 
-#' @importFrom methods is
-#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @examples 
@@ -5311,9 +5247,9 @@ cyto_cbind.list <- function(x,
 #' 
 #' @export
 cyto_list <- function(x){
-  if(is(x, "flowFrame")) {
+  if(cyto_class(x, "flowFrame")) {
     structure(list(x), names = cyto_names(x))
-  } else if(is(x, "flowSet")) {
+  } else if(cyto_class(x, "flowSet")) {
     cyto_apply(x, function(z){return(z)}, simplify = FALSE)
   }else{
     return(x)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_markers_edit}
 \alias{cyto_markers_edit}
-\title{Assign marker names to flowFrame or flowSet}
+\title{Assign marker names to cytoframe or cytoset}
 \usage{
 cyto_markers_edit(x, file = NULL, ...)
 }

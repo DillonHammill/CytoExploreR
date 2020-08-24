@@ -7,7 +7,8 @@
 cyto_details_save(x, save_as = NULL)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet} annotated with
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} annotated with
 experiment details.}
 
 \item{save_as}{name of csv file to which the experiment details shuld be

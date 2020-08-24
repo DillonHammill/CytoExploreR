@@ -7,7 +7,8 @@
 cyto_sort_by(x, sort_by = NULL)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{sort_by}{names of cyto_details variables to use for sorting. For more
 control over the sorting order, specify the factor levels for each variable

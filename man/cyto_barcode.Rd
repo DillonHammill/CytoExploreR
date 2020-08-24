@@ -2,23 +2,24 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_barcode}
 \alias{cyto_barcode}
-\title{Barcode each file in a flowSet with a sample ID}
+\title{Barcode each file in a cytoset with a sample ID}
 \usage{
 cyto_barcode(x, type = "samples")
 }
 \arguments{
-\item{x}{object of class \code{flowSet} to be barcoded.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} to
+be barcoded.}
 
 \item{type}{indicates whether the \code{"samples"}, \code{"events"} or
 \code{"both"} should be barcoded, set \code{"samples"} by default.}
 }
 \value{
-barcoded flowSet with \code{"Sample ID"} and/or \code{"Event ID"}
+barcoded cytoset with \code{"Sample ID"} and/or \code{"Event ID"}
   column added and annotated.
 }
 \description{
-Adds a new parameter to each of the flowFrames in the flowSet called
-\code{"Sample ID"} to barcode events from each flowFrame.
+Adds a new parameter to each of the cytoframes in the cytoset called
+\code{"Sample ID"} to barcode events from each cytoframe
 }
 \examples{
 

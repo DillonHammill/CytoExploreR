@@ -4,7 +4,7 @@
 \alias{cyto_merge_by}
 \alias{cyto_merge_by.GatingSet}
 \alias{cyto_merge_by.flowSet}
-\title{Merge a flowSet by experiment variables}
+\title{Merge a cytoset by experiment variables}
 \usage{
 \method{cyto_merge_by}{GatingSet}(
   x,
@@ -18,10 +18,11 @@
 \method{cyto_merge_by}{flowSet}(x, merge_by = "all", select = NULL, barcode = TRUE, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.}
 
-\item{parent}{name of the parent population to merge when a \code{GatingSet}
-object is supplied, set to the \code{"root"} node by default.}
+\item{parent}{name of the parent population to merge when a
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} object is supplied,
+set to the \code{"root"} node by default.}
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
