@@ -173,9 +173,9 @@ cyto_stats_compute.GatingSet <- function(x,
   trans <- cyto_transformer_extract(x)
 
   # FREQUENCY - GATINGHIERARCHY METHOD
-  if (switch(is.character(stat),
-             "TRUE" = grepl("cyto_stat_freq", stat),
-             "FALSE" = FALSE)) {
+  if (ifelse(is.character(stat),
+             grepl("cyto_stat_freq", stat),
+             FALSE)) {
     res <- lapply(seq_along(x), function(z) {
       cyto_stats_compute(x[[z]],
         alias = alias,
@@ -298,9 +298,9 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   )
 
   # PARENT POPULATIONS
-  if (switch(is.character(stat),
-    "TRUE" = grepl("cyto_stat_freq", stat),
-    "FALSE" = FALSE
+  if (ifelse(is.character(stat),
+    grepl("cyto_stat_freq", stat),
+    FALSE
   )) {
     if (is.null(parent)) {
       message(
@@ -322,9 +322,9 @@ cyto_stats_compute.GatingHierarchy <- function(x,
   }
 
   # FREQUENCY
-  if (switch(is.character(stat),
-    "TRUE" = grepl("cyto_stat_freq", stat),
-    "FALSE" = FALSE
+  if (ifelse(is.character(stat),
+    grepl("cyto_stat_freq", stat),
+    FALSE
   )) {
 
     # PARENT COUNTS
@@ -449,9 +449,9 @@ cyto_stats_compute.flowSet <- function(x,
   stat <- cyto_stat_dispatch(stat)
 
   # SAME BANDWIDTH
-  if (switch(is.character(stat),
-    "TRUE" = grepl("auc", stat) | grepl("mode", stat),
-    "FALSE" = FALSE
+  if (ifelse(is.character(stat),
+    grepl("auc", stat) | grepl("mode", stat),
+    FALSE
   )) {
     if (is.null(bandwidth)) {
       bandwidth <- cyto_apply(x,
@@ -568,9 +568,9 @@ cyto_stats_compute.flowFrame <- function(x,
       )
     }
     if (!is(gate, "flowFrame") & !is(gate, "flowSet")) {
-      if (switch(is.character(stat),
-        "TRUE" = !grepl("cyto_stat_freq", stat),
-        "FALSE" = FALSE
+      if (ifelse(is.character(stat),
+        !grepl("cyto_stat_freq", stat),
+        FALSE
       )) {
         x <- Subset(x, gate)
       }
@@ -580,9 +580,9 @@ cyto_stats_compute.flowFrame <- function(x,
   # COMPUTE STATISTICS ---------------------------------------------------------
   
   # CYTO_STAT FUNCTION
-  if (switch(is.character(stat),
-             "TRUE" = grepl("cyto_stat_", stat),
-             "FALSE" = FALSE)) {
+  if (ifelse(is.character(stat),
+             grepl("cyto_stat_", stat),
+             FALSE)) {
     # COPY
     if (grepl("count", stat)) {
       copy <- FALSE
@@ -606,7 +606,7 @@ cyto_stats_compute.flowFrame <- function(x,
       "rsd",
       "cv",
       "rcv",
-      "quant",
+      "quantile",
       "range"
     ), function(z) {
       grepl(paste0("^", z, "$"), stat_strip)
