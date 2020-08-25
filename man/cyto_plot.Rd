@@ -185,10 +185,10 @@
   border_fill = "white",
   border_fill_alpha = 1,
   grid = FALSE,
-  grid_line_type = 2,
+  grid_line_type = 1,
   grid_line_width = 1,
-  grid_line_col = "black",
-  grid_line_alpha = 0.2,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 
@@ -278,10 +278,10 @@
   border_fill = "white",
   border_fill_alpha = 1,
   grid = FALSE,
-  grid_line_type = 2,
+  grid_line_type = 1,
   grid_line_width = 1,
-  grid_line_col = "black",
-  grid_line_alpha = 0.2,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 
@@ -367,10 +367,10 @@
   border_fill = "white",
   border_fill_alpha = 1,
   grid = FALSE,
-  grid_line_type = 2,
+  grid_line_type = 1,
   grid_line_width = 1,
-  grid_line_col = "black",
-  grid_line_alpha = 0.2,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 }
