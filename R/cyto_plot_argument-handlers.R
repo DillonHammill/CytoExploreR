@@ -221,6 +221,7 @@
     arg_names[grepl("axes_text", arg_names)], # all axes_text arguments
     arg_names[grepl("axes_label", arg_names)], # all axes_label arguments
     arg_names[grepl("border", arg_names)], # all border arguments
+    arg_names[grepl("grid", arg_names)], # all grid arguments
     "label",
     "label_position",
     "legend"

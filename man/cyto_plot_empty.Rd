@@ -58,6 +58,11 @@ cyto_plot_empty(
   legend_line_col = NA,
   legend_box_fill = NA,
   legend_point_col = NA,
+  grid = FALSE,
+  grid_line_type = 1,
+  grid_line_width = 1,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 }
@@ -231,6 +236,24 @@ legends when legend is set to \code{"fill"}.}
 
 \item{legend_point_col}{colour(s) to use for points in 2-D scatter plot
 legend.}
+
+\item{grid}{logical indicating whether to include grid lines in the plot
+background, set to FALSE by default. Alternatively, users can supply a
+integer to indicate the number of equally spaced quantiles to used for the
+grid lines.}
+
+\item{grid_line_type}{integer [0,6] to control the line type of grid lines,
+set to \code{1} to draw solid lines by default. See
+\code{\link[graphics:par]{lty}} for alternatives.}
+
+\item{grid_line_width}{numeric to control the line width(s) of grid lines,
+set to \code{1} by default.}
+
+\item{grid_line_col}{colour to use for grid lines, set to \code{"grey95"} by
+default.}
+
+\item{grid_line_alpha}{numeric [0,1] to control the transparency of grid
+lines, set to 1 by default to remove transparency.}
 
 \item{...}{not in use.}
 

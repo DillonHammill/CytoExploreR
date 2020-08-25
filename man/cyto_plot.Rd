@@ -94,6 +94,11 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = FALSE,
+  grid_line_type = 1,
+  grid_line_width = 1,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 
@@ -179,6 +184,11 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = FALSE,
+  grid_line_type = 2,
+  grid_line_width = 1,
+  grid_line_col = "black",
+  grid_line_alpha = 0.2,
   ...
 )
 
@@ -267,6 +277,11 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = FALSE,
+  grid_line_type = 2,
+  grid_line_width = 1,
+  grid_line_col = "black",
+  grid_line_alpha = 0.2,
   ...
 )
 
@@ -351,6 +366,11 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = FALSE,
+  grid_line_type = 2,
+  grid_line_width = 1,
+  grid_line_col = "black",
+  grid_line_alpha = 0.2,
   ...
 )
 }
@@ -665,6 +685,24 @@ default.}
 
 \item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
 by default for no transparency.}
+
+\item{grid}{logical indicating whether to include grid lines in the plot
+background, set to FALSE by default. Alternatively, users can supply a
+integer to indicate the number of equally spaced quantiles to used for the
+grid lines.}
+
+\item{grid_line_type}{integer [0,6] to control the line type of grid lines,
+set to \code{1} to draw solid lines by default. See
+\code{\link[graphics:par]{lty}} for alternatives.}
+
+\item{grid_line_width}{numeric to control the line width(s) of grid lines,
+set to \code{1} by default.}
+
+\item{grid_line_col}{colour to use for grid lines, set to \code{"grey95"} by
+default.}
+
+\item{grid_line_alpha}{numeric [0,1] to control the transparency of grid
+lines, set to 1 by default to remove transparency.}
 
 \item{...}{not currently in use.}
 

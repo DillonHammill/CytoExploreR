@@ -126,10 +126,23 @@
 #'   legends when legend is set to \code{"fill"}.
 #' @param legend_point_col colour(s) to use for points in 2-D scatter plot
 #'   legend.
+#' @param grid logical indicating whether to include grid lines in the plot
+#'   background, set to FALSE by default. Alternatively, users can supply a
+#'   integer to indicate the number of equally spaced quantiles to used for the
+#'   grid lines.
+#' @param grid_line_type integer [0,6] to control the line type of grid lines,
+#'   set to \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param grid_line_width numeric to control the line width(s) of grid lines,
+#'   set to \code{1} by default.
+#' @param grid_line_col colour to use for grid lines, set to \code{"grey95"} by
+#'   default.
+#' @param grid_line_alpha numeric [0,1] to control the transparency of grid
+#'   lines, set to 1 by default to remove transparency.
 #' @param ... not in use.
 #'
 #' @importFrom grDevices adjustcolor rgb colorRamp
-#' @importFrom graphics plot box axis title par rect
+#' @importFrom graphics plot box axis title par rect axTicks abline
 #' @importFrom methods formalArgs is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -202,6 +215,11 @@ cyto_plot_empty <- function(x,
                             legend_line_col = NA,
                             legend_box_fill = NA,
                             legend_point_col = NA,
+                            grid = FALSE,
+                            grid_line_type = 1,
+                            grid_line_width = 1,
+                            grid_line_col = "grey95",
+                            grid_line_alpha = 1,
                             ...) {
 
   # PREPARE X ------------------------------------------------------------------
@@ -392,7 +410,7 @@ cyto_plot_empty <- function(x,
     length(channels) == 1) {
     axes_text <- list(axes_text[[1]], FALSE)
   }
-
+  
   # AXES LABELS ----------------------------------------------------------------
 
   # AXES LABELS - missing replaced - NA removed
@@ -443,39 +461,39 @@ cyto_plot_empty <- function(x,
   # X AXIS - TRANSFORMED
   if (is(axes_text[[1]], "list")) {
     # MINOR TICKS
-    mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
+    x_mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
     axis(1,
-      at = axes_text[[1]]$at[mnr_ind],
-      labels = axes_text[[1]]$label[mnr_ind],
+      at = axes_text[[1]]$at[x_mnr_ind],
+      labels = axes_text[[1]]$label[x_mnr_ind],
       tck = -0.015
     )
 
     # MAJOR TICKS - MUST BE >2% XRANGE FROM ZERO
-    mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
-    mjr <- list(
-      "at" = axes_text[[1]]$at[mjr_ind],
-      "label" = axes_text[[1]]$label[mjr_ind]
+    x_mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
+    x_mjr <- list(
+      "at" = axes_text[[1]]$at[x_mjr_ind],
+      "label" = axes_text[[1]]$label[x_mjr_ind]
     )
     # Zero included on plot
-    if (any(as.character(mjr$label) == "0")) {
-      zero <- which(as.character(mjr$label) == "0")
-      zero_break <- mjr$at[zero]
+    if (any(as.character(x_mjr$label) == "0")) {
+      zero <- which(as.character(x_mjr$label) == "0")
+      zero_break <- x_mjr$at[zero]
       zero_buffer <- c(
         zero_break - 0.02 * (xlim[2] - xlim[1]),
         zero_break + 0.02 * (xlim[2] - xlim[1])
       )
-      mjr_ind <- c(
+      x_mjr_ind <- c(
         zero,
-        which(mjr$at < zero_buffer[1] |
-          mjr$at > zero_buffer[2])
+        which(x_mjr$at < zero_buffer[1] |
+          x_mjr$at > zero_buffer[2])
       )
     } else {
-      mjr_ind <- seq_len(length(mjr$label))
+      x_mjr_ind <- seq_len(length(x_mjr$label))
     }
     
     axis(1,
-      at = mjr$at[mjr_ind],
-      labels = mjr$label[mjr_ind],
+      at = x_mjr$at[x_mjr_ind],
+      labels = x_mjr$label[x_mjr_ind],
       font.axis = axes_text_font,
       col.axis = axes_text_col,
       cex.axis = axes_text_size,
@@ -494,39 +512,37 @@ cyto_plot_empty <- function(x,
   # Y AXIS - TRANSFORMED
   if (is(axes_text[[2]], "list")) {
     # MINOR TICKS
-    mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
+    y_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
     axis(2,
-      at = axes_text[[2]]$at[mnr_ind],
-      labels = axes_text[[2]]$label[mnr_ind],
+      at = axes_text[[2]]$at[y_mnr_ind],
+      labels = axes_text[[2]]$label[y_mnr_ind],
       tck = -0.015
     )
     # MAJOR TICKS - MUST BE >2% yrange FROM ZERO
-    mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
-    mjr <- list(
-      "at" = axes_text[[2]]$at[mjr_ind],
-      "label" = axes_text[[2]]$label[mjr_ind]
+    y_mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
+    y_mjr <- list(
+      "at" = axes_text[[2]]$at[y_mjr_ind],
+      "label" = axes_text[[2]]$label[y_mjr_ind]
     )
-
     # Zero included on plot
-    if (any(as.character(mjr$label) == "0")) {
-      zero <- which(as.character(mjr$label) == "0")
-      zero_break <- mjr$at[zero]
+    if (any(as.character(y_mjr$label) == "0")) {
+      zero <- which(as.character(y_mjr$label) == "0")
+      zero_break <- y_mjr$at[zero]
       zero_buffer <- c(
         zero_break - 0.02 * (ylim[2] - ylim[1]),
         zero_break + 0.02 * (ylim[2] - ylim[1])
       )
-      mjr_ind <- c(
+      y_mjr_ind <- c(
         zero,
-        which(mjr$at < zero_buffer[1] |
-          mjr$at > zero_buffer[2])
+        which(y_mjr$at < zero_buffer[1] |
+          y_mjr$at > zero_buffer[2])
       )
     } else {
-      mjr_ind <- seq_len(length(mjr$label))
+      y_mjr_ind <- seq_len(length(y_mjr$label))
     }
-
     axis(2,
-      at = mjr$at[mjr_ind],
-      labels = mjr$label[mjr_ind],
+      at = y_mjr$at[y_mjr_ind],
+      labels = y_mjr$label[y_mjr_ind],
       font.axis = axes_text_font,
       col.axis = axes_text_col,
       cex.axis = axes_text_size,
@@ -542,14 +558,6 @@ cyto_plot_empty <- function(x,
     )
   }
 
-  # BORDER
-  box(
-    which = "plot",
-    lty = border_line_type,
-    lwd = border_line_width,
-    col = border_line_col
-  )
-
   # BORDER_FILL
   if (border_fill != "white") {
     rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
@@ -558,6 +566,57 @@ cyto_plot_empty <- function(x,
     )
   }
 
+  # GRID LINES
+  if(grid != FALSE) {
+    # AXES BREAKS GRID LINES
+    if(grid == TRUE) {
+      if(length(channels) == 2) {
+        axes_grid <- lapply(axes_text, `[[`, "at")
+      } else {
+        axes_grid <- list(axes_text[[1]]$at)
+      }
+    # QUANTILE GRID LINES - BASE LAYER ONLY
+    } else {
+      if(!is.numeric(grid)) {
+        grid <- 10
+      }
+      axes_grid <- lapply(channels, function(z){
+        cyto_apply(x[[1]],
+                   "cyto_stat_quantile",
+                   channels = z,
+                   input = "matrix",
+                   copy = FALSE,
+                   inverse = FALSE,
+                   probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid)))[, 1]
+      })
+      names(axes_grid) <- channels
+    }
+    # X AXIS GRID LINES
+    lapply(seq_along(axes_grid), function(z) {
+      # VERTICAL LINES
+      if(z == 1) {
+        abline(v = axes_grid[[z]],
+               lty = grid_line_type,
+               lwd = grid_line_width,
+               col = adjustcolor(grid_line_col, grid_line_alpha))
+      # HORIZONTAL LINES
+      } else {
+        abline(h = axes_grid[[z]],
+               lty = grid_line_type,
+               lwd = grid_line_width,
+               col = adjustcolor(grid_line_col, grid_line_alpha))
+      }
+    })
+  }
+  
+  # BORDER
+  box(
+    which = "plot",
+    lty = border_line_type,
+    lwd = border_line_width,
+    col = border_line_col
+  )
+  
   # TITLE
   if (!.all_na(title)) {
     title(
@@ -1391,6 +1450,11 @@ cyto_plot_theme_args <- function() {
     "contour_line_type",
     "contour_line_width",
     "contour_line_col",
-    "contour_line_alpha"
+    "contour_line_alpha",
+    "grid",
+    "grid_line_type",
+    "grid_line_width",
+    "grid_line_col",
+    "grid_line_alpha"
   )
 }

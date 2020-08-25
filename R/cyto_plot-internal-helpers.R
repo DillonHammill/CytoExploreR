@@ -237,6 +237,7 @@
 #' @return list containing axis labels and breaks.
 #'
 #' @importFrom methods is
+#' @importFrom grDevices .axisPars
 #'
 #' @noRd
 .cyto_plot_axes_text <- function(x,
@@ -244,85 +245,113 @@
                                  axes_trans = NA,
                                  axes_range = list(NA, NA),
                                  axes_limits = "data") {
+
+  # CHANNELS
+  channels <- rep(c(channels, rep(NA, 2)), length.out = 2) # x & y
   
-  # AXES_TRANS CHECKS
-  if (.all_na(axes_trans)) {
-    return(NA)
-  } else {
-    # TRANSFORMERLIST
-    if (!is(axes_trans, "transformerList")) {
-      stop("Supply a valid transformerList object to 'axes_trans'.")
-    }
+  # AXES_TRANS
+  if(!.all_na(axes_trans) & !cyto_class(axes_trans, "transformerList", TRUE)) {
+    stop("'axes_trans' must be an object of class transformerList.")
   }
   
-  # TICK LOCATIONS
-  axes_ticks <- c(
-    sort(LAPPLY(
-      1 * 10^seq_len(9),
-      function(z) {
-        -seq(90, 10, -10) * z
-      }
-    )),
-    seq(-9, 9, 1),
-    LAPPLY(
-      1 * 10^seq_len(9),
-      function(z) {
-        seq(10, 90, 10) * z
-      }
-    )
-  )
+  # AXES RANGE
   
-  # TICK LABELS
-  axes_labels <- lapply(axes_ticks, function(z) {
-    if (z != 0) {
-      pwr <- log10(abs(z))
-      if (z < 0) {
-        pwr <- -pwr
-      }
-    }
-    if (z == 0) {
-      quote(0)
-    } else if (pwr == 0) {
-      quote("")
-    } else if (abs(pwr) %% 1 == 0) {
-      substitute(10^pwr)
-    } else {
-      quote("")
-    }
-  })
-  axes_labels <- do.call("expression", axes_labels)
   
-  # PER CHANNEL
-  axes_text <- lapply(channels, function(chan) {
-    # LINEAR CHANNEL - NA
-    if (!chan %in% names(axes_trans)) {
+  # LOOP THROUGH CHANNELS
+  axes_text <- lapply(channels, function(z){
+    # 1D Y AXIS
+    if(.all_na(z)) {
       return(NA)
     }
-    # TRANSFORMED CHANNEL - TRANSFORMATIONS
-    trans_func <- axes_trans[[chan]]$transform
-    inv_func <- axes_trans[[chan]]$inverse
-    # AXIS RANGE - LINEAR SCALE
-    if (!.all_na(axes_range[[chan]])) {
-      rng <- inv_func(1.02 * axes_range[[chan]])
+    # LINEAR CHANNEL
+    if(.all_na(axes_trans) | !z %in% names(axes_trans)) {
+      # COMPUTE AXP
+      axp <- unlist(.axisPars(axes_range[[z]]))
+      # COMPUTE AXES LABELS
+      axis_breaks <- seq(axp[1], axp[2], (axp[2] - axp[1])/axp[3])
+      # AXES MINOR INTERVAL
+      axis_interval <- (axis_breaks[2] - axis_breaks[1])/axp[3]
+      # COMPUTE MAJOR TICK LOCATIONS
+      axis_ticks_min <- axp[1] - floor(
+        (axp[1] - axes_range[[z]][1])/axis_interval
+      ) * axis_interval
+      axis_ticks_max <- axp[2] + floor(
+        (axes_range[[z]][2] - axp[2])/axis_interval
+        ) * axis_interval
+      axis_ticks <- seq(axis_ticks_min, axis_ticks_max, axis_interval)
+      axis_labels <- unlist(lapply(axis_ticks, function(z){
+        if(z %in% axis_breaks){
+          return(z)
+        } else {
+          return("")
+        }
+      }))
+      axis_text <- list("label" = axis_labels,
+                        "at" = axis_ticks)
+    # TRANSFORMED CHANNEL  
     } else {
-      rng <- inv_func(1.02 * .cyto_plot_axes_limits(x,
-                                                    channels = chan,
-                                                    axes_limits = axes_limits
-      )[, chan])
+      # AXIS TICKS
+      axis_ticks <- c(
+        sort(LAPPLY(
+          1 * 10^seq_len(9),
+          function(z) {
+            -seq(90, 10, -10) * z
+          }
+        )),
+        seq(-9, 9, 1),
+        LAPPLY(
+          1 * 10^seq_len(9),
+          function(z) {
+            seq(10, 90, 10) * z
+          }
+        )
+      )
+      # AXES LABELS
+      axis_labels <- lapply(axis_ticks, function(z) {
+        if (z != 0) {
+          pwr <- log10(abs(z))
+          if (z < 0) {
+            pwr <- -pwr
+          }
+        }
+        if (z == 0) {
+          quote(0)
+        } else if (pwr == 0) {
+          quote("")
+        } else if (abs(pwr) %% 1 == 0) {
+          substitute(10^pwr)
+        } else {
+          quote("")
+        }
+      })
+      axis_labels <- do.call("expression", axis_labels)
+      # AXES TEXT
+      trans_func <- axes_trans[[z]]$transform
+      inv_func <- axes_trans[[z]]$inverse
+      # AXES RANGE ON LINEAR SCALE
+      if (!.all_na(axes_range[[z]])) {
+        rng <- inv_func(1.02 * axes_range[[z]])
+      } else {
+        rng <- inv_func(1.02 * .cyto_plot_axes_limits(x,
+                                                      channels = z,
+                                                      axes_limits = axes_limits
+        )[, z])
+      }
+      # RESTRICT AXES TICKS & LABELS BY RANGE
+      ind <- which(axis_ticks > rng[1] & axis_ticks < rng[2])
+      axis_ticks <- axis_ticks[ind]
+      axis_labels <- axis_labels[ind]
+      # BREAKS - TRANSFORMED SCALE
+      axes_breaks <- signif(trans_func(axis_ticks))
+      # BREAKS & LABELS
+      return(list("label" = axis_labels, "at" = axes_breaks))
     }
-    # RESTRICT AXES_TICKS AND AXES_LABELS BY AXIS RANGE
-    ind <- which(axes_ticks > rng[1] & axes_ticks < rng[2])
-    axes_ticks <- axes_ticks[ind]
-    axes_labels <- axes_labels[ind]
-    # BREAKS - TRANSFORMED SCALE
-    axes_breaks <- signif(trans_func(axes_ticks))
-    # BREAKS & LABELS
-    return(list("label" = axes_labels, "at" = axes_breaks))
   })
   names(axes_text) <- channels
   
-  # RETURN AXES_TEXT
+  # RETURN PREPARED AXES_TEXT
   return(axes_text)
+  
 }
 
 ## AXES LABELS ----

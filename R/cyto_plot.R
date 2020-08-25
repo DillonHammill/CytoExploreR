@@ -234,6 +234,19 @@
 #'   (i.e. background colour), set to "white" by default.
 #' @param border_fill_alpha transparency to use for border_fill colour, set to 1
 #'   by default for no transparency.
+#' @param grid logical indicating whether to include grid lines in the plot
+#'   background, set to FALSE by default. Alternatively, users can supply a
+#'   integer to indicate the number of equally spaced quantiles to used for the
+#'   grid lines.
+#' @param grid_line_type integer [0,6] to control the line type of grid lines,
+#'   set to \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param grid_line_width numeric to control the line width(s) of grid lines,
+#'   set to \code{1} by default.
+#' @param grid_line_col colour to use for grid lines, set to \code{"grey95"} by
+#'   default.
+#' @param grid_line_alpha numeric [0,1] to control the transparency of grid
+#'   lines, set to 1 by default to remove transparency.
 #' @param ... not currently in use.
 #'
 #' @examples
@@ -376,7 +389,13 @@ cyto_plot.GatingSet <- function(x,
                                 border_line_width = 1,
                                 border_line_col = "black",
                                 border_fill = "white",
-                                border_fill_alpha = 1, ...) {
+                                border_fill_alpha = 1,
+                                grid = FALSE,
+                                grid_line_type = 1,
+                                grid_line_width = 1,
+                                grid_line_col = "grey95",
+                                grid_line_alpha = 1,
+                                ...) {
   
   # GATINGSET METHOD - CALLS FLOWSET METHOD
   
@@ -854,7 +873,13 @@ cyto_plot.GatingHierarchy <- function(x,
                                       border_line_width = 1,
                                       border_line_col = "black",
                                       border_fill = "white",
-                                      border_fill_alpha = 1, ...) {
+                                      border_fill_alpha = 1,
+                                      grid = FALSE,
+                                      grid_line_type = 2,
+                                      grid_line_width = 1,
+                                      grid_line_col = "black",
+                                      grid_line_alpha = 0.2, 
+                                      ...) {
   
   # GATINGHIERARCHY METHOD - CALLS FLOWFRAME METHOD
   
@@ -1190,11 +1215,7 @@ cyto_plot.GatingHierarchy <- function(x,
       # 1D PLOT - STACKED NO OVERLAY - LACK SAMPLENAMES
       if (length(channels) == 1 &
           .all_na(overlay)) {
-        if(ifelse(.all_na(hist_layers), FALSE, hist_layers == 1)) {
-          paste(z, pt, sep = "\n")
-        } else {
-          pt
-        }
+        paste(z, pt, sep = "\n")
         # 1D PLOT - STACKED OVERLAY - SAMPLENAMES ONLY
       } else if (length(channels) == 1 &
                  !.all_na(overlay)) {
@@ -1306,7 +1327,13 @@ cyto_plot.flowSet <- function(x,
                               border_line_width = 1,
                               border_line_col = "black",
                               border_fill = "white",
-                              border_fill_alpha = 1, ...) {
+                              border_fill_alpha = 1,
+                              grid = FALSE,
+                              grid_line_type = 2,
+                              grid_line_width = 1,
+                              grid_line_col = "black",
+                              grid_line_alpha = 0.2,
+                              ...) {
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
@@ -1938,7 +1965,13 @@ cyto_plot.flowFrame <- function(x,
                                 border_line_width = 1,
                                 border_line_col = "black",
                                 border_fill = "white",
-                                border_fill_alpha = 1, ...) {
+                                border_fill_alpha = 1,
+                                grid = FALSE,
+                                grid_line_type = 2,
+                                grid_line_width = 1,
+                                grid_line_col = "black",
+                                grid_line_alpha = 0.2,
+                                ...) {
   
   # CHECKS ---------------------------------------------------------------------
   
