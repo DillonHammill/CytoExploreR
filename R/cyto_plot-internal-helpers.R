@@ -254,9 +254,21 @@
     stop("'axes_trans' must be an object of class transformerList.")
   }
   
-  # AXES RANGE
-  
-  
+  # AXES RANGE - 4% BUFFER
+  axes_range <- structure(
+    lapply(axes_range, function(z){
+      if(!.all_na(z)) {
+        # RANGE
+        rng <- z[2] - z[1]
+        pad <- (rng - rng / 1.04) / 2
+        return(c(z[1] - pad,
+                 z[2] + pad))
+      } else {
+        return(z)
+      }
+    }), 
+    names = names(axes_range))
+
   # LOOP THROUGH CHANNELS
   axes_text <- lapply(channels, function(z){
     # 1D Y AXIS
@@ -330,11 +342,11 @@
       inv_func <- axes_trans[[z]]$inverse
       # AXES RANGE ON LINEAR SCALE
       if (!.all_na(axes_range[[z]])) {
-        rng <- inv_func(1.02 * axes_range[[z]])
+        rng <- inv_func(axes_range[[z]])
       } else {
-        rng <- inv_func(1.02 * .cyto_plot_axes_limits(x,
-                                                      channels = z,
-                                                      axes_limits = axes_limits
+        rng <- inv_func(.cyto_plot_axes_limits(x,
+                                               channels = z,
+                                               axes_limits = axes_limits
         )[, z])
       }
       # RESTRICT AXES TICKS & LABELS BY RANGE
