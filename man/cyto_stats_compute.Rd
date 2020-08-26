@@ -21,8 +21,8 @@
   format = "wide",
   tibble = FALSE,
   input = "matrix",
-  smooth = 0.6,
-  bandwidth = NULL,
+  smooth = 1,
+  bandwidth = NA,
   details = TRUE,
   markers = TRUE,
   save_as = NULL,
@@ -42,8 +42,8 @@
   format = "wide",
   tibble = FALSE,
   input = "matrix",
-  smooth = 0.6,
-  bandwidth = NULL,
+  smooth = 1,
+  bandwidth = NA,
   details = TRUE,
   markers = TRUE,
   save_as = NULL,
@@ -61,8 +61,8 @@
   format = "wide",
   tibble = FALSE,
   input = "matrix",
-  smooth = 0.6,
-  bandwidth = NULL,
+  smooth = 1,
+  bandwidth = NA,
   details = TRUE,
   markers = TRUE,
   save_as = NULL,
@@ -80,8 +80,8 @@
   round = 2,
   format = "wide",
   input = "matrix",
-  smooth = 0.6,
-  bandwidth = NULL,
+  smooth = 1,
+  bandwidth = NA,
   markers = TRUE,
   tibble = FALSE,
   save_as = NULL,
@@ -160,11 +160,11 @@ formatted prior to passing it to the statistical function, options include:
 \code{"cell"}}} Set to "matrix" by default.}
 
 \item{smooth}{numeric smoothing parameter passed to \code{stats:density} when
-computing mode and area under the curve statistics, set to 0.6 by default.}
+computing mode and area under the curve statistics, set to 1 by default.}
 
 \item{bandwidth}{numeric passed to \code{stats:density} to set the bandwidth
 when computing mode or area under the curve statistics, set to NULL by
-default. If the bandwidth is not supplied or NULL, a bandwidth will be
+default. If the bandwidth is not supplied or NA, a bandwidth will be
 estimated based on all samples supplied to \code{cyto_stats_compute()}.}
 
 \item{details}{logical indicating whether to include the \code{cyto_details}

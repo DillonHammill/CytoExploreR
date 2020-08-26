@@ -61,10 +61,10 @@
 #'   - \code{"column"} or \code{"channel"}} \item{4 - \code{"row"} or
 #'   \code{"cell"}}} Set to "matrix" by default.
 #' @param smooth numeric smoothing parameter passed to \code{stats:density} when
-#'   computing mode and area under the curve statistics, set to 0.6 by default.
+#'   computing mode and area under the curve statistics, set to 1 by default.
 #' @param bandwidth numeric passed to \code{stats:density} to set the bandwidth
 #'   when computing mode or area under the curve statistics, set to NULL by
-#'   default. If the bandwidth is not supplied or NULL, a bandwidth will be
+#'   default. If the bandwidth is not supplied or NA, a bandwidth will be
 #'   estimated based on all samples supplied to \code{cyto_stats_compute()}.
 #' @param details logical indicating whether to include the \code{cyto_details}
 #'   in the output, set to TRUE by default.
@@ -148,8 +148,8 @@ cyto_stats_compute.GatingSet <- function(x,
                                          format = "wide",
                                          tibble = FALSE,
                                          input = "matrix",
-                                         smooth = 0.6,
-                                         bandwidth = NULL,
+                                         smooth = 1,
+                                         bandwidth = NA,
                                          details = TRUE,
                                          markers = TRUE,
                                          save_as = NULL,
@@ -267,8 +267,8 @@ cyto_stats_compute.GatingHierarchy <- function(x,
                                                format = "wide",
                                                tibble = FALSE,
                                                input = "matrix",
-                                               smooth = 0.6,
-                                               bandwidth = NULL,
+                                               smooth = 1,
+                                               bandwidth = NA,
                                                details = TRUE,
                                                markers = TRUE,
                                                save_as = NULL,
@@ -432,8 +432,8 @@ cyto_stats_compute.flowSet <- function(x,
                                        format = "wide",
                                        tibble = FALSE,
                                        input = "matrix",
-                                       smooth = 0.6,
-                                       bandwidth = NULL,
+                                       smooth = 1,
+                                       bandwidth = NA,
                                        details = TRUE,
                                        markers = TRUE,
                                        save_as = NULL,
@@ -527,8 +527,8 @@ cyto_stats_compute.flowFrame <- function(x,
                                          round = 2,
                                          format = "wide",
                                          input = "matrix",
-                                         smooth = 0.6,
-                                         bandwidth = NULL,
+                                         smooth = 1,
+                                         bandwidth = NA,
                                          markers = TRUE,
                                          tibble = FALSE,
                                          save_as = NULL,
@@ -719,6 +719,7 @@ cyto_stats_compute.flowFrame <- function(x,
       res <- round(res, round)
       res <- t(res)
       colnames(res) <- col_names
+      rownames(res) <- cyto_names(x)
       # AUC
     } else if (grepl("^auc$", stat_strip)) {
       res <- cyto_apply(x,
@@ -762,7 +763,7 @@ cyto_stats_compute.flowFrame <- function(x,
       }
     })
   }
-
+  
   # DATAFRAME
   res <- data.frame(res,
     check.names = FALSE

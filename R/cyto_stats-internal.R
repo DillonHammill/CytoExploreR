@@ -98,24 +98,24 @@ cyto_stat_median <- function(x,
 #' @param round numeric
 #' @noRd
 cyto_stat_mode <- function(x,
-                           smooth = 0.6,
-                           bandwidth = NULL,
+                           smooth = 1,
+                           bandwidth = NA,
+                           bins = 256,
                            round = 2,
                            ...) {
   
   # DENSITY MATRIX
-  res <- cyto_apply(x,
-                    "cyto_stat_density",
-                    input = "matrix",
-                    channels = channels,
-                    smooth = smooth,
-                    bandwidth = bandwidth,
-                    simplify = TRUE,
-                    ...)
+  res <- cyto_stat_density(x,
+                           smooth = smooth,
+                           bandwidth = bandwidth,
+                           bins = bins, 
+                           ...)
+
   # MODE
-  res[1, ] <- LAPPLY(seq_len(ncol(res)), function(z){
-    round(z[[1]]$x[z[[1]]$y == max(z[[1]]$y)], round)
+  res <- LAPPLY(res, function(z){
+    round(z$x[z$y == max(z$y)], round)
   })
+  names(res) <- colnames(x)
   return(res)
   
 }
@@ -227,8 +227,9 @@ cyto_stat_quantile <- function(x,
 #' @noRd
 cyto_stat_auc <- function(x,
                           round = 2,
-                          smooth = 0.6,
-                          bandwidth = NULL,
+                          smooth = 1,
+                          bandwidth = NA,
+                          bins = 256,
                           method = "natural",
                           min = NULL,
                           max = NULL,
@@ -238,7 +239,8 @@ cyto_stat_auc <- function(x,
   d <- cyto_stat_density(x,
                          smooth = smooth,
                          stat = "count", # cyto_stat_compute conflict
-                         bandwidth = bandwidth)
+                         bandwidth = bandwidth,
+                         bins = bins)
   
   # AREA UNDER CURVE
   res <- LAPPLY(d, function(z){
@@ -294,13 +296,13 @@ cyto_stat_bandwidth <- function(x,
 #' Density
 #' @param x a matrix
 #' @param stat "percent", "density" or "count"
-#' @param smooth numeric set to 0.6
+#' @param smooth numeric set to 1
 #' @param bins 256
 #' @importFrom stats density
 #' @noRd
 cyto_stat_density <- function(x,
                               stat = "density",
-                              smooth = 0.6,
+                              smooth = 1,
                               bandwidth = NA,
                               bins = 256,
                               ...) {
