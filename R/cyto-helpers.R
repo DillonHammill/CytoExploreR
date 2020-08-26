@@ -5120,7 +5120,12 @@ cyto_cbind.flowFrame <- function(x,
   
   # MATRIX
   if(!is.matrix(cols)){
-    stop("cols must be a matrix")
+    stop("'cols' must be a matrix")
+  }
+
+  # HANDLE EMPTY FLOWFRAME/CYTOFRAME
+  if(cyto_stat_count(x) == 0 & nrow(cols) > 0) {
+    cols <- cols[-seq_len(nrow(cols)), ,drop = FALSE]
   }
   
   # CYTOFRAME
