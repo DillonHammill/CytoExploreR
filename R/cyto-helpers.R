@@ -4694,7 +4694,9 @@ cyto_calibrate_reset <- function(){
 ## CYTO_APPLY ------------------------------------------------------------------
 
 # flowFrame/flowSet methods require parent argument (not used) otherwise parent
-# gets passed to FUN.
+# gets passed to FUN. cyto_apply cannot dispatch to cyto_stats functions unless
+# called within the package - users should interact with cyto_stats_compute
+# directly.
 
 #' Apply a function to elements of cytoframe, cytoset, GatingHierarchy or
 #' GatingSet
