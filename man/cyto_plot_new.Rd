@@ -4,20 +4,23 @@
 \alias{cyto_plot_new}
 \title{Open new graphics device for cyto_plot}
 \usage{
-cyto_plot_new(popup = TRUE, ...)
+cyto_plot_new(popup = TRUE, layout = NULL, ...)
 }
 \arguments{
 \item{popup}{logical indicating whether a popup graphics device should be
 opened.}
 
+\item{layout}{passed to \code{\link{cyto_plot_layout}} to set the layout of
+the new graphics device as it is opened, set to NULL by default to simply
+open the device without setting the layout.}
+
 \item{...}{additional arguments passed to
 \code{\link[grDevices:dev]{dev.new}}:}
 }
 \description{
-\code{cyto_plot_new} is used internally by cyto_plot to open an
-OS-specific interactive garphics device to facilitate gate drawing. Mac users
-will need to install \href{https://www.xquartz.org/}{XQuartz} for this
-functionality.
+\code{cyto_plot_new} is used internally by cyto_plot to open an OS-specific
+interactive garphics device to facilitate gate drawing. Mac users will need
+to install \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 }
 \examples{
 \dontrun{

@@ -761,13 +761,15 @@ cyto_plot_empty <- function(x,
 
 #' Open new graphics device for cyto_plot
 #'
-#' \code{cyto_plot_new} is used internally by cyto_plot to open an
-#' OS-specific interactive garphics device to facilitate gate drawing. Mac users
-#' will need to install \href{https://www.xquartz.org/}{XQuartz} for this
-#' functionality.
+#' \code{cyto_plot_new} is used internally by cyto_plot to open an OS-specific
+#' interactive garphics device to facilitate gate drawing. Mac users will need
+#' to install \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #'
 #' @param popup logical indicating whether a popup graphics device should be
 #'   opened.
+#' @param layout passed to \code{\link{cyto_plot_layout}} to set the layout of
+#'   the new graphics device as it is opened, set to NULL by default to simply
+#'   open the device without setting the layout.
 #' @param ... additional arguments passed to
 #'   \code{\link[grDevices:dev]{dev.new}}:
 #'
@@ -782,12 +784,14 @@ cyto_plot_empty <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup = TRUE, ...) {
-  # Null graphics device -> RStudioGD
+cyto_plot_new <- function(popup = TRUE,
+                          layout = NULL,
+                          ...) {
+  # NULL -> RSTUDIOGD
   if (dev.cur() == 1) {
     dev.new()
   }
-  # Open popup window - either windows/X11/xquartz
+  # POPUP GRAPHICS DEVICE
   if (popup == TRUE & interactive() & getOption("CytoExploreR_interactive")) {
     if (.Platform$OS.type == "windows") {
       suppressWarnings(dev.new(...))
@@ -799,6 +803,10 @@ cyto_plot_new <- function(popup = TRUE, ...) {
         suppressWarnings(dev.new(...))
       }
     }
+  }
+  # LAYOUT
+  if(!is.null(layout)) {
+    cyto_plot_layout(layout)
   }
 }
 
