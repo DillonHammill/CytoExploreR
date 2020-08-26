@@ -208,7 +208,7 @@
                                        channels = channels
       )
       # GATE STAT
-      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
       # PLOT LABEL
       cyto_plot_labeller(
@@ -433,7 +433,7 @@
                                        channels = channels
       )
       # GATE STAT
-      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
       # PLOT LABEL
       cyto_plot_labeller(
@@ -737,7 +737,7 @@
                                        channels = channels
       )
       # GATE STAT
-      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
       # PLOT LABEL
       cyto_plot_labeller(
@@ -971,7 +971,7 @@
                                      channels = channels
     )
     # GATE STAT
-    gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+    gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
     gate_stat <- paste(.round(gate_stat), "%")
     # PLOT LABEL
     cyto_plot_labeller(
@@ -1201,7 +1201,7 @@
                                      channels = channels
     )
     # GATE STAT
-    gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+    gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
     gate_stat <- paste(.round(gate_stat), "%")
     # PLOT LABEL
     cyto_plot_labeller(
@@ -1472,7 +1472,7 @@
                                        channels = channels
       )
       # GATE STAT
-      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
       # PLOT LABEL
       cyto_plot_labeller(
@@ -1686,7 +1686,7 @@
     # GATE STAT
     gate_pops <- .cyto_label_pops(list(fr), gate)[[1]]
     gate_stat <- LAPPLY(gate_pops, function(pop) {
-      .cyto_count(pop) / .cyto_count(fr) * 100
+      cyto_stat_count(pop) / cyto_stat_count(fr) * 100
     })
     gate_stat <- LAPPLY(gate_stat, function(z) {
       paste(.round(z), "%")
@@ -2417,7 +2417,7 @@
                                        channels = channels
       )
       # GATE STAT
-      gate_stat <- .cyto_count(Subset(fr, gate)) / .cyto_count(fr) * 100
+      gate_stat <- cyto_stat_count(Subset(fr, gate)) / cyto_stat_count(fr) * 100
       gate_stat <- paste(.round(gate_stat), "%")
       # PLOT LABEL
       cyto_plot_labeller(

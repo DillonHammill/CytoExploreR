@@ -563,8 +563,7 @@ cyto_gate_draw.flowSet <- function(x,
   # GROUPING (MERGE BY)
   fr_list <- cyto_merge_by(fs,
                            merge_by = group_by,
-                           select = select
-  )
+                           select = select)
   
   # GROUPS
   N <- length(fr_list)
@@ -932,10 +931,15 @@ cyto_gate_draw.flowFrame <- function(x,
     # NEGATED LABEL XCOORD
     negate_text_x <- suppressMessages(
       # WATCH FOR EMPTY FLOWFRAMES
-      if (.cyto_count(NP) < 2) {
+      if (cyto_stat_count(NP) < 2) {
         mean(par("usr")[c(1, 2)])
       } else {
-        .cyto_mode(NP, channels = channels[1])
+        cyto_apply(NP, 
+                   "cyto_stat_mode", 
+                   channels = channels[1],
+                   input = "matrix",
+                   inverse = FALSE,
+                   copy = FALSE)[, 1]
       }
     )
     # NEGATED LABEL YCOORD
@@ -944,15 +948,20 @@ cyto_gate_draw.flowFrame <- function(x,
     } else if (length(channels) == 2) {
       negate_text_y <- suppressMessages(
         # WATCH OUT FOR EMPTY FLOWFRAMES
-        if (.cyto_count(NP) < 2) {
+        if (cyto_stat_count(NP) < 2) {
           mean(par("usr")[c(3, 4)])
         } else {
-          .cyto_mode(NP, channels = channels[2])
+          cyto_apply(NP, 
+                     "cyto_stat_mode", 
+                     channels = channels[2],
+                     input = "matrix",
+                     inverse = FALSE,
+                     copy = FALSE)[, 1]
         }
       )
     }
     # NEGATED STATISTIC
-    negate_stat <- .cyto_count(NP) / .cyto_count(fr_list[[1]]) * 100
+    negate_stat <- cyto_stat_count(NP) / cyto_stat_count(fr_list[[1]]) * 100
     negate_stat <- paste(.round(negate_stat, 2), "%")
     # NEGATED LABEL
     cyto_plot_labeller(
