@@ -127,7 +127,7 @@
 #' @param legend_point_col colour(s) to use for points in 2-D scatter plot
 #'   legend.
 #' @param grid logical indicating whether to include grid lines in the plot
-#'   background, set to FALSE by default. Alternatively, users can supply a
+#'   background, set to TRUE by default. Alternatively, users can supply a
 #'   integer to indicate the number of equally spaced quantiles to used for the
 #'   grid lines.
 #' @param grid_line_type integer [0,6] to control the line type of grid lines,
@@ -215,7 +215,7 @@ cyto_plot_empty <- function(x,
                             legend_line_col = NA,
                             legend_box_fill = NA,
                             legend_point_col = NA,
-                            grid = FALSE,
+                            grid = TRUE,
                             grid_line_type = 1,
                             grid_line_width = 1,
                             grid_line_col = "grey95",
@@ -303,7 +303,7 @@ cyto_plot_empty <- function(x,
       # YLIM
       ymin <- as.numeric(unlist(strsplit(names(d)[1], "-"))[1])
       ymax <- max(
-        LAPPLY(names(d), function(z){
+        LAPPLY(names(d), function(z) {
           as.numeric(unlist(strsplit(z, "-"))[2])
         }),
         na.rm = TRUE
@@ -362,12 +362,12 @@ cyto_plot_empty <- function(x,
   }
 
   # AXES TEXT ------------------------------------------------------------------
-  
+
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!is(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
-  
+
   # X axis breaks and labels -  can be inherited from cyto_plot
   if (!is(axes_text[[1]], "list")) {
     if (.all_na(axes_text[[1]])) {
@@ -410,7 +410,7 @@ cyto_plot_empty <- function(x,
     length(channels) == 1) {
     axes_text <- list(axes_text[[1]], FALSE)
   }
-  
+
   # AXES LABELS ----------------------------------------------------------------
 
   # AXES LABELS - missing replaced - NA removed
@@ -435,7 +435,7 @@ cyto_plot_empty <- function(x,
 
   # Set plot margins - set par("mar")
   .cyto_plot_margins(x,
-                     channels = channels,
+    channels = channels,
     legend = legend,
     legend_text = legend_text,
     legend_text_size = legend_text_size,
@@ -490,7 +490,7 @@ cyto_plot_empty <- function(x,
     } else {
       x_mjr_ind <- seq_len(length(x_mjr$label))
     }
-    
+
     axis(1,
       at = x_mjr$at[x_mjr_ind],
       labels = x_mjr$label[x_mjr_ind],
@@ -567,48 +567,53 @@ cyto_plot_empty <- function(x,
   }
 
   # GRID LINES
-  if(grid != FALSE) {
+  if (grid != FALSE) {
     # AXES BREAKS GRID LINES
-    if(grid == TRUE) {
-      if(length(channels) == 2) {
+    if (grid == TRUE) {
+      if (length(channels) == 2) {
         axes_grid <- lapply(axes_text, `[[`, "at")
       } else {
         axes_grid <- list(axes_text[[1]]$at)
       }
-    # QUANTILE GRID LINES - BASE LAYER ONLY
+      # QUANTILE GRID LINES - BASE LAYER ONLY
     } else {
-      if(!is.numeric(grid)) {
+      if (!is.numeric(grid)) {
         grid <- 10
       }
-      axes_grid <- lapply(channels, function(z){
+      axes_grid <- lapply(channels, function(z) {
         cyto_apply(x[[1]],
-                   "cyto_stat_quantile",
-                   channels = z,
-                   input = "matrix",
-                   copy = FALSE,
-                   inverse = FALSE,
-                   probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid)))[, 1]
+          "cyto_stat_quantile",
+          channels = z,
+          input = "matrix",
+          copy = FALSE,
+          inverse = FALSE,
+          probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid))
+        )[, 1]
       })
       names(axes_grid) <- channels
     }
     # X AXIS GRID LINES
     lapply(seq_along(axes_grid), function(z) {
       # VERTICAL LINES
-      if(z == 1) {
-        abline(v = axes_grid[[z]],
-               lty = grid_line_type,
-               lwd = grid_line_width,
-               col = adjustcolor(grid_line_col, grid_line_alpha))
-      # HORIZONTAL LINES
+      if (z == 1) {
+        abline(
+          v = axes_grid[[z]],
+          lty = grid_line_type,
+          lwd = grid_line_width,
+          col = adjustcolor(grid_line_col, grid_line_alpha)
+        )
+        # HORIZONTAL LINES
       } else {
-        abline(h = axes_grid[[z]],
-               lty = grid_line_type,
-               lwd = grid_line_width,
-               col = adjustcolor(grid_line_col, grid_line_alpha))
+        abline(
+          h = axes_grid[[z]],
+          lty = grid_line_type,
+          lwd = grid_line_width,
+          col = adjustcolor(grid_line_col, grid_line_alpha)
+        )
       }
     })
   }
-  
+
   # BORDER
   box(
     which = "plot",
@@ -616,7 +621,7 @@ cyto_plot_empty <- function(x,
     lwd = border_line_width,
     col = border_line_col
   )
-  
+
   # TITLE
   if (!.all_na(title)) {
     title(
@@ -684,49 +689,56 @@ cyto_plot_empty <- function(x,
   # LEGEND ---------------------------------------------------------------------
 
   # POINT_COL_SCALE
-  if(length(channels) == 2 & 
-     (any(is.na(point_col)) | 
+  if (length(channels) == 2 &
+    (any(is.na(point_col)) |
       any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
     # LEGEND
     point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
     legend_col_ramp <- colorRamp(point_col_scale)
-    legend_cols <- seq(0, 1, 1/50) # 50 boxes
+    legend_cols <- seq(0, 1, 1 / 50) # 50 boxes
     legend_cols <- legend_col_ramp(legend_cols)
     legend_cols <- rgb(legend_cols[, 1],
-                       legend_cols[, 2],
-                       legend_cols[, 3],
-                       maxColorValue = 255)
+      legend_cols[, 2],
+      legend_cols[, 3],
+      maxColorValue = 255
+    )
     legend_cols <- adjustcolor(legend_cols, point_col_alpha)
-    
+
     # LEGEND LOCATION
-    legend_x <- c(par("usr")[2] + 0.005 * (par("usr")[2] - par("usr")[1]),
-                  par("usr")[2] + 0.035 * (par("usr")[2] - par("usr")[1]))
+    legend_x <- c(
+      par("usr")[2] + 0.005 * (par("usr")[2] - par("usr")[1]),
+      par("usr")[2] + 0.035 * (par("usr")[2] - par("usr")[1])
+    )
     legend_y <- c(par("usr")[3], par("usr")[4])
-    
+
     # LEGEND BORDER
     rect(legend_x[1],
-         legend_y[1],
-         legend_x[2],
-         legend_y[2],
-         xpd = TRUE,
-         lwd = 1)
-    
+      legend_y[1],
+      legend_x[2],
+      legend_y[2],
+      xpd = TRUE,
+      lwd = 1
+    )
+
     # LEGEND BOXES
     legend_box_x <- legend_x
-    legend_box_y <- seq(par("usr")[3], 
-                        par("usr")[4], 
-                        (par("usr")[4] - par("usr")[3])/50)
-    lapply(seq_len(50), function(z){
+    legend_box_y <- seq(
+      par("usr")[3],
+      par("usr")[4],
+      (par("usr")[4] - par("usr")[3]) / 50
+    )
+    lapply(seq_len(50), function(z) {
       rect(legend_box_x[1],
-           legend_box_y[z],
-           legend_box_x[2],
-           legend_box_y[z + 1],
-           xpd = TRUE,
-           col = legend_cols[z],
-           border = NA)
+        legend_box_y[z],
+        legend_box_x[2],
+        legend_box_y[z + 1],
+        xpd = TRUE,
+        col = legend_cols[z],
+        border = NA
+      )
     })
   }
-  
+
   # LEGEND - FALSE/"fill"/"line"
   if (legend != FALSE) {
     .cyto_plot_legend(x,
@@ -791,23 +803,34 @@ cyto_plot_new <- function(popup = TRUE,
   if (dev.cur() == 1) {
     dev.new()
   }
-  # POPUP GRAPHICS DEVICE
-  if (popup == TRUE & interactive() & getOption("CytoExploreR_interactive")) {
-    if (.Platform$OS.type == "windows") {
-      suppressWarnings(dev.new(...))
-    } else if (.Platform$OS.type == "unix") {
-      if (Sys.info()["sysname"] == "Linux") {
-        # Cairo needed for semi-transparency
-        suppressWarnings(dev.new(type = "cairo", ...))
-      } else if (Sys.info()["sysname"] == "Darwin") {
+  # INTERACTIVE GRAPHICS DEVICE
+  if(interactive() & getOption("CytoExploreR_interactive")) {
+    # NEW DEVICE
+    if(popup == TRUE) {
+      if (.Platform$OS.type == "windows") {
         suppressWarnings(dev.new(...))
+      } else if (.Platform$OS.type == "unix") {
+        if (Sys.info()["sysname"] == "Linux") {
+          # Cairo needed for semi-transparency
+          suppressWarnings(dev.new(type = "cairo", ...))
+        } else if (Sys.info()["sysname"] == "Darwin") {
+          suppressWarnings(dev.new(...))
+        }
       }
+    # DEVICE EXISTS - OPEN NEW ONE
+    } else if(names(dev.cur()) %in% c(
+      "windows",
+      "X11",
+      "x11",
+      "quartz"
+    )) {
+      dev.new()
     }
   }
+  
   # LAYOUT
-  if(!is.null(layout)) {
-    cyto_plot_layout(layout)
-  }
+  cyto_plot_layout(layout)
+  
 }
 
 ## CYTO_PLOT_RESET -------------------------------------------------------------
@@ -1076,7 +1099,8 @@ cyto_plot_save_reset <- function() {
 #'   dimensions of the plot or a matrix defining a more sophisticated layout
 #'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 #'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default.
+#'   column (2) order, set to row order by default. Resorts to
+#'   \code{options("cyto_plot_layout")} if not manually specified.
 #'
 #' @importFrom graphics par layout
 #'
@@ -1123,27 +1147,38 @@ cyto_plot_save_reset <- function() {
 cyto_plot_layout <- function(layout = NULL) {
 
   # MESSAGE
-  if (is.null(layout)) {
-    stop("Supply either a vector or matrix to construct a custom layout.")
+  if (is.null(layout) | all(layout == FALSE)) {
+    if(!is.null(getOption("cyto_plot_layout"))) {
+      layout  <- getOption("cyto_plot_layout")
+    } else {
+      invisible(NULL) # layout as current device
+    }
   }
-
+  
   # MATRIX
   if (is.matrix(layout)) {
     layout(layout)
     # VECTOR
   } else {
-    # ROW ORDER
-    if (length(layout) == 2) {
-      layout <- c(layout, 1)
-    }
-    # ROWS
-    if (layout[3] == 1) {
-      par(mfrow = c(layout[1], layout[2]))
-      # COLUMNS
-    } else if (layout[3] == 2) {
-      par(mfcol = c(layout[1], layout[2]))
+    # BYPASS LAYOUT
+    if (!all(layout == FALSE)) {
+      # ROW ORDER
+      if (length(layout) == 2) {
+        layout <- c(layout, 1)
+      }
+      # ROWS
+      if (layout[3] == 1) {
+        par(mfrow = c(layout[1], layout[2]))
+        # COLUMNS
+      } else if (layout[3] == 2) {
+        par(mfcol = c(layout[1], layout[2]))
+      }
     }
   }
+  
+  # SAVE LAYOUT PLOT/CUSTOM
+  options("cyto_plot_layout" = layout)
+  
 }
 
 ## CYTO_PLOT_CUSTOM ------------------------------------------------------------
@@ -1289,28 +1324,14 @@ cyto_plot_complete <- function(layout = NULL) {
   options("cyto_plot_save" = FALSE)
 
   # Reset layout - 1 x 1
-  if (is.null(layout)) {
-    par("mfrow" = c(1, 1))
-    par("mfcol" = c(1, 1))
-    # Reset layout as supplied
-  } else {
-    # MATRIX
-    if (is.matrix(layout)) {
-      layout(layout)
-      # VECTOR
-    } else {
-      if (length(layout) == 2) {
-        layout <- c(layout, 1)
-      }
-    }
-    # ROWS
-    if (layout[3] == 1) {
-      par(mfrow = c(layout[1], layout[2]))
-      # COLUMNS
-    } else if (layout[3] == 2) {
-      par(mfcol = c(layout[1], layout[2]))
-    }
+  if(is.null(layout)) {
+    layout <- c(1, 1, 1)
   }
+  
+  # Reset cyto_plot_layout
+  cyto_plot_layout(layout)
+  options("cyto_plot_layout" = NULL)
+
 }
 
 ## CYTO_PLOT_THEME -------------------------------------------------------------

@@ -94,7 +94,7 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
-  grid = FALSE,
+  grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
   grid_line_col = "grey95",
@@ -184,7 +184,7 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
-  grid = FALSE,
+  grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
   grid_line_col = "grey95",
@@ -277,7 +277,7 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
-  grid = FALSE,
+  grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
   grid_line_col = "grey95",
@@ -366,7 +366,7 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
-  grid = FALSE,
+  grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
   grid_line_col = "grey95",
@@ -428,7 +428,7 @@ for plotting \code{c(#rows, #columns)}.}
 
 \item{margins}{a vector of length 4 to control the margins around the bottom,
 left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
-`cyto_plot` compute optimal margins.}
+\code{cyto_plot} compute optimal margins.}
 
 \item{popup}{logical indicating whether the plot should be constructed in a
 pop-up window, set to FALSE by default. \code{popup} will open OS-specific
@@ -687,7 +687,7 @@ default.}
 by default for no transparency.}
 
 \item{grid}{logical indicating whether to include grid lines in the plot
-background, set to FALSE by default. Alternatively, users can supply a
+background, set to TRUE by default. Alternatively, users can supply a
 integer to indicate the number of equally spaced quantiles to used for the
 grid lines.}
 

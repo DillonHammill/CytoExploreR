@@ -58,7 +58,7 @@ cyto_plot_empty(
   legend_line_col = NA,
   legend_box_fill = NA,
   legend_point_col = NA,
-  grid = FALSE,
+  grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
   grid_line_col = "grey95",
@@ -238,7 +238,7 @@ legends when legend is set to \code{"fill"}.}
 legend.}
 
 \item{grid}{logical indicating whether to include grid lines in the plot
-background, set to FALSE by default. Alternatively, users can supply a
+background, set to TRUE by default. Alternatively, users can supply a
 integer to indicate the number of equally spaced quantiles to used for the
 grid lines.}
 

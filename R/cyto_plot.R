@@ -47,7 +47,7 @@
 #'   for plotting \code{c(#rows, #columns)}.
 #' @param margins a vector of length 4 to control the margins around the bottom,
 #'   left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
-#'   `cyto_plot` compute optimal margins.
+#'   \code{cyto_plot} compute optimal margins.
 #' @param popup logical indicating whether the plot should be constructed in a
 #'   pop-up window, set to FALSE by default. \code{popup} will open OS-specific
 #'   graphic device prior to plotting. Mac users will need to install
@@ -235,7 +235,7 @@
 #' @param border_fill_alpha transparency to use for border_fill colour, set to 1
 #'   by default for no transparency.
 #' @param grid logical indicating whether to include grid lines in the plot
-#'   background, set to FALSE by default. Alternatively, users can supply a
+#'   background, set to TRUE by default. Alternatively, users can supply a
 #'   integer to indicate the number of equally spaced quantiles to used for the
 #'   grid lines.
 #' @param grid_line_type integer [0,6] to control the line type of grid lines,
@@ -390,7 +390,7 @@ cyto_plot.GatingSet <- function(x,
                                 border_line_col = "black",
                                 border_fill = "white",
                                 border_fill_alpha = 1,
-                                grid = FALSE,
+                                grid = TRUE,
                                 grid_line_type = 1,
                                 grid_line_width = 1,
                                 grid_line_col = "grey95",
@@ -874,7 +874,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       border_line_col = "black",
                                       border_fill = "white",
                                       border_fill_alpha = 1,
-                                      grid = FALSE,
+                                      grid = TRUE,
                                       grid_line_type = 1,
                                       grid_line_width = 1,
                                       grid_line_col = "grey95",
@@ -1328,7 +1328,7 @@ cyto_plot.flowSet <- function(x,
                               border_line_col = "black",
                               border_fill = "white",
                               border_fill_alpha = 1,
-                              grid = FALSE,
+                              grid = TRUE,
                               grid_line_type = 1,
                               grid_line_width = 1,
                               grid_line_col = "grey95",
@@ -1349,7 +1349,7 @@ cyto_plot.flowSet <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # CURRENT PARAMETERS
-  old_pars <- par(c("mar", "mfrow"))
+  old_pars <- par(c("mar", "mfrow", "mfcol"))
   
   # METHOD & RESET
   if (is.null(getOption("cyto_plot_method"))) {
@@ -1668,34 +1668,17 @@ cyto_plot.flowSet <- function(x,
   args$axes_text <- list(axes_text_x, axes_text_y)
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
   
-  # GRAPHICS DEVICE
-  if (args$popup == TRUE) {
-    cyto_plot_new(args$popup)
-  }
-  
   # LAYOUT MISSING - SET FOR MULTIPLE PLOTS ONLY
   if (length(args$x) > 1) {
     if (all(.empty(layout))) {
       # LAYOUT DIMENSIONS
       layout <- .cyto_plot_layout(args$x,
                                   layout = layout)
-      par("mfrow" = layout)
       # LAYOUT TURNED OFF
     } else if (all(layout == FALSE) | .all_na(layout)) {
       # USE CURRENT DIMENSIONS
       layout <- par("mfrow")
-      par("mfrow" = layout)
-      # LAYOUT SUPPLIED
-    } else {
-      par("mfrow" = layout)
     }
-  }
-  
-  # NUMBER OF PLOTS PER PAGE
-  if (length(args$x) > 1) {
-    np <- prod(layout)
-  } else {
-    np <- 1
   }
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
@@ -1763,11 +1746,15 @@ cyto_plot.flowSet <- function(x,
   
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
   
+  # GRAPHICS DEVICE
+  cyto_plot_new(popup, layout)
+  print(par("mfrow"))
+  
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
   cnt <- 0
   plots <- lapply(seq_along(args), function(z) {
     # COUNTER
-    cnt <<- cnt + 1
+    assign("cnt", cnt + 1, envir = parent.frame(2))
     # ARGUMENTS
     cyto_plot_args <- args[[z]]
     # PREPARE X AND OVERLAY
@@ -1814,23 +1801,24 @@ cyto_plot.flowSet <- function(x,
       cyto_plot_memory <<- .cyto_plot_args_recall()
       cyto_plot_memory <<- cyto_plot_memory[[length(cyto_plot_memory)]]
     }
-    # RECORD PLOT (FULL PAGE OR ALL SAMPLES)
-    if (cnt %% np == 0 | cnt == length(args)) {
-      if (getOption("cyto_plot_method") == "flowSet") {
+    # RECORD FULL PAGE & OPEN NEW DEVICE
+    print(cnt)
+    print(par("page"))
+    print(par("mfg"))
+    if(par("page")) {
+      print("YEBO")
+      if(getOption("cyto_plot_method") == "flowSet") {
         p <- cyto_plot_record()
       } else {
         p <- NULL
       }
+      # OPEN NEW DEVICE 
+      if(length(args) > cnt) {
+        cyto_plot_new(popup) # use global layout
+      }
     } else {
       p <- NULL
     }
-    
-    # NEW PLOT PAGE
-    if (popup == TRUE & cnt %% np == 0 & length(args) > cnt) {
-      cyto_plot_new(popup = TRUE)
-      par("mfrow" = layout)
-    }
-    
     # RETURN RECORDED PLOT
     return(p)
   })
@@ -1876,7 +1864,12 @@ cyto_plot.flowSet <- function(x,
     }
   }
   
-  # RETURN RECORDED PLOTS
+  # RESET CYTO_PLOT_LAYOUT
+  if(!getOption("cyto_plot_custom")) {
+    options("cyto_plot_layout" = NULL)
+  }
+
+  # RETURN RECORDED PLOT
   plots[LAPPLY(plots, "is.null")] <- NULL
   if (length(plots) == 0) {
     plots <- NULL
@@ -1966,7 +1959,7 @@ cyto_plot.flowFrame <- function(x,
                                 border_line_col = "black",
                                 border_fill = "white",
                                 border_fill_alpha = 1,
-                                grid = FALSE,
+                                grid = TRUE,
                                 grid_line_type = 1,
                                 grid_line_width = 1,
                                 grid_line_col = "grey95",
