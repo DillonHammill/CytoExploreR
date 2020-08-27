@@ -196,7 +196,7 @@ cyto_export <- function(x,
 
 ## CYTO_LOAD -------------------------------------------------------------------
 
-#' Load .fcs files into ncdfFlowSet
+#' Load stored files into a cytoset or GatingSet
 #'
 #' \code{cyto_load} is a convenient wrapper around
 #' \code{\link[base:list.files]{list.files}} and
@@ -258,56 +258,57 @@ cyto_load <- function(path = ".",
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
   
-  # VALID FILES
-  files_ext <- file_ext(files)
-  files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
-  
-  # NO VALID FILES
-  if(length(files_ind) == length(files)){
-    stop(paste0(path,
-                " does not contain any valid FCS files."))
-  }
-  
-  # EXCLUDE IRRELEVANT FILES
-  if(length(files_ind) > 0){
-    files <- files[-files_ind]
-  }
-  
-  # SELECT
-  if (!is.null(select)) {
-    file_ind <- c()
-    lapply(select, function(z) {
-      if (any(grepl(z, files, ignore.case = TRUE))) {
-        file_ind <<- c(file_ind,
-                       which(grepl(z, files, ignore.case = TRUE)))
-      }
-    })
-    files <- files[unique(file_ind)]
-  }
-  
-  # EXCLUDE
-  if (!is.null(exclude)) {
-    file_ind <- c()
-    lapply(exclude, function(z) {
-      if (any(grepl(z, files, ignore.case = TRUE))) {
-        file_ind <<- c(file_ind,
-                       which(grepl(z, files, ignore.case = TRUE)))
-      }
-    })
-    files <- files[-unique(file_ind)]
-  }
-  
-  # SORTED FILE PATHS
-  if (sort) {
-    files <- file_sort(files)
-  }
-  
   # SAVED GATINGSET
   if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
     x <- load_gs(path = path)
     # FCS FILES
   } else {
+    
+    # VALID FILES
+    files_ext <- file_ext(files)
+    files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
+    
+    # NO VALID FILES
+    if(length(files_ind) == length(files)){
+      stop(paste0(path,
+                  " does not contain any valid FCS files."))
+    }
+    
+    # EXCLUDE IRRELEVANT FILES
+    if(length(files_ind) > 0){
+      files <- files[-files_ind]
+    }
+    
+    # SELECT
+    if (!is.null(select)) {
+      file_ind <- c()
+      lapply(select, function(z) {
+        if (any(grepl(z, files, ignore.case = TRUE))) {
+          file_ind <<- c(file_ind,
+                         which(grepl(z, files, ignore.case = TRUE)))
+        }
+      })
+      files <- files[unique(file_ind)]
+    }
+    
+    # EXCLUDE
+    if (!is.null(exclude)) {
+      file_ind <- c()
+      lapply(exclude, function(z) {
+        if (any(grepl(z, files, ignore.case = TRUE))) {
+          file_ind <<- c(file_ind,
+                         which(grepl(z, files, ignore.case = TRUE)))
+        }
+      })
+      files <- files[-unique(file_ind)]
+    }
+    
+    # SORTED FILE PATHS
+    if (sort) {
+      files <- file_sort(files)
+    }
+    
     # CYTOSET
     x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
     

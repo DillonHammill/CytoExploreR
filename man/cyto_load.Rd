@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_load}
 \alias{cyto_load}
-\title{Load .fcs files into ncdfFlowSet}
+\title{Load stored files into a cytoset or GatingSet}
 \usage{
 cyto_load(
   path = ".",
