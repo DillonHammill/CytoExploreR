@@ -785,7 +785,7 @@ cyto_plot_empty <- function(x,
 #' @param ... additional arguments passed to
 #'   \code{\link[grDevices:dev]{dev.new}}:
 #'
-#' @importFrom grDevices dev.cur dev.new
+#' @importFrom grDevices dev.cur dev.new dev.list dev.set graphics.off
 #'
 #' @examples
 #' \dontrun{
@@ -803,28 +803,66 @@ cyto_plot_new <- function(popup = TRUE,
   if (dev.cur() == 1) {
     dev.new()
   }
-  # INTERACTIVE GRAPHICS DEVICE
-  if(interactive() & getOption("CytoExploreR_interactive")) {
-    # NEW DEVICE
+  
+  # CURRENT DEVICE - RSTUDIO
+  if(any(grepl("rstudio", names(dev.cur()), ignore.case = TRUE))) {
+    # REQUIRE - POPUP
     if(popup == TRUE) {
-      if (.Platform$OS.type == "windows") {
-        suppressWarnings(dev.new(...))
-      } else if (.Platform$OS.type == "unix") {
-        if (Sys.info()["sysname"] == "Linux") {
-          # Cairo needed for semi-transparency
-          suppressWarnings(dev.new(type = "cairo", ...))
-        } else if (Sys.info()["sysname"] == "Darwin") {
+      # NEW POPUP DEVICE REQUIRED
+      new_device <- "popup"
+    # REQUIRE - RSTUDIO  
+    } else {
+      # PRESET LAYOUT
+      if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
+        new_device <- FALSE
+      # NEW LAYOUT  
+      } else {
+        new_device <- "rstudio"
+      }
+    }
+  # CURRENT DEVICE - POPUP
+  } else {
+    # REQUIRE POPUP
+    if(popup == TRUE) {
+      # PRESET LAYOUT
+      if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
+        new_device <- FALSE
+        # NEW LAYOUT  
+      } else {
+        new_device <- "popup"
+      }
+    # REQUIRE - RSTUDIO
+    } else {
+      # NEW RSTUDIO DEVICE REQUIRED
+      new_device <- "rstudio"
+    }
+  }
+  
+  # OPEN NEW GRAPHICS DEVICE
+  if(new_device != FALSE) {
+    # POPUP DEVICE
+    if(new_device == "popup") {
+      if(interactive() & getOption("CytoExploreR_interactive")) {
+        if (.Platform$OS.type == "windows") {
           suppressWarnings(dev.new(...))
+        } else if (.Platform$OS.type == "unix") {
+          if (Sys.info()["sysname"] == "Linux") {
+            # Cairo needed for semi-transparency
+            suppressWarnings(dev.new(type = "cairo", ...))
+          } else if (Sys.info()["sysname"] == "Darwin") {
+            suppressWarnings(dev.new(...))
+          }
         }
       }
-    # DEVICE EXISTS - OPEN NEW ONE
-    } else if(names(dev.cur()) %in% c(
-      "windows",
-      "X11",
-      "x11",
-      "quartz"
-    )) {
-      dev.new()
+    # RSTUDIO DEVICE  
+    } else if(new_device == "rstudio") {
+      dev.ind <- which(grepl("rstudio", names(dev.list()), ignore.case = TRUE))
+      if(length(dev.ind) != 0) {
+        dev.set(dev.list()[dev.ind])
+      } else {
+        graphics.off()
+        dev.new(..., noRStudioGD = FALSE)
+      }
     }
   }
   

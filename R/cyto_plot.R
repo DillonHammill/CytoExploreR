@@ -1746,9 +1746,10 @@ cyto_plot.flowSet <- function(x,
   
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
   
-  # GRAPHICS DEVICE
-  cyto_plot_new(popup, layout)
-  print(par("mfrow"))
+  # GRAPHICS DEVICE - ONLY OPEN IF LAYOUT IS BEING SET
+  if(!all(layout == FALSE)) {
+    cyto_plot_new(popup, layout)
+  }
   
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
   cnt <- 0
@@ -1802,11 +1803,7 @@ cyto_plot.flowSet <- function(x,
       cyto_plot_memory <<- cyto_plot_memory[[length(cyto_plot_memory)]]
     }
     # RECORD FULL PAGE & OPEN NEW DEVICE
-    print(cnt)
-    print(par("page"))
-    print(par("mfg"))
     if(par("page")) {
-      print("YEBO")
       if(getOption("cyto_plot_method") == "flowSet") {
         p <- cyto_plot_record()
       } else {

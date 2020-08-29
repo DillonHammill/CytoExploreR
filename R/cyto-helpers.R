@@ -3399,9 +3399,6 @@ cyto_markers_edit <- function(x,
                               file = NULL,
                               ...) {
   
-  # check class of x
-  cyto_check(x)
-  
   # flowFrame
   if (cyto_class(x, "flowFrame")) {
     
@@ -3423,6 +3420,8 @@ cyto_markers_edit <- function(x,
   } else if (cyto_class(x, "GatingSet", TRUE)) {
     fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
+  } else {
+    stop("'x' must be a valid cytometry object.")
   }
   
   # file missing
@@ -3512,7 +3511,9 @@ cyto_markers_edit <- function(x,
                   ...)
   
   # Update channels
-  BiocGenerics::colnames(x) <- as.character(dt$channel)
+  if(!all(as.character(dt$channel) %in% cyto_channels(x))) {
+    cyto_channels(x) <- as.character(dt$channel)
+  }
   
   # # TODO - CHECK IF FILE EXISTS WITH DIFFERENT CHANNELS - NEED NEW FILE NAME
   # if(length(grep(file, list.files())) != 0){

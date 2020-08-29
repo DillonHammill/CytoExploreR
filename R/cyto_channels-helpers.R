@@ -18,9 +18,6 @@
 #'
 #' @return vector of channel names.
 #'
-#' @importFrom BiocGenerics colnames
-#' @importFrom methods is
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_fluor_channels}}
@@ -55,12 +52,17 @@ cyto_channels <- function(x,
                           ...){
   
   # LIST
-  if(is(x, "list")) {
+  if(cyto_class(x, "list", TRUE)) {
     x <- x[[1]]
   }
   
   # CHANNELS
-  channels <- colnames(x)
+  if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
+    channels <- BiocGenerics::colnames(x)
+  } else {
+    channels <- flowWorkspace::colnames(x)
+  }
+  
   
   # SELECT
   if(!is.null(select)){
@@ -91,6 +93,45 @@ cyto_channels <- function(x,
   # RETURN CHANNELS
   return(channels)
   
+}
+
+## CYTO_CHANNELS REPLACEMENT METHOD --------------------------------------------
+
+#' Replace channel names
+#'
+#' @param x object of class \code{\link[flowCore:flowFrame-class] {flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSey}}.
+#' @param value vector of new column names to replace the old ones.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_channels}}
+#' @seealso \code{\link{cyto_fluor_channels}}
+#'
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation flowSet
+#' fs <- Activation
+#' 
+#' # Channels
+#' cyto_channels(fs)
+#' 
+#' # Update first FSC-A to FSC
+#' cyto_channels(fs)[1] <- "FSC"
+#'
+#' @export
+"cyto_channels<-" <- function(x, value) {
+  if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
+    BiocGenerics::colnames(x) <- value
+  } else {
+    flowWorkspace::colnames(x) <- value
+  }
+  return(x)
 }
 
 ## CYTO_MARKERS ----------------------------------------------------------------
@@ -339,7 +380,6 @@ cyto_fluor_channels <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -374,7 +414,7 @@ cyto_channels_extract <- function(x,
   x <- cyto_extract(x)
   
   # Convert to flowFrame
-  if(is(x, "flowSet")){
+  if(cyto_class(x, "flowSet")){
     x <- x[[1]]
   }
   
@@ -434,7 +474,6 @@ cyto_channels_extract <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -469,7 +508,7 @@ cyto_markers_extract <- function(x,
   x <- cyto_extract(x)
   
   # Extract flowFrame
-  if(is(x, "flowSet")){
+  if(cyto_class(x, "flowSet")){
     x <- x[[1]]
   }
   
