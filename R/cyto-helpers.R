@@ -3057,7 +3057,7 @@ cyto_beads_sample <- function(x,
 #'   column added and annotated.
 #'
 #' @importFrom methods is as
-#' @importFrom flowWorkspace `sampleNames<-`
+#' @importFrom flowWorkspace `sampleNames<-` cf_append_cols
 #' @importFrom flowCore fsApply fr_append_cols
 #'
 #' @examples
@@ -3102,7 +3102,12 @@ cyto_barcode <- function(x,
         ncol = 1
       )
       colnames(mat) <- "Sample ID"
-      suppressWarnings(fr_append_cols(fr, mat))
+      if(is(fr, "flowFrame")) {
+        suppressWarnings(fr_append_cols(fr, mat))
+      } else {
+        suppressWarnings(cf_append_cols(fr, mat))
+      }
+      
     })
   }
 
@@ -3123,7 +3128,11 @@ cyto_barcode <- function(x,
         ncol = 1
       )
       colnames(mat) <- "Event ID"
-      suppressWarnings(fr_append_cols(fr, mat))
+      if(is(fr, "flowFrame")) {
+        suppressWarnings(fr_append_cols(fr, mat))
+      } else {
+        suppressWarnings(cf_append_cols(fr, mat))
+      }
     })
   }
 

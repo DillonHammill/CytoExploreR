@@ -64,7 +64,7 @@
 #'
 #' @importFrom flowCore exprs keyword write.FCS flowSet fr_append_cols
 #' @importFrom flowWorkspace GatingSet gs_cyto_data<- flowSet_to_cytoset
-#'   recompute flowFrame_to_cytoframe cytoset gs_cyto_data
+#'   recompute flowFrame_to_cytoframe cytoset gs_cyto_data cf_append_cols
 #' @importFrom rsvd rpca
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
@@ -508,7 +508,11 @@ cyto_map.flowFrame <- function(x,
   coords <- do.call(".cyto_map", args)
 
   # ADD MAPPING COORDS TO FLOWFRAME
-  x <- fr_append_cols(x, coords)
+  if(is(x, "flowFrame")) {
+    x <- fr_append_cols(x, coords)
+  } else {
+    x <- cf_append_cols(x, coords)
+  }
 
   # VISUALISATION --------------------------------------------------------------
   
