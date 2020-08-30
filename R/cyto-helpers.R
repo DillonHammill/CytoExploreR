@@ -3302,7 +3302,11 @@ cyto_markers_edit <- function(x,
   )
   
   # Update channels
-  BiocGenerics::colnames(x) <- as.character(dt$channel)
+  if(class(x) %in% c("flowFrame", "flowSet")) {
+    BiocGenerics::colnames(x) <- as.character(dt$channel)
+  } else {
+    flowWorkspace::colnames(x) <- as.character(dt$channel)
+  }
 
   # # TODO - CHECK IF FILE EXISTS WITH DIFFERENT CHANNELS - NEED NEW FILE NAME
   # if(length(grep(file, list.files())) != 0){
