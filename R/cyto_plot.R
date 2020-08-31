@@ -1335,6 +1335,24 @@ cyto_plot.flowSet <- function(x,
                               grid_line_alpha = 1,
                               ...) {
   
+  # CYTO_PLOT_EXIT -------------------------------------------------------------
+  
+  # CURRENT SET PARAMETERS
+  old_pars <- .par()
+  
+  # NEW PLOT METHOD
+  if(is.null(getOption("cyto_plot_method"))) {
+    # CYTO_PLOT_METHOD
+    options("cyto_plot_method" = "flowSet")
+    # CYTO_PLOT_EXIT
+    on.exit({
+      par(old_pars)
+      options("cyto_plot_method" = NULL)
+      options("cyto_plot_layout" = NULL)
+      options("cyto_plot_outer_margins" = NULL)
+    })
+  }
+  
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
   # ARGUMENTS
@@ -1345,34 +1363,7 @@ cyto_plot.flowSet <- function(x,
   
   # CONVERT MISSING TO EMPTY
   .args_update(args)
-  
-  # CHECKS ---------------------------------------------------------------------
-  
-  # CURRENT PARAMETERS
-  old_pars <- par(c("mar", "mfrow", "mfcol"))
-  
-  # METHOD & RESET
-  if (is.null(getOption("cyto_plot_method"))) {
-    # SET PLOT METHOD
-    options("cyto_plot_method" = "flowSet")
-    # RESET PLOT METHOD & GRAPHICAL PARAMETERS ON EXIT
-    on.exit({
-      if (!getOption("cyto_plot_custom")) {
-        par(old_pars)
-      }
-      options("cyto_plot_method" = NULL)
-    })
-  } else {
-    # RESET GRAPHICAL PARAMETERS ON EXIT
-    if (getOption("cyto_plot_method") == "flowSet") {
-      on.exit({
-        if (!getOption("cyto_plot_custom")) {
-          par(old_pars)
-        }
-      })
-    }
-  }
-  
+
   # CHECKS ---------------------------------------------------------------------
   
   # CHANNELS
@@ -1382,11 +1373,6 @@ cyto_plot.flowSet <- function(x,
     args$channels <- cyto_channels_extract(args$x, 
                                            channels = args$channels, 
                                            plot = TRUE)
-  }
-  
-  # POPUP
-  if (getOption("cyto_plot_save") == TRUE) {
-    args$popup <- FALSE
   }
   
   # REMOVE LAYOUT FROM ARGS
@@ -1897,19 +1883,22 @@ cyto_plot.flowFrame <- function(x,
                                 grid_line_alpha = 1,
                                 ...) {
   
-  # CHECKS ---------------------------------------------------------------------
+  # CYTO_PLOT_EXIT -------------------------------------------------------------
   
-  # METHOD
-  if (is.null(getOption("cyto_plot_method"))) {
-    # SET PLOT METHOD
+  # CURRENT SET PARAMETERS
+  old_pars <- .par()
+  
+  # NEW PLOT METHOD
+  if(is.null(getOption("cyto_plot_method"))) {
+    # CYTO_PLOT_METHOD
     options("cyto_plot_method" = "flowFrame")
-    # RESET PLOT METHOD ON EXIT
-    on.exit(options("cyto_plot_method" = NULL))
-  }
-  
-  # POPUP - CYTO_PLOT_SAVE 
-  if (getOption("cyto_plot_save") == TRUE) {
-    popup <- FALSE
+    # CYTO_PLOT_EXIT
+    on.exit({
+      par(old_pars)
+      options("cyto_plot_method" = NULL)
+      options("cyto_plot_layout" = NULL)
+      options("cyto_plot_outer_margins" = NULL)
+    })
   }
   
   # CYTO_PLOT OBJECT -----------------------------------------------------------

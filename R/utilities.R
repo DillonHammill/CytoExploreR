@@ -147,13 +147,27 @@ LAPPLY <- function(...){
 ## PAR -------------------------------------------------------------------------
 
 #' Extract graphical parameters as list
+#' @param x parameters to extract, extract all if missing.
+#' @param set logical indicating whether only parameters that can be set should
+#'   be returned.
 #' @importFrom graphics par
 #' @noRd
-.par <- function(x){
-  if(length(x) == 1){
+.par <- function(x,
+                 set = TRUE){
+  if (missing(x)) {
+    pars <- par()
+    if(set) {
+      pars <- pars[!names(pars) %in% c("cin",
+                                       "cra",
+                                       "csi",
+                                       "cxy",
+                                       "din",
+                                       "page")]
+    }
+  } else if(length(x) == 1) {
     pars <- list(par(x))
     names(pars) <- x
-  }else{
+  } else {
     pars <- par(x)
   }
   return(pars)

@@ -27,9 +27,6 @@
   # Signal if a custom plot is being constructed - require cyto_plot_complete
   options("cyto_plot_custom" = FALSE)
   
-  # Signal when cyto_plot_grid method is being called
-  options("cyto_plot_grid" = FALSE)
-  
   # Save layout settings
   options("cyto_plot_layout" = NULL)
   

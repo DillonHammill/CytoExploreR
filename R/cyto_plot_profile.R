@@ -98,18 +98,23 @@ cyto_plot_profile <- function(x,
                               header_text_col = "black",
                               ...) {
 
-  # CHECKS ---------------------------------------------------------------------
-
-  # PLOT METHOD
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "profile")
-  }
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
+  # CYTO_PLOT_EXIT -------------------------------------------------------------
   
-  # RESET OLD PARAMETERS
-  old_pars <- .par(c("mfrow","oma"))
-  on.exit(par(old_pars))
+  # CURRENT SET PARAMETERS
+  old_pars <- .par()
+  
+  # NEW PLOT METHOD
+  if(is.null(getOption("cyto_plot_method"))) {
+    # CYTO_PLOT_METHOD
+    options("cyto_plot_method" = "profile")
+    # CYTO_PLOT_EXIT
+    on.exit({
+      par(old_pars)
+      options("cyto_plot_method" = NULL)
+      options("cyto_plot_layout" = NULL)
+      options("cyto_plot_margins" = NULL)
+    })
+  }
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
@@ -215,18 +220,13 @@ cyto_plot_profile <- function(x,
   # RECORD/SAVE ----------------------------------------------------------------
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save")) {
+  if (getOption("cyto_plot_save") &
+      getOption("cyto_plot_method") == "profile") {
     # CLOSE GRAPHICS DEVICE
     dev.off()
     # RESET CYTO_PLOT_SAVE
     options("cyto_plot_save" = FALSE)
-    # RESET CYTO_PLOT_METHOD
-    options("cyto_plot_method" = NULL)
   }
-  
-  # RESET CYTO_PLOT OPTIONS
-  options("cyto_plot_layout" = NULL)
-  options("cyto_plot_outer_margins" = NULL)
   
   # RETURN RECORDED PLOTS
   invisible(p)
