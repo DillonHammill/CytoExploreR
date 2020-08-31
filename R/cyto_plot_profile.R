@@ -6,10 +6,22 @@
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param channels a vector channels to use to construct the plots, set to all
-#'   channels by default.
 #' @param parent name of the population to plot when a \code{GatingHierarchy} or
 #'   \code{GatingSet} object is supplied.
+#' @param channels a vector channels to use to construct the plots, set to all
+#'   channels by default.  
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details. Sample selection occurs prior to grouping with \code{merge_by}. 
+#' @param merge_by a vector of pData variables to sort and merge samples into
+#'   groups prior to plotting, set to "name" by default to prevent merging. To
+#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
+#' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
+#'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
+#'   \code{list of flowFrame lists} containing populations to be overlaid onto
+#'   the plot(s). This argument can be set to "children" or "descendants" when a
+#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
 #' @param layout a vector of the length 2 indicating the dimensions of the grid
 #'   for plotting \code{c(#rows, #columns)}.
 #' @param hist_stack numeric [0,1] indicating the degree of offset for 1-D
@@ -73,6 +85,9 @@
 cyto_plot_profile <- function(x,
                               parent = "root",
                               channels = NULL,
+                              select = NULL,
+                              merge_by = "name",
+                              overlay = NA,
                               layout = NULL,
                               hist_stack = 0.5,
                               axes_limits = "machine",
@@ -87,7 +102,7 @@ cyto_plot_profile <- function(x,
 
   # PLOT METHOD
   if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "cyto_plot_profile")
+    options("cyto_plot_method" = "profile")
   }
 
   # GRAPHICAL PARAMETERS -------------------------------------------------------
@@ -96,35 +111,57 @@ cyto_plot_profile <- function(x,
   old_pars <- .par(c("mfrow","oma"))
   on.exit(par(old_pars))
   
-  # PREPARE PLOTTING SAPCE -----------------------------------------------------
+  # PREPARE ARGUMENTS ----------------------------------------------------------
   
   # CHANNELS
   if(is.null(channels)) {
-    channels <- cyto_channels(x)
+    channels <- cyto_channels(x, exclude = "Time")
   }
   
-  # POPUP
-  cyto_plot_new(popup)
+  # SELECT & MERGE - N GROUPS
+  if(any(c("flowSet", "GatingSet") %in% is(x))) {
+    if(!is.null(select)) {
+      x <- cyto_select(x, select)
+    }
+    if(length(x) > 1 & !.all_na(overlay)) {
+      n <- length(cyto_groups(x, merge_by))
+    } else {
+      n <- 1
+    }
+  } else {
+    n <- 1
+  }
   
-  # LAYOUT DIMENSIONS
-  layout <- .cyto_plot_layout(channels, layout)
+  # PREPARE PLOTTING SAPCE -----------------------------------------------------
+
+  # LAYOUT
+  if(n > 1) {
+    layout <- .cyto_plot_layout(rep(NA, n), layout)
+  } else {
+    layout <- .cyto_plot_layout(channels, layout)
+  }
+  
+  # USE EXISTING LAYOUT
   if(all(layout == FALSE)) {
     layout <- par("mfrow")
-  }else {
-    par("mfrow" = layout)
   }
   
-  # HEADER SPACE
+  # OUTER MARGINS
   if (!.all_na(header)) {
-    par(oma = c(0, 0, 3, 0))
+    outer_margins <- c(0, 0, 3, 0)
+  } else{
+    outer_margins <- c(0, 0, 0, 0)
   }
   
+  # SET UP GRAPHICS DEVICE
+  if(getOption("cyto_plot_method") == "profile" &
+     !getOption("cyto_plot_custom")) {
+    cyto_plot_new(popup,
+                  layout, 
+                  outer_margins)
+  }
+
   # CONSTRUCT PLOTS ------------------------------------------------------------
-  
-  # HEADER
-  if (is.null(header)) {
-    header <- "Expression Profile"
-  }
   
   # CONSTRUCT PLOTS
   p <- lapply(seq_along(channels), function(z) {
@@ -132,18 +169,27 @@ cyto_plot_profile <- function(x,
     cyto_plot(x,
               parent = parent,
               channels = channels[z],
+              overlay = overlay,
               title = NA,
               hist_layers = NA,
               hist_stack = hist_stack,
               axes_limits = axes_limits,
-              popup = FALSE,
+              popup = popup,
+              layout = FALSE,
+              merge_by = merge_by,
               ...
     )
     # HEADER
-    if(z %% prod(layout) == 0 |
-       z == length(channels)){
+    if(n > 1 | z %% prod(layout) == 0 | z == length(channels)){
       # ADD HEADER - LAYOUT ONLY
       if (!.all_na(header) & all(layout != FALSE)) {
+        if(is.null(header)) {
+          if(n > 1) {
+            header <- paste(channels[z], "Expression")
+          } else {
+            header <- "Expression Profile"
+          }
+        }
         mtext(header, 
               outer = TRUE, 
               font = header_text_font,
@@ -151,10 +197,21 @@ cyto_plot_profile <- function(x,
               col = header_text_col)
       }
       # RECORD PLOT
-      cyto_plot_record()
+      p <- cyto_plot_record()
+      # NEW PLOT
+      if(z != length(channels)) {
+        cyto_plot_new(popup,
+                      layout,
+                      outer_margins)
+      }
+      return(p)
+    } else {
+      return(NULL)
     }
+    
   })
 
+  
   # RECORD/SAVE ----------------------------------------------------------------
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
@@ -166,6 +223,10 @@ cyto_plot_profile <- function(x,
     # RESET CYTO_PLOT_METHOD
     options("cyto_plot_method" = NULL)
   }
+  
+  # RESET CYTO_PLOT OPTIONS
+  options("cyto_plot_layout" = NULL)
+  options("cyto_plot_outer_margins" = NULL)
   
   # RETURN RECORDED PLOTS
   invisible(p)

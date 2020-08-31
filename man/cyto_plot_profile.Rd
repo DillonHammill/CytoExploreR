@@ -8,6 +8,9 @@ cyto_plot_profile(
   x,
   parent = "root",
   channels = NULL,
+  select = NULL,
+  merge_by = "name",
+  overlay = NA,
   layout = NULL,
   hist_stack = 0.5,
   axes_limits = "machine",
@@ -30,6 +33,21 @@ cyto_plot_profile(
 
 \item{channels}{a vector channels to use to construct the plots, set to all
 channels by default.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
+
+\item{merge_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+
+\item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
+\code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
+\code{list of flowFrame lists} containing populations to be overlaid onto
+the plot(s). This argument can be set to "children" or "descendants" when a
+\code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.}
 
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}
