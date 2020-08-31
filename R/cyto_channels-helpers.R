@@ -99,7 +99,7 @@ cyto_channels <- function(x,
 
 #' Replace channel names
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class] {flowFrame}},
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},

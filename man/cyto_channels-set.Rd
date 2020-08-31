@@ -7,7 +7,7 @@
 cyto_channels(x) <- value
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class] {flowFrame}},
+\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 \code{\link[flowCore:flowSet-class]{flowSet}},
 \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 \code{\link[flowWorkspace:cytoset]{cytoset}},
