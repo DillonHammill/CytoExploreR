@@ -188,7 +188,7 @@ cyto_export <- function(x,
     # CytoML MISSING
   } else {
     stop(paste0(
-      "cyto_export requires the CytoML package ",
+      "cyto_export() requires the CytoML package ",
       "- BiocManager::install('CytoML')"
     ))
   }
