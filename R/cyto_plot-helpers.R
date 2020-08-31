@@ -979,7 +979,7 @@ cyto_plot_record <- function() {
 #'   \code{svg} and \code{pdf} graphics devices.
 #' @param res resolution in ppi, set to 300 by default.
 #' @param multiple logical indicating whether multiple pages should be saved to
-#'   separate numbered files, set to \code{TRUE} by default.
+#'   separate numbered files, set to \code{FALSE} by default.
 #' @param layout a vector or matrix defining the custom layout of the plot to be
 #'   created using `cyto_plot_layout`, set to NULL by default to use standard
 #'   `cyto_plot` layout. Custom layouts are required when making multiple
@@ -1040,7 +1040,7 @@ cyto_plot_save <- function(save_as,
                            height = 7,
                            units = "in",
                            res = 300,
-                           multiple = TRUE,
+                           multiple = FALSE,
                            layout = NULL,
                            outer_margins = NULL,
                            ...) {
@@ -1052,7 +1052,7 @@ cyto_plot_save <- function(save_as,
   if (multiple == TRUE & file_ext(save_as) != "pdf") {
     save_as <- paste0(
       file_ext_remove(save_as),
-      "%03d", ".",
+      "_", "%03d", ".",
       file_ext(save_as)
     )
   }
