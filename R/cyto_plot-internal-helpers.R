@@ -17,7 +17,7 @@
   
   # POPUP
   if(getOption("cyto_plot_method") == "flowFrame") {
-    cyto_plot_new(args$popup)
+    cyto_plot_new(args$popup, layout = FALSE)
   }
   
   # CYTO_PLOT_EMPTY

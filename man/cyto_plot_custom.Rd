@@ -4,7 +4,7 @@
 \alias{cyto_plot_custom}
 \title{Create custom cyto_plot}
 \usage{
-cyto_plot_custom(layout = NULL)
+cyto_plot_custom(layout = NULL, outer_margins = NULL)
 }
 \arguments{
 \item{layout}{either a vector of the form c(nrow, ncol) defining the
@@ -12,10 +12,14 @@ dimensions of the plot or a matrix defining a more sophisticated layout
 (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 third element to indicate whether plots should be placed in row (1) or
 column (2) order, set to row order by default.}
+
+\item{outer_margins}{vector of length 4 indicating the number of lines of
+text to place around the \code{c(bottom, left, top, right)} outer borders
+of the plot, set to NULL by default to use \code{par("oma")}.}
 }
 \description{
 Signal to \code{cyto_plot} that a custom plot is being created to ensure that
-plots are appropraitely saved with \code{cyto_plot_save}.
+plots are appropriately saved with \code{cyto_plot_save}.
 \code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
 and \code{cyto_plot} calls should be followed by a call to
 \code{cyto_plot_complete} to indicate when the plot is complete and should be

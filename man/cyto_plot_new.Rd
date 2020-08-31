@@ -4,7 +4,7 @@
 \alias{cyto_plot_new}
 \title{Open new graphics device for cyto_plot}
 \usage{
-cyto_plot_new(popup = TRUE, layout = NULL, ...)
+cyto_plot_new(popup = TRUE, layout = NULL, outer_margins = NULL, ...)
 }
 \arguments{
 \item{popup}{logical indicating whether a popup graphics device should be
@@ -13,6 +13,10 @@ opened.}
 \item{layout}{passed to \code{\link{cyto_plot_layout}} to set the layout of
 the new graphics device as it is opened, set to NULL by default to simply
 open the device without setting the layout.}
+
+\item{outer_margins}{vector of length 4 indicating the number of lines of
+text to place around the \code{c(bottom, left, top, right)} outer borders
+of the plot, set to NULL by default to use \code{par("oma")}.}
 
 \item{...}{additional arguments passed to
 \code{\link[grDevices:dev]{dev.new}}:}

@@ -11,7 +11,8 @@ cyto_plot_layout(layout = NULL)
 dimensions of the plot or a matrix defining a more sophisticated layout
 (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 third element to indicate whether plots should be placed in row (1) or
-column (2) order, set to row order by default.}
+column (2) order, set to row order by default. Resorts to
+\code{options("cyto_plot_layout")} if not manually specified.}
 }
 \description{
 \code{cyto_plot_layout()} sets the panel layout dimensions for combining

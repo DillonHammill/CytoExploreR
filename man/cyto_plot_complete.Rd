@@ -4,7 +4,7 @@
 \alias{cyto_plot_complete}
 \title{Indicate Completion of Custom cyto_plot Layout for Saving}
 \usage{
-cyto_plot_complete(layout = NULL)
+cyto_plot_complete(layout = NULL, outer_margins = NULL)
 }
 \arguments{
 \item{layout}{either a vector of the form c(nrow, ncol) defining the
@@ -12,6 +12,10 @@ dimensions of the plot or a matrix defining a more sophisticated layout
 (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 third element to indicate whether plots should be placed in row (1) or
 column (2) order, set to row order by default.}
+
+\item{outer_margins}{vector of length 4 indicating the number of lines of
+text to place around the \code{c(bottom, left, top, right)} outer borders
+of the plot, set to NULL by default to use \code{par("oma")}.}
 }
 \description{
 Indicate Completion of Custom cyto_plot Layout for Saving

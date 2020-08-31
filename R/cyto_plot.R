@@ -1691,68 +1691,24 @@ cyto_plot.flowSet <- function(x,
     return(lapply(args, `[[`, z))
   })
   
-  # MEMORY
-  cyto_plot_memory <- .cyto_plot_args_recall()
-  
-  # INHERIT MEMORY - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save") == TRUE) {
-    # NO MEMORY
-    if (is.null(cyto_plot_memory)) {
-      # RESET CYTO_PLOT_SAVE
-      cyto_plot_save_reset()
-      stop(
-        paste(
-          "cyto_plot must be called without cyto_plot_save to",
-          "select label co-ordinates, once co-ordinates have been",
-          "selected call cyto_plot_save and repeat the cyto_plot call."
-        )
-      )
-    }
-    # CYTO_PLOT_MEMORY INDEX
-    if (is.null(names(cyto_plot_memory))) {
-      memory_ind <- 1
-    } else {
-      memory_ind <- match(NA, names(cyto_plot_memory))
-    }
-    # UPDATE CYTO_PLOT_MEMORY (USED ARGS)
-    names(cyto_plot_memory)[memory_ind] <- "DONE"
-    # RESET CYTO_PLOT_MEMORY INDICATOR
-    if (!any(is.na(names(cyto_plot_memory)))) {
-      names(cyto_plot_memory) <- NULL
-    }
-    # INHERIT MEMORY PER PLOT
-    args <- lapply(seq_along(args), function(z) {
-      # ARGUMENTS
-      args_to_update <- args[[z]]
-      # INHERIT MEMORY
-      label_args <- c("label_text_x", "label_text_y")
-      lapply(label_args, function(arg) {
-        label_arg_length <- length(cyto_plot_memory[[memory_ind]][[z]][[arg]])
-        label_arg_memory <- cyto_plot_memory[[memory_ind]][[z]][[arg]]
-        label_arg <- rep(c(args_to_update[[arg]], rep(NA, label_arg_length)),
-                         length.out = label_arg_length
-        )
-        arg_ind <- which(is.na(label_arg))
-        label_arg[arg_ind] <- label_arg_memory[arg_ind]
-        args_to_update[[arg]] <<- label_arg
-      })
-      return(args_to_update)
-    })
-    # RESET MEMORY - CYTO_PLOT_SAVE
-  } else if (getOption("cyto_plot_save") == FALSE) {
-    .cyto_plot_args_remove()
-    cyto_plot_memory <- NULL
+  # RESET MEMORY
+  if(getOption("cyto_plot_method") == "flowSet" & 
+     !getOption("cyto_plot_save")) {
+      .cyto_plot_args_remove()
   }
   
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
   
   # GRAPHICS DEVICE - ONLY OPEN IF LAYOUT IS BEING SET
-  if(!all(layout == FALSE)) {
-    cyto_plot_new(popup, layout)
+  if(getOption("cyto_plot_method") == "flowSet" & 
+     !getOption("cyto_plot_custom")) {
+    cyto_plot_new(popup, 
+                  layout)
   }
   
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
   cnt <- 0
+  cyto_plot_memory <- NULL
   plots <- lapply(seq_along(args), function(z) {
     # COUNTER
     assign("cnt", cnt + 1, envir = parent.frame(2))
@@ -1799,8 +1755,12 @@ cyto_plot.flowSet <- function(x,
     do.call("cyto_plot", cyto_plot_args)
     # UPDATE CYTO_PLOT_MEMORY
     if (cnt == 1) {
-      cyto_plot_memory <<- .cyto_plot_args_recall()
-      cyto_plot_memory <<- cyto_plot_memory[[length(cyto_plot_memory)]]
+      assign("cyto_plot_memory", 
+             .cyto_plot_args_recall(),
+             envir = parent.frame(2))
+      assign("cyto_plot_memory", 
+             cyto_plot_memory[[length(cyto_plot_memory)]],
+             envir = parent.frame(2))
     }
     # RECORD FULL PAGE & OPEN NEW DEVICE
     if(par("page")) {
@@ -1820,33 +1780,6 @@ cyto_plot.flowSet <- function(x,
     return(p)
   })
   
-  # FORMAT CYTO_PLOT_MEMORY ----------------------------------------------------
-  
-  # FORMAT CYTO_PLOT_MEMORY - INITIAL SAVE
-  if (!getOption("cyto_plot_save")) {
-    
-    # CYTO_PLOT_MEMORY
-    cyto_plot_memory <- .cyto_plot_args_recall()
-    
-    # FORMAT
-    if (length(cyto_plot_memory) == length(args)) {
-      cyto_plot_memory <- list(cyto_plot_memory)
-    } else {
-      start <- length(cyto_plot_memory) - length(args)
-      cyto_plot_memory <- c(
-        cyto_plot_memory[seq_len(start)],
-        list(cyto_plot_memory[seq(
-          start + 1,
-          start + 1 + length(args),
-          1
-        )])
-      )
-    }
-    
-    # UPDATE CYTO_PLOT_MEMORY
-    .cyto_plot_args_save(cyto_plot_memory)
-  }
-  
   # CYTO_PLOT_SAVE -------------------------------------------------------------
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
@@ -1862,7 +1795,8 @@ cyto_plot.flowSet <- function(x,
   }
   
   # RESET CYTO_PLOT_LAYOUT
-  if(!getOption("cyto_plot_custom")) {
+  if(!getOption("cyto_plot_custom") & 
+     getOption("cyto_plot_method") == "flowSet") {
     options("cyto_plot_layout" = NULL)
   }
 
@@ -2007,58 +1941,13 @@ cyto_plot.flowFrame <- function(x,
   
   # CYTO_PLOT_MEMORY -----------------------------------------------------------
   
-  # MEMORY
-  cyto_plot_memory <- .cyto_plot_args_recall()
-  
-  # FLOWFRAME METHOD
-  if (getOption("cyto_plot_method") == "flowFrame") {
-    # MEMORY RESET - CYTO_PLOT_SAVE
-    if (getOption("cyto_plot_save") == FALSE) {
-      # RESET MEMORY
-      .cyto_plot_args_remove()
-      cyto_plot_memory <- NULL
-      # INHERIT MEMORY - CYTO_PLOT_SAVE
-    } else if (getOption("cyto_plot_save") == TRUE) {
-      # REPLACE NA WITH MEMORY
-      if (any(is.na(c(args[["label_text_x"]], args[["label_text_y"]])))) {
-        # NO MEMORY
-        if (is.null(cyto_plot_memory)) {
-          # RESET CYTO_PLOT_SAVE
-          cyto_plot_save_reset()
-          stop(
-            paste(
-              "cyto_plot must be called without cyto_plot_save to",
-              "select label co-ordinates, once co-ordinates have been",
-              "selected call cyto_plot_save and repeat the cyto_plot call."
-            )
-          )
-        }
-        # MEMORY INDEX
-        if (is.null(names(cyto_plot_memory))) {
-          memory_ind <- 1
-        } else {
-          memory_ind <- match(NA, names(cyto_plot_memory))
-        }
-        # UPDATE CYTO_PLOT_MEMORY (USED ARGS)
-        names(cyto_plot_memory)[memory_ind] <- "DONE"
-        # RESET CYTO_PLOT_MEMORY INDICATOR
-        if (!any(is.na(names(cyto_plot_memory)))) {
-          names(cyto_plot_memory) <- NULL
-        }
-        # INHERIT MEMORY
-        label_args <- c("label_text_x", "label_text_y")
-        lapply(label_args, function(arg) {
-          label_arg_length <- length(cyto_plot_memory[[memory_ind]][[arg]])
-          label_arg_memory <- cyto_plot_memory[[memory_ind]][[arg]]
-          label_arg <- rep(c(args[[arg]], rep(NA, label_arg_length)),
-                           length.out = label_arg_length
-          )
-          arg_ind <- which(is.na(label_arg))
-          label_arg[arg_ind] <- label_arg_memory[arg_ind]
-          args[[arg]] <<- label_arg
-        })
-      }
-    }
+  # MEMORY INHERIT/RESET
+  if(getOption("cyto_plot_save")) {
+    args <- .cyto_plot_args_inherit(args)
+  # RESET
+  } else if(!getOption("cyto_plot_save") & 
+            getOption("cyto_plot_method") == "flowFrame") {
+    .cyto_plot_args_remove()
   }
   
   # COMBINE X & OVERLAY - LIST OF CYTOFRAMES -----------------------------------
@@ -2227,21 +2116,25 @@ cyto_plot.flowFrame <- function(x,
   
   # UPDATE MEMORY --------------------------------------------------------------
   
+  # MEMORY
+  cyto_plot_memory <- .cyto_plot_args_recall()
+  
   # MEMORY UPDATE - CYTO_PLOT_SAVE FALSE
   if (getOption("cyto_plot_save") == FALSE) {
+    # NO MEMORY
     if (is.null(cyto_plot_memory)) {
-      .cyto_plot_args_save(list(list(
-        "label_text_x" = args$label_text_x,
-        "label_text_y" = args$label_text_y
-      )))
+      .cyto_plot_args_save(
+        list(
+          args[c("label_text_x", "label_text_y")]
+          )
+      )
+    # MEMORY
     } else {
-      .cyto_plot_args_save(c(
-        cyto_plot_memory,
-        list(list(
-          "label_text_x" = args$label_text_x,
-          "label_text_y" = args$label_text_y
-        ))
-      ))
+      .cyto_plot_args_save(
+        c(cyto_plot_memory,
+          list(args[c("label_text_x", "label_text_y")])
+        )
+      )
     }
     # MEMORY UPDATE - CYTO_PLOT_SAVE
   } else if (getOption("cyto_plot_save") == TRUE) {

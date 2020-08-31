@@ -10,8 +10,9 @@ cyto_plot_save(
   height = 7,
   units = "in",
   res = 300,
-  multiple = FALSE,
+  multiple = TRUE,
   layout = NULL,
+  outer_margins = NULL,
   ...
 )
 }
@@ -40,6 +41,10 @@ separate numbered files, set to \code{TRUE} by default.}
 created using `cyto_plot_layout`, set to NULL by default to use standard
 `cyto_plot` layout. Custom layouts are required when making multiple
 `cyto_plot` calls in the same image.}
+
+\item{outer_margins}{vector of length 4 indicating the number of lines of
+text to place around the \code{c(bottom, left, top, right)} outer borders
+of the plot, set to NULL by default to use \code{par("oma")}.}
 
 \item{...}{additional arguments for the appropriate \code{png()},
 \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.}

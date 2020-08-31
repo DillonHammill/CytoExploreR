@@ -15,9 +15,6 @@
   # Select active gatingTemplate
   options("CytoExploreR_gatingTemplate" = NULL)
   
-  # Bypass working directory checks for external files
-  options("CytoExploreR_wd_check" = TRUE)
-  
   # Create custom theme for cyto_plot
   options("cyto_plot_theme" = NULL)
   
@@ -27,11 +24,14 @@
   # Signal which cyto_plot method has been called
   options("cyto_plot_method" = NULL)
   
-  # Signal if a custom plot is being contructed - require cyto_plot_complete
+  # Signal if a custom plot is being constructed - require cyto_plot_complete
   options("cyto_plot_custom" = FALSE)
   
   # Signal when cyto_plot_grid method is being called
   options("cyto_plot_grid" = FALSE)
+  
+  # Save layout settings
+  options("cyto_plot_layout" = NULL)
   
   # Register gating and preprocessing functions with openCyto
   suppressMessages({

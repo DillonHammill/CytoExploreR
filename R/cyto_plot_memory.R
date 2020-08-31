@@ -59,3 +59,39 @@
   }
   
 }
+
+#' Inherit saved cyto_plot arguments
+#' @noRd
+.cyto_plot_args_inherit <- function(args, 
+                                    memory) {
+  
+  # MEMORY
+  if(missing(memory)) {
+    memory <- .cyto_plot_args_recall()
+  }
+  
+  # NO MEMORY
+  if(is.null(memory)) {
+    return(args)
+  # MEMORY
+  } else {
+    # MEMORY INDEX
+    if(is.null(names(memory))) {
+      memory_ind <- 1
+    } else {
+      memory_ind <- match(NA, names(memory))[1]
+    }
+    # UPDATE MEMORY NAMES - DONE
+    names(memory)[memory_ind] <- "DONE" # sets other names to NA
+    # RESET CYTO_PLOT_MEMORY INDICATOR - ALL DONE
+    if(!any(is.na(names(memory)))) {
+      names(memory) <- NULL
+    }
+    # LIST OF CYTO_PLOT ARGUMENT LISTS
+    args[names(memory[[memory_ind]])] <- memory[[memory_ind]]
+    # UPDATE MEMORY
+    .cyto_plot_args_save(memory)
+    # UPDATED ARGUMENTS
+    return(args)
+  }
+}

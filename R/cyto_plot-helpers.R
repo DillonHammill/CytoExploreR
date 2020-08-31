@@ -687,10 +687,10 @@ cyto_plot_empty <- function(x,
   }
 
   # LEGEND ---------------------------------------------------------------------
-
+  
   # POINT_COL_SCALE
   if (length(channels) == 2 &
-    (any(is.na(point_col)) |
+    (is.na(point_col)[1] |
       any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
     # LEGEND
     point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
@@ -702,7 +702,7 @@ cyto_plot_empty <- function(x,
       legend_cols[, 3],
       maxColorValue = 255
     )
-    legend_cols <- adjustcolor(legend_cols, point_col_alpha)
+    legend_cols <- adjustcolor(legend_cols, point_col_alpha[1])
 
     # LEGEND LOCATION
     legend_x <- c(
@@ -782,6 +782,9 @@ cyto_plot_empty <- function(x,
 #' @param layout passed to \code{\link{cyto_plot_layout}} to set the layout of
 #'   the new graphics device as it is opened, set to NULL by default to simply
 #'   open the device without setting the layout.
+#' @param outer_margins vector of length 4 indicating the number of lines of
+#'   text to place around the \code{c(bottom, left, top, right)} outer borders
+#'   of the plot, set to NULL by default to use \code{par("oma")}.
 #' @param ... additional arguments passed to
 #'   \code{\link[grDevices:dev]{dev.new}}:
 #'
@@ -798,73 +801,82 @@ cyto_plot_empty <- function(x,
 #' @export
 cyto_plot_new <- function(popup = TRUE,
                           layout = NULL,
+                          outer_margins = NULL,
                           ...) {
   # NULL -> RSTUDIOGD
   if (dev.cur() == 1) {
-    dev.new()
+    dev.new(...)
   }
   
-  # CURRENT DEVICE - RSTUDIO
-  if(any(grepl("rstudio", names(dev.cur()), ignore.case = TRUE))) {
-    # REQUIRE - POPUP
-    if(popup == TRUE) {
-      # NEW POPUP DEVICE REQUIRED
-      new_device <- "popup"
-    # REQUIRE - RSTUDIO  
-    } else {
-      # PRESET LAYOUT
-      if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
-        new_device <- FALSE
-      # NEW LAYOUT  
+  # NO CYTO_PLOT_SAVE  
+  if(!getOption("cyto_plot_save")) {
+    # CURRENT DEVICE - RSTUDIO
+    if(any(grepl("rstudio", names(dev.cur()), ignore.case = TRUE))) {
+      # REQUIRE - POPUP
+      if(popup == TRUE) {
+        # NEW POPUP DEVICE REQUIRED
+        new_device <- "popup"
+        # REQUIRE - RSTUDIO  
       } else {
+        # PRESET LAYOUT
+        if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
+          new_device <- FALSE
+          # NEW LAYOUT  
+        } else {
+          new_device <- "rstudio"
+        }
+      }
+      # CURRENT DEVICE - POPUP
+    } else {
+      # REQUIRE POPUP
+      if(popup == TRUE) {
+        # PRESET LAYOUT
+        if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
+          new_device <- FALSE
+          # NEW LAYOUT  
+        } else {
+          new_device <- "popup"
+        }
+        # REQUIRE - RSTUDIO
+      } else {
+        # NEW RSTUDIO DEVICE REQUIRED
         new_device <- "rstudio"
       }
     }
-  # CURRENT DEVICE - POPUP
-  } else {
-    # REQUIRE POPUP
-    if(popup == TRUE) {
-      # PRESET LAYOUT
-      if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
-        new_device <- FALSE
-        # NEW LAYOUT  
-      } else {
-        new_device <- "popup"
-      }
-    # REQUIRE - RSTUDIO
-    } else {
-      # NEW RSTUDIO DEVICE REQUIRED
-      new_device <- "rstudio"
-    }
-  }
-  
-  # OPEN NEW GRAPHICS DEVICE
-  if(new_device != FALSE) {
-    # POPUP DEVICE
-    if(new_device == "popup") {
-      if(interactive() & getOption("CytoExploreR_interactive")) {
-        if (.Platform$OS.type == "windows") {
-          suppressWarnings(dev.new(...))
-        } else if (.Platform$OS.type == "unix") {
-          if (Sys.info()["sysname"] == "Linux") {
-            # Cairo needed for semi-transparency
-            suppressWarnings(dev.new(type = "cairo", ...))
-          } else if (Sys.info()["sysname"] == "Darwin") {
+    
+    # OPEN NEW GRAPHICS DEVICE
+    if(new_device != FALSE) {
+      # POPUP DEVICE
+      if(new_device == "popup") {
+        if(interactive() & getOption("CytoExploreR_interactive")) {
+          if (.Platform$OS.type == "windows") {
             suppressWarnings(dev.new(...))
+          } else if (.Platform$OS.type == "unix") {
+            if (Sys.info()["sysname"] == "Linux") {
+              # Cairo needed for semi-transparency
+              suppressWarnings(dev.new(type = "cairo", ...))
+            } else if (Sys.info()["sysname"] == "Darwin") {
+              suppressWarnings(dev.new(...))
+            }
           }
         }
-      }
-    # RSTUDIO DEVICE  
-    } else if(new_device == "rstudio") {
-      dev.ind <- which(grepl("rstudio", names(dev.list()), ignore.case = TRUE))
-      if(length(dev.ind) != 0) {
-        dev.set(dev.list()[dev.ind])
-      } else {
-        graphics.off()
-        dev.new(..., noRStudioGD = FALSE)
+        # RSTUDIO DEVICE  
+      } else if(new_device == "rstudio") {
+        dev.ind <- which(grepl("rstudio", 
+                               names(dev.list()), 
+                               ignore.case = TRUE))
+        if(length(dev.ind) != 0) {
+          dev.set(dev.list()[dev.ind])
+        } else {
+          graphics.off()
+          dev.new(..., noRStudioGD = FALSE)
+        }
       }
     }
   }
+
+  # OUTER MARGINS
+  cyto_plot_outer_margins(outer_margins)
   
   # LAYOUT
   cyto_plot_layout(layout)
@@ -890,22 +902,20 @@ cyto_plot_reset <- function() {
   # Signal which cyto_plot method has been called
   options("cyto_plot_method" = NULL)
 
-  # Signal if a custom plot is being contructed - require cyto_plot_complete
+  # Signal if a custom plot is being constructed - require cyto_plot_complete
   options("cyto_plot_custom" = FALSE)
 
   # Signal when cyto_plot_grid method is being called
   options("cyto_plot_grid" = FALSE)
 
-  # REMOVE CYTO_PLOT TEMPFILES
-  lapply(list.files(tempdir()), function(file) {
-    if (grepl("cyto_plot", file)) {
-      file.remove(paste0(
-        tempdir(),
-        .Platform$file.sep,
-        file
-      ))
-    }
-  })
+  # Signal set layout
+  options("cyto_plot_layout" = NULL)
+  
+  # Signal set outer margins
+  options("cyto_plot_outer_margins"= NULL)
+  
+  # Reset memory
+  .cyto_plot_args_remove()
 
   # Turn off graphics device
   if (dev.cur() != 1) {
@@ -974,6 +984,9 @@ cyto_plot_record <- function() {
 #'   created using `cyto_plot_layout`, set to NULL by default to use standard
 #'   `cyto_plot` layout. Custom layouts are required when making multiple
 #'   `cyto_plot` calls in the same image.
+#' @param outer_margins vector of length 4 indicating the number of lines of
+#'   text to place around the \code{c(bottom, left, top, right)} outer borders
+#'   of the plot, set to NULL by default to use \code{par("oma")}.
 #' @param ... additional arguments for the appropriate \code{png()},
 #'   \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.
 #'
@@ -1027,8 +1040,9 @@ cyto_plot_save <- function(save_as,
                            height = 7,
                            units = "in",
                            res = 300,
-                           multiple = FALSE,
+                           multiple = TRUE,
                            layout = NULL,
+                           outer_margins = NULL,
                            ...) {
 
   # APPEND FILE EXTENSION
@@ -1098,7 +1112,8 @@ cyto_plot_save <- function(save_as,
 
   # CYTO_PLOT_CUSTOM
   if (!is.null(layout)) {
-    cyto_plot_custom(layout = layout)
+    cyto_plot_custom(layout = layout,
+                     outer_margins = outer_margins)
   }
 }
 
@@ -1185,11 +1200,11 @@ cyto_plot_save_reset <- function() {
 cyto_plot_layout <- function(layout = NULL) {
 
   # MESSAGE
-  if (is.null(layout) | all(layout == FALSE)) {
+  if (is.null(layout) | .empty(layout) | all(layout == FALSE)) {
     if(!is.null(getOption("cyto_plot_layout"))) {
       layout  <- getOption("cyto_plot_layout")
     } else {
-      invisible(NULL) # layout as current device
+      return(NULL) # layout as current device
     }
   }
   
@@ -1219,12 +1234,40 @@ cyto_plot_layout <- function(layout = NULL) {
   
 }
 
+## CYTO_PLOT_OUTER_MARGINS -----------------------------------------------------
+
+#' Set outer margins for cyto_plot layout
+#' 
+#' @param outer_margins vector of length 4 indicating the number of lines of
+#'   text to place around the \code{c(bottom, left, top, right)} outer borders
+#'   of the plot, set to NULL by default to use \code{par("oma")}.
+#' 
+#' @importFrom graphics par
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @export
+cyto_plot_outer_margins <- function(outer_margins = NULL) {
+  
+  # GET OUTER MARGINS
+  if(is.null(outer_margins)) {
+    outer_margins <- getOption("cyto_plot_margins")
+  }
+  
+  # SET OUTER MARGINS
+  if(!is.null(outer_margins)) {
+    par("oma" = outer_margins)
+    options("cyto_plot_margins" = outer_margins)
+  }
+  
+}
+
 ## CYTO_PLOT_CUSTOM ------------------------------------------------------------
 
 #' Create custom cyto_plot
 #'
 #' Signal to \code{cyto_plot} that a custom plot is being created to ensure that
-#' plots are appropraitely saved with \code{cyto_plot_save}.
+#' plots are appropriately saved with \code{cyto_plot_save}.
 #' \code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
 #' and \code{cyto_plot} calls should be followed by a call to
 #' \code{cyto_plot_complete} to indicate when the plot is complete and should be
@@ -1235,8 +1278,9 @@ cyto_plot_layout <- function(layout = NULL) {
 #'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 #'   third element to indicate whether plots should be placed in row (1) or
 #'   column (2) order, set to row order by default.
-#'
-#' @importFrom graphics par
+#' @param outer_margins vector of length 4 indicating the number of lines of
+#'   text to place around the \code{c(bottom, left, top, right)} outer borders
+#'   of the plot, set to NULL by default to use \code{par("oma")}.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1266,7 +1310,8 @@ cyto_plot_layout <- function(layout = NULL) {
 #' cyto_plot_complete()
 #' }
 #' @export
-cyto_plot_custom <- function(layout = NULL) {
+cyto_plot_custom <- function(layout = NULL,
+                             outer_margins = NULL) {
 
   # Tell CytoExploreR - cyto_plot_save and layout resets
   options("cyto_plot_custom" = TRUE)
@@ -1276,6 +1321,15 @@ cyto_plot_custom <- function(layout = NULL) {
 
   # Set layout
   cyto_plot_layout(layout)
+  
+  # Set outer margins
+  cyto_plot_outer_margins(outer_margins)
+  
+  # Reset memory
+  if(!getOption("cyto_plot_save")) {
+    .cyto_plot_args_remove()
+  }
+  
 }
 
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------
@@ -1287,6 +1341,9 @@ cyto_plot_custom <- function(layout = NULL) {
 #'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
 #'   third element to indicate whether plots should be placed in row (1) or
 #'   column (2) order, set to row order by default.
+#' @param outer_margins vector of length 4 indicating the number of lines of
+#'   text to place around the \code{c(bottom, left, top, right)} outer borders
+#'   of the plot, set to NULL by default to use \code{par("oma")}.
 #'
 #' @importFrom graphics par
 #'
@@ -1339,7 +1396,8 @@ cyto_plot_custom <- function(layout = NULL) {
 #' # Signal that the plot is complete
 #' cyto_plot_complete()
 #' @export
-cyto_plot_complete <- function(layout = NULL) {
+cyto_plot_complete <- function(layout = NULL,
+                               outer_margins = NULL) {
 
   # Close graphics device (not RStudioGD or X11)
   if (!names(dev.cur()) %in% c(
@@ -1365,10 +1423,15 @@ cyto_plot_complete <- function(layout = NULL) {
   if(is.null(layout)) {
     layout <- c(1, 1, 1)
   }
-  
-  # Reset cyto_plot_layout
   cyto_plot_layout(layout)
   options("cyto_plot_layout" = NULL)
+  
+  # Reset cyto_plot_outer_margins
+  if(is.null(outer_margins)) {
+    outer_margins <- c(0,0,0,0)
+  }
+  cyto_plot_outer_margins(outer_margins)
+  options("cyto_plot_outer_margins" = NULL)
 
 }
 
