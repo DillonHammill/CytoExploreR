@@ -1590,7 +1590,6 @@ cyto_extract <- function(x,
                          raw = FALSE,
                          channels = NULL,
                          markers = FALSE,
-                         list = FALSE,
                          ...) {
   
   # DEFAULT PARENT
