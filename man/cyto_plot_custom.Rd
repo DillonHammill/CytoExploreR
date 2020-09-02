@@ -2,28 +2,38 @@
 % Please edit documentation in R/cyto_plot-helpers.R
 \name{cyto_plot_custom}
 \alias{cyto_plot_custom}
-\title{Create custom cyto_plot}
+\title{Set customised graphical parameters for cyto_plot}
 \usage{
-cyto_plot_custom(layout = NULL, outer_margins = NULL)
+cyto_plot_custom(...)
 }
 \arguments{
-\item{layout}{either a vector of the form c(nrow, ncol) defining the
-dimensions of the plot or a matrix defining a more sophisticated layout
-(see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-third element to indicate whether plots should be placed in row (1) or
-column (2) order, set to row order by default.}
-
-\item{outer_margins}{vector of length 4 indicating the number of lines of
-text to place around the \code{c(bottom, left, top, right)} outer borders
-of the plot, set to NULL by default to use \code{par("oma")}.}
+\item{...}{graphical parameters supplied by name to be passed to
+\code{\link{cyto_plot_par}} to customise the current graphics device.}
 }
 \description{
-Signal to \code{cyto_plot} that a custom plot is being created to ensure that
-plots are appropriately saved with \code{cyto_plot_save}.
-\code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
-and \code{cyto_plot} calls should be followed by a call to
-\code{cyto_plot_complete} to indicate when the plot is complete and should be
-saved.
+\code{cyto_plot_custom()} make a call to \code{cyto_plot_par()} to set
+customised graphical parameters for the current graphics device.
+\code{cyto_plot_custom()} will then signal to \code{cyto_plot()} to ensure
+that these set graphical parameters are not overridden and to make sure that
+the plots are only saved when the user calls \code{cyto_plot_complete()}.
+\code{cyto_plot_custom()} will also record the current graphical parameters
+before changing them, so that these can be reset when
+\code{cyto_plot_complete()} is called.
+}
+\details{
+The sequence of calls to save a customised plot are described below:
+\itemize{\item \code{cyto_plot_save()} - sets a new graphics device of the
+appropriate type (e.g. \code{png()}) and makes sure that \code{cyto_plot()}
+does not open other graphics devices \item \code{cyto_plot_custom()} - sets
+up the current graphics device with customised graphical parameters and
+indicates to \code{cyto_plot()} that the user will take control over when the
+plot should be saved. \item \code{cyto_plot()} - the users can then makes
+calls to any of the \code{cyto_plot()} family of function to construct the
+plot on the customised graphics device. \item \code{cyto_plot_complete()} -
+signals that the plot is complete and ready for saving to file. Since
+\code{cyto_plot_complete()} also resets a lot of graphical parameters it
+should be called even if a call has not been made to \code{cyto_plot_save()}.
+}
 }
 \examples{
 \dontrun{

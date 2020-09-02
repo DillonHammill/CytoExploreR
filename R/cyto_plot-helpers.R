@@ -687,7 +687,7 @@ cyto_plot_empty <- function(x,
   }
 
   # LEGEND ---------------------------------------------------------------------
-  
+
   # POINT_COL_SCALE
   if (length(channels) == 2 &
     (is.na(point_col)[1] |
@@ -773,20 +773,16 @@ cyto_plot_empty <- function(x,
 
 #' Open new graphics device for cyto_plot
 #'
-#' \code{cyto_plot_new} is used internally by cyto_plot to open an OS-specific
+#' \code{cyto_plot_new} opens a new RStudio or pop-up graphics device and
+#' accepts arguments to set the graphical parameters of the new device.
+#' \code{cyto_plot_new()} is used internally by cyto_plot to open an OS-specific
 #' interactive garphics device to facilitate gate drawing. Mac users will need
 #' to install \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #'
-#' @param popup logical indicating whether a popup graphics device should be
-#'   opened.
-#' @param layout passed to \code{\link{cyto_plot_layout}} to set the layout of
-#'   the new graphics device as it is opened, set to NULL by default to simply
-#'   open the device without setting the layout.
-#' @param outer_margins vector of length 4 indicating the number of lines of
-#'   text to place around the \code{c(bottom, left, top, right)} outer borders
-#'   of the plot, set to NULL by default to use \code{par("oma")}.
-#' @param ... additional arguments passed to
-#'   \code{\link[grDevices:dev]{dev.new}}:
+#' @param popup logical indicating whether a pop-up graphics device should be
+#'   opened, set to TRUE by default if called outside of \code{cyto_plot()}.
+#' @param ... additional graphical parameters supplied by name to be passed to
+#'   \code{\link{cyto_plot_par}} to customise the new graphics device.
 #'
 #' @importFrom grDevices dev.cur dev.new dev.list dev.set graphics.off
 #'
@@ -799,88 +795,129 @@ cyto_plot_empty <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup = TRUE,
-                          layout = NULL,
-                          outer_margins = NULL,
+cyto_plot_new <- function(popup,
                           ...) {
-  # NULL -> RSTUDIOGD
-  if (dev.cur() == 1) {
-    dev.new(...)
+
+  # POPUP
+  if(missing(popup)) {
+    # CALLED WITHIN CYTO_PLOT - USE SAME DEVICE TYPE
+    if(!is.null(getOption("cyto_plot_method"))) {
+      if(grepl("rstudio", names(dev.cur()), ignore.case = TRUE)) {
+        popup <- FALSE
+      } else {
+        popup <- TRUE
+      }
+    # CALLED EXTERNALLY
+    } else {
+      popup <- TRUE
+    }
   }
   
-  # NO CYTO_PLOT_SAVE  
-  if(!getOption("cyto_plot_save")) {
+  # NULL -> RSTUDIOGD
+  if (dev.cur() == 1) {
+    dev.new()
+  }
+
+  # BYPASS ON CYTO_PLOT_SAVE
+  if (!getOption("cyto_plot_save")) {
+    # NEW DEVICE
+    if (popup) {
+      dev_new <- "popup"
+    } else {
+      dev_new <- "rstudio"
+    }
+    # CURRENT DEVICE
+    dev_old <- names(dev.cur())
+    if (grepl("rstudio", dev_old, ignore.case = TRUE)) {
+      dev_old <- "rstudio"
+    } else {
+      dev_old <- "popup"
+    }
     # CURRENT DEVICE - RSTUDIO
-    if(any(grepl("rstudio", names(dev.cur()), ignore.case = TRUE))) {
+    if (dev_old == "rstudio") {
       # REQUIRE - POPUP
-      if(popup == TRUE) {
+      if (dev_new == "popup") {
         # NEW POPUP DEVICE REQUIRED
-        new_device <- "popup"
-        # REQUIRE - RSTUDIO  
+        dev_new <- "popup"
+        # REQUIRE - RSTUDIO
       } else {
-        # PRESET LAYOUT
-        if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
-          new_device <- FALSE
-          # NEW LAYOUT  
+        # PRESET LAYOUT OR EMPTY DEVICE
+        if (getOption("cyto_plot_custom") | dev_empty()) {
+          dev_new <- FALSE
+          # NEW LAYOUT
         } else {
-          new_device <- "rstudio"
+          dev_new <- "rstudio"
         }
       }
       # CURRENT DEVICE - POPUP
-    } else {
+    } else if(dev_old == "popup") {
       # REQUIRE POPUP
-      if(popup == TRUE) {
-        # PRESET LAYOUT
-        if(ifelse(is.null(layout), FALSE, all(layout == FALSE))) {
-          new_device <- FALSE
-          # NEW LAYOUT  
+      if (dev_new == "popup") {
+        # PRESET LAYOUT OR EMPTY DEVICE
+        if (getOption("cyto_plot_custom") | dev_empty()) {
+          dev_new <- FALSE
+          # NEW LAYOUT
         } else {
-          new_device <- "popup"
+          dev_new <- "popup"
         }
         # REQUIRE - RSTUDIO
       } else {
         # NEW RSTUDIO DEVICE REQUIRED
-        new_device <- "rstudio"
+        dev_new <- "rstudio"
       }
     }
-    
     # OPEN NEW GRAPHICS DEVICE
-    if(new_device != FALSE) {
+    if (dev_new != FALSE) {
       # POPUP DEVICE
-      if(new_device == "popup") {
-        if(interactive() & getOption("CytoExploreR_interactive")) {
+      if (dev_new == "popup") {
+        if (interactive() & getOption("CytoExploreR_interactive")) {
           if (.Platform$OS.type == "windows") {
-            suppressWarnings(dev.new(...))
+            suppressWarnings(dev.new())
           } else if (.Platform$OS.type == "unix") {
             if (Sys.info()["sysname"] == "Linux") {
               # Cairo needed for semi-transparency
-              suppressWarnings(dev.new(type = "cairo", ...))
+              suppressWarnings(dev.new(type = "cairo"))
             } else if (Sys.info()["sysname"] == "Darwin") {
-              suppressWarnings(dev.new(...))
+              suppressWarnings(dev.new())
             }
           }
         }
-        # RSTUDIO DEVICE  
-      } else if(new_device == "rstudio") {
-        dev.ind <- which(grepl("rstudio", 
-                               names(dev.list()), 
-                               ignore.case = TRUE))
-        if(length(dev.ind) != 0) {
-          dev.set(dev.list()[dev.ind])
+        # RSTUDIO DEVICE
+      } else if (dev_new == "rstudio") {
+        dev_ind <- which(grepl("rstudio",
+          names(dev.list()),
+          ignore.case = TRUE
+        ))
+        if (length(dev_ind) != 0) {
+          dev.set(dev.list()[dev_ind])
         } else {
           graphics.off()
-          dev.new(..., noRStudioGD = FALSE)
+          dev.new(noRStudioGD = FALSE)
         }
       }
     }
   }
+  
+  # SET GRAPHICAL PARAMATERS - INERITS CYTO_PLOT_PAR GLOBAL
+  cyto_plot_par(...)
 
-  # OUTER MARGINS
-  cyto_plot_outer_margins(outer_margins)
-  
-  # LAYOUT
-  cyto_plot_layout(layout)
-  
+}
+
+## DEV_EMPTY -------------------------------------------------------------------
+
+#' Check if graphics device is empty
+#' @importFrom graphics par
+#' @noRd
+dev_empty <- function() {
+  # DEVICE EMPTY - NEW CAN ONLY BE CALLED IF PLOT EXISTS
+  old_par <- .par("new")
+  dev_empty <- tryCatch(
+    par(new = TRUE)[["new"]],
+    warning = function(w){TRUE},
+    finally = function(f){FALSE})
+  par(old_par)
+  print(dev_empty)
+  return(dev_empty)
 }
 
 ## CYTO_PLOT_RESET -------------------------------------------------------------
@@ -905,15 +942,12 @@ cyto_plot_reset <- function() {
   # Signal if a custom plot is being constructed - require cyto_plot_complete
   options("cyto_plot_custom" = FALSE)
 
-  # Signal when cyto_plot_grid method is being called
-  options("cyto_plot_grid" = FALSE)
+  # Reset saved parameters
+  options("cyto_plot_par" = NULL)
 
-  # Signal set layout
-  options("cyto_plot_layout" = NULL)
-  
-  # Signal set outer margins
-  options("cyto_plot_outer_margins"= NULL)
-  
+  # RESET PARAMETERS
+  options("cyto_plot_par_reset" = NULL)
+
   # Reset memory
   .cyto_plot_args_remove()
 
@@ -980,13 +1014,8 @@ cyto_plot_record <- function() {
 #' @param res resolution in ppi, set to 300 by default.
 #' @param multiple logical indicating whether multiple pages should be saved to
 #'   separate numbered files, set to \code{FALSE} by default.
-#' @param layout a vector or matrix defining the custom layout of the plot to be
-#'   created using `cyto_plot_layout`, set to NULL by default to use standard
-#'   `cyto_plot` layout. Custom layouts are required when making multiple
-#'   `cyto_plot` calls in the same image.
-#' @param outer_margins vector of length 4 indicating the number of lines of
-#'   text to place around the \code{c(bottom, left, top, right)} outer borders
-#'   of the plot, set to NULL by default to use \code{par("oma")}.
+#' @param reset logical indicating whether to reset a previous call to
+#'   \code{cyto_plot_save}.
 #' @param ... additional arguments for the appropriate \code{png()},
 #'   \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.
 #'
@@ -1041,246 +1070,111 @@ cyto_plot_save <- function(save_as,
                            units = "in",
                            res = 300,
                            multiple = FALSE,
-                           layout = NULL,
-                           outer_margins = NULL,
+                           reset = FALSE,
                            ...) {
 
-  # APPEND FILE EXTENSION
-  save_as <- file_ext_append(save_as, ".png")
-
-  # Save separate pages to separate number files
-  if (multiple == TRUE & file_ext(save_as) != "pdf") {
-    save_as <- paste0(
-      file_ext_remove(save_as),
-      "_", "%03d", ".",
-      file_ext(save_as)
-    )
-  }
-
-  # PNG DEVICE
-  if (file_ext(save_as) == "png") {
-    png(
-      filename = save_as,
-      width = width,
-      height = height,
-      units = units,
-      res = res,
-      ...
-    )
-    # TIFF DEVICE
-  } else if (file_ext(save_as) == "tiff") {
-    tiff(
-      filename = save_as,
-      width = width,
-      height = height,
-      units = units,
-      res = res,
-      ...
-    )
-    # JPEG DEVICE
-  } else if (file_ext(save_as) == "jpeg") {
-    jpeg(
-      filename = save_as,
-      width = width,
-      height = height,
-      units = units,
-      res = res,
-      ...
-    )
-    # PDF DEVICE
-  } else if (file_ext(save_as) == "pdf") {
-    pdf(
-      file = save_as,
-      width = width,
-      height = height,
-      onefile = multiple,
-      ...
-    )
-  } else if (file_ext(save_as) == "svg") {
-    svg(
-      filename = save_as,
-      width = width,
-      height = height,
-      ...
-    )
+  # RESET
+  if (reset == TRUE) {
+    # CLOSE DEVICE
+    dev.off()
+    # RESET CYTO_PLOT_SAVE
+    options("cyto_plot_save" = FALSE)
+    # SET
   } else {
-    stop(paste("Can't save file to", file_ext(save_as), "format."))
-  }
-
-  # Set global option to notify cyto_plot when dev.off() is required for saving
-  options("cyto_plot_save" = TRUE)
-
-  # CYTO_PLOT_CUSTOM
-  if (!is.null(layout)) {
-    cyto_plot_custom(layout = layout,
-                     outer_margins = outer_margins)
-  }
-}
-
-## CYTO_PLOT_SAVE_RESET --------------------------------------------------------
-
-#' Revert unwanted cyto_plot_save call
-#'
-#' @importFrom grDevices dev.off
-#'
-#' @examples
-#'
-#' # Unwanted cyto_plot_save call
-#' cyto_plot_save("Mistake.png")
-#'
-#' # Revert unwanted cyto_plot_save call
-#' cyto_plot_save_reset()
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @export
-cyto_plot_save_reset <- function() {
-  # TURN OFF GLOBAL OPTION
-  options("cyto_plot_save" = FALSE)
-  # TURN OFF GRAPHICS DEVICE
-  dev.off()
-}
-
-## CYTO_PLOT_LAYOUT ------------------------------------------------------------
-
-#' Set Panel Layout for cyto_plot
-#'
-#' \code{cyto_plot_layout()} sets the panel layout dimensions for combining
-#' different types of cyto_plot plots. Make a call to \code{cyto_plot_layout()}
-#' prior to making multiple calls to \code{cyto_plot()}.
-#'
-#' @param layout either a vector of the form c(nrow, ncol) defining the
-#'   dimensions of the plot or a matrix defining a more sophisticated layout
-#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-#'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default. Resorts to
-#'   \code{options("cyto_plot_layout")} if not manually specified.
-#'
-#' @importFrom graphics par layout
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @examples
-#' library(CytoExploreRData)
-#'
-#' # Load samples into GatingSet
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#'
-#' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#'
-#' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
-#'
-#' # Apply gatingTemplate
-#' gt <- Activation_gatingTemplate
-#' gt_gating(gt, gs)
-#'
-#' # Set out plot layout
-#' cyto_plot_layout(c(1, 2))
-#'
-#' # Add 2D plot
-#' cyto_plot(gs[[4]],
-#'   parent = "CD4 T Cells",
-#'   alias = "",
-#'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
-#'   layout = FALSE
-#' )
-#'
-#' # Add 1D plot
-#' cyto_plot(gs,
-#'   parent = "CD4 T Cells",
-#'   alias = "",
-#'   channels = "7-AAD-A",
-#'   hist_stack = 0.6,
-#'   layout = FALSE
-#' )
-#' @export
-cyto_plot_layout <- function(layout = NULL) {
-
-  # MESSAGE
-  if (is.null(layout) | .empty(layout) | all(layout == FALSE)) {
-    if(!is.null(getOption("cyto_plot_layout"))) {
-      layout  <- getOption("cyto_plot_layout")
+    # APPEND FILE EXTENSION
+    save_as <- file_ext_append(save_as, ".png")
+    # MULTIPLE FILES
+    if (multiple == TRUE & file_ext(save_as) != "pdf") {
+      save_as <- paste0(
+        file_ext_remove(save_as),
+        "_", "%03d", ".",
+        file_ext(save_as)
+      )
+    }
+    # PNG DEVICE
+    if (file_ext(save_as) == "png") {
+      png(
+        filename = save_as,
+        width = width,
+        height = height,
+        units = units,
+        res = res,
+        ...
+      )
+      # TIFF DEVICE
+    } else if (file_ext(save_as) == "tiff") {
+      tiff(
+        filename = save_as,
+        width = width,
+        height = height,
+        units = units,
+        res = res,
+        ...
+      )
+      # JPEG DEVICE
+    } else if (file_ext(save_as) == "jpeg") {
+      jpeg(
+        filename = save_as,
+        width = width,
+        height = height,
+        units = units,
+        res = res,
+        ...
+      )
+      # PDF DEVICE
+    } else if (file_ext(save_as) == "pdf") {
+      pdf(
+        file = save_as,
+        width = width,
+        height = height,
+        onefile = multiple,
+        ...
+      )
+      # SVG DEVICE
+    } else if (file_ext(save_as) == "svg") {
+      svg(
+        filename = save_as,
+        width = width,
+        height = height,
+        ...
+      )
     } else {
-      return(NULL) # layout as current device
+      stop(paste("Can't save file to", file_ext(save_as), "format."))
     }
+    # Set global option to notify cyto_plot - dev.off() is required for saving
+    options("cyto_plot_save" = TRUE)
   }
-  
-  # MATRIX
-  if (is.matrix(layout)) {
-    layout(layout)
-    # VECTOR
-  } else {
-    # BYPASS LAYOUT
-    if (!all(layout == FALSE)) {
-      # ROW ORDER
-      if (length(layout) == 2) {
-        layout <- c(layout, 1)
-      }
-      # ROWS
-      if (layout[3] == 1) {
-        par(mfrow = c(layout[1], layout[2]))
-        # COLUMNS
-      } else if (layout[3] == 2) {
-        par(mfcol = c(layout[1], layout[2]))
-      }
-    }
-  }
-  
-  # SAVE LAYOUT PLOT/CUSTOM
-  options("cyto_plot_layout" = layout)
-  
-}
-
-## CYTO_PLOT_OUTER_MARGINS -----------------------------------------------------
-
-#' Set outer margins for cyto_plot layout
-#' 
-#' @param outer_margins vector of length 4 indicating the number of lines of
-#'   text to place around the \code{c(bottom, left, top, right)} outer borders
-#'   of the plot, set to NULL by default to use \code{par("oma")}.
-#' 
-#' @importFrom graphics par
-#' 
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @export
-cyto_plot_outer_margins <- function(outer_margins = NULL) {
-  
-  # GET OUTER MARGINS
-  if(is.null(outer_margins)) {
-    outer_margins <- getOption("cyto_plot_margins")
-  }
-  
-  # SET OUTER MARGINS
-  if(!is.null(outer_margins)) {
-    par("oma" = outer_margins)
-    options("cyto_plot_margins" = outer_margins)
-  }
-  
 }
 
 ## CYTO_PLOT_CUSTOM ------------------------------------------------------------
 
-#' Create custom cyto_plot
+#' Set customised graphical parameters for cyto_plot
 #'
-#' Signal to \code{cyto_plot} that a custom plot is being created to ensure that
-#' plots are appropriately saved with \code{cyto_plot_save}.
-#' \code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
-#' and \code{cyto_plot} calls should be followed by a call to
-#' \code{cyto_plot_complete} to indicate when the plot is complete and should be
-#' saved.
+#' \code{cyto_plot_custom()} make a call to \code{cyto_plot_par()} to set
+#' customised graphical parameters for the current graphics device.
+#' \code{cyto_plot_custom()} will then signal to \code{cyto_plot()} to ensure
+#' that these set graphical parameters are not overridden and to make sure that
+#' the plots are only saved when the user calls \code{cyto_plot_complete()}.
+#' \code{cyto_plot_custom()} will also record the current graphical parameters
+#' before changing them, so that these can be reset when
+#' \code{cyto_plot_complete()} is called.
 #'
-#' @param layout either a vector of the form c(nrow, ncol) defining the
-#'   dimensions of the plot or a matrix defining a more sophisticated layout
-#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-#'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default.
-#' @param outer_margins vector of length 4 indicating the number of lines of
-#'   text to place around the \code{c(bottom, left, top, right)} outer borders
-#'   of the plot, set to NULL by default to use \code{par("oma")}.
+#' The sequence of calls to save a customised plot are described below:
+#' \itemize{\item \code{cyto_plot_save()} - sets a new graphics device of the
+#' appropriate type (e.g. \code{png()}) and makes sure that \code{cyto_plot()}
+#' does not open other graphics devices \item \code{cyto_plot_custom()} - sets
+#' up the current graphics device with customised graphical parameters and
+#' indicates to \code{cyto_plot()} that the user will take control over when the
+#' plot should be saved. \item \code{cyto_plot()} - the users can then makes
+#' calls to any of the \code{cyto_plot()} family of function to construct the
+#' plot on the customised graphics device. \item \code{cyto_plot_complete()} -
+#' signals that the plot is complete and ready for saving to file. Since
+#' \code{cyto_plot_complete()} also resets a lot of graphical parameters it
+#' should be called even if a call has not been made to \code{cyto_plot_save()}.
+#' }
+#'
+#' @param ... graphical parameters supplied by name to be passed to
+#'   \code{\link{cyto_plot_par}} to customise the current graphics device.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1310,42 +1204,41 @@ cyto_plot_outer_margins <- function(outer_margins = NULL) {
 #' cyto_plot_complete()
 #' }
 #' @export
-cyto_plot_custom <- function(layout = NULL,
-                             outer_margins = NULL) {
+cyto_plot_custom <- function(...) {
 
-  # Tell CytoExploreR - cyto_plot_save and layout resets
+  # SAVE PARS FOR CYTO_PLOT_COMPLETE RESET
+  if (getOption("cyto_plot_method") != "custom") {
+    options("cyto_plot_par_reset" = .par())
+  }
+
+  # CUSTOM
   options("cyto_plot_custom" = TRUE)
 
-  # Set plot method
+  # METHOD
   options("cyto_plot_method" = "custom")
 
-  # Set layout
-  cyto_plot_layout(layout)
-  
-  # Set outer margins
-  cyto_plot_outer_margins(outer_margins)
-  
-  # Reset memory
-  if(!getOption("cyto_plot_save")) {
+  # GRAPHICAL PARAMETERS
+  cyto_plot_par(...)
+
+  # RESET MEMORY
+  if (!getOption("cyto_plot_save")) {
     .cyto_plot_args_remove()
   }
-  
 }
 
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------
 
-#' Indicate Completion of Custom cyto_plot Layout for Saving
+#' Save custom plot and reset associated settings
 #'
-#' @param layout either a vector of the form c(nrow, ncol) defining the
-#'   dimensions of the plot or a matrix defining a more sophisticated layout
-#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-#'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default.
-#' @param outer_margins vector of length 4 indicating the number of lines of
-#'   text to place around the \code{c(bottom, left, top, right)} outer borders
-#'   of the plot, set to NULL by default to use \code{par("oma")}.
+#' \code{cyto_plot_custom()} signals that a custom plot is ready for saving with
+#' \code{cyto_plot_save()} and also resets any settings that were set by
+#' \code{cyto_plot_custom()}. For this reason it is recommended that
+#' \code{cyto_plot_complete()} be called after any plotting on a graphics device
+#' that has been set up using \code{cyto_plot_custom()}.
 #'
-#' @importFrom graphics par
+#' @param ... graphical parameters supplied by name to be passed to
+#'   \code{\link{cyto_plot_par}} to reset the parameters of the current graphics
+#'   device.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1396,43 +1289,45 @@ cyto_plot_custom <- function(layout = NULL,
 #' # Signal that the plot is complete
 #' cyto_plot_complete()
 #' @export
-cyto_plot_complete <- function(layout = NULL,
-                               outer_margins = NULL) {
+cyto_plot_complete <- function(...) {
 
-  # Close graphics device (not RStudioGD or X11)
-  if (!names(dev.cur()) %in% c(
-    "RStudioGD",
-    "windows",
-    "X11",
-    "x11",
-    "quartz"
-  )) {
-    dev.off()
+  # CLOSE DEVICE (not RStudioGD/X11/quartz)
+  if (getOption("cyto_plot_save")) {
+    if (!names(dev.cur()) %in% c(
+      "RStudioGD",
+      "windows",
+      "X11",
+      "x11",
+      "quartz"
+    )) {
+      dev.off()
+    }
   }
 
-  # Reset cyto_plot_custom
+  # CUSTOM - USE SAVED RESET PARAMETERS
+  if (getOption("cyto_plot_method") == "custom") {
+    # RESET PARAMETERS
+    old_pars <- getOption("cyto_plot_par_reset")
+    pars <- list(...)
+    old_pars <- old_pars[!names(old_pars) %in% names(pars)]
+    old_pars <- c(old_pars, pars)
+    do.call("cyto_plot_par", old_pars)
+    # NO SAVED RESET PARAMETERS
+  } else {
+    cyto_plot_par(...)
+  }
+
+  # RESET CYTO_PLOT_CUSTOM
   options("cyto_plot_custom" = FALSE)
 
-  # Reset plot method
+  # RESET CYTO_PLOT_METHOD
   options("cyto_plot_method" = NULL)
 
-  # Turn off saving
+  # RESET CYTO_PLOT_SAVE
   options("cyto_plot_save" = FALSE)
 
-  # Reset layout - 1 x 1
-  if(is.null(layout)) {
-    layout <- c(1, 1, 1)
-  }
-  cyto_plot_layout(layout)
-  options("cyto_plot_layout" = NULL)
-  
-  # Reset cyto_plot_outer_margins
-  if(is.null(outer_margins)) {
-    outer_margins <- c(0,0,0,0)
-  }
-  cyto_plot_outer_margins(outer_margins)
-  options("cyto_plot_outer_margins" = NULL)
-
+  # RESET SAVED PARAMETERS
+  cyto_plot_par(reset = TRUE)
 }
 
 ## CYTO_PLOT_THEME -------------------------------------------------------------
@@ -1446,6 +1341,8 @@ cyto_plot_complete <- function(layout = NULL,
 #' \code{cyto_plot_theme_args}.
 #'
 #' @param ... arguments supported by cyto_plot_theme.
+#' @param reset logical indicating whether \code{cyto_plot_theme()} settings
+#'   should be reset to use default settings, set to FALSE by default.
 #'
 #' @examples
 #' # Make all plots have a black background
@@ -1470,48 +1367,120 @@ cyto_plot_complete <- function(layout = NULL,
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_plot_theme <- function(...) {
+cyto_plot_theme <- function(...,
+                            reset = FALSE) {
 
-  # cyto_plot will pull down these arguments
-
-  # Arguments as named list
-  args <- list(...)
-
-  # Empty list set theme to NULL
-  if (length(args) == 0) {
-    args <- NULL
+  # RESET
+  if (reset) {
+    # RESET THEME
+    options("cyto_plot_theme" = NULL)
+    theme_args <- getOption("cyto_plot_theme")
+    # SET
   } else {
-    # Check supplied arguments are supported.
-    if (!all(names(args) %in% cyto_plot_theme_args())) {
-      lapply(names(args), function(x) {
-        if (!x %in% cyto_plot_theme_args()) {
-          message(paste(x, "is not a supported argument for cyto_plot_theme."))
-        }
-      })
+    # CURRENT THEME ARGUMENTS
+    theme_args <- getOption("cyto_plot_theme")
+    # ARGUMENTS
+    theme_new_args <- list(...)
+    # NEW THEME ARGUMENTS
+    if (length(theme_new_args) != 0) {
+      # CHECK ARGUMENTS
+      if (!all(names(theme_new_args) %in% cyto_plot_theme_args())) {
+        lapply(names(theme_new_args), function(x) {
+          if (!x %in% cyto_plot_theme_args()) {
+            message(
+              paste(x, "is not a supported argument for cyto_plot_theme.")
+            )
+          }
+        })
+      }
+      # SUPPORTED ARGUMENTS ONLY
+      theme_new_args <- theme_new_args[names(theme_new_args) %in%
+        cyto_plot_theme_args()]
     }
-
-    # Restrict list to supported arguments only
-    args <- args[names(args) %in% cyto_plot_theme_args()]
+    # REMOVE OLD PARAMETERS
+    theme_args <- theme_args[!names(theme_args) %in% names(theme_new_args)]
+    theme_args <- c(theme_args, theme_new_args)
+    options("cyto_plot_theme" = theme_args)
   }
-
-  # Assign arguments to cyto_plot_theme option
-  options("cyto_plot_theme" = args)
+  # RETURN THEME ARUMENTS
+  invisible(theme_args)
 }
 
-## CYTO_PLOT_THEME_RESET -------------------------------------------------------
+## CYTO_PLOT_PAR ---------------------------------------------------------------
 
-#' Reset cyto_plot_theme to default settings
+#' Extract a list of graphical parameters set by cyto_plot
+#'
+#' This function is designed to used within \code{cyto_plot()} to return a list
+#' of graphical parameters that have been set by \code{cyto_plot()}. This is not
+#' intended to be used by the user, but can be used to check if there are any
+#' graphical parameters that have not been properly reset after a call to
+#' \code{cyto_plot()}. If required, these graphical parameters can be reset by
+#' setting \code{reset = TRUE}.
+#'
+#' @param ... additional graphical parameters to be set by the current
+#'   \code{cyto_plot()} call (e.g. mfrow = c(1,2)).
+#' @param reset logical indicating whether these svaed graphical parameters
+#'   should be reset, set to FALSE by default.
+#'
+#' @importFrom graphics par layout
+#'
+#' @return invisibly return a list of set graphical parameters.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_plot_theme_reset <- function() {
+cyto_plot_par <- function(...,
+                          reset = FALSE) {
 
-  # Set cyto_plot_theme option to NULL
-  options("cyto_plot_theme" = NULL)
+  # RESET
+  if (reset) {
+    # RESET PARAMETERS
+    options("cyto_plot_par" = NULL)
+    par_args <- getOption("cyto_plot_par")
+    # SET
+  } else {
+    # CURRENT PARAMETERS
+    par_args <- getOption("cyto_plot_par")
+    # NEW PARAMETERS
+    par_new_args <- list(...)
+    # PREPARE PARAMETERS
+    par_args <- par_args[!names(par_args) %in% names(par_new_args)]
+    par_args <- c(par_args, par_new_args)
+    # LAYOUT
+    if("layout" %in% names(par_args)) {
+      layout <- par_args[["layout"]]
+      par_args <- par_args[!names(par_args) %in% "layout"]
+      if (is.numeric(layout)) {
+        if (is.null(dim(layout))) {
+          if (length(layout) == 2) {
+            par_args <- c(par_args, list("mfrow" = layout))
+          } else if (length(layout) == 3) {
+            if (layout[3] == 1) {
+              par_args <- c(par_args, list("mfrow" = layout[1:2]))
+            } else {
+              par_args <- c(par_args, list("mfcol" = layout[1:2]))
+            }
+          }
+        } else {
+          par_args <- c(par_args, list("layout" = layout))
+          layout(layout)
+        }
+      }
+    }
+    print("PAR")
+    print(par_args)
+    # SAVE PARAMETERS
+    options("cyto_plot_par" = par_args)
+    # SET PARAMETERS
+    if(length(par_args[!names(par_args) %in% "layout"]) > 0) {
+      par(par_args[!names(par_args) %in% "layout"])
+    }
+  }
+  # RETURN SET PARAMETERS
+  invisible(par_args)
 }
 
-## .CYTO_PLOT_THEME_ARGS -------------------------------------------------------
+## CYTO_PLOT_THEME_ARGS --------------------------------------------------------
 
 #' Get supported cyto_plot_theme arguments
 #'

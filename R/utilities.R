@@ -173,7 +173,7 @@ LAPPLY <- function(...){
   return(pars)
 }
 
-# SUPPRESS WARNINGS & MESSAGES -------------------------------------------------
+## SUPPRESS WARNINGS & MESSAGES ------------------------------------------------
 
 #' Suppress warnings and messages
 #' @noRd
@@ -230,7 +230,7 @@ SysExec <- function(
   return(paths)
 }
 
-# READ_FROM_CSV ----------------------------------------------------------------
+## READ_FROM_CSV ---------------------------------------------------------------
 
 #' Use data.table to read in a csv file
 #' @importFrom data.table fread
@@ -255,7 +255,7 @@ read_from_csv <- function(x,
   )
 }
 
-# WRITE_TO_CSV -----------------------------------------------------------------
+## WRITE_TO_CSV ----------------------------------------------------------------
 
 #' Use data.table to write data to a csv file
 #' @importFrom data.table fwrite

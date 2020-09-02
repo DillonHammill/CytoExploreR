@@ -2,23 +2,21 @@
 % Please edit documentation in R/cyto_plot-helpers.R
 \name{cyto_plot_complete}
 \alias{cyto_plot_complete}
-\title{Indicate Completion of Custom cyto_plot Layout for Saving}
+\title{Save custom plot and reset associated settings}
 \usage{
-cyto_plot_complete(layout = NULL, outer_margins = NULL)
+cyto_plot_complete(...)
 }
 \arguments{
-\item{layout}{either a vector of the form c(nrow, ncol) defining the
-dimensions of the plot or a matrix defining a more sophisticated layout
-(see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-third element to indicate whether plots should be placed in row (1) or
-column (2) order, set to row order by default.}
-
-\item{outer_margins}{vector of length 4 indicating the number of lines of
-text to place around the \code{c(bottom, left, top, right)} outer borders
-of the plot, set to NULL by default to use \code{par("oma")}.}
+\item{...}{graphical parameters supplied by name to be passed to
+\code{\link{cyto_plot_par}} to reset the parameters of the current graphics
+device.}
 }
 \description{
-Indicate Completion of Custom cyto_plot Layout for Saving
+\code{cyto_plot_custom()} signals that a custom plot is ready for saving with
+\code{cyto_plot_save()} and also resets any settings that were set by
+\code{cyto_plot_custom()}. For this reason it is recommended that
+\code{cyto_plot_complete()} be called after any plotting on a graphics device
+that has been set up using \code{cyto_plot_custom()}.
 }
 \examples{
 library(CytoExploreRData)

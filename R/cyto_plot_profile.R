@@ -111,8 +111,7 @@ cyto_plot_profile <- function(x,
     on.exit({
       par(old_pars)
       options("cyto_plot_method" = NULL)
-      options("cyto_plot_layout" = NULL)
-      options("cyto_plot_margins" = NULL)
+      options("cyto_plot_par" = NULL)
     })
   }
   
@@ -146,24 +145,19 @@ cyto_plot_profile <- function(x,
     layout <- .cyto_plot_layout(channels, layout)
   }
   
-  # USE EXISTING LAYOUT
-  if(all(layout == FALSE)) {
-    layout <- par("mfrow")
-  }
-  
   # OUTER MARGINS
   if (!.all_na(header)) {
-    outer_margins <- c(0, 0, 3, 0)
+    oma <- c(0, 0, 3, 0)
   } else{
-    outer_margins <- c(0, 0, 0, 0)
+    oma <- c(0, 0, 0, 0)
   }
   
   # SET UP GRAPHICS DEVICE
   if(getOption("cyto_plot_method") == "profile" &
      !getOption("cyto_plot_custom")) {
     cyto_plot_new(popup,
-                  layout, 
-                  outer_margins)
+                  layout = layout, 
+                  oma = oma)
   }
 
   # CONSTRUCT PLOTS ------------------------------------------------------------
@@ -205,9 +199,7 @@ cyto_plot_profile <- function(x,
       p <- cyto_plot_record()
       # NEW PLOT
       if(z != length(channels)) {
-        cyto_plot_new(popup,
-                      layout,
-                      outer_margins)
+        cyto_plot_new() # use global settings
       }
       return(p)
     } else {

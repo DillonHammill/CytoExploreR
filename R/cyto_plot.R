@@ -1337,19 +1337,17 @@ cyto_plot.flowSet <- function(x,
   
   # CYTO_PLOT_EXIT -------------------------------------------------------------
   
-  # CURRENT SET PARAMETERS
-  old_pars <- .par()
-  
   # NEW PLOT METHOD
   if(is.null(getOption("cyto_plot_method"))) {
     # CYTO_PLOT_METHOD
     options("cyto_plot_method" = "flowSet")
+    # RESET GRAPHICAL PARAMETERS
+    old_pars <- .par()
     # CYTO_PLOT_EXIT
     on.exit({
       par(old_pars)
       options("cyto_plot_method" = NULL)
-      options("cyto_plot_layout" = NULL)
-      options("cyto_plot_outer_margins" = NULL)
+      options("cyto_plot_par" = NULL)
     })
   }
   
@@ -1689,7 +1687,7 @@ cyto_plot.flowSet <- function(x,
   if(getOption("cyto_plot_method") == "flowSet" & 
      !getOption("cyto_plot_custom")) {
     cyto_plot_new(popup, 
-                  layout)
+                  layout = layout)
   }
   
   # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
@@ -1757,7 +1755,7 @@ cyto_plot.flowSet <- function(x,
       }
       # OPEN NEW DEVICE 
       if(length(args) > cnt) {
-        cyto_plot_new(popup) # use global layout
+        cyto_plot_new() # use global settings
       }
     } else {
       p <- NULL
@@ -1778,12 +1776,6 @@ cyto_plot.flowSet <- function(x,
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
     }
-  }
-  
-  # RESET CYTO_PLOT_LAYOUT
-  if(!getOption("cyto_plot_custom") & 
-     getOption("cyto_plot_method") == "flowSet") {
-    options("cyto_plot_layout" = NULL)
   }
 
   # RETURN RECORDED PLOT
@@ -1896,8 +1888,7 @@ cyto_plot.flowFrame <- function(x,
     on.exit({
       par(old_pars)
       options("cyto_plot_method" = NULL)
-      options("cyto_plot_layout" = NULL)
-      options("cyto_plot_outer_margins" = NULL)
+      options("cyto_plot_par" = NULL)
     })
   }
   
