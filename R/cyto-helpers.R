@@ -755,7 +755,11 @@ cyto_details <- function(x,
   
   # Return identifier for flowFrame
   if (cyto_class(x, "flowFrame")) {
-    return(cyto_names(x))
+    pd <- data.frame("name" = cyto_names(x),
+                     stringsAsFactors = !factor)
+    if(!drop) {
+      rownames(pd) <- cyto_names(x)
+    }
     # Return experiment details for other objects
   } else {
     pd <- pData(x)
@@ -769,8 +773,8 @@ cyto_details <- function(x,
                          as.is = !factor,
                          ...)
     }
-    return(pd)
   }
+  return(pd)
 }
 
 # CYTO_DETAILS REPLACEMENT METHOD ----------------------------------------------
@@ -1586,6 +1590,7 @@ cyto_extract <- function(x,
                          raw = FALSE,
                          channels = NULL,
                          markers = FALSE,
+                         list = FALSE,
                          ...) {
   
   # DEFAULT PARENT
