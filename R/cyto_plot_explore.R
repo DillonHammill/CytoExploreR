@@ -78,7 +78,7 @@ cyto_plot_explore.GatingSet <- function(x,
   }
   
   # Extract parent population
-  fs <- cyto_extract(x)
+  fs <- cyto_extract(x, parent = parent)
   
   # Convert fs to flowFrame
   fr <- cyto_convert(fs)
@@ -149,7 +149,7 @@ cyto_plot_explore.GatingHierarchy <- function(x,
   }
   
   # Extract parent population
-  fr <- cyto_extract(x)
+  fr <- cyto_extract(x, parent = parent)
   
   # Transformations
   axes_trans <- cyto_transformer_extract(x)
