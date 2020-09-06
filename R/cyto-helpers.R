@@ -262,7 +262,7 @@ cyto_load <- function(path = ".",
   if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
     x <- load_gs(path = path,
-                 h5_readonly = FALSE)
+                 backend_readonly = FALSE)
     # FCS FILES
   } else {
     
