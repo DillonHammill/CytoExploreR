@@ -706,19 +706,19 @@ cyto_plot.GatingSet <- function(x,
       # BASE LAYER ONLY
       if (length(channels) == 1 & hist_stack == 0) {
         label_text <- rep(
-          c(alias, rep(NA, length(alias) - G)), 
+          c(alias, rep(NA, abs(length(alias) - G))), 
           length.out = G
         )
         # EACH LAYER
       } else if (length(channels) == 1 & hist_stack != 0) {
         label_text <- rep(
-          c(alias, rep(NA, length(alias) - G)),
+          c(alias, rep(NA, abs(length(alias) - G))),
           length.out = G * L
         )
         # BASE LAYER ONLY
       } else {
         label_text <- rep(
-          c(alias, rep(NA, length(alias) - G)), 
+          c(alias, rep(NA, abs(length(alias) - G))), 
           length.out = G
         )
       }
