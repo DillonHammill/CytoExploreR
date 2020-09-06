@@ -842,7 +842,7 @@ cyto_plot_new <- function(popup,
         # REQUIRE - RSTUDIO
       } else {
         # PRESET LAYOUT OR EMPTY DEVICE
-        if (getOption("cyto_plot_custom") | dev_empty()) {
+        if (getOption("cyto_plot_method") == "custom" | dev_empty()) {
           dev_new <- FALSE
           # NEW LAYOUT
         } else {
@@ -854,7 +854,7 @@ cyto_plot_new <- function(popup,
       # REQUIRE POPUP
       if (dev_new == "popup") {
         # PRESET LAYOUT OR EMPTY DEVICE
-        if (getOption("cyto_plot_custom") | dev_empty()) {
+        if (getOption("cyto_plot_method") == "custom" | dev_empty()) {
           dev_new <- FALSE
           # NEW LAYOUT
         } else {
@@ -866,6 +866,7 @@ cyto_plot_new <- function(popup,
         dev_new <- "rstudio"
       }
     }
+    print(dev_new)
     # OPEN NEW GRAPHICS DEVICE
     if (dev_new != FALSE) {
       # POPUP DEVICE
@@ -916,7 +917,6 @@ dev_empty <- function() {
     warning = function(w){TRUE},
     finally = function(f){FALSE})
   par(old_par)
-  print(dev_empty)
   return(dev_empty)
 }
 
@@ -938,9 +938,6 @@ cyto_plot_reset <- function() {
 
   # Signal which cyto_plot method has been called
   options("cyto_plot_method" = NULL)
-
-  # Signal if a custom plot is being constructed - require cyto_plot_complete
-  options("cyto_plot_custom" = FALSE)
 
   # Reset saved parameters
   options("cyto_plot_par" = NULL)
@@ -1211,9 +1208,6 @@ cyto_plot_custom <- function(...) {
     options("cyto_plot_par_reset" = .par())
   }
 
-  # CUSTOM
-  options("cyto_plot_custom" = TRUE)
-
   # METHOD
   options("cyto_plot_method" = "custom")
 
@@ -1316,9 +1310,6 @@ cyto_plot_complete <- function(...) {
   } else {
     cyto_plot_par(...)
   }
-
-  # RESET CYTO_PLOT_CUSTOM
-  options("cyto_plot_custom" = FALSE)
 
   # RESET CYTO_PLOT_METHOD
   options("cyto_plot_method" = NULL)
@@ -1448,6 +1439,7 @@ cyto_plot_par <- function(...,
     par_args <- c(par_args, par_new_args)
     # LAYOUT
     if("layout" %in% names(par_args)) {
+      print("YASS")
       layout <- par_args[["layout"]]
       par_args <- par_args[!names(par_args) %in% "layout"]
       if (is.numeric(layout)) {
@@ -1467,8 +1459,6 @@ cyto_plot_par <- function(...,
         }
       }
     }
-    print("PAR")
-    print(par_args)
     # SAVE PARAMETERS
     options("cyto_plot_par" = par_args)
     # SET PARAMETERS

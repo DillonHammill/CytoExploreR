@@ -24,9 +24,6 @@
   # Signal which cyto_plot method has been called
   options("cyto_plot_method" = NULL)
   
-  # Signal if a custom plot is being constructed - require cyto_plot_complete
-  options("cyto_plot_custom" = FALSE)
-  
   # Store set graphical parameters
   options("cyto_plot_par" = NULL)
   

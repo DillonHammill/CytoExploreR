@@ -1377,14 +1377,14 @@ cyto_plot.flowSet <- function(x,
   args <- args[-match("layout", names(args))]
   
   # CUSTOM PLOT SIGNALLED
-  if (getOption("cyto_plot_custom")) {
+  if (getOption("cyto_plot_method") == "custom") {
     layout <- FALSE
   }
   
   # LAYOUT TURNED OFF
   if (!all(.empty(layout))) {
     if (all(layout == FALSE)) {
-      options("cyto_plot_custom" = TRUE)
+      options("cyto_plot_method" = "custom") 
     }
   }
   
@@ -1685,7 +1685,7 @@ cyto_plot.flowSet <- function(x,
   
   # GRAPHICS DEVICE - ONLY OPEN IF LAYOUT IS BEING SET
   if(getOption("cyto_plot_method") == "flowSet" & 
-     !getOption("cyto_plot_custom")) {
+     getOption("cyto_plot_method") != "custom") {
     cyto_plot_new(popup, 
                   layout = layout)
   }
@@ -1747,7 +1747,7 @@ cyto_plot.flowSet <- function(x,
              envir = parent.frame(2))
     }
     # RECORD FULL PAGE & OPEN NEW DEVICE
-    if(par("page")) {
+    if(par("page") | cnt == length(args)) {
       if(getOption("cyto_plot_method") == "flowSet") {
         p <- cyto_plot_record()
       } else {
@@ -1768,11 +1768,9 @@ cyto_plot.flowSet <- function(x,
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save") == TRUE) {
-    if (is(x, getOption("cyto_plot_method"))) {
-      if (!getOption("cyto_plot_custom")) {
-        # CLOSE GRAPHICS DEVICE
-        dev.off()
-      }
+    if (getOption("cyto_plot_method") == "flowSet") {
+      # CLOSE GRAPHICS DEVICE
+      dev.off()
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
     }
@@ -2134,11 +2132,9 @@ cyto_plot.flowFrame <- function(x,
   
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
   if (getOption("cyto_plot_save") == TRUE) {
-    if (is(x, getOption("cyto_plot_method"))) {
-      if (!getOption("cyto_plot_custom")) {
-        # CLOSE GRAPHICS DEVICE
-        dev.off()
-      }
+    if (getOption("cyto_plot_method") == "flowFrame") {
+      # CLOSE GRAPHICS DEVICE
+      dev.off()
       # RESET CYTO_PLOT_SAVE
       options("cyto_plot_save" = FALSE)
     }

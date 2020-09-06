@@ -153,8 +153,7 @@ cyto_plot_profile <- function(x,
   }
   
   # SET UP GRAPHICS DEVICE
-  if(getOption("cyto_plot_method") == "profile" &
-     !getOption("cyto_plot_custom")) {
+  if(getOption("cyto_plot_method") == "profile") {
     cyto_plot_new(popup,
                   layout = layout, 
                   oma = oma)
@@ -179,7 +178,7 @@ cyto_plot_profile <- function(x,
               ...
     )
     # HEADER
-    if(n > 1 | z %% prod(layout) == 0 | z == length(channels)){
+    if(n > 1 | par("page") | z == length(channels)){
       # ADD HEADER - LAYOUT ONLY
       if (!.all_na(header) & all(layout != FALSE)) {
         if(is.null(header)) {
