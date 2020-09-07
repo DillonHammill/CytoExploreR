@@ -757,7 +757,7 @@ cyto_details <- function(x,
   # Return identifier for flowFrame
   if (cyto_class(x, "flowFrame")) {
     pd <- data.frame("name" = cyto_names(x),
-                     stringsAsFactors = !factor)
+                     stringsAsFactors = factor)
     if(!drop) {
       rownames(pd) <- cyto_names(x)
     }
@@ -1652,229 +1652,6 @@ cyto_extract <- function(x,
   return(x)
 }
 
-## CYTO_CONVERT ----------------------------------------------------------------
-
-#' Convert between cytometry objects
-#'
-#' @param x \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param return either 'flowFrame', 'flowSet', 'GatingHierarchy', 'GatingSet',
-#'   coerced 'flowFrame list' or coerced 'flowSet list'. GatingSet and flowSet
-#'   objects can also be converted to a 'list of flowFrames'.
-#' @param parent name of parent population to extract from
-#'   \code{GatingHierarchy} and \code{GatingSet} objects.
-#' @param ... not in use.
-#'
-#' @return object specified by 'return' argument.
-#'
-#' @importFrom flowCore flowSet exprs
-#' @importFrom flowWorkspace GatingSet sampleNames
-#' @importFrom methods as
-#'
-#' @examples
-#'
-#' # Load in CytoExploreRData to access data
-#' library(CytoExploreRData)
-#'
-#' # Convert flowSet to 'list of flowFrames'
-#' cyto_convert(Activation, "list of flowFrames")
-#'
-#' # Convert flowSet to 'flowFrame'
-#' cyto_convert(Activation, "flowFrame")
-#'
-#' # Convert GatingSet to flowFrame
-#' cyto_convert(GatingSet(Activation), "flowFrame", parent = "root")
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @rdname cyto_convert
-#'
-#' @export
-cyto_convert <- function(x, ...) {
-  UseMethod("cyto_convert")
-}
-
-#' @rdname cyto_convert
-#' @export
-cyto_convert.flowFrame <- function(x,
-                                   return = "flowFrame",
-                                   ...) {
-  
-  # NAME
-  nm <- cyto_names(x)
-  
-  # CONVERSIONS
-  if (return == "list of flowFrames") {
-    return <- "flowFrame list"
-  }
-  
-  if (return == "flowFrame") {
-    
-  } else if (return %in% c("flowFrame list", "list of flowFrames")) {
-    x <- list(x)
-  } else if (return == "flowSet") {
-    x <- flowSet(x)
-    sampleNames(x) <- nm
-    x <- as(x, "ncdfFlowSet")
-  } else if (return == "flowSet list") {
-    x <- list(flowSet(x))
-    sampleNames(x[[1]]) <- nm
-    x <- list(as(x[[1]], "ncdfFlowSet"))
-  } else if (return == "GatingSet") {
-    x <- flowSet(x)
-    sampleNames(x) <- nm
-    x <- as(x, "ncdfFlowSet")
-    x <- GatingSet(x)
-  } else if (return == "GatingHierarchy") {
-    x <- flowSet(x)
-    sampleNames(x) <- nm
-    x <- as(x, "ncdfFlowSet")
-    x <- GatingSet(x)[[1]]
-  }
-  
-  return(x)
-}
-
-#' @rdname cyto_convert
-#' @export
-cyto_convert.flowSet <- function(x,
-                                 return = "flowSet",
-                                 ...) {
-  if (return == "flowSet") {
-    
-  } else if (return == "flowFrame") {
-    x <- as(x, "flowFrame")
-    # REMOVE ORIGINAL PARAMETER
-    if ("Original" %in% cyto_channels(x)) {
-      # CANNOT BE EMPTY FLOWFRAME
-      if (nrow(x) == 0) {
-        # ADD EVENT
-        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
-        # REMOVE ORIGINAL PARAMETER & ADDED EVENT
-        x <- suppressWarnings(
-          x[-1, -match("Original", cyto_channels(x))]
-        )
-      } else {
-        x <- suppressWarnings(
-          x[, -match("Original", cyto_channels(x))]
-        )
-      }
-    }
-  } else if (return == "flowFrame list") {
-    x <- as(x, "flowFrame")
-    # REMOVE ORIGINAL PARAMETER
-    if ("Original" %in% cyto_channels(x)) {
-      # CANNOT BE EMPTY FLOWFRAME
-      if (nrow(x) == 0) {
-        # ADD EVENT
-        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
-        # REMOVE ORIGINAL PARAMETER & ADDED EVENT
-        x <- suppressWarnings(
-          x[-1, -match("Original", cyto_channels(x))]
-        )
-      } else {
-        x <- suppressWarnings(
-          x[, -match("Original", cyto_channels(x))]
-        )
-      }
-    }
-    x <- list(x)
-  } else if (return == "list of flowFrames") {
-    x <- lapply(seq_len(length(x)), function(y) {
-      x[[y]]
-    })
-    names(x) <- cyto_names(x)
-  } else if (return == "flowSet list") {
-    x <- list(x)
-  } else if (return == "GatingSet") {
-    x <- GatingSet(x)
-  } else if (return == "GatingHierarchy") {
-    x <- as(x, "flowFrame")
-    # REMOVE ORIGINAL PARAMETER
-    if ("Original" %in% cyto_channels(x)) {
-      # CANNOT BE EMPTY FLOWFRAME
-      if (nrow(x) == 0) {
-        # ADD EVENT
-        exprs(x) <- rbind(rep(0, length(colnames(x))), exprs(x))
-        # REMOVE ORIGINAL PARAMETER & ADDED EVENT
-        x <- suppressWarnings(
-          x[-1, -match("Original", cyto_channels(x))]
-        )
-      } else {
-        x <- suppressWarnings(
-          x[, -match("Original", cyto_channels(x))]
-        )
-      }
-    }
-    x <- as(flowSet(x), "ncdfFlowSet")
-    x <- GatingSet(x)[[1]]
-  }
-  
-  return(x)
-}
-
-#' @rdname cyto_convert
-#' @export
-cyto_convert.GatingHierarchy <- function(x,
-                                         parent = "root",
-                                         return = "GatingHierarchy",
-                                         ...) {
-  
-  # NAME
-  nm <- cyto_names(x)
-  
-  if (return == "GatingHierarchy") {
-    
-  } else if (return == "flowFrame") {
-    x <- cyto_extract(x, parent)
-  } else if (return %in% c("flowFrame list", "list of flowFrames")) {
-    x <- list(cyto_extract(x, parent))
-  } else if (return == "flowSet") {
-    x <- flowSet(cyto_extract(x, parent))
-    sampleNames(x) <- nm
-    x <- as(x, "ncdfFlowSet")
-  } else if (return == "flowSet list") {
-    x <- list(flowSet(cyto_extract(x, parent)))
-    sampleNames(x[[1]]) <- nm
-    x <- list(as(x[[1]], "ncdfFlowSet"))
-  }
-  
-  return(x)
-}
-
-#' @rdname cyto_convert
-#' @export
-cyto_convert.GatingSet <- function(x,
-                                   parent = "root",
-                                   return = "GatingSet",
-                                   ...) {
-  if (return == "GatingSet") {
-    
-  } else if (return == "flowFrame") {
-    x <- cyto_convert(cyto_extract(x, parent), "flowFrame")
-  } else if (return == "flowFrame list") {
-    x <- list(cyto_convert(cyto_extract(x, parent), "flowFrame"))
-  } else if (return == "list of flowFrames") {
-    x <- lapply(seq(1, length(x)), function(z) {
-      cyto_extract(x[[z]], parent)
-    })
-    names(x) <- cyto_names(x)
-  } else if (return == "flowSet") {
-    x <- cyto_extract(x, parent)
-  } else if (return == "flowSet list") {
-    x <- list(cyto_extract(x, parent))
-  } else if (return == "GatingHierarchy") {
-    x <- as(
-      flowSet(cyto_convert(cyto_extract(x, parent), "flowFrame")),
-      "ncdfFlowSet"
-    )
-    x <- GatingSet(x)[[1]]
-  }
-  
-  return(x)
-}
-
 ## CYTO_FILTER -----------------------------------------------------------------
 
 #' Filter samples based on experiment variables
@@ -2430,8 +2207,10 @@ cyto_merge_by.flowSet <- function(x,
   
   # CONVERT EACH GROUP TO FLOWFRAME
   fr_list <- lapply(fs_list, function(fs) {
+    print("MERGE")
+    print(cyto_class(fs))
     if (!cyto_class(fs, "flowFrame")) {
-      cyto_convert(fs, "flowFrame")
+      flowFrame_to_cytoframe(as(fs, "flowFrame"))
     } else {
       fs
     }
@@ -5242,30 +5021,73 @@ cyto_cbind.list <- function(x,
 
 ## CYTO_LIST -------------------------------------------------------------------
 
-#' Convert cytoframe or cytoset to named cytoframe list
-#' 
+#' Convert cytometry objects to lists
+#'
 #' @param x object of class \code{cytoframe} or \code{cytoset} to be listed.
-#' 
+#' @param split logical indicating whether \code{cytosets} should be converted
+#'   to a list of \code{cytoframes} or \code{GatingSets} to a list of
+#'   \code{GatingHierarchies}, set to TRUE by default.
+#' @param extract logical indicating whether \code{cytoframes} or
+#'   \code{cytosets} should be extracted from \code{GatingHierarchies} or
+#'   \code{GatingSets}, set to TRUE by default.
+#' @param parent name of the parent population to extract from GatingHierarchy
+#'   or GatingSet objects.
+#'
 #' @return list of \code{cytoframe} objects.
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @examples 
+#'
+#' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation dataset
 #' fs <- Activation
 #'
 #' # Convert to list
 #' cf_list <- cyto_list(fs)
-#' 
+#'
 #' @export
-cyto_list <- function(x){
+cyto_list <- function(x,
+                      split = TRUE,
+                      extract = TRUE,
+                      ...){
+  
+  # CYTOFRAME -> CYTOFRAME LIST
   if(cyto_class(x, "flowFrame")) {
     structure(list(x), names = cyto_names(x))
+  # CYTOSET
   } else if(cyto_class(x, "flowSet")) {
-    cyto_apply(x, function(z){return(z)}, simplify = FALSE)
-  }else{
-    return(x)
+    # CYTOFRAME LIST
+    if(split) {
+      cyto_apply(x, function(z){return(z)}, simplify = FALSE)
+    # CYTOSET LIST
+    } else {
+      list(x)
+    }
+  # GATINGHIERARCHY
+  } else if(cyto_class(x, "GatingHierarchy", TRUE)) {
+    # CYTOFRAME LIST
+    if(extract) {
+      list(cyto_extract(x, ...))
+    # GATINGHIERARCHY LIST 
+    } else {
+      list(x)
+    }
+  # GATINGSET
+  } else if(cyto_class(x, "GatingSet", TRUE)) {
+    if(extract) {
+      x <- cyto_extract(x, ...)
+      if(split) {
+        cyto_apply(x, function(z){return(z)}, simplify = FALSE)
+      } else {
+        list(x)
+      }
+    } else {
+      if(split) {
+        lapply(x, `[[`, 1)
+      } else {
+        list(x)
+      }
+    }
   }
 }
