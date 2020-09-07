@@ -55,6 +55,7 @@ Suggests:
   CytoML
 Remotes: 
   DillonHammill/CytoExploreRData
+  r-lib/testthat
 biocViews:
 License: GPL-2
 Encoding: UTF-8
@@ -62,3 +63,4 @@ LazyData: true
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Language: en-GB
+Config/testthat/edition: 3
