@@ -2,18 +2,29 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_list}
 \alias{cyto_list}
-\title{Convert cytoframe or cytoset to named cytoframe list}
+\title{Convert cytometry objects to lists}
 \usage{
-cyto_list(x)
+cyto_list(x, split = TRUE, extract = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{cytoframe} or \code{cytoset} to be listed.}
+
+\item{split}{logical indicating whether \code{cytosets} should be converted
+to a list of \code{cytoframes} or \code{GatingSets} to a list of
+\code{GatingHierarchies}, set to TRUE by default.}
+
+\item{extract}{logical indicating whether \code{cytoframes} or
+\code{cytosets} should be extracted from \code{GatingHierarchies} or
+\code{GatingSets}, set to TRUE by default.}
+
+\item{parent}{name of the parent population to extract from GatingHierarchy
+or GatingSet objects.}
 }
 \value{
 list of \code{cytoframe} objects.
 }
 \description{
-Convert cytoframe or cytoset to named cytoframe list
+Convert cytometry objects to lists
 }
 \examples{
 library(CytoExploreRData)

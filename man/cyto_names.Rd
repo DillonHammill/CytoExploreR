@@ -2,28 +2,12 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_names}
 \alias{cyto_names}
-\alias{cyto_names.flowFrame}
-\alias{cyto_names.flowSet}
-\alias{cyto_names.GatingHierarchy}
-\alias{cyto_names.GatingSet}
-\alias{cyto_names.list}
 \title{Extract sample names}
 \usage{
 cyto_names(x)
-
-\method{cyto_names}{flowFrame}(x)
-
-\method{cyto_names}{flowSet}(x)
-
-\method{cyto_names}{GatingHierarchy}(x)
-
-\method{cyto_names}{GatingSet}(x)
-
-\method{cyto_names}{list}(x)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 }
@@ -32,34 +16,26 @@ names associated with the supplied object.
 }
 \description{
 Simply a convenient and autocomplete-friendly wrapper around
-\code{\link[flowCore:identifier-methods]{identifier}}
 \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
-names from flowFrame, flowSet GatingHierarchy or GatingSet. Anonymous
-\code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
-converted to \code{"Combined Events"}.
+names from a cytoset, GatingHierarchy or GatingSet.
 }
 \examples{
-
-# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
+# Compensation Gatingset
+gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+                         package = "CytoExploreRData"))
 
-# Activation GatingSet
-gs <- GatingSet(fs)
-
-# flowFrame
-cyto_names(fs[[1]])
-
-# flowSet
-cyto_names(fs)
+# GatingSet
+cyto_names(gs)
 
 # GatingHierarchy
 cyto_names(gs[[1]])
 
-# GatingSet
-cyto_names(gs)
+# cytoset
+cs <- cyto_data_extract(gs, "root")[["root"]]
+cyto_names(cs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -11,7 +11,7 @@ cyto_details_save(x, save_as = NULL)
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} annotated with
 experiment details.}
 
-\item{save_as}{name of csv file to which the experiment details shuld be
+\item{save_as}{name of csv file to which the experiment details should be
 saved.}
 }
 \value{
