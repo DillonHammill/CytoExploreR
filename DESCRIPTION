@@ -21,6 +21,7 @@ Depends:
 Imports: 
   BiocGenerics, 
   data.table,
+  DataEditR,
   dplyr,
   EmbedSOM,
   flowAI,
