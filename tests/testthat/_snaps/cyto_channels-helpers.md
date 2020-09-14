@@ -81,3 +81,11 @@
                                         
               "FSC-W"           "SSC-A" 
 
+# cyto_channels_restrict
+
+     [1] "FSC-A"             "FSC-W"             "SSC-A"            
+     [4] "SSC-H"             "SSC-W"             "Alexa Fluor 488-A"
+     [7] "PE-A"              "7-AAD-A"           "Alexa Fluor 405-A"
+    [10] "Alexa Fluor 430-A" "Alexa Fluor 647-A" "Alexa Fluor 700-A"
+    [13] "APC-Cy7-A"         "Time"             
+

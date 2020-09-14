@@ -7,8 +7,7 @@
 cyto_names(x) <- value
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
-\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{value}{vector of replacement names.}
@@ -20,22 +19,17 @@ Replacement method for cyto_names
 library(CytoExploreRData)
 
 # Compensation Gatingset
-gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
                          package = "CytoExploreRData"))
 
 # GatingSet
 cyto_names(gs)[1] <- "Activation_001.fcs"
 cyto_names(gs)
 
-# GatingHierarchy
-cyto_names(gs[[2]]) <- "Activation_002.fcs"
-cyto_names(gs)
-
 # cytoset
 cs <- cyto_data_extract(gs, "root")[["root"]]
 cyto_names(cs)[1:2] <- c("Activation_1.fcs", "Activation_2.fcs")
 cyto_names(cs)
-cyto_names(gs)
 
 }
 \author{

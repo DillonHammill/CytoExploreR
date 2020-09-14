@@ -113,3 +113,12 @@ test_that("cyto_channel_match", {
   expect_true(file.exists(paste0(temp_dir, "Channel_Match.csv")))
   unlink(paste0(temp_dir, "Channel_Match.csv"))
 })
+
+# CYTO_CHANNELS_RESTRICT -------------------------------------------------------
+
+test_that("cyto_channels_restrict", {
+  gs_copy <- cyto_copy(gs)
+  gs_copy_new <- cyto_channels_restrict(gs_copy,
+                                        exclude = "FSC-H")
+  expect_snapshot_output(cyto_channels(gs_copy_new))
+})

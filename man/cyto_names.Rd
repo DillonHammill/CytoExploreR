@@ -23,7 +23,7 @@ names from a cytoset, GatingHierarchy or GatingSet.
 library(CytoExploreRData)
 
 # Compensation Gatingset
-gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
                          package = "CytoExploreRData"))
 
 # GatingSet

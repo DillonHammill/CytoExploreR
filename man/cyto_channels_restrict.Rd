@@ -2,16 +2,9 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channels_restrict}
 \alias{cyto_channels_restrict}
-\alias{cyto_channels_restrict.flowFrame}
-\alias{cyto_channels_restrict.flowSet}
-\alias{cyto_channels_restrict.GatingSet}
 \title{Restrict the channels of a cytometry object}
 \usage{
-\method{cyto_channels_restrict}{flowFrame}(x, exclude = NULL, ...)
-
-\method{cyto_channels_restrict}{flowSet}(x, exclude = NULL, ...)
-
-\method{cyto_channels_restrict}{GatingSet}(x, exclude = NULL, ...)
+cyto_channels_restrict(x, exclude = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -41,17 +34,17 @@ can be forced through use of the \code{exclude} argument.
 
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 # Channels
-cyto_channels(fs)
+cyto_channels(gs)
 
 # Remove unused channels
-fs <- cyto_channels_restrict(fs)
+gs <- cyto_channels_restrict(gs)
 
 # Channels removed
-cyto_channels(fs)
+cyto_channels(gs)
 
 }
 \author{
