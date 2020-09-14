@@ -29,27 +29,24 @@ with a \code{cytoframe}, \code{cytoset} \code{GatingHierarchy} or
 \code{GatingSet}.
 }
 \examples{
-
-# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
 # Activation GatingSet
-gs <- GatingSet(fs)
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
-# flowFrame
-cyto_channels(fs[[1]])
-
-# flowSet
-cyto_channels(fs)
+# GatingSet
+cyto_channels(gs)
 
 # GatingHierarchy
-cyto_channels(gs[[1]])
+cyto_channels(gs[[1]], select = "Alexa")
 
-# GatingSet - exclude FSC & SSC channels
-cyto_channels(gs, exclude = c("FSC","SSC"))
+# cytoset
+cs <- cyto_data_extract(gs, "root")[["root"]]
+cyto_channels(cs)
+
+# cytoframe
+cyto_channels(cs[[1]], exclude = c("FSC","SSC"))
 
 }
 \seealso{

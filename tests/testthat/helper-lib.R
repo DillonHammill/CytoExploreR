@@ -1,8 +1,11 @@
 # Required Packages ------------------------------------------------------------
 library(CytoExploreRData)
+library(flowWorkspace)
+library(mockery)
 
-# Non-interactive mode
-options("CytoExploreR_interactive" = FALSE)
+# DIRECTORIES ------------------------------------------------------------------
+
+temp_dir <- paste0(tempdir(), .Platform$file.sep)
 
 # Activation GatingSet ---------------------------------------------------------
 
@@ -11,7 +14,11 @@ gs <- cyto_load(
               package = "CytoExploreRData")
   )
 
-cs <- cyto_extract(gs, "root")
+cs <- cyto_data_extract(gs, "root")[["root"]]
+
+gs_sub <- cyto_sample(gs, display = 2000)
+
+cs_sub <- cyto_data_extract(gs_sub, "root")[["root"]]
 
 # Compensation GatingSet -------------------------------------------------------
 
@@ -20,4 +27,4 @@ gs_comp <- cyto_load(
               package = "CytoExploreRData")
   )
 
-cs_comp <- cyto_extract(gs_comp, "root")
+cs_comp <- cyto_data_extract(gs_comp, "root")[["root"]]

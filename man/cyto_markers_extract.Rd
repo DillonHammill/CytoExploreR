@@ -4,7 +4,7 @@
 \alias{cyto_markers_extract}
 \title{Extract marker names for certain channels}
 \usage{
-cyto_markers_extract(x, channels, plot = FALSE)
+cyto_markers_extract(x, channels, plot = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class
@@ -19,6 +19,10 @@ cyto_markers_extract(x, channels, plot = FALSE)
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
+
+\item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
+character matching. For exact character string matching to override the
+default which ignores character case, set \code{fixed} to TRUE.}
 }
 \value{
 A vector of marker names.
@@ -34,17 +38,14 @@ marker names. The name of the channel will be returned if there is no
 associated marker found.
 }
 \examples{
-
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Activation
+# Activation GatingSet
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
-# Add samples to GatingSet
-gs <- GatingSet(fs)
-
-# Extract markers used for PE-A and Alexa Fluor 488-A
-cyto_markers_extract(gs, c("Alexa Fluor 488-A","PE-A"))
+# Extract channels for CD4 & CD8
+cyto_markers_extract(gs, c("Alexa Fluor 700-A", "CD8"))
 
 }
 \author{

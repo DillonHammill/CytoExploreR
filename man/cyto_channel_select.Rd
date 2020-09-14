@@ -22,11 +22,12 @@ Select Fluorescent Channel for Compensation Controls
 \dontrun{
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Compensation
+# Compensation Gatingset
+gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+                         package = "CytoExploreRData"))
 
 # Select a channel for each control from dropdown menu
-cyto_channel_select(fs)
+cyto_channel_select(gs)
 }
 }
 \author{

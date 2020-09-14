@@ -4,7 +4,7 @@
 \alias{cyto_channels_extract}
 \title{Extract channels associated with certain markers}
 \usage{
-cyto_channels_extract(x, channels, plot = FALSE)
+cyto_channels_extract(x, channels, plot = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class
@@ -19,6 +19,10 @@ cyto_channels_extract(x, channels, plot = FALSE)
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
+
+\item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
+character matching. For exact character string matching to override the
+default which ignores character case, set \code{fixed} to TRUE.}
 }
 \value{
 A vector of valid channel names.
@@ -34,16 +38,13 @@ valid channel names. \code{cyto_channels_extract} is particularly useful for
 determining which channel(s) are associated with particular marker(s).
 }
 \examples{
-
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Activation
+# Activation GatingSet
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
-# Add samples to GatingSet
-gs <- GatingSet(fs)
-
-# Extract channels used for CD4 & CD8
+# Extract channels for CD4 & CD8
 cyto_channels_extract(gs, c("CD4", "CD8"))
 
 }

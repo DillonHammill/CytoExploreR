@@ -22,14 +22,16 @@ Replace channel names
 \examples{
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
+# Activation GatingSet
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                         package = "CytoExploreRData"))
 
-# Channels
-cyto_channels(fs)
+# GatingSet
+cyto_channels(gs)
 
 # Update first FSC-A to FSC
-cyto_channels(fs)[1] <- "FSC"
+cyto_channels(gs)[1] <- "FSC"
+cyto_channels(gs)
 
 }
 \seealso{
