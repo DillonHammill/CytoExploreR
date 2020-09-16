@@ -7,7 +7,7 @@
 cyto_select(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{...}{named list containing experimental variables to be used to select
@@ -16,34 +16,36 @@ select. See below examples for use cases. Selected samples can be excluded
 by setting \code{exclude} to TRUE.}
 }
 \value{
-\code{flowSet} or \code{GatingSet} restricted to samples which meet
+\code{cytoset} or \code{GatingSet} restricted to samples which meet
   the designated selection criteria.
 }
 \description{
 Select samples based on experiment variables
 }
 \examples{
-
-# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
+
 # Look at experiment details
-cyto_details(Activation)
+cyto_details(gs)
 
 # Select Stim-C samples with 0 and 500 nM OVA concentrations
-fs <- cyto_select(Activation,
+gs_stim_c <- cyto_select(gs,
   Treatment = "Stim-C",
   OVAConc = c(0, 500)
 )
 
 # Select Stim-A and Stim-C treatment groups
-fs <- cyto_select(
-  Activation,
+gs_stim_ac <- cyto_select(
+  gs,
   list("Treatment" = c("Stim-A", "Stim-C"))
 )
 
 # Exclude Stim-D treatment group
-fs <- cyto_select(Activation,
+gs_stim_abc <- cyto_select(gs,
   Treatment = "Stim-D",
   exclude = TRUE
 )

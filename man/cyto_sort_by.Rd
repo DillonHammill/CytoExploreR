@@ -15,7 +15,7 @@ control over the sorting order, specify the factor levels for each variable
 in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
 }
 \value{
-\code{flowSet} or \code{GatingSet} object sorted based on experiment
+\code{cytoset} or \code{GatingSet} object sorted based on experiment
   variables.
 }
 \description{
@@ -24,11 +24,12 @@ Sort a flowSet or GatingSet by experiment variables
 \examples{
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
 # Sort by Treatment and OVAConc
-fs <- cyto_sort_by(fs,
+gs <- cyto_sort_by(gs,
 list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
 OVAConc = c(0, 5, 50, 500)))
 

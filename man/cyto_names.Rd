@@ -22,7 +22,7 @@ names from a cytoset, GatingHierarchy or GatingSet.
 \examples{
 library(CytoExploreRData)
 
-# Compensation Gatingset
+# Activation Gatingset
 gs <- load_gs(system.file("extdata/Activation-GatingSet",
                          package = "CytoExploreRData"))
 

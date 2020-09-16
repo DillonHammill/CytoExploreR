@@ -52,14 +52,16 @@ calls.
 \examples{
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
 # Calibration
-cyto_calibrate(fs)
+cyto_calibrate(gs)
 
 # Colour based on Hoechst-405 staining
-cyto_plot(fs[1],
+cyto_plot(gs[1],
+parent = "root",
 channels = c("FSC-A", "SSC-A"),
 point_col = "Hoechst-405")
 

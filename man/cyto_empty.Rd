@@ -2,20 +2,20 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_empty}
 \alias{cyto_empty}
-\title{Construct an empty flowFrame}
+\title{Construct an empty cytoframe}
 \usage{
 cyto_empty(name = NULL, channels = NULL, ...)
 }
 \arguments{
-\item{name}{name to add to the constructed flowFrame.}
+\item{name}{name to add to the constructed cytoframe}
 
-\item{channels}{channels to include in the constructed flowFrame.}
+\item{channels}{channels to include in the constructed cytoframe}
 
 \item{...}{additional arguments passed to
 \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 }
 \description{
-Construct an empty flowFrame
+Construct an empty cytoframe
 }
 \examples{
 

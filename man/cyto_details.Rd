@@ -7,8 +7,7 @@
 cyto_details(x, convert = FALSE, drop = FALSE, factor = FALSE, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace-cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -31,20 +30,17 @@ experiment details as data.frame.
 \description{
 Simply an autocomplete-friendly wrapper around
 \code{\link[flowWorkspace:pData-methods]{pData}} with some additional
-formatting options. A call is made to \code{\link{cyto_names}} if a
-\code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
+formatting options.
 }
 \examples{
-\dontrun{
-# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
-# Experiment details
-cyto_details(fs)
-}
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
+                          
+# Experiment variables
+cyto_details(gs)
 
 }
 \author{

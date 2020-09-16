@@ -16,7 +16,9 @@ gs <- cyto_load(
 
 cs <- cyto_data_extract(gs, "root")[["root"]]
 
-gs_sub <- cyto_sample(gs, display = 2000)
+gs_sub <- cyto_sample(gs, 
+                      display = 2000,
+                      seed = 56)
 
 cs_sub <- cyto_data_extract(gs_sub, "root")[["root"]]
 

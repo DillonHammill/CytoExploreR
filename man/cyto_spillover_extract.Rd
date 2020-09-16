@@ -7,7 +7,10 @@
 cyto_spillover_extract(x)
 }
 \arguments{
-\item{x}{object of class flowFrame, flowSet, GatingHierachy or GatingSet.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 }
 \value{
 list of spillover matrices or NULL.
@@ -18,11 +21,9 @@ Extract spillover matrix from cytometry object
 \examples{
 library(CytoExploreRData)
 
-# Activation GatingSet
-gs <- GatingSet(Activation)
-
-# Apply compensation
-gs <- cyto_compensate(gs)
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
 # Extract spillover matrices
 spill <- cyto_spillover_extract(gs)

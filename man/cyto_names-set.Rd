@@ -18,7 +18,7 @@ Replacement method for cyto_names
 \examples{
 library(CytoExploreRData)
 
-# Compensation Gatingset
+# Activation Gatingset
 gs <- load_gs(system.file("extdata/Activation-GatingSet",
                          package = "CytoExploreRData"))
 

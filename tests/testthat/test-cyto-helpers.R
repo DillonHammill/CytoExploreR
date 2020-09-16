@@ -71,14 +71,8 @@ test_that("cyto_details", {
     pd[1, ]
   )
   # CYTOFRAME
-  expect_equal(
-    cyto_details(cs[[1]]),
-    data.frame(
-      "name" = "Activation_1.fcs",
-      row.names = "Activation_1.fcs",
-      stringsAsFactors = FALSE
-    )
-  )
+  expect_error(cyto_details(cs[[1]]),
+               "'cyto_details' cannot be extracted from cytoframe objects!")
   # CONVERT TO FACTOR & DROP ROW NAMES
   pd$name <- factor(pd$name)
   pd$Treatment <- factor(pd$Treatment,
@@ -443,7 +437,15 @@ test_that("cyto_merge_by", {
     "Stim-D",
     "NA"
   ))
-  expect_true(all(unlist(lapply(res, "cyto_class", "flowFrame", TRUE))))
+  expect_true(all(unlist(lapply(res, "cyto_class", "flowSet", TRUE))))
+  expect_equal(unlist(lapply(res, "cyto_names")),
+               c(
+                 "Stim-A",
+                 "Stim-C",
+                 "Stim-B",
+                 "Stim-D",
+                 "NA"
+               ))
 })
 
 # CYTO_SPLIT -------------------------------------------------------------------
@@ -618,12 +620,124 @@ test_that("cyto_nodes_ancestor", {
 
 # CYTO_EMPTY -------------------------------------------------------------------
 
+# CYTO_SPILLOVER_EXTRACT -------------------------------------------------------
 
+test_that("cyto_spillover_extract", {
+  
+  expect_snapshot_output(cyto_spillover_extract(gs[1]))
+  expect_snapshot_output(cyto_spillover_extract(gs[[1]]))
+  expect_snapshot_output(cyto_spillover_extract(cs[1]))
+  expect_snapshot_output(cyto_spillover_extract(cs[[1]]))
+  
+})
+
+# CYTO_CALIBRATE ---------------------------------------------------------------
+
+test_that("cyto_calibrate", {
+  
+  # QUANTILE CALIBRATION
+  cyto_calibrate(gs_sub[29:33],
+                 parent = "root")
+  expect_true(
+    file.exists(
+      paste0(temp_dir, .Platform$file.sep, "cyto_calibrate.rds")
+      )
+    )
+  # RECALL
+  expect_snapshot_output(.cyto_calibrate_recall())
+  
+  # RANGE CALIBRATION
+  cyto_calibrate(gs_sub[29:33],
+                 parent = "root",
+                 type = "range")
+  expect_true(
+    file.exists(
+      paste0(temp_dir, .Platform$file.sep, "cyto_calibrate.rds")
+    )
+  )
+  # RECALL
+  expect_snapshot_output(.cyto_calibrate_recall())
+  
+  # RESET
+  cyto_calibrate_reset()
+  expect_false(
+    file.exists(
+      paste0(temp_dir, .Platform$file.sep, "cyto_calibrate.rds")
+    )
+  )
+  
+})
+
+# CYTO_APPLY -------------------------------------------------------------------
+
+test_that("cyto_apply", {
+  
+  # CYTOSET
+  expect_snapshot_output(
+    cyto_apply(gs_sub[29:32],
+               "cyto_names",
+               input = "cytoset")
+  )
+  
+  # CYTOFRAME
+  expect_snapshot_output(
+    cyto_apply(gs_sub[29:32],
+               function(cf){
+                 colMeans(exprs(cf))
+               },
+               input = "cytoframe",
+               inverse = TRUE,
+               channels = c("CD44", "CD69"))
+  )
+  
+  # MATRIX
+  expect_snapshot_output(
+    cyto_apply(gs_sub[29:32],
+               "nrow",
+               input = "matrix",
+               parent = "T Cells")
+  )
+  
+  # COLUMN
+  expect_snapshot_output(
+    cyto_apply(gs_sub[29:32],
+               function(z,
+                        probs,
+                        na.rm){
+                 round(
+                   quantile(z, 
+                            probs = probs,
+                            na.rm = na.rm),
+                   2)
+               },
+               probs = c(0.5, 0.75),
+               na.rm = TRUE,
+               input = "column", 
+               parent = c("CD4 T Cells", "CD8 T Cells"),
+               channels = c("CD44", "CD69"))
+  )
+  
+})
+
+# CYTO_CBIND -------------------------------------------------------------------
+
+test_that("cyto_cbind", {
+  
+  cs_copy <- cyto_copy(cs_sub[1:4])
+  expect_error(cyto_cbind(cs_copy[[1]]),
+               "'cols' must be a matrix!", fixed = TRUE)
+  new_col <- matrix(1:8000,
+                     ncol = 1,
+                     dimnames = list(NULL, "Test"))
+  cs_copy <- cyto_cbind(cs_copy, new_col)
+  expect_true("Test" %in% cyto_channels(cs_copy))
+  
+})
 
 # CLEAN UP ---------------------------------------------------------------------
 
 # EXPERIMENT MARKERS
 base::unlink(paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv"))
 
-# EEXPERIMENT DETAILS
+# EXPERIMENT DETAILS
 base::unlink(paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Details.csv"))

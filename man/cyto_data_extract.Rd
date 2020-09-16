@@ -53,7 +53,8 @@ transformations applied to the data when \code{inverse = TRUE}.}
 should be inversed, set to FALSE by default.}
 }
 \value{
-either a list of cytosets or list of raw data matrix lists.
+either a list of cytosets, list of cytoframe lists or a list of raw
+  data matrix lists.
 }
 \description{
 \code{cyto_data_extract} will extract populations specified by \code{parent}
@@ -77,7 +78,7 @@ inverse = TRUE)
 # Extract raw data matrices
 cyto_data_extract(gs,
 parent = "root",
-raw = TRUE,
+format = "matrix",
 channels = c("CD4", "CD8"))
 
 }

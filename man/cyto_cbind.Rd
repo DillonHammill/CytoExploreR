@@ -11,11 +11,11 @@
 \method{cyto_cbind}{flowSet}(x, cols = NULL)
 }
 \arguments{
-\item{x}{object of class \code{cytoframe}, \code{cytoset} or a list of
-\code{cytoframes}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}}.}
 
 \item{cols}{matrix of columns to be added to \code{x} can be supplied in a
-list for \code{cytoset} and \code{list} methods.}
+list for \code{cytoset} method.}
 }
 \description{
 Bind new columns to cytoframe or cytoset

@@ -7,7 +7,8 @@
 cyto_groups(x, group_by = "all", details = FALSE)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{group_by}{names of cyto_details variables to use for grouping For more
 control over the group order, specify the factor levels for each variable
@@ -26,16 +27,17 @@ Retrieve details about experimental groups
 \examples{
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
 # Treatment & OVAConc group names
-cyto_groups(fs, 
+cyto_groups(gs,
 group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
 OVAConc = c(0, 5, 50, 500)))
 
 # Treatment & OVAConc group details
-cyto_groups(fs, 
+cyto_groups(gs,
 group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
 OVAConc = c(0, 5, 50, 500)),
 details = TRUE)

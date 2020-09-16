@@ -7,7 +7,8 @@
 cyto_names_parse(x, vars = NULL, split = "_", exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class flowSet or GatingSet.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{vars}{vector containing the names of the variables to be added to
 \code{cyto_details}, set to var_1, var_2 ... by default.}
@@ -15,14 +16,14 @@ cyto_names_parse(x, vars = NULL, split = "_", exclude = NULL, ...)
 \item{split}{delimiter to split the file name into fragments, set to "_" by
 default.}
 
-\item{exclude}{vector of indices indicating which text fragments should not be
-included in the experiment details, set to NULL by default.}
+\item{exclude}{vector of indices indicating which text fragments should not
+be included in the experiment details, set to NULL by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[base:strsplit]{strsplit}}.}
 }
 \value{
-flowSet or GatingSet with \code{cyto_details} updated with new
+cytoset or GatingSet with \code{cyto_details} updated with new
   variables extracted from the file names.
 }
 \description{
@@ -35,13 +36,17 @@ without having to manually enter a lot of these details.
 \examples{
 library(CytoExploreRData)
 
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
+                          
 # Parse file names to variables
-fs <- cyto_names_parse(Activation,
+gs <- cyto_names_parse(gs,
 vars = c("sample_type", "sample_id"),
 split = "_")
 
 # Updated experiment details
-cyto_details(fs)
+cyto_details(gs)
 
 }
 \author{
