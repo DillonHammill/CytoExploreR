@@ -7,7 +7,7 @@
 
 #' Prepare FUN to dispatch to cyto_stat function
 #' @noRd
-cyto_stat_dispatch <- function(FUN) {
+.cyto_stat_dispatch <- function(FUN) {
   
   if(is.character(FUN)) {
     if(any(LAPPLY(c("count",
@@ -69,11 +69,11 @@ cyto_stat_geomean <- function(x,
                               ...) {
   
   res <- suppressWarnings(round(exp(colMeans(log(x))), round))
-  if(any(is.nan(res))){
-    stop(
-      "Geometric mean only works for data greater than zero."
-    )
-  }
+  # if(any(is.nan(res))){
+  #   stop(
+  #     "Geometric mean only works for data greater than zero."
+  #   )
+  # }
   return(res)
   
 }

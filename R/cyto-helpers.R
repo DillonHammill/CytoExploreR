@@ -2927,6 +2927,7 @@ cyto_sample.list <- function(x,
 #' @param count minimum number of events to downsample to, set to the minimum
 #'   count for the specified node across samples by default. \code{count} must
 #'   be less than or equal to the minimum count across the samples.
+#' @param ... additional arguments passed to \code{\link{cyto_sample}}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2936,7 +2937,8 @@ cyto_sample.list <- function(x,
 #' @export
 cyto_sample_to_node <- function(x,
                                 node = NULL,
-                                count = NULL) {
+                                count = NULL,
+                                ...) {
   
   # GATINGSET
   if (!cyto_class(x, "GatingSet", TRUE)) {
@@ -2964,7 +2966,7 @@ cyto_sample_to_node <- function(x,
   }
   
   # NODE COUNTS
-  node_pops <- cyto_extract(gs_clone, node)
+  node_pops <- cyto_data_extract(gs_clone, node)[[node]]
   node_counts <- suppressMessages(
     cyto_stats_compute(node_pops,
                        stat = "count",
@@ -2999,8 +3001,9 @@ cyto_sample_to_node <- function(x,
   # SAMPLING - ROOT POPULATION
   pops <- lapply(seq_along(node_pops), function(z) {
     cyto_sample(
-      cyto_extract(gs_clone[[z]]),
-      node_ratios[[z]]
+      cyto_data_extract(gs_clone[[z]])[["root"]],
+      node_ratios[[z]],
+      ...
     )
   })
   names(pops) <- cyto_names(node_pops)
@@ -3022,33 +3025,32 @@ cyto_sample_to_node <- function(x,
 
 ## CYTO_BARCODE ----------------------------------------------------------------
 
-#' Barcode each file in a cytoset with a sample ID
+#' Barcode each sample or event in a cytoset or GatingSet
 #'
 #' Adds a new parameter to each of the cytoframes in the cytoset called
-#' \code{"Sample ID"} to barcode events from each cytoframe
+#' \code{"Sample ID"} or \code{"Event ID"} to barcode the samples or events from
+#' each cytoframe.
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} to
-#'   be barcoded.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be barcoded.
 #' @param type indicates whether the \code{"samples"}, \code{"events"} or
 #'   \code{"both"} should be barcoded, set \code{"samples"} by default.
 #'
-#' @return barcoded cytoset with \code{"Sample ID"} and/or \code{"Event ID"}
-#'   column added and annotated.
+#' @return barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
+#'   \code{"Event ID"} column added and annotated.
 #'
-#' @importFrom methods is as
-#' @importFrom flowWorkspace `sampleNames<-`
-#' @importFrom flowCore fsApply fr_append_cols
+#' @importFrom flowWorkspace gs_cyto_data
 #'
 #' @examples
-#'
-#' # Load in CytoExploreRData to access files
 #' library(CytoExploreRData)
-#'
-#' # Load in samples
-#' fs <- Activation
+#' 
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Barcode
-#' cyto_barcode(fs)
+#' gs <- cyto_barcode(gs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -3057,9 +3059,12 @@ cyto_barcode <- function(x,
   
   # CHECKS ---------------------------------------------------------------------
   
-  # FLOWSET
-  if (!cyto_class(x, "flowSet")) {
-    stop("'cyto_barcode' expects objects of class flowSet.")
+  # CYTOSET
+  if(cyto_class(x, "GatingSet", TRUE)) {
+    cs <- cyto_data_extract(x,
+                            parent = "root")[["root"]]
+  } else {
+    cs <- x
   }
   
   # TYPE
@@ -3069,43 +3074,47 @@ cyto_barcode <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
-  # SAMPLENAMES
-  nms <- cyto_names(x)
-  
   # SAMPLE ID COLUMN - ONLY IF NOT PRESENT
   if ("samples" %in% type &
-      !"Sample ID" %in% cyto_channels(x)) {
-    x <- cyto_apply(x, function(fr) {
-      ind <- match(cyto_names(fr), nms)
-      mat <- matrix(rep(ind, cyto_stat_count(fr)), ncol = 1)
-      colnames(mat) <- "Sample ID"
-      suppressWarnings(cyto_cbind(fr, mat))
+      !"Sample ID" %in% cyto_channels(cs)) {
+    lapply(seq_along(cs), function(z) {
+      suppressWarnings(
+        cyto_cbind(cs[[z]],
+                   matrix(rep(z, cyto_stat_count(cs[[z]])),
+                          ncol = 1,
+                          dimnames = list(NULL, "Sample ID")))
+      )
     })
   }
   
   # EVENT ID COLUMN - ONLY IF NOT PRESENT
   if ("events" %in% type &
-      !"Event ID" %in% cyto_channels(x)) {
-    total_events <- cyto_apply(x, "cyto_stat_count")
+      !"Event ID" %in% cyto_channels(cs)) {
+    total_events <- cyto_apply(cs, "cyto_stat_count")
     total_events <- split(
       seq_len(sum(total_events)),
-      rep(seq_len(length(x)),
+      rep(seq_len(length(cs)),
           times = total_events
       )
     )
-    names(total_events) <- cyto_names(x)
-    x <- cyto_apply(x, function(fr) {
-      events <- total_events[[cyto_names(fr)]]
-      mat <- matrix(events,
-                    ncol = 1
+    lapply(seq_along(cs), function(z) {
+      suppressWarnings(
+        cyto_cbind(cs[[z]],
+                   matrix(total_events[[z]],
+                          ncol = 1,
+                          dimnames = list(NULL, "Event ID")))
       )
-      colnames(mat) <- "Event ID"
-      suppressWarnings(cyto_cbind(fr, mat))
     })
   }
   
-  # RETURN BARCODED FLOWSET
-  return(x)
+  # RETURN GATINGSET
+  if(cyto_class(x, "GatingSet", TRUE)) {
+    gs_cyto_data(x) <- cs
+    return(x)
+  }
+  
+  # RETURN BARCODED CYTOSET
+  return(cs)
 }
 
 ## CYTO_MARKERS_EDIT -----------------------------------------------------------
@@ -4157,52 +4166,6 @@ cyto_nodes_ancestor <- function(x,
   # RETURN COMMON ANCESTOR
   return(ancestor)
   
-}
-
-## CYTO_EMPTY ------------------------------------------------------------------
-
-#' Construct an empty cytoframe
-#'
-#' @param name name to add to the constructed cytoframe
-#' @param channels channels to include in the constructed cytoframe
-#' @param ... additional arguments passed to
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
-#'
-#' @importFrom flowCore identifier<- flowFrame
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @examples
-#'
-#' # Construct empty flowFrame
-#' cyto_empty(name = "Test.csv", channels = c("FSC-A", "SSC-A", "PE-A"))
-#' @export
-cyto_empty <- function(name = NULL,
-                       channels = NULL,
-                       ...) {
-  
-  # CHANNELS
-  if (is.null(channels)) {
-    stop("Supply the names of the channels to include in the flowFrame.")
-  }
-  
-  # CONSTRUCT EMPTY FLOWFRAME
-  empty_flowFrame <- matrix(0,
-                            ncol = length(channels),
-                            nrow = 1,
-                            byrow = TRUE
-  )
-  colnames(empty_flowFrame) <- channels
-  empty_flowFrame <- flowFrame(empty_flowFrame, ...)
-  empty_flowFrame <- empty_flowFrame[-1, ]
-  
-  # NAME
-  if (!is.null(name)) {
-    identifier(empty_flowFrame) <- name
-  }
-  
-  # RETURN EMPTY FLOWFRAME
-  return(empty_flowFrame)
 }
 
 ## CYTO_COPY -------------------------------------------------------------------

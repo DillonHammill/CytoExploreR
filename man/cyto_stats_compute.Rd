@@ -2,13 +2,9 @@
 % Please edit documentation in R/cyto_stats_compute.R
 \name{cyto_stats_compute}
 \alias{cyto_stats_compute}
-\alias{cyto_stats_compute.GatingSet}
-\alias{cyto_stats_compute.GatingHierarchy}
-\alias{cyto_stats_compute.flowSet}
-\alias{cyto_stats_compute.flowFrame}
 \title{Compute, export and save statistics}
 \usage{
-\method{cyto_stats_compute}{GatingSet}(
+cyto_stats_compute(
   x,
   alias = NULL,
   parent = NULL,
@@ -29,68 +25,9 @@
   select = NULL,
   ...
 )
-
-\method{cyto_stats_compute}{GatingHierarchy}(
-  x,
-  alias = NULL,
-  parent = NULL,
-  channels = NULL,
-  trans = NULL,
-  stat = NULL,
-  inverse = TRUE,
-  round = 2,
-  format = "wide",
-  tibble = FALSE,
-  input = "matrix",
-  smooth = 1,
-  bandwidth = NA,
-  details = TRUE,
-  markers = TRUE,
-  save_as = NULL,
-  ...
-)
-
-\method{cyto_stats_compute}{flowSet}(
-  x,
-  channels = NULL,
-  trans = NA,
-  stat = NULL,
-  gate = NA,
-  inverse = TRUE,
-  round = 2,
-  format = "wide",
-  tibble = FALSE,
-  input = "matrix",
-  smooth = 1,
-  bandwidth = NA,
-  details = TRUE,
-  markers = TRUE,
-  save_as = NULL,
-  select = NULL,
-  ...
-)
-
-\method{cyto_stats_compute}{flowFrame}(
-  x,
-  channels = NULL,
-  trans = NA,
-  stat = NULL,
-  gate = NA,
-  inverse = TRUE,
-  round = 2,
-  format = "wide",
-  input = "matrix",
-  smooth = 1,
-  bandwidth = NA,
-  markers = TRUE,
-  tibble = FALSE,
-  save_as = NULL,
-  ...
-)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-\code{\link[flowWorkspace:cytoset]{cytoset}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -119,13 +56,13 @@ to the desired statistical function.}
 frequency of population(s) in parent population(s)} \item{\code{mean} -
 arithmetic mean} \item{\code{geomean} - geometric (graphical) mean computed
 as the inverse of the arithmetic mean on the transformed scale}
-\item{\code{median} - 50th quantile} \item{\code{mode} - mode computed
-using \code{smooth} and \code{bandwidth} to control the smoothness of the
-density distribution} \item{\code{sd} - standard deviation}
-\item{\code{rsd} - robust standard deviation (less influence of outliers)}
-\item{\code{cv} - coefficient of variation} \item{\code{rcv} - robust
-coefficient of variation (less influence of outliers)}
-\item{\code{quantile} - quantiles with probabilities supplied to
+\item{\code{median} - 50th quantile} \item{\code{mode} - inverse of mode on
+transformed scale computed using \code{smooth} and \code{bandwidth} to
+control the smoothness of the density distribution} \item{\code{sd} -
+standard deviation} \item{\code{rsd} - robust standard deviation (less
+influence of outliers)} \item{\code{cv} - coefficient of variation}
+\item{\code{rcv} - robust coefficient of variation (less influence of
+outliers)} \item{\code{quantile} - quantiles with probabilities supplied to
 \code{probs}} \item{\code{range} - minima and maxima} \item{\code{auc} -
 area under curve using a combination of
 \code{\link[stats:density]{density()}},
@@ -215,8 +152,8 @@ cyto_stats_compute(gs,
 )
 
 # Name csv to save results
-tempfile <- paste0(tempdir(), 
-.Platform$file.sep, 
+tempfile <- paste0(tempdir(),
+.Platform$file.sep,
 "Population-Frequencies.csv")
 
 # Compute frequencies and save to tempfile
