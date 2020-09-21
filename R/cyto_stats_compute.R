@@ -128,7 +128,6 @@ cyto_stats_compute <- function(x,
                                channels = NULL,
                                trans = NULL,
                                stat = NULL,
-                               gate = NULL,
                                inverse = TRUE,
                                round = 2,
                                format = "wide",
@@ -418,7 +417,7 @@ cyto_stats_compute <- function(x,
               stringsAsFactors = FALSE)
           } else {
             res[[z]] <- data.frame(
-              cbind("name" = rownames(res[[z]]),
+              cbind("name" = cyto_names(alias[[z]]),
                     "alias" = rep(names(res)[z], nrow(res[[z]])),
                     res[[z]]),
               check.names = FALSE,

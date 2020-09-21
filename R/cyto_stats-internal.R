@@ -236,11 +236,13 @@ cyto_stat_auc <- function(x,
                           ...) {
   
   # DENSITY - LIST
-  d <- cyto_stat_density(x,
-                         smooth = smooth,
-                         stat = "count", # cyto_stat_compute conflict
-                         bandwidth = bandwidth,
-                         bins = bins)
+  d <- suppressWarnings(
+    cyto_stat_density(x,
+                      smooth = smooth,
+                      stat = "count", # cyto_stat_compute conflict
+                      bandwidth = bandwidth,
+                      bins = bins)
+  )
   
   # AREA UNDER CURVE
   res <- LAPPLY(d, function(z){
@@ -249,7 +251,7 @@ cyto_stat_auc <- function(x,
         splinefun(z$x, 
                   z$y, 
                   method = method),
-        lower = switch(as.charcater(is.null(min)), 
+        lower = switch(as.character(is.null(min)), 
                        "TRUE" = min(z$x), 
                        "FALSE" = min),
         upper = switch(as.character(is.null(max)),
