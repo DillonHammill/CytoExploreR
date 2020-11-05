@@ -508,7 +508,7 @@ cyto_map.flowFrame <- function(x,
   coords <- do.call(".cyto_map", args)
 
   # ADD MAPPING COORDS TO FLOWFRAME
-  if(is(x, "flowFrame")) {
+  if(class(x) == "flowFrame") {
     x <- fr_append_cols(x, coords)
   } else {
     x <- cf_append_cols(x, coords)
