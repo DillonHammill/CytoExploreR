@@ -373,7 +373,7 @@ cyto_load <- function(path = ".",
 #'
 #' @export
 cyto_clean <- function(x, ...) {
-
+  
   # GATINGSET/GATINGHIERARCHY
   if (is(x, "GatingSet") | is(x, "GatingHierarchy")) {
     # PARENT
@@ -390,13 +390,13 @@ cyto_clean <- function(x, ...) {
     }
     # CLEAN DATA
     invisible(capture.output(cyto_data <- flow_auto_qc(cyto_data,
-      html_report = FALSE,
-      mini_report = FALSE,
-      fcs_QC = FALSE,
-      folder_results = FALSE,
-      ...
+                                                       html_report = FALSE,
+                                                       mini_report = FALSE,
+                                                       fcs_QC = FALSE,
+                                                       folder_results = FALSE,
+                                                       ...
     )))
-
+    
     # RETURN CYTOSET
     if (is(cyto_data, "flowSet")) {
       cyto_data <- flowSet_to_cytoset(cyto_data)
@@ -414,11 +414,11 @@ cyto_clean <- function(x, ...) {
       pd <- cyto_details(x)
     }
     invisible(capture.output(x <- flow_auto_qc(x,
-      html_report = FALSE,
-      mini_report = FALSE,
-      fcs_QC = FALSE,
-      folder_results = FALSE,
-      ...
+                                               html_report = FALSE,
+                                               mini_report = FALSE,
+                                               fcs_QC = FALSE,
+                                               folder_results = FALSE,
+                                               ...
     )))
     # RETURN CYTOSET
     if (is(x, "flowSet")) {
@@ -486,7 +486,6 @@ cyto_clean <- function(x, ...) {
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @importFrom flowWorkspace GatingSet
-#' @importFrom tools file_ext
 #' @importFrom methods is
 #'
 #' @examples
@@ -595,7 +594,9 @@ cyto_setup <- function(path = ".",
       if(sample == TRUE){
         sample <- min(
           cyto_apply(x, 
-                     .cyto_count)
+                     "nrow",
+                     input = 2,
+                     copy = FALSE)
         )
       }
       message(
@@ -613,17 +614,15 @@ cyto_setup <- function(path = ".",
   # gatingtemplate
   if (!is.null(gatingTemplate)) {
     
-    # FILE EXTENSION
-    if (.empty(file_ext(gatingTemplate))) {
-      gatingTemplate <- paste0(gatingTemplate, ".csv")
-    }
+    # FILE EXTENSION APPEND
+    gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
     
     # ACTIVE GATINGTEMPLATE
     message(paste("Setting", gatingTemplate, "as the active gatingTemplate..."))
     cyto_gatingTemplate_select(gatingTemplate)
     
     # CREATE GATINGTEMPLATE
-    if (.all_na(match(gatingTemplate, list.files()))) {
+    if(!file_exists(gatingTemplate)){
       message(paste("Creating", gatingTemplate, "..."))
       cyto_gatingTemplate_create(gatingTemplate)
     }
