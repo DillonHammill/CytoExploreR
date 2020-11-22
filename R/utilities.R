@@ -14,7 +14,7 @@
   if(.all_na(x)){
     return(FALSE)
   }else if(is.character(x)){
-    if(all(nchar(trimws(x)) == 0)){
+    if(all(!nzchar(trimws(x)))){
       return(TRUE)
     }else{
       return(FALSE)
