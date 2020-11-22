@@ -469,7 +469,7 @@ cyto_clean <- function(x, ...) {
 #'   these details will be supplied can also be passed to this argument.
 #' @param parse_names logical indicating whether the file names should be parsed
 #'   into experiment details using \code{cyto_names_parse}, set to FALSE by
-#'   default. If you need to parse the names using a different dlimiter, supply
+#'   default. If you need to parse the names using a different delimiter, supply
 #'   the delimiter to this argument instead of TRUE.
 #' @param details logical indicating whether a call should be made to
 #'   \code{cyto_details_edit} to update the experimental details associated with
@@ -479,8 +479,7 @@ cyto_clean <- function(x, ...) {
 #'   the minimum number of events in a sample, set to FALSE by default.
 #'   Alternatively, users can supply a numeric to indicate the desired number of
 #'   events to keep in each sample.
-#' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs}}.
+#' @param ... additional arguments passed to \code{\link{cyto_load}}.
 #'
 #' @return object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
