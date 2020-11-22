@@ -37,21 +37,21 @@ cyto_import <- function(path = ".",
         acs_file <- file_paths[which(file_ext == "acs")]
         cytobank_exp <- CytoML::open_cytobank_experiment(acs_file)
         gs <- CytoML::cytobank_to_gatingset(cytobank_exp)
-      # XML 
+        # XML 
       }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
         xml_file <- file_paths[which(grepl(file_ext, 
                                            "xml", 
                                            ignore.case = TRUE))]
         gs <- CytoML::cytobank_to_gatingset(xml_file, fcs_files)
       }
-    # IMPORT DIVA TO GATINGSET
+      # IMPORT DIVA TO GATINGSET
     }else if(grepl("diva", type, ignore.case = TRUE)){
       xml_file <- file_paths[which(grepl(file_ext, 
                                          "xml", 
                                          ignore.case = TRUE))]
       diva_ws <- CytoML::open_diva_xml(xml_file)
       gs <- CytoML::diva_to_gatingset(diva_ws, fcs_files)
-    # IMPORT FLOWJO TO GATINGSET
+      # IMPORT FLOWJO TO GATINGSET
     }else if(grepl("flowjo", type, ignore.case = TRUE)){
       # WPS
       if(any(grepl("wsp", file_ext, ignore.case = TRUE))){
@@ -59,7 +59,7 @@ cyto_import <- function(path = ".",
                                            "wps", 
                                            ignore.case = TRUE))]
         gs <- CytoML::flowjo_to_gatingset(wps_file, path = path)
-      # XML
+        # XML
       }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
         xml_file <- file_paths[which(grepl(file_ext, 
                                            "xml", 
@@ -96,10 +96,8 @@ cyto_import <- function(path = ".",
     
     # GENERATE GATINGTEMPLATE
     if(!is.null(gatingTemplate)){
-      # FILE EXTENSION
-      if(file_ext(gatingTemplate) != "csv"){
-        gatingTemplate <- paste0(gatingTemplate, ".csv")
-      }
+      # APPEND FILE EXTENSION
+      gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
       # CREATE GATINGTEMPLATE
       message("Creating CytoExploreR gatingTemplate...")
       cyto_gatingTemplate_generate(gs, gatingTemplate)
@@ -108,7 +106,7 @@ cyto_import <- function(path = ".",
     # RETURN GATINGSET
     return(gs)
     
-  # CytoML MISSING
+    # CytoML MISSING
   } else {
     stop(paste0(
       "cyto_import requires the CytoML package ",
@@ -131,8 +129,6 @@ cyto_import <- function(path = ".",
 #'   Cytobank xml file with .xml extension.
 #' @param ... additional arguments passed to \code{gatingset_to_cytobank} or
 #'   \code{gatingset_to_flowjo}.
-#'
-#' @importFrom tools file_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -173,9 +169,7 @@ cyto_export <- function(x,
       stop("Supply either a wsp or xml file name to 'save_as'.")
     } else {
       # FLOWJO EXPORT BY DEFAULT
-      if (.empty(file_ext(save_as))) {
-        save_as <- paste0(save_as, ".wsp")
-      }
+      save_as <- file_ext_append(save_as, ".wsp")
     }
     
     # SAVE
@@ -231,8 +225,6 @@ cyto_export <- function(x,
 #'
 #' @importFrom flowCore identifier identifier<- parameters
 #' @importFrom flowWorkspace load_gs load_cytoset_from_fcs pData
-#' @importFrom gtools mixedsort
-#' @importFrom tools file_ext
 #'
 #' @examples
 #'
@@ -257,15 +249,18 @@ cyto_load <- function(path = ".",
                       sort = TRUE,
                       barcode = FALSE,
                       restrict = FALSE, ...) {
-
+  
   # DIRECTORY NOT FOUND
   if (!dir.exists(path)) {
     stop("Specified path does not exist.")
   }
-
+  
   # FILE PATHS
   files <- list.files(path, full.names = TRUE)
-
+  
+  # REMOVE DIRECTORIES
+  files <- files[!dir.exists(files)]
+  
   # VALID FILES
   files_ext <- file_ext(files)
   files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
@@ -292,7 +287,7 @@ cyto_load <- function(path = ".",
     })
     files <- files[unique(file_ind)]
   }
-
+  
   # EXCLUDE
   if (!is.null(exclude)) {
     file_ind <- c()
@@ -304,12 +299,12 @@ cyto_load <- function(path = ".",
     })
     files <- files[-unique(file_ind)]
   }
-
+  
   # SORTED FILE PATHS
   if (sort) {
-    files <- mixedsort(files)
+    files <- file_sort(files)
   }
-
+  
   # SAVED GATINGSET
   if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
@@ -318,24 +313,24 @@ cyto_load <- function(path = ".",
   } else {
     # CYTOSET
     x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
-
+    
     # CORRECT GUID SLOTS - NECESSARY?
     nms <- cyto_names(x)
     lapply(seq_len(length(nms)), function(z) {
       suppressMessages(identifier(x[[z]]) <<- nms[z])
     })
-
+    
     # BARCODING
     if (barcode) {
       x <- cyto_barcode(x)
     }
-
+    
     # CHANNEL RESTRICTION
     if (restrict) {
       x <- cyto_channels_restrict(x)
     }
   }
-
+  
   # RETURN CYTOSET
   return(x)
 }
