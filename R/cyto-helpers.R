@@ -1505,113 +1505,155 @@ cyto_transform_extract <- function(x,
   }
 }
 
-## CYTO_EXTRACT ----------------------------------------------------------------
+## CYTO_DATA_EXTRACT -----------------------------------------------------------
 
-#' Extract a valid flowFrame or flowSet
+#' Extract data from cytosets, GatingHierarchies or GatingSets
 #'
-#' \code{cyto_extract} is essentially a wrapper for
-#' \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}} which also
-#' accepts \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-#' \code{\link[flowCore:flowSet-class]{flowSet}} objects. The \code{parent}
-#' population is extracted from
-#' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects whilst
-#' \code{flowFrame} or \code{flowSet} objects are returned as is.
+#' \code{cyto_data_extract} will extract populations specified by \code{parent}
+#' and return a list of cytosets. \code{cyto_data_extract} can also optionally
+#' perform additional tasks on the extracted cytosets, such subsetting channels,
+#' inversing transformations and returning raw data matrices.
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierarchy} or \code{GatingSet}.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the parent population to extract from
 #'   \code{GatingHierarchy} or \code{GatingSet} objects.
 #' @param select named list containing experimental variables to be used to
 #'   select samples using \code{\link{cyto_select}}.
 #' @param copy logical indicating whether a deep copy of the extracted data
-#'   should be returned.
-#' @param raw logical indicating whether a list of raw data matrices should be
-#'   returned instead of a flowFrame or flowSet.
+#'   should be returned, set to TRUE by default to ensure that any changes to
+#'   the data will not affect the supplied data.
+#' @param format can be either \code{"cytoframe"}, \code{"cytoset"} or
+#'   \code{"matrix"} to indicate in what format the data should be returned in
+#'   the lists, set to \code{"cytoset"} by default.
 #' @param channels names of the markers or channels for which data should be
 #'   extracted, set to all channels by default.
-#' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:gh_pop_get_data]{gh_pop_get_data}} or
-#'   \code{\link[flowWorkspace:gh_pop_get_data]{gs_pop_get_data}}.
+#' @param markers logical indicating whether the column names of the raw data
+#'   matrices should be replaced with the marker names where possible, set to
+#'   FALSE by default.
+#' @param split logical indicating whether cytosets should be split into
+#'   cytosets containing a single sample each, set to FALSE by default.
+#' @param trans object of class transformerList required to inverse
+#'   transformations applied to the data when \code{inverse = TRUE}.
+#' @param inverse logical indicating whether transformations applied to the data
+#'   should be inversed, set to FALSE by default.
 #'
-#' @return either a \code{flowFrame} or a \code{cytoset}  by default. A list of
-#'   raw data matrices when raw is set to TRUE.
+#' @return either a list of cytosets, list of cytoframe lists or a list of raw
+#'   data matrix lists.
 #'
-#' @importFrom flowWorkspace gs_pop_get_data gh_pop_get_data realize_view
+#' @importFrom flowWorkspace gs_pop_get_data
 #' @importFrom flowCore exprs
-#' @importFrom methods is
 #'
 #' @examples
-#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
-#' # GatingSet
-#' gs <- GatingSet(Activation)
+#' # Activation GatingSet
+#' gs <- cyto_load(system.file("extdata/Activation-GatingSet",
+#'                 package = "CytoExploreRData"))
 #'
-#' # Extract flowFrame
-#' cyto_extract(gs[[1]], parent = "root")
-#'
-#' # Extract cytoset
-#' cyto_extract(gs, parent = "root")
+#' # Extract cytosets & inverse transform
+#' cyto_data_extract(gs[[1]],
+#' parent = c("CD4 T Cells", "CD8 T Cells"),
+#' inverse = TRUE)
 #'
 #' # Extract raw data matrices
-#' cyto_extract(gs, parent = "root", raw = TRUE)
+#' cyto_data_extract(gs,
+#' parent = "root",
+#' format = "matrix",
+#' channels = c("CD4", "CD8"))
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_extract <- function(x,
-                         parent = NULL,
-                         select = NULL,
-                         copy = FALSE,
-                         raw = FALSE,
-                         channels = NULL,
-                         ...) {
+cyto_data_extract <- function(x,
+                              parent = "root",
+                              select = NULL,
+                              copy = TRUE,
+                              format = "cytoset",
+                              channels = NULL,
+                              markers = FALSE,
+                              split = FALSE,
+                              trans = NA,
+                              inverse = FALSE) {
   
-  # DEFAULT PARENT
-  if (is.null(parent)) {
-    parent <- cyto_nodes(x, path = "auto")[1]
-  }
-
-  # EXTRACT
-  if (is(x, "GatingHierarchy")) {
-    x <- gh_pop_get_data(x, parent, ...)
-  } else if (is(x, "GatingSet")) {
-    x <- gs_pop_get_data(x, parent, ...)
-  }
-
-  # COPY
-  if (copy) {
-    x <- cyto_copy(x)
-  }
-
+  # TRANSFORMERS
+  trans <- cyto_transformer_extract(x)
+  
   # SELECT
-  if(!is.null(select)){
+  if(!is.null(select)) {
     x <- cyto_select(x, select)
   }
   
-  # RESTRICT
-  if(!is.null(channels)){
-    channels <- cyto_channels_extract(x, channels = channels)
-    x <- x[, channels]
+  # CYTOSET
+  if(cyto_class(x, "flowSet")) {
+    cs_list <- list(x)
+    # GATINGHIERARCHY/GATINGSET
+  } else {
+    cs_list <- lapply(parent, function(z){
+      gs_pop_get_data(x, z)
+    })
+    names(cs_list) <- parent
   }
   
-  # RAW DATA MATRICES
-  if (raw) {
-    nms <- cyto_names(x)
-    if (is(x, "flowFrame")) {
-      x <- list(exprs(x))
-    } else if (is(x, "flowSet")) {
-      y <- lapply(seq_along(x), function(z) {
-        exprs(x[[z]])
-      })
-      x <- y
+  # PREPARE CYTOSET LIST
+  res <- lapply(cs_list, function(cs) {
+    # COPY
+    if(copy) {
+      cs <- cyto_copy(cs)
     }
-    names(x) <- nms
-  }
+    # RESTRICT
+    if(!is.null(channels)) {
+      channels <- cyto_channels_extract(cs, channels)
+      cs <- cs[, channels, drop = FALSE]
+    }
+    # TRANSFORM
+    if(inverse & !.all_na(trans)) {
+      cs <- cyto_transform(cs,
+                           trans = trans,
+                           inverse = inverse,
+                           plot = FALSE)
+    }
+    # CYTOFRAME
+    if(format == "cytoframe") {
+      structure(
+        lapply(cyto_names(cs), function(z){
+          cs[[z]]
+        }), names = cyto_names(cs)
+      )
+      # CYTOSET
+    } else if(format == "cytoset") {
+      if(split) {
+        structure(lapply(seq_along(cs), function(z){
+          cs[z]
+        }), names = cyto_names(cs))
+      } else {
+        cs
+      }
+      # MATRIX
+    } else if(format == "matrix") {
+      structure(
+        lapply(cyto_names(cs), function(z){
+          m <- exprs(cs[[z]])
+          # MARKERS
+          if(markers){
+            colnames(m) <- unname(cyto_markers_extract(cs[[z]], colnames(m)))
+          }
+          return(m)
+        }), names = cyto_names(cs)
+      )
+    }
+  })
+  names(res) <- names(cs_list)
+  
+  # EXTRACTED DATA
+  return(res)
+}
 
-  # RETURN EXTRACTED DATA
-  return(x)
+#' @export
+cyto_extract <- function(...){
+  .Defunct("cyto_data_extract")
 }
 
 ## CYTO_CONVERT ----------------------------------------------------------------
