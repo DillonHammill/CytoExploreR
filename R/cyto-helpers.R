@@ -2094,21 +2094,24 @@ cyto_group_by <- function(x,
 
 ## CYTO_MERGE_BY ---------------------------------------------------------------
 
-#' Merge a flowSet by experiment variables
+#' Merge a cytoset by experiment variables
 #'
 #' \code{cyto_merge_by} makes a call to \code{cyto_group_by} to split samples
 #' into groups based on experiment variables. The resulting groups are then
-#' converted to flowFrames using \code{cyto_convert}. \code{cyto_merge_by} is
-#' the preferred way to merge samples in CytoExploreR as it will ensure
-#' appropriate sampling in \code{cyto_plot}.
+#' coerced in a \code{cytoset} containing a single \code{cytoframe} with the
+#' merged data. \code{cyto_merge_by} is the preferred way to merge samples in
+#' CytoExploreR as it will ensure appropriate sampling in \code{cyto_plot}.
 #'
-#' @param x object of class \code{flowSet}.
-#' @param parent name of the parent population to merge when a \code{GatingSet}
-#'   object is supplied, set to the \code{"root"} node by default.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param parent name of the parent population to merge when a
+#'   \code{GatingHierarchy} or \code{GatingSet} object is supplied, set to the
+#'   \code{"root"} node by default.
 #' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
 #'   prior to merging.
-#' @param select selection critieria passed to \code{\link{cyto_select}} which
+#' @param select selection criteria passed to \code{\link{cyto_select}} which
 #'   indicates which samples in each group to retain prior to merging, set to
 #'   NULL by default to merge all samples in each group. Filtering steps should
 #'   be comma separated and wrapped in a list. Refer to
@@ -2122,28 +2125,22 @@ cyto_group_by <- function(x,
 #' @return list of flowFrames merged by the grouping variables specified by
 #'   \code{merge_by}.
 #'
-#' @importFrom flowCore `identifier<-`
-#' @importFrom methods is
-#'
 #' @examples
-#'
-#' # Load CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
-#'
-#' # Activation GatingSet
-#' gs <- GatingSet(fs)
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Experiment details
-#' cyto_details(fs)
+#' cyto_details(gs)
 #'
 #' # Merge samples by 'Treatment'
-#' fr_list <- cyto_merge_by(fs, "Treatment")
+#' cs_list <- cyto_merge_by(gs, "Treatment")
 #'
 #' # Merge samples by 'OVAConc'
-#' fr_list <- cyto_merge_by(fs, "OVAConc")
+#' cs_list <- cyto_merge_by(gs, "OVAConc")
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_group_by}}
@@ -2151,95 +2148,61 @@ cyto_group_by <- function(x,
 #' @seealso \code{\link{cyto_barcode}}
 #' @seealso \code{\link{cyto_sample}}
 #'
-#' @name cyto_merge_by
-NULL
-
-#' @noRd
 #' @export
-cyto_merge_by <- function(x, ...) {
-  UseMethod("cyto_merge_by")
-}
-
-#' @rdname cyto_merge_by
-#' @export
-cyto_merge_by.GatingSet <- function(x,
-                                    parent = "root",
-                                    merge_by = "all",
-                                    select = NULL,
-                                    barcode = TRUE,
-                                    ...) {
-
-  # EXTRACT POPULATON
-  fs <- cyto_extract(x, parent)
-
-  # CALL FLOWSET METHOD
-  cyto_merge_by(fs,
-    merge_by = merge_by,
-    select = select,
-    barcode = barcode,
-    ...
-  )
-}
-
-#' @rdname cyto_merge_by
-#' @export
-cyto_merge_by.flowSet <- function(x,
-                                  merge_by = "all",
-                                  select = NULL,
-                                  barcode = TRUE,
-                                  ...) {
-
+cyto_merge_by <- function(x,
+                          parent = "root",
+                          merge_by = "all",
+                          select = NULL,
+                          barcode = TRUE,
+                          ...) {
+  
+  # EXTRACT DATA ---------------------------------------------------------------
+  
+  # CYTOSET
+  x <- cyto_data_extract(x,
+                         parent = parent,
+                         copy = FALSE)[[1]]
+  
   # BARCODING ------------------------------------------------------------------
-
+  
   # SAMPLE ID
   x <- cyto_barcode(x, ...)
-
+  
   # GROUPING -------------------------------------------------------------------
-
+  
   # CYTO_GROUP_BY
-  fs_list <- cyto_group_by(x, group_by = merge_by)
-
+  cs_list <- cyto_group_by(x, 
+                           group_by = merge_by)
+  
   # GROUPS
-  grps <- names(fs_list)
-
+  grps <- names(cs_list)
+  
   # COMBINED EVENTS
-  if ("all" %in% grps) {
-    grps[which("all" %in% grps)] <- "Combined Events"
+  if ("all" %in% names(cs_list)) {
+    names(cs_list)[which("all" %in% names(cs_list))] <- "Combined Events"
   }
-
+  
   # SELECTION ------------------------------------------------------------------
-
+  
   # ATTEMPT SELECTION OR RETURN ALL SAMPLES
   if (!is.null(select)) {
-    fs_list <- lapply(fs_list, function(z) {
+    cs_list <- lapply(cs_list, function(z) {
       # Select or return all samples if criteria not met
       tryCatch(cyto_select(z, select), error = function(e) {
         z
       })
     })
   }
-
+  
   # MERGING --------------------------------------------------------------------
-
-  # CONVERT EACH GROUP TO FLOWFRAME
-  fr_list <- lapply(fs_list, function(fs) {
-    if (!is(fs, "flowFrame")) {
-      cyto_convert(fs, "flowFrame")
-    } else {
-      fs
-    }
-  })
-  names(fr_list) <- grps
-
-  # REPLACE SAMPLENAMES WITH GROUPS
-  if (!all(cyto_names(fr_list) %in% grps)) {
-    lapply(seq_len(length(fr_list)), function(z) {
-      identifier(fr_list[[z]]) <<- grps[z]
-    })
-  }
-
-  # RETURN PREPARED FLOWFRAME LIST
-  return(fr_list)
+  
+  # CONVERT EACH GROUP TO MERGED CYTOSET
+  structure(lapply(seq_along(cs_list), function(z){
+    # CONVERT TO MERGED CYTOSET
+    cytoset(structure(list(flowFrame_to_cytoframe(as(z, "flowFrame"))),
+                      names = names(cs_list)[z]))
+  }), names = names(cs_list))
+  
 }
 
 ## CYTO_SPLIT ------------------------------------------------------------------

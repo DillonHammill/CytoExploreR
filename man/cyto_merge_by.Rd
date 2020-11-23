@@ -2,11 +2,9 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_merge_by}
 \alias{cyto_merge_by}
-\alias{cyto_merge_by.GatingSet}
-\alias{cyto_merge_by.flowSet}
-\title{Merge a flowSet by experiment variables}
+\title{Merge a cytoset by experiment variables}
 \usage{
-\method{cyto_merge_by}{GatingSet}(
+cyto_merge_by(
   x,
   parent = "root",
   merge_by = "all",
@@ -14,20 +12,21 @@
   barcode = TRUE,
   ...
 )
-
-\method{cyto_merge_by}{flowSet}(x, merge_by = "all", select = NULL, barcode = TRUE, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{parent}{name of the parent population to merge when a \code{GatingSet}
-object is supplied, set to the \code{"root"} node by default.}
+\item{parent}{name of the parent population to merge when a
+\code{GatingHierarchy} or \code{GatingSet} object is supplied, set to the
+\code{"root"} node by default.}
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
 prior to merging.}
 
-\item{select}{selection critieria passed to \code{\link{cyto_select}} which
+\item{select}{selection criteria passed to \code{\link{cyto_select}} which
 indicates which samples in each group to retain prior to merging, set to
 NULL by default to merge all samples in each group. Filtering steps should
 be comma separated and wrapped in a list. Refer to
@@ -47,29 +46,26 @@ list of flowFrames merged by the grouping variables specified by
 \description{
 \code{cyto_merge_by} makes a call to \code{cyto_group_by} to split samples
 into groups based on experiment variables. The resulting groups are then
-converted to flowFrames using \code{cyto_convert}. \code{cyto_merge_by} is
-the preferred way to merge samples in CytoExploreR as it will ensure
-appropriate sampling in \code{cyto_plot}.
+coerced in a \code{cytoset} containing a single \code{cytoframe} with the
+merged data. \code{cyto_merge_by} is the preferred way to merge samples in
+CytoExploreR as it will ensure appropriate sampling in \code{cyto_plot}.
 }
 \examples{
-
-# Load CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
-# Activation GatingSet
-gs <- GatingSet(fs)
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
 # Experiment details
-cyto_details(fs)
+cyto_details(gs)
 
 # Merge samples by 'Treatment'
-fr_list <- cyto_merge_by(fs, "Treatment")
+cs_list <- cyto_merge_by(gs, "Treatment")
 
 # Merge samples by 'OVAConc'
-fr_list <- cyto_merge_by(fs, "OVAConc")
+cs_list <- cyto_merge_by(gs, "OVAConc")
+
 }
 \seealso{
 \code{\link{cyto_group_by}}
