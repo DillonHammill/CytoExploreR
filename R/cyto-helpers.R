@@ -227,7 +227,6 @@ cyto_export <- function(x,
 #' @importFrom flowWorkspace load_gs load_cytoset_from_fcs pData
 #'
 #' @examples
-#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -240,6 +239,7 @@ cyto_export <- function(x,
 #'
 #' # cs is a cytoset
 #' class(cs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -339,9 +339,12 @@ cyto_load <- function(path = ".",
 
 #' Apply flowAI anomaly detection to clean cytometry data
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierarchy} or \code{GatingSet}. The \code{root} node extracted
-#'   when a \code{GatingSet} or \code{GatingHierachy} is supplied.
+#' @param x object of class \code{\link[flowWorkspace::cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace::cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace::GatingHierarchy-class]{CatingHierarchy}} or
+#'   \code{\link[flowWorkspace::GatingSet-class]{GatingSet}}. The \code{root}
+#'   node extracted when a \code{GatingSet} or \code{GatingHierachy} is
+#'   supplied.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.
 #'
@@ -365,28 +368,26 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
+#' 
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
 #'   \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}
+#'   
 #' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
 #'
 #' @export
 cyto_clean <- function(x, ...) {
   
   # GATINGSET/GATINGHIERARCHY
-  if (is(x, "GatingSet") | is(x, "GatingHierarchy")) {
+  if (cyto_class(x, "GatingSet")) {
     # PARENT
     parent <- cyto_nodes(x, path = "auto")[1]
     # EXTRACT DATA
     cyto_data <- cyto_extract(x, parent)
     # flowAI REQUIRES FLOWSET
-    if (is(cyto_data, "cytoset")) {
+    if (cyto_class(cyto_data, "cytoset")) {
       cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
-    }
-    # flowAI messes with experiment details :(
-    if (is(cyto_data, "flowSet")) {
-      pd <- cyto_details(cyto_data)
     }
     # CLEAN DATA
     invisible(capture.output(cyto_data <- flow_auto_qc(cyto_data,
@@ -396,11 +397,9 @@ cyto_clean <- function(x, ...) {
                                                        folder_results = FALSE,
                                                        ...
     )))
-    
     # RETURN CYTOSET
     if (is(cyto_data, "flowSet")) {
       cyto_data <- flowSet_to_cytoset(cyto_data)
-      cyto_details(cyto_data) <- pd
     }
     # REPLACE DATA
     gs_cyto_data(x) <- cyto_data
@@ -409,10 +408,7 @@ cyto_clean <- function(x, ...) {
     if (is(x, "cytoset")) {
       x <- cytoset_to_flowSet(x)
     }
-    # flowAI messes with experiment details :(
-    if (is(x, "flowSet")) {
-      pd <- cyto_details(x)
-    }
+    # FLOWAI
     invisible(capture.output(x <- flow_auto_qc(x,
                                                html_report = FALSE,
                                                mini_report = FALSE,
@@ -423,7 +419,6 @@ cyto_clean <- function(x, ...) {
     # RETURN CYTOSET
     if (is(x, "flowSet")) {
       x <- flowSet_to_cytoset(x)
-      cyto_details(x) <- pd
     }
   }
   return(x)
@@ -711,8 +706,8 @@ cyto_class <- function(x,
 #' Extract experiment details
 #'
 #' Simply an autocomplete-friendly wrapper around
-#' \code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
-#' \code{\link{cyto_names}} if a
+#' \code{\link[flowWorkspace:pData-methods]{pData}}. A data.frame with the name
+#' of the sample is returned if a \code{\link{cyto_names}} if a
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -741,16 +736,13 @@ cyto_class <- function(x,
 #'
 #' @export
 cyto_details <- function(x) {
-
-  # Return identifier for flowFrame
-  if (is(x, "flowFrame")) {
-    return(cyto_names(x))
-    # Return experiment details for other objects
+  
+  # EXPERIMENT DETAILS
+  if (cyto_class(x, "flowFrame", FALSE)) {
+    return(data.frame(name = cyto_names(x),
+                      stringsAsFactors = FALSE))
   } else {
-    # Fix AsIs for name column
-    pd <- pData(x)
-    # pd$name <- factor(pd$name, levels = pd$name)
-    return(pd)
+    return(pData(x))
   }
 }
 
