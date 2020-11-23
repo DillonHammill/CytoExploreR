@@ -3457,9 +3457,10 @@ cyto_details_edit <- function(x,
 
 #' Save experiment details to csv file
 #'
-#' @param x object of class \code{flowSet} or \code{GatingSet} annotated with
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} annotated with
 #'   experiment details.
-#' @param save_as name of csv file to which the experiment details shuld be
+#' @param save_as name of csv file to which the experiment details should be
 #'   saved.
 #'
 #' @return write experiment details to named csv file.
@@ -3486,24 +3487,20 @@ cyto_details_edit <- function(x,
 #' cyto_details_save(gs)
 #' }
 #'
-#' @importFrom utils write.csv
-#'
 #' @export
 cyto_details_save <- function(x,
                               save_as = NULL) {
-
+  
   # SAVE AS
   if (is.null(save_as)) {
     save_as <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Details.csv")
   }
-
+  
   # WRITE CSV FILE
   pd <- cyto_details(x)
-  write.csv(pd,
-    save_as,
-    row.names = FALSE
-  )
-
+  write_to_csv(pd,
+               save_as)
+  
   return(pd)
 }
 
