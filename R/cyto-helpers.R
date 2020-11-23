@@ -712,44 +712,69 @@ cyto_class <- function(x,
 #' Extract experiment details
 #'
 #' Simply an autocomplete-friendly wrapper around
-#' \code{\link[flowWorkspace:pData-methods]{pData}}. A data.frame with the name
-#' of the sample is returned if a \code{\link{cyto_names}} if a
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
+#' \code{\link[flowWorkspace:pData-methods]{pData}} with some additional
+#' formatting options.
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace-cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param convert logical indicating whether
+#'   \code{\link[utils:type.convert]{type.convert}} should be called on each
+#'   column.
+#' @param drop logical indicating whether row names should be dropped, set to
+#'   FALSE by default.
+#' @param factor logical indicating whether characters should be converted to
+#'   factors when convert is TRUE, set to FALSE by default.
+#' @param ... additional arguments passed to
+#'   \code{\link[utils:type.convert]{type.convert}}.
 #'
 #' @return experiment details as data.frame.
 #'
 #' @importFrom flowWorkspace pData
-#' @importFrom methods is
+#' @importFrom utils type.convert
 #'
 #' @examples
-#' \dontrun{
-#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
-#'
-#' # Experiment details
-#' cyto_details(fs)
-#' }
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'                           
+#' # Experiment variables
+#' cyto_details(gs)
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_details <- function(x) {
+cyto_details <- function(x,
+                         convert = FALSE,
+                         drop = FALSE,
+                         factor = FALSE, 
+                         ...) {
+  
+  # CYTOFRAME
+  if(cyto_class(x, "flowFrame")) {
+    stop(
+      paste0("'cyto_details' cannot be extracted from ",
+             cyto_class(x, class = TRUE), " objects!")
+    )
+  }
+  
+  # EXPERIMENT VARIABLES
+  pd <- pData(x)
+  # ROWNAMES
+  if(drop) {
+    rownames(pd) <- NULL
+  }
+  # DATA.FRAME
+  if(convert){
+    pd <- type.convert(pd, 
+                       as.is = !factor,
+                       ...)
+  }
   
   # EXPERIMENT DETAILS
-  if (cyto_class(x, "flowFrame", FALSE)) {
-    return(data.frame(name = cyto_names(x),
-                      stringsAsFactors = FALSE))
-  } else {
-    return(pData(x))
-  }
+  return(pd)
 }
 
 # CYTO_DETAILS REPLACEMENT METHOD ----------------------------------------------
