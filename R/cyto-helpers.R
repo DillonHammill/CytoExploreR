@@ -984,42 +984,6 @@ cyto_names_parse <- function(x,
   
 }
 
-## CYTO_CHECK ------------------------------------------------------------------
-
-#' Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied
-#'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be checked.
-#'
-#' @return TRUE or FALSE if object meets this class criteria.
-#'
-#' @importFrom methods is
-#'
-#' @examples
-#'
-#' # Load in CytoExploreRData to access data
-#' library(CytoExploreRData)
-#'
-#' # Valid object
-#' cyto_check(Activation)
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @export
-cyto_check <- function(x) {
-
-  # Check for valid class of object
-  if (!any(is(x, "flowFrame") |
-    is(x, "flowSet") |
-    is(x, "GatingHierarchy") |
-    is(x, "GatingSet"))) {
-    stop("'x' should be a flowFrame, flowSet, GatingHierarchy or GatingSet.")
-  }
-
-  return(TRUE)
-}
-
 ## CYTO_TRANSFORM --------------------------------------------------------------
 
 #' Apply Transformations to Cytometry Data
