@@ -19,8 +19,9 @@
 )
 }
 \arguments{
-\item{x}{object of class \code{cytoset}, \code{GatingHierarchy},
-\code{GatingSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{FUN}{name of a function to apply to each element of \code{x}.}
 
@@ -35,7 +36,7 @@ the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.}
 default.}
 
 \item{input}{indicates the data input format as required by \code{FUN} can be
-either 1 - "cytoset", 2 - "cytoset", 3 - "matrix", 4 - "column" or 5 -
+either 1 - "cytoset", 2 - "cytoframe", 3 - "matrix", 4 - "column" or 5 -
 "row", set to "cytoframe" by default. \code{cyto_apply} will take care of
 all the data formatting prior to passing it \code{FUN}. The \code{"column"}
 and \code{"row"} options are for functions that expect vectors as the

@@ -4459,15 +4459,16 @@ cyto_calibrate_reset <- function(){
 #' \code{FUN} do not conflict with the arguments of \code{cyto_apply} and they
 #' should be supplied to \code{cyto_apply} by name.
 #'
-#' @param x object of class \code{cytoset}, \code{GatingHierarchy},
-#'   \code{GatingSet}.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param FUN name of a function to apply to each element of \code{x}.
 #' @param ... additional arguments passed to \code{FUN}. Multiple arguments are
 #'   supported but must be named, see examples below.
 #' @param simplify logical indicating whether attempts should be made to coerce
 #'   the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.
 #' @param input indicates the data input format as required by \code{FUN} can be
-#'   either 1 - "cytoset", 2 - "cytoset", 3 - "matrix", 4 - "column" or 5 -
+#'   either 1 - "cytoset", 2 - "cytoframe", 3 - "matrix", 4 - "column" or 5 -
 #'   "row", set to "cytoframe" by default. \code{cyto_apply} will take care of
 #'   all the data formatting prior to passing it \code{FUN}. The \code{"column"}
 #'   and \code{"row"} options are for functions that expect vectors as the
@@ -4530,7 +4531,7 @@ cyto_apply.default <- function(x,
                                inverse = FALSE) {
   
   # GATINGHIERARCHY/GATINGSET
-  if(cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
+  if(cyto_class(x,  "GatingSet")) {
     
     # TRANSFORMERS
     trans <- cyto_transformer_extract(x)
@@ -4551,7 +4552,7 @@ cyto_apply.default <- function(x,
                    trans = trans,
                    inverse = inverse,
                    ...)
-      }),names = names(x)
+      }), names = names(x)
     )
     
     # MATRIX - SINGLE PARENT
