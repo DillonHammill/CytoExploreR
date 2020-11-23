@@ -1390,6 +1390,61 @@ cyto_transform.transformerList <- function(x,
   return(x)
 }
 
+## .CYTO_TRANSFORM -------------------------------------------------------------
+
+#' Transform vector of values given transformers
+#' 
+#' @param x values to transform.
+#' @param trans transformerList containing transformation definitions
+#' @param channel which transformer to apply.
+#' @param inverse logical indicating whether inverse transformation should be
+#'   applied.
+#'   
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'   
+#' @noRd
+.cyto_transform <- function(x,
+                            trans = NULL,
+                            channel = NULL,
+                            inverse = FALSE,
+                            ...){
+  
+  # NO TRANSFORMERS
+  if(is.null(trans)){
+    return(x)
+    # NO TRANSFORMERS
+  }else if(.all_na(trans)){
+    return(x)
+    # TRANSFORMER TO USE
+  }else{
+    if(is.null(channel)){
+      stop("Indicate which transformer to apply through 'channel' argument.")
+    }
+  }
+  
+  # TRANSFORMER
+  if(channel %in% names(trans)){
+    transformer <- trans[[channel]]
+  }else{
+    return(x)
+  }
+  
+  # SKIP NA
+  ind <- which(!is.na(x))
+  
+  # TRANSFORM
+  if(inverse == FALSE){
+    x[ind] <- transformer$transform(x[ind])
+    # INVERSE TRANSFORM  
+  }else{
+    x[ind] <- transformer$inverse(x[ind])
+  }
+  
+  # RETURN TRANSFORMED VALUES
+  return(x)
+  
+}
+
 ## CYTO_TRANSFORM_EXTRACT ------------------------------------------------------
 
 #' Extract Transformations from TransformerList
