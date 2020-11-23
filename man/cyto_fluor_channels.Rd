@@ -7,8 +7,8 @@
 cyto_fluor_channels(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -20,23 +20,23 @@ Extract Fluorescent Channels
 \examples{
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Activation
+# Activation GatingSet
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
-# Add samples to GatingSet
-gs <- GatingSet(fs)
+# GatingSet
+cyto_fluor_channels(gs)
 
-# Fluorescent channels of flowFrame
-cyto_fluor_channels(fs[[1]])
-
-# Fluorescent channels for a flowSet
-cyto_fluor_channels(fs)
-
-# Fluorescent channels for GatingHierarchy
+# GatingHierarchy
 cyto_fluor_channels(gs[[1]])
 
-# Fluorescent channels for GatingSet
-cyto_fluor_channels(gs)
+# cytoset
+cs <- cyto_data_extract(gs, "root")[["root"]]
+cyto_fluor_channels(cs)
+
+# cytoframe
+cyto_fluor_channels(cs[[1]])
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
