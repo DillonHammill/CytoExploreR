@@ -399,16 +399,16 @@ cyto_channels_extract <- function(x,
 #'
 #' \code{cyto_markers_extract} will check whether the supplied channels or
 #' marker names are valid for the
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#' \code{\link[flowCore:flowSet-class]{flowSet}},
+#' \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#' \code{\link[flowWorkspace:cytoset]{cytoset}},
 #' \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and return a vector of
 #' marker names. The name of the channel will be returned if there is no
 #' associated marker found.
 #'
 #' @param x an object of class
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
@@ -416,79 +416,106 @@ cyto_channels_extract <- function(x,
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
+#'   character matching. For exact character string matching to override the
+#'   default which ignores character case, set \code{fixed} to TRUE.
 #'
 #' @return  A vector of marker names.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#'
 #' library(CytoExploreRData)
 #'
-#' # Load in samples
-#' fs <- Activation
+#' # Activation GatingSet
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
-#' # Add samples to GatingSet
-#' gs <- GatingSet(fs)
-#'
-#' # Extract markers used for PE-A and Alexa Fluor 488-A
-#' cyto_markers_extract(gs, c("Alexa Fluor 488-A","PE-A"))
+#' # Extract channels for CD4 & CD8
+#' cyto_markers_extract(gs, c("Alexa Fluor 700-A", "CD8"))
 #'
 #' @rdname cyto_markers_extract
 #'
 #' @export
 cyto_markers_extract <- function(x, 
                                  channels,
-                                 plot = FALSE) {
+                                 plot = FALSE,
+                                 ...) {
   
-   # Incorrect channels length
+  # MARKERS
+  markers <- cyto_markers(x)
+  
+  # CHANNELS
+  chans <- cyto_channels(x)
+  
+  # EXTRACT MARKERS
+  res <- c()
+  for(z in seq_along(channels)) {
+    # EXACT MARKER MATCH
+    if(channels[z] %in% markers) {
+      res <- c(res, markers[match(channels[z], markers)])
+      # EXACT CHANNEL MATCH  
+    } else if(channels[z] %in% names(markers)) {
+      res <- c(res, markers[match(channels[z], names(markers))])
+      # PARTIAL OR NO MATCH
+    } else {
+      # PARTIAL MATCHES
+      marker_ind <- suppressWarnings(
+        which(
+          grepl(channels[z],
+                markers,
+                ignore.case = TRUE,
+                ...)
+        )
+      )
+      channel_ind <- suppressWarnings(
+        which(
+          grepl(channels[z],
+                names(markers),
+                ignore.case = TRUE,
+                ...)
+        )
+      )
+      # PARTIAL MARKER MATCH
+      if(length(marker_ind) != 0) {
+        res <- c(res, markers[marker_ind])
+        # PARTIAL CHANNEL MATCH
+      } else if(length(channel_ind) != 0) {
+        res <- c(res, markers[match(chans[channel_ind], names(markers))])
+      } else {
+        # CHANNEL UNASSIGNED MARKER - MATCH CHANNEL
+        if(channels[z] %in% chans) {
+          res <- c(res, channels[z])
+          # CHANNEL UNASSIGNED MARKER - PARTIAL
+        } else if(any(grepl(channels[z], chans, ignore.case = TRUE, ...))) {
+          res <- c(res, chans[which(grepl(channels[z],
+                                          chans,
+                                          ignore.case = TRUE,
+                                          ...))])
+          # INVALID CHANNEL/MARKER
+        } else {
+          stop(
+            paste0(channels[z], " is not a valid channel or marker for this ", 
+                   cyto_class(x, class = TRUE), "!")
+          )
+        }
+      }
+    }
+  }
+  
+  
+  # CHECK
   if (plot == TRUE) {
-    if (!length(channels) %in% c(1, 2)) {
+    if (!length(res) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
   }
-
-  # Extract data 
-  x <- cyto_extract(x)
   
-  # Extract flowFrame
-  if(is(x, "flowSet")){
-    x <- x[[1]]
-  }
-  
-  # Available channels
-  chans <- cyto_channels(x)
-  fr_data <- pData(parameters(x))
-  
-  # Channel Indices supplied
-  if (is.numeric(channels)) {
-    channels <- chans[channels]
-  }
-      
-  # Invalid channels or markers
-  if(!all(channels %in% c(fr_data$name, fr_data$desc))) {
-    stop("'channels' contains invalid channel or marker names.")
-  }
-  
-  # Check if any channels match colnames of flowFrame
-  if(any(channels %in% chans)){
-    
-    # Find indices for valid channels
-    ind <- which(channels %in% chans)
-    
-    # Check if channel has an associated marker
-    mrks <- as.vector(fr_data[,"desc"][match(channels[ind], fr_data$name)])
-    
-    # Update channels with markers
-    channels[ind[!is.na(mrks)]] <- mrks[!is.na(mrks)]
-    
-  }
-  
-  return(channels)
+  # MARKERS
+  return(res)
 }
 
 ## CYTO_CHANNEL_SELECT ---------------------------------------------------------
