@@ -2046,29 +2046,29 @@ cyto_sort_by <- function(x,
 
 #' Group a flowSet or GatingSet by experiment variables
 #'
-#' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x an object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param group_by names of cyto_details variables to use for merging, set to
 #'   "all" to group all samples in \code{x}. The order of the grouping can be
 #'   controlled by specifying the factor levels in a list (e.g. list(Treatment =
 #'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
 #'
-#' @return a named list of \code{flowSet} or \code{GatingSet} objects
+#' @return a named list of \code{cytoset} or \code{GatingSet} objects
 #'   respectively.
 #'
-#' @importFrom methods is
-#'
 #' @examples
-#'
-#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
-#' # Group flowSet by Treatment
-#' cyto_group_by(Activation, "Treatment")
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' # Group by Treatment
+#' cyto_group_by(gs, "Treatment")
 #'
 #' # Group GatingSet by Treatment and OVAConc
-#' gs <- GatingSet(Activation)
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -2076,112 +2076,19 @@ cyto_sort_by <- function(x,
 #' @export
 cyto_group_by <- function(x,
                           group_by = "all") {
-
-  # Check class of x
-  if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
-    stop("'x' should be an object of class flowSet or GatingSet.")
-  }
-
-  # Extract experiment details
-  pd <- cyto_details(x)
-
-  # Replace any NA with "NA" to avoid missing rows
-  if (any(is.na(pd))) {
-    pd[is.na(pd)] <- "NA"
-  }
-
-  # Extract sample names
-  nms <- cyto_names(x)
-
-  # group_by is a list with factor levels - should not be "all"
-  if (is(group_by, "list")) {
-    # Check variables and factor levels
-    lapply(seq_along(group_by), function(z) {
-      # Variable
-      var <- names(group_by)[z]
-      # Expected variable levels
-      var_levels <- unique(pd[, var])
-      # Watch out for NA
-      if (any(LAPPLY(group_by[[z]], "is.na"))) {
-        ind <- which(LAPPLY(group_by[[z]], "is.na"))
-        group_by[[z]][ind] <- "NA"
-      }
-      # Check variables
-      if (!var %in% colnames(pd)) {
-        stop(paste0(
-          var,
-          " is not a valid variable for this ",
-          class(x), "."
-        ))
-      }
-      # Incorrect factor levels
-      if (!all(group_by[[z]] %in% unique(pd[, var]))) {
-        lapply(group_by[[z]], function(y) {
-          if (!y %in% unique(pd[, var])) {
-            stop(paste0(
-              y, " is not a valid factor level for ",
-              group_by[[z]],
-              "."
-            ))
-          }
-        })
-      }
-      # Update factor levels in pd
-      if (!all(var_levels %in% group_by[[z]])) {
-        missing_levels <- as.vector(var_levels[!var_levels %in% group_by[[z]]])
-        group_by[[z]] <<- c(
-          group_by[[z]],
-          missing_levels
-        )
-      }
-      # Convert pd variable to factor and set levels
-      pd[, var] <<- factor(pd[, var], levels = group_by[[z]])
-    })
-    # Convert group_by to vector
-    group_by <- names(group_by)
-    # group_by is a vector of variable names
-  } else {
-    # Check variables
-    if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
-      lapply(group_by, function(y) {
-        if (!y %in% colnames(pd)) {
-          stop(paste0(y, " is not a valid variable for this ", class(x), "."))
-        }
-      })
-    }
-  }
-
-  # Split pd based on group_by into a named list
-  if (length(group_by) == 1) {
-    if (group_by == "all") {
-      pd_split <- list("all" = pd)
-    } else if (group_by == "name") {
-      pd_split <- lapply(nms, function(z) {
-        pd[pd$name == z, , drop = FALSE]
-      })
-      names(pd_split) <- nms
-    } else {
-      pd_split <- split(pd, pd[, group_by],
-        sep = " ",
-        lex.order = TRUE,
-        drop = TRUE
-      )
-    }
-  } else {
-    pd_split <- split(pd, pd[, group_by],
-      sep = " ",
-      lex.order = TRUE,
-      drop = TRUE
-    )
-  }
-
+  
+  # Experiment details per group
+  pd_split <- cyto_groups(x, 
+                          group_by = group_by,
+                          details = TRUE)
+  
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z) {
     ind <- match(pd_split[[z]][, "name"], cyto_names(x))
     x[ind]
   })
   names(x_list) <- names(pd_split)
-
+  
   return(x_list)
 }
 

@@ -7,7 +7,7 @@
 cyto_group_by(x, group_by = "all")
 }
 \arguments{
-\item{x}{an object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{an object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{group_by}{names of cyto_details variables to use for merging, set to
@@ -16,23 +16,25 @@ controlled by specifying the factor levels in a list (e.g. list(Treatment =
 c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
 }
 \value{
-a named list of \code{flowSet} or \code{GatingSet} objects
+a named list of \code{cytoset} or \code{GatingSet} objects
   respectively.
 }
 \description{
 Group a flowSet or GatingSet by experiment variables
 }
 \examples{
-
-# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Group flowSet by Treatment
-cyto_group_by(Activation, "Treatment")
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
+
+# Group by Treatment
+cyto_group_by(gs, "Treatment")
 
 # Group GatingSet by Treatment and OVAConc
-gs <- GatingSet(Activation)
 cyto_group_by(gs, c("Treatment", "OVAConc"))
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
