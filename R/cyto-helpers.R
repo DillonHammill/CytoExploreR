@@ -3036,100 +3036,97 @@ cyto_beads_sample <- function(...){
 
 ## CYTO_BARCODE ----------------------------------------------------------------
 
-#' Barcode each file in a flowSet with a sample ID
+#' Barcode each sample or event in a cytoset or GatingSet
 #'
-#' Adds a new parameter to each of the flowFrames in the flowSet called
-#' \code{"Sample ID"} to barcode events from each flowFrame.
+#' Adds a new parameter to each of the cytoframes in the cytoset called
+#' \code{"Sample ID"} or \code{"Event ID"} to barcode the samples or events from
+#' each cytoframe.
 #'
-#' @param x object of class \code{flowSet} to be barcoded.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be barcoded.
 #' @param type indicates whether the \code{"samples"}, \code{"events"} or
 #'   \code{"both"} should be barcoded, set \code{"samples"} by default.
 #'
-#' @return barcoded flowSet with \code{"Sample ID"} and/or \code{"Event ID"}
-#'   column added and annotated.
+#' @return barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
+#'   \code{"Event ID"} column added and annotated.
 #'
-#' @importFrom methods is as
-#' @importFrom flowWorkspace `sampleNames<-` cf_append_cols
-#' @importFrom flowCore fsApply fr_append_cols
+#' @importFrom flowWorkspace gs_cyto_data
 #'
 #' @examples
-#'
-#' # Load in CytoExploreRData to access files
 #' library(CytoExploreRData)
-#'
-#' # Load in samples
-#' fs <- Activation
+#' 
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Barcode
-#' cyto_barcode(fs)
+#' gs <- cyto_barcode(gs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_barcode <- function(x,
                          type = "samples") {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
-  # FLOWSET
-  if (!is(x, "flowSet")) {
-    stop("'cyto_barcode' expects objects of class flowSet.")
+  
+  # CYTOSET
+  if(cyto_class(x, "GatingSet", TRUE)) {
+    cs <- cyto_data_extract(x,
+                            parent = "root")[["root"]]
+  } else {
+    cs <- x
   }
-
+  
   # TYPE
   if (type == "both") {
     type <- c("samples", "events")
   }
-
+  
   # PREPARE DATA ---------------------------------------------------------------
-
-  # SAMPLENAMES
-  nms <- cyto_names(x)
-
+  
   # SAMPLE ID COLUMN - ONLY IF NOT PRESENT
   if ("samples" %in% type &
-    !"Sample ID" %in% cyto_channels(x)) {
-    x <- fsApply(x, function(fr) {
-      ind <- match(cyto_names(fr), nms)
-      mat <- matrix(rep(ind, .cyto_count(fr)),
-        ncol = 1
+      !"Sample ID" %in% cyto_channels(cs)) {
+    lapply(seq_along(cs), function(z) {
+      suppressWarnings(
+        cyto_cbind(cs[[z]],
+                   matrix(rep(z, cyto_stat_count(cs[[z]])),
+                          ncol = 1,
+                          dimnames = list(NULL, "Sample ID")))
       )
-      colnames(mat) <- "Sample ID"
-      if(is(fr, "flowFrame")) {
-        suppressWarnings(fr_append_cols(fr, mat))
-      } else {
-        suppressWarnings(cf_append_cols(fr, mat))
-      }
-      
     })
   }
-
+  
   # EVENT ID COLUMN - ONLY IF NOT PRESENT
   if ("events" %in% type &
-    !"Event ID" %in% cyto_channels(x)) {
-    total_events <- fsApply(x, "nrow")
+      !"Event ID" %in% cyto_channels(cs)) {
+    total_events <- cyto_apply(cs, "cyto_stat_count")
     total_events <- split(
       seq_len(sum(total_events)),
-      rep(seq_len(length(x)),
-        times = total_events
+      rep(seq_len(length(cs)),
+          times = total_events
       )
     )
-    names(total_events) <- cyto_names(x)
-    x <- fsApply(x, function(fr) {
-      events <- total_events[[cyto_names(fr)]]
-      mat <- matrix(events,
-        ncol = 1
+    lapply(seq_along(cs), function(z) {
+      suppressWarnings(
+        cyto_cbind(cs[[z]],
+                   matrix(total_events[[z]],
+                          ncol = 1,
+                          dimnames = list(NULL, "Event ID")))
       )
-      colnames(mat) <- "Event ID"
-      if(is(fr, "flowFrame")) {
-        suppressWarnings(fr_append_cols(fr, mat))
-      } else {
-        suppressWarnings(cf_append_cols(fr, mat))
-      }
     })
   }
-
-  # RETURN BARCODED FLOWSET
-  return(x)
+  
+  # RETURN GATINGSET
+  if(cyto_class(x, "GatingSet", TRUE)) {
+    gs_cyto_data(x) <- cs
+    return(x)
+  }
+  
+  # RETURN BARCODED CYTOSET
+  return(cs)
+  
 }
 
 ## CYTO_MARKERS_EDIT -----------------------------------------------------------
