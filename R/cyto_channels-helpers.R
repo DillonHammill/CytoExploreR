@@ -91,6 +91,47 @@ cyto_channels <- function(x,
   
 }
 
+## CYTO_CHANNELS REPLACEMENT METHOD --------------------------------------------
+
+#' Replace channel names
+#'
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSey}}.
+#' @param value vector of new column names to replace the old ones.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_channels}}
+#' @seealso \code{\link{cyto_fluor_channels}}
+#'
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation GatingSet
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                          package = "CytoExploreRData"))
+#' 
+#' # GatingSet
+#' cyto_channels(gs)
+#' 
+#' # Update first FSC-A to FSC
+#' cyto_channels(gs)[1] <- "FSC"
+#' cyto_channels(gs)
+#'
+#' @export
+"cyto_channels<-" <- function(x, value) {
+  if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
+    BiocGenerics::colnames(x) <- value
+  } else {
+    flowWorkspace::colnames(x) <- value
+  }
+  return(x)
+}
+
 ## CYTO_MARKERS ----------------------------------------------------------------
 
 #' Extract marker names
