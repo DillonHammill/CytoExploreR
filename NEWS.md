@@ -1,3 +1,20 @@
+# CytoExploreR 1.0.9
+
+* Add new `cyto_cbind()` function to handle addition of new parameters to cytometry objects (retaining support for flowFrames/flowSets).
+* `cyto_apply()` has been re-written to accept different data inputs (e.g. matrix, cytoframe, cytoset, column or row) and the output is more intuitively formatted.
+* `cyto_calibrate()` now uses quantile calibration by default and the upper quantile limits has been reduced from 0.99 to 0.95.
+* Barcoding of GatingSets is now supported by `cyto_barcode()`.
+* `cyto_beads_sample()` is now defunct in favour of the more flexible `cyto_sample_to_node()` function.
+* Add new `cyto_sort_by()` function to sort samples based on experimental variables.
+* Add new `cyto_groups()` function to return the names or details experimental groups.
+* `cyto_extract()` is now defunct in favour of the new `cyto_data_extract()` which has for extracting multiple populations. New arguments `format`, `split`, `markers`, `trans` and `inverse` provide flexibility in how the extracted population should be formatted.
+* `cyto_names()` has been updated to extract sample information at the level of cytosets only, attempts to extract this information from flowFrames/cytoframes will generate an error.
+* `cyto_details()` now has additional `convert`, `drop` and `factor` arguments to allow easy formatting of the returned data.frame. Support for extracting `cyto_details()` from flowFrame/cytoframe objects has been removed.
+* `cyto_transform()` now appropriately handles transforming subsetted data where some parameters defined in the transformerList may be missing in the data.
+* `cyto_details()` called on a cytoframe now returns a data.frame to match the behaviour of cytosets, GatingHierarchies and GatingSets.
+* Add new `cyto_class()` to get or check the class of cytometry objects.
+* Remove directories from file paths in `cyto_load()`. Re-factor code to ensure loading of saved GatingSets.
+
 # CytoExploreR 1.0.8
 
 * Add `select` argument to `cyto_stats_compute()` to allow computation of statistics for a subset of samples based on experimental variables.
