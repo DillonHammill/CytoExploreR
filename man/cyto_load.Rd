@@ -34,7 +34,7 @@ using \code{cyto_barcode}, set to FALSE by default.}
 dropped from the returned cytoset, set to FALSE by default. See
 \code{\link{cyto_channels_restrict}}.}
 
-\item{...}{additional arguments passed to \code{load_cytoset_from_fcs}.}
+\item{...}{additional arguments passed to \code{\link{cyto_load}}.}
 }
 \value{
 object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or

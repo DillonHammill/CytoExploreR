@@ -218,7 +218,7 @@ cyto_export <- function(x,
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default. See
 #'   \code{\link{cyto_channels_restrict}}.
-#' @param ... additional arguments passed to \code{load_cytoset_from_fcs}.
+#' @param ... additional arguments passed to \code{\link{cyto_load}}.
 #'
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -261,64 +261,60 @@ cyto_load <- function(path = ".",
   # REMOVE DIRECTORIES
   files <- files[!dir.exists(files)]
   
-  # VALID FILES
-  files_ext <- file_ext(files)
-  files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
-  
-  # NO VALID FILES
-  if(length(files_ind) == length(files)){
-    stop(paste0(path,
-                " does not contain any valid FCS files."))
-  }
-  
-  # EXCLUDE IRRELEVANT FILES
-  if(length(files_ind) > 0){
-    files <- files[-files_ind]
-  }
-  
-  # SELECT
-  if (!is.null(select)) {
-    file_ind <- c()
-    lapply(select, function(z) {
-      if (any(grepl(z, files, ignore.case = TRUE))) {
-        file_ind <<- c(file_ind,
-                       which(grepl(z, files, ignore.case = TRUE)))
-      }
-    })
-    files <- files[unique(file_ind)]
-  }
-  
-  # EXCLUDE
-  if (!is.null(exclude)) {
-    file_ind <- c()
-    lapply(exclude, function(z) {
-      if (any(grepl(z, files, ignore.case = TRUE))) {
-        file_ind <<- c(file_ind,
-                       which(grepl(z, files, ignore.case = TRUE)))
-      }
-    })
-    files <- files[-unique(file_ind)]
-  }
-  
-  # SORTED FILE PATHS
-  if (sort) {
-    files <- file_sort(files)
-  }
-  
   # SAVED GATINGSET
   if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
-    x <- load_gs(path = path)
+    x <- load_gs(path = path,
+                 backend_readonly = FALSE)
     # FCS FILES
   } else {
+    
+    # VALID FILES
+    files_ext <- file_ext(files)
+    files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
+    
+    # NO VALID FILES
+    if(length(files_ind) == length(files)){
+      stop(paste0(path,
+                  " does not contain any valid FCS files."))
+    }
+    
+    # EXCLUDE IRRELEVANT FILES
+    if(length(files_ind) > 0){
+      files <- files[-files_ind]
+    }
+    
+    # SELECT
+    if (!is.null(select)) {
+      file_ind <- c()
+      lapply(select, function(z) {
+        if (any(grepl(z, files, ignore.case = TRUE))) {
+          file_ind <<- c(file_ind,
+                         which(grepl(z, files, ignore.case = TRUE)))
+        }
+      })
+      files <- files[unique(file_ind)]
+    }
+    
+    # EXCLUDE
+    if (!is.null(exclude)) {
+      file_ind <- c()
+      lapply(exclude, function(z) {
+        if (any(grepl(z, files, ignore.case = TRUE))) {
+          file_ind <<- c(file_ind,
+                         which(grepl(z, files, ignore.case = TRUE)))
+        }
+      })
+      files <- files[-unique(file_ind)]
+    }
+    
+    # SORTED FILE PATHS
+    if (sort) {
+      files <- file_sort(files)
+    }
+    
     # CYTOSET
     x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
-    
-    # CORRECT GUID SLOTS - NECESSARY?
-    nms <- cyto_names(x)
-    lapply(seq_len(length(nms)), function(z) {
-      suppressMessages(identifier(x[[z]]) <<- nms[z])
-    })
     
     # BARCODING
     if (barcode) {
@@ -1483,7 +1479,7 @@ cyto_transform.transformerList <- function(x,
 #' @export
 cyto_transform_extract <- function(x,
                                    inverse = FALSE) {
-
+  
   # TransformLists are returned unaltered
   if (is(x, "transformList")) {
     return(x)
