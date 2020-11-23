@@ -7,7 +7,7 @@
 \alias{cyto_sample.flowFrame}
 \alias{cyto_sample.flowSet}
 \alias{cyto_sample.list}
-\title{Sample a flowFrame or flowSet}
+\title{Sample a cytoframe, cytoset, GatingHierarchy or GatingSet}
 \usage{
 cyto_sample(x, ...)
 
@@ -46,8 +46,9 @@ object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
   \code{display} events.
 }
 \description{
-\code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
-the percentage or number of events to retain.
+\code{cyto_sample} allows restriction of a \code{cytoframe}, \code{cytoset},
+\code{GatingHierarchy} or \code{GatingSet} by indicating the percentage or
+number of events to retain.
 }
 \examples{
 # Load in CytoExploreRData to access files

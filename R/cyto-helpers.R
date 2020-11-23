@@ -2220,7 +2220,6 @@ cyto_merge_by <- function(x,
 #' @return list of split flowFrames.
 #'
 #' @importFrom flowCore flowFrame exprs identifier keyword split
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2243,31 +2242,31 @@ cyto_merge_by <- function(x,
 #' @export
 cyto_split <- function(x,
                        names = NULL) {
-
+  
   # CHECKS ---------------------------------------------------------------------
-
+  
   # FLOWFRAME
-  if (!is(x, "flowFrame")) {
-    stop("cyto_split() expects a flowFrame object.")
+  if (!cyto_class(x, "flowFrame")) {
+    stop("cyto_split() requires a cytoframe object.")
   }
-
+  
   # SAMPLE ID
   if (!"Sample ID" %in% cyto_channels(x)) {
     stop("Merged samples must be barcoded in cyto_merge().")
   }
-
+  
   # SPLIT INTO FLOWFRAMES ------------------------------------------------------
-
+  
   # EXTRACT DATA
   fr_exprs <- exprs(x)
-
+  
   # SAMPLE IDs
   sample_id <- unique(fr_exprs[, "Sample ID"])
   samples <- length(sample_id)
-
+  
   # SPLIT BY SAMPLE ID
   fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
-
+  
   # NAMES
   if (!is.null(names)) {
     # INSUFFICIENT NAMES
@@ -2278,13 +2277,13 @@ cyto_split <- function(x,
   } else {
     names <- paste0("Sample-", sample_id)
   }
-
+  
   # NAME SPLIT FILES
   lapply(seq_len(samples), function(z) {
     identifier(fr_list[[z]]) <<- names[z]
   })
   names(fr_list) <- names
-
+  
   # RETURN SPLIT FLOWFRAMES
   return(fr_list)
 }
@@ -2361,7 +2360,7 @@ cyto_save.GatingSet <- function(x,
                                 save_as = NULL,
                                 inverse = FALSE,
                                 trans = NULL, ...) {
-
+  
   # SAVE GATINGSET
   if (is.null(parent)) {
     # SAVE GATINGSET
@@ -2373,8 +2372,8 @@ cyto_save.GatingSet <- function(x,
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingSet."))
     fs <- cyto_extract(x,
-      parent = parent,
-      copy = TRUE
+                       parent = parent,
+                       copy = TRUE
     )
     # TRANSFORMATIONS
     trans <- cyto_transformer_extract(x)
@@ -2387,7 +2386,7 @@ cyto_save.GatingSet <- function(x,
       inverse = inverse,
       trans = trans
     )
-
+    
     # RETURN DATA
     invisible(fr_list)
   }
@@ -2403,7 +2402,7 @@ cyto_save.GatingHierarchy <- function(x,
                                       inverse = FALSE,
                                       trans = NULL,
                                       ...) {
-
+  
   # SAVE GATINGHIERARCHY
   if (is.null(parent)) {
     # SAVE GATINGHIERARCHY
@@ -2415,8 +2414,8 @@ cyto_save.GatingHierarchy <- function(x,
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
     fr <- cyto_extract(x,
-      parent = parent,
-      copy = TRUE
+                       parent = parent,
+                       copy = TRUE
     )
     # TRANSFORMATIONS
     trans <- cyto_transformer_extract(x)
@@ -2429,7 +2428,7 @@ cyto_save.GatingHierarchy <- function(x,
       inverse = inverse,
       trans = trans
     )
-
+    
     # RETURN DATA
     invisible(fr_list)
   }
@@ -2444,13 +2443,13 @@ cyto_save.flowSet <- function(x,
                               inverse = FALSE,
                               trans = NULL,
                               ...) {
-
+  
   # COPY
   x <- cyto_copy(x)
-
+  
   # LIST OF FLOWFRAMES
   fr_list <- cyto_convert(x, "list of flowFrames")
-
+  
   # LIST OF SPLIT FLOWFRAMES
   if (split == TRUE) {
     # NAMES SUPPLIED - CHECK LENGTH
@@ -2481,7 +2480,7 @@ cyto_save.flowSet <- function(x,
       })
     }
   }
-
+  
   # DIRECTORY CHECK
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
@@ -2493,7 +2492,7 @@ cyto_save.flowSet <- function(x,
       }
     }
   }
-
+  
   # MESSAGE
   if (is.null(save_as)) {
     location <- "current working directory."
@@ -2501,7 +2500,7 @@ cyto_save.flowSet <- function(x,
     location <- save_as
   }
   message(paste0("Writing FCS files to ", location, "..."))
-
+  
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
     # INVERSE TRANSFORM
@@ -2512,9 +2511,9 @@ cyto_save.flowSet <- function(x,
       }
       # INVERSE TRANSFORM
       z <- cyto_transform(z,
-        trans = trans,
-        inverse = TRUE,
-        plot = FALSE
+                          trans = trans,
+                          inverse = TRUE,
+                          plot = FALSE
       )
     }
     # Message
@@ -2538,7 +2537,7 @@ cyto_save.flowSet <- function(x,
     }
     return(z)
   })
-
+  
   # RETURN DATA
   invisible(unlist(fr_list))
 }
@@ -2552,19 +2551,19 @@ cyto_save.flowFrame <- function(x,
                                 inverse = FALSE,
                                 trans = NULL,
                                 ...) {
-
+  
   # COPY
   x <- cyto_copy(x)
-
+  
   # SPLIT
   if (split == TRUE) {
     fr_list <- cyto_split(x,
-      names = names
+                          names = names
     )
   } else {
     fr_list <- list(x)
   }
-
+  
   # DIRECTORY CHECK
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
@@ -2576,7 +2575,7 @@ cyto_save.flowFrame <- function(x,
       }
     }
   }
-
+  
   # MESSAGE
   if (is.null(save_as)) {
     location <- "current working directory."
@@ -2584,7 +2583,7 @@ cyto_save.flowFrame <- function(x,
     location <- save_as
   }
   message(paste0("Writing FCS files to ", location, "..."))
-
+  
   # WRITE FCS FILES
   fr_list <- lapply(fr_list, function(z) {
     # INVERSE TRANSFORM
@@ -2595,9 +2594,9 @@ cyto_save.flowFrame <- function(x,
       }
       # INVERSE TRANSFORM
       z <- cyto_transform(z,
-        trans = trans,
-        inverse = TRUE,
-        plot = FALSE
+                          trans = trans,
+                          inverse = TRUE,
+                          plot = FALSE
       )
     }
     # Message
@@ -2621,17 +2620,18 @@ cyto_save.flowFrame <- function(x,
     }
     return(z)
   })
-
+  
   # RETURN DATA
   invisible(unlist(fr_list))
 }
 
 ## CYTO_SAMPLE -----------------------------------------------------------------
 
-#' Sample a flowFrame or flowSet
+#' Sample a cytoframe, cytoset, GatingHierarchy or GatingSet
 #'
-#' \code{cyto_sample} allows restriction of a flowFrame or flowSet by indicating
-#' the percentage or number of events to retain.
+#' \code{cyto_sample} allows restriction of a \code{cytoframe}, \code{cytoset},
+#' \code{GatingHierarchy} or \code{GatingSet} by indicating the percentage or
+#' number of events to retain.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
@@ -2651,9 +2651,7 @@ cyto_save.flowFrame <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
 #'   \code{display} events.
 #'
-#' @importFrom BiocGenerics nrow
 #' @importFrom flowCore sampleFilter Subset flowSet exprs
-#' @importFrom methods is
 #' @importFrom flowWorkspace gs_cyto_data gs_cyto_data<- cytoset
 #'   flowFrame_to_cytoframe flowSet_to_cytoset recompute
 #'
@@ -2791,9 +2789,10 @@ cyto_sample.flowSet <- function(x,
   
   # FLOWSET/CYTOSET
   cs <- cyto_apply(x, 
-                   cyto_sample, 
+                   "cyto_sample", 
                    display = display, 
                    seed = seed, 
+                   copy = FALSE,
                    ...)
   
   # RETURN FLOWSET/CYTOSET
@@ -2814,7 +2813,7 @@ cyto_sample.list <- function(x,
     
     # LIST OF FLOWSETS
     if (all(LAPPLY(x, function(z) {
-      is(z, "flowSet")
+      cyto_class(z, "flowSet")
     }))) {
       # Same sampling applied to all samples
       x <- lapply(x, function(z) {
@@ -2822,7 +2821,7 @@ cyto_sample.list <- function(x,
       })
       # LIST OF FLOWFRAMES
     } else if (all(LAPPLY(x, function(z) {
-      is(z, "flowFrame")
+      cyto_class(z, "flowFrame")
     }))) {
       # BARCODED FLOWFRAMES
       if (any(LAPPLY(x, function(z) {
