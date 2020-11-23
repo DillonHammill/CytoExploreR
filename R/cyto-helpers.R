@@ -1995,6 +1995,53 @@ cyto_groups <- function(x,
   
 }
 
+## CYTO_SORT_BY ----------------------------------------------------------------
+
+#' Sort a flowSet or GatingSet by experiment variables
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param sort_by names of cyto_details variables to use for sorting. For more
+#'   control over the sorting order, specify the factor levels for each variable
+#'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#'
+#' @return \code{cytoset} or \code{GatingSet} object sorted based on experiment
+#'   variables.
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' # Sort by Treatment and OVAConc
+#' gs <- cyto_sort_by(gs,
+#' list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
+#' OVAConc = c(0, 5, 50, 500)))
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_sort_by <- function(x,
+                         sort_by = NULL) {
+  
+  # Experiment details per group
+  pd_split <- cyto_groups(x,
+                          group_by = sort_by,
+                          details = TRUE)
+  
+  # Combine pd
+  pd <- do.call("rbind", pd_split)
+  
+  # Sorting indices
+  ind <- match_ind(cyto_names(x), pd[, "name"])
+  
+  # Return sorted object
+  return(x[ind])
+  
+}
+
 ## CYTO_GROUP_BY ---------------------------------------------------------------
 
 #' Group a flowSet or GatingSet by experiment variables
