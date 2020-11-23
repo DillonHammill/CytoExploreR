@@ -49,7 +49,6 @@ also a wrapper around \code{\link[flowWorkspace:save_gs]{load_gs}} to load
 saved GatingSet objects.
 }
 \examples{
-
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -62,6 +61,7 @@ cs <- cyto_load(path)
 
 # cs is a cytoset
 class(cs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -764,11 +764,11 @@ cyto_details <- function(x) {
 #' \code{\link[flowCore:identifier-methods]{identifier}}
 #' \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
 #' names from flowFrame, flowSet GatingHierarchy or GatingSet. Anonymous
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
+#' \code{\link[flowWorkspace:cytoframe]{cytoframe}} identifiers will be
 #' converted to \code{"Combined Events"}.
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
@@ -846,14 +846,16 @@ cyto_names.list <- function(x) {
 
 #' Replacement method for cyto_names
 #'
-#' @param x object of class flowFrame, flowSet, GatingHierarchy or GatingSet.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param value vector of replacement names.
 #'
 #' @importFrom flowWorkspace sampleNames<-
 #' @importFrom flowCore identifier<-
 #'
 #' @examples
-#'
 #' library(CytoExploreRData)
 #'
 #' # Activation flowSet
@@ -873,6 +875,7 @@ cyto_names.list <- function(x) {
 #'
 #' # Updated sample names
 #' cyto_names(gs)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -895,20 +898,19 @@ cyto_names.list <- function(x) {
 #' starting point for editing these values using \code{cyto_details_edit}
 #' without having to manually enter a lot of these details.
 #'
-#' @param x object of class flowSet or GatingSet.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param vars vector containing the names of the variables to be added to
 #'   \code{cyto_details}, set to var_1, var_2 ... by default.
 #' @param split delimiter to split the file name into fragments, set to "_" by
 #'   default.
-#' @param exclude vector of indices indicating which text fragments should not be
-#'   included in the experiment details, set to NULL by default.
+#' @param exclude vector of indices indicating which text fragments should not
+#'   be included in the experiment details, set to NULL by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[base:strsplit]{strsplit}}.
 #'
-#' @return flowSet or GatingSet with \code{cyto_details} updated with new
+#' @return cytoset or GatingSet with \code{cyto_details} updated with new
 #'   variables extracted from the file names.
-#'
-#' @importFrom tools file_path_sans_ext
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -925,16 +927,16 @@ cyto_names.list <- function(x) {
 #'
 #' @export
 cyto_names_parse <- function(x,
-                            vars = NULL,
-                            split = "_",
-                            exclude = NULL,
-                            ...) {
+                             vars = NULL,
+                             split = "_",
+                             exclude = NULL,
+                             ...) {
   
   # NAMES
   cyto_names <- cyto_names(x)
   
   # STRIP EXTENSION
-  cyto_names <- file_path_sans_ext(cyto_names)
+  cyto_names <- file_ext_remove(cyto_names)
   
   # SPLIT
   cyto_names_split <- strsplit(cyto_names, 

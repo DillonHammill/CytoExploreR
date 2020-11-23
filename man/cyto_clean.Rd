@@ -7,9 +7,12 @@
 cyto_clean(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}. The \code{root} node extracted
-when a \code{GatingSet} or \code{GatingHierachy} is supplied.}
+\item{x}{object of class \code{\link[flowWorkspace::cytoframe]{cytoframe}},
+\code{\link[flowWorkspace::cytoset]{cytoset}},
+\code{\link[flowWorkspace::GatingHierarchy-class]{CatingHierarchy}} or
+\code{\link[flowWorkspace::GatingSet-class]{GatingSet}}. The \code{root}
+node extracted when a \code{GatingSet} or \code{GatingHierachy} is
+supplied.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.}
@@ -31,6 +34,7 @@ gs <- GatingSet(fs)
 
 # Clean Activation GatingSet
 gs <- cyto_clean(gs)
+
 }
 \references{
 Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly

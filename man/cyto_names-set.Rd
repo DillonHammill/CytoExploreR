@@ -7,7 +7,10 @@
 cyto_names(x) <- value
 }
 \arguments{
-\item{x}{object of class flowFrame, flowSet, GatingHierarchy or GatingSet.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{value}{vector of replacement names.}
 }
@@ -15,7 +18,6 @@ cyto_names(x) <- value
 Replacement method for cyto_names
 }
 \examples{
-
 library(CytoExploreRData)
 
 # Activation flowSet
@@ -35,6 +37,7 @@ cyto_names(gs)[length(gs)] <- "last_sample"
 
 # Updated sample names
 cyto_names(gs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

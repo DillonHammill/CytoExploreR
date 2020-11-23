@@ -17,8 +17,8 @@ experiment details as data.frame.
 }
 \description{
 Simply an autocomplete-friendly wrapper around
-\code{\link[flowWorkspace:pData-methods]{pData}}. A call is made to
-\code{\link{cyto_names}} if a
+\code{\link[flowWorkspace:pData-methods]{pData}}. A data.frame with the name
+of the sample is returned if a \code{\link{cyto_names}} if a
 \code{\link[flowCore:flowFrame-class]{flowFrame}} is supplied.
 }
 \examples{

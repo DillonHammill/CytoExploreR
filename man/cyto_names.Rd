@@ -22,8 +22,8 @@ cyto_names(x)
 \method{cyto_names}{list}(x)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 }
@@ -35,7 +35,7 @@ Simply a convenient and autocomplete-friendly wrapper around
 \code{\link[flowCore:identifier-methods]{identifier}}
 \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
 names from flowFrame, flowSet GatingHierarchy or GatingSet. Anonymous
-\code{\link[flowCore:flowFrame-class]{flowFrame}} identifiers will be
+\code{\link[flowWorkspace:cytoframe]{cytoframe}} identifiers will be
 converted to \code{"Combined Events"}.
 }
 \examples{
