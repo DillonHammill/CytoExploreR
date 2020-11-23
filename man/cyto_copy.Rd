@@ -15,6 +15,16 @@ copied cytoframe, cytoset or GatingSet.
 \description{
 Copy a cytoset, cytoframe or GatingSet
 }
+\examples{
+library(CytoExploreRData)
+
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
+
+gs_copy <- cyto_copy(gs)
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

@@ -4182,51 +4182,6 @@ cyto_nodes_ancestor <- function(x,
   
 }
 
-## CYTO_EMPTY ------------------------------------------------------------------
-
-#' Construct an empty flowFrame
-#'
-#' @param name name to add to the constructed flowFrame.
-#' @param channels channels to include in the constructed flowFrame.
-#' @param ... additional arguments passed to
-#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
-#'
-#' @importFrom flowCore identifier<- flowFrame
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @examples
-#'
-#' # Construct empty flowFrame
-#' cyto_empty(name = "Test.csv", channels = c("FSC-A", "SSC-A", "PE-A"))
-#' @export
-cyto_empty <- function(name = NULL,
-                       channels = NULL, ...) {
-
-  # CHANNELS
-  if (is.null(channels)) {
-    stop("Supply the names of the channels to include in the flowFrame.")
-  }
-
-  # CONSTRUCT EMPTY FLOWFRAME
-  empty_flowFrame <- matrix(0,
-    ncol = length(channels),
-    nrow = 1,
-    byrow = TRUE
-  )
-  colnames(empty_flowFrame) <- channels
-  empty_flowFrame <- flowFrame(empty_flowFrame, ...)
-  empty_flowFrame <- empty_flowFrame[-1, ]
-
-  # NAME
-  if (!is.null(name)) {
-    identifier(empty_flowFrame) <- name
-  }
-
-  # RETURN EMPTY FLOWFRAME
-  return(empty_flowFrame)
-}
-
 ## CYTO_COPY -------------------------------------------------------------------
 
 #' Copy a cytoset, cytoframe or GatingSet
@@ -4239,19 +4194,28 @@ cyto_empty <- function(name = NULL,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' gs_copy <- cyto_copy(gs)
+#'
 #' @export
 cyto_copy <- function(x) {
-
+  
   # GatingSet
-  if (is(x, "GatingSet")) {
+  if (cyto_class(x, "GatingSet", TRUE)) {
     x <- gs_clone(x)
   }
-
+  
   # cytoset
-  if (is(x, "cytoset") | is(x, "cytoframe")) {
+  if (cyto_class(x, c("cytoframe", "cytoset"), TRUE)) {
     x <- realize_view(x)
   }
-
+  
   # RETURN COPY
   return(x)
 }
