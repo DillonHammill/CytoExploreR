@@ -4224,11 +4224,13 @@ cyto_copy <- function(x) {
 
 #' Extract spillover matrix from cytometry object
 #'
-#' @param x object of class flowFrame, flowSet, GatingHierachy or GatingSet.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @return list of spillover matrices or NULL.
 #'
-#' @importFrom methods is
 #' @importFrom flowCore keyword
 #' @importFrom flowWorkspace gh_get_compensations gs_get_compensations
 #'
@@ -4237,11 +4239,9 @@ cyto_copy <- function(x) {
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation GatingSet
-#' gs <- GatingSet(Activation)
-#'
-#' # Apply compensation
-#' gs <- cyto_compensate(gs)
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Extract spillover matrices
 #' spill <- cyto_spillover_extract(gs)
@@ -4249,7 +4249,7 @@ cyto_copy <- function(x) {
 cyto_spillover_extract <- function(x) {
   
   # GATINGSET
-  if (is(x, "GatingSet")) {
+  if (cyto_class(x, "GatingSet", TRUE)) {
     spill <- gs_get_compensations(x)
     if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
@@ -4259,14 +4259,14 @@ cyto_spillover_extract <- function(x) {
       })
     }
     # GATINGHIERARCHY
-  } else if (is(x, "GatingHierarchy")) {
+  } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
     spill <- gh_get_compensations(x)
     if (!is.null(spill)) {
       spill <- list(spill@spillover)
       names(spill) <- cyto_names(x)
     }
-    # FLOWSET
-  } else if (is(x, "flowSet")) {
+    # CYTOSET
+  } else if (cyto_class(x, "flowSet")) {
     spill <- lapply(seq_along(x), function(z) {
       # CyTOF lacks spill slot (just in case)
       sp <- tryCatch(keyword(x[[z]], "SPILL"), error = function(e) {
@@ -4280,14 +4280,12 @@ cyto_spillover_extract <- function(x) {
     if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
     }
-    # FLOWFRAME
-  } else if (is(x, "flowFrame")) {
+    # CYTOFRAME
+  } else if (cyto_class(x, "flowFrame")) {
+    # CANNOT SET NAMES
     spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
       NULL
     })
-    if (!is.null(spill)) {
-      names(spill) <- cyto_names(x)
-    }
   }
   
   # RETURN LIST OF SPILLOVER MATRICES
