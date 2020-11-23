@@ -2913,112 +2913,125 @@ cyto_sample.list <- function(x,
   return(x)
 }
 
-## CYTO_BEADS_SAMPLE -----------------------------------------------------------
+## CYTO_SAMPLE_TO_NODE ---------------------------------------------------------
 
-#' Sample GatingSet to bead count
+#' Sample GatingSet to node
 #'
-#' \code{cyto_beads_sample} can be used on samples containing beads, to
-#' downsamples each sample in a GatingSet based on a specific \code{bead_count}.
-#' For example, if Sample A contains 100 beads and 75000 events, and Sample B
-#' contains 50 beads and 5000 events. \code{cyto_beads_sample} will downsample
-#' each sample to contain 50 beads and therefore 5000 events for Sample A and
-#' 3750 events for Sample B.
+#' \code{cyto_sample_to_node} can be used to downsample the root node of a
+#' GatingSet based on the number of events in a particular node. A classic
+#' example is downsampling to a bead population to give an indication of the
+#' relative number of events per sample. For example, if Sample A contains 100
+#' beads and 75000 events, and Sample B contains 50 beads and 5000 events.
+#' \code{cyto_sample_to_node} will downsample each sample to contain 50 beads
+#' and therefore 5000 events for Sample A and 3750 events for Sample B.
 #'
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param beads name of the gated bead population to use for the calculation. If
+#' @param node name of the gated bead population to use for the calculation. If
 #'   not supplied internal checks will be made for populations named "Single
 #'   Beads" or "Beads".
-#' @param bead_count minimal bead count to down sample to, set to the minimum
-#'   bead count in samples by default. The bead count must be less than or equal
-#'   to the minimum bead count among the samples.
+#' @param count minimum number of events to downsample to, set to the minimum
+#'   count for the specified node across samples by default. \code{count} must
+#'   be less than or equal to the minimum count across the samples.
+#' @param ... additional arguments passed to \code{\link{cyto_sample}}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom flowCore flowSet
-#' @importFrom flowWorkspace flowSet_to_cytoset gs_cyto_data
+#' @importFrom flowWorkspace cytoset flowSet_to_cytoset gs_cyto_data recompute
 #'
 #' @export
-cyto_beads_sample <- function(x,
-                              beads = NULL,
-                              bead_count = NULL) {
-
+cyto_sample_to_node <- function(x,
+                                node = NULL,
+                                count = NULL,
+                                ...) {
+  
   # GATINGSET
-  if (!is(x, "GatingSet")) {
+  if (!cyto_class(x, "GatingSet", TRUE)) {
     stop("'x' must be a Gatingset object.")
   }
-
+  
   # CLONE GATINGSET
   gs_clone <- cyto_copy(x)
-
+  
   # NODES
   nodes <- cyto_nodes(gs_clone, path = "auto")
-
+  
   # BEADS
-  if (is.null(beads)) {
+  if (is.null(node)) {
     # SINGLE BEADS
     if (any(grepl("single beads", nodes, ignore.case = TRUE))) {
-      beads <- nodes[which(grepl("single beads", nodes, ignore.case = TRUE))[1]]
+      node <- nodes[which(grepl("single beads", nodes, ignore.case = TRUE))[1]]
       # BEADS
     } else if (any(grepl("beads", nodes, ignore.case = TRUE))) {
-      beads <- nodes[which(grepl("beads", nodes, ignore.case = TRUE))[1]]
+      node <- nodes[which(grepl("beads", nodes, ignore.case = TRUE))[1]]
       # BEADS MISSING
     } else {
-      stop("Supply the name of the 'beads' population.")
+      stop("Supply the name of the 'node' to downsample the GatingSet.")
     }
   }
-
-  # BEAD COUNTS
-  bead_pops <- cyto_extract(gs_clone, beads)
-  bead_counts <- suppressMessages(
-    cyto_stats_compute(bead_pops,
-      stat = "count",
-      format = "wide"
-    )
+  
+  # NODE COUNTS
+  node_pops <- cyto_data_extract(gs_clone, node)[[node]]
+  node_counts <- suppressMessages(
+    cyto_stats_compute(node_pops,
+                       stat = "count",
+                       format = "wide",
+                       details = FALSE)
   )
-  bead_counts <- bead_counts[, ncol(bead_counts), drop = TRUE]
-
-  # BEADS MISSING
-  if (any(bead_counts == 0)) {
-    ind <- which(bead_counts == 0)
+  node_counts <- node_counts[, ncol(node_counts), drop = TRUE]
+  
+  # NODE MISSING EVENTS
+  if (any(node_counts == 0)) {
+    ind <- which(node_counts == 0)
     stop(paste0(
-      "The following samples do not contain any beads:",
+      "The following samples do not contain any events in the specified node:",
       paste0("\n", cyto_names(gs_clone)[ind])
     ))
   }
-
-  # BEAD COUNT
-  if (is.null(bead_count)) {
-    bead_count <- min(bead_counts)
+  
+  # NODE COUNT
+  if (is.null(count)) {
+    count <- min(node_counts)
   } else {
-    if (!bead_count <= min(bead_counts)) {
-      bead_count <- min(bead_counts)
+    if (!count <= min(node_counts)) {
+      count <- min(node_counts)
     }
   }
-
-  # BEAD RATIOS
-  bead_ratios <- lapply(seq_len(length(bead_counts)), function(z) {
-    1 / (bead_counts[z] / bead_count)
+  
+  # NODE RATIOS
+  node_ratios <- lapply(seq_len(length(node_counts)), function(z) {
+    1 / (node_counts[z] / count)
   })
-
+  
   # SAMPLING - ROOT POPULATION
-  pops <- list()
-  lapply(seq_along(bead_pops), function(z) {
-    pops[[z]] <<- cyto_sample(
-      cyto_extract(gs_clone[[z]],
-        copy = TRUE
-      ),
-      bead_ratios[[z]]
+  pops <- lapply(seq_along(node_pops), function(z) {
+    cyto_sample(
+      cyto_data_extract(gs_clone[[z]])[["root"]],
+      node_ratios[[z]],
+      ...
     )
   })
-  names(pops) <- cyto_names(pops)
-  pops <- flowSet_to_cytoset(flowSet(pops))
-
+  names(pops) <- cyto_names(node_pops)
+  
+  # CYTOSET
+  if(cyto_class(pops[[1]], "cytoframe", TRUE)) {
+    pops <- cytoset(pops)
+  } else {
+    pops <- flowSet_to_cytoset(flowSet(pops))
+  }
+  
   # REPLACE DATA IN GATINGSET
   gs_cyto_data(gs_clone) <- pops
-
+  recompute(gs_clone)
+  
   # RETURN SAMPLED GATINGSET
   return(gs_clone)
+}
+
+#' @export
+cyto_beads_sample <- function(...){
+  .Defunct("cyto_sample_to_node")
 }
 
 ## CYTO_BARCODE ----------------------------------------------------------------
