@@ -22,7 +22,6 @@ A \code{\link[flowCore:transformList-class]{transformList}}
 Extract Transformations from TransformerList
 }
 \examples{
-
 # Load CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -38,6 +37,7 @@ trans_list <- cyto_transform_extract(trans)
 
 # Convert transformerList into inverse transformList
 inv <- cyto_transform_extract(trans, inverse = TRUE)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

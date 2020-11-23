@@ -1465,10 +1465,8 @@ cyto_transform.transformerList <- function(x,
 #'   containing the desired transformations.
 #'
 #' @importFrom flowCore transformList
-#' @importFrom methods is
 #'
 #' @examples
-#'
 #' # Load CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -1484,6 +1482,7 @@ cyto_transform.transformerList <- function(x,
 #'
 #' # Convert transformerList into inverse transformList
 #' inv <- cyto_transform_extract(trans, inverse = TRUE)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -1491,10 +1490,10 @@ cyto_transform_extract <- function(x,
                                    inverse = FALSE) {
   
   # TransformLists are returned unaltered
-  if (is(x, "transformList")) {
+  if (cyto_class(x, "transformList")) {
     return(x)
     # TransformList extracted from transformerList
-  } else if (is(x, "transformerList")) {
+  } else if (cyto_class(x, "transformerList")) {
     # Extract transformations into transformList
     if (inverse == TRUE) {
       x <- transformList(names(x), lapply(x, `[[`, "inverse"))
