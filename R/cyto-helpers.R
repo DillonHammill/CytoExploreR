@@ -4304,18 +4304,21 @@ cyto_spillover_extract <- function(x) {
 #' so that this information can be used in all downstream \code{cyto_plot}
 #' calls.
 #'
-#' @param x object of class \code{cytoframe}, \code{cytoset},
-#'   \code{GatingHierarchy} or \code{GatingSet} to use for the calibration. For
-#'   the best calibration is recommended that users supply samples containing
-#'   both negative and positive events in each channel.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to use for the
+#'   calibration. For the best calibration is recommended that users supply
+#'   samples containing both negative and positive events in each channel.
 #' @param parent name of the parent population to use for channel calibration
 #'   when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
 #'   \code{"root"} node by default.
 #' @param type indicates the type of calibration to perform, options include
-#'   \code{"range"} or \code{"quantile"}. Range calibration simply uses the full
-#'   range of values across samples for the calibration. Quantile calibration
-#'   computes an lower and upper quantile for each channel, values falling
-#'   outside the calibration range are assigned the bottom or top colour.
+#'   \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
+#'   Range calibration simply uses the full range of values across samples for
+#'   the calibration. Quantile calibration computes an lower and upper quantile
+#'   for each channel, values falling outside the calibration range are assigned
+#'   the bottom or top colour.
 #' @param probs vector of lower and upper probabilities passed to
 #'   \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
 #'   default.
@@ -4328,38 +4331,54 @@ cyto_spillover_extract <- function(x) {
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Calibration
-#' cyto_calibrate(fs)
+#' cyto_calibrate(gs)
 #'
 #' # Colour based on Hoechst-405 staining
-#' cyto_plot(fs[1],
+#' cyto_plot(gs[1],
+#' parent = "root",
 #' channels = c("FSC-A", "SSC-A"),
 #' point_col = "Hoechst-405")
 #'
 #' @export
 cyto_calibrate <- function(x,
                            parent = "root",
-                           type = "range",
-                           probs = c(0.01, 0.99),
+                           type = "quantile",
+                           probs = c(0.01, 0.95),
                            ...){
   
   # COMPUTE CHANNEL RANGES
   if(grepl("^r", type, ignore.case = TRUE)){
-    cyto_cal <- .cyto_range(x,
-                            parent = parent,
-                            axes_limits = "data",
-                            buffer = 0,
-                            ...)
-  # COMPUTE CHANNEL QUANTILES
+    cyto_cal <- cyto_apply(x,
+                           "cyto_stat_range",
+                           parent = parent,
+                           input = "matrix",
+                           inverse = FALSE,
+                           copy = FALSE,
+                           ...)
+    # COMPUTE CHANNEL QUANTILES
   }else if(grepl("^q", type, ignore.case = TRUE)){
-    cyto_cal<- .cyto_quantile(x,
-                              parent = parent,
-                              probs = probs,
-                              ...)
+    if(length(probs) != 2) {
+      stop("A lower and upper quantile probability must be supplied.")
+    }
+    cyto_cal <- cyto_apply(x,
+                           "cyto_stat_quantile",
+                           parent = parent,
+                           input = "matrix",
+                           inverse = FALSE,
+                           copy = FALSE,
+                           probs = probs,
+                           ...)
   }
+  
+  # MIN/MAX
+  cyto_cal <- apply(cyto_cal, 2, function(x){
+    c("min" = min(x), "max" = max(x))
+  })
   
   # SAVE RDS TO TEMPFILE
   tempfile <- paste0(tempdir(),
