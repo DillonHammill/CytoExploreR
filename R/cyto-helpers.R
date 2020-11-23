@@ -422,7 +422,7 @@ cyto_clean <- function(x, ...) {
 
 ## CYTO_SETUP ------------------------------------------------------------------
 
-#' Load.fcs files into GatingSet and annotate with experiment details
+#' Load, annotate and prepare FCS files into a GatingSet
 #'
 #' \code{cyto_setup} takes care of all the data loading and annotation steps to
 #' prepare your cytometry data for downstream analyses. The .fcs files are first
@@ -460,7 +460,7 @@ cyto_clean <- function(x, ...) {
 #'   these details will be supplied can also be passed to this argument.
 #' @param parse_names logical indicating whether the file names should be parsed
 #'   into experiment details using \code{cyto_names_parse}, set to FALSE by
-#'   default. If you need to parse the names using a different delimiter, supply
+#'   default. If you need to parse the names using a different dlimiter, supply
 #'   the delimiter to this argument instead of TRUE.
 #' @param details logical indicating whether a call should be made to
 #'   \code{cyto_details_edit} to update the experimental details associated with
@@ -476,7 +476,6 @@ cyto_clean <- function(x, ...) {
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @importFrom flowWorkspace GatingSet
-#' @importFrom methods is
 #'
 #' @examples
 #'
@@ -560,7 +559,7 @@ cyto_setup <- function(path = ".",
   }
   
   # FLOWSET LOADED
-  if (is(x, "flowSet")) {
+  if (cyto_class(x, "flowSet")) {
     # RESTRICT CHANNELS
     if (restrict != FALSE) {
       if(restrict == TRUE){
@@ -601,7 +600,7 @@ cyto_setup <- function(path = ".",
     x <- GatingSet(x)
   }
   
-  # gatingtemplate
+  # gatingTemplate
   if (!is.null(gatingTemplate)) {
     
     # FILE EXTENSION APPEND

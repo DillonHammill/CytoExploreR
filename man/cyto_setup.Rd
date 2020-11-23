@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_setup}
 \alias{cyto_setup}
-\title{Load.fcs files into GatingSet and annotate with experiment details}
+\title{Load, annotate and prepare FCS files into a GatingSet}
 \usage{
 cyto_setup(
   path = ".",
@@ -40,7 +40,7 @@ these details will be supplied can also be passed to this argument.}
 
 \item{parse_names}{logical indicating whether the file names should be parsed
 into experiment details using \code{cyto_names_parse}, set to FALSE by
-default. If you need to parse the names using a different delimiter, supply
+default. If you need to parse the names using a different dlimiter, supply
 the delimiter to this argument instead of TRUE.}
 
 \item{details}{logical indicating whether a call should be made to
