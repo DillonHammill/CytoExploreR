@@ -792,129 +792,100 @@ cyto_details <- function(x,
 #' Extract sample names
 #'
 #' Simply a convenient and autocomplete-friendly wrapper around
-#' \code{\link[flowCore:identifier-methods]{identifier}}
 #' \code{\link[flowWorkspace:sampleNames]{sampleNames}} to extract the sample
-#' names from flowFrame, flowSet GatingHierarchy or GatingSet. Anonymous
-#' \code{\link[flowWorkspace:cytoframe]{cytoframe}} identifiers will be
-#' converted to \code{"Combined Events"}.
+#' names from a cytoset, GatingHierarchy or GatingSet.
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @return names associated with the supplied object.
 #'
-#' @importFrom flowCore identifier
 #' @importFrom flowWorkspace sampleNames
 #'
 #' @examples
-#'
-#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                          package = "CytoExploreRData"))
 #'
-#' # Activation GatingSet
-#' gs <- GatingSet(fs)
-#'
-#' # flowFrame
-#' cyto_names(fs[[1]])
-#'
-#' # flowSet
-#' cyto_names(fs)
+#' # GatingSet
+#' cyto_names(gs)
 #'
 #' # GatingHierarchy
 #' cyto_names(gs[[1]])
 #'
-#' # GatingSet
-#' cyto_names(gs)
+#' # cytoset
+#' cs <- cyto_data_extract(gs, "root")[["root"]]
+#' cyto_names(cs)
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_names
 #'
 #' @export
 cyto_names <- function(x) {
-  UseMethod("cyto_names")
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.flowFrame <- function(x) {
-  nm <- identifier(x)
-  if (nm == "anonymous") {
-    nm <- "Combined Events"
+  
+  if(cyto_class(x, "list", TRUE)) {
+    LAPPLY(x, function(z){
+      if(cyto_class(x, "flowFrame")) {
+        stop(
+          paste0("'cyto_names' cannot be extracted from ", 
+                 cyto_class(z, class = TRUE), " objects!")
+        )
+      }
+      sampleNames(z)
+    })
+  }else {
+    if(cyto_class(x, "flowFrame")) {
+      stop(
+        paste0("'cyto_names' cannot be extracted from ", 
+               cyto_class(x, class = TRUE), " objects!")
+      )
+    }
+    sampleNames(x)
   }
-  return(nm)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.flowSet <- function(x) {
-  sampleNames(x)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.GatingHierarchy <- function(x) {
-  sampleNames(x)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.GatingSet <- function(x) {
-  sampleNames(x)
-}
-
-#' @rdname cyto_names
-#' @export
-cyto_names.list <- function(x) {
-  LAPPLY(x, "cyto_names")
+  
 }
 
 # CYTO_NAMES REPLACEMENT METHOD ------------------------------------------------
 
 #' Replacement method for cyto_names
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param value vector of replacement names.
 #'
 #' @importFrom flowWorkspace sampleNames<-
-#' @importFrom flowCore identifier<-
 #'
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                          package = "CytoExploreRData"))
 #'
-#' # Sample names
-#' cyto_names(fs)
-#'
-#' # Change first sample name
-#' cyto_names(fs)[1] <- "first_sample"
-#'
-#' # Activation GatingSet
-#' gs <- GatingSet(fs)
-#'
-#' # Change last sample name
-#' cyto_names(gs)[length(gs)] <- "last_sample"
-#'
-#' # Updated sample names
+#' # GatingSet
+#' cyto_names(gs)[1] <- "Activation_001.fcs"
 #' cyto_names(gs)
+#'
+#' # cytoset
+#' cs <- cyto_data_extract(gs, "root")[["root"]]
+#' cyto_names(cs)[1:2] <- c("Activation_1.fcs", "Activation_2.fcs")
+#' cyto_names(cs)
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 "cyto_names<-" <- function(x, value) {
-  if (cyto_class(x, c("flowSet", "GatingSet"))) {
+  if (cyto_class(x, c("flowSet", "GatingHierarchy", "GatingSet"))) {
     sampleNames(x) <- value
-  } else if (cyto_class(x, "flowFrame")) {
-    identifier(x) <- value
+  } else {
+    stop(
+      paste0("'cyto_names' cannot be replaced for objects of class ", 
+             cyto_class(x, class = TRUE), "!")
+    )
   }
   return(x)
 }

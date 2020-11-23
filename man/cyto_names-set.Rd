@@ -7,9 +7,7 @@
 cyto_names(x) <- value
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-\code{\link[flowWorkspace:cytoset]{cytoset}},
-\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{value}{vector of replacement names.}
@@ -20,23 +18,18 @@ Replacement method for cyto_names
 \examples{
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                         package = "CytoExploreRData"))
 
-# Sample names
-cyto_names(fs)
-
-# Change first sample name
-cyto_names(fs)[1] <- "first_sample"
-
-# Activation GatingSet
-gs <- GatingSet(fs)
-
-# Change last sample name
-cyto_names(gs)[length(gs)] <- "last_sample"
-
-# Updated sample names
+# GatingSet
+cyto_names(gs)[1] <- "Activation_001.fcs"
 cyto_names(gs)
+
+# cytoset
+cs <- cyto_data_extract(gs, "root")[["root"]]
+cyto_names(cs)[1:2] <- c("Activation_1.fcs", "Activation_2.fcs")
+cyto_names(cs)
 
 }
 \author{
