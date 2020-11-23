@@ -36,13 +36,17 @@ without having to manually enter a lot of these details.
 \examples{
 library(CytoExploreRData)
 
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
+                          
 # Parse file names to variables
-fs <- cyto_names_parse(Activation,
+gs <- cyto_names_parse(gs,
 vars = c("sample_type", "sample_id"),
 split = "_")
 
 # Updated experiment details
-cyto_details(fs)
+cyto_details(gs)
 
 }
 \author{

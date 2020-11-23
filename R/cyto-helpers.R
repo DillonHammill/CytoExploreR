@@ -901,7 +901,7 @@ cyto_names <- function(x) {
 #' without having to manually enter a lot of these details.
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param vars vector containing the names of the variables to be added to
 #'   \code{cyto_details}, set to var_1, var_2 ... by default.
 #' @param split delimiter to split the file name into fragments, set to "_" by
@@ -919,13 +919,17 @@ cyto_names <- function(x) {
 #' @examples
 #' library(CytoExploreRData)
 #'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'                           
 #' # Parse file names to variables
-#' fs <- cyto_names_parse(Activation,
+#' gs <- cyto_names_parse(gs,
 #' vars = c("sample_type", "sample_id"),
 #' split = "_")
 #'
 #' # Updated experiment details
-#' cyto_details(fs)
+#' cyto_details(gs)
 #'
 #' @export
 cyto_names_parse <- function(x,
