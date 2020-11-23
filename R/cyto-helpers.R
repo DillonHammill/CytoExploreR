@@ -3131,7 +3131,7 @@ cyto_barcode <- function(x,
 
 ## CYTO_MARKERS_EDIT -----------------------------------------------------------
 
-#' Assign marker names to flowFrame or flowSet
+#' Assign marker names to cytoframe or cytoset
 #'
 #' \code{cyto_markers_edit} opens an editable table containing a list of
 #' channels and markers for a \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -3147,15 +3147,13 @@ cyto_barcode <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{GatingSet}.
 #' @param file name of csv file containing columns 'channel' and 'marker'.
-#' @param ... additional arguments passed to \code{data_editor}.
+#' @param ... not in use.
 #'
 #' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore parameters
-#' @importFrom utils edit write.csv read.csv
-#' @importFrom tools file_ext
-#' @importFrom methods is
+#' @importFrom DataEditR data_edit
 #'
 #' @examples
 #'
@@ -3176,50 +3174,46 @@ cyto_barcode <- function(x,
 cyto_markers_edit <- function(x,
                               file = NULL,
                               ...) {
-
-  # check class of x
-  cyto_check(x)
-
+  
   # flowFrame
-  if (is(x, "flowFrame")) {
-
+  if (cyto_class(x, "flowFrame")) {
+    
     # Extract details of parameters
     pd <- cyto_details(parameters(x))
-
+    
     # flowSet
-  } else if (is(x, "flowSet")) {
-
+  } else if (cyto_class(x, "flowSet")) {
+    
     # Extract details of parameters
     pd <- cyto_details(parameters(x[[1]]))
-
+    
     # GatingHierarchy
-  } else if (is(x, "GatingHierarchy")) {
+  } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
     fr <- cyto_extract(x, "root")
     pd <- cyto_details(parameters(fr))
-
+    
     # GatingSet
-  } else if (is(x, "GatingSet")) {
+  } else if (cyto_class(x, "GatingSet", TRUE)) {
     fr <- cyto_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
+  } else {
+    stop("'x' must be a valid cytometry object.")
   }
-
+  
   # file missing
   if (is.null(file)) {
-
+    
     # Check if file already exists
     if (length(grep("Experiment-Markers.csv", list.files())) != 0) {
       message("Experiment-Markers.csv found in working directory.")
-
+      
       # Could be multiple files - check for matching channels
       found_files <- list.files()[grep("Experiment-Markers.csv", list.files())]
       n <- length(grep("Experiment-Markers.csv", list.files()))
-
+      
       # Run through each file and check channels match samples
       dt <- lapply(seq_len(n), function(z) {
-        mrks <- read.csv(found_files[z],
-          header = TRUE,
-          stringsAsFactors = FALSE
-        )
+        mrks <- read_from_csv(found_files[z])
         rownames(mrks) <- NULL
         # Channels must match
         if (all(cyto_channels(x) %in% mrks$channel)) {
@@ -3229,80 +3223,83 @@ cyto_markers_edit <- function(x,
         }
       })
       names(dt) <- found_files
-
+      
       # Files found but don't match
       if (all(LAPPLY(dt, "is.null"))) {
-
+        
         # Make data.frame with channel and marker columns
         dt <- pd[, c("name", "desc")]
         colnames(dt) <- c("channel", "marker")
         rownames(dt) <- NULL
       } else {
-
+        
         # Remove NULL entries from list - result should be of length 1
         dt[LAPPLY(dt, "is.null")] <- NULL
         file <- names(dt)[1]
         dt <- dt[[1]]
       }
     } else {
-
+      
       # Make data.frame with channel and marker columns
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
     }
-
+    
     # File manually supplied
   } else {
-
-    # File extension missing
-    if (file_ext(file) == "") {
-      file <- paste0(file, ".csv")
-    }
-
+    
+    # Append file extension
+    file <- file_ext_append(file, ".csv")
+    
     # File already exists
-    if (length(grep(file, list.files())) != 0) {
-      message(file, "found in working directory.")
-      dt <- read.csv(file,
-        header = TRUE,
-        stringsAsFactors = FALSE
+    if (file_exists(file)) {
+      message(
+        paste0("Editing data in ", file, "...")
       )
-
+      dt <- read_from_csv(file)
+      
       # File does not exist (yet)
     } else {
-
+      
       # Make data.frame with channel and marker columns
       dt <- pd[, c("name", "desc")]
       colnames(dt) <- c("channel", "marker")
       rownames(dt) <- NULL
     }
   }
-
+  
   # File name not supplied
   if (is.null(file)) {
     file <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv")
   }
-
-  # Edit dt using data_editor
-  dt <- data_editor(dt,
-    title = "Experiment Markers Editor",
-    save_as = file,
-    ...
-  )
+  
+  # Edit dt using data_edit
+  if(interactive()) {
+    dt <- data_edit(dt,
+                    logo = CytoExploreR_logo(),
+                    title = "Experiment Markers Editor",
+                    row_edit = FALSE, # cannot add/remove rows
+                    col_edit = FALSE,
+                    col_names = c("channel", "marker"),
+                    save_as = file,
+                    write_fun = "write_to_csv",
+                    quiet = TRUE, 
+                    hide = TRUE,
+                    ...)
+  }
   
   # Update channels
-  if(class(x) %in% c("flowFrame", "flowSet")) {
-    BiocGenerics::colnames(x) <- as.character(dt$channel)
-  } else {
-    flowWorkspace::colnames(x) <- as.character(dt$channel)
+  if(!all(as.character(dt$channel) %in% cyto_channels(x))) {
+    cyto_channels(x) <- as.character(dt$channel)
   }
-
+  
   # # TODO - CHECK IF FILE EXISTS WITH DIFFERENT CHANNELS - NEED NEW FILE NAME
   # if(length(grep(file, list.files())) != 0){
   #   # Check if file contains the same
   #
   # }
-
+  
   # Markers and channels
   cyto_channels <- dt$channel
   cyto_markers <- dt$marker
@@ -3310,7 +3307,7 @@ cyto_markers_edit <- function(x,
   
   # Only modify markers if supplied
   if (!all(is.na(cyto_markers))) {
-    if(class(x) %in% c("flowFrame", "flowSet")){
+    if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
       flowCore::markernames(x) <- cyto_markers
     }else{
       flowWorkspace::markernames(x) <- cyto_markers

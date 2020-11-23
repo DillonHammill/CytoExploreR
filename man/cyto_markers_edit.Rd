@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_markers_edit}
 \alias{cyto_markers_edit}
-\title{Assign marker names to flowFrame or flowSet}
+\title{Assign marker names to cytoframe or cytoset}
 \usage{
 cyto_markers_edit(x, file = NULL, ...)
 }
@@ -14,7 +14,7 @@ cyto_markers_edit(x, file = NULL, ...)
 
 \item{file}{name of csv file containing columns 'channel' and 'marker'.}
 
-\item{...}{additional arguments passed to \code{data_editor}.}
+\item{...}{not in use.}
 }
 \value{
 save inputs to "Experiment-Markers.csv" and returns updated samples.
