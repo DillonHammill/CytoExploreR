@@ -1660,19 +1660,23 @@ cyto_extract <- function(...){
 
 #' Filter samples based on experiment variables
 #'
-#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param ... tidyverse-style subsetting using comma separated logical
 #'   predicates based on experimental variables stored in
 #'   \code{cyto_details(x)}. See examples below for demonstration.
 #'
-#' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
+#' @return \code{cytoset} or \code{GatingSet} restricted to samples which meet
 #'   the filtering criteria.
 #'
 #' @importFrom dplyr filter
-#' @importFrom methods is
 #'
 #' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
@@ -1696,19 +1700,18 @@ cyto_extract <- function(...){
 #'
 #' @export
 cyto_filter <- function(x, ...) {
-
+  
   # Check class of x
-  if (!any(is(x, "flowSet") |
-    is(x, "GatingSet"))) {
-    stop("'x' should be an object of class flowSet or GatingSet.")
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
+    stop("'x' should be an object of class cytoset or GatingSet.")
   }
-
+  
   # Extract experiment details
   pd <- cyto_details(x)
-
+  
   # Perform filtering on pd to pull out samples
   pd_filter <- filter(pd, ...)
-
+  
   # Get indices for selected samples
   if (nrow(pd_filter) == 0) {
     message("No samples match the filtering criteria. Returning all samples.")
@@ -1716,7 +1719,7 @@ cyto_filter <- function(x, ...) {
   } else {
     ind <- match(pd_filter[, "name"], pd[, "name"])
   }
-
+  
   return(x[ind])
 }
 
@@ -1726,38 +1729,40 @@ cyto_filter <- function(x, ...) {
 
 #' Select samples based on experiment variables
 #'
-#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param ... named list containing experimental variables to be used to select
 #'   samples or named arguments containing the levels of the variables to
 #'   select. See below examples for use cases. Selected samples can be excluded
 #'   by setting \code{exclude} to TRUE.
 #'
-#' @return \code{flowSet} or \code{GatingSet} restricted to samples which meet
+#' @return \code{cytoset} or \code{GatingSet} restricted to samples which meet
 #'   the designated selection criteria.
 #'
 #' @examples
-#'
-#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
 #' # Look at experiment details
-#' cyto_details(Activation)
+#' cyto_details(gs)
 #'
 #' # Select Stim-C samples with 0 and 500 nM OVA concentrations
-#' fs <- cyto_select(Activation,
+#' gs_stim_c <- cyto_select(gs,
 #'   Treatment = "Stim-C",
 #'   OVAConc = c(0, 500)
 #' )
 #'
 #' # Select Stim-A and Stim-C treatment groups
-#' fs <- cyto_select(
-#'   Activation,
+#' gs_stim_ac <- cyto_select(
+#'   gs,
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
 #' )
 #'
 #' # Exclude Stim-D treatment group
-#' fs <- cyto_select(Activation,
+#' gs_stim_abc <- cyto_select(gs,
 #'   Treatment = "Stim-D",
 #'   exclude = TRUE
 #' )
@@ -1765,21 +1770,20 @@ cyto_filter <- function(x, ...) {
 #'
 #' @export
 cyto_select <- function(x, ...) {
-
+  
   # Check class of x
-  if (!any(is(x, "flowSet") |
-    is(x, "GatingSet"))) {
-    stop("'x' should be an object of class flowSet or GatingSet.")
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
+    stop("'x' should be an object of class cytoset or GatingSet.")
   }
-
+  
   # Pull down ... arguments to list
   args <- list(...)
-
+  
   # ... is already a named list of arguments
   if (class(args[[1]]) == "list") {
     args <- args[[1]]
   }
-
+  
   # Exclude
   if (any(grepl("exclude", names(args)))) {
     exclude <- args[[which(grepl("exclude", names(args)))]]
@@ -1787,17 +1791,17 @@ cyto_select <- function(x, ...) {
   } else {
     exclude <- FALSE
   }
-
+  
   # INDICES SUPPLIED
   if (length(args) == 1 &
-    (is.null(names(args)) | .empty(names(args))) &
-    is.numeric(unlist(args))) {
+      (is.null(names(args)) | .empty(names(args))) &
+      is.numeric(unlist(args))) {
     # INDICES TO SELECT
     ind <- unlist(args)
   } else {
     # Extract experiment details
     pd <- cyto_details(x)
-
+    
     # Check that all variables are valid
     if (!all(names(args) %in% colnames(pd))) {
       lapply(names(args), function(y) {
@@ -1806,7 +1810,7 @@ cyto_select <- function(x, ...) {
         }
       })
     }
-
+    
     # Check that all variable levels at least exist in pd
     lapply(names(args), function(z) {
       var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
@@ -1820,7 +1824,7 @@ cyto_select <- function(x, ...) {
         })
       }
     })
-
+    
     # Get filtered pd
     pd_filter <- pd
     lapply(names(args), function(y) {
@@ -1830,11 +1834,11 @@ cyto_select <- function(x, ...) {
         pd_filter <<- pd_filter[ind, , drop = FALSE]
       }
     })
-
+    
     # Get indices for selected samples
     ind <- match(pd_filter[, "name"], pd[, "name"])
   }
-
+  
   # Exclude
   if (exclude == TRUE) {
     return(x[-ind])
