@@ -3320,21 +3320,19 @@ cyto_markers_edit <- function(x,
 
 ## CYTO_DETAILS_EDIT -----------------------------------------------------------
 
-#' Interactively edit cyto_details for a flowSet or GatingSet
+#' Interactively edit cyto_details for a cytoset or GatingSet
 #'
-#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param file name of csv file containing experimental information.
-#' @param ... additional arguments passed to \code{data_editor}.
+#' @param ... not in use.
 #'
 #' @return NULL and return \code{flowSet} or \code{GatingSet} with updated
 #'   experimental details.
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom flowCore pData<-
-#' @importFrom utils edit write.csv read.csv
-#' @importFrom tools file_ext
-#' @importFrom methods is
+#' @importFrom DataEditR data_edit
 #'
 #' @examples
 #' \dontrun{
@@ -3353,27 +3351,24 @@ cyto_markers_edit <- function(x,
 cyto_details_edit <- function(x,
                               file = NULL,
                               ...) {
-
+  
   # x should be a flowSet or GatingSet
-  if (!any(is(x, "flowSet") | is(x, "GatingSet"))) {
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
     stop("Please supply either a flowSet or a GatingSet")
   }
-
+  
   # File missing
   if (is.null(file)) {
     if (length(grep("Experiment-Details.csv", list.files())) != 0) {
       message("Experiment-Details.csv found in working directory.")
-
+      
       # Could be multiple files - check for matching channels
       found_files <- list.files()[grep("Experiment-Details.csv", list.files())]
       n <- length(grep("Experiment-Details.csv", list.files()))
-
+      
       # Run through each file and check channels match samples
       pd <- lapply(seq_len(n), function(z) {
-        pdata <- read.csv(found_files[z],
-          header = TRUE,
-          stringsAsFactors = FALSE
-        )
+        pdata <- read_from_csv(found_files[z])
         # SampleNames match those of x
         if (all(cyto_names(x) %in% as.vector(pdata$name))) {
           return(pdata)
@@ -3382,49 +3377,49 @@ cyto_details_edit <- function(x,
         }
       })
       names(pd) <- found_files
-
+      
       # Files found but don't match
       if (all(LAPPLY(pd, "is.null"))) {
-
+        
         # Extract cyto_details
         pd <- cyto_details(x)
         rownames(pd) <- NULL
       } else {
-
+        
         # Remove NULL entries from list - result should be of length 1
         pd[LAPPLY(pd, "is.null")] <- NULL
         file <- names(pd)[1]
         pd <- pd[[1]]
       }
     } else {
-
+      
       # Extract cyto_details
       pd <- cyto_details(x)
       rownames(pd) <- NULL
     }
-
+    
     # File name supplied manually
   } else {
-
-    # File name lacks csv extension
-    if (file_ext(file) == "") {
-      file <- paste0(file, ".csv")
-    }
-
+    
+    # File append extension
+    file <- file_ext_append(file, ".csv")
+    
     # File already exists
     if (length(grep(file, list.files())) != 0) {
-      message(paste(file, "found in working directory."))
-      pd <- read.csv(file, header = TRUE)
-
+      message(
+        paste0("Editing data in ", file, "...")
+      )
+      pd <- read_from_csv(file)
+      
       # File does not exist
     } else {
-
+      
       # Extract cyto_details
       pd <- cyto_details(x)
       rownames(pd) <- NULL
     }
   }
-
+  
   # FILE
   if (is.null(file)) {
     file <- paste0(
@@ -3432,18 +3427,28 @@ cyto_details_edit <- function(x,
       "-Experiment-Details.csv"
     )
   }
-
+  
+  # REMOVE ROW NAMES
+  cyto_names <- pd$name
+  rownames(pd) <- NULL
+  
   # Edit cyto_details
-  pd <- data_editor(pd,
-    title = "Experiment Details Editor",
-    save_as = file,
-    ...
-  )
-  rownames(pd) <- pd$name
-
+  if(interactive()) {
+    pd <- data_edit(pd,
+                    logo = CytoExploreR_logo(),
+                    title = "Experiment Details Editor",
+                    row_edit = FALSE,
+                    col_readonly = "name",
+                    save_as = file,
+                    write_fun = "write_to_csv",
+                    quiet = TRUE,
+                    hide = TRUE,
+                    ...)
+  }
+  
   # Update cyto_details
   cyto_details(x) <- pd
-
+  
   # Return updated samples
   return(x)
 }

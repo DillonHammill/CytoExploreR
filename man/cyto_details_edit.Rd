@@ -2,24 +2,24 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_details_edit}
 \alias{cyto_details_edit}
-\title{Interactively edit cyto_details for a flowSet or GatingSet}
+\title{Interactively edit cyto_details for a cytoset or GatingSet}
 \usage{
 cyto_details_edit(x, file = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{file}{name of csv file containing experimental information.}
 
-\item{...}{additional arguments passed to \code{data_editor}.}
+\item{...}{not in use.}
 }
 \value{
 NULL and return \code{flowSet} or \code{GatingSet} with updated
   experimental details.
 }
 \description{
-Interactively edit cyto_details for a flowSet or GatingSet
+Interactively edit cyto_details for a cytoset or GatingSet
 }
 \examples{
 \dontrun{
