@@ -4442,88 +4442,327 @@ cyto_calibrate_reset <- function(){
 
 ## CYTO_APPLY ------------------------------------------------------------------
 
-# Modified version of flowCore fsApply which simplifies tibbles and
-# appropriately handles cytosets.
+# flowFrame/flowSet methods require parent argument (not used) otherwise parent
+# gets passed to FUN. cyto_apply cannot dispatch to cyto_stats functions unless
+# called within the package - users should interact with cyto_stats_compute
+# directly.
 
-#' Apply a function over cytometry objects
+#' Apply a function to elements of cytoset, GatingHierarchy or GatingSet
 #'
-#' @param x object of class \code{flowSet} or \code{cytoset}.
-#' @param FUN function to apply to each \code{flowFrame} or \code{cytoframe} in
-#'   the supplied \code{flowSet} or \code{cytoset}.
-#' @param ... optional arguments to \code{FUN}.
-#' @param simplify logical indicating whether the resulting list should be
-#'   simplified into a flowSet or bound into a matrix or data.frame using
-#'   \code{rbind}, set to TRUE by default.
-#' @param use.exprs logical indicating whether the function should be applied to
-#'   the raw data in each flowFrame, set to FALSE by default.
+#' \code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}
+#' to apply a function over elements of a \code{cytoset}, \code{GatingHierarchy}
+#' or \code{GatingSet}. \code{cyto_apply} is extremely flexible by supporting
+#' functions that accept the data in either \code{cytoset}, \code{cytoframe},
+#' \code{matrix} or \code{vector} formats. All the data processing steps are
+#' handled internally by \code{\link{cyto_data_extract}} prior to passing the
+#' data to the specified function. It is important that the arguments in
+#' \code{FUN} do not conflict with the arguments of \code{cyto_apply} and they
+#' should be supplied to \code{cyto_apply} by name.
+#'
+#' @param x object of class \code{cytoset}, \code{GatingHierarchy},
+#'   \code{GatingSet}.
+#' @param FUN name of a function to apply to each element of \code{x}.
+#' @param ... additional arguments passed to \code{FUN}. Multiple arguments are
+#'   supported but must be named, see examples below.
+#' @param simplify logical indicating whether attempts should be made to coerce
+#'   the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.
+#' @param input indicates the data input format as required by \code{FUN} can be
+#'   either 1 - "cytoset", 2 - "cytoset", 3 - "matrix", 4 - "column" or 5 -
+#'   "row", set to "cytoframe" by default. \code{cyto_apply} will take care of
+#'   all the data formatting prior to passing it \code{FUN}. The \code{"column"}
+#'   and \code{"row"} options are for functions that expect vectors as the
+#'   input.
+#' @param parent name of the parent(s) population to extract from
+#'   \code{GatingHierarchy} or \code{GatingSet} objects, set to \code{"root"} by
+#'   default.
+#' @param copy logical indicating whether the data should be copied prior to
+#'   preprocessing the data, set to TRUE by default to ensure that the original
+#'   data remains unchanged.
+#' @param channels vector of channels which should be included in the data
+#'   passed to \code{FUN}, set to all channels by default.
+#' @param trans object of class \code{transformerList} containing the
+#'   definitions of the transformers applied to the supplied data. These
+#'   transformers are only required when a cytoset is supplied to inverse
+#'   transformations when \code{inverse = TRUE}.
+#' @param inverse logical indicating whether the data should be inverse
+#'   transformed prior to applying \code{FUN}, set to FALSE by default.
 #'
 #' @importFrom methods is
-#' @importFrom flowCore fsApply phenoData phenoData<-
-#' @importFrom flowWorkspace flowSet_to_cytoset
+#' @importFrom flowCore flowSet
+#' @importFrom flowWorkspace cytoset
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples
-#' library(CytoExploreRData)
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
-#' # Activation dataset
-#' fs <- Activation
+#' # Compute CD44 & CD69 quantiles for CD4 T Cells & CD8 T Cells
+#' cyto_apply(gs,
+#' "quantile",
+#' probs = c(0.25, 0.5, 0.75),
+#' na.rm = TRUE,
+#' input = "column",
+#' parent = c("CD4 T Cells", "CD8 T Cells"),
+#' channels = c("CD44", "CD69"))
 #'
-#' # Sample each flowFrame
-#' fs <- cyto_apply(fs, cyto_sample)
-#'
-#' @seealso \code{\link[flowCore:fsApply]{fsApply}}
-#'
+#' @name cyto_apply
+NULL
+
+#' @noRd
 #' @export
-cyto_apply <- function(x, 
-                       FUN,
-                       ...,
-                       simplify = TRUE,
-                       use.exprs = FALSE){
+cyto_apply <- function(x,
+                       ...) {
+  UseMethod("cyto_apply")
+}
+
+#' @export
+cyto_apply.default <- function(x,
+                               FUN,
+                               ...,
+                               simplify = TRUE,
+                               parent = "root",
+                               input = "cytoframe",
+                               copy = TRUE,
+                               channels = NULL,
+                               trans = NA,
+                               inverse = FALSE) {
   
-  # FUNCTION MISSING
+  # GATINGHIERARCHY/GATINGSET
+  if(cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
+    
+    # TRANSFORMERS
+    trans <- cyto_transformer_extract(x)
+    
+    # LIST OF CYTOSETS
+    x <- cyto_data_extract(x,
+                           parent = parent)
+    
+    # APPLY FUNCTION
+    res <- structure(
+      lapply(x, function(z){
+        cyto_apply(z,
+                   FUN = FUN,
+                   simplify = simplify,
+                   input = input,
+                   copy = copy,
+                   channels = channels,
+                   trans = trans,
+                   inverse = inverse,
+                   ...)
+      }),names = names(x)
+    )
+    
+    # MATRIX - SINGLE PARENT
+    if(length(parent) == 1) {
+      res <- res[[1]]
+    }
+    
+    # RETURN
+    return(res)
+    
+    # UNSUPPORTED METHOD  
+  } else {
+    stop(
+      paste0(
+        "'cyto_apply' does not accept objects of class ", 
+        cyto_class(x, class = TRUE), "!"
+      )
+    )
+  }
+  
+}
+
+#' @export
+cyto_apply.flowSet <- function(x,
+                               FUN,
+                               ...,
+                               simplify = TRUE,
+                               parent = "root",
+                               input = "cytoframe",
+                               copy = TRUE,
+                               channels = NULL,
+                               trans = NA,
+                               inverse = FALSE) {
+  
+  # FUNCTION
   if(missing(FUN)) {
     stop("Supply a function to 'FUN'.")
+  }
+  
+  # FUNCTION NAME
+  if(is.function(FUN)) {
+    FUN_NAME <- deparse(substitute(FUN))
+    # UNNAMED FUNCTION
+    if(length(FUN_NAME) > 1) {
+      FUN_NAME <- "FUN"
+    }
+  }else {
+    FUN_NAME <- FUN
   }
   
   # PREPARE FUNCTION
   FUN <- match.fun(FUN)
   
-  # INVALID FUNCTION
-  if(!is.function(FUN)){
-    stop("'FUN' is not a function.")
+  # COPY
+  if(copy) {
+    x <- cyto_copy(x)
   }
   
-  # APPLY FUNCTION
-  res <- structure(lapply(cyto_names(x), function(z) {
-    y <- x[[z]]
-    FUN(if(use.exprs){
-      cyto_extract(y, raw = TRUE)[[1]]
-    }else{
-      y
-    }, ...)
-  }), names = cyto_names(x))
+  # CHANNELS
+  if(!is.null(channels)) {
+    x <- x[, cyto_channels_extract(x, channels)]
+  }
   
-  # SIMPLIFY OUTPUT
+  # INVERSE TRANSFORM
+  if(!.all_na(trans) & inverse) {
+    x <- cyto_transform(x,
+                        trans = trans,
+                        inverse = inverse,
+                        plot = FALSE)
+  }
+  
+  # CYTOSET INPUT 
+  if(input == 1 | 
+     grepl("^cytoset", input, ignore.case = TRUE) |
+     grepl("^cs", input, ignore.case = TRUE)) {
+    input <- "cytoset"
+    # CYTOFRAME INPUT
+  } else if(input == 2 | 
+            grepl("^cytoframe", input, ignore.case = TRUE) |
+            grepl("^cf", input, ignore.case = TRUE)) {
+    input  <- "cytoframe"
+    # MATRIX INPUT
+  } else if(input == 3 | 
+            grepl("^m", input, ignore.case = TRUE)) {
+    input <- "matrix"
+    # COLUMN/CHANNEL INPUT
+  } else if(input == 4 |
+            grepl("^co", input, ignore.case = TRUE) |
+            grepl("^ch", input, ignore.case = TRUE)) {
+    input <- "column"
+    # ROW/CELL
+  } else if(input == 5 |
+            grepl("^r", input, ignore.case = TRUE) |
+            grepl("ce", input, ignore.case = TRUE)) {
+    input <- "row"
+  }
+  
+  # DISPATCH
+  if(input == "cytoset") {
+    res <- structure(
+      lapply(seq_along(x), function(z){
+        FUN(x[z], ...)
+      }), names = cyto_names(x))
+  } else if(input == "cytoframe") {
+    res <- structure(
+      lapply(cyto_names(x), function(z){
+        FUN(x[[z]], ...)
+      }), names = cyto_names(x))
+  } else if(input == "matrix") {
+    res <- structure(
+      lapply(cyto_names(x), function(z){
+        FUN(exprs(x[[z]]), ...)
+      }), names = cyto_names(x))
+  } else if(input == "column") {
+    res <- structure(
+      lapply(cyto_names(x), function(z){
+        apply(exprs(x[[z]]), 2, FUN, ...)
+      }), names = cyto_names(x))
+  } else if(input =="row") {
+    res <- structure(
+      lapply(cyto_names(x), function(z){
+        apply(exprs(x[[z]]), 1, FUN, ...)
+      }), names = cyto_names(x))
+  }
+  
+  # SIMPLIFY
   if(simplify) {
-    if(all(LAPPLY(res, is, "flowFrame"))) {
-      res <- as(res,"flowSet")
-      phenoData(res) <- phenoData(x)[cyto_names(x),]
-    # CHECK LENGTHS
-    } else if(diff(range(LAPPLY(res, length))) == 0) {
-      res <- do.call(rbind, res)
+    # CYTOFRAMES -> CYTOSET
+    if(cyto_class(res[[1]], "flowFrame")) {
+      res <- cytoset(res)
+      # CYTOSET
+    }  else if(cyto_class(res[[1]], "flowSet") &
+               length(res[[1]]) == 1) {
+      res <- cytoset(
+        structure(
+          lapply(res, `[[`, 1), 
+          names = names(res)
+        )
+      )
+      # VECTOR/MATRIX/LIST
+    } else {
+      # VECTORS TO MATRIX
+      if(is.null(dim(res[[1]]))) {
+        res <- structure(
+          lapply(names(res), function(z){
+            matrix(res[[z]],
+                   nrow = 1,
+                   dimnames = list(z,
+                                   names(res[[z]])))
+          }), names = names(res))
+      }
+      # PREPARE MATRICES
+      res <- lapply(names(res), function(z){
+        # ROWNAMES
+        if(is.null(rownames(res[[z]]))) {
+          if(nrow(res[[z]]) > 1) {
+            rownames(res[[z]]) <- paste(z, 1:nrow(res[[z]]), sep = "|")
+          } else {
+            rownames(res[[z]]) <- z
+          }
+        } else {
+          if(!all(rownames(res[[z]]) == z)) {
+            rownames(res[[z]]) <- paste(z, rownames(res[[z]]), sep = "|")
+          }
+        }
+        # COLNAMES
+        if(is.null(colnames(res[[z]]))) {
+          if(ncol(res[[z]]) == 1) {
+            colnames(res[[z]]) <- FUN_NAME
+          } else {
+            colnames(res[[z]]) <- paste0(FUN_NAME, "-", 1:nrow(res[[z]]))
+          }
+        }
+        return(res[[z]])
+      })
+      # BIND MATRICES
+      res <- do.call("rbind", res)
     }
   }
   
-  # FLOWSET RETURNED
-  if(is(res, "flowSet")){
-    if(is(x, "cytoset")){
-      return(flowSet_to_cytoset(res))
-    }else{
-      return(res)
-    }
-  }else{
-    return(res)
-  }
+  # OUTPUT
+  return(res)
+  
+}
+
+#' @rdname cyto_apply
+#' @export
+cyto_apply.list <- function(x,
+                            FUN,
+                            ...,
+                            simplify = TRUE,
+                            parent = "root",
+                            input = "cytoframe",
+                            copy = TRUE,
+                            channels = NULL,
+                            trans = NA,
+                            inverse = FALSE) {
+  
+  structure(
+    lapply(x, function(z){
+      cyto_apply(z,
+                 FUN = FUN,
+                 ...,
+                 simplify = simplify,
+                 parent = parent,
+                 input = input,
+                 copy = copy,
+                 channels = channels,
+                 trans = trans,
+                 inverse = inverse)
+    }), names = names(x)
+  )
   
 }

@@ -2,40 +2,85 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_apply}
 \alias{cyto_apply}
-\title{Apply a function over cytometry objects}
+\alias{cyto_apply.list}
+\title{Apply a function to elements of cytoset, GatingHierarchy or GatingSet}
 \usage{
-cyto_apply(x, FUN, ..., simplify = TRUE, use.exprs = FALSE)
+\method{cyto_apply}{list}(
+  x,
+  FUN,
+  ...,
+  simplify = TRUE,
+  parent = "root",
+  input = "cytoframe",
+  copy = TRUE,
+  channels = NULL,
+  trans = NA,
+  inverse = FALSE
+)
 }
 \arguments{
-\item{x}{object of class \code{flowSet} or \code{cytoset}.}
+\item{x}{object of class \code{cytoset}, \code{GatingHierarchy},
+\code{GatingSet}.}
 
-\item{FUN}{function to apply to each \code{flowFrame} or \code{cytoframe} in
-the supplied \code{flowSet} or \code{cytoset}.}
+\item{FUN}{name of a function to apply to each element of \code{x}.}
 
-\item{...}{optional arguments to \code{FUN}.}
+\item{...}{additional arguments passed to \code{FUN}. Multiple arguments are
+supported but must be named, see examples below.}
 
-\item{simplify}{logical indicating whether the resulting list should be
-simplified into a flowSet or bound into a matrix or data.frame using
-\code{rbind}, set to TRUE by default.}
+\item{simplify}{logical indicating whether attempts should be made to coerce
+the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.}
 
-\item{use.exprs}{logical indicating whether the function should be applied to
-the raw data in each flowFrame, set to FALSE by default.}
+\item{parent}{name of the parent(s) population to extract from
+\code{GatingHierarchy} or \code{GatingSet} objects, set to \code{"root"} by
+default.}
+
+\item{input}{indicates the data input format as required by \code{FUN} can be
+either 1 - "cytoset", 2 - "cytoset", 3 - "matrix", 4 - "column" or 5 -
+"row", set to "cytoframe" by default. \code{cyto_apply} will take care of
+all the data formatting prior to passing it \code{FUN}. The \code{"column"}
+and \code{"row"} options are for functions that expect vectors as the
+input.}
+
+\item{copy}{logical indicating whether the data should be copied prior to
+preprocessing the data, set to TRUE by default to ensure that the original
+data remains unchanged.}
+
+\item{channels}{vector of channels which should be included in the data
+passed to \code{FUN}, set to all channels by default.}
+
+\item{trans}{object of class \code{transformerList} containing the
+definitions of the transformers applied to the supplied data. These
+transformers are only required when a cytoset is supplied to inverse
+transformations when \code{inverse = TRUE}.}
+
+\item{inverse}{logical indicating whether the data should be inverse
+transformed prior to applying \code{FUN}, set to FALSE by default.}
 }
 \description{
-Apply a function over cytometry objects
+\code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}
+to apply a function over elements of a \code{cytoset}, \code{GatingHierarchy}
+or \code{GatingSet}. \code{cyto_apply} is extremely flexible by supporting
+functions that accept the data in either \code{cytoset}, \code{cytoframe},
+\code{matrix} or \code{vector} formats. All the data processing steps are
+handled internally by \code{\link{cyto_data_extract}} prior to passing the
+data to the specified function. It is important that the arguments in
+\code{FUN} do not conflict with the arguments of \code{cyto_apply} and they
+should be supplied to \code{cyto_apply} by name.
 }
 \examples{
-library(CytoExploreRData)
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
-# Activation dataset
-fs <- Activation
+# Compute CD44 & CD69 quantiles for CD4 T Cells & CD8 T Cells
+cyto_apply(gs,
+"quantile",
+probs = c(0.25, 0.5, 0.75),
+na.rm = TRUE,
+input = "column",
+parent = c("CD4 T Cells", "CD8 T Cells"),
+channels = c("CD44", "CD69"))
 
-# Sample each flowFrame
-fs <- cyto_apply(fs, cyto_sample)
-
-}
-\seealso{
-\code{\link[flowCore:fsApply]{fsApply}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
