@@ -335,10 +335,10 @@ cyto_load <- function(path = ".",
 
 #' Apply flowAI anomaly detection to clean cytometry data
 #'
-#' @param x object of class \code{\link[flowWorkspace::cytoframe]{cytoframe}},
-#'   \code{\link[flowWorkspace::cytoset]{cytoset}},
-#'   \code{\link[flowWorkspace::GatingHierarchy-class]{CatingHierarchy}} or
-#'   \code{\link[flowWorkspace::GatingSet-class]{GatingSet}}. The \code{root}
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{CatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. The \code{root}
 #'   node extracted when a \code{GatingSet} or \code{GatingHierachy} is
 #'   supplied.
 #' @param ... additional arguments passed to
@@ -376,13 +376,13 @@ cyto_load <- function(path = ".",
 cyto_clean <- function(x, ...) {
   
   # GATINGSET/GATINGHIERARCHY
-  if (cyto_class(x, "GatingSet")) {
+  if (cyto_class(x, c("GatingHierarchy", "GatingSet"), TRUE)) {
     # PARENT
     parent <- cyto_nodes(x, path = "auto")[1]
     # EXTRACT DATA
     cyto_data <- cyto_extract(x, parent)
     # flowAI REQUIRES FLOWSET
-    if (cyto_class(cyto_data, "cytoset")) {
+    if (cyto_class(cyto_data, "cytoset", TRUE)) {
       cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
     }
     # CLEAN DATA
@@ -394,17 +394,17 @@ cyto_clean <- function(x, ...) {
                                                        ...
     )))
     # RETURN CYTOSET
-    if (is(cyto_data, "flowSet")) {
+    if (cyto_class(cyto_data, "flowSet", TRUE)) {
       cyto_data <- flowSet_to_cytoset(cyto_data)
     }
     # REPLACE DATA
     gs_cyto_data(x) <- cyto_data
   } else {
     # FLOWSET REQUIRED
-    if (is(x, "cytoset")) {
+    if (cyto_class(x, "cytoset", TRUE)) {
       x <- cytoset_to_flowSet(x)
     }
-    # FLOWAI
+    # CLEAN DATA
     invisible(capture.output(x <- flow_auto_qc(x,
                                                html_report = FALSE,
                                                mini_report = FALSE,
@@ -413,7 +413,7 @@ cyto_clean <- function(x, ...) {
                                                ...
     )))
     # RETURN CYTOSET
-    if (is(x, "flowSet")) {
+    if (cyto_class(x, "flowSet", TRUE)) {
       x <- flowSet_to_cytoset(x)
     }
   }

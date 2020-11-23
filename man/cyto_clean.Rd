@@ -7,10 +7,10 @@
 cyto_clean(x, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace::cytoframe]{cytoframe}},
-\code{\link[flowWorkspace::cytoset]{cytoset}},
-\code{\link[flowWorkspace::GatingHierarchy-class]{CatingHierarchy}} or
-\code{\link[flowWorkspace::GatingSet-class]{GatingSet}}. The \code{root}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{CatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. The \code{root}
 node extracted when a \code{GatingSet} or \code{GatingHierachy} is
 supplied.}
 
