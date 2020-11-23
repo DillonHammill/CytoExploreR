@@ -2,9 +2,9 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_class}
 \alias{cyto_class}
-\title{Get or check class of a cytometry object}
+\title{Get class of a cytometry object}
 \usage{
-cyto_class(x, expect = NULL, class = FALSE)
+cyto_class(x, expect = NULL, class)
 }
 \arguments{
 \item{x}{either a \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -21,14 +21,16 @@ expected class.}
 
 \item{class}{indicates whether the class of \code{x} should be matched based
 on the objects class (exact class match) or based on its reference class.
-See examples for more details.}
+This argument is set to TRUE by default if no class expectation is
+supplied, otherwise it is set to FALSE if not specified manually. See
+examples for more details.}
 }
 \value{
 class of \code{x} or a logical indicating whether \code{x} matches
   the expected class.
 }
 \description{
-Get or check class of a cytometry object
+Get class of a cytometry object
 }
 \examples{
 library(CytoExploreRData)
