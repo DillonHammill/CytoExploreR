@@ -877,11 +877,9 @@ cyto_names.list <- function(x) {
 #'
 #' @export
 "cyto_names<-" <- function(x, value) {
-  if (is(x, "flowSet") |
-    is(x, "GatingHierarchy") |
-    is(x, "GatingSet")) {
+  if (cyto_class(x, c("flowSet", "GatingSet"))) {
     sampleNames(x) <- value
-  } else if (is(x, "flowFrame")) {
+  } else if (cyto_class(x, "flowFrame")) {
     identifier(x) <- value
   }
   return(x)
