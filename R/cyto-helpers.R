@@ -3536,9 +3536,6 @@ cyto_details_save <- function(x,
 #' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
 #'   object.
 #'
-#' @importFrom utils read.csv
-#' @importFrom tools file_ext
-#' @importFrom methods is
 #' @importFrom flowCore decompensate
 #' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe gs_cyto_data
 #'
@@ -3586,35 +3583,21 @@ cyto_compensate.GatingSet <- function(x,
                                       select = 1,
                                       remove = FALSE,
                                       ...) {
-
+  
   # Extract flowSet
   fs <- cyto_extract(x, parent = "root")
-
+  
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
-    if (is(spillover, "character")) {
-      # file extension
-      spillover <- file_ext_append(spillover, ".csv")
-      # file does not exist
-      if(!file.exists(spillover)){
-        stop(
-          paste(spillover, 
-                "does not exist or does not have required permissions.")
-          )
-      }
+    if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
-      spill <- read.csv(spillover, 
-                        header = TRUE, 
-                        row.names = 1)
-      colnames(spill) <- rownames(spill)
-      # column/row names must be valid channels
-      if (!all(rownames(spill) %in% cyto_channels(fs)) |
-        !all(rownames(spill) %in% cyto_channels(fs))) {
+      spill <- read_from_csv(spilllover)
+      # column names must be valid channels
+      if (!all(colnames(spill) %in% cyto_channels(fs))) {
         stop(
           paste(
-            "'spillover' must have valid fluorescent channels as rownames",
-            "and colnames."
+            "'spillover' must have valid fluorescent channels as colnames."
           )
         )
       }
@@ -3622,8 +3605,7 @@ cyto_compensate.GatingSet <- function(x,
       spill <- rep(list(spill), length(fs))
       names(spill) <- cyto_names(fs)
       # spillover is a matrix/data.frame
-    } else if (is(spillover, "matrix") |
-      is(spillover, "data.frame")) {
+    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% cyto_channels(fs))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
@@ -3659,10 +3641,10 @@ cyto_compensate.GatingSet <- function(x,
       })
     }
   }
-
+  
   # Channels
   fluor_channels <- cyto_fluor_channels(fs)
-
+  
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
     # Select rows - square matrix
@@ -3673,12 +3655,12 @@ cyto_compensate.GatingSet <- function(x,
     z <- z[, fluor_channels]
     return(z)
   })
-
+  
   # REMOVE COMPENSATION
   if (remove == TRUE) {
     cf_list <- lapply(seq_along(fs), function(z) {
       cf <- decompensate(fs[[z]], spill[[z]])
-      if(!is(cf, "cytoframe")){
+      if(!cyto_class(cf, "cytoframe", TRUE)){
         cf <- flowFrame_to_cytoframe(cf)
       }
       return(cf)
@@ -3690,7 +3672,7 @@ cyto_compensate.GatingSet <- function(x,
   } else if (remove == FALSE) {
     flowWorkspace::compensate(x, spill)
   }
-
+  
   # RETURN GATINGSET
   return(x)
 }
@@ -3702,32 +3684,18 @@ cyto_compensate.flowSet <- function(x,
                                     select = 1,
                                     remove = FALSE,
                                     ...) {
-
+  
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
-    if (is(spillover, "character")) {
-      # file extension
-      spillover <- file_ext_append(spillover, ".csv")
-      # file does not exist
-      if(!file.exists(spillover)){
-        stop(
-          paste(spillover, 
-                "does not exist or does not have the required permissions.")
-          )
-      }
+    if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
-      spill <- read.csv(spillover, 
-                        header = TRUE, 
-                        row.names = 1)
-      colnames(spill) <- rownames(spill)
+      spill <- read_from_csv(spillover)
       # column/row names must be valid channels
-      if (!all(rownames(spill) %in% cyto_channels(x)) |
-        !all(rownames(spill) %in% cyto_channels(x))) {
+      if (!all(colnames(spill) %in% cyto_channels(x))) {
         stop(
           paste(
-            "'spillover' must have valid fluorescent channels as rownames",
-            "and colnames."
+            "'spillover' must have valid fluorescent channels as colnames."
           )
         )
       }
@@ -3735,8 +3703,7 @@ cyto_compensate.flowSet <- function(x,
       spill <- rep(list(spill), length(x))
       names(spill) <- cyto_names(x)
       # spillover is a matrix/data.frame
-    } else if (is(spillover, "matrix") |
-      is(spillover, "data.frame")) {
+    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% cyto_channels(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
@@ -3772,10 +3739,10 @@ cyto_compensate.flowSet <- function(x,
       })
     }
   }
-
+  
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
-
+  
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
     # Select rows - square matrix
@@ -3786,12 +3753,12 @@ cyto_compensate.flowSet <- function(x,
     z <- z[, fluor_channels]
     return(z)
   })
-
+  
   # REMOVE COMPENSATION
   if (remove == TRUE) {
     cf_list <- lapply(seq_along(x), function(z) {
       cf <- decompensate(x[[z]], spill[[z]])
-      if(!is(cf, "cytoset")){
+      if(!cyto_class(cf, "cytoset", TRUE)){
         cf <- flowFrame_to_cytoframe(cf)
       }
       return(cf)
@@ -3812,38 +3779,24 @@ cyto_compensate.flowFrame <- function(x,
                                       select = 1,
                                       remove = FALSE,
                                       ...) {
-
+  
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
     # spillover is a character string containing name of csv file
-    if (is(spillover, "character")) {
-      # file extension
-      spillover <- file_ext_append(spillover, ".csv")
-      # file does not exist
-      if(!file.exists(spillover)){
-        stop(
-          paste(spillover,
-                "does not exist or does not have the required permissions.")
-        )
-      }
+    if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
-      spill <- read.csv(spillover, 
-                        header = TRUE, 
-                        row.names = 1)
-      colnames(spill) <- rownames(spill)
+      spill <- read_from_csv(spillover)
       # column/row names must be valid channels
       if (!all(rownames(spill) %in% cyto_channels(x)) |
-        !all(rownames(spill) %in% cyto_channels(x))) {
+          !all(rownames(spill) %in% cyto_channels(x))) {
         stop(
           paste(
-            "'spillover' must have valid fluorescent channels as rownames",
-            "and colnames."
+            "'spillover' must have valid fluorescent channels as colnames."
           )
         )
       }
       # spillover is a matrix/data.frame
-    } else if (is(spillover, "matrix") |
-      is(spillover, "data.frame")) {
+    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
       if (!all(colnames(spillover) %in% cyto_channels(x))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
@@ -3864,17 +3817,17 @@ cyto_compensate.flowFrame <- function(x,
       ))
     }
   }
-
+  
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
-
+  
   # Select rows - square matrix
   if (nrow(spill) == ncol(spill)) {
     spill <- spill[match(fluor_channels, colnames(spill)), ]
   }
   # Select columns
   spill <- spill[, fluor_channels]
-
+  
   # REMOVE COMPENSATION
   if (remove == TRUE) {
     decompensate(x, spill)
