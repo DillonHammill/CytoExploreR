@@ -2,25 +2,16 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_markers}
 \alias{cyto_markers}
-\alias{cyto_markers.GatingSet}
-\alias{cyto_markers.GatingHierarchy}
-\alias{cyto_markers.flowSet}
-\alias{cyto_markers.flowFrame}
 \title{Extract marker names}
 \usage{
-\method{cyto_markers}{GatingSet}(x, select = NULL, exclude = NULL, ...)
-
-\method{cyto_markers}{GatingHierarchy}(x, select = NULL, exclude = NULL, ...)
-
-\method{cyto_markers}{flowSet}(x, select = NULL, exclude = NULL, ...)
-
-\method{cyto_markers}{flowFrame}(x, select = NULL, exclude = NULL, ...)
+cyto_markers(x, select = NULL, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list of these
+objects.}
 
 \item{select}{vector of channels or markers for which the channel/marker
 combinations should be returned.}
@@ -43,23 +34,22 @@ Extract marker names
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
 # Activation GatingSet
-gs <- GatingSet(fs)
-
-# flowFrame
-cyto_markers(fs[[1]])
-
-# flowSet
-cyto_markers(fs)
+gs <- cyto_load(system.file("extdata/Activation-GatingSet", 
+                package = "CytoExploreRData"))
 
 # GatingHierarchy
 cyto_markers(gs[[1]])
 
 # GatingSet
 cyto_markers(gs)
+
+# cytoset
+cs <- cyto_data_extract(gs, "root")[["root"]]
+cyto_markers(cs)
+
+# cytoframe
+cyto_markers(cs[[1]])
 
 }
 \seealso{
