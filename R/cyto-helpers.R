@@ -1847,6 +1847,154 @@ cyto_select <- function(x, ...) {
   }
 }
 
+## CYTO_GROUPS -----------------------------------------------------------------
+
+#' Retrieve details about experimental groups
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param group_by names of cyto_details variables to use for grouping For more
+#'   control over the group order, specify the factor levels for each variable
+#'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#' @param details logical indicating whether the split experimental details
+#'   should be returned instead of the group names, set to FALSE by default.
+#'
+#' @return names of experimental groups or a list of experiment details per
+#'   experimental group.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' # Treatment & OVAConc group names
+#' cyto_groups(gs,
+#' group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
+#' OVAConc = c(0, 5, 50, 500)))
+#'
+#' # Treatment & OVAConc group details
+#' cyto_groups(gs,
+#' group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
+#' OVAConc = c(0, 5, 50, 500)),
+#' details = TRUE)
+#'
+#' @export
+cyto_groups <- function(x, 
+                        group_by = "all",
+                        details = FALSE){
+  
+  # Check class of x
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
+    stop("'x' should be an object of class cytoset or GatingSet.")
+  }
+  
+  # Extract experiment details
+  pd <- cyto_details(x)
+  
+  # Replace any NA with "NA" to avoid missing rows
+  if (any(is.na(pd))) {
+    pd[is.na(pd)] <- "NA"
+  }
+  
+  # Extract sample names
+  nms <- cyto_names(x)
+  
+  # group_by is a list with factor levels - should not be "all"
+  if (is(group_by, "list")) {
+    # Check variables and factor levels
+    lapply(seq_along(group_by), function(z) {
+      # Variable
+      var <- names(group_by)[z]
+      # Expected variable levels
+      var_levels <- unique(pd[, var])
+      # Watch out for NA
+      if (any(LAPPLY(group_by[[z]], "is.na"))) {
+        ind <- which(LAPPLY(group_by[[z]], "is.na"))
+        group_by[[z]][ind] <- "NA"
+      }
+      # Check variables
+      if (!var %in% colnames(pd)) {
+        stop(paste0(
+          var,
+          " is not a valid variable for this ",
+          class(x), "."
+        ))
+      }
+      # Incorrect factor levels
+      if (!all(group_by[[z]] %in% unique(pd[, var]))) {
+        lapply(group_by[[z]], function(y) {
+          if (!y %in% unique(pd[, var])) {
+            stop(paste0(
+              y, " is not a valid factor level for ",
+              group_by[[z]],
+              "."
+            ))
+          }
+        })
+      }
+      # Update factor levels in pd
+      if (!all(var_levels %in% group_by[[z]])) {
+        missing_levels <- as.vector(var_levels[!var_levels %in% group_by[[z]]])
+        group_by[[z]] <<- c(
+          group_by[[z]],
+          missing_levels
+        )
+      }
+      # Convert pd variable to factor and set levels
+      pd[, var] <<- factor(pd[, var], levels = group_by[[z]])
+    })
+    # Convert group_by to vector
+    group_by <- names(group_by)
+    # group_by is a vector of variable names
+  } else {
+    # Check variables
+    if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
+      lapply(group_by, function(y) {
+        if (!y %in% colnames(pd)) {
+          stop(paste0(y, " is not a valid variable for this ", class(x), "."))
+        }
+      })
+    }
+  }
+  
+  # Split pd based on group_by into a named list
+  if (length(group_by) == 1) {
+    if (group_by == "all") {
+      pd_split <- list("all" = pd)
+    } else if (group_by == "name") {
+      pd_split <- lapply(nms, function(z) {
+        pd[pd$name == z, , drop = FALSE]
+      })
+      names(pd_split) <- nms
+    } else {
+      pd_split <- split(pd, pd[, group_by],
+                        sep = " ",
+                        lex.order = TRUE,
+                        drop = TRUE
+      )
+    }
+  } else {
+    pd_split <- split(pd, pd[, group_by],
+                      sep = " ",
+                      lex.order = TRUE,
+                      drop = TRUE
+    )
+  }
+  
+  # RETURN SPLIT DETAILS
+  if(details == TRUE){
+    return(pd_split)
+    # RETURN GROUP NAMES
+  }else{
+    return(names(pd_split))
+  }
+  
+}
+
 ## CYTO_GROUP_BY ---------------------------------------------------------------
 
 #' Group a flowSet or GatingSet by experiment variables
