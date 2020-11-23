@@ -988,8 +988,8 @@ cyto_names_parse <- function(x,
 
 #' Apply Transformations to Cytometry Data
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param trans object of class
@@ -1027,10 +1027,10 @@ cyto_names_parse <- function(x,
 #'
 #' @importFrom flowWorkspace recompute gh_get_pop_paths gh_pop_get_parent
 #'   gh_pop_get_gate gh_pop_set_gate gs_pop_set_gate
-#' @importFrom flowCore transform
+#' @importFrom flowCore transform transformList
 #' @importFrom grDevices n2mfrow
 #' @importFrom graphics par
-#' @importFrom methods is
+#' @importFrom methods as
 #'
 #' @examples
 #'
@@ -1084,65 +1084,65 @@ cyto_transform.default <- function(x,
                                    popup = FALSE,
                                    axes_limits = "machine",
                                    ...) {
-
+  
   # No transformations supplied - automatically obtain transform definitions
   if (is.null(trans) | .all_na(trans)) {
-
+    
     # Message not recommended to auto-transform flowFrame/flowSet objects
-    if (is(x, "flowFrame") | is(x, "flowSet")) {
+    if (cyto_class(x, c("flowFrame", "flowSet"))) {
       message(paste(
         "Automatically transforming flowFrame/flowSet objects",
         "is not recommended as transformation definitions will be lost."
       ))
     }
-
+    
     # Dispatch based on type argument to get TransformerList
     if (type == "log") {
       transformer_list <- cyto_transformer_log(x,
-        channels = channels,
-        parent = parent,
-        select = select,
-        plot = FALSE,
-        ...
+                                               channels = channels,
+                                               parent = parent,
+                                               select = select,
+                                               plot = FALSE,
+                                               ...
       )
     } else if (type == "arcsinh") {
       transformer_list <- cyto_transformer_arcsinh(x,
-        channels = channels,
-        parent = parent,
-        select = select,
-        plot = FALSE, ...
+                                                   channels = channels,
+                                                   parent = parent,
+                                                   select = select,
+                                                   plot = FALSE, ...
       )
     } else if (type == "biex") {
       transformer_list <- cyto_transformer_biex(x,
-        channels = channels,
-        parent = parent,
-        select = select,
-        plot = FALSE, ...
+                                                channels = channels,
+                                                parent = parent,
+                                                select = select,
+                                                plot = FALSE, ...
       )
     } else if (type == "logicle") {
       transformer_list <- cyto_transformer_logicle(x,
-        channels = channels,
-        parent = parent,
-        select = select,
-        plot = FALSE, ...
+                                                   channels = channels,
+                                                   parent = parent,
+                                                   select = select,
+                                                   plot = FALSE, ...
       )
     }
   }
-
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (is(x, "flowFrame") | is(x, "flowSet")) {
-
+  if (cyto_class(x, c("flowFrame", "flowSet"))) {
+    
     # Extract transformations from transformerList to transformList
     transform_list <- cyto_transform_extract(transformer_list,
-      inverse = inverse
+                                             inverse = inverse
     )
-
+    
     # Apply transformations
     x <- suppressMessages(transform(x, transform_list))
-
+    
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
-  } else if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
-
+  } else if (cyto_class(x, "GatingSet")) {
+    
     # Inverse transformations not yet supported
     if (inverse == TRUE) {
       stop(paste(
@@ -1150,31 +1150,31 @@ cyto_transform.default <- function(x,
         "GatingHierarchy/GatingSet objects."
       ))
     }
-
+    
     # Apply transformations
     x <- suppressMessages(transform(x, transformer_list))
   }
-
+  
   # Construct the plots
   if (plot == TRUE) {
-
+    
     # Plot if space sufficient space
     tryCatch(
       {
-
+        
         # Pull out flowFrame/flowSet to plot
         cyto_data <- cyto_extract(x, parent)
-
+        
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
-
+        
         # Channels
         channels <- names(transformer_list)
-
+        
         # Old graphics parameters
         old_pars <- .par("mfrow")
         on.exit(par(old_pars))
-
+        
         # Set up plotting area
         cyto_plot_new(popup = popup)
         n <- length(channels)
@@ -1184,21 +1184,21 @@ cyto_transform.default <- function(x,
             n2mfrow(n)[2]
           )
         )
-
+        
         # Generate plot for each channel
         lapply(channels, function(chan) {
           if (inverse == FALSE) {
             cyto_plot(cyto_data,
-              channels = chan,
-              axes_trans = transformer_list,
-              title = NA,
-              axes_limits = axes_limits
+                      channels = chan,
+                      axes_trans = transformer_list,
+                      title = NA,
+                      axes_limits = axes_limits
             )
           } else if (inverse == TRUE) {
             cyto_plot(cyto_data,
-              channels = chan,
-              title = NA,
-              axes_limits = axes_limits
+                      channels = chan,
+                      title = NA,
+                      axes_limits = axes_limits
             )
           }
         })
@@ -1208,7 +1208,7 @@ cyto_transform.default <- function(x,
       }
     )
   }
-
+  
   # Return transformed data
   return(x)
 }
@@ -1221,42 +1221,48 @@ cyto_transform.transformList <- function(x,
                                          popup = FALSE,
                                          axes_limits = "machine",
                                          ...) {
-
+  
   # Added for backwards compatibility - flowFrame/flowSet objects only
-  if (is(x, "GatingHierarchy") |
-    is(x, "GatingSet")) {
+  if (cyto_class(x, "GatingSet")) {
     stop(paste(
       "GatingHierarchy and GatingSet objects require transformerList",
       "objects to apply transformations."
     ))
   }
-
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (is(x, "flowFrame") | is(x, "flowSet")) {
-
+  if (cyto_class(x, c("flowFrame", "flowSet"))) {
+    
+    # Restrict (subsetted data may lack channels)
+    trans <- trans@transforms[names(trans) %in% cyto_channels(x)]
+    trans <- transformList(names(trans),
+                           lapply(trans, function(z){
+                             z@f
+                           }))
+    
     # Transformations applied as is - allow for inverse transformList
     x <- suppressMessages(transform(x, trans))
   }
-
+  
   # Construct plots
   if (plot == TRUE) {
     # Plot if sufficient space
     tryCatch(
       {
-
+        
         # Pull out flowFrame/flowSet to plot
         cyto_data <- cyto_extract(x)
-
+        
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
-
+        
         # Channels
         channels <- names(trans@transforms)
-
+        
         # Old graphics parameters
         old_pars <- .par("mfrow")
         on.exit(par(old_pars))
-
+        
         # Set up plotting area
         cyto_plot_new(popup = popup)
         n <- length(channels)
@@ -1266,13 +1272,13 @@ cyto_transform.transformList <- function(x,
             n2mfrow(n)[2]
           )
         )
-
+        
         # Generate plot for each channel - axes will not be transformed correctly
         lapply(channels, function(chan) {
           cyto_plot(cyto_data,
-            channels = chan,
-            title = NA,
-            axes_limits = axes_limits
+                    channels = chan,
+                    title = NA,
+                    axes_limits = axes_limits
           )
         })
       },
@@ -1281,7 +1287,7 @@ cyto_transform.transformList <- function(x,
       }
     )
   }
-
+  
   # Return transformed data
   return(x)
 }
@@ -1295,20 +1301,23 @@ cyto_transform.transformerList <- function(x,
                                            popup = FALSE,
                                            axes_limits = "machine",
                                            ...) {
-
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
-  if (is(x, "flowFrame") | is(x, "flowSet")) {
-
+  if (cyto_class(x, c("flowFrame", "flowSet"))) {
+    
+    # Restrict transformers
+    trans <- cyto_transformer_combine(trans[names(trans) %in% cyto_channels(x)])
+    
     # Extract transformations to transformList
     transform_list <- cyto_transform_extract(trans, inverse = inverse)
-
+    
     # Apply transformations
     x <- suppressMessages(transform(x, transform_list))
-
-
+    
+    
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
-  } else if (is(x, "GatingHierarchy") | is(x, "GatingSet")) {
-
+  } else if (cyto_class(x, "GatingSet")) {
+    
     # Inverse transformations not yet supported
     if (inverse == TRUE) {
       stop(paste(
@@ -1316,30 +1325,33 @@ cyto_transform.transformerList <- function(x,
         "GatingHierarchy/GatingSet objects."
       ))
     }
-
+    
+    # Restrict transformers - subsetted data may lack channels
+    trans <- cyto_transformer_combine(trans[names(trans) %in% cyto_channels(x)])
+    
     # Apply transformations
     x <- suppressMessages(transform(x, trans))
   }
-
+  
   # Construct plots
   if (plot == TRUE) {
     # Plot if sufficient space
     tryCatch(
       {
-
+        
         # Extract flowFrame/flowSet for plotting
         cyto_data <- cyto_extract(x)
-
+        
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
-
+        
         # Channels
         channels <- names(trans)
-
+        
         # Old graphics parameters
         old_pars <- .par("mfrow")
         on.exit(par(old_pars))
-
+        
         # Set up plotting area
         cyto_plot_new(popup = popup)
         n <- length(channels)
@@ -1349,21 +1361,21 @@ cyto_transform.transformerList <- function(x,
             n2mfrow(n)[2]
           )
         )
-
+        
         # Generate plot for each channel
         lapply(channels, function(chan) {
           if (inverse == FALSE) {
             cyto_plot(cyto_data,
-              channels = chan,
-              axes_trans = trans,
-              title = NA,
-              axes_limits = axes_limits
+                      channels = chan,
+                      axes_trans = trans,
+                      title = NA,
+                      axes_limits = axes_limits
             )
           } else if (inverse == TRUE) {
             cyto_plot(cyto_data,
-              channels = chan,
-              title = NA,
-              axes_limits = axes_limits
+                      channels = chan,
+                      title = NA,
+                      axes_limits = axes_limits
             )
           }
         })
@@ -1373,7 +1385,7 @@ cyto_transform.transformerList <- function(x,
       }
     )
   }
-
+  
   # Return transformed data
   return(x)
 }
