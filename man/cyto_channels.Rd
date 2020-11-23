@@ -7,8 +7,8 @@
 cyto_channels(x, select = NULL, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -25,30 +25,28 @@ vector of channel names.
 }
 \description{
 Simply a wrapper around \code{colnames} to extract the channels associated
-with a \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
+with a \code{cytoframe}, \code{cytoset} \code{GatingHierarchy} or
+\code{GatingSet}.
 }
 \examples{
-
-# Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
 # Activation GatingSet
-gs <- GatingSet(fs)
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 
-# flowFrame
-cyto_channels(fs[[1]])
-
-# flowSet
-cyto_channels(fs)
+# GatingSet
+cyto_channels(gs)
 
 # GatingHierarchy
-cyto_channels(gs[[1]])
+cyto_channels(gs[[1]], select = "Alexa")
 
-# GatingSet - exclude FSC & SSC channels
-cyto_channels(gs, exclude = c("FSC","SSC"))
+# cytoset
+cs <- cyto_data_extract(gs, "root")[["root"]]
+cyto_channels(cs)
+
+# cytoframe
+cyto_channels(cs[[1]], exclude = c("FSC","SSC"))
 
 }
 \seealso{

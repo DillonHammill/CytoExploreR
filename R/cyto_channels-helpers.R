@@ -3,10 +3,11 @@
 #' Extract channel names
 #'
 #' Simply a wrapper around \code{colnames} to extract the channels associated
-#' with a \code{flowFrame}, \code{flowSet} or \code{GatingSet}.
+#' with a \code{cytoframe}, \code{cytoset} \code{GatingHierarchy} or
+#' \code{GatingSet}.
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param select vector of channel names to select.
@@ -17,34 +18,29 @@
 #'
 #' @return vector of channel names.
 #'
-#' @importFrom BiocGenerics colnames
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_fluor_channels}}
 #'
 #' @examples
-#'
-#' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
-#'
 #' # Activation GatingSet
-#' gs <- GatingSet(fs)
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
-#' # flowFrame
-#' cyto_channels(fs[[1]])
-#'
-#' # flowSet
-#' cyto_channels(fs)
+#' # GatingSet
+#' cyto_channels(gs)
 #'
 #' # GatingHierarchy
-#' cyto_channels(gs[[1]])
+#' cyto_channels(gs[[1]], select = "Alexa")
 #'
-#' # GatingSet - exclude FSC & SSC channels
-#' cyto_channels(gs, exclude = c("FSC","SSC"))
+#' # cytoset
+#' cs <- cyto_data_extract(gs, "root")[["root"]]
+#' cyto_channels(cs)
+#'
+#' # cytoframe
+#' cyto_channels(cs[[1]], exclude = c("FSC","SSC"))
 #'
 #' @export
 cyto_channels <- function(x, 
@@ -52,8 +48,17 @@ cyto_channels <- function(x,
                           exclude = NULL,
                           ...){
   
+  # LIST
+  if(cyto_class(x, "list", TRUE)) {
+    x <- x[[1]]
+  }
+  
   # CHANNELS
-  channels <- colnames(x)
+  if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
+    channels <- BiocGenerics::colnames(x)
+  } else {
+    channels <- flowWorkspace::colnames(x)
+  }
   
   # SELECT
   if(!is.null(select)){
@@ -61,24 +66,24 @@ cyto_channels <- function(x,
       which(
         suppressWarnings(
           grepl(z, 
-              channels, 
-              ignore.case = TRUE,
-              ...))
-        )
+                channels, 
+                ignore.case = TRUE,
+                ...))
+      )
     }))
     channels <- channels[ind]
   }
   
   # EXCLUDE
   if(!is.null(exclude)){
-    lapply(exclude, function(z){
-      channels <<- channels[!suppressWarnings(
+    for(z in exclude){
+      channels <- channels[!suppressWarnings(
         grepl(z, 
               channels, 
               ignore.case = TRUE,
               ...)
-        )]
-    })
+      )]
+    }
   }
   
   # RETURN CHANNELS
