@@ -4766,3 +4766,100 @@ cyto_apply.list <- function(x,
   )
   
 }
+
+## CYTO_CBIND ------------------------------------------------------------------
+
+#' Bind new columns to cytoframe or cytoset
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param cols matrix of columns to be added to \code{x} can be supplied in a
+#'   list for \code{cytoset} method.
+#'
+#' @importFrom flowWorkspace cf_append_cols
+#' @importFrom flowCore fr_append_cols
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @name cyto_cbind
+NULL
+
+#' @noRd
+#' @export
+cyto_cbind <- function(x,
+                       ...){
+  UseMethod("cyto_cbind")
+}
+
+#' @rdname cyto_cbind
+#' @export
+cyto_cbind.flowFrame <- function(x,
+                                 cols = NULL){
+  
+  # MATRIX
+  if(!is.matrix(cols)){
+    stop("'cols' must be a matrix!")
+  }
+  
+  # HANDLE EMPTY FLOWFRAME/CYTOFRAME
+  if(cyto_stat_count(x) == 0 & nrow(cols) > 0) {
+    cols <- cols[-seq_len(nrow(cols)), ,drop = FALSE]
+  }
+  
+  # CYTOFRAME
+  if(cyto_class(x, "cytoframe", TRUE)){
+    cf_append_cols(x, cols)
+    # FLOWFRAME  
+  }else{
+    fr_append_cols(x, cols)
+  }
+  
+}
+
+#' @rdname cyto_cbind
+#' @export
+cyto_cbind.flowSet <- function(x, 
+                               cols = NULL){
+  
+  # MATRIX
+  if(is.matrix(cols)){
+    # COUNTS
+    cyto_counts <- cyto_apply(x, 
+                              "nrow", 
+                              input = "matrix",
+                              copy = FALSE)
+    # SAME NUMBER OF EVENTS
+    if(nrow(cols) != sum(cyto_counts)){
+      stop(
+        paste0("'cols' does not contain the same number of events as this", 
+               class(x))
+      )
+      # SPLIT MATRIX INTO LIST
+    }else{
+      cols <- lapply(seq_along(cyto_counts), function(z){
+        if(z == 1){
+          cols[1:cyto_counts[z], , drop = FALSE]
+        }else{
+          start <- sum(cyto_counts[1:(z-1)]) + 1
+          end <- start + cyto_counts[z] - 1
+          cols[start:end, , drop = FALSE]
+        }
+      })
+      names(cols) <- cyto_names(x)
+    }
+  }
+  
+  # BIND COLUMNS
+  cf_list <- lapply(cyto_names(x), function(z){
+    cyto_cbind(x[[z]], cols[[z]])
+  })
+  names(cf_list) <- cyto_names(x)
+  
+  # RETURN FLOWSET/CYTOSET
+  if(cyto_class(cf_list[[1]], "cytoframe", TRUE)){
+    return(cytoset(cf_list))
+  }else{
+    return(flowSet(cf_list))
+  }
+  
+}
