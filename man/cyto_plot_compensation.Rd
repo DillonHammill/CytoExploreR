@@ -167,13 +167,10 @@ transparency of density distributions, set to 0.5 by default.}
 \code{cyto_plot_compensation} plots each compensation control in all
 fluorescent channels to make it easy to identify any potential compensation
 issues. The unstained control is automatically overlaid onto the plot as a
-refernce if supplied.
+reference if supplied.
 }
 \examples{
 library(CytoExploreRData)
-
-# Bypass directory check for external files
-options("CytoExploreR_wd_check" = FALSE)
 
 # Load in compensation controls
 gs <- GatingSet(Compensation)
@@ -183,7 +180,7 @@ gt <- Compensation_gatingTemplate
 gt_gating(gt, gs)
 
 # Extract flowSet for plotting
-fs <- cyto_extract(gs, "Single Cells")
+fs <- cyto_data_extract(gs, "Single Cells")[["Single Cells"]]
 
 # Channel match file
 cmfile <- system.file("extdata",
@@ -218,9 +215,6 @@ cyto_plot_compensation(gs,
   channel_match = cmfile,
   display = 1000
 )
-
-# Return "CytoExploreR_wd_check" to default
-options("CytoExploreR_wd_check" = TRUE)
 
 }
 \seealso{
