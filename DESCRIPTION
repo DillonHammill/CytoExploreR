@@ -66,3 +66,4 @@ LazyData: true
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Language: en-GB
+Config/testthat/edition: 3
