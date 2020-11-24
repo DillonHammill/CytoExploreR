@@ -64,9 +64,9 @@
 #' @return cytoframe, cytoset, GatingHierarchy or GatingSet containing the
 #'   mapped projection parameters.
 #'
-#' @importFrom flowCore exprs keyword write.FCS flowSet fr_append_cols
+#' @importFrom flowCore exprs keyword write.FCS flowSet
 #' @importFrom flowWorkspace GatingSet gs_cyto_data<- flowSet_to_cytoset
-#'   recompute flowFrame_to_cytoframe cytoset gs_cyto_data cf_append_cols
+#'   recompute flowFrame_to_cytoframe cytoset gs_cyto_data
 #' @importFrom rsvd rpca
 #' @importFrom Rtsne Rtsne
 #' @importFrom umap umap
