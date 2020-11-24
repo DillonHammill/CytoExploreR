@@ -2,35 +2,35 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channel_match}
 \alias{cyto_channel_match}
-\title{Table Editor for Channel Match File Construction}
+\title{Create a csv file assigning a channel to each compensation control}
 \usage{
-cyto_channel_match(x, save_as = NULL, menu = TRUE)
+cyto_channel_match(x, save_as = NULL)
 }
 \arguments{
-\item{x}{object of \code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{save_as}{name to use for the saved channel match csv file, set to
 \code{"date-Channel-Match.csv"}.}
-
-\item{menu}{logical indicating whether channels should be selected from a
-drop down menu instead of manually typing them in.}
 }
 \value{
-update \code{cyto_details} of \code{flowSet} or \code{GatingSet},
+update \code{cyto_details} of \code{cytoset} or \code{GatingSet},
   write channel matching to csv file and return channel matching as a
   data.frame.
 }
 \description{
-Table Editor for Channel Match File Construction
+Create a csv file assigning a channel to each compensation control
 }
 \examples{
-\dontrun{
-# Load in CytoExploreRData to access data
-library(CytoExploreR)
+if(interactive()) {
+library(CytoExploreRData)
 
-# Generate channel match file for compensation controls
-cyto_channel_match(Compensation)
+# Compensation Gatingset
+gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+                          package = "CytoExploreRData"))
+
+# Select a channel for each control from dropdown menu
+cyto_channel_match(gs)
 }
 
 }
