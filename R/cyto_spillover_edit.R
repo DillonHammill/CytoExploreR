@@ -78,7 +78,6 @@
 #'   specified.
 #'
 #' @importFrom flowCore compensate fsApply exprs Subset each_col
-#' @importFrom utils read.csv write.csv
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
 #'   eventReactive renderPlot tabsetPanel tabPanel sidebarLayout fluidRow
@@ -90,7 +89,6 @@
 #' @importFrom methods as is
 #' @importFrom stats median
 #' @importFrom graphics lines layout
-#' @importFrom tools file_ext
 #' @importFrom flowWorkspace gs_cyto_data
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -124,35 +122,35 @@ cyto_spillover_edit.GatingSet <- function(x,
                                           header_text_size = 1.5,
                                           viewer = FALSE,
                                           ...) {
-
+  
   # PREPARE ARGUMENTS ----------------------------------------------------------
-
+  
   # COPY
   gs <- cyto_copy(x)
-
+  
   # SAMPLE NAMES
   nms <- cyto_names(gs)
-
+  
   # EXPERIMENT DETAILS
   pd <- cyto_details(gs)
-
+  
   # CHANNELS
   channels <- cyto_fluor_channels(gs)
-
+  
   # TRANSFORMATIONS
   axes_trans <- cyto_transformer_extract(gs)
-
+  
   # COMPENSATION
   comp <- cyto_spillover_extract(gs)
-
+  
   # DEFAULT TRANSFORMERS
   if (.all_na(axes_trans)) {
     axes_trans_default <- cyto_transformer_biex(gs,
-      channels = channels,
-      plot = FALSE
+                                                channels = channels,
+                                                plot = FALSE
     )
   }
-
+  
   # EXTRACT DATA
   cs <- cyto_extract(gs,
                      parent = "root",
@@ -165,15 +163,15 @@ cyto_spillover_edit.GatingSet <- function(x,
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
       cs <- cyto_transform(cs,
-        trans = trans,
-        inverse = TRUE,
-        plot = FALSE
+                           trans = trans,
+                           inverse = TRUE,
+                           plot = FALSE
       )
     }
     # REMOVE COMPENSATION
     cs <- cyto_compensate(cs,
-      spillover = comp,
-      remove = TRUE
+                          spillover = comp,
+                          remove = TRUE
     )
     # GET DEFAULT TRANSFORMERS
     if (.all_na(axes_trans)) {
@@ -183,8 +181,8 @@ cyto_spillover_edit.GatingSet <- function(x,
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     cs <- cyto_transform(cs,
-      trans = trans,
-      plot = FALSE
+                         trans = trans,
+                         plot = FALSE
     )
     # REPLACE DATA
     gs_cyto_data(gs) <- cs
@@ -198,14 +196,14 @@ cyto_spillover_edit.GatingSet <- function(x,
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
       trans <- cyto_transformer_combine(trans)
       cs <- cyto_transform(cs,
-        trans = trans,
-        plot = FALSE
+                           trans = trans,
+                           plot = FALSE
       )
       # REPLACE DATA
       gs_cyto_data(gs) <- cs
     }
   }
-
+  
   # GS TRANSORMED UNCOMPENSATED - GET GS_LINEAR
   if (!.all_na(axes_trans)) {
     # GS TRANSFORMED & UNCOMPENSATED
@@ -215,16 +213,16 @@ cyto_spillover_edit.GatingSet <- function(x,
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     cs <- cyto_transform(cs,
-      trans = trans,
-      inverse = TRUE,
-      plot = FALSE
+                         trans = trans,
+                         inverse = TRUE,
+                         plot = FALSE
     )
     # REPLACE DATA
     gs_cyto_data(gs_linear) <- cs
   }
-
+  
   # PREPARE CHANNEL_MATCH ----------------------------------------------------
-
+  
   # PREPARE CHANNEL_MATCH VARIABLE (MARKERS TO CHANNELS)
   if (any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
     # MARKERS TO CHANNELS
@@ -242,28 +240,14 @@ cyto_spillover_edit.GatingSet <- function(x,
     if (!is.null(channel_match)) {
       # CHANNEL_MATCH OBJECT
       if (is(channel_match, "data.frame") |
-        is(channel_match, "matrix") |
-        is(channel_match, "tibble")) {
+          is(channel_match, "matrix") |
+          is(channel_match, "tibble")) {
         if (!all(c("name", "channel") %in% colnames(channel_match))) {
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
       } else {
-        # File extension
-        channel_match <- file_ext_append(channel_match, ".csv")
-        # File exists
-        if (file.exists(channel_match)) {
-          channel_match <- read.csv(channel_match,
-            header = TRUE,
-            row.names = 1,
-            stringsAsFactors = FALSE
-          )
-          # file does not exist
-        } else {
-          stop(paste(
-            channel_match,
-            "does not exist or lacks required permissions."
-          ))
-        }
+        # READ CHANNEL_MATCH
+        channel_match <- read_from_csv(channel_match)
       }
       # Names of samples don't match any listed in channel_match
       if (!any(nms %in% rownames(channel_match))) {
@@ -287,9 +271,9 @@ cyto_spillover_edit.GatingSet <- function(x,
       pd$channel <- rep(NA, nrow(pd))
     }
   }
-
+  
   # PREPARE PARENTS ------------------------------------------------------------
-
+  
   # PARENT MISSING
   if (is.null(parent)) {
     if (!"parent" %in% colnames(pd)) {
@@ -312,17 +296,16 @@ cyto_spillover_edit.GatingSet <- function(x,
     parent <- rep(parent, length.out = length(x))
     pd[, "parent"] <- parent
   }
-
+  
   # PREPARE SPILLOVER MATRIX ---------------------------------------------------
-
+  
   # Spillover matrix supplied
   if (!is.null(spillover)) {
     # spillover is a data.frame or matrix or tibble
     if (is(spillover, "matrix") |
-      is(spillover, "data.frame")) {
+        is(spillover, "data.frame")) {
       # spill should be a matrix
       spill <- spillover
-      spill <- as.matrix(spill)
       # Save edited spillover matrix to date-Spillover-Matrix.csv
       spillover <- paste0(
         format(Sys.Date(), "%d%m%y"),
@@ -340,11 +323,7 @@ cyto_spillover_edit.GatingSet <- function(x,
         )[[1]]
         # Use matrix from file
       } else {
-        spill <- read.csv(spillover,
-          header = TRUE,
-          row.names = 1
-        )
-        spill <- as.matrix(spill)
+        spill <- read_from_csv(spillover)
       }
     }
     # No spillover matrix supplied
@@ -360,26 +339,26 @@ cyto_spillover_edit.GatingSet <- function(x,
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
-
+  
   # PREPARE DEFAULT SELECTIONS -------------------------------------------------
-
+  
   # UNSTAINED SAMPLE
   if (any(grepl("unstained", pd$channel, ignore.case = TRUE))) {
     unstained_initial <- pd$name[grepl("unstained",
-      pd$channel,
-      ignore.case = TRUE
+                                       pd$channel,
+                                       ignore.case = TRUE
     )][1]
   } else {
     unstained_initial <- NA
   }
-
+  
   # SAMPLE
   if (!.all_na(pd$channel)) {
     # UNSTAINED INCLUDED
     if (any(grepl("unstained", pd$channel))) {
       editor_initial_sample <- pd$name[!grepl("unstained",
-        pd$channel,
-        ignore.case = TRUE
+                                              pd$channel,
+                                              ignore.case = TRUE
       )][1]
       # NO UNSTAINED - USE FIRST SAMPLE
     } else {
@@ -388,16 +367,16 @@ cyto_spillover_edit.GatingSet <- function(x,
   } else {
     editor_initial_sample <- pd$name[1]
   }
-
+  
   # X CHANNEL
   if (!.all_na(pd$channel[pd$name == editor_initial_sample])) {
     editor_initial_xchannel <- pd$channel[pd$name == editor_initial_sample]
   } else {
     editor_initial_xchannel <- channels[1]
   }
-
+  
   # SHINY SPILLOVER MATRIX EDITOR ----------------------------------------------
-
+  
   # APPLICATION
   app <- shinyApp(
     ui <- fluidPage(
@@ -405,112 +384,112 @@ cyto_spillover_edit.GatingSet <- function(x,
       titlePanel("CytoExploreR Spillover Matrix Editor"),
       tabsetPanel(
         tabPanel("Editor",
-          fluid = TRUE,
-          sidebarLayout(
-            sidebarPanel(
-              selectInput(
-                inputId = "editor_unstained",
-                label = "Select Unstained Control:",
-                choices = c("No Unstained Control", nms),
-                selected = unstained_initial
-              ),
-              selectInput(
-                inputId = "editor_sample",
-                label = "Select Sample:",
-                choices = nms,
-                selected = editor_initial_sample
-              ),
-              selectInput(
-                inputId = "editor_xchannel",
-                label = "X Axis:",
-                choices = channels,
-                selected = editor_initial_xchannel
-              ),
-              selectInput(
-                inputId = "editor_ychannel",
-                label = "Y Axis:",
-                choices = channels,
-                selected = channels[2]
-              ),
-              checkboxInput(
-                inputId = "editor_unstained_overlay",
-                label = "Overlay Unstained Control",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "editor_unstained_median",
-                label = "Unstained Control Median",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "editor_median_tracker",
-                label = "Median Tracker",
-                value = TRUE
-              ),
-              actionButton("editor_save_button", "Save")
-            ),
-            mainPanel(
-              rHandsontableOutput("spillover_matrix",
-                height = "300px"
-              ),
-              plotOutput("editor_plots",
-                height = "400px",
-                width = "80%"
-              )
-            )
-          )
+                 fluid = TRUE,
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput(
+                       inputId = "editor_unstained",
+                       label = "Select Unstained Control:",
+                       choices = c("No Unstained Control", nms),
+                       selected = unstained_initial
+                     ),
+                     selectInput(
+                       inputId = "editor_sample",
+                       label = "Select Sample:",
+                       choices = nms,
+                       selected = editor_initial_sample
+                     ),
+                     selectInput(
+                       inputId = "editor_xchannel",
+                       label = "X Axis:",
+                       choices = channels,
+                       selected = editor_initial_xchannel
+                     ),
+                     selectInput(
+                       inputId = "editor_ychannel",
+                       label = "Y Axis:",
+                       choices = channels,
+                       selected = channels[2]
+                     ),
+                     checkboxInput(
+                       inputId = "editor_unstained_overlay",
+                       label = "Overlay Unstained Control",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "editor_unstained_median",
+                       label = "Unstained Control Median",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "editor_median_tracker",
+                       label = "Median Tracker",
+                       value = TRUE
+                     ),
+                     actionButton("editor_save_button", "Save")
+                   ),
+                   mainPanel(
+                     rHandsontableOutput("spillover_matrix",
+                                         height = "300px"
+                     ),
+                     plotOutput("editor_plots",
+                                height = "400px",
+                                width = "80%"
+                     )
+                   )
+                 )
         ),
         tabPanel("Plots",
-          fluid = TRUE,
-          sidebarLayout(
-            sidebarPanel(
-              selectInput(
-                inputId = "plots_unstained",
-                label = "Select Unstained Control:",
-                choices = c("No Unstained Control", nms),
-                selected = unstained_initial
-              ),
-              selectInput(
-                inputId = "plots_sample",
-                label = "Select Sample:",
-                choices = nms,
-                selected = editor_initial_sample
-              ),
-              selectInput(
-                inputId = "plots_xchannel",
-                label = "Channel",
-                choices = channels,
-                selected = editor_initial_xchannel
-              ),
-              checkboxInput(
-                inputId = "plots_unstained_overlay",
-                label = "Overlay Unstained Control",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "plots_uncompensated_underlay",
-                label = "Underlay Uncompensated Control",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "plots_compensated_overlay",
-                label = "Overlay Compensated Control",
-                value = TRUE
-              )
-            ),
-            mainPanel(
-              fluidRow(
-                plotOutput("plots", height = "700px", width = "100%")
-              )
-            )
-          )
+                 fluid = TRUE,
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput(
+                       inputId = "plots_unstained",
+                       label = "Select Unstained Control:",
+                       choices = c("No Unstained Control", nms),
+                       selected = unstained_initial
+                     ),
+                     selectInput(
+                       inputId = "plots_sample",
+                       label = "Select Sample:",
+                       choices = nms,
+                       selected = editor_initial_sample
+                     ),
+                     selectInput(
+                       inputId = "plots_xchannel",
+                       label = "Channel",
+                       choices = channels,
+                       selected = editor_initial_xchannel
+                     ),
+                     checkboxInput(
+                       inputId = "plots_unstained_overlay",
+                       label = "Overlay Unstained Control",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "plots_uncompensated_underlay",
+                       label = "Underlay Uncompensated Control",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "plots_compensated_overlay",
+                       label = "Overlay Compensated Control",
+                       value = TRUE
+                     )
+                   ),
+                   mainPanel(
+                     fluidRow(
+                       plotOutput("plots", height = "700px", width = "100%")
+                     )
+                   )
+                 )
         )
       )
     ),
     # Shiny application server
     server <- function(input, output, session) {
       values <- reactiveValues()
-
+      
       observe({
         if (!is.null(input$spillover_matrix)) {
           spill <- hot_to_r(input$spillover_matrix)
@@ -520,11 +499,11 @@ cyto_spillover_edit.GatingSet <- function(x,
           values$spill <- spill * 100
         }
       })
-
+      
       output$spillover_matrix <- renderRHandsontable({
         rhandsontable(values$spill,
-          rowHeaderWidth = 105,
-          readOnly = FALSE
+                      rowHeaderWidth = 105,
+                      readOnly = FALSE
         ) %>%
           hot_cols(
             type = "numeric",
@@ -555,30 +534,30 @@ cyto_spillover_edit.GatingSet <- function(x,
           ) %>%
           hot_rows(rowHeights = 20)
       })
-
+      
       # Update sample selection in plots tab & x channel selection (match)
       observe({
         gh <- input$editor_sample
         # Update sample selection in Plots tab
         updateSelectInput(session,
-          "plots_sample",
-          selected = gh
+                          "plots_sample",
+                          selected = gh
         )
         # Use channel_match to set xchannel
         xchan <- pd$channel[match(gh, pd$name)]
         # Only update x channel if not NA
         if (!.all_na(xchan)) {
           updateSelectInput(session,
-            "editor_xchannel",
-            selected = xchan
+                            "editor_xchannel",
+                            selected = xchan
           )
           updateSelectInput(session,
-            "plots_xchannel",
-            selected = xchan
+                            "plots_xchannel",
+                            selected = xchan
           )
         }
       })
-
+      
       # Re-apply compensation and transformations
       gs_comp <- eventReactive(values$spill, {
         # COPY
@@ -589,120 +568,120 @@ cyto_spillover_edit.GatingSet <- function(x,
         trans <- axes_trans[match_ind(channels, names(axes_trans))]
         trans <- cyto_transformer_combine(trans)
         gs_trans <- cyto_transform(gs_linear_copy_comp,
-          trans = trans,
-          plot = FALSE
+                                   trans = trans,
+                                   plot = FALSE
         )
         return(gs_trans)
       })
-
+      
       # Turn off unstained aspects if no unstained control is supplied
       observe({
         unst <- input$editor_unstained
         # Turn off unstained components if unstained is NA
         if (unst == "No Unstained Control") {
           updateCheckboxInput(session,
-            "editor_unstained_overlay",
-            value = FALSE
+                              "editor_unstained_overlay",
+                              value = FALSE
           )
           updateCheckboxInput(session,
-            "editor_unstained_median",
-            value = FALSE
+                              "editor_unstained_median",
+                              value = FALSE
           )
           # Turn on unstained components
         } else {
           updateCheckboxInput(session,
-            "editor_unstained_overlay",
-            value = TRUE
+                              "editor_unstained_overlay",
+                              value = TRUE
           )
           updateCheckboxInput(session,
-            "editor_unstained_median",
-            value = TRUE
+                              "editor_unstained_median",
+                              value = TRUE
           )
         }
         # Update Plots tab unstained control based on editor selection
         updateSelectInput(session,
-          "plots_unstained",
-          selected = unst
+                          "plots_unstained",
+                          selected = unst
         )
       })
-
+      
       # Update channel selection on plots tab based on editor selection
       observe({
         xchan <- input$editor_xchannel
         updateSelectInput(session,
-          "plots_xchannel",
-          selected = xchan
+                          "plots_xchannel",
+                          selected = xchan
         )
       })
-
+      
       # Update sample & channel selection in editor based on Plots selection
       observe({
         smp <- input$plots_sample
         updateSelectInput(session,
-          "editor_sample",
-          selected = smp
+                          "editor_sample",
+                          selected = smp
         )
         xchan <- input$plots_xchannel
         updateSelectInput(session,
-          "editor_xchannel",
-          selected = xchan
+                          "editor_xchannel",
+                          selected = xchan
         )
       })
-
+      
       # Update overlay unstained check box based on unstained selection (Plots)
       observe({
         unst <- input$plots_unstained
         # Remove unstained overlay
         if (unst == "No Unstained Control") {
           updateCheckboxInput(session,
-            "plots_unstained_overlay",
-            value = FALSE
+                              "plots_unstained_overlay",
+                              value = FALSE
           )
           # Turn on unstained overlay
         } else {
           updateCheckboxInput(session,
-            "plots_unstained_overlay",
-            value = TRUE
+                              "plots_unstained_overlay",
+                              value = TRUE
           )
         }
         # Update unstained control selection in editor tab
         updateSelectInput(session,
-          "editor_unstained",
-          selected = unst
+                          "editor_unstained",
+                          selected = unst
         )
       })
-
+      
       output$editor_plots <- renderPlot({
-
+        
         # Set up plot layout
         layout(matrix(c(1, 1, 2, 2, 1, 1, 3, 3),
-          byrow = TRUE,
-          ncol = 4
+                      byrow = TRUE,
+                      ncol = 4
         ))
-
+        
         # No unstained control - no unstained overlay or unstained median
         if (input$editor_unstained == "No Unstained Control") {
-
+          
           # Plots
           cyto_plot(gs_comp()[[input$editor_sample]],
-            channels = c(
-              input$editor_xchannel,
-              input$editor_ychannel
-            ),
-            parent = pd[pd$name == input$editor_sample, "parent"],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = input$editor_sample,
-            point_size = point_size,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size, ...
+                    channels = c(
+                      input$editor_xchannel,
+                      input$editor_ychannel
+                    ),
+                    parent = pd[pd$name == input$editor_sample, "parent"],
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = input$editor_sample,
+                    point_size = point_size,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = title_text_size, ...
           )
-
+          
           # Median tracker
           if (input$editor_median_tracker == TRUE) {
-
+            
             # MEDIAN TRACKER
             pop <- cyto_extract(
               gs_comp()[[input$editor_sample]],
@@ -716,83 +695,83 @@ cyto_spillover_edit.GatingSet <- function(x,
               )
             )
           }
-
+          
           # Density distribution in associated channel
           cyto_plot(gs_comp()[[input$editor_sample]],
-            channels = input$editor_xchannel,
-            parent = pd[pd$name == input$editor_sample, "parent"],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = NA,
-            ylab = "Density",
-            density_fill = "white",
-            density_line_col = "blue",
-            density_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size
+                    channels = input$editor_xchannel,
+                    parent = pd[pd$name == input$editor_sample, "parent"],
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = NA,
+                    ylab = "Density",
+                    density_fill = "white",
+                    density_line_col = "blue",
+                    density_line_width = 2,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = title_text_size
           )
-
+          
           # Density distribution in other channel
           cyto_plot(gs_comp()[[input$editor_sample]],
-            channels = input$editor_ychannel,
-            parent = pd[pd$name == input$editor_sample, "parent"],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = NA,
-            ylab = "Density",
-            density_fill = "white",
-            density_line_col = "blue",
-            density_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size
+                    channels = input$editor_ychannel,
+                    parent = pd[pd$name == input$editor_sample, "parent"],
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = NA,
+                    ylab = "Density",
+                    density_fill = "white",
+                    density_line_col = "blue",
+                    density_line_width = 2,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = title_text_size
           )
-
+          
           # Add MedFI label in other channel
           cyto_plot_label(gs_comp()[[input$editor_sample]],
-            channels = input$editor_ychannel,
-            parent = pd[pd$name == input$editor_sample, "parent"],
-            display = display,
-            label_text = "MedFI",
-            label_stat = "median",
-            label_text_x = 0.75 * par("usr")[2],
-            label_text_y = 30,
-            label_text_col = "red",
-            label_text_size = 1.1
+                          channels = input$editor_ychannel,
+                          parent = pd[pd$name == input$editor_sample, "parent"],
+                          display = display,
+                          label_text = "MedFI",
+                          label_stat = "median",
+                          label_text_x = 0.75 * par("usr")[2],
+                          label_text_y = 30,
+                          label_text_col = "red",
+                          label_text_size = 1.1
           )
-
+          
           # Unstained control supplied
         } else if (input$editor_unstained != "No Unstained Control") {
-
+          
           # NO UNSTAINED OVERLAY
           if (input$editor_unstained_overlay == FALSE) {
-
+            
             # Plot
             cyto_plot(gs_comp()[[input$editor_sample]],
-              channels = c(
-                input$editor_xchannel,
-                input$editor_ychannel
-              ),
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = input$editor_sample,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size, ...
+                      channels = c(
+                        input$editor_xchannel,
+                        input$editor_ychannel
+                      ),
+                      parent = pd[pd$name == input$editor_sample, "parent"],
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = input$editor_sample,
+                      point_size = point_size,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = title_text_size, ...
             )
-
+            
             # Median line through unstained control
             if (input$editor_unstained_median == TRUE) {
               # PULL OUT NIL - RAW DATA
               NIL <- cyto_extract(gs_comp()[[input$editor_unstained]],
-                pd[pd$name == input$editor_sample, "parent"],
-                raw = TRUE
+                                  pd[pd$name == input$editor_sample, "parent"],
+                                  raw = TRUE
               )[[1]]
               # COMPUTE MEDFI IN ALL CHANNELS
               medFI <- lapply(channels, function(z) {
@@ -803,10 +782,10 @@ cyto_spillover_edit.GatingSet <- function(x,
               cutoff <- medFI[1, input$editor_ychannel]
               abline(h = cutoff, col = "red", lwd = 2)
             }
-
+            
             # Median tracker through stained control
             if (input$editor_median_tracker == TRUE) {
-
+              
               # MEDIAN TRACKER
               pop <- cyto_extract(
                 gs_comp()[[input$editor_sample]],
@@ -820,88 +799,88 @@ cyto_spillover_edit.GatingSet <- function(x,
                 )
               )
             }
-
+            
             # Density distribution in associated channel
             cyto_plot(gs_comp()[[input$editor_sample]],
-              channels = input$editor_xchannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = NA,
-              ylab = "Density",
-              density_stack = 0,
-              density_fill = "white",
-              density_fill_alpha = 0,
-              density_line_col = "blue",
-              density_line_width = 2,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = 1.25 * title_text_size
+                      channels = input$editor_xchannel,
+                      parent = pd[pd$name == input$editor_sample, "parent"],
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = NA,
+                      ylab = "Density",
+                      density_stack = 0,
+                      density_fill = "white",
+                      density_fill_alpha = 0,
+                      density_line_col = "blue",
+                      density_line_width = 2,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = 1.25 * title_text_size
             )
-
+            
             # Density distribution in other channel
             cyto_plot(gs_comp()[[input$editor_sample]],
-              channels = input$editor_ychannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = NA,
-              ylab = "Density",
-              density_stack = 0,
-              density_fill = "white",
-              density_fill_alpha = 0,
-              density_line_col = "blue",
-              density_line_width = 2,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = 1.25 * title_text_size
+                      channels = input$editor_ychannel,
+                      parent = pd[pd$name == input$editor_sample, "parent"],
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = NA,
+                      ylab = "Density",
+                      density_stack = 0,
+                      density_fill = "white",
+                      density_fill_alpha = 0,
+                      density_line_col = "blue",
+                      density_line_width = 2,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = 1.25 * title_text_size
             )
-
+            
             # Add label for Stained median
             cyto_plot_label(gs_comp()[[input$editor_sample]],
-              channels = input$editor_ychannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              display = display,
-              label_text = "MedFI",
-              label_stat = "median",
-              label_text_x = 0.75 * par("usr")[2],
-              label_text_y = 30,
-              label_text_col = "blue",
-              label_text_size = 1.1
+                            channels = input$editor_ychannel,
+                            parent = pd[pd$name == input$editor_sample, "parent"],
+                            display = display,
+                            label_text = "MedFI",
+                            label_stat = "median",
+                            label_text_x = 0.75 * par("usr")[2],
+                            label_text_y = 30,
+                            label_text_col = "blue",
+                            label_text_size = 1.1
             )
-
+            
             # UNSTAINED OVERLAY
           } else if (input$editor_unstained_overlay == TRUE) {
-
+            
             # Plot
             cyto_plot(gs_comp()[[input$editor_sample]],
-              channels = c(
-                input$editor_xchannel,
-                input$editor_ychannel
-              ),
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              overlay = cyto_extract(
-                gs_comp()[[input$editor_unstained]],
-                pd[pd$name == input$editor_sample, "parent"]
-              ),
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = input$editor_sample,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size, ...
+                      channels = c(
+                        input$editor_xchannel,
+                        input$editor_ychannel
+                      ),
+                      parent = pd[pd$name == input$editor_sample, "parent"],
+                      overlay = cyto_extract(
+                        gs_comp()[[input$editor_unstained]],
+                        pd[pd$name == input$editor_sample, "parent"]
+                      ),
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = input$editor_sample,
+                      point_size = point_size,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = title_text_size, ...
             )
-
+            
             # Median line through unstained control
             if (input$editor_unstained_median == TRUE) {
               # PULL OUT NIL - RAW DATA
               NIL <- cyto_extract(gs_comp()[[input$editor_unstained]],
-                pd[pd$name == input$editor_sample, "parent"],
-                raw = TRUE
+                                  pd[pd$name == input$editor_sample, "parent"],
+                                  raw = TRUE
               )[[1]]
               # COMPUTE MEDFI IN ALL CHANNELS
               medFI <- lapply(channels, function(z) {
@@ -912,10 +891,10 @@ cyto_spillover_edit.GatingSet <- function(x,
               cutoff <- medFI[1, input$editor_ychannel]
               abline(h = cutoff, col = "red", lwd = 2)
             }
-
+            
             # MEDIAN TRACKER
             if (input$editor_median_tracker == TRUE) {
-
+              
               # MEDIAN TRACKER
               pop <- cyto_extract(
                 gs_comp()[[input$editor_sample]],
@@ -929,283 +908,279 @@ cyto_spillover_edit.GatingSet <- function(x,
                 )
               )
             }
-
+            
             # Density distribution in associated channel - unstained overlay
             cyto_plot(gs_comp()[[input$editor_unstained]],
-              channels = input$editor_xchannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              overlay = cyto_extract(
-                gs_comp()[[input$editor_sample]],
-                pd[pd$name == input$editor_sample, "parent"]
-              ),
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = NA,
-              ylab = "Density",
-              density_stack = 0,
-              density_fill = c("grey70", "white"),
-              density_fill_alpha = c(1, 0),
-              density_line_col = c("black", "blue"),
-              density_line_width = 2,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = 1.25 * title_text_size
+                      channels = input$editor_xchannel,
+                      parent = pd[pd$name == input$editor_sample, "parent"],
+                      overlay = cyto_extract(
+                        gs_comp()[[input$editor_sample]],
+                        pd[pd$name == input$editor_sample, "parent"]
+                      ),
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = NA,
+                      ylab = "Density",
+                      density_stack = 0,
+                      density_fill = c("grey70", "white"),
+                      density_fill_alpha = c(1, 0),
+                      density_line_col = c("black", "blue"),
+                      density_line_width = 2,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = 1.25 * title_text_size
             )
-
+            
             # Density distribution in other channel - unstained overlay
             cyto_plot(gs_comp()[[input$editor_unstained]],
-              channels = input$editor_ychannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              overlay = cyto_extract(
-                gs_comp()[[input$editor_sample]],
-                pd[pd$name == input$editor_sample, "parent"]
-              ),
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = NA,
-              ylab = "Density",
-              density_stack = 0,
-              density_fill = c("grey70", "white"),
-              density_fill_alpha = c(1, 0),
-              density_line_col = c("black", "blue"),
-              density_line_width = 2,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = 1.25 * title_text_size
+                      channels = input$editor_ychannel,
+                      parent = pd[pd$name == input$editor_sample, "parent"],
+                      overlay = cyto_extract(
+                        gs_comp()[[input$editor_sample]],
+                        pd[pd$name == input$editor_sample, "parent"]
+                      ),
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = NA,
+                      ylab = "Density",
+                      density_stack = 0,
+                      density_fill = c("grey70", "white"),
+                      density_fill_alpha = c(1, 0),
+                      density_line_col = c("black", "blue"),
+                      density_line_width = 2,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = 1.25 * title_text_size
             )
-
+            
             # Add label for unstained median
             cyto_plot_label(gs_comp()[[input$editor_unstained]],
-              channels = input$editor_ychannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              display = display,
-              label_text = "MedFI",
-              label_stat = "median",
-              label_text_x = 0.75 * par("usr")[2],
-              label_text_y = 80,
-              label_text_col = "grey40",
-              label_text_size = 1.1
+                            channels = input$editor_ychannel,
+                            parent = pd[pd$name == input$editor_sample, "parent"],
+                            display = display,
+                            label_text = "MedFI",
+                            label_stat = "median",
+                            label_text_x = 0.75 * par("usr")[2],
+                            label_text_y = 80,
+                            label_text_col = "grey40",
+                            label_text_size = 1.1
             )
-
+            
             # Add label for Stained median
             cyto_plot_label(gs_comp()[[input$editor_sample]],
-              channels = input$editor_ychannel,
-              parent = pd[pd$name == input$editor_sample, "parent"],
-              display = display,
-              label_text = "MedFI",
-              label_stat = "median",
-              label_text_x = 0.75 * par("usr")[2],
-              label_text_y = 30,
-              label_text_col = "blue",
-              label_text_size = 1.1
+                            channels = input$editor_ychannel,
+                            parent = pd[pd$name == input$editor_sample, "parent"],
+                            display = display,
+                            label_text = "MedFI",
+                            label_stat = "median",
+                            label_text_x = 0.75 * par("usr")[2],
+                            label_text_y = 30,
+                            label_text_col = "blue",
+                            label_text_size = 1.1
             )
           }
         }
       })
-
+      
       # Plots tab uses cyto_plot_compensation
       output$plots <- renderPlot({
-
+        
         # Compensation plots - fill colours are reversed internally
         if (input$plots_uncompensated_underlay == TRUE) {
           if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == FALSE) {
+              input$plots_unstained_overlay == FALSE) {
             cyto_plot_compensation(gs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent", ],
-              axes_trans = axes_trans,
-              overlay = cyto_extract(
-                gs_comp()[[input$plots_sample]],
-                pd[pd$name == input$plots_sample, "parent", ]
-              ),
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("blue", "red"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("blue", "red")
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent", ],
+                                   axes_trans = axes_trans,
+                                   overlay = cyto_extract(
+                                     gs_comp()[[input$plots_sample]],
+                                     pd[pd$name == input$plots_sample, "parent", ]
+                                   ),
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("blue", "red"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("blue", "red")
             )
           } else if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == TRUE) {
+                     input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(gs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent"],
-              axes_trans = axes_trans,
-              overlay = list(
-                cyto_extract(
-                  gs_comp()[[input$plots_sample]],
-                  pd[pd$name == input$plots_sample, "parent"]
-                ),
-                cyto_extract(
-                  gs_comp()[[input$plots_unstained]],
-                  pd[pd$name == input$plots_sample, "parent"]
-                )
-              ),
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("blue", "red", "black"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("grey", "red", "blue")
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent"],
+                                   axes_trans = axes_trans,
+                                   overlay = list(
+                                     cyto_extract(
+                                       gs_comp()[[input$plots_sample]],
+                                       pd[pd$name == input$plots_sample, "parent"]
+                                     ),
+                                     cyto_extract(
+                                       gs_comp()[[input$plots_unstained]],
+                                       pd[pd$name == input$plots_sample, "parent"]
+                                     )
+                                   ),
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("blue", "red", "black"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "red", "blue")
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == TRUE) {
+                     input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(gs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent"],
-              axes_trans = axes_trans,
-              overlay = cyto_extract(
-                gs_comp()[[input$plots_unstained]],
-                pd[pd$name == input$plots_sample, "parent"]
-              ),
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("blue", "black"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("grey", "blue")
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent"],
+                                   axes_trans = axes_trans,
+                                   overlay = cyto_extract(
+                                     gs_comp()[[input$plots_unstained]],
+                                     pd[pd$name == input$plots_sample, "parent"]
+                                   ),
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("blue", "black"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "blue")
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == FALSE) {
+                     input$plots_unstained_overlay == FALSE) {
             cyto_plot_compensation(gs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent"],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              point_col = "blue",
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = "blue"
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent"],
+                                   axes_trans = axes_trans,
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = "blue",
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = "blue"
             )
           }
         } else if (input$plots_uncompensated_underlay == FALSE) {
           if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == TRUE) {
+              input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(gs_comp()[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent"],
-              axes_trans = axes_trans,
-              overlay = cyto_extract(
-                gs_comp()[[input$plots_unstained]],
-                pd[pd$name == input$plots_sample, "parent"]
-              ),
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("red", "black"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("grey", "red")
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent"],
+                                   axes_trans = axes_trans,
+                                   overlay = cyto_extract(
+                                     gs_comp()[[input$plots_unstained]],
+                                     pd[pd$name == input$plots_sample, "parent"]
+                                   ),
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("red", "black"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "red")
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == TRUE) {
+                     input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(gs_comp()[[input$plots_unstained]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent"],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              point_col = "black",
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = "grey"
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent"],
+                                   axes_trans = axes_trans,
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = "black",
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = "grey"
             )
           } else if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == FALSE) {
+                     input$plots_unstained_overlay == FALSE) {
             cyto_plot_compensation(gs_comp()[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              parent = pd[pd$name == input$plots_sample, "parent"],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              point_col = "red",
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = "red"
+                                   channel = input$plots_xchannel,
+                                   parent = pd[pd$name == input$plots_sample, "parent"],
+                                   axes_trans = axes_trans,
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = "red",
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = "red"
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == FALSE) {
+                     input$plots_unstained_overlay == FALSE) {
             # No data to plot
           }
         }
       })
-
+      
       # Save edited spillover matrix to csv file
       observe({
         input$saveBtn
         class(values$spill) <- "numeric"
         spill.mat <- values$spill / 100
-        write.csv(spill.mat, spillover)
+        write_to_csv(spill.mat, spillover)
       })
-
+      
       # Return edited matrix on application close
       onStop(function() {
-        spill.mat <- read.csv(spillover,
-          header = TRUE,
-          row.names = 1
-        )
-        colnames(spill.mat) <- rownames(spill.mat)
+        spill.mat <- read_from_csv(spillover)
         stopApp(spill.mat)
       })
     }
   )
-
+  
   # Run the shiny application
   if (viewer) {
     sp <- runApp(app,
-      launch.browser = paneViewer(),
-      quiet = TRUE
+                 launch.browser = paneViewer(),
+                 quiet = TRUE
     )
   } else {
     sp <- runApp(app,
-      quiet = TRUE
+                 quiet = TRUE
     )
   }
-
+  
   # RETURN UPDATED SPILLOVER MATRIX
   return(sp)
 }
@@ -1225,73 +1200,59 @@ cyto_spillover_edit.flowSet <- function(x,
                                         header_text_size = 1.5,
                                         viewer = FALSE,
                                         ...) {
-
+  
   # Assign x to fs
   fs <- x
-
+  
   # Copy fs (prevent transforming underlying data)
   fs <- cyto_copy(fs)
-
+  
   # Extract sample names
   nms <- cyto_names(fs)
-
+  
   # Extract fluorescent channels
   channels <- cyto_fluor_channels(fs)
-
+  
   # Extract cyto details to pd
   pd <- cyto_details(fs)
-
+  
   # Inverse transformations
   if (.all_na(axes_trans)) {
     fs_linear <- cyto_copy(fs)
     axes_trans <- cyto_transformer_biex(fs,
-      channels = channels,
-      plot = FALSE
+                                        channels = channels,
+                                        plot = FALSE
     )
     fs <- cyto_transform(fs,
-      trans = axes_trans,
-      plot = FALSE
+                         trans = axes_trans,
+                         plot = FALSE
     )
   } else {
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
     trans <- cyto_transformer_combine(trans)
     fs_linear <- cyto_transform(cyto_copy(fs),
-      trans = trans,
-      inverse = TRUE,
-      plot = FALSE
+                                trans = trans,
+                                inverse = TRUE,
+                                plot = FALSE
     )
   }
-
+  
   # Channel match file supplied
   if (!is.null(channel_match)) {
     # channel_match is a data.frame or matrix or tibble
     if (is(channel_match, "data.frame") |
-      is(channel_match, "matrix")) {
+        is(channel_match, "matrix")) {
       # channel_match must contain "name" and "channel" columns
       if (!any(grepl("name", colnames(channel_match), ignore.case = TRUE)) |
-        !any(grepl("channel", colnames(channel_match), ignore.case = TRUE))) {
+          !any(grepl("channel", colnames(channel_match), ignore.case = TRUE))) {
         stop("'channel_match' must contain the columns 'name' and 'channel'.")
       }
       # channel_match is the name of a csv file
     } else {
-      # channel_match must contain csv file extension
-      channel_match <- file_ext_append(channel_match, ".csv")
-      # file exists
-      if (file.exists(channel_match)) {
-        channel_match <- read.csv(channel_match,
-          header = TRUE,
-          row.names = 1,
-          stringsAsFactors = FALSE
-        )
-        # file does not exist
-      } else {
-        stop(paste(
-          channel_match,
-          "does not exist or lacks required permissions."
-        ))
-      }
+      # READ CHANNEL_MATCH
+      channel_match <- read_from_csv(channel_match)
     }
-
+    
     # Names of samples don't match any listed in channel_match
     if (!any(nms %in% rownames(channel_match))) {
       # Add NA channel selections to pd
@@ -1309,21 +1270,20 @@ cyto_spillover_edit.flowSet <- function(x,
         }
       })
     }
-
+    
     # No channel match file supplied
   } else if (is.null(channel_match)) {
     # Add NA channel selections to pd
     pd$channel <- rep(NA, nrow(pd))
   }
-
+  
   # Spillover matrix supplied
   if (!is.null(spillover)) {
     # spillover is a data.frame or matrix or tibble
     if (is(spillover, "matrix") |
-      is(spillover, "data.frame")) {
+        is(spillover, "data.frame")) {
       # spill should be a matrix
       spill <- spillover
-      spill <- as.matrix(spill)
       # Save edited spillover matrix to date-Spillover-Matrix.csv
       spillover <- paste0(
         format(Sys.Date(), "%d%m%y"),
@@ -1339,11 +1299,7 @@ cyto_spillover_edit.flowSet <- function(x,
         spill <- cyto_spillover_extract(fs)[[1]]
         # Use matrix from file
       } else {
-        spill <- read.csv(spillover,
-          header = TRUE,
-          row.names = 1
-        )
-        spill <- as.matrix(spill)
+        spill <- read_from_csv(spillover)
       }
     }
     # No spillover matrix supplied
@@ -1357,24 +1313,24 @@ cyto_spillover_edit.flowSet <- function(x,
   }
   colnames(spill) <- channels
   rownames(spill) <- channels
-
+  
   # Unstained supplied?
   if (any(grepl("Unstained", pd$channel, ignore.case = TRUE))) {
     unstained_initial <- pd$name[grepl("Unstained",
-      pd$channel,
-      ignore.case = TRUE
+                                       pd$channel,
+                                       ignore.case = TRUE
     )][1]
   } else {
     unstained_initial <- NA
   }
-
+  
   # Selected sample - unstained control supplied
   if (!.all_na(pd$channel)) {
     # Unstained control included
     if (any(grepl("Unstained", pd$channel))) {
       editor_initial_sample <- pd$name[!grepl("Unstained",
-        pd$channel,
-        ignore.case = TRUE
+                                              pd$channel,
+                                              ignore.case = TRUE
       )][1]
       # No unstained control - use first sample
     } else {
@@ -1383,14 +1339,14 @@ cyto_spillover_edit.flowSet <- function(x,
   } else {
     editor_initial_sample <- pd$name[1]
   }
-
+  
   # X channel selection
   if (!.all_na(pd$channel[pd$name == editor_initial_sample])) {
     editor_initial_xchannel <- pd$channel[pd$name == editor_initial_sample]
   } else {
     editor_initial_xchannel <- channels[1]
   }
-
+  
   # Shiny application
   app <- shinyApp(
     ui <- fluidPage(
@@ -1398,107 +1354,107 @@ cyto_spillover_edit.flowSet <- function(x,
       titlePanel("CytoExploreR Spillover Matrix Editor"),
       tabsetPanel(
         tabPanel("Editor",
-          fluid = TRUE,
-          sidebarLayout(
-            sidebarPanel(
-              selectInput(
-                inputId = "editor_unstained",
-                label = "Select Unstained Control:",
-                choices = c("No Unstained Control", nms),
-                selected = unstained_initial
-              ),
-              selectInput(
-                inputId = "editor_sample",
-                label = "Select Sample:",
-                choices = nms,
-                selected = editor_initial_sample
-              ),
-              selectInput(
-                inputId = "editor_xchannel",
-                label = "X Axis:",
-                choices = channels,
-                selected = editor_initial_xchannel
-              ),
-              selectInput(
-                inputId = "editor_ychannel",
-                label = "Y Axis:",
-                choices = channels,
-                selected = channels[2]
-              ),
-              checkboxInput(
-                inputId = "editor_unstained_overlay",
-                label = "Overlay Unstained Control",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "editor_unstained_median",
-                label = "Unstained Control Median",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "editor_median_tracker",
-                label = "Median Tracker",
-                value = TRUE
-              ),
-              actionButton("editor_save_button", "Save")
-            ),
-            mainPanel(
-              rHandsontableOutput("spillover_matrix", height = "300px"),
-              plotOutput("editor_plots", height = "400px", width = "80%")
-            )
-          )
+                 fluid = TRUE,
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput(
+                       inputId = "editor_unstained",
+                       label = "Select Unstained Control:",
+                       choices = c("No Unstained Control", nms),
+                       selected = unstained_initial
+                     ),
+                     selectInput(
+                       inputId = "editor_sample",
+                       label = "Select Sample:",
+                       choices = nms,
+                       selected = editor_initial_sample
+                     ),
+                     selectInput(
+                       inputId = "editor_xchannel",
+                       label = "X Axis:",
+                       choices = channels,
+                       selected = editor_initial_xchannel
+                     ),
+                     selectInput(
+                       inputId = "editor_ychannel",
+                       label = "Y Axis:",
+                       choices = channels,
+                       selected = channels[2]
+                     ),
+                     checkboxInput(
+                       inputId = "editor_unstained_overlay",
+                       label = "Overlay Unstained Control",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "editor_unstained_median",
+                       label = "Unstained Control Median",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "editor_median_tracker",
+                       label = "Median Tracker",
+                       value = TRUE
+                     ),
+                     actionButton("editor_save_button", "Save")
+                   ),
+                   mainPanel(
+                     rHandsontableOutput("spillover_matrix", height = "300px"),
+                     plotOutput("editor_plots", height = "400px", width = "80%")
+                   )
+                 )
         ),
         tabPanel("Plots",
-          fluid = TRUE,
-          sidebarLayout(
-            sidebarPanel(
-              selectInput(
-                inputId = "plots_unstained",
-                label = "Select Unstained Control:",
-                choices = c("No Unstained Control", nms),
-                selected = unstained_initial
-              ),
-              selectInput(
-                inputId = "plots_sample",
-                label = "Select Sample:",
-                choices = nms,
-                selected = editor_initial_sample
-              ),
-              selectInput(
-                inputId = "plots_xchannel",
-                label = "Channel",
-                choices = channels,
-                selected = editor_initial_xchannel
-              ),
-              checkboxInput(
-                inputId = "plots_unstained_overlay",
-                label = "Overlay Unstained Control",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "plots_uncompensated_underlay",
-                label = "Underlay Uncompensated Control",
-                value = TRUE
-              ),
-              checkboxInput(
-                inputId = "plots_compensated_overlay",
-                label = "Overlay Compensated Control",
-                value = TRUE
-              )
-            ),
-            mainPanel(
-              fluidRow(
-                plotOutput("plots", height = "700px", width = "100%")
-              )
-            )
-          )
+                 fluid = TRUE,
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput(
+                       inputId = "plots_unstained",
+                       label = "Select Unstained Control:",
+                       choices = c("No Unstained Control", nms),
+                       selected = unstained_initial
+                     ),
+                     selectInput(
+                       inputId = "plots_sample",
+                       label = "Select Sample:",
+                       choices = nms,
+                       selected = editor_initial_sample
+                     ),
+                     selectInput(
+                       inputId = "plots_xchannel",
+                       label = "Channel",
+                       choices = channels,
+                       selected = editor_initial_xchannel
+                     ),
+                     checkboxInput(
+                       inputId = "plots_unstained_overlay",
+                       label = "Overlay Unstained Control",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "plots_uncompensated_underlay",
+                       label = "Underlay Uncompensated Control",
+                       value = TRUE
+                     ),
+                     checkboxInput(
+                       inputId = "plots_compensated_overlay",
+                       label = "Overlay Compensated Control",
+                       value = TRUE
+                     )
+                   ),
+                   mainPanel(
+                     fluidRow(
+                       plotOutput("plots", height = "700px", width = "100%")
+                     )
+                   )
+                 )
         )
       )
     ),
     # Shiny application server
     server <- function(input, output, session) {
       values <- reactiveValues()
-
+      
       observe({
         if (!is.null(input$spillover_matrix)) {
           spill <- hot_to_r(input$spillover_matrix)
@@ -1508,11 +1464,11 @@ cyto_spillover_edit.flowSet <- function(x,
           values$spill <- spill * 100
         }
       })
-
+      
       output$spillover_matrix <- renderRHandsontable({
         rhandsontable(values$spill,
-          rowHeaderWidth = 105,
-          readOnly = FALSE
+                      rowHeaderWidth = 105,
+                      readOnly = FALSE
         ) %>%
           hot_cols(
             type = "numeric",
@@ -1543,7 +1499,7 @@ cyto_spillover_edit.flowSet <- function(x,
           ) %>%
           hot_rows(rowHeights = 20)
       })
-
+      
       # Update sample selection in plots tab & x channel selection (match)
       observe({
         fr <- input$editor_sample
@@ -1557,7 +1513,7 @@ cyto_spillover_edit.flowSet <- function(x,
           updateSelectInput(session, "plots_xchannel", selected = xchan)
         }
       })
-
+      
       # Re-apply compensation and transformations
       fs.comp <- eventReactive(values$spill, {
         # Make a copy
@@ -1568,12 +1524,12 @@ cyto_spillover_edit.flowSet <- function(x,
         trans <- axes_trans[match_ind(channels, names(axes_trans))]
         trans <- cyto_transformer_combine(trans)
         fs_trans <- cyto_transform(fs_comp,
-          trans = trans,
-          plot = FALSE
+                                   trans = trans,
+                                   plot = FALSE
         )
         return(fs_trans)
       })
-
+      
       # Turn off unstained aspects if no unstained control is supplied
       observe({
         unst <- input$editor_unstained
@@ -1589,13 +1545,13 @@ cyto_spillover_edit.flowSet <- function(x,
         # Update Plots tab unstained control based on editor selection
         updateSelectInput(session, "plots_unstained", selected = unst)
       })
-
+      
       # Update channel selection on plots tab based on editor selection
       observe({
         xchan <- input$editor_xchannel
         updateSelectInput(session, "plots_xchannel", selected = xchan)
       })
-
+      
       # Update sample & channel selection in editor based on Plots selection
       observe({
         smp <- input$plots_sample
@@ -1603,7 +1559,7 @@ cyto_spillover_edit.flowSet <- function(x,
         xchan <- input$plots_xchannel
         updateSelectInput(session, "editor_xchannel", selected = xchan)
       })
-
+      
       # Update overlay unstained check box based on unstained selection (Plots)
       observe({
         unst <- input$plots_unstained
@@ -1617,34 +1573,34 @@ cyto_spillover_edit.flowSet <- function(x,
         # Update unstained control selection in editor tab
         updateSelectInput(session, "editor_unstained", selected = unst)
       })
-
+      
       output$editor_plots <- renderPlot({
-
+        
         # Set up plot layout
         layout(matrix(c(1, 1, 2, 2, 1, 1, 3, 3), byrow = TRUE, ncol = 4))
-
+        
         # No unstained control - no unstained overlay or unstained median
         if (input$editor_unstained == "No Unstained Control") {
-
+          
           # Plots
           cyto_plot(fs.comp()[[input$editor_sample]],
-            channels = c(
-              input$editor_xchannel,
-              input$editor_ychannel
-            ),
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = input$editor_sample,
-            point_size = point_size,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size, ...
+                    channels = c(
+                      input$editor_xchannel,
+                      input$editor_ychannel
+                    ),
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = input$editor_sample,
+                    point_size = point_size,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = title_text_size, ...
           )
-
+          
           # Median tracker
           if (input$editor_median_tracker == TRUE) {
-
+            
             # MEDIAN TRACKER
             .cyto_median_tracker(
               fs.comp()[[input$editor_sample]],
@@ -1654,74 +1610,74 @@ cyto_spillover_edit.flowSet <- function(x,
               )
             )
           }
-
+          
           # Density distribution in associated channel
           cyto_plot(fs.comp()[[input$editor_sample]],
-            channels = input$editor_xchannel,
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = NA,
-            ylab = "Density",
-            density_fill = "white",
-            density_line_col = "blue",
-            density_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size
+                    channels = input$editor_xchannel,
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = NA,
+                    ylab = "Density",
+                    density_fill = "white",
+                    density_line_col = "blue",
+                    density_line_width = 2,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = title_text_size
           )
-
+          
           # Density distribution in other channel
           cyto_plot(fs.comp()[[input$editor_sample]],
-            channels = input$editor_ychannel,
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = NA,
-            ylab = "Density",
-            density_fill = "white",
-            density_line_col = "blue",
-            density_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size
+                    channels = input$editor_ychannel,
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = NA,
+                    ylab = "Density",
+                    density_fill = "white",
+                    density_line_col = "blue",
+                    density_line_width = 2,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = title_text_size
           )
-
+          
           # Add MedFI label in other channel
           cyto_plot_label(fs.comp()[[input$editor_sample]],
-            channels = input$editor_ychannel,
-            trans = axes_trans,
-            display = display,
-            label_text = "MedFI",
-            label_stat = "median",
-            label_text_x = 0.75 * par("usr")[2],
-            label_text_y = 30,
-            label_text_col = "red",
-            label_text_size = 1.1
+                          channels = input$editor_ychannel,
+                          trans = axes_trans,
+                          display = display,
+                          label_text = "MedFI",
+                          label_stat = "median",
+                          label_text_x = 0.75 * par("usr")[2],
+                          label_text_y = 30,
+                          label_text_col = "red",
+                          label_text_size = 1.1
           )
-
+          
           # Unstained control supplied
         } else if (input$editor_unstained != "No Unstained Control") {
-
+          
           # Unstained Overlay
           if (input$editor_unstained_overlay == FALSE) {
-
+            
             # Plot
             cyto_plot(fs.comp()[[input$editor_sample]],
-              channels = c(
-                input$editor_xchannel,
-                input$editor_ychannel
-              ),
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = input$editor_sample,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size, ...
+                      channels = c(
+                        input$editor_xchannel,
+                        input$editor_ychannel
+                      ),
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = input$editor_sample,
+                      point_size = point_size,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = title_text_size, ...
             )
-
+            
             # Median line through unstained control
             if (input$editor_unstained_median == TRUE) {
               medians <- fsApply(fs.comp(), each_col, "median")[
@@ -1729,15 +1685,15 @@ cyto_spillover_edit.flowSet <- function(x,
                 channels
               ]
               MFI <- data.frame("Channel" = channels, "Median" = medians)
-
+              
               cutoff <- MFI[match(input$editor_ychannel, MFI$Channel), ]
-
+              
               abline(h = cutoff[2], col = "red", lwd = 2)
             }
-
+            
             # Median tracker through stained control
             if (input$editor_median_tracker == TRUE) {
-
+              
               # MEDIAN TRACKER
               .cyto_median_tracker(
                 fs.comp()[[input$editor_sample]],
@@ -1747,58 +1703,58 @@ cyto_spillover_edit.flowSet <- function(x,
                 )
               )
             }
-
+            
             # Density distribution in associated channel - unstained overlay
             cyto_plot(fs.comp()[[input$editor_sample]],
-              channels = input$editor_xchannel,
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = NA,
-              ylab = "Density",
-              density_stack = 0,
-              density_fill = "white",
-              density_fill_alpha = 0,
-              density_line_col = "blue",
-              density_line_width = 2,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = 1.25 * title_text_size
+                      channels = input$editor_xchannel,
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = NA,
+                      ylab = "Density",
+                      density_stack = 0,
+                      density_fill = "white",
+                      density_fill_alpha = 0,
+                      density_line_col = "blue",
+                      density_line_width = 2,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = 1.25 * title_text_size
             )
-
+            
             # Add label for Stained median
             cyto_plot_label(fs.comp()[[input$editor_sample]],
-              channels = input$editor_ychannel,
-              trans = axes_trans,
-              display = display,
-              label_text = "MedFI",
-              label_stat = "median",
-              label_text_x = 0.75 * par("usr")[2],
-              label_text_y = 30,
-              label_text_col = "blue",
-              label_text_size = 1.1
+                            channels = input$editor_ychannel,
+                            trans = axes_trans,
+                            display = display,
+                            label_text = "MedFI",
+                            label_stat = "median",
+                            label_text_x = 0.75 * par("usr")[2],
+                            label_text_y = 30,
+                            label_text_col = "blue",
+                            label_text_size = 1.1
             )
-
+            
             # No unstained overlay
           } else if (input$editor_unstained_overlay == TRUE) {
-
+            
             # Plot
             cyto_plot(fs.comp()[[input$editor_sample]],
-              channels = c(
-                input$editor_xchannel,
-                input$editor_ychannel
-              ),
-              overlay = fs.comp()[[input$editor_unstained]],
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              title = input$editor_sample,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size, ...
+                      channels = c(
+                        input$editor_xchannel,
+                        input$editor_ychannel
+                      ),
+                      overlay = fs.comp()[[input$editor_unstained]],
+                      axes_trans = axes_trans,
+                      axes_limits = axes_limits,
+                      display = display,
+                      title = input$editor_sample,
+                      point_size = point_size,
+                      axes_text_size = axes_text_size,
+                      axes_label_text_size = axes_label_text_size,
+                      title_text_size = title_text_size, ...
             )
-
+            
             # Median line through unstained control
             if (input$editor_unstained_median == TRUE) {
               medians <- fsApply(
@@ -1807,15 +1763,15 @@ cyto_spillover_edit.flowSet <- function(x,
                 median
               )[input$editor_unstained, channels]
               MFI <- data.frame("Channel" = channels, "Median" = medians)
-
+              
               cutoff <- MFI[match(input$editor_ychannel, MFI$Channel), ]
-
+              
               abline(h = cutoff[2], col = "red", lwd = 3)
             }
-
+            
             # Median tracker through stained control
             if (input$editor_median_tracker == TRUE) {
-
+              
               # MEDIAN TRACKER
               .cyto_median_tracker(
                 fs.comp()[[input$editor_sample]],
@@ -1826,252 +1782,248 @@ cyto_spillover_edit.flowSet <- function(x,
               )
             }
           }
-
+          
           # Density distribution in associated channel - unstained overlay
           cyto_plot(fs.comp()[[input$editor_unstained]],
-            channels = input$editor_xchannel,
-            overlay = fs.comp()[[input$editor_sample]],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = NA,
-            ylab = "Density",
-            density_stack = 0,
-            density_fill = c("grey70", "white"),
-            density_fill_alpha = c(1, 0),
-            density_line_col = c("black", "blue"),
-            density_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = 1.25 * title_text_size
+                    channels = input$editor_xchannel,
+                    overlay = fs.comp()[[input$editor_sample]],
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = NA,
+                    ylab = "Density",
+                    density_stack = 0,
+                    density_fill = c("grey70", "white"),
+                    density_fill_alpha = c(1, 0),
+                    density_line_col = c("black", "blue"),
+                    density_line_width = 2,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = 1.25 * title_text_size
           )
-
+          
           # Density distribution in other channel - unstained overlay
           cyto_plot(fs.comp()[[input$editor_unstained]],
-            channels = input$editor_ychannel,
-            overlay = fs.comp()[[input$editor_sample]],
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            display = display,
-            title = NA,
-            ylab = "Density",
-            density_stack = 0,
-            density_fill = c("grey70", "white"),
-            density_fill_alpha = c(1, 0),
-            density_line_col = c("black", "blue"),
-            density_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = 1.25 * title_text_size
+                    channels = input$editor_ychannel,
+                    overlay = fs.comp()[[input$editor_sample]],
+                    axes_trans = axes_trans,
+                    axes_limits = axes_limits,
+                    display = display,
+                    title = NA,
+                    ylab = "Density",
+                    density_stack = 0,
+                    density_fill = c("grey70", "white"),
+                    density_fill_alpha = c(1, 0),
+                    density_line_col = c("black", "blue"),
+                    density_line_width = 2,
+                    axes_text_size = axes_text_size,
+                    axes_label_text_size = axes_label_text_size,
+                    title_text_size = 1.25 * title_text_size
           )
-
+          
           # Add label for unstained median
           cyto_plot_label(fs.comp()[[input$editor_unstained]],
-            channels = input$editor_ychannel,
-            trans = axes_trans,
-            display = display,
-            label_text = "MedFI",
-            label_stat = "median",
-            label_text_x = 0.75 * par("usr")[2],
-            label_text_y = 80,
-            label_text_col = "grey40",
-            label_text_size = 1.1
+                          channels = input$editor_ychannel,
+                          trans = axes_trans,
+                          display = display,
+                          label_text = "MedFI",
+                          label_stat = "median",
+                          label_text_x = 0.75 * par("usr")[2],
+                          label_text_y = 80,
+                          label_text_col = "grey40",
+                          label_text_size = 1.1
           )
-
+          
           # Add label for Stained median
           cyto_plot_label(fs.comp()[[input$editor_sample]],
-            channels = input$editor_ychannel,
-            trans = axes_trans,
-            display = display,
-            label_text = "MedFI",
-            label_stat = "median",
-            label_text_x = 0.75 * par("usr")[2],
-            label_text_y = 30,
-            label_text_col = "blue",
-            label_text_size = 1.1
+                          channels = input$editor_ychannel,
+                          trans = axes_trans,
+                          display = display,
+                          label_text = "MedFI",
+                          label_stat = "median",
+                          label_text_x = 0.75 * par("usr")[2],
+                          label_text_y = 30,
+                          label_text_col = "blue",
+                          label_text_size = 1.1
           )
         }
       })
-
+      
       # Plots tab uses cyto_plot_compensation
       output$plots <- renderPlot({
-
+        
         # Compensation plots - fill colours are reversed internally
         if (input$plots_uncompensated_underlay == TRUE) {
           if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == FALSE) {
+              input$plots_unstained_overlay == FALSE) {
             cyto_plot_compensation(fs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              overlay = fs.comp()[[input$plots_sample]],
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("blue", "red"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("blue", "red")
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   overlay = fs.comp()[[input$plots_sample]],
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("blue", "red"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("blue", "red")
             )
           } else if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == TRUE) {
+                     input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(fs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              overlay = list(
-                fs.comp()[[input$plots_sample]],
-                fs.comp()[[input$plots_unstained]]
-              ),
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("blue", "red", "black"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("grey", "red", "blue")
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   overlay = list(
+                                     fs.comp()[[input$plots_sample]],
+                                     fs.comp()[[input$plots_unstained]]
+                                   ),
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("blue", "red", "black"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "red", "blue")
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == TRUE) {
+                     input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(fs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              overlay = fs.comp()[[input$plots_unstained]],
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("blue", "black"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("grey", "blue")
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   overlay = fs.comp()[[input$plots_unstained]],
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("blue", "black"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "blue")
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == FALSE) {
+                     input$plots_unstained_overlay == FALSE) {
             cyto_plot_compensation(fs[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              point_col = "blue",
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = "blue"
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = "blue",
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = "blue"
             )
           }
         } else if (input$plots_uncompensated_underlay == FALSE) {
           if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == TRUE) {
+              input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(fs.comp()[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              overlay = fs.comp()[[input$plots_unstained]],
-              axes_limits = axes_limits,
-              display = display,
-              point_col = c("red", "black"),
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = c("grey", "red")
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   overlay = fs.comp()[[input$plots_unstained]],
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = c("red", "black"),
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = c("grey", "red")
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == TRUE) {
+                     input$plots_unstained_overlay == TRUE) {
             cyto_plot_compensation(fs.comp()[[input$plots_unstained]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              point_col = "black",
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = "grey"
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = "black",
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = "grey"
             )
           } else if (input$plots_compensated_overlay == TRUE &
-            input$plots_unstained_overlay == FALSE) {
+                     input$plots_unstained_overlay == FALSE) {
             cyto_plot_compensation(fs.comp()[[input$plots_sample]],
-              channel = input$plots_xchannel,
-              axes_trans = axes_trans,
-              axes_limits = axes_limits,
-              display = display,
-              point_col = "red",
-              point_alpha = 0.6,
-              header = input$plots_sample,
-              title = NA,
-              point_size = point_size,
-              axes_text_size = axes_text_size,
-              axes_label_text_size = axes_label_text_size,
-              title_text_size = title_text_size,
-              header_text_size = header_text_size,
-              density_fill = "red"
+                                   channel = input$plots_xchannel,
+                                   axes_trans = axes_trans,
+                                   axes_limits = axes_limits,
+                                   display = display,
+                                   point_col = "red",
+                                   point_alpha = 0.6,
+                                   header = input$plots_sample,
+                                   title = NA,
+                                   point_size = point_size,
+                                   axes_text_size = axes_text_size,
+                                   axes_label_text_size = axes_label_text_size,
+                                   title_text_size = title_text_size,
+                                   header_text_size = header_text_size,
+                                   density_fill = "red"
             )
           } else if (input$plots_compensated_overlay == FALSE &
-            input$plots_unstained_overlay == FALSE) {
+                     input$plots_unstained_overlay == FALSE) {
             # No data to plot
           }
         }
       })
-
+      
       # Save edited spillover matrix to csv file
       observe({
         input$saveBtn
         class(values$spill) <- "numeric"
         spill.mat <- values$spill / 100
-        write.csv(spill.mat, spillover)
+        write_to_csv(spill.mat, spillover)
       })
-
+      
       # Return edited matrix on application cloase
       onStop(function() {
-        spill.mat <- read.csv(spillover,
-          header = TRUE,
-          row.names = 1
-        )
-        colnames(spill.mat) <- rownames(spill.mat)
+        spill.mat <- read_from_csv(spillover)
         stopApp(spill.mat)
       })
     }
   )
-
+  
   # Run the shiny application
   if (viewer) {
     sp <- runApp(app,
-      launch.browser = paneViewer(),
-      quiet = TRUE
+                 launch.browser = paneViewer(),
+                 quiet = TRUE
     )
   } else {
     sp <- runApp(app,
-      quiet = TRUE
+                 quiet = TRUE
     )
   }
-
+  
   # Return updated spillover matrix
   return(sp)
 }
@@ -2086,7 +2038,7 @@ cyto_spillover_edit.flowSet <- function(x,
 #' @noRd
 .cyto_median_tracker <- function(x,
                                  channels = NULL) {
-
+  
   # RAW DATA
   raw_data <- cyto_extract(x, raw = TRUE)[[1]]
   raw_data <- raw_data[, channels]
@@ -2106,10 +2058,10 @@ cyto_spillover_edit.flowSet <- function(x,
   raw_data_chunks <- lapply(seq_len(n - 1), function(z) {
     if (z < n - 1) {
       raw_data[raw_data[, channels[1]] >= chunks[z] &
-        raw_data[, channels[1]] < chunks[z + 1], ]
+                 raw_data[, channels[1]] < chunks[z + 1], ]
     } else {
       raw_data[raw_data[, channels[1]] >= chunks[z] &
-        raw_data[, channels[1]] <= chunks[z + 1], ]
+                 raw_data[, channels[1]] <= chunks[z + 1], ]
     }
   })
   # COMPUTE MEDIANS IN BOTH CHANNELS PER CHUNK
@@ -2146,14 +2098,14 @@ cyto_spillover_edit.flowSet <- function(x,
   vals_x <- medians[, channels[1]]
   vals_y <- medians[, channels[2]]
   loessMod <- loess(vals_y ~ vals_x,
-    data = medians,
-    span = 0.9
+                    data = medians,
+                    span = 0.9
   )
   loessMod <- predict(loessMod)
   # ADD LINE TO PLOT
   lines(medians[, channels[1]],
-    loessMod,
-    col = "purple2",
-    lwd = 3
+        loessMod,
+        col = "purple2",
+        lwd = 3
   )
 }
