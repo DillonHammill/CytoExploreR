@@ -2,13 +2,9 @@
 % Please edit documentation in R/cyto_plot_point.R
 \name{cyto_plot_point}
 \alias{cyto_plot_point}
-\alias{cyto_plot_point.flowFrame}
-\alias{cyto_plot_point.list}
 \title{Add points and contour lines to empty cyto_plot}
 \usage{
-cyto_plot_point(x, ...)
-
-\method{cyto_plot_point}{flowFrame}(
+cyto_plot_point(
   x,
   channels,
   overlay = NA,
@@ -19,24 +15,7 @@ cyto_plot_point(x, ...)
   point_cols = NA,
   point_col = NA,
   point_col_alpha = 1,
-  contour_lines = 0,
-  contour_line_type = 1,
-  contour_line_width = 1,
-  contour_line_col = "black",
-  contour_line_alpha = 1,
-  ...
-)
-
-\method{cyto_plot_point}{list}(
-  x,
-  channels,
-  display = 1,
-  point_shape = ".",
-  point_size = 2,
-  point_col_scale = NA,
-  point_cols = NA,
-  point_col = NA,
-  point_col_alpha = 1,
+  point_fast = FALSE,
   contour_lines = 0,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -46,15 +25,13 @@ cyto_plot_point(x, ...)
 )
 }
 \arguments{
-\item{x}{object of class \code{flowFrame} or a list of \code{flowFrame}
-onjects.}
-
-\item{...}{not in use.}
+\item{x}{object of class \code{cytoframe} or a list of \code{cytoframe}
+objects.}
 
 \item{channels}{names of the channels used to construct the plot.}
 
-\item{overlay}{optional argument if x is a flowFrame to overlay a list of
-flowFrame objects.}
+\item{overlay}{optional argument if x is a cytoframe to overlay a list of
+cytoframe objects.}
 
 \item{display}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
@@ -78,6 +55,11 @@ by default to use a blue-red density colour scale.}
 \item{point_col_alpha}{numeric [0,1] to control point colour transparency in
 2-D scatter plots, set to 1 by default to use solid colours.}
 
+\item{point_fast}{logical indicating whether points should be plotted using
+the \code{scattermore} package, set to FALSE by default. This is an
+optional feature so if you intend to use it, make sure that you have the
+scattermore package installed \code{install.packages("scattermore")}.}
+
 \item{contour_lines}{numeric indicating the number of levels to use for
 contour lines, set to 0 by default to exclude contour lines.}
 
@@ -91,6 +73,8 @@ default.}
 
 \item{contour_line_alpha}{numeric [0,1] to control transparency of contour
 lines, set to 1 by default to remove transparency.}
+
+\item{...}{not in use.}
 }
 \description{
 Add points and contour lines to empty cyto_plot
