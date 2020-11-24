@@ -36,8 +36,12 @@ formatting options.
 library(CytoExploreRData)
 
 # Activation Gatingset
-gs <- load_gs(system.file("extdata/Activation-GatingSet",
-                          package = "CytoExploreRData"))
+gs <- cyto_load(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+    )
+  )
                           
 # Experiment variables
 cyto_details(gs)

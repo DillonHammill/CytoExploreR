@@ -23,14 +23,13 @@ Apply flowAI anomaly detection to clean cytometry data
 \examples{
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
-# Clean Activation flowSet
-fs <- cyto_clean(fs)
-
 # Activation GatingSet
-gs <- GatingSet(fs)
+gs <- cyto_load(
+ system.file(
+   "extdata/Activation-GatingSet",
+   package = "CytoExploreRData"
+   )
+ )
 
 # Clean Activation GatingSet
 gs <- cyto_clean(gs)

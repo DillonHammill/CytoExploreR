@@ -345,7 +345,7 @@ cyto_load <- function(path = ".",
 #'   \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.
 #'
 #' @importFrom flowAI flow_auto_qc
-#' @importFrom flowWorkspace gs_cyto_data cytoset_to_flowSet flowSet_to_cytoset
+#' @importFrom flowWorkspace gs_cyto_data flowSet_to_cytoset
 #' @importFrom utils capture.output
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -353,14 +353,13 @@ cyto_load <- function(path = ".",
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
-#'
-#' # Clean Activation flowSet
-#' fs <- cyto_clean(fs)
-#'
 #' # Activation GatingSet
-#' gs <- GatingSet(fs)
+#' gs <- cyto_load(
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
@@ -375,49 +374,41 @@ cyto_load <- function(path = ".",
 #' @export
 cyto_clean <- function(x, ...) {
   
-  # GATINGSET/GATINGHIERARCHY
-  if (cyto_class(x, c("GatingHierarchy", "GatingSet"), TRUE)) {
-    # PARENT
-    parent <- cyto_nodes(x, path = "auto")[1]
-    # EXTRACT DATA
-    cyto_data <- cyto_extract(x, parent)
-    # flowAI REQUIRES FLOWSET
-    if (cyto_class(cyto_data, "cytoset", TRUE)) {
-      cyto_data <- cytoset_to_flowSet(cyto_data) # REMOVE
-    }
-    # CLEAN DATA
-    invisible(capture.output(cyto_data <- flow_auto_qc(cyto_data,
-                                                       html_report = FALSE,
-                                                       mini_report = FALSE,
-                                                       fcs_QC = FALSE,
-                                                       folder_results = FALSE,
-                                                       ...
-    )))
-    # RETURN CYTOSET
-    if (cyto_class(cyto_data, "flowSet", TRUE)) {
-      cyto_data <- flowSet_to_cytoset(cyto_data)
-    }
-    # REPLACE DATA
-    gs_cyto_data(x) <- cyto_data
+  # EXTRACT DATA
+  if(cyto_class(x, "GatingSet")) {
+    cyto_data <- cyto_data_extract(x,
+                                   parent = "root")[["root"]]
   } else {
-    # FLOWSET REQUIRED
-    if (cyto_class(x, "cytoset", TRUE)) {
-      x <- cytoset_to_flowSet(x)
-    }
-    # CLEAN DATA
-    invisible(capture.output(x <- flow_auto_qc(x,
-                                               html_report = FALSE,
-                                               mini_report = FALSE,
-                                               fcs_QC = FALSE,
-                                               folder_results = FALSE,
-                                               ...
-    )))
-    # RETURN CYTOSET
-    if (cyto_class(x, "flowSet", TRUE)) {
-      x <- flowSet_to_cytoset(x)
-    }
+    cyto_data <- x
   }
-  return(x)
+  
+  # flowAI
+  invisible(
+    capture.output(
+      cyto_data <- flow_auto_qc(
+        cyto_data,
+        html_report = FALSE,
+        mini_report = FALSE,
+        fcs_QC = FALSE,
+        folder_results = FALSE,
+        ...
+      )
+    )
+  )
+  
+  # CYTOSET
+  if(cyto_class(cyto_data, "flowSet", TRUE)) {
+    cyto_data <- flowSet_to_cytoset(cyto_data)
+  }
+  
+  # RETURN CLEAN DATA
+  if(cyto_class(x, "GatingSet")) {
+    gs_cyto_data(x) <- cyto_data
+    return(x)
+  } else {
+    return(cyto_data)
+  }
+  
 }
 
 ## CYTO_SETUP ------------------------------------------------------------------
@@ -737,8 +728,12 @@ cyto_class <- function(x,
 #' library(CytoExploreRData)
 #'
 #' # Activation Gatingset
-#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
-#'                           package = "CytoExploreRData"))
+#' gs <- cyto_load(
+#'   system.file(
+#'     "extdata/Activation-GatingSet",
+#'     package = "CytoExploreRData"
+#'     )
+#'   )
 #'                           
 #' # Experiment variables
 #' cyto_details(gs)
