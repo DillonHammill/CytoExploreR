@@ -522,27 +522,28 @@ cyto_markers_extract <- function(x,
 
 #' Select Fluorescent Channel for Compensation Controls
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
 #'   compensation controls.
 #'
 #' @return vector of channels in order of compensation Control samples.
 #'
-#' @importFrom utils menu
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @importFrom DataEditR data_edit
+#'
 #' @examples
-#' \dontrun{
+#' if(interactive()) {
 #' library(CytoExploreRData)
 #'
-#' # Load in samples
-#' fs <- Compensation
+#' # Compensation Gatingset
+#' gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+#'                           package = "CytoExploreRData"))
 #'
 #' # Select a channel for each control from dropdown menu
-#' cyto_channel_select(fs)
+#' cyto_channel_select(gs)
 #' }
+#' 
 #' @export
 cyto_channel_select <- function(x){
   
@@ -552,16 +553,24 @@ cyto_channel_select <- function(x){
   # Channels
   opts <- c(cyto_fluor_channels(x), "Unstained")
   
-  # Samples
-  nms <- cyto_names(x)
+  # CHANNELS
+  chans <- data.frame("name" = cyto_names(x),
+                      "channel" = NA,
+                      stringsAsFactors = FALSE)
   
   # Channel selection
-  chans <- data_editor(data.frame("name" = nms,
-                                  "channel" = NA,
-                                  stringsAsFactors = FALSE),
+  if(interactive()) {
+    chans <- data_edit(chans,
                        title = "Channel Selector",
-                       type = "selector",
-                       options = opts)
+                       logo = CytoExploreR_logo(),
+                       col_edit = FALSE,
+                       row_edit = FALSE,
+                       col_options = list("channel" = opts),
+                       col_names = "channel",
+                       col_readonly = "name",
+                       hide = TRUE,
+                       quiet = TRUE)
+  }
   
   # Missing channels
   lapply(seq_along(chans[, "channel"]), function(z){
@@ -571,8 +580,7 @@ cyto_channel_select <- function(x){
   })
   
   # RETURN VECTOR OF CHANNELS
-  chans <- chans[, "channel"]
-  return(chans)
+  return(chans[, "channel"])
 }
 
 ## CYTO_CHANNEL_MATCH ----------------------------------------------------------

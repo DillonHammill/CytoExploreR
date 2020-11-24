@@ -7,8 +7,7 @@
 cyto_channel_select(x)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
 compensation controls.}
 }
@@ -19,15 +18,17 @@ vector of channels in order of compensation Control samples.
 Select Fluorescent Channel for Compensation Controls
 }
 \examples{
-\dontrun{
+if(interactive()) {
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Compensation
+# Compensation Gatingset
+gs <- load_gs(system.file("extdata/Compensation-GatingSet",
+                          package = "CytoExploreRData"))
 
 # Select a channel for each control from dropdown menu
-cyto_channel_select(fs)
+cyto_channel_select(gs)
 }
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
