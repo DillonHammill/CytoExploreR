@@ -52,15 +52,15 @@
 #'
 #' @noRd
 .cyto_gate_manual <- function(fr,
-                         pp_res,
-                         channels,
-                         alias, ...) {
-
+                              pp_res,
+                              channels,
+                              alias, ...) {
+  
   # Determine vertices of polygon using gate_draw
   gates <- cyto_gate_draw(x = fr, 
                           channels = channels, 
                           alias = alias, ...)
-
+  
   return(gates)
 }
 
@@ -88,21 +88,21 @@
                             pp_res,
                             channels,
                             gate) {
-
+  
   # pp_res is NULL - no grouping
   if (is.null(pp_res)) {
     gt <- 1
   }
-
+  
   # Index of gate to use
   if (is.numeric(pp_res)) {
     gt <- pp_res
   } else if (is.character(pp_res)) {
-
+    
     # names of gates must contain merged groupBy info
     gt <- match(pp_res, names(gate))
   }
-
+  
   return(gate[[gt]])
 }
 
@@ -137,29 +137,29 @@
                                channels = NA,
                                groupBy = NA,
                                isCollapse = NA, ...) {
-
+  
   # Samples
   smp <- length(gs)
-
+  
   # Extract pData information
   pd <- pData(gs)
-
+  
   # groupBy
   if (is.character(groupBy) & nchar(groupBy) == 0) {
     groupBy <- NA
   }
-
+  
   # split groupBy
   if (is.character(groupBy)) {
     groupBy <- unlist(strsplit(groupBy, ":"))
   }
-
+  
   # Add groupBy info to pData gs
   if (!all(is.na(groupBy)) & all(grepl("^[A-Za-z]+$", groupBy))) {
-
+    
     # groupBy is composed of characters
     pd$groupby <- do.call(paste, pd[, groupBy, drop = FALSE])
-
+    
     grpby <- pd[, "groupby"][match(pData(fs[1])[, "name"], pd[, "name"])]
   } else if (!all(is.na(groupBy)) & !all(grepl("^[A-Za-z]+$", groupBy))) {
     if (groupBy == smp) {
@@ -169,11 +169,11 @@
       grpby <- 1
     }
   }
-
+  
   # No grouping select first gate - only 1 gate expected
   if (all(is.na(groupBy))) {
     grpby <- 1
   }
-
+  
   return(grpby)
 }
