@@ -4,7 +4,7 @@
 #'
 #' \code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
 #' plot with border, axes, axes_text and titles. Data is subsequently added to
-#' this base layer with \code{cyto_plot_point} or \code{cyto_plot_density}.
+#' this base layer with \code{cyto_plot_point} or \code{cyto_plot_hist}.
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
@@ -37,25 +37,34 @@
 #' @param xlab x axis label.
 #' @param ylab y axis label.
 #' @param margins a vector of length 4 to control the margins around the bottom,
-#'   left, top and right of the plot, set to NULL by default to let `cyto_plot`
-#'   compute optimal margins.
-#' @param density_modal logical indicating whether density should be normalised
-#'   to mode and presented as a percentage. Set to \code{TRUE} by default.
-#' @param density_smooth smoothing parameter passed to
-#'   \code{\link[stats:density]{density}} to adjust kernel density.
-#' @param density_stack numeric [0,1] indicating the degree of offset for
-#'   overlaid populations, set to 0.5 by default. #' @param density_cols vector
-#'   colours to draw from when selecting density fill colours if none are
-#'   supplied to density_fill.
-#' @param density_cols vector colours to draw from when selecting density fill
-#'   colours if none are supplied to density_fill.
-#' @param density_fill colour(s) used to fill polygons.
-#' @param density_fill_alpha numeric [0,1] used to control fill transparency,
-#'   set to 1 by default to remove transparency.
-#' @param density_line_type line type(s) to use for border(s), set to solid
-#'   lines by default.
-#' @param density_line_width line width for border.
-#' @param density_line_col colour(s) for border line, set to "black" by default.
+#'   left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
+#'   `cyto_plot` compute optimal margins.
+#' @param hist_stat can be either \code{"count"}, \code{"percent"} or
+#'   \code{"density"} to indicate the statistic to display on histograms, set to
+#'   \code{"percent"} by default. The \code{"percent"} option applies modal
+#'   normalisation and expresses the result as a percentage.
+#' @param hist_smooth smoothing parameter passed to
+#'   \code{\link[stats:density]{density}} to adjust the smoothness of the kernel
+#'   density for histograms, set to \code{1} by default.
+#' @param hist_bins number of bins to use for histograms, set to 256 by default.  
+#' @param hist_stack numeric [0,1] indicating the degree of stacking for
+#'   histograms, set to \code{0} by default.
+#' @param hist_layers numeric indicating the number of histograms to stack in
+#'   each plot, set to all samples by default. Each plot must contain the same
+#'   number of histograms.
+#' @param hist_cols vector colours to draw from when selecting histogram fill
+#'   colours if none are supplied to \code{hist_fill}.
+#' @param hist_fill fill colour(s) for histograms, select from \code{hist_cols}
+#'   if not supplied.
+#' @param hist_fill_alpha numeric [0,1] used to control histogram fill colour
+#'   transparency, set to \code{1} by default for solid colours.
+#' @param hist_line_type line type(s) to use for histogram borders, set to 1 by
+#'   default to use solid lines. See \code{\link[graphics:par]{lty}} for
+#'   alternatives.
+#' @param hist_line_width numeric to control line width(s) for histogram borders
+#'   lines, set to 1 by default.
+#' @param hist_line_col colour(s) for histogram borders, set to \code{"black"}
+#'   by default.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
 #'   \code{"."} by default to maximise plotting speed.  See
 #'   \code{\link[graphics:par]{pch}} for alternatives.
@@ -118,10 +127,23 @@
 #'   legends when legend is set to \code{"fill"}.
 #' @param legend_point_col colour(s) to use for points in 2-D scatter plot
 #'   legend.
+#' @param grid logical indicating whether to include grid lines in the plot
+#'   background, set to TRUE by default. Alternatively, users can supply a
+#'   integer to indicate the number of equally spaced quantiles to used for the
+#'   grid lines.
+#' @param grid_line_type integer [0,6] to control the line type of grid lines,
+#'   set to \code{1} to draw solid lines by default. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param grid_line_width numeric to control the line width(s) of grid lines,
+#'   set to \code{1} by default.
+#' @param grid_line_col colour to use for grid lines, set to \code{"grey95"} by
+#'   default.
+#' @param grid_line_alpha numeric [0,1] to control the transparency of grid
+#'   lines, set to 1 by default to remove transparency.
 #' @param ... not in use.
 #'
-#' @importFrom grDevices adjustcolor
-#' @importFrom graphics plot box axis title par
+#' @importFrom grDevices adjustcolor rgb colorRamp
+#' @importFrom graphics plot box axis title par rect axTicks abline
 #' @importFrom methods formalArgs is
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -140,206 +162,214 @@
 #'   channels = c("FSC-A"),
 #'   overlay = Activation[1:2]
 #' )
-#' @rdname cyto_plot_empty
 #' @export
-cyto_plot_empty <- function(x, ...) {
-  UseMethod("cyto_plot_empty")
-}
-
-#' @rdname cyto_plot_empty
-#' @export
-cyto_plot_empty.flowFrame <- function(x,
-                                      channels,
-                                      axes_trans = NA,
-                                      overlay = NA,
-                                      gate = NA,
-                                      xlim = NA,
-                                      ylim = NA,
-                                      axes_limits = "auto",
-                                      axes_limits_buffer = 0.03,
-                                      title,
-                                      xlab,
-                                      ylab,
-                                      margins = NULL,
-                                      density_modal = TRUE,
-                                      density_smooth = 1.5,
-                                      density_stack = 0.5,
-                                      density_cols = NA,
-                                      density_fill = NA,
-                                      density_fill_alpha = 1,
-                                      density_line_type = 1,
-                                      density_line_width = 1,
-                                      density_line_col = "black",
-                                      point_shape = ".",
-                                      point_size = 2,
-                                      point_col_scale = NA,
-                                      point_cols = NA,
-                                      point_col = NA,
-                                      point_col_alpha = 1,
-                                      axes_text = c(TRUE, TRUE),
-                                      axes_text_font = 1,
-                                      axes_text_size = 1,
-                                      axes_text_col = "black",
-                                      axes_label_text_font = 1,
-                                      axes_label_text_size = 1.1,
-                                      axes_label_text_col = "black",
-                                      title_text_font = 2,
-                                      title_text_size = 1.1,
-                                      title_text_col = "black",
-                                      border_line_type = 1,
-                                      border_line_width = 1,
-                                      border_line_col = "black",
-                                      border_fill = "white",
-                                      border_fill_alpha = 1,
-                                      legend = FALSE,
-                                      legend_text,
-                                      legend_text_font = 1,
-                                      legend_text_size = 1,
-                                      legend_text_col = "black",
-                                      legend_line_type = NA,
-                                      legend_line_width = NA,
-                                      legend_line_col = NA,
-                                      legend_box_fill = NA,
-                                      legend_point_col = NA,
-                                      ...) {
-
+cyto_plot_empty <- function(x,
+                            channels,
+                            axes_trans = NA,
+                            overlay = NA,
+                            gate = NA,
+                            xlim = c(NA, NA),
+                            ylim = c(NA, NA),
+                            axes_limits = "auto",
+                            axes_limits_buffer = 0.03,
+                            title,
+                            xlab,
+                            ylab,
+                            margins = c(NA, NA, NA, NA),
+                            hist_stat = "count",
+                            hist_smooth = 1,
+                            hist_bins = 256,
+                            hist_stack = 0.5,
+                            hist_cols = NA,
+                            hist_fill = NA,
+                            hist_fill_alpha = 1,
+                            hist_line_type = 1,
+                            hist_line_width = 1,
+                            hist_line_col = "black",
+                            point_shape = ".",
+                            point_size = 2,
+                            point_col_scale = NA,
+                            point_cols = NA,
+                            point_col = NA,
+                            point_col_alpha = 1,
+                            axes_text = c(TRUE, TRUE),
+                            axes_text_font = 1,
+                            axes_text_size = 1,
+                            axes_text_col = "black",
+                            axes_label_text_font = 1,
+                            axes_label_text_size = 1.1,
+                            axes_label_text_col = "black",
+                            title_text_font = 2,
+                            title_text_size = 1.1,
+                            title_text_col = "black",
+                            border_line_type = 1,
+                            border_line_width = 1,
+                            border_line_col = "black",
+                            border_fill = "white",
+                            border_fill_alpha = 1,
+                            legend = FALSE,
+                            legend_text,
+                            legend_text_font = 1,
+                            legend_text_size = 1,
+                            legend_text_col = "black",
+                            legend_line_type = NA,
+                            legend_line_width = NA,
+                            legend_line_col = NA,
+                            legend_box_fill = NA,
+                            legend_point_col = NA,
+                            grid = TRUE,
+                            grid_line_type = 1,
+                            grid_line_width = 1,
+                            grid_line_col = "grey95",
+                            grid_line_alpha = 1,
+                            ...) {
+  
+  # PREPARE X ------------------------------------------------------------------
+  
+  # X CAN BE EITHER FLOWFRAME/FLOWFRAME LIST/CYTO_PLOT ARGUMENTS
+  
+  # HISTOGRAMS - CYTO_PLOT ARGUMENTS
+  d <- NULL
+  
+  # FLOWFRAME
+  if (is(x, "flowFrame")) {
+    overlay <- cyto_list(overlay)
+    if (!.all_na(overlay)) {
+      x <- c(
+        structure(list(x), names = cyto_names(x)),
+        overlay
+      )
+    }
+    # CYTO_PLOT ARGUMENTS
+  } else if (class(x) == "cyto_plot") {
+    .args_update(x)
+  }
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
-
+  
   # Prevent scientific notation on axes - reset on exit
   scipen <- getOption("scipen")
   options(scipen = 100000000)
   on.exit(options(scipen = scipen))
-
+  
   # Extract current graphics parameters
   pars <- par("mar")
-
+  
   # Reset graphics parameters on exit
   on.exit(par(pars))
-
+  
   # ARGUMENTS ------------------------------------------------------------------
-
+  
   # Pull down arguments to named list
   args <- .args_list()
-
+  
   # Inherit arguments from cyto_plot_theme
   args <- .cyto_plot_theme_inherit(args)
-
+  
   # Update arguments
   .args_update(args)
-
+  
   # CHANNELS -------------------------------------------------------------------
-
+  
   # Check channels
   channels <- cyto_channels_extract(
-    x,
+    x[[1]],
     channels
   )
-
-  # LIST OF FLOWFRAMES ---------------------------------------------------------
-
-  # Convert overlay to list of flowFrames
-  if (!.all_na(overlay) &
-    any(is(overlay, "flowFrame") |
-      is(overlay, "flowSet"))) {
-    overlay <- cyto_convert(overlay, "list of flowFrames")
-  }
-
-  # Combine x and overlay into list
-  if (!.all_na(overlay)) {
-    fr_list <- c(list(x), overlay)
-  } else {
-    fr_list <- list(x)
-  }
-
-  # SAMPLES
-  smp <- length(fr_list)
-
+  
   # AXES LIMITS ----------------------------------------------------------------
-
+  
   # XLIM
-  if (.all_na(xlim)) {
+  if (any(is.na(xlim))) {
     # XLIM
-    xlim <- .cyto_range(fr_list,
-      channels = channels[1],
-      axes_limits = axes_limits,
-      buffer = axes_limits_buffer,
-      plot = TRUE
-    )[, 1]
+    xlim[is.na(xlim)] <- .cyto_plot_axes_limits(x,
+                                                channels = channels[1],
+                                                axes_limits = axes_limits,
+                                                buffer = axes_limits_buffer,
+                                                plot = TRUE
+    )[, 1][is.na(xlim)]
   }
   
   # YLIM
-  if (.all_na(ylim)) {
+  if (any(is.na(ylim))) {
     # 1D PLOT
     if (length(channels) == 1) {
-      # DENSITY
-      fr_dens <- .cyto_density(fr_list,
-        channel = channels,
-        smooth = density_smooth,
-        stack = density_stack,
-        modal = density_modal
-      )
+      if (is.null(d)) {
+        d <- .cyto_plot_hist(x,
+                             hist_stat = hist_stat,
+                             hist_smooth = hist_smooth,
+                             hist_bins = hist_bins,
+                             hist_stack = hist_stack
+        )
+      }
       # YLIM
-      ymin <- as.numeric(unlist(strsplit(names(fr_dens)[1], "-"))[1])
-      ymax <- as.numeric(unlist(strsplit(names(fr_dens)[smp], "-"))[2])
-      ylim <- c(ymin, ymax)
+      ymin <- as.numeric(unlist(strsplit(names(d)[1], "-"))[1])
+      ymax <- max(
+        LAPPLY(names(d), function(z) {
+          as.numeric(unlist(strsplit(z, "-"))[2])
+        }),
+        na.rm = TRUE
+      )
+      yrng <- c(ymin, ymax)
+      ylim[is.na(ylim)] <- yrng[is.na(ylim)]
       # 2D PLOT
     } else if (length(channels) == 2) {
       # YLIM
-      ylim <- .cyto_range(fr_list,
-        channels = channels[2],
-        axes_limits = axes_limits,
-        buffer = axes_limits_buffer,
-        plot = TRUE
-      )[, 1]
+      ylim[is.na(ylim)] <- .cyto_plot_axes_limits(x,
+                                                  channels = channels[2],
+                                                  axes_limits = axes_limits,
+                                                  buffer = axes_limits_buffer,
+                                                  plot = TRUE
+      )[, 1][is.na(ylim)]
     }
   }
   
   # GATE COORDS MUST BE WITHIN AXES LIMITS
-  if(!.all_na(gate)){
+  if (!.all_na(gate)) {
     # GATE COORDS
     gate_coords <- .cyto_gate_coords(gate, channels)
   }
   
   # XLIM GATE COORD ADJUSTMENT
-  if(!.all_na(gate)){
+  if (!.all_na(gate)) {
     # MIN & MAX GATE COORDS
     gate_xcoords <- gate_coords[, channels[1]]
     gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
     # GATE COORDS BELOW XMIN
-    if(is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]){
+    if (is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]) {
       xlim[1] <- gate_xcoords[1]
     }
     # GATE COORDS ABOVE XMAX
-    if(is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]){
+    if (is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]) {
       xlim[2] <- gate_xcoords[2]
     }
   }
   
   # YLIM GATE COORD ADJUSTMENT
-  if(length(channels) == 2){
+  if (length(channels) == 2) {
     # GATE COORDS
-    if(!.all_na(gate)){
+    if (!.all_na(gate)) {
       # MIN & MAX GATE COORDS
       gate_ycoords <- gate_coords[, channels[2]]
       gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
       # GATE COORDS BELOW YMIN
-      if(is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]){
+      if (is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]) {
         ylim[1] <- gate_ycoords[1]
       }
       # GATE COORDS ABOVE YMAX
-      if(is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]){
+      if (is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]) {
         ylim[2] <- gate_ycoords[2]
       }
     }
   }
   
   # AXES TEXT ------------------------------------------------------------------
-
+  
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!is(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
-
+  
   # X axis breaks and labels -  can be inherited from cyto_plot
   if (!is(axes_text[[1]], "list")) {
     if (.all_na(axes_text[[1]])) {
@@ -347,15 +377,15 @@ cyto_plot_empty.flowFrame <- function(x,
     } else if (axes_text[[1]] == TRUE) {
       lims <- list(xlim)
       names(lims) <- channels[1]
-      axes_text[[1]] <- .cyto_plot_axes_text(fr_list,
-        channels = channels[1],
-        axes_trans = axes_trans,
-        axes_range = lims,
-        axes_limits = axes_limits
+      axes_text[[1]] <- .cyto_plot_axes_text(x,
+                                             channels = channels[1],
+                                             axes_trans = axes_trans,
+                                             axes_range = lims,
+                                             axes_limits = axes_limits
       )[[1]]
     }
   }
-
+  
   # Y axis breaks and labels - can be inherited from cyto_plot
   if (!is(axes_text[[2]], "list")) {
     if (.all_na(axes_text[[2]])) {
@@ -364,173 +394,228 @@ cyto_plot_empty.flowFrame <- function(x,
       if (length(channels) == 2) {
         lims <- list(ylim)
         names(lims) <- channels[2]
-        axes_text[[2]] <- .cyto_plot_axes_text(fr_list,
-          channels = channels[2],
-          axes_trans = axes_trans,
-          axes_range = lims,
-          axes_limits = axes_limits
+        axes_text[[2]] <- .cyto_plot_axes_text(x,
+                                               channels = channels[2],
+                                               axes_trans = axes_trans,
+                                               axes_range = lims,
+                                               axes_limits = axes_limits
         )[[1]]
       } else {
         axes_text[[2]] <- NA
       }
     }
   }
-
+  
   # Turn off y axis labels for stacked overlays
-  if (!.all_na(overlay) &
-    density_stack != 0 &
-    length(channels) == 1) {
+  if (length(x) > 1 &
+      hist_stack != 0 &
+      length(channels) == 1) {
     axes_text <- list(axes_text[[1]], FALSE)
   }
-
+  
   # AXES LABELS ----------------------------------------------------------------
-
+  
   # AXES LABELS - missing replaced - NA removed
   axes_labels <- .cyto_plot_axes_label(x,
-    channels = channels,
-    xlab = xlab,
-    ylab = ylab,
-    density_modal = density_modal
+                                       channels = channels,
+                                       xlab = xlab,
+                                       ylab = ylab,
+                                       hist_stat
   )
   xlab <- axes_labels[[1]]
   ylab <- axes_labels[[2]]
-
+  
   # TITLE ----------------------------------------------------------------------
-
+  
   # TITLE - missing replaced - NA removed
   title <- .cyto_plot_title(x,
-    channels = channels,
-    overlay = overlay,
-    title = title
+                            channels = channels,
+                            title = title
   )
-
+  
   # MARGINS --------------------------------------------------------------------
-
+  
   # Set plot margins - set par("mar")
-  .cyto_plot_margins(c(list(x), overlay),
-    legend = legend,
-    legend_text = legend_text,
-    legend_text_size = legend_text_size,
-    title = title,
-    axes_text = axes_text,
-    margins = margins
+  .cyto_plot_margins(x,
+                     channels = channels,
+                     legend = legend,
+                     legend_text = legend_text,
+                     legend_text_size = legend_text_size,
+                     title = title,
+                     axes_text = axes_text,
+                     margins = margins,
+                     point_col = point_col
   )
-
+  
   # PLOT CONSTRUCTION ----------------------------------------------------------
-
+  
   # Plot
   graphics::plot(1,
-    type = "n",
-    axes = FALSE,
-    xlim = xlim,
-    ylim = ylim,
-    xlab = "",
-    ylab = "",
-    bty = "n"
+                 type = "n",
+                 axes = FALSE,
+                 xlim = xlim,
+                 ylim = ylim,
+                 xlab = "",
+                 ylab = "",
+                 bty = "n"
   )
-
+  
   # X AXIS - TRANSFORMED
   if (is(axes_text[[1]], "list")) {
     # MINOR TICKS
-    mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
+    x_mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
     axis(1,
-      at = axes_text[[1]]$at[mnr_ind],
-      labels = axes_text[[1]]$label[mnr_ind],
-      tck = -0.015
+         at = axes_text[[1]]$at[x_mnr_ind],
+         labels = axes_text[[1]]$label[x_mnr_ind],
+         tck = -0.015
     )
-
+    
     # MAJOR TICKS - MUST BE >2% XRANGE FROM ZERO
-    mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
-    mjr <- list(
-      "at" = axes_text[[1]]$at[mjr_ind],
-      "label" = axes_text[[1]]$label[mjr_ind]
+    x_mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
+    x_mjr <- list(
+      "at" = axes_text[[1]]$at[x_mjr_ind],
+      "label" = axes_text[[1]]$label[x_mjr_ind]
     )
     # Zero included on plot
-    if (any(as.character(mjr$label) == "0")) {
-      zero <- which(as.character(mjr$label) == "0")
-      zero_break <- mjr$at[zero]
+    if (any(as.character(x_mjr$label) == "0")) {
+      zero <- which(as.character(x_mjr$label) == "0")
+      zero_break <- x_mjr$at[zero]
       zero_buffer <- c(
         zero_break - 0.02 * (xlim[2] - xlim[1]),
         zero_break + 0.02 * (xlim[2] - xlim[1])
       )
-      mjr_ind <- c(
+      x_mjr_ind <- c(
         zero,
-        which(mjr$at < zero_buffer[1] |
-          mjr$at > zero_buffer[2])
+        which(x_mjr$at < zero_buffer[1] |
+                x_mjr$at > zero_buffer[2])
       )
     } else {
-      mjr_ind <- seq_len(length(mjr$label))
+      x_mjr_ind <- seq_len(length(x_mjr$label))
     }
-
+    
     axis(1,
-      at = mjr$at[mjr_ind],
-      labels = mjr$label[mjr_ind],
-      font.axis = axes_text_font,
-      col.axis = axes_text_col,
-      cex.axis = axes_text_size,
-      tck = -0.03
+         at = x_mjr$at[x_mjr_ind],
+         labels = x_mjr$label[x_mjr_ind],
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size,
+         tck = -0.03
     )
     # X AXIS - UNTRANSFORMED
   } else if (.all_na(axes_text[[1]])) {
     axis(1,
-      font.axis = axes_text_font,
-      col.axis = axes_text_col,
-      cex.axis = axes_text_size,
-      tck = -0.03
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size,
+         tck = -0.03
     )
   }
-
+  
   # Y AXIS - TRANSFORMED
   if (is(axes_text[[2]], "list")) {
     # MINOR TICKS
-    mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
+    y_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
     axis(2,
-      at = axes_text[[2]]$at[mnr_ind],
-      labels = axes_text[[2]]$label[mnr_ind],
-      tck = -0.015
+         at = axes_text[[2]]$at[y_mnr_ind],
+         labels = axes_text[[2]]$label[y_mnr_ind],
+         tck = -0.015
     )
     # MAJOR TICKS - MUST BE >2% yrange FROM ZERO
-    mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
-    mjr <- list(
-      "at" = axes_text[[2]]$at[mjr_ind],
-      "label" = axes_text[[2]]$label[mjr_ind]
+    y_mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
+    y_mjr <- list(
+      "at" = axes_text[[2]]$at[y_mjr_ind],
+      "label" = axes_text[[2]]$label[y_mjr_ind]
     )
-
     # Zero included on plot
-    if (any(as.character(mjr$label) == "0")) {
-      zero <- which(as.character(mjr$label) == "0")
-      zero_break <- mjr$at[zero]
+    if (any(as.character(y_mjr$label) == "0")) {
+      zero <- which(as.character(y_mjr$label) == "0")
+      zero_break <- y_mjr$at[zero]
       zero_buffer <- c(
         zero_break - 0.02 * (ylim[2] - ylim[1]),
         zero_break + 0.02 * (ylim[2] - ylim[1])
       )
-      mjr_ind <- c(
+      y_mjr_ind <- c(
         zero,
-        which(mjr$at < zero_buffer[1] |
-          mjr$at > zero_buffer[2])
+        which(y_mjr$at < zero_buffer[1] |
+                y_mjr$at > zero_buffer[2])
       )
     } else {
-      mjr_ind <- seq_len(length(mjr$label))
+      y_mjr_ind <- seq_len(length(y_mjr$label))
     }
-
     axis(2,
-      at = mjr$at[mjr_ind],
-      labels = mjr$label[mjr_ind],
-      font.axis = axes_text_font,
-      col.axis = axes_text_col,
-      cex.axis = axes_text_size,
-      tck = -0.03
+         at = y_mjr$at[y_mjr_ind],
+         labels = y_mjr$label[y_mjr_ind],
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size,
+         tck = -0.03
     )
     # Y AXIS - LINEAR
   } else if (.all_na(axes_text[[2]])) {
     axis(2,
-      font.axis = axes_text_font,
-      col.axis = axes_text_col,
-      cex.axis = axes_text_size,
-      tck = -0.03
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size,
+         tck = -0.03
     )
   }
-
+  
+  # BORDER_FILL
+  if (border_fill != "white") {
+    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+         col = adjustcolor(border_fill, border_fill_alpha),
+         border = NA
+    )
+  }
+  
+  # GRID LINES
+  if (grid != FALSE) {
+    # AXES BREAKS GRID LINES
+    if (grid == TRUE) {
+      if (length(channels) == 2) {
+        axes_grid <- lapply(axes_text, `[[`, "at")
+      } else {
+        axes_grid <- list(axes_text[[1]]$at)
+      }
+      # QUANTILE GRID LINES - BASE LAYER ONLY
+    } else {
+      if (!is.numeric(grid)) {
+        grid <- 10
+      }
+      axes_grid <- lapply(channels, function(z) {
+        cyto_apply(x[[1]],
+                   "cyto_stat_quantile",
+                   channels = z,
+                   input = "matrix",
+                   copy = FALSE,
+                   inverse = FALSE,
+                   probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid))
+        )[, 1]
+      })
+      names(axes_grid) <- channels
+    }
+    # X AXIS GRID LINES
+    lapply(seq_along(axes_grid), function(z) {
+      # VERTICAL LINES
+      if (z == 1) {
+        abline(
+          v = axes_grid[[z]],
+          lty = grid_line_type,
+          lwd = grid_line_width,
+          col = adjustcolor(grid_line_col, grid_line_alpha)
+        )
+        # HORIZONTAL LINES
+      } else {
+        abline(
+          h = axes_grid[[z]],
+          lty = grid_line_type,
+          lwd = grid_line_width,
+          col = adjustcolor(grid_line_col, grid_line_alpha)
+        )
+      }
+    })
+  }
+  
   # BORDER
   box(
     which = "plot",
@@ -538,16 +623,7 @@ cyto_plot_empty.flowFrame <- function(x,
     lwd = border_line_width,
     col = border_line_col
   )
-
-
-  # BORDER_FILL
-  if (border_fill != "white") {
-    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
-      col = adjustcolor(border_fill, border_fill_alpha),
-      border = NA
-    )
-  }
-
+  
   # TITLE
   if (!.all_na(title)) {
     title(
@@ -557,7 +633,7 @@ cyto_plot_empty.flowFrame <- function(x,
       font.main = title_text_font
     )
   }
-
+  
   # XLAB - position labels closer if axes text is missing
   if (!.all_na(xlab)) {
     if (is(axes_text[[1]], "list")) {
@@ -584,7 +660,7 @@ cyto_plot_empty.flowFrame <- function(x,
       )
     }
   }
-
+  
   # YLAB - position labels closer if axes text is missing
   if (!.all_na(ylab)) {
     if (is(axes_text[[2]], "list")) {
@@ -611,141 +687,106 @@ cyto_plot_empty.flowFrame <- function(x,
       )
     }
   }
-
+  
   # LEGEND ---------------------------------------------------------------------
-
+  
+  # POINT_COL_SCALE
+  if (length(channels) == 2 &
+      (is.na(point_col)[1] |
+       any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
+    # LEGEND
+    point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
+    legend_col_ramp <- colorRamp(point_col_scale)
+    legend_cols <- seq(0, 1, 1 / 50) # 50 boxes
+    legend_cols <- legend_col_ramp(legend_cols)
+    legend_cols <- rgb(legend_cols[, 1],
+                       legend_cols[, 2],
+                       legend_cols[, 3],
+                       maxColorValue = 255
+    )
+    legend_cols <- adjustcolor(legend_cols, point_col_alpha[1])
+    
+    # LEGEND LOCATION
+    legend_x <- c(
+      par("usr")[2] + 0.005 * (par("usr")[2] - par("usr")[1]),
+      par("usr")[2] + 0.035 * (par("usr")[2] - par("usr")[1])
+    )
+    legend_y <- c(par("usr")[3], par("usr")[4])
+    
+    # LEGEND BORDER
+    rect(legend_x[1],
+         legend_y[1],
+         legend_x[2],
+         legend_y[2],
+         xpd = TRUE,
+         lwd = 1
+    )
+    
+    # LEGEND BOXES
+    legend_box_x <- legend_x
+    legend_box_y <- seq(
+      par("usr")[3],
+      par("usr")[4],
+      (par("usr")[4] - par("usr")[3]) / 50
+    )
+    lapply(seq_len(50), function(z) {
+      rect(legend_box_x[1],
+           legend_box_y[z],
+           legend_box_x[2],
+           legend_box_y[z + 1],
+           xpd = TRUE,
+           col = legend_cols[z],
+           border = NA
+      )
+    })
+  }
+  
   # LEGEND - FALSE/"fill"/"line"
   if (legend != FALSE) {
-    .cyto_plot_legend(fr_list,
-      channels = channels,
-      legend = legend,
-      legend_text = legend_text,
-      legend_text_font = legend_text_font,
-      legend_text_size = legend_text_size,
-      legend_text_col = legend_text_col,
-      legend_line_type = legend_line_type,
-      legend_line_width = legend_line_width,
-      legend_line_col = legend_line_col,
-      legend_box_fill = legend_box_fill,
-      legend_point_col = legend_point_col,
-      density_cols = density_cols,
-      density_fill = density_fill,
-      density_fill_alpha = density_fill_alpha,
-      density_line_type = density_line_type,
-      density_line_width = density_line_width,
-      density_line_col = density_line_col,
-      point_shape = point_shape,
-      point_size = point_size,
-      point_col_scale = point_col_scale,
-      point_cols = point_cols,
-      point_col = point_col,
-      point_col_alpha = point_col_alpha
+    .cyto_plot_legend(x,
+                      channels = channels,
+                      legend = legend,
+                      legend_text = legend_text,
+                      legend_text_font = legend_text_font,
+                      legend_text_size = legend_text_size,
+                      legend_text_col = legend_text_col,
+                      legend_line_type = legend_line_type,
+                      legend_line_width = legend_line_width,
+                      legend_line_col = legend_line_col,
+                      legend_box_fill = legend_box_fill,
+                      legend_point_col = legend_point_col,
+                      hist_cols = hist_cols,
+                      hist_fill = hist_fill,
+                      hist_fill_alpha = hist_fill_alpha,
+                      hist_line_type = hist_line_type,
+                      hist_line_width = hist_line_width,
+                      hist_line_col = hist_line_col,
+                      point_shape = point_shape,
+                      point_size = point_size,
+                      point_col_scale = point_col_scale,
+                      point_cols = point_cols,
+                      point_col = point_col,
+                      point_col_alpha = point_col_alpha
     )
   }
-}
-
-#' @noRd
-#' @export
-cyto_plot_empty.list <- function(x,
-                                 channels,
-                                 axes_trans = NA,
-                                 gate = NA,
-                                 xlim = NA,
-                                 ylim = NA,
-                                 axes_limits = "auto",
-                                 title,
-                                 xlab,
-                                 ylab,
-                                 margins = NULL,
-                                 density_modal = TRUE,
-                                 density_smooth = 1.5,
-                                 density_stack = 0.5,
-                                 density_cols = NA,
-                                 density_fill = NA,
-                                 density_fill_alpha = 1,
-                                 density_line_type = 1,
-                                 density_line_width = 1,
-                                 density_line_col = "black",
-                                 point_shape = ".",
-                                 point_size = 2,
-                                 point_col_scale = NA,
-                                 point_cols = NA,
-                                 point_col = NA,
-                                 point_col_alpha = 1,
-                                 axes_limits_buffer = 0.03,
-                                 axes_text = c(TRUE, TRUE),
-                                 axes_text_font = 1,
-                                 axes_text_size = 1,
-                                 axes_text_col = "black",
-                                 axes_label_text_font = 1,
-                                 axes_label_text_size = 1.1,
-                                 axes_label_text_col = "black",
-                                 title_text_font = 2,
-                                 title_text_size = 1.1,
-                                 title_text_col = "black",
-                                 border_line_type = 1,
-                                 border_line_width = 1,
-                                 border_line_col = "black",
-                                 border_fill = "white",
-                                 border_fill_alpha = 1,
-                                 legend = FALSE,
-                                 legend_text,
-                                 legend_text_font = 1,
-                                 legend_text_size = 1,
-                                 legend_text_col = "black",
-                                 legend_line_type = NA,
-                                 legend_line_width = NA,
-                                 legend_line_col = NA,
-                                 legend_box_fill = NA,
-                                 legend_point_col = NA,
-                                 ...) {
-
-  # CHECKS ---------------------------------------------------------------------
-
-  # LIST OF FLOWFRAMES
-  if (!all(LAPPLY(x, is, "flowFrame"))) {
-    stop("'x' must be a list of flowFrame objects.")
-  }
-
-  # OVERLAY
-  if (length(x) > 1) {
-    overlay <- x[seq(2, length(x), 1)]
-  } else {
-    overlay <- NA
-  }
-
-  # X
-  x <- x[[1]]
-
-  # ARGUMENTS ------------------------------------------------------------------
-
-  # ARGUMENT LIST
-  args <- .args_list()
-
-  # CALL FLOWFRAME METHOD ------------------------------------------------------
-
-  # CYTO_PLOT_EMPTY ARGUMENTS
-  ARGS <- formalArgs("cyto_plot_empty.flowFrame")
-
-  # CALL FLOWFRAME METHOD
-  do.call("cyto_plot_empty.flowFrame", args[names(args) %in% ARGS])
 }
 
 ## CYTO_PLOT_NEW ---------------------------------------------------------------
 
 #' Open new graphics device for cyto_plot
 #'
-#' \code{cyto_plot_new} is used internally by cyto_plot to open an
-#' OS-specific interactive garphics device to facilitate gate drawing. Mac users
-#' will need to install \href{https://www.xquartz.org/}{XQuartz} for this
-#' functionality.
+#' \code{cyto_plot_new} opens a new RStudio or pop-up graphics device and
+#' accepts arguments to set the graphical parameters of the new device.
+#' \code{cyto_plot_new()} is used internally by cyto_plot to open an OS-specific
+#' interactive garphics device to facilitate gate drawing. Mac users will need
+#' to install \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #'
-#' @param popup logical indicating whether a popup graphics device should be
-#'   opened, set to TRUE by default.
-#' @param ... additional arguments passed to
-#'   \code{\link[grDevices:dev]{dev.new}}:
+#' @param popup logical indicating whether a pop-up graphics device should be
+#'   opened, set to TRUE by default if called outside of \code{cyto_plot()}.
+#' @param ... additional graphical parameters supplied by name to be passed to
+#'   \code{\link{cyto_plot_par}} to customise the new graphics device.
 #'
-#' @importFrom grDevices dev.cur dev.new
+#' @importFrom grDevices dev.cur dev.new dev.list dev.set graphics.off
 #'
 #' @examples
 #' \dontrun{
@@ -756,24 +797,129 @@ cyto_plot_empty.list <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup = TRUE, ...){
-  # Null graphics device -> RStudioGD
-  if(dev.cur() == 1) {
+cyto_plot_new <- function(popup,
+                          ...) {
+  
+  # POPUP
+  if(missing(popup)) {
+    # CALLED WITHIN CYTO_PLOT - USE SAME DEVICE TYPE
+    if(!is.null(getOption("cyto_plot_method"))) {
+      if(grepl("rstudio", names(dev.cur()), ignore.case = TRUE)) {
+        popup <- FALSE
+      } else {
+        popup <- TRUE
+      }
+      # CALLED EXTERNALLY
+    } else {
+      popup <- TRUE
+    }
+  }
+  
+  # NULL -> RSTUDIOGD
+  if (dev.cur() == 1) {
     dev.new()
   }
-  # Open popup window - either windows/X11/xquartz
-  if(popup == TRUE & interactive() & getOption("CytoExploreR_interactive")){
-    if(.Platform$OS.type == "windows"){
-      suppressWarnings(dev.new(...))
-    }else if (.Platform$OS.type == "unix") {
-      if (Sys.info()["sysname"] == "Linux") {
-        # Cairo needed for semi-transparency
-        suppressWarnings(dev.new(type = "cairo", ...))
-      }else if(Sys.info()["sysname"] == "Darwin"){
-        suppressWarnings(dev.new(...))
+  
+  # BYPASS ON CYTO_PLOT_SAVE
+  if (!getOption("cyto_plot_save")) {
+    # NEW DEVICE
+    if (popup) {
+      dev_new <- "popup"
+    } else {
+      dev_new <- "rstudio"
+    }
+    # CURRENT DEVICE
+    dev_old <- names(dev.cur())
+    if (grepl("rstudio", dev_old, ignore.case = TRUE)) {
+      dev_old <- "rstudio"
+    } else {
+      dev_old <- "popup"
+    }
+    # CURRENT DEVICE - RSTUDIO
+    if (dev_old == "rstudio") {
+      # REQUIRE - POPUP
+      if (dev_new == "popup") {
+        # NEW POPUP DEVICE REQUIRED
+        dev_new <- "popup"
+        # REQUIRE - RSTUDIO
+      } else {
+        # PRESET LAYOUT OR EMPTY DEVICE
+        if (getOption("cyto_plot_method") == "custom" | dev_empty()) {
+          dev_new <- FALSE
+          # NEW LAYOUT
+        } else {
+          dev_new <- "rstudio"
+        }
+      }
+      # CURRENT DEVICE - POPUP
+    } else if(dev_old == "popup") {
+      # REQUIRE POPUP
+      if (dev_new == "popup") {
+        # PRESET LAYOUT OR EMPTY DEVICE
+        if (getOption("cyto_plot_method") == "custom" | dev_empty()) {
+          dev_new <- FALSE
+          # NEW LAYOUT
+        } else {
+          dev_new <- "popup"
+        }
+        # REQUIRE - RSTUDIO
+      } else {
+        # NEW RSTUDIO DEVICE REQUIRED
+        dev_new <- "rstudio"
+      }
+    }
+    print(dev_new)
+    # OPEN NEW GRAPHICS DEVICE
+    if (dev_new != FALSE) {
+      # POPUP DEVICE
+      if (dev_new == "popup") {
+        if (interactive() & getOption("CytoExploreR_interactive")) {
+          if (.Platform$OS.type == "windows") {
+            suppressWarnings(dev.new())
+          } else if (.Platform$OS.type == "unix") {
+            if (Sys.info()["sysname"] == "Linux") {
+              # Cairo needed for semi-transparency
+              suppressWarnings(dev.new(type = "cairo"))
+            } else if (Sys.info()["sysname"] == "Darwin") {
+              suppressWarnings(dev.new())
+            }
+          }
+        }
+        # RSTUDIO DEVICE
+      } else if (dev_new == "rstudio") {
+        dev_ind <- which(grepl("rstudio",
+                               names(dev.list()),
+                               ignore.case = TRUE
+        ))
+        if (length(dev_ind) != 0) {
+          dev.set(dev.list()[dev_ind])
+        } else {
+          graphics.off()
+          dev.new(noRStudioGD = FALSE)
+        }
       }
     }
   }
+  
+  # SET GRAPHICAL PARAMATERS - INERITS CYTO_PLOT_PAR GLOBAL
+  cyto_plot_par(...)
+  
+}
+
+## DEV_EMPTY -------------------------------------------------------------------
+
+#' Check if graphics device is empty
+#' @importFrom graphics par
+#' @noRd
+dev_empty <- function() {
+  # DEVICE EMPTY - NEW CAN ONLY BE CALLED IF PLOT EXISTS
+  old_par <- .par("new")
+  dev_empty <- tryCatch(
+    par(new = TRUE)[["new"]],
+    warning = function(w){TRUE},
+    finally = function(f){FALSE})
+  par(old_par)
+  return(dev_empty)
 }
 
 ## CYTO_PLOT_RESET -------------------------------------------------------------
@@ -785,36 +931,27 @@ cyto_plot_new <- function(popup = TRUE, ...){
 #' @importFrom grDevices dev.off dev.cur
 #' @export
 cyto_plot_reset <- function() {
-
-  # Signals args called to cyto_plot - check if call is made twice
-  options("cyto_plot_call" = NULL)
-
-  # Signals if plots match in flowSet method
-  options("cyto_plot_match" = NULL)
-
+  
   # Create custom theme for cyto_plot
   options("cyto_plot_theme" = NULL)
-
+  
   # Signal cyto_plot_save method has been called
   options("cyto_plot_save" = FALSE)
-
+  
   # Signal which cyto_plot method has been called
   options("cyto_plot_method" = NULL)
-
-  # Signal if a custom plot is being contructed - require cyto_plot_complete
-  options("cyto_plot_custom" = FALSE)
-
-  # Signal when cyto_plot_grid method is being called
-  options("cyto_plot_grid" = FALSE)
-
-  # Signal previous call to cyto_plot (same plot?)
-  options("cyto_plot_call" = NULL)
-
-  # Save label co-ordinates as list
-  options("cyto_plot_label_coords" = NULL)
+  
+  # Reset saved parameters
+  options("cyto_plot_par" = NULL)
+  
+  # RESET PARAMETERS
+  options("cyto_plot_par_reset" = NULL)
+  
+  # Reset memory
+  .cyto_plot_args_remove()
   
   # Turn off graphics device
-  if(dev.cur() != 1){
+  if (dev.cur() != 1) {
     dev.off()
   }
   
@@ -831,30 +968,30 @@ cyto_plot_reset <- function() {
 #' @importFrom grDevices recordPlot
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
-#' 
+#'
 #' # Load CytoExploreRData to acces data
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Construct cyto_plot
 #' cyto_plot(fs[[1]],
-#'           channels = c("FSC-A", "SSC-A"))
-#'           
+#'   channels = c("FSC-A", "SSC-A")
+#' )
+#'
 #' # Record plot and save to object called p
 #' p <- cyto_plot_record()
-#' 
+#'
 #' # Calling p will bring back the recorded plot
 #' p
-#' 
 #' }
 #'
 #' @export
-cyto_plot_record <- function(){
+cyto_plot_record <- function() {
   recordPlot()
 }
 
@@ -875,15 +1012,12 @@ cyto_plot_record <- function(){
 #'   \code{svg} and \code{pdf} graphics devices.
 #' @param res resolution in ppi, set to 300 by default.
 #' @param multiple logical indicating whether multiple pages should be saved to
-#'   separate numbered files, set to \code{TRUE} by default.
-#' @param layout a vector or matrix defining the custom layout of the plot to be
-#'   created using `cyto_plot_layout`, set to NULL by default to use standard
-#'   `cyto_plot` layout. Custom layouts are required when making multiple
-#'   `cyto_plot` calls in the same image.
+#'   separate numbered files, set to \code{FALSE} by default.
+#' @param reset logical indicating whether to reset a previous call to
+#'   \code{cyto_plot_save}.
 #' @param ... additional arguments for the appropriate \code{png()},
 #'   \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.
 #'
-#' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom grDevices png tiff jpeg pdf svg
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -935,210 +1069,112 @@ cyto_plot_save <- function(save_as,
                            units = "in",
                            res = 300,
                            multiple = FALSE,
-                           layout = NULL,
+                           reset = FALSE,
                            ...) {
-
-  # File missing extension
-  if (file_ext(save_as) == "") {
-    # Modify file name to export png by default
-    save_as <- paste0(save_as, ".png")
-  }
-
-  # Save separate pages to separate number files
-  if (multiple == TRUE & file_ext(save_as) != "pdf") {
-    save_as <- paste0(
-      file_path_sans_ext(save_as),
-      "%03d", ".",
-      file_ext(save_as)
-    )
-  }
-
-  # PNG DEVICE
-  if (file_ext(save_as) == "png") {
-    png(
-      filename = save_as,
-      width = width,
-      height = height,
-      units = units,
-      res = res,
-      ...
-    )
-  # TIFF DEVICE
-  } else if (file_ext(save_as) == "tiff") {
-    tiff(
-      filename = save_as,
-      width = width,
-      height = height,
-      units = units,
-      res = res,
-      ...
-    )
-  # JPEG DEVICE
-  } else if (file_ext(save_as) == "jpeg") {
-    jpeg(
-      filename = save_as,
-      width = width,
-      height = height,
-      units = units,
-      res = res,
-      ...
-    )
-  # PDF DEVICE
-  } else if (file_ext(save_as) == "pdf") {
-    pdf(
-      file = save_as,
-      width = width,
-      height = height,
-      onefile = multiple,
-      ...
-    )
-  } else if(file_ext(save_as) == "svg") {
-    svg(
-      filename = save_as,
-      width = width,
-      height = height,
-      ...
-    )
+  
+  # RESET
+  if (reset == TRUE) {
+    # CLOSE DEVICE
+    dev.off()
+    # RESET CYTO_PLOT_SAVE
+    options("cyto_plot_save" = FALSE)
+    # SET
   } else {
-    stop(paste("Can't save file to", file_ext(save_as), "format."))
-  }
-
-  # Set global option to notify cyto_plot when dev.off() is required for saving
-  options("cyto_plot_save" = TRUE)
-  
-  # CYTO_PLOT_CUSTOM
-  if(!is.null(layout)){
-    cyto_plot_custom(layout = layout)
-  }
-  
-}
-
-## CYTO_PLOT_SAVE_RESET --------------------------------------------------------
-
-#' Revert unwanted cyto_plot_save call
-#'
-#' @importFrom grDevices dev.off
-#'
-#' @examples
-#'
-#' # Unwanted cyto_plot_save call
-#' cyto_plot_save("Mistake.png")
-#'
-#' # Revert unwanted cyto_plot_save call
-#' cyto_plot_save_reset()
-#' 
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @export
-cyto_plot_save_reset <- function() {
-  # TURN OFF GLOBAL OPTION
-  options("cyto_plot_save" = FALSE)
-  # TURN OFF GRAPHICS DEVICE
-  dev.off()
-}
-
-## CYTO_PLOT_LAYOUT ------------------------------------------------------------
-
-#' Set Panel Layout for cyto_plot
-#'
-#' \code{cyto_plot_layout()} sets the panel layout dimensions for combining
-#' different types of cyto_plot plots. Make a call to \code{cyto_plot_layout()}
-#' prior to making multiple calls to \code{cyto_plot()}.
-#'
-#' @param layout either a vector of the form c(nrow, ncol) defining the
-#'   dimensions of the plot or a matrix defining a more sophisticated layout
-#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-#'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default.
-#'
-#' @importFrom graphics par layout
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @examples
-#' library(CytoExploreRData)
-#'
-#' # Load samples into GatingSet
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#'
-#' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#'
-#' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
-#'
-#' # Apply gatingTemplate
-#' gt <- Activation_gatingTemplate
-#' gt_gating(gt, gs)
-#'
-#' # Set out plot layout
-#' cyto_plot_layout(c(1,2))
-#'
-#' # Add 2D plot
-#' cyto_plot(gs[[4]],
-#'   parent = "CD4 T Cells",
-#'   alias = "",
-#'   channels = c("Alexa Fluor 647-A", "7-AAD-A"),
-#'   layout = FALSE
-#' )
-#'
-#' # Add 1D plot
-#' cyto_plot(gs,
-#'   parent = "CD4 T Cells",
-#'   alias = "",
-#'   channels = "7-AAD-A",
-#'   density_stack = 0.6,
-#'   layout = FALSE
-#' )
-#' @export
-cyto_plot_layout <- function(layout = NULL) {
-
-  # MESSAGE
-  if(is.null(layout)){
-    stop("Supply either a vector or matrix to construct a custom layout.")
-  }
-  
-  # MATRIX
-  if(is.matrix(layout)){
-    layout(layout)
-  # VECTOR  
-  }else{
-    # ROW ORDER
-    if(length(layout) == 2){
-      layout <- c(layout, 1)
+    # APPEND FILE EXTENSION
+    save_as <- file_ext_append(save_as, ".png")
+    # MULTIPLE FILES
+    if (multiple == TRUE & file_ext(save_as) != "pdf") {
+      save_as <- paste0(
+        file_ext_remove(save_as),
+        "_", "%03d", ".",
+        file_ext(save_as)
+      )
     }
-    # ROWS
-    if (layout[3] == 1) {
-      par(mfrow = c(layout[1], layout[2]))
-    # COLUMNS
-    } else if (layout[3] == 2) {
-      par(mfcol = c(layout[1], layout[2]))
+    # PNG DEVICE
+    if (file_ext(save_as) == "png") {
+      png(
+        filename = save_as,
+        width = width,
+        height = height,
+        units = units,
+        res = res,
+        ...
+      )
+      # TIFF DEVICE
+    } else if (file_ext(save_as) == "tiff") {
+      tiff(
+        filename = save_as,
+        width = width,
+        height = height,
+        units = units,
+        res = res,
+        ...
+      )
+      # JPEG DEVICE
+    } else if (file_ext(save_as) == "jpeg") {
+      jpeg(
+        filename = save_as,
+        width = width,
+        height = height,
+        units = units,
+        res = res,
+        ...
+      )
+      # PDF DEVICE
+    } else if (file_ext(save_as) == "pdf") {
+      pdf(
+        file = save_as,
+        width = width,
+        height = height,
+        onefile = multiple,
+        ...
+      )
+      # SVG DEVICE
+    } else if (file_ext(save_as) == "svg") {
+      svg(
+        filename = save_as,
+        width = width,
+        height = height,
+        ...
+      )
+    } else {
+      stop(paste("Can't save file to", file_ext(save_as), "format."))
     }
+    # Set global option to notify cyto_plot - dev.off() is required for saving
+    options("cyto_plot_save" = TRUE)
   }
-
 }
 
 ## CYTO_PLOT_CUSTOM ------------------------------------------------------------
 
-#' Create custom cyto_plot
+#' Set customised graphical parameters for cyto_plot
 #'
-#' Signal to \code{cyto_plot} that a custom plot is being created to ensure that
-#' plots are appropraitely saved with \code{cyto_plot_save}.
-#' \code{cyto_plot_custom} calls must be made before \code{cyto_plo_save} calls
-#' and \code{cyto_plot} calls should be followed by a call to
-#' \code{cyto_plot_complete} to indicate when the plot is complete and should be
-#' saved.
+#' \code{cyto_plot_custom()} make a call to \code{cyto_plot_par()} to set
+#' customised graphical parameters for the current graphics device.
+#' \code{cyto_plot_custom()} will then signal to \code{cyto_plot()} to ensure
+#' that these set graphical parameters are not overridden and to make sure that
+#' the plots are only saved when the user calls \code{cyto_plot_complete()}.
+#' \code{cyto_plot_custom()} will also record the current graphical parameters
+#' before changing them, so that these can be reset when
+#' \code{cyto_plot_complete()} is called.
 #'
-#' @param layout either a vector of the form c(nrow, ncol) defining the
-#'   dimensions of the plot or a matrix defining a more sophisticated layout
-#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-#'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default.
-#'   
-#' @importFrom graphics par
-#'   
+#' The sequence of calls to save a customised plot are described below:
+#' \itemize{\item \code{cyto_plot_save()} - sets a new graphics device of the
+#' appropriate type (e.g. \code{png()}) and makes sure that \code{cyto_plot()}
+#' does not open other graphics devices \item \code{cyto_plot_custom()} - sets
+#' up the current graphics device with customised graphical parameters and
+#' indicates to \code{cyto_plot()} that the user will take control over when the
+#' plot should be saved. \item \code{cyto_plot()} - the users can then makes
+#' calls to any of the \code{cyto_plot()} family of function to construct the
+#' plot on the customised graphics device. \item \code{cyto_plot_complete()} -
+#' signals that the plot is complete and ready for saving to file. Since
+#' \code{cyto_plot_complete()} also resets a lot of graphical parameters it
+#' should be called even if a call has not been made to \code{cyto_plot_save()}.
+#' }
+#'
+#' @param ... graphical parameters supplied by name to be passed to
+#'   \code{\link{cyto_plot_par}} to customise the current graphics device.
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @examples
@@ -1147,47 +1183,58 @@ cyto_plot_layout <- function(layout = NULL) {
 #'
 #' # Activation flowSet
 #' fs <- Activation
-#' 
+#'
 #' # Save plot
 #' cyto_plot_save("Test.png",
-#'                height = 7,
-#'                width = 14)
+#'   height = 7,
+#'   width = 14
+#' )
 #'
 #' # Create custom plot - 1D & 2D plot panels
-#' cyto_plot_custom(layout = c(1,2))
+#' cyto_plot_custom(layout = c(1, 2))
 #' cyto_plot(fs[[32]],
-#'           channels = "FSC-A")
+#'   channels = "FSC-A"
+#' )
 #' cyto_plot(fs[[32]],
-#'           channels = c("FSC-A","SSC-A"))
+#'   channels = c("FSC-A", "SSC-A")
+#' )
 #'
 #' # Signal plot is complete and save
 #' cyto_plot_complete()
 #' }
 #' @export
-cyto_plot_custom <- function(layout = NULL){
+cyto_plot_custom <- function(...) {
   
-  # Tell CytoExploreR - cyto_plot_save and layout resets
-  options("cyto_plot_custom" = TRUE)
+  # SAVE PARS FOR CYTO_PLOT_COMPLETE RESET
+  if (getOption("cyto_plot_method") != "custom") {
+    options("cyto_plot_par_reset" = .par())
+  }
   
-  # Set plot method
+  # METHOD
   options("cyto_plot_method" = "custom")
   
-  # Set layout
-  cyto_plot_layout(layout)
+  # GRAPHICAL PARAMETERS
+  cyto_plot_par(...)
   
+  # RESET MEMORY
+  if (!getOption("cyto_plot_save")) {
+    .cyto_plot_args_remove()
+  }
 }
 
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------
 
-#' Indicate Completion of Custom cyto_plot Layout for Saving
+#' Save custom plot and reset associated settings
 #'
-#' @param layout either a vector of the form c(nrow, ncol) defining the
-#'   dimensions of the plot or a matrix defining a more sophisticated layout
-#'   (see \code{\link[graphics]{layout}}). Vectors can optionally contain a
-#'   third element to indicate whether plots should be placed in row (1) or
-#'   column (2) order, set to row order by default.
+#' \code{cyto_plot_custom()} signals that a custom plot is ready for saving with
+#' \code{cyto_plot_save()} and also resets any settings that were set by
+#' \code{cyto_plot_custom()}. For this reason it is recommended that
+#' \code{cyto_plot_complete()} be called after any plotting on a graphics device
+#' that has been set up using \code{cyto_plot_custom()}.
 #'
-#' @importFrom graphics par
+#' @param ... graphical parameters supplied by name to be passed to
+#'   \code{\link{cyto_plot_par}} to reset the parameters of the current graphics
+#'   device.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1216,7 +1263,7 @@ cyto_plot_custom <- function(layout = NULL){
 #' )
 #'
 #' # Set out plot layout
-#' cyto_plot_layout(c(1,2))
+#' cyto_plot_layout(c(1, 2))
 #'
 #' # Add 2D plot
 #' cyto_plot(gs[[4]],
@@ -1231,57 +1278,49 @@ cyto_plot_custom <- function(layout = NULL){
 #'   parent = "CD4 T Cells",
 #'   alias = "",
 #'   channels = "7-AAD-A",
-#'   density_stack = 0.6,
+#'   hist_stack = 0.6,
 #'   layout = FALSE
 #' )
 #'
 #' # Signal that the plot is complete
 #' cyto_plot_complete()
 #' @export
-cyto_plot_complete <- function(layout = NULL) {
-
-  # Close graphics device (not RStudioGD or X11)
-  if(!names(dev.cur()) %in% c("RStudioGD", 
-                              "windows", 
-                              "X11", 
-                              "x11", 
-                              "quartz")){
-    dev.off()
-  }
-
-  # Reset cyto_plot_custom
-  options("cyto_plot_custom" = FALSE)
+cyto_plot_complete <- function(...) {
   
-  # Reset plot method
+  # CLOSE DEVICE (not RStudioGD/X11/quartz)
+  if (getOption("cyto_plot_save")) {
+    if (!names(dev.cur()) %in% c(
+      "RStudioGD",
+      "windows",
+      "X11",
+      "x11",
+      "quartz"
+    )) {
+      dev.off()
+    }
+  }
+  
+  # CUSTOM - USE SAVED RESET PARAMETERS
+  if (getOption("cyto_plot_method") == "custom") {
+    # RESET PARAMETERS
+    old_pars <- getOption("cyto_plot_par_reset")
+    pars <- list(...)
+    old_pars <- old_pars[!names(old_pars) %in% names(pars)]
+    old_pars <- c(old_pars, pars)
+    do.call("cyto_plot_par", old_pars)
+    # NO SAVED RESET PARAMETERS
+  } else {
+    cyto_plot_par(...)
+  }
+  
+  # RESET CYTO_PLOT_METHOD
   options("cyto_plot_method" = NULL)
   
-  # Turn off saving
+  # RESET CYTO_PLOT_SAVE
   options("cyto_plot_save" = FALSE)
   
-  # Reset layout - 1 x 1
-  if(is.null(layout)){
-    par("mfrow" = c(1,1))
-    par("mfcol" = c(1,1))
-  # Reset layout as supplied
-  }else{
-    # MATRIX
-    if(is.matrix(layout)){
-      layout(layout)
-    # VECTOR
-    }else{
-      if(length(layout) == 2){
-        layout <- c(layout, 1)
-      }
-    }
-    # ROWS
-    if (layout[3] == 1) {
-      par(mfrow = c(layout[1], layout[2]))
-    # COLUMNS
-    } else if (layout[3] == 2) {
-      par(mfcol = c(layout[1], layout[2]))
-    }
-  }
-  
+  # RESET SAVED PARAMETERS
+  cyto_plot_par(reset = TRUE)
 }
 
 ## CYTO_PLOT_THEME -------------------------------------------------------------
@@ -1295,6 +1334,8 @@ cyto_plot_complete <- function(layout = NULL) {
 #' \code{cyto_plot_theme_args}.
 #'
 #' @param ... arguments supported by cyto_plot_theme.
+#' @param reset logical indicating whether \code{cyto_plot_theme()} settings
+#'   should be reset to use default settings, set to FALSE by default.
 #'
 #' @examples
 #' # Make all plots have a black background
@@ -1319,48 +1360,119 @@ cyto_plot_complete <- function(layout = NULL) {
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_plot_theme <- function(...) {
-
-  # cyto_plot will pull down these arguments
-
-  # Arguments as named list
-  args <- list(...)
-
-  # Empty list set theme to NULL
-  if (length(args) == 0) {
-    args <- NULL
+cyto_plot_theme <- function(...,
+                            reset = FALSE) {
+  
+  # RESET
+  if (reset) {
+    # RESET THEME
+    options("cyto_plot_theme" = NULL)
+    theme_args <- getOption("cyto_plot_theme")
+    # SET
   } else {
-    # Check supplied arguments are supported.
-    if (!all(names(args) %in% cyto_plot_theme_args())) {
-      lapply(names(args), function(x) {
-        if (!x %in% cyto_plot_theme_args()) {
-          message(paste(x, "is not a supported argument for cyto_plot_theme."))
-        }
-      })
+    # CURRENT THEME ARGUMENTS
+    theme_args <- getOption("cyto_plot_theme")
+    # ARGUMENTS
+    theme_new_args <- list(...)
+    # NEW THEME ARGUMENTS
+    if (length(theme_new_args) != 0) {
+      # CHECK ARGUMENTS
+      if (!all(names(theme_new_args) %in% cyto_plot_theme_args())) {
+        lapply(names(theme_new_args), function(x) {
+          if (!x %in% cyto_plot_theme_args()) {
+            message(
+              paste(x, "is not a supported argument for cyto_plot_theme.")
+            )
+          }
+        })
+      }
+      # SUPPORTED ARGUMENTS ONLY
+      theme_new_args <- theme_new_args[names(theme_new_args) %in%
+                                         cyto_plot_theme_args()]
     }
-
-    # Restrict list to supported arguments only
-    args <- args[names(args) %in% cyto_plot_theme_args()]
+    # REMOVE OLD PARAMETERS
+    theme_args <- theme_args[!names(theme_args) %in% names(theme_new_args)]
+    theme_args <- c(theme_args, theme_new_args)
+    options("cyto_plot_theme" = theme_args)
   }
-
-  # Assign arguments to cyto_plot_theme option
-  options("cyto_plot_theme" = args)
+  # RETURN THEME ARUMENTS
+  invisible(theme_args)
 }
 
-## CYTO_PLOT_THEME_RESET -------------------------------------------------------
+## CYTO_PLOT_PAR ---------------------------------------------------------------
 
-#' Reset cyto_plot_theme to default settings
+#' Extract a list of graphical parameters set by cyto_plot
+#'
+#' This function is designed to used within \code{cyto_plot()} to return a list
+#' of graphical parameters that have been set by \code{cyto_plot()}. This is not
+#' intended to be used by the user, but can be used to check if there are any
+#' graphical parameters that have not been properly reset after a call to
+#' \code{cyto_plot()}. If required, these graphical parameters can be reset by
+#' setting \code{reset = TRUE}.
+#'
+#' @param ... additional graphical parameters to be set by the current
+#'   \code{cyto_plot()} call (e.g. mfrow = c(1,2)).
+#' @param reset logical indicating whether these svaed graphical parameters
+#'   should be reset, set to FALSE by default.
+#'
+#' @importFrom graphics par layout
+#'
+#' @return invisibly return a list of set graphical parameters.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_plot_theme_reset <- function() {
-
-  # Set cyto_plot_theme option to NULL
-  options("cyto_plot_theme" = NULL)
+cyto_plot_par <- function(...,
+                          reset = FALSE) {
+  
+  # RESET
+  if (reset) {
+    # RESET PARAMETERS
+    options("cyto_plot_par" = NULL)
+    par_args <- getOption("cyto_plot_par")
+    # SET
+  } else {
+    # CURRENT PARAMETERS
+    par_args <- getOption("cyto_plot_par")
+    # NEW PARAMETERS
+    par_new_args <- list(...)
+    # PREPARE PARAMETERS
+    par_args <- par_args[!names(par_args) %in% names(par_new_args)]
+    par_args <- c(par_args, par_new_args)
+    # LAYOUT
+    if("layout" %in% names(par_args)) {
+      print("YASS")
+      layout <- par_args[["layout"]]
+      par_args <- par_args[!names(par_args) %in% "layout"]
+      if (is.numeric(layout)) {
+        if (is.null(dim(layout))) {
+          if (length(layout) == 2) {
+            par_args <- c(par_args, list("mfrow" = layout))
+          } else if (length(layout) == 3) {
+            if (layout[3] == 1) {
+              par_args <- c(par_args, list("mfrow" = layout[1:2]))
+            } else {
+              par_args <- c(par_args, list("mfcol" = layout[1:2]))
+            }
+          }
+        } else {
+          par_args <- c(par_args, list("layout" = layout))
+          layout(layout)
+        }
+      }
+    }
+    # SAVE PARAMETERS
+    options("cyto_plot_par" = par_args)
+    # SET PARAMETERS
+    if(length(par_args[!names(par_args) %in% "layout"]) > 0) {
+      par(par_args[!names(par_args) %in% "layout"])
+    }
+  }
+  # RETURN SET PARAMETERS
+  invisible(par_args)
 }
 
-## .CYTO_PLOT_THEME_ARGS -------------------------------------------------------
+## CYTO_PLOT_THEME_ARGS --------------------------------------------------------
 
 #' Get supported cyto_plot_theme arguments
 #'
@@ -1377,14 +1489,15 @@ cyto_plot_theme_args <- function() {
     "axes_limits_buffer",
     "margins",
     "popup",
-    "density_modal",
-    "density_smooth",
-    "density_stack",
-    "density_cols",
-    "density_fill_alpha",
-    "density_line_type",
-    "density_line_width",
-    "density_line_col",
+    "hist_stat",
+    "hist_bins",
+    "hist_smooth",
+    "hist_stack",
+    "hist_cols",
+    "hist_fill_alpha",
+    "hist_line_type",
+    "hist_line_width",
+    "hist_line_col",
     "axes_text",
     "axes_text_font",
     "axes_text_size",
@@ -1423,10 +1536,16 @@ cyto_plot_theme_args <- function() {
     "point_col_scale",
     "point_cols",
     "point_col_alpha",
+    "point_fast",
     "contour_lines",
     "contour_line_type",
     "contour_line_width",
     "contour_line_col",
-    "contour_line_alpha"
+    "contour_line_alpha",
+    "grid",
+    "grid_line_type",
+    "grid_line_width",
+    "grid_line_col",
+    "grid_line_alpha"
   )
 }

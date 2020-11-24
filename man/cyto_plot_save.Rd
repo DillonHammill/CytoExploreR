@@ -11,7 +11,7 @@ cyto_plot_save(
   units = "in",
   res = 300,
   multiple = FALSE,
-  layout = NULL,
+  reset = FALSE,
   ...
 )
 }
@@ -34,12 +34,10 @@ set to 7 by default for image with width of 7 inches.}
 \item{res}{resolution in ppi, set to 300 by default.}
 
 \item{multiple}{logical indicating whether multiple pages should be saved to
-separate numbered files, set to \code{TRUE} by default.}
+separate numbered files, set to \code{FALSE} by default.}
 
-\item{layout}{a vector or matrix defining the custom layout of the plot to be
-created using `cyto_plot_layout`, set to NULL by default to use standard
-`cyto_plot` layout. Custom layouts are required when making multiple
-`cyto_plot` calls in the same image.}
+\item{reset}{logical indicating whether to reset a previous call to
+\code{cyto_plot_save}.}
 
 \item{...}{additional arguments for the appropriate \code{png()},
 \code{tiff()}, \code{jpeg()}, \code{svg()} or \code{pdf} graphics devices.}

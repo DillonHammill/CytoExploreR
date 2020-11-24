@@ -4,10 +4,13 @@
 \alias{cyto_plot_theme}
 \title{Create custom themes for cyto_plot}
 \usage{
-cyto_plot_theme(...)
+cyto_plot_theme(..., reset = FALSE)
 }
 \arguments{
 \item{...}{arguments supported by cyto_plot_theme.}
+
+\item{reset}{logical indicating whether \code{cyto_plot_theme()} settings
+should be reset to use default settings, set to FALSE by default.}
 }
 \description{
 \code{cyto_plot_theme} provides an easy way to alter the theme used by

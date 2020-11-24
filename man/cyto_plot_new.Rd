@@ -4,20 +4,21 @@
 \alias{cyto_plot_new}
 \title{Open new graphics device for cyto_plot}
 \usage{
-cyto_plot_new(popup = TRUE, ...)
+cyto_plot_new(popup, ...)
 }
 \arguments{
-\item{popup}{logical indicating whether a popup graphics device should be
-opened, set to TRUE by default.}
+\item{popup}{logical indicating whether a pop-up graphics device should be
+opened, set to TRUE by default if called outside of \code{cyto_plot()}.}
 
-\item{...}{additional arguments passed to
-\code{\link[grDevices:dev]{dev.new}}:}
+\item{...}{additional graphical parameters supplied by name to be passed to
+\code{\link{cyto_plot_par}} to customise the new graphics device.}
 }
 \description{
-\code{cyto_plot_new} is used internally by cyto_plot to open an
-OS-specific interactive garphics device to facilitate gate drawing. Mac users
-will need to install \href{https://www.xquartz.org/}{XQuartz} for this
-functionality.
+\code{cyto_plot_new} opens a new RStudio or pop-up graphics device and
+accepts arguments to set the graphical parameters of the new device.
+\code{cyto_plot_new()} is used internally by cyto_plot to open an OS-specific
+interactive garphics device to facilitate gate drawing. Mac users will need
+to install \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 }
 \examples{
 \dontrun{
