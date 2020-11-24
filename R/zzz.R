@@ -15,15 +15,6 @@
   # Select active gatingTemplate
   options("CytoExploreR_gatingTemplate" = NULL)
   
-  # Bypass working directory checks for external files
-  options("CytoExploreR_wd_check" = TRUE)
-  
-  # Signals args called to cyto_plot - check if call is made twice
-  options("cyto_plot_call" = NULL)
-  
-  # Signals if plots match in flowSet method
-  options("cyto_plot_match" = NULL)
-  
   # Create custom theme for cyto_plot
   options("cyto_plot_theme" = NULL)
   
@@ -33,17 +24,11 @@
   # Signal which cyto_plot method has been called
   options("cyto_plot_method" = NULL)
   
-  # Signal if a custom plot is being contructed - require cyto_plot_complete
-  options("cyto_plot_custom" = FALSE)
+  # Store set graphical parameters
+  options("cyto_plot_par" = NULL)
   
-  # Signal when cyto_plot_grid method is being called
-  options("cyto_plot_grid" = FALSE)
-  
-  # Save label co-ordinates as list
-  options("cyto_plot_label_coords" = NULL)
-  
-  # Use scattermore in cyto_plot
-  options("cyto_plot_fast" = FALSE)  
+  # Record changes to graphical parameters settings - reuse
+  options("cyto_plot_par_reset" = NULL)
   
   # Register gating and preprocessing functions with openCyto
   suppressMessages({
@@ -55,7 +40,7 @@
                                methodName = "pp_cyto_gate_draw", 
                                dep = NA, "preprocessing")
   })
-
+  
 }
 
 # # Docker Message
