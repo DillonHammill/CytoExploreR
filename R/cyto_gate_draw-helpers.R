@@ -28,12 +28,12 @@
     # 1D PLOT - INTERVAL
     if(length(channels) == 1){
       type <- "interval"
-    # 2D PLOT - POLYGON
+      # 2D PLOT - POLYGON
     }else if(length(channels) == 2){
       type <- "polygon"
     }
   }
-
+  
   # SPLIT GATE TYPES
   split_gate_types <- .split_gate_types()
   
@@ -76,7 +76,7 @@
              (nchar(type[z]) == 1 & grepl("w", type[z], ignore.case = TRUE))){
       type[z] <<- "web"
       return(TRUE)
-    # flowSet method passes NA to flowFrame method negate
+      # flowSet method passes NA to flowFrame method negate
     }else if(z == length(type) & is.na(type[z])){ 
       return(TRUE)
     }else{
@@ -98,7 +98,7 @@
   # CANNOT USED MIXED GATES FOR SPLIT GATE METHODS
   if(any(type %in% split_gate_types) & !all(type %in% split_gate_types)){
     stop(paste("Mixed gates are not supported for",
-         paste(split_gate_types, sep = " & "), "gate types."))
+               paste(split_gate_types, sep = " & "), "gate types."))
   }
   
   # CANNOT NEGATE MULTI GATE METHODS
