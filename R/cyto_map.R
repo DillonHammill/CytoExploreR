@@ -179,7 +179,8 @@ cyto_map.GatingSet <- function(x,
     # GATINGSET
     gs <- gs_list[[z]]
     # EXTRACT FLOWSET
-    fs <- cyto_extract(gs, parent = parent)
+    fs <- cyto_data_extract(gs, 
+                            parent = parent)[[parent]]
     # MERGE TO FLOWFRAME
     fr <- cyto_merge_by(fs, merge_by = "all")[[1]]
     # MAPPING - RETURNS MERGED FLOWFRAME & SAVES FILES
@@ -469,7 +470,8 @@ cyto_map.flowFrame <- function(x,
   )
 
   # EXTRACT RAW DATA MATRIX
-  fr_exprs <- cyto_extract(x, raw = TRUE)[[1]]
+  fr_exprs <- cyto_data_extract(x, 
+                                raw = TRUE)[[1]]
 
   # RESTRICT MATRIX BY CHANNELS
   fr_exprs <- fr_exprs[, channels]
