@@ -10,9 +10,8 @@
   x,
   gatingTemplate = NULL,
   group_by = "name",
-  back_gate = FALSE,
+  overlay = NA,
   gate_track = FALSE,
-  show_all = FALSE,
   header,
   popup = FALSE,
   layout = NULL,
@@ -68,16 +67,13 @@ the GatingSet.}
 groups prior to plotting, set to "name" by default to plot each sample
 separately.}
 
-\item{back_gate}{names of the population(s) to back-gate, set to \code{FALSE}
-by default to turn off back-gating. To back-gate all populations set this
-argument to \code{"all"}.}
+\item{overlay}{names of the populations to overlay for back-gating, set to NA
+by default to turn off overlays. For simplicity, overlay can be set to
+\code{"descendants"} or \code{"children"} to overlay descendant or child
+populations within each plot.}
 
 \item{gate_track}{logical indicating whether gate colour should be tracked
 throughout gating scheme, set to TRUE by default.}
-
-\item{show_all}{logical indicating whether every population should be
-included in every plot in the gating scheme, set to \code{FALSE} by
-default.}
 
 \item{header}{character string to use as the header for the plot layout, set
 to "Gating Scheme" by default.}
@@ -160,7 +156,6 @@ cyto_plot_gating_scheme(gs[[32]],
 cyto_plot_gating_scheme(gs[1:2],
   gate_track = TRUE
 )
-
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
