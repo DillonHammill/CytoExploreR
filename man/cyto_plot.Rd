@@ -14,30 +14,31 @@
   alias = NA,
   channels,
   axes_trans = NA,
-  group_by = "name",
+  merge_by = "name",
   overlay = NA,
   gate = NA,
   display = 25000,
   layout,
-  margins = NULL,
+  margins = c(NA, NA, NA, NA),
   popup = FALSE,
   select = NULL,
-  xlim = NA,
-  ylim = NA,
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
   xlab,
   ylab,
   title,
   negate,
-  density_modal = TRUE,
-  density_smooth = 0.6,
-  density_stack = 0,
-  density_layers = NA,
-  density_cols = NA,
-  density_fill = NA,
-  density_fill_alpha = 1,
-  density_line_type = 1,
-  density_line_width = 1,
-  density_line_col = "black",
+  hist_stat = "percent",
+  hist_bins = 256,
+  hist_smooth = 1,
+  hist_stack = 0,
+  hist_layers = NA,
+  hist_cols = NA,
+  hist_fill = NA,
+  hist_fill_alpha = 1,
+  hist_line_type = 1,
+  hist_line_width = 1,
+  hist_line_col = "black",
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
@@ -92,6 +93,15 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = TRUE,
+  grid_line_type = 1,
+  grid_line_width = 1,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
+  header = NA,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
   ...
 )
 
@@ -105,23 +115,24 @@
   gate = NA,
   axes_limits = "auto",
   display = 25000,
-  margins = NULL,
+  margins = c(NA, NA, NA, NA),
   popup = FALSE,
-  xlim = NA,
-  ylim = NA,
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
   xlab,
   ylab,
   title,
   negate,
-  density_modal = TRUE,
-  density_smooth = 0.6,
-  density_stack = 0,
-  density_cols = NA,
-  density_fill = NA,
-  density_fill_alpha = 1,
-  density_line_type = 1,
-  density_line_width = 1,
-  density_line_col = "black",
+  hist_stat = "percent",
+  hist_bins = 256,
+  hist_smooth = 1,
+  hist_stack = 0,
+  hist_cols = NA,
+  hist_fill = NA,
+  hist_fill_alpha = 1,
+  hist_line_type = 1,
+  hist_line_width = 1,
+  hist_line_col = "black",
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
@@ -161,7 +172,7 @@
   gate_fill_alpha = 0,
   label,
   label_text,
-  label_stat,
+  label_stat = "",
   label_position = "auto",
   label_text_x = NA,
   label_text_y = NA,
@@ -175,6 +186,11 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = TRUE,
+  grid_line_type = 1,
+  grid_line_width = 1,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 
@@ -182,37 +198,39 @@
   x,
   channels,
   axes_trans = NA,
-  group_by = "name",
+  merge_by = "name",
   overlay = NA,
   gate = NA,
   axes_limits = "auto",
   display = 25000,
   layout,
-  margins = NULL,
+  margins = c(NA, NA, NA, NA),
   popup = FALSE,
   select = NULL,
-  xlim = NA,
-  ylim = NA,
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
   xlab,
   ylab,
   title,
   negate = FALSE,
-  density_modal = TRUE,
-  density_smooth = 0.6,
-  density_stack = 0,
-  density_layers = NA,
-  density_cols = NA,
-  density_fill = NA,
-  density_fill_alpha = 1,
-  density_line_type = 1,
-  density_line_width = 1,
-  density_line_col = "black",
+  hist_stat = "percent",
+  hist_bins = 256,
+  hist_smooth = 1,
+  hist_stack = 0,
+  hist_layers = NA,
+  hist_cols = NA,
+  hist_fill = NA,
+  hist_fill_alpha = 1,
+  hist_line_type = 1,
+  hist_line_width = 1,
+  hist_line_col = "black",
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
   point_cols = NA,
   point_col = NA,
   point_col_alpha = 1,
+  point_fast = FALSE,
   contour_lines = 0,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -260,6 +278,15 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = TRUE,
+  grid_line_type = 1,
+  grid_line_width = 1,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
+  header = NA,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
   ...
 )
 
@@ -271,29 +298,31 @@
   gate = NA,
   axes_limits = "auto",
   display = 25000,
-  margins = NULL,
+  margins = c(NA, NA, NA, NA),
   popup = FALSE,
-  xlim = NA,
-  ylim = NA,
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
   xlab,
   ylab,
   title,
   negate = FALSE,
-  density_modal = TRUE,
-  density_smooth = 0.6,
-  density_stack = 0,
-  density_cols = NA,
-  density_fill = NA,
-  density_fill_alpha = 1,
-  density_line_type = 1,
-  density_line_width = 1,
-  density_line_col = "black",
+  hist_stat = "percent",
+  hist_bins = 256,
+  hist_smooth = 1,
+  hist_stack = 0,
+  hist_cols = NA,
+  hist_fill = NA,
+  hist_fill_alpha = 1,
+  hist_line_type = 1,
+  hist_line_width = 1,
+  hist_line_col = "black",
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
   point_cols = NA,
   point_col = NA,
   point_col_alpha = 1,
+  point_fast = FALSE,
   contour_lines = 0,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -341,12 +370,17 @@
   border_line_col = "black",
   border_fill = "white",
   border_fill_alpha = 1,
+  grid = TRUE,
+  grid_line_type = 1,
+  grid_line_width = 1,
+  grid_line_col = "grey95",
+  grid_line_alpha = 1,
   ...
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -355,14 +389,14 @@
 
 \item{alias}{name of the gated population(s) to gated in the plot when a
 \code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
-\code{alias} to "" will automatically plot any gates contructed in the
+\code{alias} to "" will automatically plot any gates constructed in the
 supplied channels. \code{alias} is equivalent to the \code{gate} argument
 for \code{flowFrame} and \code{flowSet} objects.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
-constructed, either a 1-D density distribution for a single channel or a
-2-D scatterplot with blue-red colour scale for two channels.}
+constructed, either a histogram for a single channel or a 2-D scatterplot
+with density colour scale for two channels.}
 
 \item{axes_trans}{object of class
 \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
@@ -372,7 +406,7 @@ be applied to the data prior to plotting. The transformerList is used
 internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
 
-\item{group_by}{a vector of pData variables to sort and merge samples into
+\item{merge_by}{a vector of pData variables to sort and merge samples into
 groups prior to plotting, set to "name" by default to prevent merging. To
 merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
@@ -397,8 +431,8 @@ set to 25000 to display 25000 events only.}
 for plotting \code{c(#rows, #columns)}.}
 
 \item{margins}{a vector of length 4 to control the margins around the bottom,
-left, top and right of the plot, set to NULL by default to let `cyto_plot`
-compute optimal margins.}
+left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
+\code{cyto_plot} compute optimal margins.}
 
 \item{popup}{logical indicating whether the plot should be constructed in a
 pop-up window, set to FALSE by default. \code{popup} will open OS-specific
@@ -408,7 +442,7 @@ graphic device prior to plotting. Mac users will need to install
 \item{select}{named list containing experimental variables to be used to
 select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
-details.}
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{xlim}{lower and upper limits of x axis (e.g. c(0,250000)).}
 
@@ -424,37 +458,43 @@ default. Title can be removed by setting this argument to \code{NA}.}
 \item{negate}{logical indicating whether a label should be included for the
 negated population when gate objects are supplied, set to FALSE by default.}
 
-\item{density_modal}{logical indicating whether density should be normalised
-to mode and presented as a percentage for 1-D plots. Set to \code{TRUE} by
-default.}
+\item{hist_stat}{can be either \code{"count"}, \code{"percent"} or
+\code{"density"} to indicate the statistic to display on histograms, set to
+\code{"count"} by default. The \code{"percent"} option applies modal
+normalisation and expresses the result as a percentage.}
 
-\item{density_smooth}{smoothing parameter passed to
-\code{\link[stats:density]{density}} to adjust kernel density for 1-D
-plots.}
+\item{hist_bins}{number of bins to use for histograms, set to 256 by default.}
 
-\item{density_stack}{numeric [0,1] indicating the degree of offset for 1-D
-density distributions with overlay, set to 0.5 by default.}
+\item{hist_smooth}{smoothing parameter passed to
+\code{\link[stats:density]{density}} to adjust the smoothness of the kernel
+density for histograms, set to \code{1} by default. Only values greater or
+equal to 1 are supported.}
 
-\item{density_layers}{numeric indicating the number of samples to stack in
-each plot, set to all samples by default.}
+\item{hist_stack}{numeric [0,1] indicating the degree of stacking for
+histograms, set to \code{0} by default.}
 
-\item{density_cols}{vector colours to draw from when selecting density fill
-colours if none are supplied to density_fill.}
+\item{hist_layers}{numeric indicating the number of histograms to stack in
+each plot, set to all samples by default. Each plot must contain the same
+number of histograms.}
 
-\item{density_fill}{fill colour(s) for 1-D density distributions.}
+\item{hist_cols}{vector colours to draw from when selecting histogram fill
+colours if none are supplied to \code{hist_fill}.}
 
-\item{density_fill_alpha}{numeric [0,1] used to control 1-D density fill
-colour transparency, set to 1 by default for solid colours.}
+\item{hist_fill}{fill colour(s) for histograms, select from \code{hist_cols}
+if not supplied.}
 
-\item{density_line_type}{line type(s) to use for 1-D density lines, set to 1
-by default to use solid lines. See \code{\link[graphics:par]{lty}} for
+\item{hist_fill_alpha}{numeric [0,1] used to control histogram fill colour
+transparency, set to \code{1} by default for solid colours.}
+
+\item{hist_line_type}{line type(s) to use for histogram borders, set to 1 by
+default to use solid lines. See \code{\link[graphics:par]{lty}} for
 alternatives.}
 
-\item{density_line_width}{numeric to control line width(s) for 1-D density
+\item{hist_line_width}{numeric to control line width(s) for histogram borders
 lines, set to 1 by default.}
 
-\item{density_line_col}{colour(s) for 1-D density lines, set to
-\code{"black"} by default.}
+\item{hist_line_col}{colour(s) for histogram borders, set to \code{"black"}
+by default.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to
 \code{"."} by default to maximise plotting speed.  See
@@ -536,7 +576,7 @@ set to 1.1 by default.}
 \code{"black"} by default.}
 
 \item{legend}{can be either \code{"line"} or \code{"fill"} to indicate
-whether a legend should be constructed based on the density \code{"line"}
+whether a legend should be constructed based on the histogram \code{"line"}
 or \code{"fill"}, set to FALSE by default to remove the legend.}
 
 \item{legend_text}{vector of labels to use in the legend.}
@@ -646,7 +686,44 @@ default.}
 \item{border_fill_alpha}{transparency to use for border_fill colour, set to 1
 by default for no transparency.}
 
-\item{...}{additional arguments not currently in use.}
+\item{grid}{logical indicating whether to include grid lines in the plot
+background, set to TRUE by default. Alternatively, users can supply a
+integer to indicate the number of equally spaced quantiles to used for the
+grid lines.}
+
+\item{grid_line_type}{integer [0,6] to control the line type of grid lines,
+set to \code{1} to draw solid lines by default. See
+\code{\link[graphics:par]{lty}} for alternatives.}
+
+\item{grid_line_width}{numeric to control the line width(s) of grid lines,
+set to \code{1} by default.}
+
+\item{grid_line_col}{colour to use for grid lines, set to \code{"grey95"} by
+default.}
+
+\item{grid_line_alpha}{numeric [0,1] to control the transparency of grid
+lines, set to 1 by default to remove transparency.}
+
+\item{header}{text to include above the plots when plotting a \code{cytoset}
+or \code{GatingSet}. \code{cyto_plot} expects a single header which will be
+added to each new page within the \code{cyto_plot} call.}
+
+\item{header_text_font}{numeric to control the font of the header text, set
+to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
+\item{header_text_size}{numeric to control the size of the header text, set
+to 1 by default.}
+
+\item{header_text_col}{colour to use for the header text, set to "black" by
+default.}
+
+\item{...}{not currently in use.}
+
+\item{point_fast}{logical indicating whether points should be plotted using
+the \code{scattermore} package, set to FALSE by default. This is an
+optional feature so if you intend to use it, make sure that you have the
+scattermore package installed \code{install.packages("scattermore")}.}
 }
 \description{
 Explore and visualise cytometry data.
