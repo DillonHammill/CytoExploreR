@@ -1,6 +1,6 @@
 ## CYTO_GATE INTERNAL HELPERS --------------------------------------------------
 
-# A coolection of internal functions to compute gate centers and counts.
+# A collection of internal functions to compute gate centers and counts.
 
 ## .CYTO_GATE_CENTER -----------------------------------------------------------
 
@@ -28,7 +28,7 @@
                                             channels,
                                             text_x = NA,
                                             text_y = NA) {
-
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
   # PLOT LIMITS
@@ -56,7 +56,7 @@
   x <- cyto_gate_convert(x, channels = channels)
   
   # GATE CENTER ----------------------------------------------------------------
-
+  
   # 1D GATE - 1D PLOT
   if(length(channels) == 1){
     # X COORD
@@ -77,7 +77,7 @@
       gate_ymax <- ymax
     }
     
-  # 2D GATE - 2D PLOT
+    # 2D GATE - 2D PLOT
   }else if(length(channels) == 2){
     # X COORD
     if(.all_na(text_x)){
@@ -116,7 +116,7 @@
   if(.all_na(text_y)){
     text_y <- (gate_ymin + gate_ymax) / 2
   }
-
+  
   # RETURN GATE CENTER ---------------------------------------------------------
   
   # GATE CENTER MATRIX
@@ -124,7 +124,7 @@
                     ncol = 2,
                     byrow = FALSE)
   colnames(text_xy) <- c("x", "y")
-
+  
   # RETURN GATE CENTER MATRIX
   return(text_xy)
 }
@@ -134,7 +134,7 @@
                                           channels,
                                           text_x = NA,
                                           text_y = NA) {
-
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
   # PLOT LIMITS
@@ -160,7 +160,7 @@
   
   # CORRECT DIMENSIONS
   x <- cyto_gate_convert(x, channels = channels)
-
+  
   # GATE CENTER ----------------------------------------------------------------
   
   # GATE CENTER X COORD
@@ -177,7 +177,7 @@
         gate_xmax <- xmax
       }
       text_x <- (gate_xmin + gate_xmax)/2
-    # 2D POLYGONGATE  
+      # 2D POLYGONGATE  
     }else{
       # COORDS
       coords <- x@boundaries[, channels[1]]
@@ -195,7 +195,7 @@
       text_x <- sum(coords) / length(coords)
     }
   }
-
+  
   # GATE CENTER Y COORD
   if (.all_na(text_y)) {
     # 2D RECTANGLEGATE
@@ -234,13 +234,13 @@
       text_y <- sum(coords) / length(coords)
     }
   }
-
+  
   # RETURN GATE CENTER ---------------------------------------------------------
-
+  
   # GATE CENTER MATRIX
   text_xy <- matrix(c(text_x, text_y),
-    ncol = 2,
-    byrow = FALSE
+                    ncol = 2,
+                    byrow = FALSE
   )
   colnames(text_xy) <- c("x", "y")
   
@@ -253,7 +253,7 @@
                                             channels,
                                             text_x = NA,
                                             text_y = NA) {
-
+  
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
   # PLOT LIMITS
@@ -296,7 +296,7 @@
         gate_xmax <- xmax
       }
       text_x <- (gate_xmin + gate_xmax)/2
-    # ELLIPSOIDGATE
+      # ELLIPSOIDGATE
     }else{
       text_x <- x@mean[channels[1]]
     }
@@ -327,16 +327,16 @@
       text_y <- x@mean[channels[2]]
     }
   }
-
+  
   # RETURN GATE CENTER ---------------------------------------------------------
   
   # GATE CENTER MATRIX
   text_xy <- matrix(c(text_x, text_y),
-    ncol = 2,
-    byrow = FALSE,
+                    ncol = 2,
+                    byrow = FALSE,
   )
   colnames(text_xy) <- c("x", "y")
-
+  
   # RETURN GATE CENTER MATRIX
   return(text_xy)
 }
@@ -398,7 +398,7 @@
       if(.all_na(text_y[z])){
         text_y[z] <<- mean(c(y_coord, ymax))
       }
-    # QUADRANT 2 - TOP RIGHT
+      # QUADRANT 2 - TOP RIGHT
     }else if(z == 2){
       # X COORD 
       if(.all_na(text_x[z])){
@@ -408,7 +408,7 @@
       if(.all_na(text_y[z])){
         text_y[z] <<- mean(c(y_coord, ymax))
       }
-    # QUADRANT 3 - BOTTOM RIGHT
+      # QUADRANT 3 - BOTTOM RIGHT
     }else if(z == 3){
       # X COORD 
       if(.all_na(text_x[z])){
@@ -418,7 +418,7 @@
       if(.all_na(text_y[z])){
         text_y[z] <<- mean(c(y_coord, ymin))
       }
-    # QUADRANT 4 - BOTTOM LEFT
+      # QUADRANT 4 - BOTTOM LEFT
     }else if(z == 4){
       # X COORD 
       if(.all_na(text_x[z])){
@@ -447,17 +447,17 @@
                                       channels,
                                       text_x = NA,
                                       text_y = NA) {
-
+  
   # LIST GATE OBJECTS ----------------------------------------------------------
   x <- unlist(x)
-
+  
   # CALL LIST METHOD -----------------------------------------------------------
   text_xy <- .cyto_gate_center(x,
-    channels = channels,
-    text_x = text_x,
-    text_y = text_y
+                               channels = channels,
+                               text_x = text_x,
+                               text_y = text_y
   )
-
+  
   # RETURN GATE CENTER MATRIX --------------------------------------------------
   return(text_xy)
 }
@@ -467,7 +467,7 @@
                                    channels,
                                    text_x = NA,
                                    text_y = NA) {
-
+  
   # LIST GATE OBJECTS ----------------------------------------------------------
   
   # WATCH OUT FOR FILTERS
@@ -494,19 +494,19 @@
                              text_x,
                              text_y) {
     .cyto_gate_center(x,
-      channels = channels,
-      text_x = text_x,
-      text_y = text_y
+                      channels = channels,
+                      text_x = text_x,
+                      text_y = text_y
     )
   }, x,
   text_x,
   text_y,
   SIMPLIFY = FALSE
   )
-
+  
   # GATE CENTER MATRIX
   text_xy <- do.call("rbind", text_xy)
-
+  
   # RETURN GATE CENTER MATRIX
   return(text_xy)
 }
@@ -518,6 +518,7 @@
 #' @param gate list of gate objects.
 #' @param negate logical indicating if the negated population should be
 #'   included.
+#' @param total return the total number of gated populations
 #'
 #' @importFrom methods is
 #'
