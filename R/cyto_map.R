@@ -5,8 +5,8 @@
 #' \code{cyto_map} is a convenient wrapper to produce dimension-reduced maps of
 #' cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
 #' dimensionality reduction functions are called using the default settings, but
-#' can be altered by passing relvant arguments through \code{cyto_map}. To see a
-#' full list of customisable parameters refer to the documentation for each of
+#' can be altered by passing relevant arguments through \code{cyto_map}. To see
+#' a full list of customisable parameters refer to the documentation for each of
 #' these functions by clicking on the links below.
 #'
 #' If you use \code{cyto_map} to map your cytometry data, be sure to cite the
@@ -14,10 +14,12 @@
 #' have chosen to use. References to these publications can be found in the
 #' references section of this document.
 #'
-#' @param x object of class \code{flowFrame} or \code{flowSet}.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
 #' @param parent name of the parent population to extract from
-#'   \code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
-#'   \code{"root"} node by default.
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects for mapping,
+#'   set to the \code{"root"} node by default.
 #' @param select designates which samples should be used for mapping when a
 #'   \code{flowSet} or \code{GatingSet} object is supplied. Filtering steps
 #'   should be comma separated and wrapped in a list. Refer to
@@ -59,7 +61,7 @@
 #'   function. Links to the documentation for these functions can be found
 #'   below.
 #'
-#' @return flowFrame, flowSet, GatingHierarchy or GatingSet containing the
+#' @return cytoframe, cytoset, GatingHierarchy or GatingSet containing the
 #'   mapped projection parameters.
 #'
 #' @importFrom flowCore exprs keyword write.FCS flowSet fr_append_cols
@@ -508,11 +510,7 @@ cyto_map.flowFrame <- function(x,
   coords <- do.call(".cyto_map", args)
 
   # ADD MAPPING COORDS TO FLOWFRAME
-  if(class(x) == "flowFrame") {
-    x <- fr_append_cols(x, coords)
-  } else {
-    x <- cf_append_cols(x, coords)
-  }
+  x <- cyto_cbind(x, coords)
 
   # VISUALISATION --------------------------------------------------------------
   

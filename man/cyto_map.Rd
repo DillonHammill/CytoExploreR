@@ -60,15 +60,17 @@ cyto_map(x, ...)
 )
 }
 \arguments{
-\item{x}{object of class \code{flowFrame} or \code{flowSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
+\code{\link[flowWorkspace:cytoset]{cytoset}}.}
 
 \item{...}{additional arguments passed to the called dimension reduction
 function. Links to the documentation for these functions can be found
 below.}
 
 \item{parent}{name of the parent population to extract from
-\code{GatingHierarchy} or \code{GatingSet} objects for mapping, set to the
-\code{"root"} node by default.}
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} objects for mapping,
+set to the \code{"root"} node by default.}
 
 \item{select}{designates which samples should be used for mapping when a
 \code{flowSet} or \code{GatingSet} object is supplied. Filtering steps
@@ -120,15 +122,15 @@ using \code{cyto_plot}.}
 results between runs.}
 }
 \value{
-flowFrame, flowSet, GatingHierarchy or GatingSet containing the
+cytoframe, cytoset, GatingHierarchy or GatingSet containing the
   mapped projection parameters.
 }
 \description{
 \code{cyto_map} is a convenient wrapper to produce dimension-reduced maps of
 cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
 dimensionality reduction functions are called using the default settings, but
-can be altered by passing relvant arguments through \code{cyto_map}. To see a
-full list of customisable parameters refer to the documentation for each of
+can be altered by passing relevant arguments through \code{cyto_map}. To see
+a full list of customisable parameters refer to the documentation for each of
 these functions by clicking on the links below.
 }
 \details{
