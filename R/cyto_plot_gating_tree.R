@@ -12,40 +12,48 @@
 #' @param stat used in \code{GatingHierachy} method to add either "percent" or
 #'   "count" statistics onto the gating tree, set to NULL by default to exclude
 #'   statistics.
+#' @param point_shape vector of shapes to use for each node, can be either
+#'   "circle", "ellipse", "database", "box" or "text". Set to circles by
+#'   default.
+#' @param point_col vectors of colours to select from if a colour is not
+#'   supplied for each node through \code{point_col}.
+#' @param point_col vector of colours to use for each node.
+#' @param point_col_alpha fill transparency for each node, set to 0.5 by
+#'   default.
 #' @param ... not in use.
 #'
 #' @importFrom openCyto gh_generate_template CytoExploreR_.preprocess_csv
 #' @importFrom magrittr %>%
-#' @importFrom visNetwork visNetwork visEdges
+#' @importFrom visNetwork visNetwork visEdges visGroups
 #' @importFrom data.table as.data.table
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @examples 
+#'
+#' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Load in samples
 #' fs <- Activation
-#' 
+#'
 #' # Add samples to GatingSet
 #' gs <- GatingSet(fs)
-#' 
+#'
 #' # Apply compensation
 #' gs <- cyto_compensate(gs)
-#' 
+#'
 #' # Transform fluorescent channels
 #' gs <- cyto_transform(gs, select = "Stim-D", trans_type = "logicle")
-#' 
+#'
 #' # Gating
 #' gt <- Activation_gatingTemplate
 #' cyto_gatingTemplate_apply(gs, gt)
-#' 
+#'
 #' # Visualise gating tree using gatingTemplate
 #' cyto_plot_gating_tree(gt)
-#' 
+#'
 #' # Visualise gating tree for GatingSet (same output as gatingTemplate)
 #' cyto_plot_gating_tree(gs)
-#' 
+#'
 #' # Visualise gating tree for GatingHierarchy
 #' cyto_plot_gating_tree(gs[[32]], stat = "percent")
 #' cyto_plot_gating_tree(gs[[32]], stat = "count")
@@ -63,48 +71,75 @@ cyto_plot_gating_tree <- function(x, ...){
 #' @export
 cyto_plot_gating_tree.GatingHierarchy <- function(x,
                                                   stat = NULL,
+                                                  point_shape = "circle",
+                                                  point_cols = NA,
+                                                  point_col = NA,
+                                                  point_col_alpha = 0.5,
                                                   ...) {
   
-  # Extract gatingTemplate from GatingHierarchy
+  # INHERIT CYTO_PLOT_THEME ----------------------------------------------------
+  
+  # ARGUMENTS
+  args <- .args_list()
+  
+  # INHERIT THEME
+  args <- .cyto_plot_theme_inherit(args)[c("x", 
+                                           "stat", 
+                                           "point_cols", 
+                                           "point_shape")]
+  
+  # UPDATE ARGUMENTS
+  .args_update(args)
+  
+  # GATINGTEMPLATE -------------------------------------------------------------
+  
+  # EXTRACT GATINGTEMPLATE
   gt <- gh_generate_template(x)
   
-  # Extract nodes
-  nodes <- rbind("root", gt[, c("alias","alias"), drop = FALSE])
+  # UNIQUE ALIAS
+  gt$alias_unique <- LAPPLY(seq_len(nrow(gt)), function(z){
+    cyto_nodes_convert(x,
+                       nodes = gt$alias[z],
+                       anchor = gt$parent[z],
+                       path = "auto")
+  })
+  
+  # UNIQUE PARENT
+  gt$parent_unique <- LAPPLY(seq_len(nrow(gt)), function(z){
+    cyto_nodes_convert(x,
+                       nodes = gt$parent[z],
+                       path = "auto")
+  })
+  
+  # NODES
+  nodes <- rbind("root", gt[, c("alias_unique","alias"), drop = FALSE])
   colnames(nodes) <- c("id","label")
   
-  # Add group column for colours
+  # GROUP COLUMN FOR COLOURS 
   nodes$group <- nodes$id
   
-  # Extract alias and parent columns
-  edges <- gt[, c("alias","parent")]
-  
-  # Rename columns  for visNetwork
+  # EDGES
+  edges <- gt[, c("alias_unique","parent_unique")]
   colnames(edges) <- c("to", "from")
   
-  # Convert parent to basename
-  edges[, "from"] <- basename(edges[, "from"])
-  
-  # Scale nodes by frequency & add labels
+  # SCALE NODES & ADD LABELS
   if(!is.null(stat)){
     
-    # Calculate counts for each node
+    # NODE COUNTS
     node_counts <- cyto_stats_compute(x,
                                       alias = nodes$id,
                                       stat = "count",
                                       format = "long")
     
-    # Normalise as a percentage of "root"
+    # COUNT STATISTICS
     if(stat == "count"){
-      
-      # Extract counts
-      stats <- node_counts$Count
-  
+      stats <- node_counts[, ncol(node_counts)]
     }
     
-    # Normalise as a percentage of parent
+    # FREQUENCY STATISTICS
     if(stat %in% c("percent","freq")){
       
-      # Order counts based on parent names
+      # ORDER COUNTS BASED ON PARENT
       stats <- node_counts$Count/
         node_counts[match(c("root", edges$from), 
                           node_counts$Population), "Count"] * 100
@@ -113,17 +148,51 @@ cyto_plot_gating_tree.GatingHierarchy <- function(x,
       
     }
     
-    # Add value column to adjust node sizes
-    nodes$value <- node_counts$Count/node_counts$Count[1]
+    # SCALE NODE SIZE TO ROOT
+    nodes$value <- node_counts[, ncol(node_counts)]/
+      node_counts[, ncol(node_counts)][1]
     
-    # Add percent labels to edges
+    # STATISTIC LABELS TO EDGES
     edges$label <- stats[-1]
     
   }
-
-  # Call to visNetwork
+  
+  # NODE BORDER COLOURS
+  if(.all_na(point_col)){
+    if(.all_na(point_cols)){
+      point_cols <- .cyto_plot_colour_palette(type = "point_cols")
+    }
+    point_col_palette <- colorRampPalette(point_cols)
+    point_col <- point_col_palette(nrow(nodes))
+    # SOME NODE COLOURS SUPPLIED
+  }else{
+    # COLOURS SUPPLIED PER NODE
+    if(length(point_col) == nrow(nodes)){
+      
+    }else{
+      
+    }
+    
+  }
+  
+  # NODE FILL COLOURS
+  point_col_alpha <- rep(point_col_alpha, length.out = nrow(nodes))
+  point_fill <- LAPPLY(seq_len(nrow(nodes)), function(z){
+    adjustcolor(point_col[z], point_col_alpha[z])
+  })
+  
+  # NODE SHAPES
+  point_shape <- rep(point_shape, length.out = nrow(nodes))
+  
+  # NODE COLOURS
+  nodes$color.background <- point_fill
+  nodes$color.border <- point_col
+  nodes$shape <- point_shape
+  
+  # VISNETWORK
   visNetwork(nodes, edges) %>%
-    visEdges(arrows = "to", color = "black")
+    visEdges(arrows = "to", 
+             color = "black")
   
 }
 

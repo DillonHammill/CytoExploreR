@@ -7,7 +7,15 @@
 \alias{cyto_plot_gating_tree.gatingTemplate}
 \title{Plot Gating Trees}
 \usage{
-\method{cyto_plot_gating_tree}{GatingHierarchy}(x, stat = NULL, ...)
+\method{cyto_plot_gating_tree}{GatingHierarchy}(
+  x,
+  stat = NULL,
+  point_shape = "circle",
+  point_cols = NA,
+  point_col = NA,
+  point_col_alpha = 0.5,
+  ...
+)
 
 \method{cyto_plot_gating_tree}{GatingSet}(x, ...)
 
@@ -20,6 +28,15 @@
 \item{stat}{used in \code{GatingHierachy} method to add either "percent" or
 "count" statistics onto the gating tree, set to NULL by default to exclude
 statistics.}
+
+\item{point_shape}{vector of shapes to use for each node, can be either
+"circle", "ellipse", "database", "box" or "text". Set to circles by
+default.}
+
+\item{point_col}{vector of colours to use for each node.}
+
+\item{point_col_alpha}{fill transparency for each node, set to 0.5 by
+default.}
 
 \item{...}{not in use.}
 }
