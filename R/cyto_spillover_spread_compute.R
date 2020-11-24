@@ -70,7 +70,7 @@ cyto_spillover_spread_compute <- function(x,
                                           ...){
   
   # PREPARE DATA ----------------------------------------------------------
-
+  
   # COPY
   cyto_copy <- cyto_copy(x)
   
@@ -79,7 +79,7 @@ cyto_spillover_spread_compute <- function(x,
   
   # TRANSFORMATIONS
   axes_trans <- cyto_transformer_extract(cyto_copy)
-
+  
   # GATINGSET COMPENSATION
   if(is(cyto_copy, "GatingSet")){
     spill <- cyto_spillover_extract(cyto_copy)
@@ -102,7 +102,7 @@ cyto_spillover_spread_compute <- function(x,
       cyto_copy <- suppressWarnings(cyto_transform(cyto_copy,
                                                    trans = axes_trans,
                                                    plot = FALSE))
-    # TRANSFORMED DATA
+      # TRANSFORMED DATA
     }else{
       # INVERSE TRANSFORM
       suppressWarnings(cyto_transform(cyto_extract(cyto_copy),
@@ -140,7 +140,7 @@ cyto_spillover_spread_compute <- function(x,
                                ...)
   neg_pops <- pops[["negative"]]
   pos_pops <- pops[["positive"]]
-    
+  
   # UPDATE DETAILS IN X
   cyto_details(x) <- cyto_details(cyto_copy)
   
@@ -162,14 +162,14 @@ cyto_spillover_spread_compute <- function(x,
   
   # Calculate spillover spread for each compensation control
   SSM <- lapply(seq_along(neg_pops), function(z){
-      
+    
     # Extract NIL and pop
     NIL <- neg_pops[[z]]
     pop <- pos_pops[[z]]
-      
+    
     # Channel
     chan <- pd$channel[pd$name == cyto_names(pop)]
-      
+    
     # Calculate 50th and 84th percentile for NIL
     NIL_50 <- LAPPLY(channels, function(channel){
       quantile(exprs(NIL)[,channel], 0.5)
@@ -216,19 +216,19 @@ cyto_spillover_spread_compute <- function(x,
     
     # Difference in SD of NIL and pop in other detectors
     SD_diff <- sqrt(VAR_diff)
-
+    
     # Change in fluorescence in primary detector
     signal <- pop_stats[[1]][match(chan, channels)] - 
       NIL_stats[[1]][match(chan, channels)]
-
+    
     # Spillover spread values
     return(SD_diff/sqrt(signal))
-      
-  })
     
+  })
+  
   # Make matrix
   SSM <- do.call("rbind", SSM)
-    
+  
   # Add rownames (channel associated with each control)
   rownames(SSM) <- pd$channel[match(cyto_names(pos_pops), pd$name)]
   
@@ -236,15 +236,15 @@ cyto_spillover_spread_compute <- function(x,
   lapply(seq(1, nrow(SSM), 1), function(z) {
     SSM[z, match(rownames(SSM)[z], colnames(SSM))] <<- NA
   })
-    
+  
   # Sort SSM by column names
   ind <- na.omit(match(colnames(SSM), rownames(SSM)))
   SSM <- SSM[ind, ]
-    
+  
   # Turn off pop-up graphics device (gating)
   graphics.off()
   dev.new()
-    
+  
   # Heatmap label size
   ylab_width <- max(nchar(rownames(SSM))) * 0.02
   xlab_width <- max(nchar(colnames(SSM))) * 0.04  
@@ -301,9 +301,8 @@ cyto_spillover_spread_compute <- function(x,
   if (!is(spillover_spread, "character")) {
     stop("'spillover_spread' should be the name of a csv file.")
   } else {
-    spillover_spread <- file_ext_append(spillover_spread, ".csv")
-    write.csv(SSM, spillover_spread)
+    write_to_csv(SSM, spillover_spread)
   }
-
+  
   return(SSM)
 }
