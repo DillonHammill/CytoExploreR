@@ -648,14 +648,16 @@ cyto_channel_match <- function(x,
 #' Restrict the channels of a cytometry object
 #'
 #' \code{cyto_channels_restrict} removes any unused channels (channels lacking
-#' marker assignments) from a \code{flowFrame}, \code{flowSet},
+#' marker assignments) from a \code{cytoframe}, \code{cytoset},
 #' \code{GatingHierarchy} or \code{GatingSet}. By default,
 #' \code{cyto_channels_restrict} will always retain any FSC, SSC or Time
 #' channels irrespective of marker assignment. Removal of channels that contain
 #' marker assignments or channels that are privileged channels (FSC/SSC/Time)
 #' can be forced through use of the \code{exclude} argument.
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet}or \code{GatingSet}.
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param exclude vector of privileged channels or markers to remove in addition
 #'   to the channels removed by default, set to NULL by default.
 #' @param ... additional arguments passed to \code{\link{cyto_channels}} to
@@ -672,32 +674,23 @@ cyto_channel_match <- function(x,
 #'
 #' library(CytoExploreRData)
 #'
-#' # Activation flowSet
-#' fs <- Activation
-#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#
 #' # Channels
-#' cyto_channels(fs)
+#' cyto_channels(gs)
 #'
 #' # Remove unused channels
-#' fs <- cyto_channels_restrict(fs)
+#' gs <- cyto_channels_restrict(gs)
 #'
 #' # Channels removed
-#' cyto_channels(fs)
+#' cyto_channels(gs)
 #'
-#' @name cyto_channels_restrict
-NULL
-
-#' @noRd
 #' @export
-cyto_channels_restrict <- function(x, ...){
-  UseMethod("cyto_channels_restrict")
-}
-
-#' @rdname cyto_channels_restrict
-#' @export
-cyto_channels_restrict.flowFrame <- function(x, 
-                                             exclude = NULL,
-                                             ...){
+cyto_channels_restrict <- function(x, 
+                                   exclude = NULL,
+                                   ...){
   
   # CHANNELS
   channels <- cyto_channels(x)
@@ -714,7 +707,7 @@ cyto_channels_restrict.flowFrame <- function(x,
                                               "Time"))
   
   # CHANNELS WITH MARKERS ASSIGNED
-  if(!is.null(markers)){
+  if(length(markers) != 0){
     channels_to_keep <- names(markers)
     names(channels_to_keep) <- markers
     channels_to_keep <- c(channels_exempt, channels_to_keep)
@@ -759,102 +752,15 @@ cyto_channels_restrict.flowFrame <- function(x,
   ind <- match(channels, channels_to_keep)
   ind <- ind[!is.na(ind)]
   
-  # RETURN RESTRICTED FLOWFRAME/FLOWSET
-  x <- x[, channels_to_keep[ind]]
-  return(x)
-
-}
-
-#' @rdname cyto_channels_restrict
-#' @export
-cyto_channels_restrict.flowSet <- function(x,
-                                           exclude = NULL,
-                                           ...){
-  
-  # CHANNELS
-  channels <- cyto_channels(x)
-  
-  # MARKERS
-  markers <- cyto_markers(x)
-  
-  # PERFORM DEFAULT CHANNEL REMOVAL --------------------------------------------
-  
-  # PRIVELEGED CHANNELS
-  channels_exempt <- cyto_channels(x, 
-                                   select = c("FSC",
-                                              "SSC",
-                                              "Time"))
-  
-  # CHANNELS WITH MARKERS ASSIGNED
-  if(!is.null(markers)){
-    channels_to_keep <- names(markers)
-    names(channels_to_keep) <- markers
-    channels_to_keep <- c(channels_exempt, channels_to_keep)
-  }else{
-    channels_to_keep <- channels_exempt
+  # RESTRICTED CYTOFRAME/CYTOSET
+  if(cyto_class(x, c("flowFrame", "flowSet"))) {
+    x <- x[, channels_to_keep[ind]]
+    # RESTRICTED GATINGSET
+  } else {
+    gs_cyto_data(x) <- gs_cyto_data(x)[, channels_to_keep[ind]]
   }
   
-  # REMOVE DUPLICATED CHANNELS
-  channels_to_keep <- channels_to_keep[!duplicated(channels_to_keep)]
-  
-  # REMOVE PRIVILEGED CHANNELS -------------------------------------------------
-  
-  # EXCLUDE
-  if(!is.null(exclude)){
-    
-    # MARKERS TO REMOVE
-    channels_to_remove <- cyto_markers(x, 
-                                       select = exclude,
-                                       ...)
-    if(length(channels_to_remove) > 0){
-      channels_to_remove <- names(channels_to_remove)
-    }else{
-      channels_to_remove <- c()
-    }
-    
-    # CHANNELS TO REMOVE
-    channels_to_remove <- c(channels_to_remove,
-                            cyto_channels(x,
-                                          select = exclude,
-                                          ...))
-    channels_to_remove <- unique(channels_to_remove)
-    
-    # UPDATE CHANNELS TO KEEP
-    channels_to_keep <- channels_to_keep[!channels_to_keep %in% 
-                                           channels_to_remove]
-    
-  }
-  
-  # RESTRICT CHANNELS ----------------------------------------------------------
-  
-  # SORT CHANNELS AS BEFORE
-  ind <- match(channels, channels_to_keep)
-  ind <- ind[!is.na(ind)]
-  
-  # RETURN RESTRICTED FLOWFRAME/FLOWSET
-  x <- x[, channels_to_keep[ind]]
-  return(x)
-  
-}
-
-#' @rdname cyto_channels_restrict
-#' @export
-cyto_channels_restrict.GatingSet <- function(x,
-                                             exclude = NULL,
-                                             ...){
-  
-  # EXTRACT DATA
-  cyto_data <- gs_cyto_data(x)
-  
-  # RESTRICT CHANNELS
-  cyto_data <- cyto_channels_restrict(cyto_data,
-                                      exclude = exclude,
-                                      ...)
-  
-  # REPLACE DATA
-  gs_cyto_data(x) <- cyto_data
-  
-  # RETURN GATINSET
+  # RESTRICTED DATA
   return(x)
   
 }

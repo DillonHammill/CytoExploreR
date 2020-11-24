@@ -2,19 +2,14 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channels_restrict}
 \alias{cyto_channels_restrict}
-\alias{cyto_channels_restrict.flowFrame}
-\alias{cyto_channels_restrict.flowSet}
-\alias{cyto_channels_restrict.GatingSet}
 \title{Restrict the channels of a cytometry object}
 \usage{
-\method{cyto_channels_restrict}{flowFrame}(x, exclude = NULL, ...)
-
-\method{cyto_channels_restrict}{flowSet}(x, exclude = NULL, ...)
-
-\method{cyto_channels_restrict}{GatingSet}(x, exclude = NULL, ...)
+cyto_channels_restrict(x, exclude = NULL, ...)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet}or \code{GatingSet}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}}or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{exclude}{vector of privileged channels or markers to remove in addition
 to the channels removed by default, set to NULL by default.}
@@ -28,7 +23,7 @@ an object of class \code{flowFrame}, \code{flowSet},
 }
 \description{
 \code{cyto_channels_restrict} removes any unused channels (channels lacking
-marker assignments) from a \code{flowFrame}, \code{flowSet},
+marker assignments) from a \code{cytoframe}, \code{cytoset},
 \code{GatingHierarchy} or \code{GatingSet}. By default,
 \code{cyto_channels_restrict} will always retain any FSC, SSC or Time
 channels irrespective of marker assignment. Removal of channels that contain
@@ -39,17 +34,17 @@ can be forced through use of the \code{exclude} argument.
 
 library(CytoExploreRData)
 
-# Activation flowSet
-fs <- Activation
-
+# Activation Gatingset
+gs <- load_gs(system.file("extdata/Activation-GatingSet",
+                          package = "CytoExploreRData"))
 # Channels
-cyto_channels(fs)
+cyto_channels(gs)
 
 # Remove unused channels
-fs <- cyto_channels_restrict(fs)
+gs <- cyto_channels_restrict(gs)
 
 # Channels removed
-cyto_channels(fs)
+cyto_channels(gs)
 
 }
 \author{
