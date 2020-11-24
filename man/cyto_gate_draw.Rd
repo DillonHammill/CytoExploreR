@@ -86,8 +86,8 @@
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-\code{\link[flowCore:flowSet-class]{flowSet}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{parent}{name of the \code{parent} population to extract for gating when
@@ -184,7 +184,7 @@ selected gate lines, set to 1 by default to use solid colours.}
 \item{...}{additional arguments for \code{\link{cyto_plot}}.}
 }
 \value{
-\code{flowFrame} and \code{flowSet} methods return a list of flowCore
+\code{cytoframe} and \code{cytoset} methods return a list of flowCore
   gate objects per group in group_by, whilst the \code{GatingSet} applies the
   constructed gates directly to the \code{GatingSet} and adds appropriate
   entries into the specified \code{gatingTemplate}. The \code{GatingSet}
