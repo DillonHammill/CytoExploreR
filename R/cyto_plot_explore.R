@@ -8,9 +8,11 @@
 #' supplied \code{channels_y}. Thus providing a rapid means to explore the data
 #' in all available channels.
 #'
-#' @param x an object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierachy} or \code{GatingSet}. \code{flowSet} and
-#'   \code{GatingSet} objects will be coerced to a single \code{flowFrame} prior
+#' @param x an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierachy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. \code{cytoset} and
+#'   \code{GatingSet} objects will be coerced to a single \code{cytoframe} prior
 #'   to plotting.
 #' @param parent name of the parent population to plot when a
 #'   \code{GatingHierarchy} or \code{GatingSet} object is supplied, set to the
@@ -78,7 +80,8 @@ cyto_plot_explore.GatingSet <- function(x,
   }
   
   # Extract parent population
-  fs <- cyto_extract(x, parent = parent)
+  fs <- cyto_data_extract(x, 
+                          parent = parent)[[1]]
   
   # Convert fs to flowFrame
   fr <- cyto_convert(fs)
@@ -149,7 +152,8 @@ cyto_plot_explore.GatingHierarchy <- function(x,
   }
   
   # Extract parent population
-  fr <- cyto_extract(x, parent = parent)
+  fr <- cyto_data_extract(x, 
+                          parent = parent)[[1]]
   
   # Transformations
   axes_trans <- cyto_transformer_extract(x)

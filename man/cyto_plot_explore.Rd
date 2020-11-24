@@ -71,9 +71,11 @@
 )
 }
 \arguments{
-\item{x}{an object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierachy} or \code{GatingSet}. \code{flowSet} and
-\code{GatingSet} objects will be coerced to a single \code{flowFrame} prior
+\item{x}{an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierachy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. \code{cytoset} and
+\code{GatingSet} objects will be coerced to a single \code{cytoframe} prior
 to plotting.}
 
 \item{parent}{name of the parent population to plot when a
