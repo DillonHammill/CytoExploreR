@@ -6,35 +6,40 @@
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param channels a vector channels to use to construct the plots, set to all
-#'   channels by default.
 #' @param parent name of the population to plot when a \code{GatingHierarchy} or
 #'   \code{GatingSet} object is supplied.
-#' @param axes_trans object of class
-#'   \code{\link[flowWorkspace:transformerList]{transformerList}} which
-#'   was used to transform the channels of the supplied flowFrame.
-#'   \code{cyto_plot} does not support in-line transformations and as such the
-#'   transformations should be applied to the data prior to plotting. The
-#'   transformerList is used internally to ensure that the axes on the
-#'   constructed plots are appropriately labelled.
-#' @param group_by a vector of experiment variables to sort and merge samples
-#'   into groups prior to plotting, set to NA by default to prevent merging.
-#'   To merge all samples set this argument to \code{"all"}.
-#' @param select designates which samples will be plotted and used for
-#'   determining the best location to set the drawn gate(s). Filtering steps
-#'   should be comma separated and wrapped in a list. Refer to
-#'   \code{\link{cyto_select}}.
+#' @param channels a vector channels to use to construct the plots, set to all
+#'   channels by default.  
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details. Sample selection occurs prior to grouping with \code{merge_by}. 
+#' @param merge_by a vector of pData variables to sort and merge samples into
+#'   groups prior to plotting, set to "name" by default to prevent merging. To
+#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
+#' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
+#'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
+#'   \code{list of flowFrame lists} containing populations to be overlaid onto
+#'   the plot(s). This argument can be set to "children" or "descendants" when a
+#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
 #' @param layout a vector of the length 2 indicating the dimensions of the grid
 #'   for plotting \code{c(#rows, #columns)}.
+#' @param hist_stack numeric [0,1] indicating the degree of offset for 1-D
+#'   density distributions with overlay, set to 0.5 by default.
+#' @param axes_limits options include \code{"auto"}, \code{"data"} or
+#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
+#'   to \code{"machine"} by default to complete axes ranges.
+#' @param popup logical indicating whether a pop-up window should be opened
+#'   prior to plotting, set to \code{FALSE} by default.
 #' @param header character string to include in the plot header, set to the
-#'   sample names by deafult. The header can be removed by setting this argument
+#'   sample names by default. The header can be removed by setting this argument
 #'   to NA.
 #' @param header_text_font numeric indicating the font to use for the header,
 #'   set to 2 by default for bold font.
 #' @param header_text_size numeric to control the text size of the header, set
-#'   to 1 by deafult.
-#' @param density_stack numeric [0,1] indicating the degree of offset for 1-D
-#'   density distributions with overlay, set to 0.5 by default.
+#'   to 1 by default.
+#' @param header_text_col colour to use for the header, set to "black" by
+#'   default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @importFrom grDevices n2mfrow recordPlot
@@ -46,7 +51,7 @@
 #' @seealso \code{\link{cyto_plot}}
 #'
 #' @examples
-#' 
+#'
 #' # Load in CytoExploreR to access data
 #' library(CytoExploreRData)
 #'
@@ -68,355 +73,183 @@
 #' cyto_plot_profile(gs[1:9],
 #'   parent = "T Cells"
 #' )
-#' 
+#'
 #' # Group samples by Treatment & select highest OVAConc
 #'  cyto_plot_profile(gs[1:9],
 #'   parent = "CD4 T Cells",
-#'   group_by = "Treatment",
-#'   select = list("OVAConc" = 500),
+#'   merge_by = "Treatment",
+#'   select = list("OVAConc" = 500)
 #' )
-#' 
-#' @name cyto_plot_profile
-NULL
-
-#' @noRd
+#'
 #' @export
-cyto_plot_profile <- function(x, ...) {
-  UseMethod("cyto_plot_profile")
-}
-
-#' @rdname cyto_plot_profile
-#' @export
-cyto_plot_profile.GatingSet <- function(x,
-                                        parent = NULL,
-                                        channels = NULL,
-                                        group_by = NA,
-                                        select = NULL,
-                                        axes_trans = NA,
-                                        layout = NULL,
-                                        header = NULL,
-                                        header_text_font = 2,
-                                        header_text_size = 1,
-                                        ...) {
-
-  # CHECKS ---------------------------------------------------------------------
-
-  # PLOT METHOD
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "profile/GatingSet")
-  }
-
-  # PARENT
-  if (is.null(parent)) {
-    stop("Please supply the name of the parent population to plot.")
-  }
-
-  # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
+cyto_plot_profile <- function(x,
+                              parent = "root",
+                              channels = NULL,
+                              select = NULL,
+                              merge_by = "name",
+                              overlay = NA,
+                              layout = NULL,
+                              hist_layers = NA,
+                              hist_stack = 0.5,
+                              axes_limits = "machine",
+                              popup = FALSE,
+                              header = NULL,
+                              header_text_font = 2,
+                              header_text_size = 1,
+                              header_text_col = "black",
+                              ...) {
   
-  # PREPARE DATA ---------------------------------------------------------------
-
-  # EXTRACT PARENT
-  fs <- cyto_extract(x, parent)
-
-  # Plots
-  p <- cyto_plot_profile(
-    fs,
-    channels = channels,
-    group_by = group_by,
-    select = select,
-    axes_trans = axes_trans,
-    layout = layout,
-    header = header,
-    header_text_font = header_text_font,
-    header_text_size = header_text_size,
-    ...
-  )
-
-  # RECORD/SAVE ----------------------------------------------------------------
+  # CYTO_PLOT_EXIT -------------------------------------------------------------
   
-  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      # CLOSE GRAPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
-      # RESET CYTO_PLOT_METHOD
+  # CURRENT SET PARAMETERS
+  old_pars <- .par()
+  
+  # NEW PLOT METHOD
+  if(is.null(getOption("cyto_plot_method"))) {
+    # CYTO_PLOT_METHOD
+    options("cyto_plot_method" = "profile")
+    # CYTO_PLOT_EXIT
+    on.exit({
+      par(old_pars)
       options("cyto_plot_method" = NULL)
-    }
-  }
-  
-  # RETURN RECORDED PLOTS
-  invisible(p)
-  
-}
-
-#' @rdname cyto_plot_profile
-#' @export
-cyto_plot_profile.GatingHierarchy <- function(x,
-                                             parent = NULL,
-                                             channels = NULL,
-                                             axes_trans = NA, 
-                                             header = NULL,
-                                             header_text_font = 2,
-                                             header_text_size = 1, ...) {
-
-  # CHECKS ---------------------------------------------------------------------
-
-  # PLOT METHOD
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "profile/GatingHierarchy")
-  }
-
-  # PARENT
-  if (is.null(parent)) {
-    stop("Please supply the name of the parent population to plot.")
-  }
-
-  # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
-  
-  # PREPARE DATA ---------------------------------------------------------------
-
-  # EXTRACT PARENT
-  fr <- cyto_extract(x, parent)
-
-  # Plots
-  p <- cyto_plot_profile(
-    fr,
-    channels = channels,
-    axes_trans = axes_trans,
-    header = header,
-    header_text_font = header_text_font,
-    header_text_size = header_text_size, ...
-  )
-  
-  # RECORD/SAVE ----------------------------------------------------------------
-  
-  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      # CLOSE GRAPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
-      # RESET CYTO_PLOT_METHOD
-      options("cyto_plot_method" = NULL)
-    }
-  }
-  
-  # RETURN RECORDED PLOTS
-  invisible(p)
-  
-}
-
-#' @rdname cyto_plot_profile
-#' @export
-cyto_plot_profile.flowSet <- function(x,
-                                      channels = NULL,
-                                      group_by = NA,
-                                      select = NA,
-                                      axes_trans = NULL,
-                                      layout = NULL,
-                                      header = NULL,
-                                      header_text_font = 2,
-                                      header_text_size = 1,
-                                      density_stack = 0.5, ...) {
-
-  # CHECKS ---------------------------------------------------------------------
-  
-  # PLOT METHOD
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "profile/flowSet")
-  }
-  
-  # PREPARE SAMPLES ------------------------------------------------------------
-  
-  # GROUP_BY
-  if(!.all_na(group_by)){
-    fs_list <- cyto_group_by(x, group_by)
-  }else{
-    fs_list <- list(x)
-  }
-  
-  # SELECT
-  if(!.all_na(select)){
-    fs_list <- lapply(fs_list, function(z) {
-       tryCatch(cyto_select(z, select), error = function(e) {
-        z
-      })
+      options("cyto_plot_par" = NULL)
     })
-  }
-
-  # COLLAPSE GROUPS - FLOWFRAME PER GROUP
-  if(!.all_na(group_by)){
-    fr_list <- lapply(fs_list, function(z){
-      cyto_convert(z, "flowFrame")
-    })
-    names(fr_list) <- group_by
-  # FLOWSET TO FLOWFRAME LIST
-  }else{
-    fr_list <- cyto_convert(fs_list[[1]], "list of flowFrames")
-    names(fr_list) <- cyto_names(x)
   }
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
-  # TITLE
-  if (is.null(header)) {
-    header <- "Expression Profile"
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(x, exclude = "Time")
   }
-
-  # CONSTRUCT PLOTS ------------------------------------------------------------
   
-  # CYTO_PLOT_PROFILE
-  if (length(fr_list) == 1) {
-    p <- cyto_plot_profile(
-      x = fr_list[[1]],
-      channels = channels,
-      axes_trans = axes_trans,
-      layout = layout,
-      header = header,
-      header_text_font = header_text_font,
-      header_text_size = header_text_size, ...
-    )
+  # PLOT LAYOUT - CYTOSET/GATINGSET
+  if(cyto_class(x, "flowSet") | cyto_class(x, "GatingSet", TRUE)) {
+    # SELECT
+    if(!is.null(select)) {
+      x <- cyto_select(x, select)
+    }
+    # MERGE_BY
+    n <- length(cyto_groups(x, merge_by))
+    # HIST LAYERS
+    if(.all_na(overlay)) {
+      # ONE PLOT
+      if(.all_na(hist_layers)) {
+        n <- 1
+      } else {
+        n <- ceiling(n/hist_layers)
+      }
+    }
+    # PLOT LAYOUT - CYTOFRAME/GATINGHIERARCHY
   } else {
-    p <- cyto_plot_profile(
-      x = fr_list[[1]],
-      overlay = fr_list[2:length(fr_list)],
-      channels = channels,
-      axes_trans = axes_trans,
-      layout = layout,
-      header = header,
-      header_text_font = header_text_font,
-      header_text_size = header_text_size,
-      density_stack = density_stack, ...
-    )
+    n <- 1
   }
   
-  # RECORD/SAVE ----------------------------------------------------------------
-  
-  # TURN OFF GRAPHICES DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      # CLOSE GRAPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
-      # RESET CYTO_PLOT_METHOD
-      options("cyto_plot_method" = NULL)
+  # HEADER
+  if(is.null(header)) {
+    if(.all_na(overlay)) {
+      header <- "Expression Profile"
+    } else if(n > 1 & !.all_na(overlay)) {
+      header <- paste(channels, "Expression")
+    } else {
+      header <- "Expression Profile"
     }
   }
   
-  # RETURN RECORDED PLOT
-  invisible(p)
-  
-}
-
-#' @rdname cyto_plot_profile
-#' @export
-cyto_plot_profile.flowFrame <- function(x,
-                                        channels = NULL,
-                                        axes_trans = NA,
-                                        layout = NULL,
-                                        header = NULL,
-                                        header_text_font = 2,
-                                        header_text_size = 1,
-                                        ...) {
-
-  # CHECKS ---------------------------------------------------------------------
-  
-  # PLOT METHOD
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "profile/flowFrame")
-  }
-
-  # CHANNELS
-  if (is.null(channels)) {
-    channels <- cyto_channels(x, exclude = "Time")
-  }
-
-  # PREPARE CHANNELS
-  channels <- cyto_channels_extract(x, channels = channels, plot = FALSE)
-
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # OLD PARAMETERS
-  old_pars <- .par(c("mfrow","oma"))
-  
-  # RESET PARAMETERS ON EXIT
-  on.exit(par(old_pars))
+  # REPEAT HEADER ARGUMENTS
+  header <- rep(header, length.out = length(channels))
   
   # PREPARE PLOTTING SAPCE -----------------------------------------------------
   
-  # LAYOUT DIMENSIONS
-  if (is.null(layout)) {
-    layout <- c(n2mfrow(length(channels))[2], n2mfrow(length(channels))[1])
-    par(mfrow = layout)
-  } else if (!is.null(layout)) {
-    if (layout[1] == FALSE) {
-      # DO NOTHING
+  # LAYOUT
+  if(is.null(layout)) {
+    # ONE PLOT PER CHANNEL
+    if(n == 1) {
+      layout <- .cyto_plot_layout(channels, layout)
+      # MULTIPLE PLOTS PER CHANNEL
     } else {
-      par(mfrow = layout)
+      layout <- .cyto_plot_layout(n, layout)
     }
   }
-
-  # HEADER SPACE
+  
+  # OUTER MARGINS
   if (!.all_na(header)) {
-    par(oma = c(0, 0, 3, 0))
+    oma <- c(0, 0, 3, 0)
+  } else{
+    oma <- c(0, 0, 0, 0)
+  }
+  
+  # SET UP GRAPHICS DEVICE
+  if(getOption("cyto_plot_method") == "profile") {
+    cyto_plot_new(popup,
+                  layout = layout, 
+                  oma = oma)
   }
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
-  # NUMBER OF PLOTS
-  NP <- length(channels)
-  NP <- split(seq_len(NP), ceiling(seq_len(NP)/prod(layout)))
-  NP <- LAPPLY(NP, "max")
-  
-  # HEADER SAMPLENAMES
-  if (is.null(header)) {
-    header <- cyto_names(x)
-  } 
-  
   # CONSTRUCT PLOTS
-  p <- lapply(seq_len(length(channels)), function(z) {
-    
+  p <- lapply(seq_along(channels), function(z) {
+    # HEADERS HANDLED BY CYTO_PLOT
+    plot_header <- header[z]
+    if(n == 1) {
+      plot_header <- NA
+    }
     # PLOT
-    cyto_plot(x,
-      channels = channels[z],
-      axes_trans = axes_trans,
-      title = NA, ...
+    p <- cyto_plot(x,
+                   parent = parent,
+                   channels = channels[z],
+                   overlay = overlay,
+                   title = NA, # can't distinguish layers/overlays - list of cfs
+                   hist_layers = NA,
+                   hist_stack = hist_stack,
+                   axes_limits = axes_limits,
+                   popup = popup,
+                   layout = FALSE,
+                   merge_by = merge_by,
+                   header = plot_header,
+                   header_text_font = header_text_font,
+                   header_text_size = header_text_size,
+                   header_text_col = header_text_col,
+                   ...
     )
-    
     # HEADER
-    if(z %in% NP){
-      # ADD HEADER
-      if (!.all_na(header)) {
-        mtext(header, 
-              outer = TRUE, 
-              font = header_text_font,
-              cex = header_text_size)
+    if(n == 1) {
+      if(par("page") | z == length(channels)) {
+        # ADD HEADER - LAYOUT ONLY
+        if (!.all_na(header[z]) & all(layout != FALSE)) {
+          .cyto_plot_header(header[z],
+                            header_text_font = header_text_font,
+                            header_text_size = header_text_size,
+                            header_text_col = header_text_col)
+        }
+        # RECORD PLOT
+        p <- cyto_plot_record()
+        # NEW PLOT
+        if(z != length(channels)) {
+          cyto_plot_new() # use global settings
+        }
+        return(p)
+      } else {
+        return(NULL)
       }
-      # RECORD PLOT
-      cyto_plot_record()
+    } else {
+      return(p) # recorded plots from cyto_plot
     }
   })
   
   # RECORD/SAVE ----------------------------------------------------------------
-
+  
   # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      # CLOSE GARPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
-      # RESET CYTO_PLOT_METHOD
-      options("cyto_plot_method" = NULL)
-    }
+  if (getOption("cyto_plot_save") &
+      getOption("cyto_plot_method") == "profile") {
+    # CLOSE GRAPHICS DEVICE
+    dev.off()
+    # RESET CYTO_PLOT_SAVE
+    options("cyto_plot_save" = FALSE)
   }
   
   # RETURN RECORDED PLOTS
   invisible(p)
+  
 }
