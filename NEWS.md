@@ -1,12 +1,24 @@
 # CytoExploreR 1.0.9
 
+* Directories are now excluded from the files read in by `cyto_load()`.
+* `cyto_stats_compute()` also has enhanced statistical capabilities with support added for standard deviation (SD), robust standard deviation (rSD), coefficient of variation (CV), robust coefficient of variation (rCV), quantile, area under curve (AUC) and range.
+* `cyto_stats_compute()` now accepts custom functions and experimental details can be optionally excluded from the output. Statistics that rely on density distributions now use the same bandwidth for each cytoframe.
+* Rename all `density` arguments to instead use `hist` as a prefix.
+* Add legend fro point colour scale to `cyto_plot()`.
+* Add support for adding grid lines to `cyto_plot()` through `grid` argument and customisation through `grid_line_width`, `grid_line_col` and `grid_line_alpha` arguments.
+* Add new `cyto_plot_par()` function to handle graphical parameters within `cyto_plot()`. Refine behaviour of all `cyto_plot()` helper functions to ensure graphics devices are opened when expected.
+* Support for scattermore is now integrated in `cyto_plot_point()` through the `point_fast` argument, which is set to FALSE by default.
+* Add new `cyto_gate_copy()` function to support copying of gates from one node to another.
+* Add support for partial matches in `cyto_channels_extract()` and `cyto_markers_extract()`.
+* Add support for extracting channels from a list of cytometry objects in `cyto_channels()` and `cyto_markers()`. Add new replacement method for `cyto_channels()`.
+* Remove old data editor in favour of `DataEditR::data_edit()`.
 * Add new `cyto_cbind()` function to handle addition of new parameters to cytometry objects (retaining support for flowFrames/flowSets).
 * `cyto_apply()` has been re-written to accept different data inputs (e.g. matrix, cytoframe, cytoset, column or row) and the output is more intuitively formatted.
 * `cyto_calibrate()` now uses quantile calibration by default and the upper quantile limits has been reduced from 0.99 to 0.95.
 * Barcoding of GatingSets is now supported by `cyto_barcode()`.
 * `cyto_beads_sample()` is now defunct in favour of the more flexible `cyto_sample_to_node()` function.
 * Add new `cyto_sort_by()` function to sort samples based on experimental variables.
-* Add new `cyto_groups()` function to return the names or details experimental groups.
+* Add new `cyto_groups()` function to return the names or details of experimental groups.
 * `cyto_extract()` is now defunct in favour of the new `cyto_data_extract()` which has for extracting multiple populations. New arguments `format`, `split`, `markers`, `trans` and `inverse` provide flexibility in how the extracted population should be formatted.
 * `cyto_names()` has been updated to extract sample information at the level of cytosets only, attempts to extract this information from flowFrames/cytoframes will generate an error.
 * `cyto_details()` now has additional `convert`, `drop` and `factor` arguments to allow easy formatting of the returned data.frame. Support for extracting `cyto_details()` from flowFrame/cytoframe objects has been removed.
