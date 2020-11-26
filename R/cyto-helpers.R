@@ -451,7 +451,7 @@ cyto_clean <- function(x, ...) {
 #'   these details will be supplied can also be passed to this argument.
 #' @param parse_names logical indicating whether the file names should be parsed
 #'   into experiment details using \code{cyto_names_parse}, set to FALSE by
-#'   default. If you need to parse the names using a different dlimiter, supply
+#'   default. If you need to parse the names using a different delimiter, supply
 #'   the delimiter to this argument instead of TRUE.
 #' @param details logical indicating whether a call should be made to
 #'   \code{cyto_details_edit} to update the experimental details associated with
@@ -482,7 +482,7 @@ cyto_clean <- function(x, ...) {
 #' gs <- cyto_setup(path)
 #'
 #' # Markers have been assigned
-#' cyto_extract(gs, "root")[[1]]
+#' cyto_data_extract(gs, "root")[[1]]
 #'
 #' # Experiment details have been updated
 #' cyto_details(gs)
@@ -575,7 +575,7 @@ cyto_setup <- function(path = ".",
         sample <- min(
           cyto_apply(x, 
                      "nrow",
-                     input = 2,
+                     input = "matrix",
                      copy = FALSE)
         )
       }
@@ -655,7 +655,7 @@ cyto_setup <- function(path = ".",
 #' cyto_class(gs, expect = "GatingSet")
 #'
 #' # cytoset
-#' cs <- cyto_extract(gs, "root")
+#' cs <- cyto_data_extract(gs, "root")[["root"]]
 #' cyto_class(cs)
 #' cyto_class(cs, expect = "flowSet", class = FALSE) # reference class
 #'
@@ -727,13 +727,13 @@ cyto_class <- function(x,
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation Gatingset
+#' # Activation GatingSet
 #' gs <- cyto_load(
-#'   system.file(
-#'     "extdata/Activation-GatingSet",
-#'     package = "CytoExploreRData"
-#'     )
-#'   )
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
 #'                           
 #' # Experiment variables
 #' cyto_details(gs)
@@ -801,9 +801,13 @@ cyto_details <- function(x,
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation Gatingset
-#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
-#'                          package = "CytoExploreRData"))
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
 #'
 #' # GatingSet
 #' cyto_names(gs)
@@ -857,9 +861,13 @@ cyto_names <- function(x) {
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation Gatingset
-#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
-#'                          package = "CytoExploreRData"))
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
 #'
 #' # GatingSet
 #' cyto_names(gs)[1] <- "Activation_001.fcs"
@@ -914,14 +922,20 @@ cyto_names <- function(x) {
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Activation Gatingset
-#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
-#'                           package = "CytoExploreRData"))
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
 #'                           
 #' # Parse file names to variables
-#' gs <- cyto_names_parse(gs,
-#' vars = c("sample_type", "sample_id"),
-#' split = "_")
+#' gs <- cyto_names_parse(
+#'   gs,
+#'   vars = c("sample_type", "sample_id"),
+#'   split = "_"
+#'   )
 #'
 #' # Updated experiment details
 #' cyto_details(gs)
@@ -1034,7 +1048,6 @@ cyto_names_parse <- function(x,
 #' @importFrom methods as
 #'
 #' @examples
-#'
 #' # Load in CytoExploreRData to access data
 #' library(CytoExploreRData)
 #'
@@ -1057,6 +1070,7 @@ cyto_names_parse <- function(x,
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformer_log}}
@@ -1163,8 +1177,8 @@ cyto_transform.default <- function(x,
     tryCatch(
       {
         
-        # Pull out flowFrame/flowSet to plot
-        cyto_data <- cyto_extract(x, parent)
+        # cytoset
+        cyto_data <- cyto_data_extract(x, parent)[[1]]
         
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
@@ -1252,7 +1266,7 @@ cyto_transform.transformList <- function(x,
       {
         
         # Pull out flowFrame/flowSet to plot
-        cyto_data <- cyto_extract(x)
+        cyto_data <- cyto_data_extract(x)[[1]]
         
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
@@ -1341,7 +1355,7 @@ cyto_transform.transformerList <- function(x,
       {
         
         # Extract flowFrame/flowSet for plotting
-        cyto_data <- cyto_extract(x)
+        cyto_data <- cyto_data__extract(x)[[1]]
         
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
@@ -2366,10 +2380,11 @@ cyto_save.GatingSet <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingSet."))
-    fs <- cyto_extract(x,
-                       parent = parent,
-                       copy = TRUE
-    )
+    fs <- cyto_data_extract(
+      x,
+      parent = parent,
+      copy = TRUE
+    )[[1]]
     # TRANSFORMATIONS
     trans <- cyto_transformer_extract(x)
     # FLOWSET METHOD
@@ -2408,10 +2423,11 @@ cyto_save.GatingHierarchy <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-    fr <- cyto_extract(x,
-                       parent = parent,
-                       copy = TRUE
-    )
+    fr <- cyto_data_extract(
+      x,
+      parent = parent,
+      copy = TRUE
+    )[[1]]
     # TRANSFORMATIONS
     trans <- cyto_transformer_extract(x)
     # FLOWSET METHOD
@@ -2803,109 +2819,123 @@ cyto_sample.list <- function(x,
                              plot = FALSE,
                              ...) {
   
-  # CYTO_PLOT SAMPLING - RATIOS
+  # PLOT - COMPUTE SAMPLE SIZE PER LAYER
   if (plot == TRUE) {
-    
-    # LIST OF FLOWSETS
-    if (all(LAPPLY(x, function(z) {
-      cyto_class(z, "flowSet")
-    }))) {
-      # Same sampling applied to all samples
-      x <- lapply(x, function(z) {
-        cyto_sample(z, display = display, seed = seed)
-      })
-      # LIST OF FLOWFRAMES
-    } else if (all(LAPPLY(x, function(z) {
-      cyto_class(z, "flowFrame")
-    }))) {
-      # BARCODED FLOWFRAMES
-      if (any(LAPPLY(x, function(z) {
-        "Sample ID" %in% cyto_channels(z)
-      }))) {
-        # SAMPLES PER FLOWFRAME - ASSUME FLOWFRAME IF NO BARCODE
-        samples <- LAPPLY(x, function(z) {
-          tryCatch(length(unique(exprs(z)[, "Sample ID"])),
-                   error = function(e) {
-                     1
-                   }
-          )
-        })
-        # EVENTS PER SAMPLE - EACH LAYER
-        events_per_sample <- LAPPLY(seq_len(length(x)), function(z) {
-          nrow(x[[z]]) / samples[z]
-        })
-        # EVENTS RATIO - BASE LAYER REFERENCE
-        events_ratio <- events_per_sample / events_per_sample[1]
-        # SCALE SAMPLING EVENTS USING BASE LAYER AS REFERENCE
-        if (display <= 1) {
-          events_to_sample <- rep(display * nrow(x[[1]]), length(x)) *
-            events_ratio
-        } else {
-          events_to_sample <- rep(display, length(x)) *
-            events_ratio
-        }
-        # SAMPLING
-        lapply(seq_len(length(x)), function(z) {
-          x[[z]] <<- cyto_sample(x[[z]],
-                                 display = events_to_sample[z],
-                                 seed = seed
-          )
-        })
-        # NO BARCODING - RELY ON IDENTIFIERS
-      } else {
-        # Same percentage sampling applied to each flowFrame
-        if (display <= 1) {
-          # Same sampling applied to all samples
-          x <- lapply(x, function(z) {
-            cyto_sample(z, display = display, seed = seed)
-          })
-          # Sampling by event number is more complex
-        } else if (display > 1) {
-          # Identifiers
-          nms <- LAPPLY(x, function(z) {
-            cyto_names(z)
-          })
-          ind <- seq_len(length(nms))
-          # Sampling
-          x <- lapply(ind, function(z) {
-            # Base layer sampled as per usual
-            if (z == 1) {
-              cyto_sample(x[[z]], display = display, seed = seed)
-            } else {
-              # Identifier matches base - sample size decreased
-              if (nms[z] == nms[1]) {
-                # Number of events in base layer
-                base_events <- nrow(x[[1]])
-                # Number of events in overlay
-                overlay_events <- nrow(x[[z]])
-                # Proportion of overlay relative to base
-                prop <- overlay_events / base_events
-                # Update display prop * display
-                display <- ceiling(prop * display)
-                # Sampling
-                cyto_sample(x[[z]], display = display, seed = seed)
-                # Identifiers don't match - separate samples - same sampling
-              } else {
-                cyto_sample(x[[z]], display = display, seed = seed)
-              }
-            }
-          })
-        }
-      }
-    }
-    
-    # GENERIC SAMPLING
+    display <- cyto_sample_size(x, 
+                                display = display[1])
+  # SAME SAMPLE SIZE PER LAYER
   } else {
-    
     # ALLOW DIFFERENT SAMPLING PER ELEMENT
     display <- rep(display, length(x))
-    x <- mapply(function(x, display) {
-      cyto_sample(x, display)
-    }, x, display)
   }
+  
+  # SAMPLING
+  x <- mapply(function(x, display) {
+    cyto_sample(x, 
+                display = display,
+                seed = seed)
+  }, x, display)
   
   # Return sampled list
   return(x)
+}
+
+## CYTO_SAMPLE_SIZE ------------------------------------------------------------
+
+#' Compute proportional sample sizes for cyto_plot layers
+#' 
+#' @param x cytometry object or list of cytometry objects.
+#' @param display desired number of events for base layer.
+#' 
+#' @return event number as counts.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+cyto_sample_size <- function(x,
+                             display = 1) {
+  
+  # CYTOFRAME/CYTOSET LIST
+  if(cyto_class(x, "list", TRUE)) {
+    # SINGULAR CYTOSET LIST -> CYTOFRAME LIST
+    if(all(LAPPLY(x, cyto_class, "flowSet"))) {
+      x <- structure(
+        lapply(x, `[[`, 1),
+        names = cyto_names(x)
+      )
+    } else {
+      names(x) <- cyto_names(x)
+    }
+    # BARCODED FLOWFRAMES
+    if (any(LAPPLY(x, function(z) {
+      "Sample ID" %in% cyto_channels(z)
+    }))) {
+      # SAMPLES PER FLOWFRAME - ASSUME FLOWFRAME IF NO BARCODE
+      samples <- LAPPLY(x, function(z) {
+        tryCatch(length(unique(exprs(z)[, "Sample ID"])),
+                 error = function(e) {
+                   1
+                 }
+        )
+      })
+      # EVENTS PER SAMPLE - EACH LAYER
+      events_per_sample <- LAPPLY(seq_len(length(x)), function(z) {
+        nrow(x[[z]]) / samples[z]
+      })
+      # EVENTS RATIO - BASE LAYER REFERENCE
+      events_ratio <- events_per_sample / events_per_sample[1]
+      # SCALE SAMPLING EVENTS USING BASE LAYER AS REFERENCE
+      if (display <= 1) {
+        events_to_sample <- rep(display * nrow(x[[1]]), length(x)) *
+          events_ratio
+      } else {
+        events_to_sample <- rep(display, length(x)) *
+          events_ratio
+      }
+      display <- events_to_sample
+    } else {
+      # PERCENTAGE SAMPLING
+      if (display <= 1) {
+        display <- display * LAPPLY(x, nrow)
+      # COUNT SAMPLING
+      } else if (display > 1) {
+        # Identifiers
+        nms <- names(x)
+        ind <- seq_len(length(nms))
+        # Sampling
+        display <- unlist(lapply(ind, function(z) {
+          # Base layer sampled as per usual
+          if (z == 1) {
+            return(display)
+          } else {
+            # Identifier matches base - sample size decreased
+            if (nms[z] == nms[1]) {
+              # Number of events in base layer
+              base_events <- nrow(x[[1]])
+              # Number of events in overlay
+              overlay_events <- nrow(x[[z]])
+              # Proportion of overlay relative to base
+              prop <- overlay_events / base_events
+              # Update display prop * display
+              display <- ceiling(prop * display)
+              # Sampling
+              return(display)
+              # Identifiers don't match - separate samples - same sampling
+            } else {
+              return(display)
+            }
+          }
+        }))
+      }
+    }
+  # CYTOFRAME/CYTOSET OR GATINGHIERARCHY/GATINGSET
+  } else {
+    display <- rep(display, length(x))
+  }
+  
+  # DISPLAY
+  return(display)
+  
 }
 
 ## CYTO_SAMPLE_TO_NODE ---------------------------------------------------------
@@ -3184,12 +3214,12 @@ cyto_markers_edit <- function(x,
     
     # GatingHierarchy
   } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
-    fr <- cyto_extract(x, "root")
+    fr <- cyto_data_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
     
     # GatingSet
   } else if (cyto_class(x, "GatingSet", TRUE)) {
-    fr <- cyto_extract(x, "root")[[1]]
+    fr <- cyto_data_extract(x, "root")[[1]]
     pd <- cyto_details(parameters(fr))
   } else {
     stop("'x' must be a valid cytometry object.")

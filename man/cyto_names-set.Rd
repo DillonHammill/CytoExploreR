@@ -18,9 +18,13 @@ Replacement method for cyto_names
 \examples{
 library(CytoExploreRData)
 
-# Activation Gatingset
-gs <- load_gs(system.file("extdata/Activation-GatingSet",
-                         package = "CytoExploreRData"))
+# Activation GatingSet
+gs <- cyto_load(
+ system.file(
+   "extdata/Activation-GatingSet",
+   package = "CytoExploreRData"
+   )
+ )
 
 # GatingSet
 cyto_names(gs)[1] <- "Activation_001.fcs"

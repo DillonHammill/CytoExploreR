@@ -35,13 +35,13 @@ formatting options.
 \examples{
 library(CytoExploreRData)
 
-# Activation Gatingset
+# Activation GatingSet
 gs <- cyto_load(
-  system.file(
-    "extdata/Activation-GatingSet",
-    package = "CytoExploreRData"
-    )
-  )
+ system.file(
+   "extdata/Activation-GatingSet",
+   package = "CytoExploreRData"
+   )
+ )
                           
 # Experiment variables
 cyto_details(gs)

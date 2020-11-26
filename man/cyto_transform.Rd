@@ -95,7 +95,6 @@ object of class \code{flowFrame}, \code{flowSet},
 Apply Transformations to Cytometry Data
 }
 \examples{
-
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -118,6 +117,7 @@ gs_trans <- cyto_transform(gs, type = "logicle")
 # Manually construct & apply transformations
 trans <- cyto_transformer_logicle(gs)
 gs_trans <- cyto_transform(gs, trans)
+
 }
 \seealso{
 \code{\link{cyto_transformer_log}}

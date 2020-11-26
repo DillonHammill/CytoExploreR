@@ -46,7 +46,7 @@ cyto_class(gs)
 cyto_class(gs, expect = "GatingSet")
 
 # cytoset
-cs <- cyto_extract(gs, "root")
+cs <- cyto_data_extract(gs, "root")[["root"]]
 cyto_class(cs)
 cyto_class(cs, expect = "flowSet", class = FALSE) # reference class
 

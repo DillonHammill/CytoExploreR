@@ -40,7 +40,7 @@ these details will be supplied can also be passed to this argument.}
 
 \item{parse_names}{logical indicating whether the file names should be parsed
 into experiment details using \code{cyto_names_parse}, set to FALSE by
-default. If you need to parse the names using a different dlimiter, supply
+default. If you need to parse the names using a different delimiter, supply
 the delimiter to this argument instead of TRUE.}
 
 \item{details}{logical indicating whether a call should be made to
@@ -93,7 +93,7 @@ path <- paste0(datadir, "/Activation")
 gs <- cyto_setup(path)
 
 # Markers have been assigned
-cyto_extract(gs, "root")[[1]]
+cyto_data_extract(gs, "root")[[1]]
 
 # Experiment details have been updated
 cyto_details(gs)
