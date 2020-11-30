@@ -2756,13 +2756,10 @@ cyto_sample.flowFrame <- function(x,
   
   # Do nothing if no sampling required
   if (display != 1) {
-    
     # Number of events
     events <- nrow(x)
-    
     # display is the number of events to keep
     if (display > 1) {
-      
       # display is too large - retain all events
       if (display > events) {
         return(x)
@@ -2770,19 +2767,15 @@ cyto_sample.flowFrame <- function(x,
       } else {
         size <- display
       }
-      
       # display is a proportion of events to keep
     } else {
-      
       # Size
       size <- display * events
     }
-    
     # Set seed
     if (!is.null(seed)) {
       set.seed(seed)
     }
-    
     # Sample
     smp <- sampleFilter(size = size)
     x <- Subset(x, smp)
@@ -2825,7 +2818,6 @@ cyto_sample.list <- function(x,
                                 display = display[1])
   # SAME SAMPLE SIZE PER LAYER
   } else {
-    # ALLOW DIFFERENT SAMPLING PER ELEMENT
     display <- rep(display, length(x))
   }
   
@@ -2935,6 +2927,136 @@ cyto_sample_size <- function(x,
   
   # DISPLAY
   return(display)
+  
+}
+
+## CYTO_COERCE -----------------------------------------------------------------
+
+#' Coerce cytoframes in a cytoset
+#'
+#' \code{cyto_coerce} is an efficient method for simultaneously coercing and
+#' downsampling elements of a \code{cytoset}. Basically, the individual
+#' \code{cytoframe} elements are sampled prior to coercion and then sampled
+#' again to obtain the exact number of events specified to \code{display}.
+#' \code{format} provides control over the format in which the coerced data
+#' should be returned.
+#'
+#' @param x \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param display passed to \code{\link{cyto_sample}} to control the number of
+#'   events to retain in the coerced \code{cytoframe}, set to 1 by default to
+#'   retain all events.
+#' @param seed numeric passed to \code{\link{set.seed}} to return the same
+#'   sample with each run, set to NULL by default for random sampling.
+#' @param barcode logical indicating whether the samples should be barcoded
+#'   prior to coercion, set to FALSE by default.
+#' @param format can be either 1 - matrix, 2 - cytoframe or 3 - cytoset to
+#'   control the format of the returned data, set to \code{"cytoset"} by
+#'   default.
+#' @param name character string indicating the name to use for the coerced
+#'   object.
+#' @param ... additional arguments passed to \code{\link{cyto_sample}}.
+#'
+#' @return a sampled and coerced \code{matrix}, \code{cytoframe} or
+#'   \code{cytoset}.
+#'
+#' @importFrom flowWorkspace flowFrame_to_cytoframe cytoset
+#' @importFrom flowCore exprs
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
+#'
+#' # Activation cytoset
+#' cs <- cyto_data_extract(gs, "root")[["root"]]
+#'
+#' # Coerce & Sample
+#' cyto_coerce(cs, display = 50000, seed = 56)
+#'
+#' @export
+cyto_coerce <- function(x,
+                        display = 1,
+                        seed = NULL,
+                        barcode = FALSE,
+                        format = "cytoset",
+                        name = NULL,
+                        ...) {
+  
+  
+  # SAMPLING
+  if(display != 1) {
+    # SAMPLE COUNT
+    if(display > 1) {
+      # SAMPLE PERCENTAGE
+      sample <- display / sum(
+        cyto_apply(x,
+                   "nrow",
+                   input = "matrix",
+                   copy = FALSE)[, 1]
+      )
+      # SAMPLE BUFFER
+      sample <- sample + 0.02
+      # FUZZY SAMPLE
+      x <- cyto_sample(x,
+                       display = sample,
+                       seed = seed)
+      # BARCODE
+      if(barcode) {
+        x <- cyto_barcode(x)
+      }
+      # COERCE
+      x <- flowFrame_to_cytoframe(
+        as(x, "flowFrame")
+      )
+      # EXACT SAMPLE
+      x <- cyto_sample(x,
+                       display = display,
+                       seed = seed)
+    # SAMPLE PERCENTAGE
+    } else {
+      # PRECENT SAMPLE
+      x <- cyto_sample(x,
+                       display = display,
+                       seed = seed)
+      # BARCODE
+      if(barcode) {
+        x <- cyto_barcode(x)
+      }
+      # COERCE
+      x <- flowFrame_to_cytoframe(
+             as(x, "flowFrame")
+           )
+    }
+  # NO SAMPLING
+  } else {
+    # BARCODE
+    if(barcode) {
+      x <- cyto_barcode(x)
+    }
+    x <- flowFrame_to_cytoframe(
+           as(x, "flowFrame")
+         )
+  }
+  
+  # FORMAT
+  switch(format,
+         matrix = exprs(x),
+         cytoframe = x,
+         cytoset = cytoset(
+            structure(
+              list(x),
+              names = name
+            )
+          )
+        )
   
 }
 
@@ -4802,7 +4924,7 @@ cyto_apply.list <- function(x,
 #' @param cols matrix of columns to be added to \code{x} can be supplied in a
 #'   list for \code{cytoset} method.
 #'
-#' @importFrom flowWorkspace cf_append_cols
+#' @importFrom flowWorkspace cf_append_cols realize_view
 #' @importFrom flowCore fr_append_cols
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -4834,6 +4956,10 @@ cyto_cbind.flowFrame <- function(x,
   
   # CYTOFRAME
   if(cyto_class(x, "cytoframe", TRUE)){
+    # REALIZE VIEW
+    if(cf_is_subsetted(x)) {
+      x <- realize_view(x)
+    }
     cf_append_cols(x, cols)
     # FLOWFRAME  
   }else{
