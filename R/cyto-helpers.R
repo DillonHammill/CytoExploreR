@@ -3013,9 +3013,13 @@ cyto_coerce <- function(x,
         x <- cyto_barcode(x)
       }
       # COERCE
-      x <- flowFrame_to_cytoframe(
-        as(x, "flowFrame")
-      )
+      if(length(x) > 1) {
+        x <- flowFrame_to_cytoframe(
+          as(x, "flowFrame")
+        )
+      } else {
+        x <- x[[1]]
+      }
       # EXACT SAMPLE
       x <- cyto_sample(x,
                        display = display,
@@ -3031,9 +3035,13 @@ cyto_coerce <- function(x,
         x <- cyto_barcode(x)
       }
       # COERCE
-      x <- flowFrame_to_cytoframe(
-             as(x, "flowFrame")
-           )
+      if(length(x) > 1){
+        x <- flowFrame_to_cytoframe(
+          as(x, "flowFrame")
+        )
+      } else {
+        x <- x[[1]]
+      }
     }
   # NO SAMPLING
   } else {
@@ -3041,9 +3049,13 @@ cyto_coerce <- function(x,
     if(barcode) {
       x <- cyto_barcode(x)
     }
-    x <- flowFrame_to_cytoframe(
-           as(x, "flowFrame")
-         )
+    if(length(x) > 1) {
+      x <- flowFrame_to_cytoframe(
+        as(x, "flowFrame")
+      )
+    } else {
+      x <- x[[1]]
+    }
   }
   
   # FORMAT
@@ -3053,7 +3065,9 @@ cyto_coerce <- function(x,
          cytoset = cytoset(
             structure(
               list(x),
-              names = name
+              names = ifelse(is.null(name),
+                             cyto_names(x),
+                             name)
             )
           )
         )
