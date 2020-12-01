@@ -471,7 +471,7 @@ cyto_map.flowFrame <- function(x,
 
   # EXTRACT RAW DATA MATRIX
   fr_exprs <- cyto_data_extract(x, 
-                                raw = TRUE)[[1]]
+                                format = "matrix")[[1]]
 
   # RESTRICT MATRIX BY CHANNELS
   fr_exprs <- fr_exprs[, channels]

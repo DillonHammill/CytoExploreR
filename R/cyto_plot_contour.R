@@ -103,7 +103,7 @@ cyto_plot_contour <- function(x,
              contour_line_col,
              contour_line_alpha) {
       fr_exprs <- cyto_data_extract(fr, 
-                                    raw = TRUE, 
+                                    format = "matrix", 
                                     channels = channels)[[1]]
       if (contour_lines != 0) {
         # BYPASS INSUFFICIENT EVENTS
