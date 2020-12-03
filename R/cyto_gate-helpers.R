@@ -270,7 +270,7 @@ cyto_gate_rename <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @noRd
+#' @export
 cyto_gate_copy <- function(x,
                            parent = NULL,
                            alias = NULL,
