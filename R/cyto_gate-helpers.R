@@ -296,10 +296,10 @@ cyto_gate_copy <- function(x,
   }
   
   # ALIAS
-  if (is.null(alias)) {
-    stop("Supply the name(s) of the gates to edit to 'alias'.")
-  } else if (!all(alias %in% c(nodes_full, nodes_auto))) {
-    stop("Supplied alias does not exist in the GatingSet.")
+  if (is.null(copy)) {
+    stop("Supply the name of the reference node to 'copy'.")
+  } else if (!all(copy %in% c(nodes_full, nodes_auto))) {
+    stop("Reference node does not exist in the GatingSet.")
   }
   
   # MISSING GATINGTEMPLATE
