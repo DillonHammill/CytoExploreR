@@ -2,21 +2,23 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_list}
 \alias{cyto_list}
-\title{Convert cytoset to a list of cytoframes or cytosets}
+\title{Convert cytoset or GatingSet to a list of its elements}
 \usage{
-cyto_list(x, format = "cytoframe")
+cyto_list(x, extract = TRUE)
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{format}{either \code{"cytoframe"} or \code{"cytoset"} to indicate the
-class of each list element, set to \code{"cytoframe"} by default.}
+\item{extract}{logical indicating whether the data should be extracted from
+the cytoset or GatingSet container to a cytoframe or GatingHierarchy
+respectively, set to TRUE by default.}
 }
 \value{
-a list of individual cytoframe or cytoset objects.
+a list of cytoset or GatingSet elements.
 }
 \description{
-Convert cytoset to a list of cytoframes or cytosets
+Convert cytoset or GatingSet to a list of its elements
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

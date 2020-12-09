@@ -1381,7 +1381,7 @@ cyto_transform.transformerList <- function(x,
       {
         
         # Extract flowFrame/flowSet for plotting
-        cyto_data <- cyto_data__extract(x)[[1]]
+        cyto_data <- cyto_data_extract(x)[[1]]
         
         # Convert to flowFrame for plotting
         cyto_data <- cyto_convert(cyto_data, "flowFrame")
@@ -2664,22 +2664,24 @@ cyto_save.flowFrame <- function(x,
 
 ## CYTO_LIST -------------------------------------------------------------------
 
-#' Convert cytoset to a list of cytoframes or cytosets
+#' Convert cytoset or GatingSet to a list of its elements
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.
-#' @param format either \code{"cytoframe"} or \code{"cytoset"} to indicate the
-#'   class of each list element, set to \code{"cytoframe"} by default.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param extract logical indicating whether the data should be extracted from
+#'   the cytoset or GatingSet container to a cytoframe or GatingHierarchy
+#'   respectively, set to TRUE by default.
 #'
-#' @return a list of individual cytoframe or cytoset objects.
+#' @return a list of cytoset or GatingSet elements.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @export   
+#' @export
 cyto_list <- function(x,
-                      format = "cytoframe") {
+                      extract = TRUE) {
   
   # CYTOFRAME
-  if(format == "cytoframe") {
+  if(extract) {
     structure(
       lapply(seq_along(x), function(z){
         x[[z]]
@@ -3804,7 +3806,7 @@ cyto_compensate.GatingSet <- function(x,
                                       ...) {
   
   # Extract flowSet
-  fs <- cyto_extract(x, parent = "root")
+  fs <- cyto_data_extract(x, parent = "root")[["root"]]
   
   # Spillover matrix supplied - matrix, data.frame or csv file
   if (!is.null(spillover)) {
