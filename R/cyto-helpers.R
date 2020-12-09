@@ -316,6 +316,11 @@ cyto_load <- function(path = ".",
     # CYTOSET
     x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
     
+    # ROW INDICES
+    lapply(seq_along(x), function(z){
+      BiocGenerics::rownames(x[[z]]) <- as.character(1:nrow(x[[z]]))
+    })
+    
     # BARCODING
     if (barcode) {
       x <- cyto_barcode(x)
@@ -2480,7 +2485,7 @@ cyto_save.flowSet <- function(x,
   x <- cyto_copy(x)
   
   # LIST OF FLOWFRAMES
-  fr_list <- cyto_convert(x, "list of flowFrames")
+  fr_list <- cyto_list(x)
   
   # LIST OF SPLIT FLOWFRAMES
   if (split == TRUE) {
@@ -2655,6 +2660,40 @@ cyto_save.flowFrame <- function(x,
   
   # RETURN DATA
   invisible(unlist(fr_list))
+}
+
+## CYTO_LIST -------------------------------------------------------------------
+
+#' Convert cytoset to a list of cytoframes or cytosets
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param format either \code{"cytoframe"} or \code{"cytoset"} to indicate the
+#'   class of each list element, set to \code{"cytoframe"} by default.
+#'
+#' @return a list of individual cytoframe or cytoset objects.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export   
+cyto_list <- function(x,
+                      format = "cytoframe") {
+  
+  # CYTOFRAME
+  if(format == "cytoframe") {
+    structure(
+      lapply(seq_along(x), function(z){
+        x[[z]]
+      }), 
+      names = cyto_names(x))
+  } else {
+    structure(
+      lapply(seq_along(x), function(z){
+        x[z]
+      }),
+      names = cyto_names(x)
+    )
+  }
+  
 }
 
 ## CYTO_SAMPLE -----------------------------------------------------------------
