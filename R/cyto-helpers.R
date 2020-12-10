@@ -225,6 +225,7 @@ cyto_export <- function(x,
 #'
 #' @importFrom flowCore identifier identifier<- parameters
 #' @importFrom flowWorkspace load_gs load_cytoset_from_fcs pData
+#' @importFrom stringi stri_rand_strings
 #'
 #' @examples
 #' # Load in CytoExploreRData to access data
@@ -317,8 +318,13 @@ cyto_load <- function(path = ".",
     x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
     
     # ROW INDICES
+    id <- stri_rand_strings(length(x), 3, "[a-z]") # covers 17000 samples
     lapply(seq_along(x), function(z){
-      BiocGenerics::rownames(x[[z]]) <- as.character(1:nrow(x[[z]]))
+      # UNIQUE ID + ROW INDEX
+      BiocGenerics::rownames(x[[z]]) <- paste0(
+        id[z],
+        1:nrow(x[[z]])
+      )
     })
     
     # BARCODING

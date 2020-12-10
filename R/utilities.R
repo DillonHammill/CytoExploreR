@@ -275,3 +275,11 @@ write_to_csv <- function(x,
   )
   
 }
+
+## EXTRACT NUMERIC FROM STRING -------------------------------------------------
+
+#' Extract numeric from string
+#' @noRd
+str_num <- function(x) {
+  as.numeric(gsub("[^0-9.-]+", "", as.character(x)))
+}

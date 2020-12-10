@@ -39,6 +39,7 @@ Imports:
   shiny, 
   shinythemes, 
   stats,
+  stringi,
   superheat (>= 1.0.0),
   tibble,
   tidyr,
