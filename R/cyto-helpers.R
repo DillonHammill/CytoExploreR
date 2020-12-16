@@ -317,15 +317,8 @@ cyto_load <- function(path = ".",
     # CYTOSET
     x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
     
-    # ROW INDICES
-    id <- stri_rand_strings(length(x), 3, "[a-z]") # covers 17000 samples
-    lapply(seq_along(x), function(z){
-      # UNIQUE ID + ROW INDEX
-      BiocGenerics::rownames(x[[z]]) <- paste0(
-        id[z],
-        1:nrow(x[[z]])
-      )
-    })
+    # BARCODE EVENTS - REQUIRED FOR CYTO_PLOT
+    x <- cyto_barcode(x, "events")
     
     # BARCODING
     if (barcode) {
@@ -3277,7 +3270,7 @@ cyto_beads_sample <- function(...){
 #' @return barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
 #'   \code{"Event ID"} column added and annotated.
 #'
-#' @importFrom flowWorkspace gs_cyto_data
+#' @importFrom flowWorkspace gs_cyto_data realize_view
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -3298,53 +3291,90 @@ cyto_barcode <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # CYTOSET
-  if(cyto_class(x, "GatingSet", TRUE)) {
-    cs <- cyto_data_extract(x,
-                            parent = "root")[["root"]]
-  } else {
-    cs <- x
-  }
+  cs <- cyto_data_extract(x,
+                          parent = "root",
+                          copy = FALSE,
+                          format = "cytoset")[[1]]
   
   # TYPE
-  if (type == "both") {
+  if (grepl("^b", type, ignore.case = TRUE)) {
     type <- c("samples", "events")
   }
   
   # PREPARE DATA ---------------------------------------------------------------
   
-  # SAMPLE ID COLUMN - ONLY IF NOT PRESENT
-  if ("samples" %in% type &
-      !"Sample ID" %in% cyto_channels(cs)) {
-    lapply(seq_along(cs), function(z) {
-      suppressWarnings(
-        cyto_cbind(cs[[z]],
-                   matrix(rep(z, cyto_stat_count(cs[[z]])),
-                          ncol = 1,
-                          dimnames = list(NULL, "Sample ID")))
+  # CHECK FOR SAMPLE IDs
+  if (any(grepl("^s", type, ignore.case = TRUE))){
+    barcode <- TRUE
+    # SAMPLE IDs EXIST - BACKWARDS COMPATIBLE
+    if(any(grepl("\\Sample.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
+      ans <- readline(
+        "Override existing sample IDs? (Y/N): "
       )
-    })
+      # REPLACE SAMPLE IDs
+      if(grepl("^y", ans, ignore.case = TRUE)) {
+        # REMOVE SAMPLE ID COLUMN
+        cs <- realize_view(cs[, -which(grepl("\\Sample.*\\ID$", 
+                                             cyto_channels(cs), 
+                                             ignore.case = TRUE))])
+      } else {
+        barcode <- FALSE
+      }
+    }
+    # BARCODE SAMPLES
+    if(barcode){
+      lapply(seq_along(cs), function(z) {
+        suppressWarnings(
+          cyto_cbind(cs[[z]],
+                     matrix(rep(z, cyto_stat_count(cs[[z]])),
+                            ncol = 1,
+                            dimnames = list(NULL, "Sample-ID")))
+        )
+      })
+    }
   }
   
-  # EVENT ID COLUMN - ONLY IF NOT PRESENT
-  if ("events" %in% type &
-      !"Event ID" %in% cyto_channels(cs)) {
-    total_events <- cyto_apply(cs, "cyto_stat_count")
-    total_events <- split(
-      seq_len(sum(total_events)),
-      rep(seq_len(length(cs)),
-          times = total_events
+  # CHECK FOR EVENT IDs
+  if (any(grepl("^e", type, ignore.case = TRUE))) {
+    barcode <- TRUE
+    # EVENT IDs EXIST
+    if(any(grepl("\\Event.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
+      ans <- readline(
+        "Override existing event IDs? (Y/N): "
       )
-    )
-    lapply(seq_along(cs), function(z) {
-      suppressWarnings(
-        cyto_cbind(cs[[z]],
-                   matrix(total_events[[z]],
-                          ncol = 1,
-                          dimnames = list(NULL, "Event ID")))
+      # REPLACE EVENT IDs
+      if(grepl("^y", ans, ignore.case = TRUE)) {
+        # REMOVE SAMPLE ID COLUMN
+        cs <- realize_view(cs[, -which(grepl("\\Event.*\\ID$", 
+                                             cyto_channels(cs), 
+                                             ignore.case = TRUE))])
+      } else {
+        barcode <- FALSE
+      }
+    }
+    # BARCODE EVENTS
+    if(barcode) {
+      total_events <- cyto_apply(cs, 
+                                 "cyto_stat_count",
+                                 input = "matrix",
+                                 copy = FALSE)
+      total_events <- split(
+        seq_len(sum(total_events)),
+        rep(seq_len(length(cs)),
+            times = total_events
+        )
       )
-    })
+      lapply(seq_along(cs), function(z) {
+        suppressWarnings(
+          cyto_cbind(cs[[z]],
+                     matrix(total_events[[z]],
+                            ncol = 1,
+                            dimnames = list(NULL, "Event-ID")))
+        )
+      })
+    }
   }
-  
+
   # RETURN GATINGSET
   if(cyto_class(x, "GatingSet", TRUE)) {
     gs_cyto_data(x) <- cs

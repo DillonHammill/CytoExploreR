@@ -68,7 +68,7 @@
 #' @noRd
 .cyto_plot_data <- function(x,
                             overlay = NULL,
-                            merge_by = NULL,
+                            merge_by = "name",
                             select = NULL,
                             display = 50000,
                             barcode = FALSE,
@@ -81,175 +81,73 @@
     stop("cyto_plot only supports cytoset objects!")
   }
   
-  # PREPARE BASE - LIST OF CYTOSETS --------------------------------------------
+  # BASE LAYER -----------------------------------------------------------------
   
-  # SELECT - BASE
+  # BASE - SELECT
   if(!is.null(select)) {
     x <- cyto_select(x, select)
   }
   
-  # NO GROUPING - BASE
-  if(is.null(group_by)) {
-    x <- structure(
-      lapply(seq_along(x), function(z){
-        x[z]
-      }),
-      names = cyto_names(x)
-    )
-    # GROUPING - BASE
-  } else {
-    # GROUP
-    x <- cyto_group_by(x,
-                       group_by = merge_by)
-  }
+  # OVERLAYS -------------------------------------------------------------------
   
-  # PREPARE OVERLAY - LIST OF CYTOSET LISTS ------------------------------------
-  
-  # OVERLAY SUPPLIED
+  # OVERLAY
   if(!is.null(overlay)) {
     
-    # OVERLAY - CYTOFRAME/CYTOSET
+    # OVERLAY - LIST
     if(!cyto_class(overlay, "list", TRUE)) {
       overlay <- list(overlay)
     }
     
-    # OVERLAY - SELECT
-    overlay <- lapply(overlay, function(z){
-      # CYTOFRAME
-      if(cyto_class(z, "flowFrame")) {
-        rep(
-          list(
-            cytoset(
-              structure(
-                list(z),
-                names = cyto_names(z)
-              )
-            )
-          ), length(x)
-        )
-        # CYTOSET
-      } else if(cyto_class(z, "flowSet")) {
-        # CYTOSET SAME LENGTH
-        if(length(z) == length(x)) {
-          # SELECT
-          if(!is.null(select)) {
-            z <- cyto_select(z, select)
-          }
-          # GROUPING
-          if(!is.null(merge_by)) {
-            cyto_group_by(z, merge_by)
-            # COERCE & SAMPLE
-          } else {
-            structure(
-              lapply(seq_along(z), function(w){
-                z[w]
-              }),
-              names = cyto_names(z)
-            )
-          }
-          # SINGULAR CYTOSET - ON EACH PLOT
-        } else if(length(z) == 1) {
-          rep(list(z), length(x))
-          # CYTOSET VARIABLE LENGTH (COERCE)  
-        } else {
-          # THIS IS SLOW BUT UNLIKELY USE CASE
-          rep(list(cytoset(list("merge" = as(z, "flowFrame")))), length(x))
+    # OVERLAY
+    overlay <- structure(
+      lapply(overlay, function(z){
+        # CYTOSETS ONLY
+        if(!cyto_class(z, "flowSet")) {
+          stop("cyto_plot only supports cytoset objects!")
         }
-        # UNSUPPORTED CLASS
-      } else {
-        stop("'overlay' only accepts objects of class cytoframe or cytoset.")
-      }
-    })
+        # SELECT
+        if(setequal(cyto_names(z), cyto_names(x))) {
+          z <- cyto_select(z, select)
+        }
+        # GROUPING - SAME GROUPS
+        if(setequal(names(cyto_groups(z, merge_by)), names(x))) {
+          cyto_group_by(z, merge_by)
+        # REPEAT ON EACH PLOT
+        } else {
+          structure(
+            rep(list(z), length(x)),
+            names = names(x)
+          )
+        }
+      }),
+      names = names(overlay)
+    )
     
+    # COMBINE & TRANSPOSE
+    x <- transpose(c(x, overlay))
   }
   
-  # COMBINE BASE & OVERLAY -----------------------------------------------------
-  
-  # TRANSPOSE - LIST PER PLOT
-  x <- transpose(c(x, overlay))
-  
   # COERCE & SAMPLE
-  # MATCHING IDENTIFIERS - PROPRORTIONAL SAMPLING
-  # NON-MATCHING IDENTIFIERS - SAME SAMPLING
-  x <- structure(
-    # Z LIST PER PLOT
-    lapply(x, function(z){
-      # BASE LAYER COUNT
-      base_cnt <- cyto_apply(
-        z[[1]],
-        "cyto_stat_count",
-        input = "matrix",
-        copy = FALSE
-      )
-      # BASE LAYER IDENTIFIERS
-      base_id <- cyto_names(z[[1]])
-      # W LAYER
+  structure(
+    lapply(x, function(w){
       structure(
-        lapply(seq_along(z), function(w){
-          # BASE LAYER
-          if(w == 1){
-            # COERCE & SAMPLE
-            cyto_coerce(
-              z[[w]],
-              display = display,
-              seed = seed,
-              format = "cytoset",
-              barcode = barcode
-            )
-            # LAYERS  
+        lapply(seq_along(w), function(q){
+          # BASE
+          if(q == 1) {
+            cyto_coerce(w[[q]],
+                        display = display,
+                        seed = 56,
+                        format = "cytoset",
+                        name = names(w)[q])
           } else {
-            # PROPORTIONAL SAMPLING
-            id <- cyto_names(z[[w]])
-            if(all(id %in% cyto_names(z[[1]]))) {
-              cnt <- cyto_apply(
-                z[[w]],
-                "cyto_stat_count",
-                input = "matrix",
-                copy = FALSE
-              )
-              # PERCENTAGE
-              if(display < 1) {
-                events <- display * 
-                  sum(cnt[id, "count"])/sum(base_cnt[id, "count"]) * 
-                  sum(base_cnt[, "count"])
-                # COUNT
-              } else if(display > 1) {
-                events <- display/sum(base_cnt[, "count"]) * 
-                  sum(cnt[id, "count"])/sum(base_cnt[id, "count"]) * 
-                  display
-                # NONE
-              } else {
-                events <- 1
-              }
-              # SAME SAMPLING  
-            } else {
-              # NONE
-              if(display == 1) {
-                events <- 1
-                # PERCENTAGE
-              }else if(display < 1) {
-                events <- display * sum(base_cnt[, "count"])
-                # COUNT
-              } else if(display > 1) {
-                evensts <- display
-              }
-            }
-            # COERCE
-            cyto_coerce(
-              z[[w]],
-              display = events,
-              seed = seed,
-              format = "cytoset",
-              barcode = barcode
-            )
+            
           }
-        }), names = names(z)
+        }),
+        names = names(w)
       )
-    }), names = names(x)
+    })
   )
   
-  # PREPARED DATA
-  return(x)
 }
 
 ## AXES ------------------------------------------------------------------------

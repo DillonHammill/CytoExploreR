@@ -1,6 +1,7 @@
 # CytoExploreR 1.0.9
 
 * `cyto_load()` now barcodes each event with an ID so that `cyto_plot()` can plot the exact same events when using `overlay`. This behavior is different to `flowWorkspace::load_cytoset_from_fcs()` which means that users will need to use the CytoExploreR `cyto_load()` or `cyto_setup()` APIs instead.
+* `cyto_barcode()` has been re-written to allow replacement of existing barcodes.
 * Directories are now excluded from the files read in by `cyto_load()`.
 * `cyto_stats_compute()` also has enhanced statistical capabilities with support added for standard deviation (SD), robust standard deviation (rSD), coefficient of variation (CV), robust coefficient of variation (rCV), quantile, area under curve (AUC) and range.
 * `cyto_stats_compute()` now accepts custom functions and experimental details can be optionally excluded from the output. Statistics that rely on density distributions now use the same bandwidth for each cytoframe.
