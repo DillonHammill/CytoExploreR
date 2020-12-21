@@ -249,6 +249,8 @@ cyto_gate_rename <- function(x,
 #'   gatingTemplate csv file with appropriate entries.
 #'
 #' @importFrom openCyto gs_add_gating_method
+#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace gs_pop_get_gate
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -278,10 +280,10 @@ cyto_gate_copy <- function(x,
   }
   
   # ALIAS
-  if (is.null(alias)) {
-    stop("Supply the name(s) of the gates to edit to 'alias'.")
-  } else if (!all(alias %in% c(nods_full, nodes_auto))) {
-    stop("Supplied alias does not exist in the GatingSet.")
+  if (is.null(copy)) {
+    stop("Supply the name of the reference node to 'copy'.")
+  } else if (!all(copy %in% c(nodes_full, nodes_auto))) {
+    stop("Reference node does not exist in the GatingSet.")
   }
   
   # MISSING GATINGTEMPLATE
@@ -294,6 +296,11 @@ cyto_gate_copy <- function(x,
     stop("Supply the name of the gatingTemplate to edit gate(s).")
   }
   
+  # GATINGTEMPLATE FILE EXTENSION
+  if (.empty(file_ext(gatingTemplate))) {
+    gatingTemplate <- paste0(gatingTemplate, ".csv")
+  }
+  
   # UPDATE GATINGTEMPLATE ------------------------------------------------------
   
   # NEW ENTRIES
@@ -303,6 +310,11 @@ cyto_gate_copy <- function(x,
         gs = x,
         parent = parent,
         alias = alias[z],
+        dims = paste(
+          parameters(
+            gs_pop_get_gate(x, copy[z])[[1]]
+          ),
+          collapse = ","),
         gating_method = "refGate",
         gating_args = copy[z]
       )
@@ -314,14 +326,17 @@ cyto_gate_copy <- function(x,
                         gt_entries)
   
   # LOAD GATINGTEMPLATE
-  gt <- read_from_csv(gatingTemplate)
+  gt <- read.csv(gatingTemplate, 
+                 header = TRUE)
   
   # UPDATE GATINGTEMPLATE
   gt <- rbind(gt, 
               gt_entries)
   
   # WRITE UPDATED GATINGTEMPLATE
-  write_to_csv(gt, gatingTemplate)
+  write.csv(gt, 
+            gatingTemplate, 
+            row.names = FALSE)
   
   # RETURN UPDATED GATINGSET 
   return(x)
