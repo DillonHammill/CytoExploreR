@@ -267,6 +267,8 @@ cyto_gate_rename <- function(x,
 #'   gatingTemplate csv file with appropriate entries.
 #'
 #' @importFrom openCyto gs_add_gating_method
+#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace gs_pop_get_gate
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -326,6 +328,11 @@ cyto_gate_copy <- function(x,
         gs = x,
         parent = parent,
         alias = alias[z],
+        dims = paste(
+          parameters(
+            gs_pop_get_gate(x, copy[z])
+            ),
+          collapse = ","),
         gating_method = "refGate",
         gating_args = copy[z]
       )
