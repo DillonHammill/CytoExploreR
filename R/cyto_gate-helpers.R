@@ -330,7 +330,7 @@ cyto_gate_copy <- function(x,
         alias = alias[z],
         dims = paste(
           parameters(
-            gs_pop_get_gate(x, copy[z])
+            gs_pop_get_gate(x, copy[z])[[1]]
             ),
           collapse = ","),
         gating_method = "refGate",
