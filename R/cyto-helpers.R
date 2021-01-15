@@ -2893,6 +2893,72 @@ cyto_sample.list <- function(x,
   return(x)
 }
 
+## CYTO_SAMPLE_N ---------------------------------------------------------------
+
+#' Compute sample number for each cytoframe in a cytoset
+#'
+#' This function is used within \code{cyto_coerce} and \code{cyto_plot} to
+#' compute the number of events to extract from each cytoframe in cytoset prior
+#' to coercion.
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param display can be either a numeric [0,1] or integer to indicate the
+#'   percentage or number of events to keep respectively.
+#' @param parent name of the parental population to extract from GatingHierarchy
+#'   or GatingSet objects.
+#'
+#' @return named vector containing the number of events to extract from each
+#'   cytoframe within the cytoset.
+#'
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'  system.file(
+#'    "extdata/Activation-GatingSet",
+#'    package = "CytoExploreRData"
+#'    )
+#'  )
+#'
+#'  # SAMPLE SIZE
+#'  cyto_sample_n(gs,
+#'  parent = "T Cells",
+#'  display = 50000)
+#'
+#' @export
+cyto_sample_n <- function(x,
+                          display = 1,
+                          parent = NULL) {
+  
+  # TOTAL EVENTS
+  cnts <- cyto_apply(x,
+                     "nrow",
+                     parent = parent,
+                     input = "matrix",
+                     copy = FALSE)
+  
+  # DISPLAY
+  if(display < 1) {
+    display <- display * sum(cnts[, 1])
+  }
+  
+  # SAMPLE EVENTS
+  table(
+    sample(
+      unlist(
+        lapply(seq_along(x), function(z){
+          rep(rownames(cnts)[z], cnts[z, 1])
+        })
+      ), display
+    )
+  )
+  
+}
+
 ## CYTO_SAMPLE_SIZE ------------------------------------------------------------
 
 #' Compute proportional sample sizes for cyto_plot layers
@@ -2997,10 +3063,9 @@ cyto_sample_size <- function(x,
 #'
 #' \code{cyto_coerce} is an efficient method for simultaneously coercing and
 #' downsampling elements of a \code{cytoset}. Basically, the individual
-#' \code{cytoframe} elements are sampled prior to coercion and then sampled
-#' again to obtain the exact number of events specified to \code{display}.
-#' \code{format} provides control over the format in which the coerced data
-#' should be returned.
+#' \code{cytoframe} elements are sampled prior to coercion using a combination
+#' of \code{cyto_sample_n} and \code{cyto_sample}. \code{format} provides
+#' control over the format in which the coerced data should be returned.
 #'
 #' @param x \code{\link[flowWorkspace:cytoset]{cytoset}}.
 #' @param display passed to \code{\link{cyto_sample}} to control the number of
@@ -3021,7 +3086,6 @@ cyto_sample_size <- function(x,
 #'   \code{cytoset}.
 #'
 #' @importFrom flowWorkspace flowFrame_to_cytoframe cytoset
-#' @importFrom flowCore exprs
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -3051,85 +3115,55 @@ cyto_coerce <- function(x,
                         name = NULL,
                         ...) {
   
+  # SAMPLE COUNTS
+  cnts <- cyto_sample_n(x,
+                        display = display)
   
-  # SAMPLING
-  if(display != 1) {
-    # SAMPLE COUNT
-    if(display > 1) {
-      # SAMPLE PERCENTAGE
-      sample <- display / sum(
-        cyto_apply(x,
-                   "nrow",
-                   input = "matrix",
-                   copy = FALSE)[, 1]
-      )
-      # SAMPLE BUFFER
-      sample <- sample + 0.02
-      # FUZZY SAMPLE
-      x <- cyto_sample(x,
-                       display = sample,
-                       seed = seed)
-      # BARCODE
-      if(barcode) {
-        x <- cyto_barcode(x)
-      }
-      # COERCE
-      if(length(x) > 1) {
-        x <- flowFrame_to_cytoframe(
-          as(x, "flowFrame")
-        )
-      } else {
-        x <- x[[1]]
-      }
-      # EXACT SAMPLE
-      x <- cyto_sample(x,
-                       display = display,
-                       seed = seed)
-    # SAMPLE PERCENTAGE
-    } else {
-      # PRECENT SAMPLE
-      x <- cyto_sample(x,
-                       display = display,
-                       seed = seed)
-      # BARCODE
-      if(barcode) {
-        x <- cyto_barcode(x)
-      }
-      # COERCE
-      if(length(x) > 1){
-        x <- flowFrame_to_cytoframe(
-          as(x, "flowFrame")
-        )
-      } else {
-        x <- x[[1]]
-      }
-    }
-  # NO SAMPLING
-  } else {
-    # BARCODE
-    if(barcode) {
-      x <- cyto_barcode(x)
-    }
-    if(length(x) > 1) {
-      x <- flowFrame_to_cytoframe(
-        as(x, "flowFrame")
-      )
-    } else {
-      x <- x[[1]]
-    }
+  # REMOVE EMPTY SAMPLES
+  if(any(cnts == 0)) {
+    x <- cyto_select(x, list("name" = names(cnts[cnts != 0])))
+    cnts <- cnts[cnts != 0]
   }
   
-  # FORMAT
-  switch(format,
-         matrix = exprs(x),
-         cytoframe = x,
-         cytoset = cytoset(
-            structure(
-              list(x),
-              names = name
-            )
-          )
-        )
+  # SAMPLING
+  x <- cytoset(
+    structure(
+      lapply(
+        cyto_names(x), 
+        function(z){
+          cyto_sample(x[[z]], 
+                      display = cnts[z], 
+                      seed = seed)
+        }
+      ),
+    names = cyto_names(x))
+  )
+
+  # BARCODE
+  if(barcode) {
+    cyto_barcode(x)
+  }
+  
+  # COERCE
+  if(length(x) == 1) {
+    x <- x[[1]]
+  } else {
+    x <- flowFrame_to_cytoframe(
+      as(x, "flowFrame")
+    )
+  }
+  
+  # # FORMAT 
+  # if(format == "cytoset") {
+  #   x <- cytoset(
+  #     structure(
+  #       list(x),
+  #       names = name # causes issues name is NULL by default
+  #     )
+  #   )
+  # }
+  
+  return(x)
   
 }
 

@@ -43,10 +43,9 @@ a sampled and coerced \code{matrix}, \code{cytoframe} or
 \description{
 \code{cyto_coerce} is an efficient method for simultaneously coercing and
 downsampling elements of a \code{cytoset}. Basically, the individual
-\code{cytoframe} elements are sampled prior to coercion and then sampled
-again to obtain the exact number of events specified to \code{display}.
-\code{format} provides control over the format in which the coerced data
-should be returned.
+\code{cytoframe} elements are sampled prior to coercion using a combination
+of \code{cyto_sample_n} and \code{cyto_sample}. \code{format} provides
+control over the format in which the coerced data should be returned.
 }
 \examples{
 library(CytoExploreRData)
