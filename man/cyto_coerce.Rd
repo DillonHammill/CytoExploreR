@@ -10,7 +10,7 @@ cyto_coerce(
   seed = NULL,
   barcode = FALSE,
   format = "cytoset",
-  name = NULL,
+  name = "merge",
   ...
 )
 }
@@ -32,7 +32,7 @@ control the format of the returned data, set to \code{"cytoset"} by
 default.}
 
 \item{name}{character string indicating the name to use for the coerced
-object.}
+object, set to \code{"merge"} by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_sample}}.}
 }

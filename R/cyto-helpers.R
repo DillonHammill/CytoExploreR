@@ -3079,7 +3079,7 @@ cyto_sample_size <- function(x,
 #'   control the format of the returned data, set to \code{"cytoset"} by
 #'   default.
 #' @param name character string indicating the name to use for the coerced
-#'   object.
+#'   object, set to \code{"merge"} by default.
 #' @param ... additional arguments passed to \code{\link{cyto_sample}}.
 #'
 #' @return a sampled and coerced \code{matrix}, \code{cytoframe} or
@@ -3112,19 +3112,21 @@ cyto_coerce <- function(x,
                         seed = NULL,
                         barcode = FALSE,
                         format = "cytoset",
-                        name = NULL,
+                        name = "merge",
                         ...) {
+  # IDENTIFIERS
+  ids <- cyto_names(x)
   
   # SAMPLE COUNTS
   cnts <- cyto_sample_n(x,
                         display = display)
   
   # REMOVE EMPTY SAMPLES
-  if(any(cnts == 0)) {
-    x <- cyto_select(x, list("name" = names(cnts[cnts != 0])))
-    cnts <- cnts[cnts != 0]
+  if(any(!names(cnts) %in% ids)) {
+    x <- cyto_select(x,
+                     list("name" = ids[ids %in% names(cnts)]))
   }
-  
+
   # SAMPLING
   x <- cytoset(
     structure(
@@ -3153,15 +3155,15 @@ cyto_coerce <- function(x,
     )
   }
   
-  # # FORMAT 
-  # if(format == "cytoset") {
-  #   x <- cytoset(
-  #     structure(
-  #       list(x),
-  #       names = name # causes issues name is NULL by default
-  #     )
-  #   )
-  # }
+  # FORMAT
+  if(format == "cytoset") {
+    x <- cytoset(
+      structure(
+        list(x),
+        names = name
+      )
+    )
+  }
   
   return(x)
   
