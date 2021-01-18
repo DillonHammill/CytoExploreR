@@ -4,7 +4,7 @@
 \alias{cyto_sample_n}
 \title{Compute sample number for each cytoframe in a cytoset}
 \usage{
-cyto_sample_n(x, display = 1, parent = NULL)
+cyto_sample_n(x, display = 1, parent = NULL, seed = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
@@ -16,6 +16,9 @@ percentage or number of events to keep respectively.}
 
 \item{parent}{name of the parental population to extract from GatingHierarchy
 or GatingSet objects.}
+
+\item{seed}{value used to \code{set.seed()} internally. Setting a value for
+seed will return the same result with each run.}
 }
 \value{
 named vector containing the number of events to extract from each
