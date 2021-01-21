@@ -2949,6 +2949,11 @@ cyto_sample_n <- function(x,
     display <- display * sum(cnts[, 1])
   }
   
+  # DISPLAY TOO LARGE
+  if(display > sum(cnt[, 1])) {
+    display <- sum(cnt[, 1])
+  }
+  
   # SEED
   if(!is.null(seed)) {
     set.seed(seed)
