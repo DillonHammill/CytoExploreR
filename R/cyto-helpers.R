@@ -2233,8 +2233,14 @@ cyto_merge_by <- function(x,
   # CONVERT EACH GROUP TO MERGED CYTOSET
   structure(lapply(seq_along(cs_list), function(z){
     # CONVERT TO MERGED CYTOSET
-    cytoset(structure(list(flowFrame_to_cytoframe(as(cs_list[z], "flowFrame"))),
-                      names = names(cs_list)[z]))
+    cytoset(
+      structure(
+        list(
+          flowFrame_to_cytoframe(as(cs_list[z], "flowFrame"))
+          ),
+          names = names(cs_list)[z]
+        )
+      )
   }), names = names(cs_list))
   
 }
