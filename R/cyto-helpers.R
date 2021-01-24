@@ -2236,7 +2236,7 @@ cyto_merge_by <- function(x,
     cytoset(
       structure(
         list(
-          flowFrame_to_cytoframe(as(cs_list[z], "flowFrame"))
+          as(cs_list[z], "cytoframe")
           ),
           names = names(cs_list)[z]
         )
@@ -2244,6 +2244,43 @@ cyto_merge_by <- function(x,
   }), names = names(cs_list))
   
 }
+
+## CYTOFRAME COERCION METHODS --------------------------------------------------
+
+# These are wrappers for cytoframe coercion methods that are currently 
+# missing in flowWorkspace (not exported to avoid conflict with flowWorkspace).
+
+#' Coerce cytoset to cytoframe
+#' 
+#' @importFrom methods setAs
+#' @importFrom flowWorkspace flowFrame_to_cytoframe
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs("cytoset",
+      "cytoframe",
+      function(from){
+        flowFrame_to_cytoframe(
+          as(from, "flowFrame")
+        )
+      })
+
+#' Coerce flowSet to cytoframe
+#' 
+#' @importFrom methods setAs
+#' @importFrom flowWorkspace flowFrame_to_cytoframe
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs("flowSet",
+      "cytoframe",
+      function(from){
+        flowFrame_to_cytoframe(
+          as(from, "flowFrame")
+        )
+      })
 
 ## CYTO_SPLIT ------------------------------------------------------------------
 
