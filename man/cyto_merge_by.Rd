@@ -10,6 +10,7 @@ cyto_merge_by(
   merge_by = "all",
   select = NULL,
   barcode = TRUE,
+  format = "cytoset",
   ...
 )
 }
@@ -36,6 +37,9 @@ be comma separated and wrapped in a list. Refer to
 \code{\link{cyto_barcode}} prior to grouping and merging samples, set to
 TRUE by default. Barcoding helps \code{\link{cyto_sample}} to appropriately
 sample events based on the number of merged samples.}
+
+\item{format}{either \code{"cytoframe"} or \code{"cytoset"} to indicate the
+desired format for merged groups, set to \code{"cytoset"} by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_barcode}}.}
 }

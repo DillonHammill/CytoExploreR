@@ -2154,6 +2154,8 @@ cyto_group_by <- function(x,
 #'   \code{\link{cyto_barcode}} prior to grouping and merging samples, set to
 #'   TRUE by default. Barcoding helps \code{\link{cyto_sample}} to appropriately
 #'   sample events based on the number of merged samples.
+#' @param format either \code{"cytoframe"} or \code{"cytoset"} to indicate the
+#'   desired format for merged groups, set to \code{"cytoset"} by default.
 #' @param ... additional arguments passed to \code{\link{cyto_barcode}}.
 #'
 #' @return list of flowFrames merged by the grouping variables specified by
@@ -2174,7 +2176,7 @@ cyto_group_by <- function(x,
 #'
 #' # Merge samples by 'OVAConc'
 #' cs_list <- cyto_merge_by(gs, "OVAConc")
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_group_by}}
@@ -2188,6 +2190,7 @@ cyto_merge_by <- function(x,
                           merge_by = "all",
                           select = NULL,
                           barcode = TRUE,
+                          format = "cytoset",
                           ...) {
   
   # EXTRACT DATA ---------------------------------------------------------------
@@ -2221,7 +2224,6 @@ cyto_merge_by <- function(x,
   # ATTEMPT SELECTION OR RETURN ALL SAMPLES
   if (!is.null(select)) {
     cs_list <- lapply(cs_list, function(z) {
-      # Select or return all samples if criteria not met
       tryCatch(cyto_select(z, select), error = function(e) {
         z
       })
@@ -2231,17 +2233,29 @@ cyto_merge_by <- function(x,
   # MERGING --------------------------------------------------------------------
   
   # CONVERT EACH GROUP TO MERGED CYTOSET
-  structure(lapply(seq_along(cs_list), function(z){
-    # CONVERT TO MERGED CYTOSET
-    cytoset(
-      structure(
-        list(
-          as(cs_list[z], "cytoframe")
-          ),
-          names = names(cs_list)[z]
+  if(grepl("s", format, ignore.case = TRUE)) {
+    structure(
+      lapply(seq_along(cs_list), function(z){
+        cytoset(
+          structure(
+            list(
+              as(cs_list[[z]], "cytoframe")
+            ),
+            names = names(cs_list)[z]
+          )
         )
+      }), 
+      names = names(cs_list)
+    )
+  # CONVERT EACH GROUP TO CYTOFRAME
+  } else {
+    structure(
+      lapply(seq_along(cs_list), function(z){
+        as(cs_list[[z]], "cytoframe")
+      }),
+      names = names(cs_list)
       )
-  }), names = names(cs_list))
+  }
   
 }
 
