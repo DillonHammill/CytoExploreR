@@ -1,5 +1,6 @@
 # CytoExploreR 1.0.9
 
+* `cyto_merge_by` has gained a new `format` argument to control how grouped data is returned. 
 * `cyto_load()` now barcodes each event with an ID so that `cyto_plot()` can plot the exact same events when using `overlay`. This behavior is different to `flowWorkspace::load_cytoset_from_fcs()` which means that users will need to use the CytoExploreR `cyto_load()` or `cyto_setup()` APIs instead.
 * `cyto_barcode()` has been re-written to allow replacement of existing barcodes.
 * Directories are now excluded from the files read in by `cyto_load()`.

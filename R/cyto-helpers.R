@@ -2211,9 +2211,6 @@ cyto_merge_by <- function(x,
   cs_list <- cyto_group_by(x, 
                            group_by = merge_by)
   
-  # GROUPS
-  grps <- names(cs_list)
-  
   # COMBINED EVENTS
   if ("all" %in% names(cs_list)) {
     names(cs_list)[which("all" %in% names(cs_list))] <- "Combined Events"
@@ -2232,26 +2229,30 @@ cyto_merge_by <- function(x,
   
   # MERGING --------------------------------------------------------------------
   
-  # CONVERT EACH GROUP TO MERGED CYTOSET
+  # CONVERT EACH GROUP TO MERGED CYTOSET/FLOWSET
   if(grepl("s", format, ignore.case = TRUE)) {
     structure(
       lapply(seq_along(cs_list), function(z){
-        cytoset(
-          structure(
-            list(
-              as(cs_list[[z]], "cytoframe")
-            ),
-            names = names(cs_list)[z]
+        do.call(
+          cyto_class(cs_list[[z]]), # flowSet() or cytoset()
+          list(
+            structure(
+              list(
+                as(cs_list[[z]], 
+                   cyto_class(cs_list[[z]][[1]])) # flowFrame or cytoframe
+              ),
+              names = names(cs_list)[z]
+            )
           )
         )
-      }), 
+      }),
       names = names(cs_list)
     )
   # CONVERT EACH GROUP TO CYTOFRAME
   } else {
     structure(
       lapply(seq_along(cs_list), function(z){
-        as(cs_list[[z]], "cytoframe")
+        as(cs_list[[z]], cyto_class(cs_list[[z]][[1]]))
       }),
       names = names(cs_list)
       )
