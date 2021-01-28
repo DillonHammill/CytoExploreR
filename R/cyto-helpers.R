@@ -2234,12 +2234,12 @@ cyto_merge_by <- function(x,
     structure(
       lapply(seq_along(cs_list), function(z){
         do.call(
-          cyto_class(cs_list[[z]]), # flowSet() or cytoset()
+          cyto_class(cs_list[[z]]), # flowSet() / cytoset()
           list(
             structure(
               list(
                 as(cs_list[[z]], 
-                   cyto_class(cs_list[[z]][[1]])) # flowFrame or cytoframe
+                   cyto_class(cs_list[[z]][[1]])) # flowFrame / cytoframe
               ),
               names = names(cs_list)[z]
             )
@@ -2252,7 +2252,7 @@ cyto_merge_by <- function(x,
   } else {
     structure(
       lapply(seq_along(cs_list), function(z){
-        as(cs_list[[z]], cyto_class(cs_list[[z]][[1]]))
+        as(cs_list[[z]], cyto_class(cs_list[[z]][[1]])) # flowFrame / cytoframe
       }),
       names = names(cs_list)
       )
