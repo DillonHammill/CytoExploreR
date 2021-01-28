@@ -3462,20 +3462,21 @@ cyto_barcode <- function(x,
     }
     # BARCODE EVENTS
     if(barcode) {
-      total_events <- cyto_apply(cs, 
-                                 "cyto_stat_count",
-                                 input = "matrix",
-                                 copy = FALSE)
-      total_events <- split(
-        seq_len(sum(total_events)),
-        rep(seq_len(length(cs)),
-            times = total_events
-        )
-      )
+      # EVENT IDs
+      cnt <- 0
+      event_ids <- lapply(seq_along(cs), function(z){
+        if(nrow(cs[[z]]) == 0) {
+           return(NA)
+        } else {
+          ids <- seq(cnt + 1, cnt + nrow(cs[[z]]))
+          cnt <<- ids[length(ids)]
+          return(ids)
+        }
+      })
       lapply(seq_along(cs), function(z) {
         suppressWarnings(
           cyto_cbind(cs[[z]],
-                     matrix(total_events[[z]],
+                     matrix(event_ids[[z]],
                             ncol = 1,
                             dimnames = list(NULL, "Event-ID")))
         )
