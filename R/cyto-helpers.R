@@ -2966,8 +2966,6 @@ cyto_sample.list <- function(x,
 #'   percentage or number of events to keep respectively.
 #' @param parent name of the parental population to extract from GatingHierarchy
 #'   or GatingSet objects.
-#' @param seed value used to \code{set.seed()} internally. Setting a value for
-#'   seed will return the same result with each run.
 #'
 #' @return named vector containing the number of events to extract from each
 #'   cytoframe within the cytoset.
@@ -2992,8 +2990,7 @@ cyto_sample.list <- function(x,
 #' @export
 cyto_sample_n <- function(x,
                           display = 1,
-                          parent = NULL,
-                          seed = NULL) {
+                          parent = NULL) {
   
   # COUNTS
   counts <- cyto_apply(x,
@@ -3014,11 +3011,6 @@ cyto_sample_n <- function(x,
   # DISPLAY - COUNT
   if(display <= 1) {
     display <- display * total_count
-  }
-  
-  # SEED
-  if(!is.null(seed)) {
-    set.seed(seed)
   }
 
   # DISPLAY - FREQ
