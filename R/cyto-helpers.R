@@ -2995,21 +2995,25 @@ cyto_sample_n <- function(x,
                           parent = NULL,
                           seed = NULL) {
   
-  # TOTAL EVENTS
-  cnts <- cyto_apply(x,
-                     "nrow",
-                     parent = parent,
-                     input = "matrix",
-                     copy = FALSE)
+  # COUNTS
+  counts <- cyto_apply(x,
+                       "nrow",
+                       parent = parent,
+                       input = "matrix",
+                       copy = FALSE)
   
-  # DISPLAY
-  if(display < 1) {
-    display <- display * sum(cnts[, 1])
-  }
+  # FORMAT
+  counts <- structure(
+    counts[, 1, drop = TRUE],
+    names = rownames(counts)
+    )
   
-  # DISPLAY TOO LARGE
-  if(display > sum(cnt[, 1])) {
-    display <- sum(cnt[, 1])
+  # TOTAL COUNT
+  total_count <- sum(counts)
+  
+  # DISPLAY - COUNT
+  if(display <= 1) {
+    display <- display * total_count
   }
   
   # SEED
@@ -3017,16 +3021,29 @@ cyto_sample_n <- function(x,
     set.seed(seed)
   }
 
-  # SAMPLE
-  table(
-    sample(
-      unlist(
-        lapply(seq_along(x), function(z){
-          rep(rownames(cnts)[z], cnts[z, 1])
-        })
-      ), display
-    )
-  )
+  # DISPLAY - FREQ
+  display_freq <- display / total_count
+  
+  # APPROX COUNTS
+  sample_counts <- ceiling(display_freq * counts)
+  sample_total <- sum(sample_counts)
+  
+  # EXACT COUNTS - REMOVE EXCESS EVENTS
+  # ASSUME EXCESS <= LENGTH(X)
+  excess <- sample_total - display
+  for(i in seq_along(sample_counts)) {
+    if(excess > 0) {
+      if(sample_counts[i] > 0) {
+        excess <- excess - 1
+        sample_counts[i] <- sample_counts[i] - 1
+      }
+    } else {
+      break()
+    }
+  }
+  
+  # SAMPLE COUNTS
+  return(sample_counts)
   
 }
 
