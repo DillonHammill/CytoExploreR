@@ -5152,7 +5152,7 @@ cyto_apply.list <- function(x,
 #' @param cols matrix of columns to be added to \code{x} can be supplied in a
 #'   list for \code{cytoset} method.
 #'
-#' @importFrom flowWorkspace cf_append_cols realize_view
+#' @importFrom flowWorkspace cf_append_cols realize_view cf_is_subsetted
 #' @importFrom flowCore fr_append_cols
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
