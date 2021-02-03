@@ -3021,16 +3021,13 @@ cyto_sample_n <- function(x,
   sample_total <- sum(sample_counts)
   
   # EXACT COUNTS - REMOVE EXCESS EVENTS
-  # ASSUME EXCESS <= LENGTH(X)
   excess <- sample_total - display
-  for(i in seq_along(sample_counts)) {
-    if(excess > 0) {
-      if(sample_counts[i] > 0) {
-        excess <- excess - 1
-        sample_counts[i] <- sample_counts[i] - 1
-      }
-    } else {
-      break()
+  sample_ind <- which(sample_counts != 0)
+  for(i in seq_len(excess)) {
+    ind <- sample(sample_ind, 1)
+    sample_counts[ind] <- sample_counts[ind] - 1
+    if(sample_counts[ind] == 0) {
+      sample_ind <- sample_ind[-match(names(ind), names(sample_ind))]
     }
   }
   
