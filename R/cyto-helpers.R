@@ -1669,7 +1669,7 @@ cyto_data_extract <- function(x,
     } else if(format == "matrix") {
       structure(
         lapply(cyto_names(cs), function(z){
-          m <- exprs(cs[[z]])
+          m <- cyto_exprs(cs[[z]])
           # MARKERS
           if(markers){
             colnames(m) <- unname(cyto_markers_extract(cs[[z]], colnames(m)))
@@ -1688,6 +1688,82 @@ cyto_data_extract <- function(x,
 #' @export
 cyto_extract <- function(...){
   .Defunct("cyto_data_extract")
+}
+
+## CYTO_EXPRS ------------------------------------------------------------------
+
+#' Extract raw data matrix from cytoframe or cytoset
+#'
+#' A convenient wrapper around \code{\link[flowCore:exprs]{exprs}} which
+#' simplifies extraction of raw data from certain parameters. \code{cyto_exprs}
+#' is primarily for use within CytoExploreR and users should instead use the
+#' \code{cyto_data_extract} API.
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param channels vector of channel or marker names for which raw data should
+#'   be extracted.
+#' @param drop logical to control whether single channel extractions should be
+#'   converted to vectors by default, set to TRUE by default.
+#' @param ... additional arguments passed to data extraction from matrix.
+#'
+#' @return matrix or list of matrices containing raw data.
+#'
+#' @importFrom flowCore exprs
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' #' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'                           
+#' # cytoset
+#' cs <- cyto_data_extract(gs, "T Cells")[["T Cells"]]
+#' 
+#' # matrices
+#' cyto_exprs(cs, c("CD44", "CD69"))
+#'
+#' @seealso \code{\link{cyto_data_extract}}
+#'
+#' @name cyto_exprs
+NULL
+
+#' @rdname cyto_exprs
+#' @export
+cyto_exprs <- function(x,...) {
+  UseMethod("cyto_exprs")
+}
+
+#' @rdname cyto_exprs
+#' @export
+cyto_exprs.flowFrame <- function(x, 
+                                 channels = NULL,
+                                 drop = TRUE,
+                                 ...) {
+  exprs(x)[, 
+           cyto_channels_extract(x, channels), 
+           drop = drop, 
+           ...]
+}
+
+#' @rdname cyto_exprs
+#' @export
+cyto_exprs.flowSet <- function(x,
+                               channels = NULL,
+                               drop = TRUE,
+                               ...) {
+  structure(
+    lapply(seq_along(x), function(z){
+      cyto_exprs(x[[z]],
+                 channels = channels,
+                 drop = drop,
+                 ...)
+    }),
+    names = cyto_names(x)
+  )
 }
 
 ## CYTO_FILTER -----------------------------------------------------------------
@@ -1712,22 +1788,19 @@ cyto_extract <- function(...){
 #' gs <- load_gs(system.file("extdata/Activation-GatingSet",
 #'                           package = "CytoExploreRData"))
 #'
-#' # Load in CytoExploreRData to access data
-#' library(CytoExploreRData)
-#'
 #' # Look at experiment details
-#' cyto_details(Activation)
+#' cyto_details(gs)
 #'
 #' # Select Stim-C samples with 0 and 500 nM OVA concentrations
 #' fs <- cyto_filter(
-#'   Activation,
+#'   gs,
 #'   Treatment == "Stim-C",
 #'   OVAConc %in% c(0, 500)
 #' )
 #'
 #' # Select Stim-A and Stim-C treatment groups
 #' fs <- cyto_filter(
-#'   Activation,
+#'   gs,
 #'   Treatment %in% c("Stim-A", "Stim-C")
 #' )
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -3036,104 +3109,6 @@ cyto_sample_n <- function(x,
   
 }
 
-## CYTO_SAMPLE_SIZE ------------------------------------------------------------
-
-#' Compute proportional sample sizes for cyto_plot layers
-#' 
-#' @param x cytometry object or list of cytometry objects.
-#' @param display desired number of events for base layer.
-#' 
-#' @return event number as counts.
-#' 
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
-#' @noRd
-cyto_sample_size <- function(x,
-                             display = 1) {
-  
-  # CYTOFRAME/CYTOSET LIST
-  if(cyto_class(x, "list", TRUE)) {
-    # SINGULAR CYTOSET LIST -> CYTOFRAME LIST
-    if(all(LAPPLY(x, cyto_class, "flowSet"))) {
-      x <- structure(
-        lapply(x, `[[`, 1),
-        names = cyto_names(x)
-      )
-    } else {
-      names(x) <- cyto_names(x)
-    }
-    # BARCODED FLOWFRAMES
-    if (any(LAPPLY(x, function(z) {
-      "Sample ID" %in% cyto_channels(z)
-    }))) {
-      # SAMPLES PER FLOWFRAME - ASSUME FLOWFRAME IF NO BARCODE
-      samples <- LAPPLY(x, function(z) {
-        tryCatch(length(unique(exprs(z)[, "Sample ID"])),
-                 error = function(e) {
-                   1
-                 }
-        )
-      })
-      # EVENTS PER SAMPLE - EACH LAYER
-      events_per_sample <- LAPPLY(seq_len(length(x)), function(z) {
-        nrow(x[[z]]) / samples[z]
-      })
-      # EVENTS RATIO - BASE LAYER REFERENCE
-      events_ratio <- events_per_sample / events_per_sample[1]
-      # SCALE SAMPLING EVENTS USING BASE LAYER AS REFERENCE
-      if (display <= 1) {
-        events_to_sample <- rep(display * nrow(x[[1]]), length(x)) *
-          events_ratio
-      } else {
-        events_to_sample <- rep(display, length(x)) *
-          events_ratio
-      }
-      display <- events_to_sample
-    } else {
-      # PERCENTAGE SAMPLING
-      if (display <= 1) {
-        display <- display * LAPPLY(x, nrow)
-      # COUNT SAMPLING
-      } else if (display > 1) {
-        # Identifiers
-        nms <- names(x)
-        ind <- seq_len(length(nms))
-        # Sampling
-        display <- unlist(lapply(ind, function(z) {
-          # Base layer sampled as per usual
-          if (z == 1) {
-            return(display)
-          } else {
-            # Identifier matches base - sample size decreased
-            if (nms[z] == nms[1]) {
-              # Number of events in base layer
-              base_events <- nrow(x[[1]])
-              # Number of events in overlay
-              overlay_events <- nrow(x[[z]])
-              # Proportion of overlay relative to base
-              prop <- overlay_events / base_events
-              # Update display prop * display
-              display <- ceiling(prop * display)
-              # Sampling
-              return(display)
-              # Identifiers don't match - separate samples - same sampling
-            } else {
-              return(display)
-            }
-          }
-        }))
-      }
-    }
-  # CYTOFRAME/CYTOSET OR GATINGHIERARCHY/GATINGSET
-  } else {
-    display <- rep(display, length(x))
-  }
-  
-  # DISPLAY
-  return(display)
-  
-}
-
 ## CYTO_COERCE -----------------------------------------------------------------
 
 #' Coerce cytoframes in a cytoset
@@ -3196,8 +3171,7 @@ cyto_coerce <- function(x,
   
   # SAMPLE COUNTS
   cnts <- cyto_sample_n(x,
-                        display = display,
-                        seed = seed)
+                        display = display)
   
   # REMOVE EMPTY SAMPLES
   if(any(!names(cnts) %in% ids)) {
