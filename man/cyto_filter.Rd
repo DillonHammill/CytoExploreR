@@ -28,22 +28,19 @@ library(CytoExploreRData)
 gs <- load_gs(system.file("extdata/Activation-GatingSet",
                           package = "CytoExploreRData"))
 
-# Load in CytoExploreRData to access data
-library(CytoExploreRData)
-
 # Look at experiment details
-cyto_details(Activation)
+cyto_details(gs)
 
 # Select Stim-C samples with 0 and 500 nM OVA concentrations
 fs <- cyto_filter(
-  Activation,
+  gs,
   Treatment == "Stim-C",
   OVAConc \%in\% c(0, 500)
 )
 
 # Select Stim-A and Stim-C treatment groups
 fs <- cyto_filter(
-  Activation,
+  gs,
   Treatment \%in\% c("Stim-A", "Stim-C")
 )
 }
