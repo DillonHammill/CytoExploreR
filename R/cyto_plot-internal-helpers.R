@@ -265,14 +265,14 @@
           # SOME NEW CYTOFRAME(S)
           } else {
             # COMPUTE TOTAL NUMBER OF EVENTS REQUIRED FROM NEW CYTOFRAMES
-            n <- 1 - (sum(cyto_apply(cs, 
+            n <- (1 - (sum(cyto_apply(cs, 
                                      "nrow", 
                                      input = "matrix", 
                                      copy = FALSE)[, 1])/
                         sum(cyto_apply(cs[names(m[!m])],
                                        "nrow",
                                        input = "matrix",
-                                       copy = FALSE))) *
+                                       copy = FALSE)))) *
               sum(LAPPLY(i[[w]][names(m[m])], `[[`, "sample"))
             # COMPUTE SAMPLE SIZES FOR NEW CYTOFRAMES
             n <- cyto_sample_n(cs[names(m[!m])],
