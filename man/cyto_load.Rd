@@ -34,7 +34,7 @@ using \code{cyto_barcode}, set to FALSE by default.}
 dropped from the returned cytoset, set to FALSE by default. See
 \code{\link{cyto_channels_restrict}}.}
 
-\item{...}{additional arguments passed to \code{load_cytoset_from_fcs}.}
+\item{...}{additional arguments passed to \code{\link{cyto_load}}.}
 }
 \value{
 object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -49,7 +49,6 @@ also a wrapper around \code{\link[flowWorkspace:save_gs]{load_gs}} to load
 saved GatingSet objects.
 }
 \examples{
-
 # Load in CytoExploreRData to access data
 library(CytoExploreRData)
 
@@ -62,6 +61,7 @@ cs <- cyto_load(path)
 
 # cs is a cytoset
 class(cs)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
