@@ -225,7 +225,6 @@ cyto_export <- function(x,
 #'
 #' @importFrom flowCore identifier identifier<- parameters
 #' @importFrom flowWorkspace load_gs load_cytoset_from_fcs pData
-#' @importFrom stringi stri_rand_strings
 #'
 #' @examples
 #' # Load in CytoExploreRData to access data
