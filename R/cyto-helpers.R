@@ -1742,10 +1742,18 @@ cyto_exprs.flowFrame <- function(x,
                                  channels = NULL,
                                  drop = TRUE,
                                  ...) {
-  exprs(x)[, 
-           cyto_channels_extract(x, channels), 
-           drop = drop, 
-           ...]
+  if(is.null(channels)) {
+    exprs(x)[, 
+             , 
+             drop = drop,
+             ...]
+  } else {
+    exprs(x)[, 
+             cyto_channels_extract(x, channels), 
+             drop = drop, 
+             ...]
+  }
+
 }
 
 #' @rdname cyto_exprs
@@ -3080,6 +3088,11 @@ cyto_sample_n <- function(x,
   # TOTAL COUNT
   total_count <- sum(counts)
   
+  # DISPLAY CANNOT BE LARGER THAN TOTAL COUNT
+  if(display > 1 & display > total_count) {
+    display <- total_count
+  }
+  
   # DISPLAY - COUNT
   if(display <= 1) {
     display <- display * total_count
@@ -3357,7 +3370,7 @@ cyto_beads_sample <- function(...){
 #' @return barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
 #'   \code{"Event ID"} column added and annotated.
 #'
-#' @importFrom flowWorkspace gs_cyto_data realize_view
+#' @importFrom flowWorkspace gs_cyto_data realize_view cytoset
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -3410,14 +3423,19 @@ cyto_barcode <- function(x,
     }
     # BARCODE SAMPLES
     if(barcode){
-      lapply(seq_along(cs), function(z) {
-        suppressWarnings(
-          cyto_cbind(cs[[z]],
-                     matrix(rep(z, cyto_stat_count(cs[[z]])),
-                            ncol = 1,
-                            dimnames = list(NULL, "Sample-ID")))
+      cs <- cytoset(
+        structure(
+          lapply(seq_along(cs), function(z) {
+            suppressWarnings(
+              cyto_cbind(cs[[z]],
+                         matrix(rep(z, cyto_stat_count(cs[[z]])),
+                                ncol = 1,
+                                dimnames = list(NULL, "Sample-ID")))
+            )
+          }),
+          names = cyto_names(cs)
         )
-      })
+      )
     }
   }
   
@@ -3452,14 +3470,19 @@ cyto_barcode <- function(x,
           return(ids)
         }
       })
-      lapply(seq_along(cs), function(z) {
-        suppressWarnings(
-          cyto_cbind(cs[[z]],
-                     matrix(event_ids[[z]],
-                            ncol = 1,
-                            dimnames = list(NULL, "Event-ID")))
+      cs <- cytoset(
+        structure(
+          lapply(seq_along(cs), function(z) {
+            suppressWarnings(
+              cyto_cbind(cs[[z]],
+                         matrix(event_ids[[z]],
+                                ncol = 1,
+                                dimnames = list(NULL, "Event-ID")))
+            )
+          }),
+          names = cyto_names(cs)
         )
-      })
+      )
     }
   }
 
