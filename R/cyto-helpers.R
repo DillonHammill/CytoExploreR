@@ -309,7 +309,7 @@ cyto_load <- function(path = ".",
     }
     
     # SORTED FILE PATHS
-    if (sort) {
+    if (sort & length(files) > 1) {
       files <- file_sort(files)
     }
     
