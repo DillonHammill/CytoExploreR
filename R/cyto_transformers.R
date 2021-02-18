@@ -78,15 +78,15 @@ cyto_transformer_log.GatingSet <- function(x,
                                            axes_limits = "machine", ...){
   
   # Extract data
-  x <- cyto_extract(x, 
-                    parent = parent, 
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent, 
+                         copy = TRUE)[[1]]
   
   # Select data
   x <- cyto_select(x, select)
   
   # Coerce to flowFrame
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_log(x,
@@ -115,9 +115,9 @@ cyto_transformer_log.GatingHierarchy <- function(x,
                                                  axes_limits = "machine", ...){
   
   # Extract data
-  x <- cyto_extract(x, 
-                    parent = parent, 
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent, 
+                         copy = TRUE)[[1]]
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_log(x,
@@ -154,7 +154,7 @@ cyto_transformer_log.flowSet <- function(x,
   x <- cyto_select(x, select)
   
   # FLOWFRANE
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_log(
@@ -332,15 +332,15 @@ cyto_transformer_arcsinh.GatingSet <- function(x,
                                                axes_limits = "machine", ...) {
   
   # EXTRACT & COPY
-  x <- cyto_extract(x, 
-                    parent = parent, 
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent, 
+                         copy = TRUE)[[1]]
   
   # SELECT
   x <- cyto_select(x, select)
   
   # FLOWFRAME
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_arcsinh(x,
@@ -369,9 +369,9 @@ cyto_transformer_arcsinh.GatingHierarchy <- function(x,
                                                      ...) {
   
   # EXTRACT & COPY
-  x <- cyto_extract(x, 
-                    parent = parent,
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent,
+                         copy = TRUE)[[1]]
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_arcsinh(x,
@@ -407,7 +407,7 @@ cyto_transformer_arcsinh.flowSet <- function(x,
   x <- cyto_select(x, select)
   
   # FLOWFRAME
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_arcsinh(
@@ -597,15 +597,15 @@ cyto_transformer_biex.GatingSet <- function(x,
                                             axes_limits = "machine", ...) {
   
   # EXTRACT & COPY
-  x <- cyto_extract(x, 
-                    parent = parent,
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent,
+                         copy = TRUE)[[1]]
   
   # SELECT
   x <- cyto_select(x, select)
   
   # FLOWFRAME
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_biex(x,
@@ -633,9 +633,9 @@ cyto_transformer_biex.GatingHierarchy <- function(x,
                                                   axes_limits = "machine", ...) {
   
   # EXTRACT & COPY
-  x <- cyto_extract(x, 
-                    parent = parent,
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent,
+                         copy = TRUE)[[1]]
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_biex(x,
@@ -671,7 +671,7 @@ cyto_transformer_biex.flowSet <- function(x,
   x <- cyto_select(x, select)
   
   # FLOWFRAME
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_biex(x,
@@ -860,15 +860,15 @@ cyto_transformer_logicle.GatingSet <- function(x,
                                                axes_limits = "machine", ...) {
   
   # EXTRACT & COPY
-  x <- cyto_extract(x, 
-                    parent = parent,
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent,
+                         copy = TRUE)[[1]]
   
   # SELECT
   x <- cyto_select(x, select)
   
   # FLOWFRAME
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_logicle(
@@ -898,9 +898,9 @@ cyto_transformer_logicle.GatingHierarchy <- function(x,
                                                      ...) {
   
   # EXTRACT
-  x <- cyto_extract(x, 
-                    parent = parent,
-                    copy = TRUE)
+  x <- cyto_data_extract(x, 
+                         parent = parent,
+                         copy = TRUE)[[1]]
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_logicle(
@@ -937,7 +937,7 @@ cyto_transformer_logicle.flowSet <- function(x,
   x <- cyto_select(x, select)
   
   # FLOWFRAME
-  x <- cyto_convert(x, "flowFrame")
+  x <- as(x, "cytoframe")
   
   # Call to flowFrame method
   transformer_list <- cyto_transformer_logicle(
