@@ -276,12 +276,13 @@ cyto_fluor_channels <- function(x,
                                "SSC",
                                "Time",
                                "Original",
-                               "Sample ID",
-                               "Event ID",
+                               "Sample",
+                               "Event",
                                "UMAP",
                                "tSNE",
                                "PCA",
-                               "EmbedSOM"),
+                               "EmbedSOM",
+                               "FIt-SNE"),
                 ...)
 }
 
