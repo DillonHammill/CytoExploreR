@@ -1205,7 +1205,7 @@ cyto_transform.default <- function(x,
         cyto_data <- cyto_data_extract(x, parent)[[1]]
         
         # Convert to flowFrame for plotting
-        cyto_data <- cyto_convert(cyto_data, "flowFrame")
+        cyto_data <- as(cyto_data, "cytoframe")
         
         # Channels
         channels <- names(transformer_list)
@@ -1293,7 +1293,7 @@ cyto_transform.transformList <- function(x,
         cyto_data <- cyto_data_extract(x)[[1]]
         
         # Convert to flowFrame for plotting
-        cyto_data <- cyto_convert(cyto_data, "flowFrame")
+        cyto_data <- as(cyto_data, "cytoframe")
         
         # Channels
         channels <- names(trans@transforms)
@@ -1382,7 +1382,7 @@ cyto_transform.transformerList <- function(x,
         cyto_data <- cyto_data_extract(x)[[1]]
         
         # Convert to flowFrame for plotting
-        cyto_data <- cyto_convert(cyto_data, "flowFrame")
+        cyto_data <- as(cyto_data, "cytoframe")
         
         # Channels
         channels <- names(trans)
@@ -2848,7 +2848,11 @@ cyto_list <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param display can be either a numeric [0,1] or integer to indicate the
-#'   percentage or number of events to keep respectively.
+#'   percentage or number of events to keep respectively. For \code{cytoset} or
+#'   \code{GatingSet} objects, the same degree of sampling is applied to each
+#'   \code{cytoframe} by default. However, cytoframes will be separately sampled
+#'   if a vector the same length as the \code{cytoset} or \code{GatingSet} is
+#'   supplied.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
 #' @param plot logical required for lists to indicate whether sampling should be
@@ -2877,7 +2881,7 @@ cyto_list <- function(x,
 #'
 #' # Restrict first sample to 10000 events
 #' cyto_sample(fs[[1]], 10000)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_sample
@@ -2990,17 +2994,23 @@ cyto_sample.flowSet <- function(x,
                                 seed = NULL,
                                 ...) {
   
-  # FLOWSET/CYTOSET
-  cs <- cyto_apply(x, 
-                   "cyto_sample", 
-                   display = display, 
-                   seed = seed, 
-                   copy = FALSE,
-                   ...)
+  # PREPARE DISPLAY - INDIVIDUAL CYTOFRAMES
+  display <- rep(display, 
+                 length.out = length(x))
   
-  # RETURN FLOWSET/CYTOSET
-  return(cs)
-  
+  # SAPLE EACH CYTOFRAME
+  cytoset(
+    structure(
+      lapply(seq_along(x), function(z){
+        cyto_sample(x[[z]],
+                    display = display[z],
+                    seed = seed,
+                    ...)
+      }),
+      names = cyto_names(x)
+    )
+  )
+
 }
 
 #' @rdname cyto_sample
@@ -3960,7 +3970,7 @@ cyto_compensate.GatingSet <- function(x,
     # spillover is a character string containing name of csv file
     if (cyto_class(spillover, "character", TRUE)) {
       # read in spillover matrix
-      spill <- read_from_csv(spilllover)
+      spill <- read_from_csv(spillover)
       # column names must be valid channels
       if (!all(colnames(spill) %in% cyto_channels(fs))) {
         stop(

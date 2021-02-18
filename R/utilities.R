@@ -248,11 +248,19 @@ read_from_csv <- function(x,
       )
     )
   }
-  suppressMessages(
+  dt <- suppressMessages(
     fread(x, 
-          data.table = FALSE,
+          data.table = TRUE,
           ...)
   )
+  if(data.table == FALSE) {
+    dt <- as.data.frame(dt)
+    if(colnames(dt)[1] == "V1") {
+      rownames(dt) <- dt[, 1]
+      dt <- dt[, -1]
+    }
+  }
+  return(dt)
 }
 
 ## WRITE_TO_CSV ----------------------------------------------------------------
