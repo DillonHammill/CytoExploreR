@@ -30,7 +30,11 @@ cyto_sample(x, ...)
 \item{...}{not in use.}
 
 \item{display}{can be either a numeric [0,1] or integer to indicate the
-percentage or number of events to keep respectively.}
+percentage or number of events to keep respectively. For \code{cytoset} or
+\code{GatingSet} objects, the same degree of sampling is applied to each
+\code{cytoframe} by default. However, cytoframes will be separately sampled
+if a vector the same length as the \code{cytoset} or \code{GatingSet} is
+supplied.}
 
 \item{seed}{value used to \code{set.seed()} internally. Setting a value for
 seed will return the same result with each run.}
