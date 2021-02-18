@@ -230,60 +230,6 @@ SysExec <- function(
   return(paths)
 }
 
-## READ_FROM_CSV ---------------------------------------------------------------
-
-#' Use data.table to read in a csv file
-#' @importFrom data.table fread
-#' @noRd
-read_from_csv <- function(x,
-                          data.table = FALSE,
-                          ...){
-  x <- file_ext_append(x, ".csv")
-  ind <- which(!file.exists(x))
-  if(length(ind) > 0){
-    stop(
-      paste(
-        paste(x[ind], collapse = " & "),
-        "do not exist or lack the required permissions."
-      )
-    )
-  }
-  dt <- suppressMessages(
-    fread(x, 
-          data.table = TRUE,
-          ...)
-  )
-  if(data.table == FALSE) {
-    dt <- as.data.frame(dt)
-    if(colnames(dt)[1] == "V1") {
-      rownames(dt) <- dt[, 1]
-      dt <- dt[, -1]
-    }
-  }
-  return(dt)
-}
-
-## WRITE_TO_CSV ----------------------------------------------------------------
-
-#' Use data.table to write data to a csv file
-#' @importFrom data.table fwrite
-#' @noRd
-write_to_csv <- function(x,
-                         file = NULL,
-                         ...){
-  
-  if(is.null(file)){
-    stop("Supply a name for the csv file to 'file'.")
-  }
-  file <- file_ext_append(file, ".csv")
-  suppressMessages(
-    fwrite(x,
-           file = file,
-           ...)
-  )
-  
-}
-
 ## EXTRACT NUMERIC FROM STRING -------------------------------------------------
 
 #' Extract numeric from string
