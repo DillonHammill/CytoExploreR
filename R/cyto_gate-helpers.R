@@ -180,7 +180,7 @@ cyto_gate_rename <- function(x,
   
   # RENAME GATES IN GATINGHIERARCHY/GATINGSET
   mapply(function(alias, name) {
-    if (is(x, "GatingHierarchy")) {
+    if (cyto_class(x, "GatingHierarchy")) {
       gh_pop_set_name(x, alias, name)
     } else {
       gs_pop_set_name(x, alias, name)
@@ -264,7 +264,7 @@ cyto_gate_copy <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # GATINGSET
-  if(!is(x, "GatingSet")){
+  if(!cyto_class(x, "GatingSet", TRUE)){
     stop("'x' must be an object of class GatingSet.")
   }
   
@@ -394,7 +394,7 @@ cyto_gate_bool <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # GATINGSET
-  if(!is(x, "GatingSet")){
+  if(!cyto_class(x, "GatingSet", TRUE)){
     stop("'x' must be an object of class GatingSet.")
   }
   
@@ -919,7 +919,7 @@ cyto_gate_edit <- function(x,
   # GATES FORMATTED FOR GATINGTEMPLATE (QUADGATES) - EXISTING GATES
   gates_gT <- lapply(gates_gs, function(z){
     if(all(LAPPLY(z, function(y){
-      is(y, "rectangleGate") & any(grepl("quad", names(attributes(y))))
+      cyto_class(y, "rectangleGate") & any(grepl("quad", names(attributes(y))))
     }))){
       return(.cyto_gate_quad_convert(z, channels))
     }else{
@@ -943,7 +943,7 @@ cyto_gate_edit <- function(x,
   # PREPARE SAMPLES & OVERLAYS -------------------------------------------------
   
   # EXTRACT PARENT POPULATION
-  fs <- cyto_extract(x, parent)
+  fs <- cyto_data_extract(x, parent)[[1]]
   
   # GROUPING & MERGING
   fr_list <- cyto_merge_by(fs,
@@ -986,18 +986,18 @@ cyto_gate_edit <- function(x,
           # EXTRACT POPULATIONS
           nms <- overlay
           overlay <- lapply(overlay, function(z) {
-            cyto_extract(x, z)
+            cyto_data_extract(x, z)[[1]]
           })
           names(overlay) <- nms
         }
       }
     }
     # OVERLAY - FLOWFRAME
-    if (is(overlay, "flowFrame")) {
+    if (cyto_class(overlay, "flowFrame")) {
       # Always show all events
       overlay <- rep(list(list(overlay)), N)
       # flowSet to lists of flowFrame lists
-    } else if (is(overlay, "flowSet")) {
+    } else if (cyto_class(overlay, "flowSet")) {
       # GROUPING (MERGE_BY) - LIST OF FLOWFRAMES
       overlay <- cyto_merge_by(overlay,
                                merge_by = group_by,
@@ -1008,15 +1008,15 @@ cyto_gate_edit <- function(x,
         list(z)
       })
       # OVERLAY - LIST OF FLOWFRAMES OR FLOWSETS
-    } else if (is(overlay, "list")) {
+    } else if (cyto_class(overlay, "list")) {
       # LIST OF FLOWFRAMES - REPEAT FR_LIST TIMES
       if (all(LAPPLY(overlay, function(z) {
-        is(z, "flowFrame")
+        cyto_class(z, "flowFrame")
       }))) {
         overlay <- rep(list(overlay), N)
         # LIST FLOWFRAME LISTS OF LENGTH FR_LIST
       } else if (all(LAPPLY(unlist(overlay), function(z) {
-        is(z, "flowFrame")
+        cyto_class(z, "flowFrame")
       }))) {
         # Must be of same length as fr_list
         # No grouping, selecting or sampling - used as supplied
@@ -1028,7 +1028,7 @@ cyto_gate_edit <- function(x,
         }
         # LIST OF FLOWSETS
       } else if (all(LAPPLY(overlay, function(z) {
-        is(z, "flowSet")
+        cyto_class(z, "flowSet")
       }))) {
         # GROUP & MERGE EACH FLOWSET
         overlay <- lapply(overlay, function(z) {
@@ -1210,8 +1210,10 @@ cyto_gate_edit <- function(x,
   # ADD GATES TO FILTERS LISTS
   gates_gT_transposed <- lapply(seq_along(gates_gT_transposed), 
                                 function(z){
-                                  gates <- lapply(seq_along(gates_gT_transposed[[z]]), function(y){
-                                    if(!is(gates_gT_transposed[[z]][[y]], "quadGate")){
+                                  gates <- lapply(seq_along(gates_gT_transposed[[z]]), 
+                                                  function(y){
+                                    if(!cyto_class(gates_gT_transposed[[z]][[y]], 
+                                                   "quadGate")){
                                       filters(gates_gT_transposed[[z]][y])
                                     }else{
                                       gates_gT_transposed[[z]][[y]]
@@ -1284,7 +1286,7 @@ cyto_gate_edit <- function(x,
   
   # CONVERT QUAD TO RECTANGLE FOR GATINGSET SAVING (EASIEST WAY)
   gates_gs <- lapply(gates_gs, function(z){
-    if(is(z[[1]], "quadGate")){
+    if(cyto_class(z[[1]], "quadGate")){
       .cyto_gate_quad_convert(z[[1]], channels)
     }else{
       z
@@ -1357,14 +1359,14 @@ cyto_gate_type <- function(gates) {
   
   # One gate supplied
   if (length(gates) == 1) {
-    if (is(gates)[1] %in% c("filters", "list")) {
+    if (cyto_class(gates, c("filters", "list"), TRUE)) {
       gates <- gates[[1]]
     }
     # ELLIPSE
-    if (is(gates, "ellipsoidGate")) {
+    if (cyto_class(gates, "ellipsoidGate")) {
       types <- "ellipse"
       # RECTANGLE/BOUNDARY/INTERVAL/THRESHOLD
-    } else if (is(gates, "rectangleGate")) {
+    } else if (cyto_class(gates, "rectangleGate")) {
       # Includes rectangle, interval, threshold and boundary gate_types
       if (length(parameters(gates)) == 1) {
         
@@ -1390,10 +1392,10 @@ cyto_gate_type <- function(gates) {
         }
       }
       # POLYGON
-    } else if (is(gates, "polygonGate")) {
+    } else if (cyto_class(gates, "polygonGate")) {
       types <- "polygon"
       # QUADRANT
-    } else if (is(gates, "quadGate")) {
+    } else if (cyto_class(gates, "quadGate")) {
       types <- "quadrant"
     }
     # Multiple gates supplied
@@ -1401,7 +1403,7 @@ cyto_gate_type <- function(gates) {
     
     # Get classes of gates
     classes <- LAPPLY(gates, function(x) {
-      class(x)
+      cyto_class(x, class = TRUE)
     })
     
     # All gates are of the same class
@@ -1581,14 +1583,12 @@ cyto_gate_convert.default <- function(x,
                                       ...) {
   
   # Invalid gate object
-  if (!is(x)[1] %in% c(
-    "list",
-    "filters",
-    "rectangleGate",
-    "polygonGate",
-    "ellipsoidGate",
-    "quadGate"
-  )) {
+  if (!cyto_class(x, c("list",
+                       "filters",
+                       "rectangleGate",
+                       "polygonGate",
+                       "ellipsoidGate",
+                       "quadGate"), TRUE)) {
     stop(paste(
       "'x' should contain either filters, rectangleGate, polygonGate,",
       "ellipsoidGate or quadGate objects."
@@ -1918,8 +1918,8 @@ cyto_gate_prepare <- function(x,
   # LIST OF GATES --------------------------------------------------------------
   
   # PREPARE GATE LIST
-  if (is(x)[1] == "list") {
-    if (all(LAPPLY(x, "is") %in% c(
+  if (cyto_class(x, "list", TRUE)) {
+    if (all(LAPPLY(x, "cyto_class") %in% c(
       "rectangleGate",
       "polygonGate",
       "ellipsoidGate",
@@ -1928,15 +1928,13 @@ cyto_gate_prepare <- function(x,
     ))) {
       x <- unlist(x)
     }
-  } else if (is(x)[1] == "filters") {
+  } else if (cyto_class(x, "filters", TRUE)) {
     x <- unlist(x)
-  } else if (is(x)[1] %in% c(
-    "rectangleGate",
-    "polygonGate",
-    "ellipsoidGate",
-    "quadGate",
-    "filters"
-  )) {
+  } else if (cyto_class(x, c("rectangleGate",
+                             "polygonGate",
+                             "ellipsoidGate",
+                             "quadGate",
+                             "filters"), TRUE)) {
     x <- list(x)
   }
   
@@ -1986,7 +1984,7 @@ cyto_gate_transform.rectangleGate <- function(x,
                                               ...){
   
   # TRANSFORMERS
-  if(is.null(trans) | !is(trans, "transformerList")){
+  if(is.null(trans) | !cyto_class(trans, "transformerList")){
     stop("Supply a list of transformers to transform the gate co-ordinates.")
   }
   
@@ -2039,7 +2037,7 @@ cyto_gate_transform.polygonGate <- function(x,
                                             ...){
   
   # TRANSFORMERS
-  if(is.null(trans) | !is(trans, "transformerList")){
+  if(is.null(trans) | !cyto_class(trans, "transformerList")){
     stop("Supply a list of transformers to transform the gate co-ordinates.")
   }
   
@@ -2092,7 +2090,7 @@ cyto_gate_transform.ellipsoidGate <- function(x,
                                               ...) {
   
   # TRANSFORMERS
-  if(is.null(trans) | !is(trans, "transformerList")){
+  if(is.null(trans) | !cyto_class(trans, "transformerList")){
     stop("Supply a list of transformers to transform the gate co-ordinates.")
   }
   
@@ -2200,7 +2198,7 @@ cyto_gate_transform.quadGate <- function(x,
                                          ...){
   
   # TRANSFORMERS
-  if(is.null(trans) | !is(trans, "transformerList")){
+  if(is.null(trans) | !cyto_class(trans, "transformerList")){
     stop("Supply a list of transformers to transform the gate co-ordinates.")
   }
   
