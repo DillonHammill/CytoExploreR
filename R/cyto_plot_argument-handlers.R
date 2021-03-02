@@ -21,37 +21,17 @@
   
   # CALLED WITHIN CYTO_PLOT METHOD
   if (missing(plots)) {
-    if (all(LAPPLY(x$x, "is", "flowFrame"))) {
-      NP <- 1
-      MTD <- "flowFrame"
-    } else if (all(LAPPLY(x$x, function(z) {
-      LAPPLY(z, function(y) {
-        is(y, "flowFrame")
-      })
-    }))) {
       NP <- length(x$x)
-      MTD <- "flowSet"
-    }
-    # CALLED WITHIN CYTO_PLOT WRAPPER
   } else {
     NP <- plots
-    if (NP == 1) {
-      MTD <- "flowFrame"
-    } else {
-      MTD <- "flowSet"
-    }
   }
   
   # LAYERS PER PLOT - L --------------------------------------------------------
   
   # CALLED WITHIN CYTO_PLOT METHOD - VECTOR OF LENGTH NP
   if (missing(layers)) {
-    if (MTD == "flowFrame") {
-      L <- length(x$x)
-    } else if (MTD == "flowSet") {
-      L <- LAPPLY(x$x, "length")
-    }
-    # CALLED WITHIN CYTO_PLOT WRAPPER
+    L <- LAPPLY(x$x, "length")
+  # CALLED WITHIN CYTO_PLOT WRAPPER
   } else {
     if (length(layers) != NP) {
       message("Using the same number of layers per plot to split arguments.")
@@ -63,130 +43,92 @@
   # TOTAL LAYERS - TL ----------------------------------------------------------
   
   # VECTOR OF LENGTH NP
-  TL <- sum(L)
+  # TL <- sum(L)
   
   # GATE COUNT PER PLOT - GC ---------------------------------------------------
   
   # CALLED WITHIN CYTO_PLOT METHOD/WRAPPER
-  if (MTD == "flowFrame") {
-    if (all(LAPPLY(x$gate, function(z) {
-      .all_na(z)
-    }))) {
-      GC <- 1
-    } else {
-      GC <- length(x$gate)
-    }
-  } else if (MTD == "flowSet") {
-    if (.all_na(x$gate)) {
-      x$gate <- split(rep(NA, length.out = NP), seq_len(NP))
-    } else if (length(x$gate) != NP) {
-      stop("Gates must be supplied per plot to split cyto_plot arguments.")
-    }
-    GC <- LAPPLY(x$gate, function(z) {
-      if (.all_na(z)) {
-        return(1)
-      } else {
-        return(length(z))
-      }
-    })
+  if (.all_na(x$gate)) {
+    x$gate <- split(rep(NA, length.out = NP), seq_len(NP))
+  } else if (length(x$gate) != NP) {
+    stop("Gates must be supplied per plot to split cyto_plot arguments.")
   }
+  GC <- LAPPLY(x$gate, function(z) {
+    if (.all_na(z)) {
+      return(1)
+    } else {
+      return(length(z))
+    }
+  })
   
   # GATED POPULATIONS PER LAYER - GP -------------------------------------------
-  if (MTD == "flowFrame") {
-    if (GC != 0) {
-      GP <- LAPPLY(x$gate, function(z) {
-        if (class(z) == "quadGate") {
+  if (!all(GC == 0)) {
+    GP <- lapply(x$gate, function(z) {
+      LAPPLY(z, function(y) {
+        if (class(y) == "quadGate") {
           return(4)
         } else {
           return(1)
         }
       })
-      GP <- sum(GP)
-    } else {
-      GP <- 1
-    }
-  } else if (MTD == "flowSet") {
-    if (!all(GC == 0)) {
-      GP <- lapply(x$gate, function(z) {
-        LAPPLY(z, function(y) {
-          if (class(y) == "quadGate") {
-            return(4)
-          } else {
-            return(1)
-          }
-        })
-      })
-      GP <- unlist(LAPPLY(GP, "sum"))
-      # NO GATES
-    } else {
-      GP <- rep(1, NP)
-    }
+    })
+    GP <- unlist(LAPPLY(GP, "sum"))
+    # NO GATES
+  } else {
+    GP <- rep(1, NP)
   }
   
   # TOTAL GATED POPULATIONS PER LAYER - TGP ------------------------------------
-  TGP <- sum(GP)
+  # TGP <- sum(GP)
   
   # GATED/NEGATED POPULATIONS PER LAYER - GNP ----------------------------------
   
   # PREPARE NEGATE ARGUMENT
   x$negate <- rep(x$negate, length.out = NP)
-  if(MTD == "flowSet"){
-    x$negate <- split(x$negate, seq_len(NP))
-  }
-  if (MTD == "flowFrame") {
-    if (GC != 0 &
-        x$negate == TRUE &
-        !"quadGate" %in% LAPPLY(x$gate, "is")) {
-      GNP <- GP + 1
+  x$negate <- split(x$negate, seq_len(NP))
+  GNP <- LAPPLY(seq_len(NP), function(z) {
+    if (GC[z] != 0 &
+        x$negate[z] == TRUE &
+        !"quadGate" %in% LAPPLY(x$gate[[z]], "is")) {
+      return(GP[z] + 1)
     } else {
-      GNP <- GP
+      return(GP[z])
     }
-  } else if (MTD == "flowSet") {
-    GNP <- LAPPLY(seq_len(NP), function(z) {
-      if (GC[z] != 0 &
-          x$negate[z] == TRUE &
-          !"quadGate" %in% LAPPLY(x$gate[[z]], "is")) {
-        return(GP[z] + 1)
-      } else {
-        return(GP[z])
-      }
-    })
-  }
+  })
   
   # TOTAL GATED/NEGATED POPULATIONS - TGNP -------------------------------------
-  TGNP <- sum(GNP)
+  # TGNP <- sum(GNP)
   
   # CYTO_PLOT ARGUMENTS --------------------------------------------------------
   
   # MISSING LISTED AS NULL -> CONVERTED TO EMPTY
-  args <- formals("cyto_plot.flowFrame")
+  args <- formals("cyto_plot.flowSet")
+  args <- args[!names(args) %in% c("merge_by",
+                                   "overlay",
+                                   "display",
+                                   "layout",
+                                   "select",
+                                   "hist_layers")]
   lapply(names(args), function(z) {
     if (all(class(args[[z]]) == "name")) {
       args[[z]] <<- ""
     }
   })
   
-  # FLOWSET ARGUMENTS (LABEL_TEXT_SIZE ETC)
-  if(MTD == "flowSet"){
-    fs_args <- formals("cyto_plot.flowSet")
-    lapply(names(fs_args), function(z) {
-      if (all(class(fs_args[[z]]) == "name")) {
-        fs_args[[z]] <<- ""
-      }
-    })
-    args <- fs_args[names(args)]
-  }
-  
-  # REMOVE ARGUMENTS THAT SHOULD PREPARED ALREADY
+  # REMOVE ARGUMENTS THAT SHOULD PREPARED ALREADY OR SEPARATELY
   args <- args[-match(
     c(
       "x",
       "channels",
       "overlay",
-      "gate", # arguments that require manual preparation
+      "gate", # requires manual preparation
       "negate",
       "axes_trans",
       "axes_text",
+      "header",
+      "header_text_font",   # HEADER ARGUMENTS REPEATED PER 
+      "header_text_size",
+      "header_text_col",
       "..."
     ),
     names(args)
@@ -400,13 +342,9 @@
           rep(sort(arg_complete), length.out = length(arg_missing))
         ]
       }
-      # RETURN ARGUMENTS SPLIT BY PLOT
-      if(MTD == "flowFrame"){
-        arg_split <- arg_split[[1]]
-      }
       return(arg_split)
       # OTHER ARGUMENTS
-    }else{
+    } else {
       # CHANNELS
       if(arg == "channels"){
         if(class(x[[z]]) == "list"){
@@ -414,9 +352,6 @@
           return(arg_split)
         }else{
           arg_split <- rep(list(x[[z]]), length.out = NP)
-          if(MTD == "flowFrame"){
-            arg_split <- arg_split[[1]]
-          }
           return(arg_split)
         }
         # AXES_TRANS
@@ -427,9 +362,6 @@
           # LIST OF TRANSFORMERLISTS
         } else {
           arg_split <- rep(x[[z]], length.out = NP)
-        }
-        if(MTD == "flowFrame"){
-          arg_split <- arg_split[[1]]
         }
         return(arg_split)
       # AXES_TEXT
@@ -443,9 +375,6 @@
           } else {
             arg_split <- split(rep(x[[z]], length.out = NP * 2), 
                                rep(seq_len(NP), each = 2))
-          }
-          if(MTD == "flowFrame"){
-            arg_split <- arg_split[[1]] # don't extract lists
           }
         } else {
           arg_split <- x[[z]]
@@ -462,8 +391,7 @@
   x <- lapply(seq_along(x), function(z){
     arg <- names(x[z])
     if(arg %in% names(args)){
-      if(MTD == "flowFrame"){
-        w <- x[[arg]]
+      lapply(x[[arg]], function(w){
         if(is.vector(w)) {
           empty_ind <- which(LAPPLY(w, ".empty"))
           if(length(empty_ind) == 0) {
@@ -477,23 +405,7 @@
         } else {
           return(w)
         }
-      }else if(MTD == "flowSet"){
-        lapply(x[[arg]], function(w){
-          if(is.vector(w)) {
-            empty_ind <- which(LAPPLY(w, ".empty"))
-            if(length(empty_ind) == 0) {
-              return(type.convert(w, as.is = TRUE))
-            } else if(length(empty_ind) == length(w)) {
-              return(w)
-            } else {
-              w[-empty_ind] <- type.convert(w[-empty_ind], as.is = TRUE)
-              return(w)
-            }
-          } else {
-            return(w)
-          }
-        })
-      }
+      })
     } else {
       return(x[[z]])
     }
@@ -503,4 +415,3 @@
   # RETURN SPLIT ARGUMENTS
   return(x)
 }
-
