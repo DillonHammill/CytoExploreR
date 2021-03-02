@@ -346,42 +346,54 @@
                                    buffer = 0.04,
                                    anchor = TRUE){
   
-  # flowCore compatibility
+  # COMPATIBILITY --------------------------------------------------------------
+  
+  # FLOWCORE USES INSTRUMENT
   if(axes_limits == "instrument"){
     axes_limits <- "machine"
   }
   
-  # Flatten to list of flowFrames/flowSets
-  if(class(x) == "list"){
+  # DATA -----------------------------------------------------------------------
+  
+  # LIST CYTOFRAMES/CYTOSETS
+  if(cyto_class(x, "list")){
     x <- unlist(x) 
     x <- lapply(x, function(z){
-      if(is(z, "GatingHierarchy") | is(z, "GatingSet")){
-        z <- cyto_extract(z, 
-                          parent = parent)
+      # GATINGHIERARCHY/GATINGSET
+      if(cyto_class(z, "GatingSet")){
+        z <- cyto_data_extract(z, 
+                               parent = parent)[[1]]
       }
       return(z)
     })
-    # GatingSet/GatingHierarchy
-  }else{
-    x <- list(cyto_extract(x, 
-                           parent = parent))
+  # GATINGHIERARCHY/GATINGSET
+  }else if(cyto_class(x, "GatingSet")){
+    x <- list(cyto_data_extract(x, 
+                                parent = parent)[[1]])
+  # CYTOFRAME/CYTOSET
+  } else {
+    x <- list(x)
   }
   
-  # Convert markers to channels
+  # CHANNELS -------------------------------------------------------------------
+  
+  # MARKERS TO CHANNELS
   if(!.all_na(channels)){
     channels <- cyto_channels_extract(x[[1]], channels, plot)
   }else{
     channels <- cyto_channels(x[[1]])
   }
   
-  # Time parameter always uses data limits
+  # TIME CHANNEL ALWAYS USE DATA LIMITS
   if(grepl("^Time", channels, ignore.case = TRUE)){
     axes_limits <- "data"
   } 
   
+  # RANGE ----------------------------------------------------------------------
+  
   # DATA RANGE
   data_range <- lapply(x, function(z){
-    if(is(z, "flowFrame")){
+    if(cyto_class(z, "flowFrame")){
       if(nrow(z) == 0){
         type <- "instrument"
       }else{
@@ -391,7 +403,7 @@
         range(z[, channels],
               type = type)
       )
-    }else if(is(z, "flowSet")){
+    }else if(cyto_class(z, "flowSet")){
       rng <- suppressWarnings(
         cyto_apply(z, function(y){
           if(nrow(y) == 0){
@@ -422,12 +434,12 @@
   # MACHINE RANGE
   if(axes_limits == "machine"){
     machine_range <- lapply(x, function(z){
-      if(is(z, "flowFrame")){
+      if(cyto_class(z, "flowFrame")){
         rng <- suppressWarnings(
           range(z,
                 type = "instrument")[, channels, drop = FALSE]
         )
-      }else if(is(z, "flowSet")){
+      }else if(cyto_class(z, "flowSet")){
         rng <- suppressWarnings(
           cyto_apply(z,
                      "range",
@@ -454,12 +466,14 @@
     data_range["max", ] <- machine_range["max", ]
   }
   
-  # Replace lower data limit if > 0 - AUTO
+  # REPLACE LOWER LIMIT IF > 0 - AUTO
   if(axes_limits != "data" & anchor == TRUE){
     if(any(data_range[1,] > 0)){
       data_range[1, data_range[1,] > 0] <- 0
     }
   }
+  
+  # BUFFER ---------------------------------------------------------------------
   
   # ADD 2% BUFFER EITHER SIDE - 4% TOTAL IN PLOT
   if(buffer != 0){
@@ -481,7 +495,7 @@
 
 #' Axes ticks and text
 #'
-#' @param x list of \code{cytoframes}.
+#' @param x list of cytoframes/cytosets.
 #' @param channels name(s) of the channel(s) used to construct the plot.
 #' @param axes_trans transformerList.
 #' @param axes_range named list of axes limits for each each axis (i.e.
@@ -500,6 +514,8 @@
                                  axes_range = list(NA, NA),
                                  axes_limits = "data") {
   
+  # CHECKS ---------------------------------------------------------------------
+  
   # CHANNELS
   channels <- rep(c(channels, rep(NA, 2)), length.out = 2) # x & y
   
@@ -507,6 +523,8 @@
   if(!.all_na(axes_trans) & !cyto_class(axes_trans, "transformerList", TRUE)) {
     stop("'axes_trans' must be an object of class transformerList.")
   }
+  
+  # PAD SUPPLIED AXES RANGES ---------------------------------------------------
   
   # AXES RANGE - 4% BUFFER
   axes_range <- structure(
@@ -522,6 +540,8 @@
       }
     }), 
     names = names(axes_range))
+  
+  # AXES TICKS & LABELS --------------------------------------------------------
   
   # LOOP THROUGH CHANNELS
   axes_text <- lapply(channels, function(z){
@@ -624,7 +644,7 @@
 
 #' Get axes titles for cyto_plot
 #'
-#' @param x list of cytoframes.
+#' @param x list of cytoframes/cytosets.
 #' @param channels used to construct the plot.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
@@ -699,7 +719,7 @@
 
 #' Set plot layout
 #'
-#' @param x list of flowFrame lists.
+#' @param x list of  cytoframe/cytoset lists.
 #' @param layout grid dimensions c(nr, nc), NA or FALSE.
 #'
 #' @importFrom grDevices n2mfrow
@@ -960,7 +980,7 @@
 
 #' Get a list of gated populations to label
 #'
-#' @param x list of flowFrames per layer to be gated
+#' @param x list of cytoframes/cytosets per layer to be gated
 #' @param gate list of gate objects to apply to each element of x, gates only
 #'   required for base layer.
 #' @param negate logical indicating whether negated population should be
@@ -971,6 +991,7 @@
 #'
 #' @return list of flowFrames lists
 #'
+#' @importFrom flowWorkspace flowSet_to_cytoset
 #' @importFrom flowCore Subset split quadGate
 #' @importFrom methods is
 #'
@@ -984,7 +1005,7 @@
                                   ...) {
   
   # FLOWFRAME LIST
-  if(is(x, "flowFrame")){
+  if(cyto_class(x, c("flowFrame", "flowSet"))){
     x <- list(x)
   }
   
@@ -1001,38 +1022,39 @@
   # PREPARE GATES --------------------------------------------------------------
   
   # LIST OF GATE OBJECT LISTS
-  if(class(gate) == "list" &
-     all(LAPPLY(gate, "class") == "list")){
+  if(cyto_class(gate, "list") &
+     all(LAPPLY(gate, "cyto_class", "list", TRUE))){
     # USE BASE LAYER GATES
     gate <- gate[[1]]
   }
   
   # LIST OF GATE OBJECTS
-  if (class(gate) == "list") {
-    if (all(LAPPLY(gate, "is") %in% c(
-      "rectangleGate",
-      "polygonGate",
-      "ellipsoidGate",
-      "quadGate",
-      "filters"
-    ))) {
+  if (cyto_class(gate, "list", TRUE)) {
+    if (all(LAPPLY(gate, 
+                   "cyto_class", 
+                   c("rectangleGate",
+                     "polygonGate",
+                     "ellipsoidGate",
+                     "quadGate",
+                     "filters"), 
+                   TRUE))) {
       gate <- unlist(gate)
     }
-  } else if (class(gate) == "filters") {
+  } else if (cyto_class(gate, "filters", TRUE)) {
     gate <- unlist(gate)
-  } else if (class(gate) %in% c(
-    "rectangleGate",
-    "polygonGate",
-    "ellipsoidGate",
-    "quadGate",
-    "filters"
-  )) {
+  } else if (cyto_class(gate, 
+                        c("rectangleGate",
+                          "polygonGate",
+                          "ellipsoidGate",
+                          "quadGate",
+                          "filters"), 
+                        TRUE)) {
     gate <- list(gate)
   }
   
   # List of RectangleGates to QuadGate (MUST BE 4 RECTANGLES)
   if (length(gate) == 4 & all(LAPPLY(gate, function(z) {
-    is(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
+    cyto_class(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
   }))) {
     # CHANNELS
     chans <- as.character(parameters(gate[[1]]))
@@ -1074,33 +1096,47 @@
   
   # GATING PER LAYER (list of pops per layer)
   pops <- lapply(seq_along(x), function(z){
-    cyto_data <- x[[z]]
+    cs <- x[[z]]
     pops_to_label <- labels_per_layer[[z]]
     gated <- c()
     gated_pops <- lapply(seq_len(length(gate)), function(w) {
       # NO GATE OR NO STAT
       if (.all_na(gate[[w]]) | is.na(pops_to_label[[w]])) {
         assign("gated", c(gated, FALSE), envir = parent.frame(2))
-        return(cyto_data)
+        res <- cs
       }else{
         assign("gated", c(gated, TRUE), envir = parent.frame(2))
       }
       # NEGATED POPULATION
       if (negate == TRUE & w == length(gate)) {
-        split(cyto_data, gate[[w]])[[2]]
+        res <- split(cs, gate[[w]])[[2]]
+        # *** CYTOSET CONVERSION ***
+        if(cyto_class(res, "flowSet", TRUE)) {
+          res <- flowSet_to_cytoset(res)
+        }
         # GATED POPULATIONS
       } else {
         # QUADGATES RETURN MULTIPLE POPULATIONS
         if (is(gate[[w]], "quadGate")) {
           if ("quad_order" %in% names(args)) {
             quads <- unlist(strsplit(gate[[w]]@filterId, "\\|"))
-            split(cyto_data, gate[[w]])[c(2, 1, 3, 4)][match(
+            res <- split(cs, gate[[w]])[c(2, 1, 3, 4)][match(
               quad_order,
               quads
             )] # FIX ORDER
+
           } else {
-            split(cyto_data, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
+            res <- split(cs, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
           }
+          # *** CYTOSET CONVERSION ***
+          res <- structure(
+            lapply(res, function(q){
+              if(cyto_class(q, "flowSet", TRUE)){
+                flowSet_to_cytoset(q)
+              }
+            }),
+            names = names(res)
+          )
           # SINGLE POPULATIONS
         } else {
           # RECTANGLE BELONGS TO QUADGATE
@@ -1120,14 +1156,24 @@
               filterId = paste(q, collapse = "|"),
               .gate = coords
             )
-            p <- split(cyto_data, qg)[c(2, 1, 3, 4)] # FIX ORDER
+            p <- split(cs, qg)[c(2, 1, 3, 4)] # FIX ORDER
             names(p) <- q
+            # *** CYTOSET CONVERSION ***
+            p <- structure(
+              lapply(p, function(b){
+                if(cyto_class(b, "flowSet", TRUE)){
+                  flowSet_to_cytoset(b)
+                }
+              }),
+              names = names(p)
+            )
             p[[match(gate[[w]]@filterId, names(p))]]
           } else {
-            Subset(cyto_data, gate[[w]])
+            Subset(cs, gate[[w]])
           }
         }
       }
+      return(res)
     })
     # SIGNAL IF GATE PRESENT
     if(any(gated == TRUE)){
