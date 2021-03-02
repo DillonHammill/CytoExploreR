@@ -248,9 +248,9 @@ cyto_plot_empty <- function(x,
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
   # Prevent scientific notation on axes - reset on exit
-  scipen <- getOption("scipen")
-  options(scipen = 100000000)
-  on.exit(options(scipen = scipen))
+  scipen <- cyto_option("scipen")
+  cyto_option(scipen = 100000000)
+  on.exit(cyto_option(scipen = scipen))
   
   # Extract current graphics parameters
   pars <- par("mar")
@@ -803,7 +803,7 @@ cyto_plot_new <- function(popup,
   # POPUP
   if(missing(popup)) {
     # CALLED WITHIN CYTO_PLOT - USE SAME DEVICE TYPE
-    if(!is.null(getOption("cyto_plot_method"))) {
+    if(!is.null(cyto_option("cyto_plot_method"))) {
       if(grepl("rstudio", names(dev.cur()), ignore.case = TRUE)) {
         popup <- FALSE
       } else {
@@ -821,7 +821,7 @@ cyto_plot_new <- function(popup,
   }
   
   # BYPASS ON CYTO_PLOT_SAVE
-  if (!getOption("cyto_plot_save")) {
+  if (!cyto_option("cyto_plot_save")) {
     # NEW DEVICE
     if (popup) {
       dev_new <- "popup"
@@ -844,7 +844,7 @@ cyto_plot_new <- function(popup,
         # REQUIRE - RSTUDIO
       } else {
         # PRESET LAYOUT OR EMPTY DEVICE
-        if (getOption("cyto_plot_method") == "custom" | dev_empty()) {
+        if (cyto_option("cyto_plot_method") == "custom" | dev_empty()) {
           dev_new <- FALSE
           # NEW LAYOUT
         } else {
@@ -856,7 +856,7 @@ cyto_plot_new <- function(popup,
       # REQUIRE POPUP
       if (dev_new == "popup") {
         # PRESET LAYOUT OR EMPTY DEVICE
-        if (getOption("cyto_plot_method") == "custom" | dev_empty()) {
+        if (cyto_option("cyto_plot_method") == "custom" | dev_empty()) {
           dev_new <- FALSE
           # NEW LAYOUT
         } else {
@@ -873,7 +873,7 @@ cyto_plot_new <- function(popup,
     if (dev_new != FALSE) {
       # POPUP DEVICE
       if (dev_new == "popup") {
-        if (interactive() & getOption("CytoExploreR_interactive")) {
+        if (interactive() & cyto_option("CytoExploreR_interactive")) {
           if (.Platform$OS.type == "windows") {
             suppressWarnings(dev.new())
           } else if (.Platform$OS.type == "unix") {
@@ -933,19 +933,19 @@ dev_empty <- function() {
 cyto_plot_reset <- function() {
   
   # Create custom theme for cyto_plot
-  options("cyto_plot_theme" = NULL)
+  cyto_option("cyto_plot_theme", NULL)
   
   # Signal cyto_plot_save method has been called
-  options("cyto_plot_save" = FALSE)
+  cyto_option("cyto_plot_save", FALSE)
   
   # Signal which cyto_plot method has been called
-  options("cyto_plot_method" = NULL)
+  cyto_option("cyto_plot_method", NULL)
   
   # Reset saved parameters
-  options("cyto_plot_par" = NULL)
+  cyto_option("cyto_plot_par", NULL)
   
   # RESET PARAMETERS
-  options("cyto_plot_par_reset" = NULL)
+  cyto_option("cyto_plot_par_reset", NULL)
   
   # Reset memory
   .cyto_plot_args_remove()
@@ -956,6 +956,39 @@ cyto_plot_reset <- function() {
   }
   
   invisible(NULL)
+}
+
+## CYTO_OPTION -----------------------------------------------------------------
+
+#' Retrieve or set a global option for CytoExploreR
+#'
+#' @param option name of the option to retrieve or set.
+#' @param value a value to replace the current option.
+#'
+#' @return return current value of option if no \code{value} is supplied,
+#'   otherwise update the existing value of the option.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @examples
+#' # Extract current theme settings
+#' cyto_option("cyto_plot_theme")
+#'
+#' @export
+cyto_option <- function(option, value) {
+  # RETRIEVE OPTION
+  if(missing(value)) {
+    getOption(option)
+  # SET OPTION
+  } else {
+    do.call(
+      "options",
+      structure(
+        list(value),
+        names = option
+      )
+    )
+  }
 }
 
 ## CYTO_PLOT_RECORD ------------------------------------------------------------
@@ -1077,7 +1110,7 @@ cyto_plot_save <- function(save_as,
     # CLOSE DEVICE
     dev.off()
     # RESET CYTO_PLOT_SAVE
-    options("cyto_plot_save" = FALSE)
+    cyto_option("cyto_plot_save", FALSE)
     # SET
   } else {
     # APPEND FILE EXTENSION
@@ -1141,7 +1174,7 @@ cyto_plot_save <- function(save_as,
       stop(paste("Can't save file to", file_ext(save_as), "format."))
     }
     # Set global option to notify cyto_plot - dev.off() is required for saving
-    options("cyto_plot_save" = TRUE)
+    cyto_option("cyto_plot_save", TRUE)
   }
 }
 
@@ -1206,18 +1239,18 @@ cyto_plot_save <- function(save_as,
 cyto_plot_custom <- function(...) {
   
   # SAVE PARS FOR CYTO_PLOT_COMPLETE RESET
-  if (getOption("cyto_plot_method") != "custom") {
-    options("cyto_plot_par_reset" = .par())
+  if (cyto_option("cyto_plot_method") != "custom") {
+    cyto_option("cyto_plot_par_reset", .par())
   }
   
   # METHOD
-  options("cyto_plot_method" = "custom")
+  cyto_option("cyto_plot_method", "custom")
   
   # GRAPHICAL PARAMETERS
   cyto_plot_par(...)
   
   # RESET MEMORY
-  if (!getOption("cyto_plot_save")) {
+  if (!cyto_option("cyto_plot_save")) {
     .cyto_plot_args_remove()
   }
 }
@@ -1288,7 +1321,7 @@ cyto_plot_custom <- function(...) {
 cyto_plot_complete <- function(...) {
   
   # CLOSE DEVICE (not RStudioGD/X11/quartz)
-  if (getOption("cyto_plot_save")) {
+  if (cyto_option("cyto_plot_save")) {
     if (!names(dev.cur()) %in% c(
       "RStudioGD",
       "windows",
@@ -1301,9 +1334,9 @@ cyto_plot_complete <- function(...) {
   }
   
   # CUSTOM - USE SAVED RESET PARAMETERS
-  if (getOption("cyto_plot_method") == "custom") {
+  if (cyto_option("cyto_plot_method") == "custom") {
     # RESET PARAMETERS
-    old_pars <- getOption("cyto_plot_par_reset")
+    old_pars <- cyto_option("cyto_plot_par_reset")
     pars <- list(...)
     old_pars <- old_pars[!names(old_pars) %in% names(pars)]
     old_pars <- c(old_pars, pars)
@@ -1314,10 +1347,10 @@ cyto_plot_complete <- function(...) {
   }
   
   # RESET CYTO_PLOT_METHOD
-  options("cyto_plot_method" = NULL)
+  cyto_option("cyto_plot_method", NULL)
   
   # RESET CYTO_PLOT_SAVE
-  options("cyto_plot_save" = FALSE)
+  cyto_option("cyto_plot_save", FALSE)
   
   # RESET SAVED PARAMETERS
   cyto_plot_par(reset = TRUE)
@@ -1366,12 +1399,12 @@ cyto_plot_theme <- function(...,
   # RESET
   if (reset) {
     # RESET THEME
-    options("cyto_plot_theme" = NULL)
-    theme_args <- getOption("cyto_plot_theme")
+    cyto_option("cyto_plot_theme", NULL)
+    theme_args <- cyto_option("cyto_plot_theme")
     # SET
   } else {
     # CURRENT THEME ARGUMENTS
-    theme_args <- getOption("cyto_plot_theme")
+    theme_args <- cyto_option("cyto_plot_theme")
     # ARGUMENTS
     theme_new_args <- list(...)
     # NEW THEME ARGUMENTS
@@ -1393,7 +1426,7 @@ cyto_plot_theme <- function(...,
     # REMOVE OLD PARAMETERS
     theme_args <- theme_args[!names(theme_args) %in% names(theme_new_args)]
     theme_args <- c(theme_args, theme_new_args)
-    options("cyto_plot_theme" = theme_args)
+    cyto_option("cyto_plot_theme", theme_args)
   }
   # RETURN THEME ARUMENTS
   invisible(theme_args)
@@ -1428,12 +1461,12 @@ cyto_plot_par <- function(...,
   # RESET
   if (reset) {
     # RESET PARAMETERS
-    options("cyto_plot_par" = NULL)
-    par_args <- getOption("cyto_plot_par")
+    cyto_option("cyto_plot_par", NULL)
+    par_args <- cyto_option("cyto_plot_par")
     # SET
   } else {
     # CURRENT PARAMETERS
-    par_args <- getOption("cyto_plot_par")
+    par_args <- cyto_option("cyto_plot_par")
     # NEW PARAMETERS
     par_new_args <- list(...)
     # PREPARE PARAMETERS
@@ -1462,7 +1495,7 @@ cyto_plot_par <- function(...,
       }
     }
     # SAVE PARAMETERS
-    options("cyto_plot_par" = par_args)
+    cyto_option("cyto_plot_par", par_args)
     # SET PARAMETERS
     if(length(par_args[!names(par_args) %in% "layout"]) > 0) {
       par(par_args[!names(par_args) %in% "layout"])
@@ -1546,6 +1579,9 @@ cyto_plot_theme_args <- function() {
     "grid_line_type",
     "grid_line_width",
     "grid_line_col",
-    "grid_line_alpha"
+    "grid_line_alpha",
+    "header_text_font",
+    "header_text_size",
+    "header_text_col"
   )
 }
