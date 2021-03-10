@@ -592,7 +592,8 @@ cyto_gate_bool <- function(x,
   # APPLY BOOLEAN GATES
   lapply(seq_along(gates), function(z){
     gs_pop_add(x, 
-               gate = gates[[z]])
+               gate = gates[[z]],
+               parent = parent[z])
   })
   
   # RETURN GATINGSET
