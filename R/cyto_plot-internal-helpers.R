@@ -92,16 +92,17 @@
   res <- lapply(x, function(z) {
     if (z != 0) {
       pwr <- log10(abs(z))
-      if (z < 0) {
-        pwr <- -pwr
-      }
     }
     if (z == 0) {
       quote(0)
     } else if (pwr == 0) {
       quote("")
     } else if (abs(pwr) %% 1 == 0) {
-      substitute(10^pwr)
+      if(z < 0) {
+        substitute(-10^pwr)
+      } else {
+        substitute(10^pwr)
+      }
     } else {
       quote("")
     }
