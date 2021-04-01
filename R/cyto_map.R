@@ -225,7 +225,8 @@ cyto_map.GatingSet <- function(x,
     }
   })
   lapply(seq_along(gs_cyto_data), function(z) {
-    if (class(gs_cyto_data[[z]]) == "flowFrame") {
+    cf <- gs_cyto_data[[z]]
+    if (class(cf) == "flowFrame") {
       cf <- flowFrame_to_cytoframe(gs_cyto_data[[z]])
     }
     cyto_names(cf) <- names(gs_cyto_data)[z]
@@ -403,7 +404,8 @@ cyto_map.flowSet <- function(x,
     }
   })
   lapply(seq_along(fs_cyto_data), function(z) {
-    if (class(fs_cyto_data[[z]]) == "flowFrame") {
+    cf <- fs_cyto_data[[z]]
+    if (class(cf) == "flowFrame") {
       cf <- flowFrame_to_cytoframe(fs_cyto_data[[z]])
     }
     cyto_names(cf) <- names(fs_cyto_data)[z]
