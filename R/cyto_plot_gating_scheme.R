@@ -199,10 +199,8 @@ cyto_plot_gating_scheme.GatingSet <- function(x,
   if(.all_na(point_col)){
     # BACK GATE OR GATE TRACK (SELECT FROM POINT_COLS)
     if(back_gate[1] != FALSE | gate_track == TRUE){
-      if (!is.null(cyto_plot_theme)) {
-        if ("point_cols" %in% names(cyto_plot_theme)) {
-          point_cols <- cyto_plot_theme[["point_cols"]]
-        }
+      if ("point_cols" %in% names(cyto_plot_theme)) {
+        point_cols <- cyto_plot_theme[["point_cols"]]
       } else {
         point_cols <- .cyto_plot_colour_palette(type = "point_cols")
       }
@@ -645,10 +643,8 @@ cyto_plot_gating_scheme.GatingHierarchy <- function(x,
   if(.all_na(point_col)){
     # BACK GATE OR GATE TRACK (SELECT FROM POINT_COLS)
     if(back_gate[1] != FALSE | gate_track == TRUE){
-      if (!is.null(cyto_plot_theme)) {
-        if ("point_cols" %in% names(cyto_plot_theme)) {
-          point_cols <- cyto_plot_theme[["point_cols"]]
-        }
+      if ("point_cols" %in% names(cyto_plot_theme)) {
+        point_cols <- cyto_plot_theme[["point_cols"]]
       } else {
         point_cols <- .cyto_plot_colour_palette(type = "point_cols")
       }
