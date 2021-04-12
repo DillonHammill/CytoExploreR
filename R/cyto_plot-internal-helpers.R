@@ -72,12 +72,12 @@
                             select = NULL,
                             display = 50000,
                             barcode = FALSE,
-                            seed = 56) {
+                            seed = 42) {
   
   # CHECKS ---------------------------------------------------------------------
   
   # CYTOSETS ONLY
-  if(!cyto_class(x, "flowSet")) {
+  if(cyto_class(x, "flowSet", FALSE) == FALSE) {
     stop("cyto_plot only supports cytoset objects!")
   }
   
@@ -90,7 +90,7 @@
   x <- cyto_group_by(x, merge_by)
   
   # OVERLAY
-  if(!is.null(overlay)) {
+  if(!.all_na(overlay)) {
     # OVERLAY LIST
     if(!cyto_class(overlay, "list", TRUE)) {
       overlay <-  list(overlay)
@@ -99,7 +99,7 @@
     overlay <- lapply(seq_along(overlay), function(z){
       cs <- overlay[[z]]
       # CHECK
-      if(!cyto_class(cs, "flowSet")) {
+      if(cyto_class(cs, "flowSet") == FALSE) {
         stop("cyto_plot only supports cytosets!")
       }
       # SELECT - IF POSSIBLE
@@ -121,6 +121,12 @@
     })
     # COMBINE & TRANSPOSE
     x <- transpose(c(list(x), overlay))
+  # FORMAT SAMPLES
+  } else {
+    x <- structure(
+      lapply(x, list),
+      names = names(x)
+    )
   }
   
   # SAMPLE & MERGE
@@ -180,7 +186,6 @@
       # SAMPLE - SAVE TO CS_SUB_LIST - NEED CS_LIST CANNOT UPDATE IN PLACE
       cs_sub_list <- list()
       lapply(seq_along(cs_list), function(w){
-      
         # CYTOSET
         cs <- cs_list[[w]]
         # IDENTIFIERS
@@ -404,7 +409,7 @@
               type = type)
       )
     }else if(cyto_class(z, "flowSet")){
-      rng <- suppressWarnings(
+      suppressWarnings(
         cyto_apply(z, function(y){
           if(nrow(y) == 0){
             type <- "instrument"
@@ -417,9 +422,7 @@
         channels = channels,
         inverse = FALSE)
       )
-      rng <- do.call("rbind", rng)
     }
-    return(rng)
   })
   data_range <- do.call("rbind", data_range)
   
@@ -2473,7 +2476,10 @@
   if (all(LAPPLY(point_col, ".all_na"))) {
     
     # Extract data
-    fr_exprs <- exprs(x[[1]])[, channels]
+    fr_exprs <- cyto_data_extract(x[[1]],
+                                  format = "matrix",
+                                  channels = channels, 
+                                  copy = FALSE)[[1]][[1]]
     
     # Too few events for density computation
     if (!is.null(nrow(fr_exprs))) {
@@ -2520,7 +2526,10 @@
           z
         )
         # MATRIX
-        fr_exprs <- exprs(x[[1]])
+        fr_exprs <- cyto_data_extract(x[[1]],
+                                      format = "matrix",
+                                      channels = channels, 
+                                      copy = FALSE)[[1]][[1]]
         # CALIBRATION
         if (!is.null(cyto_cal)) {
           if (z %in% colnames(cyto_cal)) {
