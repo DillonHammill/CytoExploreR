@@ -1611,16 +1611,18 @@ cyto_data_extract <- function(x,
                               trans = NA,
                               inverse = FALSE) {
   
-  # TRANSFORMERS
-  trans <- cyto_transformer_extract(x)
+  # EXTRACT TRANSFORMERS
+  if(.all_na(trans)) {
+    trans <- cyto_transformer_extract(x)
+  }
   
-  # SELECT
+  # SELECT - CANNOT WORK FOR CYTOFRAMES
   if(!is.null(select)) {
     x <- cyto_select(x, select)
   }
   
-  # CYTOSET
-  if(cyto_class(x, "flowSet")) {
+  # CYTOFRAME/CYTOSET
+  if(cyto_class(x, c("flowFrame", "flowSet"))) {
     cs_list <- list(x)
     # GATINGHIERARCHY/GATINGSET
   } else {
@@ -1650,32 +1652,54 @@ cyto_data_extract <- function(x,
     }
     # CYTOFRAME
     if(format == "cytoframe") {
-      structure(
-        lapply(cyto_names(cs), function(z){
-          cs[[z]]
-        }), names = cyto_names(cs)
-      )
+      # CYTOFRAME -> CYTOFRAME
+      if(cyto_class(cs, "flowFrame")) {
+        list(cs) # CANNOT CALL CYTO_NAMES HERE
+      # CYTOSET -> CYTOFRAME
+      } else {
+        structure(
+          lapply(cyto_names(cs), function(z){
+            cs[[z]]
+          }), names = cyto_names(cs)
+        )
+      }
       # CYTOSET
     } else if(format == "cytoset") {
-      if(split) {
-        structure(lapply(seq_along(cs), function(z){
-          cs[z]
-        }), names = cyto_names(cs))
+      # CYTOFRAME -> CYTOSET
+      if(cyto_class(cs, "flowFrame")) {
+        cytoset(
+          structure(
+            list(cs), names = "cf"
+          )
+        )
+      # CYTOSET -> CYTOSET
       } else {
-        cs
+        if(split) {
+          structure(lapply(seq_along(cs), function(z){
+            cs[z]
+          }), names = cyto_names(cs))
+        } else {
+          cs
+        }
       }
       # MATRIX
     } else if(format == "matrix") {
-      structure(
-        lapply(cyto_names(cs), function(z){
-          m <- cyto_exprs(cs[[z]])
-          # MARKERS
-          if(markers){
-            colnames(m) <- unname(cyto_markers_extract(cs[[z]], colnames(m)))
-          }
-          return(m)
-        }), names = cyto_names(cs)
-      )
+      # CYTOFRAME -> MATRIX
+      if(cyto_class(cs, "flowFrame")) {
+        structure(
+          list(
+            cyto_exprs(cs, markers = TRUE)
+          ), names = "cf_raw"
+        )
+      # CYTOSET -> MATRIX
+      } else {
+        structure(
+          lapply(cyto_names(cs), function(z){
+            cyto_exprs(cs[[z]],
+                       markers = markers)
+          }), names = cyto_names(cs)
+        )
+      }
     }
   })
   names(res) <- names(cs_list)
@@ -1702,6 +1726,9 @@ cyto_extract <- function(...){
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
 #' @param channels vector of channel or marker names for which raw data should
 #'   be extracted.
+#' @param markers logical indicating whether the column names of the extracted
+#'   matrix should be converted to markers where possible, set to FALSE by
+#'   default.
 #' @param drop logical to control whether single channel extractions should be
 #'   converted to vectors by default, set to TRUE by default.
 #' @param ... additional arguments passed to data extraction from matrix.
@@ -1718,10 +1745,10 @@ cyto_extract <- function(...){
 #' # Activation Gatingset
 #' gs <- load_gs(system.file("extdata/Activation-GatingSet",
 #'                           package = "CytoExploreRData"))
-#'                           
+#'
 #' # cytoset
 #' cs <- cyto_data_extract(gs, "T Cells")[["T Cells"]]
-#' 
+#'
 #' # matrices
 #' cyto_exprs(cs, c("CD44", "CD69"))
 #'
@@ -1740,32 +1767,43 @@ cyto_exprs <- function(x,...) {
 #' @export
 cyto_exprs.flowFrame <- function(x, 
                                  channels = NULL,
+                                 markers = FALSE,
                                  drop = TRUE,
-                                 ...) {
+                               ...) {
+  # CHANNELS
   if(is.null(channels)) {
-    exprs(x)[, 
-             , 
-             drop = drop,
-             ...]
+    mt <- exprs(x)[, 
+                   , 
+                   drop = drop,
+                   ...]
   } else {
-    exprs(x)[, 
-             cyto_channels_extract(x, channels), 
-             drop = drop, 
-             ...]
+    mt <- exprs(x)[, 
+                   cyto_channels_extract(x, channels), 
+                   drop = drop, 
+                   ...]
   }
 
+  # MARKERS
+  if(markers) {
+    colnames(mt) <- unname(cyto_markers_extract(x, colnames(mt)))
+  }
+  
+  return(mt)
+  
 }
 
 #' @rdname cyto_exprs
 #' @export
 cyto_exprs.flowSet <- function(x,
                                channels = NULL,
+                               markers = FALSE,
                                drop = TRUE,
                                ...) {
   structure(
     lapply(seq_along(x), function(z){
       cyto_exprs(x[[z]],
                  channels = channels,
+                 markers = markers,
                  drop = drop,
                  ...)
     }),

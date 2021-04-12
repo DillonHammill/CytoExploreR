@@ -8,9 +8,9 @@
 \usage{
 cyto_exprs(x, ...)
 
-\method{cyto_exprs}{flowFrame}(x, channels = NULL, drop = TRUE, ...)
+\method{cyto_exprs}{flowFrame}(x, channels = NULL, markers = FALSE, drop = TRUE, ...)
 
-\method{cyto_exprs}{flowSet}(x, channels = NULL, drop = TRUE, ...)
+\method{cyto_exprs}{flowSet}(x, channels = NULL, markers = FALSE, drop = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
@@ -20,6 +20,10 @@ cyto_exprs(x, ...)
 
 \item{channels}{vector of channel or marker names for which raw data should
 be extracted.}
+
+\item{markers}{logical indicating whether the column names of the extracted
+matrix should be converted to markers where possible, set to FALSE by
+default.}
 
 \item{drop}{logical to control whether single channel extractions should be
 converted to vectors by default, set to TRUE by default.}
@@ -39,7 +43,7 @@ is primarily for use within CytoExploreR and users should instead use the
 # Activation Gatingset
 gs <- load_gs(system.file("extdata/Activation-GatingSet",
                           package = "CytoExploreRData"))
-                          
+
 # cytoset
 cs <- cyto_data_extract(gs, "T Cells")[["T Cells"]]
 
