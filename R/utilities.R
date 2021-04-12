@@ -12,6 +12,29 @@ CytoExploreR_logo <- function(){
   )
 }
 
+## FORMAL ARGUMENTS OF FUNCTION ------------------------------------------------
+
+#' Get formal arguments of function
+#' @importFrom methods formalArgs
+#' @noRd
+.formal_args <- function(x, drop = NA) {
+  args <- formalArgs(x)
+  if(!.all_na(drop)) {
+    args <- args[!args %in% drop]
+  }
+  return(args)
+}
+
+## CALL A FUNCTION ON ALIST OF ARGUMENTS ---------------------------------------
+
+#' Execute a function over relevant arguments in a list
+#' @noRd
+.execute <- function(x, 
+                       args,
+                       drop = NULL) {
+  do.call(x, args[names(args) %in% .formal_args(x, drop = drop)])
+}
+
 ## EMPTY CHARACTER STRINGS -----------------------------------------------------
 
 #' Check if vector contains only empty character strings
