@@ -116,7 +116,7 @@
   })
   
   # REMOVE ARGUMENTS THAT SHOULD PREPARED ALREADY OR SEPARATELY
-  args <- args[-match(
+  args <- args[!names(args) %in%
     c(
       "x",
       "channels",
@@ -125,14 +125,13 @@
       "negate",
       "axes_trans",
       "axes_text",
+      "layout",
       "header",
       "header_text_font",   # HEADER ARGUMENTS REPEATED PER 
       "header_text_size",
       "header_text_col",
       "..."
-    ),
-    names(args)
-  )]
+    )]
   
   # ARGUMENT NAMES
   arg_names <- names(args)
@@ -170,7 +169,7 @@
   )
   
   # UPDATE ARG_NAMES
-  arg_names <- arg_names[-match(plot_args, arg_names)]
+  arg_names <- arg_names[!arg_names %in% plot_args]
   
   # ARGUMENTS PER LAYER ------------------------------------------------------
   
@@ -183,21 +182,21 @@
   )
   
   # UPDATE ARG_NAMES
-  arg_names <- arg_names[-match(layer_args, arg_names)]
+  arg_names <- arg_names[!arg_names %in% layer_args]
   
   # ARGUMENTS PER POPULATION ---------------------------------------------------
   
   pop_args <- arg_names[grepl("label_", arg_names)]
   
   # UPDATE ARG_NAMES
-  arg_names <- arg_names[-match(pop_args, arg_names)]
+  arg_names <- arg_names[!arg_names %in% pop_args]
   
   # ARGUMENTS PER GATED POPULATION ---------------------------------------------
   
   gate_pop_args <- arg_names[grepl("gate_fill", arg_names)]
   
   # UPDATE ARG_NAMES
-  arg_names <- arg_names[-match(gate_pop_args, arg_names)]
+  arg_names <- arg_names[!arg_names %in% gate_pop_args]
   
   # ARGUMENTS PER GATE ---------------------------------------------------------
   
