@@ -193,23 +193,23 @@
 
   # SAMPLES
   SMP <- length(x)
-
+  
   # POPULATIONS PER LAYER
-  NP <- length(pops) / SMP
-
+  NP <- length(label_stat)/SMP # label_stat already repeated each layer same
+  
   # TOTAL POPULATIONS - SPLIT INDICES
   TNP <- seq_len(NP * SMP)
-
+  
   # SPLIT TNP
   TNP <- split(TNP, rep(seq_len(SMP), each = NP))
-
+  
   # COMPUTE LABEL_STAT ---------------------------------------------------------
 
   # COMPUTE STAT AGAINST BASE LAYER (NO GATES)
   if(.all_na(gate)){
     x <- rep(x[1], length(x))
   }
-  
+
   # STATISTICS
   LABEL_STAT <- LAPPLY(seq_len(SMP), function(z) {
     # LABEL_STAT
