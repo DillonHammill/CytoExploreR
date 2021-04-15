@@ -2052,11 +2052,8 @@ cyto_groups <- function(x,
     pd[is.na(pd)] <- "NA"
   }
   
-  # Extract sample names
-  nms <- cyto_names(x)
-  
   # group_by is a list with factor levels - should not be "all"
-  if (is(group_by, "list")) {
+  if (cyto_class(group_by, "list")) {
     # Check variables and factor levels
     lapply(seq_along(group_by), function(z) {
       # Variable
@@ -2118,10 +2115,10 @@ cyto_groups <- function(x,
     if (group_by == "all") {
       pd_split <- list("all" = pd)
     } else if (group_by == "name") {
-      pd_split <- lapply(nms, function(z) {
-        pd[pd$name == z, , drop = FALSE]
+      pd_split <- lapply(cyto_names(x), function(z) {
+        pd[rownames(pd) == z, , drop = FALSE] # nme column may not match
       })
-      names(pd_split) <- nms
+      names(pd_split) <- cyto_names(x)
     } else {
       pd_split <- split(pd, pd[, group_by],
                         sep = " ",
@@ -2236,7 +2233,7 @@ cyto_group_by <- function(x,
   
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z) {
-    ind <- match(pd_split[[z]][, "name"], cyto_names(x))
+    ind <- match(rownames(pd_split[[z]]), cyto_names(x)) # name column may not match
     x[ind]
   })
   names(x_list) <- names(pd_split)
@@ -2574,6 +2571,7 @@ cyto_save.GatingSet <- function(x,
   # SAVE GATINGSET
   if (is.null(parent)) {
     # SAVE GATINGSET
+    message(paste("Saving GatingSet to ", save_as, "..."))
     suppressMessages(save_gs(x, save_as))
     # RETURN GATINGSET
     invisible(x)
@@ -2597,7 +2595,6 @@ cyto_save.GatingSet <- function(x,
       inverse = inverse,
       trans = trans
     )
-    
     # RETURN DATA
     invisible(fr_list)
   }
