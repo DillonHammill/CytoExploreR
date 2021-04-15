@@ -6,6 +6,7 @@
 \usage{
 cyto_plot_contour(
   x,
+  parent = "root",
   channels,
   overlay = NA,
   display = 1,
@@ -14,19 +15,24 @@ cyto_plot_contour(
   contour_line_width = 1,
   contour_line_col = "black",
   contour_line_alpha = 1,
+  seed = 42,
   ...
 )
 }
 \arguments{
 \item{x}{either an object of class
 \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-\code{\link[flowWorkspace:cytoset]{cytoset}} or a list of
-\code{\link[flowWorkspace:cytoframe]{cytoframe}} objects.}
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list containing
+cytoframe or cytoset objects.}
+
+\item{parent}{name of the parent population to extract from GatingHierarchy
+or GatingSt objects, set to the "root" node by default.}
 
 \item{channels}{channels used to construct the existing cyto_plot.}
 
-\item{overlay}{optional argument if x is a cytoframe to overlay a list of
-cytoframe objects.}
+\item{overlay}{list containing cytoframe or cytoset objects to overlay.}
 
 \item{display}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
@@ -45,6 +51,11 @@ default.}
 \item{contour_line_alpha}{numeric [0,1] to control transparency of contour
 lines, set to 1 by default to remove transparency.}
 
+\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
+sampling is applied with each \code{\link{cyto_plot_contour}} call, set to
+an arbitrary numeric by default. This behaviour can be turned off by
+setting this argument to NULL.}
+
 \item{...}{not in use.}
 }
 \description{
@@ -53,27 +64,25 @@ Add contour lines to cyto_plot
 \examples{
 library(CytoExploreRData)
 
-# Load in Samples
-fs <- Activation
-
-# Apply compensation
-fs <- cyto_compensate(fs)
-
-# Transform fluorescent channels
-trans <- cyto_transformer_logicle(fs)
-fs <- cyto_transform(fs, trans)
-
-# Plot
-cyto_plot(fs[[32]],
-  channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
-  axes_trans = trans
+# Activation GatingSet
+gs <- cyto_load(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+  )
 )
 
-# Contour lines
-cyto_plot_contour(fs[[32]],
-  channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
-  contour_lines = 20
-)
+# Visualise T Cells
+cyto_plot(gs[[1]],
+parent = "T Cells",
+channels = c("CD4", "CD8"))
+
+# Add contour lines
+cyto_plot_contour(gs[[1]],
+parent = "T Cells",
+channels = c("CD4", "CD8"),
+contour_lines = 15)
+
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
