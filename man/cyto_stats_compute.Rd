@@ -17,7 +17,7 @@ cyto_stats_compute(
   tibble = FALSE,
   input = "matrix",
   smooth = 1,
-  bandwidth = NA,
+  bins = 256,
   details = TRUE,
   markers = TRUE,
   save_as = NULL,
@@ -92,10 +92,7 @@ formatted prior to passing it to the statistical function, options include:
 \item{smooth}{numeric smoothing parameter passed to \code{stats:density} when
 computing mode and area under the curve statistics, set to 1 by default.}
 
-\item{bandwidth}{numeric passed to \code{stats:density} to set the bandwidth
-when computing mode or area under the curve statistics, set to NULL by
-default. If the bandwidth is not supplied or NA, a bandwidth will be
-estimated based on all samples supplied to \code{cyto_stats_compute()}.}
+\item{bins}{number of bins to use for histograms, set to 256 by default.}
 
 \item{details}{logical indicating whether to include the \code{cyto_details}
 in the output, set to TRUE by default.}

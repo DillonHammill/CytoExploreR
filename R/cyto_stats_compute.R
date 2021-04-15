@@ -61,10 +61,7 @@
 #'   \code{"cell"}}} Set to "matrix" by default.
 #' @param smooth numeric smoothing parameter passed to \code{stats:density} when
 #'   computing mode and area under the curve statistics, set to 1 by default.
-#' @param bandwidth numeric passed to \code{stats:density} to set the bandwidth
-#'   when computing mode or area under the curve statistics, set to NULL by
-#'   default. If the bandwidth is not supplied or NA, a bandwidth will be
-#'   estimated based on all samples supplied to \code{cyto_stats_compute()}.
+#' @param bins number of bins to use for histograms, set to 256 by default.
 #' @param details logical indicating whether to include the \code{cyto_details}
 #'   in the output, set to TRUE by default.
 #' @param markers logical indicating whether channels should be converted to
@@ -127,7 +124,7 @@ cyto_stats_compute <- function(x,
                                alias = NULL,
                                parent = NULL,
                                channels = NULL,
-                               trans = NULL,
+                               trans = NA,
                                stat = NULL,
                                inverse = TRUE,
                                round = 2,
@@ -135,7 +132,7 @@ cyto_stats_compute <- function(x,
                                tibble = FALSE,
                                input = "matrix",
                                smooth = 1,
-                               bandwidth = NA,
+                               bins = 256,
                                details = TRUE,
                                markers = TRUE,
                                save_as = NULL,
@@ -158,10 +155,9 @@ cyto_stats_compute <- function(x,
   }
   
   # TRANSFORMERS
-  trans <- cyto_transformer_extract(x)
-  
-  # BANDWIDTH?
-  
+  if(.all_na(trans)) {
+    trans <- cyto_transformer_extract(x)
+  }
   
   # EXTRACT DATA ---------------------------------------------------------------
   
@@ -259,14 +255,14 @@ cyto_stats_compute <- function(x,
                             "nrow",
                             input = "matrix",
                             copy = FALSE)
-          res <- res[, rep(1, ncol(parent_counts))]
+          res <- res[, rep(1, ncol(parent_counts)), drop = FALSE]
           colnames(res) <- colnames(parent_counts)
           return(res)
         }), names = names(alias)
       )
       # FREQUENCY
       res <- lapply(alias_counts, function(z){
-        round(z/parent_counts, round) * 100
+        round(z/parent_counts*100, round)
       })
       # GEOMEMTRIC MEAN
     } else if (grepl("^geomean$", stat_strip)) {
@@ -306,7 +302,8 @@ cyto_stats_compute <- function(x,
                        "cyto_stat_density",
                        input = "matrix",
                        smooth = smooth,
-                       bandwidth = bandwidth,
+                       bins = bins,
+                       limits = range(z[[1]], type = "instrument"),
                        simplify = TRUE,
                        copy = FALSE,
                        ...)
@@ -315,7 +312,7 @@ cyto_stats_compute <- function(x,
           cnt <- 0
           m <- apply(d, 2, function(y){
             # CHANNEL INDEX
-            assign("cnt", cnt + 1, envir = parent.frame(2))
+            cnt <<- cnt + 1
             round(
               LAPPLY(names(y), function(w){
                 if(.all_na(y[[w]])) {
@@ -347,7 +344,8 @@ cyto_stats_compute <- function(x,
                      round = round,
                      simplify = TRUE,
                      smooth = smooth,
-                     bandwidth = bandwidth,
+                     bins = bins,
+                     limits = range(z[[1]], type = "instrument"),
                      ...)
         })
       )
@@ -406,21 +404,24 @@ cyto_stats_compute <- function(x,
               colnames(new_cols) <- paste0(gsub("cyto_stat_", "", stat), "-",
                                            1:ncol(new_cols))
             }
-            res[[z]] <- cbind(new_cols, res[[z]])
+            res[[z]] <- data.frame(new_cols, 
+                                   res[[z]],
+                                   check.names = FALSE,
+                                   stringsAsFactors = FALSE)
           }
           # EXPERIMENT DETAILS
           if(details) {
             res[[z]] <- data.frame(
-              cbind(cyto_details(alias[[z]], drop = TRUE),
-                    "alias" = rep(names(res)[z], nrow(res[[z]])),
-                    res[[z]]),
+              cyto_details(alias[[z]], drop = TRUE),
+              "alias" = rep(names(res)[z], nrow(res[[z]])),
+              res[[z]],
               check.names = FALSE,
               stringsAsFactors = FALSE)
           } else {
             res[[z]] <- data.frame(
-              cbind("name" = cyto_names(alias[[z]]),
-                    "alias" = rep(names(res)[z], nrow(res[[z]])),
-                    res[[z]]),
+              "name" = cyto_names(alias[[z]]),
+              "alias" = rep(names(res)[z], nrow(res[[z]])),
+              res[[z]],
               check.names = FALSE,
               stringsAsFactors = FALSE)
           }
