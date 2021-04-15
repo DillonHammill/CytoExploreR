@@ -230,6 +230,7 @@ cyto_stat_auc <- function(x,
                           smooth = 1,
                           bandwidth = NA,
                           bins = 256,
+                          limits = NA,
                           method = "natural",
                           min = NULL,
                           max = NULL,
@@ -241,11 +242,15 @@ cyto_stat_auc <- function(x,
                       smooth = smooth,
                       stat = "count", # cyto_stat_compute conflict
                       bandwidth = bandwidth,
-                      bins = bins)
+                      bins = bins,
+                      limits = limits)
   )
   
   # AREA UNDER CURVE
   res <- LAPPLY(d, function(z){
+    if(.all_na(z)) {
+      return(NA)
+    }
     round(
       integrate(
         splinefun(z$x, 
@@ -289,12 +294,15 @@ cyto_stat_range <- function(x,
 #' @param stat "percent", "density" or "count"
 #' @param smooth numeric set to 1
 #' @param bins 256
+#' @param bandwidth width of bins
+#' @param limits matrix with rows min and max for each column of x
 #' @importFrom stats density
 #' @noRd
 cyto_stat_density <- function(x,
                               stat = "density",
                               smooth = 1,
                               bins = 256,
+                              limits = NA,
                               bandwidth = NA,
                               ...) {
   
@@ -315,12 +323,16 @@ cyto_stat_density <- function(x,
     cnt <- 0
     bandwidth <- apply(x, 2, function(z){
       # COUNTER
-      assign("cnt", cnt + 1, envir = parent.frame(2))
+      cnt <<- cnt + 1
       # BANDWIDTH
       if(length(z) == 0) {
         return(0)
       } else {
-        rng <- range(z)
+        if(.all_na(limits)) {
+          rng <- range(z) # use data range
+        } else {
+          rng <- limits[, colnames(x)[cnt]]
+        }
         return((rng[2] - rng[1])/bins)
       }
     })
@@ -345,11 +357,8 @@ cyto_stat_density <- function(x,
                               sm = smooth,
                               bw = bandwidth,
                               ...){
-    
     # COUNTER
-    cnt <- get("cnt", envir = parent.frame(2)) + 1
-    assign("cnt", cnt, envir = parent.frame(2))
-    
+    cnt <<- cnt + 1
     # KERNEL DENSITY
     kd <- stats::density(z,
                          adjust = sm[cnt], # smoothing per channel
