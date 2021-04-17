@@ -116,7 +116,7 @@ the percentage or number of events to retain." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -154,24 +154,32 @@ the percentage or number of events to retain." />
 the percentage or number of events to retain.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_sample</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+    <pre class="usage"><span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for GatingHierarchy</span>
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>x</span>, display <span class='op'>=</span> <span class='fl'>1</span>, seed <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for GatingSet</span>
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>x</span>, display <span class='op'>=</span> <span class='fl'>1</span>, seed <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_sample</span>(<span class='no'>x</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>x</span>, display <span class='op'>=</span> <span class='fl'>1</span>, seed <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_sample</span>(<span class='no'>x</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>x</span>, display <span class='op'>=</span> <span class='fl'>1</span>, seed <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for list</span>
-<span class='fu'>cyto_sample</span>(<span class='no'>x</span>, <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>x</span>, display <span class='op'>=</span> <span class='fl'>1</span>, seed <span class='op'>=</span> <span class='cn'>NULL</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code> or
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
+<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -196,64 +204,57 @@ scaled per flowFrame to retain original ratios, as used in cyto_plot.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code> or
-  <code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code> restricted to <code>display</code>
-  percentage events.</p>
+    <p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
+  <code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+  <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
+  <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code> sampled to
+  <code>display</code> events.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Load in CytoExploreRData to access files</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='co'># Load in CytoExploreRData to access files</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
 
 <span class='co'># Restrict first sample by 50%</span>
-<span class='fu'>cyto_sample</span>(<span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='fl'>0.5</span>)</div><div class='output co'>#&gt; flowFrame object 'Activation_1.fcs'
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, <span class='fl'>0.5</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; flowFrame object 'Activation_1.fcs'
 #&gt; with 25000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -77.52   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot</div><div class='input'>
 <span class='co'># Restrict first sample to 10000 events</span>
-<span class='fu'>cyto_sample</span>(<span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='fl'>10000</span>)</div><div class='output co'>#&gt; flowFrame object 'Activation_1.fcs'
+<span class='fu'>cyto_sample</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, <span class='fl'>10000</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; flowFrame object 'Activation_1.fcs'
 #&gt; with 10000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -77.52   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
-#&gt; 261 keywords are stored in the 'description' slot</div></pre>
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
+#&gt; 261 keywords are stored in the 'description' slot</div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -269,7 +270,7 @@ scaled per flowFrame to retain original ratios, as used in cyto_plot.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

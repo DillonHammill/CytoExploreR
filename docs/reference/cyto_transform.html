@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,43 +152,43 @@
     <p>Apply Transformations to Cytometry Data</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_transform</span>(<span class='no'>x</span>, <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
+    <pre class="usage"><span class='fu'>cyto_transform</span><span class='op'>(</span><span class='va'>x</span>, trans <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for default</span>
-<span class='fu'>cyto_transform</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_transform</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  type <span class='op'>=</span> <span class='st'>"logicle"</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  parent <span class='op'>=</span> <span class='st'>"root"</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inverse <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for transformList</span>
-<span class='fu'>cyto_transform</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_transform</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for transformerList</span>
-<span class='fu'>cyto_transform</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='no'>...</span>
-)</pre>
+<span class='fu'>cyto_transform</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inverse <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -272,26 +272,35 @@ arguments.</p></td>
 <p><code><a href='cyto_transformer_biex.html'>cyto_transformer_biex</a></code></p>
 <p><code><a href='cyto_transformer_logicle.html'>cyto_transformer_logicle</a></code></p>
 <p><code><a href='cyto_transformer_combine.html'>cyto_transformer_combine</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
 
 <span class='co'># Automatically transform flowSet</span>
-<span class='no'>fs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>fs</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"arcsinh"</span>)</div><div class='output co'>#&gt; <span class='message'>Automatically transforming flowFrame/flowSet objects is not recommended as transformation definitions will be lost.</span></div><div class='img'><img src='cyto_transform-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='va'>fs_trans</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_transform</span><span class='op'>(</span><span class='va'>fs</span>, type <span class='op'>=</span> <span class='st'>"arcsinh"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Automatically transforming flowFrame/flowSet objects is not recommended as transformation definitions will be lost.</span></div><div class='img'><img src='cyto_transform-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Manually construct &amp; apply transformations</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transformer_biex.html'>cyto_transformer_biex</a></span>(<span class='no'>fs</span>)</div><div class='input'><span class='no'>fs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>fs</span>, <span class='no'>trans</span>)</div><div class='img'><img src='cyto_transform-2.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='va'>trans</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_transformer_biex.html'>cyto_transformer_biex</a></span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
+</div><div class='input'><span class='va'>fs_trans</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_transform</span><span class='op'>(</span><span class='va'>fs</span>, <span class='va'>trans</span><span class='op'>)</span>
+</div><div class='img'><img src='cyto_transform-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Add fs to GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
 <span class='co'># Automatically transform GatingSet</span>
-<span class='no'>gs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>gs</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>)</div><div class='img'><img src='cyto_transform-3.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='va'>gs_trans</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_transform</span><span class='op'>(</span><span class='va'>gs</span>, type <span class='op'>=</span> <span class='st'>"logicle"</span><span class='op'>)</span>
+</div><div class='img'><img src='cyto_transform-3.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Manually construct &amp; apply transformations</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transformer_logicle.html'>cyto_transformer_logicle</a></span>(<span class='no'>gs</span>)</div><div class='img'><img src='cyto_transform-4.png' alt='' width='700' height='433' /></div><div class='input'><span class='no'>gs_trans</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_transform</span>(<span class='no'>gs</span>, <span class='no'>trans</span>)</div><div class='img'><img src='cyto_transform-5.png' alt='' width='700' height='433' /></div></pre>
+<span class='va'>trans</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_transformer_logicle.html'>cyto_transformer_logicle</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='img'><img src='cyto_transform-4.png' alt='' width='700' height='433' /></div><div class='input'><span class='va'>gs_trans</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_transform</span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>trans</span><span class='op'>)</span>
+</div><div class='img'><img src='cyto_transform-5.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -307,7 +316,7 @@ arguments.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

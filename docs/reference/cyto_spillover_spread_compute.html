@@ -47,8 +47,9 @@
 
 
 <meta property="og:title" content="Compute Spillover Spreading Matrix — cyto_spillover_spread_compute" />
-<meta property="og:description" content="spillover_spread computes the spillover spreading matrix as described
-by Nguyen et al. (2013) using gated and compensated compensation controls." />
+<meta property="og:description" content="cyto_spillover_spread_compute computes the spillover spreading matrix
+as described by Nguyen et al. (2013) using gated and compensated compensation
+controls." />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -116,7 +117,7 @@ by Nguyen et al. (2013) using gated and compensated compensation controls." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -150,21 +151,22 @@ by Nguyen et al. (2013) using gated and compensated compensation controls." />
     </div>
 
     <div class="ref-description">
-    <p><code>spillover_spread</code> computes the spillover spreading matrix as described
-by Nguyen et al. (2013) using gated and compensated compensation controls.</p>
+    <p><code>cyto_spillover_spread_compute</code> computes the spillover spreading matrix
+as described by Nguyen et al. (2013) using gated and compensated compensation
+controls.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_spillover_spread_compute</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channel_match</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>compensated</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>spillover</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>spillover_spread</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cyto_spillover_spread_compute</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  parent <span class='op'>=</span> <span class='cn'>NULL</span>,
+  axes_trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channel_match <span class='op'>=</span> <span class='cn'>NULL</span>,
+  compensated <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  spillover <span class='op'>=</span> <span class='cn'>NULL</span>,
+  spillover_spread <span class='op'>=</span> <span class='cn'>NULL</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -202,7 +204,7 @@ following the channel selection process.</p></td>
       <th>compensated</th>
       <td><p>logical indicating whether the supplied compensation
 controls have been compensated. Compensation controls must be compensated
-prior tro calculation of spillover spreading matrix. If <code>compensated</code>
+prior to calculation of spillover spreading matrix. If <code>compensated</code>
 is set to FALSE, the compensation controls will be compensated internally
 using the supplied <code>spillover</code> matrix.</p></td>
     </tr>
@@ -243,6 +245,9 @@ arguments.</p></td>
 
     <div class='dont-index'><p><code><a href='cyto_spillover_compute.html'>cyto_spillover_compute</a></code></p>
 <p><code><a href='cyto_spillover_edit.html'>cyto_spillover_edit</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -259,7 +264,7 @@ arguments.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

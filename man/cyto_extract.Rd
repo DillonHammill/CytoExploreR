@@ -59,14 +59,15 @@ library(CytoExploreRData)
 # GatingSet
 gs <- GatingSet(Activation)
 
-# Extract flowFrame
-cyto_extract(gs[[1]], parent = "root")
+# Extract cytoframe
+cf <- cyto_extract(gs[[1]], parent = "root")
 
 # Extract cytoset
-cyto_extract(gs, parent = "root")
+cs <- cyto_extract(gs, parent = "root")
 
 # Extract raw data matrices
-cyto_extract(gs, parent = "root", raw = TRUE)
+mt <- cyto_extract(gs, parent = "root", raw = TRUE)
+mt[["Activation_1.fcs"]]
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

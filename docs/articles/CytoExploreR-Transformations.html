@@ -73,7 +73,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -98,13 +98,14 @@
 
       
 
-      </header><script src="CytoExploreR-Transformations_files/header-attrs-2.2/header-attrs.js"></script><div class="row">
+      </header><script src="CytoExploreR-Transformations_files/header-attrs-2.5/header-attrs.js"></script><link href="CytoExploreR-Transformations_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
+<script src="CytoExploreR-Transformations_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Data Transformations</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2020-06-19</h4>
+            <h4 class="date">2021-04-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoExploreR/blob/master/vignettes/CytoExploreR-Transformations.Rmd"><code>vignettes/CytoExploreR-Transformations.Rmd</code></a></small>
       <div class="hidden name"><code>CytoExploreR-Transformations.Rmd</code></div>
@@ -120,19 +121,19 @@
 Data transformations are essential for appropriately visualising cytometry data. This requirement for data transformations is due to the large dynamic range of cytometry data makes it difficult visualise both positive and negative events on a linear scale. As you can see below, the values for flow cytometry extend from 0 to 262144 which is an enormous range for fluorescent intensity values. Clearly, visualising the data on this scale is not going to allow us to identify discrete negative and positive populations.
 </div>
 <p><br></p>
-<p><img src="Transformations/Transformations-1.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-1.png" width="60%" style="display: block; margin: auto;"></p>
 <p><br></p>
 <div style="line-height: 1.8em;">
 To overcome this visulisation problem, traditionally cytometry data has been transformed using log transformations to improve visualisation and separation of negative and positive events into discrete populations. As you can see below, log transformations handle high fluorescent intensity values quite well, but struggle with values approaching zero. This results in these lower values being dumped on the lower end of the scale, which makes it appear as though the data contains three distinct populations based on fluorescent intensity. This problem is further highlighted when applying compensation to the data as it introduces more values that approach zero and below.
 </div>
 <p><br></p>
-<p><img src="Transformations/Transformations-2.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-2.png" width="60%" style="display: block; margin: auto;"></p>
 <p><br></p>
 <div style="line-height: 1.8em;">
 Recently, more sophisticated transformations such as the hyperbolic arcsine, biexponential and logicle transformations have been used to overcome the limitations of the log transformation. The result of applying these transformations using the default parameters to the Alexa Fluor 488 channel is shown below for easy comparison. As you can see, all the transformations seem to handle the higher fluorescent intensity values in a similar manner, but differ in their approach to dealing with values nearing zero. For flow cytometry data, the biexponential and logicle transformations seem to provide the best visualisation of the data as discrete negative and positive populations are clearly visible. It is important to note that the optimal transformation for each parameter is data-dependant and users should explore the different transformation types to obtain the best visualisation of the data. This process will be documented later in this vignette.
 </div>
 <p><br></p>
-<p><img src="Transformations/Transformations-3.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-3.png" width="100%" style="display: block; margin: auto;"></p>
 <p><br></p>
 <div style="line-height: 1.8em;">
 <p><strong>CytoExploreR</strong> has full support for log, arcsinh, biexponential and logicle transformations implemented in the flowWorkspace package. In this vignette we will demonstrate how <strong>CytoExploreR</strong> facilitates fine tuning of transformation parameters and how these optimised transformations can be applied cytometry data. For consistency with the RGLab suite of cytometry data analysis packages, <strong>CytoExploreR</strong> uses a series of wrapper functions to add support for these transformations with improved support for customisation. Below is a list of the key functions that you will encounter in this vignette:</p>
@@ -160,23 +161,25 @@ Recently, more sophisticated transformations such as the hyperbolic arcsine, bie
 <div style="line-height: 1.8em;">
 To demonstrate the use of the transformation functions, we will need to download the Activation FCS files shipped with <strong>CytoExploreRData</strong>. If you have not already done so, these FCS files can be easily downloaded to a folder in your current working directory by following these steps:
 </div>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="co"># Load required packages</span>
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreR</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreRData</span>)
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Load required packages</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DillonHammill/CytoExploreR">CytoExploreR</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">CytoExploreRData</span><span class="op">)</span>
 
 <span class="co"># Activation dataset </span>
-<span class="no">Activation</span>
+<span class="va">Activation</span>
 
 <span class="co"># Save Activation dataset FCS files to Activation-Samples folder</span>
-<span class="fu"><a href="../reference/cyto_save.html">cyto_save</a></span>(<span class="no">Activation</span>, <span class="kw">save_as</span> <span class="kw">=</span> <span class="st">"Activation-Samples"</span>)</pre></body></html></div>
+<span class="fu"><a href="../reference/cyto_save.html">cyto_save</a></span><span class="op">(</span><span class="va">Activation</span>, save_as <span class="op">=</span> <span class="st">"Activation-Samples"</span><span class="op">)</span></code></pre></div>
 <div style="line-height: 1.8em;">
 Now hat we have the FCS files stored locally, let’s setup up the Activation GatingSet using <code>cyto_setup</code>. It is recommended that experiment details be filled in at this point as this information can be used to easily select samples to use when customising transformations. If your computer struggles with applying the transformations, it is recommended that you set the <strong>restrict</strong> argument to TRUE in <code>cyto_setup</code> to restrict the data to only the parameters for which markers have been assigned. Although not required for this vignette, it is always a good idea to ensure that the data has been compensated prior to data transformations. The spillover matrices attached to each of the files can be applied using <code>cyto_compensate</code>.
 </div>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="co"># Activation GatingSet</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span>(<span class="st">"Activation-Samples"</span>)
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Activation GatingSet</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span><span class="op">(</span><span class="st">"Activation-Samples"</span><span class="op">)</span>
 
 <span class="co"># Apply compensation</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span>(<span class="no">gs</span>)</pre></body></html></div>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span></code></pre></div>
 <div style="line-height: 1.8em;">
 Next we will demonstrate the use of the different <code>cyto_transformer</code> functions to obtain optimised transformation definitions for each of the fluorescent channels. These transformer functions will automatically pool the supplied data, apply the transformation using the specified parameters to the specified channels and plot the resultant transformed data using <code>cyto_plot</code>. The definition of the transformation can be altered by changing the arguments of the underlying flowWorkspace transformer function. It is important to note that these <code>cyto_transformer</code> functions do not apply these transformers to the data, they are purely used to optimise the transformers prior to applying the combined transformers to the data using <code>cyto_transform</code>. As a result, these <code>cyto_transformer</code> functions do not return the transformed data, but instead the transformer definitions that can be applied to the data using <code>cyto_transform</code>.
 </div>
@@ -190,30 +193,34 @@ To make things a little easier, all these <code>cyto_transformer</code> function
 <div id="log-transformation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#log-transformation" class="anchor"></a>Log Transformation</h2>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co"># Default log transformer</span>
-<span class="no">trans_log</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_log.html">cyto_transformer_log</a></span>(<span class="no">gs</span>)</pre></body></html></div>
-<p><img src="Transformations/Transformations-4.png" width="75%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Default log transformer</span>
+<span class="va">trans_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_log.html">cyto_transformer_log</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-4.png" width="75%" style="display: block; margin: auto;"></p>
 </div>
 <div id="arcsinh-transformation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#arcsinh-transformation" class="anchor"></a>Arcsinh Transformation</h2>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="co"># Default arcsinh transformer</span>
-<span class="no">trans_arcsinh</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_arcsinh.html">cyto_transformer_arcsinh</a></span>(<span class="no">gs</span>)</pre></body></html></div>
-<p><img src="Transformations/Transformations-5.png" width="75%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Default arcsinh transformer</span>
+<span class="va">trans_arcsinh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_arcsinh.html">cyto_transformer_arcsinh</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-5.png" width="75%" style="display: block; margin: auto;"></p>
 </div>
 <div id="biexponential-transformation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#biexponential-transformation" class="anchor"></a>Biexponential Transformation</h2>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="co"># Default biexponentail transformer</span>
-<span class="no">trans_biex</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_biex.html">cyto_transformer_biex</a></span>(<span class="no">gs</span>)</pre></body></html></div>
-<p><img src="Transformations/Transformations-6.png" width="75%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Default biexponentail transformer</span>
+<span class="va">trans_biex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_biex.html">cyto_transformer_biex</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-6.png" width="75%" style="display: block; margin: auto;"></p>
 </div>
 <div id="logicle-transformation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#logicle-transformation" class="anchor"></a>Logicle Transformation</h2>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># Default biexponentail transformer</span>
-<span class="no">trans_logicle</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_logicle.html">cyto_transformer_logicle</a></span>(<span class="no">gs</span>)</pre></body></html></div>
-<p><img src="Transformations/Transformations-7.png" width="75%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Default biexponentail transformer</span>
+<span class="va">trans_logicle</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_logicle.html">cyto_transformer_logicle</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-7.png" width="75%" style="display: block; margin: auto;"></p>
 </div>
 <div id="optimisation-of-transformation-parameters" class="section level2">
 <h2 class="hasAnchor">
@@ -221,44 +228,46 @@ To make things a little easier, all these <code>cyto_transformer</code> function
 <div style="line-height: 1.8em;">
 In the examples above, we showed how we can quickly apply different types of transformations to all the fluorescent channels to identify which transformation type to use for each fluorescent channel. Based on these plots, it seems as though the logicle transformation provides the best overall result when using the default settings. In my experience, I find the logicle transformation to perform consistently the best for flow cytometry data, and it often does not even require much optimisation. For the purpose of demonstration, I will therefore switch over to the biexponential transformations to show you how we can optimise these transformation parameters to better visualise the data. Based on the plots above (green) it seems as if we can improve the transformer definitions for the PE-A and 7-AAD-A parameters. Firstly, let’s remove the unwanted transformer definitions from <code>trans_biex</code> which contains our transformation definitions for all the fluorescent channels.
 </div>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># Remove PE-A &amp; 7-AAD-A transformers </span>
-<span class="no">trans_biex</span> <span class="kw">&lt;-</span> <span class="no">trans_biex</span>[-<span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"PE-A"</span>, <span class="st">"7-AAD-A"</span>), <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">trans_biex</span>))]
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Remove PE-A &amp; 7-AAD-A transformers </span>
+<span class="va">trans_biex</span> <span class="op">&lt;-</span> <span class="va">trans_biex</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PE-A"</span>, <span class="st">"7-AAD-A"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">trans_biex</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
 
 <span class="co"># Check transformers have been removed</span>
-<span class="no">trans_biex</span></pre></body></html></div>
+<span class="va">trans_biex</span></code></pre></div>
 <div style="line-height: 1.8em;">
 Let’s spend some time optimising the biexponential transformation for the PE channel. Since the parameters for the transformers are defined in the <strong>flowWorkspace</strong> package, we will need to refer to that documentation to optimise the transformers. Running <code><a href="../reference/cyto_transformer_biex.html">?cyto_transformer_biex</a></code> will open the help documentation that contains links to the relevant documents in <strong>flowWorkspace</strong>. After consulting these documents, it looks like we can use the <code>widthBasis</code> argument to fine-tune the transformation definition. The default value is set to -10, so let’s try changing this to -100 and -1000 to see if it improves the visualisation of the data.
 </div>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="co"># default PE transformer</span>
-<span class="no">PE_biex</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_biex.html">cyto_transformer_biex</a></span>(<span class="no">gs</span>,
-                                 <span class="kw">channels</span> <span class="kw">=</span> <span class="st">"PE-A"</span>,
-                                 <span class="kw">widthBasis</span> <span class="kw">=</span> -<span class="fl">10</span>)</pre></body></html></div>
-<p><img src="Transformations/Transformations-8.png" width="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"># PE transformer
-PE_biex &lt;- cyto_transformer_biex(gs,
-                                 channels = "PE-A",.
-                                 widthBasis = -100)</pre></body></html></div>
-<p><img src="Transformations/Transformations-9.png" width="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"># PE transformer
-PE_biex &lt;- cyto_transformer_biex(gs,
-                                 channels = "PE-A",.
-                                 widthBasis = -1000)</pre></body></html></div>
-<p><img src="Transformations/Transformations-10.png" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># default PE transformer</span>
+<span class="va">PE_biex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_biex.html">cyto_transformer_biex</a></span><span class="op">(</span><span class="va">gs</span>,
+                                 channels <span class="op">=</span> <span class="st">"PE-A"</span>,
+                                 widthBasis <span class="op">=</span> <span class="op">-</span><span class="fl">10</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-8.png" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PE transformer</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>PE_biex <span class="ot">&lt;-</span> <span class="fu">cyto_transformer_biex</span>(gs,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">channels =</span> <span class="st">"PE-A"</span>,.</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">widthBasis =</span> <span class="sc">-</span><span class="dv">100</span>)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-9.png" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PE transformer</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>PE_biex <span class="ot">&lt;-</span> <span class="fu">cyto_transformer_biex</span>(gs,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">channels =</span> <span class="st">"PE-A"</span>,.</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">widthBasis =</span> <span class="sc">-</span><span class="dv">1000</span>)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Transformations/Transformations-10.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 Based on these plots and our understanding of the underlying biology, it looks like a widthBasis of -100 will provide a decent visualisation of the data. Before we can apply our transformers to the data. We will need to combine our transformers into a single list of transformers using <code>cyto_transformer_combine</code>.
 </div>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"># PE transformer
-PE_biex &lt;- cyto_transformer_biex(gs,
-                                 channels = "PE-A",.
-                                 widthBasis = -100)
-
-# Combine transformer definitions
-trans &lt;- cyto_transformer_combine(trans_biex, 
-                                  PE_biex, 
-                                  trans_logicle["7-AAD-A"])
-
-# All transformer definitions
-trans</pre></body></html></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PE transformer</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>PE_biex <span class="ot">&lt;-</span> <span class="fu">cyto_transformer_biex</span>(gs,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">channels =</span> <span class="st">"PE-A"</span>,.</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">widthBasis =</span> <span class="sc">-</span><span class="dv">100</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine transformer definitions</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>trans <span class="ot">&lt;-</span> <span class="fu">cyto_transformer_combine</span>(trans_biex, </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                                  PE_biex, </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                                  trans_logicle[<span class="st">"7-AAD-A"</span>])</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># All transformer definitions</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>trans</span></code></pre></div>
 </div>
 <div id="apply-manually-optimised-transformers-to-data" class="section level2">
 <h2 class="hasAnchor">
@@ -266,9 +275,10 @@ trans</pre></body></html></div>
 <div style="line-height: 1.8em;">
 The complete list of transformers can be applied to the data using <code>cyto_transform</code>. It is important to optimise the transformers before using <code>cyto_transform</code> as it is not currently possible to inverse the transformations applied to a GatingSet.
 </div>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="co"># Apply transformers to data</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span>(<span class="no">gs</span>,
-                     <span class="kw">trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Apply transformers to data</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span><span class="op">(</span><span class="va">gs</span>,
+                     trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="apply-default-transformers-to-data" class="section level2">
 <h2 class="hasAnchor">
@@ -276,15 +286,16 @@ The complete list of transformers can be applied to the data using <code>cyto_tr
 <div style="line-height: 1.8em;">
 <code>cyto_transform</code> can also apply batch transformers to the data using the flowWorkspace defaults. Simply indicate the type of transformation to apply through the <code>type</code> argument and <code>cyto_transform</code> will make a call to the relevant <code>cyto_transformer</code> function to obtain the transformer definitions using the defaults in flowWorkspace. These transformers will then be applied to the data within <code>cyto_transform</code> and the transformed data will be returned. It is important to note that transformer definitions cannot be customised on a per channel basis using this method. For this reason, it is recommended that the transformer definitions be optimised using the <code>cyto_transformer</code> functions prior to apply them to the data using <code>cyto_transform</code>.
 </div>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="co"># Activation GatingSet</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span>(<span class="st">"Activation-Samples"</span>)
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Activation GatingSet</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span><span class="op">(</span><span class="st">"Activation-Samples"</span><span class="op">)</span>
 
 <span class="co"># Apply compensation</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span>(<span class="no">gs</span>)
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span>
 
 <span class="co"># Apply transformers</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span>(<span class="no">gs</span>,
-                     <span class="kw">type</span> <span class="kw">=</span> <span class="st">"logicle"</span>)</pre></body></html></div>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span><span class="op">(</span><span class="va">gs</span>,
+                     type <span class="op">=</span> <span class="st">"logicle"</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div id="summary" class="section level1">
@@ -312,7 +323,7 @@ Data transformations are essential to appropriate visualisation of cytometry dat
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

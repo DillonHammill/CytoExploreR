@@ -119,7 +119,7 @@ GatingSet." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -160,16 +160,17 @@ read into a <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>c
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_setup</span>(
-  <span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>,
-  <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>restrict</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>clean</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>markers</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>parse_names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>details</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cyto_setup</span><span class='op'>(</span>
+  path <span class='op'>=</span> <span class='st'>"."</span>,
+  gatingTemplate <span class='op'>=</span> <span class='cn'>NULL</span>,
+  restrict <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  markers <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  parse_names <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  details <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  sample <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -187,7 +188,7 @@ saving.</p></td>
     <tr>
       <th>restrict</th>
       <td><p>logical indicating whether unassigned channels should be
-dropped from the returned cytoset, set to FALSE by default. Alternatvely,
+dropped from the returned cytoset, set to FALSE by default. Alternatively,
 users can supply a vector of channels to remove, see
 <code><a href='cyto_channels_restrict.html'>cyto_channels_restrict</a></code> for details.</p></td>
     </tr>
@@ -218,6 +219,13 @@ the delimiter to this argument instead of TRUE.</p></td>
 <code>cyto_details_edit</code> to update the experimental details associated with
 the loaded samples, set to TRUE by default. The name of the csv to which
 these details will be supplied can also be passed to this argument.</p></td>
+    </tr>
+    <tr>
+      <th>sample</th>
+      <td><p>logical indicating whether all samples should be downsampled to
+the minimum number of events in a sample, set to FALSE by default.
+Alternatively, users can supply a numeric to indicate the desired number of
+events to keep in each sample.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -251,26 +259,31 @@ be created if necessary and assigned as the active gatingTemplate.</p>
 <p><code><a href='cyto_clean.html'>cyto_clean</a></code></p>
 <p><code><a href='cyto_gatingTemplate_select.html'>cyto_gatingTemplate_select</a></code></p>
 <p><code><a href='cyto_gatingTemplate_create.html'>cyto_gatingTemplate_create</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Get path to Activation .fcs files in CytoExploreRData</span>
-<span class='no'>datadir</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"extdata"</span>, <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"CytoExploreRData"</span>)
-<span class='no'>path</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span>(<span class='no'>datadir</span>, <span class='st'>"/Activation"</span>)
+<span class='va'>datadir</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata"</span>, package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span><span class='op'>)</span>
+<span class='va'>path</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='va'>datadir</span>, <span class='st'>"/Activation"</span><span class='op'>)</span>
 
 <span class='co'># Load in .fcs files into an annotated GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_setup</span>(<span class='no'>path</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_setup</span><span class='op'>(</span><span class='va'>path</span><span class='op'>)</span>
 
 <span class='co'># Markers have been assigned</span>
-<span class='fu'><a href='cyto_extract.html'>cyto_extract</a></span>(<span class='no'>gs</span>, <span class='st'>"root"</span>)<span class='kw'>[[</span><span class='fl'>1</span>]]
+<span class='fu'><a href='cyto_extract.html'>cyto_extract</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='st'>"root"</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 
 <span class='co'># Experiment details have been updated</span>
-<span class='fu'><a href='cyto_details.html'>cyto_details</a></span>(<span class='no'>gs</span>)
-}</div></pre>
+<span class='fu'><a href='cyto_details.html'>cyto_details</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -286,7 +299,7 @@ be created if necessary and assigned as the active gatingTemplate.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

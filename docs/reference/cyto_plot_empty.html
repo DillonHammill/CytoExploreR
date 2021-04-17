@@ -117,7 +117,7 @@ this base layer with cyto_plot_point or cyto_plot_density." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -156,65 +156,65 @@ plot with border, axes, axes_text and titles. Data is subsequently added to
 this base layer with <code>cyto_plot_point</code> or <code>cyto_plot_density</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_plot_empty</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+    <pre class="usage"><span class='fu'>cyto_plot_empty</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_plot_empty</span>(
-  <span class='no'>x</span>,
-  <span class='no'>channels</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>gate</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
-  <span class='kw'>axes_limits_buffer</span> <span class='kw'>=</span> <span class='fl'>0.03</span>,
-  <span class='no'>title</span>,
-  <span class='no'>xlab</span>,
-  <span class='no'>ylab</span>,
-  <span class='kw'>margins</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>density_modal</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>1.5</span>,
-  <span class='kw'>density_stack</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
-  <span class='kw'>density_cols</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>density_fill</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>density_fill_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>density_line_type</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>density_line_width</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>density_line_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>point_shape</span> <span class='kw'>=</span> <span class='st'>"."</span>,
-  <span class='kw'>point_size</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>point_col_scale</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>point_cols</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>point_col</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>point_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>axes_text</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>TRUE</span>, <span class='fl'>TRUE</span>),
-  <span class='kw'>axes_text_font</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>axes_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>axes_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>axes_label_text_font</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>axes_label_text_size</span> <span class='kw'>=</span> <span class='fl'>1.1</span>,
-  <span class='kw'>axes_label_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>title_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>title_text_size</span> <span class='kw'>=</span> <span class='fl'>1.1</span>,
-  <span class='kw'>title_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>border_line_type</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>border_line_width</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>border_line_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>border_fill</span> <span class='kw'>=</span> <span class='st'>"white"</span>,
-  <span class='kw'>border_fill_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>legend</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>legend_text</span>,
-  <span class='kw'>legend_text_font</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>legend_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>legend_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>legend_line_type</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>legend_line_width</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>legend_line_col</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>legend_box_fill</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>legend_point_col</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>...</span>
-)</pre>
+<span class='fu'>cyto_plot_empty</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  <span class='va'>channels</span>,
+  axes_trans <span class='op'>=</span> <span class='cn'>NA</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  gate <span class='op'>=</span> <span class='cn'>NA</span>,
+  xlim <span class='op'>=</span> <span class='cn'>NA</span>,
+  ylim <span class='op'>=</span> <span class='cn'>NA</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"auto"</span>,
+  axes_limits_buffer <span class='op'>=</span> <span class='fl'>0.03</span>,
+  <span class='va'>title</span>,
+  <span class='va'>xlab</span>,
+  <span class='va'>ylab</span>,
+  margins <span class='op'>=</span> <span class='cn'>NULL</span>,
+  density_modal <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  density_smooth <span class='op'>=</span> <span class='fl'>1.5</span>,
+  density_stack <span class='op'>=</span> <span class='fl'>0.5</span>,
+  density_cols <span class='op'>=</span> <span class='cn'>NA</span>,
+  density_fill <span class='op'>=</span> <span class='cn'>NA</span>,
+  density_fill_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  density_line_type <span class='op'>=</span> <span class='fl'>1</span>,
+  density_line_width <span class='op'>=</span> <span class='fl'>1</span>,
+  density_line_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  point_shape <span class='op'>=</span> <span class='st'>"."</span>,
+  point_size <span class='op'>=</span> <span class='fl'>2</span>,
+  point_col_scale <span class='op'>=</span> <span class='cn'>NA</span>,
+  point_cols <span class='op'>=</span> <span class='cn'>NA</span>,
+  point_col <span class='op'>=</span> <span class='cn'>NA</span>,
+  point_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  axes_text <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='cn'>TRUE</span>, <span class='cn'>TRUE</span><span class='op'>)</span>,
+  axes_text_font <span class='op'>=</span> <span class='fl'>1</span>,
+  axes_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  axes_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  axes_label_text_font <span class='op'>=</span> <span class='fl'>1</span>,
+  axes_label_text_size <span class='op'>=</span> <span class='fl'>1.1</span>,
+  axes_label_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  title_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  title_text_size <span class='op'>=</span> <span class='fl'>1.1</span>,
+  title_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  border_line_type <span class='op'>=</span> <span class='fl'>1</span>,
+  border_line_width <span class='op'>=</span> <span class='fl'>1</span>,
+  border_line_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  border_fill <span class='op'>=</span> <span class='st'>"white"</span>,
+  border_fill_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  legend <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>legend_text</span>,
+  legend_text_font <span class='op'>=</span> <span class='fl'>1</span>,
+  legend_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  legend_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  legend_line_type <span class='op'>=</span> <span class='cn'>NA</span>,
+  legend_line_width <span class='op'>=</span> <span class='cn'>NA</span>,
+  legend_line_col <span class='op'>=</span> <span class='cn'>NA</span>,
+  legend_box_fill <span class='op'>=</span> <span class='cn'>NA</span>,
+  legend_point_col <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -496,20 +496,25 @@ legend.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Construct an empty 2D plot with black background</span>
-<span class='fu'>cyto_plot_empty</span>(<span class='no'>Activation</span><span class='kw'>[[</span><span class='fl'>32</span>]],
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"FSC-A"</span>, <span class='st'>"SSC-A"</span>),
-  <span class='kw'>border_fill</span> <span class='kw'>=</span> <span class='st'>"black"</span>
-)</div><div class='img'><img src='cyto_plot_empty-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>cyto_plot_empty</span><span class='op'>(</span><span class='va'>Activation</span><span class='op'>[[</span><span class='fl'>32</span><span class='op'>]</span><span class='op'>]</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FSC-A"</span>, <span class='st'>"SSC-A"</span><span class='op'>)</span>,
+  border_fill <span class='op'>=</span> <span class='st'>"black"</span>
+<span class='op'>)</span>
+</div><div class='img'><img src='cyto_plot_empty-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Construct an empty 1D plot</span>
-<span class='fu'>cyto_plot_empty</span>(<span class='no'>Activation</span><span class='kw'>[[</span><span class='fl'>32</span>]],
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"FSC-A"</span>),
-  <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='no'>Activation</span>[<span class='fl'>1</span>:<span class='fl'>2</span>]
-)</div><div class='img'><img src='cyto_plot_empty-2.png' alt='' width='700' height='433' /></div></pre>
+<span class='fu'>cyto_plot_empty</span><span class='op'>(</span><span class='va'>Activation</span><span class='op'>[[</span><span class='fl'>32</span><span class='op'>]</span><span class='op'>]</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FSC-A"</span><span class='op'>)</span>,
+  overlay <span class='op'>=</span> <span class='va'>Activation</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>]</span>
+<span class='op'>)</span>
+</div><div class='img'><img src='cyto_plot_empty-2.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -525,7 +530,7 @@ legend.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

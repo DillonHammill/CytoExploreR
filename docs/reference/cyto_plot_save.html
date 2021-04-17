@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,16 +152,16 @@
     <p>Save High Resolution cyto_plot Images</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_plot_save</span>(
-  <span class='no'>save_as</span>,
-  <span class='kw'>width</span> <span class='kw'>=</span> <span class='fl'>7</span>,
-  <span class='kw'>height</span> <span class='kw'>=</span> <span class='fl'>7</span>,
-  <span class='kw'>units</span> <span class='kw'>=</span> <span class='st'>"in"</span>,
-  <span class='kw'>res</span> <span class='kw'>=</span> <span class='fl'>300</span>,
-  <span class='kw'>multiple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cyto_plot_save</span><span class='op'>(</span>
+  <span class='va'>save_as</span>,
+  width <span class='op'>=</span> <span class='fl'>7</span>,
+  height <span class='op'>=</span> <span class='fl'>7</span>,
+  units <span class='op'>=</span> <span class='st'>"in"</span>,
+  res <span class='op'>=</span> <span class='fl'>300</span>,
+  multiple <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  layout <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -216,44 +216,48 @@ created using `cyto_plot_layout`, set to NULL by default to use standard
 
     <div class='dont-index'><p><code>cairo</code></p>
 <p><code><a href='https://rdrr.io/r/grDevices/png.html'>png</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load samples into GatingSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
 <span class='co'># Apply compensation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span>(<span class='no'>gs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
 
 <span class='co'># Transform fluorescent channels</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span>(<span class='no'>gs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
 
 <span class='co'># Apply gatingTemplate</span>
-<span class='fu'><a href='cyto_gatingTemplate_apply.html'>cyto_gatingTemplate_apply</a></span>(<span class='no'>gs</span>, <span class='no'>Activation_gatingTemplate</span>)
+<span class='fu'><a href='cyto_gatingTemplate_apply.html'>cyto_gatingTemplate_apply</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>Activation_gatingTemplate</span><span class='op'>)</span>
 
 <span class='co'># Save png image of gating scheme after plotting</span>
-<span class='fu'>cyto_plot_save</span>(<span class='st'>"Gating-Scheme.png"</span>,
-  <span class='kw'>width</span> <span class='kw'>=</span> <span class='fl'>20</span>,
-  <span class='kw'>height</span> <span class='kw'>=</span> <span class='fl'>16</span>
-)
-<span class='fu'><a href='cyto_plot_gating_scheme.html'>cyto_plot_gating_scheme</a></span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>1</span>]])
+<span class='fu'>cyto_plot_save</span><span class='op'>(</span><span class='st'>"Gating-Scheme.png"</span>,
+  width <span class='op'>=</span> <span class='fl'>20</span>,
+  height <span class='op'>=</span> <span class='fl'>16</span>
+<span class='op'>)</span>
+<span class='fu'><a href='cyto_plot_gating_scheme.html'>cyto_plot_gating_scheme</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
 
 <span class='co'># Save multiple pages to the same pdf file</span>
-<span class='fu'>cyto_plot_save</span>(<span class='st'>"CD4-T-Cells.pdf"</span>,
-  <span class='kw'>height</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-  <span class='kw'>width</span> <span class='kw'>=</span> <span class='fl'>16</span>,
-  <span class='kw'>multiple</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
-)
-<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span>(<span class='no'>gs</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"CD4 T Cells"</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='st'>""</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Alexa Fluor 647-A"</span>, <span class='st'>"7-AAD-A"</span>),
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>, <span class='fl'>2</span>)
-)
-}</div></pre>
+<span class='fu'>cyto_plot_save</span><span class='op'>(</span><span class='st'>"CD4-T-Cells.pdf"</span>,
+  height <span class='op'>=</span> <span class='fl'>8</span>,
+  width <span class='op'>=</span> <span class='fl'>16</span>,
+  multiple <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span>
+<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span><span class='op'>(</span><span class='va'>gs</span>,
+  parent <span class='op'>=</span> <span class='st'>"CD4 T Cells"</span>,
+  alias <span class='op'>=</span> <span class='st'>""</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Alexa Fluor 647-A"</span>, <span class='st'>"7-AAD-A"</span><span class='op'>)</span>,
+  layout <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span>
+<span class='op'>)</span>
+<span class='op'>}</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -269,7 +273,7 @@ created using `cyto_plot_layout`, set to NULL by default to use standard
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

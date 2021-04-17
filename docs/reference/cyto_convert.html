@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,19 +152,19 @@
     <p>Convert between cytometry objects</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_convert</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+    <pre class="usage"><span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_convert</span>(<span class='no'>x</span>, <span class='kw'>return</span> <span class='kw'>=</span> <span class='st'>"flowFrame"</span>, <span class='no'>...</span>)
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>x</span>, return <span class='op'>=</span> <span class='st'>"flowFrame"</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_convert</span>(<span class='no'>x</span>, <span class='kw'>return</span> <span class='kw'>=</span> <span class='st'>"flowSet"</span>, <span class='no'>...</span>)
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>x</span>, return <span class='op'>=</span> <span class='st'>"flowSet"</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for GatingHierarchy</span>
-<span class='fu'>cyto_convert</span>(<span class='no'>x</span>, <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>, <span class='kw'>return</span> <span class='kw'>=</span> <span class='st'>"GatingHierarchy"</span>, <span class='no'>...</span>)
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>x</span>, parent <span class='op'>=</span> <span class='st'>"root"</span>, return <span class='op'>=</span> <span class='st'>"GatingHierarchy"</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_convert</span>(<span class='no'>x</span>, <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>, <span class='kw'>return</span> <span class='kw'>=</span> <span class='st'>"GatingSet"</span>, <span class='no'>...</span>)</pre>
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>x</span>, parent <span class='op'>=</span> <span class='st'>"root"</span>, return <span class='op'>=</span> <span class='st'>"GatingSet"</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -196,850 +196,611 @@ objects can also be converted to a 'list of flowFrames'.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>object specified by 'return' argument.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Convert flowSet to 'list of flowFrames'</span>
-<span class='fu'>cyto_convert</span>(<span class='no'>Activation</span>, <span class='st'>"list of flowFrames"</span>)</div><div class='output co'>#&gt; $Activation_1.fcs
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>Activation</span>, <span class='st'>"list of flowFrames"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; $Activation_1.fcs
 #&gt; flowFrame object 'Activation_1.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -77.52   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_2.fcs
 #&gt; flowFrame object 'Activation_2.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -91.96   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_3.fcs
 #&gt; flowFrame object 'Activation_3.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -85.12   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_4.fcs
 #&gt; flowFrame object 'Activation_4.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144   -35.64   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144  -111.00   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144      0.00    262144
+#&gt; $P2              FSC-H          NA    262144      0.00    262144
+#&gt; $P3              FSC-W          NA    262144      0.00    262144
+#&gt; $P4              SSC-A          NA    262144    -35.64    262144
+#&gt; $P5              SSC-H          NA    262144      0.00    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_5.fcs
 #&gt; flowFrame object 'Activation_5.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144        0   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144        0   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144        0   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144        0   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144     -111   262144
-#&gt; $P8               PE-A         Va2 262144     -111   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P10           7-AAD-A        CD69 262144     -111   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144     -111   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144     -111   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144     -111   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144     -111   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144     -111   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144        0   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144      -111    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144      -111    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_6.fcs
 #&gt; flowFrame object 'Activation_6.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144  -110.96   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_7.fcs
 #&gt; flowFrame object 'Activation_7.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -82.84   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_8.fcs
 #&gt; flowFrame object 'Activation_8.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -80.56   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_9.fcs
 #&gt; flowFrame object 'Activation_9.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -76.76   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_10.fcs
 #&gt; flowFrame object 'Activation_10.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144  -105.64   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_11.fcs
 #&gt; flowFrame object 'Activation_11.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144        0   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144        0   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144        0   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144        0   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144        0   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144        0   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144     -111   262144
-#&gt; $P8               PE-A         Va2 262144     -111   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P10           7-AAD-A        CD69 262144     -111   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144     -111   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144     -111   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144     -111   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144     -111   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144     -111   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144        0   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_12.fcs
 #&gt; flowFrame object 'Activation_12.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -99.56   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_13.fcs
 #&gt; flowFrame object 'Activation_13.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -73.72   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_14.fcs
 #&gt; flowFrame object 'Activation_14.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -84.36   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_15.fcs
 #&gt; flowFrame object 'Activation_15.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -75.24   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_16.fcs
 #&gt; flowFrame object 'Activation_16.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -75.24   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_17.fcs
 #&gt; flowFrame object 'Activation_17.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -97.28   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_18.fcs
 #&gt; flowFrame object 'Activation_18.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -89.68   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_19.fcs
 #&gt; flowFrame object 'Activation_19.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -75.24   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_20.fcs
 #&gt; flowFrame object 'Activation_20.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144  -103.36   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_21.fcs
 #&gt; flowFrame object 'Activation_21.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -72.96   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144      -111    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_22.fcs
 #&gt; flowFrame object 'Activation_22.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144        0   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144        0   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144        0   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144        0   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144        0   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144        0   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144     -111   262144
-#&gt; $P8               PE-A         Va2 262144     -111   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P10           7-AAD-A        CD69 262144     -111   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144     -111   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144     -111   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144     -111   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144     -111   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144     -111   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144     -111   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144        0   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_23.fcs
 #&gt; flowFrame object 'Activation_23.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -73.72   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_24.fcs
 #&gt; flowFrame object 'Activation_24.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -84.36   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_25.fcs
 #&gt; flowFrame object 'Activation_25.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -86.64   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_26.fcs
 #&gt; flowFrame object 'Activation_26.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -74.48   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_27.fcs
 #&gt; flowFrame object 'Activation_27.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144   -111.0   262144
-#&gt; $P8               PE-A         Va2 262144   -111.0   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P10           7-AAD-A        CD69 262144   -111.0   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144   -111.0   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144    -68.4   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144   -111.0   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144   -111.0   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144   -111.0   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144      0.0   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144      -111    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_28.fcs
 #&gt; flowFrame object 'Activation_28.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144      0.0   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144   -111.0   262144
-#&gt; $P8               PE-A         Va2 262144   -111.0   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P10           7-AAD-A        CD69 262144   -111.0   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144   -111.0   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144    -72.2   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144   -111.0   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144   -111.0   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144   -111.0   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144   -111.0   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144      0.0   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144      -111    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_29.fcs
 #&gt; flowFrame object 'Activation_29.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -69.92   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_30.fcs
 #&gt; flowFrame object 'Activation_30.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -75.24   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144      -111    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_31.fcs
 #&gt; flowFrame object 'Activation_31.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -90.44   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_32.fcs
 #&gt; flowFrame object 'Activation_32.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -82.08   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; 
 #&gt; $Activation_33.fcs
 #&gt; flowFrame object 'Activation_33.fcs'
 #&gt; with 50000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -103.68   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144  -111.00   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144   -84.48   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144      -111    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144      -111    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144   -111.00    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144   -111.00    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144    -84.48    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144   -111.00    262144
+#&gt; $P18              Time          NA    262144      0.00    262144
 #&gt; 261 keywords are stored in the 'description' slot
 #&gt; </div><div class='input'>
 <span class='co'># Convert flowSet to 'flowFrame'</span>
-<span class='fu'>cyto_convert</span>(<span class='no'>Activation</span>, <span class='st'>"flowFrame"</span>)</div><div class='output co'>#&gt; flowFrame object 'anonymous'
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='va'>Activation</span>, <span class='st'>"flowFrame"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; flowFrame object 'anonymous'
 #&gt; with 1650000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P2              FSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P3              FSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P4              SSC-A        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P5              SSC-H        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P6              SSC-W        &lt;NA&gt; 262144     0.00   262144
-#&gt; $P7  Alexa Fluor 488-A         CD8 262144  -111.00   262144
-#&gt; $P8               PE-A         Va2 262144  -111.00   262144
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P10           7-AAD-A        CD69 262144  -111.00   262144
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262144  -111.00   262144
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262144   -77.52   262144
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262144  -111.00   262144
-#&gt; $P15 Alexa Fluor 647-A        CD44 262144  -111.00   262144
-#&gt; $P16 Alexa Fluor 700-A         CD4 262144  -111.00   262144
-#&gt; $P17         APC-Cy7-A       CD11c 262144  -111.00   262144
-#&gt; $P18              Time        &lt;NA&gt; 262144     0.00   262144
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262144         0    262144
+#&gt; $P2              FSC-H          NA    262144         0    262144
+#&gt; $P3              FSC-W          NA    262144         0    262144
+#&gt; $P4              SSC-A          NA    262144         0    262144
+#&gt; $P5              SSC-H          NA    262144         0    262144
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262144      -111    262144
+#&gt; $P15 Alexa Fluor 647-A        CD44    262144      -111    262144
+#&gt; $P16 Alexa Fluor 700-A         CD4    262144      -111    262144
+#&gt; $P17         APC-Cy7-A       CD11c    262144      -111    262144
+#&gt; $P18              Time          NA    262144         0    262144
 #&gt; 2 keywords are stored in the 'description' slot</div><div class='input'>
 <span class='co'># Convert GatingSet to flowFrame</span>
-<span class='fu'>cyto_convert</span>(<span class='fu'>GatingSet</span>(<span class='no'>Activation</span>), <span class='st'>"flowFrame"</span>, <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>)</div><div class='output co'>#&gt; flowFrame object 'anonymous'
+<span class='fu'>cyto_convert</span><span class='op'>(</span><span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>Activation</span><span class='op'>)</span>, <span class='st'>"flowFrame"</span>, parent <span class='op'>=</span> <span class='st'>"root"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; flowFrame object 'anonymous'
 #&gt; with 1650000 cells and 18 observables:
-#&gt;                   name        desc  range minRange maxRange
-#&gt; $P1              FSC-A        &lt;NA&gt; 262143     0.00   262143
-#&gt; $P2              FSC-H        &lt;NA&gt; 262143     0.00   262143
-#&gt; $P3              FSC-W        &lt;NA&gt; 262143     0.00   262143
-#&gt; $P4              SSC-A        &lt;NA&gt; 262143     0.00   262143
-#&gt; $P5              SSC-H        &lt;NA&gt; 262143     0.00   262143
-#&gt; $P6              SSC-W        &lt;NA&gt; 262143     0.00   262143
-#&gt; $P7  Alexa Fluor 488-A         CD8 262143  -111.00   262143
-#&gt; $P8               PE-A         Va2 262143  -111.00   262143
-#&gt; $P9     PE-Texas Red-A        &lt;NA&gt; 262143  -111.00   262143
-#&gt; $P10           7-AAD-A        CD69 262143  -111.00   262143
-#&gt; $P11          PE-Cy7-A        &lt;NA&gt; 262143  -111.00   262143
-#&gt; $P12 Alexa Fluor 405-A Hoechst-405 262143  -111.00   262143
-#&gt; $P13 Alexa Fluor 430-A Hoechst-430 262143   -77.52   262143
-#&gt; $P14        Qdot 605-A        &lt;NA&gt; 262143  -111.00   262143
-#&gt; $P15 Alexa Fluor 647-A        CD44 262143  -111.00   262143
-#&gt; $P16 Alexa Fluor 700-A         CD4 262143  -111.00   262143
-#&gt; $P17         APC-Cy7-A       CD11c 262143  -111.00   262143
-#&gt; $P18              Time        &lt;NA&gt; 262143     0.00   262143
+#&gt;                   name        desc     range  minRange  maxRange
+#&gt; $P1              FSC-A          NA    262143         0    262143
+#&gt; $P2              FSC-H          NA    262143         0    262143
+#&gt; $P3              FSC-W          NA    262143         0    262143
+#&gt; $P4              SSC-A          NA    262143         0    262143
+#&gt; $P5              SSC-H          NA    262143         0    262143
+#&gt; ...                ...         ...       ...       ...       ...
+#&gt; $P14        Qdot 605-A          NA    262143      -111    262143
+#&gt; $P15 Alexa Fluor 647-A        CD44    262143      -111    262143
+#&gt; $P16 Alexa Fluor 700-A         CD4    262143      -111    262143
+#&gt; $P17         APC-Cy7-A       CD11c    262143      -111    262143
+#&gt; $P18              Time          NA    262143         0    262143
 #&gt; 2 keywords are stored in the 'description' slot</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -1056,7 +817,7 @@ objects can also be converted to a 'list of flowFrames'.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

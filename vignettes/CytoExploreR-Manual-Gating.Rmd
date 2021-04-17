@@ -131,7 +131,7 @@ knitr::include_graphics('Gating/Manual-Gating-5.gif')
 # Interval gate
 cyto_gate_draw(cs,
                alias = "T Cells",
-               channels = c("CD44", "Va2"),
+               channels = c("Va2", "CD44"),
                type = "interval",
                axes_trans = trans)
 ```

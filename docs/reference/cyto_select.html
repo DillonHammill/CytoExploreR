@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,7 +152,7 @@
     <p>Select samples based on experiment variables</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_select</span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_select</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -175,14 +175,18 @@ by setting <code>exclude</code> to TRUE.</p></td>
 
     <p><code>flowSet</code> or <code>GatingSet</code> restricted to samples which meet
   the designated selection criteria.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Look at experiment details</span>
-<span class='fu'><a href='cyto_details.html'>cyto_details</a></span>(<span class='no'>Activation</span>)</div><div class='output co'>#&gt;                                name OVAConc Treatment
+<span class='fu'><a href='cyto_details.html'>cyto_details</a></span><span class='op'>(</span><span class='va'>Activation</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                name OVAConc Treatment
 #&gt; Activation_1.fcs   Activation_1.fcs       0    Stim-A
 #&gt; Activation_2.fcs   Activation_2.fcs       0    Stim-A
 #&gt; Activation_3.fcs   Activation_3.fcs       5    Stim-A
@@ -217,22 +221,23 @@ by setting <code>exclude</code> to TRUE.</p></td>
 #&gt; Activation_32.fcs Activation_32.fcs     500    Stim-D
 #&gt; Activation_33.fcs Activation_33.fcs       0        NA</div><div class='input'>
 <span class='co'># Select Stim-C samples with 0 and 500 nM OVA concentrations</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_select</span>(<span class='no'>Activation</span>,
-  <span class='kw'>Treatment</span> <span class='kw'>=</span> <span class='st'>"Stim-C"</span>,
-  <span class='kw'>OVAConc</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>, <span class='fl'>500</span>)
-)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_select</span><span class='op'>(</span><span class='va'>Activation</span>,
+  Treatment <span class='op'>=</span> <span class='st'>"Stim-C"</span>,
+  OVAConc <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>500</span><span class='op'>)</span>
+<span class='op'>)</span>
 
 <span class='co'># Select Stim-A and Stim-C treatment groups</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_select</span>(
-  <span class='no'>Activation</span>,
-  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"Treatment"</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Stim-A"</span>, <span class='st'>"Stim-C"</span>))
-)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_select</span><span class='op'>(</span>
+  <span class='va'>Activation</span>,
+  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Treatment"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Stim-A"</span>, <span class='st'>"Stim-C"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='op'>)</span>
 
 <span class='co'># Exclude Stim-D treatment group</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_select</span>(<span class='no'>Activation</span>,
-  <span class='kw'>Treatment</span> <span class='kw'>=</span> <span class='st'>"Stim-D"</span>,
-  <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
-)</div></pre>
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_select</span><span class='op'>(</span><span class='va'>Activation</span>,
+  Treatment <span class='op'>=</span> <span class='st'>"Stim-D"</span>,
+  exclude <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -248,7 +253,7 @@ by setting <code>exclude</code> to TRUE.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -1,5 +1,5 @@
 ---
-title: "Viualise Cytometry Data with cyto_plot()"
+title: "Visualise Cytometry Data with cyto_plot()"
 author: Dillon Hammill
 date: "`r Sys.Date()`"
 output: 
