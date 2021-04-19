@@ -1,0 +1,11 @@
+pandoc: 2.11.2
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  CytoExploreR-Compensation: CytoExploreR-Compensation.html
+  CytoExploreR-Manual-Gating: CytoExploreR-Manual-Gating.html
+  CytoExploreR-Transformations: CytoExploreR-Transformations.html
+  CytoExploreR-Visualisations: CytoExploreR-Visualisations.html
+  CytoExploreR: CytoExploreR.html
+last_built: 2021-04-19T01:48Z
+

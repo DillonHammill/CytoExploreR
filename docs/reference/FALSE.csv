@@ -1,0 +1,17 @@
+"name","OVAConc","Treatment","Population","Marker","MedFI"
+"Activation_1.fcs","0","Stim-A","T Cells","CD8",1500.80017089844
+"Activation_1.fcs","0","Stim-A","T Cells","Va2",17651.16015625
+"Activation_2.fcs","0","Stim-A","T Cells","CD8",2238.17309570312
+"Activation_2.fcs","0","Stim-A","T Cells","Va2",18607.974609375
+"Activation_3.fcs","5","Stim-A","T Cells","CD8",1540.6767578125
+"Activation_3.fcs","5","Stim-A","T Cells","Va2",18946.2333984375
+"Activation_4.fcs","5","Stim-A","T Cells","CD8",566.973846435547
+"Activation_4.fcs","5","Stim-A","T Cells","Va2",19884.810546875
+"Activation_5.fcs","50","Stim-A","T Cells","CD8",1073.80114746094
+"Activation_5.fcs","50","Stim-A","T Cells","Va2",20104.33203125
+"Activation_6.fcs","50","Stim-A","T Cells","CD8",2221.5390625
+"Activation_6.fcs","50","Stim-A","T Cells","Va2",20074.8984375
+"Activation_7.fcs","500","Stim-A","T Cells","CD8",4822.7451171875
+"Activation_7.fcs","500","Stim-A","T Cells","Va2",20492.619140625
+"Activation_8.fcs","500","Stim-A","T Cells","CD8",4368.728515625
+"Activation_8.fcs","500","Stim-A","T Cells","Va2",20925.634765625
