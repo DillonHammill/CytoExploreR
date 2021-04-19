@@ -1,3 +1,11 @@
+# CytoExploreR 1.1.0
+
+* Fix `cyto_gate_bool()` to anchor new nodes to most recent ancestor in the GatingSet.
+* Fix labelling of transformed axes within `cyto_plot()`.
+* Fix statistics computation in `cyto_plot()` when gates and overlays are present.
+* Fix `cyto_plot_gating_scheme()` to allow the use of custom colour scale when `back_gate = TRUE`.
+* Make sure `cyto_load()` is able to read in saved GatingSets.
+
 # CytoExploreR 1.0.8
 
 * Add `select` argument to `cyto_stats_compute()` to allow computation of statistics for a subset of samples based on experimental variables.

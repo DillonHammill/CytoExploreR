@@ -25,15 +25,49 @@ knitr::opts_chunk$set(
 
 <br>
 
+```{r, eval = FALSE, echo = FALSE}
+# Activation GatingSet
+library(CytoExploreRData)
+gs_linear <- GatingSet(Activation)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Transformations-1.png")
+cyto_plot(gs_linear[[1]],
+          parent = "root",
+          channels = "CD8",
+          title = "Linear Data",
+          density_fill = "orange")
+cyto_plot_complete()
+```
+
 ```{r echo = FALSE, fig.align="center", out.width = '60%'}
 knitr::include_graphics('Transformations/Transformations-1.png')
 ```
 
 <br>
 
-<div style="line-height: 1.8em;"> To overcome this visulisation problem, traditionally cytometry data has been transformed using log transformations to improve visualisation and separation of negative and positive events into discrete populations. As you can see below, log transformations handle high fluorescent intensity values quite well, but struggle with values approaching zero. This results in these lower values being dumped on the lower end of the scale, which makes it appear as though the data contains three distinct populations based on fluorescent intensity. This problem is further highlighted when applying compensation to the data as it introduces more values that approach zero and below. </div>
+<div style="line-height: 1.8em;"> To overcome this visualisation problem, traditionally cytometry data has been transformed using log transformations to improve visualisation and separation of negative and positive events into discrete populations. As you can see below, log transformations handle high fluorescent intensity values quite well, but struggle with values approaching zero. This results in these lower values being dumped on the lower end of the scale, which makes it appear as though the data contains three distinct populations based on fluorescent intensity. This problem is further highlighted when applying compensation to the data as it introduces more values that approach zero and below. </div>
 
 <br>
+
+```{r, eval = FALSE, echo = FALSE}
+gs_log <- cyto_transform(cyto_copy(gs_linear), 
+                         channels = "CD8",
+                         type = "log",
+                         copy = TRUE)
+cyto_plot_save("Transformations-2.png")
+cyto_plot_custom(c(1,1))
+cyto_plot(gs_log[[1]],
+          parent = "root",
+          channels = "CD8",
+          title = "Log Transformation",
+          density_fill = "deepskyblue")
+text(0.3, 60, "values \n approaching \n zero dumped \n in first bin")
+arrows(0.15, 60, 0.05, 40)
+rect(-0.08,-14,0.5,-2, border = "red", lwd = 2, xpd = NA)
+cyto_plot_complete()
+```
 
 ```{r echo = FALSE, fig.align="center", out.width = '60%'}
 knitr::include_graphics('Transformations/Transformations-2.png')
@@ -44,6 +78,54 @@ knitr::include_graphics('Transformations/Transformations-2.png')
 <div style="line-height: 1.8em;"> Recently, more sophisticated transformations such as the hyperbolic arcsine, biexponential and logicle transformations have been used to overcome the limitations of the log transformation. The result of applying these transformations using the default parameters to the Alexa Fluor 488 channel is shown below for easy comparison. As you can see, all the transformations seem to handle the higher fluorescent intensity values in a similar manner, but differ in their approach to dealing with values nearing zero. For flow cytometry data, the biexponential and logicle transformations seem to provide the best visualisation of the data as discrete negative and positive populations are clearly visible. It is important to note that the optimal transformation for each parameter is data-dependant and users should explore the different transformation types to obtain the best visualisation of the data. This process will be documented later in this vignette. </div> 
 
 <br>
+
+```{r, eval = FALSE, echo = FALSE}
+gs_arc <- cyto_transform(cyto_copy(gs_linear), 
+                         channels = "CD8",
+                         type = "arcsinh",
+                         copy = TRUE)
+gs_biex <- cyto_transform(cyto_copy(gs_linear), 
+                         channels = "CD8",
+                         type = "biex",
+                         copy = TRUE)
+gs_logicle <- cyto_transform(cyto_copy(gs_linear), 
+                         channels = "CD8",
+                         type = "logicle",
+                         copy = TRUE)
+cyto_plot_save("Transformations-3.png",
+               width = 10,
+               height = 10)
+cyto_plot_custom(c(2,2))
+# LOG
+cyto_plot(gs_log[[1]],
+          parent = "root",
+          channels = "CD8",
+          title = "Log Transformation",
+          density_fill = "deepskyblue")
+rect(-0.08,-14,0.5,-2, border = "red", lwd = 2, xpd = NA)
+# ARCSINH
+cyto_plot(gs_arc[[1]],
+          parent = "root",
+          channels = "CD8",
+          title = "Arcsinh Transformation",
+          density_fill = "deeppink")
+rect(-0.31,-14,0.3,-2, border = "red", lwd = 2, xpd = NA)
+# BIEX
+cyto_plot(gs_biex[[1]],
+          parent = "root",
+          channels = "CD8",
+          title = "Biexponential Transformation",
+          density_fill = "green")
+rect(-165,-14,1050,-2, border = "red", lwd = 2, xpd = NA)
+# LOGICLE
+cyto_plot(gs_logicle[[1]],
+          parent = "root",
+          channels = "CD8",
+          title = "Logicle Transformation",
+          density_fill = "yellow")
+rect(0.1,-14,1.15,-2, border = "red", lwd = 2, xpd = NA)
+cyto_plot_complete()
+```
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
 knitr::include_graphics('Transformations/Transformations-3.png')
@@ -97,6 +179,60 @@ gs <- cyto_compensate(gs)
 ```{r, eval = FALSE}
 # Default log transformer
 trans_log <- cyto_transformer_log(gs)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+gs_log <- cyto_transform(cyto_copy(gs_linear), 
+                         type = "log",
+                         copy = TRUE)
+cyto_plot_save("Transformations-4.png",
+               height = 10,
+               width = 12)
+cyto_plot_profile(gs_log[[1]],
+                  parent = "root",
+                  channels = cyto_fluor_channels(gs_log),
+                  header = "Log Transformers",
+                  density_fill = "deepskyblue")
+cyto_plot_complete()
+
+gs_arc <- cyto_transform(cyto_copy(gs_linear),
+                         type = "arcsinh",
+                         copy = TRUE)
+cyto_plot_save("Transformations-5.png",
+               height = 10,
+               width = 12)
+cyto_plot_profile(gs_arc[[1]],
+                  parent = "root",
+                  channels = cyto_fluor_channels(gs_arc),
+                  header = "Arcsinh Transformers",
+                  density_fill = "deeppink")
+cyto_plot_complete()
+
+gs_biex <- cyto_transform(cyto_copy(gs_linear), 
+                         type = "biex",
+                         copy = TRUE)
+cyto_plot_save("Transformations-6.png",
+               height = 10,
+               width = 12)
+cyto_plot_profile(gs_biex[[1]],
+                  parent = "root",
+                  channels = cyto_fluor_channels(gs_biex),
+                  header = "Biexponential Transformers",
+                  density_fill = "green")
+cyto_plot_complete()
+
+gs_logicle <- cyto_transform(cyto_copy(gs_linear), 
+                         type = "logicle",
+                         copy = TRUE)
+cyto_plot_save("Transformations-7.png",
+               height = 10,
+               width = 12)
+cyto_plot_profile(gs_logicle[[1]],
+                  parent = "root",
+                  channels = cyto_fluor_channels(gs_logicle),
+                  header = "Logicle Transformers",
+                  density_fill = "yellow")
+cyto_plot_complete()
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '75%'}
@@ -154,6 +290,17 @@ trans_biex
 cyto_plot_save("Transformations-8.png",
                height = 6,
                width = 6)
+gs_biex <- cyto_transform(cyto_copy(gs_linear[1]), 
+                          channels = "Va2",
+                          type = "biex",
+                          widthBasis = -10,
+                          copy = TRUE,
+                          plot = FALSE)
+cyto_plot(gs_biex[[1]],
+          parent = "root",
+          channels = "Va2",
+          title = "widthBasis = -10")
+cyto_plot_complete()
 ```
 
 ```{r, eval = FALSE}
@@ -173,6 +320,23 @@ cyto_plot_save("Transformations-9.png",
                width = 6)
 ```
 
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Transformations-9.png",
+               height = 6,
+               width = 6)
+gs_biex <- cyto_transform(cyto_copy(gs_linear[1]), 
+                          channels = "Va2",
+                          type = "biex",
+                          widthBasis = -100,
+                          copy = TRUE,
+                          plot = FALSE)
+cyto_plot(gs_biex[[1]],
+          parent = "root",
+          channels = "Va2",
+          title = "widthBasis = -100")
+cyto_plot_complete()
+```
+
 ```{r, eval = FALSE}
 # PE transformer
 PE_biex <- cyto_transformer_biex(gs,
@@ -188,6 +352,23 @@ knitr::include_graphics('Transformations/Transformations-9.png')
 cyto_plot_save("Transformations-10.png",
                height = 6,
                width = 6)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Transformations-10.png",
+               height = 6,
+               width = 6)
+gs_biex <- cyto_transform(cyto_copy(gs_linear[1]), 
+                          channels = "Va2",
+                          type = "biex",
+                          widthBasis = -1000,
+                          copy = TRUE,
+                          plot = FALSE)
+cyto_plot(gs_biex[[1]],
+          parent = "root",
+          channels = "Va2",
+          title = "widthBasis = -1000")
+cyto_plot_complete()
 ```
 
 ```{r, eval = FALSE}

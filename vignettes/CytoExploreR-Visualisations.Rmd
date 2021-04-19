@@ -81,7 +81,7 @@ knitr::include_graphics('Visualisations/Visualisations-11.png')
 
 # Key Features
 
-<div style="line-height: 1.8em;"> It is extrememly difficult to comprehensively describe `cyto_plot` in a single vignette. Nevertheless, here we will explore some of the key features that will be useful for routine analyses. We will start with features that are common to all plot types (e.g. titles, labels, axes and legends) and then move on to features that are for specific plot types (e.g. points, contour lines, densities and gates). </div>
+<div style="line-height: 1.8em;"> It is extremely difficult to comprehensively describe `cyto_plot` in a single vignette. Nevertheless, here we will explore some of the key features that will be useful for routine analyses. We will start with features that are common to all plot types (e.g. titles, labels, axes and legends) and then move on to features that are for specific plot types (e.g. points, contour lines, densities and gates). </div>
 
 <br>
 

@@ -47,31 +47,15 @@ After successfully installing R and RStudio, the following additional platform-s
 
 ## CytoExploreR Dependencies
 
-Now that all the setup is complete, let's install all the necessary dependencies of **CytoExploreR**. From within RStudio, run the following in the console to install the latest versions of [flowCore](https://github.com/RGLab/flowCore), [flowWorkspace](https://github.com/RGLab/flowWorkspace) and [openCyto](https://github.com/RGLab/openCyto) from Bioconductor.
+Now that all the setup is complete, let's install all the necessary dependencies of **CytoExploreR**. From within RStudio, run the following in the console to install the latest versions of the [cytoverse](https://cytoverse.org/) packages from Bioconductor.
 
 ```{r, eval = FALSE}
 # Bioconductor
 install.packages("BiocManager")
-# Install flowCore, flowWorkspace and openCyto
-library(BiocManager)
-install(c("flowCore", "flowWorkspace", "openCyto"))
-```
-
-Currently, **CytoExploreR** requires the development versions of these RGLab packages hosted on GitHub:
-
-```{r, eval = FALSE}
-# Install & load devtools
-tryCatch(library(devtools), error = function(e){
-  install.packages("devtools")
-  library(devtools)
-})
-# Install flowCore, flowWorkspace & openCyto from GitHub
-install_github("RGLab/RProtoBufLib")
-install_github("RGLab/cytolib")
-install_github("RGLab/flowCore")
-install_github("RGLab/flowWorkspace")
-install_github("RGLab/flowStats")
-install_github("RGLab/openCyto")
+# Install cytoinstaller
+remotes::install_github("RGLab/cytoinstaller")
+# Install cytoverse packages
+cytoinstaller::install_cyto(bioc_ver = "devel")
 ```
 
 ## CytoExploreR
@@ -141,11 +125,42 @@ cyto_save(Activation,
           save_as = "Activation-Samples")
 ```
 
+```{r, eval = FALSE, echo = FALSE}
+library(CytoExploreR)
+
+# Activation GatingSet
+gs <- cyto_load(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
+```
+
 These datasets will be used throughout the package vignettes to demonstrate the key features of **CytoExploreR**. A brief summary of each of the package vignettes is provided below:
 
 + The `CytoExploreR` vignette outlines a basic flow cytometry data analysis pipeline, which includes steps to compensate for fluorescent spillover, transform data for visualisation and manually gate populations to export population level statistics. This vignette serves as a basic introduction to the package and users are encouraged to explore other vignettes which explore these aspects in a lot more detail.
 
 + The `Visualisations` vignette will demonstrate the use of `cyto_plot`, a powerful data visualisation tool to explore cytometry data.
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("README-2.png",
+               height = 6,
+               width = 12)
+cyto_plot_custom(c(1,2))
+cyto_plot(gs[[32]],
+          parent = "T Cells",
+          alias = c("CD4 T Cells", "CD8 T Cells"),
+          channels = c("CD4", "CD8"),
+          contour_lines = 15,
+          title = "T Cells")
+cyto_plot(gs[c(8,16,24,32)],
+          parent = "CD4 T Cells",
+          alias = "CD69+ CD4 T Cells",
+          channels = "CD69",
+          density_stack = 0.5)
+cyto_plot_complete()
+```
 
 ```{r echo = FALSE, fig.align="center", out.width = '98%'}
 knitr::include_graphics('man/figures/README-2.png')
@@ -153,17 +168,56 @@ knitr::include_graphics('man/figures/README-2.png')
 
 + Flow cytometry users will find the `Compensation` vignette useful in describing the process of using compensation controls to correctly compensate for fluorescent spillover. 
 
+```{r, eval = FALSE, echo = FALSE}
+# Compensation GatingSet
+gs_comp <- cyto_load(
+  system.file(
+    "extdata/Compensation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
+cyto_spillover_edit(gs_comp,
+                    parent = "Single Cells",
+                    point_size = 4)
+```
+
 ```{r echo = FALSE, fig.align="center", out.width = '98%'}
 knitr::include_graphics('man/figures/README-3.png')
 ```
 
 + Data transformations are essential to appropriate visualisation of cytometry data. In the `Transformations` vignette we will explore the tools available in **CytoExploreR** to apply log, arcsinh, biexponential and/or logicle transformations to the data.
 
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("README-4.png",
+               height = 7, 
+               width = 9)
+cyto_plot_profile(gs[[32]],
+                  parent = "Single Cells",
+                  channels = cyto_fluor_channels(gs),
+                  header = NA)
+cyto_plot_complete()
+```
+
+
 ```{r echo = FALSE, fig.align="center", out.width = '80%'}
 knitr::include_graphics('man/figures/README-4.png')
 ```
 
 + In `Manual Gating` vignette we will demonstrate the use of `cyto_gate_draw` to interactively draw gates around populations. In particular, we will focus on the different gate types that are supported and how they can be used to gate populations.
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("README-1.png",
+               height = 10,
+               width = 10)
+cyto_plot_gating_scheme(gs[[32]],
+                        back_gate = TRUE,
+                        gate_track = TRUE,
+                        border_fill = "black",
+                        label_text_col = "white",
+                        label_fill_alpha = 0,
+                        header = "Gating Scheme")
+cyto_plot_complete()
+```
 
 ```{r echo = FALSE, fig.align="center", out.width = '98%'}
 knitr::include_graphics('man/figures/README-1.png')
