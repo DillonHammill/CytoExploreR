@@ -1449,7 +1449,7 @@
       ((cos(angle) * cos(angle)) / (b^2)))
     cvm <- solve(cinv)
     dimnames(cvm) <- list(channels, channels)
-
+    
     # CONSTRUCT GATE
     gate <- ellipsoidGate(
       .gate = cvm,

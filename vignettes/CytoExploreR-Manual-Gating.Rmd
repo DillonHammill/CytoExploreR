@@ -256,7 +256,7 @@ knitr::include_graphics('Gating/Manual-Gating-13.gif')
 <div style="line-height: 1.8em;"> Negated gates can be used to gate populations outside of the constructed gate by setting the negate argument to TRUE. The name of the negated population must always be supplied last to the alias argument. </div>
 
 ```{r, eval = FALSE}
-# Multiple gates
+# Negated gates
 cyto_gate_draw(cs,
                alias = c("Dead Cells","Live Cells"),
                channels = c("Hoechst-405","Hoechst-430"),

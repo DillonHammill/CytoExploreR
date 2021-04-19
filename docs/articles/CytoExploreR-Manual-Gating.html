@@ -321,7 +321,7 @@ Multiple populations can also be gated using different gate types by supplying a
 Negated gates can be used to gate populations outside of the constructed gate by setting the negate argument to TRUE. The name of the negated population must always be supplied last to the alias argument.
 </div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Multiple gates</span>
+<code class="sourceCode R"><span class="co"># Negated gates</span>
 <span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
                alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Dead Cells"</span>,<span class="st">"Live Cells"</span><span class="op">)</span>,
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Hoechst-405"</span>,<span class="st">"Hoechst-430"</span><span class="op">)</span>,
