@@ -3954,7 +3954,7 @@ cyto_nodes_convert <- function(x,
   nodes_full <- cyto_nodes(x, path = "full")
   nodes_auto <- cyto_nodes(x, path = "auto")
   nodes_terminal <- basename(nodes_full)
-
+  
   # STRIP REFERENCE TO ROOT
   nodes <- LAPPLY(nodes, function(node){
     if(grepl("root/", node)){

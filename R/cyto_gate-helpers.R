@@ -64,11 +64,6 @@ cyto_gate_remove <- function(gs,
     stop("Supply the name of the population to be removed to 'alias'.")
   }
 
-  # ALIAS
-  if (!all(alias %in% cyto_nodes(gs, path = "auto"))) {
-    stop("Supplied alias does not exist in the GatingSet.")
-  }
-
   # GATINGTEMPLATE MISSING
   if (is.null(gatingTemplate)) {
     gatingTemplate <- cyto_gatingTemplate_active()
@@ -91,14 +86,22 @@ cyto_gate_remove <- function(gs,
   )
 
   # PREPARE GATINGTEMPLATE ALIAS
-  gt_alias <- lapply(gt$alias, function(z) {
-    unlist(strsplit(as.character(z), ","))
+  gt_alias <- lapply(seq_along(gt$alias), function(z) {
+    cyto_nodes_convert(gs,
+                       nodes = unlist(strsplit(as.character(gt$alias[z]), ",")),
+                       anchor = gt$parent[z],
+                       path = "auto")
   })
 
+  # ALIAS
+  alias <- cyto_nodes_convert(gs,
+                              nodes = alias,
+                              path = "auto")
+  
   # MULTIPLE ALIAS - REMOVE ALL ASSOCIATED NODES
   alias <- unique(LAPPLY(seq_len(length(alias)), function(z) {
     LAPPLY(gt_alias, function(y) {
-      if (alias[z] == y) {
+      if (alias[z] %in% y) {
         y
       } else {
         NA
@@ -106,22 +109,21 @@ cyto_gate_remove <- function(gs,
     })
   }))
   alias <- alias[!is.na(alias)]
-
+  
   # CHILDREN
   chldrn <- LAPPLY(
     alias,
     function(x) {
-      if (!is.null(parent)) {
-        pop <- paste0(parent, "/", x)
-      } else {
-        pop <- x
-      }
+      pop <- cyto_nodes_convert(gs,
+                                nodes = x,
+                                anchor = parent,
+                                path = "auto")
       basename(gh_pop_get_descendants(gs[[1]], pop))
     }
   )
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- unique(c(alias, chldrn))
-
+  
   # REMOVE ROWS ALIAS == CHILDREN
   ind <- LAPPLY(gt_alias, function(z) {
     any(chldrn %in% z)
@@ -148,6 +150,10 @@ cyto_gate_remove <- function(gs,
 
   # UPDATE GATINGTEMPLATE
   write.csv(gt, gatingTemplate, row.names = FALSE)
+  
+  # RETURN GATINGSET
+  return(gs)
+  
 }
 
 ## CYTO_GATE_RENAME ------------------------------------------------------------
