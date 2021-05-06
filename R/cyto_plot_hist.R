@@ -6,6 +6,8 @@
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}}, list of
 #'   \code{\link[flowWorkspace:cytoframe]{cytoframes}} or a list of
 #'   \code{\link[stats:density]{density}} objects.
+#' @param parent name of the parent population to extract from GatingHierarchy
+#'   or GatingSet objects.
 #' @param channel name of the channels to be used to construct the plot.
 #' @param overlay list of cytoframe objects to overlay.
 #' @param display controls the number or percentage of events to display, set to
@@ -34,6 +36,10 @@
 #'   lines, set to 1 by default.
 #' @param hist_line_col colour(s) for histogram borders, set to \code{"black"}
 #'   by default.
+#' @param seed numeric passed to \code{\link{set.seed}} to ensure that the same
+#'   sampling is applied with each \code{\link{cyto_plot_contour}} call, set to
+#'   an arbitrary numeric by default. This behaviour can be turned off by
+#'   setting this argument to NULL.
 #' @param ... not in use.
 #'
 #' @importFrom methods is
@@ -43,6 +49,7 @@
 #'
 #' @export
 cyto_plot_hist <- function(x,
+                           parent = "root",
                            channel,
                            overlay = NA,
                            display = 1,
@@ -56,6 +63,7 @@ cyto_plot_hist <- function(x,
                            hist_line_type = 1,
                            hist_line_width = 1,
                            hist_line_col = "black",
+                           seed = 42,
                            ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -63,51 +71,38 @@ cyto_plot_hist <- function(x,
   # DENSITY LIST
   d <- NULL
   
-  # X - FLOWFRAME/FLOWFRAME LIST/DENSITY LIST/CYTO_PLOT ARGS
-  if (is(x, "flowFrame")) {
-    # FLOWFRAME LIST
-    overlay <- cyto_list(overlay)
-    if (!.all_na(overlay)) {
-      x <- c(
-        structure(list(x), names = cyto_names(x)),
-        overlay
-      )
-    } else {
-      x <- cyto_list(x)
+  # X - CYTO_PLOT ARGUMENTS
+  if(cyto_class(x, "cyto_plot")) {
+    .args_update(x)
+  # X - LIST OF DENSITY OBJECTS  
+  } else if(cyto_class(x, "list") & all(LAPPLY(x, "cyto_class", "density"))) {
+    d <- x
+  # X - CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET/LIST
+  } else {
+    # X -> LIST OF CYTOSETS
+    if(cyto_class(x, c("flowFrame", "flowSet", "GatingSet"))) {
+      x <- cyto_data_extract(x,
+                             parent = parent,
+                             format = "cytoset",
+                             copy = FALSE)
+      # OVERLAY
+      if(!.all_na(overlay)) {
+        if(!cyto_class(overlay, "list")) {
+          overlay <- cyto_list(overlay)
+        }
+        x <- c(x, overlay)
+      }
     }
-    # SAMPLING
-    if (display != 1) {
+    # SAMPLE
+    if(display != 1){
       x <- cyto_sample(x,
                        display = display,
-                       seed = 56
-      )
+                       seed = seed)
     }
     # HISTOGRAMS
     args <- .args_list(...)
     args$channels <- cyto_channels_extract(x[[1]], channel)
     d <- do.call(".cyto_plot_hist", args)
-  } else if (class(x) == "list") {
-    # FLOWFRAME LIST -> DENSITY LIST
-    if (all(LAPPLY(x, is, "flowFrame"))) {
-      # SAMPLING
-      if (display != 1) {
-        x <- cyto_sample(x,
-                         display = display,
-                         seed = 56
-        )
-      }
-      # HISTOGRAMS
-      args <- .args_list(...)
-      args$channels <- cyto_channels_extract(x[[1]], channel)
-      d <- do.call(".cyto_plot_hist", args)
-      # AS IS
-    } else if (all(LAPPLY(x, is, "density"))) {
-      d <- x
-    } else {
-      stop("'x' must be a list of cytoframe or density objects.")
-    }
-  } else if (class(x) == "cyto_plot") {
-    .args_update(x)
   }
   
   # STACKING
@@ -155,8 +150,10 @@ cyto_plot_hist <- function(x,
   # HORIZONTAL LINES -----------------------------------------------------------
   
   # YMIN PER LAYER
-  ylim <- strsplit(names(d), "-")
-  ymin <- as.numeric(lapply(ylim, `[[`, 1))
+  ylim <- lapply(d, function(D){
+    D$range
+  })
+  ymin <- lapply(ylim, `[[`, 1)
   
   # LINES UNDER DENSITY
   abline(
@@ -186,12 +183,12 @@ cyto_plot_hist <- function(x,
              hist_line_width,
              hist_line_type) {
       # COUNTER
-      assign("cnt", cnt + 1, envir = parent.frame(2))
+      cnt <<- cnt + 1
       # BYPASS NA
       if(!.all_na(D)) {
         # RANGES
         xrng <- c(D$x[1], D$x[length(D$x)]) # x values are sorted
-        yrng <- as.numeric(unlist(strsplit(names(d)[cnt], "-"))) # y values name
+        yrng <- D$range
         # PLOT - ANCHOR POLYGON
         if (!.all_na(d)) {
           polygon(

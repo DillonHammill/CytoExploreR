@@ -64,41 +64,36 @@ cyto_plot_contour <- function(x,
                               overlay = NA,
                               display = 1,
                               contour_lines = 15,
-                              contour_line_type = 1,
+                              contour_line_type = 1,          
                               contour_line_width = 1,
                               contour_line_col = "black",
                               contour_line_alpha = 1,
                               seed = 42,
                               ...) {
   
+  # WE DON'T CHECK CHANNELS OR INHERIT THEME OR REPEAT ARGUMENTS
+  
   # CHECKS -------------------------------------------------------------------
   
-  
-  # CHANNELS
-  channels <- cyto_channels_extract(x, channels)
-  
-  # EXTRACT DATA
-  if(cyto_class(x, "GatingSet")) {
-    x <- cyto_data_extract(gs,
+  # X - CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET
+  if(cyto_class(x, c("flowFrame", "flowSet", "GatingSet"))) {
+    x <- cyto_data_extract(x,
                            parent = parent,
-                           channels = channels,
+                           format = "cytoset", 
                            copy = FALSE)
-  }
-  
-  # PREPARE DATA
-  if(cyto_class(x,c("flowFrame", "flowSet"))) {
-    # COMBINE LAYERS
+    # OVERLAY
     if(!.all_na(overlay)) {
-      if(cyto_class(overlay, c("flowFrame", "flowSet"))) {
-        overlay <- list(overlay)
+      if(!cyto_class(overlay, "list")) {
+        overlay <- cyto_list(overlay)
       }
-      x <- c(list(x), overlay)
-    } else {
-      x <- list(x)
+      x <- c(x, overlay)
     }
   # CYTO_PLOT ARGUMENTS
-  } else if(cyto_class(x, "cyto_plot")) {
+  } else if(cyto_class(x, "cyto_plot")) { # not used - call point instead
     .args_update(x)
+  # CHECK LISTS
+  } else if(!all(LAPPLY(x, cyto_class, c("flowFrame", "flowSet")))) {
+    stop("'x' must be a list of cytoframes or cytosets!")
   }
   
   # SAMPLING
@@ -108,7 +103,7 @@ cyto_plot_contour <- function(x,
                      seed = seed)
   }
   
-  # CONTOUR_LINES ------------------------------------------------------------
+  # CONTOUR_LINES --------------------------------------------------------------
   
   invisible(mapply(
     function(cf,
@@ -118,9 +113,10 @@ cyto_plot_contour <- function(x,
              contour_line_col,
              contour_line_alpha) {
       # EXTRACT RAW DATA
-      cf_exprs <- cyto_data_extract(cf, 
+      cf_exprs <- cyto_data_extract(cf,
                                     format = "matrix", 
-                                    channels = channels)[[1]]
+                                    channels = channels,
+                                    copy = FALSE)[[1]]
       # MERGE CYTOSET MULTIPLE SAMPLES
       if(length(cf_exprs) > 1) {
         cf_exprs <- do.call("rbind", cf_exprs)
