@@ -367,14 +367,16 @@
       # GATINGHIERARCHY/GATINGSET
       if(cyto_class(z, "GatingSet")){
         z <- cyto_data_extract(z, 
-                               parent = parent)[[1]]
+                               parent = parent,
+                               copy = FALSE)[[1]]
       }
       return(z)
     })
   # GATINGHIERARCHY/GATINGSET
   }else if(cyto_class(x, "GatingSet")){
     x <- list(cyto_data_extract(x, 
-                                parent = parent)[[1]])
+                                parent = parent,
+                                copy = FALSE)[[1]])
   # CYTOFRAME/CYTOSET
   } else {
     x <- list(x)
@@ -736,11 +738,7 @@
   
   # LAYOUT
   if (is.null(layout) | .empty(layout)) {
-    if(is.vector(x) & length(x) == 1) {
-      layout <- rev(n2mfrow(x))
-    }else {
-      layout <- rev(n2mfrow(length(x)))
-    }
+    layout <- rev(n2mfrow(length(x)))
   }
   return(layout)
   
@@ -1106,78 +1104,80 @@
     gated_pops <- lapply(seq_len(length(gate)), function(w) {
       # NO GATE OR NO STAT
       if (.all_na(gate[[w]]) | is.na(pops_to_label[[w]])) {
-        assign("gated", c(gated, FALSE), envir = parent.frame(2))
-        res <- cs
+        gated <<- c(gated, FALSE)
+        return(cs)
       }else{
-        assign("gated", c(gated, TRUE), envir = parent.frame(2))
-      }
-      # NEGATED POPULATION
-      if (negate == TRUE & w == length(gate)) {
-        res <- split(cs, gate[[w]])[[2]]
-        # *** CYTOSET CONVERSION ***
-        if(cyto_class(res, "flowSet", TRUE)) {
-          res <- flowSet_to_cytoset(res)
-        }
-        # GATED POPULATIONS
-      } else {
-        # QUADGATES RETURN MULTIPLE POPULATIONS
-        if (is(gate[[w]], "quadGate")) {
-          if ("quad_order" %in% names(args)) {
-            quads <- unlist(strsplit(gate[[w]]@filterId, "\\|"))
-            res <- split(cs, gate[[w]])[c(2, 1, 3, 4)][match(
-              quad_order,
-              quads
-            )] # FIX ORDER
-
-          } else {
-            res <- split(cs, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
-          }
+        gated <<- c(gated, TRUE)
+        # NEGATED POPULATION
+        if (negate == TRUE & w == length(gate)) {
+          res <- split(cs, gate[[w]])[[2]]
           # *** CYTOSET CONVERSION ***
-          res <- structure(
-            lapply(res, function(q){
-              if(cyto_class(q, "flowSet", TRUE)){
-                flowSet_to_cytoset(q)
-              }
-            }),
-            names = names(res)
-          )
-          # SINGLE POPULATIONS
+          if(cyto_class(res, "flowSet", TRUE)) {
+            res <- flowSet_to_cytoset(res)
+          }
+          # GATED POPULATIONS
         } else {
-          # RECTANGLE BELONGS TO QUADGATE
-          if (is(gate[[w]], "rectangleGate") &
-              any(grepl("quad", names(attributes(gate[[w]]))))) {
-            q <- names(attributes(gate[[w]])[["quadrants"]])
-            coords <- .cyto_gate_coords(gate[w],
-                                        channels = as.character(
-                                          parameters(gate[[w]]))
-            )
-            chans <- colnames(coords)
-            coords <- lapply(colnames(coords), function(y) {
-              unique(coords[, y][is.finite(coords[, y])])
-            })
-            names(coords) <- chans
-            qg <- quadGate(
-              filterId = paste(q, collapse = "|"),
-              .gate = coords
-            )
-            p <- split(cs, qg)[c(2, 1, 3, 4)] # FIX ORDER
-            names(p) <- q
+          # QUADGATES RETURN MULTIPLE POPULATIONS
+          if (is(gate[[w]], "quadGate")) {
+            if ("quad_order" %in% names(args)) {
+              quads <- unlist(strsplit(gate[[w]]@filterId, "\\|"))
+              res <- split(cs, gate[[w]])[c(2, 1, 3, 4)][match(
+                quad_order,
+                quads
+              )] # FIX ORDER
+              
+            } else {
+              res <- split(cs, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
+            }
             # *** CYTOSET CONVERSION ***
-            p <- structure(
-              lapply(p, function(b){
-                if(cyto_class(b, "flowSet", TRUE)){
-                  flowSet_to_cytoset(b)
+            res <- structure(
+              lapply(res, function(q){
+                if(cyto_class(q, "flowSet", TRUE)){
+                  q <- flowSet_to_cytoset(q)
                 }
+                return(q)
               }),
-              names = names(p)
+              names = names(res)
             )
-            p[[match(gate[[w]]@filterId, names(p))]]
+            # SINGLE POPULATIONS
           } else {
-            Subset(cs, gate[[w]])
+            # RECTANGLE BELONGS TO QUADGATE
+            if (is(gate[[w]], "rectangleGate") &
+                any(grepl("quad", names(attributes(gate[[w]]))))) {
+              q <- names(attributes(gate[[w]])[["quadrants"]])
+              coords <- .cyto_gate_coords(gate[w],
+                                          channels = as.character(
+                                            parameters(gate[[w]]))
+              )
+              chans <- colnames(coords)
+              coords <- lapply(colnames(coords), function(y) {
+                unique(coords[, y][is.finite(coords[, y])])
+              })
+              names(coords) <- chans
+              qg <- quadGate(
+                filterId = paste(q, collapse = "|"),
+                .gate = coords
+              )
+              p <- split(cs, qg)[c(2, 1, 3, 4)] # FIX ORDER
+              names(p) <- q
+              # *** CYTOSET CONVERSION ***
+              p <- structure(
+                lapply(p, function(b){
+                  if(cyto_class(b, "flowSet", TRUE)){
+                    b <- flowSet_to_cytoset(b)
+                  }
+                  return(b)
+                }),
+                names = names(p)
+              )
+              res <- p[[match(gate[[w]]@filterId, names(p))]]
+            } else {
+              res <- Subset(cs, gate[[w]])
+            }
           }
         }
+        return(res)
       }
-      return(res)
     })
     # SIGNAL IF GATE PRESENT
     if(any(gated == TRUE)){
@@ -1217,6 +1217,7 @@
                                   gate = NA,
                                   hist_smooth = 1,
                                   hist_bins = 256,
+                                  xlim = c(NA,NA),
                                   ...) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -1227,7 +1228,7 @@
   }
   
   # FLOWFRAME LIST
-  if(is(x, "flowFrame")){
+  if(cyto_class(x, c("flowFrame", "flowSet"))){
     x <- list(x)
   }
   
@@ -1252,19 +1253,15 @@
       # STATISTIC SUPPLIED
       if (!.all_na(label_stat[[z]][y])) {
         # FREQUENCY
-        if(grepl(paste0("freq", "$"), 
-                 label_stat[[z]][y], ignore.case = TRUE)) {
-          res <- cyto_stats_compute(x[[z]],
+        if(grepl(paste0("freq$"), label_stat[[z]][y], ignore.case = TRUE)) {
+          res <- cyto_stats_compute(pops[[z]][[y]],
                                     channels = channels,
-                                    gate = pops[[z]][[y]],
+                                    parent = x[z],
                                     stat = label_stat[[z]][y],
-                                    inverse = TRUE,
-                                    trans = axes_trans,
                                     round = 2,
                                     input = "matrix",
-                                    smooth = hist_smooth,
-                                    bins = hist_bins,
-                                    markers = FALSE)
+                                    markers = FALSE,
+                                    details = FALSE)
           # OTHER STATISTICS - GATED POPS
         } else {
           res <- cyto_stats_compute(pops[[z]][[y]],
@@ -1276,10 +1273,13 @@
                                     input = "matrix",
                                     smooth = hist_smooth,
                                     bins = hist_bins,
-                                    markers = FALSE)
+                                    limits = xlim,
+                                    markers = FALSE,
+                                    details = FALSE)
         }
-        # DROP NAME COLUMN
-        res <- res[, -match("name", colnames(res)), drop = FALSE]
+        # DROP NAME & ALIAS COLUMNS
+        res <- res[, -which(c("name", "alias") %in% colnames(res)), 
+                   drop = FALSE]
         # EXTRACT STATISTICS - EITHER SINGLE OR DOUBLE
         res <- res[1, , drop = TRUE]
         # ROUND 2 DECIMAL PLACES
@@ -1428,12 +1428,11 @@
     # STACKING
     if (hist_stack != 0 &
         ifelse(.all_na(hist_layers), TRUE, hist_layers != 1)) {
-      stk <- LAPPLY(names(d), function(z){
-        as.numeric(unlist(strsplit(z, "-"))[1])
+      stk <- LAPPLY(d, function(z){
+        z$range
       })
       y_coords <- stk + 0.5 * (
-        as.numeric(unlist(strsplit(names(d)[2], "-"))[1]) - 
-          as.numeric(unlist(strsplit(names(d)[1], "-"))[1])
+        d[[2]]$range[1] - d[[1]]$range[1]
       )
       # REPEAT (Y_COORDS/LAYER)
       y_coords <- rep(y_coords, each = GNP)
@@ -1488,7 +1487,10 @@
               # X COORD - RANGE CENTER
               if (.all_na(label_text_x[[z]][y])) {
                 # NO EVENTS
-                if (cyto_stat_count(pops[[z]][[y]]) == 0) {
+                if (cyto_apply(pops[[z]][[y]],
+                               "nrow",
+                               input = "matrix",
+                               copy = FALSE)[, 1] == 0) {
                   # RANGE CENTER - PLOT LIMITS
                   text_x[y] <- mean(c(xmin, xmax))
                 } else {
@@ -1526,7 +1528,10 @@
             # X COORD - RANGE CENTER
             if (.all_na(label_text_x[[z]][y])) {
               # NO EVENTS
-              if (cyto_stat_count(pops[[z]][[y]]) == 0) {
+              if (cyto_apply(pops[[z]][[y]],
+                             "nrow",
+                             input = "matrix",
+                             copy = FALSE)[, 1] == 0) {
                 # RANGE CENTER - PLOT LIMITS
                 text_x[y] <- mean(c(xmin, xmax))
               } else {
@@ -1582,7 +1587,10 @@
               # X COORD - MODE/RANGE CENTER
               if (.all_na(label_text_x[[z]][y])) {
                 # NO EVENTS
-                if (cyto_stat_count(pops[[z]][[y]]) < 2) {
+                if (cyto_apply(pops[[z]][[y]],
+                               "nrow",
+                               input = "matrix",
+                               copy = FALSE)[, 1] < 2) {
                   # RANGE CENTER
                   text_x[y] <- mean(c(xmin, xmax))
                 } else {
@@ -1602,7 +1610,10 @@
               # Y COORD - MODE/RANGE CENTER
               if (.all_na(label_text_y[[z]][y])) {
                 # NO EVENTS
-                if (cyto_stat_count(pops[[z]][[y]]) == 0) {
+                if (cyto_apply(pops[[z]][[y]],
+                               "nrow",
+                               input = "matrix",
+                               copy = FALSE)[, 1] == 0) {
                   # RANGE CENTER
                   text_y[y] <- mean(c(ymin, ymax))
                 } else {
@@ -1625,7 +1636,10 @@
             # X COORD - MODE/RANGE CENTER
             if (.all_na(label_text_x[[z]][y])) {
               # NO EVENTS
-              if (cyto_stat_count(pops[[z]][[y]]) < 2) {
+              if (cyto_apply(pops[[z]][[y]],
+                             "nrow",
+                             input = "matrix",
+                             copy = FALSE)[, 1] < 2) {
                 # RANGE CENTER
                 text_x[y] <- mean(c(xmin, xmax))
               } else {
@@ -1645,7 +1659,10 @@
             # Y COORD - MODE
             if (.all_na(label_text_y[[z]][y])) {
               # NO EVENTS
-              if (cyto_stat_count(pops[[z]][[y]]) < 2) {
+              if (cyto_apply(pops[[z]][[y]],
+                             "nrow",
+                             input = "matrix",
+                             copy = FALSE)[, 1] < 2) {
                 text_y[y] <- mean(c(ymin, ymax))
               } else {
                 # MODE
@@ -2414,6 +2431,7 @@
 #' @importFrom grDevices densCols colorRampPalette adjustcolor
 #' @importFrom flowCore exprs
 #' @importFrom methods is
+#' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2474,20 +2492,44 @@
   
   # First layer contains density gradient if no other colour is designated
   if (all(LAPPLY(point_col, ".all_na"))) {
-    
     # Extract data
-    fr_exprs <- cyto_data_extract(x[[1]],
+    cf_exprs <- cyto_data_extract(x[[1]],
                                   format = "matrix",
                                   channels = channels, 
                                   copy = FALSE)[[1]][[1]]
-    
     # Too few events for density computation
-    if (!is.null(nrow(fr_exprs))) {
-      if (nrow(fr_exprs) >= 2) {
-        # Get density colour for each point
+    if (!is.null(nrow(cf_exprs))) {
+      if (nrow(cf_exprs) >= 2) {
+
+        # SINCE RANGE MAY BE OUTSIDE PLOT WE NEED TO ADJUST GRID SIZE
+        # IDEALLY WE SHOULD COMPUTE BANDWIDTH WITH THIS DATA REMOVED
+        # GATING SLOWS DOWN PLOTTING SO WE USE DEFAULT INSTEAD
+        # BW = DIFF(RANGE(Z))/25 AS IN grDevices::densCols()
+        # KernSmooth::bkde2D() USED UNDER THE HOOD  
+        
+        # GRID SIZE - DEFAULT 200 - INCREASE COMES AT COST OF SPEED
+        cnt <- 0
+        grid_size <- apply(cf_exprs, 
+                           2,
+                           function(z){
+                             cnt <<- cnt + 1
+                             # RANGE
+                             rng <- c(min(z), max(z))
+                             # PLOT LIMITS
+                             usr <- par("usr")[c(cnt + cnt - 1, cnt + cnt)]
+                             # GRID SIZE
+                             bins <- 200
+                             if(diff(rng) > diff(usr)) {
+                               bins <- ceiling(
+                                 bins * diff(rng)/ diff(usr)
+                               )
+                             }
+                             return(bins)
+                           })  
         point_col[[1]] <- suppressWarnings(
-          densCols(fr_exprs,
-                   colramp = col_scale
+          densCols(cf_exprs,
+                   colramp = col_scale,
+                   nbin = grid_size
           )
         )
       }
@@ -2526,9 +2568,8 @@
           z
         )
         # MATRIX
-        fr_exprs <- cyto_data_extract(x[[1]],
-                                      format = "matrix",
-                                      channels = channels, 
+        cf_exprs <- cyto_data_extract(x[[1]],
+                                      format = "matrix", 
                                       copy = FALSE)[[1]][[1]]
         # CALIBRATION
         if (!is.null(cyto_cal)) {
@@ -2539,18 +2580,18 @@
             )
           } else {
             cyto_range <- c(
-              min(fr_exprs[, z]),
-              max(fr_exprs[, z])
+              min(cf_exprs[, z]),
+              max(cf_exprs[, z])
             )
           }
         } else {
           cyto_range <- c(
-            min(fr_exprs[, z]),
-            max(fr_exprs[, z])
+            min(cf_exprs[, z]),
+            max(cf_exprs[, z])
           )
         }
         # RESCALE
-        rescale <- (fr_exprs[, z] - cyto_range[1]) /
+        rescale <- (cf_exprs[, z] - cyto_range[1]) /
           (cyto_range[2] - cyto_range[1])
         rescale[rescale > 1] <- 1
         rescale[rescale < 0] <- 0
@@ -2586,7 +2627,8 @@
 ## DENSITY ----
 
 #' Prepare histograms for cyto_plot
-#' @param x list of cytoframes.
+#' @param x list of cytosets
+#' @importFrom graphics par
 #' @noRd
 .cyto_plot_hist <- function(x,
                             channels = NULL,
@@ -2594,66 +2636,67 @@
                             hist_smooth = 1,
                             hist_bins = 256,
                             hist_stack = 0,
+                            xlim = c(NA, NA),
                             ...) {
   
-  # CHANNELS
-  channels <- cyto_channels_extract(x[[1]], channels, plot = TRUE)
+  # COMPUTE BANDWIDTH BY BINNING XLIM (256 BINS - FLOWJO)
+  # INSTRUMENT RANGE IS INCONSISTENT - FLOWWORKSPACE ISSUE #348
   
-  # BANDWIDTH - BIN INSTRUMENT RANGE
-  rng <- range(x[[1]][, channels], type = "instrument")
-  hist_bandwidth <- LAPPLY(colnames(rng), function(z){
-    (rng["max", z] - rng["min", z])/hist_bins
-  })
-  names(hist_bandwidth) <- channels
-  # KERNEL DENSITY 
-  d <- suppressWarnings(
-    cyto_apply(x, 
-               "cyto_stat_density",
-               input = 2,
-               channels = channels,
-               stat = hist_stat,
-               bandwidth = hist_bandwidth,
-               smooth = hist_smooth,
-               simplify = FALSE)
+  # KERNEL DENSITY - LIST OF DENSITY LISTS PER SAMPLE
+  d <- structure(
+    lapply(x, function(cs){
+      # HISTOGRAM
+      cyto_apply(cs, 
+                 "cyto_stat_density",
+                 input = "matrix",
+                 channels = channels,
+                 copy = FALSE,
+                 stat = hist_stat,
+                 bins = hist_bins,
+                 smooth = hist_smooth,
+                 limits = matrix(
+                   xlim,
+                   ncol = 1,
+                   dimnames = list(c("min", "max"),
+                                   channels)
+                 ),
+                 simplify = FALSE)[[1]][[1]]
+    }), names = names(x)
   )
-  d <- lapply(d, `[[`, 1)
-  # STACKING
-  if(hist_stack != 0) {
-    hist_heights <- round(LAPPLY(d, function(D){
-      if(.all_na(D)){
-        return(NA)
-      }else{
-        D$range[2]
-      }
-    }), 2)
-    hist_stack <- max(hist_heights, na.rm = TRUE) * hist_stack
-    hist_levels <- c(0, seq_along(x)) * hist_stack
-    d <- lapply(seq_along(d), function(z){
-      D <- d[[z]]
-      if(z > 1 & !.all_na(D)){
-        D$y <- D$y + hist_levels[z]
-      }
-      return(D)
-    })
-    # STORE RANGES IN NAMES
-    names(d) <- LAPPLY(seq_along(d), function(z){
-      if(is.na(hist_heights[z])) {
-        paste(hist_levels[z], hist_levels[z], sep = "-")
+  
+  # STACKING - RANGE STORED IN DENSITY OBJECT -  CANNOT ROUND DENSITY
+  hist_heights <- LAPPLY(d, function(D){
+    if(.all_na(D)){
+      return(NA)
+    }else{
+      D$range[2]
+    }
+  })
+  hist_stack <- max(hist_heights, na.rm = TRUE) * hist_stack
+  hist_levels <- c(0, seq_along(x)) * hist_stack
+  d <- lapply(seq_along(d), function(z){
+    D <- d[[z]]
+    if(z > 1 & !.all_na(D)){
+      D$y <- D$y + hist_levels[z]
+    }
+    return(D)
+  })
+  # STORE NEW RANGES IN RANGE SLOT
+  d <- structure(
+    lapply(seq_along(d), function(z){
+      if(.all_na(hist_heights[z])) {
+        d[[z]]$range <- rep(hist_levels[z], 2)
       } else {
-        paste(hist_levels[z], hist_levels[z] + hist_heights[z], sep = "-")
+        d[[z]]$range <- c(hist_levels[z],
+                          hist_levels[z] + hist_heights[z])
       }
-    })
-  } else {
-    # STORE RANGES IN NAMES
-    names(d) <- LAPPLY(d, function(z){
-      if(.all_na(z)) {
-        paste(c(0,0), collapse = "-")
-      } else {
-        paste(z$range, collapse = "-")
-      }
-    })
-  }
+      return(d[[z]])
+    }), names = names(d)
+  )
+
+  # STACKED HISTOGRAMS
   return(d)
+  
 }
 
 ## HISTOGRAM FILL ----
