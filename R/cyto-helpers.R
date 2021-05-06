@@ -1592,10 +1592,11 @@ cyto_transform_extract <- function(x,
 #' inverse = TRUE)
 #'
 #' # Extract raw data matrices
-#' cyto_data_extract(gs,
+#' mt <- cyto_data_extract(gs,
 #' parent = "root",
 #' format = "matrix",
 #' channels = c("CD4", "CD8"))
+#' mt[["Activation_1.fcs"]]
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2852,13 +2853,20 @@ cyto_save.flowFrame <- function(x,
 cyto_list <- function(x,
                       extract = TRUE) {
   
+  # CYTOFRAME SUPPLIED
+  if(cyto_class(x, "flowFrame")) {
+    return(list(x)) # no names
+  }
+  
   # CYTOFRAME
   if(extract) {
     structure(
       lapply(seq_along(x), function(z){
         x[[z]]
       }), 
-      names = cyto_names(x))
+      names = cyto_names(x)
+    )
+  # CYTOSET
   } else {
     structure(
       lapply(seq_along(x), function(z){
@@ -2890,8 +2898,6 @@ cyto_list <- function(x,
 #'   supplied.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
-#' @param plot logical required for lists to indicate whether sampling should be
-#'   scaled per flowFrame to retain original ratios, as used in cyto_plot.
 #' @param ... not in use.
 #'
 #' @return object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -3053,17 +3059,10 @@ cyto_sample.flowSet <- function(x,
 cyto_sample.list <- function(x,
                              display = 1,
                              seed = NULL,
-                             plot = FALSE,
                              ...) {
   
-  # PLOT - COMPUTE SAMPLE SIZE PER LAYER
-  if (plot == TRUE) {
-    display <- cyto_sample_size(x, 
-                                display = display[1])
   # SAME SAMPLE SIZE PER LAYER
-  } else {
-    display <- rep(display, length(x))
-  }
+  display <- rep(display, length(x))
   
   # SAMPLING
   x <- mapply(function(x, display) {
@@ -5026,7 +5025,7 @@ cyto_apply.flowSet <- function(x,
   
   # CHANNELS
   if(!is.null(channels)) {
-    x <- x[, cyto_channels_extract(x, channels)]
+    x <- x[, cyto_channels_extract(x, channels), drop = FALSE]
   }
   
   # INVERSE TRANSFORM
