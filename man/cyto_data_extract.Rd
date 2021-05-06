@@ -76,10 +76,11 @@ parent = c("CD4 T Cells", "CD8 T Cells"),
 inverse = TRUE)
 
 # Extract raw data matrices
-cyto_data_extract(gs,
+mt <- cyto_data_extract(gs,
 parent = "root",
 format = "matrix",
 channels = c("CD4", "CD8"))
+mt[["Activation_1.fcs"]]
 
 }
 \author{

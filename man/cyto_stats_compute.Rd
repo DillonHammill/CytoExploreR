@@ -9,7 +9,7 @@ cyto_stats_compute(
   alias = NULL,
   parent = NULL,
   channels = NULL,
-  trans = NULL,
+  trans = NA,
   stat = NULL,
   inverse = TRUE,
   round = 2,

@@ -5,7 +5,6 @@
 \alias{cyto_plot.GatingSet}
 \alias{cyto_plot.GatingHierarchy}
 \alias{cyto_plot.flowSet}
-\alias{cyto_plot.flowFrame}
 \title{cyto_plot}
 \usage{
 \method{cyto_plot}{GatingSet}(
@@ -202,7 +201,7 @@
   overlay = NA,
   gate = NA,
   axes_limits = "auto",
-  display = 25000,
+  display = 50000,
   layout,
   margins = c(NA, NA, NA, NA),
   popup = FALSE,
@@ -216,8 +215,8 @@
   hist_stat = "percent",
   hist_bins = 256,
   hist_smooth = 1,
-  hist_stack = 0,
-  hist_layers = NA,
+  hist_stack = 0.5,
+  hist_layers = 1,
   hist_cols = NA,
   hist_fill = NA,
   hist_fill_alpha = 1,
@@ -287,94 +286,7 @@
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
-  ...
-)
-
-\method{cyto_plot}{flowFrame}(
-  x,
-  channels,
-  axes_trans = NA,
-  overlay = NA,
-  gate = NA,
-  axes_limits = "auto",
-  display = 25000,
-  margins = c(NA, NA, NA, NA),
-  popup = FALSE,
-  xlim = c(NA, NA),
-  ylim = c(NA, NA),
-  xlab,
-  ylab,
-  title,
-  negate = FALSE,
-  hist_stat = "percent",
-  hist_bins = 256,
-  hist_smooth = 1,
-  hist_stack = 0,
-  hist_cols = NA,
-  hist_fill = NA,
-  hist_fill_alpha = 1,
-  hist_line_type = 1,
-  hist_line_width = 1,
-  hist_line_col = "black",
-  point_shape = ".",
-  point_size = 2,
-  point_col_scale = NA,
-  point_cols = NA,
-  point_col = NA,
-  point_col_alpha = 1,
-  point_fast = FALSE,
-  contour_lines = 0,
-  contour_line_type = 1,
-  contour_line_width = 1,
-  contour_line_col = "black",
-  contour_line_alpha = 1,
-  axes_limits_buffer = 0.03,
-  axes_text = c(TRUE, TRUE),
-  axes_text_font = 1,
-  axes_text_size = 1,
-  axes_text_col = "black",
-  axes_label_text_font = 1,
-  axes_label_text_size = 1.1,
-  axes_label_text_col = "black",
-  title_text_font = 2,
-  title_text_size = 1.1,
-  title_text_col = "black",
-  legend = FALSE,
-  legend_text = NA,
-  legend_text_font = 1,
-  legend_text_size = 1,
-  legend_text_col = "black",
-  legend_line_type = NA,
-  legend_line_width = NA,
-  legend_line_col = NA,
-  legend_box_fill = NA,
-  legend_point_col = NA,
-  gate_line_type = 1,
-  gate_line_width = 2.5,
-  gate_line_col = "red",
-  gate_fill = "white",
-  gate_fill_alpha = 0,
-  label,
-  label_text,
-  label_stat,
-  label_position = "auto",
-  label_text_x = NA,
-  label_text_y = NA,
-  label_text_font = 2,
-  label_text_size = 1,
-  label_text_col = "black",
-  label_fill = "white",
-  label_fill_alpha = 0.6,
-  border_line_type = 1,
-  border_line_width = 1,
-  border_line_col = "black",
-  border_fill = "white",
-  border_fill_alpha = 1,
-  grid = TRUE,
-  grid_line_type = 1,
-  grid_line_width = 1,
-  grid_line_col = "grey95",
-  grid_line_alpha = 1,
+  seed = 42,
   ...
 )
 }
@@ -474,8 +386,8 @@ equal to 1 are supported.}
 histograms, set to \code{0} by default.}
 
 \item{hist_layers}{numeric indicating the number of histograms to stack in
-each plot, set to all samples by default. Each plot must contain the same
-number of histograms.}
+each plot when there are no overlays, set to 1 histogram per plot by
+default. Each plot must contain the same number of histograms.}
 
 \item{hist_cols}{vector colours to draw from when selecting histogram fill
 colours if none are supplied to \code{hist_fill}.}
@@ -724,6 +636,11 @@ default.}
 the \code{scattermore} package, set to FALSE by default. This is an
 optional feature so if you intend to use it, make sure that you have the
 scattermore package installed \code{install.packages("scattermore")}.}
+
+\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
+sampling is applied with each \code{\link{cyto_plot}} call, set to an
+arbitrary numeric by default. This behaviour can be turned off by setting
+this argument to NULL.}
 }
 \description{
 Explore and visualise cytometry data.

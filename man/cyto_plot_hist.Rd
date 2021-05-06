@@ -6,6 +6,7 @@
 \usage{
 cyto_plot_hist(
   x,
+  parent = "root",
   channel,
   overlay = NA,
   display = 1,
@@ -19,6 +20,7 @@ cyto_plot_hist(
   hist_line_type = 1,
   hist_line_width = 1,
   hist_line_col = "black",
+  seed = 42,
   ...
 )
 }
@@ -27,6 +29,9 @@ cyto_plot_hist(
 \code{\link[flowWorkspace:cytoset]{cytoset}}, list of
 \code{\link[flowWorkspace:cytoframe]{cytoframes}} or a list of
 \code{\link[stats:density]{density}} objects.}
+
+\item{parent}{name of the parent population to extract from GatingHierarchy
+or GatingSet objects.}
 
 \item{channel}{name of the channels to be used to construct the plot.}
 
@@ -68,6 +73,11 @@ lines, set to 1 by default.}
 
 \item{hist_line_col}{colour(s) for histogram borders, set to \code{"black"}
 by default.}
+
+\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
+sampling is applied with each \code{\link{cyto_plot_contour}} call, set to
+an arbitrary numeric by default. This behaviour can be turned off by
+setting this argument to NULL.}
 
 \item{...}{not in use.}
 }

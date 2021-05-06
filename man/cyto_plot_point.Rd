@@ -6,6 +6,7 @@
 \usage{
 cyto_plot_point(
   x,
+  parent = "root",
   channels,
   overlay = NA,
   display = 1,
@@ -21,12 +22,20 @@ cyto_plot_point(
   contour_line_width = 1,
   contour_line_col = "black",
   contour_line_alpha = 1,
+  seed = 42,
   ...
 )
 }
 \arguments{
-\item{x}{object of class \code{cytoframe} or a list of \code{cytoframe}
-objects.}
+\item{x}{either an object of class
+\code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list containing
+cytoframe or cytoset objects.}
+
+\item{parent}{name of the parent population to extract from GatingHierarchy
+or GatingSet objects.}
 
 \item{channels}{names of the channels used to construct the plot.}
 
@@ -73,6 +82,11 @@ default.}
 
 \item{contour_line_alpha}{numeric [0,1] to control transparency of contour
 lines, set to 1 by default to remove transparency.}
+
+\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
+sampling is applied with each \code{\link{cyto_plot_contour}} call, set to
+an arbitrary numeric by default. This behaviour can be turned off by
+setting this argument to NULL.}
 
 \item{...}{not in use.}
 }
