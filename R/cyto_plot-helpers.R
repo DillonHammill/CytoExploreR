@@ -249,8 +249,8 @@ cyto_plot_empty <- function(x,
   
   # Prevent scientific notation on axes - reset on exit
   scipen <- cyto_option("scipen")
-  cyto_option(scipen = 100000000)
-  on.exit(cyto_option(scipen = scipen))
+  cyto_option("scipen", 100000000)
+  on.exit(cyto_option("scipen", scipen))
   
   # Extract current graphics parameters
   pars <- par("mar")
@@ -299,14 +299,15 @@ cyto_plot_empty <- function(x,
                              hist_stat = hist_stat,
                              hist_smooth = hist_smooth,
                              hist_bins = hist_bins,
-                             hist_stack = hist_stack
+                             hist_stack = hist_stack,
+                             xlim = xlim
         )
       }
       # YLIM
-      ymin <- as.numeric(unlist(strsplit(names(d)[1], "-"))[1])
+      ymin <- d[[1]]$range[1]
       ymax <- max(
-        LAPPLY(names(d), function(z) {
-          as.numeric(unlist(strsplit(z, "-"))[2])
+        LAPPLY(d, function(D){
+          D$range[2]
         }),
         na.rm = TRUE
       )
@@ -420,8 +421,7 @@ cyto_plot_empty <- function(x,
                                        channels = channels,
                                        xlab = xlab,
                                        ylab = ylab,
-                                       hist_stat
-  )
+                                       hist_stat = hist_stat)
   xlab <- axes_labels[[1]]
   ylab <- axes_labels[[2]]
   
@@ -868,7 +868,6 @@ cyto_plot_new <- function(popup,
         dev_new <- "rstudio"
       }
     }
-    print(dev_new)
     # OPEN NEW GRAPHICS DEVICE
     if (dev_new != FALSE) {
       # POPUP DEVICE
@@ -1474,7 +1473,6 @@ cyto_plot_par <- function(...,
     par_args <- c(par_args, par_new_args)
     # LAYOUT
     if("layout" %in% names(par_args)) {
-      print("YASS")
       layout <- par_args[["layout"]]
       par_args <- par_args[!names(par_args) %in% "layout"]
       if (is.numeric(layout)) {
