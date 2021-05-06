@@ -299,12 +299,9 @@
 #' )
 #' @importFrom graphics par
 #' @importFrom grDevices recordPlot
-#' @importFrom purrr transpose
 #' @importFrom openCyto gh_generate_template
-#' @importFrom methods formalArgs is
 #' @importFrom flowWorkspace gh_pop_is_negated gs_pop_get_children
 #'   gh_pop_get_descendants gh_pop_get_children gh_pop_get_gate
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
