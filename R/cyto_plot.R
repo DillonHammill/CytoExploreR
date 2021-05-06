@@ -1,5 +1,9 @@
 ## CYTO_PLOT -------------------------------------------------------------------
 
+# GatingHierarchy/GatingSet methods are almost identical and could probably be
+# combined into a single method for simplicity. select and merge_by arguments
+# are required in GatingHiewrarchy method as it calls cytoset method now.
+
 #' cyto_plot
 #'
 #' Explore and visualise cytometry data.
@@ -76,8 +80,8 @@
 #' @param hist_stack numeric [0,1] indicating the degree of stacking for
 #'   histograms, set to \code{0} by default.
 #' @param hist_layers numeric indicating the number of histograms to stack in
-#'   each plot, set to all samples by default. Each plot must contain the same
-#'   number of histograms.
+#'   each plot when there are no overlays, set to 1 histogram per plot by
+#'   default. Each plot must contain the same number of histograms.
 #' @param hist_cols vector colours to draw from when selecting histogram fill
 #'   colours if none are supplied to \code{hist_fill}.
 #' @param hist_fill fill colour(s) for histograms, select from \code{hist_cols}
@@ -254,6 +258,10 @@
 #'   to 1 by default.
 #' @param header_text_col colour to use for the header text, set to "black" by
 #'   default.
+#' @param seed numeric passed to \code{\link{set.seed}} to ensure that the same
+#'   sampling is applied with each \code{\link{cyto_plot}} call, set to an
+#'   arbitrary numeric by default. This behaviour can be turned off by setting
+#'   this argument to NULL.
 #' @param ... not currently in use.
 #'
 #' @examples
@@ -291,7 +299,6 @@
 #' )
 #' @importFrom graphics par
 #' @importFrom grDevices recordPlot
-#' @importFrom magrittr %>%
 #' @importFrom purrr transpose
 #' @importFrom openCyto gh_generate_template
 #' @importFrom methods formalArgs is
@@ -313,7 +320,7 @@ cyto_plot <- function(x, ...) {
 #' @rdname cyto_plot
 #' @export
 cyto_plot.GatingSet <- function(x,
-                                parent,
+                                parent= "root",
                                 alias = NA,
                                 channels,
                                 axes_trans = NA,
@@ -405,16 +412,10 @@ cyto_plot.GatingSet <- function(x,
                                 header_text_font = 2,
                                 header_text_size = 1,
                                 header_text_col = "black",
+                                seed = 42, 
                                 ...) {
   
-  # GATINGSET METHOD - CALLS FLOWSET METHOD
-  
   # CHECKS ---------------------------------------------------------------------
-  
-  # PARENT
-  if (missing(parent)) {
-    stop("Supply the name of the 'parent' population to plot.")
-  }
   
   # CHANNELS
   if (missing(channels)) {
@@ -440,7 +441,9 @@ cyto_plot.GatingSet <- function(x,
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
   
   # EXTRACT PARENT POPULATIONS
-  x <- cyto_extract(gs, parent)
+  x <- cyto_data_extract(gs, 
+                         parent = parent,
+                         copy = FALSE)[[1]]
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(gs)
@@ -493,7 +496,7 @@ cyto_plot.GatingSet <- function(x,
                                                   nodes = z, 
                                                   anchor = parent))
           # BOOL GATE
-          if (is(g, "booleanFilter")) {
+          if (cyto_class(g, "booleanFilter")) {
             # BOOLEAN LOGIC
             bool <- g@deparse
             # ONLY NOT AND BOOL GATES SUPPORTED
@@ -547,7 +550,7 @@ cyto_plot.GatingSet <- function(x,
                                                 nodes = z, 
                                                 anchor = parent))
         # BOOL GATE
-        if(is(g, "booleanFilter")){
+        if(cyto_class(g, "booleanFilter")){
           # BOOLEAN LOGIC
           bool <- g@deparse
           # ONLY NOT AND BOOL GATES SUPPORTED
@@ -604,7 +607,7 @@ cyto_plot.GatingSet <- function(x,
       })
       names(gt) <- alias
       # REMOVE BOOLEAN GATES
-      gt[LAPPLY(gt, function(z){is(z, "booleanFilter")})] <- NULL
+      gt[LAPPLY(gt, function(z){cyto_class(z, "booleanFilter")})] <- NULL
       return(gt)
     })
     names(gate) <- cyto_names(gs)
@@ -657,9 +660,11 @@ cyto_plot.GatingSet <- function(x,
         # EXTRACT POPULATIONS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
-          cyto_extract(gs, cyto_nodes_convert(gs, 
-                                              nodes = z, 
-                                              anchor = parent))
+          cyto_data_extract(gs, 
+                            parent = cyto_nodes_convert(gs, 
+                                                        nodes = z, 
+                                                        anchor = parent),
+                            copy = FALSE)[[1]]
         })
         names(overlay) <- nms
       }
@@ -692,10 +697,11 @@ cyto_plot.GatingSet <- function(x,
       L <- 1
     }
   }else{
-    if(is(overlay, "flowFrame") | is(overlay, "flowSet")){
+    # 2 LAYERS
+    if(cyto_class(overlay, "flowSet")){
       L <- 2
     }else{
-      # OVERLAY LIST OF FLOWFRAMES OR FLOWSETS
+      # OVERLAY LIST OF CYTOSETS
       L <- length(overlay) + 1
     }
   }
@@ -790,26 +796,23 @@ cyto_plot.GatingSet <- function(x,
   
   # PULL DOWN ARGUMENTS
   args <- .args_list()
+
+  # CALL CYTOSET METHOD
+  .execute("cyto_plot.flowSet", args)
   
-  # CYTO_PLOT FLOWSET ARGUMENTS
-  ARGS <- formalArgs("cyto_plot.flowSet")
-  
-  # RESTRICT ARGUMENTS
-  args <- args[names(args) %in% ARGS]
-  
-  # CALL FLOWSET METHOD
-  do.call("cyto_plot.flowSet", args)
 }
 
 #' @rdname cyto_plot
 #' @export
 cyto_plot.GatingHierarchy <- function(x,
-                                      parent,
+                                      parent = "root",
                                       alias = NA,
                                       channels,
                                       axes_trans = NA,
+                                      merge_by = "name",
                                       overlay = NA,
                                       gate = NA,
+                                      select = NULL,
                                       axes_limits = "auto",
                                       display = 25000,
                                       margins = c(NA, NA, NA, NA),
@@ -887,17 +890,15 @@ cyto_plot.GatingHierarchy <- function(x,
                                       grid_line_type = 1,
                                       grid_line_width = 1,
                                       grid_line_col = "grey95",
-                                      grid_line_alpha = 1, 
+                                      grid_line_alpha = 1,
+                                      header = NA,
+                                      header_text_font = 2,
+                                      header_text_size = 1,
+                                      header_text_col = "black",
+                                      seed = 42, 
                                       ...) {
   
-  # GATINGHIERARCHY METHOD - CALLS FLOWFRAME METHOD
-  
   # CHECKS ---------------------------------------------------------------------
-  
-  # PARENT
-  if (missing(parent)) {
-    stop("Supply the name of the 'parent' population to plot.")
-  }
   
   # CHANNELS
   if (missing(channels)) {
@@ -915,7 +916,9 @@ cyto_plot.GatingHierarchy <- function(x,
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
   
   # EXTRACT PARENT POPULATION
-  x <- cyto_extract(gh, parent)
+  x <- cyto_data_extract(gh, 
+                         parent = parent,
+                         copy = FALSE)[[1]]
   
   # NO GATES IN GATINHIERARCHY - ALIAS NA
   if(!.all_na(alias) & length(cyto_nodes(gh)) == 1){
@@ -965,7 +968,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                                   nodes = z, 
                                                   anchor = parent))
           # BOOL GATE
-          if (is(g, "booleanFilter")) {
+          if (cyto_class(g, "booleanFilter")) {
             # BOOLEAN LOGIC
             bool <- g@deparse
             # ONLY NOT AND BOOL GATES SUPPORTED
@@ -1021,7 +1024,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                                 nodes = z, 
                                                 anchor = parent))
         # BOOL GATE
-        if(is(g, "booleanFilter")){
+        if(cyto_class(g, "booleanFilter")){
           # BOOLEAN LOGIC
           bool <- g@deparse
           # ONLY NOT AND BOOL GATES SUPPORTED
@@ -1077,7 +1080,7 @@ cyto_plot.GatingHierarchy <- function(x,
     })
     names(gate) <- alias
     # REMOVE BOOLEAN GATES
-    ind <- which(LAPPLY(gate, function(z){is(z, "booleanFilter")}))
+    ind <- which(LAPPLY(gate, function(z){cyto_class(z, "booleanFilter")}))
     gate[ind] <- NULL
     # NEGATED GATES - SINGLE NEGATED GATE
     if(all(LAPPLY(alias, function(z){
@@ -1129,10 +1132,11 @@ cyto_plot.GatingHierarchy <- function(x,
         # EXTRACT POPULATIONS
         nms <- overlay
         overlay <- lapply(overlay, function(z) {
-          cyto_extract(gh,
-                       cyto_nodes_convert(gh, 
-                                          nodes = z, 
-                                          anchor = parent))
+          cyto_data_extract(gh,
+                            parent = cyto_nodes_convert(gh, 
+                                                        nodes = z, 
+                                                        anchor = parent),
+                            copy = FALSE)[[1]]
         })
         names(overlay) <- nms
       }
@@ -1150,10 +1154,10 @@ cyto_plot.GatingHierarchy <- function(x,
   if(.all_na(overlay)){
     L <- 1
   }else{
-    if(is(overlay, "flowFrame") | is(overlay, "flowSet")){
+    if(cyto_class(overlay, "flowSet")){
       L <- 2
     }else{
-      # OVERLAY LIST OF FLOWFRAMES OR FLOWSETS
+      # OVERLAY LIST OF CYTOSETS
       L <- length(overlay) + 1
     }
   }
@@ -1241,14 +1245,8 @@ cyto_plot.GatingHierarchy <- function(x,
   # PULL DOWN ARGUMENTS
   args <- .args_list()
   
-  # CYTO_PLOT FLOWFRAME ARGUMENTS
-  ARGS <- formalArgs("cyto_plot.flowFrame")
-  
-  # RESTRICT ARGUMENTS
-  args <- args[names(args) %in% ARGS]
-  
-  # CALL FLOWFRAME METHOD
-  do.call("cyto_plot.flowFrame", args)
+  # CALL CYTOSET METHOD
+  .execute("cyto_plot.flowSet", args)
 }
 
 #' @rdname cyto_plot
@@ -1260,7 +1258,7 @@ cyto_plot.flowSet <- function(x,
                               overlay = NA,
                               gate = NA,
                               axes_limits = "auto",
-                              display = 25000,
+                              display = 50000,
                               layout,
                               margins = c(NA, NA, NA, NA),
                               popup = FALSE,
@@ -1274,8 +1272,8 @@ cyto_plot.flowSet <- function(x,
                               hist_stat = "percent",
                               hist_bins = 256,
                               hist_smooth = 1,
-                              hist_stack = 0,
-                              hist_layers = NA,
+                              hist_stack = 0.5,
+                              hist_layers = 1,
                               hist_cols = NA,
                               hist_fill = NA,
                               hist_fill_alpha = 1,
@@ -1345,21 +1343,21 @@ cyto_plot.flowSet <- function(x,
                               header_text_font = 2,
                               header_text_size = 1,
                               header_text_col = "black",
+                              seed = 42,
                               ...) {
   
   # CYTO_PLOT_EXIT -------------------------------------------------------------
   
-  # NEW PLOT METHOD
-  if(is.null(getOption("cyto_plot_method"))) {
-    # CYTO_PLOT_METHOD
-    options("cyto_plot_method" = "flowSet")
+  # SIGNAL CALL TO CYTO_PLOT
+  if(is.null(cyto_option("cyto_plot_method"))) {
+    cyto_option("cyto_plot_method", "cytoset")
     # RESET GRAPHICAL PARAMETERS
     old_pars <- .par()
     # CYTO_PLOT_EXIT
     on.exit({
       par(old_pars)
-      options("cyto_plot_method" = NULL)
-      options("cyto_plot_par" = NULL)
+      cyto_option("cyto_plot_method", NULL)
+      cyto_option("cyto_plot_par", NULL)
     })
   }
   
@@ -1367,8 +1365,9 @@ cyto_plot.flowSet <- function(x,
   
   # ARGUMENTS
   args <- .args_list(...)
+  
+  # REMOVE OLD PARAMETERS & LAYOUT
   args <- args[!names(args) %in% c("old_pars")]
-  args <- args[!grepl("header", names(args), ignore.case = TRUE)]
   
   # INHERIT THEME
   args <- .cyto_plot_theme_inherit(args)
@@ -1379,161 +1378,72 @@ cyto_plot.flowSet <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # CHANNELS
-  if (.empty(args$channels)) {
-    stop("Supply channel/marker(s) to construct the plot.")
+  if(.empty(args$channels)) {
+    stop("Supply channel/marker(s) to 'channels' to construct the plot.")
   } else {
-    args$channels <- cyto_channels_extract(args$x, 
-                                           channels = args$channels, 
+    args$channels <- cyto_channels_extract(args$x,
+                                           channels = args$channels,
                                            plot = TRUE)
   }
   
-  # REMOVE LAYOUT FROM ARGS
-  args <- args[-match("layout", names(args))]
-  
-  # CUSTOM PLOT SIGNALLED
-  if (getOption("cyto_plot_method") == "custom") {
-    layout <- FALSE
+  # LAYOUT - CUSTOM PLOT
+  if(cyto_option("cyto_plot_method") == "custom") {
+    args$layout <- FALSE
   }
   
-  # LAYOUT TURNED OFF
-  if (!all(.empty(layout))) {
-    if (all(layout == FALSE)) {
-      options("cyto_plot_method" = "custom") 
+  # LAYOUT - TURNED OFF
+  if(!all(.empty(args$layout))) {
+    if(all(args$layout == FALSE)){
+      cyto_option("cyto_plot_method", "custom")
     }
   }
   
-  # SAMPLE PREPARATION - BASE LAYERS & OVERLAYS --------------------------------
-  
-  # SELECT
-  if (!is.null(args$select)) {
-    args$x <- cyto_select(args$x, args$select)
-  }
-  args <- args[!names(args) %in% c("select")]
-  
-  # DATA TO LIST & GROUP - CONVERT GROUPS TO CYTOFRAMES
-  args$x <- cyto_merge_by(args$x, args$merge_by)
-  
-  # OVERLAY LIST & GROUP
-  if (!.all_na(args$overlay)) {
-    # REPEAT FLOWFRAME PER PLOT
-    if (is(args$overlay, "flowFrame")) {
-      args$overlay <- rep(list(list(args$overlay)), length(arsg$x))
-      # FLOWSET TO LIST OF CYTOFRAMES
-    } else if (is(args$overlay, "flowSet")) {
-      # GROUPING
-      args$overlay <- cyto_merge_by(args$overlay, 
-                                    merge_by = args$merge_by)
-      # LIST OF FLOWFRAME LISTS
-      args$overlay <- lapply(args$overlay, function(z) {
-        list(z)
-      })
-      # LIST OF FLOWSETS TO LIST OF FLOWFRAME LISTS
-    } else if (is(args$overlay, "list")) {
-      # ALLOW LIST OF CYTOFRAMES OF LENGTH FR_LIST
-      if (all(LAPPLY(unlist(args$overlay), function(z) {
-        is(z, "flowFrame")
-      }))) {
-        # SAME LENGTH AS FR_LIST
-        if (length(args$overlay) != length(args$x)) {
-          stop(
-            paste(
-              "'overlay' must be a list of flowFrame lists -",
-              "one flowFrame list per plot."
-            )
-          )
-        }
-        # LIST OF FLOWSETS
-      } else if (all(LAPPLY(args$overlay, function(z) {
-        is(z, "flowSet")
-      }))) {
-        # GROUPING
-        args$overlay <- lapply(args$overlay, function(z) {
-          cyto_merge_by(z, 
-                        merge_by = args$merge_by)
-        })
-        args$overlay <- args$overlay %>% transpose()
-        # OVERLAY NOT SUPPORTED
-      } else {
-        stop(
-          paste(
-            "'overlay' should be either a flowFrame, flowSet, list of flowFrame",
-            "lists or list of flowSet lists."
-          )
-        )
-      }
+  # AXES_TRANS
+  if(!.all_na(args$axes_trans)) {
+    if(cyto_class(args$axes_trans, "transformList")) {
+      message("'axes_trans' must be a transformerList!")
+      args$axes_trans <- NA
     }
-    # COMBINE X & OVERLAY
-    NMS <- names(args$x)
-    args$x <- lapply(seq_len(length(args$x)), function(z) {
-      c(args$x[z], args$overlay[[z]])
-    })
-    names(args$x) <- NMS
-    # NO OVERLAY
-  } else if (.all_na(args$overlay)) {
-    # SAMPLENAMES
-    NMS <- names(args$x)
-    # LIST OF FLOWFRAME LISTS
-    args$x <- lapply(seq_len(length(args$x)), function(z) {
-      lst <- list(args$x[[z]])
-      names(lst) <- NMS[z]
-      return(lst)
+  }
+  
+  # DATA PREPARATION -----------------------------------------------------------
+  
+  # LIST OF CYTOSET LISTS
+  
+  # BASE & OVERLAY - NO BARCODING
+  args$x <- .execute(".cyto_plot_data", args)
+  
+  # REMOVE DATA ARGUMENTS
+  args <- args[!names(args) %in% c("overlay",
+                                   "display", 
+                                   "select", 
+                                   "seed")]
+  
+  # HISTOGRAM LAYERS -----------------------------------------------------------
+  
+  # INDIVIDUAL LAYERS (NO OVERLAY)
+  if(length(args$channels) == 1 & all(LAPPLY(args$x, length) == 1)) {
+    # LEGEND TEXT
+    if(.all_na(args$legend_text)){
+      args$legend_text <- names(args$x)
+    }
+    # UNPACK X
+    args$x <- unlist(args$x)
+    # SAME LAYERS PER PLOT
+    if(length(args$x) %% args$hist_layers != 0) {
+      stop("Each plot must have the same number of layers!")
+    }
+    # LAYER INDICES
+    ind <- split(seq_along(x),
+                 rep(1:(length(args$x)/args$hist_layers),
+                     each = args$hist_layers))
+    # SPLIT LAYERS
+    args$x <- lapply(unique(ind), function(z){
+      args$x[z]
     })
   }
-  args <- args[-match("overlay", names(args))]
   
-  # CLEANING -------------------------------------------------------------------
-  
-  # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE
-  args$x <- lapply(args$x, function(cf_list) {
-    cyto_apply(cf_list, function(cf){
-      lapply(seq_along(args$channels), function(z){
-        if(grepl("FSC", args$channels[z], ignore.case = TRUE) |
-           grepl("SSC", args$channels[z], ignore.case = TRUE)){
-          if (BiocGenerics::nrow(cf) != 0) {
-            if (min(range(cf, type = "data")[, args$channels[z]]) < 0) {
-              coords <- matrix(c(0, Inf), 
-                               nrow = 2,
-                               dimnames = list(c("min", "max"),
-                                               args$channels[z]))
-              cf <<- Subset(cf, rectangleGate(.gate = coords))
-            }
-          }
-        }
-      })
-      return(cf)
-    }, simplify = FALSE, input = "cytoframe")
-  })
-  
-  # HIST_LAYERS -------------------------------------------------------------
-  # DEFAULT ALL SAMPLES SAME PLOT -> LAYERS -> STACK
-  
-  # GROUP SAMPLES
-  if (length(args$channels) == 1 & length(args$x[[1]]) == 1) {
-    # LIST(LIST OF CYTOFRAMES)
-    args$x <- list(unlist(args$x))
-    # LEGEND_TEXT - SAMPLENAMES
-    if (.all_na(args$legend_text)) {
-      args$legend_text <- NMS
-    }
-    # HIST_LAYERS
-    if(!.all_na(hist_layers)) {
-      # SAME # LAYERS PER PLOT
-      if (length(args$x[[1]]) %% args$hist_layers != 0) {
-        stop("Each plot must have the same number of layers!")
-      }
-      # INDICES
-      ind <- rep(seq_len(length(args$x[[1]])),
-                 each = args$hist_layers,
-                 length.out = length(args$x[[1]])
-      )
-      # SPLITTING BY HIST_LAYERS
-      args$x <- lapply(unique(ind), function(z) {
-        args$x[[1]][ind == z]
-      })
-    }
-  }
-  
-  # GATES PREPARATION ----------------------------------------------------------
+  # GATES ----------------------------------------------------------------------
   
   # EXPECT LIST OF GATE OBJECT LISTS - ONE PER PLOT
   if (!.all_na(args$gate)) {
@@ -1587,12 +1497,12 @@ cyto_plot.flowSet <- function(x,
       }
     }
   }
-  args <- args[-match("merge_by", names(args))]
-  args <- args[-match("hist_layers", names(args))]
+  args <- args[!names(args) %in% c("merge_by",
+                                   "hist_layers")]
   
-  # ARGUMENT PREPARATION -------------------------------------------------------
+  # ARGUMENTS ------------------------------------------------------------------
   
-  # X AXIS LIMITS
+  # X AXIS LIMITS - SUPPLIED ON LINEAR SCALE
   args$xlim <- .cyto_transform(args$xlim,
                                trans = args$axes_trans,
                                channel = args$channels[1],
@@ -1608,7 +1518,7 @@ cyto_plot.flowSet <- function(x,
       )[, args$channels[1]][is.na(args$xlim)]
   }
   
-  # Y AXIS LIMITS
+  # Y AXIS LIMITS - SUPPLIED ON LINEAR SCALE
   if(length(args$channels) == 2){
     args$ylim <- .cyto_transform(args$ylim,
                                  trans = args$axes_trans,
@@ -1666,25 +1576,63 @@ cyto_plot.flowSet <- function(x,
   args$axes_text <- list(axes_text_x, axes_text_y)
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
   
-  # LAYOUT MISSING - SET FOR MULTIPLE PLOTS ONLY
-  if (length(args$x) > 1) {
-    if (all(.empty(layout))) {
-      # LAYOUT DIMENSIONS
-      layout <- .cyto_plot_layout(args$x,
-                                  layout = layout)
-      # LAYOUT TURNED OFF
-    } else if (all(layout == FALSE) | .all_na(layout)) {
-      # USE CURRENT DIMENSIONS
-      layout <- par("mfrow")
-    }
+  # LABEL_TEXT_X CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
+  args$label_text_x <- .cyto_transform(args$label_text_x,
+                                       trans = args$axes_trans,
+                                       channel = args$channels[1],
+                                       inverse = FALSE)
+  
+  # LABEL_TEXT_Y CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
+  if(length(channels) == 2) {
+    args$label_text_y <- .cyto_transform(args$label_text_y,
+                                         trans = args$axes_trans,
+                                         channel = args$channels[1],
+                                         inverse = FALSE)
   }
   
-  # HEADER
+  # LAYOUT MISSING - SET FOR MULTIPLE PLOTS ONLY
+  if (all(.empty(args$layout))) {
+    # LAYOUT DIMENSIONS
+    args$layout <- .cyto_plot_layout(args$x,
+                                     layout = args$layout)
+    # LAYOUT TURNED OFF
+  } else if (all(args$layout == FALSE) | .all_na(args$layout)) {
+    # USE CURRENT DIMENSIONS
+    args$layout <- par("mfrow")
+  }
+  
+  # HEADER ARGUMENTS - REPEAT PER PAGE
+  header_args <- args[grepl("^header", names(args))]
+  for(i in names(header_args)) {
+    header_args[[i]] <- rep(header_args[[i]], 
+                            length.out = ceiling(length(args$x)/
+                                                   prod(args$layout)))
+  }
+  
+  # UPDATE HEADER ARGUMENTS
+  .args_update(header_args)
+  
+  # REMOVE HEADER ARGUMENTS
+  args <- args[!names(args) %in% names(header_args)]
+  
+  # HEADER SPACE
   if(!.all_na(header)) {
     oma <- c(0,0,3,0)
   } else {
     oma <- par("oma")
   }
+  
+  # PREPARE GRAPHICS DEVICE ----------------------------------------------------
+  
+  # GRAPHICS DEVICE
+  if(cyto_option("cyto_plot_method") == "cytoset") {
+    cyto_plot_new(args$popup,
+                  layout = args$layout,
+                  oma = oma)
+  }
+  
+  # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
+  args <- args[!names(args) %in% "layout"]
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
@@ -1697,470 +1645,177 @@ cyto_plot.flowSet <- function(x,
   })
   
   # RESET MEMORY
-  if(getOption("cyto_plot_method") == "flowSet" & 
-     !getOption("cyto_plot_save")) {
+  if(cyto_option("cyto_plot_method") == "cytoset" & 
+     !cyto_option("cyto_plot_save")) {
     .cyto_plot_args_remove()
   }
   
-  # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
+  # CONSTRUCT PLOTS ------------------------------------------------------------
   
-  # GRAPHICS DEVICE - ONLY OPEN IF LAYOUT IS BEING SET
-  if(getOption("cyto_plot_method") == "flowSet") {
-    cyto_plot_new(popup, 
-                  layout = layout,
-                  oma = oma)
-  }
-  
-  # PASS ARGUMENTS TO CYTO_PLOT FLOWFRAME METHOD
+  # ADD PLOTS 
   cnt <- 0
-  cyto_plot_memory <- NULL
-  plots <- lapply(seq_along(args), function(z) {
-    # COUNTER
-    assign("cnt", cnt + 1, envir = parent.frame(2))
-    # ARGUMENTS
-    cyto_plot_args <- args[[z]]
-    # PREPARE X AND OVERLAY
-    if(length(cyto_plot_args$x) > 1) {
-      cyto_plot_args$overlay <- cyto_plot_args$x[-1]
+  memory <- list()
+  plots <- lapply(seq_along(args), function(z){
+    
+    #  PLOT COUNTER
+    cnt <<- cnt + 1
+    
+    # PLOT ARGUMENTS
+    ARGS <- args[[z]]
+    class(ARGS) <- "cyto_plot"
+    
+    # HISTOGRAMS ---------------------------------------------------------------
+    
+    # HISTOGRAMS - STAT/SMOOTH/STACK
+    if(length(ARGS$channels) == 1) {
+      ARGS$d <- do.call(".cyto_plot_hist", ARGS)
     } else {
-      cyto_plot_args$overlay <- NA
+      ARGS$d <- NA
     }
-    cyto_plot_args$x <- cyto_plot_args$x[[1]]
-    # TURN OFF POPUP
-    cyto_plot_args$popup <- FALSE
-    # LABEL CO-ORDINATE INHERITANCE BETWEEN PLOTS
-    if (!getOption("cyto_plot_save") &
-        any(is.na(c(
-          cyto_plot_args[["label_text_x"]],
-          cyto_plot_args[["label_text_y"]]
-        ))) &
-        cnt > 1) {
+    
+    # GATES --------------------------------------------------------------------
+    
+    # GATE DIMENSIONS
+    if(!.all_na(ARGS$gate)) {
+      ARGS$gate <- cyto_gate_prepare(ARGS$gate,
+                                     ARGS$channels)
+    }
+    
+    # LABEL TEXT & STAT ARGUMENTS ----------------------------------------------
+    
+    # LABEL ARGUMENTS
+    label_args <- do.call(".cyto_plot_label_args", ARGS)
+    ARGS[c("label",
+           "label_text",
+           "label_stat")] <- label_args[c("label",
+                                          "label_text",
+                                          "label_stat")]
+    
+    # LEGEND -------------------------------------------------------------------
+    
+    # LEGEND_TEXT
+    if(.all_na(ARGS$legend_text) |
+       length(unique(ARGS$legend_text)) == 1) {
+      ARGS$legend_text <- LAPPLY(ARGS$x, "cyto_names") 
+    }
+    
+    # LABEL STATISTICS ---------------------------------------------------------
+    
+    # STATISTICS
+    if(ARGS$label == TRUE) {
+      # POPULATIONS
+      ARGS$pops <- do.call(".cyto_plot_label_pops", ARGS)
+      # STATISTICS
+      ARGS$label_stat <- do.call(".cyto_plot_label_stat", ARGS)
+      # COMBINE LABEL_TEXT & LABEL_STAT
+      ARGS$label_text <- do.call(".cyto_plot_label_text", ARGS)
+    }
+    
+    # INHERIT LABEL CO-ORDINATES FROM MEMORY BETWEEN PLOTS
+    if(!cyto_option("cyto_plot_save") &
+       z > 1 &
+       any(
+         is.na(
+           c(ARGS$label_text_x,
+             ARGS$label_text_y)
+         )
+       )) {
       label_args <- c("label_text_x", "label_text_y")
-      lapply(label_args, function(arg) {
-        arg_ind <- which(is.na(cyto_plot_args[[arg]]))
-        cyto_plot_args[[arg]][arg_ind] <<- cyto_plot_memory[[arg]][arg_ind]
+      lapply(label_args, function(arg){
+        arg_ind <- which(is.na(ARGS[[arg]]))
+        ARGS[[arg]][arg_ind] <<- memory[[1]][[arg]][arg_ind]
       })
-      # CYTO_PLOT WILL TRANSFORM LABEL CO-ORDINATES WHEN NOT SAVING
-      # INVERSE TRANSFORM LABEL_TEXT_X
-      cyto_plot_args[["label_text_x"]] <-
-        .cyto_transform(cyto_plot_args[["label_text_x"]],
-                        trans = cyto_plot_args[["axes_trans"]],
-                        channel = cyto_plot_args[["channels"]][1],
-                        inverse = TRUE)
-      # INVERSE TRANSFORM LABEL_TEXT_Y
-      if(length(cyto_plot_args[["channels"]]) == 2){
-        cyto_plot_args[["label_text_y"]] <-
-          .cyto_transform(cyto_plot_args[["label_text_y"]],
-                          trans = cyto_plot_args[["axes_trans"]],
-                          channel = cyto_plot_args[["channels"]][2],
-                          inverse = TRUE)
-      }
     }
-    # CYTO_PLOT
-    do.call("cyto_plot", cyto_plot_args)
-    # UPDATE CYTO_PLOT_MEMORY
-    if (cnt == 1) {
-      assign("cyto_plot_memory", 
-             .cyto_plot_args_recall(),
-             envir = parent.frame(2))
-      assign("cyto_plot_memory", 
-             cyto_plot_memory[[length(cyto_plot_memory)]],
-             envir = parent.frame(2))
+    
+    # INHERIT LABEL CO-ORDINATES WHEN SAVING
+    if(cyto_option("cyto_plot_save")) {
+      ARGS <- .cyto_plot_args_inherit(ARGS)
     }
+    
+    # PLOT CONSTRUCTION --------------------------------------------------------
+    
+    # BUILD PLOT
+    ARGS <- .cyto_plot_build(ARGS)
+    
+    # PLOT MEMORY --------------------------------------------------------------
+    
+    # RECORD LABEL CO-ORDINATES
+    memory[[z]] <<- ARGS[c("label_text_x", "label_text_y")]
+    
+    # GARPHICS DEVICE ----------------------------------------------------------
+    
     # RECORD FULL PAGE & OPEN NEW DEVICE
-    if(par("page") | cnt == length(args)) {
+    if(.par("page")[[1]] | cnt == length(ARGS)) {
+      # PAGE
+      pg <- ceiling(z/prod(.par("mfrow")[[1]]))
       # HEADER
-      if(!.all_na(header)) {
-        .cyto_plot_header(header,
-                          header_text_font = header_text_font,
-                          header_text_size = header_text_size,
-                          header_text_col = header_text_col)
+      if(!.all_na(header[pg])) {
+        .cyto_plot_header(header[pg],
+                          header_text_font = header_text_font[pg],
+                          header_text_size = header_text_size[pg],
+                          header_text_col = header_text_col[pg])
       }
       # RECORD
       p <- cyto_plot_record()
-      # OPEN NEW DEVICE 
+      # OPEN NEW DEVICE
       if(length(args) > cnt) {
-        cyto_plot_new() # use global settings
+        cyto_plot_new() # USE GLOBAL SETTINGS
       }
     } else {
       p <- NULL
     }
+    
     # RETURN RECORDED PLOT
     return(p)
+    
   })
   
-  # CYTO_PLOT_SAVE -------------------------------------------------------------
+  # SAVE MEMORY ----------------------------------------------------------------
   
-  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save") == TRUE) {
-    if (getOption("cyto_plot_method") == "flowSet") {
-      # CLOSE GRAPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
+  # COMBINE MEMORY
+  memory <- structure(
+    lapply(names(memory[[1]]), function(z){
+      m <- LAPPLY(memory, `[[`, z)
+      names(m) <- rep(NA, length(m))
+      return(m)
+    }), names = names(memory[[1]])
+  )
+  
+  # UPDATE MEMORY
+  if(!cyto_option("cyto_plot_save")) {
+    cyto_plot_memory <- .cyto_plot_args_recall()
+    # NO MEMORY
+    if(is.null(cyto_plot_memory)) {
+      .cyto_plot_args_save(memory)
+    } else {
+      .cyto_plot_args_save(
+        structure(
+          lapply(names(cyto_plot_memory), function(q){
+            c(cyto_plot_memory[[q]],
+              memory[[q]])
+          }), names = names(cyto_plot_memory)
+        )
+      )
     }
   }
   
-  # RETURN RECORDED PLOT
+  # RESET SAVE & RECORD --------------------------------------------------------
+  
+  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
+  if(cyto_option("cyto_plot_save") == TRUE) {
+    if(cyto_option("cyto_plot_method") == "cytoset") {
+      # CLOSE GRAPHICS DEVICE
+      dev.off()
+      # RESET CYTO_PLOT_SAVE
+      cyto_option("cyto_plot_save", FALSE)
+    }
+  }
+  
+  # RECORD
   plots[LAPPLY(plots, "is.null")] <- NULL
-  if (length(plots) == 0) {
+  if(length(plots) == 0){
     plots <- NULL
   }
   invisible(plots)
-}
-
-#' @rdname cyto_plot
-#' @export
-cyto_plot.flowFrame <- function(x,
-                                channels,
-                                axes_trans = NA,
-                                overlay = NA,
-                                gate = NA,
-                                axes_limits = "auto",
-                                display = 25000,
-                                margins = c(NA, NA, NA, NA),
-                                popup = FALSE,
-                                xlim = c(NA, NA),
-                                ylim = c(NA, NA),
-                                xlab,
-                                ylab,
-                                title,
-                                negate = FALSE,
-                                hist_stat = "percent",
-                                hist_bins = 256,
-                                hist_smooth = 1,
-                                hist_stack = 0,
-                                hist_cols = NA,
-                                hist_fill = NA,
-                                hist_fill_alpha = 1,
-                                hist_line_type = 1,
-                                hist_line_width = 1,
-                                hist_line_col = "black",
-                                point_shape = ".",
-                                point_size = 2,
-                                point_col_scale = NA,
-                                point_cols = NA,
-                                point_col = NA,
-                                point_col_alpha = 1,
-                                point_fast = FALSE,
-                                contour_lines = 0,
-                                contour_line_type = 1,
-                                contour_line_width = 1,
-                                contour_line_col = "black",
-                                contour_line_alpha = 1,
-                                axes_limits_buffer = 0.03,
-                                axes_text = c(TRUE, TRUE),
-                                axes_text_font = 1,
-                                axes_text_size = 1,
-                                axes_text_col = "black",
-                                axes_label_text_font = 1,
-                                axes_label_text_size = 1.1,
-                                axes_label_text_col = "black",
-                                title_text_font = 2,
-                                title_text_size = 1.1,
-                                title_text_col = "black",
-                                legend = FALSE,
-                                legend_text = NA,
-                                legend_text_font = 1,
-                                legend_text_size = 1,
-                                legend_text_col = "black",
-                                legend_line_type = NA,
-                                legend_line_width = NA,
-                                legend_line_col = NA,
-                                legend_box_fill = NA,
-                                legend_point_col = NA,
-                                gate_line_type = 1,
-                                gate_line_width = 2.5,
-                                gate_line_col = "red",
-                                gate_fill = "white",
-                                gate_fill_alpha = 0,
-                                label,
-                                label_text,
-                                label_stat,
-                                label_position = "auto",
-                                label_text_x = NA,
-                                label_text_y = NA,
-                                label_text_font = 2,
-                                label_text_size = 1,
-                                label_text_col = "black",
-                                label_fill = "white",
-                                label_fill_alpha = 0.6,
-                                border_line_type = 1,
-                                border_line_width = 1,
-                                border_line_col = "black",
-                                border_fill = "white",
-                                border_fill_alpha = 1,
-                                grid = TRUE,
-                                grid_line_type = 1,
-                                grid_line_width = 1,
-                                grid_line_col = "grey95",
-                                grid_line_alpha = 1,
-                                ...) {
   
-  # CYTO_PLOT_EXIT -------------------------------------------------------------
-  
-  # CURRENT SET PARAMETERS
-  old_pars <- .par()
-  
-  # NEW PLOT METHOD
-  if(is.null(getOption("cyto_plot_method"))) {
-    # CYTO_PLOT_METHOD
-    options("cyto_plot_method" = "flowFrame")
-    # CYTO_PLOT_EXIT
-    on.exit({
-      par(old_pars)
-      options("cyto_plot_method" = NULL)
-      options("cyto_plot_par" = NULL)
-    })
-  }
-  
-  # CYTO_PLOT OBJECT -----------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list(...)
-  args <- args[!names(args) %in% c("old_pars")]
-  
-  # THEME
-  args <- .cyto_plot_theme_inherit(args)
-  
-  # CHANNELS/TRANSFORMERS ------------------------------------------------------
-  
-  # CHANNELS
-  if(.empty(args$channels)) {
-    stop("Supply channel/marker(s) to construct the plot.")
-  } else {
-    args$channels <- cyto_channels_extract(x, 
-                                           channels, 
-                                           plot = TRUE)
-  }
-  
-  # AXES_TRANS
-  if(!.all_na(args$axes_trans)){
-    if(is(args$axes_trans, "transformList")) {
-      message("'axes_trans' must be a transformerList.")
-      args$axes_trans <- NA
-    }
-  }
-  
-  # CYTO_PLOT_MEMORY -----------------------------------------------------------
-  
-  # MEMORY INHERIT/RESET
-  if(getOption("cyto_plot_save")) {
-    args <- .cyto_plot_args_inherit(args)
-    # RESET
-  } else if(!getOption("cyto_plot_save") & 
-            getOption("cyto_plot_method") == "flowFrame") {
-    .cyto_plot_args_remove()
-  }
-  
-  # COMBINE X & OVERLAY - LIST OF CYTOFRAMES -----------------------------------
-  
-  # X - LIST
-  args$x <- structure(list(x), names = cyto_names(x))
-  
-  # OVERLAY - LIST
-  if (!.all_na(args$overlay)) {
-    # overlay must be list of CYTOFRAMES
-    # flowFrame overlay added to list
-    if (is(args$overlay, "flowFrame")) {
-      args$overlay <- list(args$overlay)
-      # flowSet overlay convert to list of CYTOFRAMES
-    } else if (is(args$overlay, "flowSet")) {
-      args$overlay <- cyto_list(args$overlay)
-      # flowFrame list overlay as is - flowSet list overlay use overlay[[1]]
-    } else if (is(args$overlay, "list")) {
-      # overlay should be list of CYTOFRAMES
-      if (all(LAPPLY(args$overlay, function(z) {
-        is(z, "flowFrame")
-      }))) {
-        args$overlay <- args$overlay
-        # overlay list of flowSets - use first fs convert to list of CYTOFRAMES
-      } else if (all(LAPPLY(args$overlay, function(z) {
-        is(z, "flowSet")
-      }))) {
-        args$overlay <- cyto_list(args$overlay[[1]])
-        # overlay not supported
-      } else {
-        stop(paste(
-          "'overlay' should be either the names of the populations to",
-          "overlay, a cytoframe, a cytoset or a list of cytoframes!"
-        ))
-      }
-    }
-  }
-  
-  # MERGE X & OVERLAY - REMOVE OVERLAY ARGUMENT
-  if(!.all_na(overlay)) {
-    args$x <- c(args$x, args$overlay)
-    args <- args[-match("overlay", names(args))]
-  }
-  
-  # SAMPLING & CLEANING --------------------------------------------------------
-  
-  # SAMPLING - SET SEED
-  if (args$display != 1) {
-    args$x <- cyto_sample(args$x,
-                          display = args$display,
-                          seed = 56,
-                          plot = TRUE)
-    args$display <- 1 # downstream APIs should not re-sample
-  }
-  
-  # REMOVAL NEGATIVE FSC/SSC EVENTS - POINT_COL SCALE ISSUE
-  args$x <- cyto_apply(args$x, function(cf){
-    lapply(seq_along(args$channels), function(z){
-      if(grepl("FSC", args$channels[z], ignore.case = TRUE) |
-         grepl("SSC", args$channels[z], ignore.case = TRUE)){
-        if (BiocGenerics::nrow(cf) != 0) {
-          if (min(range(cf, type = "data")[, args$channels[z]]) < 0) {
-            coords <- matrix(c(0, Inf), 
-                             nrow = 2,
-                             dimnames = list(c("min", "max"),
-                                             args$channels[z]))
-            cf <<- Subset(cf, rectangleGate(.gate = coords))
-          }
-        }
-      }
-    })
-    return(cf)
-  }, simplify = FALSE, input = "cytoframe")
-  
-  # HISTOGRAMS -----------------------------------------------------------------
-  
-  # HISTOGRAMS - STAT/SMOOTH/STACK
-  if (length(args$channels) == 1) {
-    args$d <- do.call(".cyto_plot_hist", args)
-  } else {
-    args$d <- NA
-  }
-  
-  # GATES ----------------------------------------------------------------------
-  
-  # LIST OF GATE OBJECTS
-  if (!.all_na(args$gate)) {
-    args$gate <- cyto_gate_prepare(args$gate, 
-                                   args$channels)
-  }
-  
-  # LABELS ---------------------------------------------------------------------
-  
-  # LABEL ARGUMENTS
-  label_args <- do.call(".cyto_plot_label_args", args)
-  args[c("label", 
-         "label_text", 
-         "label_stat")] <- label_args[c("label", 
-                                        "label_text", 
-                                        "label_stat")]
-  
-  # TRANSFORM SUPPLIED LABEL CO-ORDINATES - NOT DURING SAVING
-  if (!getOption("cyto_plot_save")) {
-    # TRANSFORM LABEL_TEXT_X - SKIP CYTO_PLOT_SAVE
-    args$label_text_x <- .cyto_transform(args$label_text_x,
-                                         trans = args$axes_trans,
-                                         channel = args$channels[1],
-                                         inverse = FALSE)
-    
-    # TRANSFORM LABEL_TEXT_Y - SKIP CYTO_PLOT_SAVE
-    if(length(args$channels) == 2){
-      args$label_text_y <- .cyto_transform(args$label_text_y,
-                                           trans = args$axes_trans,
-                                           channel = args$channels[2],
-                                           inverse = FALSE)
-    }
-  }
-  
-  # AXES LIMITS ----------------------------------------------------------------
-  
-  # TRANSFORM AXES LIMITS - FLOWFRAME METHOD ONLY
-  if (getOption("cyto_plot_method") == "flowFrame") {
-    # X AXES LIMITS
-    args$xlim <- .cyto_transform(args$xlim,
-                                 trans = args$axes_trans,
-                                 channel = args$channels[1],
-                                 inverse = FALSE)
-    # Y AXES LIMITS
-    if(length(args$channels) == 2){
-      args$ylim <- .cyto_transform(args$ylim,
-                                   trans = args$axes_trans,
-                                   channel = args$channels[2],
-                                   inverse = FALSE)
-    }
-  }
-  
-  # LEGEND ---------------------------------------------------------------------
-  
-  # LEGEND_TEXT
-  if (.all_na(args$legend_text) | 
-      length(unique(args$legend_text)) == 1) {
-    args$legend_text <- cyto_names(args$x)
-  }  
-  
-  # COMPUTE LABEL STATISTICS ---------------------------------------------------
-  
-  # STATISTICS
-  if (args$label == TRUE) {
-    # POPULATIONS
-    args$pops <- do.call(".cyto_plot_label_pops", args)
-    # STATISTICS
-    args$label_stat <- do.call(".cyto_plot_label_stat", args)
-    # COMBINE LABEL_TEXT & LABEL_STAT
-    args$label_text <- do.call(".cyto_plot_label_text", args)
-  }
-  
-  # ARGUMENT SPLITTING ---------------------------------------------------------
-  
-  # REPEAT ARGUMENTS
-  args <- .cyto_plot_args_split(args)
-  
-  # PLOT CONSTRUCTION ----------------------------------------------------------
-  
-  # CYTO_PLOT_BUILD
-  args <- .cyto_plot_build(args)
-  
-  # UPDATE MEMORY --------------------------------------------------------------
-  
-  # MEMORY
-  cyto_plot_memory <- .cyto_plot_args_recall()
-  
-  # MEMORY UPDATE - CYTO_PLOT_SAVE FALSE
-  if (getOption("cyto_plot_save") == FALSE) {
-    # NO MEMORY
-    if (is.null(cyto_plot_memory)) {
-      .cyto_plot_args_save(
-        list(
-          args[c("label_text_x", "label_text_y")]
-        )
-      )
-      # MEMORY
-    } else {
-      .cyto_plot_args_save(
-        c(cyto_plot_memory,
-          list(args[c("label_text_x", "label_text_y")])
-        )
-      )
-    }
-    # MEMORY UPDATE - CYTO_PLOT_SAVE
-  } else if (getOption("cyto_plot_save") == TRUE) {
-    .cyto_plot_args_save(cyto_plot_memory)
-  }
-  
-  # RECORD PLOT ----------------------------------------------------------------
-  
-  # RECORD 
-  p <- cyto_plot_record()
-  
-  # CYTO_PLOT_SAVE -------------------------------------------------------------
-  
-  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save") == TRUE) {
-    if (getOption("cyto_plot_method") == "flowFrame") {
-      # CLOSE GRAPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
-    }
-  }
-  
-  # RETURN RECORDED PLOT
-  invisible(p)
 }

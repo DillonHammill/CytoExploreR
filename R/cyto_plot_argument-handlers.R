@@ -311,7 +311,7 @@
           if(length(arg_split[[z]]) > arg_default_length &
              any(LAPPLY(c("fill_alpha",
                           "col_alpha",
-                          "line",
+                          "line_", # miss contour_lines
                           "shape",
                           "size",
                           "font",

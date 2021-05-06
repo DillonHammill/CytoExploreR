@@ -30,8 +30,8 @@ CytoExploreR_logo <- function(){
 #' Execute a function over relevant arguments in a list
 #' @noRd
 .execute <- function(x, 
-                       args,
-                       drop = NULL) {
+                     args,
+                     drop = NULL) {
   do.call(x, args[names(args) %in% .formal_args(x, drop = drop)])
 }
 
