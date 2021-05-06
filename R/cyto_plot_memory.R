@@ -6,8 +6,7 @@
   
   temp_dir <- tempdir()
   temp_files <- list.files(temp_dir)
-  file_match <- grepl("cyto_plot_memory", temp_files) & 
-    grepl(".rds", temp_files)
+  file_match <- grepl("cyto_plot_memory.*.rds.*$", temp_files)
   
   # FILE EXISTS
   if(any(file_match)){
@@ -48,9 +47,7 @@
   
   temp_dir <- tempdir()
   temp_files <- list.files(temp_dir)
-  file_match <- grepl("cyto_plot_memory", temp_files) & 
-    grepl(".rds", temp_files)
-  
+  file_match <- grepl("cyto_plot_memory.*.rds.*$", temp_files)
   # FILE EXISTS
   if(any(file_match)){
     file.remove(paste0(temp_dir,
@@ -64,7 +61,6 @@
 #' @noRd
 .cyto_plot_args_inherit <- function(args, 
                                     memory) {
-  
   # MEMORY
   if(missing(memory)) {
     memory <- .cyto_plot_args_recall()
@@ -75,22 +71,22 @@
     return(args)
   # MEMORY
   } else {
-    # MEMORY INDEX
-    if(is.null(names(memory))) {
-      memory_ind <- 1
-    } else {
-      memory_ind <- match(NA, names(memory))[1]
-    }
-    # UPDATE MEMORY NAMES - DONE
-    names(memory)[memory_ind] <- "DONE" # sets other names to NA
-    # RESET CYTO_PLOT_MEMORY INDICATOR - ALL DONE
-    if(!any(is.na(names(memory)))) {
-      names(memory) <- NULL
-    }
-    # LIST OF CYTO_PLOT ARGUMENT LISTS
-    args[names(memory[[memory_ind]])] <- memory[[memory_ind]]
-    # UPDATE MEMORY
-    .cyto_plot_args_save(memory)
+    # LOOP THROUGH ARGUMENTS
+    lapply(names(memory), function(z){
+      # MEMORY START INDEX
+      memory_ind <- match(NA, names(memory[[z]]))
+      # MEMORY INDICES TO USE
+      memory_use <- seq(memory_ind,
+                        memory_ind + length(args[[z]]) - 1)
+      names(memory[[z]])[memory_use] <- "DONE"
+      # RESET CYTO_PLOT_MEMORY INDICATOR - ALL DONE
+      if(!any(is.na(names(memory[[z]])))) {
+        names(memory[[z]]) <- NA
+      }
+      .cyto_plot_args_save(memory)
+      # LIST OF CYTO_PLOT ARGUMENT LISTS
+      args[[z]] <<- memory[[z]][memory_use]
+    })
     # UPDATED ARGUMENTS
     return(args)
   }

@@ -379,7 +379,7 @@
           arg_split <- x[[z]]
         }
         return(arg_split)
-      }else{
+      } else {
         return(x[[z]])
       }
     }
