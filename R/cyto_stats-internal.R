@@ -359,6 +359,11 @@ cyto_stat_density <- function(x,
                               ...){
     # COUNTER
     cnt <<- cnt + 1
+    # RESTRICT DATA TO LIMITS - DATA OUTSIDE PLOT LIMITS MESSES UP BANDWIDTH
+    if(!.all_na(limits)) {
+      z <- z[z > limits[, colnames(x)[cnt]][1] &
+               z < limits[, colnames(x)[cnt]][2]]
+    }
     # KERNEL DENSITY
     kd <- stats::density(z,
                          adjust = sm[cnt], # smoothing per channel
