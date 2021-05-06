@@ -33,6 +33,43 @@ readr::write_lines(html, path = "logo.html")
 
 <br>
 
+```{r, eval = FALSE, echo = FALSE}
+library(CytoExploreR)
+gs <- cyto_load(
+  system.file(
+    "extdata/Compensation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Compensation-1.png",
+               height = 6, 
+               width = 12)
+cyto_plot_custom(c(1,2))
+cyto_plot(gs[[5]],
+          parent = "Single Cells",
+          overlay = cyto_extract(gs[[7]], parent = "Single Cells"),
+          channels = "CD8",
+          density_fill = c("green4", "black"),
+          density_fill_alpha = c(1, 0.8),
+          xlim = c(-2, 4.5),
+          title = "Primary Detector")
+cyto_plot(gs[[5]],
+          parent = "Single Cells",
+          overlay = cyto_extract(gs[[7]], parent = "Single Cells"),
+          channels = "Va2",
+          density_fill = c("red", "black"),
+          density_fill_alpha = c(1, 0.8),
+          xlim = c(-2, 4.5),
+          title = "Secondary Detector")
+text(3.5,60, "FITC \n spillover \n into PE-A",
+     cex = 1.1)
+arrows(2.8, 60, 2.4, 47)
+cyto_plot_complete()
+```
+
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
 knitr::include_graphics('Compensation/Compensation-1.png')
 ```
@@ -42,6 +79,39 @@ knitr::include_graphics('Compensation/Compensation-1.png')
 <div style="line-height: 1.8em;"> Fortunately, it is relatively simple to compensate for fluorescent spillover into secondary detectors post data acquisition, using an unstained autofluorescence control and separate controls each labelled with a single fluorophore (single colour controls). Each single colour control is used to determine the proportion of the signal in the primary detector that is being collected by secondary detectors. This percentage spillover into secondary detectors is used to reduce the signal in the secondary detectors to ensure that each fluorophore is only detected by its primary detector. This can be a cumbersome process when performed manually, as this process must be repeated for each fluorophore and every detector. The end result of compensation is that any signal in PE detector is reduced such that the FITC signal is restricted to the Alexa Fluor 488 detector as shown below: </div>
 
 <br>
+
+```{r, eval = FALSE, echo = FALSE}
+gs <- cyto_compensate(cyto_copy(gs), spillover = "190421-Spillover-Matrix.csv")
+```
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Compensation-2.png",
+               height = 6, 
+               width = 12)
+cyto_plot_custom(c(1,2))
+cyto_plot(gs[[5]],
+          parent = "Single Cells",
+          overlay = cyto_extract(gs[[7]], parent = "Single Cells"),
+          channels = "CD8",
+          density_fill = c("green4", "black"),
+          density_fill_alpha = c(1, 0.8),
+          xlim = c(-2, 4.5),
+          title = "Primary Detector",
+          layout = FALSE)
+cyto_plot(gs[[5]],
+          parent = "Single Cells",
+          overlay = cyto_extract(gs[[7]], parent = "Single Cells"),
+          channels = "Va2",
+          density_fill = c("red", "black"),
+          density_fill_alpha = c(1, 0.8),
+          title = "Secondary Detector",
+          xlim = c(-2, 4.5),
+          layout = FALSE)
+text(3.5,60, "FITC \n spillover \n removed \n from PE-A",
+     cex = 1.1)
+arrows(2.8, 60, 2.2, 50)
+cyto_plot_complete()
+```
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
 knitr::include_graphics('Compensation/Compensation-2.png')
@@ -95,11 +165,22 @@ gs <- cyto_transform(gs,
                      type = "logicle")
 ```
 
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Compensation-4.png",
+               height = 8,
+               width = 10)
+cyto_plot_profile(gs[[5]],
+                  parent = "Single Cells",
+                  channels = cyto_fluor_channels(gs),
+                  header = NA)
+cyto_plot_complete()
+```
+
 ```{r echo = FALSE, fig.align="center", out.width = '75%'}
 knitr::include_graphics('Compensation/Compensation-4.png')
 ```
 
-<div style="line-height: 1.8em;"> Next, we should gate the compensation controls to remove debris and doublets to yield the most accurate spillover values. Let's manually gate down to single cells using `cyto_gate_draw`. Back gating can prove extrmemely useful in cleaning up the data. For example, we could gate the dead cells using our Hoechst control and overly this population on our initial FSC/SSC gate to adjust the gate to avoid dead cells. For brevity this approach will not be demonstrated here, but I will document this process in an issue for those who are interested. </div>
+<div style="line-height: 1.8em;"> Next, we should gate the compensation controls to remove debris and doublets to yield the most accurate spillover values. Let's manually gate down to single cells using `cyto_gate_draw`. Back gating can prove extremely useful in cleaning up the data. For example, we could gate the dead cells using our Hoechst control and overly this population on our initial FSC/SSC gate to adjust the gate to avoid dead cells. For brevity this approach will not be demonstrated here, but I will document this process in an issue for those who are interested. </div>
 
 ```{r, eval = FALSE}
 cyto_gate_draw(gs,
@@ -199,6 +280,16 @@ cyto_plot_compensation(gs,
                        parent = "Single Cells")
 ```
 
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Compensation-13.png",
+               height = 8,
+               width = 10)
+cyto_plot_compensation(gs[[5]],
+                       parent = "Single Cells",
+                       overlay = cyto_extract(gs[[7]], "Single Cells"))
+cyto_plot_complete()
+```
+
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}
 knitr::include_graphics('Compensation/Compensation-13.png')
 ```
@@ -208,6 +299,18 @@ cyto_plot_compensation(gs,
                        parent = "Single Cells",
                        spillover = "Spillover-Matrix.csv",
                        compensate = TRUE)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Compensation-14.png",
+               height = 8,
+               width = 10)
+cyto_plot_compensation(gs[[5]],
+                       parent = "Single Cells",
+                       overlay = cyto_extract(gs[[7]], "Single Cells"),
+                       compensate = TRUE,
+                       spillover = spill) # auto comp
+cyto_plot_complete()
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '100%'}

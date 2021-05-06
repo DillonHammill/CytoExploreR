@@ -34,16 +34,12 @@ library(CytoExploreR)
 library(CytoExploreRData)
 
 # Load Activation GatingSet
-gs <- cyto_setup("Activation-Samples")
-
-# Apply compensation
-gs <- cyto_compensate(gs)
-
-# Apply transformations
-gs <- cyto_transform(gs)
-
-# Apply gates
-cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+gs <- cyto_load(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
 ```
 
 <br>
@@ -56,19 +52,21 @@ cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 cyto_plot_save("Visualisations-11.png",
                height = 6,
                width = 12)
-cyto_plot_custom(1,2)
+cyto_plot_custom(c(1,2))
 ```
 
 ```{r, eval = FALSE}
 # 2D scatter plot
 cyto_plot(gs[[32]],
           parent = "T Cells",
-          channels = c("CD4","CD8"))
+          channels = c("CD4","CD8"),
+          title = "2-D Scatter")
 
 # 1D density distribution
 cyto_plot(gs[[32]],
           parent = "T Cells",
-          channels = "CD4")
+          channels = "CD4",
+          title = "1-D Histograms")
 ```
 
 ```{r, eval = FALSE, echo = FALSE}
@@ -83,7 +81,7 @@ knitr::include_graphics('Visualisations/Visualisations-11.png')
 
 # Key Features
 
-<div style="line-height: 1.8em;"> It is extrememly difficult to comprehensively describe `cyto_plot` in a single vignette. Nevertheless, here we will explore some of the key features that will be useful for routine analyses. We will start with features that are common to all plot types (e.g. titles, labels, axes and legends) and then move on to features that are for specific plot types (e.g. points, contour lines, densities and gates). </div>
+<div style="line-height: 1.8em;"> It is extremely difficult to comprehensively describe `cyto_plot` in a single vignette. Nevertheless, here we will explore some of the key features that will be useful for routine analyses. We will start with features that are common to all plot types (e.g. titles, labels, axes and legends) and then move on to features that are for specific plot types (e.g. points, contour lines, densities and gates). </div>
 
 <br>
 
@@ -160,20 +158,25 @@ trans <- cyto_transformer_extract(gs)
 # Pull out T Cells flowSet
 T_Cells <- cyto_extract(gs, "T Cells")
 
+# Layout
+cyto_plot_custom(c(1,2))
+
 # Axes on current scale
 cyto_plot(T_Cells[[32]],
           channels = c("CD4","CD8"),
-          title = "Transformers Missing")
+          title = "Transformers Missing",
+          layout = FALSE)
 
 # Axes appropriately transformed
 cyto_plot(T_Cells[[32]],
           channels = c("CD4","CD8"),
           axes_trans = trans,
-          title = "Transformers Supplied")
+          title = "Transformers Supplied", 
+          layout = FALSE)
 ```
 
 ```{r, eval = FALSE, echo = FALSE}
-cyto_plot_complete(1,1)
+cyto_plot_complete(c(1,1))
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '98%',}
@@ -317,7 +320,7 @@ knitr::include_graphics('Visualisations/Visualisations-4.png')
 cyto_plot_save("Visualisations-12.png",
                height = 12, 
                width = 12)
-cyto_plot_custom(2,2)
+cyto_plot_custom(c(2,2))
 ```
 
 ```{r, eval = FALSE}
@@ -350,7 +353,7 @@ cyto_plot(gs[[32]],
 ```
 
 ```{r, eval = FALSE, echo = FALSE}
-cyto_plot_complete(1,1)
+cyto_plot_complete(c(1,1))
 ```
 
 ```{r echo = FALSE, fig.align="center", out.width = '98%',}
@@ -842,6 +845,15 @@ knitr::include_graphics('Visualisations/Visualisations-17.png')
 
 <div style="line-height: 1.8em;"> **CytoExploreR** makes it easy to save high resolution images for publication through the `cyto_plot_save` function. Once you are satisfied with a plot that you would like to save, simply call `cyto_plot_save` and re-run the `cyto_plot` call. `cyto_plot_save` can save images to png, tiff, jpeg, pdf and svg file formats. The desired file format is indicated by the extension of the file name passed to the `save_as` argument. The default resolution has been set to 300 dpi to ensure saving of high resolution images, this value can be altered through the `res` argument. The dimensions of the saved image can be altered by specifying the desired `height` and `width` in the specified `units`. </div>
 
+```{r, eval = FALSE, echo = FALSE}
+# Call cyto_plot_save
+cyto_plot_save("Visualisations-19.png",
+               height = 7,
+               width = 7,
+               units = "in",
+               res = 300)
+```
+
 ```{r, eval = FALSE}
 # Call cyto_plot_save
 cyto_plot_save("Plot.png",
@@ -880,6 +892,10 @@ knitr::include_graphics('Visualisations/Visualisations-19.png')
 ## Custom Plot Layouts
 
 <div style="line-height: 1.8em;"> Users can contruct their own custom plot layouts to combine any number of `cyto_plot` plots using `cyto_plot_custom`. `cyto_plot_custom` will let **CytoExploreR** know that you are taking control over setting the plot layout and allow you to set the layout manually by supplying the desired number of rows and columns. `cyto_plot_custom` also talks to `cyto_plot_save` to save the custom plot, it is therefore important to let `cyto_plot_save` know when you are ready to save the plot by making a call to `cyto_plot_complete`. `cyto_plot_complete` will also tell **CytoExploreR** that you are no longer creating a custom plot, so it is important to run this even if you are not saving the plot. Through `cyto_plot_complete`, users can also indicate the desired number of rows and columns to reset the graphics device. </div>
+
+```{r, eval = FALSE, echo = FALSE}
+cyto_plot_save("Visualisations-20.png")
+```
 
 ```{r, eval = FALSE}
 # Call cyto_plot_save
