@@ -9,7 +9,7 @@
 \usage{
 \method{cyto_plot}{GatingSet}(
   x,
-  parent,
+  parent = "root",
   alias = NA,
   channels,
   axes_trans = NA,
@@ -19,7 +19,8 @@
   display = 25000,
   layout,
   margins = c(NA, NA, NA, NA),
-  popup = FALSE,
+  popup = TRUE,
+  popup_size = c(7, 7),
   select = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -101,21 +102,25 @@
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
+  seed = 42,
   ...
 )
 
 \method{cyto_plot}{GatingHierarchy}(
   x,
-  parent,
+  parent = "root",
   alias = NA,
   channels,
   axes_trans = NA,
+  merge_by = "name",
   overlay = NA,
   gate = NA,
+  select = NULL,
   axes_limits = "auto",
   display = 25000,
   margins = c(NA, NA, NA, NA),
-  popup = FALSE,
+  popup = TRUE,
+  popup_size = c(7, 7),
   xlim = c(NA, NA),
   ylim = c(NA, NA),
   xlab,
@@ -190,6 +195,11 @@
   grid_line_width = 1,
   grid_line_col = "grey95",
   grid_line_alpha = 1,
+  header = NA,
+  header_text_font = 2,
+  header_text_size = 1,
+  header_text_col = "black",
+  seed = 42,
   ...
 )
 
@@ -204,7 +214,8 @@
   display = 50000,
   layout,
   margins = c(NA, NA, NA, NA),
-  popup = FALSE,
+  popup = TRUE,
+  popup_size = c(7, 7),
   select = NULL,
   xlim = c(NA, NA),
   ylim = c(NA, NA),
@@ -303,7 +314,7 @@
 \code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
 \code{alias} to "" will automatically plot any gates constructed in the
 supplied channels. \code{alias} is equivalent to the \code{gate} argument
-for \code{flowFrame} and \code{flowSet} objects.}
+for \code{cytoset} objects.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
@@ -322,11 +333,11 @@ appropriately labelled.}
 groups prior to plotting, set to "name" by default to prevent merging. To
 merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
-\item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
-\code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
-\code{list of flowFrame lists} containing populations to be overlaid onto
-the plot(s). This argument can be set to "children" or "descendants" when a
-\code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.}
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
+\code{list of cytosets} or \code{list of cytoset lists} containing
+populations to be overlaid onto the plot(s). This argument can be set to
+"children" or "descendants" when a \code{GatingSet} or
+\code{GatingHierarchy} to overlay all respective nodes.}
 
 \item{gate}{gate objects to be plotted, can be either objects of class
 \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},
@@ -347,9 +358,12 @@ left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
 \code{cyto_plot} compute optimal margins.}
 
 \item{popup}{logical indicating whether the plot should be constructed in a
-pop-up window, set to FALSE by default. \code{popup} will open OS-specific
+pop-up window, set to TRUE by default. \code{popup} will open OS-specific
 graphic device prior to plotting. Mac users will need to install
 \href{https://www.xquartz.org/}{XQuartz} for this functionality.}
+
+\item{popup_size}{a vector of length 2 to control the height and width of
+pop-up graphics device in inches, set to \code{c(7,7)} by default.}
 
 \item{select}{named list containing experimental variables to be used to
 select samples using \code{\link{cyto_select}} when a \code{flowSet} or
@@ -630,17 +644,17 @@ to 1 by default.}
 \item{header_text_col}{colour to use for the header text, set to "black" by
 default.}
 
+\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
+sampling is applied with each \code{\link{cyto_plot}} call, set to an
+arbitrary numeric by default. This behaviour can be turned off by setting
+this argument to NULL.}
+
 \item{...}{not currently in use.}
 
 \item{point_fast}{logical indicating whether points should be plotted using
 the \code{scattermore} package, set to FALSE by default. This is an
 optional feature so if you intend to use it, make sure that you have the
 scattermore package installed \code{install.packages("scattermore")}.}
-
-\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
-sampling is applied with each \code{\link{cyto_plot}} call, set to an
-arbitrary numeric by default. This behaviour can be turned off by setting
-this argument to NULL.}
 }
 \description{
 Explore and visualise cytometry data.
@@ -648,20 +662,13 @@ Explore and visualise cytometry data.
 \examples{
 library(CytoExploreRData)
 
-# Load samples into GatingSet
-fs <- Activation
-gs <- GatingSet(fs)
-
-# Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
-
-# Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-gs <- transform(gs, trans)
-
-# Apply gatingTemplate
-gt <- Activation_gatingTemplate
-gt_gating(gt, gs)
+# Activation GatingSet
+gs <- cyto_load(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
 
 # 2-D scatter plot with overlay & Gates
 cyto_plot(gs[1:9],
