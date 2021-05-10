@@ -172,7 +172,7 @@ LAPPLY <- function(...){
 #' Extract graphical parameters as list
 #' @param x parameters to extract, extract all if missing.
 #' @param set logical indicating whether only parameters that can be set should
-#'   be returned.
+#'   be returned, set to TRUE by default.
 #' @importFrom graphics par
 #' @noRd
 .par <- function(x,
