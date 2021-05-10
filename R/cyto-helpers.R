@@ -3599,13 +3599,13 @@ cyto_markers_edit <- function(x,
     
     # GatingHierarchy
   } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
-    fr <- cyto_data_extract(x, "root")[[1]]
-    pd <- cyto_details(parameters(fr))
+    cf <- cyto_data_extract(x, "root")[[1]][[1]]
+    pd <- cyto_details(parameters(cf))
     
     # GatingSet
   } else if (cyto_class(x, "GatingSet", TRUE)) {
-    fr <- cyto_data_extract(x, "root")[[1]]
-    pd <- cyto_details(parameters(fr))
+    cf <- cyto_data_extract(x, "root")[[1]][[1]]
+    pd <- cyto_details(parameters(cf))
   } else {
     stop("'x' must be a valid cytometry object.")
   }
@@ -3693,7 +3693,8 @@ cyto_markers_edit <- function(x,
                     col_edit = FALSE,
                     col_names = c("channel", "marker"),
                     save_as = file,
-                    write_fun = "write_to_csv",
+                    write_to_csv = "write_to_csv",
+                    write_args = list("row.names" = FALSE),
                     quiet = TRUE, 
                     hide = TRUE,
                     ...)
@@ -3715,8 +3716,14 @@ cyto_markers_edit <- function(x,
   cyto_markers <- dt$marker
   names(cyto_markers) <- cyto_channels
   
+  # EMPTY -> NA
+  ind <- which(LAPPLY(cyto_markers, ".empty"))
+  if(length(ind) > 0) {
+    cyto_markers[ind] <- NA
+  }
+  
   # Only modify markers if supplied
-  if (!all(is.na(cyto_markers))) {
+  if (!.all_na(cyto_markers)) {
     if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
       flowCore::markernames(x) <- cyto_markers
     }else{
@@ -3793,7 +3800,6 @@ cyto_details_edit <- function(x,
         
         # Extract cyto_details
         pd <- cyto_details(x)
-        rownames(pd) <- NULL
       } else {
         
         # Remove NULL entries from list - result should be of length 1
@@ -3805,7 +3811,6 @@ cyto_details_edit <- function(x,
       
       # Extract cyto_details
       pd <- cyto_details(x)
-      rownames(pd) <- NULL
     }
     
     # File name supplied manually
@@ -3826,7 +3831,6 @@ cyto_details_edit <- function(x,
       
       # Extract cyto_details
       pd <- cyto_details(x)
-      rownames(pd) <- NULL
     }
   }
   
@@ -3838,26 +3842,31 @@ cyto_details_edit <- function(x,
     )
   }
   
-  # REMOVE ROW NAMES
-  cyto_names <- pd$name
-  rownames(pd) <- NULL
-  
-  # Edit cyto_details
+  # Edit cyto_details - rownames cannot be edited
   if(interactive()) {
+    # REMOVE ROW NAMES
+    cyto_names <- rownames(pd)
+    rownames(pd) <- NULL
+    # EDIT
     pd <- data_edit(pd,
                     logo = CytoExploreR_logo(),
                     title = "Experiment Details Editor",
                     row_edit = FALSE,
-                    col_readonly = "name",
-                    save_as = file,
-                    write_fun = "write_to_csv",
+                    # col_readonly = "name",
                     quiet = TRUE,
                     hide = TRUE,
                     ...)
+    # REPLACE ROW NAMES
+    rownames(pd) <- cyto_names
   }
   
   # Update cyto_details
   cyto_details(x) <- pd
+  
+  # Save - cannot save above as rownames have been removed
+  write_to_csv(pd,
+               file = file,
+               row.names = TRUE)
   
   # Return updated samples
   return(x)
