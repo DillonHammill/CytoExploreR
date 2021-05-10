@@ -68,7 +68,7 @@ cyto_plot_empty(
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
@@ -85,7 +85,7 @@ labels of the plot are appropriately transformed. The transformation object
 will NOT be applied to the flowFrame internally and should be applied to
 the flowFrame prior to plotting.}
 
-\item{overlay}{a list of flowFrames to overlay onto the plot.}
+\item{overlay}{a list of cytosets to overlay onto the plot.}
 
 \item{gate}{list of gate objects to be plotted, used internlaly to ensure
 gate co-ordinates are taken into account when computing axes limits.}
@@ -265,7 +265,7 @@ each plot, set to all samples by default. Each plot must contain the same
 number of histograms.}
 }
 \description{
-\code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
+\code{cyto_plot_empty} generates a base for cyto_plot by creating an empty
 plot with border, axes, axes_text and titles. Data is subsequently added to
 this base layer with \code{cyto_plot_point} or \code{cyto_plot_hist}.
 }

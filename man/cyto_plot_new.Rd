@@ -4,11 +4,14 @@
 \alias{cyto_plot_new}
 \title{Open new graphics device for cyto_plot}
 \usage{
-cyto_plot_new(popup, ...)
+cyto_plot_new(popup, popup_size = c(7, 7), ...)
 }
 \arguments{
 \item{popup}{logical indicating whether a pop-up graphics device should be
 opened, set to TRUE by default if called outside of \code{cyto_plot()}.}
+
+\item{popup_size}{a vector of length 2 to control the height and width of
+pop-up graphics device in inches, set to \code{c(7,7)} by default.}
 
 \item{...}{additional graphical parameters supplied by name to be passed to
 \code{\link{cyto_plot_par}} to customise the new graphics device.}

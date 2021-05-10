@@ -120,15 +120,11 @@ gs_trans <- cyto_transform(gs, trans)
 
 }
 \seealso{
-\code{\link{cyto_transformer_log}}
+\code{\link{cyto_transformers_define}}
 
-\code{\link{cyto_transformer_arcsinh}}
+\code{\link{cyto_transformers_combine}}
 
-\code{\link{cyto_transformer_biex}}
-
-\code{\link{cyto_transformer_logicle}}
-
-\code{\link{cyto_transformer_combine}}
+\code{\link{cyto_transformers_extract}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

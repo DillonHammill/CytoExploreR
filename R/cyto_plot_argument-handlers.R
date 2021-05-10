@@ -145,6 +145,7 @@
     "axes_limits_buffer",
     "margins",
     "popup",
+    "popup_size",
     "xlab",
     "ylab",
     "xlim",

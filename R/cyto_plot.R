@@ -18,7 +18,7 @@
 #'   \code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
 #'   \code{alias} to "" will automatically plot any gates constructed in the
 #'   supplied channels. \code{alias} is equivalent to the \code{gate} argument
-#'   for \code{flowFrame} and \code{flowSet} objects.
+#'   for \code{cytoset} objects.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
 #'   the plot. The length of channels determines the type of plot to be
 #'   constructed, either a histogram for a single channel or a 2-D scatterplot
@@ -33,11 +33,11 @@
 #' @param merge_by a vector of pData variables to sort and merge samples into
 #'   groups prior to plotting, set to "name" by default to prevent merging. To
 #'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
-#' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
-#'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
-#'   \code{list of flowFrame lists} containing populations to be overlaid onto
-#'   the plot(s). This argument can be set to "children" or "descendants" when a
-#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
+#' @param overlay name(s) of the populations to overlay or a \code{cytoset},
+#'   \code{list of cytosets} or \code{list of cytoset lists} containing
+#'   populations to be overlaid onto the plot(s). This argument can be set to
+#'   "children" or "descendants" when a \code{GatingSet} or
+#'   \code{GatingHierarchy} to overlay all respective nodes.
 #' @param gate gate objects to be plotted, can be either objects of class
 #'   \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},
 #'   \code{quadGate} or \code{filters}. Lists of these supported gate objects
@@ -53,9 +53,11 @@
 #'   left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
 #'   \code{cyto_plot} compute optimal margins.
 #' @param popup logical indicating whether the plot should be constructed in a
-#'   pop-up window, set to FALSE by default. \code{popup} will open OS-specific
+#'   pop-up window, set to TRUE by default. \code{popup} will open OS-specific
 #'   graphic device prior to plotting. Mac users will need to install
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
+#' @param popup_size a vector of length 2 to control the height and width of
+#'   pop-up graphics device in inches, set to \code{c(7,7)} by default.
 #' @param select named list containing experimental variables to be used to
 #'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
@@ -267,20 +269,13 @@
 #' @examples
 #' library(CytoExploreRData)
 #'
-#' # Load samples into GatingSet
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#'
-#' # Apply compensation
-#' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#'
-#' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(gs))
-#' gs <- transform(gs, trans)
-#'
-#' # Apply gatingTemplate
-#' gt <- Activation_gatingTemplate
-#' gt_gating(gt, gs)
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'   system.file(
+#'     "extdata/Activation-GatingSet",
+#'     package = "CytoExploreRData"
+#'   )
+#' )
 #'
 #' # 2-D scatter plot with overlay & Gates
 #' cyto_plot(gs[1:9],
@@ -327,7 +322,8 @@ cyto_plot.GatingSet <- function(x,
                                 display = 25000,
                                 layout,
                                 margins = c(NA, NA, NA, NA),
-                                popup = FALSE,
+                                popup = TRUE,
+                                popup_size = c(7,7),
                                 select = NULL,
                                 xlim = c(NA, NA),
                                 ylim = c(NA, NA),
@@ -433,7 +429,7 @@ cyto_plot.GatingSet <- function(x,
   gh <- gs[[1]]
   
   # TRANSFORMATIONS 
-  axes_trans <- cyto_transformer_extract(gs)
+  axes_trans <- cyto_transformers_extract(gs)
   
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
   
@@ -813,7 +809,8 @@ cyto_plot.GatingHierarchy <- function(x,
                                       axes_limits = "auto",
                                       display = 25000,
                                       margins = c(NA, NA, NA, NA),
-                                      popup = FALSE,
+                                      popup = TRUE,
+                                      popup_size = c(7,7),
                                       xlim = c(NA, NA),
                                       ylim = c(NA, NA),
                                       xlab,
@@ -908,7 +905,7 @@ cyto_plot.GatingHierarchy <- function(x,
   gh <- x
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(gh)
+  axes_trans <- cyto_transformers_extract(gh)
   
   # PREPARE DATA & ARGUMENTS ---------------------------------------------------
   
@@ -1258,7 +1255,8 @@ cyto_plot.flowSet <- function(x,
                               display = 50000,
                               layout,
                               margins = c(NA, NA, NA, NA),
-                              popup = FALSE,
+                              popup = TRUE,
+                              popup_size = c(7,7),
                               select = NULL,
                               xlim = c(NA, NA),
                               ylim = c(NA, NA),
@@ -1624,12 +1622,13 @@ cyto_plot.flowSet <- function(x,
   # GRAPHICS DEVICE
   if(cyto_option("cyto_plot_method") == "cytoset") {
     cyto_plot_new(args$popup,
+                  popup_size = args$popup_size,
                   layout = args$layout,
                   oma = oma)
   }
   
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
-  args <- args[!names(args) %in% "layout"]
+  args <- args[!names(args) %in% c("layout")]
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   

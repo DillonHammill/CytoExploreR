@@ -2,11 +2,11 @@
 
 #' Create an empty cyto_plot
 #'
-#' \code{cyto_plot_empty} generates to base for cyto_plot by creating an empty
+#' \code{cyto_plot_empty} generates a base for cyto_plot by creating an empty
 #' plot with border, axes, axes_text and titles. Data is subsequently added to
 #' this base layer with \code{cyto_plot_point} or \code{cyto_plot_hist}.
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}}.
 #' @param channels name of the channel(s) or marker(s) to be used to construct
 #'   the plot. The length of channels determines the type of plot to be
 #'   constructed, either a 1-D density distribution for a single channel or a
@@ -20,7 +20,7 @@
 #'   labels of the plot are appropriately transformed. The transformation object
 #'   will NOT be applied to the flowFrame internally and should be applied to
 #'   the flowFrame prior to plotting.
-#' @param overlay a list of flowFrames to overlay onto the plot.
+#' @param overlay a list of cytosets to overlay onto the plot.
 #' @param gate list of gate objects to be plotted, used internlaly to ensure
 #'   gate co-ordinates are taken into account when computing axes limits.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
@@ -231,14 +231,12 @@ cyto_plot_empty <- function(x,
   # HISTOGRAMS - CYTO_PLOT ARGUMENTS
   d <- NULL
   
-  # FLOWFRAME
-  if (is(x, "flowFrame")) {
-    overlay <- cyto_list(overlay)
-    if (!.all_na(overlay)) {
-      x <- c(
-        structure(list(x), names = cyto_names(x)),
-        overlay
-      )
+  # CYTOSET
+  if (cyto_class(x, "flowSet")) {
+    x <- cyto_list(x)
+    if(!.all_na(overlay)) {
+      overlay <- cyto_list(overlay)
+      x <- c(x, overlay)
     }
     # CYTO_PLOT ARGUMENTS
   } else if (class(x) == "cyto_plot") {
@@ -253,7 +251,7 @@ cyto_plot_empty <- function(x,
   on.exit(cyto_option("scipen", scipen))
   
   # Extract current graphics parameters
-  pars <- par("mar")
+  pars <- .par("mar")
   
   # Reset graphics parameters on exit
   on.exit(par(pars))
@@ -705,13 +703,14 @@ cyto_plot_empty <- function(x,
                        maxColorValue = 255
     )
     legend_cols <- adjustcolor(legend_cols, point_col_alpha[1])
-    
+    # PLOT LIMITS
+    usr <- .par("usr")[[1]]
     # LEGEND LOCATION
     legend_x <- c(
-      par("usr")[2] + 0.005 * (par("usr")[2] - par("usr")[1]),
-      par("usr")[2] + 0.035 * (par("usr")[2] - par("usr")[1])
+      usr[2] + 0.005 * (usr[2] - usr[1]),
+      usr[2] + 0.035 * (usr[2] - usr[1])
     )
-    legend_y <- c(par("usr")[3], par("usr")[4])
+    legend_y <- c(usr[3], usr[4])
     
     # LEGEND BORDER
     rect(legend_x[1],
@@ -725,9 +724,9 @@ cyto_plot_empty <- function(x,
     # LEGEND BOXES
     legend_box_x <- legend_x
     legend_box_y <- seq(
-      par("usr")[3],
-      par("usr")[4],
-      (par("usr")[4] - par("usr")[3]) / 50
+      usr[3],
+      us[4],
+      (usr[4] - usr[3]) / 50
     )
     lapply(seq_len(50), function(z) {
       rect(legend_box_x[1],
@@ -783,6 +782,8 @@ cyto_plot_empty <- function(x,
 #'
 #' @param popup logical indicating whether a pop-up graphics device should be
 #'   opened, set to TRUE by default if called outside of \code{cyto_plot()}.
+#' @param popup_size  a vector of length 2 to control the height and width of
+#'   pop-up graphics device in inches, set to \code{c(7,7)} by default. 
 #' @param ... additional graphical parameters supplied by name to be passed to
 #'   \code{\link{cyto_plot_par}} to customise the new graphics device.
 #'
@@ -798,6 +799,7 @@ cyto_plot_empty <- function(x,
 #'
 #' @export
 cyto_plot_new <- function(popup,
+                          popup_size = c(7, 7),
                           ...) {
   
   # POPUP
@@ -813,6 +815,11 @@ cyto_plot_new <- function(popup,
     } else {
       popup <- TRUE
     }
+  }
+  
+  # POPUP SIZE
+  if("popup_size" %in% names(cyto_option("cyto_plot_par"))) {
+    popup_size <- cyto_option("cyto_plot_par")[["popup_size"]]
   }
   
   # NULL -> RSTUDIOGD
@@ -874,13 +881,23 @@ cyto_plot_new <- function(popup,
       if (dev_new == "popup") {
         if (interactive() & cyto_option("CytoExploreR_interactive")) {
           if (.Platform$OS.type == "windows") {
-            suppressWarnings(dev.new())
+            suppressWarnings(dev.new(height = popup_size[1],
+                                     width = popup_size[2],
+                                     unit = "in",
+                                     noRStudioGD = TRUE))
           } else if (.Platform$OS.type == "unix") {
             if (Sys.info()["sysname"] == "Linux") {
               # Cairo needed for semi-transparency
-              suppressWarnings(dev.new(type = "cairo"))
+              suppressWarnings(dev.new(height = popup_size[1],
+                                       width = popup_size[2],
+                                       unit = "in",
+                                       noRStudioGD = TRUE,
+                                       type = "cairo"))
             } else if (Sys.info()["sysname"] == "Darwin") {
-              suppressWarnings(dev.new())
+              suppressWarnings(dev.new(height = popup_size[1],
+                                       width = popup_size[2],
+                                       unit = "in",
+                                       noRStudioGD = TRUE))
             }
           }
         }
@@ -901,7 +918,8 @@ cyto_plot_new <- function(popup,
   }
   
   # SET GRAPHICAL PARAMATERS - INERITS CYTO_PLOT_PAR GLOBAL
-  cyto_plot_par(...)
+  cyto_plot_par(popup_size = popup_size, # named argument required
+                ...)
   
 }
 
@@ -1340,7 +1358,7 @@ cyto_plot_complete <- function(...) {
     old_pars <- old_pars[!names(old_pars) %in% names(pars)]
     old_pars <- c(old_pars, pars)
     do.call("cyto_plot_par", old_pars)
-    # NO SAVED RESET PARAMETERS
+  # NO SAVED RESET PARAMETERS
   } else {
     cyto_plot_par(...)
   }
@@ -1464,10 +1482,12 @@ cyto_plot_par <- function(...,
     par_args <- cyto_option("cyto_plot_par")
     # SET
   } else {
+    # NEW PARAMETERS
+    par_new_args <- .args_list(...)
+    # REMOVE RESET ARGUMENTS
+    par_new_args <- par_new_args[!names(par_new_args) %in% "reset"]
     # CURRENT PARAMETERS
     par_args <- cyto_option("cyto_plot_par")
-    # NEW PARAMETERS
-    par_new_args <- list(...)
     # PREPARE PARAMETERS
     par_args <- par_args[!names(par_args) %in% names(par_new_args)]
     par_args <- c(par_args, par_new_args)
@@ -1494,10 +1514,8 @@ cyto_plot_par <- function(...,
     }
     # SAVE PARAMETERS
     cyto_option("cyto_plot_par", par_args)
-    # SET PARAMETERS
-    if(length(par_args[!names(par_args) %in% "layout"]) > 0) {
-      par(par_args[!names(par_args) %in% "layout"])
-    }
+    # SET PARAMETERS - DROP LAYOUT & POPUP_SIZE
+    par(par_args[!names(par_args) %in% c("layout", "popup_size")])
   }
   # RETURN SET PARAMETERS
   invisible(par_args)
@@ -1520,6 +1538,7 @@ cyto_plot_theme_args <- function() {
     "axes_limits_buffer",
     "margins",
     "popup",
+    "popup_size",
     "hist_stat",
     "hist_bins",
     "hist_smooth",
