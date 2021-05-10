@@ -143,7 +143,7 @@ cyto_map.GatingSet <- function(x,
 
   # TRANSFORMERS
   if (is.null(trans)) {
-    trans <- cyto_transformer_extract(gs_copy)
+    trans <- cyto_transformers_extract(gs_copy)
   }
 
   # NAMES - ALL NAMES INCLUDING EMPTY PARENT

@@ -854,7 +854,7 @@ cyto_gate_edit <- function(x,
   gs <- x
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(gs)
+  axes_trans <- cyto_transformers_extract(gs)
   
   # NODES
   nds <- cyto_nodes(gs, path = "auto")

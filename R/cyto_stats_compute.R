@@ -156,7 +156,7 @@ cyto_stats_compute <- function(x,
   
   # TRANSFORMERS
   if(.all_na(trans)) {
-    trans <- cyto_transformer_extract(x)
+    trans <- cyto_transformers_extract(x)
   }
   
   # EXTRACT DATA ---------------------------------------------------------------

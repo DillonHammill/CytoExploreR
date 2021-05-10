@@ -41,7 +41,7 @@ cyto_plot_exp <- function(x,
   
   # TRANSFORMERS
   if(.all_na(axes_trans)) {
-    axes_trans <- cyto_transformer_extract(x)
+    axes_trans <- cyto_transformers_extract(x)
   }
   
   # CYTOFRAME/CYTOSET

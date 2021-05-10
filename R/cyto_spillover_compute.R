@@ -136,14 +136,14 @@ cyto_spillover_compute <- function(x,
   channels <- cyto_fluor_channels(cyto_copy)
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(cyto_copy)
+  axes_trans <- cyto_transformers_extract(cyto_copy)
   
   # DATA SHOULD BE TRANSFORMED FOR GATING
   if(.all_na(axes_trans) | is.null(axes_trans)){
-    axes_trans <- cyto_transformer_biex(cyto_copy,
-                                        channels = channels,
-                                        type = "biex",
-                                        plot = FALSE)
+    axes_trans <- cyto_transformers_define(cyto_copy,
+                                           channels = channels,
+                                           type = "biex",
+                                           plot = FALSE)
     suppressWarnings(cyto_transform(cyto_copy,
                                     trans = axes_trans,
                                     plot = FALSE))

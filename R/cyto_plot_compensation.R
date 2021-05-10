@@ -169,7 +169,7 @@ cyto_plot_compensation.GatingSet <- function(x,
   pd <- cyto_details(x)
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
   
   # CHANNELS
   channels <- cyto_fluor_channels(x)
@@ -414,7 +414,7 @@ cyto_plot_compensation.GatingHierarchy <- function(x,
   }
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
   
   # EXTRACT POPULATION
   x <- cyto_data_extract(x, 

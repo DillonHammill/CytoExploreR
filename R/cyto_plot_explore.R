@@ -92,7 +92,7 @@ cyto_plot_explore.GatingSet <- function(x,
   }
   
   # Transformations
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
   
   # Call to flowFrame method
   cyto_plot_explore(x = fr,
@@ -156,7 +156,7 @@ cyto_plot_explore.GatingHierarchy <- function(x,
                           parent = parent)[[1]]
   
   # Transformations
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
   
   # Call to flowFrame method
   cyto_plot_explore(x = fr,

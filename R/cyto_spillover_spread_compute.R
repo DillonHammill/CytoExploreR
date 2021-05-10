@@ -78,7 +78,7 @@ cyto_spillover_spread_compute <- function(x,
   channels <- cyto_fluor_channels(cyto_copy)
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(cyto_copy)
+  axes_trans <- cyto_transformers_extract(cyto_copy)
   
   # GATINGSET COMPENSATION
   if(is(cyto_copy, "GatingSet")){

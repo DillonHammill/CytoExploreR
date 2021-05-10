@@ -34,7 +34,7 @@
   channels <- cyto_fluor_channels(x)
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
   
   # PREPARE CHANNEL_MATCH ------------------------------------------------------
   

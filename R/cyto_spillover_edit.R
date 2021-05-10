@@ -138,16 +138,17 @@ cyto_spillover_edit.GatingSet <- function(x,
   channels <- cyto_fluor_channels(gs)
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(gs)
+  axes_trans <- cyto_transformers_extract(gs)
   
   # COMPENSATION
   comp <- cyto_spillover_extract(gs)
   
   # DEFAULT TRANSFORMERS
   if (.all_na(axes_trans)) {
-    axes_trans_default <- cyto_transformer_biex(gs,
-                                                channels = channels,
-                                                plot = FALSE
+    axes_trans_default <- cyto_transformers_define(gs,
+                                                   channels = channels,
+                                                   type = "biex",
+                                                   plot = FALSE
     )
   }
   

@@ -44,7 +44,7 @@ cyto_plot_comp <- function(x,
   }
 
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
 
   # CHANNEL_MATCH --------------------------------------------------------------
 

@@ -1097,11 +1097,9 @@ cyto_names_parse <- function(x,
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @seealso \code{\link{cyto_transformer_log}}
-#' @seealso \code{\link{cyto_transformer_arcsinh}}
-#' @seealso \code{\link{cyto_transformer_biex}}
-#' @seealso \code{\link{cyto_transformer_logicle}}
-#' @seealso \code{\link{cyto_transformer_combine}}
+#' @seealso \code{\link{cyto_transformers_define}}
+#' @seealso \code{\link{cyto_transformers_combine}}
+#' @seealso \code{\link{cyto_transformers_extract}}
 #'
 #' @rdname cyto_transform
 #'
@@ -1345,7 +1343,7 @@ cyto_transform.transformerList <- function(x,
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
     # Restrict transformers
-    trans <- cyto_transformer_combine(trans[names(trans) %in% cyto_channels(x)])
+    trans <- cyto_transformers_combine(trans[names(trans) %in% cyto_channels(x)])
     
     # Extract transformations to transformList
     transform_list <- cyto_transform_extract(trans, inverse = inverse)
@@ -1366,7 +1364,7 @@ cyto_transform.transformerList <- function(x,
     }
     
     # Restrict transformers - subsetted data may lack channels
-    trans <- cyto_transformer_combine(trans[names(trans) %in% cyto_channels(x)])
+    trans <- cyto_transformers_combine(trans[names(trans) %in% cyto_channels(x)])
     
     # Apply transformations
     x <- suppressMessages(transform(x, trans))
@@ -1614,7 +1612,7 @@ cyto_data_extract <- function(x,
   
   # EXTRACT TRANSFORMERS
   if(.all_na(trans)) {
-    trans <- cyto_transformer_extract(x)
+    trans <- cyto_transformers_extract(x)
   }
   
   # SELECT - CANNOT WORK FOR CYTOFRAMES
@@ -2586,7 +2584,7 @@ cyto_save.GatingSet <- function(x,
       copy = TRUE
     )[[1]]
     # TRANSFORMATIONS
-    trans <- cyto_transformer_extract(x)
+    trans <- cyto_transformers_extract(x)
     # FLOWSET METHOD
     fr_list <- cyto_save(
       x = fs,
@@ -2628,7 +2626,7 @@ cyto_save.GatingHierarchy <- function(x,
       copy = TRUE
     )[[1]]
     # TRANSFORMATIONS
-    trans <- cyto_transformer_extract(x)
+    trans <- cyto_transformers_extract(x)
     # FLOWSET METHOD
     fr_list <- cyto_save(
       x = fr,
@@ -4946,7 +4944,7 @@ cyto_apply.default <- function(x,
   if(cyto_class(x,  "GatingSet")) {
     
     # TRANSFORMERS
-    trans <- cyto_transformer_extract(x)
+    trans <- cyto_transformers_extract(x)
     
     # LIST OF CYTOSETS
     x <- cyto_data_extract(x,

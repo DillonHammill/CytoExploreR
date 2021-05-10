@@ -147,7 +147,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   fr <- cyto_data_extract(x, parent)[[1]]
   
   # TRANSFORMATIONS
-  trans <- cyto_transformer_extract(x)
+  trans <- cyto_transformers_extract(x)
   
   # EXTRACT GATE(S) ------------------------------------------------------------
   

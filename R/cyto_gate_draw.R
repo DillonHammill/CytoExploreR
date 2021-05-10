@@ -209,7 +209,7 @@ cyto_gate_draw.GatingSet <- function(x,
   channels <- cyto_channels_extract(x, channels = channels, plot = TRUE)
   
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformer_extract(x)
+  axes_trans <- cyto_transformers_extract(x)
   
   # NODES
   nds <- cyto_nodes(x, path = "auto")
