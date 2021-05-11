@@ -65,7 +65,13 @@ cyto_gate_apply <- function(x,
     }
     # NEGATED POPULATION
     if(negate == TRUE & z == length(gate)) {
-      pop <- split(x, gate[[z]])[[2]]
+      # WATCH OUT FOR EMPTY X
+      pop <- tryCatch(
+        split(x, gate[[z]])[[2]],
+        error = function(e){
+          return(x)
+        }
+      )
       # *** CYTOSET CONVERSION ***
       if(cyto_class(pop, "flowSet", TRUE)) {
         pop <- flowSet_to_cytoset(pop)
@@ -74,14 +80,34 @@ cyto_gate_apply <- function(x,
     } else {
       # QUADGATES - MULTIPLE POPULATIONS
       if(cyto_class(gate[[z]], "quadGate")) {
+        # ORDER
+        quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
+        # FIX ORDER FROM ABOVE
         if (!is.null(quad_order)) {
-          quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
-          pop <- split(x, gate[[z]])[c(2, 1, 3, 4)][match(
-            quad_order,
-            quads
-          )] # FIX ORDER
+          pop <- tryCatch(
+            # FIX ORDER
+            split(x, gate[[z]])[c(2, 1, 3, 4)][match(quad_order, quads)],
+            error = function(e){
+              return(
+                structure(
+                  list(x, x, x, x),
+                  names = quads
+                )
+              )
+            }
+          )
         } else {
-          pop <- split(x, gate[[z]])[c(2, 1, 3, 4)] # FIX ORDER
+          pop <- tryCatch(
+            split(x, gate[[z]])[c(2, 1, 3, 4)], # FIX ORDER
+            error = function(e) {
+              return(
+                structure(
+                  list(x, x, x, x),
+                  names = quads
+                )
+              )
+            }
+          )
         }
         # *** CYTOSET CONVERSION ***
         pop <- structure(
@@ -112,7 +138,17 @@ cyto_gate_apply <- function(x,
             filterId = paste(q, collapse = "|"),
             .gate = coords
           )
-          p <- split(x, qg)[c(2, 1, 3, 4)] # FIX ORDER
+          p <- tryCatch(
+            split(x, qg)[c(2, 1, 3, 4)], # FIX ORDER
+            error = function(e) {
+              return(
+                structure(
+                  list(x, x, x, x),
+                  names = q
+                )
+              )
+            }
+          )
           names(p) <- q
           # *** CYTOSET CONVERSION ***
           p <- structure(
@@ -126,7 +162,14 @@ cyto_gate_apply <- function(x,
           )
           pop <- p[[match(gate[[z]]@filterId, names(p))]]
         } else {
-          pop <- Subset(x, gate[[z]])
+          pop <- tryCatch(
+            Subset(x, gate[[z]]),
+            error = function(e) {
+              return(
+                x
+              )
+            }
+          )
         }
       }
     }
