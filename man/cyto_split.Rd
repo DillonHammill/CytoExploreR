@@ -7,18 +7,19 @@
 cyto_split(x, names = NULL)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}.}
+\item{x}{object of class \code{cytoframe} or \code{cytoset}.}
 
-\item{names}{vector of names to assign to each of the extracted flowFrames
+\item{names}{vector of names to assign to each of the extracted cytoframes
 when saving the split files. Name should be supplied in the order used
-prior to merging.}
+prior to merging (i.e. in Sample-ID order).}
 }
 \value{
-list of split flowFrames.
+a cytoset containing the split cytoframes.
 }
 \description{
-Extract individual samples merged using \code{cyto_merge()} based on
-\code{"Sample ID"} column created by \code{cyto_barcode()}.
+Extract individual samples merged using \code{cyto_merge_by()} or
+\code{cyto_coerce()} based on \code{"Sample-ID"} column created by
+\code{cyto_barcode()}.
 }
 \examples{
 

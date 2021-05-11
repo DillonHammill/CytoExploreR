@@ -380,7 +380,8 @@ cyto_clean <- function(x, ...) {
   # EXTRACT DATA
   if(cyto_class(x, "GatingSet")) {
     cyto_data <- cyto_data_extract(x,
-                                   parent = "root")[["root"]]
+                                   parent = "root",
+                                   copy = FALSE)[["root"]]
   } else {
     cyto_data <- x
   }
@@ -838,6 +839,7 @@ cyto_names <- function(x) {
 #' @rdname cyto_names
 #' @export
 cyto_names.flowFrame <- function(x) {
+  # DEFUNCT
   nm <- identifier(x)
   if (nm == "anonymous") {
     nm <- "Combined Events"
@@ -1128,43 +1130,26 @@ cyto_transform.default <- function(x,
     # Message not recommended to auto-transform flowFrame/flowSet objects
     if (cyto_class(x, c("flowFrame", "flowSet"))) {
       message(paste(
-        "Automatically transforming flowFrame/flowSet objects",
+        "Automatically transforming cytoframe/cytoset objects",
         "is not recommended as transformation definitions will be lost."
       ))
     }
     
     # Dispatch based on type argument to get TransformerList
-    if (type == "log") {
-      transformer_list <- cyto_transformer_log(x,
-                                               channels = channels,
-                                               parent = parent,
-                                               select = select,
-                                               plot = FALSE,
-                                               ...
-      )
-    } else if (type == "arcsinh") {
-      transformer_list <- cyto_transformer_arcsinh(x,
-                                                   channels = channels,
-                                                   parent = parent,
-                                                   select = select,
-                                                   plot = FALSE, ...
-      )
-    } else if (type == "biex") {
-      transformer_list <- cyto_transformer_biex(x,
-                                                channels = channels,
-                                                parent = parent,
-                                                select = select,
-                                                plot = FALSE, ...
-      )
-    } else if (type == "logicle") {
-      transformer_list <- cyto_transformer_logicle(x,
-                                                   channels = channels,
-                                                   parent = parent,
-                                                   select = select,
-                                                   plot = FALSE, ...
-      )
-    }
+    transformer_list <- cyto_transformers_define(x,
+                                                 channels = channels,
+                                                 parent = parent,
+                                                 type = type,
+                                                 select = select,
+                                                 plot = FALSE, 
+                                                 ...)
+    
   }
+  
+  # MESSAGE
+  message(
+    "Applying data transformations..."
+  )
   
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -1174,13 +1159,13 @@ cyto_transform.default <- function(x,
                                              inverse = inverse
     )
     
-    # Apply transformations
+    # APPLY TRANSFORMATIONS
     x <- suppressMessages(transform(x, transform_list))
     
     # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
     
-    # Inverse transformations not yet supported
+    # INVERSE TRANSFORM NOT SUPPORTED
     if (inverse == TRUE) {
       stop(paste(
         "Inverse transformations are not yet supported for",
@@ -1188,60 +1173,32 @@ cyto_transform.default <- function(x,
       ))
     }
     
-    # Apply transformations
+    # APPLY TRANSFORMATIONS
     x <- suppressMessages(transform(x, transformer_list))
   }
   
-  # Construct the plots
-  if (plot == TRUE) {
-    
-    # Plot if space sufficient space
+  # COMPLETE
+  message(
+    "DONE!"
+  )
+  
+  # VISUALISE TRANSFORMATIONS
+  if(plot == TRUE) {
+    # INVERSE
+    if(inverse == TRUE) {
+      transformer_list <- NA
+    }
+    # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      {
-        
-        # cytoset
-        cyto_data <- cyto_data_extract(x, parent)[[1]]
-        
-        # Convert to flowFrame for plotting
-        cyto_data <- as(cyto_data, "cytoframe")
-        
-        # Channels
-        channels <- names(transformer_list)
-        
-        # Old graphics parameters
-        old_pars <- .par("mfrow")
-        on.exit(par(old_pars))
-        
-        # Set up plotting area
-        cyto_plot_new(popup = popup)
-        n <- length(channels)
-        cyto_plot_layout(
-          c(
-            n2mfrow(n)[1],
-            n2mfrow(n)[2]
-          )
-        )
-        
-        # Generate plot for each channel
-        lapply(channels, function(chan) {
-          if (inverse == FALSE) {
-            cyto_plot(cyto_data,
-                      channels = chan,
-                      axes_trans = transformer_list,
-                      title = NA,
-                      axes_limits = axes_limits
-            )
-          } else if (inverse == TRUE) {
-            cyto_plot(cyto_data,
-                      channels = chan,
-                      title = NA,
-                      axes_limits = axes_limits
-            )
-          }
-        })
-      },
-      error = function(e) {
-        message("Insufficient plotting space, transformations have been applied.")
+      cyto_plot_profile(x,
+                        channels = channels,
+                        select = select,
+                        axes_trans = transformer_list,
+                        axes_limits = axes_limits,
+                        merge_by = "all",
+                        display = 1), # sampling performed above
+      error = function(e){
+        message("Insufficient plotting space to display transformations!")
       }
     )
   }
@@ -1267,6 +1224,11 @@ cyto_transform.transformList <- function(x,
     ))
   }
   
+  # MESSAGE
+  message(
+    "Applying data transformations..."
+  )
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
@@ -1281,46 +1243,24 @@ cyto_transform.transformList <- function(x,
     x <- suppressMessages(transform(x, trans))
   }
   
-  # Construct plots
-  if (plot == TRUE) {
-    # Plot if sufficient space
+  # COMPLETE
+  message(
+    "DONE!"
+  )
+  
+  # VISUALISE TRANSFORMATIONS
+  if(plot == TRUE) {
+    # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      {
-        
-        # Pull out flowFrame/flowSet to plot
-        cyto_data <- cyto_data_extract(x)[[1]]
-        
-        # Convert to flowFrame for plotting
-        cyto_data <- as(cyto_data, "cytoframe")
-        
-        # Channels
-        channels <- names(trans@transforms)
-        
-        # Old graphics parameters
-        old_pars <- .par("mfrow")
-        on.exit(par(old_pars))
-        
-        # Set up plotting area
-        cyto_plot_new(popup = popup)
-        n <- length(channels)
-        cyto_plot_layout(
-          c(
-            n2mfrow(n)[1],
-            n2mfrow(n)[2]
-          )
-        )
-        
-        # Generate plot for each channel - axes will not be transformed correctly
-        lapply(channels, function(chan) {
-          cyto_plot(cyto_data,
-                    channels = chan,
-                    title = NA,
-                    axes_limits = axes_limits
-          )
-        })
-      },
-      error = function(e) {
-        message("Insufficient plotting space, transformations have been applied.")
+      cyto_plot_profile(x,
+                        channels = channels,
+                        select = select,
+                        axes_trans = transformer_list,
+                        axes_limits = axes_limits,
+                        merge_by = "all",
+                        display = 1), # sampling performed above
+      error = function(e){
+        message("Insufficient plotting space to display transformations!")
       }
     )
   }
@@ -1338,6 +1278,11 @@ cyto_transform.transformerList <- function(x,
                                            popup = FALSE,
                                            axes_limits = "machine",
                                            ...) {
+  
+  # MESSAGE
+  message(
+    "Applying data transformations..."
+  )
   
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -1370,59 +1315,33 @@ cyto_transform.transformerList <- function(x,
     x <- suppressMessages(transform(x, trans))
   }
   
-  # Construct plots
-  if (plot == TRUE) {
-    # Plot if sufficient space
+  # COMPLETE
+  message(
+    "DONE!"
+  )
+  
+  # VISUALISE TRANSFORMATIONS
+  if(plot == TRUE) {
+    # INVERSE
+    if(inverse == TRUE) {
+      transformer_list <- NA
+    }
+    # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      {
-        
-        # Extract flowFrame/flowSet for plotting
-        cyto_data <- cyto_data_extract(x)[[1]]
-        
-        # Convert to flowFrame for plotting
-        cyto_data <- as(cyto_data, "cytoframe")
-        
-        # Channels
-        channels <- names(trans)
-        
-        # Old graphics parameters
-        old_pars <- .par("mfrow")
-        on.exit(par(old_pars))
-        
-        # Set up plotting area
-        cyto_plot_new(popup = popup)
-        n <- length(channels)
-        cyto_plot_layout(
-          c(
-            n2mfrow(n)[1],
-            n2mfrow(n)[2]
-          )
-        )
-        
-        # Generate plot for each channel
-        lapply(channels, function(chan) {
-          if (inverse == FALSE) {
-            cyto_plot(cyto_data,
-                      channels = chan,
-                      axes_trans = trans,
-                      title = NA,
-                      axes_limits = axes_limits
-            )
-          } else if (inverse == TRUE) {
-            cyto_plot(cyto_data,
-                      channels = chan,
-                      title = NA,
-                      axes_limits = axes_limits
-            )
-          }
-        })
-      },
-      error = function(e) {
-        message("Insufficient plotting space, transformations have been applied.")
+      cyto_plot_profile(x,
+                        parent = "root",
+                        channels = channels,
+                        select = select,
+                        axes_trans = transformer_list,
+                        axes_limits = axes_limits,
+                        merge_by = "all",
+                        display = 1), # sampling performed above
+      error = function(e){
+        message("Insufficient plotting space to display transformations!")
       }
     )
   }
-  
+
   # Return transformed data
   return(x)
 }
@@ -1687,7 +1606,9 @@ cyto_data_extract <- function(x,
       if(cyto_class(cs, "flowFrame")) {
         structure(
           list(
-            cyto_exprs(cs, markers = TRUE)
+            cyto_exprs(cs, 
+                       markers = markers,
+                       drop = FALSE)
           ), names = "cf_raw"
         )
       # CYTOSET -> MATRIX
@@ -1695,7 +1616,8 @@ cyto_data_extract <- function(x,
         structure(
           lapply(cyto_names(cs), function(z){
             cyto_exprs(cs[[z]],
-                       markers = markers)
+                       markers = markers,
+                       drop = FALSE)
           }), names = cyto_names(cs)
         )
       }
@@ -1868,7 +1790,7 @@ cyto_filter <- function(x, ...) {
     message("No samples match the filtering criteria. Returning all samples.")
     ind <- seq_len(length(x))
   } else {
-    ind <- match(pd_filter[, "name"], pd[, "name"])
+    ind <- match(rownames(pd_filter), rownames(pd))
   }
   
   return(x[ind])
@@ -1987,7 +1909,7 @@ cyto_select <- function(x, ...) {
     })
     
     # Get indices for selected samples
-    ind <- match(pd_filter[, "name"], pd[, "name"])
+    ind <- match(rownames(pd_filter), rownames(pd))
   }
   
   # Exclude
@@ -2115,7 +2037,7 @@ cyto_groups <- function(x,
       pd_split <- list("all" = pd)
     } else if (group_by == "name") {
       pd_split <- lapply(cyto_names(x), function(z) {
-        pd[rownames(pd) == z, , drop = FALSE] # nme column may not match
+        pd[rownames(pd) == z, , drop = FALSE] # name column may not match
       })
       names(pd_split) <- cyto_names(x)
     } else {
@@ -2183,7 +2105,7 @@ cyto_sort_by <- function(x,
   pd <- do.call("rbind", pd_split)
   
   # Sorting indices
-  ind <- match_ind(cyto_names(x), pd[, "name"])
+  ind <- match_ind(rownames(cyto_details(x)), rownames(pd))
   
   # Return sorted object
   return(x[ind])
@@ -2232,7 +2154,7 @@ cyto_group_by <- function(x,
   
   # Replace each element of pd_split with matching samples
   x_list <- lapply(seq_len(length(pd_split)), function(z) {
-    ind <- match(rownames(pd_split[[z]]), cyto_names(x)) # name column may not match
+    ind <- match(rownames(pd_split[[z]]), rownames(cyto_details(x)))
     x[ind]
   })
   names(x_list) <- names(pd_split)
@@ -2415,15 +2337,16 @@ setAs("flowSet",
 
 #' Split samples merged with cyto_merge
 #'
-#' Extract individual samples merged using \code{cyto_merge()} based on
-#' \code{"Sample ID"} column created by \code{cyto_barcode()}.
+#' Extract individual samples merged using \code{cyto_merge_by()} or
+#' \code{cyto_coerce()} based on \code{"Sample-ID"} column created by
+#' \code{cyto_barcode()}.
 #'
-#' @param x object of class \code{flowFrame}.
-#' @param names vector of names to assign to each of the extracted flowFrames
+#' @param x object of class \code{cytoframe} or \code{cytoset}.
+#' @param names vector of names to assign to each of the extracted cytoframes
 #'   when saving the split files. Name should be supplied in the order used
-#'   prior to merging.
+#'   prior to merging (i.e. in Sample-ID order).
 #'
-#' @return list of split flowFrames.
+#' @return a cytoset containing the split cytoframes.
 #'
 #' @importFrom flowCore flowFrame exprs identifier keyword split
 #'
@@ -2452,54 +2375,85 @@ cyto_split <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # FLOWFRAME
-  if (!cyto_class(x, "flowFrame")) {
-    stop("cyto_split() requires a cytoframe object.")
+  if (!cyto_class(x, c("flowFrame", "flowSet"))) {
+    stop("cyto_split() requires a cytoframe or cytoset object.")
   }
   
-  # SAMPLE ID
-  if (!"Sample ID" %in% cyto_channels(x)) {
-    stop("Merged samples must be barcoded in cyto_merge().")
-  }
-  
-  # SPLIT INTO FLOWFRAMES ------------------------------------------------------
-  
-  # EXTRACT DATA
-  fr_exprs <- exprs(x)
-  
-  # SAMPLE IDs
-  sample_id <- unique(fr_exprs[, "Sample ID"])
-  samples <- length(sample_id)
-  
-  # SPLIT BY SAMPLE ID
-  fr_list <- split(x, factor(fr_exprs[, "Sample ID"], levels = sample_id))
-  
-  # NAMES
-  if (!is.null(names)) {
-    # INSUFFICIENT NAMES
-    if (length(names) != length(sample_id)) {
-      stop("Supply a name for each file.")
-    }
-    # NO NAMES
+  # SAMPLE-ID COLUMN
+  ind <- which(
+    LAPPLY(cyto_channels(x), function(v){
+      grepl("^Sample.*ID.*$", v) # flowJo compatibility SampleID
+    })
+  )
+  if (length(ind) == 0) {
+    stop("Merged samples must be barcoded in cyto_merge_by().")
   } else {
-    names <- paste0("Sample-", sample_id)
+    id <- cyto_channels(x)[ind]
   }
   
-  # NAME SPLIT FILES
-  lapply(seq_len(samples), function(z) {
-    identifier(fr_list[[z]]) <<- names[z]
-  })
-  names(fr_list) <- names
+  # SPLIT INTO CYTOFRAMES ------------------------------------------------------
   
-  # RETURN SPLIT FLOWFRAMES
-  return(fr_list)
+  # CYTOFRAME -> CYTOSET
+  if(cyto_class(x, "flowFrame")) {
+    x <- cytoset(
+      list("cytoframe" = x)
+    )
+  }
+  
+  # LOOP THROUGH CYTOSET
+  cf_list <- lapply(seq_along(x), function(z){
+    # EXTRACT CYTOFRAME
+    cf <- cyto_data_extract(x[z],
+                            channels = id,
+                            format = "cytoframe",
+                            copy = FALSE)[[1]][[1]]
+    
+    # EXTRACT SAMPLE IDs
+    cf_exprs <- cyto_exprs(cf, drop = TRUE)
+    # SAMPLE IDs
+    sample_id <- unique(cf_exprs)
+    # SPLIT BY SAMPLE ID
+    cf_list <- split(cf, 
+                     factor(cf_exprs[, id], levels = sample_id))
+    # NAMES
+    if (!is.null(names)) {
+      names(cf_list) <- tryCatch(
+        names[seq(1, length(cf_list))],
+        error = function(e){
+          stop(
+            "Insufficient sample names passed to 'names'!"
+          )
+        }
+      )
+      # REMOVE USED NAMES
+      names <<- names[-seq( 1, length(cf_list))]
+      # NO NAMES
+    } else {
+      names(cf_list) <- paste0("Sample-", names(cf_list))
+    }
+    # IDENTIFIERS - NOT REQUIRED
+    cf_list <- structure(
+      lapply(seq_along(cf_list), function(v) {
+        identifier(cf_list[[v]]) <<- names(cf_list)[v]
+      }),
+      names = names(cf_list)
+    )
+    return(cf_list)
+  })
+  
+  # FLATTEN CYTOFRAME LIST
+  cf_list <- unlist(cf_list)
+  
+  # RETURN CYTOSET
+  return(cytoset(cf_list))
 }
 
 ## CYTO_SAVE -------------------------------------------------------------------
 
 #' Write samples to FCS files in new folder or save GatingSet
 #'
-#' @param x object of class \code{flowFrame}, \code{flowSet},
-#'   \code{GatingHierarchy} or \code{GatingSet}.
+#' @param x object of class \code{flowSet}, \code{GatingHierarchy} or
+#'   \code{GatingSet}.
 #' @param parent name of the parent population to extract when a
 #'   \code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name
 #'   of the parent is supplied the samples will be written to FCS files in the
@@ -2517,10 +2471,10 @@ cyto_split <- function(x,
 #'   directory. To prevent files being overwritten, it is recommended that
 #'   \code{save_as} directory not be manually created before running
 #'   \code{cyto_save}.
-#' @param inverse logical indicating whether the data should be
-#'   inverse transformed prior to writing FCS files, set to FALSE by default.
-#'   Inverse transformations of \code{flowFrame} or \code{flowSet} objects
-#'   requires passing of transformers through the \code{trans} argument.
+#' @param inverse logical indicating whether the data should be inverse
+#'   transformed prior to writing FCS files, set to FALSE by default. Inverse
+#'   transformations of \code{flowFrame} or \code{flowSet} objects requires
+#'   passing of transformers through the \code{trans} argument.
 #' @param trans object of class \code{transformerList} containing the
 #'   transformation definitions applied to the supplied data. Used internally
 #'   when \code{inverse_transform} is TRUE, to inverse the transformations prior
@@ -2578,7 +2532,7 @@ cyto_save.GatingSet <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingSet."))
-    fs <- cyto_data_extract(
+    cs <- cyto_data_extract(
       x,
       parent = parent,
       copy = TRUE
@@ -2586,8 +2540,8 @@ cyto_save.GatingSet <- function(x,
     # TRANSFORMATIONS
     trans <- cyto_transformers_extract(x)
     # FLOWSET METHOD
-    fr_list <- cyto_save(
-      x = fs,
+    cs <- cyto_save(
+      x = cs,
       split = split,
       names = names,
       save_as = save_as,
@@ -2595,7 +2549,7 @@ cyto_save.GatingSet <- function(x,
       trans = trans
     )
     # RETURN DATA
-    invisible(fr_list)
+    invisible(cs)
   }
 }
 
@@ -2620,7 +2574,7 @@ cyto_save.GatingHierarchy <- function(x,
   } else {
     # EXTRACT DATA
     message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-    fr <- cyto_data_extract(
+    cs <- cyto_data_extract(
       x,
       parent = parent,
       copy = TRUE
@@ -2628,8 +2582,8 @@ cyto_save.GatingHierarchy <- function(x,
     # TRANSFORMATIONS
     trans <- cyto_transformers_extract(x)
     # FLOWSET METHOD
-    fr_list <- cyto_save(
-      x = fr,
+    cs <- cyto_save(
+      x = cs,
       split = split,
       names = names,
       save_as = save_as,
@@ -2638,7 +2592,7 @@ cyto_save.GatingHierarchy <- function(x,
     )
     
     # RETURN DATA
-    invisible(fr_list)
+    invisible(cs)
   }
 }
 
@@ -2652,47 +2606,16 @@ cyto_save.flowSet <- function(x,
                               trans = NULL,
                               ...) {
   
-  # COPY
-  x <- cyto_copy(x)
-  
-  # LIST OF FLOWFRAMES
-  fr_list <- cyto_list(x)
-  
-  # LIST OF SPLIT FLOWFRAMES
+  # CYTOSET OF SPLIT CYTOFRAMES
   if (split == TRUE) {
-    # NAMES SUPPLIED - CHECK LENGTH
-    if (!is.null(names)) {
-      # SAMPLES PER FLOWFRAME
-      samples_per_file <- lapply(fr_list, function(z) {
-        length(unique(exprs(z)[, "Sample ID"]))
-      })
-      # SPLIT NAMES SUPPLIED
-      samples <- sum(unlist(samples_per_file))
-      if (length(names) != samples) {
-        stop(paste("Expecting", samples, "names for the split files."))
-      }
-      # PREPARE NAMES
-      ind <- LAPPLY(seq_along(fr_list), function(z) {
-        rep(z, samples_per_file[[z]])
-      })
-      names <- split(names, ind)
-      # SPLIT FR_LIST
-      fr_list <- mapply(function(z, name) {
-        cyto_split(z, names = name)
-      }, fr_list, names)
-      fr_list <- unlist(fr_list)
-      # NO NAMES SUPPLIED
-    } else {
-      fr_list <- LAPPLY(fr_list, function(z) {
-        cyto_split(z)
-      })
-    }
+    x <- cyto_split(x, 
+                    names = names)
   }
   
   # DIRECTORY CHECK
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
-    if (any(list.files(save_as) %in% cyto_names(fr_list))) {
+    if (any(list.files(save_as) %in% cyto_names(cs))) {
       message(paste0("Files will be overwritten in ", save_as, "."))
       opt <- readline("Do you want to continue? (Y/N)")
       if (grepl("n", opt, ignore.case = TRUE)) {
@@ -2709,28 +2632,28 @@ cyto_save.flowSet <- function(x,
   }
   message(paste0("Writing FCS files to ", location, "..."))
   
-  # WRITE FCS FILES
-  fr_list <- lapply(fr_list, function(z) {
-    # INVERSE TRANSFORM
-    if (inverse == TRUE) {
-      # TRANSFORMERS REQUIRED
-      if (is.null(trans) | .all_na(trans)) {
-        stop("Supply transformerList to 'trans' to inverse transformations.")
-      }
-      # INVERSE TRANSFORM
-      z <- cyto_transform(z,
-                          trans = trans,
-                          inverse = TRUE,
-                          plot = FALSE
-      )
+  # INVERSE TRANSFORM?
+  if(inverse == TRUE) {
+    # TRANSFORMERS REQUIRED
+    if (is.null(trans) | .all_na(trans)) {
+      stop("Supply transformerList to 'trans' to inverse transformations.")
     }
+    # INVERSE TRANSFORM
+    x <- cyto_transform(cyto_copy(x),
+                        trans = trans,
+                        inverse = inverse,
+                        plot = FALSE)
+  }
+  
+  # WRITE FCS FILES
+  lapply(seq_along(x), function(z){
     # Message
-    message(paste0(cyto_names(z), "..."))
+    message(paste0(cyto_names(x)[z], "..."))
     # NO DIRECTORY SPECIFIED
     if (is.null(save_as)) {
       write.FCS(
-        z,
-        cyto_names(z)
+        x[[z]],
+        cyto_names(x)[z]
       )
       # DIRECTORY SPECIFIED
     } else {
@@ -2739,98 +2662,14 @@ cyto_save.flowSet <- function(x,
         dir.create(save_as)
       }
       write.FCS(
-        z,
-        paste0(save_as, "/", cyto_names(z))
+        x[[z]],
+        paste0(save_as, "/", cyto_names(x)[z])
       )
     }
-    return(z)
   })
   
   # RETURN DATA
-  invisible(unlist(fr_list))
-}
-
-#' @rdname cyto_save
-#' @export
-cyto_save.flowFrame <- function(x,
-                                split = FALSE,
-                                names = NULL,
-                                save_as = NULL,
-                                inverse = FALSE,
-                                trans = NULL,
-                                ...) {
-  
-  # COPY
-  x <- cyto_copy(x)
-  
-  # SPLIT
-  if (split == TRUE) {
-    fr_list <- cyto_split(x,
-                          names = names
-    )
-  } else {
-    fr_list <- list(x)
-  }
-  
-  # DIRECTORY CHECK
-  if (!is.null(save_as) & dir.exists(save_as)) {
-    # FILES WILL BE OVERWRITTEN
-    if (any(list.files(save_as) %in% cyto_names(fr_list))) {
-      message(paste0("Files will be overwritten in ", save_as, "."))
-      opt <- readline("Do you want to continue? (Y/N)")
-      if (grepl("n", opt, ignore.case = TRUE)) {
-        return(NULL)
-      }
-    }
-  }
-  
-  # MESSAGE
-  if (is.null(save_as)) {
-    location <- "current working directory."
-  } else {
-    location <- save_as
-  }
-  message(paste0("Writing FCS files to ", location, "..."))
-  
-  # WRITE FCS FILES
-  fr_list <- lapply(fr_list, function(z) {
-    # INVERSE TRANSFORM
-    if (inverse == TRUE) {
-      # TRANSFORMERS REQUIRED
-      if (is.null(trans) | .all_na(trans)) {
-        stop("Supply transformerList to 'trans' to inverse transformations.")
-      }
-      # INVERSE TRANSFORM
-      z <- cyto_transform(z,
-                          trans = trans,
-                          inverse = TRUE,
-                          plot = FALSE
-      )
-    }
-    # Message
-    message(paste0(cyto_names(z), "..."))
-    # NO DIRECTORY SPECIFIED
-    if (is.null(save_as)) {
-      write.FCS(
-        z,
-        cyto_names(z)
-      )
-      # DIRECTORY SPECIFIED
-    } else {
-      # CREATE DIRECTORY
-      if (!dir.exists(save_as)) {
-        dir.create(save_as)
-      }
-      write.FCS(
-        z,
-        paste0(save_as, "/", cyto_names(z))
-      )
-    }
-    return(z)
-  })
-  
-  # RETURN DATA
-  invisible(unlist(fr_list))
+  invisible(x)
 }
 
 ## CYTO_LIST -------------------------------------------------------------------
@@ -3334,7 +3173,9 @@ cyto_sample_to_node <- function(x,
   }
   
   # NODE COUNTS
-  node_pops <- cyto_data_extract(gs_clone, node)[[node]]
+  node_pops <- cyto_data_extract(gs_clone, 
+                                 parent = node,
+                                 copy = FALSE)[[node]]
   node_counts <- suppressMessages(
     cyto_stats_compute(node_pops,
                        stat = "count",
@@ -3369,7 +3210,9 @@ cyto_sample_to_node <- function(x,
   # SAMPLING - ROOT POPULATION
   pops <- lapply(seq_along(node_pops), function(z) {
     cyto_sample(
-      cyto_data_extract(gs_clone[[z]])[["root"]],
+      cyto_data_extract(gs_clone[[z]],
+                        parent = "root",
+                        copy = FALSE)[["root"]][[1]],  # cytoframe
       node_ratios[[z]],
       ...
     )

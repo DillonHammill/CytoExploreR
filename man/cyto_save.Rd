@@ -5,7 +5,6 @@
 \alias{cyto_save.GatingSet}
 \alias{cyto_save.GatingHierarchy}
 \alias{cyto_save.flowSet}
-\alias{cyto_save.flowFrame}
 \title{Write samples to FCS files in new folder or save GatingSet}
 \usage{
 cyto_save(x, ...)
@@ -41,20 +40,10 @@ cyto_save(x, ...)
   trans = NULL,
   ...
 )
-
-\method{cyto_save}{flowFrame}(
-  x,
-  split = FALSE,
-  names = NULL,
-  save_as = NULL,
-  inverse = FALSE,
-  trans = NULL,
-  ...
-)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}, \code{flowSet},
-\code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class \code{flowSet}, \code{GatingHierarchy} or
+\code{GatingSet}.}
 
 \item{...}{not in use.}
 
@@ -79,10 +68,10 @@ directory. To prevent files being overwritten, it is recommended that
 \code{save_as} directory not be manually created before running
 \code{cyto_save}.}
 
-\item{inverse}{logical indicating whether the data should be
-inverse transformed prior to writing FCS files, set to FALSE by default.
-Inverse transformations of \code{flowFrame} or \code{flowSet} objects
-requires passing of transformers through the \code{trans} argument.}
+\item{inverse}{logical indicating whether the data should be inverse
+transformed prior to writing FCS files, set to FALSE by default. Inverse
+transformations of \code{flowFrame} or \code{flowSet} objects requires
+passing of transformers through the \code{trans} argument.}
 
 \item{trans}{object of class \code{transformerList} containing the
 transformation definitions applied to the supplied data. Used internally
