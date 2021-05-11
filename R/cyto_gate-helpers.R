@@ -1,3 +1,145 @@
+## CYTO_GATE_APPLY -------------------------------------------------------------
+
+#' Apply a list of gates to a cytoframe or cytoset
+#'
+#' \code{cyto_gate_apply()} is a helper function used within CytoExploreR to
+#' handle all gating operations. In particular it ensures appropriate handling
+#' of \code{quadGate} and \code{rectangleGates} associated with
+#' \code{quadGates}.
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
+#' @param gate a filters, rectangleGate, polygonGate, ellipsoidGate, quadGate or
+#'   list of these objects.
+#' @param negate logical flag indicating whether events outside of the supplied
+#'   gates should be included as a separate population, set to FALSE by default.
+#'
+#' @return a list of cytoframes or cytoset containing gated populations.
+#'
+#' @importFrom flowCore Subset split quadGate
+#' @importFrom flowWorkspace flowSet_to_cytoset
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_gate_apply <- function(x,
+                            gate = NA,
+                            negate = FALSE) {
+  
+  # GATE - LIST
+  if(!cyto_class(gate, "list", TRUE)) {
+    gate <- unlist(list(gate))
+  # EXTRACT FILTERS
+  } else if(cyto_class(gate, "filters", TRUE)) {
+    gate <- unlist(gate)
+  # EXTRACT ANY FILTERS IN GATE LIST
+  } else {
+    gate <- unlist(gate)
+  }
+  
+  # RECTANGLEGATES TO QUADGATE
+  quad_order <- NULL
+  if (length(gate) == 4 & all(LAPPLY(gate, function(z) {
+    cyto_class(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
+  }))) {
+    # CHANNELS
+    chans <- as.character(parameters(gate[[1]]))
+    quad_order <- LAPPLY(gate, function(z) {
+      z@filterId
+    })
+    gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
+  }
+  
+  # NEGATE - APPEND FILTER INCLUDING ALL GATES
+  if(negate == TRUE) {
+    gate <- c(gate, 
+              list("negate" = do.call("|", unname(unlist(gate)))))
+  }
+  
+  # GATED POPULATIONS
+  alias <- c()
+  pops <- lapply(seq_along(gate), function(z){
+    # NO GATE
+    if(.all_na(gate[[z]])) {
+      return(x)
+    }
+    # NEGATED POPULATION
+    if(negate == TRUE & z == length(gate)) {
+      pop <- split(x, gate[[z]])[[2]]
+      # *** CYTOSET CONVERSION ***
+      if(cyto_class(pop, "flowSet", TRUE)) {
+        pop <- flowSet_to_cytoset(pop)
+      }
+    # GATED POPULATIONS
+    } else {
+      # QUADGATES - MULTIPLE POPULATIONS
+      if(cyto_class(gate[[z]], "quadGate")) {
+        if (!is.null(quad_order)) {
+          quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
+          pop <- split(x, gate[[z]])[c(2, 1, 3, 4)][match(
+            quad_order,
+            quads
+          )] # FIX ORDER
+        } else {
+          pop <- split(x, gate[[z]])[c(2, 1, 3, 4)] # FIX ORDER
+        }
+        # *** CYTOSET CONVERSION ***
+        pop <- structure(
+          lapply(pop, function(q){
+            if(cyto_class(q, "flowSet", TRUE)){
+              q <- flowSet_to_cytoset(q)
+            }
+            return(q)
+          }),
+          names = names(pop)
+        )
+      # SINGLE POPULATIONS
+      } else {
+        # RECTANGLE BELONGS TO QUADGATE
+        if (cyto_class(gate[[z]], "rectangleGate") &
+            any(grepl("quad", names(attributes(gate[[z]]))))) {
+          q <- names(attributes(gate[[z]])[["quadrants"]])
+          coords <- .cyto_gate_coords(gate[z],
+                                      channels = as.character(
+                                        parameters(gate[[z]]))
+          )
+          chans <- colnames(coords)
+          coords <- lapply(colnames(coords), function(y) {
+            unique(coords[, y][is.finite(coords[, y])])
+          })
+          names(coords) <- chans
+          qg <- quadGate(
+            filterId = paste(q, collapse = "|"),
+            .gate = coords
+          )
+          p <- split(x, qg)[c(2, 1, 3, 4)] # FIX ORDER
+          names(p) <- q
+          # *** CYTOSET CONVERSION ***
+          p <- structure(
+            lapply(p, function(b){
+              if(cyto_class(b, "flowSet", TRUE)){
+                b <- flowSet_to_cytoset(b)
+              }
+              return(b)
+            }),
+            names = names(p)
+          )
+          pop <- p[[match(gate[[z]]@filterId, names(p))]]
+        } else {
+          pop <- Subset(x, gate[[z]])
+        }
+      }
+    }
+    return(pop)
+  })
+  names(pops) <- names(gate)
+  
+  # LIST OF GATED POPULATIONS
+  pops <- unlist(pops)
+  return(pops)
+  
+}
+
 ## CYTO_GATE_REMOVE ------------------------------------------------------------
 
 #' Remove Gate(s) and Edit gatingTemplate csv File
