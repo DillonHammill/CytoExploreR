@@ -95,7 +95,7 @@ cyto_spillover_spread_compute <- function(x,
     # UNTRANSFORMED DATA
     if(.all_na(axes_trans) | is.null(axes_trans)){
       cyto_copy <- cyto_compensate(cyto_copy, spillover = spillover)
-      axes_trans <- cyto_transformer_biex(cyto_copy,
+      axes_trans <- cyto_transformers_define(cyto_copy,
                                           channels = channels,
                                           type = "biex",
                                           plot = FALSE)
@@ -105,21 +105,21 @@ cyto_spillover_spread_compute <- function(x,
       # TRANSFORMED DATA
     }else{
       # INVERSE TRANSFORM
-      suppressWarnings(cyto_transform(cyto_extract(cyto_copy),
+      suppressWarnings(cyto_transform(cyto_data_extract(cyto_copy)[[1]],
                                       trans = axes_trans,
                                       inverse = TRUE,
                                       plot = FALSE))
       # COMPENSATE
       cyto_compensate(cyto_copy, spillover = spillover)
       # TRANSFORM
-      suppressWarnings(cyto_transform(cyto_extract(cyto_copy),
+      suppressWarnings(cyto_transform(cyto_data_extract(cyto_copy)[[1]],
                                       trans = axes_trans,
                                       plot = FALSE))
     }
   }else if(compensated == TRUE){
     # TRANSFORMATIONS
     if(.all_na(axes_trans) | is.null(axes_trans)){
-      axes_trans <- cyto_transformer_biex(cyto_copy,
+      axes_trans <- cyto_transformers_define(cyto_copy,
                                           channels = channels,
                                           type = "biex",
                                           plot = FALSE)

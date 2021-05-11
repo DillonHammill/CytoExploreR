@@ -153,16 +153,16 @@ cyto_spillover_edit.GatingSet <- function(x,
   }
   
   # EXTRACT DATA
-  cs <- cyto_extract(gs,
-                     parent = "root",
-                     copy = TRUE)
+  cs <- cyto_data_extract(gs,
+                          parent = "root",
+                          copy = TRUE)[[1]]
   
   # COMPENSATED GATINGSET
   if (!is.null(comp)) {
     # REVERSE TRANSFORMATIONS
     if (!.all_na(axes_trans)) {
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
-      trans <- cyto_transformer_combine(trans)
+      trans <- cyto_transformers_combine(trans)
       cs <- cyto_transform(cs,
                            trans = trans,
                            inverse = TRUE,
@@ -180,7 +180,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     }
     # RE-APPLY TRANSFORMATIONS
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
-    trans <- cyto_transformer_combine(trans)
+    trans <- cyto_transformers_combine(trans)
     cs <- cyto_transform(cs,
                          trans = trans,
                          plot = FALSE
@@ -195,7 +195,7 @@ cyto_spillover_edit.GatingSet <- function(x,
       axes_trans <- axes_trans_default
       # RE-APPLY TRANSFORMATIONS
       trans <- axes_trans[match_ind(channels, names(axes_trans))]
-      trans <- cyto_transformer_combine(trans)
+      trans <- cyto_transformers_combine(trans)
       cs <- cyto_transform(cs,
                            trans = trans,
                            plot = FALSE
@@ -209,10 +209,10 @@ cyto_spillover_edit.GatingSet <- function(x,
   if (!.all_na(axes_trans)) {
     # GS TRANSFORMED & UNCOMPENSATED
     gs_linear <- cyto_copy(gs)
-    cs <- cyto_extract(gs_linear, "root")
+    cs <- cyto_data_extract(gs_linear, "root")[[1]]
     # INVERSE TRANSFORMATIONS
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
-    trans <- cyto_transformer_combine(trans)
+    trans <- cyto_transformers_combine(trans)
     cs <- cyto_transform(cs,
                          trans = trans,
                          inverse = TRUE,
@@ -240,9 +240,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     # CHANNEL_MATCH SUPPLIED
     if (!is.null(channel_match)) {
       # CHANNEL_MATCH OBJECT
-      if (is(channel_match, "data.frame") |
-          is(channel_match, "matrix") |
-          is(channel_match, "tibble")) {
+      if (cyto_class(channel_match, c("data.frame", "matrix", "tibble"))) {
         if (!all(c("name", "channel") %in% colnames(channel_match))) {
           stop("channel_match must contain columns 'name' and 'channel'.")
         }
@@ -303,8 +301,7 @@ cyto_spillover_edit.GatingSet <- function(x,
   # Spillover matrix supplied
   if (!is.null(spillover)) {
     # spillover is a data.frame or matrix or tibble
-    if (is(spillover, "matrix") |
-        is(spillover, "data.frame")) {
+    if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # spill should be a matrix
       spill <- spillover
       # Save edited spillover matrix to date-Spillover-Matrix.csv
@@ -320,7 +317,7 @@ cyto_spillover_edit.GatingSet <- function(x,
       if (!file.exists(spillover)) {
         # Use first spillover matrix
         spill <- cyto_spillover_extract(
-          cyto_extract(gs)
+          cyto_data_extract(gs)[[1]] # SPILL keyword
         )[[1]]
         # Use matrix from file
       } else {
@@ -335,7 +332,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     )
     # Use spillover matrix attached to first sample
     spill <- cyto_spillover_extract(
-      cyto_extract(gs)
+      cyto_data_extract(gs)[[1]]  # SPILL keyword
     )[[1]]
   }
   colnames(spill) <- channels
@@ -567,7 +564,7 @@ cyto_spillover_edit.GatingSet <- function(x,
         gs_linear_copy_comp <- compensate(gs_linear_copy, values$spill / 100)
         # Get transformed data
         trans <- axes_trans[match_ind(channels, names(axes_trans))]
-        trans <- cyto_transformer_combine(trans)
+        trans <- cyto_transformers_combine(trans)
         gs_trans <- cyto_transform(gs_linear_copy_comp,
                                    trans = trans,
                                    plot = FALSE
@@ -684,10 +681,10 @@ cyto_spillover_edit.GatingSet <- function(x,
           if (input$editor_median_tracker == TRUE) {
             
             # MEDIAN TRACKER
-            pop <- cyto_extract(
+            pop <- cyto_data_extract(
               gs_comp()[[input$editor_sample]],
               pd[pd$name == input$editor_sample, "parent"]
-            )
+            )[[1]]
             .cyto_median_tracker(
               pop,
               c(
@@ -770,10 +767,10 @@ cyto_spillover_edit.GatingSet <- function(x,
             # Median line through unstained control
             if (input$editor_unstained_median == TRUE) {
               # PULL OUT NIL - RAW DATA
-              NIL <- cyto_extract(gs_comp()[[input$editor_unstained]],
+              NIL <- cyto_data_extract(gs_comp()[[input$editor_unstained]],
                                   pd[pd$name == input$editor_sample, "parent"],
-                                  raw = TRUE
-              )[[1]]
+                                  format = "matrix"
+              )[[1]][[1]]
               # COMPUTE MEDFI IN ALL CHANNELS
               medFI <- lapply(channels, function(z) {
                 median(NIL[, z])
@@ -788,10 +785,10 @@ cyto_spillover_edit.GatingSet <- function(x,
             if (input$editor_median_tracker == TRUE) {
               
               # MEDIAN TRACKER
-              pop <- cyto_extract(
+              pop <- cyto_data_extract(
                 gs_comp()[[input$editor_sample]],
                 pd[pd$name == input$editor_sample, "parent"]
-              )
+              )[[1]]
               .cyto_median_tracker(
                 pop,
                 c(
@@ -862,10 +859,10 @@ cyto_spillover_edit.GatingSet <- function(x,
                         input$editor_ychannel
                       ),
                       parent = pd[pd$name == input$editor_sample, "parent"],
-                      overlay = cyto_extract(
+                      overlay = cyto_data_extract(
                         gs_comp()[[input$editor_unstained]],
                         pd[pd$name == input$editor_sample, "parent"]
-                      ),
+                      )[[1]],
                       axes_trans = axes_trans,
                       axes_limits = axes_limits,
                       display = display,
@@ -879,10 +876,10 @@ cyto_spillover_edit.GatingSet <- function(x,
             # Median line through unstained control
             if (input$editor_unstained_median == TRUE) {
               # PULL OUT NIL - RAW DATA
-              NIL <- cyto_extract(gs_comp()[[input$editor_unstained]],
+              NIL <- cyto_data_extract(gs_comp()[[input$editor_unstained]],
                                   pd[pd$name == input$editor_sample, "parent"],
-                                  raw = TRUE
-              )[[1]]
+                                  format = "matrix"
+              )[[1]][[1]]
               # COMPUTE MEDFI IN ALL CHANNELS
               medFI <- lapply(channels, function(z) {
                 median(NIL[, z])
@@ -897,10 +894,10 @@ cyto_spillover_edit.GatingSet <- function(x,
             if (input$editor_median_tracker == TRUE) {
               
               # MEDIAN TRACKER
-              pop <- cyto_extract(
+              pop <- cyto_data_extract(
                 gs_comp()[[input$editor_sample]],
                 pd[pd$name == input$editor_sample, "parent"]
-              )
+              )[[1]]
               .cyto_median_tracker(
                 pop,
                 c(
@@ -914,10 +911,10 @@ cyto_spillover_edit.GatingSet <- function(x,
             cyto_plot(gs_comp()[[input$editor_unstained]],
                       channels = input$editor_xchannel,
                       parent = pd[pd$name == input$editor_sample, "parent"],
-                      overlay = cyto_extract(
+                      overlay = cyto_data_extract(
                         gs_comp()[[input$editor_sample]],
                         pd[pd$name == input$editor_sample, "parent"]
-                      ),
+                      )[[1]],
                       axes_trans = axes_trans,
                       axes_limits = axes_limits,
                       display = display,
@@ -937,10 +934,10 @@ cyto_spillover_edit.GatingSet <- function(x,
             cyto_plot(gs_comp()[[input$editor_unstained]],
                       channels = input$editor_ychannel,
                       parent = pd[pd$name == input$editor_sample, "parent"],
-                      overlay = cyto_extract(
+                      overlay = cyto_data_extract(
                         gs_comp()[[input$editor_sample]],
                         pd[pd$name == input$editor_sample, "parent"]
-                      ),
+                      )[[1]],
                       axes_trans = axes_trans,
                       axes_limits = axes_limits,
                       display = display,
@@ -996,10 +993,10 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    channel = input$plots_xchannel,
                                    parent = pd[pd$name == input$plots_sample, "parent", ],
                                    axes_trans = axes_trans,
-                                   overlay = cyto_extract(
+                                   overlay = cyto_data_extract(
                                      gs_comp()[[input$plots_sample]],
                                      pd[pd$name == input$plots_sample, "parent", ]
-                                   ),
+                                   )[[1]],
                                    axes_limits = axes_limits,
                                    display = display,
                                    point_col = c("blue", "red"),
@@ -1020,14 +1017,14 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    parent = pd[pd$name == input$plots_sample, "parent"],
                                    axes_trans = axes_trans,
                                    overlay = list(
-                                     cyto_extract(
+                                     cyto_data_extract(
                                        gs_comp()[[input$plots_sample]],
                                        pd[pd$name == input$plots_sample, "parent"]
-                                     ),
-                                     cyto_extract(
+                                     )[[1]],
+                                     cyto_data_extract(
                                        gs_comp()[[input$plots_unstained]],
                                        pd[pd$name == input$plots_sample, "parent"]
-                                     )
+                                     )[[1]]
                                    ),
                                    axes_limits = axes_limits,
                                    display = display,
@@ -1048,10 +1045,10 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    channel = input$plots_xchannel,
                                    parent = pd[pd$name == input$plots_sample, "parent"],
                                    axes_trans = axes_trans,
-                                   overlay = cyto_extract(
+                                   overlay = cyto_data_extract(
                                      gs_comp()[[input$plots_unstained]],
                                      pd[pd$name == input$plots_sample, "parent"]
-                                   ),
+                                   )[[1]],
                                    axes_limits = axes_limits,
                                    display = display,
                                    point_col = c("blue", "black"),
@@ -1092,10 +1089,10 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    channel = input$plots_xchannel,
                                    parent = pd[pd$name == input$plots_sample, "parent"],
                                    axes_trans = axes_trans,
-                                   overlay = cyto_extract(
+                                   overlay = cyto_data_extract(
                                      gs_comp()[[input$plots_unstained]],
                                      pd[pd$name == input$plots_sample, "parent"]
-                                   ),
+                                   )[[1]],
                                    axes_limits = axes_limits,
                                    display = display,
                                    point_col = c("red", "black"),
@@ -1220,8 +1217,9 @@ cyto_spillover_edit.flowSet <- function(x,
   # Inverse transformations
   if (.all_na(axes_trans)) {
     fs_linear <- cyto_copy(fs)
-    axes_trans <- cyto_transformer_biex(fs,
+    axes_trans <- cyto_transformers_define(fs,
                                         channels = channels,
+                                        type = "biex",
                                         plot = FALSE
     )
     fs <- cyto_transform(fs,
@@ -1230,7 +1228,7 @@ cyto_spillover_edit.flowSet <- function(x,
     )
   } else {
     trans <- axes_trans[match_ind(channels, names(axes_trans))]
-    trans <- cyto_transformer_combine(trans)
+    trans <- cyto_transformers_combine(trans)
     fs_linear <- cyto_transform(cyto_copy(fs),
                                 trans = trans,
                                 inverse = TRUE,
@@ -1241,8 +1239,7 @@ cyto_spillover_edit.flowSet <- function(x,
   # Channel match file supplied
   if (!is.null(channel_match)) {
     # channel_match is a data.frame or matrix or tibble
-    if (is(channel_match, "data.frame") |
-        is(channel_match, "matrix")) {
+    if (cyto_class(channel_match, c("matrix", "data.frame"))) {
       # channel_match must contain "name" and "channel" columns
       if (!any(grepl("name", colnames(channel_match), ignore.case = TRUE)) |
           !any(grepl("channel", colnames(channel_match), ignore.case = TRUE))) {
@@ -1281,8 +1278,7 @@ cyto_spillover_edit.flowSet <- function(x,
   # Spillover matrix supplied
   if (!is.null(spillover)) {
     # spillover is a data.frame or matrix or tibble
-    if (is(spillover, "matrix") |
-        is(spillover, "data.frame")) {
+    if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # spill should be a matrix
       spill <- spillover
       # Save edited spillover matrix to date-Spillover-Matrix.csv
@@ -1523,7 +1519,7 @@ cyto_spillover_edit.flowSet <- function(x,
         fs_comp <- compensate(fs_copy, values$spill / 100)
         # Get transformed data
         trans <- axes_trans[match_ind(channels, names(axes_trans))]
-        trans <- cyto_transformer_combine(trans)
+        trans <- cyto_transformers_combine(trans)
         fs_trans <- cyto_transform(fs_comp,
                                    trans = trans,
                                    plot = FALSE
@@ -1584,7 +1580,7 @@ cyto_spillover_edit.flowSet <- function(x,
         if (input$editor_unstained == "No Unstained Control") {
           
           # Plots
-          cyto_plot(fs.comp()[[input$editor_sample]],
+          cyto_plot(fs.comp()[input$editor_sample],
                     channels = c(
                       input$editor_xchannel,
                       input$editor_ychannel
@@ -1604,7 +1600,7 @@ cyto_spillover_edit.flowSet <- function(x,
             
             # MEDIAN TRACKER
             .cyto_median_tracker(
-              fs.comp()[[input$editor_sample]],
+              fs.comp()[input$editor_sample],
               c(
                 input$editor_xchannel,
                 input$editor_ychannel
@@ -1613,7 +1609,7 @@ cyto_spillover_edit.flowSet <- function(x,
           }
           
           # Density distribution in associated channel
-          cyto_plot(fs.comp()[[input$editor_sample]],
+          cyto_plot(fs.comp()[input$editor_sample],
                     channels = input$editor_xchannel,
                     axes_trans = axes_trans,
                     axes_limits = axes_limits,
@@ -1629,7 +1625,7 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Density distribution in other channel
-          cyto_plot(fs.comp()[[input$editor_sample]],
+          cyto_plot(fs.comp()[input$editor_sample],
                     channels = input$editor_ychannel,
                     axes_trans = axes_trans,
                     axes_limits = axes_limits,
@@ -1645,7 +1641,7 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Add MedFI label in other channel
-          cyto_plot_label(fs.comp()[[input$editor_sample]],
+          cyto_plot_label(fs.comp()[input$editor_sample],
                           channels = input$editor_ychannel,
                           trans = axes_trans,
                           display = display,
@@ -1664,7 +1660,7 @@ cyto_spillover_edit.flowSet <- function(x,
           if (input$editor_unstained_overlay == FALSE) {
             
             # Plot
-            cyto_plot(fs.comp()[[input$editor_sample]],
+            cyto_plot(fs.comp()[input$editor_sample],
                       channels = c(
                         input$editor_xchannel,
                         input$editor_ychannel
@@ -1697,7 +1693,7 @@ cyto_spillover_edit.flowSet <- function(x,
               
               # MEDIAN TRACKER
               .cyto_median_tracker(
-                fs.comp()[[input$editor_sample]],
+                fs.comp()[input$editor_sample],
                 c(
                   input$editor_xchannel,
                   input$editor_ychannel
@@ -1706,7 +1702,7 @@ cyto_spillover_edit.flowSet <- function(x,
             }
             
             # Density distribution in associated channel - unstained overlay
-            cyto_plot(fs.comp()[[input$editor_sample]],
+            cyto_plot(fs.comp()[input$editor_sample],
                       channels = input$editor_xchannel,
                       axes_trans = axes_trans,
                       axes_limits = axes_limits,
@@ -1724,7 +1720,7 @@ cyto_spillover_edit.flowSet <- function(x,
             )
             
             # Add label for Stained median
-            cyto_plot_label(fs.comp()[[input$editor_sample]],
+            cyto_plot_label(fs.comp()[input$editor_sample],
                             channels = input$editor_ychannel,
                             trans = axes_trans,
                             display = display,
@@ -1740,12 +1736,12 @@ cyto_spillover_edit.flowSet <- function(x,
           } else if (input$editor_unstained_overlay == TRUE) {
             
             # Plot
-            cyto_plot(fs.comp()[[input$editor_sample]],
+            cyto_plot(fs.comp()[input$editor_sample],
                       channels = c(
                         input$editor_xchannel,
                         input$editor_ychannel
                       ),
-                      overlay = fs.comp()[[input$editor_unstained]],
+                      overlay = fs.comp()[input$editor_unstained],
                       axes_trans = axes_trans,
                       axes_limits = axes_limits,
                       display = display,
@@ -1775,7 +1771,7 @@ cyto_spillover_edit.flowSet <- function(x,
               
               # MEDIAN TRACKER
               .cyto_median_tracker(
-                fs.comp()[[input$editor_sample]],
+                fs.comp()[input$editor_sample],
                 c(
                   input$editor_xchannel,
                   input$editor_ychannel
@@ -1785,9 +1781,9 @@ cyto_spillover_edit.flowSet <- function(x,
           }
           
           # Density distribution in associated channel - unstained overlay
-          cyto_plot(fs.comp()[[input$editor_unstained]],
+          cyto_plot(fs.comp()[input$editor_unstained],
                     channels = input$editor_xchannel,
-                    overlay = fs.comp()[[input$editor_sample]],
+                    overlay = fs.comp()[input$editor_sample],
                     axes_trans = axes_trans,
                     axes_limits = axes_limits,
                     display = display,
@@ -1804,9 +1800,9 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Density distribution in other channel - unstained overlay
-          cyto_plot(fs.comp()[[input$editor_unstained]],
+          cyto_plot(fs.comp()[input$editor_unstained],
                     channels = input$editor_ychannel,
-                    overlay = fs.comp()[[input$editor_sample]],
+                    overlay = fs.comp()[input$editor_sample],
                     axes_trans = axes_trans,
                     axes_limits = axes_limits,
                     display = display,
@@ -1823,7 +1819,7 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Add label for unstained median
-          cyto_plot_label(fs.comp()[[input$editor_unstained]],
+          cyto_plot_label(fs.comp()[input$editor_unstained],
                           channels = input$editor_ychannel,
                           trans = axes_trans,
                           display = display,
@@ -1836,7 +1832,7 @@ cyto_spillover_edit.flowSet <- function(x,
           )
           
           # Add label for Stained median
-          cyto_plot_label(fs.comp()[[input$editor_sample]],
+          cyto_plot_label(fs.comp()[input$editor_sample],
                           channels = input$editor_ychannel,
                           trans = axes_trans,
                           display = display,
@@ -1857,10 +1853,10 @@ cyto_spillover_edit.flowSet <- function(x,
         if (input$plots_uncompensated_underlay == TRUE) {
           if (input$plots_compensated_overlay == TRUE &
               input$plots_unstained_overlay == FALSE) {
-            cyto_plot_compensation(fs[[input$plots_sample]],
+            cyto_plot_compensation(fs[input$plots_sample],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
-                                   overlay = fs.comp()[[input$plots_sample]],
+                                   overlay = fs.comp()[input$plots_sample],
                                    axes_limits = axes_limits,
                                    display = display,
                                    point_col = c("blue", "red"),
@@ -1876,12 +1872,12 @@ cyto_spillover_edit.flowSet <- function(x,
             )
           } else if (input$plots_compensated_overlay == TRUE &
                      input$plots_unstained_overlay == TRUE) {
-            cyto_plot_compensation(fs[[input$plots_sample]],
+            cyto_plot_compensation(fs[input$plots_sample],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
                                    overlay = list(
-                                     fs.comp()[[input$plots_sample]],
-                                     fs.comp()[[input$plots_unstained]]
+                                     fs.comp()[input$plots_sample],
+                                     fs.comp()[input$plots_unstained]
                                    ),
                                    axes_limits = axes_limits,
                                    display = display,
@@ -1898,10 +1894,10 @@ cyto_spillover_edit.flowSet <- function(x,
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == TRUE) {
-            cyto_plot_compensation(fs[[input$plots_sample]],
+            cyto_plot_compensation(fs[input$plots_sample],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
-                                   overlay = fs.comp()[[input$plots_unstained]],
+                                   overlay = fs.comp()[input$plots_unstained],
                                    axes_limits = axes_limits,
                                    display = display,
                                    point_col = c("blue", "black"),
@@ -1917,7 +1913,7 @@ cyto_spillover_edit.flowSet <- function(x,
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == FALSE) {
-            cyto_plot_compensation(fs[[input$plots_sample]],
+            cyto_plot_compensation(fs[input$plots_sample],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
                                    axes_limits = axes_limits,
@@ -1937,10 +1933,10 @@ cyto_spillover_edit.flowSet <- function(x,
         } else if (input$plots_uncompensated_underlay == FALSE) {
           if (input$plots_compensated_overlay == TRUE &
               input$plots_unstained_overlay == TRUE) {
-            cyto_plot_compensation(fs.comp()[[input$plots_sample]],
+            cyto_plot_compensation(fs.comp()[input$plots_sample],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
-                                   overlay = fs.comp()[[input$plots_unstained]],
+                                   overlay = fs.comp()[input$plots_unstained],
                                    axes_limits = axes_limits,
                                    display = display,
                                    point_col = c("red", "black"),
@@ -1956,7 +1952,7 @@ cyto_spillover_edit.flowSet <- function(x,
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == TRUE) {
-            cyto_plot_compensation(fs.comp()[[input$plots_unstained]],
+            cyto_plot_compensation(fs.comp()[input$plots_unstained],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
                                    axes_limits = axes_limits,
@@ -1974,7 +1970,7 @@ cyto_spillover_edit.flowSet <- function(x,
             )
           } else if (input$plots_compensated_overlay == TRUE &
                      input$plots_unstained_overlay == FALSE) {
-            cyto_plot_compensation(fs.comp()[[input$plots_sample]],
+            cyto_plot_compensation(fs.comp()[input$plots_sample],
                                    channel = input$plots_xchannel,
                                    axes_trans = axes_trans,
                                    axes_limits = axes_limits,
@@ -2041,7 +2037,9 @@ cyto_spillover_edit.flowSet <- function(x,
                                  channels = NULL) {
   
   # RAW DATA
-  raw_data <- cyto_extract(x, raw = TRUE)[[1]]
+  raw_data <- cyto_data_extract(x, 
+                                format = "matrix",
+                                copy = FALSE)[[1]][[1]]
   raw_data <- raw_data[, channels]
   # SORT RAW DATA
   raw_data <- raw_data[order(raw_data[, channels[1]]), ]
