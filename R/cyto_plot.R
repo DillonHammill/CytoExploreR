@@ -222,6 +222,8 @@
 #'   labels, set to 1 by default.
 #' @param label_text_col colour(s) to use for text in plot labels, set to
 #'   \code{"black"} by default.
+#' @param label_text_col_alpha numeric [0, 1] to control the transparency of the
+#'   text colour, set to 1 by default to remove transparency.
 #' @param label_fill fill colour(s) to use for labels, set to "white" by
 #'   default.
 #' @param label_fill_alpha numeric to control background fill transparency of
@@ -389,6 +391,7 @@ cyto_plot.GatingSet <- function(x,
                                 label_text_font = 2,
                                 label_text_size = 0.8,
                                 label_text_col = "black",
+                                label_text_col_alpha = 1,
                                 label_fill = "white",
                                 label_fill_alpha = 0.6,
                                 border_line_type = 1,
@@ -873,6 +876,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       label_text_font = 2,
                                       label_text_size = 1,
                                       label_text_col = "black",
+                                      label_text_col_alpha = 1,
                                       label_fill = "white",
                                       label_fill_alpha = 0.6,
                                       border_line_type = 1,
@@ -1322,6 +1326,7 @@ cyto_plot.flowSet <- function(x,
                               label_text_font = 2,
                               label_text_size = 0.8,
                               label_text_col = "black",
+                              label_text_col_alpha = 1,
                               label_fill = "white",
                               label_fill_alpha = 0.6,
                               border_line_type = 1,

@@ -86,6 +86,7 @@
   label_text_font = 2,
   label_text_size = 0.8,
   label_text_col = "black",
+  label_text_col_alpha = 1,
   label_fill = "white",
   label_fill_alpha = 0.6,
   border_line_type = 1,
@@ -183,6 +184,7 @@
   label_text_font = 2,
   label_text_size = 1,
   label_text_col = "black",
+  label_text_col_alpha = 1,
   label_fill = "white",
   label_fill_alpha = 0.6,
   border_line_type = 1,
@@ -281,6 +283,7 @@
   label_text_font = 2,
   label_text_size = 0.8,
   label_text_col = "black",
+  label_text_col_alpha = 1,
   label_fill = "white",
   label_fill_alpha = 0.6,
   border_line_type = 1,
@@ -589,6 +592,9 @@ labels, set to 1 by default.}
 
 \item{label_text_col}{colour(s) to use for text in plot labels, set to
 \code{"black"} by default.}
+
+\item{label_text_col_alpha}{numeric [0, 1] to control the transparency of the
+text colour, set to 1 by default to remove transparency.}
 
 \item{label_fill}{fill colour(s) to use for labels, set to "white" by
 default.}

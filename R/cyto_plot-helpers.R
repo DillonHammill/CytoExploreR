@@ -1574,6 +1574,7 @@ cyto_plot_theme_args <- function() {
     "label_text_font",
     "label_text_size",
     "label_text_col",
+    "label_text_col_alpha",
     "label_fill",
     "label_fill_alpha",
     "border_fill",

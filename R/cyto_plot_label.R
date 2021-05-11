@@ -47,6 +47,8 @@
 #'   for details.
 #' @param label_text_col specify text colour in label for each gate, defaults to
 #'   \code{"black"} for all gates.
+#' @param label_text_col_alpha numeric [0, 1] to control the transparency of the
+#'   text colour, set to 1 by default to remove transparency.
 #' @param label_fill fill colour to use for labels, set to "white" by default.
 #' @param label_fill_alpha numeric [0,1] controls the transparency of the fill
 #'   colour, set to \code{0.6} by default.
@@ -64,6 +66,7 @@
 #' @importFrom methods is
 #' @importFrom flowWorkspace gh_pop_get_gate gh_pop_is_negated
 #' @importFrom openCyto gh_generate_template
+#' @importFrom grDevices adjustcolor
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -125,6 +128,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                                             label_text_font = 2,
                                             label_text_size = 0.8,
                                             label_text_col = "black",
+                                            label_text_col_alpha = 1,
                                             label_fill = "white",
                                             label_fill_alpha = 0.6,
                                             hist_smooth = 1, ...){
@@ -278,6 +282,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                                    label_text_font = label_text_font,
                                    label_text_size = label_text_size,
                                    label_text_col = label_text_col,
+                                   label_text_col_alpha = label_text_col_alpha,
                                    label_fill = label_fill,
                                    label_fill_alpha = label_fill_alpha,
                                    hist_smooth = hist_smooth)
@@ -302,6 +307,7 @@ cyto_plot_label.flowFrame <- function(x,
                                       label_text_font = 2,
                                       label_text_size = 0.8,
                                       label_text_col = "black",
+                                      label_text_col_alpha = 1,
                                       label_fill = "white",
                                       label_fill_alpha = 0.6,
                                       hist_smooth = 1, ...){
@@ -421,6 +427,7 @@ cyto_plot_label.flowFrame <- function(x,
              label_text_font,
              label_text_size,
              label_text_col,
+             label_text_col_alpha,
              label_fill,
              label_fill_alpha) {
       
@@ -446,7 +453,7 @@ cyto_plot_label.flowFrame <- function(x,
         border = FALSE,
         font = label_text_font,
         cex = label_text_size,
-        col = label_text_col,
+        col = adjustcolor(label_text_col, label_text_col_alpha),
         bg = label_fill,
         alpha.bg = label_fill_alpha
       )
@@ -461,6 +468,7 @@ cyto_plot_label.flowFrame <- function(x,
     label_text_font,
     label_text_size,
     label_text_col,
+    label_text_col_alpha,
     label_fill,
     label_fill_alpha,
     SIMPLIFY = FALSE
@@ -499,12 +507,16 @@ cyto_plot_label.flowFrame <- function(x,
 #'   for details.
 #' @param label_text_col specify text colour in label for each gate, defaults to
 #'   \code{"black"} for all gates.
+#' @param label_text_col_alpha numeric [0, 1] to control the transparency of the
+#'   text colour, set to 1 by default to remove transparency.
 #' @param label_fill fill colour to use for labels, set to "white" by default.
 #' @param label_fill_alpha numeric [0,1] controls the transparency of the fill
 #'   colour, set to \code{0.6} by default.
 #' @param ... not in use.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @importFrom grDevices adjustcolor
 #'
 #' @export
 cyto_plot_labeller <- function(label_text = NA,
@@ -513,6 +525,7 @@ cyto_plot_labeller <- function(label_text = NA,
                                label_text_font = 2,
                                label_text_size = 0.8,
                                label_text_col = "black",
+                               label_text_col_alpha = 1,
                                label_fill = "white",
                                label_fill_alpha = 0.6,
                                ...){
@@ -527,6 +540,7 @@ cyto_plot_labeller <- function(label_text = NA,
              label_text_font,
              label_text_size,
              label_text_col,
+             label_text_col_alpha,
              label_fill,
              label_fill_alpha) {
       
@@ -555,7 +569,7 @@ cyto_plot_labeller <- function(label_text = NA,
           border = FALSE,
           font = label_text_font,
           cex = label_text_size,
-          col = label_text_col,
+          col = adjustcolor(label_text_col, label_text_col_alpha),
           bg = label_fill,
           alpha.bg = label_fill_alpha
         )
@@ -572,6 +586,7 @@ cyto_plot_labeller <- function(label_text = NA,
     label_text_font,
     label_text_size,
     label_text_col,
+    label_text_col_alpha,
     label_fill,
     label_fill_alpha,
     SIMPLIFY = FALSE

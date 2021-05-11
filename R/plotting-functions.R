@@ -64,8 +64,9 @@
   }
   args <- list(
     x = x, y = y, labels = labels, srt = srt, adj = adj,
-    col = ifelse(colSums(col2rgb(bg) * c(1, 1.4, 0.6)) <
-                   350, "white", "black")
+    col = ifelse(colSums(col2rgb(bg) * c(1, 1.4, 0.6)) < 350, 
+                 "white", 
+                 "black")
   )
   args <- modifyList(args, list(...))
   if (xlog) {
