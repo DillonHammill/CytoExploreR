@@ -2971,7 +2971,7 @@ cyto_sample_n <- function(x,
   
   # DISPLAY CANNOT BE LARGER THAN TOTAL COUNT
   if(display > 1 & display > total_count) {
-    display <- total_count
+    display <- total_count # display may be set to zero here
   }
   
   # DISPLAY - COUNT
@@ -2980,7 +2980,11 @@ cyto_sample_n <- function(x,
   }
 
   # DISPLAY - FREQ
-  display_freq <- display / total_count
+  if(display == 0) {
+    display_freq <- 0 # avoid possible NaN
+  } else {
+    display_freq <- display / total_count
+  }
   
   # APPROX COUNTS
   sample_counts <- ceiling(display_freq * counts)
@@ -2988,12 +2992,14 @@ cyto_sample_n <- function(x,
   
   # EXACT COUNTS - REMOVE EXCESS EVENTS
   excess <- sample_total - display
-  sample_ind <- which(sample_counts != 0)
-  for(i in seq_len(excess)) {
-    ind <- sample(sample_ind, 1)
-    sample_counts[ind] <- sample_counts[ind] - 1
-    if(sample_counts[ind] == 0) {
-      sample_ind <- sample_ind[-match(names(ind), names(sample_ind))]
+  if(excess > 0) {
+    sample_ind <- which(sample_counts != 0)
+    for(i in seq_len(excess)) {
+      ind <- sample(sample_ind, 1)
+      sample_counts[ind] <- sample_counts[ind] - 1
+      if(sample_counts[ind] == 0) {
+        sample_ind <- sample_ind[-match(names(ind), names(sample_ind))]
+      }
     }
   }
   
