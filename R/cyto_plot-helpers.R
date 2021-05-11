@@ -725,7 +725,7 @@ cyto_plot_empty <- function(x,
     legend_box_x <- legend_x
     legend_box_y <- seq(
       usr[3],
-      us[4],
+      usr[4],
       (usr[4] - usr[3]) / 50
     )
     lapply(seq_len(50), function(z) {
