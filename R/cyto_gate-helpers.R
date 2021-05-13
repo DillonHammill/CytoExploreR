@@ -56,11 +56,11 @@ cyto_gate_apply <- function(x,
   
   # NEGATE - APPEND FILTER INCLUDING ALL GATES
   if(negate == TRUE) {
+    negate_filter <- !do.call("|", list(rg1, rg2))
     if(!skip) {
-      gate <- c(gate, 
-                list("negate" = do.call("|", unname(unlist(gate)))))
+      gate <- c(gate, negate_filter)
     } else {
-      gate <- list("negate" = do.call("|", unname(unlist(gate))))
+      gate <- list("negate" = negate_filter)
     }
   }
   
@@ -71,122 +71,104 @@ cyto_gate_apply <- function(x,
     if(.all_na(gate[[z]])) {
       return(x)
     }
-    # NEGATED POPULATION
-    if(negate == TRUE & z == length(gate)) {
-      # WATCH OUT FOR EMPTY X
-      pop <- tryCatch(
-        split(x, gate[[z]])[[2]],
-        error = function(e){
-          return(x)
-        }
-      )
-      # *** CYTOSET CONVERSION ***
-      if(cyto_class(pop, "flowSet", TRUE)) {
-        pop <- flowSet_to_cytoset(pop)
-      }
+    # QUADGATES - MULTIPLE POPULATIONS
+    if(cyto_class(gate[[z]], "quadGate")) {
+      # ORDER
+      quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
       # ALIAS
-      alias <<- c(alias, "negate")
-    # GATED POPULATIONS
-    } else {
-      # QUADGATES - MULTIPLE POPULATIONS
-      if(cyto_class(gate[[z]], "quadGate")) {
-        # ORDER
-        quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
-        # ALIAS
-        alias <<- c(alias, quads)
-        # FIX ORDER FROM ABOVE
-        if (!is.null(quad_order)) {
-          pop <- tryCatch(
-            # FIX ORDER
-            split(x, gate[[z]])[c(2, 1, 3, 4)][match(quad_order, quads)],
-            error = function(e){
-              return(
-                structure(
-                  list(x, x, x, x),
-                  names = quads
-                )
+      alias <<- c(alias, quads)
+      # FIX ORDER FROM ABOVE
+      if (!is.null(quad_order)) {
+        pop <- tryCatch(
+          # FIX ORDER
+          split(x, gate[[z]])[c(2, 1, 3, 4)][match(quad_order, quads)],
+          error = function(e){
+            return(
+              structure(
+                list(x, x, x, x),
+                names = quads
               )
-            }
-          )
-        } else {
-          pop <- tryCatch(
-            split(x, gate[[z]])[c(2, 1, 3, 4)], # FIX ORDER
-            error = function(e) {
-              return(
-                structure(
-                  list(x, x, x, x),
-                  names = quads
-                )
-              )
-            }
-          )
-        }
-        # *** CYTOSET CONVERSION ***
-        pop <- structure(
-          lapply(pop, function(q){
-            if(cyto_class(q, "flowSet", TRUE)){
-              q <- flowSet_to_cytoset(q)
-            }
-            return(q)
-          }),
-          names = names(pop)
+            )
+          }
         )
-      # SINGLE POPULATIONS
       } else {
-        # RECTANGLE BELONGS TO QUADGATE
-        if (cyto_class(gate[[z]], "rectangleGate") &
-            any(grepl("quad", names(attributes(gate[[z]]))))) {
-          q <- names(attributes(gate[[z]])[["quadrants"]])
-          coords <- .cyto_gate_coords(gate[z],
-                                      channels = as.character(
-                                        parameters(gate[[z]]))
-          )
-          chans <- colnames(coords)
-          coords <- lapply(colnames(coords), function(y) {
-            unique(coords[, y][is.finite(coords[, y])])
-          })
-          names(coords) <- chans
-          qg <- quadGate(
-            filterId = paste(q, collapse = "|"),
-            .gate = coords
-          )
-          p <- tryCatch(
-            split(x, qg)[c(2, 1, 3, 4)], # FIX ORDER
-            error = function(e) {
-              return(
-                structure(
-                  list(x, x, x, x),
-                  names = q
-                )
+        pop <- tryCatch(
+          split(x, gate[[z]])[c(2, 1, 3, 4)], # FIX ORDER
+          error = function(e) {
+            return(
+              structure(
+                list(x, x, x, x),
+                names = quads
               )
-            }
-          )
-          names(p) <- q
-          # ALIAS
-          alias <<- c(alias, q)
-          # *** CYTOSET CONVERSION ***
-          p <- structure(
-            lapply(p, function(b){
-              if(cyto_class(b, "flowSet", TRUE)){
-                b <- flowSet_to_cytoset(b)
-              }
-              return(b)
-            }),
-            names = names(p)
-          )
-          pop <- p[[match(gate[[z]]@filterId, names(p))]]
-        } else {
-          # alias
-          alias <<- c(alias, gate[[z]]@filterId)
-          pop <- tryCatch(
-            Subset(x, gate[[z]]),
-            error = function(e) {
-              return(
-                x
+            )
+          }
+        )
+      }
+      # *** CYTOSET CONVERSION ***
+      pop <- structure(
+        lapply(pop, function(q){
+          if(cyto_class(q, "flowSet", TRUE)){
+            q <- flowSet_to_cytoset(q)
+          }
+          return(q)
+        }),
+        names = names(pop)
+      )
+      # SINGLE POPULATIONS
+    } else {
+      # RECTANGLE BELONGS TO QUADGATE
+      if (cyto_class(gate[[z]], "rectangleGate") &
+          any(grepl("quad", names(attributes(gate[[z]]))))) {
+        q <- names(attributes(gate[[z]])[["quadrants"]])
+        coords <- .cyto_gate_coords(gate[z],
+                                    channels = as.character(
+                                      parameters(gate[[z]]))
+        )
+        chans <- colnames(coords)
+        coords <- lapply(colnames(coords), function(y) {
+          unique(coords[, y][is.finite(coords[, y])])
+        })
+        names(coords) <- chans
+        qg <- quadGate(
+          filterId = paste(q, collapse = "|"),
+          .gate = coords
+        )
+        p <- tryCatch(
+          split(x, qg)[c(2, 1, 3, 4)], # FIX ORDER
+          error = function(e) {
+            return(
+              structure(
+                list(x, x, x, x),
+                names = q
               )
+            )
+          }
+        )
+        names(p) <- q
+        # ALIAS
+        alias <<- c(alias, q)
+        # *** CYTOSET CONVERSION ***
+        p <- structure(
+          lapply(p, function(b){
+            if(cyto_class(b, "flowSet", TRUE)){
+              b <- flowSet_to_cytoset(b)
             }
-          )
-        }
+            return(b)
+          }),
+          names = names(p)
+        )
+        pop <- p[[match(gate[[z]]@filterId, names(p))]]
+      } else {
+        # alias
+        alias <<- c(alias, gate[[z]]@filterId)
+        pop <- tryCatch(
+          Subset(x, gate[[z]]),
+          error = function(e) {
+            return(
+              x
+            )
+          }
+        )
       }
     }
     return(pop)
