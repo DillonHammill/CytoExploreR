@@ -13,6 +13,9 @@
 #'   list of these objects.
 #' @param negate logical flag indicating whether events outside of the supplied
 #'   gates should be included as a separate population, set to FALSE by default.
+#' @param skip logical indicating whether gating should be skipped for gates
+#'   when\code{negate = TRUE}, set to FALSE by default. Setting this option to
+#'   TRUE will return a list containing only the negated population.
 #'
 #' @return a list of cytoframes or cytoset containing gated populations.
 #'
@@ -24,7 +27,8 @@
 #' @export
 cyto_gate_apply <- function(x,
                             gate = NA,
-                            negate = FALSE) {
+                            negate = FALSE,
+                            skip = FALSE) {
   
   # GATE - LIST
   if(!cyto_class(gate, "list", TRUE)) {
@@ -52,8 +56,12 @@ cyto_gate_apply <- function(x,
   
   # NEGATE - APPEND FILTER INCLUDING ALL GATES
   if(negate == TRUE) {
-    gate <- c(gate, 
-              list("negate" = do.call("|", unname(unlist(gate)))))
+    if(!skip) {
+      gate <- c(gate, 
+                list("negate" = do.call("|", unname(unlist(gate)))))
+    } else {
+      gate <- list("negate" = do.call("|", unname(unlist(gate))))
+    }
   }
   
   # GATED POPULATIONS
@@ -76,12 +84,16 @@ cyto_gate_apply <- function(x,
       if(cyto_class(pop, "flowSet", TRUE)) {
         pop <- flowSet_to_cytoset(pop)
       }
+      # ALIAS
+      alias <<- c(alias, "negate")
     # GATED POPULATIONS
     } else {
       # QUADGATES - MULTIPLE POPULATIONS
       if(cyto_class(gate[[z]], "quadGate")) {
         # ORDER
         quads <- unlist(strsplit(gate[[z]]@filterId, "\\|"))
+        # ALIAS
+        alias <<- c(alias, quads)
         # FIX ORDER FROM ABOVE
         if (!is.null(quad_order)) {
           pop <- tryCatch(
@@ -150,6 +162,8 @@ cyto_gate_apply <- function(x,
             }
           )
           names(p) <- q
+          # ALIAS
+          alias <<- c(alias, q)
           # *** CYTOSET CONVERSION ***
           p <- structure(
             lapply(p, function(b){
@@ -162,6 +176,8 @@ cyto_gate_apply <- function(x,
           )
           pop <- p[[match(gate[[z]]@filterId, names(p))]]
         } else {
+          # alias
+          alias <<- c(alias, gate[[z]]@filterId)
           pop <- tryCatch(
             Subset(x, gate[[z]]),
             error = function(e) {
@@ -175,7 +191,11 @@ cyto_gate_apply <- function(x,
     }
     return(pop)
   })
-  names(pops) <- names(gate)
+  
+  # POPULATION NAMES
+  if(length(unique(alias)) == length(pops)) {
+    names(pops) <- alias
+  }
   
   # LIST OF GATED POPULATIONS
   pops <- unlist(pops)

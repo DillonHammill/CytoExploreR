@@ -4,7 +4,7 @@
 \alias{cyto_gate_apply}
 \title{Apply a list of gates to a cytoframe or cytoset}
 \usage{
-cyto_gate_apply(x, gate = NA, negate = FALSE)
+cyto_gate_apply(x, gate = NA, negate = FALSE, skip = FALSE)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
@@ -15,6 +15,10 @@ list of these objects.}
 
 \item{negate}{logical flag indicating whether events outside of the supplied
 gates should be included as a separate population, set to FALSE by default.}
+
+\item{skip}{logical indicating whether gating should be skipped for gates
+when\code{negate = TRUE}, set to FALSE by default. Setting this option to
+TRUE will return a list containing only the negated population.}
 }
 \value{
 a list of cytoframes or cytoset containing gated populations.
