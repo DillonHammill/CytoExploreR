@@ -244,7 +244,7 @@
   )
   colnames(text_xy) <- c("x", "y")
   
-  # RETUEN GATE CENTER MATRIX
+  # RETURN GATE CENTER MATRIX
   return(text_xy)
 }
 
@@ -504,8 +504,8 @@
   SIMPLIFY = FALSE
   )
   
-  # GATE CENTER MATRIX
-  text_xy <- do.call("rbind", text_xy)
+  # # GATE CENTER MATRIX
+  # text_xy <- do.call("rbind", text_xy)
   
   # RETURN GATE CENTER MATRIX
   return(text_xy)
