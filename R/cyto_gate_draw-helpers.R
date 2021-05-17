@@ -43,37 +43,29 @@
   # SUPPORTED GATE TYPES -------------------------------------------------------
   
   # GATE TYPES
-  ind <- LAPPLY(seq_len(length(type)), function(z){
-    if(grepl("rectangle", type[z], ignore.case = TRUE) | 
-       (nchar(type[z]) == 1 & grepl("r", type[z], ignore.case = TRUE))){
+  ind <- LAPPLY(seq_len(length(type)), function(z) {
+    if(grepl("^r", type[z], ignore.case = TRUE)) {
       type[z] <<- "rectangle"
       return(TRUE)
-    }else if(grepl("polygon", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("p", type[z], ignore.case = TRUE))){
+    }else if(grepl("^p", type[z], ignore.case = TRUE)) {
       type[z] <<- "polygon"
       return(TRUE)
-    }else if(grepl("interval", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("i", type[z], ignore.case = TRUE))){
+    }else if(grepl("^i", type[z], ignore.case = TRUE)) {
       type[z] <<- "interval"
       return(TRUE)
-    }else if(grepl("threshold", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("t", type[z], ignore.case = TRUE))){
+    }else if(grepl("^t", type[z], ignore.case = TRUE)) {
       type[z] <<- "threshold"
       return(TRUE)
-    }else if(grepl("boundary", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("b", type[z], ignore.case = TRUE))){
+    }else if(grepl("^b", type[z], ignore.case = TRUE)) {
       type[z] <<- "boundary"
       return(TRUE)
-    }else if(grepl("ellipse", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("e", type[z], ignore.case = TRUE))){
+    }else if(grepl("^e", type[z], ignore.case = TRUE)) {
       type[z] <<- "ellipse"
       return(TRUE)
-    }else if(grepl("quadrant", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("q", type[z], ignore.case = TRUE))){
+    }else if(grepl("^q", type[z], ignore.case = TRUE)) {
       type[z] <<- "quadrant"
       return(TRUE)
-    }else if(grepl("web", type[z], ignore.case = TRUE) |
-             (nchar(type[z]) == 1 & grepl("w", type[z], ignore.case = TRUE))){
+    }else if(grepl("^w", type[z], ignore.case = TRUE)) {
       type[z] <<- "web"
       return(TRUE)
       # flowSet method passes NA to flowFrame method negate
@@ -141,7 +133,8 @@
   
   # RETURN VALID GATE TYPES ----------------------------------------------------
   
-  return(type)
+  # LIST
+  return(as.list(type))
 }
 
 ## .CYTO_ALIAS -----------------------------------------------------------------
@@ -157,8 +150,8 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.cyto_alias <- function(alias, 
-                        type){
+.cyto_gate_alias <- function(alias, 
+                             type){
   
   # ALIAS PER GATE TYPE --------------------------------------------------------
   
