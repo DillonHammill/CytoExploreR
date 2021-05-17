@@ -26,7 +26,7 @@
   # HISTOGRAMS
   if(length(args$channels) == 1) {
     cyto_plot_hist(args)
-    # POINTS & CONTOURS
+  # POINTS & CONTOURS
   } else {
     cyto_plot_point(args)
   }
@@ -67,12 +67,24 @@
 #' @importFrom purrr transpose
 #' @noRd
 .cyto_plot_data <- function(x,
-                            overlay = NULL,
+                            overlay = NA,
                             merge_by = "name",
                             select = NULL,
                             display = 50000,
                             barcode = FALSE,
                             seed = 42) {
+
+  # CYTO_GATE_DRAW -------------------------------------------------------------
+  
+  # BYPASS DATA PREPARARTION IN CYTO_PLOT CALL 
+  if(!is.null(cyto_option("cyto_plot_method")) & 
+     cyto_option("cyto_gate_draw")) {
+    if(.all_na(overlay)) {
+      return(list(list(x)))
+    } else {
+      return(list(c(list(x), overlay)))
+    }
+  }
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -119,6 +131,10 @@
       # LAYER
       return(cs)
     })
+    # OVERLAY EACH PLOT - OVERLAY MUS BE SAME LENGTH AS X FOR TRANSPOSE
+    if(length(overlay) != length(x)) {
+      overlay <- rep(overlay, length.out = length(x))
+    }
     # COMBINE & TRANSPOSE
     x <- transpose(c(list(x), overlay))
   # FORMAT SAMPLES
@@ -453,12 +469,10 @@
                      channels = channels,
                      inverse = FALSE)
         )
-        rng <- do.call("rbind", rng)
       }
       return(rng)
     })
     machine_range <- do.call("rbind", machine_range)
-    
     # MIN/MAX DATA RANGE
     machine_range <- lapply(seq_len(ncol(machine_range)), function(z){
       c(min(machine_range[, z]), max(machine_range[, z]))
@@ -466,7 +480,6 @@
     machine_range <- do.call("cbind", machine_range)
     colnames(machine_range) <- channels
     rownames(machine_range) <- c("min", "max")
-    
     # REPLACE MAX DATA RANGE 
     data_range["max", ] <- machine_range["max", ]
   }
@@ -1030,55 +1043,6 @@
     gate <- gate[[1]]
   }
   
-  # LIST OF GATE OBJECTS
-  if (cyto_class(gate, "list", TRUE)) {
-    if (all(LAPPLY(gate, 
-                   "cyto_class", 
-                   c("rectangleGate",
-                     "polygonGate",
-                     "ellipsoidGate",
-                     "quadGate",
-                     "filters"), 
-                   TRUE))) {
-      gate <- unlist(gate)
-    }
-  } else if (cyto_class(gate, "filters", TRUE)) {
-    gate <- unlist(gate)
-  } else if (cyto_class(gate, 
-                        c("rectangleGate",
-                          "polygonGate",
-                          "ellipsoidGate",
-                          "quadGate",
-                          "filters"), 
-                        TRUE)) {
-    gate <- list(gate)
-  }
-  
-  # List of RectangleGates to QuadGate (MUST BE 4 RECTANGLES)
-  if (length(gate) == 4 & all(LAPPLY(gate, function(z) {
-    cyto_class(z, "rectangleGate") & any(grepl("quad", names(attributes(z))))
-  }))) {
-    # CHANNELS
-    chans <- as.character(parameters(gate[[1]]))
-    quad_order <- LAPPLY(gate, function(z) {
-      z@filterId
-    })
-    gate <- list(.cyto_gate_quad_convert(gate, channels = chans))
-  }
-  
-  # GATES ----------------------------------------------------------------------
-  
-  # NEGATED GATE - QUADGATES EXCLUDED
-  if (negate == TRUE & !any(LAPPLY(gate, function(z) {
-    is(z, "quadGate")
-  }))) {
-    if (length(gate) > 1) {
-      gate <- c(gate, list(do.call("|", gate)))
-    } else {
-      gate <- c(gate, gate)
-    }
-  }
-  
   # LABEL_STAT -----------------------------------------------------------------
   
   # LAYERS
@@ -1099,95 +1063,105 @@
   # GATING PER LAYER (list of pops per layer)
   pops <- lapply(seq_along(x), function(z){
     cs <- x[[z]]
-    pops_to_label <- labels_per_layer[[z]]
-    gated <- c()
-    gated_pops <- lapply(seq_len(length(gate)), function(w) {
-      # NO GATE OR NO STAT
-      if (.all_na(gate[[w]]) | is.na(pops_to_label[[w]])) {
-        gated <<- c(gated, FALSE)
-        return(cs)
-      }else{
-        gated <<- c(gated, TRUE)
-        # NEGATED POPULATION
-        if (negate == TRUE & w == length(gate)) {
-          res <- split(cs, gate[[w]])[[2]]
-          # *** CYTOSET CONVERSION ***
-          if(cyto_class(res, "flowSet", TRUE)) {
-            res <- flowSet_to_cytoset(res)
-          }
-          # GATED POPULATIONS
-        } else {
-          # QUADGATES RETURN MULTIPLE POPULATIONS
-          if (is(gate[[w]], "quadGate")) {
-            if ("quad_order" %in% names(args)) {
-              quads <- unlist(strsplit(gate[[w]]@filterId, "\\|"))
-              res <- split(cs, gate[[w]])[c(2, 1, 3, 4)][match(
-                quad_order,
-                quads
-              )] # FIX ORDER
-              
-            } else {
-              res <- split(cs, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
-            }
-            # *** CYTOSET CONVERSION ***
-            res <- structure(
-              lapply(res, function(q){
-                if(cyto_class(q, "flowSet", TRUE)){
-                  q <- flowSet_to_cytoset(q)
-                }
-                return(q)
-              }),
-              names = names(res)
-            )
-            # SINGLE POPULATIONS
-          } else {
-            # RECTANGLE BELONGS TO QUADGATE
-            if (is(gate[[w]], "rectangleGate") &
-                any(grepl("quad", names(attributes(gate[[w]]))))) {
-              q <- names(attributes(gate[[w]])[["quadrants"]])
-              coords <- .cyto_gate_coords(gate[w],
-                                          channels = as.character(
-                                            parameters(gate[[w]]))
-              )
-              chans <- colnames(coords)
-              coords <- lapply(colnames(coords), function(y) {
-                unique(coords[, y][is.finite(coords[, y])])
-              })
-              names(coords) <- chans
-              qg <- quadGate(
-                filterId = paste(q, collapse = "|"),
-                .gate = coords
-              )
-              p <- split(cs, qg)[c(2, 1, 3, 4)] # FIX ORDER
-              names(p) <- q
-              # *** CYTOSET CONVERSION ***
-              p <- structure(
-                lapply(p, function(b){
-                  if(cyto_class(b, "flowSet", TRUE)){
-                    b <- flowSet_to_cytoset(b)
-                  }
-                  return(b)
-                }),
-                names = names(p)
-              )
-              res <- p[[match(gate[[w]]@filterId, names(p))]]
-            } else {
-              res <- Subset(cs, gate[[w]])
-            }
-          }
-        }
-        return(res)
-      }
-    })
-    # SIGNAL IF GATE PRESENT
-    if(any(gated == TRUE)){
-      gated[gated == TRUE] <- "gated"
+    # NO LABEL - NO GATING REQUIRED (CHECK WHOLE LAYER)
+    if(.all_na(labels_per_layer[[z]])) {
+      return(list(cs))
+    # LABEL - GATING REQUIRED
+    } else {
+      # LIST OF GATED POPULATIONS (CYTOSETS)
+      cyto_gate_apply(cs,
+                      gate = gate,
+                      negate = negate)
     }
-    if(any(gated == FALSE)){
-      gated[gated == FALSE] <- "gated"
-    }
-    names(gated_pops) <- gated
-    return(gated_pops)
+    # pops_to_label <- labels_per_layer[[z]]
+    # gated <- c()
+    # gated_pops <- lapply(seq_len(length(gate)), function(w) {
+    #   # NO GATE OR NO STAT
+    #   if (.all_na(gate[[w]]) | is.na(pops_to_label[[w]])) {
+    #     gated <<- c(gated, FALSE)
+    #     return(cs)
+    #   }else{
+    #     gated <<- c(gated, TRUE)
+    #     # NEGATED POPULATION
+    #     if (negate == TRUE & w == length(gate)) {
+    #       res <- split(cs, gate[[w]])[[2]]
+    #       # *** CYTOSET CONVERSION ***
+    #       if(cyto_class(res, "flowSet", TRUE)) {
+    #         res <- flowSet_to_cytoset(res)
+    #       }
+    #       # GATED POPULATIONS
+    #     } else {
+    #       # QUADGATES RETURN MULTIPLE POPULATIONS
+    #       if (is(gate[[w]], "quadGate")) {
+    #         if ("quad_order" %in% names(args)) {
+    #           quads <- unlist(strsplit(gate[[w]]@filterId, "\\|"))
+    #           res <- split(cs, gate[[w]])[c(2, 1, 3, 4)][match(
+    #             quad_order,
+    #             quads
+    #           )] # FIX ORDER
+    #           
+    #         } else {
+    #           res <- split(cs, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
+    #         }
+    #         # *** CYTOSET CONVERSION ***
+    #         res <- structure(
+    #           lapply(res, function(q){
+    #             if(cyto_class(q, "flowSet", TRUE)){
+    #               q <- flowSet_to_cytoset(q)
+    #             }
+    #             return(q)
+    #           }),
+    #           names = names(res)
+    #         )
+    #         # SINGLE POPULATIONS
+    #       } else {
+    #         # RECTANGLE BELONGS TO QUADGATE
+    #         if (is(gate[[w]], "rectangleGate") &
+    #             any(grepl("quad", names(attributes(gate[[w]]))))) {
+    #           q <- names(attributes(gate[[w]])[["quadrants"]])
+    #           coords <- .cyto_gate_coords(gate[w],
+    #                                       channels = as.character(
+    #                                         parameters(gate[[w]]))
+    #           )
+    #           chans <- colnames(coords)
+    #           coords <- lapply(colnames(coords), function(y) {
+    #             unique(coords[, y][is.finite(coords[, y])])
+    #           })
+    #           names(coords) <- chans
+    #           qg <- quadGate(
+    #             filterId = paste(q, collapse = "|"),
+    #             .gate = coords
+    #           )
+    #           p <- split(cs, qg)[c(2, 1, 3, 4)] # FIX ORDER
+    #           names(p) <- q
+    #           # *** CYTOSET CONVERSION ***
+    #           p <- structure(
+    #             lapply(p, function(b){
+    #               if(cyto_class(b, "flowSet", TRUE)){
+    #                 b <- flowSet_to_cytoset(b)
+    #               }
+    #               return(b)
+    #             }),
+    #             names = names(p)
+    #           )
+    #           res <- p[[match(gate[[w]]@filterId, names(p))]]
+    #         } else {
+    #           res <- Subset(cs, gate[[w]])
+    #         }
+    #       }
+    #     }
+    #     return(res)
+    #   }
+    # })
+    # # SIGNAL IF GATE PRESENT
+    # if(any(gated == TRUE)){
+    #   gated[gated == TRUE] <- "gated"
+    # }
+    # if(any(gated == FALSE)){
+    #   gated[gated == FALSE] <- "gated"
+    # }
+    # names(gated_pops) <- gated
+    # return(gated_pops)
   })
   
   # RETURN LIST OF GATED POPULATIONS
@@ -2331,25 +2305,20 @@
   
   # 1D density distributions
   if (length(channels) == 1) {
-    
     # missing/empty replace with valid title
     if (.empty(title)) {
-      
       # stacked/overlays lack a title
       if (.all_na(overlay)) {
         title <- cyto_names(x)
       } else {
         title <- NA
       }
-      
-      # NA will remove title in cyto_plot_empty
+    # NA will remove title in cyto_plot_empty
     } else if (.all_na(title)) {
       title <- NA
     }
-    
-    # 2D scatterplots
+  # 2D scatterplots
   } else if (length(channels) == 2) {
-    
     # missing title replaced with sample name
     if (.empty(title)) {
       title <- cyto_names(x)
@@ -2357,6 +2326,11 @@
     } else if (.all_na(title)) {
       title <- NA
     }
+  }
+  
+  # COMBINED EVENTS
+  if(all(title == "all")) {
+    title <- rep("Combined Events", length(title))
   }
   
   return(title)
