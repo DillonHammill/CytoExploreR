@@ -21,7 +21,7 @@ when\code{negate = TRUE}, set to FALSE by default. Setting this option to
 TRUE will return a list containing only the negated population.}
 }
 \value{
-a list of cytoframes or cytoset containing gated populations.
+a list of cytoframes or cytosets per gate.
 }
 \description{
 \code{cyto_gate_apply()} is a helper function used within CytoExploreR to

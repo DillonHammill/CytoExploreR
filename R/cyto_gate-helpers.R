@@ -17,7 +17,7 @@
 #'   when\code{negate = TRUE}, set to FALSE by default. Setting this option to
 #'   TRUE will return a list containing only the negated population.
 #'
-#' @return a list of cytoframes or cytoset containing gated populations.
+#' @return a list of cytoframes or cytosets per gate.
 #'
 #' @importFrom flowCore Subset split quadGate
 #' @importFrom flowWorkspace flowSet_to_cytoset
@@ -69,7 +69,7 @@ cyto_gate_apply <- function(x,
   pops <- lapply(seq_along(gate), function(z){
     # NO GATE
     if(.all_na(gate[[z]])) {
-      return(x)
+      return(list(x))
     }
     # QUADGATES - MULTIPLE POPULATIONS
     if(cyto_class(gate[[z]], "quadGate")) {
@@ -162,13 +162,14 @@ cyto_gate_apply <- function(x,
         # alias
         alias <<- c(alias, gate[[z]]@filterId)
         pop <- tryCatch(
-          Subset(x, gate[[z]]),
+          list(Subset(x, gate[[z]])),
           error = function(e) {
             return(
-              x
+              list(x)
             )
           }
         )
+        names(pop) <- gate[[z]]@filterId
       }
     }
     return(pop)
@@ -179,8 +180,7 @@ cyto_gate_apply <- function(x,
     names(pops) <- alias
   }
   
-  # LIST OF GATED POPULATIONS
-  pops <- unlist(pops)
+  # LIST OF GATED POPULATIONS PER GATE
   return(pops)
   
 }
