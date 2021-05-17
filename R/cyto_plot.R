@@ -1351,13 +1351,10 @@ cyto_plot.flowSet <- function(x,
   # SIGNAL CALL TO CYTO_PLOT
   if(is.null(cyto_option("cyto_plot_method"))) {
     cyto_option("cyto_plot_method", "cytoset")
-    # RESET GRAPHICAL PARAMETERS
-    old_pars <- .par()
     # CYTO_PLOT_EXIT
     on.exit({
-      par(old_pars)
+      cyto_plot_par(reset = TRUE)
       cyto_option("cyto_plot_method", NULL)
-      cyto_option("cyto_plot_par", NULL)
     })
   }
   

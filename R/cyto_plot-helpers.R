@@ -1255,11 +1255,6 @@ cyto_plot_save <- function(save_as,
 #' @export
 cyto_plot_custom <- function(...) {
   
-  # SAVE PARS FOR CYTO_PLOT_COMPLETE RESET
-  if (cyto_option("cyto_plot_method") != "custom") {
-    cyto_option("cyto_plot_par_reset", .par())
-  }
-  
   # METHOD
   cyto_option("cyto_plot_method", "custom")
   
@@ -1353,14 +1348,8 @@ cyto_plot_complete <- function(...) {
   # CUSTOM - USE SAVED RESET PARAMETERS
   if (cyto_option("cyto_plot_method") == "custom") {
     # RESET PARAMETERS
-    old_pars <- cyto_option("cyto_plot_par_reset")
-    pars <- list(...)
-    old_pars <- old_pars[!names(old_pars) %in% names(pars)]
-    old_pars <- c(old_pars, pars)
-    do.call("cyto_plot_par", old_pars)
-  # NO SAVED RESET PARAMETERS
-  } else {
-    cyto_plot_par(...)
+    cyto_plot_par(...,
+                  reset = TRUE)
   }
   
   # RESET CYTO_PLOT_METHOD
@@ -1479,8 +1468,12 @@ cyto_plot_par <- function(...,
   if (reset) {
     # RESET PARAMETERS
     cyto_option("cyto_plot_par", NULL)
-    par_args <- cyto_option("cyto_plot_par")
-    # SET
+    par_args <- cyto_option("cyto_plot_par_reset")
+    par_args_new <- list(...)
+    par_args <- par_args[!names(par_args) %in% names(par_args_new)]
+    par_args <- c(par_args, par_args_new)
+    cyto_option("cyto_plot_par_reset", NULL)
+  # SET
   } else {
     # NEW PARAMETERS
     par_new_args <- .args_list(...)
@@ -1512,11 +1505,17 @@ cyto_plot_par <- function(...,
         }
       }
     }
-    # SAVE PARAMETERS
+    # REMOVE LAYOUT AND POPUP SIZE ARGUMENTS
+    par_args <- par_args[!names(par_args) %in% c("layout", "popup_size")]
+    # RESET VALUES FOR PARAMETERS
+    par_reset <- cyto_option("cyto_plot_par_reset")
+    cyto_option("cyto_plot_par_reset",
+                c(par_reset, par_args[!names(par_args) %in% names(par_reset)]))
+    # SAVE SET PARAMETERS
     cyto_option("cyto_plot_par", par_args)
-    # SET PARAMETERS - DROP LAYOUT & POPUP_SIZE
-    par(par_args[!names(par_args) %in% c("layout", "popup_size")])
   }
+  # SET PARAMETERS
+  par(par_args)
   # RETURN SET PARAMETERS
   invisible(par_args)
 }
