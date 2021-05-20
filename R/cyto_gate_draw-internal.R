@@ -659,16 +659,16 @@
 #' @importFrom graphics locator
 #' @noRd
 .cyto_gate_ellipse_draw <- function(alias,
-                                     channels,
-                                     gate_point_shape = 16,
-                                     gate_point_size = 1,
-                                     gate_point_col = "red",
-                                     gate_point_col_alpha = 1,
-                                     gate_line_type = 1,
-                                     gate_line_width = 2.5,
-                                     gate_line_col = "red",
-                                     gate_line_col_alpha = 1, 
-                                     ...) {
+                                    channels,
+                                    gate_point_shape = 16,
+                                    gate_point_size = 1,
+                                    gate_point_col = "red",
+                                    gate_point_col_alpha = 1,
+                                    gate_line_type = 1,
+                                    gate_line_width = 2.5,
+                                    gate_line_col = "red",
+                                    gate_line_col_alpha = 1, 
+                                    ...) {
 
   # HIDE ERROR MESSAGES
   options("show.error.messages" = FALSE)
