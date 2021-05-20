@@ -8,6 +8,8 @@
 #' Check if a file exists
 #'
 #' @param x filename including file extension to be checked.
+#' @param error logical indicating whether an informative error should be thrown
+#'   if the file does not exist, set to FALSE by default.
 #'
 #' @return TRUE/FALSE if file exists.
 #'
@@ -16,14 +18,19 @@
 #' @examples
 #' file_exists("gatingTemplate.csv")
 #' @noRd
-file_exists <- function(x) {
+file_exists <- function(x,
+                        error = FALSE) {
   ind <- which(!file.exists(x))
   if(length(ind) > 0) {
-    stop(
-      paste(paste(x[ind], collapse = " & "),
-            "may not exist or lack the required permissins.")
-    )
+    if(error) {
+      stop(
+        paste(paste(x[ind], collapse = " & "),
+              "may not exist or lack the required permissions.")
+      )
+    }
+    return(FALSE)
   }
+  return(TRUE)
 }
 
 ## FILE_EXT --------------------------------------------------------------------

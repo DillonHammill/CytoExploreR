@@ -492,7 +492,7 @@ cyto_gatingTemplate_apply <- function(x,
     } else {
       # READ GATINGTEMPLATE
       gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-      file_exists(gatingTemplate)
+      file_exists(gatingTemplate, error = TRUE)
       # MESSAGE - APPLY GATINGTEMPLATE FILE
       message(paste("Applying", gatingTemplate, "to the GatingSet..."))
       # GATINGTEMPLATE FILE -> GATINGTEMPLATE
@@ -510,7 +510,7 @@ cyto_gatingTemplate_apply <- function(x,
     }
     # READ GATINGTEMPLATE
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-    file_exists(gatingTemplate)
+    file_exists(gatingTemplate, error = TRUE)
     # MESSAGE - APPLY GATINGTEMPLATE FILE
     message(paste("Applying", gatingTemplate, "to the GatingSet..."))
     # GATINGTEMPLATE FILER -> GATINGTEMPLATE
