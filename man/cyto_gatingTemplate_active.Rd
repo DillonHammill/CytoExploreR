@@ -2,16 +2,24 @@
 % Please edit documentation in R/cyto_gatingTemplate-helpers.R
 \name{cyto_gatingTemplate_active}
 \alias{cyto_gatingTemplate_active}
-\title{Active gatingTemplate}
+\title{Retrieve or set active gatingTemplate}
 \usage{
-cyto_gatingTemplate_active()
+cyto_gatingTemplate_active(x = NULL, reset = FALSE)
+}
+\arguments{
+\item{x}{name of the gatingTemplate to set as the active gatingTemplate. If
+not supplied, the name of the current active gatingTemplate will be
+returned.}
+
+\item{reset}{logical indicating whether the active gatingTemplate setting
+should be reset so that no active gatingTemplate is set, set to FALSE by
+default.}
 }
 \value{
-name of the last and therefore active gatingTemplate assigned by
-  \code{cyto_gatingTemplate_select}.
+retrieve or set current active gatingTemplate.
 }
 \description{
-Active gatingTemplate
+Retrieve or set active gatingTemplate
 }
 \seealso{
 \code{\link{cyto_gatingTemplate_select}}

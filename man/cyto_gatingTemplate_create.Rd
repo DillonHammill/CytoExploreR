@@ -4,10 +4,13 @@
 \alias{cyto_gatingTemplate_create}
 \title{Create an empty gatingTemplate csv file}
 \usage{
-cyto_gatingTemplate_create(gatingTemplate = NULL)
+cyto_gatingTemplate_create(gatingTemplate = NULL, active = FALSE)
 }
 \arguments{
 \item{gatingTemplate}{name of the gatingTemplate csv file to create.}
+
+\item{active}{logical indicating whether the created gatingTemplate should be
+set as the active gatingTemplate, set to FALSE by default.}
 }
 \description{
 Create an empty gatingTemplate csv file

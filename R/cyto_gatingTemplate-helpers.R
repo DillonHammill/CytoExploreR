@@ -113,7 +113,7 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
         # GATE
         gate <- gates[[q]]
         # QUAD GATE
-        if(is(gate, "quadGate")){
+        if(cyto_class(gate, "quadGate")){
           # USE FIRST ROW ONLY
           gt_entry <- gt_chunk_dt[1, ]
           # ALIAS
@@ -230,54 +230,51 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
   
 }
 
-## GATINGTEMPLATE SELECT -------------------------------------------------------
-
-#' Select a gatingTemplate for downstream analyses
-#'
-#' \code{cyto_gatingTemplate_select} will designate which gatingTemplate should
-#' be used for storing downstream gating results.
-#' \code{cyto_gatingTemplate_select} should therefore be called prior to gating
-#' or \code{gate_draw} will resort to using \code{"gatingTemplate.csv"} to save
-#' the constructed gates. \code{cyto_gatingTemplate_select} also provides an
-#' easy way to switch between gatingTemplates when multiple templates are
-#' required.
-#'
-#' @param x name of the gatingTemplate csv file to assign as the active
-#'   gatingTemplate for downstream analyses.
-#'
-#' @return select a gatingTemplate as the active gatingTemplate for downstream
-#'   analyses.
-#'
-#' @examples
-#' cyto_gatingTemplate_select("Activation_gatingTemplate")
-#' @seealso \code{\link{cyto_gatingTemplate_edit}}
-#'
-#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @export
-cyto_gatingTemplate_select <- function(x) {
-  
-  # APPEND FILE EXTENSION
-  x <- file_ext_append(x, ".csv")
-  
-  # Set new gatingTemplate as active
-  options("CytoExploreR_gatingTemplate" = x)
-}
-
 ## GATINGTEMPLATE ACTIVE -------------------------------------------------------
 
-#' Active gatingTemplate
+#' Retrieve or set active gatingTemplate
 #'
-#' @return name of the last and therefore active gatingTemplate assigned by
-#'   \code{cyto_gatingTemplate_select}.
+#' @param x name of the gatingTemplate to set as the active gatingTemplate. If
+#'   not supplied, the name of the current active gatingTemplate will be
+#'   returned.
+#' @param reset logical indicating whether the active gatingTemplate setting
+#'   should be reset so that no active gatingTemplate is set, set to FALSE by
+#'   default.
+#'
+#' @return retrieve or set current active gatingTemplate.
 #'
 #' @seealso \code{\link{cyto_gatingTemplate_select}}
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_gatingTemplate_active <- function() {
-  getOption("CytoExploreR_gatingTemplate")
+cyto_gatingTemplate_active <- function(x = NULL, 
+                                       reset = FALSE) {
+  if(reset) {
+    message(
+      paste0(
+        "Resetting the active gatingTemplate..."
+      )
+    )
+    cyto_option("CytoExploreR_gatingTemplate", NULL)
+  } else {
+    if(is.null(x)) {
+      cyto_option("CytoExploreR_gatingTemplate")
+    } else {
+      x <- file_ext_append(x, ".csv")
+      message(
+        paste0(
+          "Setting ", x, " as the active gatingTemplate..."
+        )
+      )
+      cyto_option("CytoExploreR_gatingTemplate", x)
+    }
+  }
+}
+
+#' @export
+cyto_gatingTemplate_select <- function(...){
+  .Defunct("cyto_gatingTemplate_active")
 }
 
 ## GATINGTEMPLATE CREATE -------------------------------------------------------
@@ -285,6 +282,8 @@ cyto_gatingTemplate_active <- function() {
 #' Create an empty gatingTemplate csv file
 #'
 #' @param gatingTemplate name of the gatingTemplate csv file to create.
+#' @param active logical indicating whether the created gatingTemplate should be
+#'   set as the active gatingTemplate, set to FALSE by default.
 #'
 #' @importFrom utils write.csv
 #' @importFrom stats setNames
@@ -292,14 +291,15 @@ cyto_gatingTemplate_active <- function() {
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
+cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
+                                       active = FALSE) {
   
-  # Inherit global option
+  # ACTIVE GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
     gatingTemplate <- cyto_gatingTemplate_active()
   }
   
-  # Create gatingTemplate for saving
+  # CREATE GATINGTEMPLATE
   if (!is.null(gatingTemplate)) {
     cols <- c(
       "alias",
@@ -313,14 +313,34 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
       "preprocessing_method",
       "preprocessing_args"
     )
-    
-    # Make empty gatingTemplate
+    # EMPTY GATINGTEMPLATE
     gt <- setNames(data.frame(matrix(ncol = length(cols), nrow = 0)), cols)
-    
-    # Write to csv file
+    # FILE EXTENSION
+    gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+    # GATINGTEMPLATE EXISTS
+    if(file_exists(gatingTemplate)) {
+      if(!cyto_enquire(
+        paste0(
+          gatingTemplate, 
+          " already exists. Do you want to replace it? (Y/N)"
+        ),
+        options = c("T", "Y")
+      )) {
+        invisible(NULL)
+      }
+    }
+    # WRITE GATINGTEMPLATE
     write_to_csv(gt,
                  gatingTemplate)
+    # SET ACTIVE GATINGTEMPLATE
+    if(active){
+      cyto_gatingTemplate_active(gatingTemplate)
+    }
+  # NO GATINGTEMPLATE
+  } else {
+    stop("Supply a name for the gatingTemplate csv file to 'gatingTempate'.")
   }
+  invisible(NULL)
 }
 
 ## GATINGTEMPLATE EDIT ---------------------------------------------------------
@@ -343,7 +363,6 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL) {
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
 #' @importFrom flowWorkspace recompute
-#' @importFrom methods is
 #' @importFrom DataEditR data_edit
 #'
 #' @examples
@@ -360,8 +379,8 @@ cyto_gatingTemplate_edit <- function(x,
                                      ...) {
   
   # x of wrong class
-  if (!is(x, "GatingSet")) {
-    stop("'x' should be either a GatingSet object.")
+  if (!cyto_class(x, "GatingSet")) {
+    stop("'x' should be a GatingSet object.")
   }
   
   # Assign x to gs
@@ -431,7 +450,6 @@ cyto_gatingTemplate_edit <- function(x,
 #'   environment with the gates in the gatingTemplate.
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
-#' @importFrom methods is
 #'
 #' @examples
 #' \dontrun{
@@ -456,72 +474,53 @@ cyto_gatingTemplate_edit <- function(x,
 cyto_gatingTemplate_apply <- function(x,
                                       gatingTemplate = NULL, ...) {
   
-  # No GatingSet supplied
+  # GATINGHIERARCHY/GATINGSET REQUIRED
   if (missing(x)) {
     stop("Supply a GatingHierarchy or GatingSet to 'x'.")
   } else {
-    if (!any(c(
-      is(x, "GatingSet"),
-      is(x, "GatingHierarchy")
-    ))) {
+    if (!cyto_class(x, "GatingSet")) {
       stop("'x' must be an object of class GatingHierarchy or GatingSet.")
     }
   }
   
-  # gatingTemplate supplied
+  # GATINGTEMPLATE SUPPLIED
   if (!is.null(gatingTemplate)) {
-    
-    # gatingTemplate object
-    if (is(gatingTemplate, "gatingTemplate")) {
-      
-      # Assign gatingTemplate to gt
+    # GATINGTEMPLATE
+    if (cyto_class(gatingTemplate, "gatingTemplate")) {
       gt <- gatingTemplate
-      
-      # name of gatingTemplate csv file
+    # GATINGTEMPLATE FILE
     } else {
-      
-      # File extension if missing
+      # READ GATINGTEMPLATE
       gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-      
-      # Working directory check
       file_exists(gatingTemplate)
-      
-      # Message to indicate which gatingTemplate is being applied
+      # MESSAGE - APPLY GATINGTEMPLATE FILE
       message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-      
-      # Read in gatingTemplate csv file to gatingTemplate object
+      # GATINGTEMPLATE FILE -> GATINGTEMPLATE
       gt <- suppressMessages(gatingTemplate(gatingTemplate))
     }
-    # no gatingTemplate supplied
+  # NO GATINGTEMPLATE
   } else if (is.null(gatingTemplate)) {
-    
-    # Missing gatingTemplate - check global option
+    # ACTIVE GATINGTEMPLATE
     if (is.null(gatingTemplate)) {
       gatingTemplate <- cyto_gatingTemplate_active()
     }
-    
-    # gatingTemplate still missing
+    # GATINGTEMPLATE MISSING
     if (is.null(gatingTemplate)) {
       stop("Supply the name of the gatingTemplate csv file to apply.")
     }
-    
-    # File extension if missing
+    # READ GATINGTEMPLATE
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-    
-    # Working directory check
     file_exists(gatingTemplate)
-    
-    # Message to indicate which gatingTemplate is being applied
+    # MESSAGE - APPLY GATINGTEMPLATE FILE
     message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-    
-    # Read in gatingTemplate csv file to gatingTemplate object
+    # GATINGTEMPLATE FILER -> GATINGTEMPLATE
     gt <- suppressMessages(gatingTemplate(gatingTemplate))
   }
   
-  # Apply gatingTemplate to GatingHierarchy/GatingSet
+  # APPLY GATINGTEMPLATE
   suppressWarnings(gt_gating(gt, x, ...))
   
-  # Return GatingSet
+  # GATINGHIERARCHY/GATINGSET
   return(x)
   
 }
@@ -619,8 +618,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #'   \code{\link[data.table:fread]{fread}}.
 #'
 #' @importFrom data.table as.data.table
-#' @importFrom methods is
-#'
+#' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @examples 
@@ -651,7 +649,7 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
   }
   
   # GATINGTEMPLATE FILE EXTENSION
-  if(is(gatingTemplate, "character")){
+  if(cyto_class(gatingTemplate, "character")){
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
     if(!file.exists(gatingTemplate)){
       stop(
@@ -662,7 +660,7 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
   }
   
   # GATINGTEMPLATE
-  if(is(gatingTemplate, "gatingTemplate")){
+  if(cyto_class(gatingTemplate, "gatingTemplate")){
     gt <- as.data.table(gatingTemplate)
     # DATA.FRAME
     if(!data.table){
@@ -688,8 +686,6 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
 #' @param save_as name of the csv file to write the gatingtemplate to.
 #' @param ... additional arguments passed to
 #'   \code{\link[data.table:fwrite]{fwrite}}.
-#'
-#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -717,7 +713,7 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
   }
   
   # READ GATINGTEMPLATE
-  if(is(gatingTemplate, "character") | is(gatingTemplate, "gatingTemplate")){
+  if(cyto_class(gatingTemplate, c("character", "gatingTemplate"))){
     gatingTemplate <- cyto_gatingTemplate_read(gatingTemplate)
   }
   
