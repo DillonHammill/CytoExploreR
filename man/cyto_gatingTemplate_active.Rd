@@ -22,7 +22,7 @@ retrieve or set current active gatingTemplate.
 Retrieve or set active gatingTemplate
 }
 \seealso{
-\code{\link{cyto_gatingTemplate_select}}
+\code{\link{cyto_gatingTemplate_create}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

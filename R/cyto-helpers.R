@@ -500,7 +500,7 @@ cyto_clean <- function(x, ...) {
 #' @seealso \code{\link{cyto_details_edit}}
 #' @seealso \code{\link{cyto_channels_restrict}}
 #' @seealso \code{\link{cyto_clean}}
-#' @seealso \code{\link{cyto_gatingTemplate_select}}
+#' @seealso \code{\link{cyto_gatingTemplate_active}}
 #' @seealso \code{\link{cyto_gatingTemplate_create}}
 #'
 #' @export
@@ -603,7 +603,7 @@ cyto_setup <- function(path = ".",
     
     # ACTIVE GATINGTEMPLATE
     message(paste("Setting", gatingTemplate, "as the active gatingTemplate..."))
-    cyto_gatingTemplate_select(gatingTemplate)
+    cyto_gatingTemplate_active(gatingTemplate)
     
     # CREATE GATINGTEMPLATE
     if(!file_exists(gatingTemplate)){

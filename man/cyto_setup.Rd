@@ -113,7 +113,7 @@ cyto_details(gs)
 
 \code{\link{cyto_clean}}
 
-\code{\link{cyto_gatingTemplate_select}}
+\code{\link{cyto_gatingTemplate_active}}
 
 \code{\link{cyto_gatingTemplate_create}}
 }

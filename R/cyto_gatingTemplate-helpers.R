@@ -243,7 +243,7 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
 #'
 #' @return retrieve or set current active gatingTemplate.
 #'
-#' @seealso \code{\link{cyto_gatingTemplate_select}}
+#' @seealso \code{\link{cyto_gatingTemplate_create}}
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
