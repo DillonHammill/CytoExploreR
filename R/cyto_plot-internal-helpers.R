@@ -1068,10 +1068,12 @@
       return(list(cs))
     # LABEL - GATING REQUIRED
     } else {
-      # LIST OF GATED POPULATIONS (CYTOSETS)
-      cyto_gate_apply(cs,
-                      gate = gate,
-                      negate = negate)
+      # LIST OF GATED POPULATIONS PER GATE -> LIST OF POPS (CYTOSETS)
+      unlist(
+        cyto_gate_apply(cs,
+                        gate = gate,
+                        negate = negate)
+      )
     }
     # pops_to_label <- labels_per_layer[[z]]
     # gated <- c()
@@ -1422,10 +1424,12 @@
   
   # GATE CENTERS - (IGNORE SUPPLIED LABEL COORDS)
   if (!.all_na(gate)) {
-    gate_centers <- .cyto_gate_center(gate,
-                                      channels = channels,
-                                      text_x = rep(NA, GC),
-                                      text_y = rep(NA, GC)
+    gate_centers <- do.call(
+      "rbind",
+      .cyto_gate_center(gate,
+                        channels = channels,
+                        text_x = rep(NA, GC),
+                        text_y = rep(NA, GC))
     )
   }
   
