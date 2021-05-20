@@ -1529,6 +1529,11 @@ cyto_data_extract <- function(x,
                               trans = NA,
                               inverse = FALSE) {
   
+  # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
+  if(is.null(parent)) {
+    parent = "root"
+  }
+  
   # EXTRACT TRANSFORMERS
   if(.all_na(trans)) {
     trans <- cyto_transformers_extract(x)
@@ -2617,8 +2622,10 @@ cyto_save.flowSet <- function(x,
     # FILES WILL BE OVERWRITTEN
     if (any(list.files(save_as) %in% cyto_names(cs))) {
       message(paste0("Files will be overwritten in ", save_as, "."))
-      opt <- readline("Do you want to continue? (Y/N)")
-      if (grepl("n", opt, ignore.case = TRUE)) {
+      if(!cyto_enquire(
+        "Do you want to continue? (Y/N)",
+        options = c("T", "Y")
+      )) {
         return(NULL)
       }
     }
@@ -3299,11 +3306,10 @@ cyto_barcode <- function(x,
     barcode <- TRUE
     # SAMPLE IDs EXIST - BACKWARDS COMPATIBLE
     if(any(grepl("\\Sample.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
-      ans <- readline(
-        "Override existing sample IDs? (Y/N): "
-      )
-      # REPLACE SAMPLE IDs
-      if(grepl("^y", ans, ignore.case = TRUE)) {
+      if(cyto_enquire(
+        "Override existing sample IDs? (Y/N): ",
+        options = c("T", "Y")
+      )) {
         # REMOVE SAMPLE ID COLUMN
         cs <- realize_view(cs[, -which(grepl("\\Sample.*\\ID$", 
                                              cyto_channels(cs), 
@@ -3311,6 +3317,7 @@ cyto_barcode <- function(x,
       } else {
         barcode <- FALSE
       }
+
     }
     # BARCODE SAMPLES
     if(barcode){
@@ -3335,11 +3342,10 @@ cyto_barcode <- function(x,
     barcode <- TRUE
     # EVENT IDs EXIST
     if(any(grepl("\\Event.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
-      ans <- readline(
-        "Override existing event IDs? (Y/N): "
-      )
-      # REPLACE EVENT IDs
-      if(grepl("^y", ans, ignore.case = TRUE)) {
+      if(cyto_enquire(
+        "Override existing event IDs? (Y/N): ",
+        options = c("T", "Y")
+      )) {
         # REMOVE SAMPLE ID COLUMN
         cs <- realize_view(cs[, -which(grepl("\\Event.*\\ID$", 
                                              cyto_channels(cs), 
@@ -3434,47 +3440,35 @@ cyto_markers_edit <- function(x,
                               file = NULL,
                               ...) {
   
-  # flowFrame
-  if (cyto_class(x, "flowFrame")) {
-    
-    # Extract details of parameters
-    pd <- cyto_details(parameters(x))
-    
-    # flowSet
-  } else if (cyto_class(x, "flowSet")) {
-    
-    # Extract details of parameters
-    pd <- cyto_details(parameters(x[[1]]))
-    
-    # GatingHierarchy
-  } else if (cyto_class(x, "GatingHierarchy", TRUE)) {
-    cf <- cyto_data_extract(x, "root")[[1]][[1]]
-    pd <- cyto_details(parameters(cf))
-    
-    # GatingSet
-  } else if (cyto_class(x, "GatingSet", TRUE)) {
-    cf <- cyto_data_extract(x, "root")[[1]][[1]]
-    pd <- cyto_details(parameters(cf))
-  } else {
-    stop("'x' must be a valid cytometry object.")
-  }
+  # CHANNELS
+  chans<- cyto_channels(x)
   
-  # file missing
+  # MARKERS
+  marks<- cyto_markers(x)
+  
+  # CHANNELS/MARKERS DATA.FRAME
+  pd <- data.frame(
+    "channel" = chans,
+    "marker" = LAPPLY(chans, function(z){
+      if(z %in% names(marks)) {
+        return(marks[z])
+      } else {
+        return(NA)
+      }
+    })
+  )
+  
+  # FILE MISSING
   if (is.null(file)) {
-    
-    # Check if file already exists
+    # FILE EXISTS
     if (length(grep("Experiment-Markers.csv", list.files())) != 0) {
       message("Experiment-Markers.csv found in working directory.")
-      
-      # Could be multiple files - check for matching channels
+      # MULTIPLE FILES? - CHECK MATCHING CHANNELS
       found_files <- list.files()[grep("Experiment-Markers.csv", list.files())]
-      n <- length(grep("Experiment-Markers.csv", list.files()))
-      
-      # Run through each file and check channels match samples
-      dt <- lapply(seq_len(n), function(z) {
-        mrks <- read_from_csv(found_files[z])
+      dt <- lapply(found_files, function(z) {
+        mrks <- read_from_csv(z)
         rownames(mrks) <- NULL
-        # Channels must match
+        # CHANNELS MUST MATCH
         if (all(cyto_channels(x) %in% mrks$channel)) {
           return(mrks)
         } else {
@@ -3482,105 +3476,93 @@ cyto_markers_edit <- function(x,
         }
       })
       names(dt) <- found_files
-      
-      # Files found but don't match
+      # FILES FOUND WITHOUT CHANNEL MATCH
       if (all(LAPPLY(dt, "is.null"))) {
-        
-        # Make data.frame with channel and marker columns
-        dt <- pd[, c("name", "desc")]
-        colnames(dt) <- c("channel", "marker")
-        rownames(dt) <- NULL
+        # CHANNEL/MARKER DATA.FRAME
+        dt <- pd
+      # FILES FOUND WITH CHANNEL MATCH
       } else {
-        
-        # Remove NULL entries from list - result should be of length 1
+        # REMOVE EMPTY ENTRIES - SELECT FIRST ONE
         dt[LAPPLY(dt, "is.null")] <- NULL
         file <- names(dt)[1]
         dt <- dt[[1]]
       }
+    # FILE DOESN'T EXIST
     } else {
-      
-      # Make data.frame with channel and marker columns
-      dt <- pd[, c("name", "desc")]
-      colnames(dt) <- c("channel", "marker")
-      rownames(dt) <- NULL
+      # CHANNEL/MARKER DATA.FRAME
+      dt <- pd
     }
-    
-    # File manually supplied
+  # FILE SUPPLIED
   } else {
-    
-    # Append file extension
-    file <- file_ext_append(file, ".csv")
-    
-    # File already exists
+    # FILE EXISTS
     if (file_exists(file)) {
       message(
         paste0("Editing data in ", file, "...")
       )
       dt <- read_from_csv(file)
-      
-      # File does not exist (yet)
+      # DT MUST CONTAIN ALL CHANNELS IN DATA
+      if(any(!pd$channel %in% dt$channel)) {
+        dt <- rbind(
+          dt,
+          pd[which(!pd$channel %in% dt$channel), , drop = FALSE]
+        )
+      }
+    # FILE DOESN'T EXIST
     } else {
-      
-      # Make data.frame with channel and marker columns
-      dt <- pd[, c("name", "desc")]
-      colnames(dt) <- c("channel", "marker")
-      rownames(dt) <- NULL
+      # CHANNEL/MARKER DATA.FRAME
+      dt <- pd
     }
   }
   
-  # File name not supplied
+  # DEFAULT FILE NAME
   if (is.null(file)) {
     file <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv")
   }
   
-  # Edit dt using data_edit
+  # EDIT
   if(interactive()) {
-    dt <- data_edit(dt,
-                    logo = CytoExploreR_logo(),
-                    title = "Experiment Markers Editor",
-                    row_edit = FALSE, # cannot add/remove rows
-                    col_edit = FALSE,
-                    col_names = c("channel", "marker"),
-                    save_as = file,
-                    write_to_csv = "write_to_csv",
-                    write_args = list("row.names" = FALSE),
-                    quiet = TRUE, 
-                    hide = TRUE,
-                    ...)
+    dt_edit <- data_edit(dt,
+                         logo = CytoExploreR_logo(),
+                         title = "Experiment Markers Editor",
+                         row_edit = FALSE, # cannot add/remove rows
+                         col_edit = FALSE,
+                         col_names = c("channel", "marker"),
+                         quiet = TRUE,
+                         hide = TRUE,
+                         ...)
+    # WRITE_TO_CSV NOT IN SCOPE
+    write_to_csv(dt_edit,
+                 file,
+                 row.names = FALSE)
   }
   
-  # Update channels
-  if(!all(as.character(dt$channel) %in% cyto_channels(x))) {
-    cyto_channels(x) <- as.character(dt$channel)
+  # ONLY UPDATE CHANNELS/MARKERS RELEVANT TO DATA
+  ind <- LAPPLY(dt$channel, match, chans)
+  cyto_chans<- dt_edit$channel[ind]
+  cyto_marks <- dt_edit$marker[ind]
+  names(cyto_marks) <- cyto_chans
+  
+  # UPDATE CHANNELS
+  if(any(!cyto_chans %in% chans)) {
+    cyto_channels(x) <- cyto_chans
   }
-  
-  # # TODO - CHECK IF FILE EXISTS WITH DIFFERENT CHANNELS - NEED NEW FILE NAME
-  # if(length(grep(file, list.files())) != 0){
-  #   # Check if file contains the same
-  #
-  # }
-  
-  # Markers and channels
-  cyto_channels <- dt$channel
-  cyto_markers <- dt$marker
-  names(cyto_markers) <- cyto_channels
   
   # EMPTY -> NA
-  ind <- which(LAPPLY(cyto_markers, ".empty"))
-  if(length(ind) > 0) {
-    cyto_markers[ind] <- NA
+  ind <- which(LAPPLY(cyto_marks, ".empty"))
+  if (length(ind) > 0) {
+    cyto_marks[ind] <- NA
   }
   
-  # Only modify markers if supplied
-  if (!.all_na(cyto_markers)) {
-    if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
-      flowCore::markernames(x) <- cyto_markers
-    }else{
-      flowWorkspace::markernames(x) <- cyto_markers
+  # UPDATE MARKERS
+  if (!.all_na(cyto_marks)) {
+    if (cyto_class(x, c("flowFrame", "flowSet"), TRUE)){
+      flowCore::markernames(x) <- cyto_marks
+    } else {
+      flowWorkspace::markernames(x) <- cyto_marks
     }
   }
   
-  # Return updated samples
+  # UPDATE CHANNELS/MARKERS IN PLACE
   return(x)
 }
 
@@ -5135,4 +5117,42 @@ cyto_cbind.flowSet <- function(x,
     return(flowSet(cf_list))
   }
   
+}
+
+## CYTO_ENQUIRE ----------------------------------------------------------------
+
+#' Ask CytoExploreR user a question
+#'
+#' @param x question to ask user.
+#' @param options possible options for user response to be TRUE.
+#' @param ignore.case logical indicating whether to ignore case when checking
+#'   against options, set to TRUE by default.
+#' @param ... additional arguments passed to \code{\link[base:grepl]{grepl}}.
+#'
+#' @return the response or logical if options are specified.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+cyto_enquire <- function(x,
+                         options = NULL,
+                         ignore.case = TRUE, 
+                         ...) {
+  # QUESTION
+  answer <- readline(x)
+  # OPTIONS
+  if(!is.null(options)) {
+    if(any(LAPPLY(options, 
+                  function(z) {
+                    grepl(z, 
+                          answer, 
+                          ignore.case = ignore.case,
+                          ...)
+                    }))) {
+      answer <- TRUE
+    } else {
+      answer <- FALSE
+    }
+  }
+  return(answer)
 }
