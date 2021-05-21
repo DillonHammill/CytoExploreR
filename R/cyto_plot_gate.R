@@ -155,6 +155,7 @@ cyto_plot_gate.rectangleGate <- function(gate,
         gate@max[channels[2]] <- ymax
       }
     }
+    
     # PLOT GATE
     rect(xleft = gate@min[channels[1]],
          xright = gate@max[channels[1]],

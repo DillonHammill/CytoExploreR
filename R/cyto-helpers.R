@@ -602,12 +602,10 @@ cyto_setup <- function(path = ".",
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
     
     # ACTIVE GATINGTEMPLATE
-    message(paste("Setting", gatingTemplate, "as the active gatingTemplate..."))
     cyto_gatingTemplate_active(gatingTemplate)
     
     # CREATE GATINGTEMPLATE
     if(!file_exists(gatingTemplate)){
-      message(paste("Creating", gatingTemplate, "..."))
       cyto_gatingTemplate_create(gatingTemplate)
     }
   }

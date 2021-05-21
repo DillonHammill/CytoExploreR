@@ -329,6 +329,8 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
         invisible(NULL)
       }
     }
+    # MESSAGE
+    message(paste("Creating", gatingTemplate, "..."))
     # WRITE GATINGTEMPLATE
     write_to_csv(gt,
                  gatingTemplate)
