@@ -2825,29 +2825,36 @@
     
     # POINT COLOUR SCALE
   } else if (type == "point_col_scale") {
-    # NEW VIRIDIS PALETTE
-    # viridis_pal <- viridis(9, option = "D")
-    # plasma_pal <- viridis(12, option = "C")
-    # viridis_pal <- viridis_pal[-9]
-    # plasma_pal <- plasma_pal[-c(1:4)]
-    # custom_pal <- c(viridis_pal, rev(plasma_pal))
     
-    pal <- c("#440154",
-             "#472D7B",
-             "#3B528B",
-             "#2C728E",
-             "#21908C",
-             "#27AD81",
-             "#5DC863",
-             "#AADC32",
-             "#F0F921",
-             "#FCD225",
-             "#FDAD32",
-             "#F58C46",
-             "#E76F5A",
-             "#D5546E",
-             "#C03A83",
-             "#A62098")
+    # # NEW VIRIDIS PALETTE
+    # viridis_pal <- viridis(12, option = "D")
+    # plasma_pal <- viridis(12, option = "C")
+    # viridis_pal <- viridis_pal[-12]
+    # plasma_pal <- plasma_pal[-c(1:4, 12)]
+    # custom_pal <- c(viridis_pal, "#E1DD37FF", rev(plasma_pal))
+    # scales::show_col(custom_pal)
+    
+    pal <- c(
+      "#440154FF",
+      "#482173FF",
+      "#433E85FF",
+      "#38598CFF",
+      "#2D708EFF",
+      "#25858EFF",
+      "#1E9B8AFF",
+      "#2BB07FFF",
+      "#51C56AFF",
+      "#85D54AFF",
+      "#C2DF23FF",
+      "#E1DD37FF",
+      "#FCD225FF",
+      "#FDAD32FF",
+      "#F58C46FF",
+      "#E76F5AFF",
+      "#D5546EFF",
+      "#C03A83FF",
+      "#A62098FF"
+    )
     
     # DENSITY COLOUR PALETTE
   } else if (type == "hist_cols") {
