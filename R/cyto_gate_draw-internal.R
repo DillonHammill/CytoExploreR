@@ -560,7 +560,8 @@
     colnames(pts) <- channels[1]
     rownames(pts) <- c("min", "max")
   } else if (length(channels) == 2) {
-    pts <- data.frame(x = c(coords$x, Inf), y = c(coords$y, Inf))
+    pts <- data.frame(x = c(coords$x, Inf), 
+                      y = c(coords$y, Inf))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
     rownames(pts) <- c("min", "max")

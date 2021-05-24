@@ -147,13 +147,12 @@
 NULL
 
 #' @noRd
-#' @export
 cyto_gate_draw <- function(x, ...) {
   UseMethod("cyto_gate_draw")
 }
 
 #' @rdname cyto_gate_draw
-#' @export
+#' @noRd
 cyto_gate_draw.GatingSet <- function(x,
                                      parent = "root",
                                      alias = NULL,
@@ -177,7 +176,8 @@ cyto_gate_draw.GatingSet <- function(x,
                                      gate_line_type = 1,
                                      gate_line_width = 2.5,
                                      gate_line_col = "red",
-                                     gate_line_col_alpha = 1, ...) {
+                                     gate_line_col_alpha = 1, 
+                                     ...) {
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -524,7 +524,7 @@ cyto_gate_draw.GatingSet <- function(x,
 }
 
 #' @rdname cyto_gate_draw
-#' @export
+#' @noRd
 cyto_gate_draw.flowSet <- function(x,
                                    alias = NULL,
                                    channels = NULL,
@@ -675,7 +675,7 @@ cyto_gate_draw.flowSet <- function(x,
 }
 
 #' @rdname cyto_gate_draw
-#' @export
+#' @noRd
 cyto_gate_draw.flowFrame <- function(x,
                                      alias = NULL,
                                      channels = NULL,
