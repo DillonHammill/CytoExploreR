@@ -15,11 +15,6 @@
   # ARGUMENTS - CYTO_PLOT CLASS
   class(args) <- "cyto_plot"
   
-  # POPUP
-  if(getOption("cyto_plot_method") == "flowFrame") {
-    cyto_plot_new(args$popup)
-  }
-  
   # CYTO_PLOT_EMPTY
   cyto_plot_empty(args)
   
@@ -836,9 +831,10 @@
     }
     mar <- margins
   }
-  
+
   # SET MAR PARAMETER
-  par("mar" = mar)
+  cyto_plot_par("mar" = mar)
+
 }
 
 ## LABELS ----------------------------------------------------------------------

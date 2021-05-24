@@ -337,7 +337,7 @@ cyto_plot.GatingSet <- function(x,
                                 hist_bins = 256,
                                 hist_smooth = 1,
                                 hist_stack = 0,
-                                hist_layers = NA,
+                                hist_layers = 1,
                                 hist_cols = NA,
                                 hist_fill = NA,
                                 hist_fill_alpha = 1,
@@ -682,7 +682,7 @@ cyto_plot.GatingSet <- function(x,
       if(.all_na(hist_layers)){
         # MERGE_BY
         if(!.all_na(merge_by)){
-          L <- length(cyto_group_by(x, merge_by))
+          L <- length(cyto_groups(x, merge_by))
         }else{
           L <- length(x)
         }
@@ -791,8 +791,8 @@ cyto_plot.GatingSet <- function(x,
   # CALL CYTO_PLOT FLOWSET METHOD ----------------------------------------------
   
   # PULL DOWN ARGUMENTS
-  args <- .args_list()
-
+  args <- .args_list(...)
+  
   # CALL CYTOSET METHOD
   .execute("cyto_plot.flowSet", args)
   
@@ -824,6 +824,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       hist_bins = 256,
                                       hist_smooth = 1,
                                       hist_stack = 0,
+                                      hist_layers = 1,
                                       hist_cols = NA,
                                       hist_fill = NA,
                                       hist_fill_alpha = 1,
@@ -1231,7 +1232,7 @@ cyto_plot.GatingHierarchy <- function(x,
       } else if (length(channels) == 1 &
                  !.all_na(overlay)) {
         z
-        # PASTE SAMPLNAME & PARENT
+        # PASTE SAMPLENAME & PARENT
       } else {
         paste(z, pt, sep = "\n")
       }
@@ -1241,7 +1242,7 @@ cyto_plot.GatingHierarchy <- function(x,
   # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
   
   # PULL DOWN ARGUMENTS
-  args <- .args_list()
+  args <- .args_list(...)
   
   # CALL CYTOSET METHOD
   .execute("cyto_plot.flowSet", args)
@@ -1418,6 +1419,8 @@ cyto_plot.flowSet <- function(x,
   
   # HISTOGRAM LAYERS -----------------------------------------------------------
   
+  # TODO: ALLOW HIST_LAYERS TO ACCEPT GROUPING VARIABLES?
+  
   # INDIVIDUAL LAYERS (NO OVERLAY)
   if(length(args$channels) == 1 & all(LAPPLY(args$x, length) == 1)) {
     # LEGEND TEXT
@@ -1426,14 +1429,23 @@ cyto_plot.flowSet <- function(x,
     }
     # UNPACK X
     args$x <- unlist(args$x)
-    # SAME LAYERS PER PLOT
-    if(length(args$x) %% args$hist_layers != 0) {
-      stop("Each plot must have the same number of layers!")
+    # HIST_LAYERS
+    if(sum(args$hist_layers) != length(x)) {
+      # SAME # LAYERS PER PLOT
+      if(length(x) %% args$hist_layers != 0) {
+        stop(
+          stop("Each plot must have the same number of layers!")
+        )
+      }
+      # REPEAT HIST_LAYERS
+      args$hist_layers <- rep(args$hist_layers,
+                              length.out = length(x)/args$hist_layers)
     }
     # LAYER INDICES
     ind <- split(seq_along(x),
-                 rep(1:(length(args$x)/args$hist_layers),
-                     each = args$hist_layers))
+                 LAPPLY(seq_along(args$hist_layers), function(z){
+                   rep(z, args$hist_layers[z])
+                 }))
     # SPLIT LAYERS
     args$x <- lapply(unique(ind), function(z){
       args$x[z]

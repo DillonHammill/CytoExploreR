@@ -250,12 +250,6 @@ cyto_plot_empty <- function(x,
   cyto_option("scipen", 100000000)
   on.exit(cyto_option("scipen", scipen))
   
-  # Extract current graphics parameters
-  pars <- .par("mar")
-  
-  # Reset graphics parameters on exit
-  on.exit(par(pars))
-  
   # ARGUMENTS ------------------------------------------------------------------
   
   # Pull down arguments to named list
@@ -799,7 +793,7 @@ cyto_plot_empty <- function(x,
 #'
 #' @export
 cyto_plot_new <- function(popup,
-                          popup_size = c(7, 7),
+                          popup_size = NULL,
                           ...) {
   
   # POPUP
@@ -818,10 +812,15 @@ cyto_plot_new <- function(popup,
   }
   
   # POPUP SIZE
-  if("popup_size" %in% names(cyto_option("cyto_plot_par"))) {
-    popup_size <- cyto_option("cyto_plot_par")[["popup_size"]]
+  if(is.null(popup_size)) {
+    # CHECK GLOBAL SETTINGS
+    if("popup_size" %in% names(cyto_option("cyto_plot_par"))) {
+      popup_size <- cyto_option("cyto_plot_par")[["popup_size"]]
+    } else {
+      popup_size <- c(7,7)
+    }
   }
-  
+
   # NULL -> RSTUDIOGD
   if (dev.cur() == 1) {
     dev.new()
@@ -1473,51 +1472,92 @@ cyto_plot_par <- function(...,
     par_args <- par_args[!names(par_args) %in% names(par_args_new)]
     par_args <- c(par_args, par_args_new)
     cyto_option("cyto_plot_par_reset", NULL)
+    par(par_args)
+    invisible(par_args)
   # SET
   } else {
     # NEW PARAMETERS
     par_new_args <- .args_list(...)
-    # REMOVE RESET ARGUMENTS
-    par_new_args <- par_new_args[!names(par_new_args) %in% "reset"]
-    # CURRENT PARAMETERS
-    par_args <- cyto_option("cyto_plot_par")
-    # PREPARE PARAMETERS
-    par_args <- par_args[!names(par_args) %in% names(par_new_args)]
-    par_args <- c(par_args, par_new_args)
-    # LAYOUT
-    if("layout" %in% names(par_args)) {
-      layout <- par_args[["layout"]]
-      par_args <- par_args[!names(par_args) %in% "layout"]
+    par_new_args <- par_new_args[!names(par_new_args) %in% c("reset")]
+    # PREPARE LAYOUT 
+    if("layout" %in% names(par_new_args)) {
+      layout <- par_new_args[["layout"]]
+      par_new_args <- par_new_args[!names(par_new_args) %in% "layout"]
       if (is.numeric(layout)) {
         if (is.null(dim(layout))) {
           if (length(layout) == 2) {
-            par_args <- c(par_args, list("mfrow" = layout))
+            par_new_args <- c(par_new_args, list("mfrow" = layout))
           } else if (length(layout) == 3) {
             if (layout[3] == 1) {
-              par_args <- c(par_args, list("mfrow" = layout[1:2]))
+              par_new_args <- c(par_new_args, list("mfrow" = layout[1:2]))
             } else {
-              par_args <- c(par_args, list("mfcol" = layout[1:2]))
+              par_new_args <- c(par_new_args, list("mfcol" = layout[1:2]))
             }
           }
         } else {
-          par_args <- c(par_args, list("layout" = layout))
-          layout(layout)
+          par_new_args <- c(par_new_args, list("layout" = layout))
+          # layout(layout) # reset = mfrow = c(1,1)
         }
       }
     }
-    # REMOVE LAYOUT AND POPUP SIZE ARGUMENTS
-    par_args <- par_args[!names(par_args) %in% c("layout", "popup_size")]
-    # RESET VALUES FOR PARAMETERS
-    par_reset <- cyto_option("cyto_plot_par_reset")
-    cyto_option("cyto_plot_par_reset",
-                c(par_reset, par_args[!names(par_args) %in% names(par_reset)]))
+
+    # CURRENT SET PARAMETERS
+    par_set_args <- cyto_option("cyto_plot_par")
+
+    # COMBINE PARAMETERS
+    par_full_args <- c(par_set_args[!names(par_set_args)
+                                    %in% names(par_new_args)],
+                       par_new_args)
+    
+    print("PAR_FULL_ARGS")
+    print(par_full_args)
+    
+    # STORE PARAMETERS FOR RESET (CONTAINS LAYOUT)
+    par_reset_args <- cyto_option("cyto_plot_reset")
+    # PARAMETERS TO RESET
+    par_reset <- names(par_full_args)[!names(par_full_args) %in% names(par_reset_args)]
+    if(length(par_reset) > 0) {
+      if("layout" %in% par_reset) {
+        par_reset_args <- c(par_reset_args,
+                            .par("mfrow"))
+        par_reset <- par_reset[!par_reset %in% "layout"]
+      }
+      if(length(par_reset) > 0) {
+        # WATCH FOR POPUP SIZE - REQUIRED FOR CYTO_PLOT_PAR
+        par_reset_args <- c(par_reset_args,
+                            .par(par_reset[!par_reset %in% c("popup_size")])) 
+        cyto_option("cyto_plot_par_reset", par_reset_args)
+      }
+    }
+    # SET LAYOUT - REMAINING PARAMETERS SET BEFORE RETURN
+    if("layout" %in% names(par_full_args)) {
+      layout(layout)
+      par_full_args <- par_full_args[!names(par_full_args) %in% "layout"]
+    }  
     # SAVE SET PARAMETERS
-    cyto_option("cyto_plot_par", par_args)
+    cyto_option("cyto_plot_par", par_full_args)
+    par_args <- par_full_args[!names(par_full_args) %in% "popup_size"]
+    # CANNOT SET MFROW/MFCOL/LAYOUT/OMA MULTIPLE TIMES
+    if(any(c("mfrow", 
+             "mfcol",
+             "layout",
+             "oma") %in% names(par_set_args))) {
+      # REMOVE FROM NEW PARAMETERS TO SET
+      par_args <- par_args[!names(par_args) %in% c("mfcol",
+                                                   "mfrow",
+                                                   "layout",
+                                                   "oma")]
+    }
+    # SET PARAMETERS
+    if(length(par_args) > 0) {
+      print("SETTING:")
+      print(par_args)
+      par(par_args)
+    }
+    # RETURN SET PARAMETERS
+    invisible(par_full_args)
   }
-  # SET PARAMETERS
-  par(par_args)
-  # RETURN SET PARAMETERS
-  invisible(par_args)
+
 }
 
 ## CYTO_PLOT_THEME_ARGS --------------------------------------------------------
