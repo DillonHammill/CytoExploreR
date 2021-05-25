@@ -1056,9 +1056,8 @@ cyto_names_parse <- function(x,
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
-#' @param ... additional arguments passed to \code{\link{cyto_transformer_log}},
-#'   \code{\link{cyto_transformer_arcsinh}}, \code{\link{cyto_transformer_biex}}
-#'   or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
+#' @param ... additional arguments passed to
+#'   \code{\link{cyto_transformers_define}}, when no \code{trans} object is
 #'   supplied.
 #'
 #' @return object of class \code{flowFrame}, \code{flowSet},
@@ -1094,7 +1093,7 @@ cyto_names_parse <- function(x,
 #' # Manually construct & apply transformations
 #' trans <- cyto_transformer_logicle(gs)
 #' gs_trans <- cyto_transform(gs, trans)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_transformers_define}}
@@ -1251,12 +1250,12 @@ cyto_transform.transformList <- function(x,
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
       cyto_plot_profile(x,
-                        channels = channels,
-                        select = select,
+                        channels = names(trans),
                         axes_trans = transformer_list,
                         axes_limits = axes_limits,
                         merge_by = "all",
-                        display = 1), # sampling performed above
+                        display = 1, 
+                        ...), # sampling performed above
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1328,12 +1327,12 @@ cyto_transform.transformerList <- function(x,
     tryCatch(
       cyto_plot_profile(x,
                         parent = "root",
-                        channels = channels,
-                        select = select,
-                        axes_trans = transformer_list,
+                        channels = names(trans),
+                        axes_trans = trans,
                         axes_limits = axes_limits,
                         merge_by = "all",
-                        display = 1), # sampling performed above
+                        display = 1,
+                        ...), # sampling performed above
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1641,10 +1640,9 @@ cyto_extract <- function(...){
 
 #' Extract raw data matrix from cytoframe or cytoset
 #'
-#' A convenient wrapper around \code{\link[flowCore:exprs]{exprs}} which
-#' simplifies extraction of raw data from certain parameters. \code{cyto_exprs}
-#' is primarily for use within CytoExploreR and users should instead use the
-#' \code{cyto_data_extract} API.
+#' A convenient wrapper around \code{exprs} which simplifies extraction of raw
+#' data from certain parameters. \code{cyto_exprs} is primarily for use within
+#' CytoExploreR and users should instead use the \code{cyto_data_extract} API.
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}} or
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}}.
@@ -2618,7 +2616,7 @@ cyto_save.flowSet <- function(x,
   # DIRECTORY CHECK
   if (!is.null(save_as) & dir.exists(save_as)) {
     # FILES WILL BE OVERWRITTEN
-    if (any(list.files(save_as) %in% cyto_names(cs))) {
+    if (any(list.files(save_as) %in% cyto_names(x))) {
       message(paste0("Files will be overwritten in ", save_as, "."))
       if(!cyto_enquire(
         "Do you want to continue? (Y/N)",
@@ -5153,4 +5151,85 @@ cyto_enquire <- function(x,
     }
   }
   return(answer)
+}
+
+## CYTO_REQUIRE ----------------------------------------------------------------
+
+#' Load external packages for use within CytoExploreR
+#'
+#' @param x name of the required package.
+#' @param source where to install the package from if it is not found on the
+#'   user's machine, options include \code{CRAN}, \code{BioC} or \code{GitHub}.
+#'   Set to \code{CRAN} by default.
+#' @param repo name of the GitHub repository from which the package should be
+#'   installed when \code{source = GitHub}.
+#' @param version minimal version requirement if the package is located on the
+#'   user's machine.
+#' @param ref citation to print to the console when loading the package for use
+#'   within CytoExploreR.
+#' @param ... additional arguments passed to \code{install.packages},
+#'   \code{BiocManager::install} or \code{remotes::install_github}.
+#'
+#' @return NULL
+#'
+#' @importFrom utils install.packages installed.packages
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_require <- function(x,
+                         source = "CRAN",
+                         repo = NULL,
+                         version = NULL,
+                         ref = NULL,
+                         ...) {
+  
+  # PACKAGE LOCATED
+  pkgs <- as.data.frame(installed.packages())
+  
+  # PACKAGE FOUND
+  if(x %in% pkgs$Package) {
+    # CHECK VERSION
+    if(!is.null(version)) {
+      # PACKAGE VERSION
+      pkg_version <- pkgs[pkgs$Package == x, "Version"]
+      # VERSION TOO OLD
+      if(tryCatch(pkg_version < version, error = function(e){TRUE})) {
+        inst <- TRUE
+      }
+    }
+  # PACKAGE MISSING 
+  } else {
+    inst <- TRUE
+  }
+  
+  # INSTALL PACKAGE
+  if(inst) {
+    # CRAN
+    if(grepl("^c", x, ignore.case = TRUE)){
+      install.packages(x)
+    # BIOCONDUCTOR
+    } else if (grepl("^b", x, ignore.case = TRUE)) {
+      if(!requireNamespace("BiocManager")) {
+        install.packages("BiocManager", ...)
+      }
+      BiocManager::install(x, ...)
+    # GITHUB
+    } else {
+      if(!requireNamespace("remotes")) {
+        install.packages("remotes")
+      }
+      remotes::install_github(repo, ...)
+    }
+  }
+  
+  # LOAD PACKAGE
+  message(paste0("Loading ", x, "..."))
+  requireNamespace(x)
+  
+  # REFERENCE
+  if(!is.null(ref)) {
+    message(ref)
+  }
+  
 }

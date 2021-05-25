@@ -52,9 +52,8 @@ cyto_transform(x, trans = NULL, ...)
 \code{\link[flowWorkspace:transformerList]{transformerList}} containing the
 transformation definitions to apply to \code{x}.}
 
-\item{...}{additional arguments passed to \code{\link{cyto_transformer_log}},
-\code{\link{cyto_transformer_arcsinh}}, \code{\link{cyto_transformer_biex}}
-or \code{\link{cyto_transformer_logicle}}, when no \code{trans} object is
+\item{...}{additional arguments passed to
+\code{\link{cyto_transformers_define}}, when no \code{trans} object is
 supplied.}
 
 \item{type}{type of transformation to apply when no trans object is supplied,

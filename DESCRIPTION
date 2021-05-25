@@ -27,6 +27,7 @@ Imports:
     flowAI,
     graphics,
     grDevices,
+    HeatmapR,
     MASS,
     methods,
     purrr,

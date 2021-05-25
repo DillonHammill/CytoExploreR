@@ -32,10 +32,9 @@ converted to vectors by default, set to TRUE by default.}
 matrix or list of matrices containing raw data.
 }
 \description{
-A convenient wrapper around \code{\link[flowCore:exprs]{exprs}} which
-simplifies extraction of raw data from certain parameters. \code{cyto_exprs}
-is primarily for use within CytoExploreR and users should instead use the
-\code{cyto_data_extract} API.
+A convenient wrapper around \code{exprs} which simplifies extraction of raw
+data from certain parameters. \code{cyto_exprs} is primarily for use within
+CytoExploreR and users should instead use the \code{cyto_data_extract} API.
 }
 \examples{
 #' library(CytoExploreRData)

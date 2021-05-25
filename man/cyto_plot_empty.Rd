@@ -22,6 +22,7 @@ cyto_plot_empty(
   hist_smooth = 1,
   hist_bins = 256,
   hist_stack = 0.5,
+  hist_layers = 1,
   hist_cols = NA,
   hist_fill = NA,
   hist_fill_alpha = 1,
@@ -127,6 +128,10 @@ density for histograms, set to \code{1} by default.}
 
 \item{hist_stack}{numeric [0,1] indicating the degree of stacking for
 histograms, set to \code{0} by default.}
+
+\item{hist_layers}{numeric indicating the number of histograms to stack in
+each plot, set to all samples by default. Each plot must contain the same
+number of histograms.}
 
 \item{hist_cols}{vector colours to draw from when selecting histogram fill
 colours if none are supplied to \code{hist_fill}.}
@@ -259,10 +264,6 @@ default.}
 lines, set to 1 by default to remove transparency.}
 
 \item{...}{not in use.}
-
-\item{hist_layers}{numeric indicating the number of histograms to stack in
-each plot, set to all samples by default. Each plot must contain the same
-number of histograms.}
 }
 \description{
 \code{cyto_plot_empty} generates a base for cyto_plot by creating an empty

@@ -56,7 +56,7 @@ cyto_gate_apply <- function(x,
   
   # NEGATE - APPEND FILTER INCLUDING ALL GATES
   if(negate == TRUE) {
-    negate_filter <- !do.call("|", list(rg1, rg2))
+    negate_filter <- !do.call("|", gate)
     if(!skip) {
       gate <- c(gate, negate_filter)
     } else {
@@ -265,10 +265,7 @@ cyto_gate_remove <- function(gs,
   }
   
   # READ IN GATINGTEMPLATE
-  gt <- read.csv(gatingTemplate,
-                 header = TRUE,
-                 stringsAsFactors = FALSE
-  )
+  gt <- cyto_gatingTemplate_read(gatingTemplate)
   
   # PREPARE GATINGTEMPLATE ALIAS
   gt_alias <- lapply(seq_along(gt$alias), function(z) {
@@ -334,7 +331,8 @@ cyto_gate_remove <- function(gs,
   }
   
   # UPDATE GATINGTEMPLATE
-  write.csv(gt, gatingTemplate, row.names = FALSE)
+  cyto_gatingTemplate_write(gt,
+                            save_as = gatingTemplate)
   
   # RETURN GATINGSET
   return(gs)
@@ -388,7 +386,7 @@ cyto_gate_rename <- function(x,
   }, alias, names)
   
   # READ IN GATINGTEMPLATE
-  gt <- read_from_csv(gatingTemplate)
+  gt <- cyto_gatingTemplate_read(gatingTemplate)
   
   # UPDATE PARENTAL NAMES
   lapply(seq_along(alias), function(z) {
@@ -428,7 +426,8 @@ cyto_gate_rename <- function(x,
   })
   
   # SAVE UPDATED GATINGTEMPLATE
-  write_to_csv(as.data.frame(gt), gatingtemplate)
+  cyto_gatingTemplate_write(gt,
+                            save_as = gatingTemplate)
   
 }
 
@@ -526,17 +525,15 @@ cyto_gate_copy <- function(x,
                         gt_entries)
   
   # LOAD GATINGTEMPLATE
-  gt <- read.csv(gatingTemplate, 
-                 header = TRUE)
+  gt <- cyto_gatingTemplate_read(gatingTemplate)
   
   # UPDATE GATINGTEMPLATE
   gt <- rbind(gt, 
               gt_entries)
   
   # WRITE UPDATED GATINGTEMPLATE
-  write.csv(gt, 
-            gatingTemplate, 
-            row.names = FALSE)
+  cyto_gatingTemplate_write(gt,
+                            save_as = gatingTemplate)
   
   # RETURN UPDATED GATINGSET 
   return(x)
@@ -750,7 +747,8 @@ cyto_gate_bool <- function(x,
   
   # UPDATE GATINGTEMPLATE
   gt <- rbind(gt, gt_entries)
-  write_to_csv(gt, gatingTemplate)
+  cyto_gatingTemplate_write(gt,
+                            save_as = gatingTemplate)
   
   # CREATE BOOLEAN GATES
   gates <- lapply(seq_along(alias), function(z){
@@ -943,7 +941,7 @@ cyto_gate_extract <- function(parent,
 #' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
 #' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
 #'   selected gate lines, set to 1 by default to use solid colours.
-#' @param ... additional arguments for \code{\link{cyto_plot.flowFrame}}.
+#' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return an object of class \code{GatingSet} with edited gate applied, as well
 #'   as gatingTemplate file with edited gate saved.
@@ -1049,7 +1047,7 @@ cyto_gate_edit <- function(x,
   # EXTRACT INFORMATION FROM GATINGTEMPLATE FILE -------------------------------
   
   # READ IN GATINGTEMPLATE
-  gtf <- read_from_csv(gatingTemplate)
+  gtf <- cyto_gatingTemplate_read(gatingTemplate)
   
   # RESTRICT BY PARENT
   gtf_parent <- gtf[gtf$parent == parent, ]
@@ -1139,7 +1137,7 @@ cyto_gate_edit <- function(x,
   type <- .cyto_gate_type(type, channels, alias, negate)
   
   # ALIAS - LIST PER GATE TYPE
-  alias <- .cyto_alias(alias, type)
+  alias <- .cyto_gate_alias(alias, type)
   
   # PREPARE SAMPLES & OVERLAYS -------------------------------------------------
   
@@ -1442,8 +1440,8 @@ cyto_gate_edit <- function(x,
   }
   
   # FIND & EDIT GATINGTEMPLATE ENTRIES
-  gt <- read_from_csv(gatingTemplate,
-                      data.table = TRUE)
+  gt <- cyto_gatingTemplate_read(gatingTemplate,
+                                 data.table = TRUE)
   
   # DATA.TABLE R CMD CHECK NOTE
   gating_method <- NULL
@@ -1480,7 +1478,8 @@ cyto_gate_edit <- function(x,
   }
   
   # SAVE UPDATED GATINGTEMPLATE
-  write_to_csv(gt, gatingTemplate)
+  cyto_gatingTemplate_write(gt,
+                            save_as = gatingTemplate)
   
   # CONVERT ALIAS BACK TO VECTOR
   alias <- as.character(unlist(alias))

@@ -23,7 +23,7 @@
 #' @param ... not in use.
 #'
 #' @importFrom openCyto gh_generate_template CytoExploreR_.preprocess_csv
-#' @importFrom magrittr %>%
+#' @importFrom rhandsontable %>%
 #' @importFrom visNetwork visNetwork visEdges visGroups
 #' @importFrom data.table as.data.table
 #'

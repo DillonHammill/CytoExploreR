@@ -83,6 +83,20 @@
 #' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
 #' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
 #'   selected gate lines, set to 1 by default to use solid colours.
+#' @param label_text_size numeric to control the size of text in the plot
+#'   labels, set to 1 by default.
+#' @param label_text_col colour(s) to use for text in plot labels, set to
+#'   \code{"black"} by default.
+#' @param label_text_col_alpha numeric [0, 1] to control the transparency of the
+#'   text colour, set to 1 by default to remove transparency.
+#' @param label_fill fill colour(s) to use for labels, set to "white" by
+#'   default.
+#' @param label_fill_alpha numeric to control background fill transparency of
+#'   label, set to 0.6 by default to introduce some transparency.
+#' @param seed numeric passed to \code{\link{set.seed}} to ensure that the same
+#'   sampling is applied with each \code{\link{cyto_plot}} call, set to an
+#'   arbitrary numeric by default. This behaviour can be turned off by setting
+#'   this argument to NULL.
 #' @param ... additional arguments for \code{\link{cyto_plot}}.
 #'
 #' @return \code{cytoframe} and \code{cytoset} methods return a list of flowCore
@@ -99,7 +113,6 @@
 #' @importFrom flowWorkspace gs_pop_get_children gh_pop_get_descendants
 #' @importFrom graphics par
 #' @importFrom purrr transpose
-#' @importFrom magrittr %>%
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -121,7 +121,7 @@ selected gate points, set to 1 by default to use solid colours.}
 \item{gate_line_col_alpha}{numeric [0,1] to control the transparency of the
 selected gate lines, set to 1 by default to use solid colours.}
 
-\item{...}{additional arguments for \code{\link{cyto_plot.flowFrame}}.}
+\item{...}{additional arguments for \code{\link{cyto_plot}}.}
 }
 \value{
 an object of class \code{GatingSet} with edited gate applied, as well

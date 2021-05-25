@@ -100,7 +100,6 @@
 #' @importFrom flowWorkspace gs_pop_get_children gh_pop_get_descendants
 #' @importFrom graphics par
 #' @importFrom purrr transpose
-#' @importFrom magrittr %>%
 #' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -143,7 +142,7 @@
 #' cyto_nodes(gs)
 #' }
 #'
-#' @name cyto_gate_draw
+#' @noRd
 NULL
 
 #' @noRd

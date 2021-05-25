@@ -109,12 +109,6 @@ select samples using \code{\link{cyto_select}} when a \code{cytoset} or
 details.}
 
 \item{...}{additional arguments passed to the desired statistical function.}
-
-\item{gate}{a \code{rectangleGate}, \code{polygonGate} or
-\code{ellipsoidGate} object to apply to each \code{cytoframe} prior to
-computing the desired statistic. This argument has been included for
-backwards compatibility only and is only valid for \code{cytoframe} or
-\code{cytoset} objects.}
 }
 \value{
 data.frame or tibble containing the computed statistics in the

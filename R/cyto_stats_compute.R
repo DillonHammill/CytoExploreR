@@ -43,11 +43,6 @@
 #' @param inverse logical passed to \code{\link{cyto_apply}} to indicate whether
 #'   transformations applied to the data should be reversed prior to passing the
 #'   data to the desired statistical function, set to TRUE by default.
-#' @param gate a \code{rectangleGate}, \code{polygonGate} or
-#'   \code{ellipsoidGate} object to apply to each \code{cytoframe} prior to
-#'   computing the desired statistic. This argument has been included for
-#'   backwards compatibility only and is only valid for \code{cytoframe} or
-#'   \code{cytoset} objects.
 #' @param round numeric indicating the number of decimal places to round the
 #'   computed statistic, set to 2 decimal places by default.
 #' @param format can be either \code{"wide"} or \code{"long"} to control the

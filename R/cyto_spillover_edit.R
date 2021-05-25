@@ -85,7 +85,7 @@
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme
-#' @importFrom magrittr %>%
+#' @importFrom rhandsontable %>%
 #' @importFrom methods as is
 #' @importFrom stats median
 #' @importFrom graphics lines layout
