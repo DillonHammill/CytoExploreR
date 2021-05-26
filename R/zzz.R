@@ -25,10 +25,10 @@
   options("cyto_plot_method" = NULL)
   
   # Store set graphical parameters
-  options("cyto_plot_par" = NULL)
+  options("cyto_plot_par" = list())
   
   # Record changes to graphical parameters settings - reuse
-  options("cyto_plot_par_reset" = NULL)
+  options("cyto_plot_par_reset" = list())
   
   # Signal when cyto_gate_draw has been called
   options("cyto_gate_draw" = FALSE)
