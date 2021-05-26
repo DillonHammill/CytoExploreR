@@ -24,8 +24,6 @@ copy.}
 
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the new entries should be saved.}
-
-\item{...}{not in use.}
 }
 \value{
 object of class \code{GatingSet} with copied gates applied and update

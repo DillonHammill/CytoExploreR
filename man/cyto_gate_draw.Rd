@@ -171,6 +171,10 @@ selected gate lines, set to 1 by default to use solid colours.}
 \item{label_text_size}{numeric to control the size of text in the plot
 labels, set to 1 by default.}
 
+\item{label_text_font}{numeric to control the font of text in plot labels,
+set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
 \item{label_text_col}{colour(s) to use for text in plot labels, set to
 \code{"black"} by default.}
 

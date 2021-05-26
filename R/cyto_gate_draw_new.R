@@ -83,6 +83,9 @@
 #' @param gate_line_col colour to use for gates, set to \code{"red"} by default.
 #' @param gate_line_col_alpha numeric [0,1] to control the transparency of the
 #'   selected gate lines, set to 1 by default to use solid colours.
+#' @param label_text_font numeric to control the font of text in plot labels,
+#'   set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+#'   alternatives.
 #' @param label_text_size numeric to control the size of text in the plot
 #'   labels, set to 1 by default.
 #' @param label_text_col colour(s) to use for text in plot labels, set to

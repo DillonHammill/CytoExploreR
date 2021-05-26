@@ -442,7 +442,6 @@ cyto_gate_rename <- function(x,
 #' @param copy vector of names to copy to new parent.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the new entries should be saved.
-#' @param ... not in use.
 #'
 #' @return object of class \code{GatingSet} with copied gates applied and update
 #'   gatingTemplate csv file with appropriate entries.
