@@ -1251,7 +1251,7 @@ cyto_transform.transformList <- function(x,
     tryCatch(
       cyto_plot_profile(x,
                         channels = names(trans),
-                        axes_trans = transformer_list,
+                        axes_trans = trans,
                         axes_limits = axes_limits,
                         merge_by = "all",
                         display = 1, 
@@ -5210,16 +5210,20 @@ cyto_require <- function(x,
       install.packages(x)
     # BIOCONDUCTOR
     } else if (grepl("^b", x, ignore.case = TRUE)) {
-      if(!requireNamespace("BiocManager")) {
+      if(!"BiocManager" %in% pkgs$Package) {
         install.packages("BiocManager", ...)
       }
-      BiocManager::install(x, ...)
+      if(requireNamepsace("BiocManager")) {
+        BiocManager::install(x, ...)
+      }
     # GITHUB
     } else {
-      if(!requireNamespace("remotes")) {
+      if(!"remotes" %in% pkgs$Package) {
         install.packages("remotes")
       }
-      remotes::install_github(repo, ...)
+      if(requireNamespace("remotes")) {
+        remotes::install_github(repo, ...)
+      }
     }
   }
   
