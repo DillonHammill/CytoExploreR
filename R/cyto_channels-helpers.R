@@ -570,7 +570,8 @@ cyto_channel_select <- function(x){
                        col_names = "channel",
                        col_readonly = "name",
                        hide = TRUE,
-                       quiet = TRUE)
+                       quiet = TRUE,
+                       viewer = "pane")
   }
   
   # Missing channels

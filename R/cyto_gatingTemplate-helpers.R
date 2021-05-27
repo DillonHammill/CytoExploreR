@@ -415,6 +415,7 @@ cyto_gatingTemplate_edit <- function(x,
                   col_names = colnames(gt),
                   quiet = TRUE,
                   hide = TRUE,
+                  viewer = "pane",
                   ...)
   
   # Read in updated template to gatingTemplate object

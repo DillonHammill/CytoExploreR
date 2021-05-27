@@ -3525,6 +3525,7 @@ cyto_markers_edit <- function(x,
                          col_names = c("channel", "marker"),
                          quiet = TRUE,
                          hide = TRUE,
+                         viewer = "pane",
                          ...)
     # WRITE_TO_CSV NOT IN SCOPE
     write_to_csv(dt_edit,
@@ -3682,6 +3683,7 @@ cyto_details_edit <- function(x,
                     # col_readonly = "name",
                     quiet = TRUE,
                     hide = TRUE,
+                    viewer = "pane",
                     ...)
     # REPLACE ROW NAMES
     rownames(pd) <- cyto_names
