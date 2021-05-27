@@ -62,6 +62,7 @@
 #' @importFrom purrr transpose
 #' @noRd
 .cyto_plot_data <- function(x,
+                            parent = "root",
                             overlay = NA,
                             merge_by = "name",
                             select = NULL,
@@ -69,11 +70,11 @@
                             barcode = FALSE,
                             seed = 42) {
 
-  # CYTO_GATE_DRAW -------------------------------------------------------------
+  # DATA PREPARED ALREADY ------------------------------------------------------
   
   # BYPASS DATA PREPARARTION IN CYTO_PLOT CALL 
   if(!is.null(cyto_option("cyto_plot_method")) & 
-     cyto_option("cyto_gate_draw")) {
+     cyto_option("cyto_plot_data")) {
     if(.all_na(overlay)) {
       return(list(list(x)))
     } else {
@@ -83,60 +84,154 @@
   
   # CHECKS ---------------------------------------------------------------------
   
-  # CYTOSETS ONLY
-  if(cyto_class(x, "flowSet", FALSE) == FALSE) {
-    stop("cyto_plot only supports cytoset objects!")
+  # GATINGSET
+  if(cyto_class(x, "GatingSet", TRUE)) {
+    gs <- x
+    gh <- x[[1]]
+  
+  # GATINGHIERARCHY
+  } else if(cyto_class(x, "GatingHierarchy", TRUE)) {
+    gs <- NULL
+    gh <- x
+  # CYTOSET
+  } else if(cyto_class(x, "flowSet")) {
+    gs <- NULL
+    gh <- NULL
+  # UNSUPPORTED OBJECT
+  } else {
+    stop(
+      "cyto_plot() only supports cytoset, GatingHierarchy or GatingSet objects!"
+    )
   }
   
-  # SELECT
-  if(!is.null(select)) {
-    x <- cyto_select(x, select)
-  }
+  # EXTRACT DATA
+  x <- cyto_data_extract(x,
+                         parent = parent,
+                         select = select,
+                         format = "cytoset",
+                         copy = FALSE)[[1]]
   
   # GROUP
   x <- cyto_group_by(x, merge_by)
   
-  # OVERLAY
+  # OVERLAY - POPULATION NAMES
   if(!.all_na(overlay)) {
-    # OVERLAY LIST
+    # OVERLAY - POPULATION NAMES
+    if(cyto_class(overlay, "character")) {
+      # GATINGHIERRACHY REQUIRED
+      if(!is.null(gh)) {
+        # DESCENDANTS
+        if(any(grepl("^descendants", overlay, ignore.case = TRUE))) {
+          overlay <- overlay[!grepl("^descendants", 
+                                    overlay, 
+                                    ignore.case = TRUE)]
+          overlay <- c(overlay, tryCatch(
+            gh_pop_get_descendants(
+              gh,
+              parent,
+              path = "auto"
+            ),
+            error = function(e){
+              return(NA)
+            }
+          ))
+        } 
+        # CHILDREN
+        if(any(grepl("^children", overlay, ignore.case = TRUE))) {
+          overlay <- overlay[!grepl("^children",
+                                    overlay,
+                                    ignore.case = TRUE)]
+          overlay <- c(overlay, tryCatch(
+            gh_pop_get_children(
+              gh,
+              parent,
+              path = "auto"
+            ),
+            error = function(e){
+              return(NA)
+            }
+          ))
+        }
+        # REMOVE DUPLICATES
+        overlay <- unique(overlay)
+        # EXTRACT DATA
+        overlay <- structure(
+          lapply(overlay, function(z) {
+            if(.all_na(z)) {
+              return(NA)
+            } else {
+              cyto_data_extract(
+                if(is.null(gs)){
+                  gh
+                }else{
+                  gs
+                }, # GatingHierarchy/GatingSet
+                parent = cyto_nodes_convert(
+                  gh,
+                  nodes = z,
+                  anchor = parent
+                ),
+                copy = FALSE,
+                format = "cytoset"
+              )[[1]]
+            }
+          }),
+          names = overlay
+        )
+        # INVALID OVERLAY
+      } else {
+        overlay <- NA
+      }
+    }
+  }
+  
+  # OVERLAY - CYTOSET/LIST OF CYTOSETS
+  if(!.all_na(overlay)) {
+    # OVERLAY -> LIST OF CYTOSETS
     if(!cyto_class(overlay, "list", TRUE)) {
-      overlay <-  list(overlay)
+      overlay <- structure(
+        list(overlay),
+        names = ifelse(length(overlay) == 1, cyto_names(overlay), NULL)
+      )
     }
     # OVERLAY - SELECT & GROUP
-    overlay <- lapply(seq_along(overlay), function(z){
-      cs <- overlay[[z]]
-      # CHECK
-      if(cyto_class(cs, "flowSet") == FALSE) {
-        stop("cyto_plot only supports cytosets!")
-      }
-      # SELECT - IF POSSIBLE
-      cs <- tryCatch(
-        cyto_select(cs, select),
-        error = function(e){return(cs)}
-      )
-      # GROUP - ONLY IF SAME GROUPS
-      if(setequal(cyto_groups(cs, merge_by), names(x))) {
-        cs <- cyto_group_by(cs, merge_by)
-      } else {
-        cs <- structure(
-          rep(list(cs), length(x)),
-          names  = names(x)
+    overlay  <- structure(
+      lapply(seq_along(overlay), function(z){
+        cs <- overlay[[z]]
+        # CHECK
+        if(cyto_class(cs, "flowSet") == FALSE) {
+          stop("cyto_plot only supports cytosets!")
+        }
+        # SELECT - IF POSSIBLE
+        cs <- tryCatch(
+          cyto_select(cs, select),
+          error = function(e){return(cs)}
         )
-      }
-      # LAYER
-      return(cs)
-    })
-    # OVERLAY EACH PLOT - OVERLAY MUS BE SAME LENGTH AS X FOR TRANSPOSE
+        # GROUP - ONLY IF SAME GROUPS
+        if(setequal(cyto_groups(cs, merge_by), names(x))) {
+          cs <- cyto_group_by(cs, merge_by)
+        } else {
+          cs <- structure(
+            rep(list(cs), length(x)),
+            names  = names(x)
+          )
+        }
+        # LAYER
+        return(cs)
+      }),
+      names = names(overlay)
+    )
+    # OVERLAY EACH PLOT - OVERLAY MUST BE SAME LENGTH AS X FOR TRANSPOSE
     if(length(overlay) != length(x)) {
       overlay <- rep(overlay, length.out = length(x))
     }
     # COMBINE & TRANSPOSE
     x <- transpose(c(list(x), overlay))
-  # FORMAT SAMPLES
+  # NO OVERLAY - FORMAT X  
   } else {
     x <- structure(
-      lapply(x, list),
-      names = names(x)
+      lapply(x, "list"),
+      names = cyto_names(x)
     )
   }
   
