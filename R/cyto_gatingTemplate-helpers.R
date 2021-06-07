@@ -409,14 +409,15 @@ cyto_gatingTemplate_edit <- function(x,
   gt <- data_edit(gt, 
                   title = "gatingTemplate Editor",
                   logo = CytoExploreR_logo(),
-                  save_as = gatingTemplate,
-                  write_fun  = "write_to_csv",
                   col_edit = FALSE,
                   col_names = colnames(gt),
                   quiet = TRUE,
                   hide = TRUE,
                   viewer = "pane",
                   ...)
+  
+  # WRITE TO FILE
+  write_to_csv(gt, gatingTemplate)
   
   # Read in updated template to gatingTemplate object
   gt <- gatingTemplate(gatingTemplate)
@@ -447,6 +448,8 @@ cyto_gatingTemplate_edit <- function(x,
 #' @param gatingTemplate name of the gatingTemplate csv file which contains the
 #'   gates to be applied to \code{x}. This can alos be an object of class
 #'   \code{gatingTemplate} if a \code{GatingSet} object is supplied.
+#' @param active logical indicating whether the applied gatingTemplate should be
+#'   set as the current active gatingTemplate set to TRUE by default.
 #' @param ... additional arguments passed to gating.
 #'
 #' @return NULL and update the GatingHierarchy/ GatingSet in the global
@@ -475,7 +478,9 @@ cyto_gatingTemplate_edit <- function(x,
 #'
 #' @export
 cyto_gatingTemplate_apply <- function(x,
-                                      gatingTemplate = NULL, ...) {
+                                      gatingTemplate = NULL,
+                                      active = TRUE,
+                                      ...) {
   
   # GATINGHIERARCHY/GATINGSET REQUIRED
   if (missing(x)) {
@@ -522,6 +527,13 @@ cyto_gatingTemplate_apply <- function(x,
   
   # APPLY GATINGTEMPLATE
   suppressWarnings(gt_gating(gt, x, ...))
+  
+  # ACTIVE GATINGTEMPLATE
+  if(active) {
+    if(is.character(gatingTemplate)) {
+      cyto_gatingTemplate_active(gatingTemplate)
+    }
+  }
   
   # GATINGHIERARCHY/GATINGSET
   return(x)
@@ -578,10 +590,14 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
                                        gatingTemplate = NULL) {
   
   # BYPASS CHECKS - GATINGTEMPLATE DOES NOT EXIST
-  gt <- tryCatch(suppressWarnings(read_from_csv(gatingTemplate)),
-                 error = function(e) {
-                   NULL
-                 }
+  gt <- tryCatch(
+    suppressWarnings(
+      cyto_gatingTemplate_read(gatingTemplate)
+      ),
+      
+    error = function(e) {
+      NULL
+    }
   )
   # MATCHING PARENT & ALIAS
   if (!is.null(gt)) {
