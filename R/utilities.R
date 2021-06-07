@@ -40,13 +40,15 @@ CytoExploreR_logo <- function(){
 #' Check if vector contains only empty character strings
 #'
 #' @param x vector.
+#' @param null return TRUE if NULL?
 #' 
 #' @return TRUE/FALSE
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.empty <- function(x){
+.empty <- function(x, 
+                   null = FALSE){
   
   if(.all_na(x)){
     return(FALSE)
@@ -57,6 +59,9 @@ CytoExploreR_logo <- function(){
       return(FALSE)
     }
   }else{
+    if(null & is.null(x)){
+      return(TRUE)
+    }
     return(FALSE)
   }
   
