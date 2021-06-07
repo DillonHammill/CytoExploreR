@@ -114,6 +114,18 @@
   # GROUP
   x <- cyto_group_by(x, merge_by)
   
+  # PREPARE X
+  x <- structure(
+    lapply(x, function(z){
+      if(is.null(gh)) {
+        return(list(z))
+      } else {
+        return(structure(list(z), names = parent))
+      }
+    }),
+    names = names(x)
+  )
+  
   # OVERLAY - POPULATION NAMES
   if(!.all_na(overlay)) {
     # OVERLAY - POPULATION NAMES
@@ -191,7 +203,9 @@
     if(!cyto_class(overlay, "list", TRUE)) {
       overlay <- structure(
         list(overlay),
-        names = ifelse(length(overlay) == 1, cyto_names(overlay), NULL)
+        names = ifelse(length(overlay) == 1, 
+                       cyto_names(overlay), 
+                       NULL)
       )
     }
     # OVERLAY - SELECT & GROUP
@@ -221,17 +235,18 @@
       }),
       names = names(overlay)
     )
+    # TRANSPOSE OVERLAY - GROUPS
+    overlay <- transpose(overlay)
     # OVERLAY EACH PLOT - OVERLAY MUST BE SAME LENGTH AS X FOR TRANSPOSE
     if(length(overlay) != length(x)) {
       overlay <- rep(overlay, length.out = length(x))
     }
-    # COMBINE & TRANSPOSE
-    x <- transpose(c(list(x), overlay))
-  # NO OVERLAY - FORMAT X  
-  } else {
+    # COMBINE X & OVERLAY
     x <- structure(
-      lapply(x, "list"),
-      names = cyto_names(x)
+      lapply(seq_along(x), function(z){
+        c(x[[z]], overlay[[z]])
+      }),
+      names = names(x)
     )
   }
   
@@ -296,11 +311,10 @@
         cs <- cs_list[[w]]
         # IDENTIFIERS
         ids <- cyto_names(cs)
-        
         # ALL CYTOFRAMES CONTAIN NEW EVENTS
         if(is.null(LAPPLY(i[[w]], `[[`, "layer"))) {
           # COMPUTE SAMPLE SIZES
-          n <- cyto_sample_n(cs, 
+          n <- cyto_sample_n(cs,
                              display = display)
           for(id in ids) {
             i[[w]][[id]]$sample <<- n[id]
@@ -328,8 +342,8 @@
             if(i[[w]][[id]]$match == nrow(cs[[id]])){
               # USE EVENT IDs FROM REFERENCE LAYER
               cf_list[[id]] <- cs[[id]][
-                cyto_exprs(cs[[id]], "Event-ID") %in% 
-                  cyto_exprs(cs_sub_list[[l]][[id]], "Event-ID") 
+                cyto_exprs(cs[[id]], "Event-ID") %in%
+                  cyto_exprs(cs_sub_list[[l]][[id]], "Event-ID")
                 ,]
               i[[w]][[id]]$sample <<- nrow(cf_list[[id]])
             # CYTOFRAME OVERLAP WITH PREVIOUS LAYER
@@ -352,7 +366,7 @@
                          nrow(cf_new),
                          round(
                            (n/i[[l]][[id]]$total)*(i[[l]][[id]]$sample)
-                           )    
+                           )
                          )
                        , "Event-ID"])
               # COMPLETE SAMPLE CYTOFRAME
@@ -367,7 +381,7 @@
           # NEW LAYER - ALL NEW CYTOFRAMES
           if(length(m[!m]) == length(cs)) {
             # COMPUTE SAMPLE SIZES
-            n <- cyto_sample_n(cs, 
+            n <- cyto_sample_n(cs,
                                display = display)
             # SAMPLE
             for(id in names(m[!m])) {
@@ -398,28 +412,326 @@
           cs_sub_list[[w]] <<- cytoset(cf_list)
         }
       })
-      
       # COERCE
-      lapply(seq_along(cs_sub_list), function(r){
-        if(length(cs_sub_list[[r]]) > 1) {
-          cytoset(
-            structure(
-              list(
-                as(cs_sub_list[[r]], "cytoframe")
-              ),
-              names = grp
+      structure(
+        lapply(seq_along(cs_sub_list), function(r){
+          if(length(cs_sub_list[[r]]) > 1) {
+            cytoset(
+              structure(
+                list(
+                  as(cs_sub_list[[r]], "cytoframe")
+                ),
+                names = grp
+              )
             )
-          )
-        } else {
-          return(cs_sub_list[[r]])
-        }
-      })
+          } else {
+            return(cs_sub_list[[r]])
+          }
+        }),
+        names = names(cs_list)
+      )
     }),
     names = names(x)
   )
   
   # DATA
   return(x)
+  
+}
+
+## GATES -----------------------------------------------------------------------
+
+#' Prepare gates for cyto_plot
+#' @param x cytoset, GatingHierarchy or GatingSet.
+#' @param parent name of the parent population
+#' @param channels 
+#' @param alias names of gated populations
+#' @param gate gate objects
+#' @param channels channels used to construct plot (required for gate
+#'   conversion)
+#' @param merge_by how the data will be merged within cyto_plot (need gates per
+#'   group)
+#' @return (named) list of gate lists
+#' @noRd
+.cyto_plot_gates <- function(x,
+                             parent = "root",
+                             channels,
+                             alias = NA, 
+                             gate = NA,
+                             merge_by = "name",
+                             select = NULL,
+                             negate = FALSE) {
+  
+  # SELECT
+  if(!.empty(select, null = TRUE)) {
+    x <- cyto_select(x, select)
+  }
+  
+  # EXPERIMENTAL GROUPS
+  grps <- cyto_groups(x,
+                      group_by = merge_by,
+                      details = TRUE)
+  
+  # ALIAS - GATINGHIERARCHY/GATINGSET
+  if(!.all_na(alias)) {
+    # CYTOSET
+    if(cyto_class(x, "flowSet")) {
+      message(
+        "'alias' is only supported for GatingHierarchy and GatingSet objects"
+      )
+      alias <- NA
+    # GATINGHIERARCHY/GATINGSET
+    } else {
+      # GATINGHIERARCHY
+      gh <- x[[1]]
+      # NEGATE - FIND BOOLEAN GATES BY DEFAULT FOR GS/GH
+      if(.empty(negate)) {
+        negate <- TRUE
+      }
+      # PARENT - AUTO PATH
+      parent <- cyto_nodes_convert(gh,
+                                   nodes = parent,
+                                   path = "auto")
+      # GATINGTEMPLATE - AUTO PATHS
+      gt <- gh_generate_template(gh)
+      gt$parent <- cyto_nodes_convert(gh,
+                                      nodes = gt$parent,
+                                      path = "auto")
+      gt$alias <- cyto_nodes_convert(gh,
+                                     nodes = gt$alias,
+                                     path = "auto")
+      # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
+      if(any(LAPPLY(alias, ".empty"))) {
+        # REMOVE EMPTY ALIAS
+        alias <- alias[!LAPPLY(alias, ".empty")]
+        # 2D - MATCH BOTH CHANNELS
+        if(length(channels) == 2) {
+          pops <- gt$alias[
+            gt$dims == paste(channels, collapse = ",") |
+              gt$dims == paste(rev(channels), collapse = ",")
+          ]
+          # 1D - SINGLE CHANNEL MATCH
+        } else if(length(channels) == 1) {
+          pops <- gt$alias[
+            LAPPLY(gt$dims, function(z){
+              grepl(channels, z)
+            })
+          ]
+        }
+        # SEARCH POSSIBLE BOOLEAN GATES
+        pops <- c(pops,
+                  add = gt$alias[LAPPLY(gt$dims, ".empty")])
+        # UPDATE ALIAS
+        alias <- c(alias, pops)
+      }
+      # REMOVE BOOLEAN GATES FROM ALIAS
+      bool <- LAPPLY(alias, function(z){
+        if(.empty(gt[gt$alias == z, "dims"])) {
+          return(z)
+        }else {
+          return(NULL)
+        }
+      })
+      if(length(bool) > 0){
+        alias <- alias[-match(bool, alias)]
+      }
+      # CHECK BOOLEAN GATES IN ALIAS
+      if(length(bool) > 0) {
+        bool <- LAPPLY(bool, function(z){
+          # CHECK ADDED GATES - MUST ANCHOR TO PARENT (BYPASS)
+          if(grepl("add", names(bool)[z])) {
+            z <- tryCatch(
+              cyto_nodes_convert(gh,
+                                 nodes = z,
+                                 anchor = parent),
+              error = function(e){
+                return(NULL)
+              })
+            # INVALID BOOLEAN GATE
+            if(is.null(z)) {
+              return(z)
+            }
+          }
+          # EXTRACT GATE
+          gate <- gh_pop_get_gate(gh,
+                                  cyto_nodes_convert(gh,
+                                                     nodes = z,
+                                                     anchor = parent))
+          # BOOLEAN GATE
+          if(cyto_class(gate, "booleanFilter")) {
+            # BOOLEAN LOGIC
+            logic <- gate@deparse
+            # ONLY AND/NOT SUPPORTED
+            if(!grepl("^!", logic)) {
+              message("Only NOT boolean gates are supported!")
+              return(NULL)
+            } else if(grepl("|", logic, fixed = TRUE)) {
+              message("Only AND NOT boolean gates are supported!")
+              return(NULL)
+            } else {
+              # STRIP &! - CHECK ALIAS
+              bool_alias <- gsub("^!", "", logic)
+              bool_alias <- unlist(strsplit(bool_alias, "&!"))
+              # BOOLEAN GATE MUST REFERENCE EVERY POPULATION IN ALIAS
+              if(!all(bool_alias %in% alias)) {
+                return(NULL)
+              } else {
+                return(z)
+              }
+              # # BOOL ALIAS MUST BE IN ALIAS
+              # if(!all(bool_alias %in% alias)) {
+              #   alias <<- unique(c(alias, bool_alias))
+              # }
+            }
+            # UNSUPPORTED GATE
+          } else {
+            return(NULL)
+          }
+        })
+        # COMBINE ALIAS & BOOLEAN GATES
+        alias <- unique(c(alias, bool))
+      }
+      # GATES PER GROUP - USE FIRST GH
+      alias <- structure(
+        lapply(grps, function(z){
+          # GH INDEX IN GATINGSET
+          id <- match(rownames(z)[1], cyto_names(x))
+          # LOOP THROUGH ALIAS
+          structure(
+            lapply(alias, function(w){
+              gh_pop_get_gate(x[[id]], # works for gh too
+                              cyto_nodes_convert(x[[id]],
+                                                 nodes = w,
+                                                 anchor = parent))
+            }),
+            names = alias
+          )
+        }),
+        names = names(grps)
+      )
+    }
+  }
+  
+  # GATE SUPPLIED MANUALLY -> LIST OF GATE OBJECT LISTS
+  if(!.all_na(gate)) {
+    # GATE OBJECTS SUPPLIED (NOT A LIST)
+    if(!cyto_class(gate, "list", TRUE)) {
+      # FILTERS -> GATE OBJECT LIST
+      if(cyto_class(gate, "filters")) {
+        gate <- unlist(gate)
+      # GATE -> GATE ONJECT LIST
+      } else {
+        gate <- list(gate)
+      }
+      # STORE FILTER NAMES IN LIST NAMES
+      ids <- LAPPLY(gate, function(z){
+        tryCatch(z@filterId,
+                 error = function(e){
+                  return(NA)
+                })
+      })
+      names(gate)[!is.na(ids)] <- ids[!is.na(ids)]
+      # REPEAT GATES PER GROUP
+      gate <- structure(
+        lapply(names(grps), function(z){
+          return(gate)
+        }),
+        names = names(grps)
+      )
+    # GATE OBJECTS SUPPLIED IN LIST
+    } else {
+      # LIST OF GATE OBJECT LISTS
+      if(cyto_class(x[[1]], "list", TRUE)) {
+        # LIST OF GATE OBJECTS PER GROUP
+        if(length(gate)!= length(grps)) {
+          gate <- rep(gate, length.out = length(grps))
+        }
+        # NEGATE & FILTERID
+        gate <- structure(
+          lapply(gate, function(w){
+            # EXTRACT FILTERS
+            gate_list <- unlist(gate[[w]])
+            ids <- LAPPLY(gate_list, function(z){
+              tryCatch(z@filterId,
+                       error = function(e){
+                         return(NA)
+                       })
+            })
+            names(gate_list)[!is.na(ids)] <- ids[!is.na(ids)]
+            return(gate_list)
+          }),
+          names = names(grps)
+        )
+      # LIST OF GATE OBJECTS  
+      } else {
+        # EXTRACT FILTERS
+        gate <- unlist(gate)
+        # STORE FILTER NAMES IN LIST NAMES
+        ids <- LAPPLY(gate, function(z){
+          tryCatch(z@filterId,
+                   error = function(e){
+                     return(NA)
+                   })
+        })
+        names(gate)[!is.na(ids)] <- ids[!is.na(ids)]
+        # REPEAT GATES PER GROUP
+        gate <- structure(
+          lapply(names(grps), function(z){
+            return(gate)
+          }),
+          names = names(grps)
+        )
+      }
+    }
+    # COMBINE GATE & ALIAS
+    gate <- structure(
+      lapply(seq_along(gate), function(z){
+        # COMBINE ALIAS
+        if(!.all_na(alias)) {
+          alias <<- NA
+          gates <- c(alias[[z]], gate[[z]])
+        } else {
+          gates <- gate[[z]]
+        }
+        # NEGATE
+        if(negate) {
+          if(length(gates) == 1) {
+            gates <- c(gates,
+                       list("negate" = !gates[[1]]))
+          } else {
+            gates <- c(gates,
+                       list("negate" = !do.call("|", unname(unlist(gates)))))
+          }
+        }
+        return(gates)
+      }),
+      names = ifelse(.all_na(alias), names(gate), names(alias))
+    )
+  # GATE - NA
+  } else {
+    # ALIAS INSTEAD OF GATE
+    if(!.all_na(alias)) {
+      gate <- structure(
+        lapply(alias, function(z){
+          # NEGATE
+          if(negate) {
+            if(length(z) == 1) {
+              z <- c(z,
+                     list("negate" = !z[[1]]))
+            } else {
+              z <- c(z,
+                     list("negate" = !do.call("|", unname(unlist(z)))))
+            }
+          }
+          return(z)
+        }),
+        names = names(alias)
+      )
+    }
+  }
+  
+  # PREPARED GATE OBJECTS
+  return(gate)
   
 }
 
