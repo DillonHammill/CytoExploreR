@@ -14,13 +14,20 @@ gs <- cyto_load(
               package = "CytoExploreRData")
 )
 
-cs <- cyto_data_extract(gs, "root")[["root"]]
+gs <- cyto_copy(gs)
+gs <- cyto_barcode(gs, "events")
+
+cs <- cyto_data_extract(gs, 
+                        parent = "root",
+                        copy = TRUE)[["root"]]
 
 gs_sub <- cyto_sample(gs, 
                       display = 2000,
                       seed = 56)
 
-cs_sub <- cyto_data_extract(gs_sub, "root")[["root"]]
+cs_sub <- cyto_data_extract(gs_sub, 
+                            parent = "root",
+                            copy = TRUE)[["root"]]
 
 # Compensation GatingSet -------------------------------------------------------
 
@@ -29,4 +36,9 @@ gs_comp <- cyto_load(
               package = "CytoExploreRData")
 )
 
-cs_comp <- cyto_data_extract(gs_comp, "root")[["root"]]
+gs_comp <- cyto_copy(gs_comp)
+gs_comp <- cyto_barcode(gs_comp, "events")
+
+cs_comp <- cyto_data_extract(gs_comp, 
+                             parent = "root",
+                             copy = TRUE)[["root"]]
