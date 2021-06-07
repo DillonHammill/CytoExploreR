@@ -4,7 +4,7 @@
 \alias{cyto_gatingTemplate_apply}
 \title{Apply gates saved in gatingTemplate to a GatingHierarchy or GatingSet}
 \usage{
-cyto_gatingTemplate_apply(x, gatingTemplate = NULL, ...)
+cyto_gatingTemplate_apply(x, gatingTemplate = NULL, active = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
@@ -12,6 +12,9 @@ cyto_gatingTemplate_apply(x, gatingTemplate = NULL, ...)
 \item{gatingTemplate}{name of the gatingTemplate csv file which contains the
 gates to be applied to \code{x}. This can alos be an object of class
 \code{gatingTemplate} if a \code{GatingSet} object is supplied.}
+
+\item{active}{logical indicating whether the applied gatingTemplate should be
+set as the current active gatingTemplate set to TRUE by default.}
 
 \item{...}{additional arguments passed to gating.}
 }
