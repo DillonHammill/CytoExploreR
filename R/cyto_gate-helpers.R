@@ -56,7 +56,11 @@ cyto_gate_apply <- function(x,
   
   # NEGATE - APPEND FILTER INCLUDING ALL GATES
   if(negate == TRUE) {
-    negate_filter <- !do.call("|", gate)
+    if(length(gate) == 1) {
+      negate_filter <- !gate[[1]]
+    } else {
+      negate_filter <- !do.call("|", unname(unlist(gate)))
+    }
     if(!skip) {
       gate <- c(gate, negate_filter)
     } else {
@@ -1297,7 +1301,8 @@ cyto_gate_edit <- function(x,
                       row_edit = FALSE,
                       col_options = list("select" = c(TRUE, FALSE)),
                       col_names = "select",
-                      col_readonly = "group")
+                      col_readonly = "group",
+                      viewer = "pane")
     grps <- grps[, "group"][which(grps[, "select"] == 1)]
     # NA TO CHARACTERS
     if(any(is.na(grps))){
@@ -1599,15 +1604,12 @@ cyto_gate_type <- function(gates) {
     }
     # Multiple gates supplied
   } else if (length(gates) > 1) {
-    
     # Get classes of gates
     classes <- LAPPLY(gates, function(x) {
       cyto_class(x, class = TRUE)
     })
-    
     # All gates are of the same class
     if (all(classes[1] == classes)) {
-      
       # Gates are all ellipses
       if (classes[1] == "ellipsoidGate") {
         types <- rep("ellipse", length(gates))
@@ -1681,17 +1683,14 @@ cyto_gate_type <- function(gates) {
             }
           })
         }
-        
         # Gates are all polygons
       } else if (classes[1] == "polygonGate") {
-        
         # Combine gate co-ordinates
         pts <- lapply(gates, function(x) {
           rbind(x@boundaries)
         })
         pts <- do.call(rbind, pts)
         dupl <- pts[pts[, 1] == pts[which(duplicated(pts))[1], ][1], ]
-        
         # May be type == "web" need to see if any points are conserved
         if (length(dupl[, 1]) == length(gates)) {
           types <- "web"
@@ -1699,7 +1698,6 @@ cyto_gate_type <- function(gates) {
           types <- rep("polygon", length(gates))
         }
       }
-      
       # Not all supplied gates are of the same class - treat separately
     } else {
       types <- LAPPLY(gates, function(x) {
