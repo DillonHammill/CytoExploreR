@@ -429,7 +429,7 @@ cyto_stats_compute <- function(x,
            stringsAsFactors = FALSE)
     )
   )
-  
+
   # FORMAT
   if(format == "long") {
     # LONG FORMAT REQUIRES MULTIPLE COLUMNS
@@ -460,7 +460,7 @@ cyto_stats_compute <- function(x,
       )
     }
   }
-  
+
   # SAVE
   if(!is.null(save_as)) {
     write_to_csv(res, save_as)
