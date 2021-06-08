@@ -4,9 +4,11 @@
 \alias{cyto_gate_extract}
 \title{Extract Saved Gate(s) from gatingTemplate.}
 \usage{
-cyto_gate_extract(parent, alias, gatingTemplate = NULL, ...)
+cyto_gate_extract(x, parent, alias, gatingTemplate = NULL, ...)
 }
 \arguments{
+\item{x}{object of class GatingHierarchy or GatingSet.}
+
 \item{parent}{name of the parental population.}
 
 \item{alias}{name of the population for which the gate must be extracted.}
@@ -21,9 +23,6 @@ Extract Saved Gate(s) from gatingTemplate.
 }
 \examples{
 library(CytoExploreRData)
-
-# Bypass working directory check for external files
-options("CytoExploreR_wd_check" = FALSE)
 
 # Load in samples
 fs <- Activation
@@ -48,8 +47,6 @@ gtfile <- system.file("extdata",
 # Extract T Cells gate
 cyto_gate_extract("Live Cells", "T Cells", gatingTemplate = gtfile)
 
-# Reset CytoExploreR_wd_check to default
-options("CytoExploreR_wd_check" = TRUE)
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
