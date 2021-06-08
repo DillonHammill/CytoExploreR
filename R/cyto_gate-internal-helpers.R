@@ -24,6 +24,20 @@
 }
 
 #' @noRd
+.cyto_gate_center.default <- function(x,
+                                      channels,
+                                      text_x = NA,
+                                      text_y = NA) {
+  
+  # CANNOT COMPUTE GATE CENTER - FILTER
+  matrix(c(text_x, text_y),
+         ncol = 2,
+         byrow = FALSE,
+         dimnames = list(NULL, c("x","y")))
+  
+}
+
+#' @noRd
 .cyto_gate_center.rectangleGate <- function(x,
                                             channels,
                                             text_x = NA,
@@ -460,6 +474,7 @@
   
   # RETURN GATE CENTER MATRIX --------------------------------------------------
   return(text_xy)
+  
 }
 
 #' @noRd
@@ -476,7 +491,7 @@
   # REPEAT ARGUMENTS -----------------------------------------------------------
   
   # GATE COUNT
-  NG <- .cyto_gate_count(x, negate = FALSE, total = FALSE)
+  NG <- .cyto_gate_count(x, total = FALSE)
   TNG <- sum(NG)
   
   # REPEAT ARGUMENTS
@@ -515,9 +530,9 @@
 
 #' Compute number of gated populations
 #'
-#' @param gate list of gate objects.
-#' @param negate logical indicating if the negated population should be
-#'   included.
+#' @param gate list of gate objects including negated filters.
+#' @param drop logical indicating whether non-gate objects should be dropped
+#'   from the count, set to FALSE by default.
 #' @param total return the total number of gated populations
 #'
 #' @importFrom methods is
@@ -525,8 +540,8 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @noRd
-.cyto_gate_count <- function(gate,
-                             negate = FALSE,
+.cyto_gate_count <- function(gate = NA,
+                             drop = FALSE,
                              total = TRUE){
   
   # NO GATE - SINGLE POPULATION
@@ -535,19 +550,23 @@
   }
   
   # POPULATION COUNT
-  P <- c()
-  lapply(seq_len(length(gate)), function(z){
-    if(is(gate[[z]], "quadGate")){
-      P <<- c(P, 4)
-    }else{
-      P <<- c(P, 1)
+  P <- LAPPLY(seq_len(length(gate)), function(z){
+    # GATE OBJECT
+    if(grepl("gate", cyto_class(gate[[z]]), ignore.case = TRUE)) {
+      if(cyto_class(gate[[z]], "quadGate")) {
+        return(4)
+      } else {
+        return(1)
+      }
+    # FILTER  
+    } else {
+      if(drop) {
+        return(NULL)
+      } else {
+        return(1)
+      }
     }
   })
-  
-  # NEGATE
-  if(negate == TRUE & !any(LAPPLY(gate, "is") == "quadGate")){
-    P <- c(P, 1)
-  }
   
   # RETURN TOTAL POPULATIONS
   if(total == TRUE){
@@ -654,23 +673,30 @@
   coords <- lapply(channels, function(z){
     LAPPLY(x, function(y){
       # RECTANGLEGATE
-      if(is(y, "rectangleGate")){
+      if(cyto_class(y, "rectangleGate")){
         if(length(y@min) == 2){
           coords <- as.numeric(c(y@min[z], y@max[z]))
         }else{
           coords <- as.numeric(c(y@min, y@max))
         }
-      }else if(is(y, "polygonGate")){
+      # POLYGONGATE
+      }else if(cyto_class(y, "polygonGate")){
         coords <- as.numeric(y@boundaries[, z])
-      }else if(is(y, "ellipsoidGate")){
+      # ELLIPSOIDGATE
+      }else if(cyto_class(y, "ellipsoidGate")){
         y <- as(y, "polygonGate")
         coords <- as.numeric(y@boundaries[, z])
-      }else if(is(y, "quadGate")){
+      # QUADGATE
+      }else if(cyto_class(y, "quadGate")){
         coords <- as.numeric(y@boundary[z])
+      # NOT SUPPORTED
+      } else {
+        coords <- NULL
       }
       return(coords)
     })
   })
+  coords[sapply(coords, "is.null")] <- NULL
   
   # COORD MATRIX
   if(length(channels) == 1){

@@ -70,6 +70,13 @@
 #'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param negate logical indicating whether a label should be included for the
 #'   negated population when gate objects are supplied, set to FALSE by default.
+#'   Setting \code{negate = TRUE} will result in the creation of a boolean
+#'   filter that contains all the events outside the gates supplied to
+#'   \code{alias} or \code{gate}. If such a boolean gate exists in the
+#'   GatingSet/GatingHierarchy it will automatically be extracted when
+#'   \code{alias = ""}. In order to prevent plotting of these boolean gates,
+#'   users will need to explicitly pass the names of the gates they want to
+#'   display to \code{alias}.
 #' @param hist_stat can be either \code{"count"}, \code{"percent"} or
 #'   \code{"density"} to indicate the statistic to display on histograms, set to
 #'   \code{"count"} by default. The \code{"percent"} option applies modal
@@ -302,17 +309,15 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @name cyto_plot
-NULL
-
 #' @noRd
-#' @export
+
+#' @noRd 
 cyto_plot <- function(x, ...) {
   UseMethod("cyto_plot")
 }
 
 #' @rdname cyto_plot
-#' @export
+#' @noRd
 cyto_plot.GatingSet <- function(x,
                                 parent= "root",
                                 alias = NA,
@@ -799,7 +804,7 @@ cyto_plot.GatingSet <- function(x,
 }
 
 #' @rdname cyto_plot
-#' @export
+#' @noRd
 cyto_plot.GatingHierarchy <- function(x,
                                       parent = "root",
                                       alias = NA,
@@ -819,7 +824,7 @@ cyto_plot.GatingHierarchy <- function(x,
                                       xlab,
                                       ylab,
                                       title,
-                                      negate,
+                                      negate = FALSE,
                                       hist_stat = "percent",
                                       hist_bins = 256,
                                       hist_smooth = 1,
@@ -1249,7 +1254,7 @@ cyto_plot.GatingHierarchy <- function(x,
 }
 
 #' @rdname cyto_plot
-#' @export
+#' @noRd
 cyto_plot.flowSet <- function(x,
                               channels,
                               axes_trans = NA,
@@ -1268,7 +1273,7 @@ cyto_plot.flowSet <- function(x,
                               xlab,
                               ylab,
                               title,
-                              negate = FALSE,
+                              negate,
                               hist_stat = "percent",
                               hist_bins = 256,
                               hist_smooth = 1,
@@ -1389,12 +1394,12 @@ cyto_plot.flowSet <- function(x,
     args$layout <- FALSE
   }
   
-  # LAYOUT - TURNED OFF
-  if(!all(.empty(args$layout))) {
-    if(all(args$layout == FALSE)){
-      cyto_option("cyto_plot_method", "custom")
-    }
-  }
+  # # LAYOUT - TURNED OFF
+  # if(!all(.empty(args$layout))) {
+  #   if(all(args$layout == FALSE)){
+  #     cyto_option("cyto_plot_method", "custom")
+  #   }
+  # }
   
   # AXES_TRANS
   if(!.all_na(args$axes_trans)) {
@@ -1423,12 +1428,17 @@ cyto_plot.flowSet <- function(x,
   
   # INDIVIDUAL LAYERS (NO OVERLAY)
   if(length(args$channels) == 1 & all(LAPPLY(args$x, length) == 1)) {
+    
     # LEGEND TEXT
     if(.all_na(args$legend_text)){
       args$legend_text <- names(args$x)
     }
     # UNPACK X
-    args$x <- unlist(args$x)
+    args$x <- unlist(args$x)  
+    # HIST_LAYERS - USE ALL LAYERS
+    if(.all_na(args$hist_layers)) {
+      args$hist_layers <- length(x)
+    }
     # HIST_LAYERS
     if(sum(args$hist_layers) != length(x)) {
       # SAME # LAYERS PER PLOT
@@ -1457,9 +1467,9 @@ cyto_plot.flowSet <- function(x,
   # EXPECT LIST OF GATE OBJECT LISTS - ONE PER PLOT
   if (!.all_na(args$gate)) {
     # GATE OBJECTS
-    if(is(args$gate)[1] != "list") {
+    if(cyto_class(args$gate)[1] != "list") {
       # EXTRACT FILTERS
-      if(is(args$gate)[1] == "filters") {
+      if(cyto_class(args$gate)[1] == "filters") {
         args$gate <- rep(list(unlist(args$gate)), 
                          length.out = length(args$x))
         # LIST GATE OBJECTS
@@ -1468,9 +1478,9 @@ cyto_plot.flowSet <- function(x,
                          length.out = length(args$x))
       }
       # LIST OF GATE OBJECTS/ LIST OF GATE OBJECT LISTS
-    } else if(is(args$gate)[1] == "list") {
+    } else if(cyto_class(args$gate)[1] == "list") {
       # LIST OF GATE OBJECT LISTS
-      if(is(args$gate[[1]])[1] == "list") {
+      if(cyto_class(args$gate[[1]])[1] == "list") {
         # EXTRACT FILTERS
         args$gate <- structure(lapply(args$gate, "unlist"), 
                                names = names(args$gate))
@@ -1634,12 +1644,10 @@ cyto_plot.flowSet <- function(x,
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
   
   # GRAPHICS DEVICE
-  if(cyto_option("cyto_plot_method") == "cytoset") {
-    cyto_plot_new(args$popup,
-                  popup_size = args$popup_size,
-                  layout = args$layout,
-                  oma = oma)
-  }
+  cyto_plot_new(args$popup,
+                popup_size = args$popup_size,
+                layout = args$layout,
+                oma = oma)
   
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]

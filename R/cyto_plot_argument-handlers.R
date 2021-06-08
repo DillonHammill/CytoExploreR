@@ -21,7 +21,7 @@
   
   # CALLED WITHIN CYTO_PLOT METHOD
   if (missing(plots)) {
-      NP <- length(x$x)
+    NP <- length(x$x)
   } else {
     NP <- plots
   }
@@ -55,7 +55,7 @@
   }
   GC <- LAPPLY(x$gate, function(z) {
     if (.all_na(z)) {
-      return(1)
+      return(0)
     } else {
       return(length(z))
     }
@@ -63,41 +63,37 @@
   
   # GATED POPULATIONS PER LAYER - GP -------------------------------------------
   if (!all(GC == 0)) {
-    GP <- lapply(x$gate, function(z) {
-      LAPPLY(z, function(y) {
-        if (class(y) == "quadGate") {
-          return(4)
+    GP <- list()
+    GNP <- list()
+    lapply(seq_along(x$gate), function(z){
+      for(y in seq_along(x$gate[[z]])){
+        # ONLY GATES UPDATE GP
+        if(grepl("gate", cyto_class(x$gate[[z]][[y]]), ignore.case = TRUE)) {
+          # QUADGATES - 4 POPULATIONS
+          if(cyto_class(x$gate[[z]][[y]], "quadGate")) {
+            GP[[z]] <<- c(tryCatch(GP[[z]], error = function(e){NULL}), 4)
+            GNP[[z]] <<- c(tryCatch(GNP[[z]], error = function(e){NULL}), 4)
+          # OTHER GATES - 1 POPULATION
+          } else {
+            GP[[z]] <<- c(tryCatch(GP[[z]], error = function(e){NULL}), 1)
+            GNP[[z]] <<- c(tryCatch(GNP[[z]], error = function(e){NULL}), 1)
+          }
+        # FILTERS ADD 1 TO GNP FOR LABEL
         } else {
-          return(1)
+          GNP[[z]] <<- c(tryCatch(GNP[[z]], error = function(e){NULL}), 1)
         }
-      })
+      }
     })
     GP <- unlist(LAPPLY(GP, "sum"))
-    # NO GATES
+    GNP <- unlist(LAPPLY(GNP, "sum"))
+  # NO GATES
   } else {
     GP <- rep(1, NP)
+    GNP <- rep(1, NP)
   }
   
-  # TOTAL GATED POPULATIONS PER LAYER - TGP ------------------------------------
-  # TGP <- sum(GP)
-  
-  # GATED/NEGATED POPULATIONS PER LAYER - GNP ----------------------------------
-  
-  # PREPARE NEGATE ARGUMENT
-  x$negate <- rep(x$negate, length.out = NP)
-  x$negate <- split(x$negate, seq_len(NP))
-  GNP <- LAPPLY(seq_len(NP), function(z) {
-    if (GC[z] != 0 &
-        x$negate[z] == TRUE &
-        !"quadGate" %in% LAPPLY(x$gate[[z]], "is")) {
-      return(GP[z] + 1)
-    } else {
-      return(GP[z])
-    }
-  })
-  
-  # TOTAL GATED/NEGATED POPULATIONS - TGNP -------------------------------------
-  # TGNP <- sum(GNP)
+  # GATE COUNT CANNOT BE ZERO WHEN REPEATING ARGUMENTS
+  GC[GC == 0] <- 1
   
   # CYTO_PLOT ARGUMENTS --------------------------------------------------------
   

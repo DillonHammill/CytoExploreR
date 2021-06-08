@@ -484,10 +484,6 @@
     } else {
       # GATINGHIERARCHY
       gh <- x[[1]]
-      # NEGATE - FIND BOOLEAN GATES BY DEFAULT FOR GS/GH
-      if(.empty(negate)) {
-        negate <- TRUE
-      }
       # PARENT - AUTO PATH
       parent <- cyto_nodes_convert(gh,
                                    nodes = parent,
@@ -563,10 +559,14 @@
             logic <- gate@deparse
             # ONLY AND/NOT SUPPORTED
             if(!grepl("^!", logic)) {
-              message("Only NOT boolean gates are supported!")
+              if(!grepl("add", names(bool)[z])) {
+                message("Only NOT boolean gates are supported!")
+              }
               return(NULL)
             } else if(grepl("|", logic, fixed = TRUE)) {
-              message("Only AND NOT boolean gates are supported!")
+              if(!grepl("add", names(bool)[z])){
+                message("Only AND NOT boolean gates are supported!")
+              }
               return(NULL)
             } else {
               # STRIP &! - CHECK ALIAS
@@ -591,24 +591,11 @@
         # COMBINE ALIAS & BOOLEAN GATES
         alias <- unique(c(alias, bool))
       }
-      # GATES PER GROUP - USE FIRST GH
-      alias <- structure(
-        lapply(grps, function(z){
-          # GH INDEX IN GATINGSET
-          id <- match(rownames(z)[1], cyto_names(x))
-          # LOOP THROUGH ALIAS
-          structure(
-            lapply(alias, function(w){
-              gh_pop_get_gate(x[[id]], # works for gh too
-                              cyto_nodes_convert(x[[id]],
-                                                 nodes = w,
-                                                 anchor = parent))
-            }),
-            names = alias
-          )
-        }),
-        names = names(grps)
-      )
+      # GATES PER GROUP - USE FIRST GH - SELECT HANDLED ABOVE
+      alias <- cyto_gate_extract(x,
+                                 parent = parent,
+                                 alias = alias,
+                                 merge_by = merge_by)
     }
   }
   
@@ -1089,7 +1076,7 @@
   # AXES_LABELS
   cnt <- 0
   axes_labels <- lapply(channels, function(z) {
-    assign("cnt", cnt + 1, envir = parent.frame(2))
+    cnt <<- cnt + 1
     # LABELS
     if (cnt == 1) {
       lab <- xlab
@@ -1266,7 +1253,7 @@
   }
   
   # POPULATIONS PER LAYER
-  NP <- .cyto_gate_count(gate, negate = negate)
+  NP <- .cyto_gate_count(gate)
   
   # TOTAL POPULATIONS
   SMP <- length(x)
@@ -1401,8 +1388,6 @@
 #' @param x list of cytoframes/cytosets per layer to be gated
 #' @param gate list of gate objects to apply to each element of x, gates only
 #'   required for base layer.
-#' @param negate logical indicating whether negated population should be
-#'   included.
 #' @param label_stat required to identify which layers require gating to get
 #'   statistics
 #' @param ... not in use.
@@ -1417,8 +1402,7 @@
 #'
 #' @noRd
 .cyto_plot_label_pops <- function(x,
-                                  gate,
-                                  negate = FALSE,
+                                  gate = NA,
                                   label_stat = NA,
                                   ...) {
   
@@ -1474,8 +1458,7 @@
       # LIST OF GATED POPULATIONS PER GATE -> LIST OF POPS (CYTOSETS)
       unlist(
         cyto_gate_apply(cs,
-                        gate = gate,
-                        negate = negate)
+                        gate = gate)
       )
     }
     # pops_to_label <- labels_per_layer[[z]]
@@ -1792,7 +1775,9 @@
   # LAYERS & POPULATIONS
   L <- length(pops)
   GNP <- length(pops[[1]])
-  GC <- .cyto_gate_count(gate, total = TRUE)
+  GC <- .cyto_gate_count(gate, 
+                         drop = TRUE,
+                         total = TRUE)
   
   # PREPARE LABEL ARGUMENTS PER LAYER
   label_text <- split(label_text, rep(seq_len(L), each = GNP))
@@ -1834,6 +1819,12 @@
                         text_x = rep(NA, GC),
                         text_y = rep(NA, GC))
     )
+  # NO GATES - NO CENTERS
+  } else {
+    gate_centers <- matrix(NA,
+                           ncol = 2,
+                           nrow = sum(GNP),
+                           dimnames = list(NULL, c("x", "y")))
   }
   
   # LABEL_TEXT_XY - MATRIX
@@ -1847,67 +1838,15 @@
       if (!.all_na(label_text[[z]][y])) {
         # ID PLOT - CENTER OF RANGE
         if (length(channels) == 1) {
-          # GATE
-          if (!.all_na(gate)) {
-            # GATED POPULATION
-            if (y <= nrow(gate_centers)) {
-              # X COORD - GATE CENTER
-              if (.all_na(label_text_x[[z]][y])) {
-                text_x[y] <- gate_centers[y, "x"]
-              } else {
-                text_x[y] <- label_text_x[[z]][y]
-              }
-              # Y COORD - STACKS/LIMITS
-              if (.all_na(label_text_y[[z]][y])) {
-                text_y[y] <- y_coords[[z]][y]
-              }else if(!.all_na(label_text_y[[z]][y])) {
-                text_y[y] <- label_text_y[[z]][y]
-              }
-              # NEGATED POPULATION
-            } else if (y > nrow(gate_centers)) {
-              # X COORD - RANGE CENTER
-              if (.all_na(label_text_x[[z]][y])) {
-                # NO EVENTS
-                if (cyto_apply(pops[[z]][[y]],
-                               "nrow",
-                               input = "matrix",
-                               copy = FALSE)[, 1] == 0) {
-                  # RANGE CENTER - PLOT LIMITS
-                  text_x[y] <- mean(c(xmin, xmax))
-                } else {
-                  # RANGE
-                  rng <- suppressMessages(
-                    .cyto_plot_axes_limits(pops[[z]][[y]],
-                                           channels = channels[1],
-                                           axes_limits = axes_limits,
-                                           buffer = 0,
-                                           anchor = FALSE
-                    )[, channels]
-                  )
-                  # UNIMODAL - 50% RANGE
-                  if (abs(diff(rng)) <= 0.6 * xrng) {
-                    text_x[y] <- quantile(rng, 0.5)
-                    # UMULTIMODAL - 56% RANGE
-                  } else {
-                    text_x[y] <- quantile(rng, 0.56)
-                  }
-                }
-                # X COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_x[[z]][y])) {
-                text_x[y] <- label_text_x[[z]][y]
-              }
-              # Y COORD - STACKS/LIMITS
-              if (.all_na(label_text_y[[z]][y])) {
-                text_y[y] <- y_coords[[z]][y]
-                # Y COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_y[[z]][y])) {
-                text_y[y] <- label_text_y[[z]][y]
-              }
-            }
-            # NO GATE
-          } else if (.all_na(gate)) {
-            # X COORD - RANGE CENTER
-            if (.all_na(label_text_x[[z]][y])) {
+          # GATE CENTER
+          gate_center <- gate_centers[y, ]
+          # X COORD REQUIRED
+          if(.all_na(label_text_x[[z]][y])) {
+            # GATE CENTER AVAILABLE
+            if(!.all_na(gate_center[1])) {
+              text_x[y] <- gate_center[1]
+              # NO GATE CENTER
+            } else {
               # NO EVENTS
               if (cyto_apply(pops[[z]][[y]],
                              "nrow",
@@ -1928,94 +1867,34 @@
                 # UNIMODAL - 50% RANGE
                 if (abs(diff(rng)) <= 0.6 * xrng) {
                   text_x[y] <- quantile(rng, 0.5)
-                  # MULTIMODAL - 56% RANGE
+                  # UMULTIMODAL - 56% RANGE
                 } else {
                   text_x[y] <- quantile(rng, 0.56)
                 }
               }
-              # X COORD MANUALLY SUPPLIED
-            } else if (!.all_na(label_text_x[[z]][y])) {
-              text_x[y] <- label_text_x[[z]][y]
             }
-            # Y COORD - STACKS/LIMITS
-            if (.all_na(label_text_y[[z]][y])) {
-              text_y[y] <- y_coords[[z]][y]
-              # Y COORD MANUALLY SUPPLIED
-            } else if (!.all_na(label_text_y[[z]][y])) {
-              text_y[y] <- label_text_y[[z]][y]
-            }
+            # X COORD - MANUALLY SUPPLIED
+          } else {
+            text_x[y] <- label_text_x[[z]][y]
+          }
+          # Y COORD - STACKS/LIMITS
+          if (.all_na(label_text_y[[z]][y])) {
+            text_y[y] <- y_coords[[z]][y]
+            # Y COORD MANUALLY SUPPLIED
+          } else if (!.all_na(label_text_y[[z]][y])) {
+            text_y[y] <- label_text_y[[z]][y]
           }
           # 2D PLOT - MODE
         } else if (length(channels) == 2) {
-          # GATE
-          if (!.all_na(gate)) {
-            # GATED POPULATION
-            if (y <= nrow(gate_centers)) {
-              # X COORD - GATE CENTER
-              if (.all_na(label_text_x[[z]][y])) {
-                text_x[y] <- gate_centers[y, "x"]
-              } else {
-                text_x[y] <- label_text_x[[z]][y]
-              }
-              # Y COORD - GATE CENTER
-              if (.all_na(label_text_y[[z]][y])) {
-                text_y[y] <- gate_centers[y, "y"]
-              } else {
-                text_y[y] <- label_text_y[[z]][y]
-              }
-              # NEGATED POPULATION
-            } else if (y > nrow(gate_centers)) {
-              # X COORD - MODE/RANGE CENTER
-              if (.all_na(label_text_x[[z]][y])) {
-                # NO EVENTS
-                if (cyto_apply(pops[[z]][[y]],
-                               "nrow",
-                               input = "matrix",
-                               copy = FALSE)[, 1] < 2) {
-                  # RANGE CENTER
-                  text_x[y] <- mean(c(xmin, xmax))
-                } else {
-                  # MODE
-                  text_x[y] <- cyto_apply(pops[[z]][[y]],
-                                          "cyto_stat_mode",
-                                          input = "matrix",
-                                          channels = channels[1],
-                                          hist_smooth = hist_smooth,
-                                          hist_bins = hist_bins,
-                                          inverse = FALSE)[, 1]
-                }
-                # X COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_x[[z]][y])) {
-                text_x[y] <- label_text_x[[z]][y]
-              }
-              # Y COORD - MODE/RANGE CENTER
-              if (.all_na(label_text_y[[z]][y])) {
-                # NO EVENTS
-                if (cyto_apply(pops[[z]][[y]],
-                               "nrow",
-                               input = "matrix",
-                               copy = FALSE)[, 1] == 0) {
-                  # RANGE CENTER
-                  text_y[y] <- mean(c(ymin, ymax))
-                } else {
-                  # MODE
-                  text_y[y] <- cyto_apply(pops[[z]][[y]],
-                                          "cyto_stat_mode",
-                                          input = "matrix",
-                                          channels = channels[2],
-                                          hist_smooth = hist_smooth,
-                                          hist_bins = hist_bins,
-                                          inverse = FALSE)[, 1]
-                }
-                # Y COORD MANUALLY SUPPLIED
-              } else if (!.all_na(label_text_y[[z]][y])) {
-                text_y[y] <- label_text_y[[z]][y]
-              }
-            }
-            # NO GATE
-          } else if (.all_na(gate)) {
-            # X COORD - MODE/RANGE CENTER
-            if (.all_na(label_text_x[[z]][y])) {
+          # GATE CENTER
+          gate_center <- gate_centers[y, ]
+          # X COORD REQUIRED
+          if(.all_na(label_text_x[[z]][y])) {
+            # GATE CENTER AVAILABLE
+            if(!.all_na(gate_center[1])) {
+              text_x[y] <- gate_center[1]
+              # NO GATE CENTER
+            } else {
               # NO EVENTS
               if (cyto_apply(pops[[z]][[y]],
                              "nrow",
@@ -2029,21 +1908,28 @@
                                         "cyto_stat_mode",
                                         input = "matrix",
                                         channels = channels[1],
-                                        hist_smooth = hist_smooth,
-                                        hist_bins = hist_bins,
+                                        smooth = hist_smooth,
+                                        bins = hist_bins,
                                         inverse = FALSE)[, 1]
               }
-              # X COORD SUPPLIED MANUALLY
-            } else if (!.all_na(label_text_x[[z]][y])) {
-              text_x[y] <- label_text_x[[z]][y]
             }
-            # Y COORD - MODE
-            if (.all_na(label_text_y[[z]][y])) {
+          # X COORD - MANUALLY SUPPLIED
+          } else {
+            text_x[y] <- label_text_x[[z]][y]
+          }
+          # Y COORD REQUIRED
+          if(.all_na(label_text_y[[z]][y])) {
+            # GATE CENTER AVAILABLE
+            if(!.all_na(gate_center[2])) {
+              text_y[y] <- gate_center[2]
+            # NO GATE CENTER
+            } else {
               # NO EVENTS
               if (cyto_apply(pops[[z]][[y]],
                              "nrow",
                              input = "matrix",
-                             copy = FALSE)[, 1] < 2) {
+                             copy = FALSE)[, 1] == 0) {
+                # RANGE CENTER
                 text_y[y] <- mean(c(ymin, ymax))
               } else {
                 # MODE
@@ -2051,14 +1937,14 @@
                                         "cyto_stat_mode",
                                         input = "matrix",
                                         channels = channels[2],
-                                        hist_smooth = hist_smooth,
-                                        hist_bins = hist_bins,
+                                        smooth = hist_smooth,
+                                        bins = hist_bins,
                                         inverse = FALSE)[, 1]
               }
-              # Y COORD MANUALLY SUPPLIED
-            } else if (!.all_na(label_text_y[[z]][y])) {
-              text_y[y] <- label_text_y[[z]][y]
             }
+          # Y COORD - MANUALLY SUPPLIED
+          } else {
+            text_y[y] <- label_text_y[[z]][y]
           }
         }
         # NO LABEL
@@ -2324,12 +2210,25 @@
   # TOTAL POPULATIONS
   TNP <- length(args$x) * NP
   
+  # REMOVE ANY FILTERS
+  args$gate <- structure(
+    lapply(args$gate, function(z){
+      # KEEP GATE OBJECTS
+      if(grepl("gate", cyto_class(z), ignore.case = TRUE)) {
+        return(z)
+      } else {
+        return(NULL)
+      }
+    }),
+    names = names(args$gate)
+  )
+  args$gate[sapply(args$gate, "is.null")] <- NULL
+  
   # GATES
   NG <- length(args$gate)
   
   # POPULATIONS PER GATE
   P <- .cyto_gate_count(args$gate,
-                        negate = FALSE,
                         total = FALSE)
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
