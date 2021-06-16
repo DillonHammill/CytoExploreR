@@ -344,10 +344,11 @@ cyto_load <- function(path = ".",
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. The \code{root}
 #'   node extracted when a \code{GatingSet} or \code{GatingHierachy} is
 #'   supplied.
+#' @param type the method to use when cleaning the data, options include
+#'   \code{"flowAI"}, \code{"flowClean"} or \code{"flowCut"}.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.
+#'   \code{flowAI::flow_auto_qc}, \code{flowClean::flowClean}, or \code{flowCut::flowCut}.
 #'
-#' @importFrom flowAI flow_auto_qc
 #' @importFrom flowWorkspace gs_cyto_data flowSet_to_cytoset
 #' @importFrom utils capture.output
 #'
@@ -366,16 +367,18 @@ cyto_load <- function(path = ".",
 #'
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
-#' 
+#'
 #' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
 #'   \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}
-#'   
+#'
 #' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
 #'
 #' @export
-cyto_clean <- function(x, ...) {
+cyto_clean <- function(x,
+                       type = "flowAI",
+                       ...) {
   
   # EXTRACT DATA
   if(cyto_class(x, "GatingSet")) {
@@ -386,19 +389,80 @@ cyto_clean <- function(x, ...) {
     cyto_data <- x
   }
   
-  # flowAI
-  invisible(
-    capture.output(
-      cyto_data <- flow_auto_qc(
-        cyto_data,
-        html_report = FALSE,
-        mini_report = FALSE,
-        fcs_QC = FALSE,
-        folder_results = FALSE,
-        ...
+  # FLOWAI
+  if(grepl("ai", type, ignore.case = TRUE)) {
+    cyto_require("flowAI",
+                 source = "BioC",
+                 repo = "giannimonaco/flowAI",
+                 ref = paste0("Monaco G, Chen H, Poidinger M, Chen J,",
+                              " de Magalhaes J, Larbi A (2016). flowAI:",
+                              " automatic and interactive anomaly discerning",
+                              " tools for flow cytometry data. Bioinformatics,",
+                              " 32(16)."))
+    invisible(
+      capture.output(
+        cyto_data <- cyto_apply(
+          cyto_data,
+          "flowAI::flow_auto_qc",
+          input = "cytoframe",
+          copy = FALSE,
+          html_report = FALSE,
+          mini_report = FALSE,
+          fcs_QC = FALSE,
+          folder_results = FALSE,
+          ...
+        )
+        # cyto_data <- flow_auto_qc(
+        #   cyto_data,
+        #   html_report = FALSE,
+        #   mini_report = FALSE,
+        #   fcs_QC = FALSE,
+        #   folder_results = FALSE,
+        #   ...
+        # )
       )
     )
-  )
+  # FLOWCLEAN
+  } else if(grepl("clean", type, ignore.case = TRUE)) {
+    cyto_require("flowClean",
+                 source = "BioC",
+                 repo = "cafletezbrant/flowClean",
+                 ref = paste0(
+                   "Fletez-Brant K, Spidlen J, Brinkman R, Roederer M,",
+                   " Chattopadhyay P (2016). flowClean: Automated",
+                   " identification and removal of fluorescence anaomalies",
+                   " in flow cytometry data. Cytometry A 89(5)"
+                 ))
+    cyto_data <- cyto_apply(
+      cyto_data,
+      "flowClean::clean",
+      input = "flowFrame",
+      slot = "frame",
+      copy = FALSE,
+      diagnostic = FALSE, 
+      ...
+    )
+    
+  # FLOWCUT
+  } else {
+    cyto_require("flowCut",
+                 source = "BioC",
+                 repo = "jmeskas/flowCut",
+                 ref = paste0(
+                   "Meskas J, Wang S, Brinkman R (2021). flowCut --- An R",
+                   " Package for precise and accurate automated removal of",
+                   " outlier events and flagging of files based on time",
+                   " versus fluorescence analysis. bioRxiv"))
+    cyto_data <- cyto_apply(
+      cyto_data,
+      "flowCut::flowCut",
+      input = "flowFrame",
+      slot = "frame",
+      copy = FALSE,
+      Plot = "None", 
+      ...
+    )
+  }
   
   # CYTOSET
   if(cyto_class(cyto_data, "flowSet", TRUE)) {
@@ -1962,7 +2026,7 @@ cyto_groups <- function(x,
                         details = FALSE){
   
   # Check class of x
-  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
+  if (!cyto_class(x, c("flowSet", "GatingSet"))) {
     stop("'x' should be an object of class cytoset or GatingSet.")
   }
   
@@ -2240,7 +2304,9 @@ cyto_merge_by <- function(x,
   # BARCODING ------------------------------------------------------------------
   
   # SAMPLE ID
-  x <- cyto_barcode(x, ...)
+  if(barcode) {
+    x <- cyto_barcode(x, ...)
+  }
   
   # GROUPING -------------------------------------------------------------------
   
@@ -2383,7 +2449,7 @@ cyto_split <- function(x,
   # SAMPLE-ID COLUMN
   ind <- which(
     LAPPLY(cyto_channels(x), function(v){
-      grepl("^Sample.*ID.*$", v) # flowJo compatibility SampleID
+      grepl("\\Sample.*\\ID$", v) # flowJo compatibility SampleID
     })
   )
   if (length(ind) == 0) {
@@ -3087,9 +3153,13 @@ cyto_coerce <- function(x,
       lapply(
         cyto_names(x), 
         function(z){
-          cyto_sample(x[[z]], 
-                      display = cnts[z], 
-                      seed = seed)
+          fr <- cyto_sample(x[[z]], 
+                            display = cnts[z], 
+                            seed = seed)
+          if(cyto_class(fr, "flowFrame", TRUE)) {
+            fr <- flowFrame_to_cytoframe(fr)
+          }
+          return(fr)
         }
       ),
     names = cyto_names(x))
@@ -4735,10 +4805,14 @@ cyto_calibrate_reset <- function(){
 #'   transformations when \code{inverse = TRUE}.
 #' @param inverse logical indicating whether the data should be inverse
 #'   transformed prior to applying \code{FUN}, set to FALSE by default.
+#' @param slot name of the slot to extract from the output if the object
+#'   returned by the function is a list or S4 R object, set to NULL by default.
+#'   the output of the function
 #'
 #' @importFrom methods is
 #' @importFrom flowCore flowSet
-#' @importFrom flowWorkspace cytoset
+#' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe
+#'   cytoframe_to_flowFrame
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -4776,7 +4850,8 @@ cyto_apply.default <- function(x,
                                copy = TRUE,
                                channels = NULL,
                                trans = NA,
-                               inverse = FALSE) {
+                               inverse = FALSE,
+                               slot = NULL) {
   
   # GATINGHIERARCHY/GATINGSET
   if(cyto_class(x,  "GatingSet")) {
@@ -4799,6 +4874,7 @@ cyto_apply.default <- function(x,
                    channels = channels,
                    trans = trans,
                    inverse = inverse,
+                   slot = slot,
                    ...)
       }), names = names(x)
     )
@@ -4833,7 +4909,8 @@ cyto_apply.flowSet <- function(x,
                                copy = TRUE,
                                channels = NULL,
                                trans = NA,
-                               inverse = FALSE) {
+                               inverse = FALSE,
+                               slot = NULL) {
   
   # FUNCTION
   if(missing(FUN)) {
@@ -4852,7 +4929,7 @@ cyto_apply.flowSet <- function(x,
   }
   
   # PREPARE FUNCTION
-  FUN <- match.fun(FUN)
+  FUN <- match_fun(FUN) # namespaced function character covered
   
   # COPY
   if(copy) {
@@ -4902,27 +4979,65 @@ cyto_apply.flowSet <- function(x,
   if(input == "cytoset") {
     res <- structure(
       lapply(seq_along(x), function(z){
-        FUN(x[z], ...)
+        output <- FUN(x[z], ...)
+        # SLOT
+        if(!is.null(slot)) {
+          output <- output[[slot]]
+        }
+        return(output)
+      }), names = cyto_names(x))
+  } else if(input == "flowFrame") { # internal use only
+    res <- structure(
+      lapply(cyto_names(x), function(z){
+        output <- FUN(cytoframe_to_flowFrame(x[[z]]), ...)
+        # SLOT
+        if(!is.null(slot)) {
+          output <- output[[slot]]
+        }
+        if(cyto_class(output, "flowFrame", TRUE)) {
+          output <- flowFrame_to_cytoframe(output)
+        }
+        return(output)
       }), names = cyto_names(x))
   } else if(input == "cytoframe") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        FUN(x[[z]], ...)
+        output <-FUN(x[[z]], ...)
+        # SLOT 
+        if(!is.null(slot)) {
+          output <- output[[slot]]
+        }
+        return(output)
       }), names = cyto_names(x))
   } else if(input == "matrix") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        FUN(exprs(x[[z]]), ...)
+        output <- FUN(exprs(x[[z]]), ...)
+        # SLOT
+        if(!is.null(slot)) {
+          output <- output[[slot]]
+        }
+        return(output)
       }), names = cyto_names(x))
   } else if(input == "column") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        apply(exprs(x[[z]]), 2, FUN, ...)
+        output <- apply(exprs(x[[z]]), 2, FUN, ...)
+        # SLOT
+        if(!is.null(slot)) {
+          output <- output[[slot]]
+        }
+        return(output)
       }), names = cyto_names(x))
   } else if(input =="row") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        apply(exprs(x[[z]]), 1, FUN, ...)
+        output <- apply(exprs(x[[z]]), 1, FUN, ...)
+        # SLOT
+        if(!is.null(slot)) {
+          output <- output[[slot]]
+        }
+        return(output)
       }), names = cyto_names(x))
   }
   
@@ -4997,7 +5112,8 @@ cyto_apply.list <- function(x,
                             copy = TRUE,
                             channels = NULL,
                             trans = NA,
-                            inverse = FALSE) {
+                            inverse = FALSE,
+                            slot = NULL) {
   
   structure(
     lapply(x, function(z){
@@ -5010,7 +5126,8 @@ cyto_apply.list <- function(x,
                  copy = copy,
                  channels = channels,
                  trans = trans,
-                 inverse = inverse)
+                 inverse = inverse,
+                 slot = slot)
     }), names = names(x)
   )
   
@@ -5198,7 +5315,13 @@ cyto_require <- function(x,
       # VERSION TOO OLD
       if(tryCatch(pkg_version < version, error = function(e){TRUE})) {
         inst <- TRUE
+      # VERSION CORRECT
+      } else {
+        inst <- FALSE
       }
+    # VERSION DOES NOT MATTER
+    } else {
+      inst <- FALSE
     }
   # PACKAGE MISSING 
   } else {
@@ -5207,30 +5330,34 @@ cyto_require <- function(x,
   
   # INSTALL PACKAGE
   if(inst) {
-    # CRAN
-    if(grepl("^c", x, ignore.case = TRUE)){
-      install.packages(x)
-    # BIOCONDUCTOR
-    } else if (grepl("^b", x, ignore.case = TRUE)) {
-      if(!"BiocManager" %in% pkgs$Package) {
-        install.packages("BiocManager", ...)
-      }
-      if(requireNamepsace("BiocManager")) {
-        BiocManager::install(x, ...)
-      }
-    # GITHUB
-    } else {
+    # MESSAGE
+    message(
+      paste0("Installing required package: ",
+             x, "...")
+    )
+    # GITHUB - REPO
+    if(!is.null(repo)) {
       if(!"remotes" %in% pkgs$Package) {
         install.packages("remotes")
       }
       if(requireNamespace("remotes")) {
         remotes::install_github(repo, ...)
       }
+    # CRAN
+    } else if(grepl("^c", source, ignore.case = TRUE)){
+      install.packages(x)
+    # BIOCONDUCTOR
+    } else if (grepl("^b", source, ignore.case = TRUE)) {
+      if(!"BiocManager" %in% pkgs$Package) {
+        install.packages("BiocManager", ...)
+      }
+      if(requireNamespace("BiocManager")) {
+        BiocManager::install(x, ...)
+      }
     }
   }
   
   # LOAD PACKAGE
-  message(paste0("Loading ", x, "..."))
   requireNamespace(x)
   
   # REFERENCE

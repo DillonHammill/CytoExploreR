@@ -70,13 +70,13 @@ cyto_transformer_extract <- function(...){
 #'   functions must be generated. Set to all the fluorescent channels by default
 #'   if no channels/markers are supplied.
 #' @param type a vector indicating the type of transformations to apply to each
-#'   channel, options include \code{"log"}, \code{"arcsinh"},
+#'   channel, options include \code{"log"}, \code{"asinh"}, \code{"asinh_Gml2"},
 #'   \code{"biexponential"} or \code{"logicle"}. A list or vector named with the
 #'   channels can be used to apply a different transformation type to each
 #'   channel. All channels will have the same settings for each transformation
 #'   type, multiple calls to \code{cyto_transformers_define()} can be made to
 #'   modify these settings per channel. Multiple transformerLists can be joined
-#'   together using \code{cyto_transformers_combine()}.
+#'   together using \code{cyto_transformers_combine()}. 
 #' @param select list of selection criteria passed to \code{cyto_select} to
 #'   select a subset of samples for \code{cyto_plot}.
 #' @param plot logical indicating whether the results of transformations should
@@ -139,13 +139,10 @@ cyto_transformers_define <- function(x,
     channels <- cyto_channels_extract(cs, channels)
   }
   
-  # SAMPLE & COERCE - SET SEED?
-  cs <- cyto_coerce(cs,
-                    display = display,
-                    format = "cytoset")
-  
   # UPDATE DEFINITION OF X - TRANSFORMERS REQUIRE CYTOFRAME
-  x <- cs[[1]]
+  x <- cyto_coerce(cs,
+                   display = display,
+                   format = "cytoset")[[1]]
   
   # PREPARE ARGUMENTS
   args <- .args_list(...)
@@ -171,18 +168,66 @@ cyto_transformers_define <- function(x,
       if(grepl("^log$", type[z], ignore.case = TRUE)) {
         .execute("flowjo_log_trans", args)
       # ARCSINH TRANSFORM
-      } else if(grepl("^arc", type[z], ignore.case = TRUE)) {
-        # TRANSFORMERS
-        args[["inverse"]] <- FALSE
-        trans <- .execute("asinh_Gml2", args)
-        # INVERSE TRANSFORMERS
-        args[["inverse"]] <- TRUE
-        inv_trans <- .execute("asinh_Gml2", args)
-        flow_trans(
-          "arcsinh",
-          trans@.Data,
-          inv_trans@.Data
-        )
+      } else if(grepl("^a", type[z], ignore.case = TRUE)) {
+        # ARCSINH GML2 FLOWWORKSPACE
+        if(grepl("^arc", type[z], ignore.case = TRUE) |
+           grepl("g", type[z], ignore.case = TRUE)) {
+          # TRANSFORMERS
+          args[["inverse"]] <- FALSE
+          trans <- .execute("asinh_Gml2", args)
+          # INVERSE TRANSFORMERS
+          args[["inverse"]] <- TRUE
+          inv_trans <- .execute("asinh_Gml2", args)
+          flow_trans(
+            "arcsinh_Gml2",
+            trans@.Data,
+            inv_trans@.Data
+          )
+        # ARCSINH COFACTOR
+        } else {
+          # TODO: ESTIMATE COFACTORS USING FLOWVS
+          # FLOWVS - CANNOT TURN OFF PLOTS & MESSAGES USE CAT
+          # COFACTOR SUPPLIED MANUALLY
+          if("cofactor" %in% names(args)) {
+            cofactor <- args[["cofactor"]]
+            # ESTIMATE COFACTOR USING FLOWVS
+          } else {
+            # FLOWVS
+            cyto_require("flowVS",
+                         source = "BioC",
+                         repo = NULL,
+                         version = NULL,
+                         ref = paste0(
+                           "Azad A, Rajwa B, Pothen A (2016). flowVS:",
+                           " channel-specific variance stabilisation in",
+                           " flow cytometry, BMC Bioinformatics 17(291)."))
+            # ESTIMATE COFACTOR TO STABILISE VARAIANCE
+            message(
+              paste0(
+                "Using flowVS to estimate cofactor for ", z, "..."
+              )
+            )
+            invisible(
+              capture.output(
+                cf <- do_call("flowVS::estParamFlowVS",
+                              list(cs, z, FALSE)) # add plot argument here
+              )
+            )
+          }
+          # TRANSFORMER DEFINITIONS
+          asinh_trans <- function(x, cofactor = cf) {
+            asinh(x/cofactor)
+          }
+          sinh_trans <- function(x, cofactor = cf) {
+            sinh(x/cofactor)
+          }
+          # TRANSFORMERS
+          flow_trans(
+            "arcsinh",
+            asinh_trans,
+            sinh_trans
+          )
+        }
       # BIEXPONENTIAL TRANSFORM
       } else if(grepl("^biex", type[z], ignore.case = TRUE)) {
         # MAXVALUE - HARD CODED
@@ -238,12 +283,12 @@ cyto_transformers_define <- function(x,
   # PLOT TRANSFORMATIONS
   if(plot) {
     # TRANSFORM DATA
-    cs <- cyto_transform(cs,
-                         trans = transformer_list,
-                         plot = FALSE)
+    x <- cyto_transform(x,
+                        trans = transformer_list,
+                        plot = FALSE)
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      cyto_plot_profile(cs,
+      cyto_plot_profile(x,
                         channels = channels,
                         axes_trans = transformer_list,
                         axes_limits = axes_limits,

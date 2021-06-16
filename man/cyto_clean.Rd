@@ -4,7 +4,7 @@
 \alias{cyto_clean}
 \title{Apply flowAI anomaly detection to clean cytometry data}
 \usage{
-cyto_clean(x, ...)
+cyto_clean(x, type = "flowAI", ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -14,8 +14,11 @@ cyto_clean(x, ...)
 node extracted when a \code{GatingSet} or \code{GatingHierachy} is
 supplied.}
 
+\item{type}{the method to use when cleaning the data, options include
+\code{"flowAI"}, \code{"flowClean"} or \code{"flowCut"}.}
+
 \item{...}{additional arguments passed to
-\code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}.}
+\code{flowAI::flow_auto_qc}, \code{flowClean::flowClean}, or \code{flowCut::flowCut}.}
 }
 \description{
 Apply flowAI anomaly detection to clean cytometry data

@@ -28,7 +28,7 @@ functions must be generated. Set to all the fluorescent channels by default
 if no channels/markers are supplied.}
 
 \item{type}{a vector indicating the type of transformations to apply to each
-channel, options include \code{"log"}, \code{"arcsinh"},
+channel, options include \code{"log"}, \code{"asinh"}, \code{"asinh_Gml2"},
 \code{"biexponential"} or \code{"logicle"}. A list or vector named with the
 channels can be used to apply a different transformation type to each
 channel. All channels will have the same settings for each transformation
