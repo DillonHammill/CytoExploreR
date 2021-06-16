@@ -244,13 +244,6 @@ cyto_plot_empty <- function(x,
     .args_update(x)
   }
   
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # Prevent scientific notation on axes - reset on exit
-  scipen <- cyto_option("scipen")
-  cyto_option("scipen", 100000000)
-  on.exit(cyto_option("scipen", scipen))
-  
   # ARGUMENTS ------------------------------------------------------------------
   
   # Pull down arguments to named list
@@ -454,7 +447,7 @@ cyto_plot_empty <- function(x,
   )
   
   # X AXIS - TRANSFORMED
-  if (is(axes_text[[1]], "list")) {
+  if (cyto_class(axes_text[[1]], "list")) {
     # MINOR TICKS
     x_mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
     axis(1,
@@ -494,18 +487,52 @@ cyto_plot_empty <- function(x,
          cex.axis = axes_text_size,
          tck = -0.03
     )
-    # X AXIS - UNTRANSFORMED
+    # X AXIS - LINEAR
   } else if (.all_na(axes_text[[1]])) {
+    # MAJOR TICKS
+    major_ticks <- axTicks(1)
+    names(major_ticks) <- trimws(format(major_ticks, scientific = FALSE))
     axis(1,
+         at = major_ticks,
+         labels = names(major_ticks),
          font.axis = axes_text_font,
          col.axis = axes_text_col,
          cex.axis = axes_text_size,
-         tck = -0.03
-    )
+         tck = -0.03)
+    # MINOR TICKS - WITHIN RANGE OF MAJOR TICKS
+    minor_ticks <- LAPPLY(seq_len(length(major_ticks)-1), function(z){
+      pretty(major_ticks[c(z, z + 1)])
+    })
+    # MINOR TICKS OUTSIDE MAJOR TICK RANGE
+    minor_ticks <- c(seq(min(major_ticks), 
+                         par("usr")[1], 
+                         diff(minor_ticks[2:1])),
+                     minor_ticks,
+                     seq(max(major_ticks), 
+                         par("usr")[2], 
+                         diff(minor_ticks[1:2])))
+    minor_ticks <- minor_ticks[!minor_ticks %in% major_ticks]
+    axis(1,
+         at = minor_ticks,
+         labels = rep("", length(minor_ticks)),
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size,
+         tck = -0.015)
+    # PREPARE AXES_TEXT - GRID LINES
+    ticks <- unique(sort(c(major_ticks, minor_ticks)))
+    labels <- LAPPLY(names(ticks), function(z){
+      if(.all_na(z)) {
+        z <- ""
+      }
+      return(z)
+    })
+    axes_text[[1]] <- list(at = ticks,
+                           labels = labels)
   }
   
-  # Y AXIS - TRANSFORMED
-  if (is(axes_text[[2]], "list")) {
+  # Y AXIS - LINEAR/TRANSFORMED
+  if (cyto_class(axes_text[[2]], "list")) {
     # MINOR TICKS
     y_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
     axis(2,
@@ -545,12 +572,46 @@ cyto_plot_empty <- function(x,
     )
     # Y AXIS - LINEAR
   } else if (.all_na(axes_text[[2]])) {
+    # MAJOR TICKS
+    major_ticks <- axTicks(2)
+    names(major_ticks) <- trimws(format(major_ticks, scientific = FALSE))
     axis(2,
+         at = major_ticks,
+         labels = names(major_ticks),
          font.axis = axes_text_font,
          col.axis = axes_text_col,
          cex.axis = axes_text_size,
-         tck = -0.03
-    )
+         tck = -0.03)
+    # MINOR TICKS - WITHIN RANGE OF MAJOR TICKS
+    minor_ticks <- LAPPLY(seq_len(length(major_ticks)-1), function(z){
+      pretty(major_ticks[c(z, z + 1)])
+    })
+    # MINOR TICKS OUTSIDE MAJOR TICK RANGE
+    minor_ticks <- c(seq(min(major_ticks), 
+                         par("usr")[3], 
+                         diff(minor_ticks[2:1])),
+                     minor_ticks,
+                     seq(max(major_ticks), 
+                         par("usr")[4], 
+                         diff(minor_ticks[1:2])))
+    minor_ticks <- minor_ticks[!minor_ticks %in% major_ticks]
+    axis(2,
+         at = minor_ticks,
+         labels = rep("", length(minor_ticks)),
+         font.axis = axes_text_font,
+         col.axis = axes_text_col,
+         cex.axis = axes_text_size,
+         tck = -0.015)
+    # PREPARE AXES_TEXT - GRID LINES
+    ticks <- unique(sort(c(major_ticks, minor_ticks)))
+    labels <- LAPPLY(names(ticks), function(z){
+      if(.all_na(z)) {
+        z <- ""
+      }
+      return(z)
+    })
+    axes_text[[2]] <- list(at = ticks,
+                           labels = labels)
   }
   
   # BORDER_FILL
@@ -706,7 +767,6 @@ cyto_plot_empty <- function(x,
       usr[2] + 0.035 * (usr[2] - usr[1])
     )
     legend_y <- c(usr[3], usr[4])
-    
     # LEGEND BORDER
     rect(legend_x[1],
          legend_y[1],
@@ -715,7 +775,6 @@ cyto_plot_empty <- function(x,
          xpd = TRUE,
          lwd = 1
     )
-    
     # LEGEND BOXES
     legend_box_x <- legend_x
     legend_box_y <- seq(
@@ -733,6 +792,23 @@ cyto_plot_empty <- function(x,
            border = NA
       )
     })
+    # # LEGEND TEXT
+    # print(names(point_col))
+    # grid_size <- names(point_col)[1]
+    # print(grid_size)
+    # x_bins <- cut(cyto_exprs(x[[1]])[[1]][, channels[1]], 
+    #               grid_size, 
+    #               labels = 1:(grid_size-1))
+    # y_bins <- cut(cyto_exprs(x[[1]])[[1]][, channels[2]], 
+    #               grid_size, 
+    #               labels = 1:(grid_size-1))
+    # counts <- table(paste0(x_bins, "-", y_bins))
+    # print(counts)
+    # print(range(counts))
+    # text(legend_box_x + 0.05 * legend_box_x,
+    #      legend_box_y[1],
+    #      labels = min(counts),
+    #      xpd = TRUE)
   }
   
   # LEGEND - FALSE/"fill"/"line"
@@ -794,7 +870,7 @@ cyto_plot_empty <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_plot_new <- function(popup,
+cyto_plot_new <- function(popup = NULL,
                           popup_size = NULL,
                           ...) {
   
@@ -802,7 +878,7 @@ cyto_plot_new <- function(popup,
   set_pars <- cyto_option("cyto_plot_par")
   
   # POPUP
-  if(missing(popup)) {
+  if(is.null(popup)) {
     # USE GLOBAL SETTING
     if("popup" %in% names(set_pars)) {
       popup <- set_pars$popup
@@ -826,7 +902,7 @@ cyto_plot_new <- function(popup,
     #   popup <- TRUE
     # }
   }
-  
+
   # POPUP SIZE
   if(is.null(popup_size)) {
     # CHECK GLOBAL SETTINGS
@@ -851,7 +927,7 @@ cyto_plot_new <- function(popup,
   
   # POPUP ARGUMENTS NOT PASSED TO CYTO_PLOT_PAR
   set_pars <- set_pars[!names(set_pars) %in% c("popup", "popup_size")]
-  
+
   # NULL -> RSTUDIOGD
   if (dev.cur() == 1) {
     dev.new()
@@ -880,10 +956,18 @@ cyto_plot_new <- function(popup,
         dev_new <- "popup"
         # REQUIRE - RSTUDIO
       } else {
-        # PRESET LAYOUT OR EMPTY DEVICE
-        if (cyto_option("cyto_plot_method") == "custom" | dev_empty()) {
+        # EMPTY DEVICE
+        if(dev_empty()) {
           dev_new <- FALSE
-          # NEW LAYOUT
+        # CUSTOM LAYOUT
+        } else if(cyto_option("cyto_plot_method") == "custom") {
+          # OPEN NEW DEVICE WHEN FULL
+          if(.par("page")[[1]]) {
+            dev_new <- "rstudio"
+          } else {
+            dev_new <- FALSE
+          }
+        # NEW LAYOUT
         } else {
           dev_new <- "rstudio"
         }
@@ -892,10 +976,18 @@ cyto_plot_new <- function(popup,
     } else if(dev_old == "popup") {
       # REQUIRE POPUP
       if (dev_new == "popup") {
-        # PRESET LAYOUT OR EMPTY DEVICE
-        if (cyto_option("cyto_plot_method") == "custom" | dev_empty()) {
+        # EMPTY DEVICE
+        if(dev_empty()){
           dev_new <- FALSE
-          # NEW LAYOUT
+        # CUSTOM LAYOUT
+        } else if(cyto_option("cyto_plot_method") == "custom") {
+          # OPEN NEW GRAPHICS DEVICE WHEN FULL
+          if(.par("page")[[1]]) {
+            dev_new <- "popup"
+          } else {
+            dev_new <- FALSE
+          }
+        # NEW LAYOUT
         } else {
           dev_new <- "popup"
         }
@@ -905,6 +997,7 @@ cyto_plot_new <- function(popup,
         dev_new <- "rstudio"
       }
     }
+
     # OPEN NEW GRAPHICS DEVICE
     if (dev_new != FALSE) {
       # POPUP DEVICE
@@ -944,12 +1037,12 @@ cyto_plot_new <- function(popup,
           dev.new(noRStudioGD = FALSE)
         }
       }
+      # SET/INHERIT GRAPHICAL PARAMETERS
+      do.call("cyto_plot_par", set_pars)
     }
+    
   }
-  
-  # SET/INHERIT GRAPHICAL PARAMETERS
-  do.call("cyto_plot_par", set_pars)
-  
+
 }
 
 ## DEV_EMPTY -------------------------------------------------------------------
@@ -1284,8 +1377,11 @@ cyto_plot_custom <- function(...) {
   # METHOD
   cyto_option("cyto_plot_method", "custom")
   
+  # TODO: MAYBE USE CYTO_PLOT_NEW BELOW? OPEN DEVICE BEFORE ADDING PLOTS
+  # CURRENTLY DEVICES ARE OPENED WITHIN CYTO_PLOT
+  
   # GRAPHICAL PARAMETERS
-  cyto_plot_par(...)
+  cyto_plot_new(...)
   
   # RESET MEMORY
   if (!cyto_option("cyto_plot_save")) {
@@ -1493,6 +1589,32 @@ cyto_plot_par <- function(...,
     reset_pars <- cyto_option("cyto_plot_par_reset")
     reset_pars <- c(reset_pars[!names(reset_pars) %in% names(new_pars)],
                     new_pars)
+    # PREPARE LAYOUT ARGUMENT - CYTO_PLOT_COMPLETE
+    if("layout" %in% names(reset_pars)) {
+      layout <- reset_pars$layout
+      reset_pars <- reset_pars[!names(reset_pars) %in% "layout"]
+      # BYPASS NON-NUMERIC LAYOUT (FALSE)
+      if(is.numeric(layout)) {
+        # LAYOUT
+        if(!is.null(dim(layout))) {
+          layout(layout) # reset to custom layout
+        } else {
+          # DEFAULT TO MFROW
+          if(length(layout) == 2) {
+            reset_pars$mfrow <- layout
+            # MFROW/MFCOL
+          } else if (length(layout) == 3) {
+            # MFROW
+            if(layout[3] == 1) {
+              reset_pars$mfrow <- layout[1:2]
+              # MFCOL
+            } else {
+              reset_pars$mfcol <- layout[1:2]
+            }
+          }
+        }
+      }
+    }
     par(reset_pars)
     cyto_option("cyto_plot_par_reset", list())
   # SET PARAMETERS

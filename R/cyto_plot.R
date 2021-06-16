@@ -389,7 +389,7 @@ cyto_plot <- function(x,
                       label_text_col = "black",
                       label_text_col_alpha = 1,
                       label_fill = "white",
-                      label_fill_alpha = 0.6,
+                      label_fill_alpha = 0.75,
                       border_line_type = 1,
                       border_line_width = 1,
                       border_line_col = "black",
@@ -628,16 +628,14 @@ cyto_plot <- function(x,
     args$ylim <- .cyto_transform(args$ylim,
                                  trans = args$axes_trans,
                                  channel = args$channels[2])
-  }
-  
-  # YLIM - 1D CALCULATED LATER
-  if (any(is.na(args$ylim)) & length(args$channels) == 2) {
-    args$ylim[is.na(args$ylim)] <- 
-      .cyto_plot_axes_limits(args$x,
-                             channels = args$channels[2],
-                             axes_limits = args$axes_limits,
-                             buffer = args$axes_limits_buffer
-      )[, args$channels[2]][is.na(args$ylim)]
+    if(any(is.na(args$ylim))) {
+      args$ylim[is.na(args$ylim)] <- 
+        .cyto_plot_axes_limits(args$x,
+                               channels = args$channels[2],
+                               axes_limits = args$axes_limits,
+                               buffer = args$axes_limits_buffer
+        )[, args$channels[2]][is.na(args$ylim)]
+    }
   }
   
   # X AXIS BREAKS & LABELS

@@ -958,29 +958,32 @@
     }
     # LINEAR CHANNEL
     if(.all_na(axes_trans) | !z %in% names(axes_trans)) {
-      # COMPUTE AXP
-      axp <- unlist(.axisPars(axes_range[[z]]))
-      # COMPUTE AXES LABELS
-      axis_breaks <- seq(axp[1], axp[2], (axp[2] - axp[1])/axp[3])
-      # AXES MINOR INTERVAL
-      axis_interval <- (axis_breaks[2] - axis_breaks[1])/axp[3]
-      # COMPUTE MAJOR TICK LOCATIONS
-      axis_ticks_min <- axp[1] - floor(
-        (axp[1] - axes_range[[z]][1])/axis_interval
-      ) * axis_interval
-      axis_ticks_max <- axp[2] + floor(
-        (axes_range[[z]][2] - axp[2])/axis_interval
-      ) * axis_interval
-      axis_ticks <- seq(axis_ticks_min, axis_ticks_max, axis_interval)
-      axis_labels <- unlist(lapply(axis_ticks, function(z){
-        if(z %in% axis_breaks){
-          return(z)
-        } else {
-          return("")
-        }
-      }))
-      axis_text <- list("label" = axis_labels,
-                        "at" = axis_ticks)
+      # CALCULATED WITHIN CYTO_PLOT_EMPTY - REQUIRES PAR("USR")
+      
+      # # COMPUTE AXP
+      # axp <- unlist(.axisPars(axes_range[[z]]))
+      # # COMPUTE AXES LABELS
+      # axis_breaks <- seq(axp[1], axp[2], (axp[2] - axp[1])/axp[3])
+      # # AXES MINOR INTERVAL
+      # axis_interval <- (axis_breaks[2] - axis_breaks[1])/axp[3]
+      # # COMPUTE MAJOR TICK LOCATIONS
+      # axis_ticks_min <- axp[1] - floor(
+      #   (axp[1] - axes_range[[z]][1])/axis_interval
+      # ) * axis_interval
+      # axis_ticks_max <- axp[2] + floor(
+      #   (axes_range[[z]][2] - axp[2])/axis_interval
+      # ) * axis_interval
+      # axis_ticks <- seq(axis_ticks_min, axis_ticks_max, axis_interval)
+      # axis_labels <- unlist(lapply(axis_ticks, function(z){
+      #   if(z %in% axis_breaks){
+      #     return(format(z, scientific = FALSE))
+      #   } else {
+      #     return("")
+      #   }
+      # }))
+      # axis_text <- list("label" = axis_labels,
+      #                   "at" = axis_ticks)
+      return(NA)
       # TRANSFORMED CHANNEL  
     } else {
       # AXIS TICKS
