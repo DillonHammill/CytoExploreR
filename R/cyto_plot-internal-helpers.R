@@ -2635,9 +2635,16 @@
   }
   
   # COMBINED EVENTS
-  if(all(title == "all")) {
-    title <- rep("Combined Events", length(title))
-  }
+  title <- LAPPLY(title, function(z){
+    if(!.all_na(z)) {
+      if(z == "all") {
+        z <- "Combined Events"
+      } else if(grepl("root", z, ignore.case = TRUE)) {
+        z <- gsub("root", "All Events", z)
+      }
+    }
+    return(z)
+  })
   
   return(title)
 }
@@ -2812,6 +2819,7 @@
                    nbin = grid_size
           )
         )
+        names(point_col)[1] <- paste0(grid_size, collapse = "-")
       }
     } else {
       point_col[[1]] <- point_col_scale[1]
@@ -2835,64 +2843,67 @@
   cyto_cal <- .cyto_calibrate_recall()
   
   # 1D COLOUR SCALE
-  point_col <- lapply(point_col, function(z) {
-    if (length(z) == 1) {
-      # NAME OF CHANNEL/MARKER
-      if (z %in% c(
-        cyto_channels(x[[1]]),
-        cyto_markers(x[[1]])
-      )) {
-        # CONVERT TO CHANNEL
-        z <- cyto_channels_extract(
-          x[[1]],
-          z
-        )
-        # MATRIX
-        cf_exprs <- cyto_data_extract(x[[1]],
-                                      format = "matrix", 
-                                      copy = FALSE)[[1]][[1]]
-        # CALIBRATION
-        if (!is.null(cyto_cal)) {
-          if (z %in% colnames(cyto_cal)) {
-            cyto_range <- c(
-              min(cyto_cal[, z]),
-              max(cyto_cal[, z])
-            )
+  point_col <- structure(
+    lapply(point_col, function(z) {
+      if (length(z) == 1) {
+        # NAME OF CHANNEL/MARKER
+        if (z %in% c(
+          cyto_channels(x[[1]]),
+          cyto_markers(x[[1]])
+        )) {
+          # CONVERT TO CHANNEL
+          z <- cyto_channels_extract(
+            x[[1]],
+            z
+          )
+          # MATRIX
+          cf_exprs <- cyto_data_extract(x[[1]],
+                                        format = "matrix", 
+                                        copy = FALSE)[[1]][[1]]
+          # CALIBRATION
+          if (!is.null(cyto_cal)) {
+            if (z %in% colnames(cyto_cal)) {
+              cyto_range <- c(
+                min(cyto_cal[, z]),
+                max(cyto_cal[, z])
+              )
+            } else {
+              cyto_range <- c(
+                min(cf_exprs[, z]),
+                max(cf_exprs[, z])
+              )
+            }
           } else {
             cyto_range <- c(
               min(cf_exprs[, z]),
               max(cf_exprs[, z])
             )
           }
-        } else {
-          cyto_range <- c(
-            min(cf_exprs[, z]),
-            max(cf_exprs[, z])
+          # RESCALE
+          rescale <- (cf_exprs[, z] - cyto_range[1]) /
+            (cyto_range[2] - cyto_range[1])
+          rescale[rescale > 1] <- 1
+          rescale[rescale < 0] <- 0
+          # POINT_COLOUR_SCALE
+          col_scale <- grDevices::colorRamp(point_col_scale)
+          # POINT COLOURS
+          col <- col_scale(rescale)
+          col <- grDevices::rgb(col[, 1],
+                                col[, 2],
+                                col[, 3],
+                                maxColorValue = 255
           )
+          return(col)
+          # NAME OF A COLOUR
+        } else {
+          return(z)
         }
-        # RESCALE
-        rescale <- (cf_exprs[, z] - cyto_range[1]) /
-          (cyto_range[2] - cyto_range[1])
-        rescale[rescale > 1] <- 1
-        rescale[rescale < 0] <- 0
-        # POINT_COLOUR_SCALE
-        col_scale <- grDevices::colorRamp(point_col_scale)
-        # POINT COLOURS
-        col <- col_scale(rescale)
-        col <- grDevices::rgb(col[, 1],
-                              col[, 2],
-                              col[, 3],
-                              maxColorValue = 255
-        )
-        return(col)
-        # NAME OF A COLOUR
       } else {
         return(z)
       }
-    } else {
-      return(z)
-    }
-  })
+    }),
+    names = names(point_col)
+  )
   
   # Adjust colors by point_fill_alpha - REMOVE CHECK FOR ALPHA != 1
   for(z in seq_len(SMP)) {

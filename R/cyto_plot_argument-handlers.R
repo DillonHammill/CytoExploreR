@@ -98,13 +98,13 @@
   # CYTO_PLOT ARGUMENTS --------------------------------------------------------
   
   # MISSING LISTED AS NULL -> CONVERTED TO EMPTY
-  args <- formals("cyto_plot.flowSet")
+  args <- formals("cyto_plot")
   args <- args[!names(args) %in% c("merge_by",
                                    "overlay",
                                    "display",
                                    "layout",
                                    "select",
-                                   "hist_layers")]
+                                   "...")]
   lapply(names(args), function(z) {
     if (all(class(args[[z]]) == "name")) {
       args[[z]] <<- ""
@@ -147,6 +147,7 @@
     "xlim",
     "ylim",
     "hist_stat",
+    "hist_layers",
     "hist_stack",
     "hist_smooth",
     "hist_bins",

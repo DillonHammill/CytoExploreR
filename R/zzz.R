@@ -30,8 +30,8 @@
   # Record changes to graphical parameters settings - reuse
   options("cyto_plot_par_reset" = list())
   
-  # Signal when cyto_gate_draw has been called
-  options("cyto_gate_draw" = FALSE)
+  # Signal when data had been prepared for cyto_plot
+  options("cyto_plot_data" = FALSE)
   
   # Register gating and preprocessing functions with openCyto
   suppressMessages({

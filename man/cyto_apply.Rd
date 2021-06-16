@@ -15,7 +15,8 @@
   copy = TRUE,
   channels = NULL,
   trans = NA,
-  inverse = FALSE
+  inverse = FALSE,
+  slot = NULL
 )
 }
 \arguments{
@@ -56,6 +57,10 @@ transformations when \code{inverse = TRUE}.}
 
 \item{inverse}{logical indicating whether the data should be inverse
 transformed prior to applying \code{FUN}, set to FALSE by default.}
+
+\item{slot}{name of the slot to extract from the output if the object
+returned by the function is a list or S4 R object, set to NULL by default.
+the output of the function}
 }
 \description{
 \code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}

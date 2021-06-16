@@ -309,1048 +309,103 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @noRd
-
-#' @noRd 
-cyto_plot <- function(x, ...) {
-  UseMethod("cyto_plot")
-}
-
-#' @rdname cyto_plot
-#' @noRd
-cyto_plot.GatingSet <- function(x,
-                                parent= "root",
-                                alias = NA,
-                                channels,
-                                axes_trans = NA,
-                                merge_by = "name",
-                                overlay = NA,
-                                gate = NA,
-                                display = 25000,
-                                layout,
-                                margins = c(NA, NA, NA, NA),
-                                popup = TRUE,
-                                popup_size = c(7,7),
-                                select = NULL,
-                                xlim = c(NA, NA),
-                                ylim = c(NA, NA),
-                                xlab,
-                                ylab,
-                                title,
-                                negate,
-                                hist_stat = "percent",
-                                hist_bins = 256,
-                                hist_smooth = 1,
-                                hist_stack = 0,
-                                hist_layers = 1,
-                                hist_cols = NA,
-                                hist_fill = NA,
-                                hist_fill_alpha = 1,
-                                hist_line_type = 1,
-                                hist_line_width = 1,
-                                hist_line_col = "black",
-                                point_shape = ".",
-                                point_size = 2,
-                                point_col_scale = NA,
-                                point_cols = NA,
-                                point_col = NA,
-                                point_col_alpha = 1,
-                                contour_lines = 0,
-                                contour_line_type = 1,
-                                contour_line_width = 1,
-                                contour_line_col = "black",
-                                contour_line_alpha = 1,
-                                axes_limits = "auto",
-                                axes_limits_buffer = 0.03,
-                                axes_text = c(TRUE, TRUE),
-                                axes_text_font = 1,
-                                axes_text_size = 1,
-                                axes_text_col = "black",
-                                axes_label_text_font = 1,
-                                axes_label_text_size = 1.1,
-                                axes_label_text_col = "black",
-                                title_text_font = 2,
-                                title_text_size = 1.1,
-                                title_text_col = "black",
-                                legend = FALSE,
-                                legend_text = NA,
-                                legend_text_font = 1,
-                                legend_text_size = 1,
-                                legend_text_col = "black",
-                                legend_line_type = NA,
-                                legend_line_width = NA,
-                                legend_line_col = NA,
-                                legend_box_fill = NA,
-                                legend_point_col = NA,
-                                gate_line_type = 1,
-                                gate_line_width = 2.5,
-                                gate_line_col = "red",
-                                gate_fill = "white",
-                                gate_fill_alpha = 0,
-                                label,
-                                label_text = NA,
-                                label_stat = "",
-                                label_position = "auto",
-                                label_text_x = NA,
-                                label_text_y = NA,
-                                label_text_font = 2,
-                                label_text_size = 0.8,
-                                label_text_col = "black",
-                                label_text_col_alpha = 1,
-                                label_fill = "white",
-                                label_fill_alpha = 0.6,
-                                border_line_type = 1,
-                                border_line_width = 1,
-                                border_line_col = "black",
-                                border_fill = "white",
-                                border_fill_alpha = 1,
-                                grid = TRUE,
-                                grid_line_type = 1,
-                                grid_line_width = 1,
-                                grid_line_col = "grey95",
-                                grid_line_alpha = 1,
-                                header = NA,
-                                header_text_font = 2,
-                                header_text_size = 1,
-                                header_text_col = "black",
-                                seed = 42, 
-                                ...) {
-  
-  # CHECKS ---------------------------------------------------------------------
-  
-  # CHANNELS
-  if (missing(channels)) {
-    stop("Supply the channel/marker(s) to construct the plot.")
-  } else {
-    channels <- cyto_channels_extract(x, channels)
-  }
-  
-  # GATINGSET - gs (x available for flowSet method call)
-  gs <- x
-  
-  # SELECT
-  if(!is.null(select)){
-    gs <- cyto_select(gs, select)
-  }
-  
-  # GATINGHIERARCHY
-  gh <- gs[[1]]
-  
-  # TRANSFORMATIONS 
-  axes_trans <- cyto_transformers_extract(gs)
-  
-  # PREPARE DATA & ARGUMENTS ---------------------------------------------------
-  
-  # EXTRACT PARENT POPULATIONS
-  x <- cyto_data_extract(gs, 
-                         parent = parent,
-                         copy = FALSE)[[1]]
-  
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(gs)
-  
-  # NO GATES IN GATINGSET - ALIAS NA
-  if(!.all_na(alias) & length(cyto_nodes(gs)) == 1){
-    message(
-      "GatingSet contains no gates - setting 'alias' to NA."
-    )
-    alias <- NA
-  }
-  
-  # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
-  if(!.all_na(alias)){
-    gt <- gh_generate_template(gh)
-    gt <- gt[basename(gt$parent) == parent, ]
-  }
-  
-  # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
-  if (.empty(alias)) {
-    # 2D PLOT - BOTH CHANNELS MATCH
-    if (length(channels) == 2) {
-      alias <- gt$alias[gt$dims == paste(channels, collapse = ",") |
-                          gt$dims == paste(rev(channels), collapse = ",")]
-      # 1D PLOT - ONE CHANNEL MATCH
-    } else if (length(channels) == 1) {
-      ind <- lapply(gt$dims, function(z) {
-        grep(channels, z)
-      })
-      ind <- LAPPLY(ind, "length") != 0
-      alias <- gt$alias[ind]
-    }
-    # NO ALIAS IN SUPPLIED CHANNELS
-    if (length(alias) == 0) {
-      alias <- NA
-    }
-    # BOOL GATE CHECK - BOOL GATES HAVE NO CHANNELS IN TEMPLATE
-    if (!.all_na(alias)) {
-      # CHECK FOR BOOL GATES
-      if (any(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))) {
-        # EMPTY CHANNELS ALIAS INDEX
-        ind <- which(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))
-        # PULL OUT ALIAS
-        empty_alias <- gt$alias[!gt$alias %in% alias][ind]
-        # ADD VALID BOOL GATES TO ALIAS
-        valid_bool_gate <- LAPPLY(empty_alias, function(z) {
-          # EXTRACT GATE
-          g <- gh_pop_get_gate(gh, 
-                               cyto_nodes_convert(gh, 
-                                                  nodes = z, 
-                                                  anchor = parent))
-          # BOOL GATE
-          if (cyto_class(g, "booleanFilter")) {
-            # BOOLEAN LOGIC
-            bool <- g@deparse
-            # ONLY NOT AND BOOL GATES SUPPORTED
-            if(!grepl("!", bool)){
-              message("Only NOT boolean gates are supported.")
-              return(FALSE)
-            }else if(grepl("|", bool, fixed = TRUE)){
-              message("Only NOT AND boolean gates are supported.")
-              return(FALSE)
-              # NOT AND GATE - CORRECT ALIAS
-            } else {
-              # STRIP &
-              bool_alias <- strsplit(bool, "&!")[[1]]
-              # STRIP !
-              bool_alias <- unlist(strsplit(bool_alias, "!"))
-              # REMOVE EMPTY ALIAS
-              bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
-              # BOOL ALIAS MUST BE IN ALIAS
-              if(all(bool_alias %in% alias)){
-                return(TRUE)
-              }else{
-                return(FALSE)
-              }
-            }
-            # NOT A BOOL GATE
-          } else {
-            return(FALSE)
-          }
-        })
-        if (any(valid_bool_gate)) {
-          # UPDATE ALIAS
-          alias <- c(alias, empty_alias[which(valid_bool_gate)])
-          # TURN ON NEGATE
-          negate <- TRUE
-        }
-      }
-    }
-    # ALIAS MANUALLY SUPPLIED - CONTAINS BOOLEAN FILTER (MUST HAVE ALL ALIAS)
-  }else if(!.all_na(alias)){
-    # ALIAS MAY BE BOOL GATE
-    if(any(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))){
-      # EMPTY CHANNELS ALIAS INDEX
-      ind <- which(LAPPLY(alias, function(z){
-        .empty(gt[gt$alias == z, "dims"])}))
-      empty_alias <- alias[ind]
-      # VALID BOOL GATE - ALIAS CORRECT
-      lapply(empty_alias, function(z){
-        # EXTRACT GATE
-        g <- gh_pop_get_gate(gh, 
-                             cyto_nodes_convert(gh, 
-                                                nodes = z, 
-                                                anchor = parent))
-        # BOOL GATE
-        if(cyto_class(g, "booleanFilter")){
-          # BOOLEAN LOGIC
-          bool <- g@deparse
-          # ONLY NOT AND BOOL GATES SUPPORTED
-          if(!grepl("!", bool)){
-            message("Only NOT boolean gates are supported.")
-            # REMOVE FROM ALIAS
-            alias <<- alias[-match(z, alias)]
-            # NEGATE
-            negate <<- FALSE
-          }else if(grepl("|", bool, fixed = TRUE)){
-            message("Only NOT AND boolean gates are supported.")
-            # REMOVE FROM ALIAS
-            alias <<- alias[-match(z, alias)]
-            # NEGATE
-            negate <<- FALSE
-            # NOT AND GATE - CORRECT ALIAS
-          } else {
-            # STRIP &
-            bool_alias <- unlist(strsplit(bool, "&!"))
-            # STRIP !
-            bool_alias <- unlist(strsplit(bool_alias, "!"))
-            # REMOVE EMPTY ALIAS
-            bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
-            # BOOL ALIAS MUST BE IN ALIAS
-            if(!all(bool_alias %in% alias)){
-              alias <<- unique(c(alias, bool_alias))
-            }
-            # NEGATE 
-            negate <<- TRUE
-          }
-          # BOOLEAN ALIAS MUST BE LAST
-          alias <<- c(alias[-match(z, alias)], z)
-          # NOT BOOL GATE 
-        }else{
-          # REMOVE FROM ALIAS
-          message(paste0("Cannot plot gate ", z,"."))
-          alias <<- alias[-match(z, alias)]
-        }
-      })
-    }
-  }
-  
-  # EXTRACT GATE OBJECTS - BYPASS BOOLEAN FILTERS - ALIAS OVERRIDES GATE
-  if (!.all_na(alias)) {
-    # REMOVE DUPLICATE ALIAS
-    alias <- unique(alias)
-    # GATES FOR EACH GATINGHIERARCHY
-    gate <- lapply(seq_along(gs), function(y) {
-      gt <- lapply(alias, function(w) {
-        gh_pop_get_gate(gs[[y]],
-                        cyto_nodes_convert(gs[[y]],
-                                           nodes = w,
-                                           anchor = parent))
-      })
-      names(gt) <- alias
-      # REMOVE BOOLEAN GATES
-      gt[LAPPLY(gt, function(z){cyto_class(z, "booleanFilter")})] <- NULL
-      return(gt)
-    })
-    names(gate) <- cyto_names(gs)
-    # NEGATED GATES - SINGLE NEGATED GATE
-    if(all(LAPPLY(alias, function(z){
-      gh_pop_is_negated(gh, cyto_nodes_convert(gh, 
-                                               nodes = z, 
-                                               anchor = parent))
-    }))){
-      # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
-      alias <- c(NA, alias)
-    }
-  }
-  
-  # CAPTURE OVERLAY POPULATION NAMES
-  nms <- NA
-  
-  # OVERLAY - POPULATION NAMES
-  if (!.all_na(overlay)) {
-    # POPULATION NAMES TO OVERLAY
-    if (is.character(overlay)) {
-      # OVERLAY DESCENDANTS
-      if(any(grepl("descendants", overlay))){
-        overlay <- tryCatch(gh_pop_get_descendants(gh, 
-                                                   parent,
-                                                   path = "auto"), 
-                            error = function(e){NA}) 
-        # OVERLAY CHILDREN  
-      }else if(any(grepl("children", overlay))){
-        overlay <- tryCatch(gh_pop_get_children(gh, 
-                                                parent,
-                                                path = "auto"),
-                            error = function(e){NA})
-      }
-      # LABEL_STAT WITHOUT GATES
-      if (.all_na(gate) & !.empty(label_stat)) {
-        if (missing(label_text)) {
-          label_text <- rep(NA, length(overlay) + 1)
-          ind <- which(!is.na(rep(c(
-            label_stat,
-            rep(NA, length(overlay) + 1)
-          ),
-          length.out = length(overlay) + 1
-          )))
-          label_text[ind] <- c(parent, overlay)[ind]
-        }
-      }
-      # CHECK OVERLAY - MAY BE NA ABOVE
-      if(!.all_na(overlay)){
-        # EXTRACT POPULATIONS
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          cyto_data_extract(gs, 
-                            parent = cyto_nodes_convert(gs, 
-                                                        nodes = z, 
-                                                        anchor = parent),
-                            copy = FALSE)[[1]]
-        })
-        names(overlay) <- nms
-      }
-    }
-  }
-  
-  # PREPARE ARGUMENTS ----------------------------------------------------------
-  
-  # NEGATE
-  if (missing(negate)) {
-    negate <- FALSE
-  }
-  
-  # LAYERS
-  if(.all_na(overlay)){
-    # 1D PLOTS - STACKING/LAYERS
-    if(length(channels) == 1){
-      # HISTOGRAM LAYERS
-      if(.all_na(hist_layers)){
-        # MERGE_BY
-        if(!.all_na(merge_by)){
-          L <- length(cyto_groups(x, merge_by))
-        }else{
-          L <- length(x)
-        }
-      }else{
-        L <- hist_layers
-      }
-    }else{
-      L <- 1
-    }
-  }else{
-    # 2 LAYERS
-    if(cyto_class(overlay, "flowSet")){
-      L <- 2
-    }else{
-      # OVERLAY LIST OF CYTOSETS
-      L <- length(overlay) + 1
-    }
-  }
-  
-  # GATES
-  if(.all_na(gate)){
-    G <- 0
-  }else{
-    G <- length(gate[[1]])
-    if(negate == TRUE){
-      G <- G + 1
-    }
-  }
-  
-  # LABEL_TEXT - ALIAS (PER PLOT)
-  if (missing(label_text)) {
-    if (!.all_na(alias)) {
-      # BASE LAYER ONLY
-      if (length(channels) == 1 & hist_stack == 0) {
-        label_text <- rep(
-          c(alias, rep(NA, abs(length(alias) - G))), 
-          length.out = G
-        )
-        # EACH LAYER
-      } else if (length(channels) == 1 & hist_stack != 0) {
-        label_text <- rep(
-          c(alias, rep(NA, abs(length(alias) - G))),
-          length.out = G * L
-        )
-        # BASE LAYER ONLY
-      } else {
-        label_text <- rep(
-          c(alias, rep(NA, abs(length(alias) - G))), 
-          length.out = G
-        )
-      }
-    } else {
-      label_text <- NA
-    }
-  }
-  
-  # LEGEND_TEXT
-  if (.all_na(legend_text)) {
-    # PARENT ONLY
-    if (.all_na(overlay)) {
-      legend_text <- parent
-      # PARENT & OVERLAY
-    } else {
-      if (!.all_na(nms)) {
-        legend_text <- c(parent, nms)
-      } else {
-        legend_text <- parent
-      }
-    }
-  }
-  
-  # TITLE
-  if (missing(title)) {
-    title <- cyto_groups(gs, 
-                         group_by = merge_by, 
-                         details = FALSE)
-    if(all(title == "all")){
-      title <- "Combined Events"
-    }
-    # PARENT
-    title <- LAPPLY(title, function(z) {
-      if (parent == "root") {
-        pt <- "All Events"
-      } else {
-        pt <- parent
-      }
-      # 1D PLOT - STACKED NO OVERLAY - LACK SAMPLENAMES
-      if (length(channels) == 1 &
-          .all_na(overlay)) {
-        if(ifelse(.all_na(hist_layers), FALSE, hist_layers == 1)) {
-          paste(z, pt, sep = "\n")
-        } else {
-          pt
-        }
-        # 1D PLOT - STACKED OVERLAY - SAMPLENAMES ONLY
-      } else if (length(channels) == 1 &
-                 !.all_na(overlay)) {
-        z
-        # PASTE SAMPLNAME & PARENT
-      } else {
-        paste(z, pt, sep = "\n")
-      }
-    })
-  }
-  
-  # CALL CYTO_PLOT FLOWSET METHOD ----------------------------------------------
-  
-  # PULL DOWN ARGUMENTS
-  args <- .args_list(...)
-  
-  # CALL CYTOSET METHOD
-  .execute("cyto_plot.flowSet", args)
-  
-}
-
-#' @rdname cyto_plot
-#' @noRd
-cyto_plot.GatingHierarchy <- function(x,
-                                      parent = "root",
-                                      alias = NA,
-                                      channels,
-                                      axes_trans = NA,
-                                      merge_by = "name",
-                                      overlay = NA,
-                                      gate = NA,
-                                      select = NULL,
-                                      axes_limits = "auto",
-                                      display = 25000,
-                                      margins = c(NA, NA, NA, NA),
-                                      popup = TRUE,
-                                      popup_size = c(7,7),
-                                      xlim = c(NA, NA),
-                                      ylim = c(NA, NA),
-                                      xlab,
-                                      ylab,
-                                      title,
-                                      negate = FALSE,
-                                      hist_stat = "percent",
-                                      hist_bins = 256,
-                                      hist_smooth = 1,
-                                      hist_stack = 0,
-                                      hist_layers = 1,
-                                      hist_cols = NA,
-                                      hist_fill = NA,
-                                      hist_fill_alpha = 1,
-                                      hist_line_type = 1,
-                                      hist_line_width = 1,
-                                      hist_line_col = "black",
-                                      point_shape = ".",
-                                      point_size = 2,
-                                      point_col_scale = NA,
-                                      point_cols = NA,
-                                      point_col = NA,
-                                      point_col_alpha = 1,
-                                      contour_lines = 0,
-                                      contour_line_type = 1,
-                                      contour_line_width = 1,
-                                      contour_line_col = "black",
-                                      contour_line_alpha = 1,
-                                      axes_limits_buffer = 0.03,
-                                      axes_text = c(TRUE, TRUE),
-                                      axes_text_font = 1,
-                                      axes_text_size = 1,
-                                      axes_text_col = "black",
-                                      axes_label_text_font = 1,
-                                      axes_label_text_size = 1.1,
-                                      axes_label_text_col = "black",
-                                      title_text_font = 2,
-                                      title_text_size = 1.1,
-                                      title_text_col = "black",
-                                      legend = FALSE,
-                                      legend_text = NA,
-                                      legend_text_font = 1,
-                                      legend_text_size = 1,
-                                      legend_text_col = "black",
-                                      legend_line_type = NA,
-                                      legend_line_width = NA,
-                                      legend_line_col = NA,
-                                      legend_box_fill = NA,
-                                      legend_point_col = NA,
-                                      gate_line_type = 1,
-                                      gate_line_width = 2.5,
-                                      gate_line_col = "red",
-                                      gate_fill = "white",
-                                      gate_fill_alpha = 0,
-                                      label,
-                                      label_text,
-                                      label_stat = "",
-                                      label_position = "auto",
-                                      label_text_x = NA,
-                                      label_text_y = NA,
-                                      label_text_font = 2,
-                                      label_text_size = 1,
-                                      label_text_col = "black",
-                                      label_text_col_alpha = 1,
-                                      label_fill = "white",
-                                      label_fill_alpha = 0.6,
-                                      border_line_type = 1,
-                                      border_line_width = 1,
-                                      border_line_col = "black",
-                                      border_fill = "white",
-                                      border_fill_alpha = 1,
-                                      grid = TRUE,
-                                      grid_line_type = 1,
-                                      grid_line_width = 1,
-                                      grid_line_col = "grey95",
-                                      grid_line_alpha = 1,
-                                      header = NA,
-                                      header_text_font = 2,
-                                      header_text_size = 1,
-                                      header_text_col = "black",
-                                      seed = 42, 
-                                      ...) {
-  
-  # CHECKS ---------------------------------------------------------------------
-  
-  # CHANNELS
-  if (missing(channels)) {
-    stop("Supply the channel/marker(s) to construct the plot.")
-  } else {
-    channels <- cyto_channels_extract(x, channels)
-  }
-  
-  # GATINGHIERACHY - gh (x available for flowFrame method call)
-  gh <- x
-  
-  # TRANSFORMATIONS
-  axes_trans <- cyto_transformers_extract(gh)
-  
-  # PREPARE DATA & ARGUMENTS ---------------------------------------------------
-  
-  # EXTRACT PARENT POPULATION
-  x <- cyto_data_extract(gh, 
-                         parent = parent,
-                         copy = FALSE)[[1]]
-  
-  # NO GATES IN GATINHIERARCHY - ALIAS NA
-  if(!.all_na(alias) & length(cyto_nodes(gh)) == 1){
-    message(
-      "GatingHierarchy contains no gates - setting 'alias' to NA."
-    )
-    alias <- NA
-  }
-  
-  # PREPARE GATINGTEMPLATE (PARENT ENTRIES ONLY)
-  if(!.all_na(alias)){
-    gt <- gh_generate_template(gh)
-    gt <- gt[basename(gt$parent) == parent, ]
-  }
-  
-  # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
-  if (.empty(alias)) {
-    # 2D PLOT - BOTH CHANNELS MATCH
-    if (length(channels) == 2) {
-      alias <- gt$alias[gt$dims == paste(channels, collapse = ",") |
-                          gt$dims == paste(rev(channels), collapse = ",")]
-      # 1D PLOT - ONE CHANNEL MATCH
-    } else if (length(channels) == 1) {
-      ind <- lapply(gt$dims, function(z) {
-        grep(channels, z)
-      })
-      ind <- LAPPLY(ind, "length") != 0
-      alias <- gt$alias[ind]
-    }
-    # NO ALIAS IN SUPPLIED CHANNELS
-    if (length(alias) == 0) {
-      alias <- NA
-    }
-    # BOOL GATE CHECK - BOOL GATES HAVE NO CHANNELS IN TEMPLATE
-    if (!.all_na(alias)) {
-      # CHECK FOR BOOL GATES
-      if (any(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))) {
-        # EMPTY CHANNELS ALIAS INDEX
-        ind <- which(LAPPLY(gt[!gt$alias %in% alias, "dims"], ".empty"))
-        # PULL OUT ALIAS
-        empty_alias <- gt$alias[!gt$alias %in% alias][ind]
-        # ADD VALID BOOL GATES TO ALIAS
-        valid_bool_gate <- LAPPLY(empty_alias, function(z) {
-          # EXTRACT GATE
-          g <- gh_pop_get_gate(gh, 
-                               cyto_nodes_convert(gh, 
-                                                  nodes = z, 
-                                                  anchor = parent))
-          # BOOL GATE
-          if (cyto_class(g, "booleanFilter")) {
-            # BOOLEAN LOGIC
-            bool <- g@deparse
-            # ONLY NOT AND BOOL GATES SUPPORTED
-            if(!grepl("!", bool)){
-              message("Only NOT boolean gates are supported.")
-              return(FALSE)
-            }else if(grepl("|", bool, fixed = TRUE)){
-              message("Only NOT AND boolean gates are supported.")
-              return(FALSE)
-              # NOT AND GATE - CORRECT ALIAS
-            } else {
-              # STRIP &
-              bool_alias <- strsplit(bool, "&!")[[1]]
-              # STRIP !
-              bool_alias <- unlist(strsplit(bool_alias, "!"))
-              # REMOVE EMPTY ALIAS
-              bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
-              # BOOL ALIAS MUST BE IN ALIAS
-              if(all(bool_alias %in% alias)){
-                return(TRUE)
-              }else{
-                return(FALSE)
-              }
-            }
-            # NOT A BOOL GATE
-          } else {
-            return(FALSE)
-          }
-        })
-        if (any(valid_bool_gate)) {
-          # UPDATE ALIAS
-          alias <- c(alias, empty_alias[which(valid_bool_gate)])
-          # TURN ON NEGATE
-          if(missing(negate)){
-            negate <- TRUE
-          }
-        }
-      }
-    }
-    # ALIAS MANUALLY SUPPLIED - CONTAINS BOOLEAN FILTER (MUST HAVE ALL ALIAS)
-  }else if(!.all_na(alias)){
-    # ALIAS MAY BE BOOL GATE
-    if(any(LAPPLY(gt[gt$alias %in% alias, "dims"], ".empty"))){
-      # EMPTY CHANNELS ALIAS INDEX
-      ind <- which(LAPPLY(alias, function(z){
-        .empty(gt[gt$alias == z, "dims"])}))
-      empty_alias <- alias[ind]
-      # VALID BOOL GATE - ALIAS CORRECT
-      lapply(empty_alias, function(z){
-        # EXTRACT GATE
-        g <- gh_pop_get_gate(gh, 
-                             cyto_nodes_convert(gh, 
-                                                nodes = z, 
-                                                anchor = parent))
-        # BOOL GATE
-        if(cyto_class(g, "booleanFilter")){
-          # BOOLEAN LOGIC
-          bool <- g@deparse
-          # ONLY NOT AND BOOL GATES SUPPORTED
-          if(!grepl("!", bool)){
-            message("Only NOT boolean gates are supported.")
-            # REMOVE FROM ALIAS
-            alias <<- alias[-match(z, alias)]
-            # NEGATE
-            negate <<- FALSE
-          }else if(grepl("|", bool, fixed = TRUE)){
-            message("Only NOT AND boolean gates are supported.")
-            # REMOVE FROM ALIAS
-            alias <<- alias[-match(z, alias)]
-            # NEGATE
-            negate <<- FALSE
-            # NOT AND GATE - CORRECT ALIAS
-          } else {
-            # STRIP &
-            bool_alias <- unlist(strsplit(bool, "&!"))
-            # STRIP !
-            bool_alias <- unlist(strsplit(bool_alias, "!"))
-            # REMOVE EMPTY ALIAS
-            bool_alias <- bool_alias[!LAPPLY(bool_alias, ".empty")]
-            # BOOL ALIAS MUST BE IN ALIAS
-            if(!all(bool_alias %in% alias)){
-              alias <<- unique(c(alias, bool_alias))
-            }
-            # NEGATE 
-            negate <<- TRUE
-          }
-          # BOOLEAN ALIAS MUST BE LAST
-          alias <<- c(alias[-match(z, alias)], z)
-          # NOT BOOL GATE 
-        }else{
-          # REMOVE FROM ALIAS
-          message(paste0("Cannot plot gate ", z,"."))
-          alias <<- alias[-match(z, alias)]
-        }
-      })
-    }
-  }
-  
-  # EXTRACT GATE OBJECTS - BYPASS BOOLEAN FILTERS
-  if (!.all_na(alias)) {
-    # REMOVE DUPLICATE ALIAS
-    alias <- unique(alias)
-    # GATES
-    gate <- lapply(alias, function(y) {
-      gh_pop_get_gate(gh, 
-                      cyto_nodes_convert(gh, 
-                                         nodes = y, 
-                                         anchor = parent))
-    })
-    names(gate) <- alias
-    # REMOVE BOOLEAN GATES
-    ind <- which(LAPPLY(gate, function(z){cyto_class(z, "booleanFilter")}))
-    gate[ind] <- NULL
-    # NEGATED GATES - SINGLE NEGATED GATE
-    if(all(LAPPLY(alias, function(z){
-      gh_pop_is_negated(gh, 
-                        cyto_nodes_convert(gh, 
-                                           nodes = z, 
-                                           anchor = parent))
-    }))){
-      # LABEL_TEXT (NA FOR GATE - ALIAS FOR LABEL)
-      alias <- c(NA, alias)
-    }
-  }
-  
-  # CAPTURE OVERLAY POPULATION NAMES
-  nms <- NA
-  
-  # OVERLAY - POPULATION NAMES
-  if (!.all_na(overlay)) {
-    # POPULATION NAMES TO OVERLAY
-    if (is.character(overlay)) {
-      # OVERLAY DESCENDANTS
-      if(any(grepl("descendants", overlay))){
-        overlay <- tryCatch(gh_pop_get_descendants(gh, 
-                                                   parent,
-                                                   path = "auto"), 
-                            error = function(e){NA}) 
-        # OVERLAY CHILDREN  
-      }else if(any(grepl("children", overlay))){
-        overlay <- tryCatch(gh_pop_get_children(gh, 
-                                                parent,
-                                                path = "auto"),
-                            error = function(e){NA})
-      }
-      # LABEL_STAT WITHOUT GATES
-      if (.all_na(gate) & !.empty(label_stat)) {
-        if (missing(label_text)) {
-          label_text <- rep(NA, length(overlay) + 1)
-          ind <- which(!is.na(rep(c(
-            label_stat,
-            rep(NA, length(overlay) + 1)
-          ),
-          length.out = length(overlay) + 1
-          )))
-          label_text[ind] <- c(parent, overlay)[ind]
-        }
-      }
-      # CHECK OVERLAY - MAY BE NA ABOVE
-      if(!.all_na(overlay)){
-        # EXTRACT POPULATIONS
-        nms <- overlay
-        overlay <- lapply(overlay, function(z) {
-          cyto_data_extract(gh,
-                            parent = cyto_nodes_convert(gh, 
-                                                        nodes = z, 
-                                                        anchor = parent),
-                            copy = FALSE)[[1]]
-        })
-        names(overlay) <- nms
-      }
-    }
-  }
-  
-  # PREPARE ARGUMENTS ----------------------------------------------------------
-  
-  # NEGATE
-  if (missing(negate)) {
-    negate <- FALSE
-  }
-  
-  # LAYERS
-  if(.all_na(overlay)){
-    L <- 1
-  }else{
-    if(cyto_class(overlay, "flowSet")){
-      L <- 2
-    }else{
-      # OVERLAY LIST OF CYTOSETS
-      L <- length(overlay) + 1
-    }
-  }
-  
-  # GATES 
-  if(.all_na(gate)){
-    G <- 0
-  }else{
-    G <- length(gate)
-    if(negate == TRUE){
-      G <- G + 1
-    }
-  }
-  
-  # LABEL_TEXT - ALIAS (PER PLOT)
-  if (missing(label_text)) {
-    if (!.all_na(alias)) {
-      # BASE LAYER ONLY
-      if (length(channels) == 1 & hist_stack == 0) {
-        label_text <- rep(
-          c(alias, rep(NA, length(alias) - G)), 
-          length.out = G
-        )
-        # EACH LAYER
-      } else if (length(channels) == 1 & hist_stack != 0) {
-        label_text <- rep(
-          c(alias, rep(NA, length(alias) - G)),
-          length.out = G * L
-        )
-        # BASE LAYER ONLY
-      } else {
-        label_text <- rep(
-          c(alias, rep(NA, length(alias) - G)), 
-          length.out = G
-        )
-      }
-    } else {
-      label_text <- NA
-    }
-  }
-  
-  # LEGEND_TEXT
-  if (.all_na(legend_text)) {
-    # PARENT ONLY
-    if (.all_na(overlay)) {
-      legend_text <- parent
-      # PARENT & OVERLAY
-    } else {
-      if (!.all_na(nms)) {
-        legend_text <- c(parent, nms)
-      } else {
-        legend_text <- parent
-      }
-    }
-  }
-  
-  # TITLE
-  if (missing(title)) {
-    # SAMPLENAME
-    title <- cyto_names(x)
-    # PARENT
-    title <- LAPPLY(title, function(z) {
-      if (parent == "root") {
-        pt <- "All Events"
-      } else {
-        pt <- parent
-      }
-      # 1D PLOT - STACKED NO OVERLAY - LACK SAMPLENAMES
-      if (length(channels) == 1 &
-          .all_na(overlay)) {
-        paste(z, pt, sep = "\n")
-        # 1D PLOT - STACKED OVERLAY - SAMPLENAMES ONLY
-      } else if (length(channels) == 1 &
-                 !.all_na(overlay)) {
-        z
-        # PASTE SAMPLENAME & PARENT
-      } else {
-        paste(z, pt, sep = "\n")
-      }
-    })
-  }
-  
-  # CALL CYTO_PLOT FLOWFRAME METHOD --------------------------------------------
-  
-  # PULL DOWN ARGUMENTS
-  args <- .args_list(...)
-  
-  # CALL CYTOSET METHOD
-  .execute("cyto_plot.flowSet", args)
-}
-
-#' @rdname cyto_plot
-#' @noRd
-cyto_plot.flowSet <- function(x,
-                              channels,
-                              axes_trans = NA,
-                              merge_by = "name",
-                              overlay = NA,
-                              gate = NA,
-                              axes_limits = "auto",
-                              display = 50000,
-                              layout,
-                              margins = c(NA, NA, NA, NA),
-                              popup = TRUE,
-                              popup_size = c(7,7),
-                              select = NULL,
-                              xlim = c(NA, NA),
-                              ylim = c(NA, NA),
-                              xlab,
-                              ylab,
-                              title,
-                              negate,
-                              hist_stat = "percent",
-                              hist_bins = 256,
-                              hist_smooth = 1,
-                              hist_stack = 0.5,
-                              hist_layers = 1,
-                              hist_cols = NA,
-                              hist_fill = NA,
-                              hist_fill_alpha = 1,
-                              hist_line_type = 1,
-                              hist_line_width = 1,
-                              hist_line_col = "black",
-                              point_shape = ".",
-                              point_size = 2,
-                              point_col_scale = NA,
-                              point_cols = NA,
-                              point_col = NA,
-                              point_col_alpha = 1,
-                              point_fast = FALSE,
-                              contour_lines = 0,
-                              contour_line_type = 1,
-                              contour_line_width = 1,
-                              contour_line_col = "black",
-                              contour_line_alpha = 1,
-                              axes_limits_buffer = 0.03,
-                              axes_text = c(TRUE, TRUE),
-                              axes_text_font = 1,
-                              axes_text_size = 1,
-                              axes_text_col = "black",
-                              axes_label_text_font = 1,
-                              axes_label_text_size = 1.1,
-                              axes_label_text_col = "black",
-                              title_text_font = 2,
-                              title_text_size = 1.1,
-                              title_text_col = "black",
-                              legend = FALSE,
-                              legend_text = NA,
-                              legend_text_font = 1,
-                              legend_text_size = 1,
-                              legend_text_col = "black",
-                              legend_line_type = NA,
-                              legend_line_width = NA,
-                              legend_line_col = NA,
-                              legend_box_fill = NA,
-                              legend_point_col = NA,
-                              gate_line_type = 1,
-                              gate_line_width = 2.5,
-                              gate_line_col = "red",
-                              gate_fill = "white",
-                              gate_fill_alpha = 0,
-                              label,
-                              label_text = NA,
-                              label_stat,
-                              label_position = "auto",
-                              label_text_x = NA,
-                              label_text_y = NA,
-                              label_text_font = 2,
-                              label_text_size = 0.8,
-                              label_text_col = "black",
-                              label_text_col_alpha = 1,
-                              label_fill = "white",
-                              label_fill_alpha = 0.6,
-                              border_line_type = 1,
-                              border_line_width = 1,
-                              border_line_col = "black",
-                              border_fill = "white",
-                              border_fill_alpha = 1,
-                              grid = TRUE,
-                              grid_line_type = 1,
-                              grid_line_width = 1,
-                              grid_line_col = "grey95",
-                              grid_line_alpha = 1,
-                              header = NA,
-                              header_text_font = 2,
-                              header_text_size = 1,
-                              header_text_col = "black",
-                              seed = 42,
-                              ...) {
+#' @export
+cyto_plot <- function(x,
+                      channels,
+                      axes_trans = NA,
+                      merge_by = "name",
+                      overlay = NA,
+                      gate = NA,
+                      axes_limits = "auto",
+                      display = 50000,
+                      layout,
+                      margins = c(NA, NA, NA, NA),
+                      popup = TRUE,
+                      popup_size = c(NA, NA),
+                      select = NULL,
+                      xlim = c(NA, NA),
+                      ylim = c(NA, NA),
+                      xlab,
+                      ylab,
+                      title,
+                      negate = FALSE,
+                      hist_stat = "percent",
+                      hist_bins = 256,
+                      hist_smooth = 1,
+                      hist_stack = 0,
+                      hist_layers = NA,
+                      hist_cols = NA,
+                      hist_fill = NA,
+                      hist_fill_alpha = 1,
+                      hist_line_type = 1,
+                      hist_line_width = 1,
+                      hist_line_col = "black",
+                      point_shape = ".",
+                      point_size = 2,
+                      point_col_scale = NA,
+                      point_cols = NA,
+                      point_col = NA,
+                      point_col_alpha = 1,
+                      point_fast = FALSE,
+                      contour_lines = 0,
+                      contour_line_type = 1,
+                      contour_line_width = 1,
+                      contour_line_col = "black",
+                      contour_line_alpha = 1,
+                      axes_limits_buffer = 0.03,
+                      axes_text = c(TRUE, TRUE),
+                      axes_text_font = 1,
+                      axes_text_size = 1,
+                      axes_text_col = "black",
+                      axes_label_text_font = 1,
+                      axes_label_text_size = 1.1,
+                      axes_label_text_col = "black",
+                      title_text_font = 2,
+                      title_text_size = 1.1,
+                      title_text_col = "black",
+                      legend = FALSE,
+                      legend_text = NA,
+                      legend_text_font = 1,
+                      legend_text_size = 1,
+                      legend_text_col = "black",
+                      legend_line_type = NA,
+                      legend_line_width = NA,
+                      legend_line_col = NA,
+                      legend_box_fill = NA,
+                      legend_point_col = NA,
+                      gate_line_type = 1,
+                      gate_line_width = 2.5,
+                      gate_line_col = "red",
+                      gate_fill = "white",
+                      gate_fill_alpha = 0,
+                      label,
+                      label_text,
+                      label_stat,
+                      label_position = "auto",
+                      label_text_x = NA,
+                      label_text_y = NA,
+                      label_text_font = 2,
+                      label_text_size = 0.8,
+                      label_text_col = "black",
+                      label_text_col_alpha = 1,
+                      label_fill = "white",
+                      label_fill_alpha = 0.6,
+                      border_line_type = 1,
+                      border_line_width = 1,
+                      border_line_col = "black",
+                      border_fill = "white",
+                      border_fill_alpha = 1,
+                      grid = TRUE,
+                      grid_line_type = 1,
+                      grid_line_width = 1,
+                      grid_line_col = "grey95",
+                      grid_line_alpha = 1,
+                      header = NA,
+                      header_text_font = 2,
+                      header_text_size = 1,
+                      header_text_col = "black",
+                      seed = 42,
+                      ...) {
   
   # CYTO_PLOT_EXIT -------------------------------------------------------------
   
@@ -1362,6 +417,15 @@ cyto_plot.flowSet <- function(x,
       cyto_plot_par(reset = TRUE)
       cyto_option("cyto_plot_method", NULL)
     })
+  }
+  
+  # CLASS CHECK ----------------------------------------------------------------
+  
+  # CYTOSET/GATINGHIERARCHY/GATINGSET
+  if(!cyto_class(x, c("flowSet", "GatingSet"))) {
+    stop(
+      "cyto_plot only supports cytoset, Gatinghierarchy or GatingSet objects!"
+      )
   }
   
   # CYTO_PLOT_THEME ------------------------------------------------------------
@@ -1401,26 +465,35 @@ cyto_plot.flowSet <- function(x,
   #   }
   # }
   
-  # AXES_TRANS
+  # AXES_TRANS - SUPPLIED
   if(!.all_na(args$axes_trans)) {
     if(cyto_class(args$axes_trans, "transformList")) {
       message("'axes_trans' must be a transformerList!")
       args$axes_trans <- NA
     }
+  # AXES_TRANS - EXTRACT
+  } else {
+    args$axes_trans <- cyto_transformers_extract(args$x)
   }
+  
+  # GATES PREPARATION ----------------------------------------------------------
+  
+  # GATE - LIST OF GATE OBJECT LISTS
+  args$gate <- .execute(".cyto_plot_gates", args)
   
   # DATA PREPARATION -----------------------------------------------------------
   
-  # LIST OF CYTOSET LISTS
-  
-  # BASE & OVERLAY - NO BARCODING
+  # X - LIST OF CYTOSET LISTS - NO BARCODING
   args$x <- .execute(".cyto_plot_data", args)
   
   # REMOVE DATA ARGUMENTS
-  args <- args[!names(args) %in% c("overlay",
+  args <- args[!names(args) %in% c("parent",
+                                   "alias",
+                                   "overlay",
+                                   "select",
                                    "display", 
-                                   "select", 
-                                   "seed")]
+                                   "seed",
+                                   "negate")]
   
   # HISTOGRAM LAYERS -----------------------------------------------------------
   
@@ -1428,7 +501,6 @@ cyto_plot.flowSet <- function(x,
   
   # INDIVIDUAL LAYERS (NO OVERLAY)
   if(length(args$channels) == 1 & all(LAPPLY(args$x, length) == 1)) {
-    
     # LEGEND TEXT
     if(.all_na(args$legend_text)){
       args$legend_text <- names(args$x)
@@ -1437,7 +509,11 @@ cyto_plot.flowSet <- function(x,
     args$x <- unlist(args$x)  
     # HIST_LAYERS - USE ALL LAYERS
     if(.all_na(args$hist_layers)) {
-      args$hist_layers <- length(x)
+      if(args$hist_stack == 0) {
+        args$hist_layers <- 1
+      } else {
+        args$hist_layers <- length(x)
+      }
     }
     # HIST_LAYERS
     if(sum(args$hist_layers) != length(x)) {
@@ -1451,75 +527,85 @@ cyto_plot.flowSet <- function(x,
       args$hist_layers <- rep(args$hist_layers,
                               length.out = length(x)/args$hist_layers)
     }
-    # LAYER INDICES
-    ind <- split(seq_along(x),
-                 LAPPLY(seq_along(args$hist_layers), function(z){
-                   rep(z, args$hist_layers[z])
-                 }))
+    # LAYERS
+    L <- LAPPLY(seq_along(args$x), function(z){
+      rep(z, length(x[[z]])) # index in args$gate
+    })
+    names(L) <- 1:length(L) # index in unlist(args$x)
+    L <- split(L, LAPPLY(seq_along(args$hist_layers), function(z){
+      rep(z, args$hist_layers[z])
+    }))
+    # # LAYER INDICES
+    # ind <- split(seq_along(x),
+    #              LAPPLY(seq_along(args$hist_layers), function(z){
+    #                rep(z, args$hist_layers[z])
+    # }))
     # SPLIT LAYERS
-    args$x <- lapply(unique(ind), function(z){
-      args$x[z]
+    args$x <- lapply(L, function(z){
+      args$x[as.numeric(names(z))]
+    })
+    names(args$x) <- NULL
+    # GATES
+    args$gate <- lapply(L, function(z){
+      args$gate[[z[1]]] # use first set of gates
     })
   }
   
-  # GATES ----------------------------------------------------------------------
+  # REMOVE MERGE_BY & HIST_LAYERS
+  args <- args[!names(args) %in% c("merge_by")]
   
-  # EXPECT LIST OF GATE OBJECT LISTS - ONE PER PLOT
-  if (!.all_na(args$gate)) {
-    # GATE OBJECTS
-    if(cyto_class(args$gate)[1] != "list") {
-      # EXTRACT FILTERS
-      if(cyto_class(args$gate)[1] == "filters") {
-        args$gate <- rep(list(unlist(args$gate)), 
-                         length.out = length(args$x))
-        # LIST GATE OBJECTS
-      } else {
-        args$gate <- rep(list(list(unlist(args$gate))), 
-                         length.out = length(args$x))
+  # ARGUMENTS ------------------------------------------------------------------
+  
+  # TITLE - INHERIT NAMES
+  if(all(LAPPLY(args$title, ".empty"))) {
+    # REPEAT
+    args$title <- rep("", length(args$x))
+    # HISTOGRAMS
+    if(length(args$channels) == 1) {
+      # GROUPS
+      if(!is.null(names(args$x))) {
+        args$title <- names(args$x)
       }
-      # LIST OF GATE OBJECTS/ LIST OF GATE OBJECT LISTS
-    } else if(cyto_class(args$gate)[1] == "list") {
-      # LIST OF GATE OBJECT LISTS
-      if(cyto_class(args$gate[[1]])[1] == "list") {
-        # EXTRACT FILTERS
-        args$gate <- structure(lapply(args$gate, "unlist"), 
-                               names = names(args$gate))
-        # GATE PER SUPPLIED CYTOFRAME
-        if(length(args$gate) != length(x)) {
-          args$gate <- structure(rep(args$gate, length.out = length(x)),
-                                 names = cyto_names(x))
+      # POPULATIONS - SHARED
+      args$title <- LAPPLY(seq_along(args$x), function(z){
+        if(length(unique(names(args$x[[z]]))) == 1) {
+          return(
+            paste(args$title[z],
+                  unique(names(args$x[[z]])),
+                  sep = "\n")
+            )
+        } else {
+          return(args$title[z])
         }
-        # MERGE_BY
-        if(args$merge_by != "name") {
-          groups <- cyto_groups(x, 
-                                group_by = args$merge_by, 
-                                details = TRUE)
-          if(is.null(names(args$gate))) {
-            names(args$gate) <- cyto_names(x)
-          }
-          args$gate <- lapply(groups, function(z){
-            args$gate[[z$name[1]]]
-          })
-        }
-        # HIST_LAYERS - FIRST SET OF GATES
-        if(length(args$channels) == 1) {
-          if(.all_na(hist_layers)) {
-            args$gate <- args$gate[1]
-          } else {
-            args$gate <- args$gate[seq(1, length(x), by = args$hist_layers)]
-          }
-        }
-        # LIST OF GATE OBJECTS
-      } else {
-        # EXTRACT FILTERS & REPEAT
-        args$gate <- rep(list(unlist(args$gate)), length.out = length(args$x))
+      })
+    # POINTS  
+    } else {
+      # GROUPS
+      if(!is.null(names(args$x))) {
+        args$title <- names(args$x)
+      }
+      # POPULATIONS
+      if(!is.null(LAPPLY(args$x, "names"))) {
+        args$title <- paste(args$title,
+                            LAPPLY(args$x, function(z){
+                              names(z)[1] # BASE LAYER
+                            }),
+                            sep = "\n")
       }
     }
   }
-  args <- args[!names(args) %in% c("merge_by",
-                                   "hist_layers")]
   
-  # ARGUMENTS ------------------------------------------------------------------
+  # LEGEND_TEXT
+  if(.all_na(args$legend_text)) {
+    # POPULATIONS
+    if(!is.null(LAPPLY(args$x, "names"))) {
+      args$legend_text <- LAPPLY(args$x, function(z){
+        nm <- names(z)
+        nm[nm == "root"] <- "All Events"
+        return(nm)
+      })
+    }
+  }
   
   # X AXIS LIMITS - SUPPLIED ON LINEAR SCALE
   args$xlim <- .cyto_transform(args$xlim,
@@ -1595,6 +681,17 @@ cyto_plot.flowSet <- function(x,
   args$axes_text <- list(axes_text_x, axes_text_y)
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
   
+  # LABEL_TEXT
+  if(all(LAPPLY(args$label_text, ".empty"))) {
+    if(!is.null(LAPPLY(args$gate, "names"))) {
+      args$label_text <- LAPPLY(seq_along(args$gate), function(z){
+        rep(names(args$gate[[z]]), length(args$x[[z]]))
+      })
+    } else {
+      args$label_text <- NA
+    }
+  }
+  
   # LABEL_TEXT_X CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
   args$label_text_x <- .cyto_transform(args$label_text_x,
                                        trans = args$axes_trans,
@@ -1643,6 +740,15 @@ cyto_plot.flowSet <- function(x,
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
   
+  # POPUP_SIZE - INHERIT CUSTOM DEVICE SIZE
+  if(.all_na(args$popup_size)) {
+    if("popup_size" %in% names(cyto_option("cyto_plot_par"))) {
+      args$popup_size <- cyto_option("cyto_plot_par")[["popup_size"]]
+    } else {
+      args$popup_size <- c(7,7)
+    }
+  }
+  
   # GRAPHICS DEVICE
   cyto_plot_new(args$popup,
                 popup_size = args$popup_size,
@@ -1659,6 +765,9 @@ cyto_plot.flowSet <- function(x,
   
   # TRANSPOSE ARGUMENTS
   args <- lapply(seq_along(args$x), function(z) {
+    # lapply(seq_along(args), function(w){
+    #   args[[w]][z]
+    # })
     return(lapply(args, `[[`, z))
   })
   

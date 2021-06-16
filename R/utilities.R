@@ -35,6 +35,44 @@ CytoExploreR_logo <- function(){
   do.call(x, args[names(args) %in% .formal_args(x, drop = drop)])
 }
 
+
+## DOCALL ----------------------------------------------------------------------
+
+#' Modified version of do.call that handles namespaces
+#' @noRd
+do_call <- function(what, args, ...) {
+  if(is.character(what)){
+    FUN <- strsplit(what, "::")[[1]]
+    what <- if(length(FUN) == 1) {
+      get(FUN[[1]], 
+          envir = parent.frame(), 
+          mode = "function")
+    } else {
+      get(FUN[[2]], 
+          envir = asNamespace(FUN[[1]]), 
+          mode = "function")
+    }
+  }
+  do.call(what, as.list(args), ...)
+}
+
+## MATCHFUN --------------------------------------------------------------------
+
+#' Modified version of match.fun to handle namespaced functions
+#' @noRd
+match_fun <- function(FUN, descend = TRUE) {
+  # NAMESPACED CHARACTER
+  if(is.character(FUN)) {
+    if(grepl(":{2,3}", FUN)) {
+      FUN <- unlist(strsplit(FUN, ":{2,3}"))
+      FUN <- get(FUN[2],
+                 envir = asNamespace(FUN[1]),
+                 mode = "function")
+    }
+  }
+  match.fun(FUN, descend = descend)
+}
+
 ## EMPTY CHARACTER STRINGS -----------------------------------------------------
 
 #' Check if vector contains only empty character strings
