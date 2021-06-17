@@ -1593,6 +1593,10 @@ cyto_data_extract <- function(x,
   # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
   if(is.null(parent)) {
     parent = "root"
+  } else {
+    parent <- cyto_nodes_convert(x,
+                                 nodes = parent,
+                                 path = "auto")
   }
   
   # EXTRACT TRANSFORMERS
