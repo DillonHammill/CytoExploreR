@@ -4,7 +4,15 @@
 \alias{cyto_gate_extract}
 \title{Extract Saved Gate(s) from gatingTemplate.}
 \usage{
-cyto_gate_extract(x, parent, alias, gatingTemplate = NULL, ...)
+cyto_gate_extract(
+  x,
+  parent,
+  alias,
+  gatingTemplate = NULL,
+  select = NULL,
+  merge_by = "name",
+  ...
+)
 }
 \arguments{
 \item{x}{object of class GatingHierarchy or GatingSet.}
@@ -15,6 +23,12 @@ cyto_gate_extract(x, parent, alias, gatingTemplate = NULL, ...)
 
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the gate(s) are saved.}
+
+\item{select}{passed to \code{cyto_select}.}
+
+\item{merge_by}{passed to \code{cyto_groups} to split \code{GatingSet} intp
+groups, gates will be extracted from the first Gatinghierarchy within each
+group.}
 
 \item{...}{not used.}
 }

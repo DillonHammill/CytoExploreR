@@ -594,7 +594,6 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
     suppressWarnings(
       cyto_gatingTemplate_read(gatingTemplate)
       ),
-      
     error = function(e) {
       NULL
     }

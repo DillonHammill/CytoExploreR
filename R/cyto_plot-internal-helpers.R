@@ -2642,7 +2642,8 @@
     if(!.all_na(z)) {
       if(z == "all") {
         z <- "Combined Events"
-      } else if(grepl("root", z, ignore.case = TRUE)) {
+      }
+      if(grepl("root", z, ignore.case = TRUE)) {
         z <- gsub("root", "All Events", z)
       }
     }
