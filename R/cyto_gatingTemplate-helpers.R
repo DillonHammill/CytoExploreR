@@ -416,6 +416,9 @@ cyto_gatingTemplate_edit <- function(x,
                   viewer = "pane",
                   ...)
   
+  # BE NICE - REMOVE WHITESPACE FROM DIMS (COMMON MISTAKE)
+  gt$dims <- gsub(" *, *", ",", gt$dims)
+  
   # WRITE TO FILE
   write_to_csv(gt, gatingTemplate)
   
