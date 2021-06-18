@@ -246,7 +246,8 @@ cyto_gate_remove <- function(gs,
                              alias = NULL,
                              channels = NULL,
                              type = NULL,
-                             gatingTemplate = NULL, ...) {
+                             gatingTemplate = NULL, 
+                             ...) {
   
   # ALIAS MISSING
   if (is.null(alias)) {
@@ -351,6 +352,7 @@ cyto_gate_remove <- function(gs,
 #' @param alias current names of the gates to be changed.
 #' @param names new names to use for \code{alias}.
 #' @param gatingTemplate name of the gatingTemplate csv file to be edited.
+#' @param ... not in use.
 #'
 #' @return update gate names in \code{GatingSet} or \code{GatingHierarchy} and
 #'   update the gatingTemplate accordingly.
@@ -363,7 +365,8 @@ cyto_gate_remove <- function(gs,
 cyto_gate_rename <- function(x,
                              alias = NULL,
                              names = NULL,
-                             gatingTemplate = NULL) {
+                             gatingTemplate = NULL,
+                             ...) {
   
   # MISSING GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
@@ -446,6 +449,7 @@ cyto_gate_rename <- function(x,
 #' @param copy vector of names to copy to new parent.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the new entries should be saved.
+#' @param ... not in use.
 #'
 #' @return object of class \code{GatingSet} with copied gates applied and update
 #'   gatingTemplate csv file with appropriate entries.
@@ -461,7 +465,8 @@ cyto_gate_copy <- function(x,
                            parent = NULL,
                            alias = NULL,
                            copy = NULL,
-                           gatingTemplate = NULL){
+                           gatingTemplate = NULL,
+                           ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -554,6 +559,7 @@ cyto_gate_copy <- function(x,
 #' @param logic vector of logic to define each of the boolean populations.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the new entries should be saved.
+#' @param ... not in use.
 #'
 #' @return object of class \code{GatingSet} with new boolean gates and updated
 #'   gatingTemplate csv file with appropriate entries.
@@ -589,7 +595,8 @@ cyto_gate_bool <- function(x,
                            parent = NULL,
                            alias = NULL,
                            logic = NULL,
-                           gatingTemplate = NULL){
+                           gatingTemplate = NULL,
+                           ...){
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -912,7 +919,7 @@ cyto_gate_extract <- function(x,
         # GATINGHIERARCHY - FIRST GATINGHIERARCHY
         gh <- z[[1]]
         # EXTRACT GATES
-        structure(
+        gates <- structure(
           lapply(alias, function(w){
             gate <- gh_pop_get_gate(gh, w)
             # CONVERT BOOLEANFILTER TO VALID FILTER
@@ -938,6 +945,20 @@ cyto_gate_extract <- function(x,
           }),
           names = alias
         )
+        # RECTANGLEGATES BELONG TO QUADGATE?
+        quad_ind <- which(LAPPLY(gates, function(v){
+          cyto_class(v, "rectangleGate") &
+            any(grepl("quad", names(attributes(v))))
+        }))
+        # ALL RECTANGLES MUST BE PRESENT
+        if(length(quad_ind) == 4) {
+          # CREATE QUADGATE
+          quad <- .cyto_gate_quad_convert(gates[quad_ind], channels = chans)
+          # REMOVE RECTANGLEGATES
+          gates[quad_ind] <- NULL
+          gates[[quad@filterId]] <- quad
+        }
+        return(gates)
       }),
       names = names(x)
     )
@@ -1057,7 +1078,7 @@ cyto_gate_extract <- function(x,
 #' )
 #' }
 #'
-#' @export
+#' @noRd
 cyto_gate_edit <- function(x,
                            parent = NULL,
                            alias = NULL,
@@ -1081,7 +1102,8 @@ cyto_gate_edit <- function(x,
                            gate_line_type = 1,
                            gate_line_width = 2.5,
                            gate_line_col = "red",
-                           gate_line_col_alpha = 1, ...) {
+                           gate_line_col_alpha = 1, 
+                           ...) {
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -1463,8 +1485,7 @@ cyto_gate_edit <- function(x,
                                gate_line_type = gate_line_type,
                                gate_line_width = gate_line_width,
                                gate_line_col = gate_line_col,
-                               gate_line_col_alpha = gate_line_col_alpha,
-    )
+                               gate_line_col_alpha = gate_line_col_alpha)
     
     # NAME GATES
     names(gate_new) <- LAPPLY(alias, function(z) {

@@ -9,7 +9,8 @@ cyto_gate_copy(
   parent = NULL,
   alias = NULL,
   copy = NULL,
-  gatingTemplate = NULL
+  gatingTemplate = NULL,
+  ...
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ copy.}
 
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the new entries should be saved.}
+
+\item{...}{not in use.}
 }
 \value{
 object of class \code{GatingSet} with copied gates applied and update

@@ -9,7 +9,8 @@ cyto_gate_bool(
   parent = NULL,
   alias = NULL,
   logic = NULL,
-  gatingTemplate = NULL
+  gatingTemplate = NULL,
+  ...
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ be added, set to the most recent common ancestor by default.}
 
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the new entries should be saved.}
+
+\item{...}{not in use.}
 }
 \value{
 object of class \code{GatingSet} with new boolean gates and updated
