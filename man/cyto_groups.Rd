@@ -4,7 +4,7 @@
 \alias{cyto_groups}
 \title{Retrieve details about experimental groups}
 \usage{
-cyto_groups(x, group_by = "all", details = FALSE)
+cyto_groups(x, group_by = "all", details = FALSE, select = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -16,6 +16,10 @@ in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
 
 \item{details}{logical indicating whether the split experimental details
 should be returned instead of the group names, set to FALSE by default.}
+
+\item{select}{vector of indices or named list containing experimental
+variables passed to \code{\link{cyto_select}} to be used to select samples
+prior to retrieving group-wise experimental details.}
 }
 \value{
 names of experimental groups or a list of experiment details per
@@ -42,6 +46,15 @@ group_by = list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
 OVAConc = c(0, 5, 50, 500)),
 details = TRUE)
 
+}
+\seealso{
+\code{\link{cyto_select}}
+
+\code{\link{cyto_group_by}}
+
+\code{\link{cyto_merge_by}}
+
+\code{\link{cyto_sort_by}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

@@ -1593,10 +1593,6 @@ cyto_data_extract <- function(x,
   # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
   if(is.null(parent)) {
     parent = "root"
-  } else {
-    parent <- cyto_nodes_convert(x,
-                                 nodes = parent,
-                                 path = "auto")
   }
   
   # EXTRACT TRANSFORMERS
@@ -1934,16 +1930,31 @@ cyto_select <- function(x, ...) {
     exclude <- FALSE
   }
   
+  # Extract experiment details
+  pd <- cyto_details(x)
+  
   # INDICES SUPPLIED
   if (length(args) == 1 &
-      (is.null(names(args)) | .empty(names(args))) &
-      is.numeric(unlist(args))) {
-    # INDICES TO SELECT
-    ind <- unlist(args)
+      (is.null(names(args)) | .empty(names(args)))) {
+    # NULL
+    if(is.null(unlist(args))) {
+      ind <- seq_along(x)
+    # NUMERIC INDICES
+    } else if(is.numeric(unlist(args))) {
+      ind <- unlist(args)
+    # UNNAMED
+    } else {
+      # NAMES?
+      if(all(unlist(args) %in% rownames(pd))) {
+        ind <- LAPPLY(unlist(args), match, rownames(pd))
+      # HUH?
+      } else {
+        stop(
+          "Selection criteria must be named with experimental variables!"
+        )
+      }
+    }
   } else {
-    # Extract experiment details
-    pd <- cyto_details(x)
-    
     # Check that all variables are valid
     if (!all(names(args) %in% colnames(pd))) {
       lapply(names(args), function(y) {
@@ -2000,6 +2011,9 @@ cyto_select <- function(x, ...) {
 #'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
 #' @param details logical indicating whether the split experimental details
 #'   should be returned instead of the group names, set to FALSE by default.
+#' @param select vector of indices or named list containing experimental
+#'   variables passed to \code{\link{cyto_select}} to be used to select samples
+#'   prior to retrieving group-wise experimental details.
 #'
 #' @return names of experimental groups or a list of experiment details per
 #'   experimental group.
@@ -2024,10 +2038,16 @@ cyto_select <- function(x, ...) {
 #' OVAConc = c(0, 5, 50, 500)),
 #' details = TRUE)
 #'
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_group_by}}
+#' @seealso \code{\link{cyto_merge_by}}
+#' @seealso \code{\link{cyto_sort_by}}
+#'
 #' @export
 cyto_groups <- function(x, 
                         group_by = "all",
-                        details = FALSE){
+                        details = FALSE,
+                        select = NULL){
   
   # Check class of x
   if (!cyto_class(x, c("flowSet", "GatingSet"))) {
@@ -2136,13 +2156,16 @@ cyto_groups <- function(x,
 
 ## CYTO_SORT_BY ----------------------------------------------------------------
 
-#' Sort a flowSet or GatingSet by experiment variables
+#' Sort a cytoset or GatingSet by experiment variables
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param sort_by names of cyto_details variables to use for sorting. For more
 #'   control over the sorting order, specify the factor levels for each variable
 #'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#' @param select vector of indices or named list containing experimental
+#'   variables passed to \code{\link{cyto_select}} to be used to select samples
+#'   prior to sorting.
 #'
 #' @return \code{cytoset} or \code{GatingSet} object sorted based on experiment
 #'   variables.
@@ -2161,12 +2184,19 @@ cyto_groups <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_groups}}
+#' @seealso \code{\link{cyto_group_by}}
+#' @seealso \code{\link{cyto_merge_by}}
+#'
 #' @export
 cyto_sort_by <- function(x,
-                         sort_by = NULL) {
+                         sort_by = NULL,
+                         select = NULL) {
   
   # Experiment details per group
   pd_split <- cyto_groups(x,
+                          select = select,
                           group_by = sort_by,
                           details = TRUE)
   
@@ -2191,6 +2221,9 @@ cyto_sort_by <- function(x,
 #'   "all" to group all samples in \code{x}. The order of the grouping can be
 #'   controlled by specifying the factor levels in a list (e.g. list(Treatment =
 #'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#' @param select vector of indices or named list containing experimental
+#'   variables passed to \code{\link{cyto_select}} to be used to select samples
+#'   prior to grouping.
 #'
 #' @return a named list of \code{cytoset} or \code{GatingSet} objects
 #'   respectively.
@@ -2212,12 +2245,19 @@ cyto_sort_by <- function(x,
 #'
 #' @rdname cyto_group_by
 #'
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_groups}}
+#' @seealso \code{\link{cyto_sort_by}}
+#' @seealso \code{\link{cyto_merge_by}}
+#'
 #' @export
 cyto_group_by <- function(x,
-                          group_by = "all") {
+                          group_by = "all",
+                          select = NULL) {
   
   # Experiment details per group
   pd_split <- cyto_groups(x, 
+                          select = select,
                           group_by = group_by,
                           details = TRUE)
   
@@ -2284,6 +2324,7 @@ cyto_group_by <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @seealso \code{\link{cyto_groups}}
 #' @seealso \code{\link{cyto_group_by}}
 #' @seealso \code{\link{cyto_select}}
 #' @seealso \code{\link{cyto_barcode}}

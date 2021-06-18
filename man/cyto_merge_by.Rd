@@ -72,6 +72,8 @@ cs_list <- cyto_merge_by(gs, "OVAConc")
 
 }
 \seealso{
+\code{\link{cyto_groups}}
+
 \code{\link{cyto_group_by}}
 
 \code{\link{cyto_select}}

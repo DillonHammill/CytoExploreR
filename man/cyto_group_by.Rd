@@ -4,7 +4,7 @@
 \alias{cyto_group_by}
 \title{Group a flowSet or GatingSet by experiment variables}
 \usage{
-cyto_group_by(x, group_by = "all")
+cyto_group_by(x, group_by = "all", select = NULL)
 }
 \arguments{
 \item{x}{an object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -14,6 +14,10 @@ cyto_group_by(x, group_by = "all")
 "all" to group all samples in \code{x}. The order of the grouping can be
 controlled by specifying the factor levels in a list (e.g. list(Treatment =
 c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
+
+\item{select}{vector of indices or named list containing experimental
+variables passed to \code{\link{cyto_select}} to be used to select samples
+prior to grouping.}
 }
 \value{
 a named list of \code{cytoset} or \code{GatingSet} objects
@@ -35,6 +39,15 @@ cyto_group_by(gs, "Treatment")
 # Group GatingSet by Treatment and OVAConc
 cyto_group_by(gs, c("Treatment", "OVAConc"))
 
+}
+\seealso{
+\code{\link{cyto_select}}
+
+\code{\link{cyto_groups}}
+
+\code{\link{cyto_sort_by}}
+
+\code{\link{cyto_merge_by}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

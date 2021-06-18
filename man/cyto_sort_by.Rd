@@ -2,9 +2,9 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_sort_by}
 \alias{cyto_sort_by}
-\title{Sort a flowSet or GatingSet by experiment variables}
+\title{Sort a cytoset or GatingSet by experiment variables}
 \usage{
-cyto_sort_by(x, sort_by = NULL)
+cyto_sort_by(x, sort_by = NULL, select = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -13,13 +13,17 @@ cyto_sort_by(x, sort_by = NULL)
 \item{sort_by}{names of cyto_details variables to use for sorting. For more
 control over the sorting order, specify the factor levels for each variable
 in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
+
+\item{select}{vector of indices or named list containing experimental
+variables passed to \code{\link{cyto_select}} to be used to select samples
+prior to sorting.}
 }
 \value{
 \code{cytoset} or \code{GatingSet} object sorted based on experiment
   variables.
 }
 \description{
-Sort a flowSet or GatingSet by experiment variables
+Sort a cytoset or GatingSet by experiment variables
 }
 \examples{
 library(CytoExploreRData)
@@ -33,6 +37,15 @@ gs <- cyto_sort_by(gs,
 list(Treatment = c("Stim-A", "Stim-B", "Stim-C", "Stim-D"),
 OVAConc = c(0, 5, 50, 500)))
 
+}
+\seealso{
+\code{\link{cyto_select}}
+
+\code{\link{cyto_groups}}
+
+\code{\link{cyto_group_by}}
+
+\code{\link{cyto_merge_by}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
