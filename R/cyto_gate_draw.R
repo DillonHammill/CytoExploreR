@@ -232,7 +232,7 @@ cyto_gate_draw <- function(x,
       message(
         paste("Creating", gatingTemplate, "to save the constructed gate(s).")
       )
-      cyto_gatingTemplate_create(gatingTemplate) # ACTIVE?
+      cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
       gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
     }
   }
@@ -278,19 +278,19 @@ cyto_gate_draw <- function(x,
     lapply(seq_along(cs_lists), function(z){
       # CYTOSET LIST
       cs_list <- cs_lists[[z]]
-      # TITLE
-      if(.empty(title[z])) {
-        # GROUP
-        title[z] <<- names(cs_lists)[z]
-        # PARENT POPULATION
-        if(!is.null(names(cs_lists[[z]])[1])) {
-          title[z] <<- paste(title[z], 
-                             names(cs_lists[[z]])[1], 
-                             sep = "\n")
-        }
-      }
-      # PLOT
+      # CYTO_PLOT
       if(plot == TRUE) {
+        # TITLE
+        if(.empty(title[z])) {
+          # GROUP
+          title[z] <<- names(cs_lists)[z]
+          # PARENT POPULATION
+          if(!is.null(names(cs_lists[[z]])[1])) {
+            title[z] <<- paste(title[z], 
+                               names(cs_lists[[z]])[1], 
+                               sep = "\n")
+          }
+        }
         # MERGED CYTOSET
         cyto_plot(cs_list[[1]],
                   channels = channels,
@@ -300,6 +300,7 @@ cyto_gate_draw <- function(x,
                     NA
                   ),
                   legend = FALSE,
+                  axes_trans = axes_trans,
                   axes_limits = "machine",
                   title = title[z],
                   ...)
