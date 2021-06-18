@@ -483,6 +483,14 @@ cyto_plot <- function(x,
   
   # DATA PREPARATION -----------------------------------------------------------
   
+  # # SORT_BY - CONTROL ORDER WITHOUT MERGING
+  # if(args$merge_by == "name") {
+  #   if(!.empty(args$sort_by)) {
+  #     args$x <- cyto_sort_by(args$x, args$sort_by)
+  #   }
+  # }
+  # args <- args[!names(args) %in% "sort_by"]
+  
   # X - LIST OF CYTOSET LISTS - NO BARCODING
   args$x <- .execute(".cyto_plot_data", args)
   
@@ -826,10 +834,11 @@ cyto_plot <- function(x,
     
     # LABEL STATISTICS ---------------------------------------------------------
     
+    # POPULATIONS TO LABEL
+    ARGS$pops <- do.call(".cyto_plot_label_pops", ARGS)
+    
     # STATISTICS
     if(ARGS$label == TRUE) {
-      # POPULATIONS
-      ARGS$pops <- do.call(".cyto_plot_label_pops", ARGS)
       # STATISTICS
       ARGS$label_stat <- do.call(".cyto_plot_label_stat", ARGS)
       # COMBINE LABEL_TEXT & LABEL_STAT
@@ -838,6 +847,7 @@ cyto_plot <- function(x,
     
     # INHERIT LABEL CO-ORDINATES FROM MEMORY BETWEEN PLOTS
     if(!cyto_option("cyto_plot_save") &
+       ARGS$label &
        z > 1 &
        any(
          is.na(

@@ -1406,6 +1406,7 @@
 #' @noRd
 .cyto_plot_label_pops <- function(x,
                                   gate = NA,
+                                  label = TRUE,
                                   label_stat = NA,
                                   ...) {
   
@@ -1417,7 +1418,7 @@
   # NO GATES -------------------------------------------------------------------
   
   # RETURN X
-  if (.all_na(gate)) {
+  if (.all_na(gate) | label == FALSE) {
     pops <- lapply(seq_len(length(x)), function(z){
       x[z]
     })
@@ -2286,8 +2287,7 @@
         )
       )
       # RETAIN MANUALLY SELECTED CO-ORDINATES
-      if (args$label == TRUE &
-          !.all_na(args$label_text[[z]])) {
+      if (args$label == TRUE & !.all_na(args$label_text[[z]])) {
         # ADD LABELS
         text_xy <- do.call("cyto_plot_labeller", lapply(label_args, `[[`, z))
       } else {
@@ -2300,8 +2300,7 @@
       # NEGATED POPULATION(S) - LABEL(s) ONLY
     } else {
       # RETAIN MANUALLY SELECTED CO-ORDINATES
-      if (args$label == TRUE &
-          !.all_na(args$label_text[[z]])) {
+      if (args$label == TRUE & !.all_na(args$label_text[[z]])) {
         # ADD LABELS
         text_xy <- do.call("cyto_plot_labeller", lapply(label_args, `[[`, z))
       } else {
@@ -2337,8 +2336,7 @@
   # LABEL_COORDS MATRIX
   label_text_xy <- matrix(c(args$label_text_x, args$label_text_y),
                           ncol = 2,
-                          byrow = FALSE
-  )
+                          byrow = FALSE)
   colnames(label_text_xy) <- c("x", "y")
   return(label_text_xy)
   
@@ -2640,8 +2638,8 @@
   # COMBINED EVENTS
   title <- LAPPLY(title, function(z){
     if(!.all_na(z)) {
-      if(z == "all") {
-        z <- "Combined Events"
+      if(grepl("^all\n", z, ignore.case = TRUE)) {
+        z <- gsub("^all", "Combined Events", z)
       }
       if(grepl("root", z, ignore.case = TRUE)) {
         z <- gsub("root", "All Events", z)
