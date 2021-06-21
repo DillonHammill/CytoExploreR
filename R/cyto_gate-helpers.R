@@ -436,6 +436,9 @@ cyto_gate_rename <- function(x,
   cyto_gatingTemplate_write(gt,
                             save_as = gatingTemplate)
   
+  # RETURN GATINGSET
+  return(x)
+  
 }
 
 ## CYTO_GATE_COPY --------------------------------------------------------------
@@ -726,54 +729,64 @@ cyto_gate_bool <- function(x,
     stop("Supply the name of the gatingTemplate to edit gate(s).")
   }
   
-  # CHECK GATINGTEMPLATE
-  gt <- tryCatch(.cyto_gatingTemplate_check(parent,
-                                            alias,
-                                            gatingTemplate),
-                 error = function(e){
-                   stop(
-                     paste("Boolean populations already exist in gatingTemplate.",
-                           "Remove them with cyto_gate_remove first to update them.")
-                   )
-                 })
+  # READ GATINGTEMPLATE
+  gt <- cyto_gatingTemplate_read(gatingTemplate)
+  gt_alias <- unlist(strsplit(gt$alias, ","))
   
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
   
-  # ENTRY
+  # EMPTY GATINGTEMPLATE ENTRY
   gt_entry <- gt[1, , drop = FALSE]
   gt_entry[1, ] <- rep(NA, ncol(gt_entry))
   
   # ADD BOOLEAN ENTRIES
-  gt_entries <- lapply(seq_along(alias), function(z){
-    gt_pop <- gt_entry
-    gt_pop[, "alias"] <- alias[z]
-    gt_pop[, "pop"] <- "+"
-    gt_pop[, "parent"] <- parent[z]
-    gt_pop[, "gating_method"] <- "boolGate"
-    gt_pop[, "gating_args"] <- logic[z]
-    return(gt_pop)
-  })
+  gt_entries <- structure(
+    lapply(seq_along(alias), function(z){
+      # BOOLEAN GATE ALREADY EXISTS - UPDATE LOGIC?
+      if(alias[z] %in% gt_alias) {
+        # DON'T UPDATE EXISTING BOOLEAN LOGIC
+        if(!cyto_enquire(
+          paste0(
+            alias[z], " already exists in the gatingTemplate. Do you want ",
+            "to update the boolean logic for this population? (Y/N)"
+          ),
+          options = c("Y", "T")
+        )) {
+          return(NULL)
+        # UPDATE EXISTING BOOLEAN LOGIC
+        } else {
+          # REMOVE EXISTING ENTRY FROM GATINGTEMPLATE
+          gt <<- gt[gt$alias != alias[z], ]
+        }
+      }
+      # NEW GATINGTEMPLATE ENTRIES
+      gt_pop <- gt_entry
+      gt_pop[, "alias"] <- alias[z]
+      gt_pop[, "pop"] <- "+"
+      gt_pop[, "parent"] <- parent[z]
+      gt_pop[, "gating_method"] <- "boolGate"
+      gt_pop[, "gating_args"] <- logic[z]
+      # CREATE BOOLEANFILTER
+      gate <- eval(
+        substitute(
+          booleanFilter(v, filterId = alias[z]),
+          list(v = as.symbol(logic[z]))
+        )
+      )
+      # ADD BOOLEANFILTER TO GATINGSET
+      gs_pop_add(x,
+                 gate = gate,
+                 parent = parent[z])
+      # RETURN NEW GATINGTEMPLATE ENTRY
+      return(gt_pop)
+    }), 
+    names = alias)
   gt_entries <- do.call("rbind", gt_entries)
   
   # UPDATE GATINGTEMPLATE
   gt <- rbind(gt, gt_entries)
   cyto_gatingTemplate_write(gt,
                             save_as = gatingTemplate)
-  
-  # CREATE BOOLEAN GATES
-  gates <- lapply(seq_along(alias), function(z){
-    call <- substitute(booleanFilter(v, filterId = alias[z]), 
-                       list(v = as.symbol(logic[z])))
-    eval(call)
-  })
-  names(gates) <- alias
-  
-  # APPLY BOOLEAN GATES
-  lapply(seq_along(gates), function(z){
-    gs_pop_add(x, 
-               gate = gates[[z]],
-               parent = parent[z])
-  })
   
   # RETURN GATINGSET
   return(x)

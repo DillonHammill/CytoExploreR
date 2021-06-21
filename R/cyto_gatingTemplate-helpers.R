@@ -240,6 +240,9 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
 #' @param reset logical indicating whether the active gatingTemplate setting
 #'   should be reset so that no active gatingTemplate is set, set to FALSE by
 #'   default.
+#' @param ask logical indicating whether the user should be asked to supply a
+#'   name for the active gatingTemplate if one has not been set, set to FALSE
+#'   by default.
 #'
 #' @return retrieve or set current active gatingTemplate.
 #'
@@ -249,7 +252,8 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
 #'
 #' @export
 cyto_gatingTemplate_active <- function(x = NULL, 
-                                       reset = FALSE) {
+                                       reset = FALSE,
+                                       ask = FALSE) {
   if(reset) {
     message(
       paste0(
@@ -259,16 +263,33 @@ cyto_gatingTemplate_active <- function(x = NULL,
     cyto_option("CytoExploreR_gatingTemplate", NULL)
   } else {
     if(is.null(x)) {
-      cyto_option("CytoExploreR_gatingTemplate")
-    } else {
-      x <- file_ext_append(x, ".csv")
-      message(
-        paste0(
-          "Setting ", x, " as the active gatingTemplate..."
-        )
-      )
-      cyto_option("CytoExploreR_gatingTemplate", x)
+      gt <- cyto_option("CytoExploreR_gatingTemplate")
+      # ACTIVE GATINGTEMPLATE NOT SET
+      if(is.null(gt) & ask == TRUE) {
+        if(interactive()){
+          x <- cyto_enquire(
+            "Please supply a name for the active gatingTemplate:"
+          )
+        } else {
+          stop(
+            "Please supply the name of a gatingTemplate CSV file."
+          )
+        }
+      # ACTIVE GATINGTEMPLATE SET
+      } else {
+        return(gt)
+      }
     }
+    # SET NEW ACTIVE GATINGTEMPLATE
+    x <- file_ext_append(x, ".csv")
+    message(
+      paste0(
+        "Setting ", x, " as the active gatingTemplate..."
+      )
+    )
+    cyto_option("CytoExploreR_gatingTemplate", x)
+    # ACTIVE GATINGTEMPLATE
+    invisible(x)
   }
 }
 
@@ -296,52 +317,48 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
   
   # ACTIVE GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
-    gatingTemplate <- cyto_gatingTemplate_active()
+    gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
   }
   
   # CREATE GATINGTEMPLATE
-  if (!is.null(gatingTemplate)) {
-    cols <- c(
-      "alias",
-      "pop",
-      "parent",
-      "dims",
-      "gating_method",
-      "gating_args",
-      "collapseDataForGating",
-      "groupBy",
-      "preprocessing_method",
-      "preprocessing_args"
-    )
-    # EMPTY GATINGTEMPLATE
-    gt <- setNames(data.frame(matrix(ncol = length(cols), nrow = 0)), cols)
-    # FILE EXTENSION
-    gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-    # GATINGTEMPLATE EXISTS
-    if(file_exists(gatingTemplate)) {
-      if(!cyto_enquire(
-        paste0(
-          gatingTemplate, 
-          " already exists. Do you want to replace it? (Y/N)"
-        ),
-        options = c("T", "Y")
-      )) {
-        invisible(NULL)
-      }
+  cols <- c(
+    "alias",
+    "pop",
+    "parent",
+    "dims",
+    "gating_method",
+    "gating_args",
+    "collapseDataForGating",
+    "groupBy",
+    "preprocessing_method",
+    "preprocessing_args"
+  )
+  # EMPTY GATINGTEMPLATE
+  gt <- setNames(data.frame(matrix(ncol = length(cols), nrow = 0)), cols)
+  # FILE EXTENSION
+  gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+  # GATINGTEMPLATE EXISTS
+  if(file_exists(gatingTemplate)) {
+    if(!cyto_enquire(
+      paste0(
+        gatingTemplate, 
+        " already exists. Do you want to replace it? (Y/N)"
+      ),
+      options = c("T", "Y")
+    )) {
+      invisible(NULL)
     }
-    # MESSAGE
-    message(paste("Creating", gatingTemplate, "..."))
-    # WRITE GATINGTEMPLATE
-    write_to_csv(gt,
-                 gatingTemplate)
-    # SET ACTIVE GATINGTEMPLATE
-    if(active){
-      cyto_gatingTemplate_active(gatingTemplate)
-    }
-  # NO GATINGTEMPLATE
-  } else {
-    stop("Supply a name for the gatingTemplate csv file to 'gatingTempate'.")
   }
+  # MESSAGE
+  message(paste("Creating", gatingTemplate, "..."))
+  # WRITE GATINGTEMPLATE
+  write_to_csv(gt,
+               gatingTemplate)
+  # SET ACTIVE GATINGTEMPLATE
+  if(active){
+    cyto_gatingTemplate_active(gatingTemplate)
+  }
+  
   invisible(NULL)
 }
 
