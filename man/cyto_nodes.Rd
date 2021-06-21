@@ -2,17 +2,23 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_nodes}
 \alias{cyto_nodes}
-\title{Extract Names of Gated Populations in GatingHierarchy or GatingSet}
+\title{Names of gated populations in gatingTemplate/GatingHierarchy/GatingSet}
 \usage{
-cyto_nodes(x, ...)
+cyto_nodes(x, path = "full", ...)
 }
 \arguments{
 \item{x}{object of class
-\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}},
+\code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}, or the name of
+a gatingTemplate CSV file.}
+
+\item{path}{can be either \code{"full"} or \code{"auto"} to return the
+complete path or shortest unique path to each node.}
 
 \item{...}{additional arguments passed to
-\code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.}
+\code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or
+\code{\link[openCyto:gt_get_nodes]{gt_get_nodes}}.}
 }
 \value{
 character vector of gated node/population names.

@@ -7,13 +7,15 @@
 cyto_nodes_check(x, nodes = NULL)
 }
 \arguments{
-\item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class \code{GatingHierarchy}, \code{GatingSet},
+\code{gatingTemplate} or the name of a gatingTemplate CSV file.}
 
 \item{nodes}{vector of node paths to check.}
 }
 \value{
 supplied nodes or throw an error if any nodes do not exist or are not
-  unique within the \code{GatingHierarchy} or \code{GatingSet}.
+  unique within the \code{GatingHierarchy}, \code{GatingSet} or
+  \code{gatingTemplate}.
 }
 \description{
 Check if nodes are unique and exist in GatingSet or GatingHierarchy

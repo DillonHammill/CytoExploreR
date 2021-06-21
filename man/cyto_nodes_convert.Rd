@@ -7,7 +7,8 @@
 cyto_nodes_convert(x, nodes = NULL, anchor = NULL, path = "auto")
 }
 \arguments{
-\item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
+\item{x}{object of class \code{GatingHierarchy}, \code{GatingSet},
+\code{gatingTemplate} or the name of a gatingTemplate CSV file.}
 
 \item{nodes}{vectors of nodes to check and convert.}
 

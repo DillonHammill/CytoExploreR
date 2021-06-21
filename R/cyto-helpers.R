@@ -4202,29 +4202,54 @@ cyto_compensate.flowFrame <- function(x,
 
 ## CYTO_NODES ------------------------------------------------------------------
 
-#' Extract Names of Gated Populations in GatingHierarchy or GatingSet
+#' Names of gated populations in gatingTemplate/GatingHierarchy/GatingSet
 #'
 #' \code{cyto_nodes} is simply an autocomplete-friendly wrapper for
 #' \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
 #'
 #' @param x object of class
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}},
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}},
+#'   \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}, or the name of
+#'   a gatingTemplate CSV file.
+#' @param path can be either \code{"full"} or \code{"auto"} to return the
+#'   complete path or shortest unique path to each node.
 #' @param ... additional arguments passed to
-#'   \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}}.
+#'   \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or
+#'   \code{\link[openCyto:gt_get_nodes]{gt_get_nodes}}.
 #'
 #' @return character vector of gated node/population names.
 #'
 #' @importFrom flowWorkspace gh_get_pop_paths gs_get_pop_paths
+#' @importFrom openCyto gatingTemplate gt_get_nodes
 #'
 #' @export
-cyto_nodes <- function(x, ...) {
+cyto_nodes <- function(x,
+                       path = "full",
+                       ...) {
   
-  # Make call to gh/gs_get_pop_paths
+  # GATINGHIERARCHY
   if (cyto_class(x, "GatingHierarchy", TRUE)) {
-    gh_get_pop_paths(x, ...)
+    gh_get_pop_paths(x,
+                     path = path,
+                     ...)
+  # GATINGSET
   } else if (cyto_class(x, "GatingSet", TRUE)) {
-    gs_get_pop_paths(x, ...)
+    gs_get_pop_paths(x,
+                     path = path,
+                     ...)
+  # GATINGTEMPLATE
+  } else {
+    # GATINGTEMPLATE NAME
+    if(is.character(cyto_class(x))) {
+      x <- suppressMessages(gatingTemplate(x))
+    }
+    # NODES
+    if(path == "full") {
+      names(gt_get_nodes(x, only.names = TRUE, ...))
+    } else {
+      unname(gt_get_nodes(x, only.names = TRUE, ...))
+    }
   }
 }
 
@@ -4232,11 +4257,13 @@ cyto_nodes <- function(x, ...) {
 
 #' Check if nodes are unique and exist in GatingSet or GatingHierarchy
 #'
-#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param x object of class \code{GatingHierarchy}, \code{GatingSet},
+#'   \code{gatingTemplate} or the name of a gatingTemplate CSV file.
 #' @param nodes vector of node paths to check.
 #'
 #' @return supplied nodes or throw an error if any nodes do not exist or are not
-#'   unique within the \code{GatingHierarchy} or \code{GatingSet}.
+#'   unique within the \code{GatingHierarchy}, \code{GatingSet} or
+#'   \code{gatingTemplate}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -4309,7 +4336,8 @@ cyto_nodes_check <- function(x,
 #' \code{cyto_nodes_convert} will attempt to anchor the node path to a known
 #' unique parental node.
 #'
-#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param x object of class \code{GatingHierarchy}, \code{GatingSet},
+#'   \code{gatingTemplate} or the name of a gatingTemplate CSV file.
 #' @param nodes vectors of nodes to check and convert.
 #' @param anchor unique path to parental node to use as an anchor for ambiguous
 #'   nodes.
@@ -4468,7 +4496,8 @@ cyto_nodes_convert <- function(x,
 
 #' Get name of most recent common ancestor shared by nodes
 #'
-#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
+#' @param x object of class \code{GatingHierarchy},\code{GatingSet},
+#'   \code{gatingTemplate} or the name of a gatingTemplate CSV file.
 #' @param nodes vector of nodes for which the most recent common ancestor should
 #'   be returned.
 #' @param ... additional arguments passed to \code{\link{cyto_nodes_convert}} to
@@ -4476,21 +4505,21 @@ cyto_nodes_convert <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation GatingSet
 #' gs <- GatingSet(Activation)
-#' 
+#'
 #' # Compensation
 #' gs <- cyto_compensate(gs)
-#' 
+#'
 #' # Transformations
 #' gs <- cyto_transform(gs)
-#' 
+#'
 #' # Gating
 #' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
-#' 
+#'
 #' # Ancestral node of CD4 T Cells & CD8 T Cells
 #' cyto_nodes_ancestor(gs, nodes = c("CD4 T Cells", "CD8 T Cells"))
 #'
@@ -4498,11 +4527,6 @@ cyto_nodes_convert <- function(x,
 cyto_nodes_ancestor <- function(x,
                                 nodes = NULL, 
                                 ...){
-  
-  # GATINHIERARCHY OR GATINGSET
-  if(!cyto_class(x, c("GatingHierarchy", "GatingSet"))) {
-    stop("'x' must be a GatingHierarchy or GatingSet object.")
-  }
   
   # MISSING NODES
   if(is.null(nodes)){
