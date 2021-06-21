@@ -4242,6 +4242,7 @@ cyto_nodes <- function(x,
   } else {
     # GATINGTEMPLATE NAME
     if(is.character(cyto_class(x))) {
+      x <- file_ext_append(x, ".csv")
       x <- suppressMessages(gatingTemplate(x))
     }
     # NODES
