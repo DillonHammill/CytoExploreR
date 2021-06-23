@@ -13,6 +13,7 @@ cyto_gate_draw(
   gatingTemplate = NULL,
   overlay = NA,
   merge_by = "all",
+  group_by = NULL,
   select = NULL,
   negate = FALSE,
   display = 50000,
@@ -75,8 +76,14 @@ containing populations to be overlaid onto the plot(s).}
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
 prior to gating, set to "all" by default to apply the same gate(s) to all
-samples. If group_by is supplied a different gate will be constructed for
+samples. If merge_by is supplied a different gate will be constructed for
 each merged group.}
+
+\item{group_by}{same as \code{merge_by} included for backwards compatibility
+with older versions of CytoExploreR, \code{group_by} was renamed to
+\code{merge_by} in CytoExploreR v2.0.0 to maintain consistency with
+\code{cyto_plot}. Users should therefore use \code{merge_by} as support for
+\code{group_by} will be ended in the future.}
 
 \item{select}{designates which samples will be plotted and used for
 determining the best location to set the drawn gate(s). Filtering steps

@@ -311,7 +311,9 @@
 #'
 #' @export
 cyto_plot <- function(x,
+                      parent = "root",
                       channels,
+                      alias = NA,
                       axes_trans = NA,
                       merge_by = "name",
                       overlay = NA,
@@ -503,6 +505,9 @@ cyto_plot <- function(x,
                                    "seed",
                                    "negate")]
   
+  print(args$gate)
+  print(args$x)
+  
   # HISTOGRAM LAYERS -----------------------------------------------------------
   
   # TODO: ALLOW HIST_LAYERS TO ACCEPT GROUPING VARIABLES?
@@ -687,11 +692,11 @@ cyto_plot <- function(x,
   args$axes_text <- list(axes_text_x, axes_text_y)
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
   
-  # LABEL_TEXT
+  # LABEL_TEXT - WATCH OUT QUADGATES!
   if(all(LAPPLY(args$label_text, ".empty"))) {
     if(!is.null(LAPPLY(args$gate, "names"))) {
       args$label_text <- LAPPLY(seq_along(args$gate), function(z){
-        rep(names(args$gate[[z]]), length(args$x[[z]]))
+        rep(unlist(strsplit(names(args$gate[[z]]), "\\|")), length(args$x[[z]]))
       })
     } else {
       args$label_text <- NA

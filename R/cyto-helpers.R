@@ -1549,6 +1549,9 @@ cyto_transform_extract <- function(x,
 #'   transformations applied to the data when \code{inverse = TRUE}.
 #' @param inverse logical indicating whether transformations applied to the data
 #'   should be inversed, set to FALSE by default.
+#' @param path can be either \code{"auto"} or \code{"full"} to control whether
+#'   the extracted list should be labelled with the shortest or complete path to
+#'   each population in parent.
 #'
 #' @return either a list of cytosets, list of cytoframe lists or a list of raw
 #'   data matrix lists.
@@ -1588,11 +1591,19 @@ cyto_data_extract <- function(x,
                               markers = FALSE,
                               split = FALSE,
                               trans = NA,
-                              inverse = FALSE) {
+                              inverse = FALSE,
+                              path = "auto") {
   
   # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
   if(is.null(parent)) {
     parent = "root"
+  }
+  
+  # PARENTAL PATH
+  if(cyto_class(x, "GatingSet")) {
+    parent <- cyto_nodes_convert(x,
+                                 nodes = parent,
+                                 path = path)
   }
   
   # EXTRACT TRANSFORMERS
@@ -1610,10 +1621,11 @@ cyto_data_extract <- function(x,
     cs_list <- list(x)
     # GATINGHIERARCHY/GATINGSET
   } else {
-    cs_list <- lapply(parent, function(z){
-      gs_pop_get_data(x, z)
-    })
-    names(cs_list) <- parent
+    cs_list <- structure(
+      lapply(parent, function(z){
+        gs_pop_get_data(x, z)
+      }),
+      names = parent)
   }
   
   # PREPARE CYTOSET LIST
@@ -2143,6 +2155,9 @@ cyto_groups <- function(x,
                       drop = TRUE
     )
   }
+  
+  # CONVERT ALL -> COMBINED EVENTS
+  names(pd_split)[names(pd_split) == "all"] <- "Combined Events"
   
   # RETURN SPLIT DETAILS
   if(details == TRUE){
@@ -4241,7 +4256,7 @@ cyto_nodes <- function(x,
   # GATINGTEMPLATE
   } else {
     # GATINGTEMPLATE NAME
-    if(is.character(cyto_class(x))) {
+    if(is.character(x)) {
       x <- file_ext_append(x, ".csv")
       x <- suppressMessages(gatingTemplate(x))
     }

@@ -126,7 +126,6 @@
 #' @return index of gate to apply to samples.
 #'
 #' @importFrom openCyto registerPlugins
-#' @importFrom flowWorkspace pData
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -142,7 +141,7 @@
   smp <- length(gs)
   
   # Extract pData information
-  pd <- pData(gs)
+  pd <- cyto_details(gs)
   
   # groupBy
   if (is.character(groupBy) & nchar(groupBy) == 0) {
@@ -160,7 +159,7 @@
     # groupBy is composed of characters
     pd$groupby <- do.call(paste, pd[, groupBy, drop = FALSE])
     
-    grpby <- pd[, "groupby"][match(pData(fs[1])[, "name"], pd[, "name"])]
+    grpby <- pd[, "groupby"][match(cyto_details(fs[1])[, "name"], pd[, "name"])]
   } else if (!all(is.na(groupBy)) & !all(grepl("^[A-Za-z]+$", groupBy))) {
     if (groupBy == smp) {
       grpby <- 1

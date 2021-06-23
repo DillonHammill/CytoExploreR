@@ -6,7 +6,9 @@
 \usage{
 cyto_plot(
   x,
+  parent = "root",
   channels,
+  alias = NA,
   axes_trans = NA,
   merge_by = "name",
   overlay = NA,
@@ -109,10 +111,19 @@ cyto_plot(
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
+\item{parent}{name of the population to plot when a \code{GatingHierarchy} or
+\code{GatingSet} object is supplied.}
+
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be
 constructed, either a histogram for a single channel or a 2-D scatterplot
 with density colour scale for two channels.}
+
+\item{alias}{name of the gated population(s) to gated in the plot when a
+\code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
+\code{alias} to "" will automatically plot any gates constructed in the
+supplied channels. \code{alias} is equivalent to the \code{gate} argument
+for \code{cytoset} objects.}
 
 \item{axes_trans}{object of class
 \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
@@ -458,15 +469,6 @@ arbitrary numeric by default. This behaviour can be turned off by setting
 this argument to NULL.}
 
 \item{...}{not currently in use.}
-
-\item{parent}{name of the population to plot when a \code{GatingHierarchy} or
-\code{GatingSet} object is supplied.}
-
-\item{alias}{name of the gated population(s) to gated in the plot when a
-\code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
-\code{alias} to "" will automatically plot any gates constructed in the
-supplied channels. \code{alias} is equivalent to the \code{gate} argument
-for \code{cytoset} objects.}
 }
 \description{
 Explore and visualise cytometry data.

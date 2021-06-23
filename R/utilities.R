@@ -56,7 +56,7 @@ do_call <- function(what, args, ...) {
   do.call(what, as.list(args), ...)
 }
 
-## MATCHFUN --------------------------------------------------------------------
+## MATCH_FUN -------------------------------------------------------------------
 
 #' Modified version of match.fun to handle namespaced functions
 #' @noRd

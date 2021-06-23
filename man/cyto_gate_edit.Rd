@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_gate-helpers.R
 \name{cyto_gate_edit}
 \alias{cyto_gate_edit}
-\title{Edit Existing Gate(s).}
+\title{Edit gates that exist in a GatingSet and gatingTemplate}
 \usage{
 cyto_gate_edit(
   x,
@@ -12,14 +12,16 @@ cyto_gate_edit(
   type = NULL,
   gatingTemplate = NULL,
   overlay = NA,
-  group_by = "all",
+  merge_by = "all",
+  group_by = NULL,
   select = NULL,
   negate = FALSE,
-  display = 25000,
+  display = 50000,
   axis = "x",
   label = TRUE,
   plot = TRUE,
-  popup = TRUE,
+  title = "",
+  axes_trans = NA,
   axes_limits = "machine",
   gate_point_shape = 16,
   gate_point_size = 1,
@@ -29,6 +31,13 @@ cyto_gate_edit(
   gate_line_width = 2.5,
   gate_line_col = "red",
   gate_line_col_alpha = 1,
+  label_text_size = 1,
+  label_text_font = 2,
+  label_text_col = "black",
+  label_text_col_alpha = 1,
+  label_fill = "white",
+  label_fill_alpha = 0.75,
+  seed = 42,
   ...
 )
 }
@@ -41,8 +50,8 @@ cyto_gate_edit(
 
 \item{channels}{name(s) of the channel(s) used to construct the gate(s). This
 argument is not necessary but is included to allow conversion of
-\code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply changing
-\code{"draw"} to \code{"remove"}.}
+\code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply
+changing \code{"draw"} to \code{"remove"}.}
 
 \item{type}{vector of gate type names used to construct the gates. Multiple
 \code{types} are supported but should be accompanied with an \code{alias}
@@ -60,11 +69,17 @@ as upper or lower case first letters as well. Default \code{type} is
 containing populations to be overlaid onto the plot(s). Only overlaid
 flowSet objects are subjected to sampling by \code{display}.}
 
-\item{group_by}{vector of pData column names (e.g.
+\item{merge_by}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
 prior to gating, set to the length of x by default to construct a single
-gate for all samples. If group_by is supplied a different gate will be
+gate for all samples. If merge_by is supplied a different gate will be
 constructed for each group.}
+
+\item{group_by}{same as \code{merge_by} included for backwards compatibility
+with older versions of CytoExploreR, \code{group_by} was renamed to
+\code{merge_by} in CytoExploreR v2.0.0 to maintain consistency with
+\code{cyto_plot}. Users should therefore use \code{merge_by} as support for
+\code{group_by} will be ended in the future.}
 
 \item{select}{vector containing the indices of samples within gs to use for
 plotting.}
@@ -86,9 +101,6 @@ default.}
 
 \item{plot}{logical indicating whether a plot should be drawn, set to
 \code{TRUE} by default.}
-
-\item{popup}{logical indicating whether the plot should be constructed in a
-pop-up window, set to TRUE by default.}
 
 \item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
@@ -121,14 +133,41 @@ selected gate points, set to 1 by default to use solid colours.}
 \item{gate_line_col_alpha}{numeric [0,1] to control the transparency of the
 selected gate lines, set to 1 by default to use solid colours.}
 
+\item{label_text_size}{numeric to control the size of text in the plot
+labels, set to 1 by default.}
+
+\item{label_text_font}{numeric to control the font of text in plot labels,
+set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
+\item{label_text_col}{colour(s) to use for text in plot labels, set to
+\code{"black"} by default.}
+
+\item{label_text_col_alpha}{numeric [0, 1] to control the transparency of the
+text colour, set to 1 by default to remove transparency.}
+
+\item{label_fill}{fill colour(s) to use for labels, set to "white" by
+default.}
+
+\item{label_fill_alpha}{numeric to control background fill transparency of
+label, set to 0.6 by default to introduce some transparency.}
+
+\item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
+sampling is applied with each \code{\link{cyto_plot}} call, set to an
+arbitrary numeric by default. This behaviour can be turned off by setting
+this argument to NULL.}
+
 \item{...}{additional arguments for \code{\link{cyto_plot}}.}
+
+\item{popup}{logical indicating whether the plot should be constructed in a
+pop-up window, set to TRUE by default.}
 }
 \value{
 an object of class \code{GatingSet} with edited gate applied, as well
   as gatingTemplate file with edited gate saved.
 }
 \description{
-Edit Existing Gate(s).
+Edit gates that exist in a GatingSet and gatingTemplate
 }
 \examples{
 \dontrun{

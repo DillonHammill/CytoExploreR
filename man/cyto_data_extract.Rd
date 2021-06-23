@@ -14,7 +14,8 @@ cyto_data_extract(
   markers = FALSE,
   split = FALSE,
   trans = NA,
-  inverse = FALSE
+  inverse = FALSE,
+  path = "auto"
 )
 }
 \arguments{
@@ -51,6 +52,10 @@ transformations applied to the data when \code{inverse = TRUE}.}
 
 \item{inverse}{logical indicating whether transformations applied to the data
 should be inversed, set to FALSE by default.}
+
+\item{path}{can be either \code{"auto"} or \code{"full"} to control whether
+the extracted list should be labelled with the shortest or complete path to
+each population in parent.}
 }
 \value{
 either a list of cytosets, list of cytoframe lists or a list of raw

@@ -109,10 +109,12 @@
                          parent = parent,
                          select = select,
                          format = "cytoset",
-                         copy = FALSE)[[1]]
+                         copy = FALSE)
+  parent <- names(x) # path
+  
   
   # GROUP
-  x <- cyto_group_by(x, merge_by)
+  x <- cyto_group_by(x[[1]], merge_by)
   
   # PREPARE X
   x <- structure(
@@ -606,7 +608,7 @@
       # FILTERS -> GATE OBJECT LIST
       if(cyto_class(gate, "filters")) {
         gate <- unlist(gate)
-      # GATE -> GATE ONJECT LIST
+      # GATE -> GATE OBJECT LIST
       } else {
         gate <- list(gate)
       }
@@ -1420,7 +1422,11 @@
   # RETURN X
   if (.all_na(gate) | label == FALSE) {
     pops <- lapply(seq_len(length(x)), function(z){
-      x[z]
+      if(!.all_na(gate)) {
+        rep(x[z], length(gate))
+      } else {
+        x[z]
+      }
     })
     return(pops)
   }
@@ -2251,6 +2257,13 @@
     }
   }
   
+  # SPLIT GATE_LINE ARGUMENTS BY GATE
+  for(z in gate_args[which(grepl("gate_line", gate_args))]){
+    if(z %in% names(args)) {
+      args[[z]] <- split(args[[z]], seq_len(NG))
+    }
+  }
+  
   # SPLIT LABEL ARGUMENTS BY POPULATIONS PER LAYER
   for(z in label_args) {
     if(z %in% names(args)) {
@@ -2635,15 +2648,11 @@
     }
   }
   
-  # COMBINED EVENTS
+  # COMBINED/ALL EVENTS
   title <- LAPPLY(title, function(z){
     if(!.all_na(z)) {
-      if(grepl("^all\n", z, ignore.case = TRUE)) {
-        z <- gsub("^all", "Combined Events", z)
-      }
-      if(grepl("root", z, ignore.case = TRUE)) {
-        z <- gsub("root", "All Events", z)
-      }
+      z <- gsub("^all", "Combined Events", z)
+      z <- gsub("root", "All Events", z)
     }
     return(z)
   })

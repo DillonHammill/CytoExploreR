@@ -4,7 +4,15 @@
 \alias{cyto_gate_extract}
 \title{Extract Saved Gate(s) from gatingTemplate.}
 \usage{
-cyto_gate_extract(x, parent, alias, select = NULL, merge_by = "name", ...)
+cyto_gate_extract(
+  x,
+  parent = NULL,
+  alias,
+  select = NULL,
+  merge_by = "name",
+  path = "auto",
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy}, \code{GatingSet},
@@ -20,7 +28,7 @@ cyto_gate_extract(x, parent, alias, select = NULL, merge_by = "name", ...)
 groups, gates will be extracted from the first Gatinghierarchy within each
 group.}
 
-\item{...}{not used.}
+\item{...}{not in use.}
 }
 \description{
 Extract Saved Gate(s) from gatingTemplate.

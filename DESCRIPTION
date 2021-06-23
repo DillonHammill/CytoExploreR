@@ -21,7 +21,7 @@ Depends:
 Imports: 
     BiocGenerics,
     data.table,
-    DataEditR (>= 0.1.1),
+    DataEditR (>= 0.1.2),
     dplyr,
     EmbedSOM,
     graphics,

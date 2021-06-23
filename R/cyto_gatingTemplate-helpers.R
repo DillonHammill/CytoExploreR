@@ -621,8 +621,8 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
   # MATCHING PARENT & ALIAS
   if (!is.null(gt)) {
     if (parent %in% gt$parent) {
-      gt <- gt[gt$parent == parent, ]
-      gt_alias <- lapply(gt$alias, function(z) {
+      gt_chunk <- gt[gt$parent == parent, ]
+      gt_alias <- lapply(gt_chunk$alias, function(z) {
         unlist(strsplit(as.character(z), ","))
       })
       lapply(gt_alias, function(z) {
@@ -634,7 +634,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
           )
           stop(paste(
             "Supply another gatingTemplate",
-            "or edit gate(s) using cyto_gate_edit."
+            "or edit gate(s) using cyto_gate_edit()."
           ))
         }
       })
@@ -689,12 +689,7 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
   # GATINGTEMPLATE FILE EXTENSION
   if(cyto_class(gatingTemplate, "character")){
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-    if(!file.exists(gatingTemplate)){
-      stop(
-        paste(gatingTemplate, 
-              "does not exist or does not have the required permissions")
-      )
-    }
+    file_exists(gatingTemplate, error = TRUE)
   }
   
   # GATINGTEMPLATE
@@ -704,9 +699,9 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
     if(!data.table){
       gt <- as.data.frame(gt)
     }
-  }else{
+  } else {
     gt <- read_from_csv(gatingTemplate,
-                        data.table = FALSE,
+                        data.table = data.table,
                         ...)
   }
   
@@ -752,12 +747,19 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
   
   # READ GATINGTEMPLATE
   if(cyto_class(gatingTemplate, c("character", "gatingTemplate"))){
-    gatingTemplate <- cyto_gatingTemplate_read(gatingTemplate)
+    gatingTemplate <- cyto_gatingTemplate_read(gatingTemplate,
+                                               data.table = TRUE)
   }
+  
+  # HANDLE NAs
+  gatingTemplate$groupBy[LAPPLY(gatingTemplate$groupBy, ".empty")] <- "NA"
+  gatingTemplate$preprocessing_args[
+    LAPPLY(gatingTemplate$preprocessing_args, ".empty")] <- "NA"
   
   # WRITE GATINGTEMPLATE
   write_to_csv(gatingTemplate,
                file = save_as, 
+               na = "NA",
                ...)
   
 }
