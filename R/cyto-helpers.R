@@ -1873,6 +1873,163 @@ cyto_filter <- function(x, ...) {
   return(x[ind])
 }
 
+
+## CYTO_MATCH ------------------------------------------------------------------
+
+#' Get index of samples matching experimental criteria
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param ... named list containing experimental variables to be used to select
+#'   samples or named arguments containing the levels of the variables to
+#'   select. See below examples for use cases. Neagtive exclusion indices can be
+#'   returned by setting \code{exclude = TRUE}.
+#'
+#' @return vector of indices that representat the location of the selected
+#'   sample(s) within the supplied \code{cytoset} or \code{GatingSet}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' # Look at experiment details
+#' cyto_details(gs)
+#'
+#' # Indices of Stim-C samples with 0 and 500 nM OVA concentrations
+#' cyto_match(gs,
+#'   Treatment = "Stim-C",
+#'   OVAConc = c(0, 500)
+#' )
+#'
+  #' # Indices of Stim-A and Stim-C treatment groups
+#' cyto_match(
+#'   gs,
+#'   list("Treatment" = c("Stim-A", "Stim-C"))
+#' )
+#'
+#' # Exclusion indices of Stim-D treatment group
+#' cyto_match(gs,
+#'   Treatment = "Stim-D",
+#'   exclude = TRUE
+#' )
+#' 
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_filter}}
+#' 
+#' @export
+cyto_match <- function(x, 
+                       ...) {
+  
+  # CYTOSET/GATINGSET
+  if(!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet")) {
+    stop(
+      "'x' should be an object of class cytoset or GatingSet."
+    )
+  }
+  
+  # ARGUMENTS
+  args <- list(...)
+  
+  # ... NAMED LIST OF ARGUMENTS
+  if(cyto_class(args[[1]], "list")) {
+    args <- args[[1]]
+  }
+  
+  # EXCLUDE
+  if(any(grepl("exclude", names(args)))) {
+    exclude <- args[[which(grepl("exclude", names(args)))]]
+    args <- args[-which(grepl("exclude", names(args)))]
+  } else {
+    exclude <- FALSE
+  }
+  
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+  
+  # INDICES/NAMES
+  if(length(args) == 1 & (is.null(names(args)) | .empty(names(args)))) {
+    # NULL
+    if(is.null(unlist(args))) {
+      ind <- seq_along(x)
+    # INDICES SUPPLIED
+    } else if(is.numeric(unlist(args))) {
+      ind <- unlist(args)
+    # UNNAMED CHARACTERS
+    } else {
+      # MATCH NAMES - ROWNAMES/NAME/PARTIAL
+      ind <- LAPPLY(unlist(args), function(z){
+        # ROWNAMES - EXACT MATCH
+        if(z %in% rownames(pd)) {
+          match(z, rownames(pd))
+        # ROWNAMES - PARTIAL MATCH
+        } else if(any(grepl(z, rownames(pd), ignore.case = TRUE))) {
+          which(grepl(z, rownames(pd), ignore.case = TRUE))
+        # NAME COLUMN - EXACT MATCH
+        } else if(z %in% pd[, "name"]) {
+          match(z, pd[, "name"])
+        # NAME COLUMN - PARTIAL MATCH
+        } else if(any(grepl(z, pd[, "name"], ignore.case = TRUE))) {
+          which(grepl(z, pd[, "name"], ignore.case = TRUE))
+        # NO MATCH
+        } else {
+          NULL
+        }
+      })
+    }
+  # EXPERIMENTAL VARIABLES
+  } else {
+    # VALID VARIABLES
+    if (!all(names(args) %in% colnames(pd))) {
+      lapply(names(args), function(y) {
+        if (!y %in% names(pd)) {
+          stop(paste(y, "is not a valid variable in cyto_details(x)."))
+        }
+      })
+    }
+    
+    # VARIABLE LEVELS EXIST
+    lapply(names(args), function(z) {
+      var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
+      lvls <- levels(var)
+      # some variable levels do not exist in pd
+      if (!all(args[[z]] %in% lvls)) {
+        lapply(args[[z]], function(v) {
+          if (!v %in% lvls) {
+            stop(paste0(v, " is not a valid level for ", z, "!"))
+          }
+        })
+      }
+    })
+    
+    # FILTERED EXPERIMENT DETAILS
+    pd_filter <- pd
+    lapply(names(args), function(y) {
+      ind <- which(pd_filter[, y] %in% args[[y]])
+      # SKIP FILTER IF VARIABLE LEVEL MISSING
+      if (length(ind) != 0) {
+        pd_filter <<- pd_filter[ind, , drop = FALSE]
+      }
+    })
+    
+    # INDICES
+    ind <- match(rownames(pd_filter), rownames(pd))
+  }
+  
+  # NEGATIVE EXCLUSION INDICES
+  if (exclude == TRUE) {
+    return(-ind)
+  # POSITIVE SELECTION INDICES
+  } else {
+    return(ind)
+  }
+  
+}
+
 ## CYTO_SELECT -----------------------------------------------------------------
 
 # Similar to cyto_filter but acts in a non-tidyverse way.
@@ -1918,98 +2075,20 @@ cyto_filter <- function(x, ...) {
 #' )
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @seealso \code{\link{cyto_match}}
+#' @seealso \code{\link{cyto_filter}}
+#'
 #' @export
-cyto_select <- function(x, ...) {
+cyto_select <- function(x, 
+                        ...) {
   
-  # Check class of x
-  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
-    stop("'x' should be an object of class cytoset or GatingSet.")
-  }
+  # MATCH - INDICES
+  ind <- cyto_match(x,
+                    ...)
   
-  # Pull down ... arguments to list
-  args <- list(...)
+  # RETURN SELECTED SAMPLES
+  return(x[ind])
   
-  # ... is already a named list of arguments
-  if (class(args[[1]]) == "list") {
-    args <- args[[1]]
-  }
-  
-  # Exclude
-  if (any(grepl("exclude", names(args)))) {
-    exclude <- args[[which(grepl("exclude", names(args)))]]
-    args <- args[-which(grepl("exclude", names(args)))]
-  } else {
-    exclude <- FALSE
-  }
-  
-  # Extract experiment details
-  pd <- cyto_details(x)
-  
-  # INDICES SUPPLIED
-  if (length(args) == 1 &
-      (is.null(names(args)) | .empty(names(args)))) {
-    # NULL
-    if(is.null(unlist(args))) {
-      ind <- seq_along(x)
-    # NUMERIC INDICES
-    } else if(is.numeric(unlist(args))) {
-      ind <- unlist(args)
-    # UNNAMED
-    } else {
-      # NAMES?
-      if(all(unlist(args) %in% rownames(pd))) {
-        ind <- LAPPLY(unlist(args), match, rownames(pd))
-      # HUH?
-      } else {
-        stop(
-          "Selection criteria must be named with experimental variables!"
-        )
-      }
-    }
-  } else {
-    # Check that all variables are valid
-    if (!all(names(args) %in% colnames(pd))) {
-      lapply(names(args), function(y) {
-        if (!y %in% names(pd)) {
-          stop(paste(y, "is not a valid variable in cyto_details(x)."))
-        }
-      })
-    }
-    
-    # Check that all variable levels at least exist in pd
-    lapply(names(args), function(z) {
-      var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
-      lvls <- levels(var)
-      # some variable levels do not exist in pd
-      if (!all(args[[z]] %in% lvls)) {
-        lapply(args[[z]], function(v) {
-          if (!v %in% lvls) {
-            stop(paste0(v, " is not a valid level for ", z, "!"))
-          }
-        })
-      }
-    })
-    
-    # Get filtered pd
-    pd_filter <- pd
-    lapply(names(args), function(y) {
-      ind <- which(pd_filter[, y] %in% args[[y]])
-      # No filtering if variable level is missing
-      if (length(ind) != 0) {
-        pd_filter <<- pd_filter[ind, , drop = FALSE]
-      }
-    })
-    
-    # Get indices for selected samples
-    ind <- match(rownames(pd_filter), rownames(pd))
-  }
-  
-  # Exclude
-  if (exclude == TRUE) {
-    return(x[-ind])
-  } else {
-    return(x[ind])
-  }
 }
 
 ## CYTO_GROUPS -----------------------------------------------------------------
