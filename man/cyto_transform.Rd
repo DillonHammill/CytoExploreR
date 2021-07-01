@@ -20,6 +20,7 @@ cyto_transform(x, trans = NULL, ...)
   plot = TRUE,
   popup = FALSE,
   axes_limits = "machine",
+  quiet = FALSE,
   ...
 )
 
@@ -29,6 +30,7 @@ cyto_transform(x, trans = NULL, ...)
   plot = TRUE,
   popup = FALSE,
   axes_limits = "machine",
+  quiet = FALSE,
   ...
 )
 
@@ -39,6 +41,7 @@ cyto_transform(x, trans = NULL, ...)
   plot = TRUE,
   popup = FALSE,
   axes_limits = "machine",
+  quiet = FALSE,
   ...
 )
 }
@@ -85,6 +88,9 @@ popup window, set to FALSE by default.}
 to \code{"machine"} by default to use entire axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
+
+\item{quiet}{logical which prevents the prointing of messages when set to
+TRUE.}
 }
 \value{
 object of class \code{flowFrame}, \code{flowSet},

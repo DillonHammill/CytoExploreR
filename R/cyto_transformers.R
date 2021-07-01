@@ -285,7 +285,8 @@ cyto_transformers_define <- function(x,
     # TRANSFORM DATA
     x <- cyto_transform(x,
                         trans = transformer_list,
-                        plot = FALSE)
+                        plot = FALSE,
+                        quiet = TRUE)
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
       cyto_plot_profile(x,

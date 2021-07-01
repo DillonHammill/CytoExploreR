@@ -1120,6 +1120,8 @@ cyto_names_parse <- function(x,
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param quiet logical which prevents the prointing of messages when set to
+#'   TRUE.
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_transformers_define}}, when no \code{trans} object is
 #'   supplied.
@@ -1183,6 +1185,7 @@ cyto_transform.default <- function(x,
                                    plot = TRUE,
                                    popup = FALSE,
                                    axes_limits = "machine",
+                                   quiet = FALSE,
                                    ...) {
   
   # No transformations supplied - automatically obtain transform definitions
@@ -1190,10 +1193,12 @@ cyto_transform.default <- function(x,
     
     # Message not recommended to auto-transform flowFrame/flowSet objects
     if (cyto_class(x, c("flowFrame", "flowSet"))) {
-      message(paste(
-        "Automatically transforming cytoframe/cytoset objects",
-        "is not recommended as transformation definitions will be lost."
-      ))
+      if(!quiet) {
+        message(paste(
+          "Automatically transforming cytoframe/cytoset objects",
+          "is not recommended as transformation definitions will be lost."
+        ))
+      }
     }
     
     # Dispatch based on type argument to get TransformerList
@@ -1208,8 +1213,12 @@ cyto_transform.default <- function(x,
   }
   
   # MESSAGE
-  message(
-    "Applying data transformations..."
+  if(!quiet)(
+    message(
+      paste0("Applying ", 
+             ifelse(inverse, "inverse ", ""),
+             "data transformations...")
+    )
   )
   
   # TRANSFORM FLOWFRAME OR FLOWSET
@@ -1239,9 +1248,11 @@ cyto_transform.default <- function(x,
   }
   
   # COMPLETE
-  message(
-    "DONE!"
-  )
+  if(!quiet){
+    message(
+      "DONE!"
+    )
+  }
   
   # VISUALISE TRANSFORMATIONS
   if(plot == TRUE) {
@@ -1275,6 +1286,7 @@ cyto_transform.transformList <- function(x,
                                          plot = TRUE,
                                          popup = FALSE,
                                          axes_limits = "machine",
+                                         quiet = FALSE,
                                          ...) {
   
   # Added for backwards compatibility - flowFrame/flowSet objects only
@@ -1286,9 +1298,13 @@ cyto_transform.transformList <- function(x,
   }
   
   # MESSAGE
-  message(
-    "Applying data transformations..."
-  )
+  if(!quiet){
+    message(
+      paste0("Applying ", 
+             ifelse(inverse, "inverse ", ""),
+             "data transformations...")
+    )
+  }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -1305,9 +1321,11 @@ cyto_transform.transformList <- function(x,
   }
   
   # COMPLETE
-  message(
-    "DONE!"
-  )
+  if(!quiet){
+    message(
+      "DONE!"
+    )
+  }
   
   # VISUALISE TRANSFORMATIONS
   if(plot == TRUE) {
@@ -1338,12 +1356,17 @@ cyto_transform.transformerList <- function(x,
                                            plot = TRUE,
                                            popup = FALSE,
                                            axes_limits = "machine",
+                                           quiet = FALSE,
                                            ...) {
   
   # MESSAGE
-  message(
-    "Applying data transformations..."
-  )
+  if(!quiet){
+    message(
+      paste0("Applying ", 
+             ifelse(inverse, "inverse ", ""),
+             "data transformations...")
+    )
+  }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -1377,9 +1400,11 @@ cyto_transform.transformerList <- function(x,
   }
   
   # COMPLETE
-  message(
-    "DONE!"
-  )
+  if(!quiet){
+    message(
+      "DONE!"
+    )
+  }
   
   # VISUALISE TRANSFORMATIONS
   if(plot == TRUE) {
@@ -1926,7 +1951,7 @@ cyto_match <- function(x,
                        ...) {
   
   # CYTOSET/GATINGSET
-  if(!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet")) {
+  if(!cyto_class(x, c("flowSet", "GatingSet"))) {
     stop(
       "'x' should be an object of class cytoset or GatingSet."
     )
