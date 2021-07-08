@@ -593,7 +593,7 @@ cyto_channel_select <- function(x){
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param save_as name to use for the saved channel match csv file, set to
 #'   \code{"date-Channel-Match.csv"}.
-#'   
+#'
 #' @return update \code{cyto_details} of \code{cytoset} or \code{GatingSet},
 #'   write channel matching to csv file and return channel matching as a
 #'   data.frame.

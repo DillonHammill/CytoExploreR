@@ -346,8 +346,8 @@ cyto_load <- function(path = ".",
 #'   supplied.
 #' @param type the method to use when cleaning the data, options include
 #'   \code{"flowAI"}, \code{"flowClean"} or \code{"flowCut"}.
-#' @param ... additional arguments passed to
-#'   \code{flowAI::flow_auto_qc}, \code{flowClean::flowClean}, or \code{flowCut::flowCut}.
+#' @param ... additional arguments passed to \code{flowAI::flow_auto_qc},
+#'   \code{flowClean::flowClean}, or \code{flowCut::flowCut}.
 #'
 #' @importFrom flowWorkspace gs_cyto_data flowSet_to_cytoset
 #' @importFrom utils capture.output
@@ -372,6 +372,16 @@ cyto_load <- function(path = ".",
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
 #'   \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}
+#'
+#' @references Fletez-Brant K, Spidlen J, Brinkman R, Roederer M, Chattopadhyay
+#'   P (2016). flowClean: Automated identification and removal of fluorescence
+#'   anaomalies in flow cytometry data. Cytometry A 89(5).
+#'   \url{https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.22837}
+#'
+#' @references Meskas J, Wang S, Brinkman R (2021). flowCut --- An R Package for
+#'   precise and accurate automated removal of outlier events and flagging of
+#'   files based on time versus fluorescence analysis. bioRxiv.
+#'   \url{https://doi.org/10.1101/2020.04.23.058545}
 #'
 #' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
 #'
@@ -1367,7 +1377,6 @@ cyto_transform.transformerList <- function(x,
              "data transformations...")
     )
   }
-  
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
@@ -1669,7 +1678,8 @@ cyto_data_extract <- function(x,
       cs <- cyto_transform(cs,
                            trans = trans,
                            inverse = inverse,
-                           plot = FALSE)
+                           plot = FALSE,
+                           quiet = TRUE)
     }
     # CYTOFRAME
     if(format == "cytoframe") {
@@ -3845,7 +3855,7 @@ cyto_details_edit <- function(x,
       found_files <- list.files()[grep("Experiment-Details.csv", list.files())]
       n <- length(grep("Experiment-Details.csv", list.files()))
       
-      # Run through each file and check channels match samples
+      # Run through each file and check names match samples
       pd <- lapply(seq_len(n), function(z) {
         pdata <- read_from_csv(found_files[z])
         # SampleNames match those of x
@@ -5135,7 +5145,8 @@ cyto_apply.flowSet <- function(x,
     x <- cyto_transform(x,
                         trans = trans,
                         inverse = inverse,
-                        plot = FALSE)
+                        plot = FALSE,
+                        quiet = TRUE)
   }
   
   # CYTOSET INPUT 
