@@ -293,7 +293,9 @@ cyto_load <- function(path = ".",
                          which(grepl(z, files, ignore.case = TRUE)))
         }
       })
-      files <- files[unique(file_ind)]
+      if(length(file_ind) > 0){
+        files <- files[unique(file_ind)]
+      }
     }
     
     # EXCLUDE
@@ -305,7 +307,9 @@ cyto_load <- function(path = ".",
                          which(grepl(z, files, ignore.case = TRUE)))
         }
       })
-      files <- files[-unique(file_ind)]
+      if(length(file_ind) > 0){
+        files <- files[-unique(file_ind)]
+      }
     }
     
     # SORTED FILE PATHS
@@ -5220,6 +5224,8 @@ cyto_apply.flowSet <- function(x,
         return(output)
       }), names = cyto_names(x))
   } else if(input == "column") {
+    # TODO: Add support for passing channel-specific arguments through here
+    # named vector or named list
     res <- structure(
       lapply(cyto_names(x), function(z){
         output <- apply(exprs(x[[z]]), 2, FUN, ...)
