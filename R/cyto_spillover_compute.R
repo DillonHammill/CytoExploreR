@@ -132,9 +132,11 @@ cyto_spillover_compute <- function(x,
                                    spill = NULL,
                                    spillover = NULL,
                                    save_as = NULL,
-                                   type = "autospill",
+                                   type = "autocomp",
                                    axes_limits = "machine",
                                    ...) {
+  
+  # function to find max signal if multiple controls present
   
   # PREPARE DATA ---------------------------------------------------------------
   
@@ -321,6 +323,18 @@ cyto_spillover_compute <- function(x,
       flow.control = cs_prep,
       asp = asp
     )$spillover
+    
+    # # FIX CHANNELS
+    # colnames(spill) <- 
+    #   channels[
+    #     match(gsub("-|/", " ", channels),
+    #           gsub("-", " ", colnames(spill)))
+    #   ]
+    # rownames(spill) <- 
+    #   channels[
+    #     match(gsub("-|/", " ", channels),
+    #           gsub("-", " ", rownames(spill)))
+    #   ]
     
   }
   
