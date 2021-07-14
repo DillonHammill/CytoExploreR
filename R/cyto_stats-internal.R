@@ -22,7 +22,8 @@
                     "rcv",
                     "quantile",
                     "auc",
-                    "range"), function(z){
+                    "range",
+                    "bin"), function(z){
                       grepl(paste0("^", z, "$"), FUN, ignore.case = TRUE)
                     }))) {
       FUN <- paste0("cyto_stat_", tolower(FUN))
@@ -392,5 +393,79 @@ cyto_stat_density <- function(x,
   
   # RETURN LIST OF DENSITY OBJECTS
   return(res)
+  
+}
+
+## CYTO_STAT_BIN ---------------------------------------------------------------
+
+#' Bin cytometry data
+#'
+#' @param x a matrix of values to bin.
+#' @param bins the number of bins to use, set to 400 by default.
+#' @param type whether to use \code{"count"} or \code{"freq"}.
+#' @param limits matrix or named list containing the minimum and maximum values
+#'   for each channel on the current scale, defaults to the data range if not
+#'   supplied.
+#'
+#' @return vector of binned data with either counts of frequencies.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @noRd
+cyto_stat_bin <- function(x, 
+                          bins = 400,
+                          type = "count",
+                          limits = NULL) {
+  
+  # BIN DATA
+  cnt <- 0
+  apply(
+    x,
+    2,
+    function(y){
+      # COUNTER
+      cnt <<- cnt + 1
+      # CHANNEL
+      x_chan <- colnames(x)[cnt]
+      # PREPARE LIMITS
+      if(is.null(dim(limits))) {
+        limits <- do.call("cbind", limits)
+      }
+      # MINIMUM
+      x_min <- ifelse(
+        is.numeric(limits[,x_chan][1]),
+        limits[,x_chan][1],
+        min(y)
+      )
+      # MAXIMUM
+      x_max <- ifelse(
+        is.numeric(limits[,x_chan][2]),
+        limits[,x_chan][2],
+        max(y)
+      )
+      # BREAKS
+      breaks <- seq(
+        x_min,
+        x_max,
+        (x_max - x_min) / bins,
+      )
+      # USE CUT() TO CREATE BINS
+      x_bin <- cut(
+        y, 
+        breaks = breaks,
+        labels = seq_len(bins),
+        include.lowest = TRUE
+      )
+      # COUNTS PER BIN
+      x_bin <- table(
+        x_bin
+      )
+      # COUNTS -> FREQUENCY
+      if(type != "count") {
+        x_bin <- x_bin/length(x)
+      }
+      return(x_bin)
+    }
+  )
   
 }
