@@ -874,12 +874,19 @@ cyto_plot_new <- function(popup = NULL,
                           popup_size = NULL,
                           ...) {
   
-  # STORED GRAPHICAL PATAMETERS
+  # STORED PARAMETERS ----------------------------------------------------------
+  
+  # STORED GRAPHICAL PARAMETERS
   set_pars <- cyto_option("cyto_plot_par")
   
-  # POPUP
+  # CYTO_PLOT_SAVE - POPUP -> FALSE
+  if(cyto_option("cyto_plot_save")) {
+    popup <- FALSE
+  }
+  
+  # INHERIT POPUP ARGUMENT
   if(is.null(popup)) {
-    # USE GLOBAL SETTING
+    # USE STORED SETTING
     if("popup" %in% names(set_pars)) {
       popup <- set_pars$popup
     # USE SAME DEVICE TYPE
@@ -890,20 +897,9 @@ cyto_plot_new <- function(popup = NULL,
         popup <- TRUE
       }
     }
-    # # CALLED WITHIN CYTO_PLOT - USE SAME DEVICE TYPE
-    # if(!is.null(cyto_option("cyto_plot_method"))) {
-    #   if(grepl("rstudio", names(dev.cur()), ignore.case = TRUE)) {
-    #     popup <- FALSE
-    #   } else {
-    #     popup <- TRUE
-    #   }
-    # # CALLED EXTERNALLY
-    # } else {
-    #   popup <- TRUE
-    # }
   }
-
-  # POPUP SIZE
+  
+  # INHERIT POPUP_SIZE ARGUMENT
   if(is.null(popup_size)) {
     # CHECK GLOBAL SETTINGS
     if("popup_size" %in% names(set_pars)) {
@@ -913,28 +909,24 @@ cyto_plot_new <- function(popup = NULL,
     }
   }
   
-  # INHERIT STORED PARAMETERS
-  new_pars <- .args_list(...)
-  new_pars <- new_pars[!names(new_pars) %in% "set_pars"]
-  set_pars <- c(set_pars[!names(set_pars) %in% names(new_pars)], 
-                new_pars)
-  
-  # ADD POPUP & POPUP_SIZE TO STORED PARAMETERS
-  pars <- cyto_option("cyto_plot_par")
-  pars$popup <- popup
-  pars$popup_size <- popup_size
-  cyto_option("cyto_plot_par", pars)
-  
-  # POPUP ARGUMENTS NOT PASSED TO CYTO_PLOT_PAR
+  # STORE POPUP & POPUP_SIZE GLOBALLY
+  set_pars$popup <- popup
+  set_pars$popup_size <- popup_size
+  cyto_option("cyto_plot_par", set_pars)
   set_pars <- set_pars[!names(set_pars) %in% c("popup", "popup_size")]
-
-  # NULL -> RSTUDIOGD
-  if (dev.cur() == 1) {
-    dev.new()
-  }
   
-  # BYPASS ON CYTO_PLOT_SAVE
-  if (!cyto_option("cyto_plot_save")) {
+  # OPEN NEW GRAPHICS DEVICE ---------------------------------------------------
+  
+  # CYTO_PLOT_SAVE
+  if(cyto_option("cyto_plot_save")) {
+    # DON'T OPEN NEW DEVICE - USE EXISTING DEVICE (PDF MULTIPAGE)
+    dev_new <- FALSE
+  # NEW GRAPHICS DEVICE REQUIRED?
+  } else {
+    # NULL -> RSTUDIOGD
+    if (dev.cur() == 1) {
+      dev.new()
+    }
     # NEW DEVICE
     if (popup) {
       dev_new <- "popup"
@@ -959,7 +951,7 @@ cyto_plot_new <- function(popup = NULL,
         # EMPTY DEVICE
         if(dev_empty()) {
           dev_new <- FALSE
-        # CUSTOM LAYOUT
+          # CUSTOM LAYOUT
         } else if(cyto_option("cyto_plot_method") == "custom") {
           # OPEN NEW DEVICE WHEN FULL
           if(.par("page")[[1]]) {
@@ -967,7 +959,7 @@ cyto_plot_new <- function(popup = NULL,
           } else {
             dev_new <- FALSE
           }
-        # NEW LAYOUT
+          # NEW LAYOUT
         } else {
           dev_new <- "rstudio"
         }
@@ -979,7 +971,7 @@ cyto_plot_new <- function(popup = NULL,
         # EMPTY DEVICE
         if(dev_empty()){
           dev_new <- FALSE
-        # CUSTOM LAYOUT
+          # CUSTOM LAYOUT
         } else if(cyto_option("cyto_plot_method") == "custom") {
           # OPEN NEW GRAPHICS DEVICE WHEN FULL
           if(.par("page")[[1]]) {
@@ -987,7 +979,7 @@ cyto_plot_new <- function(popup = NULL,
           } else {
             dev_new <- FALSE
           }
-        # NEW LAYOUT
+          # NEW LAYOUT
         } else {
           dev_new <- "popup"
         }
@@ -997,7 +989,6 @@ cyto_plot_new <- function(popup = NULL,
         dev_new <- "rstudio"
       }
     }
-
     # OPEN NEW GRAPHICS DEVICE
     if (dev_new != FALSE) {
       # POPUP DEVICE
@@ -1037,11 +1028,53 @@ cyto_plot_new <- function(popup = NULL,
           dev.new(noRStudioGD = FALSE)
         }
       }
-      # SET/INHERIT GRAPHICAL PARAMETERS
-      do.call("cyto_plot_par", set_pars)
     }
-    
   }
+  
+  # INCOMING PARAMETERS --------------------------------------------------------
+  
+  # NEW PARAMETERS
+  new_pars <- list(...)
+  
+  # SET PARAMETERS -------------------------------------------------------------
+  
+  # EMPTY DEVICE - SET ALL PARAMETERS
+  if(dev_empty()) {
+    # COMBINE SET_PARS & NEW_PARS - REPLACE OLD WITH NEW
+    set_pars <- c(
+      set_pars[!names(set_pars) %in% names(new_pars)],
+      new_pars
+    )
+  # USED DEVICE - BYPASS LAYOUT/OMA PARAMETERS
+  } else {
+    # SET NEW PARAMETERS OT PARAMETERS THAT CHANGE & NOT PRIVILEGED
+    shared_pars <- names(new_pars)[names(new_pars) %in% names(set_pars)]
+    update_pars <- structure(
+      lapply(shared_pars, function(z){
+        if(!setequal(new_pars[[z]], set_pars[[z]])) {
+          return(new_pars[[z]])
+        } else {
+          return(NULL)
+        }
+      }),
+      names = shared_pars
+    )
+    update_pars[LAPPLY(update_pars, "is.null")] <- NULL
+    set_pars <- c(
+      update_pars,
+      new_pars[!names(new_pars) %in% names(set_pars)] # NEW
+    )
+    # EXCLUDE PARAMETERS THAT REQUIRE NEW DEVICE
+    set_pars <- set_pars[!names(set_pars) %in% c("layout",
+                                                 "mfrow",
+                                                 "mfcol",
+                                                 "oma",
+                                                 "omi",
+                                                 "omd")]
+  }
+  
+  # SET GRAPHICAL PARAMETERS
+  do.call("cyto_plot_par", set_pars)
 
 }
 
@@ -1461,7 +1494,9 @@ cyto_plot_complete <- function(...) {
       "windows",
       "X11",
       "x11",
-      "quartz"
+      "quartz",
+      "cairo",
+      "Cairo"
     )) {
       dev.off()
     }
@@ -1583,6 +1618,11 @@ cyto_plot_par <- function(...,
   new_pars <- .args_list(...)
   new_pars <- new_pars[!names(new_pars) %in% "reset"]
   
+  # EMPTY PARAMETERS
+  if(length(new_pars) == 0){
+    invisible(NULL)
+  }
+  
   # RESET PARAMETERS
   if (reset) {
     cyto_option("cyto_plot_par", list())
@@ -1651,7 +1691,7 @@ cyto_plot_par <- function(...,
                   new_pars)
     cyto_option("cyto_plot_par", set_pars)
     # GET RESET VALUES FOR NEW PARAMETERS
-    reset_pars <- par(names(new_pars)[!names(new_pars) %in% "layout"])
+    reset_pars <- .par(names(new_pars)[!names(new_pars) %in% "layout"])
     # RESET LAYOUT WITH MFROW
     if("layout" %in% names(new_pars)) {
       reset_pars$mfrow <- par("mfrow")
