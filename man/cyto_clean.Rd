@@ -17,8 +17,8 @@ supplied.}
 \item{type}{the method to use when cleaning the data, options include
 \code{"flowAI"}, \code{"flowClean"} or \code{"flowCut"}.}
 
-\item{...}{additional arguments passed to
-\code{flowAI::flow_auto_qc}, \code{flowClean::flowClean}, or \code{flowCut::flowCut}.}
+\item{...}{additional arguments passed to \code{flowAI::flow_auto_qc},
+\code{flowClean::flowClean}, or \code{flowCut::flowCut}.}
 }
 \description{
 Apply flowAI anomaly detection to clean cytometry data
@@ -43,6 +43,16 @@ Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
   15;32(16):2473-80.
   \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}
+
+Fletez-Brant K, Spidlen J, Brinkman R, Roederer M, Chattopadhyay
+  P (2016). flowClean: Automated identification and removal of fluorescence
+  anaomalies in flow cytometry data. Cytometry A 89(5).
+  \url{https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.22837}
+
+Meskas J, Wang S, Brinkman R (2021). flowCut --- An R Package for
+  precise and accurate automated removal of outlier events and flagging of
+  files based on time versus fluorescence analysis. bioRxiv.
+  \url{https://doi.org/10.1101/2020.04.23.058545}
 }
 \seealso{
 \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
