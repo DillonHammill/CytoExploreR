@@ -1204,7 +1204,7 @@
     
     # TITLE
     if (.all_na(title)) {
-      mar[3] <- 2.1
+      mar[3] <- 2.2
     }
     
     # X AXIS
@@ -1462,7 +1462,7 @@
     cs <- x[[z]]
     # NO LABEL - NO GATING REQUIRED (CHECK WHOLE LAYER)
     if(.all_na(labels_per_layer[[z]])) {
-      return(list(cs))
+      return(rep(list(cs), length(label_stat)/layers))
     # LABEL - GATING REQUIRED
     } else {
       # LIST OF GATED POPULATIONS PER GATE -> LIST OF POPS (CYTOSETS)
@@ -1471,95 +1471,6 @@
                         gate = gate)
       )
     }
-    # pops_to_label <- labels_per_layer[[z]]
-    # gated <- c()
-    # gated_pops <- lapply(seq_len(length(gate)), function(w) {
-    #   # NO GATE OR NO STAT
-    #   if (.all_na(gate[[w]]) | is.na(pops_to_label[[w]])) {
-    #     gated <<- c(gated, FALSE)
-    #     return(cs)
-    #   }else{
-    #     gated <<- c(gated, TRUE)
-    #     # NEGATED POPULATION
-    #     if (negate == TRUE & w == length(gate)) {
-    #       res <- split(cs, gate[[w]])[[2]]
-    #       # *** CYTOSET CONVERSION ***
-    #       if(cyto_class(res, "flowSet", TRUE)) {
-    #         res <- flowSet_to_cytoset(res)
-    #       }
-    #       # GATED POPULATIONS
-    #     } else {
-    #       # QUADGATES RETURN MULTIPLE POPULATIONS
-    #       if (is(gate[[w]], "quadGate")) {
-    #         if ("quad_order" %in% names(args)) {
-    #           quads <- unlist(strsplit(gate[[w]]@filterId, "\\|"))
-    #           res <- split(cs, gate[[w]])[c(2, 1, 3, 4)][match(
-    #             quad_order,
-    #             quads
-    #           )] # FIX ORDER
-    #           
-    #         } else {
-    #           res <- split(cs, gate[[w]])[c(2, 1, 3, 4)] # FIX ORDER
-    #         }
-    #         # *** CYTOSET CONVERSION ***
-    #         res <- structure(
-    #           lapply(res, function(q){
-    #             if(cyto_class(q, "flowSet", TRUE)){
-    #               q <- flowSet_to_cytoset(q)
-    #             }
-    #             return(q)
-    #           }),
-    #           names = names(res)
-    #         )
-    #         # SINGLE POPULATIONS
-    #       } else {
-    #         # RECTANGLE BELONGS TO QUADGATE
-    #         if (is(gate[[w]], "rectangleGate") &
-    #             any(grepl("quad", names(attributes(gate[[w]]))))) {
-    #           q <- names(attributes(gate[[w]])[["quadrants"]])
-    #           coords <- .cyto_gate_coords(gate[w],
-    #                                       channels = as.character(
-    #                                         parameters(gate[[w]]))
-    #           )
-    #           chans <- colnames(coords)
-    #           coords <- lapply(colnames(coords), function(y) {
-    #             unique(coords[, y][is.finite(coords[, y])])
-    #           })
-    #           names(coords) <- chans
-    #           qg <- quadGate(
-    #             filterId = paste(q, collapse = "|"),
-    #             .gate = coords
-    #           )
-    #           p <- split(cs, qg)[c(2, 1, 3, 4)] # FIX ORDER
-    #           names(p) <- q
-    #           # *** CYTOSET CONVERSION ***
-    #           p <- structure(
-    #             lapply(p, function(b){
-    #               if(cyto_class(b, "flowSet", TRUE)){
-    #                 b <- flowSet_to_cytoset(b)
-    #               }
-    #               return(b)
-    #             }),
-    #             names = names(p)
-    #           )
-    #           res <- p[[match(gate[[w]]@filterId, names(p))]]
-    #         } else {
-    #           res <- Subset(cs, gate[[w]])
-    #         }
-    #       }
-    #     }
-    #     return(res)
-    #   }
-    # })
-    # # SIGNAL IF GATE PRESENT
-    # if(any(gated == TRUE)){
-    #   gated[gated == TRUE] <- "gated"
-    # }
-    # if(any(gated == FALSE)){
-    #   gated[gated == FALSE] <- "gated"
-    # }
-    # names(gated_pops) <- gated
-    # return(gated_pops)
   })
   
   # RETURN LIST OF GATED POPULATIONS
@@ -1624,21 +1535,28 @@
     ST <- lapply(seq_len(length(pops[[z]])), function(y) {
       # STATISTIC SUPPLIED
       if (!.all_na(label_stat[[z]][y])) {
+        # DISPATCH
+        label_stat_fun <- .cyto_stat_dispatch(label_stat[[z]][y])
         # FREQUENCY
-        if(grepl(paste0("freq$"), label_stat[[z]][y], ignore.case = TRUE)) {
+        if(grepl("freq$", label_stat_fun, ignore.case = TRUE)) {
           res <- cyto_stats_compute(pops[[z]][[y]],
                                     channels = channels,
                                     parent = x[z],
-                                    stat = label_stat[[z]][y],
+                                    stat = label_stat_fun,
                                     round = 2,
                                     input = "matrix",
                                     markers = FALSE,
                                     details = FALSE)
-          # OTHER STATISTICS - GATED POPS
-        } else {
+        # HISTOGRAM STATISTICS - ADDITIONAL ARGUMENTS
+        } else if(any(LAPPLY(c("mode",
+                               "auc"), function(w){
+                                 grepl(paste0(w, "$"), 
+                                       label_stat_fun, 
+                                       ignore.case = TRUE)
+                               }))){
           res <- cyto_stats_compute(pops[[z]][[y]],
                                     channels = channels,
-                                    stat = label_stat[[z]][y],
+                                    stat = label_stat_fun,
                                     inverse = TRUE,
                                     trans = axes_trans,
                                     round = 2,
@@ -1648,6 +1566,17 @@
                                     limits = xlim,
                                     markers = FALSE,
                                     details = FALSE)
+        # OTHER STATISTICS - GATED POPS
+        } else {
+          res <- cyto_stats_compute(pops[[z]][[y]],
+                                    channels = channels,
+                                    stat = label_stat_fun,
+                                    inverse = TRUE,
+                                    trans = axes_trans,
+                                    round = 2,
+                                    input = "matrix",
+                                    markers = FALSE,
+                                    details = FALSE)
         }
         # DROP NAME & ALIAS COLUMNS
         res <- res[, -which(c("name", "alias") %in% colnames(res)), 
@@ -1655,7 +1584,7 @@
         # EXTRACT STATISTICS - EITHER SINGLE OR DOUBLE
         res <- res[1, , drop = TRUE]
         # ROUND 2 DECIMAL PLACES
-        if(!grepl("count$", label_stat[[z]][y])) {
+        if(!grepl("count$", label_stat_fun)) {
           res <- .round(res)
         }
         # STATSTICS REQUIRE %
@@ -1664,7 +1593,7 @@
                         "cv",
                         "rcv"), function(w){
                           grepl(paste0(w, "$"), 
-                                label_stat[[z]][y], 
+                                label_stat_fun, 
                                 ignore.case = TRUE)
                         }))) {
           res <- paste(res, "%")
@@ -2212,13 +2141,13 @@
   # GENERAL --------------------------------------------------------------------
   
   # SAMPLES
-  SMP <- length(args$x)
+  L <- length(args$x)
   
   # POPULATIONS PER LAYER
   NP <- length(args$pops[[1]])
   
   # TOTAL POPULATIONS
-  TNP <- length(args$x) * NP
+  TNP <- L * NP
   
   # REMOVE ANY FILTERS
   args$gate <- structure(
@@ -2268,7 +2197,7 @@
   for(z in label_args) {
     if(z %in% names(args)) {
       args[[z]] <- rep(args[[z]], length.out = TNP)
-      args[[z]] <- split(args[[z]], rep(seq_len(SMP), each = NP))
+      args[[z]] <- split(args[[z]], rep(seq_len(L), each = NP))
       # RE-ARRANGE LABEL COORDS PER GATE
       args[[z]] <- lapply(seq_len(NP), function(y){
         LAPPLY(args[[z]], `[[`, y)
@@ -2335,11 +2264,11 @@
   args$label_text_y <- label_text_xy[, "y"]
   
   # REVERT LABEL_TEXT_X & LABEL_TEXT_Y TO ORIGINAL FORMAT
-  if (SMP > 1) {
-    args$label_text_x <- LAPPLY(seq_len(SMP), function(z) {
+  if (L > 1) {
+    args$label_text_x <- LAPPLY(seq_len(L), function(z) {
       args$label_text_x[names(args$label_text_x) == z]
     })
-    args$label_text_y <- LAPPLY(seq_len(SMP), function(z) {
+    args$label_text_y <- LAPPLY(seq_len(L), function(z) {
       args$label_text_y[names(args$label_text_y) == z]
     })
   }
