@@ -5015,7 +5015,7 @@ cyto_calibrate_reset <- function(){
 #' @importFrom methods is
 #' @importFrom flowCore flowSet
 #' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe
-#'   cytoframe_to_flowFrame
+#'   cytoframe_to_flowFrame flowSet_to_cytoset
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -5188,7 +5188,7 @@ cyto_apply.flowSet <- function(x,
         if(!is.null(slot)) {
           output <- output[[slot]]
         }
-        return(output)
+        return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "flowFrame") { # internal use only
     res <- structure(
@@ -5198,10 +5198,7 @@ cyto_apply.flowSet <- function(x,
         if(!is.null(slot)) {
           output <- output[[slot]]
         }
-        if(cyto_class(output, "flowFrame", TRUE)) {
-          output <- flowFrame_to_cytoframe(output)
-        }
-        return(output)
+        return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "cytoframe") {
     res <- structure(
@@ -5211,7 +5208,7 @@ cyto_apply.flowSet <- function(x,
         if(!is.null(slot)) {
           output <- output[[slot]]
         }
-        return(output)
+        return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "matrix") {
     res <- structure(
@@ -5221,7 +5218,7 @@ cyto_apply.flowSet <- function(x,
         if(!is.null(slot)) {
           output <- output[[slot]]
         }
-        return(output)
+        return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "column") {
     # TODO: Add support for passing channel-specific arguments through here
@@ -5233,7 +5230,7 @@ cyto_apply.flowSet <- function(x,
         if(!is.null(slot)) {
           output <- output[[slot]]
         }
-        return(output)
+        return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input =="row") {
     res <- structure(
@@ -5243,7 +5240,7 @@ cyto_apply.flowSet <- function(x,
         if(!is.null(slot)) {
           output <- output[[slot]]
         }
-        return(output)
+        return(cyto_convert(output))
       }), names = cyto_names(x))
   }
   
@@ -5336,6 +5333,44 @@ cyto_apply.list <- function(x,
                  slot = slot)
     }), names = names(x)
   )
+  
+}
+
+## CYTO_CONVERT ----------------------------------------------------------------
+
+#' Convert flowFrame/flowSet objects to cytoframe/cytoset objects
+#'
+#' @param x object of class \code{flowFrame}, \code{flowSet}, \code{cytoframe}
+#'   or \code{cytoset}.
+#' @param ... additional arguments passed to
+#'
+#' @return a cytoframe or cytoset.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom flowWorkspace flowFrame_to_cytoframe flowSet_to_cytoset
+#'
+#' @seealso
+#'   \code{\link[flowWorkspace:flowFrame_to_cytoframe]{flowFrame_to_cytoframe}}
+#' @seealso
+#'   \code{\link[flowWorkspace:flowSet_to_cytoset]{flowSet_to_cytoset}}  
+#'
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # flowSet to cytoset
+#' cs <- cyto_convert(Activation)
+#'
+#' @export
+cyto_convert <- function(x,
+                         ...) {
+
+  if(cyto_class(x, "flowFrame", TRUE)) {
+    x <- flowFrame_to_cytoframe(x, ...)
+  } else if(cyto_class(x, "flowSet", TRUE)) {
+    x <- flowSet_to_cytoset(x)
+  }
+  return(x)
   
 }
 
