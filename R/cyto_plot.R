@@ -426,7 +426,7 @@ cyto_plot <- function(x,
   # CYTOSET/GATINGHIERARCHY/GATINGSET
   if(!cyto_class(x, c("flowSet", "GatingSet"))) {
     stop(
-      "cyto_plot only supports cytoset, Gatinghierarchy or GatingSet objects!"
+      "cyto_plot only supports cytoset, GatingHierarchy or GatingSet objects!"
       )
   }
   
@@ -460,12 +460,12 @@ cyto_plot <- function(x,
     args$layout <- FALSE
   }
   
-  # # LAYOUT - TURNED OFF
-  # if(!all(.empty(args$layout))) {
-  #   if(all(args$layout == FALSE)){
-  #     cyto_option("cyto_plot_method", "custom")
-  #   }
-  # }
+  # LAYOUT - TURNED OFF
+  if(!all(.empty(args$layout))) {
+    if(all(args$layout == FALSE)){
+      cyto_option("cyto_plot_method", "custom")
+    }
+  }
   
   # AXES_TRANS - SUPPLIED
   if(!.all_na(args$axes_trans)) {
@@ -476,6 +476,12 @@ cyto_plot <- function(x,
   # AXES_TRANS - EXTRACT
   } else {
     args$axes_trans <- cyto_transformers_extract(args$x)
+  }
+  
+  # HEADER
+  if(cyto_option("cyto_plot_method") == "custom") {
+    # CANNOT SET HEADER FOR CUSTOM LAYOUTS
+    args$header <- NA
   }
   
   # GATES PREPARATION ----------------------------------------------------------
@@ -505,9 +511,6 @@ cyto_plot <- function(x,
                                    "seed",
                                    "negate")]
   
-  print(args$gate)
-  print(args$x)
-  
   # HISTOGRAM LAYERS -----------------------------------------------------------
   
   # TODO: ALLOW HIST_LAYERS TO ACCEPT GROUPING VARIABLES?
@@ -519,6 +522,12 @@ cyto_plot <- function(x,
       args$legend_text <- names(args$x)
     }
     # UNPACK X
+    args$x <- structure(
+      unlist(args$x),
+      names = LAPPLY(seq_along(args$x), function(z){
+        paste0(names(args$x)[z], "\n",names(args$x[[z]]))
+      })
+    )
     args$x <- unlist(args$x)  
     # HIST_LAYERS - USE ALL LAYERS
     if(.all_na(args$hist_layers)) {
@@ -575,6 +584,20 @@ cyto_plot <- function(x,
     args$title <- rep("", length(args$x))
     # HISTOGRAMS
     if(length(args$channels) == 1) {
+      args$title <- LAPPLY(seq_along(args$title), function(z){
+        title <- paste0(args$title[z], names(args$x)[z])
+        if(.empty(title)) {
+          
+        }
+        # GROUP/POPULATION DOWN A LEVEL
+        if(.empty(title)) {
+        
+        # POPULATION
+        } else {
+          
+        }
+      })
+      
       # GROUPS
       if(!is.null(names(args$x))) {
         args$title <- names(args$x)
@@ -722,32 +745,36 @@ cyto_plot <- function(x,
     # LAYOUT DIMENSIONS
     args$layout <- .cyto_plot_layout(args$x,
                                      layout = args$layout)
-    # LAYOUT TURNED OFF
+  # LAYOUT TURNED OFF
   } else if (all(args$layout == FALSE) | .all_na(args$layout)) {
-    # USE CURRENT DIMENSIONS
-    args$layout <- par("mfrow")
+    # CHECK GLOBAL PARAMETERS
+    if(any(c("layout", "mfrow", "mfcol") %in% names(cyto_option("cyto_plot_par")))) {
+      args$layout <- cyto_option("cyto_plot_par")[c("layout",
+                                                    "mfrow",
+                                                    "mfcol")][[1]]
+    } else {
+      # USE CURRENT DIMENSIONS
+      args$layout <- par("mfrow")
+    }
   }
   
   # HEADER ARGUMENTS - REPEAT PER PAGE
   header_args <- args[grepl("^header", names(args))]
   for(i in names(header_args)) {
     header_args[[i]] <- rep(header_args[[i]], 
-                            length.out = ceiling(length(args$x)/
-                                                   prod(args$layout)))
+                            length.out = if(!is.null(dim(args$layout))) {
+                              max(unique(unlist(args$layout)))
+                            }else {
+                              ceiling(length(args$x)/
+                                        prod(args$layout))
+                            })
   }
   
   # UPDATE HEADER ARGUMENTS
   .args_update(header_args)
   
-  # REMOVE HEADER ARGUMENTS
+  # REMOVE HEADER ARGUMENTS - CANNOT SPLIT LATER
   args <- args[!names(args) %in% names(header_args)]
-  
-  # HEADER SPACE
-  if(!.all_na(header)) {
-    oma <- c(0,0,3,0)
-  } else {
-    oma <- par("oma")
-  }
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
   
@@ -761,10 +788,16 @@ cyto_plot <- function(x,
   }
   
   # GRAPHICS DEVICE
-  cyto_plot_new(args$popup,
-                popup_size = args$popup_size,
-                layout = args$layout,
-                oma = oma)
+  if(.all_na(header)) {
+    cyto_plot_new(args$popup,
+                  popup_size = args$popup_size,
+                  layout = args$layout)
+  } else {
+    cyto_plot_new(args$popup,
+                  popup_size = args$popup_size,
+                  layout = args$layout,
+                  oma = c(0, 0, 3, 0))
+  }
   
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]
@@ -884,22 +917,36 @@ cyto_plot <- function(x,
     
     # GARPHICS DEVICE ----------------------------------------------------------
     
-    # RECORD FULL PAGE & OPEN NEW DEVICE
-    if(.par("page")[[1]] | cnt == length(ARGS)) {
-      # PAGE
-      pg <- ceiling(z/prod(.par("mfrow")[[1]]))
-      # HEADER
-      if(!.all_na(header[pg])) {
-        .cyto_plot_header(header[pg],
-                          header_text_font = header_text_font[pg],
-                          header_text_size = header_text_size[pg],
-                          header_text_col = header_text_col[pg])
+    # FILL GRAPHICS DEVICE
+    if(z == length(args$x)){
+      # FILL GRAPHICS DEVICE - BYPASS FOR CUSTOM LAYOUTS
+      if(!cyto_option("cyto_plot_method") == "custom") {
+        while(.par("page") == FALSE) {
+          plot.new()
+        }
+      }
+    }
+    
+    # RECORD FULL GRAPHICS DEVICE
+    if(.par("page") == TRUE) {
+      # HEADER - EXCLUDED FROM ARGS
+      if(!.all_na(header)) {
+        if(!.all_na(header[1])) {
+          .cyto_plot_header(header[1],
+                            header_text_font = header_text_font[1],
+                            header_text_size = header_text_size[1],
+                            header_text_col = header_text_col[1])
+          header <- header[-1]
+          header_text_font <- header_text_font[-1]
+          header_text_size <- header_text_size[-1]
+          header_text_col <- header_text_col[-1]
+        }
       }
       # RECORD
       p <- cyto_plot_record()
-      # OPEN NEW DEVICE
-      if(length(args) > cnt) {
-        cyto_plot_new() # USE GLOBAL SETTINGS
+      # NEW DEVICE
+      if(z < length(args$x)) {
+        cyto_plot_new() #USE GLOBAL SETTINGS
       }
     } else {
       p <- NULL
@@ -951,7 +998,7 @@ cyto_plot <- function(x,
     }
   }
   
-  # RECORD
+  # RECORDED PLOTS
   plots[LAPPLY(plots, "is.null")] <- NULL
   if(length(plots) == 0){
     plots <- NULL

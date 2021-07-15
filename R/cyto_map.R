@@ -360,7 +360,8 @@ cyto_map.flowSet <- function(x,
     # FLOWSET
     fs <- fs_list[[z]]
     # MERGE TO FLOWFRAME
-    fr <- cyto_merge_by(fs, merge_by = "all")[[1]]
+    fr <- cyto_merge_by(fs, 
+                        merge_by = "all")[[1]]
     # MAPPING - RETURNS MERGED FLOWFRAME & SAVES FILES
     cyto_data <- cyto_map(fr,
       channels = channels,
@@ -377,6 +378,8 @@ cyto_map.flowSet <- function(x,
       ...
     )
     # SPLIT - LIST OF FLOWFRAMES
+    print(cyto_data)
+    print(names[[z]])
     cyto_data <- cyto_split(cyto_data, names = names[[z]])
     # CONVERT FLOWFRAME LIST TO FLOWSET
     return(flowSet_to_cytoset(flowSet(cyto_data)))
@@ -445,8 +448,8 @@ cyto_map.flowFrame <- function(x,
       exclude = c(
         "Time",
         "Original",
-        "Sample ID",
-        "Event ID",
+        "\\Sample.*\\ID$",
+        "\\Event.*\\ID$",
         "PCA",
         "tSNE",
         "FIt-SNE",
@@ -584,38 +587,39 @@ cyto_map.flowFrame <- function(x,
   
   # CHARACTER
   if (is.character(type)) {
+    print("YEESSS")
     # MESSAGE
     message(paste0("Computing ", type, " co-ordinates..."))
     # PCA
-    if (grepl(type, "PCA", ignore.case = TRUE)) {
+    if (grepl(type, "^PCA$", ignore.case = TRUE)) {
       # MAPPING
       mp <- rpca(x, ...)
       # MAPPING CO-ORDINATES
       coords <- mp$x[, 1:2, drop = FALSE]
       colnames(coords) <- c("PCA-1", "PCA-2")
       # tSNE
-    } else if (grepl(type, "tSNE", ignore.case = TRUE)) {
+    } else if (grepl(type, "^tSNE$", ignore.case = TRUE)) {
       # MAPPING
       mp <- Rtsne(x, ...)
       # MAPPING CO-ORDINATES
       coords <- mp$Y
       colnames(coords) <- c("tSNE-1", "tSNE-2")
       # FIt-SNE
-    } else if (grepl(type, "FIt-SNE", ignore.case = TRUE) |
+    } else if (grepl(type, "^FIt-SNE$", ignore.case = TRUE) |
       grepl(type, "FItSNE", ignore.case = TRUE)) {
       mp <- fftRtsne(x, ...)
       # MAPPING CO-ORDINATES
       coords <- mp[, 1:2, drop = FALSE]
       colnames(coords) <- c("FIt-SNE-1", "FIt-SNE-2")
       # UMAP
-    } else if (grepl(type, "UMAP", ignore.case = TRUE)) {
+    } else if (grepl(type, "^UMAP$", ignore.case = TRUE)) {
       # MAPPING
       mp <- umap(x, ...)
       # MAPPING CO-ORDINATES
       coords <- mp$layout
       colnames(coords) <- c("UMAP-1", "UMAP-2")
       # EmbedSOM
-    } else if (grepl(type, "EmbedSOM", ignore.case = TRUE)) {
+    } else if (grepl(type, "^EmbedSOM$", ignore.case = TRUE)) {
       # DATA
       names(args)[1] <- "data"
       # CREATE SOM - FLOWSOM NOT SUPPLIED (fsom)

@@ -81,7 +81,7 @@
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
 #'   eventReactive renderPlot tabsetPanel tabPanel sidebarLayout fluidRow
-#'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer
+#'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer icon
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme
@@ -101,13 +101,12 @@
 NULL
 
 #' @noRd
-#' @export
 cyto_spillover_edit <- function(x, ...) {
   UseMethod("cyto_spillover_edit")
 }
 
 #' @rdname cyto_spillover_edit
-#' @export
+#' @noRd
 cyto_spillover_edit.GatingSet <- function(x,
                                           parent = NULL,
                                           channel_match = NULL,
@@ -403,11 +402,25 @@ cyto_spillover_edit.GatingSet <- function(x,
                        choices = channels,
                        selected = editor_initial_xchannel
                      ),
-                     selectInput(
-                       inputId = "editor_ychannel",
-                       label = "Y Axis:",
-                       choices = channels,
-                       selected = channels[2]
+                     splitLayout(
+                       selectInput(
+                         inputId = "editor_ychannel",
+                         label = "Y Axis:",
+                         choices = channels,
+                         selected = channels[2]
+                       ),
+                       actionButton(
+                         inputId = "ychannel_down",
+                         label = NULL,
+                         icon = icon("arrow-up", )
+                       ),
+                       actionButton(
+                         inputId = "ychannel_up",
+                         label = NULL,
+                         icon = icon("arrow-down")
+                       ),
+                       cellWidths = c("80%", "10%", "10%"),
+                       cellArgs = list(style = "vertical-align: text-bottom")
                      ),
                      checkboxInput(
                        inputId = "editor_unstained_overlay",
@@ -501,7 +514,8 @@ cyto_spillover_edit.GatingSet <- function(x,
       output$spillover_matrix <- renderRHandsontable({
         rhandsontable(values$spill,
                       rowHeaderWidth = 105,
-                      readOnly = FALSE
+                      readOnly = FALSE,
+                      manualColumnResize = TRUE
         ) %>%
           hot_cols(
             type = "numeric",
@@ -674,7 +688,9 @@ cyto_spillover_edit.GatingSet <- function(x,
                     point_size = point_size,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size, ...
+                    title_text_size = title_text_size,
+                    popup = FALSE,
+                    ...
           )
           
           # Median tracker
@@ -708,7 +724,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size
+                    title_text_size = title_text_size,
+                    popup = FALSE
           )
           
           # Density distribution in other channel
@@ -725,7 +742,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size
+                    title_text_size = title_text_size,
+                    popup = FALSE
           )
           
           # Add MedFI label in other channel
@@ -761,7 +779,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                       point_size = point_size,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = title_text_size, ...
+                      title_text_size = title_text_size,
+                      popup = FALSE, ...
             )
             
             # Median line through unstained control
@@ -814,7 +833,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                       density_line_width = 2,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = 1.25 * title_text_size
+                      title_text_size = 1.25 * title_text_size,
+                      popup = FALSE
             )
             
             # Density distribution in other channel
@@ -833,7 +853,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                       density_line_width = 2,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = 1.25 * title_text_size
+                      title_text_size = 1.25 * title_text_size,
+                      popup = FALSE
             )
             
             # Add label for Stained median
@@ -870,7 +891,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                       point_size = point_size,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = title_text_size, ...
+                      title_text_size = title_text_size,
+                      popup = FALSE, ...
             )
             
             # Median line through unstained control
@@ -927,7 +949,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                       density_line_width = 2,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = 1.25 * title_text_size
+                      title_text_size = 1.25 * title_text_size,
+                      popup = FALSE
             )
             
             # Density distribution in other channel - unstained overlay
@@ -950,7 +973,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                       density_line_width = 2,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = 1.25 * title_text_size
+                      title_text_size = 1.25 * title_text_size,
+                      popup = FALSE
             )
             
             # Add label for unstained median
@@ -1008,7 +1032,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("blue", "red")
+                                   density_fill = c("blue", "red"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == TRUE &
                      input$plots_unstained_overlay == TRUE) {
@@ -1037,7 +1062,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("grey", "red", "blue")
+                                   density_fill = c("grey", "red", "blue"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == TRUE) {
@@ -1060,7 +1086,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("grey", "blue")
+                                   density_fill = c("grey", "blue"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == FALSE) {
@@ -1079,7 +1106,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = "blue"
+                                   density_fill = "blue",
+                                   popup = FALSE
             )
           }
         } else if (input$plots_uncompensated_underlay == FALSE) {
@@ -1104,7 +1132,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("grey", "red")
+                                   density_fill = c("grey", "red"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == TRUE) {
@@ -1123,7 +1152,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = "grey"
+                                   density_fill = "grey",
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == TRUE &
                      input$plots_unstained_overlay == FALSE) {
@@ -1142,7 +1172,8 @@ cyto_spillover_edit.GatingSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = "red"
+                                   density_fill = "red",
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == FALSE) {
@@ -1184,7 +1215,7 @@ cyto_spillover_edit.GatingSet <- function(x,
 }
 
 #' @rdname cyto_spillover_edit
-#' @export
+#' @noRd
 cyto_spillover_edit.flowSet <- function(x,
                                         channel_match = NULL,
                                         spillover = NULL,
@@ -1501,13 +1532,19 @@ cyto_spillover_edit.flowSet <- function(x,
       observe({
         fr <- input$editor_sample
         # Update sample selection in Plots tab
-        updateSelectInput(session, "plots_sample", selected = fr)
+        updateSelectInput(session, 
+                          "plots_sample", 
+                          selected = fr)
         # Use channel_match to set xchannel
         xchan <- pd$channel[match(fr, pd$name)]
         # Only update x channel if not NA
         if (!.all_na(xchan)) {
-          updateSelectInput(session, "editor_xchannel", selected = xchan)
-          updateSelectInput(session, "plots_xchannel", selected = xchan)
+          updateSelectInput(session, 
+                            "editor_xchannel", 
+                            selected = xchan)
+          updateSelectInput(session, 
+                            "plots_xchannel", 
+                            selected = xchan)
         }
       })
       
@@ -1546,7 +1583,9 @@ cyto_spillover_edit.flowSet <- function(x,
       # Update channel selection on plots tab based on editor selection
       observe({
         xchan <- input$editor_xchannel
-        updateSelectInput(session, "plots_xchannel", selected = xchan)
+        updateSelectInput(session, 
+                          "plots_xchannel", 
+                          selected = xchan)
       })
       
       # Update sample & channel selection in editor based on Plots selection
@@ -1592,7 +1631,9 @@ cyto_spillover_edit.flowSet <- function(x,
                     point_size = point_size,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size, ...
+                    title_text_size = title_text_size,
+                    popup = FALSE,
+                    ...
           )
           
           # Median tracker
@@ -1621,7 +1662,8 @@ cyto_spillover_edit.flowSet <- function(x,
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size
+                    title_text_size = title_text_size,
+                    popup = FALSE
           )
           
           # Density distribution in other channel
@@ -1637,7 +1679,8 @@ cyto_spillover_edit.flowSet <- function(x,
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = title_text_size
+                    title_text_size = title_text_size,
+                    popup = FALSE
           )
           
           # Add MedFI label in other channel
@@ -1672,7 +1715,8 @@ cyto_spillover_edit.flowSet <- function(x,
                       point_size = point_size,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = title_text_size, ...
+                      title_text_size = title_text_size,
+                      popup = FALSE, ...
             )
             
             # Median line through unstained control
@@ -1716,7 +1760,8 @@ cyto_spillover_edit.flowSet <- function(x,
                       density_line_width = 2,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = 1.25 * title_text_size
+                      title_text_size = 1.25 * title_text_size,
+                      popup = FALSE
             )
             
             # Add label for Stained median
@@ -1749,7 +1794,9 @@ cyto_spillover_edit.flowSet <- function(x,
                       point_size = point_size,
                       axes_text_size = axes_text_size,
                       axes_label_text_size = axes_label_text_size,
-                      title_text_size = title_text_size, ...
+                      title_text_size = title_text_size,
+                      popup = FALSE,
+                      ...
             )
             
             # Median line through unstained control
@@ -1796,7 +1843,8 @@ cyto_spillover_edit.flowSet <- function(x,
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = 1.25 * title_text_size
+                    title_text_size = 1.25 * title_text_size,
+                    popup = FALSE
           )
           
           # Density distribution in other channel - unstained overlay
@@ -1815,7 +1863,8 @@ cyto_spillover_edit.flowSet <- function(x,
                     density_line_width = 2,
                     axes_text_size = axes_text_size,
                     axes_label_text_size = axes_label_text_size,
-                    title_text_size = 1.25 * title_text_size
+                    title_text_size = 1.25 * title_text_size,
+                    popup = FALSE
           )
           
           # Add label for unstained median
@@ -1868,7 +1917,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("blue", "red")
+                                   density_fill = c("blue", "red"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == TRUE &
                      input$plots_unstained_overlay == TRUE) {
@@ -1890,7 +1940,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("grey", "red", "blue")
+                                   density_fill = c("grey", "red", "blue"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == TRUE) {
@@ -1909,7 +1960,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("grey", "blue")
+                                   density_fill = c("grey", "blue"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == FALSE) {
@@ -1927,7 +1979,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = "blue"
+                                   density_fill = "blue",
+                                   popup = FALSE
             )
           }
         } else if (input$plots_uncompensated_underlay == FALSE) {
@@ -1948,7 +2001,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = c("grey", "red")
+                                   density_fill = c("grey", "red"),
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == TRUE) {
@@ -1966,7 +2020,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = "grey"
+                                   density_fill = "grey",
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == TRUE &
                      input$plots_unstained_overlay == FALSE) {
@@ -1984,7 +2039,8 @@ cyto_spillover_edit.flowSet <- function(x,
                                    axes_label_text_size = axes_label_text_size,
                                    title_text_size = title_text_size,
                                    header_text_size = header_text_size,
-                                   density_fill = "red"
+                                   density_fill = "red",
+                                   popup = FALSE
             )
           } else if (input$plots_compensated_overlay == FALSE &
                      input$plots_unstained_overlay == FALSE) {
@@ -2001,7 +2057,7 @@ cyto_spillover_edit.flowSet <- function(x,
         write_to_csv(spill.mat, spillover)
       })
       
-      # Return edited matrix on application cloase
+      # Return edited matrix on application close
       onStop(function() {
         spill.mat <- read_from_csv(spillover)
         stopApp(spill.mat)

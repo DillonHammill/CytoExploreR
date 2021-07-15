@@ -212,7 +212,8 @@ cyto_stats_compute <- function(x,
       "cv",
       "rcv",
       "quantile",
-      "range"
+      "range",
+      "bin"
     ), function(z) {
       grepl(paste0("^", z, "$"), stat_strip)
     }))) {

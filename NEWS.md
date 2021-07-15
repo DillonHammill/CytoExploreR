@@ -1,5 +1,37 @@
-# CytoExploreR 1.0.9
+# CytoExploreR 2.0.0
 
+* Add new family of `cyto_func_()` functions to more elegantly handle the calling of internal/external functions.
+* `cyto_spillover_edit()` now has up/down buttons next to channel selectors to make it easier to scroll through channels.
+* `cyto_select()` can now extract samples based on partial string matches for file names. For example, `cyto_select(gs, c("7AAD", "PE"))` will extract all samples with `7AAD` or `PE` in their file names. A new `cyto_match()` function has been added to return the indices of samples that match the selection criteria.
+* `cyto_gate_edit()` now appropriately handles the `negate` argument and allows addition/removal of negated gates.
+* `group_by` argument in `cyto_gate_draw()` and `cyto_gate_edit()` has been renamed to `merge_by` to maintain consistency with `cyto_plot()`.
+* Added new `cyto_gate_extract()` function to facilitate the extraction and formatting of gates extracted from GatingHierarchies, GatingSets or gatingTemplates.
+* `cyto_nodes()` family of functions have been updated to include support for extracting and manipulating nodes stored in gatingTemplates.
+* Added `cyto_nodes_ancestor()` to make it easy to get the most recent common ancestor for a collection of populations. 
+* `cyto_gate_bool()` now checks to see if the boolean gate is already defined within the gatingTemplate and asks the user if they would like to update the logic for this gate. As an alternative, boolean gates can be modified manually by directly editing the ntries in the gatingTemplate using `cyto_gatingTemplate_edit()`.
+* `cyto_gate_draw()` now uses a single method that has support for cytoset and GatingSet objects. The cytoset method simply returns the constructed gates in a list, whilst the GatingSet method adds the gates to the GatingSet, updates the gatingTemplate and returns the updated GatingSet.
+* `cyto_clean()` now supports flowAI, flowClean and flowCut.
+* Added new `cyto_require()` function to handle imports of external packages not included with CytoExploreR.
+* `cyto_plot()` now has a new colourblind friendly palette for 2D scatter plots.
+* `cyto_gatingTemplate_create()` now performs a directory check to ensure that the specified gatingTemplate does not already exist.
+* Add `active` argument to `cyto_gatingTemplate_create()` to allow users to automatically set a newly created gatingTemplate as the active gatingTemplate.
+* `cyto_gatingTemplate_select()` is now defunct in favour of `cyto_gatingTemplate_active()` which can now either set or retrieve the current active gatingTemplate.
+* Handling of negated gates within `cyto_gate_draw()` has been significantly improved.
+* Substantial speed improvements have been made to `cyto_gate_draw()` as a result of simplified internals and the use of the same data preparation method used within `cyto_plot()`.
+* The `group_by` argument in `cyto_gate_draw()` has been renamed to `merge_by` to match `cyto_plot()`. 
+* Added new `label_text_col_alpha` argument to `cyto_plot()` to allow control over transparency of label text.
+* Added new `cyto_gate_apply()` function to handle all gating operations within `CytoExploreR`. This handy function applies gates to cytoframes or cytosets and returns a list of gated populations.
+* cytoframe method for `cyto_save()` has been removed, users should use cytosets instead.
+* `cyto_split()` now returns a cytoset and also accepts cytosets containing merged cytoframes.
+* `popup` is now set to `TRUE` by default in `cyto_plot()` and support has been added for modifying the size of the pop-up graphics device through the `popup_size` argument. This argument has also been added to `cyto_plot_theme()` so that the default size of the graphics device can be modified globally.
+* The entire family of `cyto_transformer()` functions have been completely re-written. The old transformer function have now been merged into a single function called `cyto_transformers_define()`. This function replaces the old `cyto_transformer_log()`, `cyto_transformer_arcsinh()`, `cyto_transformer_biex()` and `cyto_transformer_logicle()` functions which are now defunct. The old `cyto_transformer_combine()` and `cyto_transformer_extract()` functions have also been renamed to instead use the more consistent `cyto_transformers` prefix.
+* `cyto_gate_remove()` now handles removal of populations defined by quadrant gates.
+* All density arguments within `cyto_plot()` have been renamed to instead carry a `hist` prefix. A new `hist_stat` argument has been added to control the statistic to display on the plot, options include `count`, `density` or `percent`. Data outside plot limits is now excluded from the kernel density computation to improve visualisation of the data.
+* Significant improvements have been made to the handling of 2D density colours within `cyto_plot()`. The resolution has been improved by increasing the number of bins used to construct the grid when computing the binned 2D density kernel (new default is set to 200 bins). The grid is also now increased proportionately if there is data outside the plot limits, thus prevent stretching of bin colours within the plot (preventing a box-like appearance).
+* `cyto_plot_contour()` has been re-written to accept any cytometry data type and to restrict 2D density computation to be within plot limits. 
+* `cyto_plot()` gains significant speed improvements due to changes in the way that data is sampled and merged internally. A new function `cyto_sample_n()` is now used compute sample sizes for cytoframes prior to merging.
+* Fix labelling of transformed axes for values less than zero.
+* `cyto_sample()` has been updated to add support for individually sampling cytoframes within a cytoset.
 * `cyto_merge_by` has gained a new `format` argument to control how grouped data is returned. 
 * `cyto_load()` now barcodes each event with an ID so that `cyto_plot()` can plot the exact same events when using `overlay`. This behavior is different to `flowWorkspace::load_cytoset_from_fcs()` which means that users will need to use the CytoExploreR `cyto_load()` or `cyto_setup()` APIs instead.
 * `cyto_barcode()` has been re-written to allow replacement of existing barcodes.
@@ -9,14 +41,14 @@
 * Rename all `density` arguments to instead use `hist` as a prefix.
 * Add legend fro point colour scale to `cyto_plot()`.
 * Add support for adding grid lines to `cyto_plot()` through `grid` argument and customisation through `grid_line_width`, `grid_line_col` and `grid_line_alpha` arguments.
-* Add new `cyto_plot_par()` function to handle graphical parameters within `cyto_plot()`. Refine behaviour of all `cyto_plot()` helper functions to ensure graphics devices are opened when expected.
+* Add new `cyto_plot_par()` function to handle graphical parameters within `cyto_plot()`. Refine behaviour of all `cyto_plot()` helper functions to ensure graphics devices are opened when expected. `cyto_plot_layout()` is now defunct, `layout` can now be directly passed to `cyto_plot_new()` or `cyto_plot_complete()`.
 * Support for scattermore is now integrated in `cyto_plot_point()` through the `point_fast` argument, which is set to FALSE by default.
 * Add new `cyto_gate_copy()` function to support copying of gates from one node to another.
-* Add support for partial matches in `cyto_channels_extract()` and `cyto_markers_extract()`.
+* Add support for partial matches in `cyto_channels_extract()` and `cyto_markers_extract()`. This means that partial matching of channels/markers is now supported by `cyto_plot()` as well.
 * Add support for extracting channels from a list of cytometry objects in `cyto_channels()` and `cyto_markers()`. Add new replacement method for `cyto_channels()`.
 * Remove old data editor in favour of `DataEditR::data_edit()`.
 * Add new `cyto_cbind()` function to handle addition of new parameters to cytometry objects (retaining support for flowFrames/flowSets).
-* `cyto_apply()` has been re-written to accept different data inputs (e.g. matrix, cytoframe, cytoset, column or row) and the output is more intuitively formatted.
+* `cyto_apply()` has been re-written to accept different data inputs (e.g. matrix, cytoframe, cytoset, column or row) and the output is more intuitively formatted. A new `slot` argument has been added to allow extraction of data from a specific slot of a function output.
 * `cyto_calibrate()` now uses quantile calibration by default and the upper quantile limits has been reduced from 0.99 to 0.95.
 * Barcoding of GatingSets is now supported by `cyto_barcode()`.
 * `cyto_beads_sample()` is now defunct in favour of the more flexible `cyto_sample_to_node()` function.
@@ -29,6 +61,14 @@
 * `cyto_details()` called on a cytoframe now returns a data.frame to match the behaviour of cytosets, GatingHierarchies and GatingSets.
 * Add new `cyto_class()` to get or check the class of cytometry objects.
 * Remove directories from file paths in `cyto_load()`. Re-factor code to ensure loading of saved GatingSets.
+
+# CytoExploreR 1.1.0
+
+* Fix `cyto_gate_bool()` to anchor new nodes to most recent ancestor in the GatingSet.
+* Fix labelling of transformed axes within `cyto_plot()`.
+* Fix statistics computation in `cyto_plot()` when gates and overlays are present.
+* Fix `cyto_plot_gating_scheme()` to allow the use of custom colour scale when `back_gate = TRUE`.
+* Make sure `cyto_load()` is able to read in saved GatingSets.
 
 # CytoExploreR 1.0.8
 

@@ -81,7 +81,8 @@ cyto_array_analyse.GatingSet <- function(x,
                                         "-", 
                                         "Bead-Array-Details.csv"),
                        logo = CytoExploreR_logo(),
-                       write_fun = "write_to_csv"
+                       write_fun = "write_to_csv",
+                       viewer = "pane"
     )
   } else {
     if (is(array, "character")) {

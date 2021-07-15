@@ -81,7 +81,7 @@
 #'   select = list("OVAConc" = 500)
 #' )
 #'
-#' @export
+#' @noRd
 cyto_plot_profile <- function(x,
                               parent = "root",
                               channels = NULL,
