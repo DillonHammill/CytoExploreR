@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -98,13 +98,14 @@
 
       
 
-      </header><script src="CytoExploreR-Compensation_files/header-attrs-2.2/header-attrs.js"></script><div class="row">
+      </header><script src="CytoExploreR-Compensation_files/header-attrs-2.5/header-attrs.js"></script><link href="CytoExploreR-Compensation_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
+<script src="CytoExploreR-Compensation_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Compensation of Fluorescent Spillover</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2020-06-19</h4>
+            <h4 class="date">2021-05-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoExploreR/blob/master/vignettes/CytoExploreR-Compensation.Rmd"><code>vignettes/CytoExploreR-Compensation.Rmd</code></a></small>
       <div class="hidden name"><code>CytoExploreR-Compensation.Rmd</code></div>
@@ -120,13 +121,13 @@
 In conventional flow cytometry, cells are labelled with fluorophore-conjugated antibodies and interrogated with a series of lasers which emit light of specific wavelengths. These fluorophores are excited by these lasers to emit photons of multiple energies and wavelengths, which are sorted by a series of optical filters to direct photons of the same wavelength to a specific detector. As a result, photons emitted from the excited fluorophores will be mostly collected by a single detctor (primary detector) but will also be collected by other detectors (secondary detectors). For example, photons emitted by a sample stained with only a FITC-conjugated antibody (FITC single colour control) will mostly be collected by the Alexa Fluor 488 primary detector, but there will also be collection by the PE secondary detector. When we compare the signal of our FITC single colour control relative to our unstained control (black) in these channels, it becomes clear that a proportion of the FITC signal is being collected by the PE detector. Clearly, this fluorescent spillover is not desirable, if we stained cells with both FITC and PE-conjugated antibodies it would be difficult to determine which events were truely labelled with our PE-conjugated antibodies.
 </div>
 <p><br></p>
-<p><img src="Compensation/Compensation-1.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-1.png" width="100%" style="display: block; margin: auto;"></p>
 <p><br></p>
 <div style="line-height: 1.8em;">
 Fortunately, it is relatively simple to compensate for fluorescent spillover into secondary detectors post data acquisition, using an unstained autofluorescence control and separate controls each labelled with a single fluorophore (single colour controls). Each single colour control is used to determine the proportion of the signal in the primary detector that is being collected by secondary detectors. This percentage spillover into secondary detectors is used to reduce the signal in the secondary detectors to ensure that each fluorophore is only detected by its primary detector. This can be a cumbersome process when performed manually, as this process must be repeated for each fluorophore and every detector. The end result of compensation is that any signal in PE detector is reduced such that the FITC signal is restricted to the Alexa Fluor 488 detector as shown below:
 </div>
 <p><br></p>
-<p><img src="Compensation/Compensation-2.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-2.png" width="100%" style="display: block; margin: auto;"></p>
 <p><br></p>
 <div style="line-height: 1.8em;">
 <p>In this vignette, we will explore the collection of compensation tools in <strong>CytoExploreR</strong> and demonstrate their appropriate use to accurately compensate for fluorescent spillover. The following functions will be explored in detail in this vignette:</p>
@@ -152,42 +153,47 @@ Fortunately, it is relatively simple to compensate for fluorescent spillover int
 <div style="line-height: 1.8em;">
 To demonstrate appropriate usage of these compensation tools, users will need to download the set of compensation controls shipped with <strong>CytoExploreRData</strong>. If you have not already done so, you can easily download these FCS files to a folder in your current working directory as outlined below:
 </div>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="co"># Load required packages</span>
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreRData</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreR</span>)
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Load required packages</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">CytoExploreRData</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DillonHammill/CytoExploreR">CytoExploreR</a></span><span class="op">)</span>
 
 <span class="co"># Compensation dataset</span>
-<span class="no">Compensation</span>
+<span class="va">Compensation</span>
 
 <span class="co"># Save Compensation dataset FCS files to Compensation-Samples folder</span>
-<span class="fu"><a href="../reference/cyto_save.html">cyto_save</a></span>(<span class="no">Compensation</span>, <span class="kw">save_as</span> <span class="kw">=</span> <span class="st">"Compensation-Samples"</span>)</pre></body></html></div>
+<span class="fu"><a href="../reference/cyto_save.html">cyto_save</a></span><span class="op">(</span><span class="va">Compensation</span>, save_as <span class="op">=</span> <span class="st">"Compensation-Samples"</span><span class="op">)</span></code></pre></div>
 <div style="line-height: 1.8em;">
 Now that we have the FCS files saved locally, let’s load in the compensation controls and setup a new gatingTemplate using <code>cyto_setup</code>. Users should enter in the marker assignments in the table editor, this ensures that the antibody panel used for the experiment is saved to a csv file for future reference. This Experiment-Markers.csv file will be automatically applied when loading in the fully stained samples. Later on in this vignette, <strong>CytoExploreR</strong> will ask us to assign a fluorescent channel to each single colour control to determine the degree of spillover into secondary detectors. Users may wish to enter these channels manually in the experiment details table editor by adding a “channel” column and typing in a channel name for each compensation control (entries for unstained controls should be left empty). Typing out names of fluorescent channels manually can lead to typing errors, so for the purpose of this vignette I will show you how you can select these channels from a drop down menu instead.
 </div>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="co"># Compensation GatingSet</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span>(<span class="st">"Compensation-Samples"</span>,
-                 <span class="kw">gatingTemplate</span> <span class="kw">=</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</pre></body></html></div>
-<p><img src="Compensation/Compensation-3.png" width="40%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Compensation GatingSet</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span><span class="op">(</span><span class="st">"Compensation-Samples"</span>,
+                 gatingTemplate <span class="op">=</span> <span class="st">"Compensation-gatingTemplate.csv"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-3.png" width="40%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 It is recommended that the compensation controls be appropriately transformed before proceeding. <strong>CytoExploreR</strong> will detect if the data has not been transformed and automatically apply the biexponential transformation to each of the fluorescent channels. The default parameters for these transformations may not be perfect for all channels, so it recommended that these transformations be optimised manually by the user. For more information on data transformation types and implementation, refer to the Transformations vignette where this is explained in detail. For now, let’s use the more robust logicle transformation and apply it to all the fluorescent channels using <code>cyto_transform</code>. All fluorescent channels be transformed by default unless specific channels or markers are passed through the channels argument.
 </div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co"># Apply logicle transformation to fluorescent channels</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span>(<span class="no">gs</span>,
-                     <span class="kw">type</span> <span class="kw">=</span> <span class="st">"logicle"</span>)</pre></body></html></div>
-<p><img src="Compensation/Compensation-4.png" width="75%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Apply logicle transformation to fluorescent channels</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span><span class="op">(</span><span class="va">gs</span>,
+                     type <span class="op">=</span> <span class="st">"logicle"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-4.png" width="75%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
-Next, we should gate the compensation controls to remove debris and doublets to yield the most accurate spillover values. Let’s manually gate down to single cells using <code>cyto_gate_draw</code>. Back gating can prove extrmemely useful in cleaning up the data. For example, we could gate the dead cells using our Hoechst control and overly this population on our initial FSC/SSC gate to adjust the gate to avoid dead cells. For brevity this approach will not be demonstrated here, but I will document this process in an issue for those who are interested.
+Next, we should gate the compensation controls to remove debris and doublets to yield the most accurate spillover values. Let’s manually gate down to single cells using <code>cyto_gate_draw</code>. Back gating can prove extremely useful in cleaning up the data. For example, we could gate the dead cells using our Hoechst control and overly this population on our initial FSC/SSC gate to adjust the gate to avoid dead cells. For brevity this approach will not be demonstrated here, but I will document this process in an issue for those who are interested.
 </div>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">gs</span>,
-               <span class="kw">parent</span> <span class="kw">=</span> <span class="st">"root"</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"FSC-A"</span>, <span class="st">"SSC-A"</span>))</pre></body></html></div>
-<p><img src="Compensation/Compensation-5.png" width="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">gs</span>,
-               <span class="kw">parent</span> <span class="kw">=</span> <span class="st">"Cells"</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"Single Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"FSC-A"</span>, <span class="st">"SSC-A"</span>))</pre></body></html></div>
-<p><img src="Compensation/Compensation-6.png" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">gs</span>,
+               parent <span class="op">=</span> <span class="st">"root"</span>,
+               alias <span class="op">=</span> <span class="st">"Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>, <span class="st">"SSC-A"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-5.png" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">gs</span>,
+               parent <span class="op">=</span> <span class="st">"Cells"</span>,
+               alias <span class="op">=</span> <span class="st">"Single Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>, <span class="st">"SSC-A"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-6.png" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="automated-computation-of-spillover-matrix" class="section level2">
 <h2 class="hasAnchor">
@@ -195,30 +201,32 @@ Next, we should gate the compensation controls to remove debris and doublets to 
 <div style="line-height: 1.8em;">
 Now that our compensation controls have been transformed and pre-gated, we can move on to automatically computing the spillover matrix using <code>cyto_spillover_compute</code>. All we need to do is supply the prepared compensation controls, indicate which population we want to use for the calculation and supply a name of csv file to which the computed matrix will be saved. The computed spillover matrix will also be returned as an R object, so let’s assign this to <code>spill</code> so that we can use it later on.
 </div>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># Automated compensation</span>
-<span class="no">spill</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_spillover_compute.html">cyto_spillover_compute</a></span>(<span class="no">gs</span>,
-                                <span class="kw">parent</span> <span class="kw">=</span> <span class="st">"Single Cells"</span>,
-                                <span class="kw">spillover</span> <span class="kw">=</span> <span class="st">"Spillover-Matrix.csv"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Automated compensation</span>
+<span class="va">spill</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_spillover_compute.html">cyto_spillover_compute</a></span><span class="op">(</span><span class="va">gs</span>,
+                                parent <span class="op">=</span> <span class="st">"Single Cells"</span>,
+                                spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span><span class="op">)</span></code></pre></div>
 <div style="line-height: 1.8em;">
 <p><code>cyto_spillover_compute</code> will guide the user through the following steps to automatically compute the spillover matrix:</p>
 <ul>
 <li>
 <strong>Selection of a fluorescent channel for each compensation control from a drop menu.</strong> Channel selection can also be bypassed by manually adding a “channel” column using <code>cyto_details_edit</code> as outlined above, or by supplying a <code>channel_match</code> csv file containing a “name” and “channel” column. Channel match files can be manually created using <code>cyto_channel_match</code> if desired.</li>
 </ul>
-<p><img src="Compensation/Compensation-7.png" width="75%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-7.png" width="75%" style="display: block; margin: auto;"></p>
 <ul>
 <li>
 <strong>Gating of the positive (and negative) signal for each compensation control in the assigned channel.</strong> In order to properly compute the spillover values, <strong>CytoExploreR</strong> requires an appropriate unstained reference population. This reference population can take the form of a universal unstained control (as demonstrated below) or unstained events within each compensation control. When using a universal unstained control, the unstained control will be overlaid onto the plot and users be asked to gate the positive signal for each of the compensation controls. Otherwise, users will be asked to gate the negative and then the positive signal for each compensation control. The accuracy of the spillover calculation is heavily dependant on where these gates are positioned, with practice it will become clear that it is best to retain the final peak and tail in the positive gates.</li>
 </ul>
-<p><img src="Compensation/Compensation-8.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-8.png" width="60%" style="display: block; margin: auto;"></p>
 <ul><li>
 <strong>Computation and saving of the spillover matrix.</strong> It is that simple! <code>cyto_spillover_compute</code> will take of the computations internally, return the computed spillover matrix and save the matrix to a named csv file for downstream use.
 </li></ul>
 </div>
 
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># Computed spillover matrix</span>
-<span class="no">spill</span></pre></body></html></div>
-<p><img src="Compensation/Compensation-9.png" width="100%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Computed spillover matrix</span>
+<span class="va">spill</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-9.png" width="100%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 To aid in the calculation of accurate spillover values, <code>cyto_spillover_compute</code> also supports the use of different populations for each compensation control to ensure proper autofluorescence correction. For example, we compensating for a marker such as CD11b it would be desirable to isolate just the myeloid cells and use this population for the spillover computation. This can be important, as myeloid cells may have a distinct autofluorescence profile compared to other cell types in the sample, which will influence the computed spillover value. For this reason, try to make sure that the composition of the populations in negative and positive populations are the same. To use a different parent population for each compensation control, users can manually supply a vector of population names to the <code>parent</code> argument, or manually enter this information into a <code>parent</code> column of <code>cyto_details</code> using <code>cyto_details_edit</code>.
 </div>
@@ -229,22 +237,23 @@ To aid in the calculation of accurate spillover values, <code>cyto_spillover_com
 <div style="line-height: 1.8em;">
 As described above, automatically computing the spillover matrix is heavily dependant on how the populations are gated prior to computing the spillover matrix. As a result, <code>cyto_spillover_compute</code> may not always get the degree of compensation exactly correct and manual adjustment will be required. Luckily, <strong>CytoExploreR</strong> has a fantastic interactive spillover matrix editor that allows editing of spillover values in realtime. To start up the spillover matrix editor we can simply change <code>compute</code> from the <code>cyto_spillover_compute</code> call to <code>edit</code>.
 </div>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="co"># Open CytoExploreR spillover matrix editor</span>
-<span class="no">spill</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_spillover_edit.html">cyto_spillover_edit</a></span>(<span class="no">gs</span>,
-                             <span class="kw">parent</span> <span class="kw">=</span> <span class="st">"Single Cells"</span>,
-                             <span class="kw">spillover</span> <span class="kw">=</span> <span class="st">"Spillover-Matrix.csv"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Open CytoExploreR spillover matrix editor</span>
+<span class="va">spill</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_spillover_edit.html">cyto_spillover_edit</a></span><span class="op">(</span><span class="va">gs</span>,
+                             parent <span class="op">=</span> <span class="st">"Single Cells"</span>,
+                             spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span><span class="op">)</span></code></pre></div>
 <div style="line-height: 1.8em;">
 In the <strong>Editor</strong> tab, users will encounter series of dropdown menus to select controls and channels, an interactive spillover matrix and some plots to track changes to the data in realtime as the spillover values are edited. In this case, we want to edit the computed spillover matrix saved to “Spillover-Matrix.csv” but it is also possible to edit the spillover matrix attached to each control by removing the <code>spillover</code> argument. In the 2D scatter plot, we can see a horizontal red line through the median of the unstained control as well as a purple line which tracks the median through the stained control. By definition, the correct spillover value is reached once these two lines cross in the positive population and the medFI of stained population matches that of the unstained population in secondary detectors. As you can see below it looks like we need to remove some more of the FITC signal from the PE detector.
 </div>
-<p><img src="Compensation/Compensation-10.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-10.png" width="100%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 Changing the spillover values is as easy as selecting and replacing the value that you would like to edit. The plots below the matrix will automatically update whenever changes are made to the matrix. The spillover values can then be fine tuned such that the medFI of the stained and unstained populations are the same. Compare the figure below to previous one to see how changing the spillover value of Alexa Fluor 488 into PE to 18.16 alters the plots and medFIs. Changing spillover values manually will affect other secondary detectors, so this must be repeated for all secondary detectors by changing the selected channel in the y axis dropdown menu. Remember, <code>cyto_spillover_edit</code> accepts all <code>cyto_plot</code> arguments so it is possible to make the points bigger or add contour lines to aid in setting accurate spillover values.
 </div>
-<p><img src="Compensation/Compensation-11.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-11.png" width="100%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 Identifying compensation issues in large dataset can be an extremely tedious process, this where the the <strong>Plots</strong> tab can help. If you switch over to the plots tab, users can select a compensation control and display the signal in the primary detector against all secondary detectors. To highlight any compensation issues, the compensated and unstained data are overlaid onto the uncompensated data. Very quickly we can identify any lingering issues and return to the editor tab to make appropriate adjustments. Finally, the changes made to the spillover matrix can be saved by selecting the <code>save</code> button on the <code>editor</code> tab. The updated spillover matrix will be returned as an R object and updated in the csv file.
 </div>
-<p><img src="Compensation/Compensation-12.png" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-12.png" width="100%" style="display: block; margin: auto;"></p>
 </div>
 <div id="visualise-compensation" class="section level2">
 <h2 class="hasAnchor">
@@ -252,14 +261,16 @@ Identifying compensation issues in large dataset can be an extremely tedious pro
 <div style="line-height: 1.8em;">
 It is also possible to generate the plots in the plots tab externally of the spillover matrix editor using <code>cyto_plot_compensation</code>. This is a special plotting function that can perform inline compensation, so that you don’t have to worry about inversing transformations, applyig the compensation and re-transforming the data to check whether the compensation is correct. Simply set <code>compensate</code> to TRUE and <code>cyto_plot_compensation</code> will plot the compensated data for each compensation control in all fluorescent channels. As before, if no spillover matrix is supplied to the <code>spillover</code> argument, the matrix attached to each of the compensation controls will be applied. Of course this function inherits from <code>cyto_plot_theme</code> and accepts all <code>cyto_plot</code> arguments so that you can customise it to your heart’s content.
 </div>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="../reference/cyto_plot_compensation.html">cyto_plot_compensation</a></span>(<span class="no">gs</span>,
-                       <span class="kw">parent</span> <span class="kw">=</span> <span class="st">"Single Cells"</span>)</pre></body></html></div>
-<p><img src="Compensation/Compensation-13.png" width="100%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="../reference/cyto_plot_compensation.html">cyto_plot_compensation</a></span>(<span class="no">gs</span>,
-                       <span class="kw">parent</span> <span class="kw">=</span> <span class="st">"Single Cells"</span>,
-                       <span class="kw">spillover</span> <span class="kw">=</span> <span class="st">"Spillover-Matrix.csv"</span>,
-                       <span class="kw">compensate</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
-<p><img src="Compensation/Compensation-14.png" width="100%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/cyto_plot_compensation.html">cyto_plot_compensation</a></span><span class="op">(</span><span class="va">gs</span>,
+                       parent <span class="op">=</span> <span class="st">"Single Cells"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-13.png" width="100%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/cyto_plot_compensation.html">cyto_plot_compensation</a></span><span class="op">(</span><span class="va">gs</span>,
+                       parent <span class="op">=</span> <span class="st">"Single Cells"</span>,
+                       spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span>,
+                       compensate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Compensation/Compensation-14.png" width="100%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 As you can see from the above plots, <strong>CytoExploreR</strong> does a pretty great job at appropriately compensating the data. Now that we have our fine tuned spillover matrix, we are done with our compensation controls and all we need to do is apply the saved spillover matrix to our samples.
 </div>
@@ -270,21 +281,22 @@ As you can see from the above plots, <strong>CytoExploreR</strong> does a pretty
 <div style="line-height: 1.8em;">
 For completeness, I will demonstrate how we can apply the saved spillover matrix to our gated and transformed compensation controls. It is important to remember that compenstion of fluorescent spillover must occur prior to data transformations. Since our compensation controls have been transformed, we will need to load in the samples again, compensate the samples with the saved spillover matrix, re-apply the data transformations and finally re-apply any gates. These are the same steps that will be used to load, compensate, transform and gate our samples during downstream analyses.
 </div>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="co"># Compensation GatingSet</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span>(<span class="st">"Compensation-Samples"</span>,
-                 <span class="kw">gatingTemplate</span> <span class="kw">=</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Compensation GatingSet</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span><span class="op">(</span><span class="st">"Compensation-Samples"</span>,
+                 gatingTemplate <span class="op">=</span> <span class="st">"Compensation-gatingTemplate.csv"</span><span class="op">)</span>
 
 <span class="co"># Apply compensation</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span>(<span class="no">gs</span>,
-                      <span class="kw">spillover</span> <span class="kw">=</span> <span class="st">"Spillover-Matrix.csv"</span>)
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span><span class="op">(</span><span class="va">gs</span>,
+                      spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span><span class="op">)</span>
 
 <span class="co"># Data transformations</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span>(<span class="no">gs</span>,
-                     <span class="kw">type</span> <span class="kw">=</span> <span class="st">"logicle"</span>)
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span><span class="op">(</span><span class="va">gs</span>,
+                     type <span class="op">=</span> <span class="st">"logicle"</span><span class="op">)</span>
 
 <span class="co"># Apply gates</span>
-<span class="fu"><a href="../reference/cyto_gatingTemplate_apply.html">cyto_gatingTemplate_apply</a></span>(<span class="no">gs</span>,
-                          <span class="kw">gatingTemplate</span> <span class="kw">=</span> <span class="st">"Compensation-gatingTemplate.csv"</span>)</pre></body></html></div>
+<span class="fu"><a href="../reference/cyto_gatingTemplate_apply.html">cyto_gatingTemplate_apply</a></span><span class="op">(</span><span class="va">gs</span>,
+                          gatingTemplate <span class="op">=</span> <span class="st">"Compensation-gatingTemplate.csv"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="summary" class="section level2">
 <h2 class="hasAnchor">
@@ -316,7 +328,7 @@ For completeness, I will demonstrate how we can apply the saved spillover matrix
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

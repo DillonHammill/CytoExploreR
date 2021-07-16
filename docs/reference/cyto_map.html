@@ -50,8 +50,8 @@
 <meta property="og:description" content="cyto_map is a convenient wrapper to produce dimension-reduced maps of
 cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
 dimensionality reduction functions are called using the default settings, but
-can be altered by passing relvant arguments through cyto_map. To see a
-full list of customisable parameters refer to the documentation for each of
+can be altered by passing relevant arguments through cyto_map. To see
+a full list of customisable parameters refer to the documentation for each of
 these functions by clicking on the links below." />
 <meta property="og:image" content="/logo.png" />
 
@@ -85,7 +85,7 @@ these functions by clicking on the links below." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -120,7 +120,7 @@ these functions by clicking on the links below." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -157,72 +157,73 @@ these functions by clicking on the links below." />
     <p><code>cyto_map</code> is a convenient wrapper to produce dimension-reduced maps of
 cytometry data using PCA, tSNE, FIt-SNE, UMAP and EmbedSOM. These
 dimensionality reduction functions are called using the default settings, but
-can be altered by passing relvant arguments through <code>cyto_map</code>. To see a
-full list of customisable parameters refer to the documentation for each of
+can be altered by passing relevant arguments through <code>cyto_map</code>. To see
+a full list of customisable parameters refer to the documentation for each of
 these functions by clicking on the links below.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_map</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+    <pre class="usage"><span class='fu'>cyto_map</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_map</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
-  <span class='kw'>merge_by</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
-  <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_map</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  parent <span class='op'>=</span> <span class='st'>"root"</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  display <span class='op'>=</span> <span class='fl'>1</span>,
+  type <span class='op'>=</span> <span class='st'>"UMAP"</span>,
+  merge_by <span class='op'>=</span> <span class='st'>"all"</span>,
+  split <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  names <span class='op'>=</span> <span class='cn'>NULL</span>,
+  save_as <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inverse <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  seed <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_map</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
-  <span class='kw'>merge_by</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
-  <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_map</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  display <span class='op'>=</span> <span class='fl'>1</span>,
+  type <span class='op'>=</span> <span class='st'>"UMAP"</span>,
+  merge_by <span class='op'>=</span> <span class='st'>"all"</span>,
+  split <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  names <span class='op'>=</span> <span class='cn'>NULL</span>,
+  save_as <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inverse <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  seed <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_map</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"UMAP"</span>,
-  <span class='kw'>split</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>inverse</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>...</span>
-)</pre>
+<span class='fu'>cyto_map</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  display <span class='op'>=</span> <span class='fl'>1</span>,
+  type <span class='op'>=</span> <span class='st'>"UMAP"</span>,
+  split <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  names <span class='op'>=</span> <span class='cn'>NULL</span>,
+  save_as <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inverse <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  trans <span class='op'>=</span> <span class='cn'>NULL</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  seed <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code>flowFrame</code> or <code>flowSet</code>.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -233,8 +234,9 @@ below.</p></td>
     <tr>
       <th>parent</th>
       <td><p>name of the parent population to extract from
-<code>GatingHierarchy</code> or <code>GatingSet</code> objects for mapping, set to the
-<code>"root"</code> node by default.</p></td>
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code> objects for mapping,
+set to the <code>"root"</code> node by default.</p></td>
     </tr>
     <tr>
       <th>select</th>
@@ -313,7 +315,7 @@ results between runs.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>flowFrame, flowSet, GatingHierarchy or GatingSet containing the
+    <p>cytoframe, cytoset, GatingHierarchy or GatingSet containing the
   mapped projection parameters.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -355,6 +357,9 @@ references section of this document.</p>
 <p><code><a href='https://rdrr.io/pkg/umap/man/umap.html'>UMAP</a></code></p>
 <p><code><a href='https://rdrr.io/pkg/EmbedSOM/man/SOM.html'>SOM</a></code></p>
 <p><code><a href='https://rdrr.io/pkg/EmbedSOM/man/EmbedSOM.html'>EmbedSOM</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -371,7 +376,7 @@ references section of this document.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

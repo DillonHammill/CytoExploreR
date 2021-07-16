@@ -84,7 +84,7 @@ without having to manually enter a lot of these details." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -119,7 +119,7 @@ without having to manually enter a lot of these details." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -160,14 +160,15 @@ starting point for editing these values using <code>cyto_details_edit</code>
 without having to manually enter a lot of these details.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_names_parse</span>(<span class='no'>x</span>, <span class='kw'>vars</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>split</span> <span class='kw'>=</span> <span class='st'>"_"</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_names_parse</span><span class='op'>(</span><span class='va'>x</span>, vars <span class='op'>=</span> <span class='cn'>NULL</span>, split <span class='op'>=</span> <span class='st'>"_"</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class flowSet or GatingSet.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
       <th>vars</th>
@@ -181,8 +182,8 @@ default.</p></td>
     </tr>
     <tr>
       <th>exclude</th>
-      <td><p>vector of indices indicating which text fragments should not be
-included in the experiment details, set to NULL by default.</p></td>
+      <td><p>vector of indices indicating which text fragments should not
+be included in the experiment details, set to NULL by default.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -193,52 +194,66 @@ included in the experiment details, set to NULL by default.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>flowSet or GatingSet with <code>cyto_details</code> updated with new
+    <p>cytoset or GatingSet with <code>cyto_details</code> updated with new
   variables extracted from the file names.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
+<span class='co'># Activation GatingSet</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_load.html'>cyto_load</a></span><span class='op'>(</span>
+ <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span>
+   <span class='st'>"extdata/Activation-GatingSet"</span>,
+   package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span>
+   <span class='op'>)</span>
+ <span class='op'>)</span>
+                          
 <span class='co'># Parse file names to variables</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_names_parse</span>(<span class='no'>Activation</span>,
-<span class='kw'>vars</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"sample_type"</span>, <span class='st'>"sample_id"</span>),
-<span class='kw'>split</span> <span class='kw'>=</span> <span class='st'>"_"</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_names_parse</span><span class='op'>(</span>
+  <span class='va'>gs</span>,
+  vars <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"sample_type"</span>, <span class='st'>"sample_id"</span><span class='op'>)</span>,
+  split <span class='op'>=</span> <span class='st'>"_"</span>
+  <span class='op'>)</span>
 
 <span class='co'># Updated experiment details</span>
-<span class='fu'><a href='cyto_details.html'>cyto_details</a></span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt;                                name OVAConc Treatment sample_type sample_id
-#&gt; Activation_1.fcs   Activation_1.fcs       0    Stim-A  Activation         1
-#&gt; Activation_2.fcs   Activation_2.fcs       0    Stim-A  Activation         2
-#&gt; Activation_3.fcs   Activation_3.fcs       5    Stim-A  Activation         3
-#&gt; Activation_4.fcs   Activation_4.fcs       5    Stim-A  Activation         4
-#&gt; Activation_5.fcs   Activation_5.fcs      50    Stim-A  Activation         5
-#&gt; Activation_6.fcs   Activation_6.fcs      50    Stim-A  Activation         6
-#&gt; Activation_7.fcs   Activation_7.fcs     500    Stim-A  Activation         7
-#&gt; Activation_8.fcs   Activation_8.fcs     500    Stim-A  Activation         8
-#&gt; Activation_9.fcs   Activation_9.fcs       0    Stim-B  Activation         9
-#&gt; Activation_10.fcs Activation_10.fcs       0    Stim-B  Activation        10
-#&gt; Activation_11.fcs Activation_11.fcs       5    Stim-B  Activation        11
-#&gt; Activation_12.fcs Activation_12.fcs       5    Stim-B  Activation        12
-#&gt; Activation_13.fcs Activation_13.fcs      50    Stim-B  Activation        13
-#&gt; Activation_14.fcs Activation_14.fcs      50    Stim-B  Activation        14
-#&gt; Activation_15.fcs Activation_15.fcs     500    Stim-B  Activation        15
-#&gt; Activation_16.fcs Activation_16.fcs     500    Stim-B  Activation        16
-#&gt; Activation_17.fcs Activation_17.fcs       0    Stim-C  Activation        17
-#&gt; Activation_18.fcs Activation_18.fcs       0    Stim-C  Activation        18
-#&gt; Activation_19.fcs Activation_19.fcs       5    Stim-C  Activation        19
-#&gt; Activation_20.fcs Activation_20.fcs       5    Stim-C  Activation        20
-#&gt; Activation_21.fcs Activation_21.fcs      50    Stim-C  Activation        21
-#&gt; Activation_22.fcs Activation_22.fcs      50    Stim-C  Activation        22
-#&gt; Activation_23.fcs Activation_23.fcs     500    Stim-C  Activation        23
-#&gt; Activation_24.fcs Activation_24.fcs     500    Stim-C  Activation        24
-#&gt; Activation_25.fcs Activation_25.fcs       0    Stim-D  Activation        25
-#&gt; Activation_26.fcs Activation_26.fcs       0    Stim-D  Activation        26
-#&gt; Activation_27.fcs Activation_27.fcs       5    Stim-D  Activation        27
-#&gt; Activation_28.fcs Activation_28.fcs       5    Stim-D  Activation        28
-#&gt; Activation_29.fcs Activation_29.fcs      50    Stim-D  Activation        29
-#&gt; Activation_30.fcs Activation_30.fcs      50    Stim-D  Activation        30
-#&gt; Activation_31.fcs Activation_31.fcs     500    Stim-D  Activation        31
-#&gt; Activation_32.fcs Activation_32.fcs     500    Stim-D  Activation        32
-#&gt; Activation_33.fcs Activation_33.fcs       0        NA  Activation        33</div><div class='input'>
+<span class='fu'><a href='cyto_details.html'>cyto_details</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                   Treatment OVAConc              name sample_id sample_type
+#&gt; Activation_1.fcs     Stim-A       0  Activation_1.fcs         1  Activation
+#&gt; Activation_2.fcs     Stim-A       0  Activation_2.fcs         2  Activation
+#&gt; Activation_3.fcs     Stim-A       5  Activation_3.fcs         3  Activation
+#&gt; Activation_4.fcs     Stim-A       5  Activation_4.fcs         4  Activation
+#&gt; Activation_5.fcs     Stim-A      50  Activation_5.fcs         5  Activation
+#&gt; Activation_6.fcs     Stim-A      50  Activation_6.fcs         6  Activation
+#&gt; Activation_7.fcs     Stim-A     500  Activation_7.fcs         7  Activation
+#&gt; Activation_8.fcs     Stim-A     500  Activation_8.fcs         8  Activation
+#&gt; Activation_9.fcs     Stim-B       0  Activation_9.fcs         9  Activation
+#&gt; Activation_10.fcs    Stim-B       0 Activation_10.fcs        10  Activation
+#&gt; Activation_11.fcs    Stim-B       5 Activation_11.fcs        11  Activation
+#&gt; Activation_12.fcs    Stim-B       5 Activation_12.fcs        12  Activation
+#&gt; Activation_13.fcs    Stim-B      50 Activation_13.fcs        13  Activation
+#&gt; Activation_14.fcs    Stim-B      50 Activation_14.fcs        14  Activation
+#&gt; Activation_15.fcs    Stim-B     500 Activation_15.fcs        15  Activation
+#&gt; Activation_16.fcs    Stim-B     500 Activation_16.fcs        16  Activation
+#&gt; Activation_17.fcs    Stim-C       0 Activation_17.fcs        17  Activation
+#&gt; Activation_18.fcs    Stim-C       0 Activation_18.fcs        18  Activation
+#&gt; Activation_19.fcs    Stim-C       5 Activation_19.fcs        19  Activation
+#&gt; Activation_20.fcs    Stim-C       5 Activation_20.fcs        20  Activation
+#&gt; Activation_21.fcs    Stim-C      50 Activation_21.fcs        21  Activation
+#&gt; Activation_22.fcs    Stim-C      50 Activation_22.fcs        22  Activation
+#&gt; Activation_23.fcs    Stim-C     500 Activation_23.fcs        23  Activation
+#&gt; Activation_24.fcs    Stim-C     500 Activation_24.fcs        24  Activation
+#&gt; Activation_25.fcs    Stim-D       0 Activation_25.fcs        25  Activation
+#&gt; Activation_26.fcs    Stim-D       0 Activation_26.fcs        26  Activation
+#&gt; Activation_27.fcs    Stim-D       5 Activation_27.fcs        27  Activation
+#&gt; Activation_28.fcs    Stim-D       5 Activation_28.fcs        28  Activation
+#&gt; Activation_29.fcs    Stim-D      50 Activation_29.fcs        29  Activation
+#&gt; Activation_30.fcs    Stim-D      50 Activation_30.fcs        30  Activation
+#&gt; Activation_31.fcs    Stim-D     500 Activation_31.fcs        31  Activation
+#&gt; Activation_32.fcs    Stim-D     500 Activation_32.fcs        32  Activation
+#&gt; Activation_33.fcs        NA       0 Activation_33.fcs        33  Activation</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -255,7 +270,7 @@ included in the experiment details, set to NULL by default.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

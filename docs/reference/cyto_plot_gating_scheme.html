@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot Cytometry Gating Strategies — cyto_plot_gating_scheme • CytoExploreR</title>
+<title>Plot Cytometry Gating Strategies — cyto_plot_gating_scheme2.GatingHierarchy • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,7 +46,7 @@
 
 
 
-<meta property="og:title" content="Plot Cytometry Gating Strategies — cyto_plot_gating_scheme" />
+<meta property="og:title" content="Plot Cytometry Gating Strategies — cyto_plot_gating_scheme2.GatingHierarchy" />
 <meta property="og:description" content="cyto_plot_gating_scheme automatically plots the entire gating scheme
 and has full support for gate tracking and back-gating through
 gate_track and back_gate." />
@@ -82,7 +82,7 @@ gate_track and back_gate." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -117,7 +117,7 @@ gate_track and back_gate." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -146,7 +146,7 @@ gate_track and back_gate." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Plot Cytometry Gating Strategies</h1>
-    <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_plot_gating_scheme.R'><code>R/cyto_plot_gating_scheme.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_plot_gating_scheme-2.R'><code>R/cyto_plot_gating_scheme-2.R</code></a>, <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_plot_gating_scheme.R'><code>R/cyto_plot_gating_scheme.R</code></a></small>
     <div class="hidden name"><code>cyto_plot_gating_scheme.Rd</code></div>
     </div>
 
@@ -156,56 +156,65 @@ and has full support for gate tracking and back-gating through
 <code>gate_track</code> and <code>back_gate</code>.</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_plot_gating_scheme</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='st'>"name"</span>,
-  <span class='kw'>back_gate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>gate_track</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>show_all</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>header</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>point_col</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>label_text_size</span> <span class='kw'>=</span> <span class='fl'>0.8</span>,
-  <span class='kw'>gate_line_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>legend</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>legend_text</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>legend_text_size</span> <span class='kw'>=</span> <span class='fl'>1.2</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>border_line_width</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>border_line_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>title_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>...</span>
-)
+    <pre class="usage"><span class='co'># S3 method for GatingHierarchy</span>
+<span class='fu'><a href='cyto_plot_gating_scheme2.html'>cyto_plot_gating_scheme2</a></span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  gatingTemplate <span class='op'>=</span> <span class='cn'>NULL</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  legend <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
+
+<span class='co'># S3 method for GatingSet</span>
+<span class='fu'>cyto_plot_gating_scheme</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  gatingTemplate <span class='op'>=</span> <span class='cn'>NULL</span>,
+  group_by <span class='op'>=</span> <span class='st'>"name"</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  gate_track <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>header</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  layout <span class='op'>=</span> <span class='cn'>NULL</span>,
+  point_col <span class='op'>=</span> <span class='cn'>NA</span>,
+  label_text_size <span class='op'>=</span> <span class='fl'>0.8</span>,
+  gate_line_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  legend <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  legend_text <span class='op'>=</span> <span class='cn'>NULL</span>,
+  legend_text_size <span class='op'>=</span> <span class='fl'>1.2</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  border_line_width <span class='op'>=</span> <span class='cn'>NULL</span>,
+  border_line_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  title_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for GatingHierarchy</span>
-<span class='fu'>cyto_plot_gating_scheme</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>back_gate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>gate_track</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>show_all</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>header</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='no'>layout</span>,
-  <span class='kw'>point_col</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>label_text_size</span> <span class='kw'>=</span> <span class='fl'>0.8</span>,
-  <span class='kw'>gate_line_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>legend</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='no'>legend_text</span>,
-  <span class='kw'>legend_text_size</span> <span class='kw'>=</span> <span class='fl'>1.2</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>border_line_width</span>,
-  <span class='kw'>border_line_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>title_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>...</span>
-)</pre>
+<span class='fu'>cyto_plot_gating_scheme</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  gatingTemplate <span class='op'>=</span> <span class='cn'>NULL</span>,
+  back_gate <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  gate_track <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  show_all <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>header</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>layout</span>,
+  point_col <span class='op'>=</span> <span class='cn'>NA</span>,
+  label_text_size <span class='op'>=</span> <span class='fl'>0.8</span>,
+  gate_line_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  legend <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  <span class='va'>legend_text</span>,
+  legend_text_size <span class='op'>=</span> <span class='fl'>1.2</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>border_line_width</span>,
+  border_line_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  title_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -217,10 +226,31 @@ and has full support for gate tracking and back-gating through
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
+      <th>overlay</th>
+      <td><p>names of the populations to overlay for back-gating, set to NA
+by default to turn off overlays. For simplicity, overlay can be set to
+<code>"descendants"</code> or <code>"children"</code> to overlay descendant or child
+populations within each plot.</p></td>
+    </tr>
+    <tr>
       <th>gatingTemplate</th>
       <td><p>name of the gatingTemplate csv file used to gate
 <code>x</code>. If not supplied the gating scheme will be obtained directly from
 the GatingSet.</p></td>
+    </tr>
+    <tr>
+      <th>popup</th>
+      <td><p>logical indicating whether the gating scheme should be plotted
+in a pop-up window, set to FALSE by default.</p></td>
+    </tr>
+    <tr>
+      <th>legend</th>
+      <td><p>logical indicating whether a legend should be included when an
+overlay is supplied.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>extra arguments passed to <code><a href='cyto_plot.html'>cyto_plot</a></code>.</p></td>
     </tr>
     <tr>
       <th>group_by</th>
@@ -229,31 +259,14 @@ groups prior to plotting, set to "name" by default to plot each sample
 separately.</p></td>
     </tr>
     <tr>
-      <th>back_gate</th>
-      <td><p>names of the population(s) to back-gate, set to <code>FALSE</code>
-by default to turn off back-gating. To back-gate all populations set this
-argument to <code>"all"</code>.</p></td>
-    </tr>
-    <tr>
       <th>gate_track</th>
       <td><p>logical indicating whether gate colour should be tracked
 throughout gating scheme, set to TRUE by default.</p></td>
     </tr>
     <tr>
-      <th>show_all</th>
-      <td><p>logical indicating whether every population should be
-included in every plot in the gating scheme, set to <code>FALSE</code> by
-default.</p></td>
-    </tr>
-    <tr>
       <th>header</th>
       <td><p>character string to use as the header for the plot layout, set
 to "Gating Scheme" by default.</p></td>
-    </tr>
-    <tr>
-      <th>popup</th>
-      <td><p>logical indicating whether the gating scheme should be plotted
-in a pop-up window, set to FALSE by default.</p></td>
     </tr>
     <tr>
       <th>layout</th>
@@ -274,11 +287,6 @@ labels, set to 0.8 by default.</p></td>
     <tr>
       <th>gate_line_col</th>
       <td><p>colour to use for gate borders, set to "red" by default.</p></td>
-    </tr>
-    <tr>
-      <th>legend</th>
-      <td><p>logical indicating whether a legend should be included when an
-overlay is supplied.</p></td>
     </tr>
     <tr>
       <th>legend_text</th>
@@ -320,39 +328,42 @@ default.</p></td>
       <td><p>colour to use for title text, set to "black" by
 default.</p></td>
     </tr>
-    <tr>
-      <th>...</th>
-      <td><p>extra arguments passed to <code><a href='cyto_plot.html'>cyto_plot</a></code>.</p></td>
-    </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
 <span class='co'># Apply compensation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span>(<span class='no'>gs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
 
 <span class='co'># Transform fluorescent channels</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span>(<span class='no'>gs</span>)</div><div class='img'><img src='cyto_plot_gating_scheme-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Insufficient plotting space, transformations have been applied.</span></div><div class='input'>
 <span class='co'># Gate using cyto_gate_draw</span>
-<span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Activation_gatingTemplate</span>
-<span class='fu'>gt_gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
+<span class='va'>gt</span> <span class='op'>&lt;-</span> <span class='va'>Activation_gatingTemplate</span>
+<span class='fu'>gt_gating</span><span class='op'>(</span><span class='va'>gt</span>, <span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Gating scheme</span>
-<span class='fu'>cyto_plot_gating_scheme</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>4</span>]])</div><div class='img'><img src='cyto_plot_gating_scheme-2.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>cyto_plot_gating_scheme</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>4</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in match(c(parent, overlay), nodes): object 'nodes' not found</span></div><div class='input'>
 <span class='co'># Back-gating</span>
-<span class='fu'>cyto_plot_gating_scheme</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>32</span>]],
-  <span class='kw'>back_gate</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
-)</div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='output co'>#&gt; <span class='warning'>Warning: data length is not a multiple of split variable</span></div><div class='img'><img src='cyto_plot_gating_scheme-3.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>cyto_plot_gating_scheme</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>32</span><span class='op'>]</span><span class='op'>]</span>,
+  back_gate <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in match(c(parent, overlay), nodes): object 'nodes' not found</span></div><div class='input'>
 <span class='co'># Gate-tracking</span>
-<span class='fu'>cyto_plot_gating_scheme</span>(<span class='no'>gs</span>[<span class='fl'>1</span>:<span class='fl'>2</span>],
-  <span class='kw'>gate_track</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
-)</div><div class='img'><img src='cyto_plot_gating_scheme-4.png' alt='' width='700' height='433' /></div><div class='img'><img src='cyto_plot_gating_scheme-5.png' alt='' width='700' height='433' /></div><div class='input'>
-</div></pre>
+<span class='fu'>cyto_plot_gating_scheme</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>]</span>,
+  gate_track <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in `[.data.frame`(gatingTemplate, gatingTemplate$parent %in% parent_nodes &amp;     !.empty(xchannel) &amp; !.empty(ychannel), c("parent", "/", "alias")): undefined columns selected</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -368,7 +379,7 @@ default.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Table Editor for Channel Match File Construction — cyto_channel_match • CytoExploreR</title>
+<title>Create a csv file assigning a channel to each compensation control — cyto_channel_match • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,8 +46,8 @@
 
 
 
-<meta property="og:title" content="Table Editor for Channel Match File Construction — cyto_channel_match" />
-<meta property="og:description" content="Table Editor for Channel Match File Construction" />
+<meta property="og:title" content="Create a csv file assigning a channel to each compensation control — cyto_channel_match" />
+<meta property="og:description" content="Create a csv file assigning a channel to each compensation control" />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -143,23 +143,23 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Table Editor for Channel Match File Construction</h1>
+    <h1>Create a csv file assigning a channel to each compensation control</h1>
     <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_channels-helpers.R'><code>R/cyto_channels-helpers.R</code></a></small>
     <div class="hidden name"><code>cyto_channel_match.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Table Editor for Channel Match File Construction</p>
+    <p>Create a csv file assigning a channel to each compensation control</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_channel_match</span>(<span class='no'>x</span>, <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>menu</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_channel_match</span><span class='op'>(</span><span class='va'>x</span>, save_as <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of <code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code> or
+      <td><p>object of <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
@@ -167,27 +167,30 @@
       <td><p>name to use for the saved channel match csv file, set to
 <code>"date-Channel-Match.csv"</code>.</p></td>
     </tr>
-    <tr>
-      <th>menu</th>
-      <td><p>logical indicating whether channels should be selected from a
-drop down menu instead of manually typing them in.</p></td>
-    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>update <code>cyto_details</code> of <code>flowSet</code> or <code>GatingSet</code>,
+    <p>update <code>cyto_details</code> of <code>cytoset</code> or <code>GatingSet</code>,
   write channel matching to csv file and return channel matching as a
   data.frame.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreR</span>)
+    <pre class="examples"><div class='input'><span class='kw'>if</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
-<span class='co'># Generate channel match file for compensation controls</span>
-<span class='fu'>cyto_channel_match</span>(<span class='no'>Compensation</span>)
-}</div></pre>
+<span class='co'># Compensation Gatingset</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>load_gs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata/Compensation-GatingSet"</span>,
+                          package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># Select a channel for each control from dropdown menu</span>
+<span class='fu'>cyto_channel_match</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -203,7 +206,7 @@ drop down menu instead of manually typing them in.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

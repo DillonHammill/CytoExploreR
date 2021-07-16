@@ -79,7 +79,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
       </span>
     </div>
 
@@ -114,7 +114,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -146,6 +146,17 @@
       <small>Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="cytoexplorer-110" class="section level1">
+<h1 class="page-header" data-toc-text="1.1.0">
+<a href="#cytoexplorer-110" class="anchor"></a>CytoExploreR 1.1.0</h1>
+<ul>
+<li>Fix <code><a href="../reference/cyto_gate_bool.html">cyto_gate_bool()</a></code> to anchor new nodes to most recent ancestor in the GatingSet.</li>
+<li>Fix labelling of transformed axes within <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code>.</li>
+<li>Fix statistics computation in <code><a href="../reference/cyto_plot.html">cyto_plot()</a></code> when gates and overlays are present.</li>
+<li>Fix <code><a href="../reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme()</a></code> to allow the use of custom colour scale when <code>back_gate = TRUE</code>.</li>
+<li>Make sure <code><a href="../reference/cyto_load.html">cyto_load()</a></code> is able to read in saved GatingSets.</li>
+</ul>
+</div>
     <div id="cytoexplorer-108" class="section level1">
 <h1 class="page-header" data-toc-text="1.0.8">
 <a href="#cytoexplorer-108" class="anchor"></a>CytoExploreR 1.0.8</h1>
@@ -257,7 +268,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

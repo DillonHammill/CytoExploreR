@@ -49,8 +49,8 @@
 <meta property="og:title" content="Extract channels associated with certain markers — cyto_channels_extract" />
 <meta property="og:description" content="cyto_channels_extract will check whether the supplied channels or
 marker names are valid for the
-flowFrame,
-flowSet,
+cytoframe,
+cytoset,
 GatingHierarchy or
 GatingSet and return a vector of
 valid channel names. cyto_channels_extract is particularly useful for
@@ -87,7 +87,7 @@ determining which channel(s) are associated with particular marker(s)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -122,7 +122,7 @@ determining which channel(s) are associated with particular marker(s)." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -158,15 +158,15 @@ determining which channel(s) are associated with particular marker(s)." />
     <div class="ref-description">
     <p><code>cyto_channels_extract</code> will check whether the supplied channels or
 marker names are valid for the
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>,
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code> and return a vector of
 valid channel names. <code>cyto_channels_extract</code> is particularly useful for
 determining which channel(s) are associated with particular marker(s).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_channels_extract</span>(<span class='no'>x</span>, <span class='no'>channels</span>, <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_channels_extract</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>channels</span>, plot <span class='op'>=</span> <span class='cn'>FALSE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -174,8 +174,8 @@ determining which channel(s) are associated with particular marker(s).</p>
     <tr>
       <th>x</th>
       <td><p>an object of class
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>,
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
@@ -190,24 +190,31 @@ determining which channel(s) are associated with particular marker(s).</p>
 a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 <code>channels</code> are supplied.</p></td>
     </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional arguments passed to <code><a href='https://rdrr.io/r/base/grep.html'>grepl</a></code> for
+character matching. For exact character string matching to override the
+default which ignores character case, set <code>fixed</code> to TRUE.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A vector of valid channel names.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
-<span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+<span class='co'># Activation GatingSet</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>load_gs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata/Activation-GatingSet"</span>,
+                          package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='co'># Add samples to GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
-
-<span class='co'># Extract channels used for CD4 &amp; CD8</span>
-<span class='fu'>cyto_channels_extract</span>(<span class='no'>gs</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CD4"</span>, <span class='st'>"CD8"</span>))</div><div class='output co'>#&gt; [1] "Alexa Fluor 700-A" "Alexa Fluor 488-A"</div><div class='input'>
+<span class='co'># Extract channels for CD4 &amp; CD8</span>
+<span class='fu'>cyto_channels_extract</span><span class='op'>(</span><span class='va'>gs</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"CD4"</span>, <span class='st'>"CD8"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "Alexa Fluor 700-A" "Alexa Fluor 488-A"</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -224,7 +231,7 @@ performed to ensure that only 1 or 2 <code>channels</code> are supplied.</p></td
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,292 +152,320 @@
     <p>Compute, export and save statistics</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_stats_compute</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"median"</span>,
-  <span class='kw'>format</span> <span class='kw'>=</span> <span class='st'>"long"</span>,
-  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='no'>...</span>
-)
-
-<span class='co'># S3 method for GatingHierarchy</span>
-<span class='fu'>cyto_stats_compute</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"median"</span>,
-  <span class='kw'>format</span> <span class='kw'>=</span> <span class='st'>"long"</span>,
-  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='no'>...</span>
-)
-
-<span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_stats_compute</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"median"</span>,
-  <span class='kw'>gate</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>format</span> <span class='kw'>=</span> <span class='st'>"long"</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='no'>...</span>
-)
-
-<span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_stats_compute</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"median"</span>,
-  <span class='kw'>gate</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>format</span> <span class='kw'>=</span> <span class='st'>"long"</span>,
-  <span class='kw'>density_smooth</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cyto_stats_compute</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  alias <span class='op'>=</span> <span class='cn'>NULL</span>,
+  parent <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  trans <span class='op'>=</span> <span class='cn'>NA</span>,
+  stat <span class='op'>=</span> <span class='cn'>NULL</span>,
+  inverse <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  round <span class='op'>=</span> <span class='fl'>2</span>,
+  format <span class='op'>=</span> <span class='st'>"wide"</span>,
+  tibble <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  input <span class='op'>=</span> <span class='st'>"matrix"</span>,
+  smooth <span class='op'>=</span> <span class='fl'>1</span>,
+  bins <span class='op'>=</span> <span class='fl'>256</span>,
+  details <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  markers <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  save_as <span class='op'>=</span> <span class='cn'>NULL</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>,
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
       <th>alias</th>
-      <td><p>name(s) of the population(s) for which the statistic should be
-calculated when a <code>GatingHierarchy</code> or <code>GatingSet</code> is supplied.</p></td>
+      <td><p>names of the populations in the <code>GatingHerarchy</code> or
+<code>GatingSet</code> for which statistics should be computed.</p></td>
     </tr>
     <tr>
       <th>parent</th>
-      <td><p>name(s) of the parent population(s) used calculate population
-frequencies when a <code>GatingHierarchy</code> or <code>GatingSet</code> object is
-supplied. The frequency of alias in each parent will be returned as a
-percentage.</p></td>
+      <td><p>names of the parent populations in the <code>GatingHierarchy</code>
+or <code>GatingSet</code> required when computing frequency statistics. When
+<code>stat = "freq"</code> the frequency of each <code>alias</code> population will be
+computed as a proportion of each <code>parent</code> population.</p></td>
     </tr>
     <tr>
       <th>channels</th>
-      <td><p>names of of channels for which statistic should be
-calculated, set to all channels by default.</p></td>
+      <td><p>names of the channels or markers for which statistics should
+be computed, set to all channels with marker assignments by default.</p></td>
     </tr>
     <tr>
       <th>trans</th>
-      <td><p>object of class
-<code><a href='https://rdrr.io/pkg/flowWorkspace/man/transformerList.html'>transformerList</a></code> used to
-transfom the channels of the supplied data. The <code>transformerList</code> is
-required to return the data to the original linear scale when calculating
-statistics.</p></td>
+      <td><p>an object of class <code>transformerList</code> containing the
+transformers used to transform the channels of the supplied data. The
+transformerList will be automatically extracted from the
+<code>GatingHierarchy</code> or <code>GatingSet</code>, so this argument is only
+required for <code>cytoframes</code> or <code>cytosets</code>. The transformerList is
+passed to <code><a href='cyto_apply.html'>cyto_apply</a></code> which will make sure the data is
+appropriately transformed based on <code>inverse</code> prior to passing the data
+to the desired statistical function.</p></td>
     </tr>
     <tr>
       <th>stat</th>
-      <td><p>name of the statistic to calculate, options include
-<code>"count"</code>, <code>"freq"</code>, <code>"median"</code>, <code>"mode"</code>,
-<code>"mean"</code>, <code>"geo mean"</code>, <code>"CV"</code>, or <code>"freq"</code>.</p></td>
+      <td><p>name of a statistic to compute, options include:</p><ul>
+<li><p><code>count</code> - number of events</p></li>
+<li><p><code>freq/percent</code> -
+frequency of population(s) in parent population(s)</p></li>
+<li><p><code>mean</code> -
+arithmetic mean</p></li>
+<li><p><code>geomean</code> - geometric (graphical) mean computed
+as the inverse of the arithmetic mean on the transformed scale</p></li>
+<li><p><code>median</code> - 50th quantile</p></li>
+<li><p><code>mode</code> - inverse of mode on
+transformed scale computed using <code>smooth</code> and <code>bandwidth</code> to
+control the smoothness of the density distribution</p></li>
+<li><p><code>sd</code> -
+standard deviation</p></li>
+<li><p><code>rsd</code> - robust standard deviation (less
+influence of outliers)</p></li>
+<li><p><code>cv</code> - coefficient of variation</p></li>
+<li><p><code>rcv</code> - robust coefficient of variation (less influence of
+outliers)</p></li>
+<li><p><code>quantile</code> - quantiles with probabilities supplied to
+<code>probs</code></p></li>
+<li><p><code>range</code> - minima and maxima</p></li>
+<li><p><code>auc</code> -
+area under curve using a combination of
+<code><a href='https://rdrr.io/r/stats/density.html'>density()</a></code>,
+<code><a href='https://rdrr.io/r/stats/splinefun.html'>splinefun()</a></code> and
+<code><a href='https://rdrr.io/r/stats/integrate.html'>integrate()</a></code></p></li>
+</ul><p><code>stat</code> dispatches through
+<code><a href='cyto_apply.html'>cyto_apply</a></code> so any custom function can be named through this
+argument as well. See <code><a href='cyto_apply.html'>cyto_apply</a></code> for details.</p></td>
+    </tr>
+    <tr>
+      <th>inverse</th>
+      <td><p>logical passed to <code><a href='cyto_apply.html'>cyto_apply</a></code> to indicate whether
+transformations applied to the data should be reversed prior to passing the
+data to the desired statistical function, set to TRUE by default.</p></td>
+    </tr>
+    <tr>
+      <th>round</th>
+      <td><p>numeric indicating the number of decimal places to round the
+computed statistic, set to 2 decimal places by default.</p></td>
     </tr>
     <tr>
       <th>format</th>
-      <td><p>indicates whether the data should be returned in the
-<code>"wide"</code> or <code>"long"</code> format, set to the <code>"long"</code> format by
-default.</p></td>
+      <td><p>can be either <code>"wide"</code> or <code>"long"</code> to control the
+format of the returned statistics, set to <code>"wide"</code> by default.</p></td>
+    </tr>
+    <tr>
+      <th>tibble</th>
+      <td><p>logical indicating whether the statistics should be returned as
+tibble instead of a data.frame, set to FALSE by default.</p></td>
+    </tr>
+    <tr>
+      <th>input</th>
+      <td><p>passed to <code><a href='cyto_apply.html'>cyto_apply</a></code> to control how the data is
+formatted prior to passing it to the statistical function, options include:</p><ul>
+<li><p>1 - <code>"cytoframe"</code></p></li>
+<li><p>2 - <code>"matrix"</code></p></li>
+<li><p>3
+- <code>"column"</code> or <code>"channel"</code></p></li>
+<li><p>4 - <code>"row"</code> or
+<code>"cell"</code></p></li>
+</ul><p>Set to "matrix" by default.</p></td>
+    </tr>
+    <tr>
+      <th>smooth</th>
+      <td><p>numeric smoothing parameter passed to <code>stats:density</code> when
+computing mode and area under the curve statistics, set to 1 by default.</p></td>
+    </tr>
+    <tr>
+      <th>bins</th>
+      <td><p>number of bins to use for histograms, set to 256 by default.</p></td>
+    </tr>
+    <tr>
+      <th>details</th>
+      <td><p>logical indicating whether to include the <code>cyto_details</code>
+in the output, set to TRUE by default.</p></td>
+    </tr>
+    <tr>
+      <th>markers</th>
+      <td><p>logical indicating whether channels should be converted to
+markers where possible in the output, set to TRUE by default.</p></td>
     </tr>
     <tr>
       <th>save_as</th>
-      <td><p>name of a csv file to which the statistical results should be
-saved.</p></td>
+      <td><p>name of a csv file to which the output should be saved, set to
+NULL by default to bypass this saving step.</p></td>
     </tr>
     <tr>
       <th>select</th>
       <td><p>named list containing experimental variables to be used to
-select samples using <code><a href='cyto_select.html'>cyto_select</a></code> when a <code>flowSet</code> or
+select samples using <code><a href='cyto_select.html'>cyto_select</a></code> when a <code>cytoset</code> or
 <code>GatingSet</code> is supplied. Refer to <code><a href='cyto_select.html'>cyto_select</a></code> for more
 details.</p></td>
     </tr>
     <tr>
-      <th>density_smooth</th>
-      <td><p>smoothing parameter passed to
-<code><a href='https://rdrr.io/r/stats/density.html'>density</a></code> when calculating mode, set to 1.5 by
-default.</p></td>
-    </tr>
-    <tr>
       <th>...</th>
-      <td><p>not in use.</p></td>
+      <td><p>additional arguments passed to the desired statistical function.</p></td>
     </tr>
     <tr>
       <th>gate</th>
-      <td><p>object of class <code>rectangleGate</code>, <code>polygonGate</code> or
-<code>ellipsoidGate</code> to apply to <code>flowFrame</code> or <code>flowSet</code> objects
-prior to computing statistics.</p></td>
+      <td><p>a <code>rectangleGate</code>, <code>polygonGate</code> or
+<code>ellipsoidGate</code> object to apply to each <code>cytoframe</code> prior to
+computing the desired statistic. This argument has been included for
+backwards compatibility only and is only valid for <code>cytoframe</code> or
+<code>cytoset</code> objects.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a tibble containing the computed statistics in the wide or long
-  format.</p>
+    <p>data.frame or tibble containing the computed statistics in the
+  desired format and optionally a csv file containing the computed
+  statistics.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
-<span class='co'># Apply compensation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>compensate</span>(<span class='no'>gs</span>, <span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]]@<span class='kw'>description</span>$<span class='no'>SPILL</span>)
+<span class='co'># Compensation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
 
-<span class='co'># Transform fluorescent channels</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'>estimateLogicle</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>32</span>]], <span class='fu'><a href='cyto_fluor_channels.html'>cyto_fluor_channels</a></span>(<span class='no'>gs</span>))
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='no'>gs</span>, <span class='no'>trans</span>)
-
-<span class='co'># Gate using cyto_gate_draw</span>
-<span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Activation_gatingTemplate</span>
-<span class='fu'>gt_gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
+<span class='co'># Transformations</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Insufficient plotting space, transformations have been applied.</span></div><div class='input'>
+<span class='co'># Gating</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_gatingTemplate_apply.html'>cyto_gatingTemplate_apply</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>Activation_gatingTemplate</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Compute statistics - median</span>
-<span class='fu'>cyto_stats_compute</span>(<span class='no'>gs</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='st'>"T Cells"</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"PE-A"</span>),
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"median"</span>,
-  <span class='kw'>save</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
-)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 66 x 6</span><span>
-#&gt;    name             OVAConc Treatment Population Marker  MedFI
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;fct&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> Activation_1.fcs 0       Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>1</span><span>501.
-#&gt; </span><span style='color: #555555;'> 2</span><span> Activation_1.fcs 0       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>17</span><span>651.
-#&gt; </span><span style='color: #555555;'> 3</span><span> Activation_2.fcs 0       Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>2</span><span>238.
-#&gt; </span><span style='color: #555555;'> 4</span><span> Activation_2.fcs 0       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>18</span><span>608.
-#&gt; </span><span style='color: #555555;'> 5</span><span> Activation_3.fcs 5       Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>1</span><span>541.
-#&gt; </span><span style='color: #555555;'> 6</span><span> Activation_3.fcs 5       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>18</span><span>946.
-#&gt; </span><span style='color: #555555;'> 7</span><span> Activation_4.fcs 5       Stim-A    T Cells    CD8      567.
-#&gt; </span><span style='color: #555555;'> 8</span><span> Activation_4.fcs 5       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>19</span><span>885.
-#&gt; </span><span style='color: #555555;'> 9</span><span> Activation_5.fcs 50      Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>1</span><span>074.
-#&gt; </span><span style='color: #555555;'>10</span><span> Activation_5.fcs 50      Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>20</span><span>104.
-#&gt; </span><span style='color: #555555;'># ... with 56 more rows</span><span></div><div class='input'>
-<span class='co'># Compute statistics for experimental group</span>
-<span class='fu'>cyto_stats_compute</span>(<span class='no'>gs</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='st'>"T Cells"</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"PE-A"</span>),
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"median"</span>,
-  <span class='kw'>save</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>Treatment</span> <span class='kw'>=</span> <span class='st'>"Stim-A"</span>)
-)</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 16 x 6</span><span>
-#&gt;    name             OVAConc Treatment Population Marker  MedFI
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;fct&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> Activation_1.fcs 0       Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>1</span><span>501.
-#&gt; </span><span style='color: #555555;'> 2</span><span> Activation_1.fcs 0       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>17</span><span>651.
-#&gt; </span><span style='color: #555555;'> 3</span><span> Activation_2.fcs 0       Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>2</span><span>238.
-#&gt; </span><span style='color: #555555;'> 4</span><span> Activation_2.fcs 0       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>18</span><span>608.
-#&gt; </span><span style='color: #555555;'> 5</span><span> Activation_3.fcs 5       Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>1</span><span>541.
-#&gt; </span><span style='color: #555555;'> 6</span><span> Activation_3.fcs 5       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>18</span><span>946.
-#&gt; </span><span style='color: #555555;'> 7</span><span> Activation_4.fcs 5       Stim-A    T Cells    CD8      567.
-#&gt; </span><span style='color: #555555;'> 8</span><span> Activation_4.fcs 5       Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>19</span><span>885.
-#&gt; </span><span style='color: #555555;'> 9</span><span> Activation_5.fcs 50      Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>1</span><span>074.
-#&gt; </span><span style='color: #555555;'>10</span><span> Activation_5.fcs 50      Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>20</span><span>104.
-#&gt; </span><span style='color: #555555;'>11</span><span> Activation_6.fcs 50      Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>2</span><span>222.
-#&gt; </span><span style='color: #555555;'>12</span><span> Activation_6.fcs 50      Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>20</span><span>075.
-#&gt; </span><span style='color: #555555;'>13</span><span> Activation_7.fcs 500     Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>4</span><span>823.
-#&gt; </span><span style='color: #555555;'>14</span><span> Activation_7.fcs 500     Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>20</span><span>493.
-#&gt; </span><span style='color: #555555;'>15</span><span> Activation_8.fcs 500     Stim-A    T Cells    CD8     </span><span style='text-decoration: underline;'>4</span><span>369.
-#&gt; </span><span style='color: #555555;'>16</span><span> Activation_8.fcs 500     Stim-A    T Cells    Va2    </span><span style='text-decoration: underline;'>20</span><span>926.</div><div class='input'>
-<span class='co'># Compute population frequencies and save to csv file</span>
-<span class='fu'>cyto_stats_compute</span>(<span class='no'>gs</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CD4 T Cells"</span>, <span class='st'>"CD8 T Cells"</span>),
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Live Cells"</span>, <span class='st'>"T Cells"</span>),
-  <span class='kw'>stat</span> <span class='kw'>=</span> <span class='st'>"freq"</span>,
-  <span class='kw'>save_as</span> <span class='kw'>=</span> <span class='st'>"Population-Frequencies"</span>
-)</div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; <span class='message'>New names:</span>
-#&gt; <span class='message'>* count -&gt; count...1</span>
-#&gt; <span class='message'>* count -&gt; count...2</span></div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 132 x 6</span><span>
-#&gt;    name             OVAConc Treatment Population  Parent     Frequency
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;fct&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>          </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> Activation_1.fcs 0       Stim-A    CD4 T Cells Live Cells      13.3
-#&gt; </span><span style='color: #555555;'> 2</span><span> Activation_1.fcs 0       Stim-A    CD8 T Cells Live Cells      16.1
-#&gt; </span><span style='color: #555555;'> 3</span><span> Activation_1.fcs 0       Stim-A    CD4 T Cells T Cells         41.2
-#&gt; </span><span style='color: #555555;'> 4</span><span> Activation_1.fcs 0       Stim-A    CD8 T Cells T Cells         49.8
-#&gt; </span><span style='color: #555555;'> 5</span><span> Activation_2.fcs 0       Stim-A    CD4 T Cells Live Cells      15.0
-#&gt; </span><span style='color: #555555;'> 6</span><span> Activation_2.fcs 0       Stim-A    CD8 T Cells Live Cells      18.3
-#&gt; </span><span style='color: #555555;'> 7</span><span> Activation_2.fcs 0       Stim-A    CD4 T Cells T Cells         41.2
-#&gt; </span><span style='color: #555555;'> 8</span><span> Activation_2.fcs 0       Stim-A    CD8 T Cells T Cells         50.2
-#&gt; </span><span style='color: #555555;'> 9</span><span> Activation_3.fcs 5       Stim-A    CD4 T Cells Live Cells      14.9
-#&gt; </span><span style='color: #555555;'>10</span><span> Activation_3.fcs 5       Stim-A    CD8 T Cells Live Cells      18.1
-#&gt; </span><span style='color: #555555;'># ... with 122 more rows</span><span></div><div class='input'>
-</div></span></pre>
+<span class='fu'>cyto_stats_compute</span><span class='op'>(</span><span class='va'>gs</span>,
+  alias <span class='op'>=</span> <span class='st'>"T Cells"</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"PE-A"</span><span class='op'>)</span>,
+  stat <span class='op'>=</span> <span class='st'>"median"</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt;                 name Treatment OVAConc   alias     CD8      Va2
+#&gt; 1   Activation_1.fcs    Stim-A       0 T Cells 1500.80 17650.05
+#&gt; 2   Activation_2.fcs    Stim-A       0 T Cells 2256.58 18609.77
+#&gt; 3   Activation_3.fcs    Stim-A       5 T Cells 1540.68 18946.23
+#&gt; 4   Activation_4.fcs    Stim-A       5 T Cells  567.54 19874.78
+#&gt; 5   Activation_5.fcs    Stim-A      50 T Cells 1102.45 20104.33
+#&gt; 6   Activation_6.fcs    Stim-A      50 T Cells 2164.58 20074.90
+#&gt; 7   Activation_7.fcs    Stim-A     500 T Cells 4808.94 20486.06
+#&gt; 8   Activation_8.fcs    Stim-A     500 T Cells 4370.65 20925.35
+#&gt; 9   Activation_9.fcs    Stim-B       0 T Cells 3354.17 17586.40
+#&gt; 10 Activation_10.fcs    Stim-B       0 T Cells 1297.17 17973.38
+#&gt; 11 Activation_11.fcs    Stim-B       5 T Cells 3857.94 18340.17
+#&gt; 12 Activation_12.fcs    Stim-B       5 T Cells 4350.15 18871.20
+#&gt; 13 Activation_13.fcs    Stim-B      50 T Cells 3621.18 18426.13
+#&gt; 14 Activation_14.fcs    Stim-B      50 T Cells 2291.32 19365.62
+#&gt; 15 Activation_15.fcs    Stim-B     500 T Cells 4850.92 19410.60
+#&gt; 16 Activation_16.fcs    Stim-B     500 T Cells 5083.20 20546.19
+#&gt; 17 Activation_17.fcs    Stim-C       0 T Cells  759.02 19795.24
+#&gt; 18 Activation_18.fcs    Stim-C       0 T Cells  478.81 18129.59
+#&gt; 19 Activation_19.fcs    Stim-C       5 T Cells 2509.31 19803.92
+#&gt; 20 Activation_20.fcs    Stim-C       5 T Cells  530.12 19371.80
+#&gt; 21 Activation_21.fcs    Stim-C      50 T Cells 4769.55 20884.91
+#&gt; 22 Activation_22.fcs    Stim-C      50 T Cells 4751.83 20005.57
+#&gt; 23 Activation_23.fcs    Stim-C     500 T Cells 5904.28 17984.60
+#&gt; 24 Activation_24.fcs    Stim-C     500 T Cells 6559.26 20215.38
+#&gt; 25 Activation_25.fcs    Stim-D       0 T Cells 4547.27 18816.81
+#&gt; 26 Activation_26.fcs    Stim-D       0 T Cells 4544.19 17962.56
+#&gt; 27 Activation_27.fcs    Stim-D       5 T Cells 4689.65 16231.62
+#&gt; 28 Activation_28.fcs    Stim-D       5 T Cells 4493.16 15694.07
+#&gt; 29 Activation_29.fcs    Stim-D      50 T Cells 6392.02 19035.28
+#&gt; 30 Activation_30.fcs    Stim-D      50 T Cells 5344.23 16617.94
+#&gt; 31 Activation_31.fcs    Stim-D     500 T Cells 6405.79 18495.34
+#&gt; 32 Activation_32.fcs    Stim-D     500 T Cells 6389.46 17582.23
+#&gt; 33 Activation_33.fcs        NA       0 T Cells     NaN      NaN</div><div class='input'>
+<span class='co'># Name csv to save results</span>
+<span class='va'>tempfile</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span><span class='op'>(</span><span class='op'>)</span>,
+<span class='va'>.Platform</span><span class='op'>$</span><span class='va'>file.sep</span>,
+<span class='st'>"Population-Frequencies.csv"</span><span class='op'>)</span>
+
+<span class='co'># Compute frequencies and save to tempfile</span>
+<span class='fu'>cyto_stats_compute</span><span class='op'>(</span><span class='va'>gs</span>,
+  alias <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"CD4 T Cells"</span>, <span class='st'>"CD8 T Cells"</span><span class='op'>)</span>,
+  parent <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Live Cells"</span>, <span class='st'>"T Cells"</span><span class='op'>)</span>,
+  stat <span class='op'>=</span> <span class='st'>"freq"</span>,
+  save_as <span class='op'>=</span> <span class='va'>tempfile</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt;                 name Treatment OVAConc       alias Live Cells T Cells
+#&gt; 1   Activation_1.fcs    Stim-A       0 CD4 T Cells      13.27   41.17
+#&gt; 2   Activation_2.fcs    Stim-A       0 CD4 T Cells      14.99   41.18
+#&gt; 3   Activation_3.fcs    Stim-A       5 CD4 T Cells      14.86   40.77
+#&gt; 4   Activation_4.fcs    Stim-A       5 CD4 T Cells      13.57   42.17
+#&gt; 5   Activation_5.fcs    Stim-A      50 CD4 T Cells      15.09   40.26
+#&gt; 6   Activation_6.fcs    Stim-A      50 CD4 T Cells      13.47   40.61
+#&gt; 7   Activation_7.fcs    Stim-A     500 CD4 T Cells      14.02   38.94
+#&gt; 8   Activation_8.fcs    Stim-A     500 CD4 T Cells      13.57   39.03
+#&gt; 9   Activation_9.fcs    Stim-B       0 CD4 T Cells      13.00   38.74
+#&gt; 10 Activation_10.fcs    Stim-B       0 CD4 T Cells      12.30   40.53
+#&gt; 11 Activation_11.fcs    Stim-B       5 CD4 T Cells      13.87   38.14
+#&gt; 12 Activation_12.fcs    Stim-B       5 CD4 T Cells      11.33   37.05
+#&gt; 13 Activation_13.fcs    Stim-B      50 CD4 T Cells      13.50   38.31
+#&gt; 14 Activation_14.fcs    Stim-B      50 CD4 T Cells      12.83   39.62
+#&gt; 15 Activation_15.fcs    Stim-B     500 CD4 T Cells      14.32   36.75
+#&gt; 16 Activation_16.fcs    Stim-B     500 CD4 T Cells      13.68   38.18
+#&gt; 17 Activation_17.fcs    Stim-C       0 CD4 T Cells      12.64   40.88
+#&gt; 18 Activation_18.fcs    Stim-C       0 CD4 T Cells      12.66   42.42
+#&gt; 19 Activation_19.fcs    Stim-C       5 CD4 T Cells      15.70   40.49
+#&gt; 20 Activation_20.fcs    Stim-C       5 CD4 T Cells      13.44   43.06
+#&gt; 21 Activation_21.fcs    Stim-C      50 CD4 T Cells      15.48   38.13
+#&gt; 22 Activation_22.fcs    Stim-C      50 CD4 T Cells      13.41   37.80
+#&gt; 23 Activation_23.fcs    Stim-C     500 CD4 T Cells      12.90   33.87
+#&gt; 24 Activation_24.fcs    Stim-C     500 CD4 T Cells      12.95   33.96
+#&gt; 25 Activation_25.fcs    Stim-D       0 CD4 T Cells      13.94   37.34
+#&gt; 26 Activation_26.fcs    Stim-D       0 CD4 T Cells      13.72   38.01
+#&gt; 27 Activation_27.fcs    Stim-D       5 CD4 T Cells      13.72   36.72
+#&gt; 28 Activation_28.fcs    Stim-D       5 CD4 T Cells      13.08   36.35
+#&gt; 29 Activation_29.fcs    Stim-D      50 CD4 T Cells      12.68   32.30
+#&gt; 30 Activation_30.fcs    Stim-D      50 CD4 T Cells      14.22   34.86
+#&gt; 31 Activation_31.fcs    Stim-D     500 CD4 T Cells      11.84   31.63
+#&gt; 32 Activation_32.fcs    Stim-D     500 CD4 T Cells      11.42   31.40
+#&gt; 33 Activation_33.fcs        NA       0 CD4 T Cells       0.00     NaN
+#&gt; 34  Activation_1.fcs    Stim-A       0 CD8 T Cells      16.05   49.78
+#&gt; 35  Activation_2.fcs    Stim-A       0 CD8 T Cells      18.30   50.29
+#&gt; 36  Activation_3.fcs    Stim-A       5 CD8 T Cells      18.12   49.72
+#&gt; 37  Activation_4.fcs    Stim-A       5 CD8 T Cells      15.39   47.83
+#&gt; 38  Activation_5.fcs    Stim-A      50 CD8 T Cells      18.45   49.23
+#&gt; 39  Activation_6.fcs    Stim-A      50 CD8 T Cells      16.64   50.20
+#&gt; 40  Activation_7.fcs    Stim-A     500 CD8 T Cells      19.01   52.78
+#&gt; 41  Activation_8.fcs    Stim-A     500 CD8 T Cells      18.00   51.79
+#&gt; 42  Activation_9.fcs    Stim-B       0 CD8 T Cells      17.35   51.72
+#&gt; 43 Activation_10.fcs    Stim-B       0 CD8 T Cells      15.00   49.44
+#&gt; 44 Activation_11.fcs    Stim-B       5 CD8 T Cells      19.19   52.73
+#&gt; 45 Activation_12.fcs    Stim-B       5 CD8 T Cells      16.26   53.19
+#&gt; 46 Activation_13.fcs    Stim-B      50 CD8 T Cells      18.41   52.24
+#&gt; 47 Activation_14.fcs    Stim-B      50 CD8 T Cells      16.44   50.74
+#&gt; 48 Activation_15.fcs    Stim-B     500 CD8 T Cells      20.97   53.79
+#&gt; 49 Activation_16.fcs    Stim-B     500 CD8 T Cells      19.14   53.41
+#&gt; 50 Activation_17.fcs    Stim-C       0 CD8 T Cells      15.02   48.56
+#&gt; 51 Activation_18.fcs    Stim-C       0 CD8 T Cells      14.12   47.31
+#&gt; 52 Activation_19.fcs    Stim-C       5 CD8 T Cells      19.61   50.58
+#&gt; 53 Activation_20.fcs    Stim-C       5 CD8 T Cells      14.88   47.69
+#&gt; 54 Activation_21.fcs    Stim-C      50 CD8 T Cells      21.52   53.02
+#&gt; 55 Activation_22.fcs    Stim-C      50 CD8 T Cells      18.93   53.35
+#&gt; 56 Activation_23.fcs    Stim-C     500 CD8 T Cells      21.39   56.17
+#&gt; 57 Activation_24.fcs    Stim-C     500 CD8 T Cells      21.72   56.96
+#&gt; 58 Activation_25.fcs    Stim-D       0 CD8 T Cells      19.94   53.42
+#&gt; 59 Activation_26.fcs    Stim-D       0 CD8 T Cells      19.33   53.57
+#&gt; 60 Activation_27.fcs    Stim-D       5 CD8 T Cells      20.46   54.76
+#&gt; 61 Activation_28.fcs    Stim-D       5 CD8 T Cells      19.99   55.56
+#&gt; 62 Activation_29.fcs    Stim-D      50 CD8 T Cells      22.96   58.47
+#&gt; 63 Activation_30.fcs    Stim-D      50 CD8 T Cells      23.05   56.48
+#&gt; 64 Activation_31.fcs    Stim-D     500 CD8 T Cells      21.61   57.73
+#&gt; 65 Activation_32.fcs    Stim-D     500 CD8 T Cells      21.51   59.17
+#&gt; 66 Activation_33.fcs        NA       0 CD8 T Cells       0.00     NaN</div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -453,7 +481,7 @@ prior to computing statistics.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

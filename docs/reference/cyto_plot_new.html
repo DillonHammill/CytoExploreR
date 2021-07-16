@@ -47,10 +47,11 @@
 
 
 <meta property="og:title" content="Open new graphics device for cyto_plot — cyto_plot_new" />
-<meta property="og:description" content="cyto_plot_new is used internally by cyto_plot to open an
-OS-specific interactive garphics device to facilitate gate drawing. Mac users
-will need to install XQuartz for this
-functionality." />
+<meta property="og:description" content="cyto_plot_new opens a new RStudio or pop-up graphics device and
+accepts arguments to set the graphical parameters of the new device.
+cyto_plot_new() is used internally by cyto_plot to open an OS-specific
+interactive garphics device to facilitate gate drawing. Mac users will need
+to install XQuartz for this functionality." />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -83,7 +84,7 @@ functionality." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -118,7 +119,7 @@ functionality." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,35 +153,41 @@ functionality." />
     </div>
 
     <div class="ref-description">
-    <p><code>cyto_plot_new</code> is used internally by cyto_plot to open an
-OS-specific interactive garphics device to facilitate gate drawing. Mac users
-will need to install <a href='https://www.xquartz.org/'>XQuartz</a> for this
-functionality.</p>
+    <p><code>cyto_plot_new</code> opens a new RStudio or pop-up graphics device and
+accepts arguments to set the graphical parameters of the new device.
+<code>cyto_plot_new()</code> is used internally by cyto_plot to open an OS-specific
+interactive garphics device to facilitate gate drawing. Mac users will need
+to install <a href='https://www.xquartz.org/'>XQuartz</a> for this functionality.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_plot_new</span>(<span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_plot_new</span><span class='op'>(</span><span class='va'>popup</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>popup</th>
-      <td><p>logical indicating whether a popup graphics device should be
-opened.</p></td>
+      <td><p>logical indicating whether a pop-up graphics device should be
+opened, set to TRUE by default if called outside of <code><a href='cyto_plot.html'>cyto_plot()</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments passed to
-<code>dev.new</code>:</p></td>
+      <td><p>additional graphical parameters supplied by name to be passed to
+<code><a href='cyto_plot_par.html'>cyto_plot_par</a></code> to customise the new graphics device.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># Open platform-specific graphics device</span>
-<span class='fu'>cyto_plot_new</span>()
-}</div></pre>
+<span class='fu'>cyto_plot_new</span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -196,7 +203,7 @@ opened.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

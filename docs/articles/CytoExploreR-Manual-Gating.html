@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -98,13 +98,14 @@
 
       
 
-      </header><script src="CytoExploreR-Manual-Gating_files/header-attrs-2.2/header-attrs.js"></script><div class="row">
+      </header><script src="CytoExploreR-Manual-Gating_files/header-attrs-2.5/header-attrs.js"></script><link href="CytoExploreR-Manual-Gating_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
+<script src="CytoExploreR-Manual-Gating_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Manual Gating</h1>
                         <h4 class="author">Dillon Hammill</h4>
             
-            <h4 class="date">2020-06-19</h4>
+            <h4 class="date">2021-05-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/DillonHammill/CytoExploreR/blob/master/vignettes/CytoExploreR-Manual-Gating.Rmd"><code>vignettes/CytoExploreR-Manual-Gating.Rmd</code></a></small>
       <div class="hidden name"><code>CytoExploreR-Manual-Gating.Rmd</code></div>
@@ -126,39 +127,42 @@ Cytometry data analysis typically involves a process of manual gating to separat
 <div style="line-height: 1.8em;">
 To demonsrate the each of these <code>cyto_gate_draw</code> gate types, users will need to download and setup the <code>Activation</code> dataset shipped with <strong>CytoExploreRData</strong>. This vignette is for demonstration purposes only, we will not be gating the GatingSet directly as we will be gating random populations.
 </div>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="co"># Load required packages</span>
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">CytoExploreR</span>)
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Load required packages</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DillonHammill/CytoExploreR">CytoExploreR</a></span><span class="op">)</span>
 
 <span class="co"># Setup Activation samples</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span>(<span class="st">"Activation-Samples"</span>,
-                 <span class="kw">gatingTemplate</span> <span class="kw">=</span> <span class="st">"Manual-Gating.csv"</span>)
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span><span class="op">(</span><span class="st">"Activation-Samples"</span>,
+                 gatingTemplate <span class="op">=</span> <span class="st">"Manual-Gating.csv"</span><span class="op">)</span>
 
 <span class="co"># Apply compensation</span>
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span>(<span class="no">gs</span>)
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_compensate.html">cyto_compensate</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span>
 
 <span class="co"># Transform fluorescent channels</span>
-<span class="no">trans</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_logicle.html">cyto_transformer_logicle</a></span>(<span class="no">gs</span>)
-<span class="no">gs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span>(<span class="no">gs</span>,
-                     <span class="kw">trans</span> <span class="kw">=</span> <span class="no">trans</span>)
+<span class="va">trans</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transformer_logicle.html">cyto_transformer_logicle</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span>
+<span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span><span class="op">(</span><span class="va">gs</span>,
+                     trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span>
 
 <span class="co"># Extract root cytoset</span>
-<span class="no">cs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/cyto_extract.html">cyto_extract</a></span>(<span class="no">gs</span>, <span class="st">"root"</span>)</pre></body></html></div>
+<span class="va">cs</span> <span class="op">&lt;-</span> <span class="fu">cyto_extract</span><span class="op">(</span><span class="va">gs</span>, <span class="st">"root"</span><span class="op">)</span></code></pre></div>
 <div id="boundary-gates" class="section level2">
 <h2 class="hasAnchor">
 <a href="#boundary-gates" class="anchor"></a>Boundary Gates</h2>
 <div style="line-height: 1.8em;">
 Boundary gates are used to exclude events above a certain threshold in 1D or 2D plots. To draw a boundary gate, simply select the uppermost limit of the gate and all events below the selected boundary will be included in a rectangle gate.
 </div>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"boundary"</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-1.gif" width="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="st">"FSC-A"</span>,
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"boundary"</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-2.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"boundary"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-1.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"Cells"</span>,
+               channels <span class="op">=</span> <span class="st">"FSC-A"</span>,
+               type <span class="op">=</span> <span class="st">"boundary"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-2.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="rectangle-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -166,13 +170,14 @@ Boundary gates are used to exclude events above a certain threshold in 1D or 2D 
 <div style="line-height: 1.8em;">
 Rectangle gates can be drawn around populations in 2D scatter plots. To draw a rectangle gate, simply select two diagonal points that define the limits of the population and a rectangle will constructed around the population.
 </div>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="co"># Rectangle gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"CD4 T Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>, <span class="st">"CD8"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"rectangle"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-3.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Rectangle gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"CD4 T Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>, <span class="st">"CD8"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"rectangle"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-3.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="polygon-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -180,12 +185,13 @@ Rectangle gates can be drawn around populations in 2D scatter plots. To draw a r
 <div style="line-height: 1.8em;">
 Polygon gates are the default gate type for 2D plots. To draw a polygon gate around a population, simply select the points that define the boundary of the population and right click to close the gate. Windows users will need to select “stop” from the dropdown menu.
 </div>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="co"># Polygon gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"FSC-A"</span>, <span class="st">"SSC-A"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"polygon"</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-4.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Polygon gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>, <span class="st">"SSC-A"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"polygon"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-4.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="ellipsoid-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -193,13 +199,14 @@ Polygon gates are the default gate type for 2D plots. To draw a polygon gate aro
 <div style="line-height: 1.8em;">
 Ellipsoid gates are supported for populations visible in 2D plots. To draw an ellipsoid gate around the population, simply select four points that encompass the population and an ellipse will be constructed around the population. Currently, ellipsoid gates are only supported for channels on the scale (i.e. both channels must be either linear or transformed).
 </div>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># Ellipse gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"CD8 T Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>, <span class="st">"CD8"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"ellipse"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-5.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Ellipse gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"CD8 T Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>, <span class="st">"CD8"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"ellipse"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-5.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="interval-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -207,20 +214,22 @@ Ellipsoid gates are supported for populations visible in 2D plots. To draw an el
 <div style="line-height: 1.8em;">
 Interval gates can be used to gate a population in 1D or 2D plots which lies between an upper and lower limit. To draw an interval gate around a population, simply select the lower and upper boundary of the population and a rectangle gate will be constructed around the population.
 </div>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># Interval gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"T Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD44"</span>, <span class="st">"Va2"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"interval"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-6.gif" width="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="co"># Interval gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"T Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="st">"Va2"</span>,
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"interval"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-7.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Interval gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"T Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Va2"</span>, <span class="st">"CD44"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"interval"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-6.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Interval gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"T Cells"</span>,
+               channels <span class="op">=</span> <span class="st">"Va2"</span>,
+               type <span class="op">=</span> <span class="st">"interval"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-7.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="threshold-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -228,20 +237,22 @@ Interval gates can be used to gate a population in 1D or 2D plots which lies bet
 <div style="line-height: 1.8em;">
 Threshold gates can be used to gate a population in 1D or 2D plots that lies above a certain threshold. To draw a threshold gate around a population, simply select the lowermost limit of the population to construct a rectangle gate around the events above this threshold.
 </div>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="co"># Threshold gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"Dead Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Hoechst-405"</span>, <span class="st">"Hoechst-430"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"threshold"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-8.gif" width="60%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="co"># Threshold gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="st">"T Cells"</span>,
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="st">"Va2"</span>,
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"threshold"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-9.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Threshold gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"Dead Cells"</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Hoechst-405"</span>, <span class="st">"Hoechst-430"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"threshold"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-8.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Threshold gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="st">"T Cells"</span>,
+               channels <span class="op">=</span> <span class="st">"Va2"</span>,
+               type <span class="op">=</span> <span class="st">"threshold"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-9.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="quadrant-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -249,13 +260,14 @@ Threshold gates can be used to gate a population in 1D or 2D plots that lies abo
 <div style="line-height: 1.8em;">
 Quadrant gates can be used to gate four distinct populations in 2D plots. To draw a quadrant gate around these populations, simply select the centermost point between these populations to position the quadrant gate crosshair. Population names should be passed to the alias argument in top left, top right, bottom right and bottom left order (clockwise).
 </div>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="co"># Quadrant gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>),
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"quadrant"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-10.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Quadrant gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span><span class="op">)</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>,<span class="st">"CD8"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"quadrant"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-10.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="web-gates-experimental" class="section level2">
 <h2 class="hasAnchor">
@@ -263,13 +275,14 @@ Quadrant gates can be used to gate four distinct populations in 2D plots. To dra
 <div style="line-height: 1.8em;">
 Web gates are an experimetal version of quadrant gates that allow gating of multiple populations located around a central point. To contruct a web gate around populations, simply select the centermost point and surrounding points to draw a polygon gate around each poulation. The current implementation of web gates does not account for events shared between gates and for this reason has been flagged as an experimental feature until this issue has been addressed.
 </div>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="co"># Web gate</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span>),
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"web"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-11.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Web gate</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>,<span class="st">"B"</span>,<span class="st">"C"</span>,<span class="st">"D"</span><span class="op">)</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>,<span class="st">"CD8"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"web"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-11.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="multiple-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -277,13 +290,14 @@ Web gates are an experimetal version of quadrant gates that allow gating of mult
 <div style="line-height: 1.8em;">
 Multiple gates can be easily constructed by supplying multiple population names to the alias argument.
 </div>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="co"># Multiple gates</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>),
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"rectangle"</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-12.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Multiple gates</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>,<span class="st">"CD8"</span><span class="op">)</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>,<span class="st">"CD8"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"rectangle"</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-12.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="mixed-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -291,13 +305,14 @@ Multiple gates can be easily constructed by supplying multiple population names 
 <div style="line-height: 1.8em;">
 Multiple populations can also be gated using different gate types by supplying a vector of gate types to the type argument.
 </div>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="co"># Multiple gates</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>),
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CD4"</span>,<span class="st">"CD8"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"rectangle"</span>, <span class="st">"ellipse"</span>),
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-13.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Multiple gates</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>,<span class="st">"CD8"</span><span class="op">)</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>,<span class="st">"CD8"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"rectangle"</span>, <span class="st">"ellipse"</span><span class="op">)</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-13.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 <div id="negated-gates" class="section level2">
 <h2 class="hasAnchor">
@@ -305,14 +320,15 @@ Multiple populations can also be gated using different gate types by supplying a
 <div style="line-height: 1.8em;">
 Negated gates can be used to gate populations outside of the constructed gate by setting the negate argument to TRUE. The name of the negated population must always be supplied last to the alias argument.
 </div>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="co"># Multiple gates</span>
-<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span>(<span class="no">cs</span>,
-               <span class="kw">alias</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Dead Cells"</span>,<span class="st">"Live Cells"</span>),
-               <span class="kw">channels</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Hoechst-405"</span>,<span class="st">"Hoechst-430"</span>),
-               <span class="kw">type</span> <span class="kw">=</span> <span class="st">"rectangle"</span>,
-               <span class="kw">negate</span> <span class="kw">=</span> <span class="fl">TRUE</span>,
-               <span class="kw">axes_trans</span> <span class="kw">=</span> <span class="no">trans</span>)</pre></body></html></div>
-<p><img src="Gating/Manual-Gating-14.gif" width="60%" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Negated gates</span>
+<span class="fu"><a href="../reference/cyto_gate_draw.html">cyto_gate_draw</a></span><span class="op">(</span><span class="va">cs</span>,
+               alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Dead Cells"</span>,<span class="st">"Live Cells"</span><span class="op">)</span>,
+               channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Hoechst-405"</span>,<span class="st">"Hoechst-430"</span><span class="op">)</span>,
+               type <span class="op">=</span> <span class="st">"rectangle"</span>,
+               negate <span class="op">=</span> <span class="cn">TRUE</span>,
+               axes_trans <span class="op">=</span> <span class="va">trans</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../R%20Projects/CytoExploreR/vignettes/Gating/Manual-Gating-14.gif" width="60%" style="display: block; margin: auto;"></p>
 </div>
 </div>
   </div>
@@ -332,7 +348,7 @@ Negated gates can be used to gate populations outside of the constructed gate by
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

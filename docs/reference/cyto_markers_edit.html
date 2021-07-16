@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Assign marker names to flowFrame or flowSet — cyto_markers_edit • CytoExploreR</title>
+<title>Assign marker names to cytoframe or cytoset — cyto_markers_edit • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,7 +46,7 @@
 
 
 
-<meta property="og:title" content="Assign marker names to flowFrame or flowSet — cyto_markers_edit" />
+<meta property="og:title" content="Assign marker names to cytoframe or cytoset — cyto_markers_edit" />
 <meta property="og:description" content="cyto_markers_edit opens an editable table containing a list of
 channels and markers for a flowFrame,
 flowSet,
@@ -87,7 +87,7 @@ window and saved to a &quot;Experiment-markers.csv&quot; file for future use." /
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -122,7 +122,7 @@ window and saved to a &quot;Experiment-markers.csv&quot; file for future use." /
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -150,7 +150,7 @@ window and saved to a &quot;Experiment-markers.csv&quot; file for future use." /
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Assign marker names to flowFrame or flowSet</h1>
+    <h1>Assign marker names to cytoframe or cytoset</h1>
     <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto-helpers.R'><code>R/cyto-helpers.R</code></a></small>
     <div class="hidden name"><code>cyto_markers_edit.Rd</code></div>
     </div>
@@ -166,7 +166,7 @@ respectively. These entries will be updated in the <code>x</code> upon closing t
 window and saved to a "Experiment-markers.csv" file for future use.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_markers_edit</span>(<span class='no'>x</span>, <span class='kw'>file</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_markers_edit</span><span class='op'>(</span><span class='va'>x</span>, file <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -184,26 +184,31 @@ window and saved to a "Experiment-markers.csv" file for future use.</p>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments passed to <code>data_editor</code>.</p></td>
+      <td><p>not in use.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>save inputs to "Experiment-Markers.csv" and returns updated samples.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
 
 <span class='co'># Add marker names to channels - edit table</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_markers_edit</span>(<span class='no'>fs</span>)
-}</div></pre>
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_markers_edit</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -219,7 +224,7 @@ window and saved to a "Experiment-markers.csv" file for future use.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

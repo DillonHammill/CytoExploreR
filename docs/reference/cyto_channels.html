@@ -48,7 +48,8 @@
 
 <meta property="og:title" content="Extract channel names — cyto_channels" />
 <meta property="og:description" content="Simply a wrapper around colnames to extract the channels associated
-with a flowFrame, flowSet or GatingSet." />
+with a cytoframe, cytoset GatingHierarchy or
+GatingSet." />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -81,7 +82,7 @@ with a flowFrame, flowSet or GatingSet." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -116,7 +117,7 @@ with a flowFrame, flowSet or GatingSet." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -151,18 +152,19 @@ with a flowFrame, flowSet or GatingSet." />
 
     <div class="ref-description">
     <p>Simply a wrapper around <code>colnames</code> to extract the channels associated
-with a <code>flowFrame</code>, <code>flowSet</code> or <code>GatingSet</code>.</p>
+with a <code>cytoframe</code>, <code>cytoset</code> <code>GatingHierarchy</code> or
+<code>GatingSet</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_channels</span>(<span class='no'>x</span>, <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_channels</span><span class='op'>(</span><span class='va'>x</span>, select <span class='op'>=</span> <span class='cn'>NULL</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>,
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
@@ -188,41 +190,41 @@ default which ignores character case, set <code>fixed</code> to TRUE.</p></td>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='cyto_fluor_channels.html'>cyto_fluor_channels</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
-
-<span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Activation GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>load_gs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata/Activation-GatingSet"</span>,
+                          package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='co'># flowFrame</span>
-<span class='fu'>cyto_channels</span>(<span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]])</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
-#&gt;  [4] "SSC-A"             "SSC-H"             "SSC-W"            
-#&gt;  [7] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
-#&gt; [10] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
-#&gt; [13] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
-#&gt; [16] "Alexa Fluor 700-A" "APC-Cy7-A"         "Time"             </div><div class='input'>
-<span class='co'># flowSet</span>
-<span class='fu'>cyto_channels</span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
+<span class='co'># GatingSet</span>
+<span class='fu'>cyto_channels</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
 #&gt;  [4] "SSC-A"             "SSC-H"             "SSC-W"            
 #&gt;  [7] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
 #&gt; [10] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
 #&gt; [13] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
 #&gt; [16] "Alexa Fluor 700-A" "APC-Cy7-A"         "Time"             </div><div class='input'>
 <span class='co'># GatingHierarchy</span>
-<span class='fu'>cyto_channels</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>1</span>]])</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
+<span class='fu'>cyto_channels</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, select <span class='op'>=</span> <span class='st'>"Alexa"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "Alexa Fluor 488-A" "Alexa Fluor 405-A" "Alexa Fluor 430-A"
+#&gt; [4] "Alexa Fluor 647-A" "Alexa Fluor 700-A"</div><div class='input'>
+<span class='co'># cytoset</span>
+<span class='va'>cs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_data_extract.html'>cyto_data_extract</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='st'>"root"</span><span class='op'>)</span><span class='op'>[[</span><span class='st'>"root"</span><span class='op'>]</span><span class='op'>]</span>
+<span class='fu'>cyto_channels</span><span class='op'>(</span><span class='va'>cs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
 #&gt;  [4] "SSC-A"             "SSC-H"             "SSC-W"            
 #&gt;  [7] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
 #&gt; [10] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
 #&gt; [13] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
 #&gt; [16] "Alexa Fluor 700-A" "APC-Cy7-A"         "Time"             </div><div class='input'>
-<span class='co'># GatingSet - exclude FSC &amp; SSC channels</span>
-<span class='fu'>cyto_channels</span>(<span class='no'>gs</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"FSC"</span>,<span class='st'>"SSC"</span>))</div><div class='output co'>#&gt;  [1] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
+<span class='co'># cytoframe</span>
+<span class='fu'>cyto_channels</span><span class='op'>(</span><span class='va'>cs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>, exclude <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FSC"</span>,<span class='st'>"SSC"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
 #&gt;  [4] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
 #&gt;  [7] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
 #&gt; [10] "Alexa Fluor 700-A" "APC-Cy7-A"         "Time"             </div><div class='input'>
@@ -242,7 +244,7 @@ default which ignores character case, set <code>fixed</code> to TRUE.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

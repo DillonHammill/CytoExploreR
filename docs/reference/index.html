@@ -79,7 +79,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -114,7 +114,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -168,15 +168,21 @@
       <tr>
         
         <td>
-          <p><code><a href="cyto_barcode.html">cyto_barcode()</a></code> </p>
+          <p><code><a href="cyto_apply.html">cyto_apply(<i>&lt;list&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Barcode each file in a flowSet with a sample ID</p></td>
+        <td><p>Apply a function to elements of cytoset, GatingHierarchy or GatingSet</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_beads_sample.html">cyto_beads_sample()</a></code> </p>
+          <p><code><a href="cyto_array_analyse.html">cyto_array_analyse</a></code> </p>
         </td>
-        <td><p>Sample GatingSet to bead count</p></td>
+        <td><p>Analyse cytokine bead array data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_barcode.html">cyto_barcode()</a></code> </p>
+        </td>
+        <td><p>Barcode each sample or event in a cytoset or GatingSet</p></td>
       </tr><tr>
         
         <td>
@@ -192,6 +198,18 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_cbind.html">cyto_cbind(<i>&lt;flowFrame&gt;</i>)</a></code> <code><a href="cyto_cbind.html">cyto_cbind(<i>&lt;flowSet&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Bind new columns to cytoframe or cytoset</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_channels-set.html">`cyto_channels&lt;-`()</a></code> </p>
+        </td>
+        <td><p>Replace channel names</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_channels.html">cyto_channels()</a></code> </p>
         </td>
         <td><p>Extract channel names</p></td>
@@ -204,7 +222,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_channels_restrict.html">cyto_channels_restrict(<i>&lt;flowFrame&gt;</i>)</a></code> <code><a href="cyto_channels_restrict.html">cyto_channels_restrict(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_channels_restrict.html">cyto_channels_restrict(<i>&lt;GatingSet&gt;</i>)</a></code> </p>
+          <p><code><a href="cyto_channels_restrict.html">cyto_channels_restrict()</a></code> </p>
         </td>
         <td><p>Restrict the channels of a cytometry object</p></td>
       </tr><tr>
@@ -212,7 +230,7 @@
         <td>
           <p><code><a href="cyto_channel_match.html">cyto_channel_match()</a></code> </p>
         </td>
-        <td><p>Table Editor for Channel Match File Construction</p></td>
+        <td><p>Create a csv file assigning a channel to each compensation control</p></td>
       </tr><tr>
         
         <td>
@@ -222,9 +240,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_check.html">cyto_check()</a></code> </p>
+          <p><code><a href="cyto_class.html">cyto_class()</a></code> </p>
         </td>
-        <td><p>Check a flowFrame, flowSet, GatingHierarchy or GatingSet has been supplied</p></td>
+        <td><p>Get class of a cytometry object</p></td>
       </tr><tr>
         
         <td>
@@ -234,21 +252,27 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_coerce.html">cyto_coerce()</a></code> </p>
+        </td>
+        <td><p>Coerce cytoframes in a cytoset</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_compensate.html">cyto_compensate()</a></code> </p>
         </td>
         <td><p>Apply fluorescence compensation to samples</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_convert.html">cyto_convert()</a></code> </p>
-        </td>
-        <td><p>Convert between cytometry objects</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cyto_copy.html">cyto_copy()</a></code> </p>
         </td>
         <td><p>Copy a cytoset, cytoframe or GatingSet</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_data_extract.html">cyto_data_extract()</a></code> </p>
+        </td>
+        <td><p>Extract data from cytosets, GatingHierarchies or GatingSets</p></td>
       </tr><tr>
         
         <td>
@@ -260,7 +284,7 @@
         <td>
           <p><code><a href="cyto_details_edit.html">cyto_details_edit()</a></code> </p>
         </td>
-        <td><p>Interactively edit cyto_details for a flowSet or GatingSet</p></td>
+        <td><p>Interactively edit cyto_details for a cytoset or GatingSet</p></td>
       </tr><tr>
         
         <td>
@@ -270,21 +294,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_empty.html">cyto_empty()</a></code> </p>
-        </td>
-        <td><p>Construct an empty flowFrame</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cyto_export.html">cyto_export()</a></code> </p>
         </td>
         <td><p>Export cytometry data for use in flowJo or Cytobank</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_extract.html">cyto_extract()</a></code> </p>
+          <p><code><a href="cyto_exprs.html">cyto_exprs()</a></code> </p>
         </td>
-        <td><p>Extract a valid flowFrame or flowSet</p></td>
+        <td><p>Extract raw data matrix from cytoframe or cytoset</p></td>
       </tr><tr>
         
         <td>
@@ -309,6 +327,12 @@
           <p><code><a href="cyto_gate_convert.html">cyto_gate_convert(<i>&lt;rectangleGate&gt;</i>)</a></code> <code><a href="cyto_gate_convert.html">cyto_gate_convert(<i>&lt;polygonGate&gt;</i>)</a></code> <code><a href="cyto_gate_convert.html">cyto_gate_convert(<i>&lt;ellipsoidGate&gt;</i>)</a></code> <code><a href="cyto_gate_convert.html">cyto_gate_convert(<i>&lt;quadGate&gt;</i>)</a></code> <code><a href="cyto_gate_convert.html">cyto_gate_convert(<i>&lt;filters&gt;</i>)</a></code> <code><a href="cyto_gate_convert.html">cyto_gate_convert(<i>&lt;list&gt;</i>)</a></code> <code><a href="cyto_gate_convert.html">cyto_gate_prepare()</a></code> </p>
         </td>
         <td><p>Convert Between 1D and 2D Gate Objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_gate_copy.html">cyto_gate_copy()</a></code> </p>
+        </td>
+        <td><p>Copy gates to other nodes in GatingSet and update gatingTemplate</p></td>
       </tr><tr>
         
         <td>
@@ -384,6 +408,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_gatingTemplate_read.html">cyto_gatingTemplate_read()</a></code> </p>
+        </td>
+        <td><p>Read in a gatingTemplate object or gatingTemplate csv file</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_gatingTemplate_select.html">cyto_gatingTemplate_select()</a></code> </p>
         </td>
         <td><p>Select a gatingTemplate for downstream analyses</p></td>
@@ -396,9 +426,27 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_gatingTemplate_write.html">cyto_gatingTemplate_write()</a></code> </p>
+        </td>
+        <td><p>Write gatingTemplate to csv file</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_groups.html">cyto_groups()</a></code> </p>
+        </td>
+        <td><p>Retrieve details about experimental groups</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_group_by.html">cyto_group_by()</a></code> </p>
         </td>
         <td><p>Group a flowSet or GatingSet by experiment variables</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_list.html">cyto_list()</a></code> </p>
+        </td>
+        <td><p>Convert cytoset or GatingSet to a list of its elements</p></td>
       </tr><tr>
         
         <td>
@@ -414,7 +462,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_markers.html">cyto_markers(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_markers.html">cyto_markers(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_markers.html">cyto_markers(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_markers.html">cyto_markers(<i>&lt;flowFrame&gt;</i>)</a></code> </p>
+          <p><code><a href="cyto_markers.html">cyto_markers()</a></code> </p>
         </td>
         <td><p>Extract marker names</p></td>
       </tr><tr>
@@ -422,7 +470,7 @@
         <td>
           <p><code><a href="cyto_markers_edit.html">cyto_markers_edit()</a></code> </p>
         </td>
-        <td><p>Assign marker names to flowFrame or flowSet</p></td>
+        <td><p>Assign marker names to cytoframe or cytoset</p></td>
       </tr><tr>
         
         <td>
@@ -432,9 +480,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_merge_by.html">cyto_merge_by(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_merge_by.html">cyto_merge_by(<i>&lt;flowSet&gt;</i>)</a></code> </p>
+          <p><code><a href="cyto_merge_by.html">cyto_merge_by()</a></code> </p>
         </td>
-        <td><p>Merge a flowSet by experiment variables</p></td>
+        <td><p>Merge a cytoset by experiment variables</p></td>
       </tr><tr>
         
         <td>
@@ -468,15 +516,33 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_nodes_check.html">cyto_nodes_check()</a></code> </p>
+        </td>
+        <td><p>Check if nodes are unique and exist in GatingSet or GatingHierarchy</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_nodes_convert.html">cyto_nodes_convert()</a></code> </p>
         </td>
         <td><p>Convert to unique node paths</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_option.html">cyto_option()</a></code> </p>
+        </td>
+        <td><p>Retrieve or set a global option for CytoExploreR</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_plot.html">cyto_plot(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_plot.html">cyto_plot(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_plot.html">cyto_plot(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_plot.html">cyto_plot(<i>&lt;flowFrame&gt;</i>)</a></code> </p>
         </td>
         <td><p>cyto_plot</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_plot2.html">cyto_plot2(<i>&lt;flowSet&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>New and improved cyto_plot</p></td>
       </tr><tr>
         
         <td>
@@ -488,7 +554,7 @@
         <td>
           <p><code><a href="cyto_plot_complete.html">cyto_plot_complete()</a></code> </p>
         </td>
-        <td><p>Indicate Completion of Custom cyto_plot Layout for Saving</p></td>
+        <td><p>Save custom plot and reset associated settings</p></td>
       </tr><tr>
         
         <td>
@@ -500,13 +566,7 @@
         <td>
           <p><code><a href="cyto_plot_custom.html">cyto_plot_custom()</a></code> </p>
         </td>
-        <td><p>Create custom cyto_plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cyto_plot_density.html">cyto_plot_density()</a></code> </p>
-        </td>
-        <td><p>Add density distributions to empty plots</p></td>
+        <td><p>Set customised graphical parameters for cyto_plot</p></td>
       </tr><tr>
         
         <td>
@@ -528,15 +588,33 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_plot_gating_scheme.html">cyto_plot_gating_scheme(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_plot_gating_scheme.html">cyto_plot_gating_scheme(<i>&lt;GatingHierarchy&gt;</i>)</a></code> </p>
+          <p><code><a href="cyto_plot_gating_scheme.html">cyto_plot_gating_scheme2(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_plot_gating_scheme.html">cyto_plot_gating_scheme(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_plot_gating_scheme.html">cyto_plot_gating_scheme(<i>&lt;GatingHierarchy&gt;</i>)</a></code> </p>
         </td>
         <td><p>Plot Cytometry Gating Strategies</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_plot_gating_scheme2.html">cyto_plot_gating_scheme2</a></code> </p>
+        </td>
+        <td><p>Plot cytometry gating strategies</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="cyto_plot_gating_tree.html">cyto_plot_gating_tree(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_plot_gating_tree.html">cyto_plot_gating_tree(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_plot_gating_tree.html">cyto_plot_gating_tree(<i>&lt;gatingTemplate&gt;</i>)</a></code> </p>
         </td>
         <td><p>Plot Gating Trees</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_plot_heatmap.html">cyto_plot_heatmap(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_plot_heatmap.html">cyto_plot_heatmap(<i>&lt;flowFrame&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Construct a heatmap of cytometry data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_plot_hist.html">cyto_plot_hist()</a></code> </p>
+        </td>
+        <td><p>Add histograms to empty plots</p></td>
       </tr><tr>
         
         <td>
@@ -552,9 +630,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_plot_layout.html">cyto_plot_layout()</a></code> </p>
+          <p><code><a href="cyto_plot_map.html">cyto_plot_map(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_plot_map.html">cyto_plot_map(<i>&lt;flowFrame&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Set Panel Layout for cyto_plot</p></td>
+        <td><p>Plot maps coloured by parameter</p></td>
       </tr><tr>
         
         <td>
@@ -564,13 +642,19 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="cyto_plot_par.html">cyto_plot_par()</a></code> </p>
+        </td>
+        <td><p>Extract a list of graphical parameters set by cyto_plot</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cyto_plot_point.html">cyto_plot_point()</a></code> </p>
         </td>
         <td><p>Add points and contour lines to empty cyto_plot</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_plot_profile.html">cyto_plot_profile(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_plot_profile.html">cyto_plot_profile(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_plot_profile.html">cyto_plot_profile(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_plot_profile.html">cyto_plot_profile(<i>&lt;flowFrame&gt;</i>)</a></code> </p>
+          <p><code><a href="cyto_plot_profile.html">cyto_plot_profile()</a></code> </p>
         </td>
         <td><p>Plot expression profile in all channels</p></td>
       </tr><tr>
@@ -594,12 +678,6 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_plot_save_reset.html">cyto_plot_save_reset()</a></code> </p>
-        </td>
-        <td><p>Revert unwanted cyto_plot_save call</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cyto_plot_theme.html">cyto_plot_theme()</a></code> </p>
         </td>
         <td><p>Create custom themes for cyto_plot</p></td>
@@ -612,15 +690,21 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_plot_theme_reset.html">cyto_plot_theme_reset()</a></code> </p>
+          <p><code><a href="cyto_sample.html">cyto_sample()</a></code> </p>
         </td>
-        <td><p>Reset cyto_plot_theme to default settings</p></td>
+        <td><p>Sample a cytoframe, cytoset, GatingHierarchy or GatingSet</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_sample.html">cyto_sample()</a></code> </p>
+          <p><code><a href="cyto_sample_n.html">cyto_sample_n()</a></code> </p>
         </td>
-        <td><p>Sample a flowFrame or flowSet</p></td>
+        <td><p>Compute sample number for each cytoframe in a cytoset</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_sample_to_node.html">cyto_sample_to_node()</a></code> </p>
+        </td>
+        <td><p>Sample GatingSet to node</p></td>
       </tr><tr>
         
         <td>
@@ -638,7 +722,13 @@
         <td>
           <p><code><a href="cyto_setup.html">cyto_setup()</a></code> </p>
         </td>
-        <td><p>Load.fcs files into GatingSet and annotate with experiment details</p></td>
+        <td><p>Load, annotate and prepare FCS files into a GatingSet</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cyto_sort_by.html">cyto_sort_by()</a></code> </p>
+        </td>
+        <td><p>Sort a flowSet or GatingSet by experiment variables</p></td>
       </tr><tr>
         
         <td>
@@ -672,7 +762,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cyto_stats_compute.html">cyto_stats_compute(<i>&lt;GatingSet&gt;</i>)</a></code> <code><a href="cyto_stats_compute.html">cyto_stats_compute(<i>&lt;GatingHierarchy&gt;</i>)</a></code> <code><a href="cyto_stats_compute.html">cyto_stats_compute(<i>&lt;flowSet&gt;</i>)</a></code> <code><a href="cyto_stats_compute.html">cyto_stats_compute(<i>&lt;flowFrame&gt;</i>)</a></code> </p>
+          <p><code><a href="cyto_stats_compute.html">cyto_stats_compute()</a></code> </p>
         </td>
         <td><p>Compute, export and save statistics</p></td>
       </tr><tr>
@@ -726,21 +816,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="data_editor.html">data_editor()</a></code> </p>
-        </td>
-        <td><p>Interactive data editor</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="fftRtsne.html">fftRtsne()</a></code> </p>
         </td>
         <td><p>FIt-SNE Based on Kluger Lab FIt-SNE</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="file_wd_check.html">file_wd_check()</a></code> </p>
-        </td>
-        <td><p>Check if a file exists in the current working directory</p></td>
       </tr>
     </tbody>
     </table>
@@ -760,7 +838,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

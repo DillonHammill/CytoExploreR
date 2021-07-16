@@ -48,9 +48,8 @@
 
 <meta property="og:title" content="Extract experiment details — cyto_details" />
 <meta property="og:description" content="Simply an autocomplete-friendly wrapper around
-pData. A call is made to
-cyto_names if a
-flowFrame is supplied." />
+pData with some additional
+formatting options." />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -83,7 +82,7 @@ flowFrame is supplied." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -118,7 +117,7 @@ flowFrame is supplied." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -153,40 +152,99 @@ flowFrame is supplied." />
 
     <div class="ref-description">
     <p>Simply an autocomplete-friendly wrapper around
-<code><a href='https://rdrr.io/pkg/flowWorkspace/man/pData-methods.html'>pData</a></code>. A call is made to
-<code><a href='cyto_names.html'>cyto_names</a></code> if a
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code> is supplied.</p>
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/pData-methods.html'>pData</a></code> with some additional
+formatting options.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_details</span>(<span class='no'>x</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_details</span><span class='op'>(</span><span class='va'>x</span>, convert <span class='op'>=</span> <span class='cn'>FALSE</span>, drop <span class='op'>=</span> <span class='cn'>FALSE</span>, factor <span class='op'>=</span> <span class='cn'>FALSE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code>,
-<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingSet</a></code> or
+      <td><p>object of class <code>cytoset</code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierarchy</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>convert</th>
+      <td><p>logical indicating whether
+<code><a href='https://rdrr.io/r/utils/type.convert.html'>type.convert</a></code> should be called on each
+column.</p></td>
+    </tr>
+    <tr>
+      <th>drop</th>
+      <td><p>logical indicating whether row names should be dropped, set to
+FALSE by default.</p></td>
+    </tr>
+    <tr>
+      <th>factor</th>
+      <td><p>logical indicating whether characters should be converted to
+factors when convert is TRUE, set to FALSE by default.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional arguments passed to
+<code><a href='https://rdrr.io/r/utils/type.convert.html'>type.convert</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>experiment details as data.frame.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='co'># Load in CytoExploreRData to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
-<span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-
-<span class='co'># Experiment details</span>
-<span class='fu'>cyto_details</span>(<span class='no'>fs</span>)
-}</div></pre>
+<span class='co'># Activation GatingSet</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_load.html'>cyto_load</a></span><span class='op'>(</span>
+ <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span>
+   <span class='st'>"extdata/Activation-GatingSet"</span>,
+   package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span>
+   <span class='op'>)</span>
+ <span class='op'>)</span>
+                          
+<span class='co'># Experiment variables</span>
+<span class='fu'>cyto_details</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                name Treatment OVAConc
+#&gt; Activation_1.fcs   Activation_1.fcs    Stim-A       0
+#&gt; Activation_2.fcs   Activation_2.fcs    Stim-A       0
+#&gt; Activation_3.fcs   Activation_3.fcs    Stim-A       5
+#&gt; Activation_4.fcs   Activation_4.fcs    Stim-A       5
+#&gt; Activation_5.fcs   Activation_5.fcs    Stim-A      50
+#&gt; Activation_6.fcs   Activation_6.fcs    Stim-A      50
+#&gt; Activation_7.fcs   Activation_7.fcs    Stim-A     500
+#&gt; Activation_8.fcs   Activation_8.fcs    Stim-A     500
+#&gt; Activation_9.fcs   Activation_9.fcs    Stim-B       0
+#&gt; Activation_10.fcs Activation_10.fcs    Stim-B       0
+#&gt; Activation_11.fcs Activation_11.fcs    Stim-B       5
+#&gt; Activation_12.fcs Activation_12.fcs    Stim-B       5
+#&gt; Activation_13.fcs Activation_13.fcs    Stim-B      50
+#&gt; Activation_14.fcs Activation_14.fcs    Stim-B      50
+#&gt; Activation_15.fcs Activation_15.fcs    Stim-B     500
+#&gt; Activation_16.fcs Activation_16.fcs    Stim-B     500
+#&gt; Activation_17.fcs Activation_17.fcs    Stim-C       0
+#&gt; Activation_18.fcs Activation_18.fcs    Stim-C       0
+#&gt; Activation_19.fcs Activation_19.fcs    Stim-C       5
+#&gt; Activation_20.fcs Activation_20.fcs    Stim-C       5
+#&gt; Activation_21.fcs Activation_21.fcs    Stim-C      50
+#&gt; Activation_22.fcs Activation_22.fcs    Stim-C      50
+#&gt; Activation_23.fcs Activation_23.fcs    Stim-C     500
+#&gt; Activation_24.fcs Activation_24.fcs    Stim-C     500
+#&gt; Activation_25.fcs Activation_25.fcs    Stim-D       0
+#&gt; Activation_26.fcs Activation_26.fcs    Stim-D       0
+#&gt; Activation_27.fcs Activation_27.fcs    Stim-D       5
+#&gt; Activation_28.fcs Activation_28.fcs    Stim-D       5
+#&gt; Activation_29.fcs Activation_29.fcs    Stim-D      50
+#&gt; Activation_30.fcs Activation_30.fcs    Stim-D      50
+#&gt; Activation_31.fcs Activation_31.fcs    Stim-D     500
+#&gt; Activation_32.fcs Activation_32.fcs    Stim-D     500
+#&gt; Activation_33.fcs Activation_33.fcs        NA       0</div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -202,7 +260,7 @@ flowFrame is supplied." />
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

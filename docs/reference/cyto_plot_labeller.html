@@ -81,7 +81,7 @@ cyto_plot." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -116,7 +116,7 @@ cyto_plot." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -154,16 +154,17 @@ cyto_plot." />
 cyto_plot.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_plot_labeller</span>(
-  <span class='kw'>label_text</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>label_text_x</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>label_text_y</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>label_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>label_text_size</span> <span class='kw'>=</span> <span class='fl'>0.8</span>,
-  <span class='kw'>label_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>label_fill</span> <span class='kw'>=</span> <span class='st'>"white"</span>,
-  <span class='kw'>label_fill_alpha</span> <span class='kw'>=</span> <span class='fl'>0.6</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cyto_plot_labeller</span><span class='op'>(</span>
+  label_text <span class='op'>=</span> <span class='cn'>NA</span>,
+  label_text_x <span class='op'>=</span> <span class='cn'>NA</span>,
+  label_text_y <span class='op'>=</span> <span class='cn'>NA</span>,
+  label_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  label_text_size <span class='op'>=</span> <span class='fl'>0.8</span>,
+  label_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  label_fill <span class='op'>=</span> <span class='st'>"white"</span>,
+  label_fill_alpha <span class='op'>=</span> <span class='fl'>0.6</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -209,8 +210,15 @@ for details.</p></td>
       <td><p>numeric [0,1] controls the transparency of the fill
 colour, set to <code>0.6</code> by default.</p></td>
     </tr>
+    <tr>
+      <th>...</th>
+      <td><p>not in use.</p></td>
+    </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -227,7 +235,7 @@ colour, set to <code>0.6</code> by default.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -252,7 +252,7 @@ read_from_csv <- function(x,
     dt <- as.data.frame(dt)
     if(colnames(dt)[1] == "V1") {
       rownames(dt) <- dt[, 1]
-      dt <- dt[, -1]
+      dt <- dt[, -1, drop = FALSE]
     }
   }
   return(dt)

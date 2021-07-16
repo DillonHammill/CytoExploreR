@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,14 +152,15 @@
     <p>Replacement method for cyto_names</p>
     </div>
 
-    <pre class="usage"><span class='fu'><a href='cyto_names.html'>cyto_names</a></span>(<span class='no'>x</span>) <span class='kw'>&lt;-</span> <span class='no'>value</span></pre>
+    <pre class="usage"><span class='fu'><a href='cyto_names.html'>cyto_names</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='va'>value</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class flowFrame, flowSet, GatingHierarchy or GatingSet.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
       <th>value</th>
@@ -167,16 +168,40 @@
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
-<span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+<span class='co'># Activation GatingSet</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_load.html'>cyto_load</a></span><span class='op'>(</span>
+ <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span>
+   <span class='st'>"extdata/Activation-GatingSet"</span>,
+   package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span>
+   <span class='op'>)</span>
+ <span class='op'>)</span>
 
-<span class='co'># Sample names</span>
-<span class='fu'><a href='cyto_names.html'>cyto_names</a></span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt;  [1] "Activation_1.fcs"  "Activation_2.fcs"  "Activation_3.fcs" 
+<span class='co'># GatingSet</span>
+<span class='fu'><a href='cyto_names.html'>cyto_names</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='st'>"Activation_001.fcs"</span>
+<span class='fu'><a href='cyto_names.html'>cyto_names</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "Activation_001.fcs" "Activation_2.fcs"   "Activation_3.fcs"  
+#&gt;  [4] "Activation_4.fcs"   "Activation_5.fcs"   "Activation_6.fcs"  
+#&gt;  [7] "Activation_7.fcs"   "Activation_8.fcs"   "Activation_9.fcs"  
+#&gt; [10] "Activation_10.fcs"  "Activation_11.fcs"  "Activation_12.fcs" 
+#&gt; [13] "Activation_13.fcs"  "Activation_14.fcs"  "Activation_15.fcs" 
+#&gt; [16] "Activation_16.fcs"  "Activation_17.fcs"  "Activation_18.fcs" 
+#&gt; [19] "Activation_19.fcs"  "Activation_20.fcs"  "Activation_21.fcs" 
+#&gt; [22] "Activation_22.fcs"  "Activation_23.fcs"  "Activation_24.fcs" 
+#&gt; [25] "Activation_25.fcs"  "Activation_26.fcs"  "Activation_27.fcs" 
+#&gt; [28] "Activation_28.fcs"  "Activation_29.fcs"  "Activation_30.fcs" 
+#&gt; [31] "Activation_31.fcs"  "Activation_32.fcs"  "Activation_33.fcs" </div><div class='input'>
+<span class='co'># cytoset</span>
+<span class='va'>cs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_data_extract.html'>cyto_data_extract</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='st'>"root"</span><span class='op'>)</span><span class='op'>[[</span><span class='st'>"root"</span><span class='op'>]</span><span class='op'>]</span>
+<span class='fu'><a href='cyto_names.html'>cyto_names</a></span><span class='op'>(</span><span class='va'>cs</span><span class='op'>)</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Activation_1.fcs"</span>, <span class='st'>"Activation_2.fcs"</span><span class='op'>)</span>
+<span class='fu'><a href='cyto_names.html'>cyto_names</a></span><span class='op'>(</span><span class='va'>cs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "Activation_1.fcs"  "Activation_2.fcs"  "Activation_3.fcs" 
 #&gt;  [4] "Activation_4.fcs"  "Activation_5.fcs"  "Activation_6.fcs" 
 #&gt;  [7] "Activation_7.fcs"  "Activation_8.fcs"  "Activation_9.fcs" 
 #&gt; [10] "Activation_10.fcs" "Activation_11.fcs" "Activation_12.fcs"
@@ -187,27 +212,7 @@
 #&gt; [25] "Activation_25.fcs" "Activation_26.fcs" "Activation_27.fcs"
 #&gt; [28] "Activation_28.fcs" "Activation_29.fcs" "Activation_30.fcs"
 #&gt; [31] "Activation_31.fcs" "Activation_32.fcs" "Activation_33.fcs"</div><div class='input'>
-<span class='co'># Change first sample name</span>
-<span class='fu'><a href='cyto_names.html'>cyto_names</a></span>(<span class='no'>fs</span>)[<span class='fl'>1</span>] <span class='kw'>&lt;-</span> <span class='st'>"first_sample"</span>
-
-<span class='co'># Activation GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
-
-<span class='co'># Change last sample name</span>
-<span class='fu'><a href='cyto_names.html'>cyto_names</a></span>(<span class='no'>gs</span>)[<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>gs</span>)] <span class='kw'>&lt;-</span> <span class='st'>"last_sample"</span>
-
-<span class='co'># Updated sample names</span>
-<span class='fu'><a href='cyto_names.html'>cyto_names</a></span>(<span class='no'>gs</span>)</div><div class='output co'>#&gt;  [1] "first_sample"      "Activation_2.fcs"  "Activation_3.fcs" 
-#&gt;  [4] "Activation_4.fcs"  "Activation_5.fcs"  "Activation_6.fcs" 
-#&gt;  [7] "Activation_7.fcs"  "Activation_8.fcs"  "Activation_9.fcs" 
-#&gt; [10] "Activation_10.fcs" "Activation_11.fcs" "Activation_12.fcs"
-#&gt; [13] "Activation_13.fcs" "Activation_14.fcs" "Activation_15.fcs"
-#&gt; [16] "Activation_16.fcs" "Activation_17.fcs" "Activation_18.fcs"
-#&gt; [19] "Activation_19.fcs" "Activation_20.fcs" "Activation_21.fcs"
-#&gt; [22] "Activation_22.fcs" "Activation_23.fcs" "Activation_24.fcs"
-#&gt; [25] "Activation_25.fcs" "Activation_26.fcs" "Activation_27.fcs"
-#&gt; [28] "Activation_28.fcs" "Activation_29.fcs" "Activation_30.fcs"
-#&gt; [31] "Activation_31.fcs" "Activation_32.fcs" "last_sample"      </div></pre>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -223,7 +228,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -47,10 +47,10 @@
 
 
 <meta property="og:title" content="Explore Cytometry Data in Bivariate Plots — cyto_plot_explore" />
-<meta property="og:description" content="cyto_plot_explore is an extremely useful tool to explore all aspectes
+<meta property="og:description" content="cyto_plot_explore is an extremely useful tool to explore all aspects
 of your cytometry data. cyto_plot_explore constructs a faceted plot
 for each of the supplied channels_x by plotting them against all the
-supplied channels_y. Thus providing a rapid means tro explore the data
+supplied channels_y. Thus providing a rapid means to explore the data
 in all available channels." />
 <meta property="og:image" content="/logo.png" />
 
@@ -84,7 +84,7 @@ in all available channels." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -119,7 +119,7 @@ in all available channels." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -153,87 +153,89 @@ in all available channels." />
     </div>
 
     <div class="ref-description">
-    <p><code>cyto_plot_explore</code> is an extremely useful tool to explore all aspectes
+    <p><code>cyto_plot_explore</code> is an extremely useful tool to explore all aspects
 of your cytometry data. <code>cyto_plot_explore</code> constructs a faceted plot
 for each of the supplied <code>channels_x</code> by plotting them against all the
-supplied <code>channels_y</code>. Thus providing a rapid means tro explore the data
+supplied <code>channels_y</code>. Thus providing a rapid means to explore the data
 in all available channels.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_plot_explore</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels_x</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels_y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>layout</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_plot_explore</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  parent <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels_x <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels_y <span class='op'>=</span> <span class='cn'>NULL</span>,
+  axes_trans <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>layout</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  title <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>header</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for GatingHierarchy</span>
-<span class='fu'>cyto_plot_explore</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels_x</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels_y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>layout</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_plot_explore</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  parent <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels_x <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels_y <span class='op'>=</span> <span class='cn'>NULL</span>,
+  axes_trans <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>layout</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  title <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>header</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_plot_explore</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels_x</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels_y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>layout</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_plot_explore</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  channels_x <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels_y <span class='op'>=</span> <span class='cn'>NULL</span>,
+  axes_trans <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>layout</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  title <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>header</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_plot_explore</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels_x</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels_y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>layout</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>title</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='no'>header</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>header_text_col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='no'>...</span>
-)</pre>
+<span class='fu'>cyto_plot_explore</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  channels_x <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels_y <span class='op'>=</span> <span class='cn'>NULL</span>,
+  axes_trans <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>layout</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  title <span class='op'>=</span> <span class='cn'>NA</span>,
+  <span class='va'>header</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>an object of class <code>flowFrame</code>, <code>flowSet</code>,
-<code>GatingHierachy</code> or <code>GatingSet</code>. <code>flowSet</code> and
-<code>GatingSet</code> objects will be coerced to a single <code>flowFrame</code> prior
+      <td><p>an object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>GatingHierachy</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>. <code>cytoset</code> and
+<code>GatingSet</code> objects will be coerced to a single <code>cytoframe</code> prior
 to plotting.</p></td>
     </tr>
     <tr>
@@ -297,6 +299,9 @@ default. Turn off the header by setting this argument to NA.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -313,7 +318,7 @@ default. Turn off the header by setting this argument to NA.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

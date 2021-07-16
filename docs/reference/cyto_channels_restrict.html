@@ -48,7 +48,7 @@
 
 <meta property="og:title" content="Restrict the channels of a cytometry object — cyto_channels_restrict" />
 <meta property="og:description" content="cyto_channels_restrict removes any unused channels (channels lacking
-marker assignments) from a flowFrame, flowSet,
+marker assignments) from a cytoframe, cytoset,
 GatingHierarchy or GatingSet. By default,
 cyto_channels_restrict will always retain any FSC, SSC or Time
 channels irrespective of marker assignment. Removal of channels that contain
@@ -86,7 +86,7 @@ can be forced through use of the exclude argument." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -121,7 +121,7 @@ can be forced through use of the exclude argument." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -156,7 +156,7 @@ can be forced through use of the exclude argument." />
 
     <div class="ref-description">
     <p><code>cyto_channels_restrict</code> removes any unused channels (channels lacking
-marker assignments) from a <code>flowFrame</code>, <code>flowSet</code>,
+marker assignments) from a <code>cytoframe</code>, <code>cytoset</code>,
 <code>GatingHierarchy</code> or <code>GatingSet</code>. By default,
 <code>cyto_channels_restrict</code> will always retain any FSC, SSC or Time
 channels irrespective of marker assignment. Removal of channels that contain
@@ -164,21 +164,16 @@ marker assignments or channels that are privileged channels (FSC/SSC/Time)
 can be forced through use of the <code>exclude</code> argument.</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_channels_restrict</span>(<span class='no'>x</span>, <span class='kw'>exclude</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_channels_restrict</span><span class='op'>(</span><span class='va'>x</span>, exclude <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code>flowFrame</code>, <code>flowSet</code>or <code>GatingSet</code>.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
       <th>exclude</th>
@@ -196,26 +191,31 @@ control character matching for the exclude argument.</p></td>
 
     <p>an object of class <code>flowFrame</code>, <code>flowSet</code>,
   <code>GatingHierarchy</code> or <code>GatingSet</code> with unused channels removed.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
-<span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-
+<span class='co'># Activation Gatingset</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>load_gs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span><span class='st'>"extdata/Activation-GatingSet"</span>,
+                          package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'># Channels</span>
-<span class='fu'><a href='cyto_channels.html'>cyto_channels</a></span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
+<span class='fu'><a href='cyto_channels.html'>cyto_channels</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
 #&gt;  [4] "SSC-A"             "SSC-H"             "SSC-W"            
 #&gt;  [7] "Alexa Fluor 488-A" "PE-A"              "PE-Texas Red-A"   
 #&gt; [10] "7-AAD-A"           "PE-Cy7-A"          "Alexa Fluor 405-A"
 #&gt; [13] "Alexa Fluor 430-A" "Qdot 605-A"        "Alexa Fluor 647-A"
 #&gt; [16] "Alexa Fluor 700-A" "APC-Cy7-A"         "Time"             </div><div class='input'>
 <span class='co'># Remove unused channels</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_channels_restrict</span>(<span class='no'>fs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_channels_restrict</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
 
 <span class='co'># Channels removed</span>
-<span class='fu'><a href='cyto_channels.html'>cyto_channels</a></span>(<span class='no'>fs</span>)</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
+<span class='fu'><a href='cyto_channels.html'>cyto_channels</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;  [1] "FSC-A"             "FSC-H"             "FSC-W"            
 #&gt;  [4] "SSC-A"             "SSC-H"             "SSC-W"            
 #&gt;  [7] "Alexa Fluor 488-A" "PE-A"              "7-AAD-A"          
 #&gt; [10] "Alexa Fluor 405-A" "Alexa Fluor 430-A" "Alexa Fluor 647-A"
@@ -236,7 +236,7 @@ control character matching for the exclude argument.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

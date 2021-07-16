@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,59 +152,24 @@
     <p>Plot expression profile in all channels</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_plot_profile</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='no'>...</span>
-)
-
-<span class='co'># S3 method for GatingHierarchy</span>
-<span class='fu'>cyto_plot_profile</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='no'>...</span>
-)
-
-<span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_plot_profile</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>density_stack</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
-  <span class='no'>...</span>
-)
-
-<span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_plot_profile</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>axes_trans</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>header_text_font</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>header_text_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cyto_plot_profile</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  parent <span class='op'>=</span> <span class='st'>"root"</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  merge_by <span class='op'>=</span> <span class='st'>"name"</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  layout <span class='op'>=</span> <span class='cn'>NULL</span>,
+  hist_layers <span class='op'>=</span> <span class='cn'>NA</span>,
+  hist_stack <span class='op'>=</span> <span class='fl'>0.5</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  popup <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  header <span class='op'>=</span> <span class='cn'>NULL</span>,
+  header_text_font <span class='op'>=</span> <span class='fl'>2</span>,
+  header_text_size <span class='op'>=</span> <span class='fl'>1</span>,
+  header_text_col <span class='op'>=</span> <span class='st'>"black"</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -227,27 +192,25 @@
 channels by default.</p></td>
     </tr>
     <tr>
-      <th>group_by</th>
-      <td><p>a vector of experiment variables to sort and merge samples
-into groups prior to plotting, set to NA by default to prevent merging.
-To merge all samples set this argument to <code>"all"</code>.</p></td>
-    </tr>
-    <tr>
       <th>select</th>
-      <td><p>designates which samples will be plotted and used for
-determining the best location to set the drawn gate(s). Filtering steps
-should be comma separated and wrapped in a list. Refer to
-<code><a href='cyto_select.html'>cyto_select</a></code>.</p></td>
+      <td><p>named list containing experimental variables to be used to
+select samples using <code><a href='cyto_select.html'>cyto_select</a></code> when a <code>flowSet</code> or
+<code>GatingSet</code> is supplied. Refer to <code><a href='cyto_select.html'>cyto_select</a></code> for more
+details. Sample selection occurs prior to grouping with <code>merge_by</code>.</p></td>
     </tr>
     <tr>
-      <th>axes_trans</th>
-      <td><p>object of class
-<code><a href='https://rdrr.io/pkg/flowWorkspace/man/transformerList.html'>transformerList</a></code> which
-was used to transform the channels of the supplied flowFrame.
-<code>cyto_plot</code> does not support in-line transformations and as such the
-transformations should be applied to the data prior to plotting. The
-transformerList is used internally to ensure that the axes on the
-constructed plots are appropriately labelled.</p></td>
+      <th>merge_by</th>
+      <td><p>a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to prevent merging. To
+merge all samples set this argument to <code>TRUE</code> or <code>"all"</code>.</p></td>
+    </tr>
+    <tr>
+      <th>overlay</th>
+      <td><p>name(s) of the populations to overlay or a <code>flowFrame</code>,
+<code>flowSet</code>, <code>list of flowFrames</code>, <code>list of flowSets</code> or
+<code>list of flowFrame lists</code> containing populations to be overlaid onto
+the plot(s). This argument can be set to "children" or "descendants" when a
+<code>GatingSet</code> or <code>GatingHierarchy</code> to overlay all respective nodes.</p></td>
     </tr>
     <tr>
       <th>layout</th>
@@ -255,9 +218,25 @@ constructed plots are appropriately labelled.</p></td>
 for plotting <code>c(#rows, #columns)</code>.</p></td>
     </tr>
     <tr>
+      <th>hist_stack</th>
+      <td><p>numeric [0,1] indicating the degree of offset for 1-D
+density distributions with overlay, set to 0.5 by default.</p></td>
+    </tr>
+    <tr>
+      <th>axes_limits</th>
+      <td><p>options include <code>"auto"</code>, <code>"data"</code> or
+<code>"machine"</code> to use optimised, data or machine limits respectively. Set
+to <code>"machine"</code> by default to complete axes ranges.</p></td>
+    </tr>
+    <tr>
+      <th>popup</th>
+      <td><p>logical indicating whether a pop-up window should be opened
+prior to plotting, set to <code>FALSE</code> by default.</p></td>
+    </tr>
+    <tr>
       <th>header</th>
       <td><p>character string to include in the plot header, set to the
-sample names by deafult. The header can be removed by setting this argument
+sample names by default. The header can be removed by setting this argument
 to NA.</p></td>
     </tr>
     <tr>
@@ -268,50 +247,61 @@ set to 2 by default for bold font.</p></td>
     <tr>
       <th>header_text_size</th>
       <td><p>numeric to control the text size of the header, set
-to 1 by deafult.</p></td>
+to 1 by default.</p></td>
+    </tr>
+    <tr>
+      <th>header_text_col</th>
+      <td><p>colour to use for the header, set to "black" by
+default.</p></td>
     </tr>
     <tr>
       <th>...</th>
       <td><p>additional arguments passed to <code><a href='cyto_plot.html'>cyto_plot</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>density_stack</th>
-      <td><p>numeric [0,1] indicating the degree of offset for 1-D
-density distributions with overlay, set to 0.5 by default.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='cyto_plot.html'>cyto_plot</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># Load in CytoExploreR to access data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
 <span class='co'># Apply compensation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span>(<span class='no'>gs</span>, <span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]]@<span class='kw'>description</span>$<span class='no'>SPILL</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_compensate.html'>cyto_compensate</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>fs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>@</span><span class='va'>description</span><span class='op'>$</span><span class='va'>SPILL</span><span class='op'>)</span>
 
 <span class='co'># Transform fluorescent channels</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span>(<span class='no'>gs</span>, <span class='kw'>trans_type</span> <span class='kw'>=</span> <span class='st'>"logicle"</span>)</div><div class='img'><img src='cyto_plot_profile-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_transform.html'>cyto_transform</a></span><span class='op'>(</span><span class='va'>gs</span>, trans_type <span class='op'>=</span> <span class='st'>"logicle"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Insufficient plotting space, transformations have been applied.</span></div><div class='input'>
 <span class='co'># Apply gates</span>
-<span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Activation_gatingTemplate</span>
-<span class='fu'>gt_gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
+<span class='va'>gt</span> <span class='op'>&lt;-</span> <span class='va'>Activation_gatingTemplate</span>
+<span class='fu'>gt_gating</span><span class='op'>(</span><span class='va'>gt</span>, <span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Plot expression profile of T Cells in all channels</span>
-<span class='fu'>cyto_plot_profile</span>(<span class='no'>gs</span>[<span class='fl'>1</span>:<span class='fl'>9</span>],
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"T Cells"</span>
-)</div><div class='img'><img src='cyto_plot_profile-2.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>cyto_plot_profile</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>]</span>,
+  parent <span class='op'>=</span> <span class='st'>"T Cells"</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error: 'cyto_extract' is defunct.</span>
+#&gt; <span class='error'>Use 'cyto_data_extract' instead.</span>
+#&gt; <span class='error'>See help("Defunct")</span></div><div class='input'>
 <span class='co'># Group samples by Treatment &amp; select highest OVAConc</span>
- <span class='fu'>cyto_plot_profile</span>(<span class='no'>gs</span>[<span class='fl'>1</span>:<span class='fl'>9</span>],
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"CD4 T Cells"</span>,
-  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='st'>"Treatment"</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"OVAConc"</span> <span class='kw'>=</span> <span class='fl'>500</span>),
-)</div><div class='img'><img src='cyto_plot_profile-3.png' alt='' width='700' height='433' /></div><div class='input'>
+ <span class='fu'>cyto_plot_profile</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>]</span>,
+  parent <span class='op'>=</span> <span class='st'>"CD4 T Cells"</span>,
+  merge_by <span class='op'>=</span> <span class='st'>"Treatment"</span>,
+  select <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"OVAConc"</span> <span class='op'>=</span> <span class='fl'>500</span><span class='op'>)</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error: 'cyto_extract' is defunct.</span>
+#&gt; <span class='error'>Use 'cyto_data_extract' instead.</span>
+#&gt; <span class='error'>See help("Defunct")</span></div><div class='output co'>#&gt; <span class='warning'>Warning: calling par(new=TRUE) with no plot</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -328,7 +318,7 @@ density distributions with overlay, set to 0.5 by default.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

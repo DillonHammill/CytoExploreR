@@ -81,7 +81,7 @@ saved to an R object for future reference." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -116,7 +116,7 @@ saved to an R object for future reference." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -154,30 +154,35 @@ saved to an R object for future reference." />
 saved to an R object for future reference.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_plot_record</span>()</pre>
+    <pre class="usage"><span class='fu'>cyto_plot_record</span><span class='op'>(</span><span class='op'>)</span></pre>
 
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 
 <span class='co'># Load CytoExploreRData to acces data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
 
 <span class='co'># Construct cyto_plot</span>
-<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span>(<span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]],
-          <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"FSC-A"</span>, <span class='st'>"SSC-A"</span>))
+<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span><span class='op'>(</span><span class='va'>fs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"FSC-A"</span>, <span class='st'>"SSC-A"</span><span class='op'>)</span>
+<span class='op'>)</span>
 
 <span class='co'># Record plot and save to object called p</span>
-<span class='no'>p</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_plot_record</span>()
+<span class='va'>p</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_plot_record</span><span class='op'>(</span><span class='op'>)</span>
 
 <span class='co'># Calling p will bring back the recorded plot</span>
-<span class='no'>p</span>
+<span class='va'>p</span>
+<span class='op'>}</span>
 
-}</div></pre>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -193,7 +198,7 @@ saved to an R object for future reference.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

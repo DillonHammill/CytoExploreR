@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Indicate Completion of Custom cyto_plot Layout for Saving — cyto_plot_complete • CytoExploreR</title>
+<title>Save custom plot and reset associated settings — cyto_plot_complete • CytoExploreR</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,8 +46,12 @@
 
 
 
-<meta property="og:title" content="Indicate Completion of Custom cyto_plot Layout for Saving — cyto_plot_complete" />
-<meta property="og:description" content="Indicate Completion of Custom cyto_plot Layout for Saving" />
+<meta property="og:title" content="Save custom plot and reset associated settings — cyto_plot_complete" />
+<meta property="og:description" content="cyto_plot_custom() signals that a custom plot is ready for saving with
+cyto_plot_save() and also resets any settings that were set by
+cyto_plot_custom(). For this reason it is recommended that
+cyto_plot_complete() be called after any plotting on a graphics device
+that has been set up using cyto_plot_custom()." />
 <meta property="og:image" content="/logo.png" />
 
 
@@ -80,7 +84,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -115,7 +119,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -143,76 +147,87 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Indicate Completion of Custom cyto_plot Layout for Saving</h1>
+    <h1>Save custom plot and reset associated settings</h1>
     <small class="dont-index">Source: <a href='https://github.com/DillonHammill/CytoExploreR/blob/master/R/cyto_plot-helpers.R'><code>R/cyto_plot-helpers.R</code></a></small>
     <div class="hidden name"><code>cyto_plot_complete.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Indicate Completion of Custom cyto_plot Layout for Saving</p>
+    <p><code><a href='cyto_plot_custom.html'>cyto_plot_custom()</a></code> signals that a custom plot is ready for saving with
+<code><a href='cyto_plot_save.html'>cyto_plot_save()</a></code> and also resets any settings that were set by
+<code><a href='cyto_plot_custom.html'>cyto_plot_custom()</a></code>. For this reason it is recommended that
+<code>cyto_plot_complete()</code> be called after any plotting on a graphics device
+that has been set up using <code><a href='cyto_plot_custom.html'>cyto_plot_custom()</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_plot_complete</span>(<span class='kw'>layout</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_plot_complete</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>layout</th>
-      <td><p>either a vector of the form c(nrow, ncol) defining the
-dimensions of the plot or a matrix defining a more sophisticated layout
-(see <code><a href='https://rdrr.io/r/graphics/layout.html'>layout</a></code>). Vectors can optionally contain a
-third element to indicate whether plots should be placed in row (1) or
-column (2) order, set to row order by default.</p></td>
+      <th>...</th>
+      <td><p>graphical parameters supplied by name to be passed to
+<code><a href='cyto_plot_par.html'>cyto_plot_par</a></code> to reset the parameters of the current graphics
+device.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill (Dillon.Hammill@anu.edu.au)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load samples into GatingSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
 <span class='co'># Apply compensation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>compensate</span>(<span class='no'>gs</span>, <span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]]@<span class='kw'>description</span>$<span class='no'>SPILL</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>compensate</span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>fs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>@</span><span class='va'>description</span><span class='op'>$</span><span class='va'>SPILL</span><span class='op'>)</span>
 
 <span class='co'># Transform fluorescent channels</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'>estimateLogicle</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>4</span>]], <span class='fu'><a href='cyto_fluor_channels.html'>cyto_fluor_channels</a></span>(<span class='no'>gs</span>))
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='no'>gs</span>, <span class='no'>trans</span>)
+<span class='va'>trans</span> <span class='op'>&lt;-</span> <span class='fu'>estimateLogicle</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>4</span><span class='op'>]</span><span class='op'>]</span>, <span class='fu'><a href='cyto_fluor_channels.html'>cyto_fluor_channels</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>trans</span><span class='op'>)</span>
 
 <span class='co'># Apply gatingTemplate</span>
-<span class='no'>gt</span> <span class='kw'>&lt;-</span> <span class='no'>Activation_gatingTemplate</span>
-<span class='fu'>gt_gating</span>(<span class='no'>gt</span>, <span class='no'>gs</span>)</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
+<span class='va'>gt</span> <span class='op'>&lt;-</span> <span class='va'>Activation_gatingTemplate</span>
+<span class='fu'>gt_gating</span><span class='op'>(</span><span class='va'>gt</span>, <span class='va'>gs</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Single Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dead Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Live Cells gating...</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD8 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'CD69+ CD4 T Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>Preprocessing for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>Gating for 'Dendritic Cells'</span></div><div class='output co'>#&gt; <span class='message'>done!</span></div><div class='output co'>#&gt; <span class='message'>done.</span></div><div class='output co'>#&gt; <span class='message'>finished.</span></div><div class='input'>
 <span class='co'># Save custom plot</span>
-<span class='fu'><a href='cyto_plot_save.html'>cyto_plot_save</a></span>(<span class='st'>"Custom.png"</span>,
-  <span class='kw'>height</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-  <span class='kw'>width</span> <span class='kw'>=</span> <span class='fl'>16</span>
-)
+<span class='fu'><a href='cyto_plot_save.html'>cyto_plot_save</a></span><span class='op'>(</span><span class='st'>"Custom.png"</span>,
+  height <span class='op'>=</span> <span class='fl'>8</span>,
+  width <span class='op'>=</span> <span class='fl'>16</span>
+<span class='op'>)</span>
 
 <span class='co'># Set out plot layout</span>
-<span class='fu'><a href='cyto_plot_layout.html'>cyto_plot_layout</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>2</span>))
-
+<span class='fu'>cyto_plot_layout</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in cyto_plot_layout(c(1, 2)): could not find function "cyto_plot_layout"</span></div><div class='input'>
 <span class='co'># Add 2D plot</span>
-<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>4</span>]],
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"CD4 T Cells"</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='st'>""</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Alexa Fluor 647-A"</span>, <span class='st'>"7-AAD-A"</span>),
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
-)
-
+<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>4</span><span class='op'>]</span><span class='op'>]</span>,
+  parent <span class='op'>=</span> <span class='st'>"CD4 T Cells"</span>,
+  alias <span class='op'>=</span> <span class='st'>""</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Alexa Fluor 647-A"</span>, <span class='st'>"7-AAD-A"</span><span class='op'>)</span>,
+  layout <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error: 'cyto_extract' is defunct.</span>
+#&gt; <span class='error'>Use 'cyto_data_extract' instead.</span>
+#&gt; <span class='error'>See help("Defunct")</span></div><div class='input'>
 <span class='co'># Add 1D plot</span>
-<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span>(<span class='no'>gs</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"CD4 T Cells"</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='st'>""</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='st'>"7-AAD-A"</span>,
-  <span class='kw'>density_stack</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
-)
-
+<span class='fu'><a href='cyto_plot.html'>cyto_plot</a></span><span class='op'>(</span><span class='va'>gs</span>,
+  parent <span class='op'>=</span> <span class='st'>"CD4 T Cells"</span>,
+  alias <span class='op'>=</span> <span class='st'>""</span>,
+  channels <span class='op'>=</span> <span class='st'>"7-AAD-A"</span>,
+  hist_stack <span class='op'>=</span> <span class='fl'>0.6</span>,
+  layout <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error: 'cyto_extract' is defunct.</span>
+#&gt; <span class='error'>Use 'cyto_data_extract' instead.</span>
+#&gt; <span class='error'>See help("Defunct")</span></div><div class='input'>
 <span class='co'># Signal that the plot is complete</span>
-<span class='fu'>cyto_plot_complete</span>()</div></pre>
+<span class='fu'>cyto_plot_complete</span><span class='op'>(</span><span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -228,7 +243,7 @@ column (2) order, set to row order by default.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

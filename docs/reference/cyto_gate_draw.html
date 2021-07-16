@@ -89,7 +89,7 @@ their entries in the gatingTemplate." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -124,7 +124,7 @@ their entries in the gatingTemplate." />
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -171,93 +171,93 @@ their entries in the gatingTemplate.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for GatingSet</span>
-<span class='fu'>cyto_gate_draw</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"root"</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>negate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
-  <span class='kw'>axis</span> <span class='kw'>=</span> <span class='st'>"x"</span>,
-  <span class='kw'>label</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='kw'>gate_point_shape</span> <span class='kw'>=</span> <span class='fl'>16</span>,
-  <span class='kw'>gate_point_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_point_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>gate_point_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_line_type</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_line_width</span> <span class='kw'>=</span> <span class='fl'>2.5</span>,
-  <span class='kw'>gate_line_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>gate_line_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_gate_draw</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  parent <span class='op'>=</span> <span class='st'>"root"</span>,
+  alias <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  type <span class='op'>=</span> <span class='cn'>NULL</span>,
+  gatingTemplate <span class='op'>=</span> <span class='cn'>NULL</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  group_by <span class='op'>=</span> <span class='st'>"all"</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  negate <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  display <span class='op'>=</span> <span class='fl'>25000</span>,
+  axis <span class='op'>=</span> <span class='st'>"x"</span>,
+  label <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  popup <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  gate_point_shape <span class='op'>=</span> <span class='fl'>16</span>,
+  gate_point_size <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_point_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  gate_point_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_line_type <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_line_width <span class='op'>=</span> <span class='fl'>2.5</span>,
+  gate_line_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  gate_line_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for flowSet</span>
-<span class='fu'>cyto_gate_draw</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>group_by</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
-  <span class='kw'>select</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>negate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
-  <span class='kw'>axis</span> <span class='kw'>=</span> <span class='st'>"x"</span>,
-  <span class='kw'>label</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='kw'>gate_point_shape</span> <span class='kw'>=</span> <span class='fl'>16</span>,
-  <span class='kw'>gate_point_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_point_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>gate_point_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_line_type</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_line_width</span> <span class='kw'>=</span> <span class='fl'>2.5</span>,
-  <span class='kw'>gate_line_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>gate_line_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='no'>...</span>
-)
+<span class='fu'>cyto_gate_draw</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  alias <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  type <span class='op'>=</span> <span class='cn'>NULL</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  group_by <span class='op'>=</span> <span class='st'>"all"</span>,
+  select <span class='op'>=</span> <span class='cn'>NULL</span>,
+  negate <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  display <span class='op'>=</span> <span class='fl'>25000</span>,
+  axis <span class='op'>=</span> <span class='st'>"x"</span>,
+  label <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  popup <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  gate_point_shape <span class='op'>=</span> <span class='fl'>16</span>,
+  gate_point_size <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_point_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  gate_point_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_line_type <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_line_width <span class='op'>=</span> <span class='fl'>2.5</span>,
+  gate_line_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  gate_line_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
 <span class='co'># S3 method for flowFrame</span>
-<span class='fu'>cyto_gate_draw</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>overlay</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>negate</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>display</span> <span class='kw'>=</span> <span class='fl'>25000</span>,
-  <span class='kw'>axis</span> <span class='kw'>=</span> <span class='st'>"x"</span>,
-  <span class='kw'>label</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>popup</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>axes_limits</span> <span class='kw'>=</span> <span class='st'>"machine"</span>,
-  <span class='kw'>gate_point_shape</span> <span class='kw'>=</span> <span class='fl'>16</span>,
-  <span class='kw'>gate_point_size</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_point_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>gate_point_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_line_type</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>gate_line_width</span> <span class='kw'>=</span> <span class='fl'>2.5</span>,
-  <span class='kw'>gate_line_col</span> <span class='kw'>=</span> <span class='st'>"red"</span>,
-  <span class='kw'>gate_line_col_alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='no'>...</span>
-)</pre>
+<span class='fu'>cyto_gate_draw</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  alias <span class='op'>=</span> <span class='cn'>NULL</span>,
+  channels <span class='op'>=</span> <span class='cn'>NULL</span>,
+  type <span class='op'>=</span> <span class='cn'>NULL</span>,
+  overlay <span class='op'>=</span> <span class='cn'>NA</span>,
+  negate <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  display <span class='op'>=</span> <span class='fl'>25000</span>,
+  axis <span class='op'>=</span> <span class='st'>"x"</span>,
+  label <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  plot <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  popup <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  axes_limits <span class='op'>=</span> <span class='st'>"machine"</span>,
+  gate_point_shape <span class='op'>=</span> <span class='fl'>16</span>,
+  gate_point_size <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_point_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  gate_point_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_line_type <span class='op'>=</span> <span class='fl'>1</span>,
+  gate_line_width <span class='op'>=</span> <span class='fl'>2.5</span>,
+  gate_line_col <span class='op'>=</span> <span class='st'>"red"</span>,
+  gate_line_col_alpha <span class='op'>=</span> <span class='fl'>1</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowCore/man/flowFrame-class.html'>flowFrame</a></code>,
-<code><a href='https://rdrr.io/pkg/flowCore/man/flowSet-class.html'>flowSet</a></code> or
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code> or
 <code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>.</p></td>
     </tr>
     <tr>
@@ -405,7 +405,7 @@ selected gate lines, set to 1 by default to use solid colours.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>flowFrame</code> and <code>flowSet</code> methods return a list of flowCore
+    <p><code>cytoframe</code> and <code>cytoset</code> methods return a list of flowCore
   gate objects per group in group_by, whilst the <code>GatingSet</code> applies the
   constructed gates directly to the <code>GatingSet</code> and adds appropriate
   entries into the specified <code>gatingTemplate</code>. The <code>GatingSet</code>
@@ -417,39 +417,44 @@ selected gate lines, set to 1 by default to use solid colours.</p></td>
 <p><code><a href='cyto_gate_edit.html'>cyto_gate_edit</a></code></p>
 <p><code><a href='cyto_gate_remove.html'>cyto_gate_remove</a></code></p>
 <p><code><a href='cyto_gate_rename.html'>cyto_gate_rename</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># Gate drawing requires an interactive R session</span>
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Load in samples</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>fs</span> <span class='op'>&lt;-</span> <span class='va'>Activation</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>GatingSet</span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span>
 
 <span class='co'># Apply compensation</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>compensate</span>(<span class='no'>gs</span>, <span class='no'>fs</span><span class='kw'>[[</span><span class='fl'>1</span>]]@<span class='kw'>description</span>$<span class='no'>SPILL</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>compensate</span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>fs</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>@</span><span class='va'>description</span><span class='op'>$</span><span class='va'>SPILL</span><span class='op'>)</span>
 
 <span class='co'># Transform fluorescent channels</span>
-<span class='no'>trans</span> <span class='kw'>&lt;-</span> <span class='fu'>estimateLogicle</span>(<span class='no'>gs</span><span class='kw'>[[</span><span class='fl'>4</span>]], <span class='fu'><a href='cyto_fluor_channels.html'>cyto_fluor_channels</a></span>(<span class='no'>fs</span>))
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span>(<span class='no'>gs</span>, <span class='no'>trans</span>)
+<span class='va'>trans</span> <span class='op'>&lt;-</span> <span class='fu'>estimateLogicle</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>[[</span><span class='fl'>4</span><span class='op'>]</span><span class='op'>]</span>, <span class='fu'><a href='cyto_fluor_channels.html'>cyto_fluor_channels</a></span><span class='op'>(</span><span class='va'>fs</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/transform.html'>transform</a></span><span class='op'>(</span><span class='va'>gs</span>, <span class='va'>trans</span><span class='op'>)</span>
 
 <span class='co'># Gate using cyto_gate_draw</span>
-<span class='fu'>gt_gating</span>(<span class='no'>Activation_gatingTemplate</span>, <span class='no'>gs</span>)
+<span class='fu'>gt_gating</span><span class='op'>(</span><span class='va'>Activation_gatingTemplate</span>, <span class='va'>gs</span><span class='op'>)</span>
 
 <span class='co'># draw gates using cyto_gate_draw</span>
-<span class='fu'>cyto_gate_draw</span>(<span class='no'>gs</span>,
-  <span class='kw'>parent</span> <span class='kw'>=</span> <span class='st'>"Dendritic Cells"</span>,
-  <span class='kw'>channels</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"Alexa Fluor 700-A"</span>),
-  <span class='kw'>alias</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CD8+ DC"</span>, <span class='st'>"CD4+ DC"</span>),
-  <span class='kw'>gatingTemplate</span> <span class='kw'>=</span> <span class='st'>"Example-gatingTemplate.csv"</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"rectangle"</span>,
-  <span class='kw'>contour_lines</span> <span class='kw'>=</span> <span class='fl'>15</span>
-)
+<span class='fu'>cyto_gate_draw</span><span class='op'>(</span><span class='va'>gs</span>,
+  parent <span class='op'>=</span> <span class='st'>"Dendritic Cells"</span>,
+  channels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Alexa Fluor 488-A"</span>, <span class='st'>"Alexa Fluor 700-A"</span><span class='op'>)</span>,
+  alias <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"CD8+ DC"</span>, <span class='st'>"CD4+ DC"</span><span class='op'>)</span>,
+  gatingTemplate <span class='op'>=</span> <span class='st'>"Example-gatingTemplate.csv"</span>,
+  type <span class='op'>=</span> <span class='st'>"rectangle"</span>,
+  contour_lines <span class='op'>=</span> <span class='fl'>15</span>
+<span class='op'>)</span>
 
 <span class='co'># Constructed gate applied directly to GatingSet</span>
-<span class='fu'><a href='cyto_nodes.html'>cyto_nodes</a></span>(<span class='no'>gs</span>)
-}</div></pre>
+<span class='fu'><a href='cyto_nodes.html'>cyto_nodes</a></span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -465,7 +470,7 @@ selected gate lines, set to 1 by default to use solid colours.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

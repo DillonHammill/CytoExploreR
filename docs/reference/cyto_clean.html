@@ -80,7 +80,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">CytoExploreR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.9</span>
       </span>
     </div>
 
@@ -115,7 +115,7 @@
       <a href="../articles/CytoExploreR-Transformations.html">Data Transformations</a>
     </li>
     <li>
-      <a href="../articles/CytoExploreR-Visualisations.html">Viualise Cytometry Data with cyto_plot()</a>
+      <a href="../articles/CytoExploreR-Visualisations.html">Visualise Cytometry Data with cyto_plot()</a>
     </li>
   </ul>
 </li>
@@ -152,16 +152,19 @@
     <p>Apply flowAI anomaly detection to clean cytometry data</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cyto_clean</span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>cyto_clean</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>object of class <code>flowFrame</code>, <code>flowSet</code>,
-<code>GatingHierarchy</code> or <code>GatingSet</code>. The <code>root</code> node extracted
-when a <code>GatingSet</code> or <code>GatingHierachy</code> is supplied.</p></td>
+      <td><p>object of class <code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoframe.html'>cytoframe</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/cytoset.html'>cytoset</a></code>,
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingHierarchy-class.html'>CatingHierarchy</a></code> or
+<code><a href='https://rdrr.io/pkg/flowWorkspace/man/GatingSet-class.html'>GatingSet</a></code>. The <code>root</code>
+node extracted when a <code>GatingSet</code> or <code>GatingHierachy</code> is
+supplied.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -179,21 +182,25 @@ when a <code>GatingSet</code> or <code>GatingHierachy</code> is supplied.</p></t
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='https://rdrr.io/pkg/flowAI/man/flow_auto_qc.html'>flow_auto_qc</a></code></p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Dillon Hammill, <a href='mailto:Dillon.Hammill@anu.edu.au'>Dillon.Hammill@anu.edu.au</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>CytoExploreRData</span>)
-
-<span class='co'># Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='no'>Activation</span>
-
-<span class='co'># Clean Activation flowSet</span>
-<span class='no'>fs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_clean</span>(<span class='no'>fs</span>)
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>CytoExploreRData</span><span class='op'>)</span>
 
 <span class='co'># Activation GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>GatingSet</span>(<span class='no'>fs</span>)
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cyto_load.html'>cyto_load</a></span><span class='op'>(</span>
+ <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span><span class='op'>(</span>
+   <span class='st'>"extdata/Activation-GatingSet"</span>,
+   package <span class='op'>=</span> <span class='st'>"CytoExploreRData"</span>
+   <span class='op'>)</span>
+ <span class='op'>)</span>
 
 <span class='co'># Clean Activation GatingSet</span>
-<span class='no'>gs</span> <span class='kw'>&lt;-</span> <span class='fu'>cyto_clean</span>(<span class='no'>gs</span>)</div></pre>
+<span class='va'>gs</span> <span class='op'>&lt;-</span> <span class='fu'>cyto_clean</span><span class='op'>(</span><span class='va'>gs</span><span class='op'>)</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -209,7 +216,7 @@ when a <code>GatingSet</code> or <code>GatingHierachy</code> is supplied.</p></t
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
