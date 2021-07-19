@@ -256,7 +256,9 @@ cyto_load <- function(path = ".",
   }
   
   # FILE PATHS
-  files <- list.files(path, full.names = TRUE)
+  files <- list.files(path, 
+                      full.names = TRUE,
+                      recursive = TRUE) # search internal directories
   
   # REMOVE DIRECTORIES
   files <- files[!dir.exists(files)]
