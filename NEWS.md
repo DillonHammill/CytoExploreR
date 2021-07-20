@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* Add new logical `append` argument to `cyto_markers_extract()` to optionally return extracted markers in the form `<marker> channel`.
 * Add new family of `cyto_func_()` functions to more elegantly handle the calling of internal/external functions.
 * `cyto_spillover_edit()` now has up/down buttons next to channel selectors to make it easier to scroll through channels.
 * `cyto_select()` can now extract samples based on partial string matches for file names. For example, `cyto_select(gs, c("7AAD", "PE"))` will extract all samples with `7AAD` or `PE` in their file names. A new `cyto_match()` function has been added to return the indices of samples that match the selection criteria.

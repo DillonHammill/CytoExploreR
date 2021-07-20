@@ -407,8 +407,7 @@ cyto_channels_extract <- function(x,
 #' marker names. The name of the channel will be returned if there is no
 #' associated marker found.
 #'
-#' @param x an object of class
-#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#' @param x an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -417,6 +416,9 @@ cyto_channels_extract <- function(x,
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param append logical indicating whether the name of the channel should be
+#'   appended to the marker names in the form \code{<marker> channel}, set to
+#'   FALSE by default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -444,6 +446,7 @@ cyto_channels_extract <- function(x,
 cyto_markers_extract <- function(x, 
                                  channels,
                                  plot = FALSE,
+                                 append = FALSE,
                                  ...) {
   
   # MARKERS
@@ -480,22 +483,37 @@ cyto_markers_extract <- function(x,
                 ...)
         )
       )
+      
       # PARTIAL MARKER MATCH
       if(length(marker_ind) != 0) {
         res <- c(res, markers[marker_ind])
         # PARTIAL CHANNEL MATCH
       } else if(length(channel_ind) != 0) {
-        res <- c(res, markers[match(chans[channel_ind], names(markers))])
+        res <- c(res, markers[channel_ind])
       } else {
         # CHANNEL UNASSIGNED MARKER - MATCH CHANNEL
         if(channels[z] %in% chans) {
-          res <- c(res, channels[z])
+          res <- c(
+            res, 
+            structure(
+              c(channels[z]),
+              names = channels[z]
+            )
+          )
           # CHANNEL UNASSIGNED MARKER - PARTIAL
         } else if(any(grepl(channels[z], chans, ignore.case = TRUE, ...))) {
-          res <- c(res, chans[which(grepl(channels[z],
-                                          chans,
-                                          ignore.case = TRUE,
-                                          ...))])
+          res <- c(
+            res,
+            structure(
+              chans[which(grepl(channels[z],
+                                chans,
+                                ignore.case = TRUE,
+                                ...))],
+              names = chans[which(grepl(channels[z],
+                                        chans,
+                                        ignore.case = TRUE,
+                                        ...))])
+          )
           # INVALID CHANNEL/MARKER
         } else {
           stop(
@@ -507,12 +525,21 @@ cyto_markers_extract <- function(x,
     }
   }
   
-  
   # CHECK
   if (plot == TRUE) {
     if (!length(res) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
+  }
+  
+  # APPEND
+  if(append) {
+    res <- paste0(
+      "<",
+      res,
+      "> ",
+      names(res)
+    )
   }
   
   # MARKERS
