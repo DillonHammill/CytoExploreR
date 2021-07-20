@@ -406,8 +406,9 @@ cyto_stat_density <- function(x,
 #' @param limits matrix or named list containing the minimum and maximum values
 #'   for each channel on the current scale, defaults to the data range if not
 #'   supplied.
+#' @param ... not in use.
 #'
-#' @return vector of binned data with either counts of frequencies.
+#' @return matrix of binned data per channel with either counts of frequencies.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -415,7 +416,8 @@ cyto_stat_density <- function(x,
 cyto_stat_bin <- function(x, 
                           bins = 400,
                           type = "count",
-                          limits = NULL) {
+                          limits = NULL,
+                          ...) {
   
   # BIN DATA
   cnt <- 0
@@ -465,6 +467,64 @@ cyto_stat_bin <- function(x,
         x_bin <- x_bin/length(x)
       }
       return(x_bin)
+    }
+  )
+  
+}
+
+## CYTO_STAT_SCALE -------------------------------------------------------------
+
+#' Channel-wise re-scaling for cytometry data
+#'
+#' @param x object of class \code{matrix}.
+#' @param type indicates the type of re-scaling to perform, options include
+#'   \code{"range"}, \code{"mean"} or \code{"zscore"}.
+#' @param ... not in use.
+#'
+#' @return matrix with data re-scaled per channel.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @noRd
+cyto_stat_scale <- function(x,
+                            type = "range",
+                            ...) {
+  
+  # SCALING
+  apply(
+    x,
+    2, 
+    function(z) {
+      # RANGE
+      if(grepl("^r", type, ignore.case = TRUE)) {
+        # DATA LIMITS
+        zmin <- min(z, na.rm = TRUE)
+        zmax <- max(z, na.rm = TRUE)
+        # RANGE SCALING
+        return((z - zmin)/(zmax - zmin))
+      # MEAN
+      } else if(grepl("^m", type, ignore.case = TRUE)) {
+        # DATA LIMITS
+        zmin <- min(z, na.rm = TRUE)
+        zmax <- max(z, na.rm = TRUE)
+        # MEAN
+        zmean <- mean(z, na.rm = TRUE)
+        # MEAN SCALING
+        return((z - zmean)/(zmax-zmin))
+      # Z SCORE
+      } else if(grepl("^z", type, ignore.case = TRUE)) {
+        # MEAN 
+        zmean <- mean(z, na.rm = TRUE)
+        # SD
+        zsd <- sd(z, na.rm = TRUE)
+        # Z-SCORE SCALING
+        return((z - zmean)/zsd)
+      # UNSUPPORTED SCALING METHOD
+      } else {
+        stop(
+          "'type' must be either 'range', 'mean' or 'zscore'!"
+        )
+      }
     }
   )
   
