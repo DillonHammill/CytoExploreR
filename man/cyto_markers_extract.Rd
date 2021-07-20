@@ -20,7 +20,8 @@ a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
 
 \item{append}{logical indicating whether the name of the channel should be
-appended after th marker names, set to FALSE by default.}
+appended to the marker names in the form \code{<marker> channel}, set to
+FALSE by default.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the
