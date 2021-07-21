@@ -197,6 +197,14 @@ cyto_markers <- function(x,
     markers <- flowWorkspace::markernames(x)
   }
   
+  # INCONSISTENT MARKERS - ALLOW IF SOME SAMPLES UNANNOTATED
+  if(cyto_class(markers, "list")) {
+    markers[LAPPLY(markers, "length") == 0] <- NULL
+    if(length(markers) == 1){
+      markers <- markers[[1]]
+    }
+  }
+  
   # MARKER SELECTION/EXCLUSION
   if(!length(markers) == 0) {
     # SELECT
