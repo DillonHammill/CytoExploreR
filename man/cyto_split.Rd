@@ -4,7 +4,7 @@
 \alias{cyto_split}
 \title{Split samples merged with cyto_merge}
 \usage{
-cyto_split(x, id = "\\\\Sample.*ID$", names = NULL)
+cyto_split(x, id = NULL, names = NULL)
 }
 \arguments{
 \item{x}{object of class \code{cytoframe} or \code{cytoset}.}

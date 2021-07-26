@@ -14,6 +14,7 @@ cyto_save(x, ...)
   parent = NULL,
   split = FALSE,
   names = NULL,
+  id = NULL,
   save_as = NULL,
   inverse = FALSE,
   trans = NULL,
@@ -25,6 +26,7 @@ cyto_save(x, ...)
   parent = NULL,
   split = FALSE,
   names = NULL,
+  id = NULL,
   save_as = NULL,
   inverse = FALSE,
   trans = NULL,
@@ -35,6 +37,7 @@ cyto_save(x, ...)
   x,
   split = FALSE,
   names = NULL,
+  id = NULL,
   save_as = NULL,
   inverse = FALSE,
   trans = NULL,
@@ -61,6 +64,10 @@ FALSE by default.}
 \item{names}{original names of the samples prior to merging using
 \code{cyto_merge_by}, only required when split is TRUE. These names will be
 re-assigned to each of split flowFrames.}
+
+\item{id}{passed to \code{cyto_split},  can be either the name of a channel
+or marker containing the IDs for samples or a vector containing an index
+for each event within \code{x}, set to \code{Sample-ID} channel by default.}
 
 \item{save_as}{name of the folder to which the written FCS files should be
 saved, set to NULL by default to save the files to the current working

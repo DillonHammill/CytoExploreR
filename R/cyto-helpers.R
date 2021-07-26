@@ -2660,7 +2660,7 @@ setAs("flowSet",
 #'
 #' @export
 cyto_split <- function(x,
-                       id = "\\Sample.*ID$",
+                       id = NULL,
                        names = NULL) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -2668,6 +2668,11 @@ cyto_split <- function(x,
   # FLOWFRAME
   if (!cyto_class(x, c("flowFrame", "flowSet"))) {
     stop("cyto_split() requires a cytoframe or cytoset object.")
+  }
+  
+  # ID - MISSING
+  if(is.null(id)) {
+    id <- "\\Sample.*ID$"
   }
   
   # ID - CHANNEL NAME
@@ -2796,6 +2801,9 @@ cyto_split <- function(x,
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing FCS files, set to
 #'   FALSE by default.
+#' @param id passed to \code{cyto_split},  can be either the name of a channel
+#'   or marker containing the IDs for samples or a vector containing an index
+#'   for each event within \code{x}, set to \code{Sample-ID} channel by default.
 #' @param names original names of the samples prior to merging using
 #'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
 #'   re-assigned to each of split flowFrames.
@@ -2850,6 +2858,7 @@ cyto_save.GatingSet <- function(x,
                                 parent = NULL,
                                 split = FALSE,
                                 names = NULL,
+                                id = NULL,
                                 save_as = NULL,
                                 inverse = FALSE,
                                 trans = NULL, ...) {
@@ -2877,6 +2886,7 @@ cyto_save.GatingSet <- function(x,
       x = cs,
       split = split,
       names = names,
+      id = id,
       save_as = save_as,
       inverse = inverse,
       trans = trans
@@ -2892,6 +2902,7 @@ cyto_save.GatingHierarchy <- function(x,
                                       parent = NULL,
                                       split = FALSE,
                                       names = NULL,
+                                      id = NULL,
                                       save_as = NULL,
                                       inverse = FALSE,
                                       trans = NULL,
@@ -2919,6 +2930,7 @@ cyto_save.GatingHierarchy <- function(x,
       x = cs,
       split = split,
       names = names,
+      id = id,
       save_as = save_as,
       inverse = inverse,
       trans = trans
@@ -2934,6 +2946,7 @@ cyto_save.GatingHierarchy <- function(x,
 cyto_save.flowSet <- function(x,
                               split = FALSE,
                               names = NULL,
+                              id = NULL,
                               save_as = NULL,
                               inverse = FALSE,
                               trans = NULL,
@@ -2942,7 +2955,8 @@ cyto_save.flowSet <- function(x,
   # CYTOSET OF SPLIT CYTOFRAMES
   if (split == TRUE) {
     x <- cyto_split(x, 
-                    names = names)
+                    names = names,
+                    id = id)
   }
   
   # DIRECTORY CHECK
