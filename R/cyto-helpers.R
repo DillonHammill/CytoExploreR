@@ -2628,13 +2628,17 @@ setAs("flowSet",
 #' \code{cyto_barcode()}.
 #'
 #' @param x object of class \code{cytoframe} or \code{cytoset}.
+#' @param id can be either the name of a channel or marker containing the IDs
+#'   for samples or a vector containing an index for each event within \code{x},
+#'   set to \code{Sample-ID} channel by default.
 #' @param names vector of names to assign to each of the extracted cytoframes
-#'   when saving the split files. Name should be supplied in the order used
+#'   when saving the split files. Names should be supplied in the order used
 #'   prior to merging (i.e. in Sample-ID order).
 #'
 #' @return a cytoset containing the split cytoframes.
 #'
-#' @importFrom flowCore flowFrame exprs identifier keyword split
+#' @importFrom flowCore identifier split
+#' @importFrom utils type.convert
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -2656,6 +2660,7 @@ setAs("flowSet",
 #'
 #' @export
 cyto_split <- function(x,
+                       id = "\\Sample.*ID$",
                        names = NULL) {
   
   # CHECKS ---------------------------------------------------------------------
@@ -2665,16 +2670,40 @@ cyto_split <- function(x,
     stop("cyto_split() requires a cytoframe or cytoset object.")
   }
   
-  # SAMPLE-ID COLUMN
-  ind <- which(
-    LAPPLY(cyto_channels(x), function(v){
-      grepl("\\Sample.*\\ID$", v) # flowJo compatibility SampleID
-    })
-  )
-  if (length(ind) == 0) {
-    stop("Merged samples must be barcoded in cyto_merge_by().")
+  # ID - CHANNEL NAME
+  if(is.character(id)) {
+    id <- cyto_channels_extract(x, id)[1] # FIRST MATCH
+  # ID - VECTOR
   } else {
-    id <- cyto_channels(x)[ind]
+    # EVENTS
+    if(cyto_class(x, "flowFrame")) {
+      cnts <- matrix(
+        nrow(x),
+        dimnames = list(NULL, "nrow")
+      )
+    } else {
+      cnts <- cyto_apply(
+        x,
+        FUN = "nrow",
+        input = "matrix",
+        copy = FALSE
+      )
+    }
+    # INSUFFICIENT IDS
+    if(length(id) != sum(cnts)) {
+      stop(
+        "'id' must contain an ID for every event in 'x'!"
+      )
+    # NUMERIC/FACTOR IDS
+    } else {
+      id <- split(
+        id,
+        LAPPLY(nrow(cnts), function(z){
+          rep(z, cnts[z, 1])
+        }),
+        drop = FALSE
+      )
+    }
   }
   
   # SPLIT INTO CYTOFRAMES ------------------------------------------------------
@@ -2688,19 +2717,33 @@ cyto_split <- function(x,
   
   # LOOP THROUGH CYTOSET
   cf_list <- lapply(seq_along(x), function(z){
-    # EXTRACT CYTOFRAME
-    cf <- cyto_data_extract(x[z],
-                            channels = id,
-                            format = "cytoframe",
-                            copy = FALSE)[[1]][[1]]
-    
-    # EXTRACT SAMPLE IDs
-    cf_exprs <- cyto_exprs(cf, drop = TRUE)
-    # SAMPLE IDs
-    sample_id <- unique(cf_exprs)
-    # SPLIT BY SAMPLE ID
-    cf_list <- split(cf, 
-                     factor(cf_exprs[, id], levels = sample_id))
+    # CYTOFRAME
+    cf <- cyto_data_extract(
+      x[z],
+      format = "cytoframe",
+      copy = FALSE
+    )[[1]][[1]]
+    # IDS
+    if(cyto_class(id, "list", TRUE)) {
+      ids <- id[[z]]
+      if(!cyto_class(ids, "factor")) {
+        ids <- factor(ids)
+      }
+    # IDS - STORED IN A CHANNEL
+    } else {
+      ids <- factor(
+        cyto_exprs(
+          cf, 
+          channels = id,
+          drop = TRUE
+        )
+      )
+    }
+    # BYPASS EMPTY SAMPLES
+    cf_list <- split(
+      cf,
+      ids
+    )
     # NAMES
     if (!is.null(names)) {
       names(cf_list) <- tryCatch(
@@ -2715,12 +2758,16 @@ cyto_split <- function(x,
       names <<- names[-seq( 1, length(cf_list))]
       # NO NAMES
     } else {
-      names(cf_list) <- paste0("Sample-", names(cf_list))
+      # FACTOR LEVELS - MAY BE ASSIGNED
+      if(!is.character(type.convert(names(cf_list), as.is = TRUE))) {
+        names(cf_list) <- paste0("Sample-", names(cf_list))
+      }
     }
     # IDENTIFIERS - NOT REQUIRED
     cf_list <- structure(
       lapply(seq_along(cf_list), function(v) {
         identifier(cf_list[[v]]) <<- names(cf_list)[v]
+        return(cf_list[[v]])
       }),
       names = names(cf_list)
     )

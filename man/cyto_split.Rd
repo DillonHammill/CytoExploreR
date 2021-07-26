@@ -4,13 +4,17 @@
 \alias{cyto_split}
 \title{Split samples merged with cyto_merge}
 \usage{
-cyto_split(x, names = NULL)
+cyto_split(x, id = "\\\\Sample.*ID$", names = NULL)
 }
 \arguments{
 \item{x}{object of class \code{cytoframe} or \code{cytoset}.}
 
+\item{id}{can be either the name of a channel or marker containing the IDs
+for samples or a vector containing an index for each event within \code{x},
+set to \code{Sample-ID} channel by default.}
+
 \item{names}{vector of names to assign to each of the extracted cytoframes
-when saving the split files. Name should be supplied in the order used
+when saving the split files. Names should be supplied in the order used
 prior to merging (i.e. in Sample-ID order).}
 }
 \value{
