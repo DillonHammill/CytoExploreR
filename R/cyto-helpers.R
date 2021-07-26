@@ -1706,7 +1706,7 @@ cyto_data_extract <- function(x,
         cs,
         format = "cytoset",
         display = ifelse(is.null(sample), 1, sample),
-        name = names(cs_list)[id],
+        name = paste0(names(cs_list)[id], "-merge"),
         barcode = barcode,
         seed = seed
       )
