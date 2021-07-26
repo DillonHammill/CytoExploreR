@@ -4,7 +4,7 @@
 \alias{cyto_barcode}
 \title{Barcode each sample or event in a cytoset or GatingSet}
 \usage{
-cyto_barcode(x, type = "samples")
+cyto_barcode(x, type = "samples", overwrite = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -12,6 +12,10 @@ cyto_barcode(x, type = "samples")
 
 \item{type}{indicates whether the \code{"samples"}, \code{"events"} or
 \code{"both"} should be barcoded, set \code{"samples"} by default.}
+
+\item{overwrite}{logical to indicate whether existing barcodes should be
+overwritten, thus providing a non-interactive way to control how existing
+barcodes are handled.}
 }
 \value{
 barcoded cytoset or GatingSey with \code{"Sample ID"} and/or

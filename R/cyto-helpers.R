@@ -3319,6 +3319,9 @@ cyto_sample_n <- function(x,
 #'   default.
 #' @param name character string indicating the name to use for the coerced
 #'   object, set to \code{"merge"} by default.
+#' @param overwrite logical passed to \code{cyto_barcode} to control whether
+#'   existing barcodes should be overwritten, the user will be asked
+#'   interactively if not manually supplied.
 #' @param ... additional arguments passed to \code{\link{cyto_sample}}.
 #'
 #' @return a sampled and coerced \code{matrix}, \code{cytoframe} or
@@ -3352,6 +3355,7 @@ cyto_coerce <- function(x,
                         barcode = FALSE,
                         format = "cytoset",
                         name = "merge",
+                        overwrite = NULL,
                         ...) {
   # IDENTIFIERS
   ids <- cyto_names(x)
@@ -3386,7 +3390,8 @@ cyto_coerce <- function(x,
 
   # BARCODE
   if(barcode) {
-    cyto_barcode(x)
+    cyto_barcode(x,
+                 overwrite = overwrite)
   }
   
   # COERCE
@@ -3549,6 +3554,9 @@ cyto_beads_sample <- function(...){
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to be barcoded.
 #' @param type indicates whether the \code{"samples"}, \code{"events"} or
 #'   \code{"both"} should be barcoded, set \code{"samples"} by default.
+#' @param overwrite logical to indicate whether existing barcodes should be
+#'   overwritten, thus providing a non-interactive way to control how existing
+#'   barcodes are handled.
 #'
 #' @return barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
 #'   \code{"Event ID"} column added and annotated.
@@ -3557,19 +3565,20 @@ cyto_beads_sample <- function(...){
 #'
 #' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Activation Gatingset
 #' gs <- load_gs(system.file("extdata/Activation-GatingSet",
 #'                           package = "CytoExploreRData"))
 #'
 #' # Barcode
 #' gs <- cyto_barcode(gs)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
 cyto_barcode <- function(x,
-                         type = "samples") {
+                         type = "samples",
+                         overwrite = NULL) {
   
   # CHECKS ---------------------------------------------------------------------
   
@@ -3586,15 +3595,22 @@ cyto_barcode <- function(x,
   
   # PREPARE DATA ---------------------------------------------------------------
   
+  # BARCODE?
+  barcode <- TRUE
+  
   # CHECK FOR SAMPLE IDs
   if (any(grepl("^s", type, ignore.case = TRUE))){
-    barcode <- TRUE
     # SAMPLE IDs EXIST - BACKWARDS COMPATIBLE
     if(any(grepl("\\Sample.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
-      if(cyto_enquire(
-        "Override existing sample IDs? (Y/N): ",
-        options = c("T", "Y")
-      )) {
+      # OVERWRITE
+      if(!is.logical(overwrite)) {
+        overwrite <- cyto_enquire(
+          "Override existing sample IDs? (Y/N): ",
+          options = c("T", "Y")
+        )
+      }
+      # OVERWRITE BARCODES
+      if(overwrite) {
         # REMOVE SAMPLE ID COLUMN
         cs <- realize_view(cs[, -which(grepl("\\Sample.*\\ID$", 
                                              cyto_channels(cs), 
@@ -3602,7 +3618,6 @@ cyto_barcode <- function(x,
       } else {
         barcode <- FALSE
       }
-
     }
     # BARCODE SAMPLES
     if(barcode){
@@ -3624,14 +3639,18 @@ cyto_barcode <- function(x,
   
   # CHECK FOR EVENT IDs
   if (any(grepl("^e", type, ignore.case = TRUE))) {
-    barcode <- TRUE
     # EVENT IDs EXIST
     if(any(grepl("\\Event.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
-      if(cyto_enquire(
-        "Override existing event IDs? (Y/N): ",
-        options = c("T", "Y")
-      )) {
-        # REMOVE SAMPLE ID COLUMN
+      # OVERWRITE
+      if(!is.logical(overwrite)) {
+        overwrite <- cyto_enquire(
+          "Override existing event IDs? (Y/N): ",
+          options = c("T", "Y")
+        )
+      }
+      # OVERWRITE BARCODES
+      if(overwrite){
+        # REMOVE EVENT ID COLUMN
         cs <- realize_view(cs[, -which(grepl("\\Event.*\\ID$", 
                                              cyto_channels(cs), 
                                              ignore.case = TRUE))])

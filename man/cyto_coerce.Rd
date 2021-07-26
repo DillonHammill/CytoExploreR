@@ -11,6 +11,7 @@ cyto_coerce(
   barcode = FALSE,
   format = "cytoset",
   name = "merge",
+  overwrite = NULL,
   ...
 )
 }
@@ -33,6 +34,10 @@ default.}
 
 \item{name}{character string indicating the name to use for the coerced
 object, set to \code{"merge"} by default.}
+
+\item{overwrite}{logical passed to \code{cyto_barcode} to control whether
+existing barcodes should be overwritten, the user will be asked
+interactively if not manually supplied.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_sample}}.}
 }
