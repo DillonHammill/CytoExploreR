@@ -1589,6 +1589,19 @@ cyto_transform_extract <- function(x,
 #'   transformations applied to the data when \code{inverse = TRUE}.
 #' @param inverse logical indicating whether transformations applied to the data
 #'   should be inversed, set to FALSE by default.
+#' @param sample passed to \code{\link{cyto_sample}} to extract a subset of
+#'   events from each sample. \code{sample} indicates the number or proportion
+#'   of events to extract from each sample.
+#' @param coerce logical to indicate whether the data should be merged into a
+#'   single object prior to returning the data, set to FALSE by default. If
+#'   \code{coerce} is TRUE, \code{sample} controls the proportion or number of
+#'   events to keep in the merged object.
+#' @param barcode additional argument passed to \code{cyto_coerce} when
+#'   \code{coerce} is TRUE to control whether samples should be barcoded prior
+#'   to coercion, set to FALSE by default.
+#' @param seed values used to \code{set.seed()} internally to return the same
+#'   extract the same subset of events on each run when \code{sample} is
+#'   supplied.
 #' @param path can be either \code{"auto"} or \code{"full"} to control whether
 #'   the extracted list should be labelled with the shortest or complete path to
 #'   each population in parent.
@@ -1632,7 +1645,13 @@ cyto_data_extract <- function(x,
                               split = FALSE,
                               trans = NA,
                               inverse = FALSE,
+                              sample = NULL,
+                              coerce = FALSE,
+                              barcode = FALSE,
+                              seed = NULL,
                               path = "auto") {
+  
+  # TODO: ADD COERCE ARGUMENT? TO MERGE MATRICES ETC.
   
   # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
   if(is.null(parent)) {
@@ -1669,7 +1688,9 @@ cyto_data_extract <- function(x,
   }
   
   # PREPARE CYTOSET LIST
-  res <- lapply(cs_list, function(cs) {
+  res <- lapply(seq_along(cs_list), function(id) {
+    # CYTOSET
+    cs <- cs_list[[id]]
     # COPY
     if(copy) {
       cs <- cyto_copy(cs)
@@ -1678,6 +1699,24 @@ cyto_data_extract <- function(x,
     if(!is.null(channels)) {
       channels <- cyto_channels_extract(cs, channels)
       cs <- cs[, channels, drop = FALSE]
+    }
+    # COERCE - NAME WITH PARENT
+    if(coerce) {
+      cs <- cyto_coerce(
+        cs,
+        format = "cytoset",
+        display = ifelse(is.null(sample), 1, sample),
+        name = names(cs_list)[id],
+        barcode = barcode,
+        seed = seed
+      )
+      # SAMPLE
+    }else if(!is.null(sample)) {
+      cs <- cyto_sample(
+        cs,
+        display = sample,
+        seed = seed
+      )
     }
     # TRANSFORM
     if(inverse & !.all_na(trans)) {
@@ -1692,7 +1731,7 @@ cyto_data_extract <- function(x,
       # CYTOFRAME -> CYTOFRAME
       if(cyto_class(cs, "flowFrame")) {
         list(cs) # CANNOT CALL CYTO_NAMES HERE
-      # CYTOSET -> CYTOFRAME
+        # CYTOSET -> CYTOFRAME
       } else {
         structure(
           lapply(cyto_names(cs), function(z){
@@ -1709,7 +1748,7 @@ cyto_data_extract <- function(x,
             list(cs), names = "cf"
           )
         )
-      # CYTOSET -> CYTOSET
+        # CYTOSET -> CYTOSET
       } else {
         if(split) {
           structure(lapply(seq_along(cs), function(z){
@@ -1730,7 +1769,7 @@ cyto_data_extract <- function(x,
                        drop = FALSE)
           ), names = "cf_raw"
         )
-      # CYTOSET -> MATRIX
+        # CYTOSET -> MATRIX
       } else {
         structure(
           lapply(cyto_names(cs), function(z){

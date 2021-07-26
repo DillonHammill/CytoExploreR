@@ -15,6 +15,10 @@ cyto_data_extract(
   split = FALSE,
   trans = NA,
   inverse = FALSE,
+  sample = NULL,
+  coerce = FALSE,
+  barcode = FALSE,
+  seed = NULL,
   path = "auto"
 )
 }
@@ -52,6 +56,23 @@ transformations applied to the data when \code{inverse = TRUE}.}
 
 \item{inverse}{logical indicating whether transformations applied to the data
 should be inversed, set to FALSE by default.}
+
+\item{sample}{passed to \code{\link{cyto_sample}} to extract a subset of
+events from each sample. \code{sample} indicates the number or proportion
+of events to extract from each sample.}
+
+\item{coerce}{logical to indicate whether the data should be merged into a
+single object prior to returning the data, set to FALSE by default. If
+\code{coerce} is TRUE, \code{sample} controls the proportion or number of
+events to keep in the merged object.}
+
+\item{barcode}{additional argument passed to \code{cyto_coerce} when
+\code{coerce} is TRUE to control whether samples should be barcoded prior
+to coercion, set to FALSE by default.}
+
+\item{seed}{values used to \code{set.seed()} internally to return the same
+extract the same subset of events on each run when \code{sample} is
+supplied.}
 
 \item{path}{can be either \code{"auto"} or \code{"full"} to control whether
 the extracted list should be labelled with the shortest or complete path to
