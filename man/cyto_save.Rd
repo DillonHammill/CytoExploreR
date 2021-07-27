@@ -18,6 +18,7 @@ cyto_save(x, ...)
   save_as = NULL,
   inverse = FALSE,
   trans = NULL,
+  overwrite = NULL,
   ...
 )
 
@@ -30,6 +31,7 @@ cyto_save(x, ...)
   save_as = NULL,
   inverse = FALSE,
   trans = NULL,
+  overwrite = NULL,
   ...
 )
 
@@ -41,6 +43,7 @@ cyto_save(x, ...)
   save_as = NULL,
   inverse = FALSE,
   trans = NULL,
+  overwrite = NULL,
   ...
 )
 }
@@ -84,6 +87,10 @@ passing of transformers through the \code{trans} argument.}
 transformation definitions applied to the supplied data. Used internally
 when \code{inverse_transform} is TRUE, to inverse the transformations prior
 to writing FCS files.}
+
+\item{overwrite}{logical flag to control how \code{save_as} should be handled
+if files already exist in this directory, users will be asked interactively
+if \code{overwrite} is not manually supplied here.}
 }
 \value{
 list of flowFrames containing the data that was saved to the FCS

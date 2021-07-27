@@ -2820,6 +2820,9 @@ cyto_split <- function(x,
 #'   transformation definitions applied to the supplied data. Used internally
 #'   when \code{inverse_transform} is TRUE, to inverse the transformations prior
 #'   to writing FCS files.
+#' @param overwrite logical flag to control how \code{save_as} should be handled
+#'   if files already exist in this directory, users will be asked interactively
+#'   if \code{overwrite} is not manually supplied here.
 #' @param ... not in use.
 #'
 #' @return list of flowFrames containing the data that was saved to the FCS
@@ -2861,13 +2864,53 @@ cyto_save.GatingSet <- function(x,
                                 id = NULL,
                                 save_as = NULL,
                                 inverse = FALSE,
-                                trans = NULL, ...) {
+                                trans = NULL, 
+                                overwrite = NULL, 
+                                ...) {
   
   # SAVE GATINGSET
   if (is.null(parent)) {
+    # SAVE_AS
+    if(is.null(save_as)){
+      stop(
+        paste0(
+          "Supply the name of a new/empty directory to 'save_as' ",
+          "to save this GatingSet."
+        )
+      )
+    }
+    # DIRECTORY CHECK
+    if(dir.exists(save_as) & length(list.files(save_as)) > 0){
+      # OVERWRITE
+      if(is.null(overwrite)) {
+        overwrite <- cyto_enquire(
+          paste0(
+            save_as,
+            " already contains some files. ",
+            "Do you want to overwrite this directory? (Y/N)"
+          ),
+          options = c("Y", "T")
+        )
+      }
+      # REPLACE DIRECTORY
+      if(overwrite){
+        unlink(save_as, recursive = TRUE)
+      # ABORT
+      } else {
+        invisible(NULL)
+      }
+    }
     # SAVE GATINGSET
-    message(paste("Saving GatingSet to ", save_as, "..."))
-    suppressMessages(save_gs(x, save_as))
+    message(
+      paste(
+        "Saving GatingSet to ", 
+        save_as, 
+        "..."
+      )
+    )
+    suppressMessages(
+      save_gs(x, save_as)
+    )
     # RETURN GATINGSET
     invisible(x)
     # SAVE FCS FILES
@@ -2889,7 +2932,8 @@ cyto_save.GatingSet <- function(x,
       id = id,
       save_as = save_as,
       inverse = inverse,
-      trans = trans
+      trans = trans,
+      overwrite = overwrite
     )
     # RETURN DATA
     invisible(cs)
@@ -2906,13 +2950,53 @@ cyto_save.GatingHierarchy <- function(x,
                                       save_as = NULL,
                                       inverse = FALSE,
                                       trans = NULL,
+                                      overwrite = NULL,
                                       ...) {
   
   # SAVE GATINGHIERARCHY
   if (is.null(parent)) {
-    # SAVE GATINGHIERARCHY
-    suppressMessages(save_gs(x, save_as))
-    # RETURN GATINGHIERARCHY
+    # SAVE_AS
+    if(is.null(save_as)){
+      stop(
+        paste0(
+          "Supply the name of a new/empty directory to 'save_as' ",
+          "to save this GatingSet."
+        )
+      )
+    }
+    # DIRECTORY CHECK
+    if(dir.exists(save_as) & length(list.files(save_as)) > 0){
+      # OVERWRITE
+      if(is.null(overwrite)) {
+        overwrite <- cyto_enquire(
+          paste0(
+            save_as,
+            " already contains some files. ",
+            "Do you want to overwrite this directory? (Y/N)"
+          ),
+          options = c("Y", "T")
+        )
+      }
+      # REPLACE DIRECTORY
+      if(overwrite){
+        unlink(save_as, recursive = TRUE)
+        # ABORT
+      } else {
+        invisible(NULL)
+      }
+    }
+    # SAVE GATINGSET
+    message(
+      paste(
+        "Saving GatingSet to ", 
+        save_as, 
+        "..."
+      )
+    )
+    suppressMessages(
+      save_gs(x, save_as)
+    )
+    # RETURN GATINGSET
     invisible(x)
     # SAVE FCS FILES
   } else {
@@ -2933,7 +3017,8 @@ cyto_save.GatingHierarchy <- function(x,
       id = id,
       save_as = save_as,
       inverse = inverse,
-      trans = trans
+      trans = trans,
+      overwrite = overwrite
     )
     
     # RETURN DATA
@@ -2950,6 +3035,7 @@ cyto_save.flowSet <- function(x,
                               save_as = NULL,
                               inverse = FALSE,
                               trans = NULL,
+                              overwrite = NULL,
                               ...) {
   
   # CYTOSET OF SPLIT CYTOFRAMES
@@ -2961,14 +3047,22 @@ cyto_save.flowSet <- function(x,
   
   # DIRECTORY CHECK
   if (!is.null(save_as) & dir.exists(save_as)) {
-    # FILES WILL BE OVERWRITTEN
+    # OVERWRITE FILES?
     if (any(list.files(save_as) %in% cyto_names(x))) {
-      message(paste0("Files will be overwritten in ", save_as, "."))
-      if(!cyto_enquire(
-        "Do you want to continue? (Y/N)",
-        options = c("T", "Y")
-      )) {
-        return(NULL)
+      # OVERWRITE
+      if(is.null(overwrite)){
+        overwrite <- cyto_enquire(
+          paste0(
+            "Files will be overwritten in ", 
+            save_as, 
+            ". Do you want to continue? (Y/N)"
+          ),
+          options = c("T", "Y")
+        )
+      }
+      # ABORT
+      if(!overwrite) {
+        invisible(NULL)
       }
     }
   }
