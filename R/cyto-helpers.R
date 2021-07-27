@@ -3756,7 +3756,7 @@ cyto_barcode <- function(x,
   # CHECK FOR SAMPLE IDs
   if (any(grepl("^s", type, ignore.case = TRUE))){
     # SAMPLE IDs EXIST - BACKWARDS COMPATIBLE
-    if(any(grepl("\\Sample.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
+    if(any(grepl("^Sample-?ID$", cyto_channels(cs), ignore.case = TRUE))) {
       # OVERWRITE
       if(!is.logical(overwrite)) {
         overwrite <- cyto_enquire(
@@ -3767,7 +3767,7 @@ cyto_barcode <- function(x,
       # OVERWRITE BARCODES
       if(overwrite) {
         # REMOVE SAMPLE ID COLUMN
-        cs <- realize_view(cs[, -which(grepl("\\Sample.*\\ID$", 
+        cs <- realize_view(cs[, -which(grepl("^Sample-?ID$", 
                                              cyto_channels(cs), 
                                              ignore.case = TRUE))])
       } else {
@@ -3795,7 +3795,7 @@ cyto_barcode <- function(x,
   # CHECK FOR EVENT IDs
   if (any(grepl("^e", type, ignore.case = TRUE))) {
     # EVENT IDs EXIST
-    if(any(grepl("\\Event.*\\ID$", cyto_channels(cs), ignore.case = TRUE))) {
+    if(any(grepl("^Event-?ID$", cyto_channels(cs), ignore.case = TRUE))) {
       # OVERWRITE
       if(!is.logical(overwrite)) {
         overwrite <- cyto_enquire(
@@ -3806,7 +3806,7 @@ cyto_barcode <- function(x,
       # OVERWRITE BARCODES
       if(overwrite){
         # REMOVE EVENT ID COLUMN
-        cs <- realize_view(cs[, -which(grepl("\\Event.*\\ID$", 
+        cs <- realize_view(cs[, -which(grepl("^Event-?ID$", 
                                              cyto_channels(cs), 
                                              ignore.case = TRUE))])
       } else {
