@@ -1,5 +1,7 @@
 # CytoExploreR 2.0.0
 
+* A new `overwrite` argument has been added to `cyto_save()` to provide a non-interactive way of controlling how existing directories should be handled when attempting to save files.
+* Add new `id` argument to `cyto_split()` to allow more control over how samples are split. The sample IDs can now be stored at the `cytoframe` level or passed manually as a vector or factor to `id`. The names will automatically be inherited from factors where appropriate.
 * Add new logical `append` argument to `cyto_markers_extract()` to optionally return extracted markers in the form `<marker> channel`.
 * Add new family of `cyto_func_()` functions to more elegantly handle the calling of internal/external functions.
 * `cyto_spillover_edit()` now has up/down buttons next to channel selectors to make it easier to scroll through channels.
@@ -55,7 +57,7 @@
 * `cyto_beads_sample()` is now defunct in favour of the more flexible `cyto_sample_to_node()` function.
 * Add new `cyto_sort_by()` function to sort samples based on experimental variables.
 * Add new `cyto_groups()` function to return the names or details of experimental groups.
-* `cyto_extract()` is now defunct in favour of the new `cyto_data_extract()` which has for extracting multiple populations. New arguments `format`, `split`, `markers`, `trans` and `inverse` provide flexibility in how the extracted population should be formatted.
+* `cyto_extract()` is now defunct in favour of the new `cyto_data_extract()` which has for extracting multiple populations. New arguments `format`, `split`, `coerce`, `markers`, `trans`, `inverse` and `sample` provide flexibility in how the extracted population should be formatted.
 * `cyto_names()` has been updated to extract sample information at the level of cytosets only, attempts to extract this information from flowFrames/cytoframes will generate an error.
 * `cyto_details()` now has additional `convert`, `drop` and `factor` arguments to allow easy formatting of the returned data.frame. Support for extracting `cyto_details()` from flowFrame/cytoframe objects has been removed.
 * `cyto_transform()` now appropriately handles transforming subsetted data where some parameters defined in the transformerList may be missing in the data.

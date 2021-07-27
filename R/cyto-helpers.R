@@ -5566,9 +5566,9 @@ cyto_apply.list <- function(x,
 #' @importFrom flowWorkspace flowFrame_to_cytoframe flowSet_to_cytoset
 #'
 #' @seealso
-#'   \code{\link[flowWorkspace:flowFrame_to_cytoframe]{flowFrame_to_cytoframe}}
+#'   \code{\link[flowWorkspace:convert]{flowFrame_to_cytoframe}}
 #' @seealso
-#'   \code{\link[flowWorkspace:flowSet_to_cytoset]{flowSet_to_cytoset}}  
+#'   \code{\link[flowWorkspace:convert]{flowSet_to_cytoset}}  
 #'
 #' @examples 
 #' library(CytoExploreRData)

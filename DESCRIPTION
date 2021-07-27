@@ -1,8 +1,8 @@
 Package: CytoExploreR
 Type: Package
 Title: Interactive Analysis of Cytometry Data
-Version: 1.0.9
-Date: 2020-06-19
+Version:2.0.0
+Date: 2020-07-27
 Authors@R: c(
   person("Dillon", "Hammill", role = c("aut", "cre"), email = "Dillon.Hammill@anu.edu.au"),
   person("Greg", "Finak", role = "ctb", email = "gfinak@fredhutch.org"),
@@ -23,7 +23,6 @@ Imports:
     data.table,
     DataEditR (>= 0.1.2),
     dplyr,
-    EmbedSOM,
     graphics,
     grDevices,
     HeatmapR,
@@ -32,15 +31,12 @@ Imports:
     purrr,
     robustbase,
     rhandsontable (>= 0.3.8),
-    Rtsne,
-    rsvd,
     shiny,
     shinythemes,
     stats,
     superheat (>= 1.0.0),
     tibble,
     tidyr,
-    umap,
     utils,
     visNetwork
 Suggests: 
