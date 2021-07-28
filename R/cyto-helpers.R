@@ -1596,9 +1596,12 @@ cyto_transform_extract <- function(x,
 #'   single object prior to returning the data, set to FALSE by default. If
 #'   \code{coerce} is TRUE, \code{sample} controls the proportion or number of
 #'   events to keep in the merged object.
-#' @param barcode additional argument passed to \code{cyto_coerce} when
-#'   \code{coerce} is TRUE to control whether samples should be barcoded prior
-#'   to coercion, set to FALSE by default.
+#' @param barcode logical to control whether \code{cyto_barcode} should be
+#'   called on the data prior to export. This argument also accepts options that
+#'   can be passed to the \code{type} argument of \code{cyto_barcode} to
+#'   control the type of barcoding to perform.
+#' @param overwrite logical passed to \code{cyto_barcode} to provide a
+#'   non-interactive way of controlling how existing barcodes should be handled.
 #' @param seed values used to \code{set.seed()} internally to return the same
 #'   extract the same subset of events on each run when \code{sample} is
 #'   supplied.
@@ -1634,6 +1637,12 @@ cyto_transform_extract <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_barcode}}
+#' @seealso \code{\link{cyto_coerce}}
+#' @seealso \code{\link{cyto_sample}}
+#' @seealso \code{\link{cyto_transform}}
+#'
 #' @export
 cyto_data_extract <- function(x,
                               parent = "root",
@@ -1648,6 +1657,7 @@ cyto_data_extract <- function(x,
                               sample = NULL,
                               coerce = FALSE,
                               barcode = FALSE,
+                              overwrite = NULL,
                               seed = NULL,
                               path = "auto") {
   
@@ -1700,18 +1710,29 @@ cyto_data_extract <- function(x,
       channels <- cyto_channels_extract(cs, channels)
       cs <- cs[, channels, drop = FALSE]
     }
+    # BARCODE
+    if(barcode != FALSE) {
+      if(barcode == TRUE) {
+        barcode <- "samples"
+      }
+      cs <- cyto_barcode(cs,
+                         type = barcode,
+                         overwrite = overwrite)
+    }
     # COERCE - NAME WITH PARENT
     if(coerce) {
+      # SAMPLE COERCED CYTOSET
       cs <- cyto_coerce(
         cs,
         format = "cytoset",
         display = ifelse(is.null(sample), 1, sample),
         name = paste0(names(cs_list)[id], "-merge"),
-        barcode = barcode,
+        barcode = FALSE,
         seed = seed
       )
-      # SAMPLE
-    }else if(!is.null(sample)) {
+    # SAMPLE
+     }else if(!is.null(sample)) {
+      # SAMPLE EACH CYTOFRAME
       cs <- cyto_sample(
         cs,
         display = sample,

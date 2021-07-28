@@ -18,6 +18,7 @@ cyto_data_extract(
   sample = NULL,
   coerce = FALSE,
   barcode = FALSE,
+  overwrite = NULL,
   seed = NULL,
   path = "auto"
 )
@@ -66,9 +67,13 @@ single object prior to returning the data, set to FALSE by default. If
 \code{coerce} is TRUE, \code{sample} controls the proportion or number of
 events to keep in the merged object.}
 
-\item{barcode}{additional argument passed to \code{cyto_coerce} when
-\code{coerce} is TRUE to control whether samples should be barcoded prior
-to coercion, set to FALSE by default.}
+\item{barcode}{logical to control whether \code{cyto_barcode} should be
+called on the data prior to export. This argument also accepts options that
+can be passed to the \code{type} argument of \code{cyto_barcode} to
+control the type of barcoding to perform.}
+
+\item{overwrite}{logical passed to \code{cyto_barcode} to provide a
+non-interactive way of controlling how existing barcodes should be handled.}
 
 \item{seed}{values used to \code{set.seed()} internally to return the same
 extract the same subset of events on each run when \code{sample} is
@@ -108,6 +113,17 @@ format = "matrix",
 channels = c("CD4", "CD8"))
 mt[["Activation_1.fcs"]]
 
+}
+\seealso{
+\code{\link{cyto_select}}
+
+\code{\link{cyto_barcode}}
+
+\code{\link{cyto_coerce}}
+
+\code{\link{cyto_sample}}
+
+\code{\link{cyto_transform}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
