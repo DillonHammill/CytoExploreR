@@ -16,7 +16,8 @@ cyto_load(
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in. Preferably
-the name of folder in current working directory.}
+the name of folder in current working directory, but paths to individual
+files are also allowed.}
 
 \item{select}{vector of file names to select when loading files, set to NULL
 be default to select all files in the specified directory.}

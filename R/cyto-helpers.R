@@ -206,7 +206,8 @@ cyto_export <- function(x,
 #' saved GatingSet objects.
 #'
 #' @param path points to the location of the .fcs files to read in. Preferably
-#'   the name of folder in current working directory.
+#'   the name of folder in current working directory, but paths to individual
+#'   files are also allowed.
 #' @param select vector of file names to select when loading files, set to NULL
 #'   be default to select all files in the specified directory.
 #' @param exclude vector of file names to exclude when loading files, set to
@@ -239,7 +240,7 @@ cyto_export <- function(x,
 #'
 #' # cs is a cytoset
 #' class(cs)
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
@@ -250,18 +251,34 @@ cyto_load <- function(path = ".",
                       barcode = FALSE,
                       restrict = FALSE, ...) {
   
-  # DIRECTORY NOT FOUND
-  if (!dir.exists(path)) {
-    stop("Specified path does not exist.")
-  }
+  # TODO: Add support for multiple directories or filenames passed to path
   
-  # FILE PATHS
-  files <- list.files(path, 
-                      full.names = TRUE,
-                      recursive = TRUE) # search internal directories
-  
-  # REMOVE DIRECTORIES
-  files <- files[!dir.exists(files)]
+  # PATH - DIRECTORY/FILES
+  files <- LAPPLY(path, function(z){
+    # DIRECTORY
+    if(dir.exists(z)){
+      return(
+        list.files(
+          z,
+          full.names = TRUE,
+          recursive = TRUE
+        )
+      )
+    # FILE
+    } else if(!file.exists(z)) {
+      return(
+        z
+      )
+    # DIRECTORY/ FILE DOES NOT EXIST
+    } else {
+      stop(
+        paste0(
+          z,
+          " is inaccessible or does not exist!"
+        )
+      )
+    }
+  })
   
   # SAVED GATINGSET
   if ("pb" %in% file_ext(files)) {
@@ -3587,8 +3604,8 @@ cyto_coerce <- function(x,
 
   # BARCODE
   if(barcode) {
-    cyto_barcode(x,
-                 overwrite = overwrite)
+    x <- cyto_barcode(x,
+                      overwrite = overwrite)
   }
   
   # COERCE
