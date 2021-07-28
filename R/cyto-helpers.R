@@ -250,9 +250,7 @@ cyto_load <- function(path = ".",
                       sort = TRUE,
                       barcode = FALSE,
                       restrict = FALSE, ...) {
-  
-  # TODO: Add support for multiple directories or filenames passed to path
-  
+
   # PATH - DIRECTORY/FILES
   files <- LAPPLY(path, function(z){
     # DIRECTORY

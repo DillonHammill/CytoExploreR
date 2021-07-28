@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* `path` argument in `cyto_load()` has been updated to allow support for multiple directories or paths to files.
 * A new `overwrite` argument has been added to `cyto_save()` to provide a non-interactive way of controlling how existing directories should be handled when attempting to save files.
 * Add new `id` argument to `cyto_split()` to allow more control over how samples are split. The sample IDs can now be stored at the `cytoframe` level or passed manually as a vector or factor to `id`. The names will automatically be inherited from factors where appropriate.
 * Add new logical `append` argument to `cyto_markers_extract()` to optionally return extracted markers in the form `<marker> channel`.
