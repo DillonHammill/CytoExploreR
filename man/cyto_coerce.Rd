@@ -6,7 +6,7 @@
 \usage{
 cyto_coerce(
   x,
-  display = 1,
+  sample = 1,
   seed = NULL,
   barcode = FALSE,
   format = "cytoset",
@@ -18,9 +18,12 @@ cyto_coerce(
 \arguments{
 \item{x}{\code{\link[flowWorkspace:cytoset]{cytoset}}.}
 
-\item{display}{passed to \code{\link{cyto_sample}} to control the number of
-events to retain in the coerced \code{cytoframe}, set to 1 by default to
-retain all events.}
+\item{sample}{numeric to control how events should be sampled when coercing
+samples. If a single value is supplied it is passed to \code{cyto_sample_n}
+to compute the number of events to extract from each sample to obtain
+\code{sample} total events in the coerced data. Alternatively, users can
+manually supply a \code{sample} value for each file for more control over
+the way in which samples are sampled prior to merging.}
 
 \item{seed}{numeric passed to \code{\link{set.seed}} to return the same
 sample with each run, set to NULL by default for random sampling.}
@@ -66,8 +69,11 @@ gs <- cyto_load(
 # Activation cytoset
 cs <- cyto_data_extract(gs, "root")[["root"]]
 
-# Coerce & Sample
-cyto_coerce(cs, display = 50000, seed = 56)
+# Coerce & Sample 50000 total events
+cyto_coerce(cs, sample = 50000, seed = 56)
+
+# Sample 5000 events each & coerce
+cyto_coerce(cs, sample = rep(5000, 33))
 
 }
 \author{

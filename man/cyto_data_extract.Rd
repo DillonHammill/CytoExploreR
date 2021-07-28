@@ -8,7 +8,7 @@ cyto_data_extract(
   x,
   parent = "root",
   select = NULL,
-  copy = TRUE,
+  copy = FALSE,
   format = "cytoset",
   channels = NULL,
   markers = FALSE,
@@ -35,8 +35,8 @@ cyto_data_extract(
 select samples using \code{\link{cyto_select}}.}
 
 \item{copy}{logical indicating whether a deep copy of the extracted data
-should be returned, set to TRUE by default to ensure that any changes to
-the data will not affect the supplied data.}
+should be returned, set to FALSE by default. Users should set this argument
+to TRUE if they wish to keep the original data unchanged.}
 
 \item{format}{can be either \code{"cytoframe"}, \code{"cytoset"} or
 \code{"matrix"} to indicate in what format the data should be returned in
@@ -69,8 +69,8 @@ events to keep in the merged object.}
 
 \item{barcode}{logical to control whether \code{cyto_barcode} should be
 called on the data prior to export. This argument also accepts options that
-can be passed to the \code{type} argument of \code{cyto_barcode} to
-control the type of barcoding to perform.}
+can be passed to the \code{type} argument of \code{cyto_barcode} to control
+the type of barcoding to perform.}
 
 \item{overwrite}{logical passed to \code{cyto_barcode} to provide a
 non-interactive way of controlling how existing barcodes should be handled.}

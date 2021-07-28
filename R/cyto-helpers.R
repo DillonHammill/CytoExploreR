@@ -1573,8 +1573,8 @@ cyto_transform_extract <- function(x,
 #' @param select named list containing experimental variables to be used to
 #'   select samples using \code{\link{cyto_select}}.
 #' @param copy logical indicating whether a deep copy of the extracted data
-#'   should be returned, set to TRUE by default to ensure that any changes to
-#'   the data will not affect the supplied data.
+#'   should be returned, set to FALSE by default. Users should set this argument
+#'   to TRUE if they wish to keep the original data unchanged.
 #' @param format can be either \code{"cytoframe"}, \code{"cytoset"} or
 #'   \code{"matrix"} to indicate in what format the data should be returned in
 #'   the lists, set to \code{"cytoset"} by default.
@@ -1598,8 +1598,8 @@ cyto_transform_extract <- function(x,
 #'   events to keep in the merged object.
 #' @param barcode logical to control whether \code{cyto_barcode} should be
 #'   called on the data prior to export. This argument also accepts options that
-#'   can be passed to the \code{type} argument of \code{cyto_barcode} to
-#'   control the type of barcoding to perform.
+#'   can be passed to the \code{type} argument of \code{cyto_barcode} to control
+#'   the type of barcoding to perform.
 #' @param overwrite logical passed to \code{cyto_barcode} to provide a
 #'   non-interactive way of controlling how existing barcodes should be handled.
 #' @param seed values used to \code{set.seed()} internally to return the same
@@ -1647,7 +1647,7 @@ cyto_transform_extract <- function(x,
 cyto_data_extract <- function(x,
                               parent = "root",
                               select = NULL,
-                              copy = TRUE,
+                              copy = FALSE,
                               format = "cytoset",
                               channels = NULL,
                               markers = FALSE,
@@ -3483,9 +3483,12 @@ cyto_sample_n <- function(x,
 #' control over the format in which the coerced data should be returned.
 #'
 #' @param x \code{\link[flowWorkspace:cytoset]{cytoset}}.
-#' @param display passed to \code{\link{cyto_sample}} to control the number of
-#'   events to retain in the coerced \code{cytoframe}, set to 1 by default to
-#'   retain all events.
+#' @param sample numeric to control how events should be sampled when coercing
+#'   samples. If a single value is supplied it is passed to \code{cyto_sample_n}
+#'   to compute the number of events to extract from each sample to obtain
+#'   \code{sample} total events in the coerced data. Alternatively, users can
+#'   manually supply a \code{sample} value for each file for more control over
+#'   the way in which samples are sampled prior to merging.
 #' @param seed numeric passed to \code{\link{set.seed}} to return the same
 #'   sample with each run, set to NULL by default for random sampling.
 #' @param barcode logical indicating whether the samples should be barcoded
@@ -3521,12 +3524,15 @@ cyto_sample_n <- function(x,
 #' # Activation cytoset
 #' cs <- cyto_data_extract(gs, "root")[["root"]]
 #'
-#' # Coerce & Sample
-#' cyto_coerce(cs, display = 50000, seed = 56)
+#' # Coerce & Sample 50000 total events
+#' cyto_coerce(cs, sample = 50000, seed = 56)
+#'
+#' # Sample 5000 events each & coerce
+#' cyto_coerce(cs, sample = rep(5000, 33))
 #'
 #' @export
 cyto_coerce <- function(x,
-                        display = 1,
+                        sample = 1,
                         seed = NULL,
                         barcode = FALSE,
                         format = "cytoset",
@@ -3536,14 +3542,29 @@ cyto_coerce <- function(x,
   # IDENTIFIERS
   ids <- cyto_names(x)
   
-  # SAMPLE COUNTS
-  cnts <- cyto_sample_n(x,
-                        display = display)
-  
+  # SAMPLE REQUIRES CYTO_SAMPLE_N
+  if(length(sample) == 1) {
+    sample <- cyto_sample_n(x,
+                            display = sample)
+  # SAMPLE MANUALLY SUPPLIED
+  } else if(length(sample) == length(x)) {
+    if(is.null(names(sample))) {
+      names(sample) <- ids
+    }
+  # SAMPLE PER CYTOFRAME REQUIRED
+  } else {
+    stop(
+      paste0(
+        "'sample' must have the same length as 'x' to use custom sampling ",
+        "per cytoframe!"
+      )
+    )
+  }
+
   # REMOVE EMPTY SAMPLES
-  if(any(!names(cnts) %in% ids)) {
+  if(any(!names(sample) %in% ids)) {
     x <- cyto_select(x,
-                     list("name" = ids[ids %in% names(cnts)]))
+                     list("name" = ids[ids %in% names(sample)]))
   }
 
   # SAMPLING
@@ -3553,7 +3574,7 @@ cyto_coerce <- function(x,
         cyto_names(x), 
         function(z){
           fr <- cyto_sample(x[[z]], 
-                            display = cnts[z], 
+                            display = sample[z], 
                             seed = seed)
           if(cyto_class(fr, "flowFrame", TRUE)) {
             fr <- flowFrame_to_cytoframe(fr)
