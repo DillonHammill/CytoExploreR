@@ -4,14 +4,14 @@
 \alias{cyto_sample_n}
 \title{Compute sample number for each cytoframe in a cytoset}
 \usage{
-cyto_sample_n(x, display = 1, parent = NULL)
+cyto_sample_n(x, events = 1, parent = NULL)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{display}{can be either a numeric [0,1] or integer to indicate the
+\item{events}{can be either a numeric [0,1] or integer to indicate the
 percentage or number of events to keep respectively.}
 
 \item{parent}{name of the parental population to extract from GatingHierarchy
@@ -38,7 +38,7 @@ gs <- cyto_load(
  # SAMPLE SIZE
  cyto_sample_n(gs,
  parent = "T Cells",
- display = 50000)
+ events = 50000)
 
 }
 \author{

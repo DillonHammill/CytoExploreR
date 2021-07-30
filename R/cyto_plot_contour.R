@@ -12,7 +12,7 @@
 #'   or GatingSt objects, set to the "root" node by default.
 #' @param overlay list containing cytoframe or cytoset objects to overlay.
 #' @param channels channels used to construct the existing cyto_plot.
-#' @param display controls the number or percentage of events to display, set to
+#' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
 #' @param contour_lines numeric indicating the number of levels to use for
 #'   contour lines, set to 15 by default.
@@ -62,7 +62,7 @@ cyto_plot_contour <- function(x,
                               parent = "root",
                               channels,
                               overlay = NA,
-                              display = 1,
+                              events = 1,
                               contour_lines = 15,
                               contour_line_type = 1,          
                               contour_line_width = 1,
@@ -97,9 +97,9 @@ cyto_plot_contour <- function(x,
   }
   
   # SAMPLING
-  if(display != 1) {
+  if(events != 1) {
     x <- cyto_sample(x,
-                     display = display,
+                     events = events,
                      seed = seed)
   }
   

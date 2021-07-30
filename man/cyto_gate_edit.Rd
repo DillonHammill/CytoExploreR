@@ -16,7 +16,7 @@ cyto_gate_edit(
   group_by = NULL,
   select = NULL,
   negate = FALSE,
-  display = 50000,
+  events = 50000,
   axis = "x",
   label = TRUE,
   plot = TRUE,
@@ -66,8 +66,7 @@ as upper or lower case first letters as well. Default \code{type} is
 
 \item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
 \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
-containing populations to be overlaid onto the plot(s). Only overlaid
-flowSet objects are subjected to sampling by \code{display}.}
+containing populations to be overlaid onto the plot(s).}
 
 \item{merge_by}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
@@ -89,8 +88,8 @@ made for the negated population (i.e. all events outside the constructed
 gates), set to FALSE by default. If negate is set to TRUE, a name for the
 negated population MUST be supplied at the end of the alias argument.}
 
-\item{display}{fraction or number of events to display in the plot during the
-gating process, set to 25 000 events by default.}
+\item{events}{fraction or number of events to display in the plot during the
+gating process, set to 50000 events by default.}
 
 \item{axis}{indicates whether the \code{"x"} or \code{"y"} axis should be
 gated for 2-D interval gates.}

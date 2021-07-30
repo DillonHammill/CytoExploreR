@@ -12,7 +12,7 @@ cyto_setup(
   markers = TRUE,
   parse_names = FALSE,
   details = TRUE,
-  sample = FALSE,
+  events = 1,
   ...
 )
 }
@@ -48,10 +48,10 @@ the delimiter to this argument instead of TRUE.}
 the loaded samples, set to TRUE by default. The name of the csv to which
 these details will be supplied can also be passed to this argument.}
 
-\item{sample}{logical indicating whether all samples should be downsampled to
-the minimum number of events in a sample, set to FALSE by default.
-Alternatively, users can supply a numeric to indicate the desired number of
-events to keep in each sample.}
+\item{events}{numeric passed to \code{cyto_sample} to control the number or
+proportion of events to retain in each sample, set to 1 by default to keep
+all events. Setting \code{events} to 0 will result in downsampling to the
+minimum number of events across samples.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_load}}.}
 }

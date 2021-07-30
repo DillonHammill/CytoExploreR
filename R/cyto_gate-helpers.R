@@ -977,12 +977,11 @@ cyto_gate_extract <- function(x,
 #'   \code{group_by} will be ended in the future.
 #' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
 #'   \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
-#'   containing populations to be overlaid onto the plot(s). Only overlaid
-#'   flowSet objects are subjected to sampling by \code{display}.
+#'   containing populations to be overlaid onto the plot(s). 
 #' @param select vector containing the indices of samples within gs to use for
 #'   plotting.
-#' @param display fraction or number of events to display in the plot during the
-#'   gating process, set to 25 000 events by default.
+#' @param events fraction or number of events to display in the plot during the
+#'   gating process, set to 50000 events by default.
 #' @param negate logical indicating whether a gatingTemplate entry should be
 #'   made for the negated population (i.e. all events outside the constructed
 #'   gates), set to FALSE by default. If negate is set to TRUE, a name for the
@@ -1090,7 +1089,7 @@ cyto_gate_edit <- function(x,
                            group_by = NULL,
                            select = NULL,
                            negate = FALSE,
-                           display = 50000,
+                           events = 50000,
                            axis = "x",
                            label = TRUE,
                            plot = TRUE,
@@ -1270,7 +1269,7 @@ cyto_gate_edit <- function(x,
                               overlay = overlay,
                               merge_by = merge_by,
                               select = select,
-                              display = display,
+                              events = events,
                               seed = seed)
   
   # SELECT GROUP(S) TO EDIT ----------------------------------------------------

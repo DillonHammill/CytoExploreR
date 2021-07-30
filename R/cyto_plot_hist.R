@@ -10,7 +10,7 @@
 #'   or GatingSet objects.
 #' @param channel name of the channels to be used to construct the plot.
 #' @param overlay list of cytoframe objects to overlay.
-#' @param display controls the number or percentage of events to display, set to
+#' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
 #' @param hist_stat can be either \code{"count"}, \code{"percent"} or
 #'   \code{"density"} to indicate the statistic to display on histograms, set to
@@ -52,7 +52,7 @@ cyto_plot_hist <- function(x,
                            parent = "root",
                            channel,
                            overlay = NA,
-                           display = 1,
+                           events = 1,
                            hist_stat = "count",
                            hist_bins = 256,
                            hist_smooth = 1,
@@ -94,9 +94,9 @@ cyto_plot_hist <- function(x,
       }
     }
     # SAMPLE
-    if(display != 1){
+    if(events != 1){
       x <- cyto_sample(x,
-                       display = display,
+                       events = events,
                        seed = seed)
     }
     # HISTOGRAMS

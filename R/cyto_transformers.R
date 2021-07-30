@@ -81,8 +81,8 @@ cyto_transformer_extract <- function(...){
 #'   select a subset of samples for \code{cyto_plot}.
 #' @param plot logical indicating whether the results of transformations should
 #'   be plotted using \code{cyto_plot}.
-#' @param display number or frequency of events to display in plots, set to
-#'   25000 events by default. See \code{\link{cyto_plot}} for details.
+#' @param events number or frequency of events to display in plots, set to
+#'   50000 events by default. See \code{\link{cyto_plot}} for details.
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
@@ -116,7 +116,7 @@ cyto_transformers_define <- function(x,
                                      channels = NULL,
                                      type = "logicle",
                                      select = NULL,
-                                     display = 50000,
+                                     events = 50000,
                                      plot = TRUE,
                                      axes_limits = "machine",
                                      ...) {
@@ -141,7 +141,7 @@ cyto_transformers_define <- function(x,
   
   # UPDATE DEFINITION OF X - TRANSFORMERS REQUIRE CYTOFRAME
   x <- cyto_coerce(cs,
-                   display = display,
+                   events = events,
                    format = "cytoset")[[1]]
   
   # PREPARE ARGUMENTS
@@ -293,7 +293,7 @@ cyto_transformers_define <- function(x,
                         channels = channels,
                         axes_trans = transformer_list,
                         axes_limits = axes_limits,
-                        display = 1), # sampling performed above
+                        events = 1), # sampling performed above
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }

@@ -9,7 +9,7 @@ cyto_plot_contour(
   parent = "root",
   channels,
   overlay = NA,
-  display = 1,
+  events = 1,
   contour_lines = 15,
   contour_line_type = 1,
   contour_line_width = 1,
@@ -34,7 +34,7 @@ or GatingSt objects, set to the "root" node by default.}
 
 \item{overlay}{list containing cytoframe or cytoset objects to overlay.}
 
-\item{display}{controls the number or percentage of events to display, set to
+\item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
 
 \item{contour_lines}{numeric indicating the number of levels to use for

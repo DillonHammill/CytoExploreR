@@ -4,7 +4,7 @@
 \alias{cyto_sample_to_node}
 \title{Sample GatingSet to node}
 \usage{
-cyto_sample_to_node(x, node = NULL, count = NULL, ...)
+cyto_sample_to_node(x, node = NULL, events = NULL, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -14,9 +14,9 @@ cyto_sample_to_node(x, node = NULL, count = NULL, ...)
 not supplied internal checks will be made for populations named "Single
 Beads" or "Beads".}
 
-\item{count}{minimum number of events to downsample to, set to the minimum
-count for the specified node across samples by default. \code{count} must
-be less than or equal to the minimum count across the samples.}
+\item{events}{minimum number of events to downsample to, set to the minimum
+count for the specified node across samples by default. \code{events} must
+be less than or equal to the minimum event count across the samples.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_sample}}.}
 }

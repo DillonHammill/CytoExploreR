@@ -9,7 +9,7 @@ cyto_plot_hist(
   parent = "root",
   channel,
   overlay = NA,
-  display = 1,
+  events = 1,
   hist_stat = "count",
   hist_bins = 256,
   hist_smooth = 1,
@@ -37,7 +37,7 @@ or GatingSet objects.}
 
 \item{overlay}{list of cytoframe objects to overlay.}
 
-\item{display}{controls the number or percentage of events to display, set to
+\item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
 
 \item{hist_stat}{can be either \code{"count"}, \code{"percent"} or

@@ -10,7 +10,7 @@ cyto_transformers_define(
   channels = NULL,
   type = "logicle",
   select = NULL,
-  display = 50000,
+  events = 50000,
   plot = TRUE,
   axes_limits = "machine",
   ...
@@ -39,8 +39,8 @@ together using \code{cyto_transformers_combine()}.}
 \item{select}{list of selection criteria passed to \code{cyto_select} to
 select a subset of samples for \code{cyto_plot}.}
 
-\item{display}{number or frequency of events to display in plots, set to
-25000 events by default. See \code{\link{cyto_plot}} for details.}
+\item{events}{number or frequency of events to display in plots, set to
+50000 events by default. See \code{\link{cyto_plot}} for details.}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}

@@ -13,7 +13,7 @@
 #' @param channels names of the channels used to construct the plot.
 #' @param overlay optional argument if x is a cytoframe to overlay a list of
 #'   cytoframe objects.
-#' @param display controls the number or percentage of events to display, set to
+#' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
 #'   \code{"."} by default to maximise plotting speed.  See
@@ -59,7 +59,7 @@ cyto_plot_point <- function(x,
                             parent = "root",
                             channels,
                             overlay = NA,
-                            display = 1,
+                            events = 1,
                             point_shape = ".",
                             point_size = 2,
                             point_col_scale = NA,
@@ -104,9 +104,9 @@ cyto_plot_point <- function(x,
   # SAMPLE DATA ----------------------------------------------------------------
   
   # DISPLAY
-  if (display != 1) {
+  if (events != 1) {
     x <- cyto_sample(x,
-                     display = display,
+                     events = events,
                      seed = seed
     )
   }
@@ -263,7 +263,7 @@ cyto_plot_point <- function(x,
     if (contour_lines[z] != 0) {
       cyto_plot_contour(x[[z]],
                         channels = channels,
-                        display = 1,
+                        events = 1,
                         contour_lines = contour_lines[z],
                         contour_line_type = contour_line_type[z],
                         contour_line_width = contour_line_width[z],

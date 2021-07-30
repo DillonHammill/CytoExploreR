@@ -42,11 +42,11 @@
 #'   \code{rectangleGate}, \code{polygonGate}, \code{ellipsoidGate},
 #'   \code{quadGate} or \code{filters}. Lists of these supported gate objects
 #'   are also supported.
-#' @param display numeric to control the number or percentage of events to
+#' @param events numeric to control the number or percentage of events to
 #'   display. Values [0,1] indicate the percentage of events to display (i.e.
 #'   value of 1 will display all events), whilst values larger than 1 indicate
-#'   the number of events to display. The default value for \code{display} is
-#'   set to 25000 to display 25000 events only.
+#'   the number of events to display. The default value for \code{events} is
+#'   set to 50000 to display 50000 events only.
 #' @param layout a vector of the length 2 indicating the dimensions of the grid
 #'   for plotting \code{c(#rows, #columns)}.
 #' @param margins a vector of length 4 to control the margins around the bottom,
@@ -319,7 +319,7 @@ cyto_plot <- function(x,
                       overlay = NA,
                       gate = NA,
                       axes_limits = "auto",
-                      display = 50000,
+                      events = 50000,
                       layout,
                       margins = c(NA, NA, NA, NA),
                       popup = TRUE,
@@ -507,7 +507,7 @@ cyto_plot <- function(x,
                                    "alias",
                                    "overlay",
                                    "select",
-                                   "display", 
+                                   "events", 
                                    "seed",
                                    "negate")]
   

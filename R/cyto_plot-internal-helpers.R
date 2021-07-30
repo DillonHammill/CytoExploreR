@@ -66,7 +66,7 @@
                             overlay = NA,
                             merge_by = "name",
                             select = NULL,
-                            display = 50000,
+                            events = 50000,
                             barcode = FALSE,
                             seed = 42) {
 
@@ -317,12 +317,12 @@
         if(is.null(LAPPLY(i[[w]], `[[`, "layer"))) {
           # COMPUTE SAMPLE SIZES
           n <- cyto_sample_n(cs,
-                             display = display)
+                             events = events)
           for(id in ids) {
             i[[w]][[id]]$sample <<- n[id]
           }
           cs_sub_list[[w]] <<- cyto_sample(cs,
-                                           display = n,
+                                           events = n,
                                            seed = seed)
         # SOME/ALL CYTOFRAMES CONTAIN EVENTS ON PLOT
         } else {
@@ -384,12 +384,12 @@
           if(length(m[!m]) == length(cs)) {
             # COMPUTE SAMPLE SIZES
             n <- cyto_sample_n(cs,
-                               display = display)
+                               events = events)
             # SAMPLE
             for(id in names(m[!m])) {
               i[[w]][[id]]$sample <<- n[id]
               cf_list[[id]] <- cyto_sample(cs[[id]],
-                                           display = n[id],
+                                           events = n[id],
                                            seed = seed)
             }
           # SOME NEW CYTOFRAME(S)
@@ -402,12 +402,12 @@
             )
             # COMPUTE SAMPLE SIZES FOR NEW CYTOFRAMES
             n <- cyto_sample_n(cs[names(m[!m])],
-                               display = n)
+                               events = n)
             # SAMPLE
             for(id in names(m[!m])) {
               i[[w]][[id]]$sample <<- n[id]
               cf_list[[id]] <- cyto_sample(cs[[id]],
-                                           display = n[id])
+                                           events = n[id])
             }
           }
           # ADD CYTOFRAMES TO NEW CYTOSET

@@ -101,7 +101,7 @@
   args <- formals("cyto_plot")
   args <- args[!names(args) %in% c("merge_by",
                                    "overlay",
-                                   "display",
+                                   "events",
                                    "layout",
                                    "select",
                                    "...")]
@@ -136,7 +136,7 @@
   
   # NEGATE HANDLED ABOVE
   plot_args <- c(
-    "display",
+    "events",
     "axes_limits",
     "axes_limits_buffer",
     "margins",

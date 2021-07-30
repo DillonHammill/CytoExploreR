@@ -11,7 +11,7 @@
   parent,
   alias = NA,
   channels = NULL,
-  display = 1,
+  events = 1,
   gate = NA,
   negate = NA,
   label_text,
@@ -32,7 +32,7 @@
   x,
   channels = NULL,
   trans = NA,
-  display = 1,
+  events = 1,
   gate = NA,
   negate = FALSE,
   label_text = NA,
@@ -62,8 +62,8 @@ object is supplied. This is equivalent to the \code{gate} argument for
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for
 gating.}
 
-\item{display}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{display} can substantial improve
+\item{events}{numeric [0,1] to control the percentage of events to be
+plotted. Specifying a value for \code{events} can substantial improve
 plotting speed for less powerful machines.}
 
 \item{gate}{object of class

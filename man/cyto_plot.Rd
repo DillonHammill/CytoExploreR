@@ -14,7 +14,7 @@ cyto_plot(
   overlay = NA,
   gate = NA,
   axes_limits = "auto",
-  display = 50000,
+  events = 50000,
   layout,
   margins = c(NA, NA, NA, NA),
   popup = TRUE,
@@ -154,11 +154,11 @@ to \code{"auto"} by default to use optimised axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
 
-\item{display}{numeric to control the number or percentage of events to
+\item{events}{numeric to control the number or percentage of events to
 display. Values [0,1] indicate the percentage of events to display (i.e.
 value of 1 will display all events), whilst values larger than 1 indicate
-the number of events to display. The default value for \code{display} is
-set to 25000 to display 25000 events only.}
+the number of events to display. The default value for \code{events} is
+set to 50000 to display 50000 events only.}
 
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}

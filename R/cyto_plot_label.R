@@ -52,8 +52,8 @@
 #' @param label_fill fill colour to use for labels, set to "white" by default.
 #' @param label_fill_alpha numeric [0,1] controls the transparency of the fill
 #'   colour, set to \code{0.6} by default.
-#' @param display numeric [0,1] to control the percentage of events to be
-#'   plotted. Specifying a value for \code{display} can substantial improve
+#' @param events numeric [0,1] to control the percentage of events to be
+#'   plotted. Specifying a value for \code{events} can substantial improve
 #'   plotting speed for less powerful machines.
 #' @param hist_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust kernel density for mode
@@ -118,7 +118,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
                                             parent,
                                             alias = NA,
                                             channels = NULL,
-                                            display = 1,
+                                            events = 1,
                                             gate = NA,
                                             negate = NA,
                                             label_text,
@@ -272,7 +272,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
   label_text_xy <- cyto_plot_label(x = fr,
                                    channels = channels,
                                    trans = trans,
-                                   display = display,
+                                   events = events,
                                    gate = gate,
                                    negate = negate,
                                    label_text = label_text,
@@ -297,7 +297,7 @@ cyto_plot_label.GatingHierarchy <- function(x,
 cyto_plot_label.flowFrame <- function(x,
                                       channels = NULL,
                                       trans = NA,
-                                      display = 1,
+                                      events = 1,
                                       gate = NA,
                                       negate = FALSE,
                                       label_text = NA,
@@ -320,8 +320,10 @@ cyto_plot_label.flowFrame <- function(x,
   }
   
   # SAMPLING
-  if(display != 1){
-    x <- cyto_sample(x, display = display, seed = 56)
+  if(events != 1){
+    x <- cyto_sample(x,
+                     events = events, 
+                     seed = 56)
   }
   
   # STATISTIC

@@ -55,8 +55,8 @@
 #'  for the negated population (i.e. all events outside the constructed gates),
 #'  set to FALSE by default. If negate is set to TRUE, a name for the negated
 #'  population MUST be supplied at the end of the alias argument.
-#' @param display fraction or number of events to display in the plot during the
-#'  gating process, set to 25 000 events by default.
+#' @param events fraction or number of events to display in the plot during the
+#'  gating process, set to 50000 events by default.
 #' @param axis indicates whether the \code{"x"} or \code{"y"} axis should be
 #'  gated for 2-D interval gates.
 #' @param label logical indicating whether to include
@@ -182,7 +182,7 @@ cyto_gate_draw <- function(x,
                            group_by = NULL,
                            select = NULL,
                            negate = FALSE,
-                           display = 50000,
+                           events = 50000,
                            axis = "x",
                            label = TRUE,
                            plot = TRUE,
@@ -272,7 +272,7 @@ cyto_gate_draw <- function(x,
                               overlay = overlay,
                               merge_by = merge_by,
                               select = select,
-                              display = display,
+                              events = events,
                               seed = seed)
 
   # GATING ---------------------------------------------------------------------

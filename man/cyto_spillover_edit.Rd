@@ -14,7 +14,7 @@ cyto_spillover_edit(
   save_as = NULL,
   axes_trans = NA,
   axes_limits = "machine",
-  display = 2000,
+  events = 2000,
   point_size = 4,
   axes_text_size = 1.7,
   axes_label_text_size = 2,
@@ -56,7 +56,7 @@ for visualisation.}
 \code{"machine"} to use optimised, data or machine limits respectively. Set
 to \code{"machine"} by default to use entire axes ranges.}
 
-\item{display}{numeric passed to \code{cyto_plot} to control the number of
+\item{events}{numeric passed to \code{cyto_plot} to control the number of
 events to be displayed in the plots, set to 2000 events by default.}
 
 \item{point_size}{integer passed to \code{cyto_plot} to control the size of

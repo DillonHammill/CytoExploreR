@@ -110,13 +110,13 @@
 NULL
 
 #' @rdname cyto_map
-#' @export
+#' @noRd
 cyto_map <- function(x, ...) {
   UseMethod("cyto_map")
 }
 
 #' @rdname cyto_map
-#' @export
+#' @noRd
 cyto_map.GatingSet <- function(x,
                                parent = "root",
                                select = NULL,
@@ -304,7 +304,7 @@ cyto_map.GatingSet <- function(x,
 }
 
 #' @rdname cyto_map
-#' @export
+#' @noRd
 cyto_map.flowSet <- function(x,
                              select = NULL,
                              channels = NULL,
@@ -426,7 +426,7 @@ cyto_map.flowSet <- function(x,
 }
 
 #' @rdname cyto_map
-#' @export
+#' @noRd
 cyto_map.flowFrame <- function(x,
                                channels = NULL,
                                display = 1,
@@ -587,7 +587,6 @@ cyto_map.flowFrame <- function(x,
   
   # CHARACTER
   if (is.character(type)) {
-    print("YEESSS")
     # MESSAGE
     message(paste0("Computing ", type, " co-ordinates..."))
     # PCA

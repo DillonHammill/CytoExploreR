@@ -11,15 +11,15 @@
 \usage{
 cyto_sample(x, ...)
 
-\method{cyto_sample}{GatingHierarchy}(x, display = 1, seed = NULL, ...)
+\method{cyto_sample}{GatingHierarchy}(x, events = 1, seed = NULL, ...)
 
-\method{cyto_sample}{GatingSet}(x, display = 1, seed = NULL, ...)
+\method{cyto_sample}{GatingSet}(x, events = 1, seed = NULL, ...)
 
-\method{cyto_sample}{flowFrame}(x, display = 1, seed = NULL, ...)
+\method{cyto_sample}{flowFrame}(x, events = 1, seed = NULL, ...)
 
-\method{cyto_sample}{flowSet}(x, display = 1, seed = NULL, ...)
+\method{cyto_sample}{flowSet}(x, events = 1, seed = NULL, ...)
 
-\method{cyto_sample}{list}(x, display = 1, seed = NULL, ...)
+\method{cyto_sample}{list}(x, events = 1, seed = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -29,12 +29,13 @@ cyto_sample(x, ...)
 
 \item{...}{not in use.}
 
-\item{display}{can be either a numeric [0,1] or integer to indicate the
+\item{events}{can be either a numeric [0,1] or integer to indicate the
 percentage or number of events to keep respectively. For \code{cytoset} or
 \code{GatingSet} objects, the same degree of sampling is applied to each
 \code{cytoframe} by default. However, cytoframes will be separately sampled
 if a vector the same length as the \code{cytoset} or \code{GatingSet} is
-supplied.}
+supplied. Setting \code{events} to 0 will result in downsampling to the
+minimum number of events across samples.}
 
 \item{seed}{value used to \code{set.seed()} internally. Setting a value for
 seed will return the same result with each run.}
@@ -43,8 +44,8 @@ seed will return the same result with each run.}
 object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
   \code{\link[flowCore:flowSet-class]{flowSet}},
   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
-  \code{display} events.
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to \code{events}
+  events.
 }
 \description{
 \code{cyto_sample} allows restriction of a \code{cytoframe}, \code{cytoset},

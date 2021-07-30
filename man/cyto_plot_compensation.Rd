@@ -191,21 +191,21 @@ cmfile <- system.file("extdata",
 # Compensation plots - flowFrame
 cyto_plot_compensation(fs[[1]],
   channel_match = cmfile,
-  display = 1000
+  events = 1000
 )
 
 # Compensation plots - flowSet
 cyto_plot_compensation(fs,
   channel_match = cmfile,
   compensate = TRUE,
-  display = 1000
+  events = 1000
 )
 
 # Compensation plots - GatingHierarchy
 cyto_plot_compensation(gs[[1]],
   parent = "Single Cells",
   channel_match = cmfile,
-  display = 1000,
+  events = 1000,
   contour_lines = 10
 )
 
@@ -213,7 +213,7 @@ cyto_plot_compensation(gs[[1]],
 cyto_plot_compensation(gs,
   parent = "Single Cells",
   channel_match = cmfile,
-  display = 1000
+  events = 1000
 )
 
 }

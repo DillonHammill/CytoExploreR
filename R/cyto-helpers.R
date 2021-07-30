@@ -556,10 +556,10 @@ cyto_clean <- function(x,
 #'   \code{cyto_details_edit} to update the experimental details associated with
 #'   the loaded samples, set to TRUE by default. The name of the csv to which
 #'   these details will be supplied can also be passed to this argument.
-#' @param sample logical indicating whether all samples should be downsampled to
-#'   the minimum number of events in a sample, set to FALSE by default.
-#'   Alternatively, users can supply a numeric to indicate the desired number of
-#'   events to keep in each sample.
+#' @param events numeric passed to \code{cyto_sample} to control the number or
+#'   proportion of events to retain in each sample, set to 1 by default to keep
+#'   all events. Setting \code{events} to 0 will result in downsampling to the
+#'   minimum number of events across samples.
 #' @param ... additional arguments passed to \code{\link{cyto_load}}.
 #'
 #' @return object of class
@@ -606,7 +606,8 @@ cyto_setup <- function(path = ".",
                        markers = TRUE,
                        parse_names = FALSE,
                        details = TRUE,
-                       sample = FALSE, ...) {
+                       events = 1, 
+                       ...) {
   
   # CYTOSET/GATINGSET
   message("Loading FCS files into a GatingSet...")
@@ -669,21 +670,9 @@ cyto_setup <- function(path = ".",
                       remove_from = clean)
     }
     # SAMPLING
-    if(sample != FALSE){
-      if(sample == TRUE){
-        sample <- min(
-          cyto_apply(x, 
-                     "nrow",
-                     input = "matrix",
-                     copy = FALSE)
-        )
-      }
-      message(
-        paste("Downsampling each sample to",
-              sample, "events.")
-      )
+    if(all(events != 1)) {
       x <- cyto_sample(x, 
-                       display = sample,
+                       events = events,
                        seed = 56)
     }
     # GATINGSET
@@ -1299,7 +1288,7 @@ cyto_transform.default <- function(x,
                         axes_trans = transformer_list,
                         axes_limits = axes_limits,
                         merge_by = "all",
-                        display = 1), # sampling performed above
+                        events = 1), # sampling performed above
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1367,7 +1356,7 @@ cyto_transform.transformList <- function(x,
                         axes_trans = trans,
                         axes_limits = axes_limits,
                         merge_by = "all",
-                        display = 1, 
+                        events = 1, 
                         ...), # sampling performed above
       error = function(e){
         message("Insufficient plotting space to display transformations!")
@@ -1450,7 +1439,7 @@ cyto_transform.transformerList <- function(x,
                         axes_trans = trans,
                         axes_limits = axes_limits,
                         merge_by = "all",
-                        display = 1,
+                        events = 1,
                         ...), # sampling performed above
       error = function(e){
         message("Insufficient plotting space to display transformations!")
@@ -1606,7 +1595,8 @@ cyto_transform_extract <- function(x,
 #'   should be inversed, set to FALSE by default.
 #' @param sample passed to \code{\link{cyto_sample}} to extract a subset of
 #'   events from each sample. \code{sample} indicates the number or proportion
-#'   of events to extract from each sample.
+#'   of events to extract from each sample, set to \code{1} by default to
+#'   extract all events.
 #' @param coerce logical to indicate whether the data should be merged into a
 #'   single object prior to returning the data, set to FALSE by default. If
 #'   \code{coerce} is TRUE, \code{sample} controls the proportion or number of
@@ -1669,14 +1659,12 @@ cyto_data_extract <- function(x,
                               split = FALSE,
                               trans = NA,
                               inverse = FALSE,
-                              sample = NULL,
+                              events = 1,
                               coerce = FALSE,
                               barcode = FALSE,
                               overwrite = NULL,
                               seed = NULL,
                               path = "auto") {
-  
-  # TODO: ADD COERCE ARGUMENT? TO MERGE MATRICES ETC.
   
   # PARENT - CYTO_STATS_COMPUTE ALIAS NULL
   if(is.null(parent)) {
@@ -1740,17 +1728,19 @@ cyto_data_extract <- function(x,
       cs <- cyto_coerce(
         cs,
         format = "cytoset",
-        display = ifelse(is.null(sample), 1, sample),
-        name = paste0(names(cs_list)[id], "-merge"),
+        events = events,
+        name = ifelse(is.null(names(cs_list)), 
+                      paste0("merge-", id),
+                      paste0(names(cs_list)[id], "-merge")),
         barcode = FALSE,
         seed = seed
       )
     # SAMPLE
-     }else if(!is.null(sample)) {
+     }else if(all(events != 1)) {
       # SAMPLE EACH CYTOFRAME
       cs <- cyto_sample(
         cs,
-        display = sample,
+        events = events,
         seed = seed
       )
     }
@@ -1883,7 +1873,7 @@ cyto_exprs.flowFrame <- function(x,
                                  channels = NULL,
                                  markers = FALSE,
                                  drop = TRUE,
-                               ...) {
+                                 ...) {
   # CHANNELS
   if(is.null(channels)) {
     mt <- exprs(x)[, 
@@ -1965,7 +1955,8 @@ cyto_exprs.flowSet <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-cyto_filter <- function(x, ...) {
+cyto_filter <- function(x,
+                        ...) {
   
   # Check class of x
   if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
@@ -3206,12 +3197,13 @@ cyto_list <- function(x,
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param display can be either a numeric [0,1] or integer to indicate the
+#' @param events can be either a numeric [0,1] or integer to indicate the
 #'   percentage or number of events to keep respectively. For \code{cytoset} or
 #'   \code{GatingSet} objects, the same degree of sampling is applied to each
 #'   \code{cytoframe} by default. However, cytoframes will be separately sampled
 #'   if a vector the same length as the \code{cytoset} or \code{GatingSet} is
-#'   supplied.
+#'   supplied. Setting \code{events} to 0 will result in downsampling to the
+#'   minimum number of events across samples.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
 #' @param ... not in use.
@@ -3219,8 +3211,8 @@ cyto_list <- function(x,
 #' @return object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
-#'   \code{display} events.
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to \code{events}
+#'   events.
 #'
 #' @importFrom flowCore sampleFilter Subset flowSet exprs
 #' @importFrom flowWorkspace gs_cyto_data gs_cyto_data<- cytoset
@@ -3251,7 +3243,7 @@ cyto_sample <- function(x, ...) {
 #' @rdname cyto_sample
 #' @export
 cyto_sample.GatingHierarchy <- function(x,
-                                        display = 1,
+                                        events = 1,
                                         seed = NULL,
                                         ...) {
   
@@ -3260,7 +3252,7 @@ cyto_sample.GatingHierarchy <- function(x,
   
   # SAMPLING
   cs <- cyto_sample(cs,
-                    display = display,
+                    events = events,
                     seed = seed,
                     ...)
   
@@ -3278,7 +3270,7 @@ cyto_sample.GatingHierarchy <- function(x,
 #' @rdname cyto_sample
 #' @export
 cyto_sample.GatingSet <- function(x,
-                                  display = 1,
+                                  events = 1,
                                   seed = NULL,
                                   ...){
   
@@ -3287,7 +3279,7 @@ cyto_sample.GatingSet <- function(x,
   
   # SAMPLING
   cs <- cyto_sample(cs,
-                    display = display,
+                    events = events,
                     seed = seed,
                     ...)
   
@@ -3305,7 +3297,7 @@ cyto_sample.GatingSet <- function(x,
 #' @rdname cyto_sample
 #' @export
 cyto_sample.flowFrame <- function(x,
-                                  display = 1,
+                                  events = 1,
                                   seed = NULL,
                                   ...) {
   
@@ -3315,22 +3307,22 @@ cyto_sample.flowFrame <- function(x,
   }
   
   # Do nothing if no sampling required
-  if (display != 1) {
+  if (events != 1) {
     # Number of events
-    events <- nrow(x)
-    # display is the number of events to keep
-    if (display > 1) {
-      # display is too large - retain all events
-      if (display > events) {
+    n <- nrow(x)
+    # n is the number of events to keep
+    if (events > 1) {
+      # n is too large - retain all events
+      if (events > n) {
         return(x)
-        # display is sample of x
+        # n is sample of x
       } else {
-        size <- display
+        size <- events
       }
-      # display is a proportion of events to keep
+      # n is a proportion of events to keep
     } else {
       # Size
-      size <- display * events
+      size <- events * n
     }
     # Set seed
     if (!is.null(seed)) {
@@ -3347,20 +3339,35 @@ cyto_sample.flowFrame <- function(x,
 #' @rdname cyto_sample
 #' @export
 cyto_sample.flowSet <- function(x,
-                                display = 1,
+                                events = 1,
                                 seed = NULL,
                                 ...) {
   
+  # SAMPLE TO MINIMUM EVENTS
+  if(all(events == 0)) {
+    events <- min(
+      cyto_apply(
+        x,
+        "nrow",
+        input = "matrix",
+        copy = FALSE
+      )
+    )
+    message(
+      paste("Downsampling each sample to",
+            events, "events.")
+    )
+  }
+  
   # PREPARE DISPLAY - INDIVIDUAL CYTOFRAMES
-  display <- rep(display, 
-                 length.out = length(x))
+  events <- rep(events, length.out = length(x))
   
   # SAPLE EACH CYTOFRAME
   cytoset(
     structure(
       lapply(seq_along(x), function(z){
         cyto_sample(x[[z]],
-                    display = display[z],
+                    events = events[z],
                     seed = seed,
                     ...)
       }),
@@ -3373,19 +3380,19 @@ cyto_sample.flowSet <- function(x,
 #' @rdname cyto_sample
 #' @export
 cyto_sample.list <- function(x,
-                             display = 1,
+                             events = 1,
                              seed = NULL,
                              ...) {
   
   # SAME SAMPLE SIZE PER LAYER
-  display <- rep(display, length(x))
+  events <- rep(events, length(x))
   
   # SAMPLING
-  x <- mapply(function(x, display) {
+  x <- mapply(function(x, events) {
     cyto_sample(x, 
-                display = display,
+                events = events,
                 seed = seed)
-  }, x, display)
+  }, x, events)
   
   # Return sampled list
   return(x)
@@ -3402,7 +3409,7 @@ cyto_sample.list <- function(x,
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param display can be either a numeric [0,1] or integer to indicate the
+#' @param events can be either a numeric [0,1] or integer to indicate the
 #'   percentage or number of events to keep respectively.
 #' @param parent name of the parental population to extract from GatingHierarchy
 #'   or GatingSet objects.
@@ -3425,11 +3432,11 @@ cyto_sample.list <- function(x,
 #'  # SAMPLE SIZE
 #'  cyto_sample_n(gs,
 #'  parent = "T Cells",
-#'  display = 50000)
+#'  events = 50000)
 #'
 #' @export
 cyto_sample_n <- function(x,
-                          display = 1,
+                          events = 1,
                           parent = NULL) {
   
   # COUNTS
@@ -3449,28 +3456,28 @@ cyto_sample_n <- function(x,
   total_count <- sum(counts)
   
   # DISPLAY CANNOT BE LARGER THAN TOTAL COUNT
-  if(display > 1 & display > total_count) {
-    display <- total_count # display may be set to zero here
+  if(events > 1 & events > total_count) {
+    events <- total_count # n may be set to zero here
   }
   
   # DISPLAY - COUNT
-  if(display <= 1) {
-    display <- display * total_count
+  if(events <= 1) {
+    events <- events * total_count
   }
 
   # DISPLAY - FREQ
-  if(display == 0) {
-    display_freq <- 0 # avoid possible NaN
+  if(events == 0) {
+    events_freq <- 0 # avoid possible NaN
   } else {
-    display_freq <- display / total_count
+    events_freq <- events / total_count
   }
   
   # APPROX COUNTS
-  sample_counts <- ceiling(display_freq * counts)
+  sample_counts <- ceiling(events_freq * counts)
   sample_total <- sum(sample_counts)
   
   # EXACT COUNTS - REMOVE EXCESS EVENTS
-  excess <- sample_total - display
+  excess <- sample_total - events
   if(excess > 0) {
     sample_ind <- which(sample_counts != 0)
     for(i in seq_len(excess)) {
@@ -3498,12 +3505,12 @@ cyto_sample_n <- function(x,
 #' control over the format in which the coerced data should be returned.
 #'
 #' @param x \code{\link[flowWorkspace:cytoset]{cytoset}}.
-#' @param sample numeric to control how events should be sampled when coercing
+#' @param events numeric to control how events should be sampled when coercing
 #'   samples. If a single value is supplied it is passed to \code{cyto_sample_n}
 #'   to compute the number of events to extract from each sample to obtain
-#'   \code{sample} total events in the coerced data. Alternatively, users can
-#'   manually supply a \code{sample} value for each file for more control over
-#'   the way in which samples are sampled prior to merging.
+#'   \code{events} in the coerced data. Alternatively, users can manually supply
+#'   a \code{events} value for each file for more control over the way in which
+#'   samples are sampled prior to merging.
 #' @param seed numeric passed to \code{\link{set.seed}} to return the same
 #'   sample with each run, set to NULL by default for random sampling.
 #' @param barcode logical indicating whether the samples should be barcoded
@@ -3540,14 +3547,14 @@ cyto_sample_n <- function(x,
 #' cs <- cyto_data_extract(gs, "root")[["root"]]
 #'
 #' # Coerce & Sample 50000 total events
-#' cyto_coerce(cs, sample = 50000, seed = 56)
+#' cyto_coerce(cs, events = 50000, seed = 56)
 #'
 #' # Sample 5000 events each & coerce
-#' cyto_coerce(cs, sample = rep(5000, 33))
+#' cyto_coerce(cs, events = rep(5000, 33))
 #'
 #' @export
 cyto_coerce <- function(x,
-                        sample = 1,
+                        events = 1,
                         seed = NULL,
                         barcode = FALSE,
                         format = "cytoset",
@@ -3558,28 +3565,28 @@ cyto_coerce <- function(x,
   ids <- cyto_names(x)
   
   # SAMPLE REQUIRES CYTO_SAMPLE_N
-  if(length(sample) == 1) {
-    sample <- cyto_sample_n(x,
-                            display = sample)
+  if(length(events) == 1) {
+    events <- cyto_sample_n(x,
+                            events = events)
   # SAMPLE MANUALLY SUPPLIED
-  } else if(length(sample) == length(x)) {
-    if(is.null(names(sample))) {
-      names(sample) <- ids
+  } else if(length(events) == length(x)) {
+    if(is.null(names(events))) {
+      names(events) <- ids
     }
   # SAMPLE PER CYTOFRAME REQUIRED
   } else {
     stop(
       paste0(
-        "'sample' must have the same length as 'x' to use custom sampling ",
+        "'events' must have the same length as 'x' to use custom sampling ",
         "per cytoframe!"
       )
     )
   }
 
   # REMOVE EMPTY SAMPLES
-  if(any(!names(sample) %in% ids)) {
+  if(any(!names(events) %in% ids)) {
     x <- cyto_select(x,
-                     list("name" = ids[ids %in% names(sample)]))
+                     list("name" = ids[ids %in% names(events)]))
   }
 
   # SAMPLING
@@ -3589,7 +3596,7 @@ cyto_coerce <- function(x,
         cyto_names(x), 
         function(z){
           fr <- cyto_sample(x[[z]], 
-                            display = sample[z], 
+                            events = events[z], 
                             seed = seed)
           if(cyto_class(fr, "flowFrame", TRUE)) {
             fr <- flowFrame_to_cytoframe(fr)
@@ -3646,9 +3653,9 @@ cyto_coerce <- function(x,
 #' @param node name of the gated bead population to use for the calculation. If
 #'   not supplied internal checks will be made for populations named "Single
 #'   Beads" or "Beads".
-#' @param count minimum number of events to downsample to, set to the minimum
-#'   count for the specified node across samples by default. \code{count} must
-#'   be less than or equal to the minimum count across the samples.
+#' @param events minimum number of events to downsample to, set to the minimum
+#'   count for the specified node across samples by default. \code{events} must
+#'   be less than or equal to the minimum event count across the samples.
 #' @param ... additional arguments passed to \code{\link{cyto_sample}}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -3659,7 +3666,7 @@ cyto_coerce <- function(x,
 #' @export
 cyto_sample_to_node <- function(x,
                                 node = NULL,
-                                count = NULL,
+                                events = NULL,
                                 ...) {
   
   # GATINGSET
@@ -3709,17 +3716,17 @@ cyto_sample_to_node <- function(x,
   }
   
   # NODE COUNT
-  if (is.null(count)) {
-    count <- min(node_counts)
+  if (is.null(events)) {
+    events <- min(node_counts)
   } else {
-    if (!count <= min(node_counts)) {
-      count <- min(node_counts)
+    if (!events <= min(node_counts)) {
+      events <- min(node_counts)
     }
   }
   
   # NODE RATIOS
   node_ratios <- lapply(seq_len(length(node_counts)), function(z) {
-    1 / (node_counts[z] / count)
+    1 / (node_counts[z] / events)
   })
   
   # SAMPLING - ROOT POPULATION
@@ -3728,7 +3735,7 @@ cyto_sample_to_node <- function(x,
       cyto_data_extract(gs_clone[[z]],
                         parent = "root",
                         copy = FALSE)[["root"]][[1]],  # cytoframe
-      node_ratios[[z]],
+      events = node_ratios[[z]],
       ...
     )
   })
@@ -4261,7 +4268,10 @@ cyto_details_save <- function(x,
   
   # SAVE AS
   if (is.null(save_as)) {
-    save_as <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Details.csv")
+    save_as <- paste0(
+      format(Sys.Date(), "%d%m%y"),
+      "-Experiment-Details.csv"
+    )
   }
   
   # WRITE CSV FILE

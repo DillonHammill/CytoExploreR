@@ -9,7 +9,7 @@ cyto_plot_point(
   parent = "root",
   channels,
   overlay = NA,
-  display = 1,
+  events = 1,
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
@@ -42,7 +42,7 @@ or GatingSet objects.}
 \item{overlay}{optional argument if x is a cytoframe to overlay a list of
 cytoframe objects.}
 
-\item{display}{controls the number or percentage of events to display, set to
+\item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
 
 \item{point_shape}{shape(s) to use for points in 2-D scatterplots, set to

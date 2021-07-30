@@ -38,7 +38,7 @@
 #'   gs,
 #'   alias = "Lymphocytes", pop = "+", parent = "root",
 #'   dims = "FSC-A,SSC-A", gating_method = "cyto_gate_manual",
-#'   gating_args = "display=0.5,alias='Lymphocytes',type='ellipse'",
+#'   gating_args = "events=0.5,alias='Lymphocytes',type='ellipse'",
 #'   collapseDataForGating = TRUE, groupBy = 2
 #' )
 #'

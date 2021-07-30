@@ -15,7 +15,7 @@ cyto_data_extract(
   split = FALSE,
   trans = NA,
   inverse = FALSE,
-  sample = NULL,
+  events = 1,
   coerce = FALSE,
   barcode = FALSE,
   overwrite = NULL,
@@ -58,10 +58,6 @@ transformations applied to the data when \code{inverse = TRUE}.}
 \item{inverse}{logical indicating whether transformations applied to the data
 should be inversed, set to FALSE by default.}
 
-\item{sample}{passed to \code{\link{cyto_sample}} to extract a subset of
-events from each sample. \code{sample} indicates the number or proportion
-of events to extract from each sample.}
-
 \item{coerce}{logical to indicate whether the data should be merged into a
 single object prior to returning the data, set to FALSE by default. If
 \code{coerce} is TRUE, \code{sample} controls the proportion or number of
@@ -82,6 +78,11 @@ supplied.}
 \item{path}{can be either \code{"auto"} or \code{"full"} to control whether
 the extracted list should be labelled with the shortest or complete path to
 each population in parent.}
+
+\item{sample}{passed to \code{\link{cyto_sample}} to extract a subset of
+events from each sample. \code{sample} indicates the number or proportion
+of events to extract from each sample, set to \code{1} by default to
+extract all events.}
 }
 \value{
 either a list of cytosets, list of cytoframe lists or a list of raw
