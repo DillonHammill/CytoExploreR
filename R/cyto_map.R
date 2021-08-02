@@ -1,0 +1,497 @@
+## CYTO_MAP --------------------------------------------------------------------
+
+#' Create dimension-reduced maps of cytometry data
+#'
+#' \code{cyto_map} is a convenient wrapper function to produced
+#' dimension-reduced maps o cytometry data using any available
+#' dimension-reduction algorithm. \code{cyto_map} comes with native support for
+#' PCA, t-SNE, FIt-SNE, UMAP and EmbedSOM. Simply supply the name of the
+#' dimension reduction function to the \code{type} argument and additional
+#' arguments directly to \code{cyto_map}. \code{cyto_map} takes care of merging
+#' the data prior to generating the dimension-reduced maps and automatically
+#' splits the data into the original samples for downstream analyses.
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param parent name of the parent population to extract from the GatingSet for
+#'   mapping, set to the \code{"root"} node by default.
+#' @param type indicates the type of dimension reduction algorithm to apply to
+#'   the data, can be either supplied by name \code{e.g. "UMAP"} or as a
+#'   function \code{e.g. "uwot::umap"}. Natively supported options include:
+#'   \itemize{\item{"PCA"}{uses rsvd::rpca() to compute principal
+#'   components}\item{"t-SNE"}{uses Rtsne::Rtsne() to compute t-SNE
+#'   co-ordinates} \item{"FIt-SNE"}{uses
+#'   \url{https://github.com/KlugerLab/FIt-SNE} to compute FIt-SNE co-ordinates
+#'   (some additional configuration required)}\item{"UMAP"}{uses uwot::umap() to
+#'   compute UMAP co-ordinates}\item{}{EmbedSOM}{uses EmbedSOM::SOM() and
+#'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}}
+#' @param names original names of the samples prior to merging, passed to
+#'   \code{cyto_save} when \code{split} is TRUE to retain original file names in
+#'   the split cytoframes.
+#' @param scale optional argument to scale each channel prior to computing
+#'   dimension-reduced co-ordinates, options include \code{"range"},
+#'   \code{"mean"} or \code{"zscore"}.
+#' @param events number or proportion of events to map, can optionally be
+#'   supplied per cytoframe for more fine control over how the data is sampled
+#'   prior to mapping. Set to 1 by default to map all events.
+#' @param labels optional labels for new dimension-reduced parameters (e.g.
+#'   \code{c("UMAP-1", "UMAP-2")}).
+#' @param merge_by passed to \code{cyto_merge_by} to control how samples should
+#'   be merged prior to performing dimension-reduction, set to \code{"all"} by
+#'   default to create a single dimension-reduced map for all samples.
+#'   Alternatively, a different dimension-reduced map will be created for each
+#'   group of samples merged by \code{cyto-merge_by}.
+#' @param seed numeric passed to \code{cyto_data_extract} to ensure consistent
+#'   sampling between runs, set to NULL by default to off this feature.
+#' @param inverse logical to indicate whether the data should be inverse
+#'   transformed when saving, set to FALSE by default.
+#' @param trans object of class \code{transformerList} containing the
+#'   transformation definitions applied to the supplied data. Used internally
+#'   when \code{inverse} is TRUE to inverse these transformations prior to
+#'   writing the data to FCS files using \code{cyto_save}.
+#' @param plot logical indicating whether a call should be made to
+#'   \code{cyto_plot_map} to visualise the produced dimension-reduced maps, set
+#'   to TRUE by default.
+#' @param ... additional arguments passed to the specified dimension reduction
+#'   algorithm
+#'
+#' @return either a \code{cytoset} or \code{GatingSet} with the
+#'   dimension-reduced parameters added as additional channels in each of the
+#'   underlyig \code{cytoframes}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_data_extract}}
+#' @seealso \code{\link{cyto_save}}
+#' @seealso \code{\link{cyto_plot_map}}
+#'
+#' @export
+cyto_map <- function(x,
+                     parent = "root",
+                     channels = NULL,
+                     type = "UMAP",
+                     names = NULL,
+                     scale = NULL,
+                     events = 1,
+                     labels = NULL,
+                     merge_by = "all",
+                     seed = NULL,
+                     inverse = FALSE,
+                     trans = NA,
+                     plot = TRUE,
+                     ...) {
+  
+  # CHECKS ---------------------------------------------------------------------
+  
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(
+      x,
+      exclude = c(
+        "Time",
+        "Original",
+        "Sample",
+        "Event",
+        "PCA",
+        "t-?SNE",
+        "FIt-?SNE",
+        "UMAP",
+        "EmbedSOM"
+      )
+    )
+    channels <- channels[
+      channels %in% names(cyto_markers(x))
+    ]
+  }
+  
+  # CONVERT CHANNELS
+  channels <- cyto_channels_extract(
+    x,
+    channels = channels,
+    plot = FALSE
+  )
+  
+  # TRANSFORMERS
+  if(.all_na(trans)) {
+    trans <- cyto_transformers_extract(x)
+  }
+  
+  # SELECT
+  x <- cyto_select(
+    x,
+    select
+  )
+  
+  # COPY - REQUIRED?
+  x <- cyto_copy(x)
+  
+  # NAMES - ALL SELECTED SAMPLES (MAY BE EMPTY)
+  x_names <- cyto_names(x)
+  
+  # COUNTS PER SAMPLE (NEED TO REMOVE ZERO EVENT SAMPLES)
+  x_counts <- cyto_apply(
+    x,
+    parent = parent,
+    FUN = "nrow",
+    input = "matrix",
+    copy = FALSE
+  )[, 1]
+  
+  # EXCLUDE ZERO EVENT SAMPLES
+  x_data <- x[
+    names(cyto_counts)[cyto_counts != 0]
+  ]
+  
+  # EMBEDDING PER GROUP
+  x_data_groups <- cyto_group_by(
+    x_data,
+    group_by = merge_by
+  )
+  
+  # NAMES FOR EXPORTED FILES - SPLIT PER GROUP
+  if(is.null(names)) {
+    names <- structure(
+      lapply(x_data_groups, "cyto_names"),
+      names = names(x_data_groups)
+    )
+  } else {
+    names  <- split(
+      names,
+      rep(
+        seq_along(x_data_groups), 
+        LAPPLY(x_data_groups, "length")
+      )
+    )
+  }
+  
+  # MAP EACH GROUP
+  x_data_map <- structure(
+    lapply(seq_along(x_data_groups), function(z){
+      # CYTO_DATA TO MAP
+      cyto_data <- x_data_groups[[z]]
+      # CYTOFRAME CONTAINER
+      cf <- cyto_data_extract(
+        cyto_data,
+        parent = parent,
+        format = "cytoframe",
+        coerce = TRUE,
+        events = events,
+        barcode = TRUE,
+        overwrite = TRUE,
+        seed = seed,
+        copy = FALSE
+      )[[1]][[1]]
+      # RAW DATA
+      cf_exprs <- cyto_exprs(cf)[, channels]
+      # RE-SCALE DATA
+      if(!is.null(scale)) {
+        cf_exprs <- cyto_stat_scale(
+          cf_exprs,
+          type = scale
+        )
+      }
+      # PERFORM MAPPING
+      coords <- .cyto_map(
+        type = type,
+        seed = seed,
+        labels = labels,
+        ...
+      )
+      # APPEND NEW PARAMETERS
+      cf <- cyto_cbind(
+        cf, 
+        coords
+      )
+      # SPLIT - LIST OF CYTOFRAMES
+      cf_list <- cyto_split(
+        cf,
+        names = names[[z]]
+      )
+      # CYTOSET
+      return(
+        cytoset(cf_list)
+      )
+    }),
+    names = names(cyto_data_groups)
+  )
+  
+  # COMBINE CYTOSETS
+  x_data_map <- cyto_fun_call("rbind2", x_data_map)
+
+  # CHANNELS - INCLUDE MAPPED CHANNELS
+  x_data_map_chans <- cyto_channels(x_data_map)
+  
+  # MAPPED NON-EMPTY FILE NAMES
+  x_data_map_names <- cyto_names(x_data_map)
+    
+  # COMPLETE MAPPED DATA
+  x_data_map <- cytoset(
+    structure(
+      lapply(
+        seq_along(x_names),
+        function(z) {
+          # CYTOFRAME 
+          if(x_names[z] %in% x_data_map_names) {
+            ind <- match(x_names[z], x_data_map_names)
+            cf <- x_data_map[[ind]]
+          # EMPTY CYTOFRAME
+          } else {
+            cf <- cyto_empty(
+              x_names[z],
+              x_data_map_chans
+            )
+          }
+          # FLOWFRAME TO CYTOFRAME (IN CASE)
+          return(
+            cyto_convert(cf)
+          )
+        }
+      )
+    )
+  )
+  cyto_details(x_data_map) <- cyto_details(x)[
+    match(rownames(cyto_details(x)), rownames(cyto_details(x_data_map))), 
+  ]
+  
+  # UPDATE CYTOSET IN GATINGSET
+  if(cyto_class(x, "GatingSet")) {
+    gs_cyto_data(x) <- x_data_map
+    suppressMessages(recompute(x))
+  } else {
+    x <- x_data_map
+  }
+  
+  # PLOT 
+  if(plot) {
+    # cyto_plot_map()
+  }
+  
+  # SAVE
+  if(!is.null(save_as)) {
+    cyto_save(
+      x,
+      split = FALSE,
+      save_as = save_as,
+      inverse = inverse,
+      trans = trans
+    )
+  }
+  
+  # RETURN FORMATTED DATA
+  return(x)
+  
+}
+
+#' Internal function to perform dimension reduction
+#' @noRd
+.cyto_map <- function(x,
+                      type = "UMAP",
+                      seed = NULL,
+                      labels = NULL,
+                      ...){
+  
+  # SEED
+  if(!is.null(seed)) {
+    set.seed(seed)
+  }
+  
+  # ARGUMENTS
+  args <- .args_list(...)
+  args <- args[
+    -match(
+      c("type",
+        "seed",
+        "labels"),
+      names(args)
+    )
+  ]
+  
+  # MAPPING FUNCTION - NAME
+  if(is.function(type)) {
+    cyto_map_fun <- tail(
+      as.character(
+        substitute(
+          type
+        )
+      ), 
+      1
+    )
+  } else {
+    # NAMESPACED FUNCTION
+    if(grepl(":{2,3}", type)) {
+      cyto_map_fun <- tail(
+        strsplit(
+          FUN, 
+          ":{2,3}"
+        ),
+        1
+      )
+    } else {
+      cyto_map_fun <- type
+    }
+  }
+  
+  # CHARACTER FUNCTION
+  if(is.character(type)) {
+    # PCA
+    if(grepl("^PCA$", type, ignore.case = TRUE)) {
+      # MESSAGE
+      message(
+        "Using rsvd::rpca() to compute PCA co-ordinates..."
+      )
+      # RSVD
+      cyto_require(
+        "rsvd",
+        source = "CRAN",
+        ref = paste0(
+          "Erichson NB, Voronin S, Brunton SL, Kutz JN (2019). Randomized ",
+          "Matrix Decompositions Using R. Journal of Statistical Software, ",
+          "89(11), 1–48. doi: 10.18637/jss.v089.i11."
+        )
+      )
+      # TYPE -> FUNCTION
+      type <- cyto_func_match("rsvd::rpca")
+    # FIt-SNE
+    } else if(grepl("^FIt-?SNE$", type, ignore.case = TRUE)) {
+      # MESSAGE
+      message(
+        "Using FIt-SNE::fftRtsne() to compute FIt-SNE co-ordinates... "
+      )
+      # TYPE -> FUNCTION
+      type <- CytoExploreR::fftRtsne
+    # T-SNE
+    } else if(grepl("^t-?SNE$", type, ignore.case = TRUE)) {
+      # MESSAGE
+      message(
+        paste0(
+          "Using Rtsne::Rtsne() to compute t-SNE co-ordinates..."
+        )
+      )
+      # Rtsne
+      cyto_require(
+        "Rtsne",
+        source = "CRAN",
+        ref = paste0(
+          "L.J.P. van der Maaten and G.E. Hinton. Visualizing High-Dimensional",
+          " Data Using t-SNE. Journal of Machine Learning Research",
+          " 9(Nov):2579-2605, 2008."
+        )
+      )
+      # TYPE -> FUNCTION
+      type <- cyto_func_match(
+        "Rtsne::Rtsne"
+      )
+    # UMAP 
+    } else if(grepl("^UMAP$", type, ignore.case = TRUE)) {
+      # MESSAGE
+      message(
+        "Using uwot::umap() to compute UMAP co-ordinates..."
+      )
+      # UWOT
+      cyto_require(
+        "uwot",
+        source = "CRAN",
+        ref = paste0(
+          "McInnes L., Healy J. & Melville J. (2018) UMAP: Uniform Manifold ",
+          "Approximation and Projection for Dimension Reduction. ",
+          "arXiv:1802.03426v3"
+        )
+      )
+      # TYPE -> FUNCTION
+      type <- cyto_func_match(
+        "uwot::umap"
+      )
+    # EMBEDSOM
+    } else if(grepl("^Embed-?SOM$", type , ignore.case = TRUE)) {
+      # MESSAGE
+      message(
+        "Using EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates..."
+      )
+      # EMBEDSOM
+      cyto_require(
+        "EmbedSOM",
+        source = "CRAN",
+        ref = paste0(
+          "Kratchovil M., Koladiya A. & Vondrasek J. (2019) Generalised ",
+          "EmbedSOM on quadtree-structured self-organising maps. F1000 ",
+          "Research (8:2120)"
+        )
+      )
+      # DATA
+      names(args)[1] <- "data"
+      # CREATE SOM - FLOWSOM NOT SUPPLIED
+      if(!"fsom" %in% names(args)) {
+        # SOM
+        args[["map"]] <- cyto_func_execute(
+          "EmbedSOM::SOM",
+          args
+        )
+        # EMBEDSOM
+        cyto_map_coords <- cyto_func_execute(
+          "EmbedSOM::EmbedSOM",
+          args
+        )
+        colnames(cyto_map_coords) <- c("EmbedSOM-1", "EmbedSOM-2")
+      }
+    # OTHER
+    } else {
+      type <- tryCatch(
+        cyto_func_match(
+          type
+        ),
+        error = function(e){
+          stop(
+            "'type'is not the name of a valid dimension reduction function!"
+          )
+        }
+      )
+    }
+  }
+  
+  # FUNCTION
+  if(is.function(type)) {
+    # MESSAGE
+    message(
+      paste0(
+        "Computing ",
+        cyto_map_fun,
+        " co-ordinates..."
+      )
+    )
+    # FORMAL ARGUMENTS
+    cyto_map_fun_args <- cyto_func_args(type)
+    names(args)[match("x", names(args))] <- cyto_map_fun_args[1]
+    # CALL MAPPING FUNCTION
+    cyto_map_coords <- cyto_func_call(
+      type,
+      args
+    )
+    # EXTRACT CO-ORDINATES (ALL DIMENSIONS)
+    if(!cyto_class(cyto_map_coords, "matrix")) {
+      # FIND CO-ORDINATES
+      coords <- NULL
+      lapply(seq_along(cyto_map_coords), function(z){
+        if(cyto_class(cyto_map_coords[z], "matrix")) {
+          if(nrow(cyto_map_coords[z]) == nrow(x)) {
+            coords <<- cbind(coords, cyto_map_coords[z])
+          }
+        }
+      })
+      cyto_map_coords <- coords
+    }
+    # COLUMN NAMES
+    if(!is.null(labels)) {
+      colnames(cyto_map_coords) <- labels
+    } else {
+      colnames(cyto_map_coords) <- paste0(
+        cyto_map_fun,
+        "-",
+        1:ncol(cyto_map_coords)
+      )
+    }
+  }
+  
+  # RETURN MAPPED DATA
+  return(cyto_map_coords)
+  
+}
