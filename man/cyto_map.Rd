@@ -10,7 +10,7 @@ cyto_map(
   channels = NULL,
   type = "UMAP",
   names = NULL,
-  scale = NULL,
+  scale = "range",
   events = 1,
   labels = NULL,
   merge_by = "all",
@@ -45,7 +45,8 @@ the split cytoframes.}
 
 \item{scale}{optional argument to scale each channel prior to computing
 dimension-reduced co-ordinates, options include \code{"range"},
-\code{"mean"} or \code{"zscore"}.}
+\code{"mean"} or \code{"zscore"}. Set to \code{"range"} by default, scaling
+can be turned off by setting this argument to NULL.}
 
 \item{events}{number or proportion of events to map, can optionally be
 supplied per cytoframe for more fine control over how the data is sampled

@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* `cyto_map()` has been re-written to add support for extracting events on a per sample basis. A new `scale` argument has been added to optionally scale each channel to `mean`, `range` or `zscore`. A new `labels` argument has been added to allow more fine control over the names of the dimension-reduced parameters.
 * BREAKING CHANGE: `display` argument has been replaced with `events` in all functions for consistency.
 * `path` argument in `cyto_load()` has been updated to allow support for multiple directories or paths to files.
 * A new `overwrite` argument has been added to `cyto_save()` to provide a non-interactive way of controlling how existing directories should be handled when attempting to save files.
