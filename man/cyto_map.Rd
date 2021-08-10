@@ -12,7 +12,7 @@ cyto_map(
   type = "UMAP",
   scale = "range",
   events = 1,
-  labels = NULL,
+  label = NULL,
   merge_by = "all",
   seed = NULL,
   inverse = FALSE,
@@ -54,8 +54,9 @@ can be turned off by setting this argument to NULL.}
 supplied per cytoframe for more fine control over how the data is sampled
 prior to mapping. Set to 1 by default to map all events.}
 
-\item{labels}{optional labels for new dimension-reduced parameters (e.g.
-\code{c("UMAP-1", "UMAP-2")}).}
+\item{label}{optional label for new dimension-reduced parameters \code{e.g.
+"UMAP"} to which the parameter indices will be appended \code{e.g. "UMAP-1"
+and "UMAP-2"}.}
 
 \item{merge_by}{passed to \code{cyto_merge_by} to control how samples should
 be merged prior to performing dimension-reduction, set to \code{"all"} by
@@ -72,8 +73,8 @@ default.}
 
 \item{trans}{object of class \code{transformerList} containing the
 transformation definitions applied to the supplied data. Used internally
-when \code{inverse} is TRUE to inverse these transformations prior to
-apply dimension reduction algorithm.}
+when \code{inverse} is TRUE to inverse these transformations prior to apply
+dimension reduction algorithm.}
 
 \item{plot}{logical indicating whether a call should be made to
 \code{cyto_plot_map} to visualise the produced dimension-reduced maps, set

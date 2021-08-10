@@ -39,8 +39,9 @@
 #' @param events number or proportion of events to map, can optionally be
 #'   supplied per cytoframe for more fine control over how the data is sampled
 #'   prior to mapping. Set to 1 by default to map all events.
-#' @param labels optional labels for new dimension-reduced parameters (e.g.
-#'   \code{c("UMAP-1", "UMAP-2")}).
+#' @param label optional label for new dimension-reduced parameters \code{e.g.
+#'   "UMAP"} to which the parameter indices will be appended \code{e.g. "UMAP-1"
+#'   and "UMAP-2"}.
 #' @param merge_by passed to \code{cyto_merge_by} to control how samples should
 #'   be merged prior to performing dimension-reduction, set to \code{"all"} by
 #'   default to create a single dimension-reduced map for all samples.
@@ -53,8 +54,8 @@
 #'   default.
 #' @param trans object of class \code{transformerList} containing the
 #'   transformation definitions applied to the supplied data. Used internally
-#'   when \code{inverse} is TRUE to inverse these transformations prior to
-#'   apply dimension reduction algorithm.
+#'   when \code{inverse} is TRUE to inverse these transformations prior to apply
+#'   dimension reduction algorithm.
 #' @param plot logical indicating whether a call should be made to
 #'   \code{cyto_plot_map} to visualise the produced dimension-reduced maps, set
 #'   to TRUE by default.
@@ -81,7 +82,7 @@ cyto_map <- function(x,
                      type = "UMAP",
                      scale = "range",
                      events = 1,
-                     labels = NULL,
+                     label = NULL,
                      merge_by = "all",
                      seed = NULL,
                      inverse = FALSE,
@@ -197,7 +198,7 @@ cyto_map <- function(x,
         cf_exprs,
         type = type,
         seed = seed,
-        labels = labels,
+        label = label,
         ...
       )
       # APPEND NEW PARAMETERS
@@ -287,7 +288,7 @@ cyto_map <- function(x,
 .cyto_map <- function(x,
                       type = "UMAP",
                       seed = NULL,
-                      labels = NULL,
+                      label = NULL,
                       ...){
   
   # SEED
@@ -301,7 +302,7 @@ cyto_map <- function(x,
     -match(
       c("type",
         "seed",
-        "labels"),
+        "label"),
       names(args)
     )
   ]
@@ -320,12 +321,15 @@ cyto_map <- function(x,
     # NAMESPACED FUNCTION
     if(grepl(":{2,3}", type)) {
       cyto_map_fun <- tail(
-        strsplit(
-          FUN, 
-          ":{2,3}"
+        unlist(
+          strsplit(
+            type, 
+            ":{2,3}"
+          )
         ),
         1
       )
+      print(cyto_map_fun)
     } else {
       cyto_map_fun <- type
     }
@@ -454,7 +458,7 @@ cyto_map <- function(x,
     message(
       paste0(
         "Computing ",
-        cyto_map_fun,
+        paste0(cyto_map_fun, "()"),
         " co-ordinates..."
       )
     )
@@ -480,8 +484,12 @@ cyto_map <- function(x,
       cyto_map_coords <- coords
     }
     # COLUMN NAMES
-    if(!is.null(labels)) {
-      colnames(cyto_map_coords) <- labels
+    if(!is.null(label)) {
+      colnames(cyto_map_coords) <- paste0(
+        label,
+        "-",
+        1:ncol(cyto_map_coords)
+      )
     } else {
       colnames(cyto_map_coords) <- paste0(
         cyto_map_fun,
