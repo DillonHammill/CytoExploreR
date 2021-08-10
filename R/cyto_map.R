@@ -471,9 +471,9 @@ cyto_map <- function(x,
       # FIND CO-ORDINATES
       coords <- NULL
       lapply(seq_along(cyto_map_coords), function(z){
-        if(cyto_class(cyto_map_coords[z], "matrix")) {
-          if(nrow(cyto_map_coords[z]) == nrow(x)) {
-            coords <<- cbind(coords, cyto_map_coords[z])
+        if(cyto_class(cyto_map_coords[[z]], "matrix")) {
+          if(nrow(cyto_map_coords[[z]]) == nrow(x)) {
+            coords <<- cbind(coords, cyto_map_coords[[z]])
           }
         }
       })
