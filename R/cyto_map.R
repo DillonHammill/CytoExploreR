@@ -15,6 +15,10 @@
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the parent population to extract from the GatingSet for
 #'   mapping, set to the \code{"root"} node by default.
+#' @param select passed to \code{cyto_select()} to control which samples are
+#'   passed to the dimension reduction algorithm, set to all samples by default.
+#' @param channels names of the channels or markers to feed into the dimension
+#'   reduction algorithm, set to all channels with markers assigned by default.
 #' @param type indicates the type of dimension reduction algorithm to apply to
 #'   the data, can be either supplied by name \code{e.g. "UMAP"} or as a
 #'   function \code{e.g. "uwot::umap"}. Natively supported options include:
@@ -45,11 +49,12 @@
 #' @param seed numeric passed to \code{cyto_data_extract} to ensure consistent
 #'   sampling between runs, set to NULL by default to off this feature.
 #' @param inverse logical to indicate whether the data should be inverse
-#'   transformed when saving, set to FALSE by default.
+#'   transformed prior to performing dimension reduction, set to FALSE by
+#'   default.
 #' @param trans object of class \code{transformerList} containing the
 #'   transformation definitions applied to the supplied data. Used internally
 #'   when \code{inverse} is TRUE to inverse these transformations prior to
-#'   writing the data to FCS files using \code{cyto_save}.
+#'   apply dimension reduction algorithm.
 #' @param plot logical indicating whether a call should be made to
 #'   \code{cyto_plot_map} to visualise the produced dimension-reduced maps, set
 #'   to TRUE by default.
@@ -60,6 +65,8 @@
 #'   dimension-reduced parameters added as additional channels in each of the
 #'   underlyig \code{cytoframes}.
 #'
+#' @importFrom flowWorkspace cytoset gs_cyto_data recompute
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_data_extract}}
@@ -69,9 +76,9 @@
 #' @export
 cyto_map <- function(x,
                      parent = "root",
+                     select = NULL,
                      channels = NULL,
                      type = "UMAP",
-                     names = NULL,
                      scale = "range",
                      events = 1,
                      labels = NULL,
@@ -139,9 +146,10 @@ cyto_map <- function(x,
   )[, 1]
   
   # EXCLUDE ZERO EVENT SAMPLES
-  x_data <- x[
-    names(cyto_counts)[cyto_counts != 0]
-  ]
+  x_data <- cyto_select(
+    x,
+    names(x_counts)[x_counts != 0]
+  )
   
   # EMBEDDING PER GROUP
   x_data_groups <- cyto_group_by(
@@ -150,20 +158,10 @@ cyto_map <- function(x,
   )
   
   # NAMES FOR EXPORTED FILES - SPLIT PER GROUP
-  if(is.null(names)) {
-    names <- structure(
-      lapply(x_data_groups, "cyto_names"),
-      names = names(x_data_groups)
-    )
-  } else {
-    names  <- split(
-      names,
-      rep(
-        seq_along(x_data_groups), 
-        LAPPLY(x_data_groups, "length")
-      )
-    )
-  }
+  names <- structure(
+    lapply(x_data_groups, "cyto_names"),
+    names = names(x_data_groups)
+  )
   
   # MAP EACH GROUP
   x_data_map <- structure(
@@ -180,10 +178,13 @@ cyto_map <- function(x,
         barcode = TRUE,
         overwrite = TRUE,
         seed = seed,
+        trans = trans,
+        inverse = inverse,
         copy = FALSE
       )[[1]][[1]]
       # RAW DATA
-      cf_exprs <- cyto_exprs(cf)[, channels]
+      cf_exprs <- cyto_exprs(cf,
+                             channels = channels)
       # RE-SCALE DATA
       if(!is.null(scale)) {
         cf_exprs <- cyto_stat_scale(
@@ -193,6 +194,7 @@ cyto_map <- function(x,
       }
       # PERFORM MAPPING
       coords <- .cyto_map(
+        cf_exprs,
         type = type,
         seed = seed,
         labels = labels,
@@ -203,21 +205,26 @@ cyto_map <- function(x,
         cf, 
         coords
       )
-      # SPLIT - LIST OF CYTOFRAMES
-      cf_list <- cyto_split(
+      # SPLIT - CYTOSET
+      cyto_split(
         cf,
         names = names[[z]]
       )
-      # CYTOSET
-      return(
-        cytoset(cf_list)
-      )
     }),
-    names = names(cyto_data_groups)
+    names = names(x_data_groups)
   )
   
   # COMBINE CYTOSETS
-  x_data_map <- cyto_fun_call("rbind2", x_data_map)
+  if(length(x_data_map) >  1) {
+    x_data_map <- cyto_convert(
+      cyto_func_call(
+        "rbind2",
+        x_data_map
+      )
+    )
+  } else {
+    x_data_map <- x_data_map[[1]]
+  }
 
   # CHANNELS - INCLUDE MAPPED CHANNELS
   x_data_map_chans <- cyto_channels(x_data_map)
@@ -233,25 +240,28 @@ cyto_map <- function(x,
         function(z) {
           # CYTOFRAME 
           if(x_names[z] %in% x_data_map_names) {
-            ind <- match(x_names[z], x_data_map_names)
-            cf <- x_data_map[[ind]]
+            cyto_convert(
+              x_data_map[[match(x_names[z], x_data_map_names)]]
+            )
           # EMPTY CYTOFRAME
           } else {
-            cf <- cyto_empty(
+            cyto_empty(
               x_names[z],
               x_data_map_chans
             )
           }
-          # FLOWFRAME TO CYTOFRAME (IN CASE)
-          return(
-            cyto_convert(cf)
-          )
         }
-      )
+      ),
+      names = x_names
     )
   )
+  
+  # INHERIT EXPERIMENT DETAILS
   cyto_details(x_data_map) <- cyto_details(x)[
-    match(rownames(cyto_details(x)), rownames(cyto_details(x_data_map))), 
+    match(
+      rownames(cyto_details(x_data_map)),
+      rownames(cyto_details(x))
+    ),
   ]
   
   # UPDATE CYTOSET IN GATINGSET
@@ -265,17 +275,6 @@ cyto_map <- function(x,
   # PLOT 
   if(plot) {
     # cyto_plot_map()
-  }
-  
-  # SAVE
-  if(!is.null(save_as)) {
-    cyto_save(
-      x,
-      split = FALSE,
-      save_as = save_as,
-      inverse = inverse,
-      trans = trans
-    )
   }
   
   # RETURN FORMATTED DATA
