@@ -1915,6 +1915,58 @@ cyto_exprs.flowSet <- function(x,
   )
 }
 
+## CYTO_EMPTY ------------------------------------------------------------------
+
+#' Construct an empty cytoframe
+#'
+#' @param name name to add to the constructed cytoframe
+#' @param channels channels to include in the constructed cytoframe
+#' @param ... additional arguments passed to
+#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+#'
+#' @importFrom flowCore identifier<- flowFrame
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' # Construct empty cytoframe
+#' cyto_empty(name = "Test.csv", 
+#' channels = c("FSC-A", "SSC-A", "PE-A"))
+#' 
+#' @export
+cyto_empty <- function(name = NULL,
+                       channels = NULL, ...) {
+  
+  # CHANNELS
+  if (is.null(channels)) {
+    stop(
+      "Supply the names of the channels to include in the cytoframe"
+    )
+  }
+  
+  # CONSTRUCT EMPTY FLOWFRAME
+  fr <- matrix(0,
+               ncol = length(channels),
+               nrow = 1,
+               byrow = TRUE
+  )
+  colnames(fr) <- channels
+  fr <- flowFrame(fr, ...)
+  fr <- fr[-1, ]
+  
+  # NAME
+  if (!is.null(name)) {
+    identifier(fr) <- name
+  }
+  
+  # FLOWFRAME -> CYTOFRAME
+  return(
+    cyto_convert(
+      fr
+    )
+  )
+}
+
 ## CYTO_FILTER -----------------------------------------------------------------
 
 #' Filter samples based on experiment variables
@@ -2776,6 +2828,8 @@ cyto_split <- function(x,
       cf,
       ids
     )
+    # STORE SPLIT DATA IN SEPARATE H5 FILES
+    cf_list <- lapply(cf_list, "cyto_copy")
     # NAMES
     if (!is.null(names)) {
       names(cf_list) <- tryCatch(
