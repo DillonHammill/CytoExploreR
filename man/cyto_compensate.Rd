@@ -9,11 +9,35 @@
 \usage{
 cyto_compensate(x, ...)
 
-\method{cyto_compensate}{GatingSet}(x, spillover = NULL, select = 1, remove = FALSE, ...)
+\method{cyto_compensate}{GatingSet}(
+  x,
+  spillover = NULL,
+  select = 1,
+  remove = FALSE,
+  percent = FALSE,
+  copy = FALSE,
+  ...
+)
 
-\method{cyto_compensate}{flowSet}(x, spillover = NULL, select = 1, remove = FALSE, ...)
+\method{cyto_compensate}{flowSet}(
+  x,
+  spillover = NULL,
+  select = 1,
+  remove = FALSE,
+  percent = FALSE,
+  copy = FALSE,
+  ...
+)
 
-\method{cyto_compensate}{flowFrame}(x, spillover = NULL, select = 1, remove = FALSE, ...)
+\method{cyto_compensate}{flowFrame}(
+  x,
+  spillover = NULL,
+  select = 1,
+  remove = FALSE,
+  percent = FALSE,
+  copy = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -35,6 +59,15 @@ spillover matrix file, set \code{select} to NULL.}
 
 \item{remove}{logical indicating whether applied compensation should be
 removed from the supplied samples, set to FALSE by default.}
+
+\item{percent}{logical to indicate whether the values in the supplied
+spillover matrix are presented as percentages instead of decimals, set to
+FALSE by default.}
+
+\item{copy}{logical to control whether the supplied data should be copied
+prior to applying compensation for fluorescent spillover, set to FALSE by
+default. Setting this argument to TRUE will leave the supplied data
+untouched and return a copy of the data with compensation applied.}
 }
 \value{
 a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}

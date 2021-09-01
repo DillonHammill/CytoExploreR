@@ -887,7 +887,7 @@ cyto_details <- function(x,
 #' @return names associated with the supplied object.
 #'
 #' @importFrom flowCore identifier
-#' @importFrom flowWorkspace sampleNames
+#' @importFrom flowWorkspace sampleNames cf_get_uri
 #'
 #' @examples
 #' library(CytoExploreRData)
@@ -922,7 +922,19 @@ cyto_names <- function(x) {
 #' @export
 cyto_names.flowFrame <- function(x) {
   # DEFUNCT
-  nm <- identifier(x)
+  nm <- tryCatch(
+    identifier(x),
+    error = function(e){
+      # FILE NAME
+      return(
+        file_ext_remove(
+          basename(
+            cf_get_uri(x)
+          )
+        )
+      )
+    }
+  )
   if (nm == "anonymous") {
     nm <- "Combined Events"
   }
@@ -4385,6 +4397,13 @@ cyto_details_save <- function(x,
 #'   spillover matrix file, set \code{select} to NULL.
 #' @param remove logical indicating whether applied compensation should be
 #'   removed from the supplied samples, set to FALSE by default.
+#' @param percent logical to indicate whether the values in the supplied
+#'   spillover matrix are presented as percentages instead of decimals, set to
+#'   FALSE by default.
+#' @param copy logical to control whether the supplied data should be copied
+#'   prior to applying compensation for fluorescent spillover, set to FALSE by
+#'   default. Setting this argument to TRUE will leave the supplied data
+#'   untouched and return a copy of the data with compensation applied.
 #' @param ... not in use.
 #'
 #' @return a compensated \code{flowFrame}, \code{flowSet} or \code{GatingSet}
@@ -4436,108 +4455,34 @@ cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
                                       select = 1,
                                       remove = FALSE,
+                                      percent = FALSE,
+                                      copy = FALSE,
                                       ...) {
   
   # CYTOSET
   cs <- cyto_data_extract(
     x, 
-    parent = "root"
+    parent = "root",
+    copy = copy,
   )[["root"]]
   
-  # SPILLOVER SUPPLIED - ARRAY OR FILE NAME
-  if (!is.null(spillover)) {
-    # SPILL - FILE NAME
-    if (cyto_class(spillover, "character", TRUE)) {
-      # READ SPILL
-      spill <- read_from_csv(spillover)
-      # NON-SQUARE MATRIX
-      if(!all(colnames(spill) %in% cyto_channels(cs))) {
-        # LONG MATRIX - REQUIRE 2 COLUMNS WITH CHANNEL NAMES
-        if(sum(LAPPLY(seq_len(ncol(spill)), function(z){
-          all(spill[, z] %in% cyto_channels(cs))
-        })) == 2){
-          # SPILL -> SQUARE MATRIX
-          spill_mat <- diag(
-            x = 1, 
-            ncol = length(cyto_channels(cs))
-          )
-          colnames(spill_mat) <- cyto_channels(cs)
-          rownames(spill_mat) <- cyto_channels(cs)
-          # FILL SPILL MATRIX
-          
-        # INCORRECT MATRIX FORMAT
-        } else {
-          stop(
-            paste(
-              "'spillover' should be a square matrix with channels",
-              "as column names!"
-            )
-          )
-        }
-      }
-      # SPILLOVER -> NAMED LIST
-      spill <- rep(list(spill), length(cs))
-      names(spill) <- cyto_names(cs)
-      # SPILL - ARRAY
-    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
-      # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% cyto_channels(cs))) {
-        stop("'spillover' must have valid fluorescent channels as colnames.")
-      } else {
-        spill <- spillover
-      }
-      # SPILL -> NAMED LIST
-      spill <- rep(list(spill), length(cs))
-      names(spill) <- cyto_names(cs)
-    # SPILL = NAMED LIST
-    } else {
-      spill <- spillover
-    }
-  # EXTRACT SPILL
-  } else if (is.null(spillover)) {
-    if (!is.null(select)) {
-      spill <- cyto_spillover_extract(cs[[select]])
-      if (is.null(spill)) {
-        stop("Unable to extract spillover matrix from selected sample.")
-      }
-      spill <- rep(spill, length(cs))
-      names(spill) <- cyto_names(cs)
-    } else {
-      spill <- lapply(cyto_names(cs), function(y) {
-        sm <- cyto_spillover_extract(cs[[y]])[[1]]
-        if (is.null(sm)) {
-          stop(paste0(
-            "Unable to extract spillover matrix from ",
-            cyto_names(cs[[y]]), "."
-          ))
-        }
-        return(sm)
-      })
-    }
-  }
-  
-  # Channels
-  fluor_channels <- cyto_fluor_channels(cs)
-  
-  # Spillover may contain more channels than in samples
-  spill <- lapply(spill, function(z) {
-    # Select rows - square matrix
-    if (nrow(z) == ncol(z)) {
-      z <- z[match(fluor_channels, colnames(z)), ]
-    }
-    # Select columns
-    z <- z[, fluor_channels]
-    return(z)
-  })
+  # PREPARE SPILLOVER MATRIX
+  spill <- .cyto_spillover_prepare(
+    cs,
+    spillover = spillover,
+    select = select,
+    percent = percent
+  )
   
   # REMOVE COMPENSATION
   if (remove == TRUE) {
     cf_list <- lapply(seq_along(cs), function(z) {
-      cf <- decompensate(cs[[z]], spill[[z]])
-      if(!cyto_class(cf, "cytoframe", TRUE)){
-        cf <- flowFrame_to_cytoframe(cf)
-      }
-      return(cf)
+      cyto_convert(
+        decompensate(
+          cs[[z]], 
+          spill[[z]]
+        )
+      )
     })
     names(cf_list) <- cyto_names(cs)
     cs <- cytoset(cf_list)
@@ -4557,90 +4502,37 @@ cyto_compensate.flowSet <- function(x,
                                     spillover = NULL,
                                     select = 1,
                                     remove = FALSE,
+                                    percent = FALSE,
+                                    copy = FALSE,
                                     ...) {
   
-  # Spillover matrix supplied - matrix, data.frame or csv file
-  if (!is.null(spillover)) {
-    # spillover is a character string containing name of csv file
-    if (cyto_class(spillover, "character", TRUE)) {
-      # read in spillover matrix
-      spill <- read_from_csv(spillover)
-      # column/row names must be valid channels
-      if (!all(colnames(spill) %in% cyto_channels(x))) {
-        stop(
-          paste(
-            "'spillover' must have valid fluorescent channels as colnames."
-          )
-        )
-      }
-      # Convert spill into a named list
-      spill <- rep(list(spill), length(x))
-      names(spill) <- cyto_names(x)
-      # spillover is a matrix/data.frame
-    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
-      # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% cyto_channels(x))) {
-        stop("'spillover' must have valid fluorescent channels as colnames.")
-      } else {
-        spill <- spillover
-      }
-      # Convert spill into a named list
-      spill <- rep(list(spill), length(x))
-      names(spill) <- cyto_names(x)
-      # SPILLOVER IS A LIST
-    } else {
-      spill <- spillover
-    }
-    # Extract spillover matrix directly from x
-  } else if (is.null(spillover)) {
-    if (!is.null(select)) {
-      spill <- cyto_spillover_extract(x[[select]])
-      if (is.null(spill)) {
-        stop("Unable to extract spillover matrix from selected sample.")
-      }
-      spill <- rep(spill, length(x))
-      names(spill) <- cyto_names(x)
-    } else {
-      spill <- lapply(cyto_names(x), function(y) {
-        sm <- cyto_spillover_extract(x[[y]])[[1]]
-        if (is.null(sm)) {
-          stop(paste0(
-            "Unable to extract spillover matrix from ",
-            cyto_names(x[[y]]), "."
-          ))
-        }
-        return(sm)
-      })
-    }
+  # PREPARE SPILLOVER MATRIX
+  spill <- .cyto_spillover_prepare(
+    x,
+    spillover = spillover,
+    select = select,
+    percent = percent
+  )
+  
+  # COPY
+  if(copy) {
+    x <- cyto_copy(x)
   }
-  
-  # Channels
-  fluor_channels <- cyto_fluor_channels(x)
-  
-  # Spillover may contain more channels than in samples
-  spill <- lapply(spill, function(z) {
-    # Select rows - square matrix
-    if (nrow(z) == ncol(z)) {
-      z <- z[match(fluor_channels, colnames(z)), ]
-    }
-    # Select columns
-    z <- z[, fluor_channels]
-    return(z)
-  })
   
   # REMOVE COMPENSATION
   if (remove == TRUE) {
     cf_list <- lapply(seq_along(x), function(z) {
-      cf <- decompensate(x[[z]], spill[[z]])
-      if(!cyto_class(cf, "cytoset", TRUE)){
-        cf <- flowFrame_to_cytoframe(cf)
-      }
-      return(cf)
+      cyto_convert(
+        decompensate(
+          x[[z]],
+          spill[[z]]
+        )
+      )
     })
     names(cf_list) <- cyto_names(x)
     x <- cytoset(cf_list)
     return(x)
-    # APPLY COMPENSATION
+  # APPLY COMPENSATION
   } else if (remove == FALSE) {
     flowCore::compensate(x, spill)
   }
@@ -4652,55 +4544,21 @@ cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
                                       select = 1,
                                       remove = FALSE,
+                                      percent = FALSE,
+                                      copy = FALSE,
                                       ...) {
   
-  # Spillover matrix supplied - matrix, data.frame or csv file
-  if (!is.null(spillover)) {
-    # spillover is a character string containing name of csv file
-    if (cyto_class(spillover, "character", TRUE)) {
-      # read in spillover matrix
-      spill <- read_from_csv(spillover)
-      # column/row names must be valid channels
-      if (!all(rownames(spill) %in% cyto_channels(x)) |
-          !all(rownames(spill) %in% cyto_channels(x))) {
-        stop(
-          paste(
-            "'spillover' must have valid fluorescent channels as colnames."
-          )
-        )
-      }
-      # spillover is a matrix/data.frame
-    } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
-      # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% cyto_channels(x))) {
-        stop("'spillover' must have valid fluorescent channels as colnames.")
-      } else {
-        spill <- spillover
-      }
-      # spillover is a list
-    } else {
-      spill <- spillover[[1]]
-    }
-    # Extract spillover matrix directly from x
-  } else if (is.null(spillover)) {
-    spill <- cyto_spillover_extract(x)[[1]]
-    if (is.null(spill)) {
-      stop(paste0(
-        "Unable to extract spillover matrix from",
-        cyto_names(x), "."
-      ))
-    }
-  }
+  # PREPARE SPILLOVER MATRIX
+  spill <- cyto_spillover_prepare(
+    x,
+    spillover = spillover,
+    percent = percent,
+  )[[1]]
   
-  # Channels
-  fluor_channels <- cyto_fluor_channels(x)
-  
-  # Select rows - square matrix
-  if (nrow(spill) == ncol(spill)) {
-    spill <- spill[match(fluor_channels, colnames(spill)), ]
+  # COPY
+  if(copy) {
+    x <- cyto_copy(x)
   }
-  # Select columns
-  spill <- spill[, fluor_channels]
   
   # REMOVE COMPENSATION
   if (remove == TRUE) {
@@ -4709,6 +4567,142 @@ cyto_compensate.flowFrame <- function(x,
   } else if (remove == FALSE) {
     flowCore::compensate(x, spill)
   }
+}
+
+## .CYTO_SPILLOVER_PREPARE -----------------------------------------------------
+
+#' Prepare a supplied spillover matrix
+#'
+#' @param x cytoset or GatingSet.
+#' @param spill an array, list or character vector.
+#' @param select index or name of the sample from which the spillover matrix
+#'   should be extracted when no spillover matrix file is supplied to
+#'   \code{spillover}. To compensate each sample individually using their stored
+#'   spillover matrix file, set \code{select} to NULL.
+#' @param percent logical to indicate whether the values in the supplied
+#'   spillover matrix are presented as percentages instead of decimals, set to
+#'   FALSE by default.
+#'
+#' @return a square spillover matrix.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+.cyto_spillover_prepare <- function(x,
+                                    spillover = NULL,
+                                    select = NULL,
+                                    percent = FALSE) {
+  
+  # EXTRACT CHANNELS
+  chans <- cyto_channels(x)
+  
+  # EXTRACT SPILLOVER MATRIX
+  if(is.null(spillover)) {
+    # CYTOFRAME
+    if(cyto_class(x, "flowFrame")) {
+      spill <- cyto_spillover_extract(x)
+      if (is.null(spill)) {
+        stop("Unable to extract spillover matrix from selected sample.")
+      }
+      names(spill) <- cyto_names(x)
+      # CYTOSET/GATINGSET
+    } else {
+      if (!is.null(select)) {
+        spill <- cyto_spillover_extract(x[[select]])
+        if (is.null(spill)) {
+          stop("Unable to extract spillover matrix from selected sample.")
+        }
+        spill <- rep(spill, length(x))
+        names(spill) <- cyto_names(x)
+      } else {
+        spill <- lapply(cyto_names(x), function(y) {
+          sm <- cyto_spillover_extract(x[y])[[1]]
+          if (is.null(sm)) {
+            stop(paste0(
+              "Unable to extract spillover matrix from ",
+              cyto_names(x[y]), "."
+            ))
+          }
+          return(sm)
+        })
+      }
+    }
+  }
+  
+  # READ SPILLOVER MATRIX FROM FILE
+  if(cyto_class(spillover, "character", TRUE)) {
+    spill <- read_from_csv(spillover)
+  }
+  
+  # CREATE LIST OF SPILLOVER MATRICES - BYPASS CHECKING LISTS
+  if(!cyto_class(spillover, "list", TRUE)) {
+    # NON-SQUARE OR UNLABELLED MATRIX
+    if(!all(colnames(spill) %in% chans)) {
+      # ANY COLUMNS CONTAINING CHANNEL NAMES?
+      chans_ind <- LAPPLY(seq_len(ncol(spill)), function(z){
+        if(all(spill[, z] %in% chans)) {
+          return(z)
+        } else {
+          return(NULL)
+        }
+      })
+      # COLUMN CONTAINING SPILLOVER VALUES
+      spill_ind <- LAPPLY(seq_len(ncol(spill)), function(z){
+        if(is.numeric(spill[, z])) {
+          return(z)
+        } else {
+          return(NULL)
+        }
+      })
+      # LONG MATRIX - 2 CHANNEL COLUMNS & VALUE COLUMN
+      if(length(chans_ind) == 2 & length(spill_ind) >= 1) {
+        # SPILLOVER CHANNELS
+        spill_chans <- unique(unlist(spill[, chans_ind]))
+        # INITIALISE SQUARE SPILLOVER MATRIX
+        spill_mat <- diag(
+          length(spill_chans)
+        )
+        colnames(spill_mat) <- spill_chans
+        rownames(spill_mat) <- spill_chans
+        # FILL MATRIX
+        lapply(seq_len(nrow(spill)), function(z){
+          spill_mat[rownames(spill_mat) %in% spill[z, chans_ind[1]],
+                    colnames(spill_mat) %in% spill[z, chans_ind[2]]] <<- 
+            spill[z, spill_ind[1]]
+        })
+        spill <- spill_mat
+        # INVALID SPILLOVER MATRIX
+      } else {
+        stop(
+          paste(
+            "'spillover' should be a square matrix with channels",
+            "as column names!"
+          )
+        )
+      }
+    }
+    # SPILLOVER LIST
+    spill <- rep(list(spill), length(x))
+    names(spill) <- cyto_names(x)
+  }
+
+  # EXCLUDE MISSING PARAMETERS
+  spill <- structure(
+    lapply(spill, function(z){
+      # MATCH COLUMN NAMES ONLY - ROWNAMES MAY NOT BE SUPPLIED
+      z <- z[colnames(z) %in% chans, colnames(z) %in% chans]
+      # PERCENTAGES
+      if(percent){
+        z <- z/100
+      }
+      return(z)
+    }),
+    names = names(spill)
+  )
+  
+  # PREPARED SPILLOVER MATRIX
+  return(spill)
+
 }
 
 ## CYTO_NODES ------------------------------------------------------------------
@@ -5185,6 +5179,7 @@ cyto_spillover_extract <- function(x) {
     spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
       NULL
     })
+    names(spill) <- cyto_names(x)
   }
   
   # RETURN LIST OF SPILLOVER MATRICES
