@@ -1197,6 +1197,49 @@ cyto_plot_record <- function() {
   recordPlot()
 }
 
+## CYTO_PLOT_NEW_PAGE ----------------------------------------------------------
+
+#' Add plots to a new page 
+#'
+#' \code{cyto_plot_fill()} is a handy function designed to fill incomplete
+#' \code{cyto_plot()} layouts so that the next call to \code{cyto_plot()}
+#' generates a plot on a new page.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @importFrom graphics plot.new
+#'
+#' @examples
+#' library(CytoExploreRData)
+#' library(flowWorkspace)
+#' 
+#' cs <- flowSet_to_cytoset(Activation)
+#' 
+#' # create custom plot layout
+#' cyto_plot_custom(layout = c(2,2))
+#' 
+#' # add some plots - leave some panels empty
+#' cyto_plot(
+#'   cs[1:3],
+#'   channels = c("FSC-A", "SSC-A")
+#' )
+#' 
+#' # signal page is complete - use new page for next plots
+#' cyto_plot_new_page()
+#' 
+#' # add these plots to new page
+#' cyto_plot(
+#'   cs[4:7],
+#'   channels = c("FSC-A", "SSC-A")
+#' )
+#' 
+#' @export
+cyto_plot_new_page <- function(){
+  while(!.par("page")[[1]]) {
+    plot.new()
+  }
+}
+
 ## CYTO_PLOT_SAVE --------------------------------------------------------------
 
 #' Save High Resolution cyto_plot Images

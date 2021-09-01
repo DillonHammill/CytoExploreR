@@ -1131,6 +1131,10 @@ cyto_names_parse <- function(x,
 #' @param inverse logical indicating whether the inverse transformations should
 #'   be applied. Currently only supported for \code{flowFrame} and
 #'   \code{flowSet} objects.
+#' @param copy logical indicating whether the data should be copied prior to
+#'   applying the transformations, set to FALSE by default. Setting this
+#'   argument to TRUE will leave the supplied data untouched and return a copy
+#'   of the data with the transformations applied.
 #' @param plot logical indicating whether the result of the transformations
 #'   should be plotted using \code{\link{cyto_plot}}.
 #' @param popup logical indicating whether plots should be constructed in a
@@ -1140,7 +1144,7 @@ cyto_names_parse <- function(x,
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
-#' @param quiet logical which prevents the prointing of messages when set to
+#' @param quiet logical which prevents the printing of messages when set to
 #'   TRUE.
 #' @param ... additional arguments passed to
 #'   \code{\link{cyto_transformers_define}}, when no \code{trans} object is
@@ -1202,6 +1206,7 @@ cyto_transform.default <- function(x,
                                    parent = "root",
                                    select = NULL,
                                    inverse = FALSE,
+                                   copy = FALSE,
                                    plot = TRUE,
                                    popup = FALSE,
                                    axes_limits = "machine",
@@ -1240,6 +1245,11 @@ cyto_transform.default <- function(x,
              "data transformations...")
     )
   )
+  
+  # COPY
+  if(copy){
+    x <- cyto_copy(x)
+  }
   
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
@@ -1303,6 +1313,7 @@ cyto_transform.default <- function(x,
 #' @export
 cyto_transform.transformList <- function(x,
                                          trans = NULL,
+                                         copy = FALSE,
                                          plot = TRUE,
                                          popup = FALSE,
                                          axes_limits = "machine",
@@ -1326,10 +1337,15 @@ cyto_transform.transformList <- function(x,
     )
   }
   
+  # COPY
+  if(copy){
+    x <- cyto_copy(x)
+  }
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
-    # Restrict (subsetted data may lack channels)
+    # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
     trans <- trans@transforms[names(trans) %in% cyto_channels(x)]
     trans <- transformList(names(trans),
                            lapply(trans, function(z){
@@ -1373,6 +1389,7 @@ cyto_transform.transformList <- function(x,
 cyto_transform.transformerList <- function(x,
                                            trans = NULL,
                                            inverse = FALSE,
+                                           copy = FALSE,
                                            plot = TRUE,
                                            popup = FALSE,
                                            axes_limits = "machine",
@@ -1387,23 +1404,28 @@ cyto_transform.transformerList <- function(x,
              "data transformations...")
     )
   }
+  
+  # COPY
+  if(copy) {
+    x <- cyto_copy(x)
+  }
+  
   # TRANSFORM FLOWFRAME OR FLOWSET
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
-    # Restrict transformers
+    # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
     trans <- cyto_transformers_combine(trans[names(trans) %in% cyto_channels(x)])
     
-    # Extract transformations to transformList
+    # TRANSFORMLIST
     transform_list <- cyto_transform_extract(trans, inverse = inverse)
     
-    # Apply transformations
+    # APPLY TRANSFORMATIONS
     x <- suppressMessages(transform(x, transform_list))
     
-    
-    # TRANSFORM GATINGHIERARCHY OR GATINGSET
+  # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
     
-    # Inverse transformations not yet supported
+    # INVERSE TRANSFORMATIONS NOT SUPPORTED
     if (inverse == TRUE) {
       stop(paste(
         "Inverse transformations are not yet supported for",
@@ -1411,10 +1433,10 @@ cyto_transform.transformerList <- function(x,
       ))
     }
     
-    # Restrict transformers - subsetted data may lack channels
+    # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
     trans <- cyto_transformers_combine(trans[names(trans) %in% cyto_channels(x)])
     
-    # Apply transformations
+    # APPLY TRANSFORMATIONS
     x <- suppressMessages(transform(x, trans))
   }
   
@@ -4416,57 +4438,77 @@ cyto_compensate.GatingSet <- function(x,
                                       remove = FALSE,
                                       ...) {
   
-  # Extract flowSet
-  fs <- cyto_data_extract(x, parent = "root")[["root"]]
+  # CYTOSET
+  cs <- cyto_data_extract(
+    x, 
+    parent = "root"
+  )[["root"]]
   
-  # Spillover matrix supplied - matrix, data.frame or csv file
+  # SPILLOVER SUPPLIED - ARRAY OR FILE NAME
   if (!is.null(spillover)) {
-    # spillover is a character string containing name of csv file
+    # SPILL - FILE NAME
     if (cyto_class(spillover, "character", TRUE)) {
-      # read in spillover matrix
+      # READ SPILL
       spill <- read_from_csv(spillover)
-      # column names must be valid channels
-      if (!all(colnames(spill) %in% cyto_channels(fs))) {
-        stop(
-          paste(
-            "'spillover' must have valid fluorescent channels as colnames."
+      # NON-SQUARE MATRIX
+      if(!all(colnames(spill) %in% cyto_channels(cs))) {
+        # LONG MATRIX - REQUIRE 2 COLUMNS WITH CHANNEL NAMES
+        if(sum(LAPPLY(seq_len(ncol(spill)), function(z){
+          all(spill[, z] %in% cyto_channels(cs))
+        })) == 2){
+          # SPILL -> SQUARE MATRIX
+          spill_mat <- diag(
+            x = 1, 
+            ncol = length(cyto_channels(cs))
           )
-        )
+          colnames(spill_mat) <- cyto_channels(cs)
+          rownames(spill_mat) <- cyto_channels(cs)
+          # FILL SPILL MATRIX
+          
+        # INCORRECT MATRIX FORMAT
+        } else {
+          stop(
+            paste(
+              "'spillover' should be a square matrix with channels",
+              "as column names!"
+            )
+          )
+        }
       }
-      # Convert spill into a named list
-      spill <- rep(list(spill), length(fs))
-      names(spill) <- cyto_names(fs)
-      # spillover is a matrix/data.frame
+      # SPILLOVER -> NAMED LIST
+      spill <- rep(list(spill), length(cs))
+      names(spill) <- cyto_names(cs)
+      # SPILL - ARRAY
     } else if (cyto_class(spillover, c("matrix", "data.frame"))) {
       # column names must be valid channels (rownames not essential)
-      if (!all(colnames(spillover) %in% cyto_channels(fs))) {
+      if (!all(colnames(spillover) %in% cyto_channels(cs))) {
         stop("'spillover' must have valid fluorescent channels as colnames.")
       } else {
         spill <- spillover
       }
-      # Convert spill into a named list
-      spill <- rep(list(spill), length(fs))
-      names(spill) <- cyto_names(fs)
-      # spillover is a list
+      # SPILL -> NAMED LIST
+      spill <- rep(list(spill), length(cs))
+      names(spill) <- cyto_names(cs)
+    # SPILL = NAMED LIST
     } else {
       spill <- spillover
     }
-    # Extract spillover matrix directly from fs
+  # EXTRACT SPILL
   } else if (is.null(spillover)) {
     if (!is.null(select)) {
-      spill <- cyto_spillover_extract(fs[[select]])
+      spill <- cyto_spillover_extract(cs[[select]])
       if (is.null(spill)) {
         stop("Unable to extract spillover matrix from selected sample.")
       }
-      spill <- rep(spill, length(fs))
-      names(spill) <- cyto_names(fs)
+      spill <- rep(spill, length(cs))
+      names(spill) <- cyto_names(cs)
     } else {
-      spill <- lapply(cyto_names(fs), function(y) {
-        sm <- cyto_spillover_extract(fs[[y]])[[1]]
+      spill <- lapply(cyto_names(cs), function(y) {
+        sm <- cyto_spillover_extract(cs[[y]])[[1]]
         if (is.null(sm)) {
           stop(paste0(
             "Unable to extract spillover matrix from ",
-            cyto_names(fs[[y]]), "."
+            cyto_names(cs[[y]]), "."
           ))
         }
         return(sm)
@@ -4475,7 +4517,7 @@ cyto_compensate.GatingSet <- function(x,
   }
   
   # Channels
-  fluor_channels <- cyto_fluor_channels(fs)
+  fluor_channels <- cyto_fluor_channels(cs)
   
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
@@ -4490,14 +4532,14 @@ cyto_compensate.GatingSet <- function(x,
   
   # REMOVE COMPENSATION
   if (remove == TRUE) {
-    cf_list <- lapply(seq_along(fs), function(z) {
-      cf <- decompensate(fs[[z]], spill[[z]])
+    cf_list <- lapply(seq_along(cs), function(z) {
+      cf <- decompensate(cs[[z]], spill[[z]])
       if(!cyto_class(cf, "cytoframe", TRUE)){
         cf <- flowFrame_to_cytoframe(cf)
       }
       return(cf)
     })
-    names(cf_list) <- cyto_names(fs)
+    names(cf_list) <- cyto_names(cs)
     cs <- cytoset(cf_list)
     gs_cyto_data(x) <- cs
     # APPLY COMPENSATION
@@ -5234,7 +5276,7 @@ cyto_calibrate <- function(x,
   
   # MIN/MAX
   cyto_cal <- apply(cyto_cal, 2, function(x){
-    c("min" = min(x), "max" = max(x))
+    c("min" = min(x, na.rm = TRUE), "max" = max(x, na.rm = TRUE))
   })
   
   # SAVE RDS TO TEMPFILE

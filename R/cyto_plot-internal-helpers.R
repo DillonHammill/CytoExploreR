@@ -2781,7 +2781,7 @@
   
   # RANGE CALIBRATION
   cyto_cal <- .cyto_calibrate_recall()
-  
+
   # 1D COLOUR SCALE
   point_col <- structure(
     lapply(point_col, function(z) {

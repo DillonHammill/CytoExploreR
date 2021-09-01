@@ -262,7 +262,7 @@ cyto_map <- function(x,
     match(
       rownames(cyto_details(x_data_map)),
       rownames(cyto_details(x))
-    ),
+    ), , drop = FALSE
   ]
   
   # UPDATE CYTOSET IN GATINGSET

@@ -17,6 +17,7 @@ cyto_transform(x, trans = NULL, ...)
   parent = "root",
   select = NULL,
   inverse = FALSE,
+  copy = FALSE,
   plot = TRUE,
   popup = FALSE,
   axes_limits = "machine",
@@ -27,6 +28,7 @@ cyto_transform(x, trans = NULL, ...)
 \method{cyto_transform}{transformList}(
   x,
   trans = NULL,
+  copy = FALSE,
   plot = TRUE,
   popup = FALSE,
   axes_limits = "machine",
@@ -38,6 +40,7 @@ cyto_transform(x, trans = NULL, ...)
   x,
   trans = NULL,
   inverse = FALSE,
+  copy = FALSE,
   plot = TRUE,
   popup = FALSE,
   axes_limits = "machine",
@@ -77,6 +80,11 @@ to select a subset of samples for visualising the transformations.}
 be applied. Currently only supported for \code{flowFrame} and
 \code{flowSet} objects.}
 
+\item{copy}{logical indicating whether the data should be copied prior to
+applying the transformations, set to FALSE by default. Setting this
+argument to TRUE will leave the supplied data untouched and return a copy
+of the data with the transformations applied.}
+
 \item{plot}{logical indicating whether the result of the transformations
 should be plotted using \code{\link{cyto_plot}}.}
 
@@ -89,7 +97,7 @@ to \code{"machine"} by default to use entire axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
 
-\item{quiet}{logical which prevents the prointing of messages when set to
+\item{quiet}{logical which prevents the printing of messages when set to
 TRUE.}
 }
 \value{
