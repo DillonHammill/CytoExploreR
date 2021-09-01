@@ -1,8 +1,7 @@
 # CytoExploreR 2.0.0
 
-* Add new `percent` argument to `cyto_compensate()`for users to indicate if the spillover values have been presented as percentages instead of decimals.
 * Add `copy` argument to `cyto_compensate()` to apply compensation to a copy of the supplied data.
-* `cyto_compensate()` now supports spillover matrices in long format (i.e. non-square matrix with 3 columns of form | channel | channel | value |).
+* `cyto_compensate()` now supports spillover matrices in long format (i.e. non-square matrix with 3 columns of form | channel | channel | value |) or matrices with values presented as percentages instead of decimals.
 * Add new `cyto_plot_new_page()` function to allow plotting on new page when previous page contains empty panels.
 * Add optional copy argument to `cyto_transform()` to apply transformations to  copy of the supplied data.
 * `cyto_map()` has been re-written to add support for extracting events on a per sample basis. A new `scale` argument has been added to optionally scale each channel to `mean`, `range` or `zscore`. A new `label` argument has been added to allow more fine control over the names of the dimension-reduced parameters.

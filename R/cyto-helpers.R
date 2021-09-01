@@ -4397,9 +4397,6 @@ cyto_details_save <- function(x,
 #'   spillover matrix file, set \code{select} to NULL.
 #' @param remove logical indicating whether applied compensation should be
 #'   removed from the supplied samples, set to FALSE by default.
-#' @param percent logical to indicate whether the values in the supplied
-#'   spillover matrix are presented as percentages instead of decimals, set to
-#'   FALSE by default.
 #' @param copy logical to control whether the supplied data should be copied
 #'   prior to applying compensation for fluorescent spillover, set to FALSE by
 #'   default. Setting this argument to TRUE will leave the supplied data
@@ -4455,7 +4452,6 @@ cyto_compensate.GatingSet <- function(x,
                                       spillover = NULL,
                                       select = 1,
                                       remove = FALSE,
-                                      percent = FALSE,
                                       copy = FALSE,
                                       ...) {
   
@@ -4470,8 +4466,7 @@ cyto_compensate.GatingSet <- function(x,
   spill <- .cyto_spillover_prepare(
     cs,
     spillover = spillover,
-    select = select,
-    percent = percent
+    select = select
   )
   
   # REMOVE COMPENSATION
@@ -4502,7 +4497,6 @@ cyto_compensate.flowSet <- function(x,
                                     spillover = NULL,
                                     select = 1,
                                     remove = FALSE,
-                                    percent = FALSE,
                                     copy = FALSE,
                                     ...) {
   
@@ -4510,8 +4504,7 @@ cyto_compensate.flowSet <- function(x,
   spill <- .cyto_spillover_prepare(
     x,
     spillover = spillover,
-    select = select,
-    percent = percent
+    select = select
   )
   
   # COPY
@@ -4544,15 +4537,13 @@ cyto_compensate.flowFrame <- function(x,
                                       spillover = NULL,
                                       select = 1,
                                       remove = FALSE,
-                                      percent = FALSE,
                                       copy = FALSE,
                                       ...) {
   
   # PREPARE SPILLOVER MATRIX
   spill <- cyto_spillover_prepare(
     x,
-    spillover = spillover,
-    percent = percent,
+    spillover = spillover
   )[[1]]
   
   # COPY
@@ -4579,9 +4570,6 @@ cyto_compensate.flowFrame <- function(x,
 #'   should be extracted when no spillover matrix file is supplied to
 #'   \code{spillover}. To compensate each sample individually using their stored
 #'   spillover matrix file, set \code{select} to NULL.
-#' @param percent logical to indicate whether the values in the supplied
-#'   spillover matrix are presented as percentages instead of decimals, set to
-#'   FALSE by default.
 #'
 #' @return a square spillover matrix.
 #'
@@ -4590,8 +4578,7 @@ cyto_compensate.flowFrame <- function(x,
 #' @noRd
 .cyto_spillover_prepare <- function(x,
                                     spillover = NULL,
-                                    select = NULL,
-                                    percent = FALSE) {
+                                    select = NULL) {
   
   # EXTRACT CHANNELS
   chans <- cyto_channels(x)
@@ -4691,8 +4678,8 @@ cyto_compensate.flowFrame <- function(x,
     lapply(spill, function(z){
       # MATCH COLUMN NAMES ONLY - ROWNAMES MAY NOT BE SUPPLIED
       z <- z[colnames(z) %in% chans, colnames(z) %in% chans]
-      # PERCENTAGES
-      if(percent){
+      # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
+      if(any(z >= 10)){
         z <- z/100
       }
       return(z)

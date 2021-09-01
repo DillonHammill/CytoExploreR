@@ -14,7 +14,6 @@ cyto_compensate(x, ...)
   spillover = NULL,
   select = 1,
   remove = FALSE,
-  percent = FALSE,
   copy = FALSE,
   ...
 )
@@ -24,7 +23,6 @@ cyto_compensate(x, ...)
   spillover = NULL,
   select = 1,
   remove = FALSE,
-  percent = FALSE,
   copy = FALSE,
   ...
 )
@@ -34,7 +32,6 @@ cyto_compensate(x, ...)
   spillover = NULL,
   select = 1,
   remove = FALSE,
-  percent = FALSE,
   copy = FALSE,
   ...
 )
@@ -59,10 +56,6 @@ spillover matrix file, set \code{select} to NULL.}
 
 \item{remove}{logical indicating whether applied compensation should be
 removed from the supplied samples, set to FALSE by default.}
-
-\item{percent}{logical to indicate whether the values in the supplied
-spillover matrix are presented as percentages instead of decimals, set to
-FALSE by default.}
 
 \item{copy}{logical to control whether the supplied data should be copied
 prior to applying compensation for fluorescent spillover, set to FALSE by
