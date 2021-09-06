@@ -4614,13 +4614,15 @@ cyto_compensate.flowFrame <- function(x,
         })
       }
     }
+  } else {
+    spill <- spillover
   }
   
   # READ SPILLOVER MATRIX FROM FILE
-  if(cyto_class(spillover, "character", TRUE)) {
-    spill <- read_from_csv(spillover)
+  if(cyto_class(spill, "character", TRUE)) {
+    spill <- read_from_csv(spill)
   }
-  
+
   # CREATE LIST OF SPILLOVER MATRICES - BYPASS CHECKING LISTS
   if(!cyto_class(spillover, "list", TRUE)) {
     # NON-SQUARE OR UNLABELLED MATRIX
