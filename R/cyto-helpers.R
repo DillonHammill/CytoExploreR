@@ -4624,7 +4624,7 @@ cyto_compensate.flowFrame <- function(x,
   }
 
   # CREATE LIST OF SPILLOVER MATRICES - BYPASS CHECKING LISTS
-  if(!cyto_class(spillover, "list", TRUE)) {
+  if(!cyto_class(spill, "list", TRUE)) {
     # NON-SQUARE OR UNLABELLED MATRIX
     if(!all(colnames(spill) %in% chans)) {
       # ANY COLUMNS CONTAINING CHANNEL NAMES?
@@ -4674,16 +4674,16 @@ cyto_compensate.flowFrame <- function(x,
     spill <- rep(list(spill), length(x))
     names(spill) <- cyto_names(x)
   }
-
+  
   # EXCLUDE MISSING PARAMETERS
   spill <- structure(
     lapply(spill, function(z){
       # MATCH COLUMN NAMES ONLY - ROWNAMES MAY NOT BE SUPPLIED
       z <- z[colnames(z) %in% chans, colnames(z) %in% chans]
-      # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
-      if(any(z >= 10)){
-        z <- z/100
-      }
+      # # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
+      # if(any(z >= 10)){
+      #   z <- z/100
+      # }
       return(z)
     }),
     names = names(spill)
