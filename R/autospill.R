@@ -84,7 +84,6 @@
   if(is.null(x_chan)) {
     x_chan <- cyto_details(x)$channel
   }
-  
   # EXTRACT DATA
   exprs <- cyto_exprs(
     x[[1]],
@@ -116,29 +115,38 @@
     rlm_pval <- 2*(pt(abs(rlm_t), rlm_df, lower.tail = FALSE))
     # RLM NOT CONVERGED - USE LM INSTEAD
   } else {
-    warning(
-      paste0(
-        "fitting rlm() to ",
-        y_chan, " ~ ", x_chan,
-        " did not converge - resorting to lm() instead."
-      )
-    )
+    # warning(
+    #   paste0(
+    #     "fitting rlm() to ",
+    #     y_chan, " ~ ", x_chan,
+    #     " did not converge - resorting to lm() instead."
+    #   )
+    # )
     rlm <- lm(exprs[, 2] ~ exprs[, 1])
     rlm_coef <- rlm$coefficients
     rlm_pval <- summary(rlm)$coefficients[, 4]
   }
   # SKEWNESS
   rlm_skew <- c(0,0)
+  names(rlm_skew) <- c(x_chan, y_chan)
   if(skew) {
-    rlm_skew <- apply(
-      exprs,
-      2,
-      function(z){
-        n <- length(z)
-        (sum((z-mean(z))^3)/n)/(sum((z-mean(z))^2)/n)^(3/2)
-      }
-    )
+    rlm_skew <- cyto_stat_skewness(exprs)
   }
+  # # PLOT DATA
+  # plot(
+  #   exprs[, 1:2],
+  #   xlab = x_chan,
+  #   ylab = y_chan,
+  #   pch = 16
+  #   # xlim = c(0, 262144),
+  #   # ylim = c(0, 262144)
+  # )
+  # # PLOT RLM MODEL
+  # abline(
+  #   rlm,
+  #   col = "red",
+  #   lwd = 2
+  # )
   # RETURN RLM PARAMETERS
   return(
     cbind(
@@ -172,6 +180,11 @@
   # INITIALISE COEFFICIENTS
   spill_zero <- rep(0, n)
   names(spill_zero) <- pd$channel
+  
+  # # CREATE PLOT LAYOUT
+  # par(mfrow = c(n,n-1),
+  #     oma = c(0,0,3,0),
+  #     mar = c(4.1,4.1,2.1,2.1))
   
   # FIT RLM & EXTRACT INTERCEPTS & COEFFICIENTS
   spill_coef <- do.call(
@@ -213,6 +226,12 @@
     )
   )
   
+  # # RESET PLOT LAYOUT
+  # mtext("INITIAL SPILLOVER", outer = TRUE)
+  # par(mfrow = c(1,1),
+  #     oma = c(0,0,0,0), 
+  #     mar = c(4.1,4.1,2.1,2.1))
+  
   # LIST OF INTERCEPTS & COEFFICIENTS 
   return(
     list(
@@ -231,12 +250,14 @@
 #' @param x object of class cytoset containing untransformed uncompensated
 #'   single colour controls.
 #' @param spill object returned by .cyto_asp_spill_init().
+#' @param trans 
 #'
 #' @return spillover matrix computed and refined using the autospill approach.
 #'
 #' @noRd
 .cyto_asp_spill_refine <- function(x,
-                                   spill = NULL) {
+                                   spill = NULL,
+                                   trans = NA) {
   
   # INITIALISE PARAMETERS
   rs_convergence <- FALSE
@@ -266,18 +287,12 @@
   while(!rs_exit) {
     # UPDATE SPILLOVER MATRIX
     spill_curr <- spill_curr + spill_update
-    spill_curr <- sweep(
-      spill_curr,
-      1,
-      diag(spill_curr),
-      "/"
-    )
-    # SPILLOVER ORIGINAL
-    spill_curr_original <- spill_curr
     # COMPENSATION ERROR
     spill_error <- .cyto_asp_spill_error(
       x,
-      spill = spill_curr_original
+      spill = spill_curr,
+      trans = trans,
+      transform = !rs_scale_untransformed
     )
     # SLOPE ERROR
     spill_slope_error <- spill_error$slope - diag(n)
@@ -294,16 +309,16 @@
     }
     # CHANGE IN DELTA
     rs_delta_change <- mean(rs_delta_history)
-    # # UPDATE PARAMETERS
-    # if(rs_scale_untransformed && rs_delta_max < rs_delta_threshold) {
-    #   # SWITCH TO BIEXPONENTIAL SCALE & RESET DELTA PARAMETERS
-    #   rs_scale_untransformed <- FALSE
-    #   rs_delta_threshold <- 1e-04 # asp$rs.delta.threshold.tran
-    #   rs_lambda <- 1
-    #   rs_delta <- -1
-    #   rs_delta_history <- rep(-1, 10) # asp$rs.delta.history.n
-    #   rs_delta_change <- -1
-    # }
+    # SWITCH TO BIEXPONENTIAL SCALE
+    if(rs_scale_untransformed && rs_delta_max < rs_delta_threshold) {
+      # RESET LAMBDA & DELTA HISTORY
+      rs_scale_untransformed <- FALSE
+      rs_delta_threshold <- 1e-04 # asp$rs.delta.threshold.tran
+      rs_lambda <- 1
+      rs_delta <- -1
+      rs_delta_history <- rep(-1, 10)
+      rs_delta_change <- -1
+    }
     # REDUCE LAMBDA & RESET DELTA HISTORY
     if(rs_delta_change > -1e-06 && rs_lambda == 1) {
       rs_lambda <- 0.1
@@ -322,15 +337,15 @@
     rs_iter_last <- rs_convergence
     rs_iter <- rs_iter + 1
     # UPDATE SPILLOVER MATRIX
-    spil_update <- rs_lambda * (spill_slope_error %*% spill_curr)
+    spill_update <- rs_lambda * (spill_slope_error %*% spill_curr)
   }
   
-  # CHECK CONVERGENCE
-  if(!rs_convergence) {
-    stop(
-      "Autospill failed to converge when computing spillover matrix."
-    )
-  }
+  # # CHECK CONVERGENCE
+  # if(!rs_convergence) {
+  #   stop(
+  #     "Autospill failed to converge when computing spillover matrix."
+  #   )
+  # }
   
   # RETURN REFINED SPILLOVER MATRIX
   return(spill_curr)
@@ -346,13 +361,21 @@
 #'   controls.
 #' @param spill matrix containing the spillover coefficient estimates to be
 #'   applied to the data.
+#' @param trans object of class transformerList containing the transformation
+#'   definitions for fluorescent channels to apply to the data when
+#'   \code{transform = TRUE}.
+#' @param transform logical indicating whether biexponential transformations
+#'   should be applied prior to computing spillover error, set to FALSE by
+#'   default.
 #'
 #' @return list of matrices describing compensation error, with intercepts,
 #'   coefficients, slopes, and skewness.
 #'
 #' @noRd
 .cyto_asp_spill_error <- function(x,
-                                  spill = NULL) {
+                                  spill = NULL,
+                                  trans = NA,
+                                  transform = FALSE) {
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
@@ -371,6 +394,11 @@
   spill_zero <- rep(0, n)
   names(spill_zero) <- pd$channel
   
+  # # CREATE PLOT LAYOUT
+  # par(mfrow = c(n, n-1),
+  #     oma = c(0,0,3,0),
+  #     mar = c(4.1,4.1,2.1,2.1))
+  
   # FIT RLM - EXTRACT INTERCEPTS, COEFFICIENTS, SLOPES & SKEWNESS
   spill_params <- do.call(
     "rbind",
@@ -381,11 +409,30 @@
         spill_coef <- spill_zero
         spill_slope <- spill_zero
         spill_skew <- spill_zero
-        # PREPARE DATA
+        # EXTRACT DATA
         cs <- cyto_select(
           x,
           channel = z
         )
+        # TRANSFORM DATA
+        if(transform) {
+          # TRANSFORMERS
+          if(.all_na(trans)) {
+            trans <- cyto_transformers_define(
+              cs,
+              channels = pd$channel,
+              type = "biex",
+              plot = FALSE
+            )
+          }
+          # APPLY TRANSFORMATIONS
+          cs <- cyto_transform(
+            cs,
+            trans = trans,
+            plot = FALSE,
+            quiet = TRUE
+          )
+        }
         # FIT RLM MODELS & UPDATE PARAMETERS
         lapply(pd$channel, function(w){
           # DIAGONAL PARAMETERS COMBINATIONS
@@ -405,8 +452,50 @@
             # STORE COEFFICIENT & INTERCEPT
             spill_int[w] <<- rlm_params[1, 1]
             spill_coef[w] <<- rlm_params[2, 1]
-            spill_slope[w] <<- spill_coef[w]
-            spill_skew[w] <<- rlm_params[2, 3] # skewness in secondary channel
+            # SLOPE/SKEWNESS - LINEAR DATA
+            if(!transform) {
+              spill_slope[w] <<- spill_coef[w]
+              spill_skew[w] <<- rlm_params[2, 3] # skewness in secondary channel
+            # SLOPE/SKEWNESS - TRANSFORMED DATA
+            } else {
+              yp <- cyto_apply(
+                cs, 
+                "quantile",
+                probs = c(0.01, 0.99),
+                input = "matrix",
+                channels = z,
+                copy = FALSE
+              )[1, ]
+              xp <- c(spill_int[w] + spill_coef[w] * yp[1],
+                      spill_int[w] + spill_coef[w] * yp[2])
+              if(yp[1] == yp[2] || xp[1] == xp[2]) {
+                spill_slope[w] <<- 0
+              } else {
+                yp <- .cyto_transform(
+                  yp,
+                  trans = trans,
+                  channel = z,
+                  inverse = TRUE
+                )
+                xp <- .cyto_transform(
+                  xp,
+                  trans = trans,
+                  channel = w,
+                  inverse = TRUE
+                )
+                spill_slope[w] <<- spill_coef[w] * (xp[2] - xp[1]) * 
+                  (yp[2] - yp[1]) / ((xp[2] - xp[1])*(yp[2] - yp[1]))
+              }
+              spill_skew[w] <<- cyto_apply(
+                cs,
+                "cyto_stat_skewness",
+                input = "matrix",
+                channels = w,
+                copy = TRUE,
+                inverse = TRUE,
+                trans = trans
+              )[1, ]
+            }
           }
         })
         # RETURN RLM PARAMETERS
@@ -423,6 +512,12 @@
     )
   )
     
+  # # RESET PLOT LAYOUT
+  # mtext("SPILLOVER REFINE", outer = TRUE)
+  # par(mfrow = c(1,1),
+  #     oma = c(0,0,3,0),
+  #     mar = c(4.1,4.1,2.1,2.1))
+  
   # SPILLOVER ERROR PARAMETERS
   return(
     list(

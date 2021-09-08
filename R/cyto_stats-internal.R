@@ -20,6 +20,7 @@
                     "rsd",
                     "cv",
                     "rcv",
+                    "skewness",
                     "quantile",
                     "auc",
                     "range",
@@ -525,6 +526,37 @@ cyto_stat_scale <- function(x,
           "'type' must be either 'range', 'mean' or 'zscore'!"
         )
       }
+    }
+  )
+  
+}
+
+## CYTO_STAT_SKEWNESS ----------------------------------------------------------
+
+#' Compute skewness of distributions
+#' 
+#' Used within autospill code in CytoExploreR.
+#' 
+#' @param x a matrix.
+#' @param ... not in use.
+#' 
+#' @return matrix with skewness values per channel.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+cyto_stat_skewness <- function(x,
+                               ...) {
+  
+  apply(
+    x,
+    2,
+    function(z){
+      if(any(is.na(z))) {
+        z <- z[!is.na(z)]
+      }
+      n <- length(z)
+      (sum((x-mean(x))^3)/n)/(sum((x-mean(x))^2)/n)^(3/2)
     }
   )
   
