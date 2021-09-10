@@ -535,8 +535,6 @@ cyto_stat_scale <- function(x,
 
 #' Compute skewness of distributions
 #' 
-#' Used within autospill code in CytoExploreR.
-#' 
 #' @param x a matrix.
 #' @param ... not in use.
 #' 
