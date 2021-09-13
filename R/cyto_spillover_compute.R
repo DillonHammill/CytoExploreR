@@ -2,39 +2,34 @@
 
 #' Compute Spillover Matrix
 #'
-#' \code{cyto_spillover_compute} uses the method described by Bagwell & Adams
-#' 1993 to automatically calculate the fluorescent spillover matrix using single
-#' stain compensation controls.
+#' \code{cyto_spillover_compute} automatically computes the fluorescent
+#' spillover matrix for a set of single colour compensation controls using
+#' either the method proposed by Bagwell et al. (1993) or the more recent method
+#' proposed by Roca et al. (2021).
 #'
-#' \code{cyto_spillover_compute} supports spillover matrix calculation for both
-#' internal or universal unstained reference populations based on channel
-#' selection. \code{cyto_spillover_compute} expects the fluorescent channels of
-#' the samples to be pre-transformed. Attempts will be made to transform the
-#' data internally (using biexponential transformations) if it looks like the
-#' data has not been transformed.
+#' The method proposed by Roca et al. (2021) is now the default method, and has
+#' been implemented in \code{cyto_spillover_compute} as a fully automated
+#' algorithm to compute the spillover matrix. Users simply need to ensure that
+#' the channel associated with each control is annotated in the
+#' \code{cyto_details()} of the supplied data or alternatively this information
+#' can be interactively supplied through a channel match file using
+#' \code{cyto_channel_match()}.
 #'
-#' \code{cyto_spillover_compute} begins by the user selecting which fluorescent
-#' channel is associated with each compensation control from a dropdown menu.
-#' The results of these selections are saved to a csv file called
-#' "Compensation-Channels.csv" which can be passed to the \code{channel_match}
-#' argument on subsequent runs to bypass the channel selection process. In cases
-#' where multiple controls are supplied for the same channel, the control with
-#' the greatest signal in the designated channel (MedFI) will be used for the
-#' calculation.
+#' The method proposed by Bagwell et al. (1993) is also supported but is
+#' implemented as a semi-automated approach as it requires gating of the
+#' positive and negative signal within each single colour control to accurately
+#' compute the spillover coefficients. Gating is performed on a per channel
+#' basis with the user manually drawing interval gates around the positive and
+#' negative signal for each control. If a universal unstained control is
+#' supplied, users are only asked to gate the positive signal for each control
+#' and the unstained control will be used as the reference for the negative
+#' signal in each channel.
 #'
-#' Following channel selection, \code{cyto_spillover_compute} runs through each
-#' compensation control and plots the density distribution in the associated
-#' channel. If a universal "Unstained" compensation control is supplied, the
-#' unstained compensation control will be overlaid onto the plot as a reference
-#' for gating. Users can then gate the positive signal for spillover calculation
-#' using an interval gate. If no universal unstained compensation control is
-#' supplied, users are expected to gate the negative and then the positive
-#' signal for each compensation control.
-#'
-#' The percentage spillover is calculated based on the median fluorescent
-#' intensities (MedFI) of the positive populations relative to that of the
-#' reference negative population(s). The calculated spillover matrix is returned
-#' and written to a named csv file for future use.
+#' The computed spillover is returned as a matrix and exported as a csv file
+#' specified by the \code{save_as} argument. To assess the quality of the
+#' compensation, refer to \code{\link{cyto_spillover_edit}} and
+#' \code{\link{cyto_plot_compensation}}. Users can apply their computed
+#' spillover matrices to their samples using \code{\link{cyto_compensate}}.
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
@@ -111,6 +106,9 @@
 #' }
 #'
 #' @seealso \code{\link{cyto_spillover_edit}}
+#' @seealso \code{\link{cyto_spillover_edit}}
+#' @seealso \code{\link{cyto_plot_compensation}}
+#' @seealso \code{\link{cyto_compensate}}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
