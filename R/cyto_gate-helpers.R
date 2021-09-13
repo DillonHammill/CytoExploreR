@@ -111,10 +111,7 @@ cyto_gate_apply <- function(x,
       # *** CYTOSET CONVERSION ***
       pop <- structure(
         lapply(pop, function(q){
-          if(cyto_class(q, "flowSet", TRUE)){
-            q <- flowSet_to_cytoset(q)
-          }
-          return(q)
+          cyto_convert(q)
         }),
         names = names(pop)
       )
@@ -154,10 +151,7 @@ cyto_gate_apply <- function(x,
         # *** CYTOSET CONVERSION ***
         p <- structure(
           lapply(p, function(b){
-            if(cyto_class(b, "flowSet", TRUE)){
-              b <- flowSet_to_cytoset(b)
-            }
-            return(b)
+            cyto_convert(b)
           }),
           names = names(p)
         )

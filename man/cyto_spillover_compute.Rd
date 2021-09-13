@@ -7,12 +7,11 @@
 cyto_spillover_compute(
   x,
   parent = "root",
-  axes_trans = NULL,
+  axes_trans = NA,
   channel_match = NULL,
-  spill = NULL,
   spillover = NULL,
   save_as = NULL,
-  type = "autocomp",
+  type = "roca",
   axes_limits = "machine",
   ...
 )
@@ -45,11 +44,14 @@ control. Users need not generate this file by hand as it will be created
 following the channel selection process. This information can also be added
 directly to the samples using \code{cyto_details_edit}.}
 
-\item{spill}{a starting csv file to use when \code{type = "autospill"}.}
-
 \item{save_as}{name of a csv file to which the computed spillover matrix
 should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 date by default.}
+
+\item{type}{options include \code{"Bagwell"} or \code{"Roca"} to indicate
+which method to use when computing the spillover matrix, set to
+\code{"Roca"} by default. Refer to \code{references} section for more
+details about each method.}
 
 \item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
@@ -135,9 +137,9 @@ options("CytoExploreR_wd_check" = TRUE)
 
 }
 \references{
-C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral
-  overlap compensation for any number of flow cytometry parameters. in:
-  Annals of the New York Academy of Sciences, 677:167-184.
+C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral overlap
+  compensation for any number of flow cytometry parameters. in: Annals of the
+  New York Academy of Sciences, 677:167-184.
 
 Roca et al. (2021). AutoSpill is a principled framework that
   simplifies the analysis of multichromatic flow cytometry data. Nature

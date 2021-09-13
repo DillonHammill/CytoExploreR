@@ -59,10 +59,13 @@
 #'   control. Users need not generate this file by hand as it will be created
 #'   following the channel selection process. This information can also be added
 #'   directly to the samples using \code{cyto_details_edit}.
-#' @param spill a starting csv file to use when \code{type = "autospill"}.
 #' @param save_as name of a csv file to which the computed spillover matrix
 #'   should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 #'   date by default.
+#' @param type options include \code{"Bagwell"} or \code{"Roca"} to indicate
+#'   which method to use when computing the spillover matrix, set to
+#'   \code{"Roca"} by default. Refer to \code{references} section for more
+#'   details about each method.
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
@@ -107,18 +110,13 @@
 #' options("CytoExploreR_wd_check" = TRUE)
 #' }
 #'
-#' @importFrom flowCore each_col fsApply sampleNames flowSet Subset
-#' @importFrom flowWorkspace pData GatingSet
-#' @importFrom methods as is
-#' @importFrom stats median
-#'
 #' @seealso \code{\link{cyto_spillover_edit}}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @references C. B. Bagwell \& E. G. Adams (1993). Fluorescence spectral
-#'   overlap compensation for any number of flow cytometry parameters. in:
-#'   Annals of the New York Academy of Sciences, 677:167-184.
+#' @references C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral overlap
+#'   compensation for any number of flow cytometry parameters. in: Annals of the
+#'   New York Academy of Sciences, 677:167-184.
 #'
 #' @references Roca et al. (2021). AutoSpill is a principled framework that
 #'   simplifies the analysis of multichromatic flow cytometry data. Nature
@@ -127,215 +125,126 @@
 #' @export
 cyto_spillover_compute <- function(x,
                                    parent = "root",
-                                   axes_trans = NULL,
+                                   axes_trans = NA,
                                    channel_match = NULL,
-                                   spill = NULL,
                                    spillover = NULL,
                                    save_as = NULL,
-                                   type = "autocomp",
+                                   type = "roca",
                                    axes_limits = "machine",
                                    ...) {
   
-  # function to find max signal if multiple controls present
+
   
   # PREPARE DATA ---------------------------------------------------------------
   
-  # CHANNELS 
-  channels <- cyto_fluor_channels(x)
-  
   # TRANSFORMATIONS
-  axes_trans <- cyto_transformers_extract(x)
+  if(!.all_na(axes_trans)) {
+    axes_trans <- cyto_transformers_extract(x)
+  }
   
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
+  # COPY DATA
+  x <- cyto_copy(x)
   
-  # ANNOTATE CHANNELS & PARENT
-  if(!"channel" %in% colnames(pd)) {
-    if(!is.null(channel_match)) {
-      if(is.null(dim(channel_match))) {
-        cm <- read_from_csv(channel_match)
-      } else {
-        cm <- channel_match
-      }
+  # BAGWELL METHOD REQUIRES TRANSFORMED DATA
+  if(grepl("^b", type, ignore.case = TRUE)) {
+    if(.all_na(axes_trans)) {
+      axes_trans <- cyto_transformers_define(x, 
+                                             type = "biex",
+                                             plot = FALSE)
+      suppressWarnings(cyto_transform(x,
+                                      trans = axes_trans,
+                                      plot = FALSE,
+                                      quiet = TRUE))
     }
   }
   
-  # DATA SHOULD BE TRANSFORMED FOR GATING
-  if(.all_na(axes_trans) | is.null(axes_trans)){
-    axes_trans <- cyto_transformers_define(cyto_copy,
-                                           channels = channels,
-                                           type = "biex",
-                                           plot = FALSE)
-    suppressWarnings(cyto_transform(cyto_copy,
-                                    trans = axes_trans,
-                                    plot = FALSE))
-  }
+  # REMOVE EXCESS CONTRTOLS, ANNOTATE CHANNELS & COPY DATA
+  cs <- .cyto_spillover_controls(
+    x,
+    parent = parent,
+    type = type,
+    channel_match = channel_match,
+    axes_trans = axes_trans
+  )
   
   # SPILLOVER COMPUTATION ------------------------------------------------------
   
-  # AUTOCOMP - BAGWELL METHOD
-  if(grepl("c", type, ignore.case = TRUE)) {
-    # NEGATIVE AND POSITIVE POPULATIONS (TRANSFORMED)
-    pops <- .cyto_spillover_pops(cyto_copy,
-                                 parent = parent,
-                                 channel_match = channel_match,
+  # BAGWELL METHOD
+  if(grepl("^b", type, ignore.case = TRUE)) {
+    
+    # NOTE: CS - LIST PER CONTROL WITH NEGATIVE & POSITIVE EVENTS
+    
+    # MESSAGE
+    message(
+      "Computing spillover matrix using the Bagwell et al. (1993) method... \n"
+    )
+    # REFERENCE
+    message(
+      paste0(
+        "C. B. Bagwell & E. G. Adams (1993). Fluorescence spectral ",
+        "overlap compensation for any number of flow cytometry parameters. in:",
+        " Annals of the New York Academy of Sciences, 677:167-184.", "\n"
+      )
+    )
+    
+    # GATED NEGATIVE AND POSITIVE POPULATIONS (TRANSFORMED)
+    pops <- .cyto_spillover_pops(cs,
                                  axes_trans = axes_trans,
                                  axes_limits = axes_limits,
                                  ...)
-    neg_pops <- pops[["negative"]]
-    pos_pops <- pops[["positive"]]
     
-    # UPDATE DETAILS IN X
-    cyto_details(x) <- cyto_details(cyto_copy)
+    # CHANNELS - ONLY USE CHANNELS IN CONTROLS NOW
+    channels <- names(pops)
     
-    # EXPERIMENT DETAILS
-    pd <- cyto_details(pos_pops)
+    # COMPUTE SPILLOVER COEFFICIENTS PER CHANNEL
+    spill <- do.call(
+      "rbind",
+      lapply(names(pops), function(z){
+        # COMPUTE NEAGTIVE STATS
+        neg_stats <- cyto_stats_compute(
+          pops[[z]][["-"]],
+          stat = "median",
+          channels = channels,
+          format = "wide",
+          trans = axes_trans,
+          markers = FALSE,
+          details = FALSE
+        )[, channels]
+        # COMPUTE POSITIVE STATS
+        pos_stats <- cyto_stats_compute(
+          pops[[z]][["+"]],
+          stat = "median",
+          channels = channels,
+          format = "wide",
+          trans = axes_trans,
+          markers = FALSE,
+          details = FALSE
+        )[, channels]
+        # SUBTRACT BACKGROUND
+        coef <- pos_stats - neg_stats
+        # NORMALISE
+        return(as.numeric(coef/coef[, z]))
+      })
+    )
+    rownames(spill) <- names(pops)
+    colnames(spill) <- names(pops)
     
-    # SAMPLE NAMES
-    nms <- cyto_names(pos_pops)
-    
-    # MEDFI ALL CHANNELS
-    neg_stats <- list()
-    lapply(seq_along(neg_pops), function(z){
-      # CHECK PREVIOUS - PREVENT DUPLICATE COMPUTATION
-      if(z > 1 & any(LAPPLY(seq_len(z-1), function(y){
-        identical(neg_pops[[z]], neg_pops[[y]])
-      }))){
-        neg_stats[[z]] <<- neg_stats[[which(LAPPLY(seq_len(z-1), function(y){
-          identical(neg_pops[[z]], neg_pops[[y]])
-        }))[1]]]
-      }else{
-        neg_stats[[z]] <<- suppressMessages(
-          cyto_stats_compute(neg_pops[[z]],
-                             stat = "median",
-                             channels = channels,
-                             format = "wide",
-                             trans = axes_trans)
-        )
-      }
-    })
-    neg_stats <- do.call("rbind", neg_stats)
-    neg_stats <- neg_stats[, -which(names(neg_stats) %in% colnames(pd))]
-    colnames(neg_stats) <- channels
-    neg_stats <- neg_stats[, channels]
-    neg_stats <- data.matrix(neg_stats)
-    rownames(neg_stats) <- nms
-    
-    # Calculate medFI for all channels in all stained controls
-    pos_stats <- suppressMessages(cyto_stats_compute(pos_pops,
-                                                     stat = "median",
-                                                     channels = channels,
-                                                     format = "wide",
-                                                     trans = axes_trans
-    ))
-    pos_stats <- pos_stats[, -which(names(pos_stats) %in% colnames(pd))]
-    colnames(pos_stats) <- channels
-    pos_stats <- pos_stats[, channels]
-    pos_stats <- data.matrix(pos_stats)
-    rownames(pos_stats) <- nms
-    
-    # Subtract background fluorescence
-    signal <- pos_stats - neg_stats
-    signal <- as.matrix(signal)
-    
-    # Construct spillover matrix - include values for which there is a control
-    spill_matrix <- diag(x = 1, 
-                         nrow = length(channels), 
-                         ncol = length(channels))
-    colnames(spill_matrix) <- channels
-    rownames(spill_matrix) <- channels
-    
-    # Normalise each row to stained channel
-    lapply(seq(1, nrow(signal), 1), function(z) {
-      signal[z, ] <<- signal[z, ] /
-        signal[z, match(pd$channel[z], colnames(spill_matrix))]
-    })
-    
-    # Insert values into appropriate rows
-    rws <- match(pd$channel, rownames(spill_matrix))
-    spill_matrix[rws, ] <- signal
   # AUTOSPILL - ROCA METHOD  
   } else {
-    # AUTOSPILL REQUIRED
-    cyto_require(
-      source = "GitHub",
-      rep = "carlosproca/autospill",
-      version = NULL,
-      ref = paste0(
+    # MESSAGE
+    message(
+      "Computing spillover matrix using the Roca et al. (2021) method... \n"
+    )
+    # REFERENCE
+    message(
+      paste0(
         "Roca et al. (2021). AutoSpill is a principled framework that ",
-        "simplifies the analysis of multichromatic flow cytometry data.",
-        " Nature Communications 12(2890)."
+        "simplifies the analysis of multichromatic flow cytometry data. Nature",
+        " Communications 12(2890)."
       )
     )
-    # AUTOFLUORESCENCE (EXCLUDE UNSTAINED CONTROL)
-    x <- cyto_select(x, 
-                     channel = "Unstained", 
-                     exclude = TRUE)
-    
-    # PREPARE CYTOSET - PDATA LOST?
-    cs <- cytoset(
-      structure(
-        lapply(seq_along(x), function(z) {
-          cyto_data_extract(
-            x[z],
-            parent = cyto_details(x[z])$parent,
-            copy = FALSE
-          )[[1]][[1]]
-        }),
-        names = cyto_names(x)
-      )
-    )
-    
-    # AUTOSPILL PARAMETERS
-    asp <- cyto_func_call(
-      "autospill::get.autospill.param"
-    )
-    
-    # PREPARE CONTROLS FOR AUTOSPILL
-    cs_prep <- cyto_func_call(
-      "autospill::read.flow.control",
-      control.dir = cs,
-      control.def.file = data.frame(
-        filename = cyto_names(cs),
-        dye = cyto_details(cs)$channel,
-        antigen = cyto_markers(cs, cyto_details(cs)$channel),
-        wavelength = NA,
-        stringsAsFactors = FALSE
-      ),
-      asp = asp
-    )
-    
-    # INITIAL SPILLOVER MATRICES
-    cs_spill <- cyto_func_call(
-      "autospill::get.marker.spillover",
-      scale.untransformed = TRUE,
-      flow.gate = NULL,
-      flow.control = cs_prep,
-      asp = asp
-    )
-    
-    # REFINE SPILLOVER MATRIX
-    spill_matrix <- cyto_fun_call(
-      "autospill::refine.spillover",
-      marker.spillover.unco.untr = cs_spill,
-      marker.spillover.unco.tran = NULL,
-      flow.gate = NULL,
-      flow.control = cs_prep,
-      asp = asp
-    )$spillover
-    
-    # # FIX CHANNELS
-    # colnames(spill) <- 
-    #   channels[
-    #     match(gsub("-|/", " ", channels),
-    #           gsub("-", " ", colnames(spill)))
-    #   ]
-    # rownames(spill) <- 
-    #   channels[
-    #     match(gsub("-|/", " ", channels),
-    #           gsub("-", " ", rownames(spill)))
-    #   ]
-    
+    # AUTOSPILL - SPILLOVER MATRIX
+    spill <- .cyto_asp_spill(cs)
   }
   
   # DEFAULT CSV FILENAME
@@ -347,9 +256,9 @@ cyto_spillover_compute <- function(x,
   if (!cyto_class(save_as, "character")) {
     stop("'save_as' should be the name of a csv file.")
   } else {
-    write_to_csv(spill_matrix, 
+    write_to_csv(spill, 
                  save_as)
   }
   
-  return(spill_matrix)
+  return(spill)
 }

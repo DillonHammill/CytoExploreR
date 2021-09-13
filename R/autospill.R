@@ -14,36 +14,16 @@
 #'   Communications 12:2890
 #'
 #' @noRd
-.cyto_asp_spill <- function(x,
-                            parent = "root") {
-  
-  # HANDLE DUPLICATE CONTROLS
-  # CHANNEL MATCH REQUIRED
-  
-  # SAMPLE PREPARATION ---------------------------------------------------------
-  
-  # DATA MUST BE LINEAR
-  
-  # EXTRACT DATA - REMOVE UNSTAINED CONTROL
-  cs <- cyto_data_extract(
-    x,
-    parent = parent,
-    format = "cytoset",
-    select = list(
-      channel = "Unstained",
-      exclude = TRUE
-    ),
-    copy = FALSE
-  )[[1]]
+.cyto_asp_spill <- function(x) {
   
   # AUTOSPILL - COMPUTE SPILLOVER COEFFICIENTS ---------------------------------
   
   # INITIAL SPILLOVER COEFFICIENTS
-  spill <- .cyto_asp_spill_init(cs)
+  spill <- .cyto_asp_spill_init(x)
   
   # REFINE SPILLOVER COEFFICIENTS
   spill <- .cyto_asp_spill_refine(
-    cs,
+    x,
     spill
   )
   
@@ -270,7 +250,7 @@
   while(!rs_exit) {
     # UPDATE SPILLOVER MATRIX
     spill_curr <- spill_curr + spill_update
-    spill_curr <- sweep(spill_curr, 1, diag( spill_curr ), "/")
+    spill_curr <- sweep(spill_curr, 1, diag(spill_curr), "/")
     # COMPENSATION ERROR
     spill_error <- .cyto_asp_spill_error(
       x,
