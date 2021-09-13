@@ -307,13 +307,15 @@ cyto_fluor_channels <- function(x,
 #' valid channel names. \code{cyto_channels_extract} is particularly useful for
 #' determining which channel(s) are associated with particular marker(s).
 #'
-#' @param x an object of class
-#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#' @param x an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
 #'   700-A","CD8")).
+#' @param skip vector of markers/channels in \code{channels} to bypass when
+#'   converting to valid channels, for example \code{"Unstained"} is bypassed
+#'   when checking channels in the channel match file.
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
@@ -338,6 +340,7 @@ cyto_fluor_channels <- function(x,
 #' @export
 cyto_channels_extract <- function(x,
                                   channels, 
+                                  skip = NULL,
                                   plot = FALSE,
                                   ...) {
   
@@ -350,8 +353,11 @@ cyto_channels_extract <- function(x,
   # EXTRACT CHANNELS
   res <- c()
   for(z in seq_along(channels)) {
+    # SKIP
+    if(any(grepl(channels[z], skip, ignore.case = TRUE, ...))) {
+      res <- c(res, channels[z])
     # EXACT MARKER MATCH
-    if(channels[z] %in% markers) {
+    } else if(channels[z] %in% markers) {
       res <- c(res, names(markers)[match(channels[z], markers)])
       # EXACT CHANNEL MATCH  
     } else if(channels[z] %in% chans) {
@@ -421,12 +427,15 @@ cyto_channels_extract <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param channels vector of channel and/or marker names (e.g. c("Alexa Fluor
 #'   700-A","CD8")).
-#' @param plot logical indicating whether the channels will be used to construct
-#'   a plot, set to FALSE by default. If set to TRUE an additional check will be
-#'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param skip vector of markers/channels in \code{channels} to bypass when
+#'   converting to valid markers, for example \code{"Unstained"} is bypassed
+#'   when checking markers in the channel match file.
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
+#' @param plot logical indicating whether the channels will be used to construct
+#'   a plot, set to FALSE by default. If set to TRUE an additional check will be
+#'   performed to ensure that only 1 or 2 \code{channels} are supplied.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -453,8 +462,9 @@ cyto_channels_extract <- function(x,
 #' @export
 cyto_markers_extract <- function(x, 
                                  channels,
-                                 plot = FALSE,
+                                 skip = NULL,
                                  append = FALSE,
+                                 plot = FALSE,
                                  ...) {
   
   # MARKERS
@@ -466,8 +476,12 @@ cyto_markers_extract <- function(x,
   # EXTRACT MARKERS
   res <- c()
   for(z in seq_along(channels)) {
+    # SKIP
+    if(any(grepl(channels[z], skip, ignore.case = TRUE, ...))) {
+      res <- c(res, channels[z])
+      names(res[length(res)]) <- channels[z] # append
     # EXACT MARKER MATCH
-    if(channels[z] %in% markers) {
+    } else if(channels[z] %in% markers) {
       res <- c(res, markers[match(channels[z], markers)])
       # EXACT CHANNEL MATCH  
     } else if(channels[z] %in% names(markers)) {

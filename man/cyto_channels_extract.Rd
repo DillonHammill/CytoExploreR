@@ -4,17 +4,20 @@
 \alias{cyto_channels_extract}
 \title{Extract channels associated with certain markers}
 \usage{
-cyto_channels_extract(x, channels, plot = FALSE, ...)
+cyto_channels_extract(x, channels, skip = NULL, plot = FALSE, ...)
 }
 \arguments{
-\item{x}{an object of class
-\code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\item{x}{an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 \code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{channels}{vector of channel and/or marker names (e.g. c("Alexa Fluor
 700-A","CD8")).}
+
+\item{skip}{vector of markers/channels in \code{channels} to bypass when
+converting to valid channels, for example \code{"Unstained"} is bypassed
+when checking channels in the channel match file.}
 
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be

@@ -4,7 +4,14 @@
 \alias{cyto_markers_extract}
 \title{Extract marker names for certain channels}
 \usage{
-cyto_markers_extract(x, channels, plot = FALSE, append = FALSE, ...)
+cyto_markers_extract(
+  x,
+  channels,
+  skip = NULL,
+  append = FALSE,
+  plot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -15,13 +22,17 @@ cyto_markers_extract(x, channels, plot = FALSE, append = FALSE, ...)
 \item{channels}{vector of channel and/or marker names (e.g. c("Alexa Fluor
 700-A","CD8")).}
 
-\item{plot}{logical indicating whether the channels will be used to construct
-a plot, set to FALSE by default. If set to TRUE an additional check will be
-performed to ensure that only 1 or 2 \code{channels} are supplied.}
+\item{skip}{vector of markers/channels in \code{channels} to bypass when
+converting to valid markers, for example \code{"Unstained"} is bypassed
+when checking markers in the channel match file.}
 
 \item{append}{logical indicating whether the name of the channel should be
 appended to the marker names in the form \code{<marker> channel}, set to
 FALSE by default.}
+
+\item{plot}{logical indicating whether the channels will be used to construct
+a plot, set to FALSE by default. If set to TRUE an additional check will be
+performed to ensure that only 1 or 2 \code{channels} are supplied.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the
