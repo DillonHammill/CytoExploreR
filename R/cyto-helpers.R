@@ -2075,7 +2075,7 @@ cyto_filter <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param ... named list containing experimental variables to be used to select
 #'   samples or named arguments containing the levels of the variables to
-#'   select. See below examples for use cases. Neagtive exclusion indices can be
+#'   select. See below examples for use cases. Negative exclusion indices can be
 #'   returned by setting \code{exclude = TRUE}.
 #'
 #' @return vector of indices that representat the location of the selected
@@ -4565,7 +4565,7 @@ cyto_compensate.flowFrame <- function(x,
 #' Prepare a supplied spillover matrix
 #'
 #' @param x cytoset or GatingSet.
-#' @param spill an array, list or character vector.
+#' @param spillover an array, list or character vector.
 #' @param select index or name of the sample from which the spillover matrix
 #'   should be extracted when no spillover matrix file is supplied to
 #'   \code{spillover}. To compensate each sample individually using their stored

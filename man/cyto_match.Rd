@@ -12,7 +12,7 @@ cyto_match(x, ...)
 
 \item{...}{named list containing experimental variables to be used to select
 samples or named arguments containing the levels of the variables to
-select. See below examples for use cases. Neagtive exclusion indices can be
+select. See below examples for use cases. Negative exclusion indices can be
 returned by setting \code{exclude = TRUE}.}
 }
 \value{
