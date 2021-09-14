@@ -411,13 +411,13 @@ cyto_plot <- function(x,
   
   # CYTO_PLOT_EXIT -------------------------------------------------------------
   
-  # SIGNAL CALL TO CYTO_PLOT
+  # SIGNAL CALL TO CYTO_PLOT & RESET
   if(is.null(cyto_option("cyto_plot_method"))) {
+    # SET CYTO_PLOT_METHOD
     cyto_option("cyto_plot_method", "cytoset")
     # CYTO_PLOT_EXIT
     on.exit({
-      cyto_plot_par(reset = TRUE)
-      cyto_option("cyto_plot_method", NULL)
+      cyto_plot_complete()
     })
   }
   
@@ -915,16 +915,11 @@ cyto_plot <- function(x,
     # RECORD LABEL CO-ORDINATES
     memory[[z]] <<- ARGS[c("label_text_x", "label_text_y")]
     
-    # GARPHICS DEVICE ----------------------------------------------------------
+    # GRAPHICS DEVICE ----------------------------------------------------------
     
-    # FILL GRAPHICS DEVICE
-    if(z == length(args$x)){
-      # FILL GRAPHICS DEVICE - BYPASS FOR CUSTOM LAYOUTS
-      if(!cyto_option("cyto_plot_method") == "custom") {
-        while(.par("page") == FALSE) {
-          plot.new()
-        }
-      }
+    # FILL GRAPHICS DEVICE - NEW PAGE
+    if(z == length(args) & cyto_option("cyto_plot_method") == "cytoset"){
+      cyto_plot_new_page()
     }
     
     # RECORD FULL GRAPHICS DEVICE
@@ -945,8 +940,8 @@ cyto_plot <- function(x,
       # RECORD
       p <- cyto_plot_record()
       # NEW DEVICE
-      if(z < length(args$x)) {
-        cyto_plot_new() #USE GLOBAL SETTINGS
+      if(z < length(args)) {
+        cyto_plot_new() # USE GLOBAL SETTINGS
       }
     } else {
       p <- NULL
@@ -986,17 +981,7 @@ cyto_plot <- function(x,
     }
   }
   
-  # RESET SAVE & RECORD --------------------------------------------------------
-  
-  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if(cyto_option("cyto_plot_save") == TRUE) {
-    if(cyto_option("cyto_plot_method") == "cytoset") {
-      # CLOSE GRAPHICS DEVICE
-      dev.off()
-      # RESET CYTO_PLOT_SAVE
-      cyto_option("cyto_plot_save", FALSE)
-    }
-  }
+  # RETURN RECORDED PLOTS ------------------------------------------------------
   
   # RECORDED PLOTS
   plots[LAPPLY(plots, "is.null")] <- NULL
