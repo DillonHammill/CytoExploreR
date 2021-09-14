@@ -2099,7 +2099,7 @@ cyto_filter <- function(x,
 #'   OVAConc = c(0, 500)
 #' )
 #'
-  #' # Indices of Stim-A and Stim-C treatment groups
+#' # Indices of Stim-A and Stim-C treatment groups
 #' cyto_match(
 #'   gs,
 #'   list("Treatment" = c("Stim-A", "Stim-C"))
@@ -4052,10 +4052,10 @@ cyto_markers_edit <- function(x,
                               ...) {
   
   # CHANNELS
-  chans<- cyto_channels(x)
+  chans <- cyto_channels(x)
   
   # MARKERS
-  marks<- cyto_markers(x)
+  marks <- cyto_markers(x)
   
   # CHANNELS/MARKERS DATA.FRAME
   pd <- data.frame(
@@ -4080,7 +4080,7 @@ cyto_markers_edit <- function(x,
         mrks <- read_from_csv(z)
         rownames(mrks) <- NULL
         # CHANNELS MUST MATCH
-        if (all(cyto_channels(x) %in% mrks$channel)) {
+        if (all(chans %in% mrks$channel)) {
           return(mrks)
         } else {
           return(NULL)
@@ -4150,6 +4150,7 @@ cyto_markers_edit <- function(x,
   
   # ONLY UPDATE CHANNELS/MARKERS RELEVANT TO DATA
   ind <- LAPPLY(dt$channel, match, chans)
+  ind <- ind[!is.na(ind)] # UPDATE ONLY CHANELS/MARKERS IN SAMPLES
   cyto_chans<- dt_edit$channel[ind]
   cyto_marks <- dt_edit$marker[ind]
   names(cyto_marks) <- cyto_chans
