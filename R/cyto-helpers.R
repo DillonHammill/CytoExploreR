@@ -2176,41 +2176,71 @@ cyto_match <- function(x,
     }
   # EXPERIMENTAL VARIABLES
   } else {
-    # VALID VARIABLES
-    if (!all(names(args) %in% colnames(pd))) {
-      lapply(names(args), function(y) {
-        if (!y %in% names(pd)) {
-          stop(paste(y, "is not a valid variable in cyto_details(x)."))
+    # INDICES PER VARIABLE
+    ind <- lapply(names(args), function(z){
+      # DIRECT MATCH
+      if(z %in% colnames(pd)) {
+        var_ind <- which(colnames(pd) %in% z)
+        # PARTIAL OR NO MATCH
+      } else {
+        var_ind <- grep(
+          z, 
+          colnames(pd),
+          ignore.case = TRUE
+        )
+        # NO MATCH
+        if(length(var_ind) == 0) {
+          stop(
+            paste0(
+              z,
+              " is not a valid variable in cyto_details(x)."
+            )
+          )
+          # MULTIPLE MATCHES
+        } else if(length(var_ind) > 1) {
+          stop(
+            paste0(
+              z,
+              " matches multiple variables in cyto_details(x)."
+            )
+          )
+        }
+      }
+      # ORDER AS SUPPLIED
+      LAPPLY(args[[z]], function(w){
+        # EXACT MATCH
+        if(w %in% pd[, var_ind]) {
+          return(
+            match_ind(pd[, var_ind], w)
+          )
+          # NO MATCH OR PARTIAL MATCH
+        } else {
+          levels <- grep(
+            w,
+            pd[, var_ind],
+            ignore.case = TRUE
+          )
+          # NO MATCH
+          if(length(levels) == 0) {
+            stop(
+              paste(
+                w, 
+                "is not a valid level for ",
+                z,
+                "!"
+              )
+            )
+          }
+          return(levels)
         }
       })
+    })
+    # INTERSECTION
+    if(length(ind) > 1) {
+      ind <- do.call("intersect", ind)
+    } else {
+      ind <- ind[[1]]
     }
-    
-    # VARIABLE LEVELS EXIST
-    lapply(names(args), function(z) {
-      var <- factor(pd[, z], exclude = NULL) # keep <NA> as factor level
-      lvls <- levels(var)
-      # some variable levels do not exist in pd
-      if (!all(args[[z]] %in% lvls)) {
-        lapply(args[[z]], function(v) {
-          if (!v %in% lvls) {
-            stop(paste0(v, " is not a valid level for ", z, "!"))
-          }
-        })
-      }
-    })
-    
-    # FILTERED EXPERIMENT DETAILS
-    pd_filter <- pd
-    lapply(names(args), function(y) {
-      ind <- which(pd_filter[, y] %in% args[[y]])
-      # SKIP FILTER IF VARIABLE LEVEL MISSING
-      if (length(ind) != 0) {
-        pd_filter <<- pd_filter[ind, , drop = FALSE]
-      }
-    })
-    
-    # INDICES
-    ind <- match(rownames(pd_filter), rownames(pd))
   }
   
   # NEGATIVE EXCLUSION INDICES
@@ -4151,7 +4181,7 @@ cyto_markers_edit <- function(x,
   # ONLY UPDATE CHANNELS/MARKERS RELEVANT TO DATA
   ind <- LAPPLY(dt$channel, match, chans)
   ind <- ind[!is.na(ind)] # UPDATE ONLY CHANELS/MARKERS IN SAMPLES
-  cyto_chans<- dt_edit$channel[ind]
+  cyto_chans <- dt_edit$channel[ind]
   cyto_marks <- dt_edit$marker[ind]
   names(cyto_marks) <- cyto_chans
   
