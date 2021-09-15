@@ -2211,7 +2211,7 @@ cyto_match <- function(x,
         # EXACT MATCH
         if(w %in% pd[, var_ind]) {
           return(
-            match_ind(pd[, var_ind], w)
+            match_ind(w, pd[, var_ind])
           )
           # NO MATCH OR PARTIAL MATCH
         } else {
@@ -2223,9 +2223,9 @@ cyto_match <- function(x,
           # NO MATCH
           if(length(levels) == 0) {
             stop(
-              paste(
+              paste0(
                 w, 
-                "is not a valid level for ",
+                " is not a valid level for ",
                 z,
                 "!"
               )
