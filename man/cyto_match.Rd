@@ -4,7 +4,7 @@
 \alias{cyto_match}
 \title{Get index of samples matching experimental criteria}
 \usage{
-cyto_match(x, ...)
+cyto_match(x, ..., exclude = FALSE, exact = FALSE)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -12,11 +12,18 @@ cyto_match(x, ...)
 
 \item{...}{named list containing experimental variables to be used to select
 samples or named arguments containing the levels of the variables to
-select. See below examples for use cases. Negative exclusion indices can be
-returned by setting \code{exclude = TRUE}.}
+select. Supplied lists can optionally include the above \code{exclude} and
+\code{exact} arguments}
+
+\item{exclude}{logical to indicate whether negative exclusion indices should
+be returned for samples matching the supplied experimental criteria, set to
+FALSE by default.}
+
+\item{exact}{logical indicating whether to only search for samples by exact
+matching to experimental criteria, set to FALSE by default.}
 }
 \value{
-vector of indices that representat the location of the selected
+vector of indices that indicate the location of the selected
   sample(s) within the supplied \code{cytoset} or \code{GatingSet}.
 }
 \description{

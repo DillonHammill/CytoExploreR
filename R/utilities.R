@@ -188,11 +188,15 @@ match_ind <- function(x, y, ...){
 #' @noRd
 .args_update <- function(x){
   
-  lapply(seq(1,length(x)), function(z){
-    assign(names(x)[z], 
-           x[[z]], envir = parent.frame(n = 3))
-  })
-  
+  if(is.null(x)) {
+    lapply(seq(1,length(x)), function(z){
+      if(!is.null(names(x)[z])) {
+        assign(names(x)[z], 
+               x[[z]], envir = parent.frame(n = 3))
+      }
+    })
+  }
+
 }
 
 ## ROUND -----------------------------------------------------------------------

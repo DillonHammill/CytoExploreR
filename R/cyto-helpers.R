@@ -2075,15 +2075,20 @@ cyto_filter <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param ... named list containing experimental variables to be used to select
 #'   samples or named arguments containing the levels of the variables to
-#'   select. See below examples for use cases. Negative exclusion indices can be
-#'   returned by setting \code{exclude = TRUE}.
+#'   select. Supplied lists can optionally include the above \code{exclude} and
+#'   \code{exact} arguments 
+#' @param exclude logical to indicate whether negative exclusion indices should
+#'   be returned for samples matching the supplied experimental criteria, set to
+#'   FALSE by default.
+#' @param exact logical indicating whether to only search for samples by exact
+#'   matching to experimental criteria, set to FALSE by default.
 #'
-#' @return vector of indices that representat the location of the selected
+#' @return vector of indices that indicate the location of the selected
 #'   sample(s) within the supplied \code{cytoset} or \code{GatingSet}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' library(CytoExploreRData)
 #'
 #' # Activation Gatingset
@@ -2110,13 +2115,15 @@ cyto_filter <- function(x,
 #'   Treatment = "Stim-D",
 #'   exclude = TRUE
 #' )
-#' 
+#'
 #' @seealso \code{\link{cyto_select}}
 #' @seealso \code{\link{cyto_filter}}
-#' 
+#'
 #' @export
 cyto_match <- function(x, 
-                       ...) {
+                       ...,
+                       exclude = FALSE,
+                       exact = FALSE) {
   
   # CYTOSET/GATINGSET
   if(!cyto_class(x, c("flowSet", "GatingSet"))) {
@@ -2133,13 +2140,9 @@ cyto_match <- function(x,
     args <- args[[1]]
   }
   
-  # EXCLUDE
-  if(any(grepl("exclude", names(args)))) {
-    exclude <- args[[which(grepl("exclude", names(args)))]]
-    args <- args[-which(grepl("exclude", names(args)))]
-  } else {
-    exclude <- FALSE
-  }
+  # EXACT & EXCLUDE
+  .args_update(args[names(args) %in% c("exclude", "exact")])
+  args <- args[!names(args) %in% c("exclude", "exact")]
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
@@ -2156,23 +2159,35 @@ cyto_match <- function(x,
     } else {
       # MATCH NAMES - ROWNAMES/NAME/PARTIAL
       ind <- LAPPLY(unlist(args), function(z){
-        # ROWNAMES - EXACT MATCH
+        # ROWNAMES - EXACT
         if(z %in% rownames(pd)) {
           match(z, rownames(pd))
-        # ROWNAMES - PARTIAL MATCH
-        } else if(any(grepl(z, rownames(pd), ignore.case = TRUE))) {
-          which(grepl(z, rownames(pd), ignore.case = TRUE))
-        # NAME COLUMN - EXACT MATCH
+        # NAME - EXACT
         } else if(z %in% pd[, "name"]) {
           match(z, pd[, "name"])
-        # NAME COLUMN - PARTIAL MATCH
-        } else if(any(grepl(z, pd[, "name"], ignore.case = TRUE))) {
-          which(grepl(z, pd[, "name"], ignore.case = TRUE))
+        # PARTIAL MATCH
+        } else if(exact == FALSE) {
+          # ROWNAMES - PARTIAL
+          if(grepl(z, rownames(pd), ignore.case = TRUE)) {
+            grep(z, rownames(pd), ignore.case = TRUE)
+          # NAME - PARTIAL
+          } else if(grepl(z, pd[, "name"], ignore.case = TRUE)) {
+            grep(z, pd[, "name"], ignore.case = TRUE)
+          # NO MATCH
+          } else {
+            NULL
+          }
         # NO MATCH
         } else {
           NULL
         }
       })
+      # NO MATCH
+      if(length(ind) == 0) {
+        stop(
+          "Could not match samples by name using supplied matching criteria!"
+        )
+      }
     }
   # EXPERIMENTAL VARIABLES
   } else {
@@ -2180,59 +2195,57 @@ cyto_match <- function(x,
     ind <- lapply(names(args), function(z){
       # DIRECT MATCH
       if(z %in% colnames(pd)) {
-        var_ind <- which(colnames(pd) %in% z)
-        # PARTIAL OR NO MATCH
-      } else {
+        var_ind <- match_ind(z, colnames(pd))
+      # PARTIAL MATCH
+      } else if(exact == FALSE) {
         var_ind <- grep(
           z, 
           colnames(pd),
           ignore.case = TRUE
         )
-        # NO MATCH
-        if(length(var_ind) == 0) {
-          stop(
-            paste0(
-              z,
-              " is not a valid variable in cyto_details(x)."
-            )
+      }
+      # NO MATCH
+      if(length(var_ind) == 0) {
+        stop(
+          paste0(
+            z,
+            " is not a valid variable in cyto_details(x)."
           )
-          # MULTIPLE MATCHES
-        } else if(length(var_ind) > 1) {
-          stop(
-            paste0(
-              z,
-              " matches multiple variables in cyto_details(x)."
-            )
+        )
+        # MULTIPLE MATCHES
+      } else if(length(var_ind) > 1) {
+        stop(
+          paste0(
+            z,
+            " matches multiple variables in cyto_details(x)."
           )
-        }
+        )
       }
       # ORDER AS SUPPLIED
       LAPPLY(args[[z]], function(w){
         # EXACT MATCH
         if(w %in% pd[, var_ind]) {
-          return(
-            match_ind(w, pd[, var_ind])
-          )
-          # NO MATCH OR PARTIAL MATCH
-        } else {
+          levels <- match_ind(w, pd[, var_ind])
+        # PARTIAL MATCH
+        } else if(exact == FALSE) {
           levels <- grep(
             w,
             pd[, var_ind],
             ignore.case = TRUE
           )
-          # NO MATCH
-          if(length(levels) == 0) {
-            stop(
-              paste0(
-                w, 
-                " is not a valid level for ",
-                z,
-                "!"
-              )
-            )
-          }
-          return(levels)
         }
+        # NO MATCH
+        if(length(levels) == 0) {
+          stop(
+            paste0(
+              w, 
+              " is not a valid level for ",
+              z,
+              "!"
+            )
+          )
+        }
+        return(levels)
       })
     })
     # INTERSECTION
@@ -2264,7 +2277,8 @@ cyto_match <- function(x,
 #' @param ... named list containing experimental variables to be used to select
 #'   samples or named arguments containing the levels of the variables to
 #'   select. See below examples for use cases. Selected samples can be excluded
-#'   by setting \code{exclude} to TRUE.
+#'   by setting \code{exclude = TRUE} and exact matches can be performed by
+#'   setting \code{exact = TRUE}. See \code{\link{cyto_match}} or more details.
 #'
 #' @return \code{cytoset} or \code{GatingSet} restricted to samples which meet
 #'   the designated selection criteria.
@@ -4106,12 +4120,28 @@ cyto_markers_edit <- function(x,
       message("Experiment-Markers.csv found in working directory.")
       # MULTIPLE FILES? - CHECK MATCHING CHANNELS
       found_files <- list.files()[grep("Experiment-Markers.csv", list.files())]
+      overwrite <- TRUE
       dt <- lapply(found_files, function(z) {
         mrks <- read_from_csv(z)
         rownames(mrks) <- NULL
-        # CHANNELS MUST MATCH
-        if (all(chans %in% mrks$channel)) {
-          return(mrks)
+        # SEARCH FOR CHANNEL COLUMN
+        mrks_ind <- NULL
+        chans_ind <- NULL
+        for(i in 1:ncol(mrks)) {
+          mrks_ind <- i
+          chans_ind <- match_ind(chans, mrks[, i])
+          if(length(chans_ind) == length(chans)) {
+            break()
+          }
+        }
+        # ALL CHANNELS MATCH
+        if(length(chans_ind) == length(chans)) {
+          # DON'T OVERWRITE FILE IF IT CONTAINS EXTRA DATA
+          if(nrow(mrks) > length(chans)) {
+            overwrite <<- FALSE
+          }
+          colnames(mrks)[mrks_ind] <- "channel"
+          return(mrks[chans_ind, ])
         } else {
           return(NULL)
         }
@@ -4125,7 +4155,10 @@ cyto_markers_edit <- function(x,
       } else {
         # REMOVE EMPTY ENTRIES - SELECT FIRST ONE
         dt[LAPPLY(dt, "is.null")] <- NULL
-        file <- names(dt)[1]
+        # OVERWRITE DATA IN PLACE IF NO EXTRA DATA PRESENT
+        if(overwrite) {
+          file <- names(dt)[1]
+        }
         dt <- dt[[1]]
       }
     # FILE DOESN'T EXIST
@@ -4160,8 +4193,8 @@ cyto_markers_edit <- function(x,
     file <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv")
   }
   
-  # EDIT
-  if(interactive()) {
+  # EDIT - NON-INTERACTIVE UPDATE WITHOUT EDITING
+  if(interactive() & cyto_option("CytoExploreR_interactive")) {
     dt_edit <- data_edit(dt,
                          logo = CytoExploreR_logo(),
                          title = "Experiment Markers Editor",
@@ -4215,14 +4248,14 @@ cyto_markers_edit <- function(x,
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param file name of csv file containing experimental information.
+#' @param file name of csv file containing the experimental information
+#'   associated with each sample in the supplied data. This file must contain a
+#'   column called \code{"name"} which contains the names of the samples.
 #' @param ... not in use.
 #'
 #' @return NULL and return \code{flowSet} or \code{GatingSet} with updated
 #'   experimental details.
 #'
-#' @importFrom flowWorkspace pData
-#' @importFrom flowCore pData<-
 #' @importFrom DataEditR data_edit
 #'
 #' @examples
@@ -4243,72 +4276,93 @@ cyto_details_edit <- function(x,
                               file = NULL,
                               ...) {
   
-  # x should be a flowSet or GatingSet
+  # CYTOSET/GATINGSET
   if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
     stop("Please supply either a flowSet or a GatingSet")
   }
   
-  # File missing
+  # FILE MISSING
   if (is.null(file)) {
     if (length(grep("Experiment-Details.csv", list.files())) != 0) {
       message("Experiment-Details.csv found in working directory.")
       
-      # Could be multiple files - check for matching channels
+      # MULTIPLE FILES
       found_files <- list.files()[grep("Experiment-Details.csv", list.files())]
-      n <- length(grep("Experiment-Details.csv", list.files()))
-      
-      # Run through each file and check names match samples
-      pd <- lapply(seq_len(n), function(z) {
+
+      # CHECK EACH FILE FOR MATCHING SAMPLES
+      overwrite <- TRUE
+      pd <- lapply(seq_along(found_files), function(z) {
         pdata <- read_from_csv(found_files[z])
-        # SampleNames match those of x
-        if (all(cyto_names(x) %in% as.vector(pdata$name))) {
-          return(pdata)
+        # SEARCH FILE FOR SAMPLE NAMES - EXACT MATCH
+        pdata_ind <- NULL
+        cyto_ind <- NULL
+        for(i in 1:ncol(pdata)) {
+          pdata_ind <- i
+          cyto_ind <- tryCatch(
+            cyto_match(x, 
+                       as.vector(pdata[, i]), 
+                       exact = TRUE),
+            error = function(e){
+              return(NULL) # NO MATCHES
+            }
+          )
+          if(length(cyto_ind) == length(x)) {
+            break()
+          }
+        }
+        # ALL SAMPLES MATCH
+        if(length(cyto_ind) == length(x)) {
+          # DON'T OVERWRITE FILE IF IT CONTAINS EXTRA DATA
+          if(nrow(pdata) > length(cyto_ind)) {
+            overwrite <<- FALSE
+          }
+          colnames(pdata)[pdata_ind] <- "name"
+          return(pdata[cyto_ind, ])
         } else {
           return(NULL)
         }
       })
       names(pd) <- found_files
       
-      # Files found but don't match
+      # NO MATCHING FILE
       if (all(LAPPLY(pd, "is.null"))) {
-        
-        # Extract cyto_details
+        # USE STORED DETAILS
         pd <- cyto_details(x)
       } else {
-        
-        # Remove NULL entries from list - result should be of length 1
+        # USE FIRST MATCHING FILE
         pd[LAPPLY(pd, "is.null")] <- NULL
-        file <- names(pd)[1]
+        # OVERWRITE DATA IN PLACE IF NO EXTRA DATA PRESENT
+        if(overwrite){
+          file <- names(pd)[1] # SUPPLIED FILE OVERWRITTEN
+        }
         pd <- pd[[1]]
       }
+    # NO FILE FOUND
     } else {
-      
-      # Extract cyto_details
+      # USE STORED DETAILS
       pd <- cyto_details(x)
     }
     
-    # File name supplied manually
+  # FILE SUPPLIED MANUALLY
   } else {
-    
-    # File append extension
+    # FILE EXTENSION
     file <- file_ext_append(file, ".csv")
-    
-    # File already exists
+    # FILE EXISTS
     if (length(grep(file, list.files())) != 0) {
       message(
         paste0("Editing data in ", file, "...")
       )
       pd <- read_from_csv(file)
-      
-      # File does not exist
+      # MATCH SAMPLES
+      ind <- cyto_match(x, pd[, "name"])
+    # FILE DOES NOT EXIST
     } else {
-      
-      # Extract cyto_details
+      # USE STORED DETAILS
       pd <- cyto_details(x)
     }
   }
   
-  # FILE
+  # SAVE EDITS TO NEW FILE
   if (is.null(file)) {
     file <- paste0(
       format(Sys.Date(), "%d%m%y"),
@@ -4316,8 +4370,8 @@ cyto_details_edit <- function(x,
     )
   }
   
-  # Edit cyto_details - rownames cannot be edited
-  if(interactive()) {
+  # EDIT DETAILS - ROWNAMES CANNOT BE EDITED
+  if(interactive() & cyto_option("CytoExploreR_interactive")) {
     # REMOVE ROW NAMES
     cyto_names <- rownames(pd)
     rownames(pd) <- NULL
@@ -4335,10 +4389,10 @@ cyto_details_edit <- function(x,
     rownames(pd) <- cyto_names
   }
   
-  # Update cyto_details
+  # UPDATE DETAILS
   cyto_details(x) <- pd
   
-  # Save - cannot save above as rownames have been removed
+  # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
   write_to_csv(pd,
                file = file,
                row.names = TRUE)

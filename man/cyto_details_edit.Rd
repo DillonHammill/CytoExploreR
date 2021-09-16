@@ -10,7 +10,9 @@ cyto_details_edit(x, file = NULL, ...)
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{file}{name of csv file containing experimental information.}
+\item{file}{name of csv file containing the experimental information
+associated with each sample in the supplied data. This file must contain a
+column called \code{"name"} which contains the names of the samples.}
 
 \item{...}{not in use.}
 }

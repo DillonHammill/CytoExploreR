@@ -13,7 +13,8 @@ cyto_select(x, ...)
 \item{...}{named list containing experimental variables to be used to select
 samples or named arguments containing the levels of the variables to
 select. See below examples for use cases. Selected samples can be excluded
-by setting \code{exclude} to TRUE.}
+by setting \code{exclude = TRUE} and exact matches can be performed by
+setting \code{exact = TRUE}. See \code{\link{cyto_match}} or more details.}
 }
 \value{
 \code{cytoset} or \code{GatingSet} restricted to samples which meet
