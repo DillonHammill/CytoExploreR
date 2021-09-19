@@ -47,8 +47,8 @@
 #'   value of 1 will display all events), whilst values larger than 1 indicate
 #'   the number of events to display. The default value for \code{events} is set
 #'   to 50000 to display 50000 events only.
-#' @param layout a vector of the length 2 indicating the dimensions of the grid
-#'   for plotting \code{c(#rows, #columns)}.
+#' @param layout a vector of the length 2 of form \code{c(#rows, #columns)} or a
+#'   matrix indicating the dimensions of the grid for plotting.
 #' @param margins a vector of length 4 to control the margins around the bottom,
 #'   left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
 #'   \code{cyto_plot} compute optimal margins.
@@ -317,6 +317,8 @@
 #'   gh_pop_get_descendants gh_pop_get_children gh_pop_get_gate
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @return a list containing the recorded plots.
 #'
 #' @export
 cyto_plot <- function(x,

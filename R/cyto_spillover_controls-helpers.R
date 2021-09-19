@@ -1,13 +1,10 @@
-## CYTO_SPILLOVER_CONTROLS -----------------------------------------------------
+## CYTO_SPILL_ANNOTATE ---------------------------------------------------------
 
-#' Prepare compensation controls for cyto_spillover_compute
-#' @importFrom flowWorkspace cytoset
+#' Annotate compensation controls with channels and parents
 #' @noRd
-.cyto_spillover_controls <- function(x,
-                                     parent = "root",
-                                     type = "roca",
-                                     channel_match = NULL,
-                                     axes_trans = NA) {
+.cyto_spillover_controls_annotate <- function(x,
+                                              parent = "root",
+                                              channel_match = NULL) {
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
@@ -54,14 +51,14 @@
           }
         })
         channel_match <- channel_match[!LAPPLY(channel_match, "is.null")][[1]]
-      # CHANNELS/MARKERS
+        # CHANNELS/MARKERS
       } else {
         channel_match <- pd
         channel_match$channel <- cyto_channels_extract(x, 
                                                        channels = channel_match, 
                                                        skip = "Unstained")
       }
-    # CHANNEL_MATCH - ARRAY
+      # CHANNEL_MATCH - ARRAY
     } else {
       # CHECK COLNAMES
       if(!all(c("name", "channel") %in% colnames(channel_match))) {
@@ -92,7 +89,7 @@
     # UPDATE CHANNELS IN EXPERIMENT DETAILS
     pd <- cbind(pd, 
                 "channel" = channel_match[
-                    cyto_match(x, channel_match[, "name"]), "channel"])
+                  cyto_match(x, channel_match[, "name"]), "channel"])
     cyto_details(x) <- pd
   }
   
@@ -102,7 +99,30 @@
     cyto_details(x) <- pd
   }
   
-  # ISOLATE UNSTAINED CONTROL(S)
+  return(x)
+  
+}
+
+## CYTO_SPILLOVER_CONTROLS -----------------------------------------------------
+
+#' Prepare compensation controls for cyto_spillover_compute
+#' @importFrom flowWorkspace cytoset
+#' @noRd
+.cyto_spillover_controls_prepare <- function(x,
+                                             parent = "root",
+                                             type = "roca",
+                                             channel_match = NULL,
+                                             axes_trans = NA) {
+  
+  # ANNOTATE CONTROLS
+  x <- .cyto_spillover_controls_annotate(x,
+                                         parent = parent,
+                                         channel_match = channel_match)
+  
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+  
+  #ISOLATE UNSTAINED CONTROL
   if(any(grepl("Unstained", pd[, "channel"], ignore.case = TRUE))) {
     ind <- cyto_match(x, channel = "Unstained")
     x_NIL <- x[ind]
@@ -162,7 +182,7 @@
             rowMeans(cv[, pd[, "channel"][pd[, "channel"] != z]])
           )
         )
-      # MULTIPLE STAINED CONTROLS
+        # MULTIPLE STAINED CONTROLS
       } else {
         # COMPUTE CHANNEL MEDFI
         cyto_ind <<- c(
@@ -183,7 +203,7 @@
     })
     cs <- cs[cyto_ind]
   }
-  
+
   # UPDATE EXPERIMENT DETAILS
   pd <- cyto_details(cs)
   
@@ -237,10 +257,10 @@
 #' @importFrom flowWorkspace flowSet_to_cytoset cytoset
 #' @return list of negative and positive flowSets
 #' @noRd
-.cyto_spillover_pops <- function(x,
-                                 axes_trans = NA,
-                                 axes_limits = "machine",
-                                 ...) {
+.cyto_spillover_controls_pops <- function(x,
+                                          axes_trans = NA,
+                                          axes_limits = "machine",
+                                          ...) {
   
   # GATE POPULATIONS PER CHANNEL
   structure(

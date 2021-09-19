@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* Major improvements to `cyto_plot_compensation()` to better handle compensated and/or transformed data. Added support for fitting robust linear models and displaying spillover coefficients on plots.
 * Added new `"trim"` option to `axes_limits` argument in `cyto_plot()` to trim lowest 1% of events from each channel when computing axes limits.
 * Autospill is now the default method used to compute the spillover matrix in `cyto_spillover_compute()`. Users can control which method to use (either Bagwell or Roca) through the new `type` argument.
 * Add `copy` argument to `cyto_compensate()` to apply compensation to a copy of the supplied data.

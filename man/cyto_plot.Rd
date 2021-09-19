@@ -162,8 +162,8 @@ value of 1 will display all events), whilst values larger than 1 indicate
 the number of events to display. The default value for \code{events} is set
 to 50000 to display 50000 events only.}
 
-\item{layout}{a vector of the length 2 indicating the dimensions of the grid
-for plotting \code{c(#rows, #columns)}.}
+\item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
+matrix indicating the dimensions of the grid for plotting.}
 
 \item{margins}{a vector of length 4 to control the margins around the bottom,
 left, top and right of the plot, set to c(NA, NA, NA, NA) by default to let
@@ -480,6 +480,9 @@ arbitrary numeric by default. This behaviour can be turned off by setting
 this argument to NULL.}
 
 \item{...}{not currently in use.}
+}
+\value{
+a list containing the recorded plots.
 }
 \description{
 Explore and visualise cytometry data.
