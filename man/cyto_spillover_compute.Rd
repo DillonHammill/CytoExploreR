@@ -44,6 +44,9 @@ control. Users need not generate this file by hand as it will be created
 following the channel selection process. This information can also be added
 directly to the samples using \code{cyto_details_edit}.}
 
+\item{spillover}{superseded by the \code{save_as} argument above, only
+included for backwards compatibility with older versions of CytoExploreR.}
+
 \item{save_as}{name of a csv file to which the computed spillover matrix
 should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 date by default.}

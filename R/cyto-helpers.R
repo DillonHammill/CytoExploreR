@@ -2140,9 +2140,17 @@ cyto_match <- function(x,
     args <- args[[1]]
   }
   
-  # EXACT & EXCLUDE
-  .args_update(args[names(args) %in% c("exclude", "exact")])
-  args <- args[!names(args) %in% c("exclude", "exact")]
+  # EXACT
+  if("exact" %in% names(args)) {
+    exact <- args[["exact"]]
+    args <- args[!names(args) %in% "exact"]
+  }
+  
+  # EXCLUDE
+  if("exclude" %in% names(args)) {
+    exclude <- args[["exclude"]]
+    args <- args[!names(args) %in% "exclude"]
+  }
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
@@ -2168,10 +2176,10 @@ cyto_match <- function(x,
         # PARTIAL MATCH
         } else if(exact == FALSE) {
           # ROWNAMES - PARTIAL
-          if(grepl(z, rownames(pd), ignore.case = TRUE)) {
+          if(any(grepl(z, rownames(pd), ignore.case = TRUE))) {
             grep(z, rownames(pd), ignore.case = TRUE)
           # NAME - PARTIAL
-          } else if(grepl(z, pd[, "name"], ignore.case = TRUE)) {
+          } else if(any(grepl(z, pd[, "name"], ignore.case = TRUE))) {
             grep(z, pd[, "name"], ignore.case = TRUE)
           # NO MATCH
           } else {

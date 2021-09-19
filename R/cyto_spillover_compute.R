@@ -57,6 +57,8 @@
 #' @param save_as name of a csv file to which the computed spillover matrix
 #'   should be written, set to \code{Spillover-Matrix.csv} prefixed with the
 #'   date by default.
+#' @param spillover superseded by the \code{save_as} argument above, only
+#'   included for backwards compatibility with older versions of CytoExploreR.
 #' @param type options include \code{"Bagwell"} or \code{"Roca"} to indicate
 #'   which method to use when computing the spillover matrix, set to
 #'   \code{"Roca"} by default. Refer to \code{references} section for more
@@ -130,8 +132,19 @@ cyto_spillover_compute <- function(x,
                                    type = "roca",
                                    axes_limits = "machine",
                                    ...) {
-  
 
+  # SPILLOVER ------------------------------------------------------------------
+  
+  # BACKWARDS COMPATIBILITY
+  if(!is.null(spillover)) {
+    warning(
+      paste0(
+        "'spillover' is now deprecated in favour of `save_as` - ",
+        "please use that argument instead."
+      )
+    )
+    save_as <- spillover
+  }
   
   # PREPARE DATA ---------------------------------------------------------------
   
@@ -157,7 +170,7 @@ cyto_spillover_compute <- function(x,
   }
   
   # REMOVE EXCESS CONTRTOLS, ANNOTATE CHANNELS & COPY DATA
-  cs <- .cyto_spillover_controls(
+  cs <- .cyto_spillover_controls_prepare(
     x,
     parent = parent,
     type = type,
@@ -186,10 +199,10 @@ cyto_spillover_compute <- function(x,
     )
     
     # GATED NEGATIVE AND POSITIVE POPULATIONS (TRANSFORMED)
-    pops <- .cyto_spillover_pops(cs,
-                                 axes_trans = axes_trans,
-                                 axes_limits = axes_limits,
-                                 ...)
+    pops <- .cyto_spillover_controls_pops(cs,
+                                          axes_trans = axes_trans,
+                                          axes_limits = axes_limits,
+                                          ...)
     
     # CHANNELS - ONLY USE CHANNELS IN CONTROLS NOW
     channels <- names(pops)
