@@ -6,31 +6,31 @@
 #' @noRd
 .onLoad <- function(libname, pkgname) {
   
-  # Turn off bell noises whilst gating
+  # GATING BELL NOISES
   options("locatorBell" = FALSE)
   
-  # Interactive mode
+  # INTERACTIVE MODE
   options("CytoExploreR_interactive" = TRUE)
   
-  # Select active gatingTemplate
+  # ACTIVE GATINGTEMPLATE
   options("CytoExploreR_gatingTemplate" = NULL)
   
-  # Create custom theme for cyto_plot
+  # CUSTOM THEME FOR CYTO_PLOT()
   options("cyto_plot_theme" = NULL)
   
-  # Signal cyto_plot_save method has been called
+  # CYTO_PLOT_SAVE()
   options("cyto_plot_save" = FALSE)
   
-  # Signal which cyto_plot method has been called
+  # CYTO_PLOT() METHOD
   options("cyto_plot_method" = NULL)
   
-  # Store set graphical parameters
+  # CYTO_PLOT() SET GRAPHICAL PARAMETERS
   options("cyto_plot_par" = list())
   
-  # Record changes to graphical parameters settings - reuse
+  # CYTO_PLOT() RESET GRAPHICAL PARAMETERS
   options("cyto_plot_par_reset" = list())
   
-  # Signal when data had been prepared for cyto_plot
+  # CYTO_PLOT() DATA ALREADY PREPARED
   options("cyto_plot_data" = FALSE)
   
   # Register gating and preprocessing functions with openCyto

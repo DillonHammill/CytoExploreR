@@ -101,6 +101,7 @@ cyto_plot(
   header_text_font = 2,
   header_text_size = 1,
   header_text_col = "black",
+  page = FALSE,
   seed = 42,
   ...
 )
@@ -127,9 +128,9 @@ for \code{cytoset} objects.}
 
 \item{axes_trans}{object of class
 \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
-to transform the channels of the supplied data. \code{cyto_plot} does
-not support in-line transformations and as such the transformations should
-be applied to the data prior to plotting. The transformerList is used
+to transform the channels of the supplied data. \code{cyto_plot} does not
+support in-line transformations and as such the transformations should be
+applied to the data prior to plotting. The transformerList is used
 internally to ensure that the axes on the constructed plots are
 appropriately labelled.}
 
@@ -148,17 +149,18 @@ populations to be overlaid onto the plot(s). This argument can be set to
 \code{quadGate} or \code{filters}. Lists of these supported gate objects
 are also supported.}
 
-\item{axes_limits}{options include \code{"auto"}, \code{"data"} or
-\code{"machine"} to use optimised, data or machine limits respectively. Set
-to \code{"auto"} by default to use optimised axes ranges. Fine control over
+\item{axes_limits}{options include \code{"auto"}, \code{"trim"},
+\code{"data"} or \code{"machine"} to use optimised, lower trimmed (remove
+lowest 1% of events), data or machine limits respectively. Set to
+\code{"auto"} by default to use optimised axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
 
 \item{events}{numeric to control the number or percentage of events to
 display. Values [0,1] indicate the percentage of events to display (i.e.
 value of 1 will display all events), whilst values larger than 1 indicate
-the number of events to display. The default value for \code{events} is
-set to 50000 to display 50000 events only.}
+the number of events to display. The default value for \code{events} is set
+to 50000 to display 50000 events only.}
 
 \item{layout}{a vector of the length 2 indicating the dimensions of the grid
 for plotting \code{c(#rows, #columns)}.}
@@ -451,7 +453,10 @@ lines, set to 1 by default to remove transparency.}
 
 \item{header}{text to include above the plots when plotting a \code{cytoset}
 or \code{GatingSet}. \code{cyto_plot} expects a single header which will be
-added to each new page within the \code{cyto_plot} call.}
+added to each full page within the \code{cyto_plot} call. For custom
+plotting functions, if the final page has empty panels, we need to set
+\code{page = TRUE} in custom plotting functions to ensure that the header
+is appropriately added.}
 
 \item{header_text_font}{numeric to control the font of the header text, set
 to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
@@ -462,6 +467,12 @@ to 1 by default.}
 
 \item{header_text_col}{colour to use for the header text, set to "black" by
 default.}
+
+\item{page}{used internally within cyto_plot() wrapper functions to signal if
+a new page is required after constructing the plot(s), set to FALSE by
+default. This argument is only required for custom layouts which result in
+pages with empty panels that require a header, because cyto_plot() only
+adds headers to complete pages.}
 
 \item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
 sampling is applied with each \code{\link{cyto_plot}} call, set to an

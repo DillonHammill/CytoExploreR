@@ -25,9 +25,9 @@
 #'   with density colour scale for two channels.
 #' @param axes_trans object of class
 #'   \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
-#'   to transform the channels of the supplied data. \code{cyto_plot} does
-#'   not support in-line transformations and as such the transformations should
-#'   be applied to the data prior to plotting. The transformerList is used
+#'   to transform the channels of the supplied data. \code{cyto_plot} does not
+#'   support in-line transformations and as such the transformations should be
+#'   applied to the data prior to plotting. The transformerList is used
 #'   internally to ensure that the axes on the constructed plots are
 #'   appropriately labelled.
 #' @param merge_by a vector of pData variables to sort and merge samples into
@@ -45,8 +45,8 @@
 #' @param events numeric to control the number or percentage of events to
 #'   display. Values [0,1] indicate the percentage of events to display (i.e.
 #'   value of 1 will display all events), whilst values larger than 1 indicate
-#'   the number of events to display. The default value for \code{events} is
-#'   set to 50000 to display 50000 events only.
+#'   the number of events to display. The default value for \code{events} is set
+#'   to 50000 to display 50000 events only.
 #' @param layout a vector of the length 2 indicating the dimensions of the grid
 #'   for plotting \code{c(#rows, #columns)}.
 #' @param margins a vector of length 4 to control the margins around the bottom,
@@ -133,9 +133,10 @@
 #'   plots, set to \code{"black"} by default.
 #' @param contour_line_alpha numeric [0,1] to control the transparency of
 #'   contour lines, set to 1 by default to remove transparency.
-#' @param axes_limits options include \code{"auto"}, \code{"data"} or
-#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
-#'   to \code{"auto"} by default to use optimised axes ranges. Fine control over
+#' @param axes_limits options include \code{"auto"}, \code{"trim"},
+#'   \code{"data"} or \code{"machine"} to use optimised, lower trimmed (remove
+#'   lowest 1% of events), data or machine limits respectively. Set to
+#'   \code{"auto"} by default to use optimised axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
 #' @param axes_limits_buffer decimal indicating the percentage of buffering to
@@ -261,7 +262,10 @@
 #'   lines, set to 1 by default to remove transparency.
 #' @param header text to include above the plots when plotting a \code{cytoset}
 #'   or \code{GatingSet}. \code{cyto_plot} expects a single header which will be
-#'   added to each new page within the \code{cyto_plot} call.
+#'   added to each full page within the \code{cyto_plot} call. For custom
+#'   plotting functions, if the final page has empty panels, we need to set
+#'   \code{page = TRUE} in custom plotting functions to ensure that the header
+#'   is appropriately added.
 #' @param header_text_font numeric to control the font of the header text, set
 #'   to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -269,6 +273,11 @@
 #'   to 1 by default.
 #' @param header_text_col colour to use for the header text, set to "black" by
 #'   default.
+#' @param page used internally within cyto_plot() wrapper functions to signal if
+#'   a new page is required after constructing the plot(s), set to FALSE by
+#'   default. This argument is only required for custom layouts which result in
+#'   pages with empty panels that require a header, because cyto_plot() only
+#'   adds headers to complete pages.
 #' @param seed numeric passed to \code{\link{set.seed}} to ensure that the same
 #'   sampling is applied with each \code{\link{cyto_plot}} call, set to an
 #'   arbitrary numeric by default. This behaviour can be turned off by setting
@@ -406,6 +415,7 @@ cyto_plot <- function(x,
                       header_text_font = 2,
                       header_text_size = 1,
                       header_text_col = "black",
+                      page = FALSE,
                       seed = 42,
                       ...) {
   
@@ -435,8 +445,8 @@ cyto_plot <- function(x,
   # ARGUMENTS
   args <- .args_list(...)
   
-  # REMOVE OLD PARAMETERS & LAYOUT
-  args <- args[!names(args) %in% c("old_pars")]
+  # REMOVE PAGE ARGUMENT
+  args <- args[!names(args) %in% c("page")]
   
   # INHERIT THEME
   args <- .cyto_plot_theme_inherit(args)
@@ -460,12 +470,12 @@ cyto_plot <- function(x,
     args$layout <- FALSE
   }
   
-  # LAYOUT - TURNED OFF
-  if(!all(.empty(args$layout))) {
-    if(all(args$layout == FALSE)){
-      cyto_option("cyto_plot_method", "custom")
-    }
-  }
+  # # LAYOUT - TURNED OFF
+  # if(!all(.empty(args$layout))) {
+  #   if(all(args$layout == FALSE)){
+  #     cyto_option("cyto_plot_method", "custom")
+  #   }
+  # }
   
   # AXES_TRANS - SUPPLIED
   if(!.all_na(args$axes_trans)) {
@@ -478,11 +488,11 @@ cyto_plot <- function(x,
     args$axes_trans <- cyto_transformers_extract(args$x)
   }
   
-  # HEADER
-  if(cyto_option("cyto_plot_method") == "custom") {
-    # CANNOT SET HEADER FOR CUSTOM LAYOUTS
-    args$header <- NA
-  }
+  # # HEADER - HEADER ADDED TO COMPLETE LAYOUT
+  # if(cyto_option("cyto_plot_method") == "custom") {
+  #   # CANNOT SET HEADER FOR CUSTOM LAYOUTS
+  #   args$header <- NA
+  # }
   
   # GATES PREPARATION ----------------------------------------------------------
   
@@ -748,7 +758,8 @@ cyto_plot <- function(x,
   # LAYOUT TURNED OFF
   } else if (all(args$layout == FALSE) | .all_na(args$layout)) {
     # CHECK GLOBAL PARAMETERS
-    if(any(c("layout", "mfrow", "mfcol") %in% names(cyto_option("cyto_plot_par")))) {
+    if(any(c("layout", "mfrow", "mfcol") %in% 
+           names(cyto_option("cyto_plot_par")))) {
       args$layout <- cyto_option("cyto_plot_par")[c("layout",
                                                     "mfrow",
                                                     "mfcol")][[1]]
@@ -787,17 +798,18 @@ cyto_plot <- function(x,
     }
   }
   
-  # GRAPHICS DEVICE
+  # HEADER SPACE
   if(.all_na(header)) {
-    cyto_plot_new(args$popup,
-                  popup_size = args$popup_size,
-                  layout = args$layout)
+    oma <- .par("oma")[[1]]
   } else {
-    cyto_plot_new(args$popup,
-                  popup_size = args$popup_size,
-                  layout = args$layout,
-                  oma = c(0, 0, 3, 0))
+    oma <- c(0, 0, 3, 0)
   }
+  
+  # GRAPHICS DEVICE
+  cyto_plot_new(args$popup,
+                popup_size = args$popup_size,
+                layout = args$layout,
+                oma = oma)
   
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]
@@ -918,7 +930,8 @@ cyto_plot <- function(x,
     # GRAPHICS DEVICE ----------------------------------------------------------
     
     # FILL GRAPHICS DEVICE - NEW PAGE
-    if(z == length(args) & cyto_option("cyto_plot_method") == "cytoset"){
+    if(page | 
+       (z == length(args) & cyto_option("cyto_plot_method") == "cytoset")){
       cyto_plot_new_page()
     }
     

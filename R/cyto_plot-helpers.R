@@ -951,8 +951,8 @@ cyto_plot_new <- function(popup = NULL,
         # EMPTY DEVICE
         if(dev_empty()) {
           dev_new <- FALSE
-          # CUSTOM LAYOUT
-        } else if(cyto_option("cyto_plot_method") == "custom") {
+        # CUSTOM PLOTTING FUNCTION - OPEN NEW DEVICE WHEN FULL
+        } else if(cyto_option("cyto_plot_method") != "cytoset") {
           # OPEN NEW DEVICE WHEN FULL
           if(.par("page")[[1]]) {
             dev_new <- "rstudio"
@@ -971,8 +971,8 @@ cyto_plot_new <- function(popup = NULL,
         # EMPTY DEVICE
         if(dev_empty()){
           dev_new <- FALSE
-          # CUSTOM LAYOUT
-        } else if(cyto_option("cyto_plot_method") == "custom") {
+        # CUSTOM PLOTTING FUNCTION - OPEN NEW DEVICE WHEN FULL
+        } else if(cyto_option("cyto_plot_method") != "cytoset") {
           # OPEN NEW GRAPHICS DEVICE WHEN FULL
           if(.par("page")[[1]]) {
             dev_new <- "popup"
@@ -1452,9 +1452,6 @@ cyto_plot_custom <- function(...) {
   
   # METHOD
   cyto_option("cyto_plot_method", "custom")
-  
-  # TODO: MAYBE USE CYTO_PLOT_NEW BELOW? OPEN DEVICE BEFORE ADDING PLOTS
-  # CURRENTLY DEVICES ARE OPENED WITHIN CYTO_PLOT
   
   # GRAPHICAL PARAMETERS
   cyto_plot_new(...)

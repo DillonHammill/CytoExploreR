@@ -736,8 +736,8 @@
 #' @param x cytometry object(s) which require range calculation.
 #' @param parent name of parent population to extract for range calculation.
 #' @param channels name(s) of channel(s).
-#' @param axes_limits either "auto", "data" or "machine". "auto" use data limits but
-#'   always includes zero.
+#' @param axes_limits either "auto", "trim", "data" or "machine". "auto" use
+#'   data limits but always includes zero.
 #' @param plot logical indicating whether a check should be performed for
 #'   channel length.
 #' @param buffer fraction indicating the amount of buffering to be added on top
@@ -813,10 +813,21 @@
       }else{
         type <- "data"
       }
-      rng <- suppressWarnings(
-        range(z[, channels],
-              type = type)
-      )
+      # QUANTILE TRIM 1%
+      if(type == "trim") {
+        rng <- cyto_stat_quantile(
+          cyto_exprs(z,
+                     channels = channels,
+                     drop = FALSE),
+          probs = c(0.01, 1)
+        )
+        rownames(rng) <- c("min", "max")
+      } else {
+        rng <- suppressWarnings(
+          range(z[, channels],
+                type = type)
+        )
+      }
     }else if(cyto_class(z, "flowSet")){
       suppressWarnings(
         cyto_apply(z, function(y){
@@ -825,7 +836,20 @@
           }else{
             type <- "data"
           }
-          range(y, type = type)
+          if(axes_limits == "trim") {
+            rng <- cyto_stat_quantile(
+              cyto_exprs(y,
+                         channels = channels,
+                         drop = FALSE),
+              probs = c(0.01, 1)
+            )
+            rownames(rng) <- c("min", "max")
+          } else {
+            rng <- suppressWarnings(
+              range(y, type = type)
+            )
+          }
+          return(rng)
         }, 
         input = "cytoframe", 
         channels = channels,

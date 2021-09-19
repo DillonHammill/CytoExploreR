@@ -1,5 +1,7 @@
 # CytoExploreR 2.0.0
 
+* Added new `"trim"` option to `axes_limits` argument in `cyto_plot()` to trim lowest 1% of events from each channel when computing axes limits.
+* Autospill is now the default method used to compute the spillover matrix in `cyto_spillover_compute()`. Users can control which method to use (either Bagwell or Roca) through the new `type` argument.
 * Add `copy` argument to `cyto_compensate()` to apply compensation to a copy of the supplied data.
 * `cyto_compensate()` now supports spillover matrices in long format (i.e. non-square matrix with 3 columns of form | channel | channel | value |).
 * Add new `cyto_plot_new_page()` function to allow plotting on new page when previous page contains empty panels.
