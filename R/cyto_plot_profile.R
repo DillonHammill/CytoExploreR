@@ -1,6 +1,6 @@
 ## CYTO_PLOT_PROFILE -----------------------------------------------------------
 
-#' Plot expression profile in all channels
+#' Plot expression profile in multiple channels
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.

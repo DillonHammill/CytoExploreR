@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_plot_profile.R
 \name{cyto_plot_profile}
 \alias{cyto_plot_profile}
-\title{Plot expression profile in all channels}
+\title{Plot expression profile in multiple channels}
 \usage{
 cyto_plot_profile(
   x,
@@ -71,7 +71,7 @@ argumemt to NA.}
 list of recorded plots.
 }
 \description{
-Plot expression profile in all channels
+Plot expression profile in multiple channels
 }
 \examples{
 \dontrun{
