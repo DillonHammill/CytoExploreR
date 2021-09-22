@@ -2,254 +2,377 @@
 
 #' Plot expression profile in all channels
 #'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
-#'   \code{\link[flowCore:flowSet-class]{flowSet}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param parent name of the population to plot when a \code{GatingHierarchy} or
-#'   \code{GatingSet} object is supplied.
-#' @param channels a vector channels to use to construct the plots, set to all
-#'   channels by default.  
-#' @param select named list containing experimental variables to be used to
-#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
-#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
-#'   details. Sample selection occurs prior to grouping with \code{merge_by}. 
+#' @param parent name of the parent population to extract from \code{GatingSet}
+#'   objects, set to the \code{"root"} node by default.
+#' @param channels names of the channels or markers in which the data should be
+#'   plotted, set to all channels except \code{"Time"} and \code{"Event-ID"} by
+#'   default.
 #' @param merge_by a vector of pData variables to sort and merge samples into
 #'   groups prior to plotting, set to "name" by default to prevent merging. To
 #'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
-#' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
-#'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
-#'   \code{list of flowFrame lists} containing populations to be overlaid onto
-#'   the plot(s). This argument can be set to "children" or "descendants" when a
-#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
-#' @param layout a vector of the length 2 indicating the dimensions of the grid
-#'   for plotting \code{c(#rows, #columns)}.
-#' @param hist_stack numeric [0,1] indicating the degree of offset for 1-D
-#'   density distributions with overlay, set to 0.5 by default.
-#' @param axes_limits options include \code{"auto"}, \code{"data"} or
-#'   \code{"machine"} to use optimised, data or machine limits respectively. Set
-#'   to \code{"machine"} by default to complete axes ranges.
-#' @param popup logical indicating whether a pop-up window should be opened
-#'   prior to plotting, set to \code{FALSE} by default.
-#' @param header character string to include in the plot header, set to the
-#'   sample names by default. The header can be removed by setting this argument
-#'   to NA.
-#' @param header_text_font numeric indicating the font to use for the header,
-#'   set to 2 by default for bold font.
-#' @param header_text_size numeric to control the text size of the header, set
-#'   to 1 by default.
-#' @param header_text_col colour to use for the header, set to "black" by
-#'   default.
+#' @param overlay name(s) of the populations to overlay or a \code{cytoset},
+#'   \code{list of cytosets} or \code{list of cytoset lists} containing
+#'   populations to be overlaid onto the plot(s). This argument can be set to
+#'   "children" or "descendants" when a \code{GatingSet} or
+#'   \code{GatingHierarchy} to overlay all respective nodes.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details. Sample selection occurs prior to grouping with \code{merge_by}.
+#' @param order can be either \code{"channels"} or \code{"groups"} to control
+#'   the order in which the data is plotted. Setting \code{order = "channels"}
+#'   will plot each group on a single page in all the supplied channels. On the
+#'   other hand, setting \code{order = "groups"} will plot each channel on a
+#'   separate page for all groups.  
+#' @param layout a vector of the length 2 of form \code{c(#rows, #columns)} or a
+#'   matrix indicating the dimensions of the grid for plotting.
+#' @param hist_layers numeric indicating the number of histograms to stack in
+#'   each plot when there are no overlays, set to 1 histogram per plot by
+#'   default. Each plot must contain the same number of histograms.
+#' @param hist_stack numeric [0,1] indicating the degree of stacking for
+#'   histograms, set to \code{0} by default.
+#' @param header vector of text to include on each page of plots, not
+#'   recommended to modify by hand, headers can be removed by setting this
+#'   argumemt to NA.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
-#' @importFrom grDevices n2mfrow recordPlot
-#' @importFrom graphics par mtext
-#' @importFrom methods is
+#' @return list of recorded plots.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @seealso \code{\link{cyto_plot}}
+#' @seealso \code{\link{cyto_plot_explore}}
+#' @seealso \code{\link{cyto_select}}
+#' @seealso \code{\link{cyto_merge_by}}
 #'
-#' @examples
-#'
-#' # Load in CytoExploreR to access data
+#' @examples 
+#' \dontrun{
 #' library(CytoExploreRData)
 #'
-#' # Load in samples
-#' fs <- Activation
-#' gs <- GatingSet(fs)
-#'
-#' # Apply compensation
-#' gs <- cyto_compensate(gs, fs[[1]]@description$SPILL)
-#'
-#' # Transform fluorescent channels
-#' gs <- cyto_transform(gs, trans_type = "logicle")
-#'
-#' # Apply gates
-#' gt <- Activation_gatingTemplate
-#' gt_gating(gt, gs)
-#'
-#' # Plot expression profile of T Cells in all channels
-#' cyto_plot_profile(gs[1:9],
-#'   parent = "T Cells"
+#' # Activation GatingSet
+#' gs <- cyto_load(
+#'   system.file(
+#'     "extdata/Activation-GatingSet",
+#'     package = "CytoExploreRData"
+#'   )
 #' )
 #'
-#' # Group samples by Treatment & select highest OVAConc
-#'  cyto_plot_profile(gs[1:9],
-#'   parent = "CD4 T Cells",
-#'   merge_by = "Treatment",
-#'   select = list("OVAConc" = 500)
+#' # Expression profile in all channels per sample
+#' cyto_plot_profile(
+#'   gs,
+#'   parent = "Live Cells",
+#'   order = "channels"
 #' )
+#' 
+#' # Compare expression between samples in each channel
+#' cyto_plot_profile(
+#'   gs,
+#'   parent = "Live Cells",
+#'   order = "groups"
+#' )
+#' }
 #'
-#' @noRd
+#' @export
 cyto_plot_profile <- function(x,
                               parent = "root",
                               channels = NULL,
-                              select = NULL,
                               merge_by = "name",
                               overlay = NA,
-                              layout = NULL,
+                              select = NULL,
+                              order = "channels",
+                              layout,
                               hist_layers = NA,
-                              hist_stack = 0.5,
-                              axes_limits = "machine",
-                              popup = FALSE,
-                              header = NULL,
-                              header_text_font = 2,
-                              header_text_size = 1,
-                              header_text_col = "black",
+                              hist_stack = 0,
+                              header,
                               ...) {
   
-  # CYTO_PLOT_EXIT -------------------------------------------------------------
+  # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
-  # CURRENT SET PARAMETERS
-  old_pars <- .par()
-  
-  # NEW PLOT METHOD
-  if(is.null(getOption("cyto_plot_method"))) {
-    # CYTO_PLOT_METHOD
-    options("cyto_plot_method" = "profile")
+  # CYTO_PLOT METHOD & EXIT
+  if(is.null(cyto_option("cyto_plot_method"))) {
+    # SET CYTO_PLOT_METHOD
+    cyto_option("cyto_plot_method", "profile")
     # CYTO_PLOT_EXIT
     on.exit({
-      par(old_pars)
-      options("cyto_plot_method" = NULL)
-      options("cyto_plot_par" = NULL)
+      cyto_plot_complete()
     })
   }
   
-  # PREPARE ARGUMENTS ----------------------------------------------------------
+  # PREPARE PLOT PARAMETERS ----------------------------------------------------
   
   # CHANNELS
   if(is.null(channels)) {
-    channels <- cyto_channels(x, exclude = "Time")
+    channels <- cyto_channels(
+      x, 
+      exclude = c("Time", "Event-ID")
+    )
   }
   
-  # PLOT LAYOUT - CYTOSET/GATINGSET
-  if(cyto_class(x, "flowSet") | cyto_class(x, "GatingSet", TRUE)) {
-    # SELECT
-    if(!is.null(select)) {
-      x <- cyto_select(x, select)
-    }
-    # MERGE_BY
-    n <- length(cyto_groups(x, merge_by))
-    # HIST LAYERS
-    if(.all_na(overlay)) {
-      # ONE PLOT
-      if(.all_na(hist_layers)) {
-        n <- 1
+  # EXTRACT NAMES OF VARIABLES FOR MERGING
+  if(cyto_class(merge_by, "list", TRUE)) {
+    vars <- names(merge_by)
+  } else {
+    vars <- merge_by
+  }
+  
+  # GROUPS
+  grps <- cyto_groups(
+    x,
+    select = select,
+    group_by = merge_by,
+    details = TRUE
+  )
+  
+  # PREPARE GROUPS PER PLOT - OVERLAY
+  if(!.all_na(overlay)) {
+    # EACH GROUP IN SEPARATE PLOT
+    hist_layers <- NA
+    # PREPARE GROUP NAMES (GROUPS PER PLOT) - GRPS UNCHANGED
+    grps_names <- lapply(
+      seq_along(grps), 
+      function(z) {
+        names(grps)[z]
+      }
+    )
+  # PREPARE GROUPS PER PLOT - NO OVERLAY
+  } else {
+    # SET HIST_LAYERS BASED ON HIST_STACK
+    if(.all_na(hist_layers)) {
+      if(all(hist_stack == 0)) {
+        hist_layers <- 1
       } else {
-        n <- ceiling(n/hist_layers)
+        hist_layers <- length(grps)
+      }
+    # CHECK SUPPLIED HIST_LAYERS
+    } else {
+      if(length(grps) %% hist_layers != 0) {
+        stop(
+          "Each plot must have the same number of layers!"
+        )
       }
     }
-    # PLOT LAYOUT - CYTOFRAME/GATINGHIERARCHY
+    # SPLIT GROUPS BY HIST_LAYERS
+    if(hist_layers != length(grps)) {
+      # ALL GROUPS - SAME PLOT
+      if(hist_layers == length(grps)) {
+        # PREPARE GROUP NAMES PER PLOT
+        grps_names <- list(names(grps))
+        # PREPARE GROUPS PER PLOT
+        grps <- list(do.call("rbind", grps))
+      # MULTIPLE GROUPS PER PLOT
+      } else {
+        # SPLIT GROUPS INTO PLOTS
+        grps_ind <- split(
+          seq_along(grps),
+          rep(
+            seq(
+              length(grps) / hist_layers
+            ),
+            each = hist_layers
+          )
+        )
+        # SPLIT GROUP NAMES
+        grps_names <- lapply(
+          grps_ind,
+          function(z){
+            names(grps)[z]
+          }
+        )
+        # SPLIT GROUPS
+        grps <- lapply(
+          grps_ind,
+          function(z){
+            do.call(
+              "rbind",
+              grps[z]
+            )
+          }
+        )
+      }
+    # ALL GROUPS PER PLOT
+    } else {
+      # GROUP NAMES ONE PER PLOT
+      grps_names <- list(names(grps))
+      # COMBINE GROUPS
+      grps <- list(do.call("rbind", grps))
+    }
+  }
+  
+  # PREPARE LAYOUT - IS THIS CORRECT?
+  if(missing(layout)) {
+    # SWITCH LAYOUTS FOR SINGLE PLOTS
+    if(length(channels) == 1) {
+      order <- "group"
+    } else if(length(grps) == 1) {
+      order <- "channel"
+    }
+    # CHANNEL ORDER
+    if(grepl("^c", order, ignore.case = TRUE)) {
+       layout <- .cyto_plot_layout(channels)
+    # GROUP ORDER
+    } else {
+      layout <- .cyto_plot_layout(grps)
+    }
+  }
+    
+  # TOTAL PLOTS PER PAGE - BASED ON LAYOUT
+  if(is.null(dim(layout))) {
+    np <- prod(layout)
   } else {
-    n <- 1
+    np <- length(unique(unlist(layout)))
   }
   
-  # HEADER
-  if(is.null(header)) {
-    if(.all_na(overlay)) {
-      header <- "Expression Profile"
-    } else if(n > 1 & !.all_na(overlay)) {
-      header <- paste(channels, "Expression")
+  # PAGES
+  if(grepl("^c", order, ignore.case = TRUE)) {
+    n <- length(grps)
+    pg <- ceiling(length(channels)/np)
+    tpg <- n * pg
+  } else {
+    n <- length(channels)
+    pg <- ceiling(length(grps)/np)
+    tpg <- n * pg
+  }
+  
+  # PREPARE HEADERS - HANDLE COMBINED EVENTS
+  if(missing(header)) {
+    # CHANNEL ORDER
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      # PREPARE HEADER BASED ON GROUPS PER PLOT
+      if(!.all_na(hist_layers)) {
+        # SINGLE GROUP PER PLOT
+        if(hist_layers == 1) {
+          header <- rep(unlist(grps_names), each = pg)
+        # MULTIPLE GROUPS PER PLOT
+        } else {
+          header <- paste0(
+            "Expression Profile - ", 
+            rep(
+              seq_len(n),
+              each = pg
+            )
+          )
+        }
+      # SINGLE GROUP PER PLOT
+      } else {
+        header <- rep(unlist(grps_names), each = pg)
+      }
+    # GROUP ORDER
     } else {
-      header <- "Expression Profile"
+      header <- rep(
+        cyto_markers_extract(
+          x,
+          channels = channels,
+          append = TRUE
+        ),
+        each = pg
+      )
+    }
+  # SUPPLIED HEADERS
+  } else {
+    # NO HEADERS
+    if(.all_na(header)) {
+      header <- rep(NA, length.out = tpg)
+    # CUSTOM HEADERS
+    } else {
+      # REPEAT HEADERS - MULTIPLE PAGES
+      if(length(header) == tp) {
+        header <- rep(header, each = pg)
+      } else {
+        stop(
+          paste0(
+            "Supply a header for each ",
+            ifelse(grepl("^c", order, ignore.case = TRUE),
+                   "group!",
+                   "channel!")
+          )
+        )
+      }
     }
   }
-  
-  # REPEAT HEADER ARGUMENTS
-  header <- rep(header, length.out = length(channels))
-  
-  # PREPARE PLOTTING SAPCE -----------------------------------------------------
-  
-  # LAYOUT
-  if(is.null(layout)) {
-    # ONE PLOT PER CHANNEL
-    if(n == 1) {
-      layout <- .cyto_plot_layout(channels, layout)
-      # MULTIPLE PLOTS PER CHANNEL
-    } else {
-      layout <- .cyto_plot_layout(n, layout)
-    }
-  }
-  
-  # OUTER MARGINS
-  if (!.all_na(header)) {
-    oma <- c(0, 0, 3, 0)
-  } else{
-    oma <- c(0, 0, 0, 0)
-  }
-  
-  # SET UP GRAPHICS DEVICE
-  if(getOption("cyto_plot_method") == "profile") {
-    cyto_plot_new(popup,
-                  layout = layout, 
-                  oma = oma)
-  }
+
+  # TODO: IMPROVE TITLES
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
-  # CONSTRUCT PLOTS
-  p <- lapply(seq_along(channels), function(z) {
-    # HEADERS HANDLED BY CYTO_PLOT
-    plot_header <- header[z]
-    if(n == 1) {
-      plot_header <- NA
-    }
-    # PLOT
-    p <- cyto_plot(x,
-                   parent = parent,
-                   channels = channels[z],
-                   overlay = overlay,
-                   title = NA, # can't distinguish layers/overlays - list of cfs
-                   hist_layers = NA,
-                   hist_stack = hist_stack,
-                   axes_limits = axes_limits,
-                   popup = popup,
-                   layout = FALSE,
-                   merge_by = merge_by,
-                   header = plot_header,
-                   header_text_font = header_text_font,
-                   header_text_size = header_text_size,
-                   header_text_col = header_text_col,
-                   ...
-    )
-    # HEADER
-    if(n == 1) {
-      if(par("page") | z == length(channels)) {
-        # ADD HEADER - LAYOUT ONLY
-        if (!.all_na(header[z]) & all(layout != FALSE)) {
-          .cyto_plot_header(header[z],
-                            header_text_font = header_text_font,
-                            header_text_size = header_text_size,
-                            header_text_col = header_text_col)
-        }
-        # RECORD PLOT
-        p <- cyto_plot_record()
-        # NEW PLOT
-        if(z != length(channels)) {
-          cyto_plot_new() # use global settings
-        }
-        return(p)
-      } else {
-        return(NULL)
-      }
-    } else {
-      return(p) # recorded plots from cyto_plot
-    }
-  })
-  
-  # RECORD/SAVE ----------------------------------------------------------------
-  
-  # TURN OFF GRAPHICS DEVICE - CYTO_PLOT_SAVE
-  if (getOption("cyto_plot_save") &
-      getOption("cyto_plot_method") == "profile") {
-    # CLOSE GRAPHICS DEVICE
-    dev.off()
-    # RESET CYTO_PLOT_SAVE
-    options("cyto_plot_save" = FALSE)
+  # CALL CYTO_PLOT IN CHANNEL ORDER
+  if(grepl("^c", order, ignore.case = TRUE)) {
+    # CONSTRUCT & RECORD PLOTS
+    plots <- lapply(seq_along(grps), function(z){
+      # HEADER COUNTER
+      cnt <- (z - 1) * pg
+      # RECORDED PLOTS PER GROUP
+      plt <- lapply(seq_along(channels), function(w){
+        # CONSTRUCT PLOT
+        cyto_plot(
+          x,
+          parent = parent,
+          select = grps[[z]][, "name"],
+          channels = channels[w],
+          overlay = overlay,
+          merge_by = vars,
+          layout = layout,
+          hist_layers = hist_layers,
+          hist_stack = hist_stack, 
+          header = header[cnt + ceiling(w/np)],
+          # title = NA,
+          page = if(w == length(channels)) {
+            TRUE
+          } else {
+            FALSE
+          },
+          ...
+        )
+      })
+      # PREPARE RECORDED PLOTS
+      plt[LAPPLY(plt, "is.null")] <- NULL
+      return(plt)
+    })
+  # CALL CYTO_PLOT IN GROUP ORDER 
+  } else {
+    # CONSTRUCT & RECORD PLOTS
+    plots <- lapply(seq_along(channels), function(z){
+      # HEADER COUNTER
+      cnt <- (z - 1) * pg
+      # RECORDED PLOTS PER GROUP
+      plt <- lapply(seq_along(grps), function(w){
+        # CONSTRUCT PLOT
+        cyto_plot(
+          x,
+          parent = parent,
+          select = grps[[w]][, "name"],
+          channels = channels[z],
+          overlay = overlay,
+          merge_by = vars,
+          layout = layout,
+          hist_layers = hist_layers,
+          hist_stack = hist_stack, 
+          header = header[cnt + ceiling(w/np)],
+          # title = NA,
+          page = if(w == length(grps)) {
+            TRUE
+          } else {
+            FALSE
+          },
+          ...
+        )
+      })
+      # PREPARE RECORDED PLOTS
+      plt[LAPPLY(plt, "is.null")] <- NULL
+      return(plt)
+    })
   }
   
+  # FORMAT RECORDED PLOTS
+  plots[LAPPLY(plots, "is.null")] <- NULL
+  if(length(plots) == 0) {
+    plots <- NULL
+  }
+
+  # RECORDED PLOTS -------------------------------------------------------------
+  
   # RETURN RECORDED PLOTS
-  invisible(p)
+  invisible(plots)
   
 }

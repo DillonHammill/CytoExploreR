@@ -559,7 +559,7 @@ cyto_plot <- function(x,
       }
       # REPEAT HIST_LAYERS
       args$hist_layers <- rep(args$hist_layers,
-                              length.out = length(x)/args$hist_layers)
+                              length.out = length(args$x)/args$hist_layers)
     }
     # LAYERS
     L <- LAPPLY(seq_along(args$x), function(z){
@@ -580,9 +580,13 @@ cyto_plot <- function(x,
     })
     names(args$x) <- NULL
     # GATES
-    args$gate <- lapply(L, function(z){
-      args$gate[[z[1]]] # use first set of gates
-    })
+    if(!.all_na(args$gate)) {
+      args$gate <- lapply(L, function(z){
+        args$gate[[z[1]]] # use first set of gates
+      })
+    } else {
+      args$gate <- rep(list(NA), length.out = length(args$x))
+    }
   }
   
   # REMOVE MERGE_BY & HIST_LAYERS

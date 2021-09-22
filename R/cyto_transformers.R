@@ -142,10 +142,12 @@ cyto_transformers_define <- function(x,
   # UPDATE DEFINITION OF X - TRANSFORMERS REQUIRE CYTOFRAME
   x <- cyto_coerce(cs,
                    events = events,
-                   format = "cytoset")[[1]]
+                   format = "cytoset",
+                   name = "Combined Events")
   
   # PREPARE ARGUMENTS
   args <- .args_list(...)
+  args$x <- x[[1]]
   
   # TYPE - NAMED LIST TO NAMED VECTOR
   if(cyto_class(type, "list")) {
@@ -159,7 +161,7 @@ cyto_transformers_define <- function(x,
   }
   
   # CHANNEL RANGES - MAXVALUE BIEX
-  rng <- range(x)
+  rng <- range(x[[1]])
   
   # TRANSFORMATION DEFINITIONS
   transformer_list <- structure(
@@ -210,7 +212,7 @@ cyto_transformers_define <- function(x,
             invisible(
               capture.output(
                 cf <- do_call("flowVS::estParamFlowVS",
-                              list(cs, z, FALSE)) # add plot argument here
+                              list(cs, z))
               )
             )
           }

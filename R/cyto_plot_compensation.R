@@ -118,7 +118,7 @@ cyto_plot_compensation <- function(x,
   # SIGNAL CALL TO CYTO_PLOT & RESET
   if(is.null(cyto_option("cyto_plot_method"))) {
     # SET CYTO_PLOT_METHOD
-    cyto_option("cyto_plot_method", "comp")
+    cyto_option("cyto_plot_method", "compensation")
     # CYTO_PLOT_EXIT
     on.exit({
       cyto_plot_complete()
@@ -339,13 +339,6 @@ cyto_plot_compensation <- function(x,
   }
   header <- rep(header, length.out = length(x))
   names(header) <- names(x)
-  
-  # HEADER SPACE
-  if(!.all_na(header)) {
-    oma <- c(0,0,3,0)
-  } else {
-    oma <- .par("oma")[[1]]
-  }
 
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
@@ -356,7 +349,7 @@ cyto_plot_compensation <- function(x,
       # PLOT FOR EACH CHANNEL
       p <- lapply(names(x), function(v){
         # HISTOGRAM/SCATTER
-        cyto_plot(
+         plt <- cyto_plot(
           x[[z]][["uncompensated"]],
           channels = if(z == v) {
             z
@@ -415,7 +408,7 @@ cyto_plot_compensation <- function(x,
           # SPILLOVER COEEFICIENTS
           if(!is.null(spill) & text) {
             text(
-              labels = paste0("sp = ", round(spill[z, v]*100, 2), "%"),
+              labels = paste0("spill = ", round(spill[z, v]*100, 2), "%"),
               x = mean(.par("usr")[[1]][1:2]),
               y = .par("usr")[[1]][3] + 0.9 * diff(.par("usr")[[1]][3:4]),
               cex = text_size,
@@ -425,14 +418,17 @@ cyto_plot_compensation <- function(x,
           }
         }
         # RECORD PLOTS
-        if(.par("page")[[1]]) {
-          return(cyto_plot_record())
-        } else {
-          return(NULL)
+        if(cyto_class(plt, "list", TRUE)) {
+          # CYTO_PLOT WILL NOT CAPTURE ANNOTATIONS ON LAST PANEL
+          plt <- cyto_plot_record()
         }
+        return(plt)
       })
       # REMOVE NULL PLOTS
       p[LAPPLY(p, "is.null")] <- NULL
+      if(length(p) == 0) {
+        p <- NULL
+      }
       return(p)
     }),
     names = LAPPLY(x, function(w){
@@ -440,7 +436,7 @@ cyto_plot_compensation <- function(x,
     })
   )
   
-  # RECORD/SAVE ----------------------------------------------------------------
+  # RECORDED PLOTS -------------------------------------------------------------
   
   # RETURN RECORDED PLOTS
   invisible(plots)

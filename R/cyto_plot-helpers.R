@@ -1460,6 +1460,8 @@ cyto_plot_custom <- function(...) {
   if (!cyto_option("cyto_plot_save")) {
     .cyto_plot_args_remove()
   }
+  
+  invisible(NULL)
 }
 
 ## CYTO_PLOT_COMPLETE ----------------------------------------------------------

@@ -54,7 +54,7 @@
                        .Platform$file.sep,
                        temp_files[file_match]))
   }
-  
+  invisible(NULL)
 }
 
 #' Inherit saved cyto_plot arguments
