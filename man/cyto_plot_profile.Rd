@@ -8,9 +8,9 @@ cyto_plot_profile(
   x,
   parent = "root",
   channels = NULL,
-  merge_by = "name",
   overlay = NA,
   select = NULL,
+  merge_by = "name",
   order = "channels",
   layout,
   hist_layers = NA,
@@ -30,10 +30,6 @@ objects, set to the \code{"root"} node by default.}
 plotted, set to all channels except \code{"Time"} and \code{"Event-ID"} by
 default.}
 
-\item{merge_by}{a vector of pData variables to sort and merge samples into
-groups prior to plotting, set to "name" by default to prevent merging. To
-merge all samples set this argument to \code{TRUE} or \code{"all"}.}
-
 \item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
 \code{list of cytosets} or \code{list of cytoset lists} containing
 populations to be overlaid onto the plot(s). This argument can be set to
@@ -44,6 +40,10 @@ populations to be overlaid onto the plot(s). This argument can be set to
 select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 details. Sample selection occurs prior to grouping with \code{merge_by}.}
+
+\item{merge_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
 \item{order}{can be either \code{"channels"} or \code{"groups"} to control
 the order in which the data is plotted. Setting \code{order = "channels"}

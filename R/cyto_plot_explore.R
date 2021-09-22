@@ -1,380 +1,211 @@
 ## CYTO_PLOT_EXPLORE -----------------------------------------------------------
 
-#' Explore Cytometry Data in Bivariate Plots
-#'
-#' \code{cyto_plot_explore} is an extremely useful tool to explore all aspects
-#' of your cytometry data. \code{cyto_plot_explore} constructs a faceted plot
-#' for each of the supplied \code{channels_x} by plotting them against all the
-#' supplied \code{channels_y}. Thus providing a rapid means to explore the data
-#' in all available channels.
-#'
-#' @param x an object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierachy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}. \code{cytoset} and
-#'   \code{GatingSet} objects will be coerced to a single \code{cytoframe} prior
-#'   to plotting.
-#' @param parent name of the parent population to plot when a
-#'   \code{GatingHierarchy} or \code{GatingSet} object is supplied, set to the
-#'   last gated population by default.
-#' @param channels_x vector of channels to explore, set to all fluorescent
-#'   channels by default. Each channel in \code{channels_x} will be plotted
-#'   against all \code{channels_y}, with each \code{channels_x} on a separate
-#'   page.
-#' @param channels_y vector of channels to plot each channels_x against, set to
-#'   all channels by default.
-#' @param axes_trans object of class transformerList passed to \code{cyto_plot}
-#'   to appropriately display transformed data in plots.
-#' @param layout vector of grid dimensions \code{c(#rows,#columns)} for each
-#'   plot.
-#' @param popup logical indicating whether plots should be constructed in a
-#'   pop-up window.
-#' @param title text to include above each plot, set to NA by default to remove
-#'   titles.
-#' @param header title to use for the plots, set to the name of the sample by
-#'   default. Turn off the header by setting this argument to NA.
-#' @param header_text_font font to use for header text, set to 2 by default.
-#' @param header_text_size text size for header, set to 1 by default.
-#' @param header_text_col colour for header text, set to "black" by default.
-#' @param ... additional arguments passed to \code{cyto_plot}.
-#'
-#' @importFrom grDevices n2mfrow
-#' @importFrom graphics mtext plot.new
-#' @importFrom methods is
-#'
+#' Explore cytometry data in a series of bivariate scatterplots
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
-#' @name cyto_plot_explore
-NULL
-
-#' @noRd
+#' 
 #' @export
-cyto_plot_explore <- function(x, ...){
-  UseMethod("cyto_plot_explore")
-}
-
-#' @rdname cyto_plot_explore
-#' @export
-cyto_plot_explore.GatingSet <- function(x,
-                                        parent = NULL,
-                                        channels_x = NULL,
-                                        channels_y = NULL,
-                                        axes_trans = NA,
-                                        layout,
-                                        popup = FALSE,
-                                        title = NA,
-                                        header,
-                                        header_text_font = 2,
-                                        header_text_size = 1,
-                                        header_text_col = "black",
-                                        ...){
+cyto_plot_explore <- function(x,
+                              parent = "root",
+                              channel_x = NULL,
+                              channels_y = NULL,
+                              select = NULL,
+                              merge_by = "name",
+                              order = "channels",
+                              layout,
+                              header,
+                              ...) {
   
-  # Set plot method
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "Explore/GatingSet")
-  }
+  # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
-  # Default parent population
-  if(is.null(parent)){
-    parent <- cyto_nodes(x)[length(cyto_nodes(x))]
-  }
-  
-  # Extract parent population
-  fs <- cyto_data_extract(x, 
-                          parent = parent)[[1]]
-  
-  # Convert fs to flowFrame
-  fr <- cyto_convert(fs)
-  
-  # Combined events header
-  if(missing(header)){
-    header <- "Combined Events"
-  }
-  
-  # Transformations
-  axes_trans <- cyto_transformers_extract(x)
-  
-  # Call to flowFrame method
-  cyto_plot_explore(x = fr,
-                    channels_x = channels_x,
-                    channels_y = channels_y,
-                    axes_trans = axes_trans,
-                    layout = layout,
-                    popup = popup,
-                    title = title,
-                    header = header,
-                    header_text_font = header_text_font,
-                    header_text_size = header_text_size,
-                    header_text_col = header_text_col,
-                    ...)
-  
-  # Turn off graphics device for saving
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      
-      # Close graphics device
-      dev.off()
-      
-      # Reset cyto_plot_save
-      options("cyto_plot_save" = FALSE)
-      
-      # Reset cyto_plot_method
-      options("cyto_plot_method" = NULL)
-    }
-  }
-  
-}
-
-#' @rdname cyto_plot_explore
-#' @export
-cyto_plot_explore.GatingHierarchy <- function(x,
-                                              parent = NULL,
-                                              channels_x = NULL,
-                                              channels_y = NULL,
-                                              axes_trans = NA,
-                                              layout,
-                                              popup = FALSE,
-                                              title = NA,
-                                              header,
-                                              header_text_font = 2,
-                                              header_text_size = 1,
-                                              header_text_col = "black",
-                                              ...){
-  
-  # Set plot method
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "Explore/GatingHierarchy")
-  }
-  
-  # Default parent population
-  if(is.null(parent)){
-    parent <- cyto_nodes(x)[length(cyto_nodes(x))]
-  }
-  
-  # Extract parent population
-  fr <- cyto_data_extract(x, 
-                          parent = parent)[[1]]
-  
-  # Transformations
-  axes_trans <- cyto_transformers_extract(x)
-  
-  # Call to flowFrame method
-  cyto_plot_explore(x = fr,
-                    channels_x = channels_x,
-                    channels_y = channels_y,
-                    axes_trans = axes_trans,
-                    layout = layout,
-                    popup = popup,
-                    title = title,
-                    header = header,
-                    header_text_font = header_text_font,
-                    header_text_size = header_text_size,
-                    header_text_col = header_text_col,
-                    ...)
-  
-  # Turn off graphics device for saving
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      
-      # Close graphics device
-      dev.off()
-      
-      # Reset cyto_plot_save
-      options("cyto_plot_save" = FALSE)
-      
-      # Reset cyto_plot_method
-      options("cyto_plot_method" = NULL)
-    }
-  }
-  
-}
-
-#' @rdname cyto_plot_explore
-#' @export
-cyto_plot_explore.flowSet <- function(x,
-                                      channels_x = NULL,
-                                      channels_y = NULL,
-                                      axes_trans = NA,
-                                      layout,
-                                      popup = FALSE,
-                                      title = NA,
-                                      header,
-                                      header_text_font = 2,
-                                      header_text_size = 1,
-                                      header_text_col = "black",
-                                      ...){
-  
-  # Set plot method
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "Explore/flowSet")
-  }
-  
-  # Merge flowSet to flowFrame
-  fr <- cyto_convert(x, "flowFrame")
-  
-  # Combined events header
-  if(missing(header)){
-    header <- "Combined Events"
-  }
-  
-  # Call to flowFrame method
-  cyto_plot_explore(x = fr,
-                    channels_x = channels_x,
-                    channels_y = channels_y,
-                    axes_trans = axes_trans,
-                    layout = layout,
-                    popup = popup,
-                    title = title,
-                    header = header,
-                    header_text_font = header_text_font,
-                    header_text_size = header_text_size,
-                    header_text_col = header_text_col,
-                    ...)
-  
-  # Turn off graphics device for saving
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      
-      # Close graphics device
-      dev.off()
-      
-      # Reset cyto_plot_save
-      options("cyto_plot_save" = FALSE)
-      
-      # Reset cyto_plot_method
-      options("cyto_plot_method" = NULL)
-    }
-  }
-  
-}
-
-#' @rdname cyto_plot_explore
-#' @export
-cyto_plot_explore.flowFrame <- function(x,
-                                        channels_x = NULL,
-                                        channels_y = NULL,
-                                        axes_trans = NA,
-                                        layout,
-                                        popup = FALSE,
-                                        title = NA,
-                                        header,
-                                        header_text_font = 2,
-                                        header_text_size = 1,
-                                        header_text_col = "black",
-                                        ...){
-  
-  # Set plot method
-  if (is.null(getOption("cyto_plot_method"))) {
-    options("cyto_plot_method" = "Explore/flowFrame")
-  }
-  
-  # Graphics parameters
-  pars <- par(c("mfrow","oma"))
-  on.exit(par(pars))
-  
-  # Extract channels
-  chans <- colnames(x)
-  fluor_chans <- cyto_fluor_channels(x)
-  
-  # Use all fluorescent channels as default for channels_x
-  if(is.null(channels_x)){
-    channels_x <- fluor_chans
-  }
-  
-  # Use all channels as default for channels_y
-  if(is.null(channels_y)){
-    channels_y <- chans
-  }
-  
-  # Pop up
-  if(popup == TRUE){
-    cyto_plot_new(popup)
-  }
-  
-  # Layout
-  if(missing(layout)){
-    layout <- c(
-      n2mfrow(length(channels_y))[2],
-      n2mfrow(length(channels_y))[1]
-    )
-    par(mfrow = layout)
-  }else{
-    if(layout[1] == FALSE){
-      # Do nothing
-    }else{
-      par(mfrow = layout)
-    }
-  }
-  
-  # Header
-  if(missing(header)){
-    header <- cyto_names(x)
-  }
-  
-  # Space for header
-  if(!.all_na(header)){
-    par(oma = c(0, 0, 3, 0))
-  }
-  
-  # channel_y is constant on each page
-  lapply(seq_along(channels_y), function(z){
-    lapply(seq_along(channels_x), function(w){
-      # CONSTRUCT PLOT
-      if(channels_x[w] == channels_y[z]){
-        # 1D PLOT
-        cyto_plot(x,
-                  channels = channels_x[w],
-                  axes_trans = axes_trans,
-                  title = title,
-                  legend = FALSE,
-                  ...)
-      }else{
-        # 2D PLOT
-        cyto_plot(x,
-                  channels = c(channels_x[w], channels_y[z]),
-                  axes_trans = axes_trans,
-                  title = title,
-                  legend = FALSE, ...)
-      }
-      # Add header and call new plot after all channels_x
-      if(w == length(channels_x) | w %% prod(layout) == 0){
-        # Add header
-        if(!.all_na(header)){
-          mtext(header,
-                outer = TRUE,
-                font = header_text_font,
-                cex = header_text_size,
-                col = header_text_col)
-        }
-        # Call new plot if new pages required (i.e. more channels_x/y to come)
-        if(w < length(channels_x) | z < length(channels_y)){
-          if(popup == TRUE) {
-            cyto_plot_new(popup)
-            par(mfrow = layout)
-            par(oma = c(0, 0, 3, 0))
-          } else {
-            plot.new()
-            par(mfrow = layout)
-            par(oma = c(0, 0, 3, 0))
-          }
-        }
-      }
+  # CYTO_PLOT METHOD & EXIT
+  if(is.null(cyto_option("cyto_plot_method"))) {
+    # SET CYTO_PLOT_METHOD
+    cyto_option("cyto_plot_method", "explore")
+    # CYTO_PLOT_EXIT
+    on.exit({
+      cyto_plot_complete()
     })
-  })
+  }
   
-  # Turn off graphics device for saving
-  if (getOption("cyto_plot_save")) {
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      
-      # Close graphics device
-      dev.off()
-      
-      # Reset cyto_plot_save
-      options("cyto_plot_save" = FALSE)
-      
-      # Reset cyto_plot_method
-      options("cyto_plot_method" = NULL)
+  # PREPARE PLOT PARAMETERS ----------------------------------------------------
+  
+  # X CHANNELS - DEFAULT TO FLUORESCENT CHANNELS
+  if(is.null(channels_x)) {
+    channels_x <- cyto_fluor_channels(x)
+  }
+  
+  # Y CHANNELS - DEFAULT ALL CHANNELS
+  if(is.null(channels_y)) {
+    channels_y <- cyto_channels(x)
+  }
+  
+  # EXTRACT NAMES OF VARIABLES FOR MERGING
+  if(cyto_class(merge_by, "list", TRUE)) {
+    vars <- names(merge_by)
+  } else {
+    vars <- merge_by
+  }
+  
+  # GROUPS
+  grps <- cyto_groups(
+    x,
+    select = select,
+    group_by = group_by,
+    details = TRUE
+  )
+  
+  # LAYOUT 
+  if(missing(layout)) {
+    # SWITCH LAYOUTS FOR SINGLE PLOTS
+    if(length(channels_x) == 1) {
+      order <- "groups"
+    } else if(length(grps) == 1) {
+      order <- "channels"
+    }
+    # CHANNEL ORDER
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      layout <- .cyto_plot_layout(channels_y)
+    # GROUP ORDER
+    } else {
+      layout <- .cyto_plot_layout(grps)
     }
   }
+  
+  # TOTAL PLOTS PER PAGE - BASED ON LAYOUT
+  if(is.null(dim(layout))) {
+    np <- prod(layout)
+  } else {
+    np <- length(unique(unlist(layout)))
+  }
+  
+  # PAGES
+  if(grepl("^c", order, ignore.case = TRUE)) {
+    n <- length(grps)
+    pg <- ceiling(length(channels_y)/np)
+    tpg <- n * pg
+  } else {
+    n <- length(channels)
+    pg <- ceiling(length(grps)/np)
+    tpg <- n * pg
+  }
+  
+  # PREPARE HEADERS
+  if(missing(header)) {
+    # CHANNEL ORDER
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      header <- rep(
+        names(grps),
+        each = pg
+      )
+    # GROUP ORDER
+    } else {
+      header <- rep(
+        cyto_markers_extract(
+          x,
+          channels = channels,
+          append = TRUE
+        ),
+        each = pg
+      )
+    }
+  # SUPPLIED HEADERS
+  } else {
+    # NO HEADERS
+    if(.all_na(header)) {
+      header <- rep(NA, length.out = tpg)
+    } else {
+      stop(
+        paste0(
+          "Supply a header for each ",
+          ifelse(grepl("^c", order, ignore.case = TRUE),
+                 "group!",
+                 "channel!")
+        )
+      )
+    }
+  }
+  
+  
+  # CONSTRUCT PLOTS ------------------------------------------------------------
+  
+  # CALL CYTO_PLOT - CHANNEL ORDER
+  if(grepl("^c", order, ignore.case = TRUE)) {
+    # CONSTRUCT & RECORD PLOTS
+    plots <- lapply(seq_along(grps), function(z){
+      # HEADER COUNTER
+      cnt <- (z - 1) * pg
+      # RECORDED PLOTS PER GROUP - LOOP THROUGH CHANNELS_X
+      lapply(seq_along(channels_x), function(w){
+        # X CHANNEL
+        x_chan <- channels_x[w]
+        # LOOP THROUGH CHANNELS_Y
+        lapply(seq_along(channels_y), function(v){
+          # Y CHANNEL
+          y_chan <- channels_y[v]
+          # CONSTRUCT PLOT
+          p <- cyto_plot(
+            x,
+            parent = parent,
+            select = grps[[z]][, "name"],
+            channels = c(x_chan, y_chan),
+            overlay = overlay,
+            layout = layout,
+            header = header[cnt + ceiling(w/np)],
+            page = if(v == length(channels_y)) {
+              TRUE
+            } else {
+              FALSE
+            },
+            ...
+          )
+        })
+      })
+    })
+  # CALL CYTO_PLOT - GROUP ORDER
+  } else {
+    # CONSTRUCT & RECORD PLOTS
+    plots <- lapply(seq_along(channels_x), function(z){
+      # HEADER COUNTER
+      cnt <- (z - 1) * pg
+      # X CHANNEL
+      x_chan <- channels_x[z]
+      # LOOP THROUGH CHANNELS_Y
+      plots <- lapply(seq_along(channels_y), function(w){
+        # Y CHANNEL
+        y_chan <- channels_y[w]
+        # CONTRUCT PLOT
+        p <- cyto_plot(
+          x,
+          parent = parent,
+          select = select,
+          channels = c(x_chan, y_chan),
+          overlay = overlay,
+          layout = layout,
+          header = header[cnt + ceiling(w/np)],
+          page = if(w == length(channels_y)) {
+            TRUE
+          } else {
+            FALSE
+          },
+          ...
+        )
+        # PREPARE RECORDED PLOTS
+        p[LAPPLY(p, "is.null")] <- NULL
+        return(p)
+      })
+    })
+  }
+  
+  # FORMAT RECORDED PLOTS
+  plots[LAPPLY(plots, "is.null")] <- NULL
+  if(length(plots) == 0) {
+    plots <- NULL
+  }
+  
+  # RECORDED PLOTS -------------------------------------------------------------
+  
+  # RETURN RECORDED PLOTS
+  return(plots)
   
 }

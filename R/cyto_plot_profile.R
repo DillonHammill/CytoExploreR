@@ -9,9 +9,6 @@
 #' @param channels names of the channels or markers in which the data should be
 #'   plotted, set to all channels except \code{"Time"} and \code{"Event-ID"} by
 #'   default.
-#' @param merge_by a vector of pData variables to sort and merge samples into
-#'   groups prior to plotting, set to "name" by default to prevent merging. To
-#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param overlay name(s) of the populations to overlay or a \code{cytoset},
 #'   \code{list of cytosets} or \code{list of cytoset lists} containing
 #'   populations to be overlaid onto the plot(s). This argument can be set to
@@ -21,6 +18,9 @@
 #'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
+#' @param merge_by a vector of pData variables to sort and merge samples into
+#'   groups prior to plotting, set to "name" by default to prevent merging. To
+#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.  
 #' @param order can be either \code{"channels"} or \code{"groups"} to control
 #'   the order in which the data is plotted. Setting \code{order = "channels"}
 #'   will plot each group on a single page in all the supplied channels. On the
@@ -78,9 +78,9 @@
 cyto_plot_profile <- function(x,
                               parent = "root",
                               channels = NULL,
-                              merge_by = "name",
                               overlay = NA,
                               select = NULL,
+                              merge_by = "name",
                               order = "channels",
                               layout,
                               hist_layers = NA,
@@ -204,9 +204,9 @@ cyto_plot_profile <- function(x,
   if(missing(layout)) {
     # SWITCH LAYOUTS FOR SINGLE PLOTS
     if(length(channels) == 1) {
-      order <- "group"
+      order <- "groups"
     } else if(length(grps) == 1) {
-      order <- "channel"
+      order <- "channels"
     }
     # CHANNEL ORDER
     if(grepl("^c", order, ignore.case = TRUE)) {
@@ -235,7 +235,7 @@ cyto_plot_profile <- function(x,
     tpg <- n * pg
   }
   
-  # PREPARE HEADERS - HANDLE COMBINED EVENTS
+  # PREPARE HEADERS
   if(missing(header)) {
     # CHANNEL ORDER
     if(grepl("^c", order, ignore.case = TRUE)) {
@@ -303,7 +303,7 @@ cyto_plot_profile <- function(x,
       # HEADER COUNTER
       cnt <- (z - 1) * pg
       # RECORDED PLOTS PER GROUP
-      plt <- lapply(seq_along(channels), function(w){
+      p <- lapply(seq_along(channels), function(w){
         # CONSTRUCT PLOT
         cyto_plot(
           x,
@@ -326,8 +326,8 @@ cyto_plot_profile <- function(x,
         )
       })
       # PREPARE RECORDED PLOTS
-      plt[LAPPLY(plt, "is.null")] <- NULL
-      return(plt)
+      p[LAPPLY(p, "is.null")] <- NULL
+      return(p)
     })
   # CALL CYTO_PLOT IN GROUP ORDER 
   } else {
@@ -336,7 +336,7 @@ cyto_plot_profile <- function(x,
       # HEADER COUNTER
       cnt <- (z - 1) * pg
       # RECORDED PLOTS PER GROUP
-      plt <- lapply(seq_along(grps), function(w){
+      p <- lapply(seq_along(grps), function(w){
         # CONSTRUCT PLOT
         cyto_plot(
           x,
@@ -359,8 +359,8 @@ cyto_plot_profile <- function(x,
         )
       })
       # PREPARE RECORDED PLOTS
-      plt[LAPPLY(plt, "is.null")] <- NULL
-      return(plt)
+      p[LAPPLY(p, "is.null")] <- NULL
+      return(p)
     })
   }
   
