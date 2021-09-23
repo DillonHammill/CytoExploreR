@@ -113,7 +113,8 @@ cyto_plot(
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{parent}{name of the population to plot when a \code{GatingHierarchy} or
-\code{GatingSet} object is supplied.}
+\code{GatingSet} object is supplied, set to the \code{"root"} node by
+default.}
 
 \item{channels}{name of the channel(s) or marker(s) to be used to construct
 the plot. The length of channels determines the type of plot to be

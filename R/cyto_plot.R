@@ -13,7 +13,8 @@
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the population to plot when a \code{GatingHierarchy} or
-#'   \code{GatingSet} object is supplied.
+#'   \code{GatingSet} object is supplied, set to the \code{"root"} node by
+#'   default.
 #' @param alias name of the gated population(s) to gated in the plot when a
 #'   \code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
 #'   \code{alias} to "" will automatically plot any gates constructed in the

@@ -2,10 +2,13 @@
 
 #' Plot expression profile in multiple channels
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param parent name of the parent population to extract from \code{GatingSet}
-#'   objects, set to the \code{"root"} node by default.
+#' @param parent name of the population to plot when a \code{GatingHierarchy} or
+#'   \code{GatingSet} object is supplied, set to the \code{"root"} node by
+#'   default.
 #' @param channels names of the channels or markers in which the data should be
 #'   plotted, set to all channels except \code{"Time"} and \code{"Event-ID"} by
 #'   default.
@@ -20,12 +23,12 @@
 #'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param merge_by a vector of pData variables to sort and merge samples into
 #'   groups prior to plotting, set to "name" by default to prevent merging. To
-#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.  
+#'   merge all samples set this argument to \code{TRUE} or \code{"all"}.
 #' @param order can be either \code{"channels"} or \code{"groups"} to control
 #'   the order in which the data is plotted. Setting \code{order = "channels"}
 #'   will plot each group on a single page in all the supplied channels. On the
 #'   other hand, setting \code{order = "groups"} will plot each channel on a
-#'   separate page for all groups.  
+#'   separate page for all groups.
 #' @param layout a vector of the length 2 of form \code{c(#rows, #columns)} or a
 #'   matrix indicating the dimensions of the grid for plotting.
 #' @param hist_layers numeric indicating the number of histograms to stack in
@@ -33,9 +36,10 @@
 #'   default. Each plot must contain the same number of histograms.
 #' @param hist_stack numeric [0,1] indicating the degree of stacking for
 #'   histograms, set to \code{0} by default.
-#' @param header vector of text to include on each page of plots, not
-#'   recommended to modify by hand, headers can be removed by setting this
-#'   argumemt to NA.
+#' @param header can be set to NA to remove headers from plots. Alternatively,
+#'   users can supply a vector of headers for each page, this can be tricky to
+#'   get right so it is recommended for users to use the default headers where
+#'   possible.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return list of recorded plots.
@@ -44,10 +48,8 @@
 #'
 #' @seealso \code{\link{cyto_plot}}
 #' @seealso \code{\link{cyto_plot_explore}}
-#' @seealso \code{\link{cyto_select}}
-#' @seealso \code{\link{cyto_merge_by}}
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' library(CytoExploreRData)
 #'
@@ -65,7 +67,7 @@
 #'   parent = "Live Cells",
 #'   order = "channels"
 #' )
-#' 
+#'
 #' # Compare expression between samples in each channel
 #' cyto_plot_profile(
 #'   gs,
@@ -87,6 +89,9 @@ cyto_plot_profile <- function(x,
                               hist_stack = 0,
                               header,
                               ...) {
+  
+  # TODO: IMPROVE TITLES
+  # TODO: HEADERS INCORRECT FOR LAYOUTS > DEFAULT
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
@@ -291,8 +296,6 @@ cyto_plot_profile <- function(x,
       }
     }
   }
-
-  # TODO: IMPROVE TITLES
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   

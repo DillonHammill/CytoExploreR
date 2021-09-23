@@ -7,18 +7,111 @@
 cyto_plot_explore(
   x,
   parent = "root",
-  channel_x = NULL,
+  channels_x = NULL,
   channels_y = NULL,
   select = NULL,
   merge_by = "name",
+  overlay = NA,
   order = "channels",
   layout,
   header,
   ...
 )
 }
+\arguments{
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{parent}{name of the population to plot when a \code{GatingHierarchy} or
+\code{GatingSet} object is supplied, set to the \code{"root"} node by
+default.}
+
+\item{channels_x}{vector of channels or markers to plot on the x axis of the
+plots, by default we use channels returned by
+\code{\link{cyto_fluor_channels}}.}
+
+\item{channels_y}{vector of channels or markers to plot on the y axis of the
+plots, by default we use all channels as returned by
+\code{\link{cyto_channels}}.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
+
+\item{merge_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
+\code{list of cytosets} or \code{list of cytoset lists} containing
+populations to be overlaid onto the plot(s). This argument can be set to
+"children" or "descendants" when a \code{GatingSet} or
+\code{GatingHierarchy} to overlay all respective nodes.}
+
+\item{order}{can be either \code{"channels"} or \code{"groups"} to control
+the order in which the data is plotted. Setting \code{order = "channels"}
+will plot each group on a single page with a plot for each channel in
+\code{channels_y}. On the other hand, setting \code{order = "groups"} will
+plot each channel on a separate page with a plot for each group in
+\code{merge_by}.}
+
+\item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
+matrix indicating the dimensions of the grid for plotting.}
+
+\item{header}{can be set to NA to remove headers from plots. Alternatively,
+users can supply a vector of headers for each page, this can be tricky to
+get right so it is recommended for users to use the default headers where
+possible.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
+}
+\value{
+list of recorded plots.
+}
 \description{
 Explore cytometry data in a series of bivariate scatterplots
+}
+\examples{
+\dontrun{
+library(CytoExploreRData)
+
+# Activation GatingSet
+gs <- cyto_load(
+  system.file(
+    "extdata/Activation-GatingSet",
+    package = "CytoExploreRData"
+  )
+)
+
+# Plot a sample in all relevant channels
+cyto_plot_explore(
+  gs,
+  parent = "Live Cells",
+  select = 32,
+  order = "channels",
+  channels_x = c("Va2", "CD4", "CD8", "CD44", "CD69", "CD11c"),
+  channels_y = c("Va2", "CD4", "CD8", "CD44", "CD69", "CD11c"),
+)
+
+# Compare differences between samples in all relevant channels
+cyto_plot_explore(
+  gs,
+  parent = "Live Cells",
+  select = 32,
+  order = "groups",
+  channels_x = c("Va2", "CD4", "CD8", "CD44", "CD69", "CD11c"),
+  channels_y = c("Va2", "CD4", "CD8", "CD44", "CD69", "CD11c"),
+)
+}
+
+}
+\seealso{
+\code{\link{cyto_plot}}
+
+\code{\link{cyto_plot_profile}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

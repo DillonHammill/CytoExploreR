@@ -20,11 +20,14 @@ cyto_plot_profile(
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{parent}{name of the parent population to extract from \code{GatingSet}
-objects, set to the \code{"root"} node by default.}
+\item{parent}{name of the population to plot when a \code{GatingHierarchy} or
+\code{GatingSet} object is supplied, set to the \code{"root"} node by
+default.}
 
 \item{channels}{names of the channels or markers in which the data should be
 plotted, set to all channels except \code{"Time"} and \code{"Event-ID"} by
@@ -61,9 +64,10 @@ default. Each plot must contain the same number of histograms.}
 \item{hist_stack}{numeric [0,1] indicating the degree of stacking for
 histograms, set to \code{0} by default.}
 
-\item{header}{vector of text to include on each page of plots, not
-recommended to modify by hand, headers can be removed by setting this
-argumemt to NA.}
+\item{header}{can be set to NA to remove headers from plots. Alternatively,
+users can supply a vector of headers for each page, this can be tricky to
+get right so it is recommended for users to use the default headers where
+possible.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
@@ -105,10 +109,6 @@ cyto_plot_profile(
 \code{\link{cyto_plot}}
 
 \code{\link{cyto_plot_explore}}
-
-\code{\link{cyto_select}}
-
-\code{\link{cyto_merge_by}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)
