@@ -306,11 +306,12 @@ cyto_plot_explore <- function(x,
             y_chan <- y_chans[w]
             # UPDATE HEADER COUNTER
             cnt <<- cnt + pg
-            # CONTRUCT PLOT
+            # CONSTRUCT PLOT
             cyto_plot(
               x,
               parent = parent,
               select = select,
+              merge_by = merge_by,
               channels = c(x_chan, y_chan),
               overlay = overlay,
               layout = layout,

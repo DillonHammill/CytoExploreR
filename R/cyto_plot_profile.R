@@ -338,28 +338,21 @@ cyto_plot_profile <- function(x,
       # HEADER COUNTER
       cnt <- (z - 1) * pg
       # RECORDED PLOTS PER GROUP
-      p <- lapply(seq_along(grps), function(w){
-        # CONSTRUCT PLOT
-        cyto_plot(
-          x,
-          parent = parent,
-          select = grps[[w]][, "name"],
-          channels = channels[z],
-          overlay = overlay,
-          merge_by = vars,
-          layout = layout,
-          hist_layers = hist_layers,
-          hist_stack = hist_stack, 
-          header = header[cnt + ceiling(w/np)],
-          # title = NA,
-          page = if(w == length(grps)) {
-            TRUE
-          } else {
-            FALSE
-          },
-          ...
-        )
-      })
+      p <- cyto_plot(
+        x,
+        parent = parent,
+        select = select,
+        channels = channels[z],
+        overlay = overlay,
+        merge_by = merge_by,
+        layout = layout,
+        hist_layers = hist_layers,
+        hist_stack = hist_stack, 
+        header = header[cnt + seq_len(pg)],
+        # title = NA,
+        page = TRUE,
+        ...
+      )
       # PREPARE RECORDED PLOTS
       p[LAPPLY(p, "is.null")] <- NULL
       return(p)
