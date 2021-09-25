@@ -937,8 +937,8 @@ cyto_plot <- function(x,
     # GRAPHICS DEVICE ----------------------------------------------------------
     
     # FILL GRAPHICS DEVICE - NEW PAGE
-    if(page | 
-       (z == length(args) & cyto_option("cyto_plot_method") == "cytoset")){
+    if(z == length(args) & 
+       (cyto_option("cyto_plot_method") == "cytoset" | page)) {
       cyto_plot_new_page()
     }
     

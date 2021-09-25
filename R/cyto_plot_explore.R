@@ -94,8 +94,6 @@ cyto_plot_explore <- function(x,
                               header,
                               ...) {
   
-  # TODO: HEADERS INCORRECT FOR LAYOUTS > DEFAULT
-  
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
   # CYTO_PLOT METHOD & EXIT
@@ -123,6 +121,14 @@ cyto_plot_explore <- function(x,
   } else {
     channels_y <- cyto_channels_extract(x, channels_y)
   }
+  
+  # COMPUTE CHANNEL COMBINATIONS FOR CHANNEL IN CHANNELS_X
+  x_chan_combos <- LAPPLY(
+    channels_x,
+    function(z){
+      length(channels_y[!channels_y %in% z])
+    }
+  )
   
   # EXTRACT NAMES OF VARIABLES FOR MERGING
   if(cyto_class(merge_by, "list", TRUE)) {
@@ -153,11 +159,7 @@ cyto_plot_explore <- function(x,
       layout <- .cyto_plot_layout(
         seq_len(
           max(
-            LAPPLY(channels_x, function(z){
-              return(
-                length(channels_y[!channels_y %in% z])
-              )
-            })
+            x_chan_combos
           )
         )
       )
@@ -167,8 +169,6 @@ cyto_plot_explore <- function(x,
     }
   }
   
-  # TODO: GROUP ORDER ACCOUNT FOR DUPLICATE CHANNELS
-  
   # TOTAL PLOTS PER PAGE - BASED ON LAYOUT
   if(is.null(dim(layout))) {
     np <- prod(layout)
@@ -176,14 +176,21 @@ cyto_plot_explore <- function(x,
     np <- length(unique(unlist(layout)))
   }
   
-  # PAGES
+  # PAGES - X CHANNEL AGAINST Y CHANNELS * GROUPS
   if(grepl("^c", order, ignore.case = TRUE)) {
+    # NUMBER OF GROUPS TO PLOT
     n <- length(grps)
-    pg <- ceiling(length(channels_y)/np)
+    # PAGES PER GROUP - X CHANNEL SEPARATE PAGE BY UNIQUE Y CHANNELS
+    pg <- sum(ceiling(x_chan_combos/np))
+    # TOTAL PAGES
     tpg <- n * pg
+  # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
   } else {
-    n <- length(channels_y)
+    # NUMBER OF GROUPS TO PLOT
+    n <- length(channels_x)
+    # PAGES PER GROUP - LENGTH(GRPS)
     pg <- ceiling(length(grps)/np)
+    # TOTAL PAGES
     tpg <- n * pg
   }
   
@@ -197,14 +204,24 @@ cyto_plot_explore <- function(x,
       )
     # GROUP ORDER
     } else {
-      header <- rep(
-        cyto_markers_extract(
-          x,
-          channels = channels_x,
-          append = TRUE
-        ),
-        each = pg
-      )
+      header <- LAPPLY(channels_x, function(z){
+        rep(
+          paste0(
+            cyto_markers_extract(
+              x,
+              channels = z,
+              append = TRUE
+            ),
+            " / ",
+            cyto_markers_extract(
+              x,
+              channels = channels_y[!channels_y %in% z],
+              append = TRUE
+            )
+          ),
+          each = pg
+        )
+      })
     }
   # SUPPLIED HEADERS
   } else {
@@ -223,79 +240,96 @@ cyto_plot_explore <- function(x,
     }
   }
   
-  
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
   # CALL CYTO_PLOT - CHANNEL ORDER
   if(grepl("^c", order, ignore.case = TRUE)) {
     # CONSTRUCT & RECORD PLOTS
-    plots <- lapply(seq_along(grps), function(z){
-      # HEADER COUNTER
-      cnt <- (z - 1) * pg
-      # RECORDED PLOTS PER GROUP - LOOP THROUGH CHANNELS_X
-      lapply(seq_along(channels_x), function(w){
+    plots <- structure(
+      lapply(seq_along(grps), function(z){
+        # HEADER COUNTER
+        cnt <- (z - 1) * pg
+        # RECORDED PLOTS PER GROUP - LOOP THROUGH CHANNELS_X
+        structure(
+          lapply(seq_along(channels_x), function(w){
+            # X CHANNEL
+            x_chan <- channels_x[w]
+            # RESTRICT Y CHANNELS
+            y_chans <- channels_y[!channels_y %in% x_chan]
+            # LOOP THROUGH CHANNELS_Y
+            p <- lapply(seq_along(y_chans), function(v){
+              # Y CHANNEL
+              y_chan <- y_chans[v]
+              # CONSTRUCT PLOT
+              cyto_plot(
+                x,
+                parent = parent,
+                select = grps[[z]][, "name"],
+                merge_by = vars,
+                channels = c(x_chan, y_chan),
+                overlay = overlay,
+                layout = layout,
+                header = header[cnt + ceiling(w/np)],
+                page = if(v == length(y_chans)) {
+                  TRUE
+                } else {
+                  FALSE
+                },
+                ...
+              )
+            })
+            # PREPARE PLOTS
+            p[LAPPLY(p, "is.null")] <- NULL
+            p <- lapply(p, `[[`, 1)
+            return(p)
+          }),
+          names = channels_x
+        )
+      }),
+      names = names(grps)
+    )
+  # CALL CYTO_PLOT - GROUP ORDER
+  } else {
+    # HEADER COUNTER
+    cnt <- 1
+    # CONSTRUCT & RECORD PLOTS
+    plots <- structure(
+      lapply(seq_along(channels_x), function(z){
         # X CHANNEL
-        x_chan <- channels_x[w]
+        x_chan <- channels_x[z]
         # RESTRICT Y CHANNELS
         y_chans <- channels_y[!channels_y %in% x_chan]
         # LOOP THROUGH CHANNELS_Y
-        lapply(seq_along(y_chans), function(v){
-          # Y CHANNEL
-          y_chan <- y_chans[v]
-          # CONSTRUCT PLOT
-          p <- cyto_plot(
-            x,
-            parent = parent,
-            select = grps[[z]][, "name"],
-            merge_by = vars,
-            channels = c(x_chan, y_chan),
-            overlay = overlay,
-            layout = layout,
-            header = header[cnt + ceiling(w/np)],
-            page = if(v == length(y_chans)) {
-              TRUE
-            } else {
-              FALSE
-            },
-            ...
-          )
-          return(p)
-        })
-      })
-    })
-  # CALL CYTO_PLOT - GROUP ORDER
-  } else {
-    # CONSTRUCT & RECORD PLOTS
-    plots <- lapply(seq_along(channels_x), function(z){
-      # HEADER COUNTER
-      cnt <- (z - 1) * pg
-      # X CHANNEL
-      x_chan <- channels_x[z]
-      # LOOP THROUGH CHANNELS_Y
-      plots <- lapply(seq_along(channels_y), function(w){
-        # Y CHANNEL
-        y_chan <- channels_y[w]
-        # CONTRUCT PLOT
-        p <- cyto_plot(
-          x,
-          parent = parent,
-          select = select,
-          channels = c(x_chan, y_chan),
-          overlay = overlay,
-          layout = layout,
-          header = header[cnt + ceiling(w/np)],
-          page = if(w == length(channels_y)) {
-            TRUE
-          } else {
-            FALSE
-          },
-          ...
+        p <- structure(
+          lapply(seq_along(y_chans), function(w){
+            # Y CHANNEL
+            y_chan <- y_chans[w]
+            # UPDATE HEADER COUNTER
+            cnt <<- cnt + pg
+            # CONTRUCT PLOT
+            cyto_plot(
+              x,
+              parent = parent,
+              select = select,
+              channels = c(x_chan, y_chan),
+              overlay = overlay,
+              layout = layout,
+              header = header[(cnt - pg):cnt],
+              page = TRUE,
+              ...
+            )
+          }),
+          names = y_chans
         )
-        # PREPARE RECORDED PLOTS
+        # UPDATE HEADER COUNTER
+        cnt <<- cnt
+        # PREPARE PLOTS
         p[LAPPLY(p, "is.null")] <- NULL
+        p <- lapply(p, `[[`, 1)
         return(p)
-      })
-    })
+      }),
+      names = channels_x
+    )
   }
   
   # FORMAT RECORDED PLOTS

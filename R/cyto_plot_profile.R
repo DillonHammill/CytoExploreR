@@ -91,7 +91,6 @@ cyto_plot_profile <- function(x,
                               ...) {
   
   # TODO: IMPROVE TITLES
-  # TODO: HEADERS INCORRECT FOR LAYOUTS > DEFAULT
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
