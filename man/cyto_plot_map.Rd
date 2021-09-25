@@ -2,42 +2,23 @@
 % Please edit documentation in R/cyto_plot_map.R
 \name{cyto_plot_map}
 \alias{cyto_plot_map}
-\alias{cyto_plot_map.flowSet}
-\alias{cyto_plot_map.flowFrame}
-\title{Plot maps coloured by parameter}
+\title{Plot dimension reduced maps in all dimensions}
 \usage{
-\method{cyto_plot_map}{flowSet}(
+cyto_plot_map(
   x,
-  map = NULL,
+  parent = "root",
   channels = NULL,
   select = NULL,
-  group_by = "name",
-  layout = NULL,
-  header = NULL,
-  header_text_font = 2,
-  header_text_size = 1,
-  header_text_col = "black",
-  ...
-)
-
-\method{cyto_plot_map}{flowFrame}(
-  x,
-  map = NULL,
-  channels = NULL,
-  layout = NULL,
-  header = NULL,
-  header_text_font = 2,
-  header_text_size = 1,
-  header_text_col = "black",
+  merge_by = "name",
+  overlay = NA,
+  order = "channels",
+  point_col = NA,
   point_col_scale = NA,
-  point_col_alpha = 1,
+  layout,
+  header = NA,
   ...
 )
-}
-\arguments{
-\item{page}{can be either "channel" or "sample" indicating whether each page
-should contain for each sample or each channel.}
 }
 \description{
-Plot maps coloured by parameter
+Plot dimension reduced maps in all dimensions
 }

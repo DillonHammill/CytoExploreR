@@ -1,299 +1,233 @@
 ## CYTO_PLOT_MAP ---------------------------------------------------------------
 
-#' Plot maps coloured by parameter
-#'
-#' @param page can be either "channel" or "sample" indicating whether each page
-#'   should contain for each sample or each channel.
-#'
-#' @importFrom grDevices n2mfrow rgb colorRamp adjustcolor
-#' @importFrom graphics mtext
-#' @name cyto_plot_map
-NULL
-
+#' Plot dimension reduced maps in all dimensions
+#' 
 #' @export
-#' @noRd
-cyto_plot_map <- function(x, ...){
-  UseMethod("cyto_plot_map")
-}
-
-#' @rdname cyto_plot_map
-#' @export
-cyto_plot_map.flowSet <- function(x,
-                                  map = NULL,
-                                  channels = NULL,
-                                  select = NULL,
-                                  group_by = "name",
-                                  layout = NULL,
-                                  header = NULL,
-                                  header_text_font = 2,
-                                  header_text_size = 1,
-                                  header_text_col = "black",
-                                  ...){
+cyto_plot_map <- function(x,
+                          parent = "root",
+                          channels = NULL,
+                          select = NULL,
+                          merge_by = "name",
+                          overlay = NA,
+                          order = "channels",
+                          point_col = NA,
+                          point_col_scale = NA,
+                          layout,
+                          header = NA,
+                          ...) {
   
-  # PREPARE DATA ---------------------------------------------------------------
+  # CYTO_PLOT_COMPLETE ----------------------------------------------------------
   
-  # SELECT
-  if(!is.null(select)){
-    x <- cyto_select(x, select = select)
+  # CYTO_PLOT METHOD & EXIT
+  if(is.null(cyto_option("cyto_plot_method"))) {
+    # SET CYTO_PLOT_METHOD
+    cyto_option("cyto_plot_method", "map")
+    # CYTO_PLOT_EXIT
+    on.exit({
+      cyto_plot_complete()
+    })
   }
+
+  # PREPARE PLOT PARAMETERS ----------------------------------------------------
   
-  # GROUP_BY
-  fr_list <- cyto_group_by(x,
-                           group_by = group_by)
-  
-  # CALIBRATION
-  message(
-    paste0("Remember to calibrate the colour scales using cyto_calibrate() ",
-           "before calling cyto_plot_map().")
+  # GROUPS
+  grps <- cyto_groups(
+    x,
+    select = select,
+    group_by = merge_by,
+    details = TRUE
   )
   
-  # PREPARE ARGUMENTS ----------------------------------------------------------
-  
-  # HEADER
-  if(is.null(header)){
-    header <- names(fr_list)
-    if(all(header == "all")){
-      header <- "Combined Events"
-    }
-  }else{
-    header <- rep(header, length.out = length(fr_list))
-  }
-  
-  # REPEAT HEADER ARGUMENTS
-  header_text_font <- rep(header_text_font, length.out = length(fr_list))
-  header_text_size <- rep(header_text_size, length.out = length(fr_list))
-  header_text_col <- rep(header_text_col, length.out = length(fr_list))
-  
-  # CALL FLOWFRAME METHOD ------------------------------------------------------
-  
-  print(fr_list)
-  print(seq_along(fr_list))
-  
-  # CYTO_PLOT_MAP
-  plots <- lapply(seq_along(fr_list), function(z){
-    suppressMessages(
-      cyto_plot_map(fr_list[[z]],
-                    map = map,
-                    channels = channels,
-                    layout = layout,
-                    header = header[z],
-                    header_text_font = header_text_font[z],
-                    header_text_size = header_text_size[z],
-                    header_text_col = header_text_col[z],
-                    point_col_scale = point_col_scale,
-                    point_col_alpha = point_col_alpha,
-                    ...)
-    )
-  })
-  
-  # RECORD/SAVE ----------------------------------------------------------------
-  
-  # TURN OFF GRAPHICS DEVICE
-  if (getOption("cyto_plot_save")) {
-    # PLOT METHOD
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      # CLOSE GRAPHICS DEVICE
-      cyto_plot_complete()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
-    }
-  }
-  
-  # RETURN LIST OF RECORDED PLOTS
-  invisible(plots)
-  
-}
-
-#' @rdname cyto_plot_map
-#' @export
-cyto_plot_map.flowFrame <- function(x,
-                                    map = NULL,
-                                    channels = NULL,
-                                    layout = NULL,
-                                    header = NULL,
-                                    header_text_font = 2,
-                                    header_text_size = 1,
-                                    header_text_col = "black",
-                                    point_col_scale = NA,
-                                    point_col_alpha = 1,
-                                    ...){
-  
-  # GRAPHICAL PARAMETERS -------------------------------------------------------
-  
-  # CURRENT PARAMETERS
-  old_pars <- .par(c("oma", "mfrow"))
-  
-  # THEME ----------------------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list(...)
-  
-  # INHERIT THEME
-  args <- .cyto_plot_theme_inherit(args)
-  
-  # UPDATE ARGUMENTS
-  .args_update(args)
-  
-  # CHECKS ---------------------------------------------------------------------
-  
-  # METHOD & RESET
-  if (is.null(getOption("cyto_plot_method"))) {
-    # SET PLOT METHOD
-    options("cyto_plot_method" = "map/flowFrame")
-    # RESET PLOT METHOD & GRAPHICAL PARAMETERS ON EXIT
-    on.exit({
-      par(old_pars)
-      options("cyto_plot_method" = NULL)
-    })
+  # GROUPING VARIABLES
+  if(cyto_class(merge_by, "list", TRUE)) {
+    vars <- names(merge_by)
   } else {
-    # RESET GRAPHICAL PARAMETERS ON EXIT
-    on.exit(par(old_pars))
+    vars <- merge_by
   }
   
-  # CALIBRATION 
-  cyto_cal <- .cyto_calibrate_recall()
-  if(is.null(cyto_cal)){
-    message(
-      "Please use cyto_calibrate() to properly calibrate the colour scales."
+  # POINT_COL - DEFAULT
+  if(.all_na(point_col)) {
+    # DEFAULT - ALL FLUORESCENT  CHANNELS
+    point_col <- cyto_fluor_channels(x)
+  # POINT_COL SUPPLIED
+  } else {
+    point_col <- cyto_channels_extract(x, point_col)
+  }
+  
+  # POINT_COL_SCALE - LIST - DIFFERENT COLOUR SCALE PER CHANNEL
+  if(cyto_class(point_col_scale, "list", TRUE)) {
+    point_col_scale <- rep(point_col_scale, length(point_col))
+    names(point_col_scale) <- point_col
+  # POINT_COL_SCALE - VECTOR/FUNCTION - SAME COLOUR SCALE PER CHANNEL
+  } else {
+    point_col_scale <- structure(
+      lapply(seq_along(point_col), function(z){
+        return(point_col_scale)
+      }),
+      names = point_col
     )
   }
   
-  # CHANNELS -------------------------------------------------------------------
-  
-  # MAP
-  if(is.null(map)){
-    map <- cyto_channels(x)
-    map <- map[c(length(map) - 1, length(map))]
-  }
-  
-  # DEFAULT CHANNELS WITH MARKERS
-  if(is.null(channels)){
-    channels <- names(cyto_markers(x))
-  }
-  
-  # ARGUMENTS ------------------------------------------------------------------
-  
-  # HEADER
-  if(is.null(header)){
-    header <- cyto_names(x)
-  }
-  
-  # HEADER SPACE
-  if (!is.na(header)) {
-    par(oma = c(0, 0, 3, 0))
-  }
-  
-  # LEGEND
-  legend_x <- NULL
-  legend_y <- NULL
-  
-  # PLOT LAYOUT
-  if(is.null(layout)){
-    dims <- n2mfrow(length(channels))
-    layout <- c(dims[2], dims[1])
-  }
-  
-  # SET LAYOUT
-  par("mfrow" = layout)
-  
-  # PLOTS
-  plots <- lapply(seq_along(channels), function(z){
-    
-    # CYTO_PLOT ----------------------------------------------------------------
-    cyto_plot(x,
-              channels = map,
-              overlay = NA,
-              title = channels[z],
-              point_col = channels[z],
-              legend = FALSE,
-              margins = c(5.1, 5.1, 4.1, 2.5),
-              ...)
-    
-    # LEGEND -------------------------------------------------------------------
-    
-    # LEGEND X COORDS
-    if(is.null(legend_x)){
-      legend_x <- c(par("usr")[2] + 0.01 * (par("usr")[2] - par("usr")[1]),
-                    par("usr")[2] + 0.04 * (par("usr")[2] - par("usr")[1]))
+  # LAYOUT
+  if(missing(layout)) {
+    if(length(point_col) == 1) {
+      order <- "groups"
+    } else if(length(grps) == 1) {
+      order <- "channels"
     }
-    
-    # LEGEND Y COORDS
-    if(is.null(legend_y)){
-      legend_y <- c(par("usr")[3], par("usr")[4])
+    # CHANNEL ORDER
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      layout <- .cyto_plot_layout(point_col)
+    # GROUP ORDER
+    } else {
+      layout <- .cyto_plot_layout(grps)
     }
-    
-    # LEGEND COLOUR SCALE
-    legend_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
-    legend_col_ramp <- colorRamp(legend_col_scale)
-    legend_cols <- seq(0, 1, 1/50) # 50 boxes
-    legend_cols <- legend_col_ramp(legend_cols)
-    legend_cols <- rgb(legend_cols[, 1],
-                       legend_cols[, 2],
-                       legend_cols[, 3],
-                       maxColorValue = 255)
-    legend_cols <- adjustcolor(legend_cols, point_col_alpha)
-    
-    # LEGEND BORDER
-    rect(legend_x[1],
-         legend_y[1],
-         legend_x[2],
-         legend_y[2],
-         xpd = TRUE)
-    
-    # LEGEND BOXES
-    legend_box_x <- legend_x
-    legend_box_y <- seq(par("usr")[3], 
-                        par("usr")[4], 
-                        (par("usr")[4] - par("usr")[3])/50)
-    lapply(seq_len(50), function(z){
-      rect(legend_box_x[1],
-           legend_box_y[z],
-           legend_box_x[2],
-           legend_box_y[z + 1],
-           xpd = TRUE,
-           col = legend_cols[z],
-           border = NA)
-    })
-    
-    # LEGEND LABELS
-    
-    # HEADER & RECORD ----------------------------------------------------------
-    
-    # ADD HEADER & RECORD PLOT(S)
-    if(z %in% c(prod(layout), length(channels))){
-      # HEADER
-      if (!is.null(header)) {
-        mtext(header,
-              outer = TRUE,
-              font = header_text_font,
-              cex = header_text_size,
-              col = header_text_col
+  }
+  
+  # TOTAL PLOTS PER PAGE
+  if(is.null(dim(layout))) {
+    np <- prod(layout)
+  } else {
+    np <- length(unique(unlist(layout)))
+  }
+  
+  # PAGES - CHANNELS ON SAME PAGE
+  if(grepl("^c", order, ignore.case = TRUE)) {
+    # NUMBER OF GROUPS TO PLOT
+    n <- length(grps)
+    # PAGES PER GROUP
+    pg <- ceiling(length(grps)/np)
+    # TOTAL PAGES
+    tpg <- n * pg
+  # PAGES - GROUPS ON SAME PAGE
+  } else {
+    # NUMBER OF GROUPS TO PLOT
+    n <- length(point_col)
+    # PAGES PER GROUP
+    pg <- ceiling(length(grps)/np)
+    # TOTAL PAGES
+    tpg <- n * pg
+  }
+  
+  # DEFAULT HEADERS
+  if(missing(header)) {
+    # CHANNEL ORDER - GROUPS AS HEADERS
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      header <- rep(
+        names(grps),
+        each = pg
+      )
+    # GROUP ORDER - CHANNELS AS HEADERS
+    } else {
+      header <- rep(
+        cyto_markers_extract(
+          x,
+          channels = point_col,
+          append = TRUE
+        ),
+        each = pg
+      )
+    }
+  # SUPPLIED HEADERS
+  } else {
+    # NO HEADERS
+    if(.all_na(header)) {
+      header <- rep(NA, length.out = tpg)
+    } else {
+      stop(
+        paste0(
+          "Supply a header for each ",
+          ifelse(grepl("^c", order, ignore.case = TRUE),
+                 "group!",
+                 "channel!")
         )
-      }
-      return(cyto_plot_record())
-    }else{
-      return(NULL)
-    }
-    
-  })
-  
-  # REMOVE EMPTY PLOTS
-  plots <- plots[!LAPPLY(plots, "is.null")]
-  
-  # RECORD/SAVE ----------------------------------------------------------------
-  
-  # TURN OFF GRAPHICS DEVICE
-  if (getOption("cyto_plot_save")) {
-    # PLOT METHOD
-    if (is(x, basename(getOption("cyto_plot_method")))) {
-      # CLOSE GRAPHICS DEVICE
-      cyto_plot_complete()
-      # RESET CYTO_PLOT_SAVE
-      options("cyto_plot_save" = FALSE)
+      )
     }
   }
   
-  # RETURN LIST OF RECORDED PLOTS
+  # CONSTRUCT PLOTS ------------------------------------------------------------
+  
+  # CALL CYTO_PLOT - CHANNEL ORDER
+  if(grepl("^c", order, ignore.case = TRUE)) {
+    plots <- structure(
+      lapply(seq_along(grps), function(z){
+        # HEADER COUNTER
+        cnt <- (z - 1) * pg
+        # RECORD PLOTS PER GROUP
+        p <- structure(
+          lapply(seq_along(point_col), function(w){
+            # CONSTRUCT PLOT
+            cyto_plot(
+              x,
+              parent = parent,
+              select = grps[[z]][, "name"],
+              merge_by = vars,
+              channels = channels,
+              overlay = overlay,
+              layout = layout,
+              header = header[cnt + ceiling(w/np)],
+              page = if(w == length(point_col)) {
+                TRUE
+              } else {
+                FALSE
+              },
+              point_col = point_col[w],
+              point_col_scale <- point_col_scale[[w]],
+              ...
+            )
+          }),
+          names = point_col
+        )
+        # PREPARE RECORDED PLOTS
+        p[LAPPLY(p, "is.null")] <- NULL
+        p <- lapply(p, `[[`, 1)
+        return(p)
+      }),
+      names = names(grps)
+    )
+  # CALL CYTO_PLOT - GROUP ORDER
+  } else {
+    plots <- structure(
+      lapply(seq_along(point_col), function(z){
+        # HEADER COUNTER
+        cnt <- (z - 1) * pg
+        # RECORD PLOTS PER CHANNEL
+        p <- structure(
+          lapply(seq_along(grps), function(w){
+            # CONSTRUCT PLOT
+            cyto_plot(
+              x,
+              parent = parent,
+              select = grps[[w]][, "name"],
+              merge_by = vars,
+              channels = channels,
+              overlay = overlay,
+              layout = layout,
+              header = header[cnt + ceiling(w/np)],
+              page = if(w == length(grps)) {
+                TRUE
+              } else {
+                FALSE
+              },
+              point_col = point_col[z],
+              point_col_scale <- point_col_scale[[z]],
+              ...
+            )
+          }),
+          names = names(grps)
+        )
+        # PREPARE RECORDED PLOTS
+        p[LAPPLY(p, "is.null")] <- NULL
+        p <- lapply(p, `[[`, 1)
+        return(p)
+      }),
+      names = point_col
+    )
+  }
+  
+  # RECORDED PLOTS -------------------------------------------------------------
+  
+  # RETURN RECORDED PLOTS
   invisible(plots)
   
 }
