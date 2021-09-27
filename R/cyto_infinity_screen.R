@@ -190,6 +190,7 @@ cyto_infinity_screen <- function(path = NULL,
         "type" = "backbone",
         stringsAsFactors = FALSE
       )
+      rownames(backbone) <- NULL
       # INTERACTIVELY EDIT BACKBONE SELECTION
       backbone <- data_edit(
         backbone,
