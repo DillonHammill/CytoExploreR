@@ -443,20 +443,20 @@ cyto_spillover_edit <- function(x,
                         selected = plots_opts_select,
                         choiceNames = list(
                           "Overlay unstained control",
-                          "Underlay uncompensated control",
-                          "Overlay compensated control"
+                          "Overlay compensated data",
+                          "Fit robust linear models"
                         ),
                         choiceValues = list(
                           "unstained",
-                          "uncompensated",
-                          "compensated"
+                          "compensated",
+                          "models"
                         ))
             ),
             mainPanel(
               width = 9,
-              compPlotUI(
-                "plots"
-              )
+              # compPlotUI(
+              #   "plots"
+              # )
             )
           )
         )
@@ -717,9 +717,9 @@ cyto_spillover_edit <- function(x,
       )
       
       # COMPENSATION PLOTS
-      compPlotServer(
-        
-      )
+      # compPlotServer(
+      #   
+      # )
       
       # SAVE & EXPORT ----------------------------------------------------------
       
@@ -1299,6 +1299,24 @@ editPlotServer <- function(id,
         }
         # HISTOGRAMS - CORRECT & OTHER CHANNEL
         for(chan in c(xchan(), ychan())) {
+          # COMPUTE LABEL_TEXT_X - LINEAR SCALE - TRANSFORMED BY CYTO_PLOT
+          if(chan == ychan()){
+            # TRANSFORMERS - INVERSE TRANSFORM
+            if(xchan() %in% names(axes_trans)) {
+              # LABEL_TEXT_X ON LINEAR SCALE
+              label_text_x <- .cyto_transform(
+                .par("usr")[[1]][1] + 0.90 * diff(.par("usr")[[1]][1:2]),
+                trans = axes_trans,
+                channel = xchan(),
+                inverse = TRUE
+              )
+            # NO TRANSFORMERS - LINEAR SCALE
+            } else {
+              label_text_x <- .par("usr")[[1]][1] + 
+                0.90 * diff(.par("usr")[[1]][1:2])
+            }
+          }
+          # CONSTRCUT PLOT
           cyto_plot(
             if (overlay) {
               NIL_comp_trans()
@@ -1357,11 +1375,11 @@ editPlotServer <- function(id,
             label_text_x = if (chan == ychan()) {
               if(overlay) {
                 rep(
-                  0.75 * par("usr")[2],
+                  label_text_x,
                   2
                 )
               } else {
-                0.75 * par("usr")[2]
+                label_text_x
               }
             } else {
               NA
