@@ -46,13 +46,19 @@ written, replaces the \code{path_to_output} argument in
 the \code{infinityFlow} package documentation for more details.}
 }
 \value{
-not sure yet.
+raw and background-corrected imputed expression data for every
+  Infinity antibody, new FCS files written to \code{save_as} along with plots
+  of UMAP projections of the backbone antibody panel.
 }
 \description{
 \code{cyto_infinity_screen()} is a CytoExploreR wrapper around the
 \code{infinity_flow()} function in the \code{infinityFlow} package that uses
-machine learning to integrate multiplexed parallel cytometry
-datasets.
+machine learning to integrate multiplexed parallel cytometry datasets. Users
+should note that \code{cyto_infinity_screen()} takes on the path to the FCS
+files rather than a \code{cytoset} or \code{GatingSet}. Furthermore,
+\code{cyto_infinity_screen()} does not return a \code{cytoset} or
+\code{GatingSet}, instead the new FCS files written to \code{save_as} should
+be read in afterwards using \code{cyto_setup} as per usual.
 }
 \references{
 Becht E, Headley M, Newell E, Gottardo R (2020). Infinity Flow:

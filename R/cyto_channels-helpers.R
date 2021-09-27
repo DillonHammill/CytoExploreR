@@ -597,33 +597,31 @@ cyto_markers_extract <- function(x,
 #' @export
 cyto_channel_select <- function(x){
   
-  # Message
+  # MESSAGE
   message("Select a fluorescent channel for each of the samples:")
   
-  # Channels
+  # CHANNEL OPTIONS
   opts <- c(cyto_fluor_channels(x), "Unstained")
   
-  # CHANNELS
+  # CHANNEL TEMPLATE
   chans <- data.frame("name" = cyto_names(x),
                       "channel" = NA,
                       stringsAsFactors = FALSE)
   
-  # Channel selection
-  if(interactive()) {
-    chans <- data_edit(chans,
-                       title = "Channel Selector",
-                       logo = CytoExploreR_logo(),
-                       col_edit = FALSE,
-                       row_edit = FALSE,
-                       col_options = list("channel" = opts),
-                       col_names = "channel",
-                       col_readonly = "name",
-                       hide = TRUE,
-                       quiet = TRUE,
-                       viewer = "pane")
-  }
+  # CHANNEL SELECTION
+  chans <- data_edit(chans,
+                     title = "Channel Selector",
+                     logo = CytoExploreR_logo(),
+                     col_edit = FALSE,
+                     row_edit = FALSE,
+                     col_options = list("channel" = opts),
+                     col_names = "channel",
+                     col_readonly = "name",
+                     hide = TRUE,
+                     quiet = TRUE,
+                     viewer = "pane")
   
-  # Missing channels
+  # MISSING CHANNELS
   lapply(seq_along(chans[, "channel"]), function(z){
     if(is.na(chans[z, "channel"])){
       stop(paste0("No channel selected for ", chans[z, "name"], "."))
@@ -640,8 +638,14 @@ cyto_channel_select <- function(x){
 #'
 #' @param x object of \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param channels vector of channels, one channel for each cytoframe in
+#'   \code{x}. Channels are added a \code{"channel"} column within
+#'   \code{cyto_details(x)} either by name or the order in which the channels
+#'   are supplied. If no channels are supplied the user will be asked to
+#'   interactively enter this information using \code{cyto_channel_select()}.
 #' @param save_as name to use for the saved channel match csv file, set to
-#'   \code{"date-Channel-Match.csv"}.
+#'   \code{"date-Channel-Match.csv"} by default. To prevent writting to a new
+#'   channel match file, set this argument to \code{NULL}.
 #'
 #' @return update \code{cyto_details} of \code{cytoset} or \code{GatingSet},
 #'   write channel matching to csv file and return channel matching as a
@@ -663,29 +667,53 @@ cyto_channel_select <- function(x){
 #'
 #' @export
 cyto_channel_match <- function(x,
-                               save_as = NULL) {
+                               channels = NULL,
+                               save_as) {
   
-  # Set default name for channel_match file
-  if (is.null(save_as)) {
+  # DEFAULT FILENAME
+  if (missing(save_as)) {
     save_as <- paste0(
       format(Sys.Date(), "%d%m%y"),
       "-", "Channel-Match.csv"
     )
   }
   
-  # Extract sample names
+  # SAMPLE NAMES
   nms <- cyto_names(x)
   
-  # Channels data to edit
-  chans <- cyto_channel_select(x)
-  channel_match <- data.frame("name" = nms,
-                              "channel" = chans,
-                              stringsAsFactors = FALSE)
-  colnames(channel_match) <- c("name", "channel")
-  rownames(channel_match) <- NULL
+  # CHANNELS - SUPPLIED
+  if(is.null(channels)) {
+    # INCORRECT NUMBER OF CHANNELS
+    if(length(channels) != length(x)) {
+      stop(
+        "Incorrect number of chnanels supplied to cyto_channel_match()!"
+      )
+    # CORRECT NUMBER OF CHANNELS
+    } else {
+      channel_match <- data.frame(
+        "name" = nms,
+        "channel" = channels,
+        stringsAsFactors = FALSE
+      )
+      rownames(channel_match) <- NULL
+    }
+  # NO CHANNELS SUPPLIED
+  } else {
+    # INTERACTIVELY EDIT CHANNELS
+    chans <- cyto_channel_select(x)
+    channel_match <- data.frame("name" = nms,
+                                "channel" = chans,
+                                stringsAsFactors = FALSE)
+    rownames(channel_match) <- NULL
+  }
   
-  # Write edited channel match file to csv file
-  write_to_csv(channel_match, save_as)
+  # WRITE CHANNEL_MATCH FILE
+  if(!is.null(save_as)) {
+    write_to_csv(
+      channel_match, 
+      save_as
+    )
+  }
   
   # Update cyto_details
   cyto_details(x)$channel <- channel_match$channel
