@@ -357,7 +357,7 @@ cyto_load <- function(path = ".",
 
 ## CYTO_CLEAN ------------------------------------------------------------------
 
-#' Apply flowAI anomaly detection to clean cytometry data
+#' Apply anomaly detection algorithms to clean cytometry data
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
@@ -389,7 +389,7 @@ cyto_load <- function(path = ".",
 #' # Clean Activation GatingSet
 #' gs <- cyto_clean(gs)
 #'
-#' @references Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
+#' @references Monaco G, et al. (2016) flowAI: automatic and interactive anomaly
 #'   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
 #'   15;32(16):2473-80.
 #'   \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}

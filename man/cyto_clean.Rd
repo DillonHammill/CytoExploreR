@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_clean}
 \alias{cyto_clean}
-\title{Apply flowAI anomaly detection to clean cytometry data}
+\title{Apply anomaly detection algorithms to clean cytometry data}
 \usage{
 cyto_clean(x, type = "flowAI", ...)
 }
@@ -21,7 +21,7 @@ supplied.}
 \code{flowClean::flowClean}, or \code{flowCut::flowCut}.}
 }
 \description{
-Apply flowAI anomaly detection to clean cytometry data
+Apply anomaly detection algorithms to clean cytometry data
 }
 \examples{
 library(CytoExploreRData)
@@ -39,7 +39,7 @@ gs <- cyto_clean(gs)
 
 }
 \references{
-Monaco,G. et al. (2016) flowAI: automatic and interactive anomaly
+Monaco G, et al. (2016) flowAI: automatic and interactive anomaly
   discerning tools for flow cytometry data. Bioinformatics. 2016 Aug
   15;32(16):2473-80.
   \url{https://academic.oup.com/bioinformatics/article/32/16/2473/2240408}
