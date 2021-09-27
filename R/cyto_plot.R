@@ -753,7 +753,7 @@ cyto_plot <- function(x,
   if(length(channels) == 2) {
     args$label_text_y <- .cyto_transform(args$label_text_y,
                                          trans = args$axes_trans,
-                                         channel = args$channels[1],
+                                         channel = args$channels[2],
                                          inverse = FALSE)
   }
   
