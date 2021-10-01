@@ -4,7 +4,7 @@
 \alias{cyto_channel_match}
 \title{Create a csv file assigning a channel to each compensation control}
 \usage{
-cyto_channel_match(x, channels = NULL, save_as)
+cyto_channel_match(x, channels = NULL, save_as = NULL)
 }
 \arguments{
 \item{x}{object of \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -17,8 +17,8 @@ are supplied. If no channels are supplied the user will be asked to
 interactively enter this information using \code{cyto_channel_select()}.}
 
 \item{save_as}{name to use for the saved channel match csv file, set to
-\code{"date-Channel-Match.csv"} by default. To prevent writting to a new
-channel match file, set this argument to \code{NULL}.}
+\code{"date-Channel-Match.csv"} by default. To prevent writing to a new
+channel match file, set this argument to \code{NA}.}
 }
 \value{
 update \code{cyto_details} of \code{cytoset} or \code{GatingSet},

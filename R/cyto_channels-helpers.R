@@ -644,8 +644,8 @@ cyto_channel_select <- function(x){
 #'   are supplied. If no channels are supplied the user will be asked to
 #'   interactively enter this information using \code{cyto_channel_select()}.
 #' @param save_as name to use for the saved channel match csv file, set to
-#'   \code{"date-Channel-Match.csv"} by default. To prevent writting to a new
-#'   channel match file, set this argument to \code{NULL}.
+#'   \code{"date-Channel-Match.csv"} by default. To prevent writing to a new
+#'   channel match file, set this argument to \code{NA}.
 #'
 #' @return update \code{cyto_details} of \code{cytoset} or \code{GatingSet},
 #'   write channel matching to csv file and return channel matching as a
@@ -668,10 +668,10 @@ cyto_channel_select <- function(x){
 #' @export
 cyto_channel_match <- function(x,
                                channels = NULL,
-                               save_as) {
+                               save_as = NULL) {
   
   # DEFAULT FILENAME
-  if (missing(save_as)) {
+  if (is.null(save_as)) {
     save_as <- paste0(
       format(Sys.Date(), "%d%m%y"),
       "-", "Channel-Match.csv"
@@ -708,7 +708,7 @@ cyto_channel_match <- function(x,
   }
   
   # WRITE CHANNEL_MATCH FILE
-  if(!is.null(save_as)) {
+  if(!.all_na(save_as)) {
     write_to_csv(
       channel_match, 
       save_as
@@ -721,6 +721,192 @@ cyto_channel_match <- function(x,
   # Return edited channel match file
   return(channel_match)
 }
+
+## CYTO_CHANNEL_MATCH_CHECK ----------------------------------------------------
+
+#' Check and prepare data stored in channel match files
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param parent vector of parental populations to extract from each sample in
+#'   \code{x}, set to the \code{"root"} node by default.
+#' @param channel_match a vector of channels one per sample or the name of a CSV
+#'   file which indicates the name of the channel associated with each sample If
+#'   \code{channel_match} is not supplied or the channels are not annotated in
+#'   \code{cyto_details(x)} the user will be asked to interactively enter this
+#'   information usng \code{cyto_channel_match()}.
+#' @param save_as passed to \code{cyto_channel_match()} to control whether the
+#'   channel annotation should be written to a CSV file.
+#'
+#' @return data.frame containing the updated experimental details.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#' library(CytoExploreRData)
+#' 
+#' # Compensation GatingSet
+#' gs <- GatingSet(Compensation)
+#' 
+#' # Annotate channel matches in experiment details
+#' cyto_channel_match_check(gs)
+#' }
+#'
+#' @export
+cyto_channel_match_check <- function(x,
+                                     parent = "root",
+                                     channel_match = NULL,
+                                     save_as = NA){
+  
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+  
+  # ANNOTATE PARENT(S)
+  if(!"parent" %in% colnames(pd)) {
+    pd[, "parent"] <- rep(
+      parent, 
+      length.out = length(x)
+    )
+  }
+  
+  # CHANNEL_MATCH FILE SEARCH
+  if(is.null(channel_match)) {
+    channel_match <- grep(
+      "channel-match.csv$",
+      list.files(),
+      ignore.case = TRUE
+    )
+    if(length(channel_match) == 0) {
+      channel_match <- NULL
+    } else {
+      channel_match <- list.files()[channel_match]
+    }
+  }
+  
+  # ANNOTATE CHANNEL(S)
+  if(!"channel" %in% colnames(pd)) {
+    # CHANNEL_MATCH SUPPLIED
+    if(!is.null(channel_match)) {
+      # CHANNEL VECTOR OR FILE
+      if(is.null(dim(channel_match))) {
+        # CHANNEL_MATCH FILE
+        if(all(file_exists(file_ext_append(channel_match, ".csv")))) {
+          # FIND VALID CHANNEL_MATCH
+          channel_match <- structure(
+            lapply(
+              seq_along(channel_match),
+              function(z){
+                # READ CHANNEL_MATCH FILE
+                cm <- read_from_csv(
+                  channel_match[z]
+                )
+                # CHECK CHANNEL_MATCH
+                if(all(c("name", "channel") %in% colnames(cm))) {
+                  if(all(cyto_names(x) %in% cm[, "name"])) {
+                    return(cm[
+                      cyto_match(
+                        x,
+                        cm[, "name"]
+                      )
+                    ])
+                  } else {
+                    return(NULL)
+                  }
+                } else {
+                  return(NULL)
+                }
+              }
+            )
+          )
+          channel_match[LAPPLY(channel_match, "is.null")] <- NULL
+          if(length(channel_match) == 0) {
+            channel_match <- NULL
+          }
+          # UPDATE EXPERIMENT DETAILS
+          if(!is.null(channel_match)) {
+            # UPDATE CHANNEL(S)
+            pd[, "channel"] <- channel_match[, "channel"]
+            # UPDATE PARENT(S)
+            if("parent" %in% colnames(channel_match)) {
+              pd[, "parent"] <- channel_match[, "parent"]
+            }
+          }
+        # CHANNEL VECTOR
+        } else {
+          # UPDATE CHANNEL(S)
+          if(length(channel_match) == length(x)) {
+            pd[, "channel"] <- cyto_channels_extract(
+              x,
+              channels = channel_match,
+              skip = "Unstained"
+            )
+          }
+        }
+      # ARRAY
+      } else {
+        # NAME COLUMN REQUIRED
+        if("name" %in% colnames(pd)) {
+          # UPDATE PARENT(S)
+          if("parent" %in% colnames(pd)) {
+            pd[, "parent"] <- channel_match[
+              cyto_match(
+                x,
+                channel_match[, "name"]
+              ),
+              "parent"
+            ]
+          }
+          # UPDATE CHANNEL(S)
+          if("channel" %in% colnames(pd)) {
+            pd[, "channel"] <- channel_match[
+              cyto_match(
+                x,
+                channel_match[, "name"]
+              ),
+              "channel"
+            ]
+          }
+        }
+      }
+    }
+  }
+  
+  # CYTO_CHANNEL_MATCH() - LAST RESORT
+  if(!"channel" %in% colnames(pd)) {
+    channel_match <- cyto_channel_match(
+      x,
+      save_as = save_as
+    )
+    pd[, "channel"] <- channel_match[
+      cyto_match(
+        x,
+        channel_match[, "name"]
+      ),
+      "channel"
+    ]
+    pd[, "parent"] <- channel_match[
+      cyto_match(
+        x,
+        channel_match[, "name"]
+      ),
+      "parent"
+    ]
+  }
+  
+  # UPDATE EXPERIMENT DETAILS STORED IN X
+  cyto_details(x) <- pd[
+    cyto_match(
+      x,
+      pd[, "name"]
+    ),
+  ]
+  
+  # RETURN UPDATED EXPERIMENT DETAILS
+  return(pd)
+  
+}
+
 
 ## CYTO_CHANNELS_RESTRICT ------------------------------------------------------
 
