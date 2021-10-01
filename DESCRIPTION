@@ -26,6 +26,7 @@ Imports:
     graphics,
     grDevices,
     HeatmapR,
+    ks,
     MASS,
     methods,
     purrr,

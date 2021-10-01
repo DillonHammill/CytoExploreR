@@ -559,3 +559,62 @@ cyto_stat_skewness <- function(x,
   )
   
 }
+
+## CYTO_STAT_BKDE ----------------------------------------------------------------
+
+#' Compute binned 2D kernel density estimate
+#' 
+#' @param x a 2D matrix.
+#' @param bins number of bins to use for x and y values, set to 250 by default.
+#' 
+#' @return vector of binned counts mapped to each row in x.
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @importFrom ks binning
+#' 
+#' @noRd
+cyto_stat_bkde <- function(x,
+                           bins = 250,
+                           ...) {
+  
+  # COMPUTE 2D BINNED COUNTS
+  bkde <- suppressWarnings(
+    binning(
+      x,
+      bgridsize = rep(bins, length.out = ncol(x)),
+      ...
+    )
+  )
+  
+  # COMPUTE BREAKS FOR BINNING - SEE DENSCOLS()
+  mkBreaks <- function(u){
+    u - diff(range(u))/(length(u)-1)/2
+  }
+  
+  # COMPUTE X BINS
+  xbin <- cut(
+    x[, 1],
+    mkBreaks(
+      bkde$eval.points[[1]]
+    ),
+    labels = FALSE
+  )
+  
+  # COMPUTE Y BINS
+  ybin <- cut(
+    x[, 2],
+    mkBreaks(
+      bkde$eval.points[[2]]
+    ),
+    labels = FALSE
+  )
+  
+  # GET COUNTS FOR BINS
+  bkde <- bkde$counts[cbind(xbin, ybin)]
+  bkde[is.na(bkde)] <- min(bkde, na.rm = TRUE) # EVENTS OUTSIDE GRID - MIN COUNT
+  
+  # VECTOR OF BINNED COUNTS
+  return(bkde)
+  
+}
