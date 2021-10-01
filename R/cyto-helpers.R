@@ -3585,12 +3585,12 @@ cyto_sample_n <- function(x,
                        parent = parent,
                        input = "matrix",
                        copy = FALSE)
-  
+
   # FORMAT
   counts <- structure(
     counts[, 1, drop = TRUE],
     names = rownames(counts)
-    )
+  )
   
   # TOTAL COUNT
   total_count <- sum(counts)
@@ -5717,40 +5717,56 @@ cyto_apply.flowSet <- function(x,
     } else {
       # VECTORS TO MATRIX
       if(is.null(dim(res[[1]]))) {
+        # ATTEMPT MATRIX CONVERSION
         res <- structure(
-          lapply(names(res), function(z){
-            matrix(res[[z]],
-                   nrow = 1,
-                   dimnames = list(z,
-                                   names(res[[z]])))
-          }), names = names(res))
+          lapply(
+            names(res),
+            function(z){
+              tryCatch(
+                matrix(res[[z]],
+                       nrow = 1,
+                       dimnames = list(z,
+                                       names(res[[z]]))),
+                error = function(e) {
+                  return(res[[z]])
+                }
+              )
+            }
+          ),
+          names = names(res)
+        )
       }
-      # PREPARE MATRICES
-      res <- lapply(names(res), function(z){
-        # ROWNAMES
-        if(is.null(rownames(res[[z]]))) {
-          if(nrow(res[[z]]) > 1) {
-            rownames(res[[z]]) <- paste(z, 1:nrow(res[[z]]), sep = "|")
+      # LIST OF MATRICES
+      if(all(!is.null(LAPPLY(res, "dim")))) {
+        # PREPARE & FORMAT MATRICES
+        res <- lapply(names(res), function(z){
+          # ROWNAMES
+          if(is.null(rownames(res[[z]]))) {
+            if(nrow(res[[z]]) > 1) {
+              rownames(res[[z]]) <- paste(z, 1:nrow(res[[z]]), sep = "|")
+            } else {
+              rownames(res[[z]]) <- z
+            }
           } else {
-            rownames(res[[z]]) <- z
+            if(!all(rownames(res[[z]]) == z)) {
+              rownames(res[[z]]) <- paste(z, rownames(res[[z]]), sep = "|")
+            }
           }
-        } else {
-          if(!all(rownames(res[[z]]) == z)) {
-            rownames(res[[z]]) <- paste(z, rownames(res[[z]]), sep = "|")
+          # COLNAMES
+          if(is.null(colnames(res[[z]]))) {
+            if(ncol(res[[z]]) == 1) {
+              colnames(res[[z]]) <- FUN_NAME
+            } else {
+              colnames(res[[z]]) <- paste0(FUN_NAME, "-", 1:ncol(res[[z]]))
+            }
           }
+          return(res[[z]])
+        })
+        # RBIND MATRICES - SAME DIMENSIONS
+        if(length(unique(LAPPLY(res, "ncol"))) == 1) {
+          res <- do.call("rbind", res)
         }
-        # COLNAMES
-        if(is.null(colnames(res[[z]]))) {
-          if(ncol(res[[z]]) == 1) {
-            colnames(res[[z]]) <- FUN_NAME
-          } else {
-            colnames(res[[z]]) <- paste0(FUN_NAME, "-", 1:nrow(res[[z]]))
-          }
-        }
-        return(res[[z]])
-      })
-      # BIND MATRICES
-      res <- do.call("rbind", res)
+      }
     }
   }
   
@@ -5913,6 +5929,8 @@ cyto_cbind.flowSet <- function(x,
       })
       names(cols) <- cyto_names(x)
     }
+  } else {
+    stop("'cols' must be a matrix!")
   }
   
   # BIND COLUMNS
