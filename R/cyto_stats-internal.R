@@ -618,3 +618,72 @@ cyto_stat_bkde <- function(x,
   return(bkde)
   
 }
+
+## CYTO_STAT_RESCALE -----------------------------------------------------------
+
+#' Rescale values within a newly defined range
+#' 
+#' @param x values to be rescaled in the form of a vector.
+#' @param scale min max values of new scale.
+#' 
+#' @return vector or matrix of rescaled values.
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+cyto_stat_rescale <- function(x,
+                              scale = NULL) {
+  
+  # SCALE REQUIRED
+  if(is.null(scale)) {
+    stop(
+      "Supply min/max values for new scale(s) to 'scale' to rescale values!"
+    )
+  }
+  
+  # MATRIX
+  if(!is.null(dim(x))) {
+    # SCALE
+    if(is.null(dim(scale)) | ncol(scale) != ncol(x)) {
+      stop(
+        "'scale' must a matrix of min/max values for each column in x!"
+      )
+    }
+    # RESCALE EACH COLUMN
+    cnt <- 0
+    return(
+      apply(
+        x,
+        2,
+        function(z){
+          cnt <<- cnt + 1
+          cyto_stat_rescale(
+            z,
+            scale = if(!is.null(colnames(x)) & !is.null(colnames(scale))) {
+              scale[, colnames(x)[cnt]]
+            } else {
+              scale[, cnt]
+            }
+          )
+        }
+      )
+    )
+  # VECTOR
+  } else {
+    return(
+      LAPPLY(
+        x, 
+        function(w) {
+          if(w < min(scale)) {
+            return(0)
+          } else if(w > max(scale)) {
+            return(1)
+          } else {
+            return((w - min(scale)) / diff(scale))
+          }
+        }
+      )
+    )
+  }
+  
+}
