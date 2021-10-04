@@ -189,6 +189,35 @@
 #'   legends when legend is set to \code{"fill"}.
 #' @param legend_point_col colour(s) to use for points in 2-D scatter plot
 #'   legend.
+#' @param key options include \code{"scale"} to display only the colour scale,
+#'   \code{"both"} to display the colour scale and text to annotate
+#'   \code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
+#'   key from the plot(s). Set to \code{"both"} by default to display colour
+#'   scale and associated text in the key.
+#' @param key_scale can be either \code{"fixed"} to use the same colour scale
+#'   for points between plots, or \code{"free"} to set a unique colour scale for
+#'   each plot. \code{key_scale} is set to \code{"fixed"} by default create a
+#'   shared colour scale which allows comparison of relative counts between
+#'   plots.
+#' @param key_text_font font to use for text in the key, set to 1 by default for
+#'   plain font.
+#' @param key_text_size numeric to control the size of text in the plot key, set
+#'   to 1 by default.
+#' @param key_text_col colour to use for text in the plot key, set to
+#'   \code{"black"} by default.
+#' @param key_text_col_alpha numeric [0, 1] to control the transparency of the
+#'   text colour in the plot key, set to 1 by default to remove transparency.
+#' @param key_title title to place above the key set to \code{"count"} when
+#'   \code{point_col = NA} or the name of the channel/marker supplied to
+#'   \code{point_col}.
+#' @param key_title_text_font font to use for the key title, set to 1 by default
+#'   for plain font.
+#' @param key_title_text_size numeric to control the size of title text in teh
+#'   key, set to 1 by default.
+#' @param key_title_text_col colour to use for the key title, set to
+#'   \code{"black"} by default.
+#' @param key_title_text_col_alpha numeric [0, 1] to control the transparency of
+#'   the key title text, set to 1 by default to remove transparency.
 #' @param gate_line_type integer [0,6] to control the line type of gates, set to
 #'   \code{1} to draw solid lines by default. See
 #'   \code{\link[graphics:par]{lty}} for alternatives.
@@ -387,6 +416,17 @@ cyto_plot <- function(x,
                       legend_line_col = NA,
                       legend_box_fill = NA,
                       legend_point_col = NA,
+                      key = "both",
+                      key_scale = "fixed", 
+                      key_text_font = 1,
+                      key_text_size = 0.8,
+                      key_text_col = "black",
+                      key_text_col_alpha = 1,
+                      key_title = "",
+                      key_title_text_font = 1,
+                      key_title_text_size = 0.8,
+                      key_title_text_col = "black",
+                      key_title_text_col_alpha = 1,
                       gate_line_type = 1,
                       gate_line_width = 2.5,
                       gate_line_col = "red",
@@ -697,11 +737,7 @@ cyto_plot <- function(x,
       .cyto_plot_axes_text(args$x[[1]],
                            channels = args$channels[1],
                            axes_trans = args$axes_trans,
-                           axes_range = structure(list(args$xlim, 
-                                                       args$ylim),
-                                                  names = rep(c(args$channels, 
-                                                                NA),
-                                                              length.out = 2)),
+                           axes_range = list(args$xlim),
                            axes_limits = args$axes_limits
       )[[1]]
   } else {
@@ -715,10 +751,7 @@ cyto_plot <- function(x,
         .cyto_plot_axes_text(args$x[[1]],
                              channels = args$channels[2],
                              axes_trans = args$axes_trans,
-                             axes_range = structure(list(args$xlim, args$ylim),
-                                                    names = rep(c(args$channels, 
-                                                                  NA),
-                                                                length.out = 2)),
+                             axes_range = list(args$ylim),
                              axes_limits = args$axes_limits
         )[[1]]
     } else if (length(args$channels) == 1) {
@@ -794,6 +827,21 @@ cyto_plot <- function(x,
   # REMOVE HEADER ARGUMENTS - CANNOT SPLIT LATER
   args <- args[!names(args) %in% names(header_args)]
   
+  # KEY SCALE - KDE ANNOTATED IN BASE LAYER CYTOSETS
+  if(length(channels) == 2) {
+    args$key_scale <- .cyto_plot_key_scale(
+      args$x,
+      channels = args$channels,
+      xlim = args$xlim,
+      ylim = args$ylim,
+      point_col = args$point_col,
+      key_scale = args$key_scale,
+      axes_trans = args$axes_trans
+    )
+    args$x <- args$key_scale$x
+    args$key_scale <- args$key_scale$key
+  }
+  
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
   
   # POPUP_SIZE - INHERIT CUSTOM DEVICE SIZE
@@ -820,6 +868,7 @@ cyto_plot <- function(x,
   
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]
+  
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
   

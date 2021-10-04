@@ -21,7 +21,7 @@
 #'   will NOT be applied to the flowFrame internally and should be applied to
 #'   the flowFrame prior to plotting.
 #' @param overlay a list of cytosets to overlay onto the plot.
-#' @param gate list of gate objects to be plotted, used internlaly to ensure
+#' @param gate list of gate objects to be plotted, used internally to ensure
 #'   gate co-ordinates are taken into account when computing axes limits.
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of y axis (e.g. c(0,5)).
@@ -46,7 +46,7 @@
 #' @param hist_smooth smoothing parameter passed to
 #'   \code{\link[stats:density]{density}} to adjust the smoothness of the kernel
 #'   density for histograms, set to \code{1} by default.
-#' @param hist_bins number of bins to use for histograms, set to 256 by default.  
+#' @param hist_bins number of bins to use for histograms, set to 256 by default.
 #' @param hist_stack numeric [0,1] indicating the degree of stacking for
 #'   histograms, set to \code{0} by default.
 #' @param hist_layers numeric indicating the number of histograms to stack in
@@ -127,6 +127,34 @@
 #'   legends when legend is set to \code{"fill"}.
 #' @param legend_point_col colour(s) to use for points in 2-D scatter plot
 #'   legend.
+#' @param key options include \code{"scale"} to display only the colour scale,
+#'   \code{"both"} to display the colour scale and text to annotate
+#'   \code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
+#'   key from the plot(s). Set to \code{"both"} by default to display colour
+#'   scale and associated text in the key.
+#' @param key_scale inherits scale limits computed within \code{cyto_plot},
+#'   should be a vector of the form \code{c(min, max)}, \code{cyto_plot_empty()}
+#'   will attempt to compute these limits based on the supplied data if
+#'   \code{key_scale} is not supplied.
+#' @param key_text_font font to use for text in the key, set to 1 by default for
+#'   plain font.
+#' @param key_text_size numeric to control the size of text in the plot key, set
+#'   to 1 by default.
+#' @param key_text_col colour to use for text in the plot key, set to
+#'   \code{"black"} by default.
+#' @param key_text_col_alpha numeric [0, 1] to control the transparency of the
+#'   text colour in the plot key, set to 1 by default to remove transparency.
+#' @param key_title title to place above the key set to \code{"count"} when
+#'   \code{point_col = NA} or the name of the channel/marker supplied to
+#'   \code{point_col}.
+#' @param key_title_text_font font to use for the key title, set to 1 by default
+#'   for plain font.
+#' @param key_title_text_size numeric to control the size of title text in teh
+#'   key, set to 1 by default.
+#' @param key_title_text_col colour to use for the key title, set to
+#'   \code{"black"} by default.
+#' @param key_title_text_col_alpha numeric [0, 1] to control the transparency of
+#'   the key title text, set to 1 by default to remove transparency.
 #' @param grid logical indicating whether to include grid lines in the plot
 #'   background, set to TRUE by default. Alternatively, users can supply a
 #'   integer to indicate the number of equally spaced quantiles to used for the
@@ -142,7 +170,7 @@
 #'   lines, set to 1 by default to remove transparency.
 #' @param ... not in use.
 #'
-#' @importFrom grDevices adjustcolor rgb colorRamp
+#' @importFrom grDevices adjustcolor rgb colorRamp axisTicks
 #' @importFrom graphics plot box axis title par rect axTicks abline
 #' @importFrom methods formalArgs is
 #'
@@ -218,6 +246,17 @@ cyto_plot_empty <- function(x,
                             legend_line_col = NA,
                             legend_box_fill = NA,
                             legend_point_col = NA,
+                            key = "both",
+                            key_scale = "fixed",
+                            key_text_font = 1,
+                            key_text_size = 0.8,
+                            key_text_col = "black",
+                            key_text_col_alpha = 1,
+                            key_title = "",
+                            key_title_text_font = 1,
+                            key_title_text_size = 0.8,
+                            key_title_text_col = "black",
+                            key_title_text_col_alpha = 1,
                             grid = TRUE,
                             grid_line_type = 1,
                             grid_line_width = 1,
@@ -353,38 +392,34 @@ cyto_plot_empty <- function(x,
   # AXES TEXT ------------------------------------------------------------------
   
   # Convert axes_text to list - allows inheritance from cyto_plot
-  if (!is(axes_text, "list")) {
+  if (!cyto_class(axes_text, "list")) {
     axes_text <- list(axes_text[1], axes_text[2])
   }
   
   # X axis breaks and labels -  can be inherited from cyto_plot
-  if (!is(axes_text[[1]], "list")) {
+  if (!cyto_class(axes_text[[1]], "list")) {
     if (.all_na(axes_text[[1]])) {
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[1]] == TRUE) {
-      lims <- list(xlim)
-      names(lims) <- channels[1]
       axes_text[[1]] <- .cyto_plot_axes_text(x,
                                              channels = channels[1],
                                              axes_trans = axes_trans,
-                                             axes_range = lims,
+                                             axes_range = list(xlim),
                                              axes_limits = axes_limits
       )[[1]]
     }
   }
   
   # Y axis breaks and labels - can be inherited from cyto_plot
-  if (!is(axes_text[[2]], "list")) {
+  if (!cyto_class(axes_text[[2]], "list")) {
     if (.all_na(axes_text[[2]])) {
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[2]] == TRUE) {
       if (length(channels) == 2) {
-        lims <- list(ylim)
-        names(lims) <- channels[2]
         axes_text[[2]] <- .cyto_plot_axes_text(x,
                                                channels = channels[2],
                                                axes_trans = axes_trans,
-                                               axes_range = lims,
+                                               axes_range = list(ylim),
                                                axes_limits = axes_limits
         )[[1]]
       } else {
@@ -419,9 +454,31 @@ cyto_plot_empty <- function(x,
                             title = title
   )
   
+  # KEY SCALE ------------------------------------------------------------------
+  
+  # KEY_SCALE REQUIRED FOR MARGINS
+  if(length(channels) == 2 &
+     (is.na(point_col)[1] |
+      any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
+     key %in% c("scale", "both") &
+     !cyto_class(key_scale, "list")) {
+    key_scale <- .cyto_plot_key_scale(
+      x,
+      channels = channels,
+      xlim = xlim,
+      ylim = ylim,
+      point_col = point_col,
+      key_scale = key_scale,
+      axes_trans = axes_trans
+    )
+    # UPDATE X - INCLUDES NEW *BKDE* PARAMETER
+    x <- key_scale$x
+    key_scale <- key_scale$key
+  }
+  
   # MARGINS --------------------------------------------------------------------
   
-  # Set plot margins - set par("mar")
+  # PLOT MARGINS - set par("mar")
   .cyto_plot_margins(x,
                      channels = channels,
                      legend = legend,
@@ -430,12 +487,14 @@ cyto_plot_empty <- function(x,
                      title = title,
                      axes_text = axes_text,
                      margins = margins,
-                     point_col = point_col
+                     point_col = point_col,
+                     key = key,
+                     key_scale = key_scale
   )
   
   # PLOT CONSTRUCTION ----------------------------------------------------------
   
-  # Plot
+  # PLOT
   graphics::plot(1,
                  type = "n",
                  axes = FALSE,
@@ -446,7 +505,19 @@ cyto_plot_empty <- function(x,
                  bty = "n"
   )
   
-  # X AXIS - TRANSFORMED
+  # X AXIS TEXT
+  if(.all_na(axes_text[[1]])) {
+    axes_text[[1]] <- .cyto_plot_axes_text(
+      x,
+      channels = channels[1],
+      axes_range = list(xlim),
+      axes_limits = axes_limits,
+      axes_limits_buffer = axes_limits_buffer,
+      axes_trans = axes_trans
+    )[[1]]
+  }
+  
+  # ADD X AXIS TO PLOT
   if (cyto_class(axes_text[[1]], "list")) {
     # MINOR TICKS
     x_mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
@@ -456,82 +527,31 @@ cyto_plot_empty <- function(x,
          tck = -0.015
     )
     
-    # MAJOR TICKS - MUST BE >2% XRANGE FROM ZERO
+    # MAJOR TICKS
     x_mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
-    x_mjr <- list(
-      "at" = axes_text[[1]]$at[x_mjr_ind],
-      "label" = axes_text[[1]]$label[x_mjr_ind]
-    )
-    # Zero included on plot
-    if (any(as.character(x_mjr$label) == "0")) {
-      zero <- which(as.character(x_mjr$label) == "0")
-      zero_break <- x_mjr$at[zero]
-      zero_buffer <- c(
-        zero_break - 0.02 * (xlim[2] - xlim[1]),
-        zero_break + 0.02 * (xlim[2] - xlim[1])
-      )
-      x_mjr_ind <- c(
-        zero,
-        which(x_mjr$at < zero_buffer[1] |
-                x_mjr$at > zero_buffer[2])
-      )
-    } else {
-      x_mjr_ind <- seq_len(length(x_mjr$label))
-    }
-    
     axis(1,
-         at = x_mjr$at[x_mjr_ind],
-         labels = x_mjr$label[x_mjr_ind],
+         at = axes_text[[1]]$at[x_mjr_ind],
+         labels = axes_text[[1]]$label[x_mjr_ind],
          font.axis = axes_text_font,
          col.axis = axes_text_col,
          cex.axis = axes_text_size,
          tck = -0.03
     )
-    # X AXIS - LINEAR
-  } else if (.all_na(axes_text[[1]])) {
-    # MAJOR TICKS
-    major_ticks <- axTicks(1)
-    names(major_ticks) <- trimws(format(major_ticks, scientific = FALSE))
-    axis(1,
-         at = major_ticks,
-         labels = names(major_ticks),
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size,
-         tck = -0.03)
-    # MINOR TICKS - WITHIN RANGE OF MAJOR TICKS
-    minor_ticks <- LAPPLY(seq_len(length(major_ticks)-1), function(z){
-      pretty(major_ticks[c(z, z + 1)])
-    })
-    # MINOR TICKS OUTSIDE MAJOR TICK RANGE
-    minor_ticks <- c(seq(min(major_ticks), 
-                         par("usr")[1], 
-                         diff(minor_ticks[2:1])),
-                     minor_ticks,
-                     seq(max(major_ticks), 
-                         par("usr")[2], 
-                         diff(minor_ticks[1:2])))
-    minor_ticks <- minor_ticks[!minor_ticks %in% major_ticks]
-    axis(1,
-         at = minor_ticks,
-         labels = rep("", length(minor_ticks)),
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size,
-         tck = -0.015)
-    # PREPARE AXES_TEXT - GRID LINES
-    ticks <- unique(sort(c(major_ticks, minor_ticks)))
-    labels <- LAPPLY(names(ticks), function(z){
-      if(.all_na(z)) {
-        z <- ""
-      }
-      return(z)
-    })
-    axes_text[[1]] <- list(at = ticks,
-                           labels = labels)
   }
   
-  # Y AXIS - LINEAR/TRANSFORMED
+  # Y AXIS TEXT
+  if(.all_na(axes_text[[2]])) {
+    axes_text[[2]] <- .cyto_plot_axes_text(
+      x,
+      channels = channels[2],
+      axes_range = list(ylim),
+      axes_limits = axes_limits,
+      axes_limits_buffer = axes_limits_buffer,
+      axes_trans = axes_trans
+    )[[1]]
+  }
+  
+  # ADD Y AXIS TO PLOT
   if (cyto_class(axes_text[[2]], "list")) {
     # MINOR TICKS
     y_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
@@ -540,78 +560,16 @@ cyto_plot_empty <- function(x,
          labels = axes_text[[2]]$label[y_mnr_ind],
          tck = -0.015
     )
-    # MAJOR TICKS - MUST BE >2% yrange FROM ZERO
+    # MAJOR TICKS
     y_mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
-    y_mjr <- list(
-      "at" = axes_text[[2]]$at[y_mjr_ind],
-      "label" = axes_text[[2]]$label[y_mjr_ind]
-    )
-    # Zero included on plot
-    if (any(as.character(y_mjr$label) == "0")) {
-      zero <- which(as.character(y_mjr$label) == "0")
-      zero_break <- y_mjr$at[zero]
-      zero_buffer <- c(
-        zero_break - 0.02 * (ylim[2] - ylim[1]),
-        zero_break + 0.02 * (ylim[2] - ylim[1])
-      )
-      y_mjr_ind <- c(
-        zero,
-        which(y_mjr$at < zero_buffer[1] |
-                y_mjr$at > zero_buffer[2])
-      )
-    } else {
-      y_mjr_ind <- seq_len(length(y_mjr$label))
-    }
     axis(2,
-         at = y_mjr$at[y_mjr_ind],
-         labels = y_mjr$label[y_mjr_ind],
+         at = axes_text[[2]]$at[y_mjr_ind],
+         labels = axes_text[[2]]$label[y_mjr_ind],
          font.axis = axes_text_font,
          col.axis = axes_text_col,
          cex.axis = axes_text_size,
          tck = -0.03
     )
-    # Y AXIS - LINEAR
-  } else if (.all_na(axes_text[[2]])) {
-    # MAJOR TICKS
-    major_ticks <- axTicks(2)
-    names(major_ticks) <- trimws(format(major_ticks, scientific = FALSE))
-    axis(2,
-         at = major_ticks,
-         labels = names(major_ticks),
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size,
-         tck = -0.03)
-    # MINOR TICKS - WITHIN RANGE OF MAJOR TICKS
-    minor_ticks <- LAPPLY(seq_len(length(major_ticks)-1), function(z){
-      pretty(major_ticks[c(z, z + 1)])
-    })
-    # MINOR TICKS OUTSIDE MAJOR TICK RANGE
-    minor_ticks <- c(seq(min(major_ticks), 
-                         par("usr")[3], 
-                         diff(minor_ticks[2:1])),
-                     minor_ticks,
-                     seq(max(major_ticks), 
-                         par("usr")[4], 
-                         diff(minor_ticks[1:2])))
-    minor_ticks <- minor_ticks[!minor_ticks %in% major_ticks]
-    axis(2,
-         at = minor_ticks,
-         labels = rep("", length(minor_ticks)),
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size,
-         tck = -0.015)
-    # PREPARE AXES_TEXT - GRID LINES
-    ticks <- unique(sort(c(major_ticks, minor_ticks)))
-    labels <- LAPPLY(names(ticks), function(z){
-      if(.all_na(z)) {
-        z <- ""
-      }
-      return(z)
-    })
-    axes_text[[2]] <- list(at = ticks,
-                           labels = labels)
   }
   
   # BORDER_FILL
@@ -742,73 +700,34 @@ cyto_plot_empty <- function(x,
     }
   }
   
-  # LEGEND ---------------------------------------------------------------------
+  # KEY ------------------------------------------------------------------------
   
-  # POINT_COL_SCALE
-  if (length(channels) == 2 &
-      (is.na(point_col)[1] |
-       any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
-    # LEGEND
-    point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
-    legend_col_ramp <- colorRamp(point_col_scale)
-    legend_cols <- seq(0, 1, 1 / 50) # 50 boxes
-    legend_cols <- legend_col_ramp(legend_cols)
-    legend_cols <- rgb(legend_cols[, 1],
-                       legend_cols[, 2],
-                       legend_cols[, 3],
-                       maxColorValue = 255
+  # KEY - COUNTS OR MARKER EXPRESSION - BASE LAYER ONLY
+  if(length(channels) == 2 &
+     (is.na(point_col)[1] |
+      any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
+     !key %in% "none") {
+    # ADD KEY TO PLOT
+    .cyto_plot_key(
+      x,
+      channels = channels,
+      xlim = xlim,
+      ylim = ylim,
+      point_col = point_col,
+      point_col_scale = point_col_scale,
+      point_col_alpha = point_col_alpha,
+      key = key,
+      key_scale = key_scale,
+      key_text_font = key_text_font,
+      key_text_size = key_text_size,
+      key_text_col = key_text_col,
+      key_text_col_alpha = key_text_col_alpha,
+      axes_trans = axes_trans,
+      key_title = key_title,
+      key_title_text_font = key_title_text_font,
+      key_title_text_col = key_title_text_col,
+      key_title_text_col_alpha = key_title_text_col_alpha
     )
-    legend_cols <- adjustcolor(legend_cols, point_col_alpha[1])
-    # PLOT LIMITS
-    usr <- .par("usr")[[1]]
-    # LEGEND LOCATION
-    legend_x <- c(
-      usr[2] + 0.005 * (usr[2] - usr[1]),
-      usr[2] + 0.035 * (usr[2] - usr[1])
-    )
-    legend_y <- c(usr[3], usr[4])
-    # LEGEND BORDER
-    rect(legend_x[1],
-         legend_y[1],
-         legend_x[2],
-         legend_y[2],
-         xpd = TRUE,
-         lwd = 1
-    )
-    # LEGEND BOXES
-    legend_box_x <- legend_x
-    legend_box_y <- seq(
-      usr[3],
-      usr[4],
-      (usr[4] - usr[3]) / 50
-    )
-    lapply(seq_len(50), function(z) {
-      rect(legend_box_x[1],
-           legend_box_y[z],
-           legend_box_x[2],
-           legend_box_y[z + 1],
-           xpd = TRUE,
-           col = legend_cols[z],
-           border = NA
-      )
-    })
-    # # LEGEND TEXT
-    # print(names(point_col))
-    # grid_size <- names(point_col)[1]
-    # print(grid_size)
-    # x_bins <- cut(cyto_exprs(x[[1]])[[1]][, channels[1]], 
-    #               grid_size, 
-    #               labels = 1:(grid_size-1))
-    # y_bins <- cut(cyto_exprs(x[[1]])[[1]][, channels[2]], 
-    #               grid_size, 
-    #               labels = 1:(grid_size-1))
-    # counts <- table(paste0(x_bins, "-", y_bins))
-    # print(counts)
-    # print(range(counts))
-    # text(legend_box_x + 0.05 * legend_box_x,
-    #      legend_box_y[1],
-    #      labels = min(counts),
-    #      xpd = TRUE)
   }
   
   # LEGEND - FALSE/"fill"/"line"
@@ -1840,6 +1759,16 @@ cyto_plot_theme_args <- function() {
     "grid_line_alpha",
     "header_text_font",
     "header_text_size",
-    "header_text_col"
+    "header_text_col",
+    "key",
+    "key_scale",
+    "key_text_font",
+    "key_text_size",
+    "key_text_col",
+    "key_text_col_alpha",
+    "key_title_text_font",
+    "key_title_text_size",
+    "key_title_text_col",
+    "key_title_text_col_alpha"
   )
 }

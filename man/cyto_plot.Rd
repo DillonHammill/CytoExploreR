@@ -70,6 +70,17 @@ cyto_plot(
   legend_line_col = NA,
   legend_box_fill = NA,
   legend_point_col = NA,
+  key = "both",
+  key_scale = "fixed",
+  key_text_font = 1,
+  key_text_size = 0.8,
+  key_text_col = "black",
+  key_text_col_alpha = 1,
+  key_title = "",
+  key_title_text_font = 1,
+  key_title_text_size = 0.8,
+  key_title_text_col = "black",
+  key_title_text_col_alpha = 1,
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
@@ -352,6 +363,46 @@ legends when legend is set to \code{"fill"}.}
 
 \item{legend_point_col}{colour(s) to use for points in 2-D scatter plot
 legend.}
+
+\item{key}{options include \code{"scale"} to display only the colour scale,
+\code{"both"} to display the colour scale and text to annotate
+\code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
+key from the plot(s). Set to \code{"both"} by default to display colour
+scale and associated text in the key.}
+
+\item{key_scale}{can be either \code{"fixed"} to use the same colour scale
+for points between plots, or \code{"free"} to set a unique colour scale for
+each plot. \code{key_scale} is set to \code{"fixed"} by default create a
+shared colour scale which allows comparison of relative counts between
+plots.}
+
+\item{key_text_font}{font to use for text in the key, set to 1 by default for
+plain font.}
+
+\item{key_text_size}{numeric to control the size of text in the plot key, set
+to 1 by default.}
+
+\item{key_text_col}{colour to use for text in the plot key, set to
+\code{"black"} by default.}
+
+\item{key_text_col_alpha}{numeric [0, 1] to control the transparency of the
+text colour in the plot key, set to 1 by default to remove transparency.}
+
+\item{key_title}{title to place above the key set to \code{"count"} when
+\code{point_col = NA} or the name of the channel/marker supplied to
+\code{point_col}.}
+
+\item{key_title_text_font}{font to use for the key title, set to 1 by default
+for plain font.}
+
+\item{key_title_text_size}{numeric to control the size of title text in teh
+key, set to 1 by default.}
+
+\item{key_title_text_col}{colour to use for the key title, set to
+\code{"black"} by default.}
+
+\item{key_title_text_col_alpha}{numeric [0, 1] to control the transparency of
+the key title text, set to 1 by default to remove transparency.}
 
 \item{gate_line_type}{integer [0,6] to control the line type of gates, set to
 \code{1} to draw solid lines by default. See

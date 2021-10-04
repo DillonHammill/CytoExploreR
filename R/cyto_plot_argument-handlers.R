@@ -117,7 +117,7 @@
       "x",
       "channels",
       "overlay",
-      "gate", # requires manual preparation
+      "gate", # REQUIRES MANUAL PREPARATION (FOR NOW)
       "negate",
       "axes_trans",
       "axes_text",
@@ -126,6 +126,7 @@
       "header_text_font",   # HEADER ARGUMENTS REPEATED PER 
       "header_text_size",
       "header_text_col",
+      "key_scale", # prepared manually
       "..."
     )]
   
@@ -163,7 +164,8 @@
     arg_names[grepl("grid", arg_names)], # all grid arguments
     "label",
     "label_position",
-    "legend"
+    "legend",
+    arg_names[grepl("key", arg_names)] # all key arguments
   )
   
   # UPDATE ARG_NAMES
@@ -344,7 +346,7 @@
     } else {
       # CHANNELS
       if(arg == "channels"){
-        if(class(x[[z]]) == "list"){
+        if(cyto_class(x[[z]], "list", TRUE)){
           arg_split <- rep(x[[z]], length.out = NP)
           return(arg_split)
         }else{
@@ -354,7 +356,7 @@
         # AXES_TRANS
       }else if(arg == "axes_trans"){
         # TRANSFORMERLIST
-        if (is(x[[z]], "transformerList")) {
+        if (cyto_class(x[[z]], "transformerList")) {
           arg_split <- rep(list(x[[z]]), length.out = NP)
           # LIST OF TRANSFORMERLISTS
         } else {
@@ -364,7 +366,7 @@
       # AXES_TEXT
       }else if(arg == "axes_text") {
         # LIST ALREADY PREPARED
-        if(!is(x[[z]], "list")) {
+        if(!cyto_class(x[[z]], "list")) {
           # REPEAT
           if(length(x[[z]]) < 2) {
             arg_split <- split(rep(c(x[[z]], TRUE), length.out = NP * 2), 

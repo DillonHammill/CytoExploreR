@@ -60,6 +60,17 @@ cyto_plot_empty(
   legend_line_col = NA,
   legend_box_fill = NA,
   legend_point_col = NA,
+  key = "both",
+  key_scale = "fixed",
+  key_text_font = 1,
+  key_text_size = 0.8,
+  key_text_col = "black",
+  key_text_col_alpha = 1,
+  key_title = "",
+  key_title_text_font = 1,
+  key_title_text_size = 0.8,
+  key_title_text_col = "black",
+  key_title_text_col_alpha = 1,
   grid = TRUE,
   grid_line_type = 1,
   grid_line_width = 1,
@@ -88,7 +99,7 @@ the flowFrame prior to plotting.}
 
 \item{overlay}{a list of cytosets to overlay onto the plot.}
 
-\item{gate}{list of gate objects to be plotted, used internlaly to ensure
+\item{gate}{list of gate objects to be plotted, used internally to ensure
 gate co-ordinates are taken into account when computing axes limits.}
 
 \item{xlim}{lower and upper limits of x axis (e.g. c(0,5)).}
@@ -244,6 +255,45 @@ legends when legend is set to \code{"fill"}.}
 
 \item{legend_point_col}{colour(s) to use for points in 2-D scatter plot
 legend.}
+
+\item{key}{options include \code{"scale"} to display only the colour scale,
+\code{"both"} to display the colour scale and text to annotate
+\code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
+key from the plot(s). Set to \code{"both"} by default to display colour
+scale and associated text in the key.}
+
+\item{key_scale}{inherits scale limits computed within \code{cyto_plot},
+should be a vector of the form \code{c(min, max)}, \code{cyto_plot_empty()}
+will attempt to compute these limits based on the supplied data if
+\code{key_scale} is not supplied.}
+
+\item{key_text_font}{font to use for text in the key, set to 1 by default for
+plain font.}
+
+\item{key_text_size}{numeric to control the size of text in the plot key, set
+to 1 by default.}
+
+\item{key_text_col}{colour to use for text in the plot key, set to
+\code{"black"} by default.}
+
+\item{key_text_col_alpha}{numeric [0, 1] to control the transparency of the
+text colour in the plot key, set to 1 by default to remove transparency.}
+
+\item{key_title}{title to place above the key set to \code{"count"} when
+\code{point_col = NA} or the name of the channel/marker supplied to
+\code{point_col}.}
+
+\item{key_title_text_font}{font to use for the key title, set to 1 by default
+for plain font.}
+
+\item{key_title_text_size}{numeric to control the size of title text in teh
+key, set to 1 by default.}
+
+\item{key_title_text_col}{colour to use for the key title, set to
+\code{"black"} by default.}
+
+\item{key_title_text_col_alpha}{numeric [0, 1] to control the transparency of
+the key title text, set to 1 by default to remove transparency.}
 
 \item{grid}{logical indicating whether to include grid lines in the plot
 background, set to TRUE by default. Alternatively, users can supply a
