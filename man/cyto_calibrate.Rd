@@ -7,6 +7,7 @@
 cyto_calibrate(
   x,
   parent = "root",
+  channels = NULL,
   type = "quantile",
   probs = c(0.01, 0.95),
   ...
@@ -23,6 +24,12 @@ samples containing both negative and positive events in each channel.}
 \item{parent}{name of the parent population to use for channel calibration
 when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
 \code{"root"} node by default.}
+
+\item{channels}{names of the channels or markers for which the calibration.
+settings should be updated, set to all channels by default. All channels
+within the same \code{cyto_calibrate} call will use the same settings for
+\code{type} and \code{probs}. Multiple calls to \code{cyto_calibrate} allow
+for channel-wise control over these settings which are stored globally.}
 
 \item{type}{indicates the type of calibration to perform, options include
 \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.

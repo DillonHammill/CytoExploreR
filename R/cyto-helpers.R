@@ -5289,6 +5289,11 @@ cyto_spillover_extract <- function(x) {
 #' @param parent name of the parent population to use for channel calibration
 #'   when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
 #'   \code{"root"} node by default.
+#' @param channels names of the channels or markers for which the calibration.
+#'   settings should be updated, set to all channels by default. All channels
+#'   within the same \code{cyto_calibrate} call will use the same settings for
+#'   \code{type} and \code{probs}. Multiple calls to \code{cyto_calibrate} allow
+#'   for channel-wise control over these settings which are stored globally.
 #' @param type indicates the type of calibration to perform, options include
 #'   \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
 #'   Range calibration simply uses the full range of values across samples for
@@ -5323,38 +5328,64 @@ cyto_spillover_extract <- function(x) {
 #' @export
 cyto_calibrate <- function(x,
                            parent = "root",
+                           channels = NULL,
                            type = "quantile",
                            probs = c(0.01, 0.95),
                            ...){
   
+  # RECALL CALIBRATION SETTINGS - ALL CHANNELS
+  cyto_cal <- .cyto_calibrate_recall()
+  
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(x)
+  }
+  
   # COMPUTE CHANNEL RANGES
   if(grepl("^r", type, ignore.case = TRUE)){
-    cyto_cal <- cyto_apply(x,
-                           "cyto_stat_range",
-                           parent = parent,
-                           input = "matrix",
-                           inverse = FALSE,
-                           copy = FALSE,
-                           ...)
+    cyto_cal_new <- cyto_apply(x,
+                               "cyto_stat_range",
+                               parent = parent,
+                               channels = channels,
+                               input = "matrix",
+                               inverse = FALSE,
+                               copy = FALSE,
+                               ...)
     # COMPUTE CHANNEL QUANTILES
   }else if(grepl("^q", type, ignore.case = TRUE)){
     if(length(probs) != 2) {
       stop("A lower and upper quantile probability must be supplied.")
     }
-    cyto_cal <- cyto_apply(x,
-                           "cyto_stat_quantile",
-                           parent = parent,
-                           input = "matrix",
-                           inverse = FALSE,
-                           copy = FALSE,
-                           probs = probs,
-                           ...)
+    cyto_cal_new <- cyto_apply(x,
+                               "cyto_stat_quantile",
+                               parent = parent,
+                               input = "matrix",
+                               channels = channels,
+                               inverse = FALSE,
+                               copy = FALSE,
+                               probs = probs,
+                               ...)
   }
   
   # MIN/MAX
-  cyto_cal <- apply(cyto_cal, 2, function(x){
-    c("min" = min(x, na.rm = TRUE), "max" = max(x, na.rm = TRUE))
-  })
+  cyto_cal_new <- apply(
+    cyto_cal_new,
+    2, 
+    function(x){
+      c("min" = min(x, na.rm = TRUE),
+        "max" = max(x, na.rm = TRUE))
+      }
+  )
+  
+  # UPDATE GLOBAL CALIBRATION SETTINGS
+  if(is.null(cyto_cal)) {
+    cyto_cal <- cyto_cal_new
+  } else {
+    cyto_cal <- cbind(
+      cyto_cal[, !colnames(cyto_cal) %in% colnames(cyto_cal_new)],
+      cyto_cal_new
+    )
+  }
   
   # SAVE RDS TO TEMPFILE
   tempfile <- paste0(tempdir(),
