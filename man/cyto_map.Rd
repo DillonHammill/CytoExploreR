@@ -47,8 +47,8 @@ EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}}}
 
 \item{scale}{optional argument to scale each channel prior to computing
 dimension-reduced co-ordinates, options include \code{"range"},
-\code{"mean"} or \code{"zscore"}. Set to \code{"range"} by default, scaling
-can be turned off by setting this argument to NULL.}
+\code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
+default, scaling can be turned off by setting this argument to NULL.}
 
 \item{events}{number or proportion of events to map, can optionally be
 supplied per cytoframe for more fine control over how the data is sampled

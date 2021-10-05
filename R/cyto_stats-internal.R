@@ -479,7 +479,7 @@ cyto_stat_bin <- function(x,
 #'
 #' @param x object of class \code{matrix}.
 #' @param type indicates the type of re-scaling to perform, options include
-#'   \code{"range"}, \code{"mean"} or \code{"zscore"}.
+#'   \code{"range"}, \code{"mean"}, \code{"median"} or \code{"zscore"}.
 #' @param ... not in use.
 #'
 #' @return matrix with data re-scaled per channel.
@@ -504,7 +504,7 @@ cyto_stat_scale <- function(x,
         # RANGE SCALING
         return((z - zmin)/(zmax - zmin))
       # MEAN
-      } else if(grepl("^m", type, ignore.case = TRUE)) {
+      } else if(grepl("^mea", type, ignore.case = TRUE)) {
         # DATA LIMITS
         zmin <- min(z, na.rm = TRUE)
         zmax <- max(z, na.rm = TRUE)
@@ -512,6 +512,15 @@ cyto_stat_scale <- function(x,
         zmean <- mean(z, na.rm = TRUE)
         # MEAN SCALING
         return((z - zmean)/(zmax-zmin))
+      # MEDIAN
+      } else if(grepl("^med", type, ignore.case = TRUE)) {
+        # DATA LIMITS
+        zmin <- min(z, na.rm = TRUE)
+        zmax <- max(z, na.rm = TRUE)
+        # MEAN
+        zmed <- median(z, na.rm = TRUE)
+        # MEAN SCALING
+        return((z - zmed)/(zmax-zmin))
       # Z SCORE
       } else if(grepl("^z", type, ignore.case = TRUE)) {
         # MEAN 
