@@ -357,7 +357,7 @@ cyto_load <- function(path = ".",
 
 ## CYTO_CLEAN ------------------------------------------------------------------
 
-#' Apply anomaly detection algorithms to clean cytometry data
+#' Apply anomaly detection algorithms to obtain clean cytometry data
 #'
 #' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
@@ -366,11 +366,12 @@ cyto_load <- function(path = ".",
 #'   node extracted when a \code{GatingSet} or \code{GatingHierachy} is
 #'   supplied.
 #' @param type the method to use when cleaning the data, options include
-#'   \code{"flowAI"}, \code{"flowClean"} or \code{"flowCut"}.
+#'   \code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
+#'   set to \code{"flowAI"} by default.
 #' @param ... additional arguments passed to \code{flowAI::flow_auto_qc},
 #'   \code{flowClean::flowClean}, or \code{flowCut::flowCut}.
 #'
-#' @importFrom flowWorkspace gs_cyto_data flowSet_to_cytoset
+#' @importFrom flowWorkspace gs_cyto_data flowSet_to_cytoset GatingSet
 #' @importFrom utils capture.output
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -404,6 +405,10 @@ cyto_load <- function(path = ".",
 #'   files based on time versus fluorescence analysis. bioRxiv.
 #'   \url{https://doi.org/10.1101/2020.04.23.058545}
 #'
+#' @references Emmaneel A, et al. (2021) PeacoQC: peak-based selection of high
+#'   quality cytometry data. Cytometry A.
+#'   \url{https://onlinelibrary.wiley.com/doi/10.1002/cyto.a.24501}
+#'
 #' @seealso \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
 #'
 #' @export
@@ -422,14 +427,16 @@ cyto_clean <- function(x,
   
   # FLOWAI
   if(grepl("ai", type, ignore.case = TRUE)) {
-    cyto_require("flowAI",
-                 source = "BioC",
-                 repo = "giannimonaco/flowAI",
-                 ref = paste0("Monaco G, Chen H, Poidinger M, Chen J,",
-                              " de Magalhaes J, Larbi A (2016). flowAI:",
-                              " automatic and interactive anomaly discerning",
-                              " tools for flow cytometry data. Bioinformatics,",
-                              " 32(16)."))
+    cyto_require(
+      "flowAI",
+      source = "BioC",
+      repo = "giannimonaco/flowAI",
+      ref = paste0("Monaco G, Chen H, Poidinger M, Chen J,",
+                   " de Magalhaes J, Larbi A (2016). flowAI:",
+                   " automatic and interactive anomaly discerning",
+                   " tools for flow cytometry data. Bioinformatics,",
+                   " 32(16).")
+    )
     invisible(
       capture.output(
         cyto_data <- cyto_apply(
@@ -455,15 +462,17 @@ cyto_clean <- function(x,
     )
   # FLOWCLEAN
   } else if(grepl("clean", type, ignore.case = TRUE)) {
-    cyto_require("flowClean",
-                 source = "BioC",
-                 repo = "cafletezbrant/flowClean",
-                 ref = paste0(
-                   "Fletez-Brant K, Spidlen J, Brinkman R, Roederer M,",
-                   " Chattopadhyay P (2016). flowClean: Automated",
-                   " identification and removal of fluorescence anaomalies",
-                   " in flow cytometry data. Cytometry A 89(5)"
-                 ))
+    cyto_require(
+      "flowClean",
+      source = "BioC",
+      repo = "cafletezbrant/flowClean",
+      ref = paste0(
+        "Fletez-Brant K, Spidlen J, Brinkman R, Roederer M,",
+        " Chattopadhyay P (2016). flowClean: Automated",
+        " identification and removal of fluorescence anaomalies",
+        " in flow cytometry data. Cytometry A 89(5)"
+      )
+    )
     cyto_data <- cyto_apply(
       cyto_data,
       "flowClean::clean",
@@ -475,15 +484,18 @@ cyto_clean <- function(x,
     )
     
   # FLOWCUT
-  } else {
-    cyto_require("flowCut",
-                 source = "BioC",
-                 repo = "jmeskas/flowCut",
-                 ref = paste0(
-                   "Meskas J, Wang S, Brinkman R (2021). flowCut --- An R",
-                   " Package for precise and accurate automated removal of",
-                   " outlier events and flagging of files based on time",
-                   " versus fluorescence analysis. bioRxiv"))
+  } else if(grepl("cut", type, ignore.case = TRUE)) {
+    cyto_require(
+      "flowCut",
+      source = "BioC",
+      repo = "jmeskas/flowCut",
+      ref = paste0(
+        "Meskas J, Wang S, Brinkman R (2021). flowCut --- An R",
+        " Package for precise and accurate automated removal of",
+        " outlier events and flagging of files based on time",
+        " versus fluorescence analysis. bioRxiv"
+      )
+    )
     cyto_data <- cyto_apply(
       cyto_data,
       "flowCut::flowCut",
@@ -492,6 +504,53 @@ cyto_clean <- function(x,
       copy = FALSE,
       Plot = "None", 
       ...
+    )
+  # PEACOQC
+  } else {
+    cyto_require(
+      "PeacoQC",
+      source = "BioC",
+      repo = "saeyslab/PeacoQC",
+      ref = paste0(
+        "Emmaneel A, et al. (2021) PeacoQC: peak-based selection of high ",
+        "quality cytometry data. Cytometry A."
+      )
+    )
+    # PEACOQC
+    cyto_data <- cyto_apply(
+      cyto_data,
+      function(fr) {
+        # PREPARE ARGUMENTS
+        args <- list(...)
+        # TURN OFF PLOTTING
+        if(!"plot" %in% names(args)) {
+          args[["plot"]] <- FALSE
+        }
+        # DON'T WRITE FCS FILES
+        if(!"save_fcs" %in% names(args)) {
+          args[["save_fcs"]] <- FALSE
+        }
+        # DEFAULT CHANNELS
+        if(!"channels" %in% names(args)) {
+          args[["channels"]] <- cyto_channels(fr)
+        }
+        # REMOVE MARGINAL EVENTS - RANGES SHOULD BE SUPPLIED MANUALLY
+        fr <- cyto_func_execute(
+          "PeacoQC::RemoveMargins",
+          c(list("ff" = fr), 
+            args)
+        )
+        # RUN PEACOQC
+        fr <- cyto_func_execute(
+          "PeacoQC::PeacoQC",
+          c(list("ff" = fr), 
+            args)
+        )
+        # RETURN HIGH QUALITY FLOWFRAME
+        return(fr[["FinalFF"]])
+      },
+      input = "flowFrame",
+      copy = FALSE
     )
   }
   

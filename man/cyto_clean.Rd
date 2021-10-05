@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_clean}
 \alias{cyto_clean}
-\title{Apply anomaly detection algorithms to clean cytometry data}
+\title{Apply anomaly detection algorithms to obtain clean cytometry data}
 \usage{
 cyto_clean(x, type = "flowAI", ...)
 }
@@ -15,13 +15,14 @@ node extracted when a \code{GatingSet} or \code{GatingHierachy} is
 supplied.}
 
 \item{type}{the method to use when cleaning the data, options include
-\code{"flowAI"}, \code{"flowClean"} or \code{"flowCut"}.}
+\code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
+set to \code{"flowAI"} by default.}
 
 \item{...}{additional arguments passed to \code{flowAI::flow_auto_qc},
 \code{flowClean::flowClean}, or \code{flowCut::flowCut}.}
 }
 \description{
-Apply anomaly detection algorithms to clean cytometry data
+Apply anomaly detection algorithms to obtain clean cytometry data
 }
 \examples{
 library(CytoExploreRData)
@@ -53,6 +54,10 @@ Meskas J, Wang S, Brinkman R (2021). flowCut --- An R Package for
   precise and accurate automated removal of outlier events and flagging of
   files based on time versus fluorescence analysis. bioRxiv.
   \url{https://doi.org/10.1101/2020.04.23.058545}
+
+Emmaneel A, et al. (2021) PeacoQC: peak-based selection of high
+  quality cytometry data. Cytometry A.
+  \url{https://onlinelibrary.wiley.com/doi/10.1002/cyto.a.24501}
 }
 \seealso{
 \code{\link[flowAI:flow_auto_qc]{flow_auto_qc}}
