@@ -557,17 +557,24 @@ cyto_stat_scale <- function(x,
 cyto_stat_skewness <- function(x,
                                ...) {
   
-  apply(
-    x,
-    2,
-    function(z){
-      if(any(is.na(z))) {
-        z <- z[!is.na(z)]
-      }
-      n <- length(z)
-      (sum((x-mean(x))^3)/n)/(sum((x-mean(x))^2)/n)^(3/2)
+  # VECTOR
+  if(is.null(dim(x))) {
+    if(any(is.na(x))) {
+      x <- x[!is.na(x)]
     }
-  )
+    n <- length(x)
+    return(
+      (sum((x-mean(x))^3)/n) / 
+        (sum((x-mean(x))^2)/n) ^ (3/2)
+    )
+  # MATRIX
+  } else {
+    apply(
+      x,
+      2,
+      "cyto_stat_skewness"
+    )
+  }
   
 }
 
