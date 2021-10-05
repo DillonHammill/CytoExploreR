@@ -559,9 +559,7 @@ cyto_stat_skewness <- function(x,
   
   # VECTOR
   if(is.null(dim(x))) {
-    if(any(is.na(x))) {
-      x <- x[!is.na(x)]
-    }
+    x <- x[!is.na(x)]
     n <- length(x)
     return(
       (sum((x-mean(x))^3)/n) / 
