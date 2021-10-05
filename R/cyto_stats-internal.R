@@ -491,52 +491,54 @@ cyto_stat_scale <- function(x,
                             type = "range",
                             ...) {
   
-  # SCALING
-  apply(
-    x,
-    2, 
-    function(z) {
-      # RANGE
-      if(grepl("^r", type, ignore.case = TRUE)) {
-        # DATA LIMITS
-        zmin <- min(z, na.rm = TRUE)
-        zmax <- max(z, na.rm = TRUE)
-        # RANGE SCALING
-        return((z - zmin)/(zmax - zmin))
+  # VECTOR
+  if(is.null(dim(x))) {
+    # RANGE
+    if(grepl("^r", type, ignore.case = TRUE)) {
+      # DATA LIMITS
+      xmin <- min(x, na.rm = TRUE)
+      xmax <- max(x, na.rm = TRUE)
+      # RANGE SCALING
+      return((x - xmin)/(xmax - xmin))
       # MEAN
-      } else if(grepl("^mea", type, ignore.case = TRUE)) {
-        # DATA LIMITS
-        zmin <- min(z, na.rm = TRUE)
-        zmax <- max(z, na.rm = TRUE)
-        # MEAN
-        zmean <- mean(z, na.rm = TRUE)
-        # MEAN SCALING
-        return((z - zmean)/(zmax-zmin))
+    } else if(grepl("^mea", type, ignore.case = TRUE)) {
+      # DATA LIMITS
+      xmin <- min(x, na.rm = TRUE)
+      xmax <- max(x, na.rm = TRUE)
+      # MEAN
+      xmean <- mean(x, na.rm = TRUE)
+      # MEAN SCALING
+      return((x - xmean)/(xmax-xmin))
       # MEDIAN
-      } else if(grepl("^med", type, ignore.case = TRUE)) {
-        # DATA LIMITS
-        zmin <- min(z, na.rm = TRUE)
-        zmax <- max(z, na.rm = TRUE)
-        # MEAN
-        zmed <- median(z, na.rm = TRUE)
-        # MEAN SCALING
-        return((z - zmed)/(zmax-zmin))
+    } else if(grepl("^med", type, ignore.case = TRUE)) {
+      # DATA LIMITS
+      xmin <- min(x, na.rm = TRUE)
+      xmax <- max(x, na.rm = TRUE)
+      # MEAN
+      xmed <- median(x, na.rm = TRUE)
+      # MEAN SCALING
+      return((x - xmed)/(xmax-xmin))
       # Z SCORE
-      } else if(grepl("^z", type, ignore.case = TRUE)) {
-        # MEAN 
-        zmean <- mean(z, na.rm = TRUE)
-        # SD
-        zsd <- sd(z, na.rm = TRUE)
-        # Z-SCORE SCALING
-        return((z - zmean)/zsd)
+    } else if(grepl("^z", type, ignore.case = TRUE)) {
+      # MEAN 
+      xmean <- mean(x, na.rm = TRUE)
+      # SD
+      xsd <- sd(x, na.rm = TRUE)
+      # Z-SCORE SCALING
+      return((x - xmean)/xsd)
       # UNSUPPORTED SCALING METHOD
-      } else {
-        stop(
-          "'type' must be either 'range', 'mean' or 'zscore'!"
-        )
-      }
+    } else {
+      stop(
+        "'type' must be either 'range', 'mean' or 'zscore'!"
+      )
     }
-  )
+  } else {
+    apply(
+      x,
+      2,
+      "cyto_stat_scale"
+    )
+  }
   
 }
 
