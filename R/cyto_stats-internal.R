@@ -626,7 +626,7 @@ cyto_stat_bkde <- function(x,
 #' @param x values to be rescaled in the form of a vector.
 #' @param scale min max values of new scale.
 #' 
-#' @return vector or matrix of rescaled values.
+#' @return vector or matrix of rescaled values within range [0,1].
 #' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' 
