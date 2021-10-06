@@ -41,56 +41,105 @@
 ## COUNT -----------------------------------------------------------------------
 
 #' Count
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @noRd
 cyto_stat_count <- function(x, 
                             ...) {
-  return(structure(nrow(x), names = "count"))
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      c("count" = length(x))
+    )
+  # MATRIX
+  } else {
+    return(
+      c("count" = nrow(x))
+    )
+  }
+  
 }
 
 ## MEAN ------------------------------------------------------------------------
 
 #' Mean
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param round numeric
 #' @noRd
 cyto_stat_mean <- function(x, 
                            round = 2,
                            ...) {
-  return(round(colMeans(x, na.rm = TRUE, ...), round))
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      c("mean" = round(
+        mean(x, na.rm = TRUE, ...),
+        round))
+    )
+  # MATRIX - COLMEANS FOR SPEED
+  } else {
+    return(
+      round(
+        colMeans(
+          x, 
+          na.rm = TRUE,
+          ...
+        ), 
+        round
+      )
+    )
+  }
+  
 }
 
 ## GEOMETRIC MEAN --------------------------------------------------------------
 
 #' Geometric Mean
-#' @param x a linear matrix
+#' @param x a linear vector or matrix
 #' @param round numeric
 #' @noRd
 cyto_stat_geomean <- function(x,
                               round = 2,
                               ...) {
   
-  res <- suppressWarnings(round(exp(colMeans(log(x))), round))
-  # if(any(is.nan(res))){
-  #   stop(
-  #     "Geometric mean only works for data greater than zero."
-  #   )
-  # }
-  return(res)
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      c("geomean" = suppressWarnings(round(exp(mean(log(x))), round)))
+    )
+  # MATRIX
+  } else {
+    return(
+      suppressWarnings(round(exp(colMeans(log(x))), round))
+    )
+  }
   
 }
 
 ## MEDIAN ----------------------------------------------------------------------
 
 #' Median
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param round numeric
 #' @importFrom robustbase colMedians
 #' @noRd
 cyto_stat_median <- function(x,
                              round = 2,
                              ...) {
-  return(round(colMedians(x, na.rm = TRUE, ...), round))
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      "median" = round(median(x, na.rm = TRUE, ...), round)
+    )
+  # MATRIX
+  } else {
+    return(
+      round(colMedians(x, na.rm = TRUE, ...), round)
+    )
+  }
+  
 }
 
 ## MODE ------------------------------------------------------------------------
@@ -103,36 +152,123 @@ cyto_stat_mode <- function(x,
                            smooth = 1,
                            bandwidth = NA,
                            bins = 256,
+                           limits = c(NA, NA),
                            round = 2,
                            ...) {
   
-  # DENSITY MATRIX
-  res <- cyto_stat_density(x,
-                           smooth = smooth,
-                           bandwidth = bandwidth,
-                           bins = bins, 
-                           ...)
+  # PREPARE LIMITS
+  if(is.null(dim(limits))) {
+    # LIST
+    if(cyto_class(limits, "list")) {
+      limits <- do.call(
+        "cbind",
+        limits
+      )
+      # VECTOR
+    } else {
+      limits <- matrix(
+        limits,
+        ncol = ifelse(
+          is.null(dim(x)),
+          1,
+          ncol(x)
+        ),
+        nrow = 2,
+        dimnames = list(
+          NULL,
+          if(is.null(dim(x))) {
+            NULL
+          } else{
+            colnames(x)
+          }
+        )
+      )
+    }
+  }
   
-  # MODE
-  res <- LAPPLY(res, function(z){
-    round(z$x[z$y == max(z$y)], round)
-  })
-  names(res) <- colnames(x)
-  return(res)
+  # VECTOR
+  if(is.null(dim(x))) {
+    kde <- cyto_stat_density(
+      x,
+      smooth = smooth,
+      bandwidth = bandwidth,
+      bins = bins,
+      limits = limits[, 1],
+      ...
+    )
+    return(
+      c(
+        "mode" = round(
+          kde$x[kde$y == max(kde$y)],
+          round
+        )
+      )
+    )
+    
+  # MATRIX
+  } else {
+    # SORT LIMITS
+    if(all(colnames(limits) %in% colnames(x))) {
+      limits <- limits[, colnames(x)]
+    }
+    # REPEAT ARGUMENTS
+    bins <- rep(bins, length.out = ncol(x))
+    bandwidth <- rep(bandwidth, length.out = ncol(x))
+    smooth <- rep(smooth, length.out = ncol(x))
+    round <- rep(round, length.out = ncol(x))
+    # APPLY CYTO_STAT_MODE()
+    cnt <- 0
+    apply(
+      x,
+      2, 
+      function(z){
+        cnt <<- cnt + 1
+        cyto_stat_mode(
+          z,
+          smooth = smooth[cnt],
+          bandwidth = bandwidth[cnt],
+          bins = bins[cnt],
+          limits = limits[, cnt, drop = FALSE],
+          round = round,
+          ...
+        )
+      }
+    )
+  }
   
 }
 
 ## STANDARD DEVIATION ----------------------------------------------------------
 
 #' Standard Deviation
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param round numeric
 #' @importFrom stats sd
 #' @noRd
 cyto_stat_sd <- function(x,
                          round = 2,
                          ...) {
-  return(round(apply(x, 2, sd, na.rm = TRUE, ...), round))
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      c(
+        "sd" = round(
+          sd(x, na.rm = TRUE, ...),
+          round
+        )
+      )
+    )
+  # MATRIX
+  } else {
+    apply(
+      x,
+      2,
+      "cyto_stat_sd",
+      round = round
+    )
+  }
+
 }
 
 ## ROBUST STANDARD DEVIATION ---------------------------------------------------
@@ -145,22 +281,45 @@ cyto_stat_rsd <- function(x,
                           round = 2,
                           ...) {
   
-  # MEDIANS
-  md <- cyto_stat_median(x)
-  
-  # ROBUST STANDARD DEVIATIONS
-  res <- LAPPLY(names(md), function(z){
-    round(median(abs(x[, z] - md[z])) * 1.4826, round)
-  })
-  names(res) <- names(md)
-  return(res)
-  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      c(
+        "rsd" = round(
+          median(
+            abs(x - median(x))
+          ) * 1.4826,
+          round
+        )
+      )
+    )
+  # MATRIX
+  } else {
+    # MEDIANS - COLMEDIANS FOR SPEED
+    md <- cyto_stat_median(x)
+    # ROBUST STANDARD DEVIATIONS
+    cnt <- c(0)
+    apply(
+      x,
+      2,
+      function(z){
+        cnt <<- cnt + 1
+        round(
+          median(
+            abs(z - md[cnt])
+          ) * 1.4826,
+          round
+        )
+      }
+    )
+  }
+
 }
 
 ## COEFFICIENT OF VARIATION ----------------------------------------------------
 
 #' Coefficient of Varaition
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param round numeric
 #' @noRd
 cyto_stat_cv <- function(x, 
@@ -174,49 +333,88 @@ cyto_stat_cv <- function(x,
   sd <- cyto_stat_sd(x)
   
   # COEFFICIENT OF VARIATION
-  return(round(sd/md * 100, round))
+  cv <- round(sd/md * 100, round)
+  
+  # NAMES
+  if(is.null(dim(x))) {
+    names(cv) <- "cv"
+  } 
+  return(cv)
   
 } 
 
 ## ROBUST COEFFICIENT OF VARIATION ---------------------------------------------
 
 #' Robust Coefficient of Varaition
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param round numeric
 #' @noRd
 cyto_stat_rcv <- function(x, 
                           round = 2,
                           ...){
   
-  # MEDIANS
-  md <- cyto_stat_median(x)
-  
-  # ROBUST STANDARD DEVIATIONS - PREVENT DUPLICATE MEDIAN COMPUTATION
-  rSD <- LAPPLY(names(md), function(z){
-    median(abs(x[, z] - md[z])) * 1.4826
-  })
-  names(rSD) <- names(md)
-  
-  # ROBUST COEFFICIENT OF VARIATION
-  res <- LAPPLY(names(md), function(z){
-    round(rSD[z]/md[z] * 100, round)
-  })
-  names(res) <- names(md)
-  return(res)
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      c(
+        "rcv" = round(
+          (median(abs(x - median(x))) * 1.4826)/median(x) * 100
+          , round
+        )
+      )
+    )
+  # MATRIX
+  } else {
+    # MEDIANS
+    md <- cyto_stat_median(x)
+    cnt <- c(0)
+    apply(
+      x,
+      2,
+      function(z){
+        round(
+          (median(abs(z - md[cnt])) * 1.4826)/md[cnt] * 100
+          , round
+        )
+      }
+    )
+  }
   
 } 
 
 ## QUANTILES -------------------------------------------------------------------
 
 #' Quantiles
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param round numeric
 #' @noRd
 cyto_stat_quantile <- function(x,
                                round = 2,
                                ...) {
   
-  return(round(apply(x, 2, quantile, na.rm = TRUE, ...), round))
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      round(
+        quantile(
+          x,
+          na.rm = TRUE,
+          ...
+        ), 
+        round
+      )
+    )
+  # MATRIX
+  } else {
+    return(
+      apply(
+        x,
+        2,
+        "cyto_stat_quantile",
+        round = round
+      )
+    )
+  }
   
 }
 
@@ -232,44 +430,116 @@ cyto_stat_auc <- function(x,
                           smooth = 1,
                           bandwidth = NA,
                           bins = 256,
-                          limits = NA,
+                          limits = c(NA, NA),
                           method = "natural",
                           min = NULL,
                           max = NULL,
                           ...) {
   
-  # DENSITY - LIST
-  d <- suppressWarnings(
-    cyto_stat_density(x,
-                      smooth = smooth,
-                      stat = "count", # cyto_stat_compute conflict
-                      bandwidth = bandwidth,
-                      bins = bins,
-                      limits = limits)
-  )
-  
-  # AREA UNDER CURVE
-  res <- LAPPLY(d, function(z){
-    if(.all_na(z)) {
-      return(NA)
+  # PREPARE LIMITS
+  if(is.null(dim(limits))) {
+    # LIST
+    if(cyto_class(limits, "list")) {
+      limits <- do.call(
+        "cbind",
+        limits
+      )
+      # VECTOR
+    } else {
+      limits <- matrix(
+        limits,
+        ncol = ifelse(
+          is.null(dim(x)),
+          1,
+          ncol(x)
+        ),
+        nrow = 2,
+        dimnames = list(
+          NULL,
+          if(is.null(dim(x))) {
+            NULL
+          } else{
+            colnames(x)
+          }
+        )
+      )
     }
-    round(
-      integrate(
-        splinefun(z$x, 
-                  z$y, 
-                  method = method),
-        lower = switch(as.character(is.null(min)), 
-                       "TRUE" = min(z$x), 
-                       "FALSE" = min),
-        upper = switch(as.character(is.null(max)),
-                       "TRUE" = max(z$x),
-                       "FALSE" = max),
-        subdivisions = 2000,
-        ...
-      )$value, round)
-  })
-  names(res) <- names(d)
-  return(res)
+  }
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    # KERNEL DENSITY ESTIMATE
+    kde <- cyto_stat_denity(
+      x,
+      smooth = smooth,
+      stat = "count",
+      bandwidth = bandwidth,
+      bins = bins,
+      limits = limits[, 1]
+    )
+    # AREA UNDER CURVE
+    if(.all_na(kde)) {
+      return(
+        c("auc" = NA)
+      )
+    }
+    return(
+      c(
+        "auc" = round(
+          integrate(
+            splinefun(x$x, 
+                      x$y, 
+                      method = method),
+            lower = if(.all_na(min)) {
+              min(x$x, na.rm = TRUE)
+            } else {
+              min
+            },
+            upper = if(.all_na(max)) {
+              max(x$x, na.rm = TRUE)
+            } else {
+              max
+            },
+            subdivisions = 2000,
+            ...
+          )$value, round)
+      )
+    )
+  # MATRIX
+  } else {
+    # SORT LIMITS
+    if(all(colnames(limits) %in% colnames(x))) {
+      limits <- limits[, colnames(x)]
+    }
+    # REPEAT ARGUMENTS
+    smooth <- rep(smooth, length.out = ncol(x))
+    bandwidth <- rep(bandwidth, length.out = ncol(x))
+    bins <- rep(bins, length.out = ncol(x))
+    method <- rep(method, length.out = ncol(x))
+    min <- rep(min, length.out = ncol(x))
+    max <- rep(max, length.out = ncol(x))
+    # APPLY CYTO_STAT_AUC()
+    cnt <- 0
+    apply(
+      x,
+      2,
+      function(z){
+        cnt <<- cnt + 1
+        cyto_stat_auc(
+          z,
+          round = round,
+          smooth = smooth[cnt],
+          bandwidth = bandwidth[cnt],
+          bins = bins[cnt],
+          limits = limits[, cnt, drop = FALSE],
+          method = method[cnt],
+          min = min[cnt],
+          max = max[cnt],
+          ...
+        )
+      }
+    )
+  }
   
 }
 
@@ -282,9 +552,32 @@ cyto_stat_auc <- function(x,
 cyto_stat_range <- function(x,
                             round = 2,
                             ...) {
-  res <- suppressWarnings(round(apply(x, 2, range, ...), round))
-  rownames(res) <- c("min", "max")
-  return(res)
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    return(
+      suppressWarnings(
+        round(
+          range(
+            x,
+            na.rm = TRUE,
+            ...
+          ),
+          round
+        )
+      )
+    )
+  # MATRIX
+  } else {
+    return(
+      apply(
+        x,
+        2,
+        "cyto_stat_range",
+        round = round
+      )
+    )
+  }
 }
 
 ## DENSITY ---------------------------------------------------------------------
@@ -292,7 +585,7 @@ cyto_stat_range <- function(x,
 # BANDWIDTH COMPUTED AT CYTOFRAME/CYTOSET LEVEL USING INSTRUMENT RANGE.
 
 #' Density
-#' @param x a matrix
+#' @param x a vector or matrix
 #' @param stat "percent", "density" or "count"
 #' @param smooth numeric set to 1
 #' @param bins 256
@@ -304,82 +597,91 @@ cyto_stat_density <- function(x,
                               stat = "density",
                               smooth = 1,
                               bins = 256,
-                              limits = NA,
+                              limits = c(NA, NA),
                               bandwidth = NA,
                               ...) {
   
-  # TOO FEW EVENTS
-  if(nrow(x) <= 2){
-    warning("Insufficient events to compute kernel density.")
-    res <- rep(list(NA), ncol(x))
-    names(res) <- colnames(x)
-    return(res)
-  }
-  
-  # CONVERT BINS TO BANDWIDTH
-  if(.all_na(bandwidth)) {
-    # BINS
-    bins <- rep(bins, length.out = ncol(x))
-    names(bins) <- colnames(x)
-    # BANDWIDTH
-    cnt <- 0
-    bandwidth <- apply(x, 2, function(z){
-      # COUNTER
-      cnt <<- cnt + 1
-      # BANDWIDTH
-      if(length(z) == 0) {
-        return(0)
-      } else {
-        if(.all_na(limits)) {
-          rng <- range(z) # use data range
-        } else {
-          rng <- limits[, colnames(x)[cnt]]
-        }
-        return((rng[2] - rng[1])/bins)
-      }
-    })
-  } else {
-    if(length(bandwidth) != ncol(x)) {
-      stop("A bandwidth is required for each channel!")
+  # PREPARE LIMITS
+  if(is.null(dim(limits))) {
+    # LIST
+    if(cyto_class(limits, "list")) {
+      limits <- do.call(
+        "cbind",
+        limits
+      )
+      # VECTOR
+    } else {
+      limits <- matrix(
+        limits,
+        ncol = ifelse(
+          is.null(dim(x)),
+          1,
+          ncol(x)
+        ),
+        nrow = 2,
+        dimnames = list(
+          NULL,
+          if(is.null(dim(x))) {
+            NULL
+          } else{
+            colnames(x)
+          }
+        )
+      )
     }
   }
   
-  # SMOOTH
-  if(smooth < 1) {
-    # SMOOTH < 1 RESULTS IN INACCURATE COUNTS
-    stop("'smooth' must be greater than or equal to 1!")
-  }
-  smooth <- rep(smooth, ncol(x))
-  names(smooth) <- colnames(x)
-  
-  # DENSITY - LIST
-  cnt <- 0
-  res <- apply(x, 2, function(z,
-                              st = stat,
-                              sm = smooth,
-                              bw = bandwidth,
-                              ...){
-    # COUNTER
-    cnt <<- cnt + 1
+  # VECTOR
+  if(is.null(dim(x))) {
+    # X - NUMERIC
+    x <- as.numeric(x)
+    # TOO FEW EVENTS FOR KDE
+    if(length(x) < 2) {
+      warning(
+        "Insufficient events to compute kernel density!"
+      )
+      return(
+        NA
+      )
+    }
+    # CONVERT BINS TO BANDWIDTH
+    if(.all_na(bandwidth)) {
+      # BINS
+      if(length(x) == 0) {
+        bandwidth <- 0
+      } else {
+        if(.all_na(limits[, 1])) {
+          rng <- range(x)
+        } else {
+          rng <- limits[, 1]
+        }
+        bandwidth <- diff(rng) / bins
+      }
+    }
+    # SMOOTH - INACCURATE COUNTS OTHERWISE
+    if(smooth < 1) {
+      stop("'smooth' must be greater than or equal to 1!")
+    }
     # RESTRICT DATA TO LIMITS - DATA OUTSIDE PLOT LIMITS MESSES UP BANDWIDTH
-    if(!.all_na(limits)) {
-      z <- z[z > limits[, colnames(x)[cnt]][1] &
-               z < limits[, colnames(x)[cnt]][2]]
+    if(!.all_na(limits[, 1])) {
+      x <- x[x > min(limits[, 1], na.rm = TRUE) &
+               x < max(limits[, 1], na.rm = TRUE)]
     }
     # KERNEL DENSITY
-    kd <- stats::density(z,
-                         adjust = sm[cnt], # smoothing per channel
-                         bw = bw[cnt], # bandwidth per channel
-                         ...)
-    
+    kd <- stats::density(
+      x,
+      adjust = smooth, 
+      bw = bandwidth, 
+      ...
+    )
     # PERCENT
-    if(grepl("percent", st, ignore.case = TRUE)){
+    if(grepl("percent", stat, ignore.case = TRUE)){
       # MODAL
       kd$y <- (kd$y / max(kd$y)) * 100
       # ATTACH RANGE
       kd$range <- c(0, 100)
       # COUNT
-    }else if(grepl("count", st, ignore.case = TRUE)){
+    }else if(grepl("count", stat, ignore.case = TRUE)){
       # COUNT
       kd$y <- kd$y * kd$n * kd$bw
       # ATTACH RANGE
@@ -390,10 +692,36 @@ cyto_stat_density <- function(x,
       kd$range <- c(0, max(kd$y))
     }
     return(kd)
-  })
-  
-  # RETURN LIST OF DENSITY OBJECTS
-  return(res)
+    
+  # MATRIX
+  } else {
+    # SORT LIMITS
+    if(all(colnames(limits) %in% colnames(x))) {
+      limits <- limits[, colnames(x)]
+    }
+    # REPEAT ARGUMENTS
+    bins <- rep(bins, length.out = ncol(x))
+    bandwidth <- rep(bandwidth, length.out = ncol(x))
+    smooth <- rep(smooth, length.out = ncol(x))
+    stat <- rep(stat, length.out = ncol(x))
+    # APPLY CYTO_STAT_DENSITY()
+    cnt <- 0
+    apply(
+      x,
+      2, 
+      function(z) {
+        cnt <<- cnt + 1
+        cyto_stat_density(
+          z,
+          stat = stat[cnt],
+          smooth = smooth[cnt],
+          bandwidth = bandwidth[cnt],
+          limits = limits[, cnt, drop = FALSE],
+          ...
+        )
+      }
+    )
+  }
   
 }
 
@@ -401,7 +729,7 @@ cyto_stat_density <- function(x,
 
 #' Bin cytometry data
 #'
-#' @param x a matrix of values to bin.
+#' @param x a vector or matrix of values to bin.
 #' @param bins the number of bins to use, set to 400 by default.
 #' @param type whether to use \code{"count"} or \code{"freq"}.
 #' @param limits matrix or named list containing the minimum and maximum values
@@ -417,59 +745,97 @@ cyto_stat_density <- function(x,
 cyto_stat_bin <- function(x, 
                           bins = 400,
                           type = "count",
-                          limits = NULL,
+                          limits = c(NA, NA),
                           ...) {
   
-  # BIN DATA
-  cnt <- 0
-  apply(
-    x,
-    2,
-    function(y){
-      # COUNTER
-      cnt <<- cnt + 1
-      # CHANNEL
-      x_chan <- colnames(x)[cnt]
-      # PREPARE LIMITS
-      if(is.null(dim(limits))) {
-        limits <- do.call("cbind", limits)
-      }
-      # MINIMUM
-      x_min <- ifelse(
-        is.numeric(limits[,x_chan][1]),
-        limits[,x_chan][1],
-        min(y)
+  # PREPARE LIMITS
+  if(is.null(dim(limits))) {
+    # LIST
+    if(cyto_class(limits, "list")) {
+      limits <- do.call(
+        "cbind",
+        limits
       )
-      # MAXIMUM
-      x_max <- ifelse(
-        is.numeric(limits[,x_chan][2]),
-        limits[,x_chan][2],
-        max(y)
+    # VECTOR
+    } else {
+      limits <- matrix(
+        limits,
+        ncol = ifelse(
+          is.null(dim(x)),
+          1,
+          ncol(x)
+        ),
+        nrow = 2,
+        dimnames = list(
+          NULL,
+          if(is.null(dim(x))) {
+            NULL
+          } else{
+            colnames(x)
+          }
+        )
       )
-      # BREAKS
-      breaks <- seq(
-        x_min,
-        x_max,
-        (x_max - x_min) / bins,
-      )
-      # USE CUT() TO CREATE BINS
-      x_bin <- cut(
-        y, 
-        breaks = breaks,
-        labels = seq_len(bins),
-        include.lowest = TRUE
-      )
-      # COUNTS PER BIN
-      x_bin <- table(
-        x_bin
-      )
-      # COUNTS -> FREQUENCY
-      if(type != "count") {
-        x_bin <- x_bin/length(x)
-      }
-      return(x_bin)
     }
-  )
+  }
+  
+  # VECTOR
+  if(is.null(dim(x))) {
+    # X - NUMERIC
+    x <- as.numeric(x)
+    # MINIMUM
+    xmin <- min(limits[, 1])
+    if(.all_na(xmin)) {
+      xmin <- min(x, na.rm = TRUE)
+    }
+    # MAXIMUM
+    xmax <- max(limits[, 1])
+    if(.all_na(xmax)) {
+      xmax <- max(x, na.rm = TRUE)
+    }
+    # BREAKS
+    breaks <- seq(
+      xmin,
+      xmax,
+      (xmax - xmin) / bins,
+    )
+    # USE CUT() TO CREATE BINS
+    xbin <- cut(
+      x, 
+      breaks = breaks,
+      labels = seq_len(bins),
+      include.lowest = TRUE
+    )
+    # COUNTS PER BIN
+    xbin <- table(
+      xbin
+    )
+    # COUNTS -> FREQUENCY
+    if(type != "count") {
+      xbin <- xbin/length(x)
+    }
+    return(xbin)
+  # MATRIX
+  } else {
+    # SORT LIMITS
+    if(all(colnames(limits) %in% colnames(x))) {
+      limits <- limits[, colnames(x)]
+    }
+    # APPLY CYTO_STAT_BIN OVER COLUMNS
+    cnt <- c(0)
+    apply(
+      x,
+      2,
+      function(z){
+        cnt <<- cnt + 1
+        cyto_stat_bin(
+          z,
+          bins = bins,
+          type = type,
+          limits = limits[, cnt, drop = FALSE]
+        )
+      }
+    )
+  }
   
 }
 
