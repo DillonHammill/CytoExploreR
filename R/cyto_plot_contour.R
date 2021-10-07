@@ -71,7 +71,7 @@ cyto_plot_contour <- function(x,
                               seed = 42,
                               ...) {
   
-  # WE DON'T CHECK CHANNELS OR INHERIT THEME OR REPEAT ARGUMENTS
+  # TODO: BYPASS BKDE2D COMPUTATION
   
   # CHECKS -------------------------------------------------------------------
   
@@ -88,6 +88,12 @@ cyto_plot_contour <- function(x,
       }
       x <- c(x, overlay)
     }
+    # SAMPLING
+    if(all(events != 1)) {
+      x <- cyto_sample(x,
+                       events = events,
+                       seed = seed)
+    }
   # CYTO_PLOT ARGUMENTS
   } else if(cyto_class(x, "cyto_plot")) { # not used - call point instead
     .args_update(x)
@@ -96,57 +102,42 @@ cyto_plot_contour <- function(x,
     stop("'x' must be a list of cytoframes or cytosets!")
   }
   
-  # SAMPLING
-  if(events != 1) {
-    x <- cyto_sample(x,
-                     events = events,
-                     seed = seed)
-  }
   
   # CONTOUR_LINES --------------------------------------------------------------
   
   invisible(mapply(
-    function(cf,
+    function(cs,
              contour_lines,
              contour_line_type,
              contour_line_width,
              contour_line_col,
              contour_line_alpha) {
-      # EXTRACT RAW DATA
-      cf_exprs <- cyto_data_extract(cf,
-                                    format = "matrix", 
-                                    channels = channels,
-                                    copy = FALSE)[[1]]
-      # MERGE CYTOSET MULTIPLE SAMPLES
-      if(length(cf_exprs) > 1) {
-        cf_exprs <- do.call("rbind", cf_exprs)
-      } else {
-        cf_exprs <- cf_exprs[[1]]
-      }
-      # ADD CONTOUR LINES
-      if (contour_lines != 0) {
-        # BYPASS INSUFFICIENT EVENTS
-        if (nrow(cf_exprs) > 2) {
-          # 2D KERNEL DENSITY
-          z <- kde2d(
-            x = cf_exprs[, 1],
-            y = cf_exprs[, 2],
-            n = 75,
-            lims = par("usr")
-          )
-          # PLOT CONTOUR LINES
-          graphics::contour(
-            z = z$z,
-            x = z$x,
-            y = z$y,
-            add = TRUE,
-            drawlabels = FALSE,
-            nlevels = contour_lines,
-            col = adjustcolor(contour_line_col, contour_line_alpha),
-            lwd = contour_line_width,
-            lty = contour_line_type
-          )
-        }
+      # COMPUTE BKDE2D  
+      if(contour_lines != 0) {
+        # COMPUTE BKDE2D
+        bkde2d <- cyto_apply(
+          cs,
+          "cyto_stat_bkde2d",
+          input = "matrix",
+          channels = channels,
+          bins = c(250, 250),
+          limits = list(.par("usr")[[1]][1:2],
+                        .par("usr")[[1]][3:4]),
+          copy = FALSE,
+          simplify = FALSE
+        )[[1]]
+        # PLOT CONTOUR LINES
+        graphics::contour(
+          z = bkde2d$bkde,
+          x = bkde2d$bins$x,
+          y = bkde2d$bins$y,
+          add = TRUE,
+          drawlabels = FALSE,
+          nlevels = contour_lines,
+          col = adjustcolor(contour_line_col, contour_line_alpha),
+          lwd = contour_line_width,
+          lty = contour_line_type
+        )
       }
     }, 
     x,

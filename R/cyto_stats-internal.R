@@ -942,62 +942,177 @@ cyto_stat_skewness <- function(x,
   
 }
 
-## CYTO_STAT_BKDE ----------------------------------------------------------------
+## CYTO_STAT_BKDE --------------------------------------------------------------
 
 #' Compute binned 2D kernel density estimate
-#' 
+#'
+#' Modified version of \code{KernSmooth::bkde()} that can return 2D binned
+#' counts as well as smooth kernel density estimate.
+#'
 #' @param x a 2D matrix.
 #' @param bins number of bins to use for x and y values, set to 250 by default.
-#' 
-#' @return vector of binned counts mapped to each row in x.
-#' 
+#' @param bandwidth a vector of length 2 containing the bandwidth to use for the
+#'   kernel density estimate for each column in \code{x}, uses
+#'   \code{KernSmooth::dpik()} to compute bandwidths if not manually supplied.
+#' @param limits list containing the ranges of each column in x to truncate the
+#'   grid.
+#' @param smooth logical indicating whether binned counts should be smoothed
+#'   using kernel density estimates, set to TRUE by default. If only binned
+#'   counts are required set this argument to FALSE to prevent running KDE code.
+#' @param ... not in use.
+#'
+#' @return list with slots counts, bkde and bins.
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
-#' @importFrom ks binning
-#' 
+#'
+#' @import KernSmooth
+#' @importFrom stats fft
+#'
 #' @noRd
-cyto_stat_bkde <- function(x,
-                           bins = 250,
-                           ...) {
+cyto_stat_bkde2d <- function(x,
+                             bins = 250,
+                             bandwidth = c(NA, NA),
+                             limits = list(NA, NA),
+                             smooth = TRUE,
+                             ...) {
   
-  # COMPUTE 2D BINNED COUNTS
-  bkde <- suppressWarnings(
-    binning(
-      x,
-      bgridsize = rep(bins, length.out = ncol(x)),
-      ...
+  # SETUP PARAMETERS
+  n <- nrow(x)
+  M <- rep(bins, length.out = 2)
+  h <- bandwidth
+  tau <- 3.4             # bivariate normal kernel
+  
+  # LIMITS - MATRIX
+  if(!is.null(dim(limits))) {
+    limits <- lapply(1:ncol(limits), function(z){limits[, z, drop = TRUE]})
+  }
+  
+  # DEFAULT LIMITS - MATCH KERNSMOOTH
+  limits <- lapply(seq_along(limits), function(z){
+    if(any(is.na((limits[[z]])))) {
+      return(
+        c(
+          min(x[, z]) - 1.5 * h[z],
+          max(x[, z]) + 1.5 * h[z]
+        )
+      )
+    }
+    return(limits[[z]])
+  })
+  
+  # COMPUTE BANDWIDTH USING PLUGIN METHOD
+  bandwidth <- LAPPLY(seq_along(bandwidth), function(z){
+    if(.all_na(bandwidth[z])) {
+      return(
+        dpik(
+          x[, z],
+          gridsize = M[z],
+          range.x = limits[[z]],
+          truncate = TRUE
+        )
+      )
+    } else {
+      # BANDWIDTH > 0
+      if(bandwidth[z] <= 0) {
+        stop("'bandwidth' must be strictly positive!")
+      }
+      return(
+        bandwidth[z]
+      )
+    }
+  })
+  h <- bandwidth
+  
+  # COMPUTE GRID POINTS
+  a <- LAPPLY(limits, "min")
+  b <- LAPPLY(limits, "max")
+  xpts <- seq(
+    a[1],
+    b[1],
+    length = M[1]
+  )
+  ypts <- seq(
+    a[2],
+    b[2],
+    length = M[2]
+  )
+  
+  # LINEAR BINNING - INTERNAL LINBIN2D()
+  cnts <- cyto_func_call(
+    "KernSmooth:::linbin2D",
+    list(
+      X = x,
+      gpoints1 = xpts,
+      gpoints2 = ypts
     )
   )
   
-  # COMPUTE BREAKS FOR BINNING - SEE DENSCOLS()
-  mkBreaks <- function(u){
-    u - diff(range(u))/(length(u)-1)/2
+  # KERNEL DENSITY ESIMATE SMOOTHING
+  if(smooth) {
+    # COMPUTE KERNEL WEIGHTS
+    L <- c(0, 0)
+    kapid <- list(0, 0)
+    lapply(seq_len(2), function(z){
+      L[z] <<- min(floor(tau*h[z]*(M[z]-1)/(b[z]-a[z])), M[z] - 1L)
+      lvecid <- seq(0, L[z])
+      facid <- (b[z] - a[z])/(h[z]*(M[z]-1L))
+      w <- matrix(dnorm(lvecid*facid)/h[z])
+      tot <- sum(c(w, rev(w[-1L]))) * facid * h[z]
+      kapid[[z]] <<- w/tot
+    })
+    kapp <- kapid[[1L]] %*% (t(kapid[[2L]]))/n
+    
+    # GRIDSIZE TOO SMALL
+    if(min(L) == 0) {
+      warning(
+        "Binning grid too coarse for current bandwidth: increase 'bins'."
+      )
+    }
+    
+    # COMBINE WEIGHTS & COUNTS TO GET ESTIMATE (FFT)
+    P <- 2^(ceiling(log(M+L)/log(2)))   # smallest powers of 2 >= M+L
+    L1 <- L[1L] ; L2 <- L[2L]
+    M1 <- M[1L] ; M2 <- M[2L]
+    P1 <- P[1L] ; P2 <- P[2L]
+    
+    # WRAP AROUND VERSION OF KAPP
+    rp <- matrix(0, P1, P2)
+    rp[1L:(L1+1), 1L:(L2+1)] <- kapp
+    if (L1) rp[(P1-L1+1):P1, 1L:(L2+1)] <- kapp[(L1+1):2, 1L:(L2+1)]
+    if (L2) rp[, (P2-L2+1):P2] <- rp[, (L2+1):2]
+    
+    # ZERO PADDED COUNTS
+    sp <- matrix(0, P1, P2)
+    sp[1L:M1, 1L:M2] <- cnts
+    
+    # INVERT ELEMET-WISE PRODUCT FFTs - TRUNCATE & NORMALISE
+    rp <- fft(rp)                       
+    sp <- fft(sp)
+    rp <- Re(fft(rp*sp, inverse = TRUE)/(P1*P2))[1L:M1, 1L:M2]
+    
+    # NON-NEGATIVE
+    rp <- rp * matrix(as.numeric(rp>0), nrow(rp), ncol(rp))
+    
+    # RETURN
+    return(
+      list(
+        counts = cnts,
+        bkde = rp,
+        bins = list("x" = xpts,
+                    "y" = ypts)
+      )
+    )
+  # COUNTS ONLY
+  } else {
+    return(
+      list(
+        counts = cnts,
+        bkde = NA,
+        bins = list("x" = xpts,
+                    "y" = ypts)
+      )
+    )
   }
-  
-  # COMPUTE X BINS
-  xbin <- cut(
-    x[, 1],
-    mkBreaks(
-      bkde$eval.points[[1]]
-    ),
-    labels = FALSE
-  )
-  
-  # COMPUTE Y BINS
-  ybin <- cut(
-    x[, 2],
-    mkBreaks(
-      bkde$eval.points[[2]]
-    ),
-    labels = FALSE
-  )
-  
-  # GET COUNTS FOR BINS
-  bkde <- bkde$counts[cbind(xbin, ybin)]
-  bkde[is.na(bkde)] <- min(bkde, na.rm = TRUE) # EVENTS OUTSIDE GRID - MIN COUNT
-  
-  # VECTOR OF BINNED COUNTS
-  return(bkde)
   
 }
 
