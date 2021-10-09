@@ -2008,6 +2008,57 @@ cyto_exprs.flowSet <- function(x,
   )
 }
 
+## CYTO_EXPRS REPLACEMENT METHOD -----------------------------------------------
+
+#' @noRd
+#' @export
+"cyto_exprs<-" <- function(object, value) {
+  UseMethod("cyto_exprs<-")
+}
+
+#' @importFrom flowCore exprs<-
+#' @noRd
+#' @export
+"cyto_exprs<-.flowFrame" <- function(object, value) {
+  exprs(object) <- value
+  return(object)
+}
+
+#' @importFrom flowCore exprs<-
+#' @noRd
+#' @export
+"cyto_exprs<-.flowSet" <- function(object, value) {
+  
+  # TODO: THROWS ERROR WHEN REPLACING SUBSET OF CYTOSET
+  # CYTO_EXPRS(CS[1:2]) <- LIST(...) - S4 NOT SUBSETTABLE
+  
+  # VALUE - LIST OF MATRICES
+  if(!all(LAPPLY(value, "cyto_class", "matrix")) |
+     length(value) != length(object)) {
+    stop(
+      paste0(
+        "Replacement value must be a list of matrices, one per each ",
+        cyto_class(object[[1]])[1], 
+        " in this ",
+        cyto_class(object)[1],
+        "!"
+      )
+    )
+  }
+  # ORDER MATRICES
+  if(all(cyto_names(object) %in% names(value))) {
+    value <- value[cyto_names(object)]
+  }
+  # REPLACE EXPRESSION DATA
+  lapply(
+    seq_along(object),
+    function(z) {
+      exprs(object[[z]]) <- value[[z]]
+    }
+  )
+  return(object)
+}
+
 ## CYTO_EMPTY ------------------------------------------------------------------
 
 #' Construct an empty cytoframe
