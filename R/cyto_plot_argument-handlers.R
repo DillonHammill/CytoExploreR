@@ -156,6 +156,7 @@
     "hist_cols",
     "point_cols",
     "point_col_scale",
+    "point_col_smooth",
     "point_fast",
     arg_names[grepl("title", arg_names)], # all title arguments
     arg_names[grepl("axes_text", arg_names)], # all axes_text arguments

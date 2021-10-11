@@ -40,6 +40,7 @@ cyto_plot(
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
+  point_col_smooth = TRUE,
   point_cols = NA,
   point_col = NA,
   point_col_alpha = 1,
@@ -263,6 +264,12 @@ set to 2 by default.}
 \item{point_col_scale}{vector of ordered colours to use for the density
 colour gradient of points.}
 
+\item{point_col_smooth}{logical indicating whether the 2D binned counts
+should be smoothed using kernel density estimates prior to selecting
+colours from \code{point_col_scale}, set to TRUE by default. Setting
+\code{point_col_smooth} to FALSE will significantly improve plotting speed
+on less powerful machines but produce more granular plots.}
+
 \item{point_cols}{vector colours to draw from when selecting colours for
 points if none are supplied to point_col.}
 
@@ -374,7 +381,8 @@ scale and associated text in the key.}
 for points between plots, or \code{"free"} to set a unique colour scale for
 each plot. \code{key_scale} is set to \code{"fixed"} by default create a
 shared colour scale which allows comparison of relative counts between
-plots.}
+plots. \code{key_scale} also accepts a vector containing the range of
+values for the scale, or a list of ranges for the scale in each plot.}
 
 \item{key_text_font}{font to use for text in the key, set to 1 by default for
 plain font.}

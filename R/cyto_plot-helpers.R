@@ -135,7 +135,8 @@
 #' @param key_scale inherits scale limits computed within \code{cyto_plot},
 #'   should be a vector of the form \code{c(min, max)}, \code{cyto_plot_empty()}
 #'   will attempt to compute these limits based on the supplied data if
-#'   \code{key_scale} is not supplied.
+#'   \code{key_scale} is not supplied. See the \code{key_scale} argument in
+#'   \code{\link{cyto_plot}} for details.
 #' @param key_text_font font to use for text in the key, set to 1 by default for
 #'   plain font.
 #' @param key_text_size numeric to control the size of text in the plot key, set
@@ -309,6 +310,7 @@ cyto_plot_empty <- function(x,
     # XLIM
     xlim[is.na(xlim)] <- .cyto_plot_axes_limits(x,
                                                 channels = channels[1],
+                                                gate = gate,
                                                 axes_limits = axes_limits,
                                                 buffer = axes_limits_buffer,
                                                 plot = TRUE
@@ -343,49 +345,11 @@ cyto_plot_empty <- function(x,
       # YLIM
       ylim[is.na(ylim)] <- .cyto_plot_axes_limits(x,
                                                   channels = channels[2],
+                                                  gate = gate,
                                                   axes_limits = axes_limits,
                                                   buffer = axes_limits_buffer,
                                                   plot = TRUE
       )[, 1][is.na(ylim)]
-    }
-  }
-  
-  # GATE COORDS MUST BE WITHIN AXES LIMITS
-  if (!.all_na(gate)) {
-    # GATE COORDS
-    gate_coords <- .cyto_gate_coords(gate, channels)
-  }
-  
-  # XLIM GATE COORD ADJUSTMENT
-  if (!.all_na(gate)) {
-    # MIN & MAX GATE COORDS
-    gate_xcoords <- gate_coords[, channels[1]]
-    gate_xcoords <- c(min(gate_xcoords), max(gate_xcoords))
-    # GATE COORDS BELOW XMIN
-    if (is.finite(gate_xcoords[1]) & gate_xcoords[1] < xlim[1]) {
-      xlim[1] <- gate_xcoords[1]
-    }
-    # GATE COORDS ABOVE XMAX
-    if (is.finite(gate_xcoords[2]) & gate_xcoords[2] > xlim[2]) {
-      xlim[2] <- gate_xcoords[2]
-    }
-  }
-  
-  # YLIM GATE COORD ADJUSTMENT
-  if (length(channels) == 2) {
-    # GATE COORDS
-    if (!.all_na(gate)) {
-      # MIN & MAX GATE COORDS
-      gate_ycoords <- gate_coords[, channels[2]]
-      gate_ycoords <- c(min(gate_ycoords), max(gate_ycoords))
-      # GATE COORDS BELOW YMIN
-      if (is.finite(gate_ycoords[1]) & gate_ycoords[1] < ylim[1]) {
-        ylim[1] <- gate_ycoords[1]
-      }
-      # GATE COORDS ABOVE YMAX
-      if (is.finite(gate_ycoords[2]) & gate_ycoords[2] > ylim[2]) {
-        ylim[2] <- gate_ycoords[2]
-      }
     }
   }
   
@@ -434,7 +398,7 @@ cyto_plot_empty <- function(x,
       length(channels) == 1) {
     axes_text <- list(axes_text[[1]], FALSE)
   }
-  
+
   # AXES LABELS ----------------------------------------------------------------
   
   # AXES LABELS - missing replaced - NA removed
@@ -461,7 +425,7 @@ cyto_plot_empty <- function(x,
      (is.na(point_col)[1] |
       any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
      key %in% c("scale", "both") &
-     !cyto_class(key_scale, "list")) {
+     !cyto_class(key_scale, "cyto_plot_key")) {
     key_scale <- .cyto_plot_key_scale(
       x,
       channels = channels,
@@ -470,10 +434,7 @@ cyto_plot_empty <- function(x,
       point_col = point_col,
       key_scale = key_scale,
       axes_trans = axes_trans
-    )
-    # UPDATE X - INCLUDES NEW *BKDE* PARAMETER
-    x <- key_scale$x
-    key_scale <- key_scale$key
+    )[[1]]
   }
   
   # MARGINS --------------------------------------------------------------------
@@ -1744,6 +1705,7 @@ cyto_plot_theme_args <- function() {
     "point_shape",
     "point_size",
     "point_col_scale",
+    "point_col_smooth",
     "point_cols",
     "point_col_alpha",
     "point_fast",

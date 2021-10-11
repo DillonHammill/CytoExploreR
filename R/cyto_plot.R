@@ -112,6 +112,11 @@
 #'   set to 2 by default.
 #' @param point_col_scale vector of ordered colours to use for the density
 #'   colour gradient of points.
+#' @param point_col_smooth logical indicating whether the 2D binned counts
+#'   should be smoothed using kernel density estimates prior to selecting
+#'   colours from \code{point_col_scale}, set to TRUE by default. Setting
+#'   \code{point_col_smooth} to FALSE will significantly improve plotting speed
+#'   on less powerful machines but produce more granular plots.
 #' @param point_cols vector colours to draw from when selecting colours for
 #'   points if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
@@ -198,7 +203,8 @@
 #'   for points between plots, or \code{"free"} to set a unique colour scale for
 #'   each plot. \code{key_scale} is set to \code{"fixed"} by default create a
 #'   shared colour scale which allows comparison of relative counts between
-#'   plots.
+#'   plots. \code{key_scale} also accepts a vector containing the range of
+#'   values for the scale, or a list of ranges for the scale in each plot.
 #' @param key_text_font font to use for text in the key, set to 1 by default for
 #'   plain font.
 #' @param key_text_size numeric to control the size of text in the plot key, set
@@ -386,6 +392,7 @@ cyto_plot <- function(x,
                       point_shape = ".",
                       point_size = 2,
                       point_col_scale = NA,
+                      point_col_smooth = TRUE,
                       point_cols = NA,
                       point_col = NA,
                       point_col_alpha = 1,
@@ -711,6 +718,7 @@ cyto_plot <- function(x,
     args$xlim[is.na(args$xlim)] <- 
       .cyto_plot_axes_limits(args$x,
                              channels = args$channels[1],
+                             gate = args$gate[[1]],
                              axes_limits = args$axes_limits,
                              buffer = args$axes_limits_buffer
       )[, args$channels[1]][is.na(args$xlim)]
@@ -725,6 +733,7 @@ cyto_plot <- function(x,
       args$ylim[is.na(args$ylim)] <- 
         .cyto_plot_axes_limits(args$x,
                                channels = args$channels[2],
+                               gate = args$gate[[1]],
                                axes_limits = args$axes_limits,
                                buffer = args$axes_limits_buffer
         )[, args$channels[2]][is.na(args$ylim)]
@@ -827,7 +836,7 @@ cyto_plot <- function(x,
   # REMOVE HEADER ARGUMENTS - CANNOT SPLIT LATER
   args <- args[!names(args) %in% names(header_args)]
   
-  # KEY SCALE - KDE ANNOTATED IN BASE LAYER CYTOSETS
+  # KEY_SCALE 
   if(length(channels) == 2) {
     args$key_scale <- .cyto_plot_key_scale(
       args$x,
@@ -838,8 +847,6 @@ cyto_plot <- function(x,
       key_scale = args$key_scale,
       axes_trans = args$axes_trans
     )
-    args$x <- args$key_scale$x
-    args$key_scale <- args$key_scale$key
   }
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------

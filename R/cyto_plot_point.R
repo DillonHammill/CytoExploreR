@@ -3,16 +3,20 @@
 #' Add points and contour lines to empty cyto_plot
 #'
 #' @param x either an object of class
-#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list containing
-#'   cytoframe or cytoset objects.
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the parent population to extract from GatingHierarchy
 #'   or GatingSet objects.
 #' @param channels names of the channels used to construct the plot.
-#' @param overlay optional argument if x is a cytoframe to overlay a list of
-#'   cytoframe objects.
+#' @param overlay name(s) of the populations to overlay or a \code{cytoset} or
+#'   \code{list of cytosets} containing populations to be overlaid onto the
+#'   plot(s). This argument can be set to "children" or "descendants" when a
+#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
 #' @param point_shape shape(s) to use for points in 2-D scatterplots, set to
@@ -22,6 +26,11 @@
 #'   set to 2 by default.
 #' @param point_col_scale vector of ordered colours to use for the density
 #'   colour gradient of points.
+#' @param point_col_smooth logical indicating whether the 2D binned counts
+#'   should be smoothed using kernel density estimates prior to selecting
+#'   colours from \code{point_col_scale}, set to TRUE by default. Setting
+#'   \code{point_col_smooth} to FALSE will significantly improve plotting speed
+#'   on less powerful machines but produce more granular plots.
 #' @param point_cols vector colours to draw from when selecting colours for
 #'   points if none are supplied to point_col.
 #' @param point_col colour(s) to use for points in 2-D scatter plots, set to NA
@@ -47,7 +56,7 @@
 #'   setting this argument to NULL.
 #' @param ... not in use.
 #'
-#' @importFrom flowCore exprs polygonGate
+#' @importFrom flowCore exprs
 #' @importFrom graphics par rasterImage points
 #' @importFrom grDevices col2rgb dev.size
 #' @importFrom stats rnorm
@@ -59,10 +68,12 @@ cyto_plot_point <- function(x,
                             parent = "root",
                             channels,
                             overlay = NA,
+                            select = NULL,
                             events = 1,
                             point_shape = ".",
                             point_size = 2,
                             point_col_scale = NA,
+                            point_col_smooth = TRUE,
                             point_cols = NA,
                             point_col = NA,
                             point_col_alpha = 1,
@@ -71,207 +82,235 @@ cyto_plot_point <- function(x,
                             contour_line_type = 1,
                             contour_line_width = 1,
                             contour_line_col = "black",
-                            contour_line_alpha = 1, 
+                            contour_line_alpha = 1,
                             seed = 42, 
                             ...) {
   
   # CHECKS ---------------------------------------------------------------------
   
   # X - CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET
-  if(cyto_class(x, c("flowFrame", "flowSet", "GatingSet"))) {
-    x <- cyto_data_extract(x, 
-                           parent = parent,
-                           format = "cytoset",
-                           copy = FALSE)
-    # OVERLAY
-    if(!.all_na(overlay)){
-      if(!cyto_class(overlay, "list")) {
-        overlay <- cyto_list(overlay)
-      }
-      x <- c(x, overlay)
-    }
+  if(cyto_class(x, c("flowSet", "GatingSet"))) {
+    # PREPARE DATA - .CYTO_PLOT_DATA()
+    # CYTO_PLOT NOT CALLED AFTER POINTS - DON'T SET CYTO_PLOT_DATA OPTION
+    x <- .cyto_plot_data(
+      x,
+      parent = parent,
+      overlay = overlay,
+      merge_by = "all",
+      select = select,
+      events = events,
+      barcode = FALSE,
+      seed = seed
+    )[[1]]
+    # PULL DOWN ARGUMENTS
+    args <- .args_list(...)
   # CYTO_PLOT ARGUMENTS
   } else if(cyto_class(x, "cyto_plot")) {
-    .args_update(x)
+    args <- x
   # CHECK LISTS
-  } else if(!all(LAPPLY(x, cyto_class, c("flowFrame", "flowSet")))) {
-    stop("'x' must be a list of cytoframes or cytosets!")
+  } else if(!all(LAPPLY(x, cyto_class, "flowSet"))) {
+    stop("'x' must be a list of cytosets!")
   }
   
-  # CHANNELS
-  channels <- cyto_channels_extract(x, channels)
-  
-  # SAMPLE DATA ----------------------------------------------------------------
-  
-  # DISPLAY
-  if (events != 1) {
-    x <- cyto_sample(x,
-                     events = events,
-                     seed = seed
-    )
-  }
-  
-  # ARGUMENTS ------------------------------------------------------------------
-  
-  # ARGUMENTS
-  args <- .args_list()
+  # PREPARE ARGUMENTS ----------------------------------------------------------
   
   # CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
   
-  # UPDATE
-  .args_update(args)
+  # REPEAT ARGUMENTS PER LAYER
+  layer_args <- c(
+    "point_shape",
+    "point_size",
+    "point_col",
+    "point_col_alpha",
+    names(args)[grepl("contour_", names(args))]
+  )
+  lapply(
+    layer_args,
+    function(z) {
+      args[[z]] <<- rep(args[[z]], length.out = length(args$x))
+    }
+  )
   
   # PREPARE DATA ---------------------------------------------------------------
   
-  # COLOUR BY 3RD PARAMETER
-  x <- lapply(seq_along(x), function(z) {
-    # COLOUR BY 3RD PARAMETER
-    if (point_col[z] %in% c(cyto_channels(x[[z]]), cyto_markers(x[[z]]))) {
-      chan <- cyto_channels_extract(x[[z]], point_col[z])
-      # SORT EVENTS IN CYTOSET
-      return(
-        cytoset(
-          structure(
-            list(x[[z]][[1]][order(cyto_data_extract(x[[z]],
-                                                channels = chan,
-                                                format = "matrix",
-                                                copy = FALSE)[[1]][[1]]), ]),
-           names = cyto_names(x[[z]])
-          )
-        )
+  # BASE LAYER - BKDE2D
+  if(.all_na(args$point_col[1])) {
+    # BKDE
+    if(!"bkde2d" %in% names(args)) {
+      args$bkde2d <- list(
+        counts = NA,
+        bins = NA,
+        bkde = NA
       )
     }
-    return(x[[z]])
-  })
+    # RECOMPUTE BKDE
+    if(.all_na(args$bkde2d$bkde)) {
+      # RECOMPUTE BKDE2D - DEFAULT BINS
+      args$bkde2d <- cyto_apply(
+        args$x[[1]],
+        "cyto_stat_bkde2d",
+        input = "matrix",
+        channels = args$channels,
+        limits = list(.par("usr")[[1]][1:2],
+                      .par("usr")[[1]][3:4]),
+        smooth = args$point_col_smooth,
+        copy = FALSE,
+        simplify = FALSE
+      )[[1]]
+    }
+  } else {
+    args$bkde2d <- list(
+      counts = NA,
+      bins = NA,
+      bkde = NA
+    )
+  }
+  
+  # BASE LAYER - CHANNEL/MARKER - EXACT MATCHES ONLY
+  if(args$point_col[1] %in% c(cyto_channels(args$x[[1]]),
+                              cyto_markers(args$x[[1]]))) {
+    # CONVERT TO CHANNEL
+    args$point_col[1] <- cyto_channels_extract(
+      args$x[[1]],
+      channels = args$point_col[1]
+    )
+    # SORT EVENTS - X[[1]] - CYTOSET
+    cyto_exprs(args$x[[1]]) <- list(
+      cyto_exprs(args$x[[1]])[[1]][
+        order(
+          cyto_exprs(
+            args$x[[1]],
+            channels = args$point_col[1],
+            drop = TRUE
+          )[[1]]
+        ),
+      ]
+    )
+  }
   
   # POINT_COL ------------------------------------------------------------------
-  point_col <- .cyto_plot_point_col(x,
-                                    channels = channels,
-                                    point_col_scale = point_col_scale,
-                                    point_cols = point_cols,
-                                    point_col = point_col,
-                                    point_col_alpha = point_col_alpha
+  
+  # GET POINT COLOURS - PASS KEY_SCALE & BKDE2D
+  args$point_col <- cyto_func_call(
+    ".cyto_plot_point_col",
+    args
   )
-  
-  # REPEAT ARGUMENTS -----------------------------------------------------------
-  
-  # ARGUMENTS TO REPEAT
-  args <- .args_list()[c(
-    "point_shape",
-    "point_size",
-    "contour_lines",
-    "contour_line_type",
-    "contour_line_width",
-    "contour_line_col",
-    "contour_line_alpha"
-  )]
-  
-  # REPEAT ARGUMENTS
-  args <- lapply(args, function(arg) {
-    rep(arg, length.out = length(x))
-  })
-  
-  # UPDATE ARGUMENTS
-  .args_update(args)
   
   # GRAPHICAL PARAMETERS -------------------------------------------------------
   
   # PLOT LIMITS
-  usr <- par("usr")
+  usr <- .par("usr")[[1]]
   
   # FAST PLOTTING --------------------------------------------------------------
   
-  # GLOBAL OPTION
-  if (point_fast) {
-    if (requireNamespace("scattermore")) {
-      # DEVICE SIZE
-      size <- as.integer(dev.size("px") / dev.size("in") * par("pin"))
-      point_fast <- TRUE
-    } else {
-      message("Fast plotting requires the 'scattermore' package.")
-      message("Please install it using install.packages('scattermore').")
-      message("Resorting to conventional plotting...")
-      point_fast <- FALSE
-    }
-  } else {
-    point_fast <- FALSE
+  # SCATTERMORE FAST PLOTIING
+  if (args$point_fast) {
+    # SCATTERMORE
+    cyto_require(
+      "scattermore",
+      source = "CRAN"
+    )
+    # DEVICE SIZE
+    dev_size <- as.integer(dev.size("px") / dev.size("in") * .par("pin")[[1]])
   }
   
   # POINT & CONTOUR LINES LAYERS -----------------------------------------------
   
-  # LAYERS
-  lapply(seq_len(length(x)), function(z) {
-    # EXTRACT MATRIX - CANNOT RESTRICT MATRIX
-    cf_exprs <- cyto_data_extract(
-      x[[z]],
-      format = "matrix",
-      copy = FALSE
-    )[[1]][[1]]
-    # POINTS - SKIP NO EVENTS
-    if (!is.null(nrow(cf_exprs))) {
-      # POINTS
-      if (nrow(cf_exprs) != 0) {
-        # SAMPLE-ID?
-        ind <- which(
-          LAPPLY(channels, function(v){
-            grepl("^Sample.*ID.*$", v) # flowJo compatibility SampleID
-          })
-        )
-        # SAMPLE ID - JITTER BARCODES
-        if(length(ind) > 0) {
-          cf_exprs[, ind] <- LAPPLY(unique(cf_exprs[, ind]), function(z) {
-            rnorm(
-              n = length(cf_exprs[, ind][cf_exprs[, ind] == z]),
-              mean = z,
-              sd = 0.1
+  # ADD POINTS & CONTOURS
+  lapply(
+    seq_along(args$x),
+    function(z) {
+      # EXTRACT MATRIX
+      exprs <- cyto_data_extract(
+        args$x[[z]],
+        format = "matrix",
+        copy = FALSE
+      )[[1]][[1]]
+      # POINTS - SKIP NO EVENTS
+      if(!is.null(nrow(exprs))) {
+        # POINTS - BYPASS EMPTY CYTOFRAME
+        if(nrow(exprs) != 0) {
+          # SAMPLE-ID
+          ind <- which(
+            LAPPLY(
+              args$channels,
+              function(v) {
+                grepl("^Sample.*ID.*$", v)
+              }
             )
-          })
-        }
-        # PLOT DEFAULT POINTS
-        if (!point_fast) {
-          # CONVENTIONAL PLOTTING
-          points(
-            x = cf_exprs[, channels[1]],
-            y = cf_exprs[, channels[2]],
-            pch = point_shape[z],
-            cex = point_size[z],
-            col = point_col[[z]]
           )
+          # JITTER BARCODES FOR SAMPLE-ID
+          if(length(ind) > 0) {
+            exprs[, ind] <- LAPPLY(
+              unique(exprs[, ind]),
+              function(w){
+                rnorm(
+                  n = length(
+                    exprs[, ind][exprs[, ind] == w]
+                  ),
+                  mean = w,
+                  sd = 0.1
+                )
+              }
+            )
+          }
+          # PLOT DEFAULT POINTS
+          if (!args$point_fast) {
+            # CONVENTIONAL PLOTTING
+            points(
+              x = exprs[, args$channels[1]],
+              y = exprs[, args$channels[2]],
+              pch = args$point_shape[z],
+              cex = args$point_size[z],
+              col = args$point_col[[z]]
+            )
           # SCATTERMORE POINTS - LACK PCH CONTROL
-        } else {
-          # RASTER
-          rasterImage(
-            scattermore::scattermore(
-              xy = cbind(cf_exprs[, channels[1]], cf_exprs[, channels[2]]),
-              size = size,
-              xlim = usr[1:2],
-              ylim = usr[3:4],
-              cex = 0.5 * point_size[[z]],
-              rgba = col2rgb(point_col[[z]], alpha = TRUE),
-              output.raster = TRUE
-            ),
-            xleft = usr[1],
-            xright = usr[2],
-            ybottom = usr[3],
-            ytop = usr[4]
-          )
+          } else {
+            # RASTER
+            rasterImage(
+              cyto_func_call(
+                "scattermore::scattermore",
+                list(
+                  xy = cbind(
+                    exprs[, args$channels[1]], 
+                    exprs[, args$channels[2]]
+                  ),
+                  size = dev_size,
+                  xlim = usr[1:2],
+                  ylim = usr[3:4],
+                  cex = 0.5 * args$point_size[[z]],
+                  rgba = col2rgb(
+                    args$point_col[[z]], 
+                    alpha = TRUE
+                  ),
+                  output.raster = TRUE
+                )
+              ),
+              xleft = usr[1],
+              xright = usr[2],
+              ybottom = usr[3],
+              ytop = usr[4]
+            )
+          }
+          # CONTOUR_LINES
+          if (args$contour_lines[z] != 0) {
+            cyto_plot_contour(
+              args$x[[z]],
+              channels = args$channels,
+              events = 1,
+              contour_lines = args$contour_lines[z],
+              contour_line_type = args$contour_line_type[z],
+              contour_line_width = args$contour_line_width[z],
+              contour_line_col = args$contour_line_col[z],
+              contour_line_alpha = args$contour_line_alpha[z],
+              bkde2d = args$bkde2d
+            )
+          }
         }
       }
     }
-    # CONTOUR_LINES
-    if (contour_lines[z] != 0) {
-      cyto_plot_contour(x[[z]],
-                        channels = channels,
-                        events = 1,
-                        contour_lines = contour_lines[z],
-                        contour_line_type = contour_line_type[z],
-                        contour_line_width = contour_line_width[z],
-                        contour_line_col = contour_line_col[z],
-                        contour_line_alpha = contour_line_alpha[z]
-      )
-    }
-  })
+  )
   
   # INVISIBLE NULL RETURN
   invisible(NULL)

@@ -3,14 +3,19 @@
 #' Add contour lines to cyto_plot
 #'
 #' @param x either an object of class
-#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
 #'   \code{\link[flowWorkspace:cytoset]{cytoset}},
-#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list containing
-#'   cytoframe or cytoset objects.
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the parent population to extract from GatingHierarchy
 #'   or GatingSt objects, set to the "root" node by default.
-#' @param overlay list containing cytoframe or cytoset objects to overlay.
+#' @param overlay name(s) of the populations to overlay or a \code{cytoset} or
+#'   \code{list of cytosets} containing populations to be overlaid onto the
+#'   plot(s). This argument can be set to "children" or "descendants" when a
+#'   \code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details. Sample selection occurs prior to grouping with \code{merge_by}.
 #' @param channels channels used to construct the existing cyto_plot.
 #' @param events controls the number or percentage of events to display, set to
 #'   1 by default to display all events.
@@ -62,6 +67,7 @@ cyto_plot_contour <- function(x,
                               parent = "root",
                               channels,
                               overlay = NA,
+                              select = NULL,
                               events = 1,
                               contour_lines = 15,
                               contour_line_type = 1,          
@@ -71,81 +77,100 @@ cyto_plot_contour <- function(x,
                               seed = 42,
                               ...) {
   
-  # TODO: BYPASS BKDE2D COMPUTATION
-  
-  # CHECKS -------------------------------------------------------------------
+  # CHECKS ---------------------------------------------------------------------
   
   # X - CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET
-  if(cyto_class(x, c("flowFrame", "flowSet", "GatingSet"))) {
-    x <- cyto_data_extract(x,
-                           parent = parent,
-                           format = "cytoset", 
-                           copy = FALSE)
-    # OVERLAY
-    if(!.all_na(overlay)) {
-      if(!cyto_class(overlay, "list")) {
-        overlay <- cyto_list(overlay)
-      }
-      x <- c(x, overlay)
-    }
-    # SAMPLING
-    if(all(events != 1)) {
-      x <- cyto_sample(x,
-                       events = events,
-                       seed = seed)
-    }
+  if(cyto_class(x, c("flowSet", "GatingSet"))) {
+    # PREPARE DATA - .CYTO_PLOT_DATA()
+    # CYTO_PLOT NOT CALLED AFTER CONTOURS - DON'T SET CYTO_PLOT_DATA OPTION
+    x <- .cyto_plot_data(
+      x,
+      parent = parent,
+      overlay = overlay,
+      merge_by = "all",
+      select = select,
+      events = events,
+      barcode = FALSE,
+      seed = seed
+    )[[1]]
+    # PULL DOWN ARGUMENTS
+    args <- .args_list(...)
   # CYTO_PLOT ARGUMENTS
-  } else if(cyto_class(x, "cyto_plot")) { # not used - call point instead
-    .args_update(x)
+  } else if(cyto_class(x, "cyto_plot")) {
+    args <- x
   # CHECK LISTS
-  } else if(!all(LAPPLY(x, cyto_class, c("flowFrame", "flowSet")))) {
-    stop("'x' must be a list of cytoframes or cytosets!")
+  } else if(!all(LAPPLY(x, cyto_class, "flowSet"))) {
+    stop("'x' must be a list of cytosets!")
   }
   
+  # PREPARE ARGUMENTS ----------------------------------------------------------
   
-  # CONTOUR_LINES --------------------------------------------------------------
+  # INHERIT THEME
+  args <- .cyto_plot_theme_inherit(args)
   
-  invisible(mapply(
-    function(cs,
-             contour_lines,
-             contour_line_type,
-             contour_line_width,
-             contour_line_col,
-             contour_line_alpha) {
-      # COMPUTE BKDE2D  
-      if(contour_lines != 0) {
-        # COMPUTE BKDE2D
-        bkde2d <- cyto_apply(
-          cs,
-          "cyto_stat_bkde2d",
-          input = "matrix",
-          channels = channels,
-          bins = c(250, 250),
-          limits = list(.par("usr")[[1]][1:2],
-                        .par("usr")[[1]][3:4]),
-          copy = FALSE,
-          simplify = FALSE
-        )[[1]]
-        # PLOT CONTOUR LINES
-        graphics::contour(
-          z = bkde2d$bkde,
-          x = bkde2d$bins$x,
-          y = bkde2d$bins$y,
-          add = TRUE,
-          drawlabels = FALSE,
-          nlevels = contour_lines,
-          col = adjustcolor(contour_line_col, contour_line_alpha),
-          lwd = contour_line_width,
-          lty = contour_line_type
-        )
+  # CONTOUR ARGUMENTS
+  contour_args <- names(args)[grepl("contour_", names(args))]
+  
+  # REPEAT CONTOUR ARGUMENTS
+  lapply(
+    contour_args,
+    function(z) {
+      args[[z]] <<- rep(args[[z]], length.out = length(args$x))
+    }
+  )
+  
+  # CONTOUR LINES --------------------------------------------------------------
+  
+  # ADD CONTOUR LINES
+  invisible(
+    lapply(
+      seq_along(args$x),
+      function(z) {
+        # CONTOUR LINES REQUIRED
+        if(args$contour_lines != 0) {
+          # BKDE NOT PRE-COMPUTED
+          if(!"bkde2d" %in% names(args)) {
+            args$bkde2d <- list(
+              counts = NA,
+              bins = NA,
+              bkde = NA
+            )
+          }
+          # BKDE IS NOT SMOOTHED (TOO FEW EVENTS OR COUNTS ONLY)
+          if(.all_na(args$bkde2d$bkde)) {
+            # RECOMPUTE BKDE2D - POSSIBLE DUPLICATE BINNING
+            args$bkde2d <- cyto_apply(
+              args$x[[z]],
+              "cyto_stat_bkde2d",
+              input = "matrix",
+              channels = args$channels,
+              bins = c(250, 250),
+              limits = list(.par("usr")[[1]][1:2],
+                            .par("usr")[[1]][3:4]),
+              copy = FALSE,
+              simplify = FALSE
+            )[[1]]
+          }
+          # ADD CONTOUR LINES- BKDE REQUIRED (BYPASS SAMPLES TOO FEW EVENTS)
+          if(!.all_na(args$bkde2d$bkde)) {
+            graphics::contour(
+              z = args$bkde2d$bkde,
+              x = args$bkde2d$bins$x,
+              y = args$bkde2d$bins$y,
+              add = TRUE,
+              drawlabels = FALSE,
+              nlevels = args$contour_lines[z],
+              col = adjustcolor(
+                args$contour_line_col[z], 
+                args$contour_line_alpha[z]
+              ),
+              lwd = args$contour_line_width[z],
+              lty = args$contour_line_type[z]
+            )
+          }
+        }
       }
-    }, 
-    x,
-    contour_lines,
-    contour_line_type,
-    contour_line_width,
-    contour_line_col,
-    contour_line_alpha
-  ))
+    )
+  )
   
 }

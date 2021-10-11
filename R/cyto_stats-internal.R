@@ -574,7 +574,8 @@ cyto_stat_range <- function(x,
         x,
         2,
         "cyto_stat_range",
-        round = round
+        round = round,
+        ...
       )
     )
   }
@@ -1003,14 +1004,18 @@ cyto_stat_bkde2d <- function(x,
   # COMPUTE BANDWIDTH USING PLUGIN METHOD
   bandwidth <- LAPPLY(seq_along(bandwidth), function(z){
     if(.all_na(bandwidth[z])) {
-      return(
-        dpik(
-          x[, z],
-          gridsize = M[z],
-          range.x = limits[[z]],
-          truncate = TRUE
+      if(length(x[, z]) < 2) {
+        return(NA)
+      } else {
+        return(
+          dpik(
+            x[, z],
+            gridsize = M[z],
+            range.x = limits[[z]],
+            truncate = TRUE
+          )
         )
-      )
+      }
     } else {
       # BANDWIDTH > 0
       if(bandwidth[z] <= 0) {
@@ -1048,7 +1053,7 @@ cyto_stat_bkde2d <- function(x,
   )
   
   # KERNEL DENSITY ESIMATE SMOOTHING
-  if(smooth) {
+  if(smooth & n >= 2) {
     # COMPUTE KERNEL WEIGHTS
     L <- c(0, 0)
     kapid <- list(0, 0)
@@ -1062,12 +1067,12 @@ cyto_stat_bkde2d <- function(x,
     })
     kapp <- kapid[[1L]] %*% (t(kapid[[2L]]))/n
     
-    # GRIDSIZE TOO SMALL
-    if(min(L) == 0) {
-      warning(
-        "Binning grid too coarse for current bandwidth: increase 'bins'."
-      )
-    }
+    # # GRIDSIZE TOO SMALL
+    # if(min(L) == 0) {
+    #   warning(
+    #     "Binning grid too coarse for current bandwidth: increase 'bins'."
+    #   )
+    # }
     
     # COMBINE WEIGHTS & COUNTS TO GET ESTIMATE (FFT)
     P <- 2^(ceiling(log(M+L)/log(2)))   # smallest powers of 2 >= M+L

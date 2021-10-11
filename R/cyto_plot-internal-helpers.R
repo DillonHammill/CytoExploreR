@@ -112,7 +112,6 @@
                          copy = FALSE)
   parent <- names(x) # path
   
-  
   # GROUP
   x <- cyto_group_by(x[[1]], merge_by)
   
@@ -735,7 +734,9 @@
 #'
 #' @param x cytometry object(s) which require range calculation.
 #' @param parent name of parent population to extract for range calculation.
-#' @param channels name(s) of channel(s).
+#' @param channels name of a channel.
+#' @param gate list of gates to plot, gate co-ordinates used to compute
+#'   axes_limits.
 #' @param axes_limits either "auto", "trim", "data" or "machine". "auto" use
 #'   data limits but always includes zero.
 #' @param plot logical indicating whether a check should be performed for
@@ -753,6 +754,7 @@
 .cyto_plot_axes_limits <- function(x,
                                    parent = NULL,
                                    channels = NA,
+                                   gate = NA,
                                    axes_limits = "auto",
                                    plot = FALSE,
                                    buffer = 0.03,
@@ -903,6 +905,27 @@
   if(axes_limits != "data" & anchor == TRUE){
     if(any(data_range[1,] > 0)){
       data_range[1, data_range[1,] > 0] <- 0
+    }
+  }
+  
+  # GATES ----------------------------------------------------------------------
+  
+  # MAKE SURE ALL GATES ARE VISIBLE
+  if(!.all_na(gate)) {
+    # GATE CO-ORDINATES
+    coords <- .cyto_gate_coords(gate, channels)
+    # DROP NON-FINITE CO-ORDINATES
+    coords <- coords[is.finite(coords[, 1]), , drop = FALSE]
+    # BYPASS INFINITE CO-ORDINATES
+    if(nrow(coords) > 0) {
+      # MINIMUM
+      if(min(coords) < min(data_range)) {
+        data_range[1, 1] <- min(coords)
+      }
+      # MAXIMUM
+      if(max(coords) > max(data_range)) {
+        data_range[2, 1] <- max(coords)
+      }
     }
   }
   
@@ -2677,6 +2700,7 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @importFrom graphics text rect lines
+#' @importFrom grDevices adjustcolor colorRamp
 #' 
 #' @noRd
 .cyto_plot_key <- function(x,
@@ -2699,6 +2723,7 @@
                            key_title_text_col_alpha = 1,
                            axes_trans = NA) {
   
+  # USE MTEXT FOR CRISPER TEXT APPEARANCE
   # KEY AXIS -> KEY SCALE -> KEY TITLE
   
   # CONSTRUCT KEY
@@ -2706,7 +2731,7 @@
     # KEY AXIS & TITLE
     if(key == "both") {
       # KEY_SCALE REQUIRED
-      if(!cyto_class(key_scale, "list")) {
+      if(!cyto_class(key_scale, "cyto_plot_key")) {
         key_scale <- .cyto_plot_key_scale(
           list(x),
           channels = channels,
@@ -2716,8 +2741,6 @@
           key_scale = key_scale,
           axes_trans = axes_trans
         )[[1]]
-        # x <- key_scale$x[[1]] # NOT REQUIRED HERE
-        key_scale <- key_scale$key
       }
       # COMPUTE KEY LOCATION
       usr <- .par("usr")[[1]]
@@ -2743,6 +2766,15 @@
                 col = "black",
                 xpd = TRUE
               )
+              # # AXIS TEXT
+              # mtext(
+              #   text = key_scale$label[z],
+              #   side = 4,
+              #   at = list(x = key_x[2] + 0.8 * diff(key_x),
+              #             y = key_scale$at[z]),
+              #   adj = 0, # align left
+              #   outer = TRUE
+              # )
               # TEXT
               text(
                 x = key_x[2] + 0.8 * diff(key_x),
@@ -2795,7 +2827,7 @@
           }
           # TITLE TEXT
           text(
-            x = key_x[2] + 1.1 * diff(key_x),
+            x = key_x[2] + 1 * diff(key_x),
             y = key_y[2] + 0.02 * diff(key_y),
             pos = 3,
             offset = 0,
@@ -2811,12 +2843,7 @@
     # KEY SCALE
     key_boxes <- 60
     # POINT_COL_ALPHA
-    key_col_scale <- adjustcolor(
-      .cyto_plot_point_col_scale(
-        point_col_scale
-      ),
-      point_col_alpha
-    )
+    key_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
     key_col_ramp <- colorRamp(key_col_scale)
     key_cols <- seq(0, 1, 1/key_boxes)
     key_cols <- key_col_ramp(key_cols)
@@ -2867,9 +2894,7 @@
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
-#' @importFrom ks binning
 #' @importFrom flowCore exprs
-#' @importFrom grDevices axisTicks
 #' 
 #' @noRd
 .cyto_plot_key_scale <- function(x,
@@ -2879,9 +2904,6 @@
                                  point_col = NA,
                                  key_scale = "fixed",
                                  axes_trans = NA) {
-
-  # WE NEED TO RETURN KEY SCALE & UPDATED X
-  # OTHERWISE WE NEED TO COMPUTE BKDE TWICE WHEN ADD POINTS (INEFFICIENT)
 
   # X AXES LIMITS REQUIRED - CROP GRID
   if(any(is.na(xlim))) {
@@ -2905,211 +2927,204 @@
     )
   }
   
-  # COLOUR SCALE REQUIRED - COUNTS
-  if(any(is.na(point_col))) {
-    # COMPUTE RANGE & ADD BKDE COLUMN TO X
-    key_range <- list()
-    lapply(
-      seq_along(x), 
-      function(z){
-        # BYPASS SAMPLES < 2 EVENTS
-        if(BiocGenerics::nrow(x[[z]][[1]][[1]]) < 2) {
-          # UPDATE KEY RANGE
-          key_range <<- c(key_range, list(NA, NA))
-          # ADD BKDE COLUMN TO CYTOFRAMES
-          if(!is.null(cyto_option("cyto_plot_method"))) {
-            x[[z]][[1]] <<- cyto_cbind(
-              x[[z]][[1]],
-              matrix(
-                0,
-                ncol = 1,
-                nrow = BiocGenerics::nrow(x[[z]][[1]][[1]]),
-                dimnames = list(
-                  NULL,
-                  "*bkde*"
-                )
-              )
-            )
-          }
-        # COMPUTE 2D BINNED KERNEL DENSITY COUNTS - RESTRICT GRID TO PLOT LIMITS
-        } else {
-          bkde <- cyto_apply(
-            x[[z]][[1]],
-            "cyto_stat_bkde",
-            input = "matrix",
-            channels = channels,
-            xmin = c(min(xlim), min(ylim)),
-            xmax = c(max(xlim), max(ylim)),
-            copy = FALSE,
-            simplify = FALSE
-          )[[1]]
-          # UPDATE KEY RANGE 
-          key_range <<- c(
-            key_range,
-            list(
-              range(
-                bkde
-              )
-            )
-          )
-          # ADD BKDE COLUMN TO CYTOFRAMES
-          if(!is.null(cyto_option("cyto_plot_method"))) {
-            x[[z]][[1]] <<- cyto_cbind(
-              x[[z]][[1]],
-              matrix(
-                bkde,
-                ncol = 1,
-                dimnames = list(
-                  NULL,
-                  "*bkde*"
-                )
-              )
-            )
-          }
-        }
-      }
-    )
-    
-    # FIXED COLOUR SCALE
-    if(key_scale == "fixed") {
-      key_range <- rep(
-        list(
-          range(
-            unlist(key_range),
-            na.rm = TRUE
-          )
-        ),
-        length(x)
-      )
-    }
-    
-    # NORMALISE STORED BKDE TO RANGE
-    if(!is.null(cyto_option("cyto_plot_method"))) {
-      lapply(
-        seq_along(x),
-        function(w) {
-          # UPDATE BKDE WITH NORMALISED COUNTS - BYPASS EMPTY
-          if(BiocGenerics::nrow(x[[w]][[1]][[1]]) < 2) {
-            # RESCALE COUNTS TO RANGE
-            exprs(x[[w]][[1]])[, "*bkde*"] <<- cyto_apply(
-              x[[w]][[1]],
-              "cyto_stat_rescale",
-              input = "column",
-              channels = "*bkde*",
-              scale = key_range[[w]],
-              copy = FALSE,
-              simplify = FALSE
-            )[[1]]
-          }
-        }
-      )
-    }
-    
-    # USE .CYTO_PLOT_AXES_TEXT() TO COMPUTE TICK LOCATIONS & FORMAT LABELS
-    key <- list(
-      "x" = x,
-      "key" = lapply(
-        key_range, 
-        function(w){
-          # BYPASS EMPTY SAMPLES
-          if(.all_na(w)) {
-            list(
-              "label" = NA,
-              "at" = NA
-            )
-            # PREPARE KEY
-          } else {
-            .cyto_plot_axes_text(
-              channels = NA,
-              axes_range = list(w),
-              rescale = ylim,
-              format = TRUE
-            )[[1]]
-          }
-        }
-      )
-    )
-    
-  # COLOUR SCALE REQUIRED - MARKER EXPRESSION
-  } else if(any(point_col %in% c(cyto_channels(x[[1]]),
-                                 cyto_markers(x[[1]])))) {
-    # CONVERT POINT_COL
-    point_col <- cyto_channels_extract(
-      x[[1]],
-      channels = point_col
-    )
-    # RANGE OF COLOUR SCALE
-    cyto_plot_cal <- .cyto_calibrate_recall()
-    # EXTRACT RANGE FROM CALIBRATION SETTINGS
-    if(point_col[1] %in% colnames(cyto_plot_cal) & key_scale == "fixed") {
-      key_range <- rep(
-        list(cyto_plot_cal[, point_col[1]]), 
-        length(x)
-      )
-    # COMPUTE RANGE BASED ON DATA
-    } else {
-      # COMPUTE RANGE PER SAMPLE
-      key_range <- cyto_apply(
-        x,
-        "cyto_stat_range",
-        input = "matrix",
-        channels = point_col[1],
-        copy = FALSE
-      )
-      # MATRICES TO VECTORS
-      key_range <- lapply(key_range, function(p){
-        p[[1]][, 1]
-        })
-      # CONVERT TO FIXED SCALE
-      if(key_scale == "fixed") {
-        key_range <- rep(
-          list(range(key_range, na.rm = TRUE)),
+  # STORE RANGES FOR SCALE
+  key_range <- NULL
+  
+  # KEY RANGES MANUALLY SUPPLIED
+  if(cyto_class(key_scale, "list", TRUE) | is.numeric(key_scale)) {
+    # SCALE RANGE FIXED
+    if(is.numeric(key_scale)) {
+      key_range <- structure(
+        rep(
+          list(key_scale),
           length(x)
+        ),
+        names = names(x)
+      )
+      # SCALE AS LIST - FREE OR FIXED
+    } else {
+      key_range <- structure(
+        rep(
+          key_scale,
+          length.out = length(x)
+        ),
+        names = names(x)
+      )
+    }
+  }
+  
+  # COLOUR SCALE - COUNTS
+  if(is.na(point_col[1])) {
+    # SCALE MANUALLY SUPPLIED
+    if(is.null(key_range)) {
+      # COMPUTE BINNED COUNTS
+      key_range <- structure(
+        lapply(
+          seq_along(x),
+          function(z) {
+            # COMPUTE BINNED COUNTS
+            range(
+              cyto_apply(
+                x[[z]][[1]],
+                "cyto_stat_bkde2d",
+                input = "matrix",
+                channels = channels,
+                limits = list(xlim, ylim),
+                smooth = FALSE,
+                copy = FALSE,
+                simplify = FALSE
+              )[[1]]$counts,
+              na.rm = TRUE
+            )
+          }
+        ),
+        names = names(x)
+      )
+      # FIXED SCALE
+      if(key_scale == "fixed") {
+        key_range  <- structure(
+          rep(
+            list(range(unlist(key_range), na.rm = TRUE)),
+            length(x)
+          ),
+          names = names(key_range)
         )
       }
     }
-    # USE .CYTO_PLOT_AXES_TEXT() TO COMPUTE TICK LOCATIONS & FORMAT LABELS
-    key <- list(
-      "x" = x,
-      "key" = lapply(
-        key_range, 
-        function(w){
-          # BYPASS EMPTY SAMPLES
-          if(.all_na(w)) {
-            list(
+    # PREPARE KEYS
+    key <- structure(
+      lapply(
+        key_range,
+        function(z){
+          # NA BKDE - TOO FEW EVENTS
+          if(.all_na(z)) {
+             k <-list(
+              "range" = NA,
               "label" = NA,
               "at" = NA
             )
-            # PREPARE KEY
+          # PREPARE AXIS TICKS & LABELS
           } else {
-            .cyto_plot_axes_text(
-              x, # NOT REQUIRED - RANGE SPECIFIED
-              channels = point_col[1],
-              axes_trans = axes_trans,
-              axes_range = list(w),
+            k <- .cyto_plot_axes_text(
+              channels = NA,
+              axes_range = list(z),
               rescale = ylim,
               format = TRUE
             )[[1]]
+            k$range <- z
           }
+          class(k) <- "cyto_plot_key"
+          return(k)
         }
       )
     )
-    
-  # COLOUR SCALE NOT REQUIRED
-  } else {
-    key <- list(
-      "x" = x,
-      "key" = rep(
-        list(
-          "label" = NA,
-          "at" = NA
-        ),
-        length(x)
+  # COLOUR SCALE - MARKER EXPRESSION
+  } else if(point_col[1] %in% c(cyto_markers(x[[1]][[1]]),
+                                cyto_channels(x[[1]][[1]]))) {
+    # CONVERT POINT_COL TO CHANNEL
+    point_col[1] <- cyto_channels_extract(
+      x[[1]][[1]], 
+      channels = point_col[1]
+    )
+    # KEY RANGES REQUIRED
+    if(is.null(key_range)) {
+      # CALIBRATION SETTINGS
+      cyto_cal <- .cyto_calibrate_recall()
+      # FIXED KEY SCALE
+      if(key_scale == "fixed") {
+        # TRY CALIBARTION SETTINGS
+        if(point_col[1] %in% colnames(cyto_cal)) {
+          key_range < structure(
+            rep(
+              list(cyto_cal[, point_col[1]]),
+              length(x)
+            ),
+            names = names(x)
+          )
+        }
+      }
+      # FREE KEY SCALE - DATA RANGES
+      if(is.null(key_range)) {
+        # COMPUTE DATA RANGES
+        key_range <- structure(
+          lapply(
+            seq_along(x),
+            function(z) {
+              # COMPUTE BINNED COUNTS
+              cyto_apply(
+                x[[z]][[1]],
+                "cyto_stat_range",
+                input = "matrix",
+                channels = point_col[1],
+                copy = FALSE
+              )[, 1]
+            }
+          ),
+          names = names(x)
+        )
+        # EXCLUDE INFINITE LIMITS
+        key_range <- lapply(key_range, function(v){
+          if(!any(is.finite(v))) {
+            v[!is.finite(v)] <- NA
+          }
+          return(v)
+        })
+        # FIXED KEY SCALE - DATA RANGE
+        if(key_scale == "fixed") {
+          key_range  <- structure(
+            rep(
+              list(range(unlist(key_range), na.rm = TRUE)),
+              length(x)
+            ),
+            names = names(key_range)
+          )
+        }
+      }
+    }
+    # PREPARE KEYS
+    key <- structure(
+      lapply(
+        key_range,
+        function(z){
+          # INFINITE RANGE
+          if(.all_na(z) | any(!is.finite(z))) {
+            k <- list(
+              "range" = NA,
+              "label" = NA,
+              "at" = NA
+            )
+            # PREPARE AXIS TICKS & LABELS
+          } else {
+            k <- .cyto_plot_axes_text(
+              channels = point_col[1],
+              axes_range = list(z),
+              axes_trans = axes_trans,
+              rescale = ylim,
+              format = TRUE
+            )[[1]]
+            k$range <- z
+          }
+          class(k) <- "cyto_plot_key"
+          return(k)
+        }
       )
     )
+  # NO COLOUR SCALE REQUIRED
+  } else {
+    k <- list(
+      "range" =  NA,
+      "label" = NA,
+      "at" = NA
+    )
+    class(k) <- "cyto_plot_key"
+    key <- rep(
+      list(k),
+      length(x)
+    )
+    names(key) <- names(x)
   }
-
-  # RETURN KEY SCALE
+  
+  # RETURN KEYS
   return(key)
   
 }
@@ -3242,10 +3257,16 @@
 #' @param point_col vector of length x indicating colours to use for each layer.
 #'   If NA set to default density gradient.
 #' @param point_col_alpha transparency to use for point colours.
+#' @param point_col_smooth logical indicating whether the 2D binned counts
+#'   should be smoothed using kernel density estimates prior to selecting
+#'   colours from \code{point_col_scale}, set to TRUE by default. Setting
+#'   \code{point_col_smooth} to FALSE will significantly improve plotting speed
+#'   on less powerful machines but produce more granular plots.
+#' @param ... additional arguments inherited from \code{cyto_plot_point()} or
+#'   \code{cyto_plot()} including \code{bkde2d} and \code{key_scale}
 #'
-#' @importFrom grDevices densCols colorRampPalette adjustcolor
+#' @importFrom grDevices colorRampPalette adjustcolor colorRamp rgb
 #' @importFrom flowCore exprs
-#' @importFrom methods is
 #' @importFrom graphics par
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -3256,189 +3277,256 @@
                                  point_col_scale,
                                  point_cols,
                                  point_col,
-                                 point_col_alpha = 1) {
+                                 point_col_alpha = 1,
+                                 point_col_smooth = TRUE,
+                                 ...) {
   
-  # Expected number of colours
-  SMP <- length(x)
+  # PULL DOWN ARGUMENTS --------------------------------------------------------
   
-  # Pull down arguments to named list
-  args <- .args_list()
+  # ARGUMENTS - CARRY ADDITIONAL ARGUMENTS FROM CYTO_PLOT()
+  args <- .args_list(...)
   
-  # Inherit arguments from cyto_plot_theme - possibly remove?
+  # INHERIT CYTO_PLOT_THEME
   args <- .cyto_plot_theme_inherit(args)
   
-  # Update arguments
-  .args_update(args)
+  # PREPARE ARGUMENTS ----------------------------------------------------------
   
-  # No colours supplied for density gradient
-  if (.all_na(point_col_scale)) {
-    point_col_scale <- .cyto_plot_colour_palette(type = "point_col_scale")
+  # POINT_COL_SCALE
+  if(.all_na(args$point_col_scale)) {
+    args$point_col_scale <- .cyto_plot_colour_palette(
+      type = "point_col_scale"
+    )
   }
   
-  # Make colorRampPalette
-  if (class(point_col_scale) != "function") {
-    col_scale <- colorRampPalette(point_col_scale)
-  } else {
-    col_scale <- point_col_scale
+  # CREATE COLORRAMP USING POINT_COL_SCALE
+  if(!cyto_class(args$point_col_scale, "function")) {
+    args$point_col_scale <- colorRamp(
+      args$point_col_scale
+    )
   }
   
-  # No colours supplied for selection
-  if (.all_na(point_cols)) {
-    point_cols <- .cyto_plot_colour_palette(type = "point_cols")
+  # USE DEFUALT COLOURS FOR POINTS
+  if(.all_na(args$point_cols)) {
+    args$point_cols <- .cyto_plot_colour_palette(
+      type = "point_cols"
+    )
   }
   
-  # Make colorRampPalette
-  if (class(point_cols) != "function") {
-    cols <- colorRampPalette(point_cols)
-  } else {
-    cols <- point_cols
+  # CREATE COLORRAMPPALETTE USING POINT_COLS
+  if (!cyto_class(args$point_cols, "function")) {
+    args$point_cols <- colorRampPalette(
+      args$point_cols
+    )
   }
   
-  # Repeat point_col arguments SMP times
-  point_col <- rep(point_col, length.out = SMP)
-  point_col_alpha <- rep(point_col_alpha, length.out = SMP)
+  # REPEAT POINT COLOUR ARGUMENTS
+  lapply(
+    c("point_col", "point_col_alpha"),
+    function(z) {
+      args[[z]] <<- rep(args[[z]], length.out = length(args$x))
+    }
+  )
   
-  # Convert point_col to list
-  if (!is(point_col, "list")) {
-    point_col <- lapply(seq(1, SMP), function(z) {
-      point_col[z]
-    })
-  }
-  
-  # First layer contains density gradient if no other colour is designated
-  if (all(LAPPLY(point_col, ".all_na"))) {
-    # Extract data
-    cf_exprs <- cyto_data_extract(x[[1]],
-                                  format = "matrix",
-                                  channels = channels, 
-                                  copy = FALSE)[[1]][[1]]
-    # Too few events for density computation
-    if (!is.null(nrow(cf_exprs))) {
-      if (nrow(cf_exprs) >= 2) {
-
-        # SINCE RANGE MAY BE OUTSIDE PLOT WE NEED TO ADJUST GRID SIZE
-        # IDEALLY WE SHOULD COMPUTE BANDWIDTH WITH THIS DATA REMOVED
-        # GATING SLOWS DOWN PLOTTING SO WE USE DEFAULT INSTEAD
-        # BW = DIFF(RANGE(Z))/25 AS IN grDevices::densCols()
-        # KernSmooth::bkde2D() USED UNDER THE HOOD  
-        
-        # GRID SIZE - DEFAULT 200 - INCREASE COMES AT COST OF SPEED
-        cnt <- 0
-        grid_size <- apply(cf_exprs, 
-                           2,
-                           function(z){
-                             cnt <<- cnt + 1
-                             # RANGE
-                             rng <- c(min(z), max(z))
-                             # PLOT LIMITS
-                             usr <- par("usr")[c(cnt + cnt - 1, cnt + cnt)]
-                             # GRID SIZE- MATCH .CYTO_PLOT_KEY_SCALE()
-                             bins <- 200
-                             if(diff(rng) > diff(usr)) {
-                               bins <- ceiling(
-                                 bins * diff(rng)/ diff(usr)
-                               )
-                             }
-                             return(bins)
-                           })  
-        point_col[[1]] <- suppressWarnings(
-          densCols(cf_exprs,
-                   colramp = col_scale,
-                   nbin = grid_size
-          )
-        )
-        names(point_col)[1] <- paste0(grid_size, collapse = "-")
+  # POINT_COL -> LIST
+  if(!cyto_class(args$point_col, "list")) {
+    args$point_col <- lapply(
+      seq_along(args$point_col),
+      function(z) {
+        args$point_col[z]
       }
+    )
+  }
+  
+  # BASE LAYER - DENSITY GRADIENT
+  if(is.na(args$point_col[[1]])) {
+    # NUMBER OF EVENTS
+    N <- nrow(cyto_exprs(x[[1]][[1]]))
+    # INSUFFICIENT EVENTS
+    if(N < 2) {
+      # USE MINIMUM COLOUR FOR POINTS
+      args$point_col[[1]] <- rgb(
+        args$point_col_scale(rep(0, N)),
+        maxColorValue = 255
+      )
+    # COMPUTE BKDE - MAP TO ROWS
     } else {
-      point_col[[1]] <- point_col_scale[1]
+      # BKDE COUNTS REQUIRED
+      if(!"bkde2d" %in% names(args)) {
+        args$bkde2d <- cyto_apply(
+          args$x[[1]],
+          "cyto_stat_bkde2d",
+          input = "matrix",
+          channels = args$channels,
+          limits = list(.par("usr")[[1]][1:2],
+                        .par("usr")[[1]][3:4]),
+          smooth = args$point_col_smooth,
+          copy = FALSE,
+          simplify = FALSE
+        )[[1]]
+      }
+      # SCALE RANGE
+      if(!"key_scale" %in% names(args)) {
+        # USE RANGE OF COUNTS FOR SCALING
+        args$key_scale <- list(
+          range = range(args$bkde2d$counts),
+          label = NA,
+          at = NA
+        )
+      }
+      # RE-SCALE BINNED COUNTS - RANGE [0,1]
+      args$bkde2d$counts <- cyto_stat_rescale(
+        args$bkde2d$counts,
+        scale = matrix(
+          args$key_scale$range,
+          nrow = 2,
+          ncol = ncol(args$bkde2d$counts)
+        )
+      )
+      # RE-SCALE BKDE
+      if(args$point_col_smooth) {
+        # STORE RE-SCALED BKDE IN COUNTS SLOT
+        args$bkde2d$counts <- min(args$bkde2d$counts) +
+          ((args$bkde2d$bkde - min(args$bkde2d$bkde))/
+             diff(range(args$bkde2d$bkde))) * diff(range(args$bkde2d$counts))
+      }
+      # MAP BKDE TO ROWS & ASSIGN COLOURS
+      args$point_col[[1]] <- cyto_apply(
+        args$x[[1]],
+        channels = args$channels,
+        input = "matrix", 
+        copy = FALSE,
+        simplify = FALSE,
+        bkde = args$bkde,
+        point_col_scale = args$point_col_scale,
+        FUN = function(
+          z,
+          bkde,
+          point_col_scale) {
+          # COMPUTE BREAKS FOR CUT - SEE DENSCOLS()
+          mkBreaks <-  function(u){
+            u - diff(range(u))/(length(u)-1)/2
+          }
+          # COMPUTE BINS
+          b <- do.call(
+            "cbind",
+            lapply(
+              seq_len(2),
+              function(w){
+                cut(
+                  z[, w],
+                  breaks = mkBreaks(
+                    bkde$bins[[w]]
+                  ),
+                  labels = FALSE
+                )
+              }
+            )
+          )
+          # MAP DATA TO (SMOOTHED) COUNTS
+          b <- bkde$counts[b]
+          b[is.na(b)] <- min(bkde$counts, na.rm = TRUE) # EVENTS OUTSIDE GRID
+          # CONVERT TO COLOURS
+          return(
+            rgb(
+              point_col_scale(b),
+              maxColorValue = 255
+            )
+          )
+        }
+      )[[1]]
+    }
+  # BASE LAYER - MARKER EXPRESSION - DATA SORTED IN CYTO_PLOT_POINT()
+  } else if(args$point_col[[1]] %in% c(cyto_channels(args$x[[1]]),
+                                       cyto_markers(args$x[[1]]))) {
+    # CONVERT POINT_COL TO CHANNEL
+    args$point_col[[1]] <- cyto_channels_extract(
+      args$x[[1]],
+      channels = args$point_col[[1]]
+    )
+    # INSUFFICIENT EVENTS
+    N <- nrow(cyto_exprs(x[[1]][[1]]))
+    if(N < 2) {
+      # USE MINIMUM COLOUR FOR POINTS
+      args$point_col[[1]] <- rgb(
+        args$point_col_scale(rep(0, N)),
+        maxColorValue = 255
+      )
+    } else {
+      # KEY_SCALE
+      if(!"key_scale" %in% names(args)) {
+        # CALIBRATION SETTINGS
+        cal <- .cyto_calibrate_recall()
+        # USED STORED SETTINGS
+        if(args$point_col[[1]] %in% colnames(cal)) {
+          args$key_scale <- list(
+            range = cal[, args$point_col[[1]]],
+            label = NA,
+            at = NA
+          )
+          # USE DATA RANGE
+        } else {
+          args$key_scale <- list(
+            range = cyto_apply(
+              args$x[[1]],
+              "cyto_stat_range",
+              channels = args$point_col[[1]],
+              copy = FALSE,
+              input = "matrix"
+            )[, 1],
+            label = NA,
+            at = NA
+          )
+        }
+      }
+      # RE-SCALE DATA TO RANGE & ASSIGN COLOURS
+      args$point_col[[1]] <- cyto_apply(
+        args$x[[1]],
+        channels = args$point_col[[1]],
+        input = "column",
+        copy = FALSE,
+        scale = args$key_scale$range,
+        FUN = function(z,
+                       scale) {
+          rgb(
+            args$point_col_scale(
+              cyto_stat_rescale(
+                z, 
+                scale = scale
+              )
+            ),
+            maxColorValue = 255
+          )
+        }
+      )
     }
   }
   
-  # Remaining colours are selected one per layer from point_cols
-  if (any(LAPPLY(point_col, ".all_na"))) {
-    
-    # Number of layers missing colours
-    n <- length(point_col[LAPPLY(point_col, ".all_na")])
-    
-    # Pull colours out of point_cols
-    clrs <- cols(n)
-    
-    # Replace NA values in point_col with selected colours
-    point_col[LAPPLY(point_col, ".all_na")] <- clrs
+  # REMAINING LAYERS - SELECT FROM POINT_COLS
+  if (any(LAPPLY(args$point_col, ".all_na"))) {
+    # NUMBER OF REQUIRED COLOURS
+    n <- length(
+      args$point_col[
+        LAPPLY(args$point_col, ".all_na")
+      ]
+    )
+    # GET MISSING COLOURS FROM POINT_COLS
+    clrs <- args$point_cols(n)
+    # UPDATE COLOURS IN POINT_COL
+    args$point_col[
+      LAPPLY(args$point_col, ".all_na")
+    ] <- clrs
   }
   
-  # RANGE CALIBRATION
-  cyto_cal <- .cyto_calibrate_recall()
-
-  # 1D COLOUR SCALE
-  point_col <- structure(
-    lapply(point_col, function(z) {
-      if (length(z) == 1) {
-        # NAME OF CHANNEL/MARKER
-        if (z %in% c(
-          cyto_channels(x[[1]]),
-          cyto_markers(x[[1]])
-        )) {
-          # CONVERT TO CHANNEL
-          z <- cyto_channels_extract(
-            x[[1]],
-            z
-          )
-          # MATRIX
-          cf_exprs <- cyto_data_extract(x[[1]],
-                                        format = "matrix", 
-                                        copy = FALSE)[[1]][[1]]
-          # CALIBRATION
-          if (!is.null(cyto_cal)) {
-            if (z %in% colnames(cyto_cal)) {
-              cyto_range <- c(
-                min(cyto_cal[, z]),
-                max(cyto_cal[, z])
-              )
-            } else {
-              cyto_range <- c(
-                min(cf_exprs[, z]),
-                max(cf_exprs[, z])
-              )
-            }
-          } else {
-            cyto_range <- c(
-              min(cf_exprs[, z]),
-              max(cf_exprs[, z])
-            )
-          }
-          # RESCALE
-          rescale <- (cf_exprs[, z] - cyto_range[1]) /
-            (cyto_range[2] - cyto_range[1])
-          rescale[rescale > 1] <- 1
-          rescale[rescale < 0] <- 0
-          # POINT_COLOUR_SCALE
-          col_scale <- grDevices::colorRamp(point_col_scale)
-          # POINT COLOURS
-          col <- col_scale(rescale)
-          col <- grDevices::rgb(col[, 1],
-                                col[, 2],
-                                col[, 3],
-                                maxColorValue = 255
-          )
-          return(col)
-          # NAME OF A COLOUR
-        } else {
-          return(z)
-        }
-      } else {
-        return(z)
-      }
-    }),
-    names = names(point_col)
-  )
+  # POINT COLOUR ALPHA ADJUSTMENT
+  lapply(seq_along(args$point_col), function(z) {
+    args$point_col[[z]] <<- adjustcolor(
+      args$point_col[[z]], 
+      args$point_col_alpha[z]
+    )
+  })
   
-  # Adjust colors by point_fill_alpha - REMOVE CHECK FOR ALPHA != 1
-  for(z in seq_len(SMP)) {
-    point_col[[z]] <- adjustcolor(point_col[[z]], point_col_alpha[z])
-  }
-  
-  return(point_col)
+  # RETURN LIST OF COLOURS
+  return(args$point_col)
 }
 
 ## HISTOGRAMS ------------------------------------------------------------------

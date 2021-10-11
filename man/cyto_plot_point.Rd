@@ -9,10 +9,12 @@ cyto_plot_point(
   parent = "root",
   channels,
   overlay = NA,
+  select = NULL,
   events = 1,
   point_shape = ".",
   point_size = 2,
   point_col_scale = NA,
+  point_col_smooth = TRUE,
   point_cols = NA,
   point_col = NA,
   point_col_alpha = 1,
@@ -28,19 +30,24 @@ cyto_plot_point(
 }
 \arguments{
 \item{x}{either an object of class
-\code{\link[flowWorkspace:cytoframe]{cytoframe}},
 \code{\link[flowWorkspace:cytoset]{cytoset}},
-\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list containing
-cytoframe or cytoset objects.}
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{parent}{name of the parent population to extract from GatingHierarchy
 or GatingSet objects.}
 
 \item{channels}{names of the channels used to construct the plot.}
 
-\item{overlay}{optional argument if x is a cytoframe to overlay a list of
-cytoframe objects.}
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset} or
+\code{list of cytosets} containing populations to be overlaid onto the
+plot(s). This argument can be set to "children" or "descendants" when a
+\code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}
@@ -54,6 +61,12 @@ set to 2 by default.}
 
 \item{point_col_scale}{vector of ordered colours to use for the density
 colour gradient of points.}
+
+\item{point_col_smooth}{logical indicating whether the 2D binned counts
+should be smoothed using kernel density estimates prior to selecting
+colours from \code{point_col_scale}, set to TRUE by default. Setting
+\code{point_col_smooth} to FALSE will significantly improve plotting speed
+on less powerful machines but produce more granular plots.}
 
 \item{point_cols}{vector colours to draw from when selecting colours for
 points if none are supplied to point_col.}

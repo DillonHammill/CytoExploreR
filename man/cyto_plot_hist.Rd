@@ -9,6 +9,7 @@ cyto_plot_hist(
   parent = "root",
   channel,
   overlay = NA,
+  select = NULL,
   events = 1,
   hist_stat = "count",
   hist_bins = 256,
@@ -25,17 +26,26 @@ cyto_plot_hist(
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-\code{\link[flowWorkspace:cytoset]{cytoset}}, list of
-\code{\link[flowWorkspace:cytoframe]{cytoframes}} or a list of
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}, list of
+\code{\link[flowWorkspace:cytoset]{cytosets}} or a list of
 \code{\link[stats:density]{density}} objects.}
 
 \item{parent}{name of the parent population to extract from GatingHierarchy
 or GatingSet objects.}
 
-\item{channel}{name of the channels to be used to construct the plot.}
+\item{channel}{name of the channel to be used to construct the plot.}
 
-\item{overlay}{list of cytoframe objects to overlay.}
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset} or
+\code{list of cytosets} containing populations to be overlaid onto the
+plot(s). This argument can be set to "children" or "descendants" when a
+\code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}

@@ -9,6 +9,7 @@ cyto_plot_contour(
   parent = "root",
   channels,
   overlay = NA,
+  select = NULL,
   events = 1,
   contour_lines = 15,
   contour_line_type = 1,
@@ -21,18 +22,24 @@ cyto_plot_contour(
 }
 \arguments{
 \item{x}{either an object of class
-\code{\link[flowWorkspace:cytoframe]{cytoframe}},
 \code{\link[flowWorkspace:cytoset]{cytoset}},
-\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}},
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} or a list containing
-cytoframe or cytoset objects.}
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{parent}{name of the parent population to extract from GatingHierarchy
 or GatingSt objects, set to the "root" node by default.}
 
 \item{channels}{channels used to construct the existing cyto_plot.}
 
-\item{overlay}{list containing cytoframe or cytoset objects to overlay.}
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset} or
+\code{list of cytosets} containing populations to be overlaid onto the
+plot(s). This argument can be set to "children" or "descendants" when a
+\code{GatingSet} or \code{GatingHierarchy} to overlay all respective nodes.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
 
 \item{events}{controls the number or percentage of events to display, set to
 1 by default to display all events.}

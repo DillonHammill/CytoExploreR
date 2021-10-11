@@ -265,7 +265,8 @@ scale and associated text in the key.}
 \item{key_scale}{inherits scale limits computed within \code{cyto_plot},
 should be a vector of the form \code{c(min, max)}, \code{cyto_plot_empty()}
 will attempt to compute these limits based on the supplied data if
-\code{key_scale} is not supplied.}
+\code{key_scale} is not supplied. See the \code{key_scale} argument in
+\code{\link{cyto_plot}} for details.}
 
 \item{key_text_font}{font to use for text in the key, set to 1 by default for
 plain font.}
