@@ -2770,8 +2770,7 @@
               # mtext(
               #   text = key_scale$label[z],
               #   side = 4,
-              #   at = list(x = key_x[2] + 0.8 * diff(key_x),
-              #             y = key_scale$at[z]),
+              #   line = 1,
               #   adj = 0, # align left
               #   outer = TRUE
               # )

@@ -11,7 +11,7 @@ cyto_plot_new(popup = NULL, popup_size = NULL, ...)
 opened, set to TRUE by default if called outside of \code{cyto_plot()}.}
 
 \item{popup_size}{a vector of length 2 to control the height and width of
-pop-up graphics device in inches, set to \code{c(7,7)} by default.}
+pop-up graphics device in inches, set to \code{c(10,10)} by default.}
 
 \item{...}{additional graphical parameters supplied by name to be passed to
 \code{\link{cyto_plot_par}} to customise the new graphics device.}

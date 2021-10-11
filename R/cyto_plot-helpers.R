@@ -734,7 +734,7 @@ cyto_plot_empty <- function(x,
 #' @param popup logical indicating whether a pop-up graphics device should be
 #'   opened, set to TRUE by default if called outside of \code{cyto_plot()}.
 #' @param popup_size  a vector of length 2 to control the height and width of
-#'   pop-up graphics device in inches, set to \code{c(7,7)} by default. 
+#'   pop-up graphics device in inches, set to \code{c(10,10)} by default. 
 #' @param ... additional graphical parameters supplied by name to be passed to
 #'   \code{\link{cyto_plot_par}} to customise the new graphics device.
 #'
@@ -785,7 +785,7 @@ cyto_plot_new <- function(popup = NULL,
     if("popup_size" %in% names(set_pars)) {
       popup_size <- set_pars$popup_size
     } else {
-      popup_size <- c(7,7)
+      popup_size <- c(10,10)
     }
   }
   
