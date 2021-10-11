@@ -2030,7 +2030,7 @@ cyto_exprs.flowSet <- function(x,
 "cyto_exprs<-.flowSet" <- function(object, value) {
   
   # TODO: THROWS ERROR WHEN REPLACING SUBSET OF CYTOSET
-  # CYTO_EXPRS(CS[1:2]) <- LIST(...) - S4 NOT SUBSETTABLE
+  # CYTO_EXPRS(CS[1:2]) <- LIST(MAT, MAT) - S4 NOT SUBSETTABLE
   
   # VALUE - LIST OF MATRICES
   if(!all(LAPPLY(value, "cyto_class", "matrix")) |
@@ -3603,6 +3603,10 @@ cyto_sample.flowSet <- function(x,
         copy = FALSE
       )
     )
+    # BYPASS ZERO EVENT SAMPLING
+    if(events == 0) {
+      return(x)
+    }
     message(
       paste("Downsampling each sample to",
             events, "events.")
