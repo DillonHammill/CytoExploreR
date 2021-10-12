@@ -1554,19 +1554,32 @@
     }
   }
   
-  # TODO: NEED CYTO_GATE_NAMES() FUNCTION TO PULL NAMES FROM GATES
-  # EITHER NAMES OF LIST OR FILTERID
-  
   # LABEL_TEXT
   if(any(LAPPLY(label_text, ".empty"))) {
     # POPULATION NAMES FROM GATES - WATCH OUT QUADGATES
-    if(!.all_na(gate) & !is.null(names(gate))) {
+    if(!.all_na(gate)) {
       pops <- rep(
-        unlist(
-          strsplit(
-            names(gate),
-            "\\|"
-          )
+        LAPPLY(
+          seq_along(gate),
+          function(z) {
+            # USE NAMES OF GATE LIST
+            if(!is.null(names(gate)[z])) {
+              unlist(
+                strsplit(
+                  names(gate)[z],
+                  "\\|"
+                )
+              )
+            # USE FILTERIDs
+            } else {
+              unlist(
+                strsplit(
+                  gate[[z]]@filterId,
+                  "\\|"
+                )
+              )
+            }
+          }
         ),
         length(x)
       )
