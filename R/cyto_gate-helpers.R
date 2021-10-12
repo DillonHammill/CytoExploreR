@@ -2191,9 +2191,12 @@ cyto_gate_convert.list <- function(x,
   x <- unlist(x)
   
   # CONVERT GATES --------------------------------------------------------------
-  x <- lapply(x, function(z) {
-    cyto_gate_convert(z, channels)
-  })
+  x <- structure(
+    lapply(x, function(z) {
+      cyto_gate_convert(z, channels)
+    }),
+    names = names(x)
+  )
   
   # RETURN CONVERTED GATES -----------------------------------------------------
   return(x)
@@ -2210,8 +2213,6 @@ cyto_gate_convert.list <- function(x,
 #'
 #' @return a list of unique modified gate objects.
 #'
-#' @importFrom methods is
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @name cyto_gate_convert
@@ -2222,7 +2223,7 @@ cyto_gate_prepare <- function(x,
   
   # PREPARE GATE LIST
   if (cyto_class(x, "list", TRUE)) {
-    if (all(LAPPLY(x, "cyto_class") %in% c(
+    if (!all(LAPPLY(x, "cyto_class") %in% c(
       "rectangleGate",
       "polygonGate",
       "ellipsoidGate",
@@ -2241,8 +2242,8 @@ cyto_gate_prepare <- function(x,
     x <- list(x)
   }
   
-  # UNIQUE GATE LIST
-  x <- unique(x)
+  # UNIQUE GATE LIST - UNIQUE() DROP NAMES
+  x <- x[!duplicated(x)]
   
   # DIMENSIONS
   x <- cyto_gate_convert(x, channels = channels)
@@ -2568,15 +2569,16 @@ cyto_gate_transform.list <- function(x,
                                      ...){
   
   # TRANSFORM GATES
-  nms <- names(x)
-  gates <- lapply(x, function(z){
-    cyto_gate_transform(z,
-                        trans = trans,
-                        inverse = inverse)
-  })
-  if(!is.null(nms)){
-    names(gates) <- nms
-  }
+  gates <- structure(
+    lapply(x, function(z){
+      cyto_gate_transform(
+        z,
+        trans = trans,
+        inverse = inverse
+      )
+    }), names = names(x)
+  )
+
   
   # RETURN UPDATED GATES
   return(gates)

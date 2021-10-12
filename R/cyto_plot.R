@@ -774,17 +774,6 @@ cyto_plot <- function(x,
   args$axes_text <- list(axes_text_x, axes_text_y)
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
   
-  # LABEL_TEXT - WATCH OUT QUADGATES!
-  if(all(LAPPLY(args$label_text, ".empty"))) {
-    if(!is.null(LAPPLY(args$gate, "names"))) {
-      args$label_text <- LAPPLY(seq_along(args$gate), function(z){
-        rep(unlist(strsplit(names(args$gate[[z]]), "\\|")), length(args$x[[z]]))
-      })
-    } else {
-      args$label_text <- NA
-    }
-  }
-  
   # LABEL_TEXT_X CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
   args$label_text_x <- .cyto_transform(args$label_text_x,
                                        trans = args$axes_trans,
@@ -877,7 +866,7 @@ cyto_plot <- function(x,
   args <- args[!names(args) %in% c("layout")]
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
-
+  
   # REPEAT & SPLIT ARGUMENTS
   args <- .cyto_plot_args_split(args)
   

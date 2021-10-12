@@ -209,7 +209,7 @@ cyto_stat_mode <- function(x,
   } else {
     # SORT LIMITS
     if(all(colnames(limits) %in% colnames(x))) {
-      limits <- limits[, colnames(x)]
+      limits <- limits[, colnames(x), drop = FALSE]
     }
     # REPEAT ARGUMENTS
     bins <- rep(bins, length.out = ncol(x))
@@ -509,7 +509,7 @@ cyto_stat_auc <- function(x,
   } else {
     # SORT LIMITS
     if(all(colnames(limits) %in% colnames(x))) {
-      limits <- limits[, colnames(x)]
+      limits <- limits[, colnames(x), drop = FALSE]
     }
     # REPEAT ARGUMENTS
     smooth <- rep(smooth, length.out = ncol(x))
@@ -631,7 +631,7 @@ cyto_stat_density <- function(x,
       )
     }
   }
-  
+
   # VECTOR
   if(is.null(dim(x))) {
     # X - NUMERIC
@@ -698,7 +698,7 @@ cyto_stat_density <- function(x,
   } else {
     # SORT LIMITS
     if(all(colnames(limits) %in% colnames(x))) {
-      limits <- limits[, colnames(x)]
+      limits <- limits[, colnames(x), drop = FALSE]
     }
     # REPEAT ARGUMENTS
     bins <- rep(bins, length.out = ncol(x))
@@ -819,7 +819,7 @@ cyto_stat_bin <- function(x,
   } else {
     # SORT LIMITS
     if(all(colnames(limits) %in% colnames(x))) {
-      limits <- limits[, colnames(x)]
+      limits <- limits[, colnames(x), drop = FALSE]
     }
     # APPLY CYTO_STAT_BIN OVER COLUMNS
     cnt <- c(0)

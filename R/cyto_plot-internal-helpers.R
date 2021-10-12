@@ -67,6 +67,8 @@
                             merge_by = "name",
                             select = NULL,
                             events = 50000,
+                            hist_stack = 0,
+                            hist_layers = NA,
                             barcode = FALSE,
                             seed = 42) {
 
@@ -442,7 +444,11 @@
     names = names(x)
   )
 
-  # DATA
+  # HISTOGRAM LAYERS
+  
+  
+  
+  # DATA READY FOR CYTO_PLOT
   return(x)
   
 }
@@ -1347,8 +1353,6 @@
                                key = "both",
                                key_scale = "fixed") {
   
-  # TODO: CODE IS VERY BASIC - MORE SOPHISTICATION REQUIRED
-  
   # ARGUMENTS
   args <- .args_list()
 
@@ -1454,13 +1458,6 @@
   TNP <- NP * SMP
   TNP_split <- split(seq_len(TNP), rep(seq_len(SMP), each = NP))
   
-  # LABEL_TEXT
-  if (all(LAPPLY(label_text, ".empty"))) {
-    label_text <- rep(NA, TNP)
-  } else {
-    label_text <- rep(c(label_text, rep(NA, TNP)), length.out = TNP)
-  }
-  
   # LABEL_STAT FILLED WITH EMPTY
   if (!all(LAPPLY(label_stat, ".empty")) &
       any(LAPPLY(label_stat, ".empty"))) {
@@ -1554,6 +1551,38 @@
         # LABEL EACH LAYER
         label_stat <- rep(label_stat, length.out = TNP)
       }
+    }
+  }
+  
+  # TODO: NEED CYTO_GATE_NAMES() FUNCTION TO PULL NAMES FROM GATES
+  # EITHER NAMES OF LIST OR FILTERID
+  
+  # LABEL_TEXT
+  if(any(LAPPLY(label_text, ".empty"))) {
+    # POPULATION NAMES FROM GATES - WATCH OUT QUADGATES
+    if(!.all_na(gate) & !is.null(names(gate))) {
+      pops <- rep(
+        unlist(
+          strsplit(
+            names(gate),
+            "\\|"
+          )
+        ),
+        length(x)
+      )
+      label_text <- LAPPLY(
+        seq_along(label_text),
+        function(z) {
+          if(!.all_na(label_stat[z]) & .empty(label_text[z])) {
+            return(pops[z])
+          } else {
+            return(label_text[z])
+          }
+        }
+      )
+    # REMOVE LABEL_TEXT
+    } else {
+      label_text[LAPPLY(label_text, ".empty")] <- NA
     }
   }
   
@@ -3049,7 +3078,7 @@
       if(key_scale == "fixed") {
         # TRY CALIBARTION SETTINGS
         if(point_col[1] %in% colnames(cyto_cal)) {
-          key_range < structure(
+          key_range <- structure(
             rep(
               list(cyto_cal[, point_col[1]]),
               length(x)
