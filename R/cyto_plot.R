@@ -876,7 +876,6 @@ cyto_plot <- function(x,
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]
   
-  
   # PREPARE ARGUMENTS ----------------------------------------------------------
   
   # REPEAT & SPLIT ARGUMENTS
@@ -940,8 +939,7 @@ cyto_plot <- function(x,
     # LEGEND -------------------------------------------------------------------
     
     # LEGEND_TEXT
-    if(.all_na(ARGS$legend_text) |
-       length(unique(ARGS$legend_text)) == 1) {
+    if(.all_na(ARGS$legend_text)) {
       ARGS$legend_text <- LAPPLY(ARGS$x, "cyto_names") 
     }
     

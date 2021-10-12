@@ -1340,18 +1340,18 @@
                                key = "both",
                                key_scale = "fixed") {
   
-  # TODO: IMPROVE MARGINS FOR KEY USING TEXT SIZE IN KEY_SCALE
+  # TODO: CODE IS VERY BASIC - MORE SOPHISTICATION REQUIRED
   
   # ARGUMENTS
   args <- .args_list()
-  
+
   # MARGINS
   if (is.null(margins) | .empty(margins) | .all_na(margins)) {
     
     # DEFAULT
     mar <- c(5.1, 5.1, 4.1, 2.1)
     
-    # KEY
+    # KEY 
     if(length(channels) == 2 & 
        (any(is.na(point_col)) | 
         any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
@@ -1365,10 +1365,23 @@
     }
     
     # LEGEND TEXT
-    if (length(x) > 1 &
-        legend != FALSE &
-        !.all_na(legend_text)) {
-      mar[4] <- 7 + max(nchar(legend_text)) * 0.32 * mean(legend_text_size)
+    if (legend != FALSE & !.all_na(legend_text)) {
+      # KEY REQUIRED
+      if(length(channels) == 2 & 
+         (any(is.na(point_col)) | 
+          any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
+         !key %in% "none") {
+        # KEY SCALE & TEXT
+        if(key %in% "both" & length(channels) == 2) {
+          mar[4] <- 8.8 + max(nchar(legend_text))*0.32*mean(legend_text_size)
+        # KEY SCALE ONLY
+        } else {
+          mar[4] <- 7.5 + max(nchar(legend_text))*0.32*mean(legend_text_size)
+        }
+      # NO KEY
+      } else {
+        mar[4] <- 7 + max(nchar(legend_text))*0.32*mean(legend_text_size)
+      }
     }
     
     # TITLE
@@ -1399,9 +1412,9 @@
     }
     mar <- margins
   }
-
+  
   # SET MAR PARAMETER
-  cyto_plot_par("mar" = mar)
+  cyto_plot_par(mar = mar)
 
 }
 
@@ -2496,13 +2509,13 @@
 #'   points if none are supplied to point_col.
 #' @param point_col colours to use for points, set to NA by default to blue-red
 #'   density colour scale.
-#' @param point_alpha numeric [0,1] used to control colour transparency, set to
+#' @param point_col_alpha numeric [0,1] used to control colour transparency, set to
 #'   1 by default to remove transparency.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom graphics legend strheight
-#' @importFrom grDevices adjustcolor
+#' @importFrom grDevices adjustcolor colorRamp rgb
 #'
 #' @noRd
 .cyto_plot_legend <- function(x,
@@ -2528,7 +2541,8 @@
                               point_col_scale = NA,
                               point_cols = NA,
                               point_col = NA,
-                              point_col_alpha = 1) {
+                              point_col_alpha = 1,
+                              key = "both") {
   
   # ARGUMENTS ------------------------------------------------------------------
   
@@ -2543,50 +2557,44 @@
   
   # LEGEND_TEXT ----------------------------------------------------------------
   
-  # Estimate legend height using strheight
+  # ESTIMATE LEGEND HEIGHT
   lgnd <- paste(legend_text, collapse = " \n ")
-  lgnd_height <- strheight(lgnd,
-                           cex = legend_text_size,
-                           font = legend_text_font
+  lgnd_height <- strheight(
+    lgnd,
+    cex = legend_text_size,
+    font = legend_text_font
   )
   
   # LEGEND POSITION ------------------------------------------------------------
   
-  # Calculate y center of plot
-  cnt <- par("usr")[3] + (par("usr")[4] - par("usr")[3]) / 2
+  # PLOT CENTER
+  cnt <- .par("usr")[[1]][3] + (.par("usr")[[1]][4] - .par("usr")[[1]][3]) / 2
   
-  # Legend for 1D density distributions
+  # LEGEND - HISTOGRAMS - NO KEY
   if (length(channels) == 1) {
-    
-    # Set default legend type to fill
+    # DEFAULT - FILL
     if (legend == TRUE) {
       legend <- "fill"
     }
-    
-    # Reverse legend text order for legend
+    # REVERSE TEXT ORDER FOR LEGEND
     legend_text <- rev(legend_text)
-    
-    # Line legend
+    # LEGEND - LINE
     if (legend == "line") {
-      
-      # Revert to hist_line_col if no colours supplied
+      # USE HIST_LINE_COL
       if (.all_na(legend_line_col)) {
         legend_line_col <- hist_line_col
       }
-      
-      # Revert to hist_line_type if not specified
+      # USE HIST_LINE_TYPE
       if (.all_na(legend_line_type)) {
         legend_line_type <- hist_line_type
       }
-      
-      # Revert to hist_line_width if not specified
+      # USE HIST_LINE_WIDTH
       if (.all_na(legend_line_width)) {
         legend_line_width <- hist_line_width
       }
-      
-      # Construct legend
+      # LEGEND
       legend(
-        x = 1.07 * par("usr")[2],
+        x = 1.07 * .par("usr")[[1]][2],
         y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
         text.font = rev(legend_text_font),
@@ -2599,21 +2607,20 @@
         bty = "n",
         x.intersp = 0.5
       )
-      # Fill legend
+    # LEGEND - FILL
     } else if (legend == "fill") {
-      
       # COLOURS
-      hist_fill <- .cyto_plot_hist_fill(x,
-                                        hist_fill = hist_fill,
-                                        hist_cols = hist_cols,
-                                        hist_fill_alpha = 1
+      hist_fill <- .cyto_plot_hist_fill(
+        x,
+        hist_fill = hist_fill,
+        hist_cols = hist_cols,
+        hist_fill_alpha = 1
       )
-      
-      # Revert to hist_fill if no legend fill colours supplied
+      # USE HIST_FILL
       if (.all_na(legend_box_fill)) {
         legend_box_fill <- hist_fill
       }
-      # Alpha adjust colours if suppplied directly to legend_box_fill
+      # ALPHA ADJUST COLOURS SUPPLIED TO LEGEND_BOX_FILL
       if (!.all_na(legend_box_fill) &
           !all(hist_fill_alpha == 1)) {
         legend_box_fill <- mapply(
@@ -2623,10 +2630,9 @@
           }, legend_box_fill, hist_fill_alpha
         )
       }
-      
-      # Construct legend
+      # LEGEND
       legend(
-        x = 1.07 * par("usr")[2],
+        x = 1.07 * .par("usr")[[1]][2],
         y = cnt + 0.52 * lgnd_height,
         legend = legend_text,
         fill = rev(legend_box_fill),
@@ -2638,54 +2644,68 @@
         text.font = rev(legend_text_font)
       )
     }
-    
-    # Legend for 2D scatter plot
+  # LEGEND - SCATTERPLOTS - KEY
   } else if (length(channels) == 2) {
-    
     # CYTO_PLOT_POINT_COL_SCALE
     point_col_scale <- .cyto_plot_point_col_scale(point_col_scale)
-    
-    # Prepare point_col - alpha adjust later
-    point_col <- .cyto_plot_point_col(x,
-                                      channels = channels,
-                                      point_col_scale = point_col_scale,
-                                      point_cols = point_cols,
-                                      point_col = point_col,
-                                      point_col_alpha = 1
-    )
-    
-    # Prepare point col - use first density colour
-    point_col <- LAPPLY(point_col, function(z) {
-      if (length(z) > 1) {
-        return(point_col_scale[1])
+    # DENSITY/MARKER EXPRESSION - MINIMUM COLOUR - KEY
+    if(.all_na(point_col[1]) | point_col[1] %in% c(cyto_channels(x[[1]]),
+                                                   cyto_markers(x[[1]]))) {
+      point_col_scale <- colorRamp(point_col_scale)
+      point_col[1] <- rgb(
+        point_col_scale(0), 
+        maxColorValue = 255
+      )
+      # ADJUST LEGEND POSITION TO KEY 
+      if(key == "none") {
+        legend_x <- 1.08 * .par("usr")[[1]][2]
+      # KEY - SCALE & TEXT
+      } else if(key == "both") {
+        legend_x <- 1.15 * .par("usr")[[1]][2]
+      # KEY - SCALE ONLY
       } else {
-        return(z)
+        legend_x <- 1.1 * .par("usr")[[1]][2]
       }
-    })
-    
-    # Revert to point_col if no legend point cols supplied
-    if (.all_na(legend_point_col)) {
-      legend_point_col <- point_col
+    # NO KEY
+    } else {
+      legend_x <- 1.08 * .par("usr")[[1]][2]
     }
-    
-    # Alpha adjust colours supplied directly to legend_point_col
+    # GET REMAINING COLOURS
+    point_col <- .cyto_plot_point_col(
+      x,
+      channels = channels,
+      point_col_scale = point_col_scale,
+      point_cols = point_cols,
+      point_col = point_col,
+      point_col_alpha = 1
+    )
+    # USE POINT_COL
+    if (.all_na(legend_point_col)) {
+      legend_point_col <- unlist(point_col)
+    }
+    # ALPHA ADJUST COLOURS SUPPLIED DIRECTLY TO LEGEND_POINT_COL
     if (!.all_na(legend_point_col) &
         !all(point_col_alpha == 1)) {
       legend_point_col <- mapply(function(col, alpha) {
         adjustcolor(col, alpha)
       }, legend_point_col, point_col_alpha)
     }
-    
+    # USE SQUARE PCH FOR "."
+    point_shape[point_shape == "."] <- 15
+    point_shape <- as.numeric(point_shape)
+    # LEGEND - BOXES - POINT KEY TOO SMALL
     legend(
-      x = 1.08 * par("usr")[2],
+      x = legend_x,
       y = cnt + 0.6 * lgnd_height,
-      legend = rev(legend_text),
+      legend = paste0("   ", rev(legend_text)), # HACKY WAY TO ALIGN TEXT
       col = rev(legend_point_col),
       pch = rev(point_shape),
-      pt.cex = rev(2 * point_size),
+      pt.cex = 2.4,
       xpd = TRUE,
       bty = "n",
-      x.intersp = 0.7,
+      x.intersp = 0.5, # MOVE DIAGONALLY
+      y.intersp = 1.2,
+      adj = c(0, 0.49), # XY ADJUSTMENT
       cex = legend_text_size,
       text.col = rev(legend_text_col),
       text.font = rev(legend_text_font)
@@ -2723,11 +2743,15 @@
                            key_title_text_col_alpha = 1,
                            axes_trans = NA) {
   
-  # USE MTEXT FOR CRISPER TEXT APPEARANCE
-  # KEY AXIS -> KEY SCALE -> KEY TITLE
-  
   # CONSTRUCT KEY
   if(!.all_na(key) | !key == "none") {
+    # COMPUTE KEY LOCATION
+    usr <- .par("usr")[[1]]
+    key_x <- c(
+      usr[2] + 0.005 * diff(usr[1:2]),
+      usr[2] + 0.035 * diff(usr[1:2])
+    )
+    key_y <- usr[3:4]
     # KEY AXIS & TITLE
     if(key == "both") {
       # KEY_SCALE REQUIRED
@@ -2742,13 +2766,6 @@
           axes_trans = axes_trans
         )[[1]]
       }
-      # COMPUTE KEY LOCATION
-      usr <- .par("usr")[[1]]
-      key_x <- c(
-        usr[2] + 0.005 * diff(usr[1:2]),
-        usr[2] + 0.035 * diff(usr[1:2])
-      )
-      key_y <- usr[3:4]
       # KEY AXIS TEXT - BYPASS EMPTY SAMPLES FREE SCALE
       if(!.all_na(key_scale$at)) {
         # KEY AXIS
@@ -2766,14 +2783,6 @@
                 col = "black",
                 xpd = TRUE
               )
-              # # AXIS TEXT
-              # mtext(
-              #   text = key_scale$label[z],
-              #   side = 4,
-              #   line = 1,
-              #   adj = 0, # align left
-              #   outer = TRUE
-              # )
               # TEXT
               text(
                 x = key_x[2] + 0.8 * diff(key_x),

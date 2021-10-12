@@ -716,7 +716,8 @@ cyto_plot_empty <- function(x,
                       point_col_scale = point_col_scale,
                       point_cols = point_cols,
                       point_col = point_col,
-                      point_col_alpha = point_col_alpha
+                      point_col_alpha = point_col_alpha,
+                      key = key
     )
   }
 }
