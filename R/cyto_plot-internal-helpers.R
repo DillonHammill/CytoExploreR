@@ -1586,10 +1586,14 @@
       label_text <- LAPPLY(
         seq_along(label_text),
         function(z) {
-          if(!.all_na(label_stat[z]) & .empty(label_text[z])) {
-            return(pops[z])
+          if(!.all_na(label_stat[z])) {
+            if(.empty(label_text[z])) {
+              return(pops[z])
+            } else {
+              return(label_text[z])
+            }
           } else {
-            return(label_text[z])
+            return(NA)
           }
         }
       )
