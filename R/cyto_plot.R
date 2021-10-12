@@ -617,11 +617,6 @@ cyto_plot <- function(x,
     L <- split(L, LAPPLY(seq_along(args$hist_layers), function(z){
       rep(z, args$hist_layers[z])
     }))
-    # # LAYER INDICES
-    # ind <- split(seq_along(x),
-    #              LAPPLY(seq_along(args$hist_layers), function(z){
-    #                rep(z, args$hist_layers[z])
-    # }))
     # SPLIT LAYERS
     args$x <- lapply(L, function(z){
       args$x[as.numeric(names(z))]
@@ -649,19 +644,8 @@ cyto_plot <- function(x,
     # HISTOGRAMS
     if(length(args$channels) == 1) {
       args$title <- LAPPLY(seq_along(args$title), function(z){
-        title <- paste0(args$title[z], names(args$x)[z])
-        if(.empty(title)) {
-          
-        }
-        # GROUP/POPULATION DOWN A LEVEL
-        if(.empty(title)) {
-        
-        # POPULATION
-        } else {
-          
-        }
+        paste0(args$title[z], names(args$x)[z])
       })
-      
       # GROUPS
       if(!is.null(names(args$x))) {
         args$title <- names(args$x)
@@ -835,6 +819,12 @@ cyto_plot <- function(x,
       point_col = args$point_col,
       key_scale = args$key_scale,
       axes_trans = args$axes_trans
+    )
+  # KEY_SCALE 1D - REQUIRED FOR ARGUMENT SPLITTER
+  } else {
+    args$key_scale <- split(
+      rep("fixed", length.out = length(args$x)),
+      1:length(args$x)
     )
   }
   

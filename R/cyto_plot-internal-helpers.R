@@ -67,8 +67,6 @@
                             merge_by = "name",
                             select = NULL,
                             events = 50000,
-                            hist_stack = 0,
-                            hist_layers = NA,
                             barcode = FALSE,
                             seed = 42) {
 
@@ -444,10 +442,6 @@
     names = names(x)
   )
 
-  # HISTOGRAM LAYERS
-  
-  
-  
   # DATA READY FOR CYTO_PLOT
   return(x)
   
