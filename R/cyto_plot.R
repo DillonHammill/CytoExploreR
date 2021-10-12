@@ -877,7 +877,7 @@ cyto_plot <- function(x,
   args <- args[!names(args) %in% c("layout")]
   
   # PREPARE ARGUMENTS ----------------------------------------------------------
-  
+
   # REPEAT & SPLIT ARGUMENTS
   args <- .cyto_plot_args_split(args)
   

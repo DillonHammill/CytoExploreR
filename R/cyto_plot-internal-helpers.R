@@ -197,7 +197,6 @@
       }
     }
   }
-  
   # OVERLAY - CYTOSET/LIST OF CYTOSETS
   if(!.all_na(overlay)) {
     # OVERLAY -> LIST OF CYTOSETS
@@ -271,7 +270,7 @@
             # IDENTIFIER
             id <- ids[q]
             l <- list(
-              "total" = nrow(cs[[q]]),
+              "total" = nrow(cyto_exprs(cs[[q]])),
               "layer" = NULL,
               "match" = NULL,
               "sample" = NULL
@@ -288,7 +287,7 @@
                   m <- sum(
                     cyto_exprs(cs[[q]], "Event-ID") %in%
                       cyto_exprs(cs_list[[v]][[match(id, ids)]], "Event-ID")
-                  )
+                  ) 
                   # ANY MATCHING EVENTS
                   if(m > 0) {
                     # UPDATE LIST
@@ -315,14 +314,18 @@
         # ALL CYTOFRAMES CONTAIN NEW EVENTS
         if(is.null(LAPPLY(i[[w]], `[[`, "layer"))) {
           # COMPUTE SAMPLE SIZES
-          n <- cyto_sample_n(cs,
-                             events = events)
+          n <- cyto_sample_n(
+            cs,
+            events = events
+          )
           for(id in ids) {
             i[[w]][[id]]$sample <<- n[id]
           }
-          cs_sub_list[[w]] <<- cyto_sample(cs,
-                                           events = n,
-                                           seed = seed)
+          cs_sub_list[[w]] <<- cyto_sample(
+            cs,
+            events = n,
+            seed = seed
+          )
         # SOME/ALL CYTOFRAMES CONTAIN EVENTS ON PLOT
         } else {
           # FIND WHICH CYTOFRAMES HAVE EVENTS ON PLOT
@@ -340,13 +343,13 @@
             # SAMPLE SIZE OF REFERENCE LAYER
             s <- i[[l]][[id]]$sample
             # CYTOFRAME SUBSET OF PREVIOUS LAYER
-            if(i[[w]][[id]]$match == nrow(cs[[id]])){
+            if(i[[w]][[id]]$match == nrow(cyto_exprs(cs[[id]]))){
               # USE EVENT IDs FROM REFERENCE LAYER
               cf_list[[id]] <- cs[[id]][
                 cyto_exprs(cs[[id]], "Event-ID") %in%
                   cyto_exprs(cs_sub_list[[l]][[id]], "Event-ID")
                 ,]
-              i[[w]][[id]]$sample <<- nrow(cf_list[[id]])
+              i[[w]][[id]]$sample <<- nrow(cyto_exprs(cf_list[[id]]))
             # CYTOFRAME OVERLAP WITH PREVIOUS LAYER
             } else {
               # EVENT IDs FROM LAYER SAMPLE
@@ -382,14 +385,18 @@
           # NEW LAYER - ALL NEW CYTOFRAMES
           if(length(m[!m]) == length(cs)) {
             # COMPUTE SAMPLE SIZES
-            n <- cyto_sample_n(cs,
-                               events = events)
+            n <- cyto_sample_n(
+              cs,
+              events = events
+            )
             # SAMPLE
             for(id in names(m[!m])) {
               i[[w]][[id]]$sample <<- n[id]
-              cf_list[[id]] <- cyto_sample(cs[[id]],
-                                           events = n[id],
-                                           seed = seed)
+              cf_list[[id]] <- cyto_sample(
+                cs[[id]],
+                events = n[id],
+                seed = seed
+              )
             }
           # SOME NEW CYTOFRAME(S)
           } else if(length(m[!m]) != 0 & length(m[!m]) < length(cs)) {
@@ -434,7 +441,7 @@
     }),
     names = names(x)
   )
-  
+
   # DATA
   return(x)
   
