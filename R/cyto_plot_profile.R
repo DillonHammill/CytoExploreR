@@ -281,7 +281,7 @@ cyto_plot_profile <- function(x,
     # CUSTOM HEADERS
     } else {
       # REPEAT HEADERS - MULTIPLE PAGES
-      if(length(header) == tp) {
+      if(length(header) == tpg) {
         header <- rep(header, each = pg)
       } else {
         stop(

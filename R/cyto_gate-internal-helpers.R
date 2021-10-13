@@ -583,16 +583,15 @@
 #' Convert between quadGate to rectangleGates 
 #' @return list of rectangleGates or a quadGate.
 #' @importFrom flowCore rectangleGate quadGate parameters
-#' @importFrom methods is
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #' @noRd
 .cyto_gate_quad_convert <- function(gate,
                                     channels) {
   # RECTANGLEGATES SUPPLIED
-  if(is(gate)[1] == "list") {
+  if(cyto_class(gate, "list", TRUE)) {
     # LIST OF RECTANGLEGATES
     if(all(LAPPLY(gate, function(z){
-      is(z, "rectangleGate")
+      cyto_class(z, "rectangleGate")
     }))){
       # ORDER QUADRANTS - GATINGSET EXTRACTED GATES
       if(all(LAPPLY(gate, function(z){
@@ -622,7 +621,7 @@
                      .gate = coords)
       return(qg)
     }
-  }else if(is(gate, "quadGate")){
+  }else if(cyto_class(gate, "quadGate")){
     # INPUT CO-ORDINATE
     xcoord <- gate@boundary[1]
     ycoord <- gate@boundary[2]

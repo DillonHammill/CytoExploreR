@@ -402,17 +402,17 @@ cyto_transformers_combine <- function(...) {
   
 }
 
-## .CYTO_TRANSFORMER_COMPLETE --------------------------------------------------
+## .CYTO_TRANSFORMERS_COMPLETE -------------------------------------------------
 
 #' Get complete transformerList for compensation functions
 #' @importFrom methods is
 #' @noRd
-.cyto_transformer_complete <- function(x, ...){
-  UseMethod(".cyto_transformer_complete")
+.cyto_transformers_complete <- function(x, ...){
+  UseMethod(".cyto_transformers_complete")
 }
 
 #' @noRd
-.cyto_transformer_complete.flowFrame <- function(x,
+.cyto_transformers_complete.flowFrame <- function(x,
                                                  axes_trans = NA) {
   
   # Fluorescent channels
@@ -459,7 +459,7 @@ cyto_transformers_combine <- function(...) {
 }
 
 #' @noRd
-.cyto_transformer_complete.flowSet <- function(x, 
+.cyto_transformers_complete.flowSet <- function(x, 
                                                axes_trans = NA){
   
   # Fluorescent channels
@@ -505,7 +505,7 @@ cyto_transformers_combine <- function(...) {
 }
 
 #' @noRd
-.cyto_transformer_complete.GatingHierarchy <- function(x,
+.cyto_transformers_complete.GatingHierarchy <- function(x,
                                                        axes_trans = NA){
   
   # Fluorescent channels
@@ -592,7 +592,7 @@ cyto_transformers_combine <- function(...) {
           trans_chans <- linear_chans[linear_chans%in% names(axes_trans)]
           extra_chans <- linear_chans[!linear_chans%in% names(axes_trans)]
           # Get biex transformers for missing channels
-          trans <- cyto_transformer_define(x,
+          trans <- cyto_transformers_define(x,
                                          channels = extra_chans,
                                          type = "biex",
                                          plot = FALSE)
@@ -654,14 +654,14 @@ cyto_transformers_combine <- function(...) {
 }
 
 #' @noRd
-.cyto_transformer_complete.GatingSet <- function(x,
+.cyto_transformers_complete.GatingSet <- function(x,
                                                  axes_trans = NA){
   
-  # Extract GatingHierachy
+  # Extract GatingHierarchy
   x <- x[[1]]
   
-  # Make call to GatingHierchy method
-  axes_trans <- .cyto_transformer_complete(x,
+  # Make call to GatingHierarchy method
+  axes_trans <- .cyto_transformers_complete(x,
                                            axes_trans = axes_trans)
   
   # Return complete transformerList

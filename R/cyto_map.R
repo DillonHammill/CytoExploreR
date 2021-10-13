@@ -29,9 +29,6 @@
 #'   (some additional configuration required)}\item{"UMAP"}{uses uwot::umap() to
 #'   compute UMAP co-ordinates}\item{}{EmbedSOM}{uses EmbedSOM::SOM() and
 #'   EmbedSOM::EmbedSOM() to compute EmbedSOM co-ordinates}}
-#' @param names original names of the samples prior to merging, passed to
-#'   \code{cyto_save} when \code{split} is TRUE to retain original file names in
-#'   the split cytoframes.
 #' @param scale optional argument to scale each channel prior to computing
 #'   dimension-reduced co-ordinates, options include \code{"range"},
 #'   \code{"mean"}, \code{"median"} or \code{"zscore"}. Set to \code{"range"} by
@@ -284,6 +281,7 @@ cyto_map <- function(x,
 }
 
 #' Internal function to perform dimension reduction
+#' @importFrom utils tail
 #' @noRd
 .cyto_map <- function(x,
                       type = "UMAP",

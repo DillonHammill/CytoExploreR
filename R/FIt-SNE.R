@@ -85,7 +85,6 @@
 #'
 #' @importFrom utils file_test
 #' @importFrom stats sd
-#' @importFrom rsvd rsvd
 #'
 #' @seealso \code{\link{cyto_map}}
 #'
@@ -211,9 +210,19 @@ fftRtsne <- function(X,
     if (rand_seed != -1)  {
       set.seed(rand_seed)
     }
+    # RSVD
+    cyto_require(
+      "rsvd",
+      source = "CRAN",
+      ref = paste0(
+        "Erichson NB, Voronin S, Brunton SL, Kutz JN (2019). Randomized ",
+        "Matrix Decompositions Using R. Journal of Statistical Software, ",
+        "89(11), 1–48. doi: 10.18637/jss.v089.i11."
+      )
+    )
     message('Using rsvd() to compute the top PCs for initialization.')
     X_c <- scale(X, center=T, scale=F)
-    rsvd_out <- rsvd::rsvd(X_c, k=dims)
+    rsvd_out <- cyto_func_call("rsvd::rsvd", list(A = X_c, k = dims))
     X_top_pcs <- rsvd_out$u %*% diag(rsvd_out$d, nrow=dims)
     initialization <- 0.0001*(X_top_pcs/sd(X_top_pcs[,1])) 
   }else if (is.character(initialization) && initialization == 'random'){

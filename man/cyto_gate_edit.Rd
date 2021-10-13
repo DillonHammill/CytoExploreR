@@ -101,6 +101,17 @@ default.}
 \item{plot}{logical indicating whether a plot should be drawn, set to
 \code{TRUE} by default.}
 
+\item{title}{title to use for the plot, set to the name of the group by
+default. Title can be removed by setting this argument to \code{NA}.}
+
+\item{axes_trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+to transform the channels of the supplied data. \code{cyto_plot} does not
+support in-line transformations and as such the transformations should be
+applied to the data prior to plotting. The transformerList is used
+internally to ensure that the axes on the constructed plots are
+appropriately labelled.}
+
 \item{axes_limits}{options include \code{"auto"}, \code{"data"} or
 \code{"machine"} to use optimised, data or machine limits respectively. Set
 to \code{"machine"} by default to use entire axes ranges. Fine control over
@@ -157,9 +168,6 @@ arbitrary numeric by default. This behaviour can be turned off by setting
 this argument to NULL.}
 
 \item{...}{additional arguments for \code{\link{cyto_plot}}.}
-
-\item{popup}{logical indicating whether the plot should be constructed in a
-pop-up window, set to TRUE by default.}
 }
 \value{
 an object of class \code{GatingSet} with edited gate applied, as well

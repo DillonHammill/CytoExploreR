@@ -398,26 +398,33 @@ cyto_plot_label.flowFrame <- function(x,
   
   # STATISTICS PER POPULATION --------------------------------------------------
   
+  # TODO: CHECK THIS WORKS - NEGATE?
+  
   # POPULATIONS
-  pops <- .cyto_label_pops(list(x),
-                           gate = gate,
-                           negate = negate)
+  pops <- .cyto_plot_label_pops(
+    list(x),
+    gate = gate,
+    negate = negate
+  )
   
   # COMPUTE STATISTICS
-  label_stat <- .cyto_label_stat(list(x), 
-                                 pops = pops,
-                                 channels = channels,
-                                 label_stat = label_stat,
-                                 axes_trans = trans,
-                                 gate = gate,
-                                 hist_smooth = hist_smooth)
+  label_stat <- .cyto_plot_label_stat(
+    list(x), 
+    pops = pops,
+    channels = channels,
+    label_stat = label_stat,
+    axes_trans = trans,
+    gate = gate,
+    hist_smooth = hist_smooth
+  )
   
   # PREPARE LABEL_TEXT ---------------------------------------------------------
   
   # MERGE LABEL_TEXT & LABEL_STAT
-  label_text <- .cyto_label_text(label_text,
-                                 label_stat)
-  
+  label_text <- .cyto_plot_label_text(
+    label_text,
+    label_stat
+  )
   
   # LABEL CONSTRUCTION ---------------------------------------------------------
   

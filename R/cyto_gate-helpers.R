@@ -768,6 +768,7 @@ cyto_gate_bool <- function(x,
 #' @param merge_by passed to \code{cyto_groups} to split \code{GatingSet} intp
 #'   groups, gates will be extracted from the first Gatinghierarchy within each
 #'   group.
+#' @param path passed to \code{cyto_nodes()}.
 #' @param ... not in use.
 #'
 #' @importFrom openCyto gt_get_gate gatingTemplate
@@ -866,7 +867,9 @@ cyto_gate_extract <- function(x,
         # ALL RECTANGLES MUST BE PRESENT
         if(length(quad_ind) == 4) {
           # CREATE QUADGATE
-          quad <- .cyto_gate_quad_convert(gates[quad_ind], channels = chans)
+          quad <- .cyto_gate_quad_convert(
+            gates[quad_ind]
+          )
           # REMOVE RECTANGLEGATES
           gates[quad_ind] <- NULL
           gates[[quad@filterId]] <- quad
@@ -987,8 +990,15 @@ cyto_gate_extract <- function(x,
 #'   default.
 #' @param plot logical indicating whether a plot should be drawn, set to
 #'   \code{TRUE} by default.
-#' @param popup logical indicating whether the plot should be constructed in a
-#'   pop-up window, set to TRUE by default.
+#' @param title title to use for the plot, set to the name of the group by
+#'   default. Title can be removed by setting this argument to \code{NA}.
+#' @param axes_trans object of class
+#'   \code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+#'   to transform the channels of the supplied data. \code{cyto_plot} does not
+#'   support in-line transformations and as such the transformations should be
+#'   applied to the data prior to plotting. The transformerList is used
+#'   internally to ensure that the axes on the constructed plots are
+#'   appropriately labelled.
 #' @param axes_limits options include \code{"auto"}, \code{"data"} or
 #'   \code{"machine"} to use optimised, data or machine limits respectively. Set
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over

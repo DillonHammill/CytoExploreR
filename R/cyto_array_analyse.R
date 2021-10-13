@@ -359,7 +359,7 @@ cyto_array_analyse.GatingSet <- function(x,
 
 #' @noRd
 pseudo_log_trans <- function(sigma = 1, base = 10) {
-  trans_new(
+  scales::trans_new(
     "pseudo_log",
     function(x) asinh(x / (2 * sigma)) / log(base),
     function(x) 2 * sigma * sinh(x * log(base))

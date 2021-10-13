@@ -104,7 +104,7 @@ cyto_gate_clust <- function(x,
         break()
       }
       # CLUSTER VECTOR - WHOLE NUMBERS
-      if(length(cluster_result[i]) == .cyto_count(fr) &
+      if(length(cluster_result[i]) == nrow(cyto_exprs(fr)) &
          all(cluster_result[i] %% 1 == 0)){
         clusters <<- cluster_result[[i]]
       }

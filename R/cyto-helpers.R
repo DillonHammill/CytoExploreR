@@ -1686,7 +1686,7 @@ cyto_transform_extract <- function(x,
 #'   transformations applied to the data when \code{inverse = TRUE}.
 #' @param inverse logical indicating whether transformations applied to the data
 #'   should be inversed, set to FALSE by default.
-#' @param sample passed to \code{\link{cyto_sample}} to extract a subset of
+#' @param events passed to \code{\link{cyto_sample}} to extract a subset of
 #'   events from each sample. \code{sample} indicates the number or proportion
 #'   of events to extract from each sample, set to \code{1} by default to
 #'   extract all events.
@@ -4748,7 +4748,7 @@ cyto_compensate.flowFrame <- function(x,
                                       ...) {
   
   # PREPARE SPILLOVER MATRIX
-  spill <- cyto_spillover_prepare(
+  spill <- .cyto_spillover_prepare(
     x,
     spillover = spillover
   )[[1]]
@@ -6010,7 +6010,7 @@ NULL
 #' @noRd
 #' @export
 cyto_cbind <- function(x,
-                       ...){
+                       cols = NULL){
   UseMethod("cyto_cbind")
 }
 
@@ -6199,20 +6199,18 @@ cyto_require <- function(x,
       if(!"remotes" %in% pkgs$Package) {
         install.packages("remotes")
       }
-      if(requireNamespace("remotes")) {
-        remotes::install_github(repo, ...)
-      }
+        cyto_func_call("remotes::install_github", list(repo, ...))
+        # remotes::install_github(repo, ...)
     # CRAN
     } else if(grepl("^c", source, ignore.case = TRUE)){
-      install.packages(x)
+      install.packages(x, ...)
     # BIOCONDUCTOR
     } else if (grepl("^b", source, ignore.case = TRUE)) {
       if(!"BiocManager" %in% pkgs$Package) {
         install.packages("BiocManager", ...)
       }
-      if(requireNamespace("BiocManager")) {
-        BiocManager::install(x, ...)
-      }
+        cyto_func_call("BiocManager::install", list(x, ...))
+        # BiocManager::install(x, ...)
     }
   }
   

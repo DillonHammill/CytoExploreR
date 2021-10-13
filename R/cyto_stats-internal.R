@@ -469,7 +469,7 @@ cyto_stat_auc <- function(x,
   # VECTOR
   if(is.null(dim(x))) {
     # KERNEL DENSITY ESTIMATE
-    kde <- cyto_stat_denity(
+    kde <- cyto_stat_density(
       x,
       smooth = smooth,
       stat = "count",
@@ -967,7 +967,7 @@ cyto_stat_skewness <- function(x,
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @import KernSmooth
-#' @importFrom stats fft
+#' @importFrom stats fft dnorm
 #'
 #' @noRd
 cyto_stat_bkde2d <- function(x,

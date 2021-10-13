@@ -1,108 +1,3 @@
-## CYTO_SPILL_ANNOTATE ---------------------------------------------------------
-
-#' Annotate compensation controls with channels and parents
-#' @noRd
-.cyto_spillover_controls_annotate <- function(x,
-                                              parent = "root",
-                                              channel_match = NULL) {
-  
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
-  
-  # CHANNEL_MATCH NOT SUPPLIED - MAY BE PRESENT
-  if(is.null(channel_match)) {
-    # SEARCH FOR CHANNEL MATCH FILE
-    channel_match <- tryCatch(
-      list.files()[grepl(
-        "channel-match.csv$",
-        list.files(),
-        ignore.case = TRUE
-      )],
-      error = function(e) {
-        return(NULL)
-      }
-    )
-    if(length(channel_match) == 0){
-      channel_match <- NULL
-    }
-  }
-  
-  # CHANNEL_MATCH SUPPLIED
-  if(!is.null(channel_match)) {
-    # CHANNEL_MATCH - VECTOR OF CHANNELS OR FILE NAME
-    if(is.null(dim(channel_match))) {
-      # CHANNEL_MATCH FILE
-      if(all(file_exists(file_ext_append(channel_match)))) {
-        # FIND CORRECT CHANNEL_MATCH FILE
-        channel_match <- lapply(channel_match, function(z){
-          # READ FILE
-          cm <- read_from_csv(z)
-          # CHECK COLUMNS - CYTO_CHANNEL_MATCH()
-          if(!all(c("name", "channel") %in% colnames(cm))) {
-            return(NULL)
-            # VALID CHANNEL MATCH
-          } else {
-            # CHANNEL_MATCH - MUST CONTAIN ALL SAMPLES
-            if(length(cyto_match(x, cm[, "name"]) == nrow(cm))) {
-              return(cm)
-            } else {
-              return(NULL)
-            }
-          }
-        })
-        channel_match <- channel_match[!LAPPLY(channel_match, "is.null")][[1]]
-        # CHANNELS/MARKERS
-      } else {
-        channel_match <- pd
-        channel_match$channel <- cyto_channels_extract(x, 
-                                                       channels = channel_match, 
-                                                       skip = "Unstained")
-      }
-      # CHANNEL_MATCH - ARRAY
-    } else {
-      # CHECK COLNAMES
-      if(!all(c("name", "channel") %in% colnames(channel_match))) {
-        warning(
-          "Use cyto_channel_match() to create 'channel_match' file!"
-        )
-        channel_match <- NULL
-      }
-      # CHECK SAMPLES - CREATE FROM SCRATCH IF ARE SAMPLES MISSING
-      if(length(cyto_match(x, channel_match[, "name"]) != nrow(channel_match))) {
-        warning(
-          paste0(
-            "'channel_match' does not cover all samples in this ",
-            cyto_class(x), "!"
-          )
-        )
-        channel_match <- NULL
-      }
-    }
-  }
-  
-  # ANNOTATE CHANNELS
-  if(!"channel" %in% colnames(pd)) {
-    # CREATE NEW CHANNEL_MATCH FILE
-    if(is.null(channel_match)) {
-      channel_match <- cyto_channel_match(x)
-    }
-    # UPDATE CHANNELS IN EXPERIMENT DETAILS
-    pd <- cbind(pd, 
-                "channel" = channel_match[
-                  cyto_match(x, channel_match[, "name"]), "channel"])
-    cyto_details(x) <- pd
-  }
-  
-  # ANNOTATE PARENT
-  if(!any(grepl("parent", colnames(pd), ignore.case = TRUE))) {
-    pd$parent <- rep(parent, length.out = length(x))
-    cyto_details(x) <- pd
-  }
-  
-  return(x)
-  
-}
-
 ## CYTO_SPILLOVER_CONTROLS -----------------------------------------------------
 
 #' Prepare compensation controls for cyto_spillover_compute
@@ -112,15 +7,16 @@
                                              parent = "root",
                                              type = "roca",
                                              channel_match = NULL,
-                                             axes_trans = NA) {
+                                             axes_trans = NA,
+                                             save_as = NULL) {
   
-  # ANNOTATE CONTROLS
-  x <- .cyto_spillover_controls_annotate(x,
-                                         parent = parent,
-                                         channel_match = channel_match)
-  
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
+  # ANNOTATE CONTROLS - SAVE TO FILE
+  pd <- cyto_channel_match_check(
+    x,
+    parent = parent,
+    channel_match = channel_match,
+    save_as = save_as
+  )
   
   #ISOLATE UNSTAINED CONTROL
   if(any(grepl("Unstained", pd[, "channel"], ignore.case = TRUE))) {

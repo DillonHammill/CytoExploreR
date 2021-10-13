@@ -34,7 +34,6 @@
 #'   setting this argument to NULL.
 #' @param ... not in use.
 #'
-#' @importFrom MASS kde2d
 #' @importFrom graphics contour par
 #' @importFrom grDevices adjustcolor
 #'

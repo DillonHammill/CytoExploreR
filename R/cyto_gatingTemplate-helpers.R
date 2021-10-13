@@ -362,7 +362,7 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
   invisible(NULL)
 }
 
-## GATINGTEMPLATE EDIT ---------------------------------------------------------
+## GATINGTEMPLATE_EDIT ---------------------------------------------------------
 
 #' Interactively Edit a gatingTemplate
 #'

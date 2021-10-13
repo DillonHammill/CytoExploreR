@@ -54,6 +54,9 @@
 #' @param spillover added for backwards compatibility with older versions of
 #'   CytoExploreR, this performs the same operations as \code{spill} but will be
 #'   eventually phased out in favour of the more concise \code{spill} argument.
+#' @param save_as name of a csv file to which the edited spillover matrix should
+#'   be written, set to \code{Spillover-Matrix.csv} prefixed with the date by
+#'   default.
 #' @param axes_trans an object of class \code{transformerList} containing
 #'   transformers to used to transform the fluorescent channels of the samples
 #'   for visualisation.
@@ -84,7 +87,8 @@
 #'   checkboxInput actionButton mainPanel plotOutput reactiveValues observe
 #'   eventReactive renderImage tabsetPanel tabPanel sidebarLayout fluidRow
 #'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer icon
-#'   span img NS
+#'   span img NS reactive moduleServer observeEvent column
+#'   updateCheckboxGroupInput
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme

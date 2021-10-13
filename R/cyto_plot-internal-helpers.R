@@ -1165,7 +1165,7 @@
             x,
             channels = chan,
             axes_limits = axes_limits,
-            axes_limits_buffer = axes_limits_buffer
+            buffer = axes_limits_buffer
           )[, chan])
       }
       # RESTRICT AXES TICKS & LABELS BY RANGE

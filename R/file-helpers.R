@@ -61,8 +61,6 @@ file_ext_remove <- function(x,
 #' @param x vector of filenames.
 #' @param ext vector of extensions to append.
 #'
-#' @importFrom tools file_ext
-#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd

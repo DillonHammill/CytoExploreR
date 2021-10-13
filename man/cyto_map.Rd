@@ -82,10 +82,6 @@ to TRUE by default.}
 
 \item{...}{additional arguments passed to the specified dimension reduction
 algorithm}
-
-\item{names}{original names of the samples prior to merging, passed to
-\code{cyto_save} when \code{split} is TRUE to retain original file names in
-the split cytoframes.}
 }
 \value{
 either a \code{cytoset} or \code{GatingSet} with the

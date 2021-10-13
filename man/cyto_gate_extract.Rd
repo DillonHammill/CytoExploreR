@@ -28,6 +28,8 @@ cyto_gate_extract(
 groups, gates will be extracted from the first Gatinghierarchy within each
 group.}
 
+\item{path}{passed to \code{cyto_nodes()}.}
+
 \item{...}{not in use.}
 }
 \description{
