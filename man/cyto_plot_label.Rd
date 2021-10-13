@@ -2,18 +2,19 @@
 % Please edit documentation in R/cyto_plot_label.R
 \name{cyto_plot_label}
 \alias{cyto_plot_label}
-\alias{cyto_plot_label.GatingHierarchy}
-\alias{cyto_plot_label.flowFrame}
 \title{Add labels to cyto_plot}
 \usage{
-\method{cyto_plot_label}{GatingHierarchy}(
+cyto_plot_label(
   x,
-  parent,
+  parent = "root",
   alias = NA,
   channels = NULL,
-  events = 1,
+  axes_trans = NA,
+  events = 50000,
+  negate = FALSE,
   gate = NA,
-  negate = NA,
+  overlay = NA,
+  merge_by = "name",
   label_text,
   label_stat,
   label_text_x = NA,
@@ -27,141 +28,130 @@
   hist_smooth = 1,
   ...
 )
-
-\method{cyto_plot_label}{flowFrame}(
-  x,
-  channels = NULL,
-  trans = NA,
-  events = 1,
-  gate = NA,
-  negate = FALSE,
-  label_text = NA,
-  label_stat = NA,
-  label_text_x = NA,
-  label_text_y = NA,
-  label_text_font = 2,
-  label_text_size = 0.8,
-  label_text_col = "black",
-  label_text_col_alpha = 1,
-  label_fill = "white",
-  label_fill_alpha = 0.6,
-  hist_smooth = 1,
-  ...
-)
 }
 \arguments{
-\item{x}{object of class \code{flowFrame}.}
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{parent}{name of the parent population to extract when a
-\code{GatingHierarchy} object is supplied.}
+\item{parent}{name of the population to plot when a \code{GatingHierarchy} or
+\code{GatingSet} object is supplied, set to the \code{"root"} node by
+default.}
 
-\item{alias}{name of teh gated populations to label when a GatingHierarchy
-object is supplied. This is equivalent to the \code{gate} argument for
-\code{flowFrame} objects.}
+\item{alias}{name of the gated population(s) to gated in the plot when a
+\code{GatingHierarchy} or \code{GatingSet} object is supplied. Setting
+\code{alias} to "" will automatically plot any gates constructed in the
+supplied channels. \code{alias} is equivalent to the \code{gate} argument
+for \code{cytoset} objects.}
 
-\item{channels}{a vector indicating the fluorescent channel(s) to be used for
-gating.}
+\item{channels}{name of the channel(s) or marker(s) to be used to construct
+the plot.}
 
-\item{events}{numeric [0,1] to control the percentage of events to be
-plotted. Specifying a value for \code{events} can substantial improve
-plotting speed for less powerful machines.}
+\item{axes_trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+to transform the channels of the supplied data.  The transformerList is
+used internally to ensure that the data is converted to a linear scale
+(when required) prior to computing statistics for labels.}
 
-\item{gate}{object of class
-\code{\link[flowCore:rectangleGate-class]{rectangleGate}},
-\code{\link[flowCore:polygonGate-class]{polygonGate}},
-\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}},
-\code{\link[flowCore:quadGate-class]{quadGate}}, \code{"list"} or
-\code{\link[flowCore:filters-class]{filters}}.}
+\item{events}{numeric to control the number or percentage of events to
+display. Values [0,1] indicate the percentage of events to display (i.e.
+value of 1 will display all events), whilst values larger than 1 indicate
+the number of events to display. The default value for \code{events} is set
+to 50000 to display 50000 events only.}
 
 \item{negate}{logical indicating whether a label should be included for the
-neagted population (i.e. events outside the gate). Set to FALSE by default
-to only calculate statistics for events within the gate.}
+negated population when gate objects are supplied, set to FALSE by default.
+Setting \code{negate = TRUE} will result in the creation of a boolean
+filter that contains all the events outside the gates supplied to
+\code{alias} or \code{gate}. If such a boolean gate exists in the
+GatingSet/GatingHierarchy it will automatically be extracted when
+\code{alias = ""}. In order to prevent plotting of these boolean gates,
+users will need to explicitly pass the names of the gates they want to
+display to \code{alias}.}
 
-\item{label_text}{character string to include in the label above the
-statistic (e.g. population name(s)).}
+\item{gate}{gate objects to be apply to data prior to computing statistics
+for labels, can be either objects of class \code{rectangleGate},
+\code{polygonGate}, \code{ellipsoidGate}, \code{quadGate} or
+\code{filters}. Lists of these supported gate objects are also supported.}
 
-\item{label_stat}{indicates the type of statistic to include in the label,
-can be either code{"count"}, \code{"median"}, \code{"mean"}, \code{"mode"},
-\code{"geo mean"} or \code{"CV"}. Only count and percent statistics are
-supported for 2D plots.}
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
+\code{list of cytosets} or \code{list of cytoset lists} containing
+populations to be overlaid onto the plot(s). This argument can be set to
+"children" or "descendants" when a \code{GatingSet} or
+\code{GatingHierarchy} to overlay all respective nodes.}
 
-\item{label_text_x}{vector containing the x co-ordinates for the plot labels.
-Label positions can be interactively selected if no co-ordinates are
-manually supplied.}
+\item{merge_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
 
-\item{label_text_y}{vector containing the x co-ordinates for the plot labels.
-Label positions can be interactively selected if no co-ordinates are
-manually supplied.}
+\item{label_text}{vector of population names to use in the labels. To exclude
+the population names set this argument to NA.}
 
-\item{label_text_font}{integer [1,2,3,4] passed to \code{text} to alter the
-font, set to \code{2} by default for a bold font.}
+\item{label_stat}{indicates the type of statistic to include in the plot
+labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
+\code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
+\code{"percent"} for gated data or \code{NA} to exclude statistics for
+un-gated data. Currently, only \code{"percent"} and \code{"count"} are
+supported for 2-D scatter plots.}
 
-\item{label_text_size}{numeric character expansion used to control the size
-of the text in the labels, set to \code{0.8} by default. See \code{?text}
-for details.}
+\item{label_text_x}{vector of x co-ordinate(s) to manually adjust the
+position plot label(s) on the plot. To interactively position labels set
+either \code{label_text_x} or \code{label_text_y} to "select".}
 
-\item{label_text_col}{specify text colour in label for each gate, defaults to
-\code{"black"} for all gates.}
+\item{label_text_y}{vector of y co-ordinate(s) to manually adjust the
+position plot label(s) on the plot. To interactively position labels set
+either \code{label_text_x} or \code{label_text_y} to "select".}
+
+\item{label_text_font}{numeric to control the font of text in plot labels,
+set to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+alternatives.}
+
+\item{label_text_size}{numeric to control the size of text in the plot
+labels, set to 1 by default.}
+
+\item{label_text_col}{colour(s) to use for text in plot labels, set to
+\code{"black"} by default.}
 
 \item{label_text_col_alpha}{numeric [0, 1] to control the transparency of the
 text colour, set to 1 by default to remove transparency.}
 
-\item{label_fill}{fill colour to use for labels, set to "white" by default.}
+\item{label_fill}{fill colour(s) to use for labels, set to "white" by
+default.}
 
-\item{label_fill_alpha}{numeric [0,1] controls the transparency of the fill
-colour, set to \code{0.6} by default.}
+\item{label_fill_alpha}{numeric to control background fill transparency of
+label, set to 0.6 by default to introduce some transparency.}
 
 \item{hist_smooth}{smoothing parameter passed to
-\code{\link[stats:density]{density}} to adjust kernel density for mode
-calculation.}
-
-\item{...}{not in use.}
-
-\item{trans}{object of class \code{\link[flowWorkspace]{transformerList}}
-which was used to transform the fluorescent channels of the supplied
-flowFrame.}
+\code{\link[stats:density]{density}} to adjust the smoothness of the kernel
+density for histograms, set to \code{1} by default. Only values greater or
+equal to 1 are supported.}
 }
 \value{
-add a boxed text label to an existing cyto_plot.
+a matrix containing the xy co-ordinates of the labels.
 }
 \description{
-Interactively label existing plots with boxed labels containing text and
-statistics. \code{cyto_plot_label} can only label the last plot and can only
-add labels on a per sample basis (i.e. single layer only). Locations for each
-label must be manually selected. More complex labelling can be achieved
-directly through \code{cyto_plot}.
+\code{cyto_plot_label()} prepares the data in the same way as
+\code{cyto_plot()} by allows uses to interactively add labels to plots that
+have already been created.
 }
 \examples{
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Activation
-gs <- GatingSet(fs)
+# Activation GatingSet
+gs <- GatingSet(Activation)
 
-# Apply compensation
-gs <- compensate(gs, fs[[1]]@description$SPILL)
+# Call cyto_plot()
+cyto_plot(gs[1], parent = "root", channels = c("FSC-A", "SSC-A"))
 
-# Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
-gs <- transform(gs, trans)
-
-# Gate using gate_draw
-gt_gating(Activation_gatingTemplate, gs)
-
-# Plot
-cyto_plot(gs[[32]],
-  parent = "CD4 T Cells",
-  channels = c("CD69")
-)
-
-# Label - median fluorescent intensity
-cyto_plot_label(cyto_data_extract(gs, "CD4 T Cells")[[1]][[32]],
-  channels = "CD69",
-  label_stat = "median",
-  label_text = "MedFI",
-  trans = trans,
-  label_text_x = 3,
-  label_text_y = 50
+# Add label after plotting
+cyto_plot_label(
+  gs[1],
+  parent = "root",
+  channels = c("FSC-A", "SSC-A"),
+  label_stat = "count",
+  label_text = "count",
+  label_text_x = 150000,
+  label_text_y = 150000
 )
 
 }

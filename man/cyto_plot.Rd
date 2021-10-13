@@ -119,8 +119,7 @@ cyto_plot(
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-\code{\link[flowWorkspace:cytoset]{cytoset}},
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
@@ -433,7 +432,7 @@ population names to the \code{label_text} argument. The default statistic
 is \code{"percent"} for gated data. This argument must be set to TRUE in
 order to add labels with gates.}
 
-\item{label_text}{vector of population names to use in the labels.The exclude
+\item{label_text}{vector of population names to use in the labels.To exclude
 the population names set this argument to NA.}
 
 \item{label_stat}{indicates the type of statistic to include in the plot
