@@ -125,6 +125,8 @@ label, set to 0.6 by default to introduce some transparency.}
 \code{\link[stats:density]{density}} to adjust the smoothness of the kernel
 density for histograms, set to \code{1} by default. Only values greater or
 equal to 1 are supported.}
+
+\item{...}{not in use.}
 }
 \value{
 a matrix containing the xy co-ordinates of the labels.

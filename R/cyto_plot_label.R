@@ -81,6 +81,7 @@
 #'   \code{\link[stats:density]{density}} to adjust the smoothness of the kernel
 #'   density for histograms, set to \code{1} by default. Only values greater or
 #'   equal to 1 are supported.
+#' @param ... not in use.
 #'
 #' @return a matrix containing the xy co-ordinates of the labels.
 #'
@@ -150,11 +151,11 @@ cyto_plot_label <- function(x,
   # CONVERT CHANNELS
   args$channels <- cyto_channels_extract(args$x[[1]], args$channels)
   
-  # DATA - .CYTO_PLOT_DATA() -> LIST OF MERGED CYTOSETS PER LAYER
-  args$x <- cyto_func_execute(".cyto_plot_data", args)[[1]]
-  
   # GATE - .CYTO_PLOT_GATES() -> LIST OF GATE OBJECTS
   args$gate <- cyto_func_execute(".cyto_plot_gates", args)[[1]]
+  
+  # DATA - .CYTO_PLOT_DATA() -> LIST OF MERGED CYTOSETS PER LAYER
+  args$x <- cyto_func_execute(".cyto_plot_data", args)[[1]]
   
   # PREPARE GATES
   if(!.all_na(args$gate)) {
