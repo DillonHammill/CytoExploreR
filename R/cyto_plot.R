@@ -8,8 +8,7 @@
 #'
 #' Explore and visualise cytometry data.
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
-#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the population to plot when a \code{GatingHierarchy} or
@@ -239,7 +238,7 @@
 #'   population names to the \code{label_text} argument. The default statistic
 #'   is \code{"percent"} for gated data. This argument must be set to TRUE in
 #'   order to add labels with gates.
-#' @param label_text vector of population names to use in the labels.The exclude
+#' @param label_text vector of population names to use in the labels.To exclude
 #'   the population names set this argument to NA.
 #' @param label_stat indicates the type of statistic to include in the plot
 #'   labels, can be \code{"percent"}, \code{"count"}, \code{"mean"},
@@ -547,7 +546,7 @@ cyto_plot <- function(x,
   # GATES PREPARATION ----------------------------------------------------------
   
   # GATE - LIST OF GATE OBJECT LISTS
-  args$gate <- .execute(".cyto_plot_gates", args)
+  args$gate <- cyto_func_execute(".cyto_plot_gates", args)
   
   # DATA PREPARATION -----------------------------------------------------------
   
@@ -560,7 +559,7 @@ cyto_plot <- function(x,
   # args <- args[!names(args) %in% "sort_by"]
   
   # X - LIST OF CYTOSET LISTS - NO BARCODING
-  args$x <- .execute(".cyto_plot_data", args)
+  args$x <- cyto_func_execute(".cyto_plot_data", args)
   
   # REMOVE DATA ARGUMENTS
   args <- args[!names(args) %in% c("parent",

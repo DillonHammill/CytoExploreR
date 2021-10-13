@@ -1435,7 +1435,6 @@
                                   label_text = "",
                                   label_stat = "",
                                   gate = NA,
-                                  negate = FALSE,
                                   hist_stack = 0,
                                   ...) {
   
@@ -1767,7 +1766,8 @@
         # DISPATCH
         label_stat_fun <- .cyto_stat_dispatch(label_stat[[z]][y])
         # FREQUENCY
-        if(grepl("freq$", label_stat_fun, ignore.case = TRUE)) {
+        if(grepl("freq$", label_stat_fun, ignore.case = TRUE) |
+           grepl("percent$", label_stat_fun, ignore.case = TRUE)) {
           res <- cyto_stats_compute(pops[[z]][[y]],
                                     channels = channels,
                                     parent = x[z],
@@ -1901,7 +1901,7 @@
                                     label_text_x = NA,
                                     label_text_y = NA,
                                     label_text_size = 1.8,
-                                    hist_stack = 0.5,
+                                    hist_stack = 0,
                                     hist_layers = NA,
                                     hist_smooth = 1,
                                     hist_bins = 256,
