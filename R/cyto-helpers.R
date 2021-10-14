@@ -1368,8 +1368,7 @@ cyto_transform.default <- function(x,
                         select = select,
                         axes_trans = transformer_list,
                         axes_limits = axes_limits,
-                        merge_by = "all",
-                        events = 1), # sampling performed above
+                        merge_by = "all"),
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1442,9 +1441,7 @@ cyto_transform.transformList <- function(x,
                         channels = names(trans),
                         axes_trans = trans,
                         axes_limits = axes_limits,
-                        merge_by = "all",
-                        events = 1, 
-                        ...), # sampling performed above
+                        merge_by = "all"), 
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1531,9 +1528,7 @@ cyto_transform.transformerList <- function(x,
                         channels = names(trans),
                         axes_trans = trans,
                         axes_limits = axes_limits,
-                        merge_by = "all",
-                        events = 1,
-                        ...), # sampling performed above
+                        merge_by = "all"),
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }

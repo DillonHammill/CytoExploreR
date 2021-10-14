@@ -682,11 +682,11 @@ cyto_channel_match <- function(x,
   nms <- cyto_names(x)
   
   # CHANNELS - SUPPLIED
-  if(is.null(channels)) {
+  if(!is.null(channels)) {
     # INCORRECT NUMBER OF CHANNELS
     if(length(channels) != length(x)) {
       stop(
-        "Incorrect number of chnanels supplied to cyto_channel_match()!"
+        "Incorrect number of channels supplied to cyto_channel_match()!"
       )
     # CORRECT NUMBER OF CHANNELS
     } else {

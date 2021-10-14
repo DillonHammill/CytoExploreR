@@ -14,21 +14,25 @@
 # argument. Maintaining support for the old cyto_transformer functions is
 # cumbersome and as such these APIs are now defunct.
 
+#' @noRd
 #' @export
 cyto_transformer_log <- function(...){
   .Defunct("cyto_transformers_define")
 }
 
+#' @noRd
 #' @export
 cyto_transformer_biex <- function(...){
   .Defunct("cyto_transformers_define")
 }
 
+#' @noRd
 #' @export
 cyto_transformer_arcsinh <- function(...){
   .Defunct("cyto_transformers_define")
 }
 
+#' @noRd
 #' @export
 cyto_transformer_logicle <- function(...){
   .Defunct("cyto_transformers_define")
@@ -38,11 +42,13 @@ cyto_transformer_logicle <- function(...){
 # been renamed to instead use the cyto_transformers_ prefix. As such, the old
 # cyto_transformer_ APIs are now defunct as well.
 
+#' @noRd
 #' @export
 cyto_transformer_combine <- function(...){
   .Defunct("cyto_transformers_combine")
 }
 
+#' @noRd
 #' @export
 cyto_transformer_extract <- function(...){
   .Defunct("cyto_transformers_extract")
