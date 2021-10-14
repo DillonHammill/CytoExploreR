@@ -4434,13 +4434,12 @@ cyto_details_edit <- function(x,
             overwrite <<- FALSE
           }
           colnames(pdata)[pdata_ind] <- "name"
-          return(pdata[cyto_ind, ])
+          return(pdata[cyto_ind, , drop = FALSE])
         } else {
           return(NULL)
         }
       })
       names(pd) <- found_files
-      
       # NO MATCHING FILE
       if (all(LAPPLY(pd, "is.null"))) {
         # USE STORED DETAILS
@@ -4502,7 +4501,7 @@ cyto_details_edit <- function(x,
                     hide = TRUE,
                     viewer = "pane",
                     ...)
-    # REPLACE ROW NAMES
+    # REPLACE ROW NAMES - REQUIRED TO UPDATE CYTO_DETAILS
     rownames(pd) <- cyto_names
   }
   

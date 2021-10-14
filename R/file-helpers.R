@@ -230,6 +230,7 @@ file_sort <- function(x,
 #' @noRd
 read_from_csv <- function(x,
                           data.table = FALSE,
+                          header = TRUE,
                           ...){
   x <- file_ext_append(x, ".csv")
   ind <- which(!file.exists(x))
@@ -244,6 +245,7 @@ read_from_csv <- function(x,
   dt <- suppressMessages(
     fread(x, 
           data.table = TRUE,
+          header = TRUE,
           ...)
   )
   if(data.table == FALSE) {
