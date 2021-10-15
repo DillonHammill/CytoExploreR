@@ -175,7 +175,7 @@ cyto_spillover_compute <- function(x,
   # SELECT CONTROLS
   x <- cyto_select(
     x,
-    select = select
+    select
   )
   
   # REMOVE EXCESS CONTRTOLS, ANNOTATE CHANNELS & COPY DATA

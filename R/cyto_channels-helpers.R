@@ -808,7 +808,7 @@ cyto_channel_match_check <- function(x,
                       cyto_match(
                         x,
                         cm[, "name"]
-                      )
+                      ),
                     ])
                   } else {
                     return(NULL)
@@ -822,6 +822,8 @@ cyto_channel_match_check <- function(x,
           channel_match[LAPPLY(channel_match, "is.null")] <- NULL
           if(length(channel_match) == 0) {
             channel_match <- NULL
+          } else {
+            channel_match <- channel_match[[1]]
           }
           # UPDATE EXPERIMENT DETAILS
           if(!is.null(channel_match)) {

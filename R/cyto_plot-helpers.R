@@ -1637,9 +1637,293 @@ cyto_plot_par <- function(...,
   invisible(NULL)
 }
 
+#' @noRd
 #' @export
 cyto_plot_layout <- function(...){
   .Defunct("cyto_plot_par")
+}
+
+## CYTO_PLOT_CALIBRATE ---------------------------------------------------------
+
+#' Calibrate channel ranges for cyto_plot
+#'
+#' The density colour scale for points in \code{cyto_plot} can now be made to
+#' represent fluorescent intensity of a third channel, instead of local density
+#' in the 2D plotting space. In order for this feature to work properly, the
+#' full range for the channel/marker of interest is required to appropriately
+#' set the colour scale. \code{cyto_plot_calibrate} performs this range
+#' calibration, so that this information can be used in all downstream
+#' \code{cyto_plot} calls.
+#'
+#' @param x object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} to use for the
+#'   calibration. For the best calibration is recommended that users supply
+#'   samples containing both negative and positive events in each channel.
+#' @param parent name of the parent population to use for channel calibration
+#'   when a \code{GatingHierarchy} or \code{GatingSet} is supplied, set to the
+#'   \code{"root"} node by default.
+#' @param channels names of the channels or markers for which the calibration.
+#'   settings should be updated, set to all channels by default. All channels
+#'   within the same \code{cyto_plot_calibrate} call will use the same settings
+#'   for \code{type} and \code{probs}. Multiple calls to
+#'   \code{cyto_plot_calibrate} allow for channel-wise control over these
+#'   settings which are stored globally.
+#' @param type indicates the type of calibration to perform, options include
+#'   \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
+#'   Range calibration simply uses the full range of values across samples for
+#'   the calibration. Quantile calibration computes an lower and upper quantile
+#'   for each channel, values falling outside the calibration range are assigned
+#'   the bottom or top colour. Alternatively, users can also supply their own
+#'   custom calibration function to \code{type} that accepts a matrix.
+#' @param probs vector of lower and upper probabilities passed to
+#'   \code{stats:quantile} to compute quantiles, set to \code{c(0.01, 0.99)} by
+#'   default.
+#' @param limits manually supply channel limits in a named list or matrix,
+#'   values should be supplied on the linear scale as per
+#'   \code{\link{cyto_plot}}. Any missing values in \code{limits} will be
+#'   computed using the method indicated by \code{type}.
+#' @param axes_trans object of class \code{transformerList} containing the
+#'   definitions of the transformers applied to the supplied data. These
+#'   transformers are only required when a cytoset to transform supplied channel
+#'   limits.
+#' @param ... not in use.
+#'
+#' @return saves calibration settings for use by \code{\link{cyto_plot}}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation Gatingset
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                           package = "CytoExploreRData"))
+#'
+#' # Calibration
+#' cyto_plot_calibrate(gs)
+#'
+#' # Colour based on Hoechst-405 staining
+#' cyto_plot(gs[1],
+#' parent = "root",
+#' channels = c("FSC-A", "SSC-A"),
+#' point_col = "Hoechst-405")
+#'
+#' @export
+cyto_plot_calibrate <- function(x,
+                                parent = "root",
+                                channels = NULL,
+                                type = "quantile",
+                                probs = c(0.01, 0.95),
+                                limits = c(NA, NA),
+                                axes_trans = NA,
+                                ...){
+  
+  # RECALL CALIBRATION SETTINGS - ALL CHANNELS
+  cyto_cal <- .cyto_plot_calibrate_recall()
+  
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_channels(x)
+  }
+  
+  # TRANSFORMERS
+  if(.all_na(axes_trans)) {
+    axes_trans <- cyto_transformers_extract(x)
+  }
+  
+  # PREPARE LIMITS
+  if(is.null(dim(limits))) {
+    # LIST
+    if(cyto_class(limits, "list")) {
+      # LIMITS PER CHANNEL
+      if(!length(limits) == length(channels)) {
+        stop(
+          "'limits' must be supplied per channel in 'channels'!"
+        )
+      }
+      limits <- do.call(
+        "cbind",
+        limits
+      )
+      # CHANNEL NAMES
+      if(is.null(colnames(limits))) {
+        colnames(limits) <- channels
+      }
+    # VECTOR
+    } else {
+      limits <- matrix(
+        limits,
+        ncol = length(channels),
+        nrow = 2,
+        dimnames = list(
+          NULL,
+          channels
+        )
+      )
+    }
+  }
+  
+  # SORT LIMITS
+  if(all(colnames(limits) %in% channels)) {
+    limits <- limits[, channels, drop = FALSE]
+  }
+  
+  # COMPUTE CALIBRATION SETTINGS
+  cnt <- 0
+  cyto_cal_new <- apply(
+    limits, 
+    2,
+    function(z) {
+      cnt <<- cnt + 1
+      # TRANSFORM LIMITS
+      if(!.all_na(z) & channels[cnt] %in% names(axes_trans)) {
+        z[!is.na(z)] <- .cyto_transform(
+          z[!is.na(z)],
+          trans = axes_trans,
+          channel = channels[cnt],
+          inverse = FALSE
+        )
+      }
+      # ONLY COMPUTE LIMITS IF NOT SUPPLIED
+      if(any(is.na(z))) {
+        # RANGE
+        if(grepl("^r", type, ignore.case = TRUE)) {
+          res <- cyto_apply(
+            x,
+            "cyto_stat_range",
+            parent = parent,
+            channels = channels[cnt],
+            input = "matrix",
+            inverse = FALSE,
+            copy = FALSE,
+            ...
+          )
+        # QUANTILES
+        } else if(grepl("^q", type, ignore.case = TRUE)) {
+          res <- cyto_apply(
+            x,
+            "cyto_stat_quantile",
+            parent = parent,
+            input = "matrix",
+            channels = channels[cnt],
+            inverse = FALSE,
+            copy = FALSE,
+            probs = probs,
+            ...
+          )
+        # CUSTOM FUNCTION
+        } else {
+          res <- cyto_apply(
+            x,
+            type,
+            parent = parent,
+            input = "matrix",
+            channels = channels[cnt],
+            inverse = FALSE,
+            copy = FALSE,
+            ...
+          )
+        }
+        # UPDATE LIMITS
+        res <- range(res, na.rm = TRUE)
+        z[is.na(z)] <- res[is.na(z)]
+      }
+      # RETRUN MIN/MAX LIMITS PER CHANNEL
+      return(
+        c("min" = min(z, na.rm = TRUE),
+          "max" = max(z, na.rm = TRUE))
+      )
+    }
+  )
+  
+  # UPDATE GLOBAL CALIBRATION SETTINGS
+  if(is.null(cyto_cal)) {
+    cyto_cal <- cyto_cal_new
+  } else {
+    cyto_cal <- cbind(
+      cyto_cal[, !colnames(cyto_cal) %in% colnames(cyto_cal_new)],
+      cyto_cal_new
+    )
+  }
+  
+  # SAVE RDS TO TEMPFILE
+  tempfile <- paste0(tempdir(),
+                     .Platform$file.sep,
+                     "cyto_plot_calibrate.rds")
+  saveRDS(cyto_cal,
+          tempfile)
+  
+}
+
+## CYTO_PLOT_CALIBRATE_RESET ---------------------------------------------------
+
+#' Remove current calibration settings
+#'
+#' @return remove current calibration settings created by
+#'   \code{cyto_plot_calibrate}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+cyto_plot_calibrate_reset <- function(){
+  
+  # TEMP FILES
+  temp_dir <- tempdir()
+  temp_files <- list.files(temp_dir)
+  
+  # REMOVE CALIBRATION SETTINGS
+  if(any(grepl("cyto_.*calibrate.rds", temp_files, ignore.case = TRUE))){
+    files <- temp_files[grepl("cyto_.*calibrate.rds", 
+                              temp_files,
+                              ignore.case = TRUE)]
+    file.remove(paste0(temp_dir,
+                       .Platform$file.sep,
+                       files))
+  }
+  
+}
+
+## CYTO_PLOT_CALIBRATE_RECALL --------------------------------------------------
+
+#' Recall saved calibration settings
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+.cyto_plot_calibrate_recall <- function(){
+  
+  # TEMPFILES
+  temp_dir <- tempdir()
+  temp_files <- list.files(temp_dir)
+  
+  # CALIBRATION
+  if(any(grepl("cyto_.*calibrate.rds", temp_files))){
+    files <- temp_files[grepl("cyto_.*calibrate.rds", 
+                              temp_files,
+                              ignore.case = TRUE)]
+    return(
+      readRDS(paste0(temp_dir,
+                     .Platform$file.sep,
+                     files))
+    )
+  }else{
+    return(NULL)
+  }
+  
+}
+
+#' @noRd
+#' @export
+cyto_calibrate <- function(...){
+  .Defunct("cyto_plot_calibrate")
+}
+
+#' @noRd
+#' @export
+cyto_calibrate_reset <- function(...){
+  .Defunct("cyto_plot_calibrate_reset")
 }
 
 ## CYTO_PLOT_THEME_ARGS --------------------------------------------------------

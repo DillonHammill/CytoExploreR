@@ -84,7 +84,7 @@ be launched in the RStudio viewer pane, set to FALSE by default.}
 }
 \value{
 edited spillover matrix and save to designated \code{spillover} csv
-  file. Saved filename defaults to \code{date-Spillover-Matrix.csv} is not
+  file. Saved filename defaults to \code{date-Spillover-Matrix.csv} if not
   specified.
 }
 \description{

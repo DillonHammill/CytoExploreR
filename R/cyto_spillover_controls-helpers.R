@@ -47,9 +47,9 @@
       names = cyto_names(x)
     )
   )
-  
-  # UPDATE EXPERIMENT DETAILS
-  cyto_details(cs) <- pd[cyto_match(cs, rownames(pd)), ]
+
+  # UPDATE EXPERIMENT DETAILS - MATCH NAMES NOT ROWNAMES - CS HAS NEW NAMES
+  cyto_details(cs) <- pd[match_ind(cyto_details(cs)[, "name"], pd[, "name"]), ]
   
   # UPDATED EXPERIMENT DETAILS
   pd <- cyto_details(cs)

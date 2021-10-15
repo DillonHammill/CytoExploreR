@@ -66,7 +66,10 @@
                             overlay = NA,
                             merge_by = "name",
                             select = NULL,
+                            channels = NULL,
                             events = 50000,
+                            hist_layers = NA,
+                            hist_stack = 0,
                             barcode = FALSE,
                             seed = 42) {
 
@@ -76,9 +79,26 @@
   if(!is.null(cyto_option("cyto_plot_method")) & 
      cyto_option("cyto_plot_data")) {
     if(.all_na(overlay)) {
-      return(list(list(x)))
+      return(
+        list(
+          structure(
+            list(x),
+            names = cyto_names(x)
+          )
+        )
+      )
     } else {
-      return(list(c(list(x), overlay)))
+      return(
+        list(
+          c(
+            structure(
+              list(x)
+            ),
+            names = cyto_names(x),
+            overlay
+          )
+        )
+      )
     }
   }
   
@@ -442,6 +462,15 @@
     names = names(x)
   )
 
+  # HIST_LAYERS SUPPLIED
+  if(!.all_na(hist_layers)) {
+    
+  
+  } else {
+    # CHECK CHANNELS
+    
+  }
+  
   # DATA READY FOR CYTO_PLOT
   return(x)
   
@@ -3084,7 +3113,7 @@
     # KEY RANGES REQUIRED
     if(is.null(key_range)) {
       # CALIBRATION SETTINGS
-      cyto_cal <- .cyto_calibrate_recall()
+      cyto_cal <- .cyto_plot_calibrate_recall()
       # FIXED KEY SCALE
       if(key_scale == "fixed") {
         # TRY CALIBARTION SETTINGS
@@ -3510,7 +3539,7 @@
       # KEY_SCALE
       if(!"key_scale" %in% names(args)) {
         # CALIBRATION SETTINGS
-        cal <- .cyto_calibrate_recall()
+        cal <- .cyto_plot_calibrate_recall()
         # USED STORED SETTINGS
         if(args$point_col[[1]] %in% colnames(cal)) {
           args$key_scale <- list(

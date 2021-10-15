@@ -1008,11 +1008,13 @@ cyto_stat_bkde2d <- function(x,
         return(NA)
       } else {
         return(
-          dpik(
-            x[, z],
-            gridsize = M[z],
-            range.x = limits[[z]],
-            truncate = TRUE
+          suppressWarnings(
+            dpik(
+              x[, z],
+              gridsize = M[z],
+              range.x = limits[[z]],
+              truncate = TRUE
+            )
           )
         )
       }

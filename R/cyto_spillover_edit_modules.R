@@ -80,7 +80,7 @@
 #' @param ... additional arguments passed to \code{cyto_plot}.
 #'
 #' @return edited spillover matrix and save to designated \code{spillover} csv
-#'   file. Saved filename defaults to \code{date-Spillover-Matrix.csv} is not
+#'   file. Saved filename defaults to \code{date-Spillover-Matrix.csv} if not
 #'   specified.
 #'
 #' @importFrom shiny shinyApp fluidPage titlePanel sidebarPanel selectInput
@@ -88,7 +88,7 @@
 #'   eventReactive renderImage tabsetPanel tabPanel sidebarLayout fluidRow
 #'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer icon
 #'   span img NS reactive moduleServer observeEvent column
-#'   updateCheckboxGroupInput
+#'   updateCheckboxGroupInput checkboxGroupInput
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
 #' @importFrom shinythemes shinytheme
