@@ -4505,6 +4505,11 @@ cyto_details_edit <- function(x,
     rownames(pd) <- cyto_names
   }
   
+  # DETAILS REQUIRE ROWNAMES FOR UPDATING - (ROWNAMES MISSING IN FILE)
+  if(is.null(rownames(pd))) {
+    rownames(pd) <- pd[, "name"]
+  }
+  
   # UPDATE DETAILS
   cyto_details(x) <- pd
   
