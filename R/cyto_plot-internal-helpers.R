@@ -3014,9 +3014,9 @@
   # STORE RANGES FOR SCALE
   key_range <- NULL
   
-  # KEY RANGES MANUALLY SUPPLIED
+  # KEY RANGES MANUALLY SUPPLIED ON LINEAR SCALE - NO NA SAFEGUARD
   if(cyto_class(key_scale, "list", TRUE) | is.numeric(key_scale)) {
-    # SCALE RANGE FIXED
+    # FIXED SCALE - VECTOR
     if(is.numeric(key_scale)) {
       key_range <- structure(
         rep(
@@ -3025,7 +3025,7 @@
         ),
         names = names(x)
       )
-      # SCALE AS LIST - FREE OR FIXED
+    # SCALE - LIST
     } else {
       key_range <- structure(
         rep(
@@ -3164,6 +3164,23 @@
           )
         }
       }
+    # TRANSFORM MANUALLY SUPPLIED SCALE
+    } else {
+        # TRANSFORM SCALES
+        if(point_col[1] %in% names(axes_trans)) {
+          key_range <- structure(
+            lapply(
+              seq_along(key_range),
+              function(z) {
+                .cyto_transform(key_range[[z]],
+                                trans = axes_trans,
+                                channel = point_col[1],
+                                inverse = FALSE)
+              }
+            ),
+            names = names(key_range)
+          )
+        }
     }
     # PREPARE KEYS
     key <- structure(
