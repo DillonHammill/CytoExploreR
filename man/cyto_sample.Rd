@@ -44,8 +44,8 @@ seed will return the same result with each run.}
 object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
   \code{\link[flowCore:flowSet-class]{flowSet}},
   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to \code{events}
-  events.
+  \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
+  \code{events} events.
 }
 \description{
 \code{cyto_sample} allows restriction of a \code{cytoframe}, \code{cytoset},

@@ -58,9 +58,10 @@ transformations when \code{inverse = TRUE}.}
 \item{inverse}{logical indicating whether the data should be inverse
 transformed prior to applying \code{FUN}, set to FALSE by default.}
 
-\item{slot}{name of the slot to extract from the output if the object
-returned by the function is a list or S4 R object, set to NULL by default.
-the output of the function}
+\item{slot}{allows extraction of particular data from the output of
+\code{FUN}, it can be either a be the name of  a function or the name of a
+slot to extract from a list or an array (i.e. column name), set to NULL by
+default to return the entire object returned by \code{FUN}.}
 }
 \description{
 \code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}

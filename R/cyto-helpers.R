@@ -1682,7 +1682,7 @@ cyto_transform_extract <- function(x,
 #' @param inverse logical indicating whether transformations applied to the data
 #'   should be inversed, set to FALSE by default.
 #' @param events passed to \code{\link{cyto_sample}} to extract a subset of
-#'   events from each sample. \code{sample} indicates the number or proportion
+#'   events from each sample. \code{events} indicates the number or proportion
 #'   of events to extract from each sample, set to \code{1} by default to
 #'   extract all events.
 #' @param coerce logical to indicate whether the data should be merged into a
@@ -1785,7 +1785,8 @@ cyto_data_extract <- function(x,
       lapply(parent, function(z){
         gs_pop_get_data(x, z)
       }),
-      names = parent)
+      names = parent
+    )
   }
   
   # PREPARE CYTOSET LIST
@@ -1823,7 +1824,7 @@ cyto_data_extract <- function(x,
         barcode = FALSE,
         seed = seed
       )
-    # SAMPLE
+     # SAMPLE
      }else if(all(events != 1)) {
       # SAMPLE EACH CYTOFRAME
       cs <- cyto_sample(
@@ -3456,8 +3457,8 @@ cyto_list <- function(x,
 #' @return object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #'   \code{\link[flowCore:flowSet-class]{flowSet}},
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to \code{events}
-#'   events.
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} sampled to
+#'   \code{events} events.
 #'
 #' @importFrom flowCore sampleFilter Subset flowSet exprs
 #' @importFrom flowWorkspace gs_cyto_data gs_cyto_data<- cytoset
@@ -3815,8 +3816,10 @@ cyto_coerce <- function(x,
   
   # SAMPLE REQUIRES CYTO_SAMPLE_N
   if(length(events) == 1) {
-    events <- cyto_sample_n(x,
-                            events = events)
+    events <- cyto_sample_n(
+      x,
+      events = events
+    )
   # SAMPLE MANUALLY SUPPLIED
   } else if(length(events) == length(x)) {
     if(is.null(names(events))) {
@@ -3844,9 +3847,11 @@ cyto_coerce <- function(x,
       lapply(
         cyto_names(x), 
         function(z){
-          fr <- cyto_sample(x[[z]], 
-                            events = events[z], 
-                            seed = seed)
+          fr <- cyto_sample(
+            x[[z]], 
+            events = events[z], 
+            seed = seed
+          )
           if(cyto_class(fr, "flowFrame", TRUE)) {
             fr <- flowFrame_to_cytoframe(fr)
           }
@@ -5428,9 +5433,10 @@ cyto_spillover_extract <- function(x) {
 #'   transformations when \code{inverse = TRUE}.
 #' @param inverse logical indicating whether the data should be inverse
 #'   transformed prior to applying \code{FUN}, set to FALSE by default.
-#' @param slot name of the slot to extract from the output if the object
-#'   returned by the function is a list or S4 R object, set to NULL by default.
-#'   the output of the function
+#' @param slot allows extraction of particular data from the output of
+#'   \code{FUN}, it can be either a be the name of  a function or the name of a
+#'   slot to extract from a list or an array (i.e. column name), set to NULL by
+#'   default to return the entire object returned by \code{FUN}.
 #'
 #' @importFrom methods is
 #' @importFrom flowCore flowSet
@@ -5483,8 +5489,11 @@ cyto_apply.default <- function(x,
     trans <- cyto_transformers_extract(x)
     
     # LIST OF CYTOSETS
-    x <- cyto_data_extract(x,
-                           parent = parent)
+    x <- cyto_data_extract(
+      x,
+      parent = parent,
+      format = "cytoset"
+    )
     
     # APPLY FUNCTION
     res <- structure(
@@ -5603,41 +5612,49 @@ cyto_apply.flowSet <- function(x,
   if(input == "cytoset") {
     res <- structure(
       lapply(seq_along(x), function(z){
-        output <- FUN(x[z], ...)
-        # SLOT
-        if(!is.null(slot)) {
-          output <- output[[slot]]
-        }
+        output <- cyto_slot(
+          FUN(
+            x[z],
+            ...
+          ),
+          slot = slot
+        )
         return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "flowFrame") { # internal use only
     res <- structure(
       lapply(cyto_names(x), function(z){
-        output <- FUN(cytoframe_to_flowFrame(x[[z]]), ...)
-        # SLOT
-        if(!is.null(slot)) {
-          output <- output[[slot]]
-        }
+        output <- cyto_slot(
+          FUN(
+            cytoframe_to_flowFrame(x[[z]]), 
+            ...
+          ),
+          slot = slot
+        )
         return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "cytoframe") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        output <-FUN(x[[z]], ...)
-        # SLOT 
-        if(!is.null(slot)) {
-          output <- output[[slot]]
-        }
+        output <- cyto_slot(
+          FUN(
+            x[[z]], 
+            ...
+          ),
+          slot = slot
+        )
         return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "matrix") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        output <- FUN(exprs(x[[z]]), ...)
-        # SLOT
-        if(!is.null(slot)) {
-          output <- output[[slot]]
-        }
+        output <- cyto_slot(
+          FUN(
+            exprs(x[[z]]),
+            ...
+          ),
+          slot = slot
+        )
         return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input == "column") {
@@ -5645,21 +5662,29 @@ cyto_apply.flowSet <- function(x,
     # named vector or named list
     res <- structure(
       lapply(cyto_names(x), function(z){
-        output <- apply(exprs(x[[z]]), 2, FUN, ...)
-        # SLOT
-        if(!is.null(slot)) {
-          output <- output[[slot]]
-        }
+        output <- cyto_slot(
+          apply(
+            exprs(x[[z]]),
+            2, 
+            FUN, 
+            ...
+          ),
+          slot = slot
+        )
         return(cyto_convert(output))
       }), names = cyto_names(x))
   } else if(input =="row") {
     res <- structure(
       lapply(cyto_names(x), function(z){
-        output <- apply(exprs(x[[z]]), 1, FUN, ...)
-        # SLOT
-        if(!is.null(slot)) {
-          output <- output[[slot]]
-        }
+        output <- cyto_slot(
+          apply(
+            exprs(x[[z]]),
+            1, 
+            FUN,
+            ...
+          ),
+          slot = slot
+        )
         return(cyto_convert(output))
       }), names = cyto_names(x))
   }
@@ -5769,6 +5794,75 @@ cyto_apply.list <- function(x,
                  slot = slot)
     }), names = names(x)
   )
+  
+}
+
+#' Extract elements from objects
+#' @noRd
+cyto_slot <- function(x,
+                      slot = NULL) {
+  
+  # NO SLOT
+  if(is.null(slot)) {
+    return(x)
+  }
+  
+  # TRY MATCH A FUNCTION 
+  slot <- tryCatch(
+    cyto_func_match(
+      slot
+    ),
+    error = function(e) {
+      return(slot)
+    }
+  )
+  
+  # EXTRACT SLOT USING FUNCTION
+  if(cyto_class(slot, "function")) {
+    return(
+      cyto_func_call(
+        slot,
+        list(x)
+      )
+    )
+  # EXTRACT SLOT BY NAME
+  } else {
+    # LIST OR VECTOR
+    if(is.null(dim(x))) {
+      if(slot %in% names(x)) {
+        return(
+          x[[slot]]
+        )
+      } else {
+        warning(
+          paste0(
+            slot, 
+            " does not exist in this ", 
+            cyto_class(x)[1], 
+            "!"
+          )
+        )
+        return(x)
+      }
+    # ARRAY
+    } else {
+      if(slot %in% colnames(x)) {
+        return(
+          x[, slot]
+        )
+      } else {
+        warning(
+          paste0(
+            slot, 
+            " does not exist in the column names of this ", 
+            cyto_class(x)[1], 
+            "!"
+          )
+        )
+        return(x)
+      }
+    }
+  }
   
 }
 

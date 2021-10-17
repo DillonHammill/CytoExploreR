@@ -59,7 +59,7 @@ transformations applied to the data when \code{inverse = TRUE}.}
 should be inversed, set to FALSE by default.}
 
 \item{events}{passed to \code{\link{cyto_sample}} to extract a subset of
-events from each sample. \code{sample} indicates the number or proportion
+events from each sample. \code{events} indicates the number or proportion
 of events to extract from each sample, set to \code{1} by default to
 extract all events.}
 
