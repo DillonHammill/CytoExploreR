@@ -19,7 +19,8 @@ supplied.}
 set to \code{"flowAI"} by default.}
 
 \item{...}{additional arguments passed to \code{flowAI::flow_auto_qc},
-\code{flowClean::flowClean}, or \code{flowCut::flowCut}.}
+\code{flowClean::flowClean}, \code{flowCut::flowCut} or
+\code{PeacoQC::PeacoQC}.}
 }
 \description{
 Apply anomaly detection algorithms to obtain clean cytometry data

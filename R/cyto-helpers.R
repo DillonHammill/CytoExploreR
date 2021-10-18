@@ -369,7 +369,8 @@ cyto_load <- function(path = ".",
 #'   \code{"flowAI"}, \code{"flowClean"}, \code{"flowCut"} or \code{"PeacoQC"},
 #'   set to \code{"flowAI"} by default.
 #' @param ... additional arguments passed to \code{flowAI::flow_auto_qc},
-#'   \code{flowClean::flowClean}, or \code{flowCut::flowCut}.
+#'   \code{flowClean::flowClean}, \code{flowCut::flowCut} or
+#'   \code{PeacoQC::PeacoQC}.
 #'
 #' @importFrom flowWorkspace gs_cyto_data flowSet_to_cytoset GatingSet
 #' @importFrom utils capture.output
@@ -2339,11 +2340,11 @@ cyto_match <- function(x,
       LAPPLY(args[[z]], function(w){
         # EXACT MATCH
         if(w %in% pd[, var_ind]) {
-          levels <- match_ind(w, pd[, var_ind])
+          levels <- which(pd[, var_ind] %in% as.character(w))
         # PARTIAL MATCH
         } else if(exact == FALSE) {
           levels <- grep(
-            w,
+            as.character(w),
             pd[, var_ind],
             ignore.case = TRUE
           )
