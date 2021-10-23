@@ -1964,18 +1964,17 @@ cyto_exprs.flowFrame <- function(x,
                                  markers = FALSE,
                                  drop = TRUE,
                                  ...) {
+  
   # CHANNELS
-  if(is.null(channels)) {
-    mt <- exprs(x)[, 
-                   , 
-                   drop = drop,
-                   ...]
-  } else {
-    mt <- exprs(x)[, 
-                   cyto_channels_extract(x, channels), 
-                   drop = drop, 
-                   ...]
+  if(!is.null(channels)) {
+    x <- x[, cyto_channels_extract(x, channels)]
   }
+  
+  # EXTRACT DATA
+  mt <- exprs(x)[, 
+                 , 
+                 drop = drop,
+                 ...]
 
   # MARKERS
   if(markers) {
@@ -1993,10 +1992,17 @@ cyto_exprs.flowSet <- function(x,
                                markers = FALSE,
                                drop = TRUE,
                                ...) {
+  
+  # CHANNELS
+  if(!is.null(channels)) {
+    x <- x[, cyto_channels_extract(x, channels)]
+  }
+  
+  # EXTRACT DATA
   structure(
     lapply(seq_along(x), function(z){
       cyto_exprs(x[[z]],
-                 channels = channels,
+                 channels = NULL,
                  markers = markers,
                  drop = drop,
                  ...)
