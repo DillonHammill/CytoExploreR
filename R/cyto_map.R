@@ -161,6 +161,35 @@ cyto_map <- function(x,
     names = names(x_data_groups)
   )
   
+  # LABELS
+  if(is.null(label)) {
+    if(is.function(type)) {
+      label <- tail(
+        as.character(
+          substitute(
+            type
+          )
+        ), 
+        1
+      )
+    } else {
+      # NAMESPACED FUNCTION
+      if(grepl(":{2,3}", type)) {
+        label <- tail(
+          unlist(
+            strsplit(
+              type, 
+              ":{2,3}"
+            )
+          ),
+          1
+        )
+      } else {
+        label <- type
+      }
+    }
+  }
+  
   # MAP EACH GROUP
   x_data_map <- structure(
     lapply(seq_along(x_data_groups), function(z){
@@ -185,6 +214,13 @@ cyto_map <- function(x,
                              channels = channels)
       # RE-SCALE DATA
       if(!is.null(scale)) {
+        message(
+          paste0(
+            "Performing ",
+            scale,
+            " normalisation on channels..."
+          )
+        )
         cf_exprs <- cyto_stat_scale(
           cf_exprs,
           type = scale
@@ -305,31 +341,32 @@ cyto_map <- function(x,
     )
   ]
   
-  # MAPPING FUNCTION - NAME
-  if(is.function(type)) {
-    cyto_map_fun <- tail(
-      as.character(
-        substitute(
-          type
-        )
-      ), 
-      1
-    )
-  } else {
-    # NAMESPACED FUNCTION
-    if(grepl(":{2,3}", type)) {
-      cyto_map_fun <- tail(
-        unlist(
-          strsplit(
-            type, 
-            ":{2,3}"
+  # LABEL
+  if(is.null(label)) {
+    if(is.function(type)) {
+      label <- tail(
+        as.character(
+          substitute(
+            type
           )
-        ),
+        ), 
         1
       )
-      print(cyto_map_fun)
     } else {
-      cyto_map_fun <- type
+      # NAMESPACED FUNCTION
+      if(grepl(":{2,3}", type)) {
+        label <- tail(
+          unlist(
+            strsplit(
+              type, 
+              ":{2,3}"
+            )
+          ),
+          1
+        )
+      } else {
+        label <- type
+      }
     }
   }
   
@@ -422,19 +459,27 @@ cyto_map <- function(x,
       # DATA
       names(args)[1] <- "data"
       # CREATE SOM - FLOWSOM NOT SUPPLIED
-      if(!"fsom" %in% names(args)) {
+      if(!any(c("fsom", "map") %in% names(args))) {
+        # DEFAULT SOM GRID SIZE - X
+        if(!"xdim" %in% names(args)) {
+          args[["xdim"]] <- 24
+        }
+        # DEFAULT SOM GRID SIZE - Y
+        if(!"ydim" %in% names(args)) {
+          args[["ydim"]] <- 24
+        }
         # SOM
         args[["map"]] <- cyto_func_execute(
           "EmbedSOM::SOM",
           args
         )
-        # EMBEDSOM
-        cyto_map_coords <- cyto_func_execute(
-          "EmbedSOM::EmbedSOM",
-          args
-        )
-        colnames(cyto_map_coords) <- c("EmbedSOM-1", "EmbedSOM-2")
       }
+      # EMBEDSOM
+      cyto_map_coords <- cyto_func_execute(
+        "EmbedSOM::EmbedSOM",
+        args
+      )
+      colnames(cyto_map_coords) <- c("EmbedSOM-1", "EmbedSOM-2")  
     # OTHER
     } else {
       type <- tryCatch(
@@ -456,7 +501,7 @@ cyto_map <- function(x,
     message(
       paste0(
         "Computing ",
-        paste0(cyto_map_fun, "()"),
+        paste0(label, "()"),
         " co-ordinates..."
       )
     )
@@ -482,19 +527,11 @@ cyto_map <- function(x,
       cyto_map_coords <- coords
     }
     # COLUMN NAMES
-    if(!is.null(label)) {
-      colnames(cyto_map_coords) <- paste0(
-        label,
-        "-",
-        1:ncol(cyto_map_coords)
-      )
-    } else {
-      colnames(cyto_map_coords) <- paste0(
-        cyto_map_fun,
-        "-",
-        1:ncol(cyto_map_coords)
-      )
-    }
+    colnames(cyto_map_coords) <- paste0(
+      label,
+      "-",
+      1:ncol(cyto_map_coords)
+    )
   }
   
   # RETURN MAPPED DATA
