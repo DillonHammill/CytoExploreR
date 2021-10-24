@@ -229,7 +229,7 @@ cyto_spillover_edit <- function(x,
         cs <- cyto_transform(cs, 
                              trans = trans, 
                              inverse = TRUE, 
-                             plot = TRUE,
+                             plot = FALSE,
                              quiet = TRUE)
       }
       # REMOVE COMPENSATION
@@ -355,7 +355,7 @@ cyto_spillover_edit <- function(x,
   # SPILL - BACKWARDS COMPATIBILITY
   if(!is.null(spillover)) {
     spill <- spillover
-    messsage(
+    message(
       paste0(
         "'spillover' is now deprecated in favour of the more concise 'spill' ",
         "argument. Please pass your spillover matrix to 'spill' instead."
@@ -1275,9 +1275,13 @@ editPlotServer <- function(id,
           axes_text_size = axes_text_size,
           axes_label_text_size = axes_label_text_size,
           title_text_size = title_text_size,
+          key_text_size = 2,
+          key_title_text_size = 2,
           popup = FALSE,
           ...
         )
+        # STORE PLOT LIMITS
+        usr <- .par("usr")[[1]]
         # UNSTAINED MEDIAN
         if(!.empty(NIL_comp_trans(), null = TRUE) & "line" %in% opts()) {
           medFI <- cyto_apply(
@@ -1302,23 +1306,28 @@ editPlotServer <- function(id,
           )
         }
         # HISTOGRAMS - CORRECT & OTHER CHANNEL
-        for(chan in c(xchan(), ychan())) {
-          # COMPUTE LABEL_TEXT_X - LINEAR SCALE - TRANSFORMED BY CYTO_PLOT
-          if(chan == ychan()){
-            # TRANSFORMERS - INVERSE TRANSFORM
-            if(xchan() %in% names(axes_trans)) {
-              # LABEL_TEXT_X ON LINEAR SCALE
-              label_text_x <- .cyto_transform(
-                .par("usr")[[1]][1] + 0.90 * diff(.par("usr")[[1]][1:2]),
-                trans = axes_trans,
-                channel = xchan(),
-                inverse = TRUE
-              )
-            # NO TRANSFORMERS - LINEAR SCALE
+        for(i in seq_len(2)) {
+          # CHANNEL
+          chan <- c(xchan(), ychan())[i]
+          # COMPUTE LABEL TEXT LOCATIONS
+          if(chan %in% names(axes_trans)) {
+            # AXES_LIMITS FROM 2D PLOT
+            if(i == 1) {
+              lims <- usr[1:2]
             } else {
-              label_text_x <- .par("usr")[[1]][1] + 
-                0.90 * diff(.par("usr")[[1]][1:2])
+              lims <- usr[3:4]
             }
+            # LABEL_TEXT_X ON LINEAR SCALE
+            label_text_x <- .cyto_transform(
+              min(lims) + 0.90 * diff(lims),
+              trans = axes_trans,
+              channel = chan,
+              inverse = TRUE
+            )
+          # NO TRANSFORMERS - LINEAR SCALE
+          } else {
+            label_text_x <- min(lims) + 
+              0.90 * diff(lims)
           }
           # CONSTRCUT PLOT
           cyto_plot(

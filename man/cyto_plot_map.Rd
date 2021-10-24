@@ -15,7 +15,8 @@ cyto_plot_map(
   point_col = NA,
   point_col_scale = NA,
   layout,
-  header = NA,
+  header,
+  title,
   ...
 )
 }

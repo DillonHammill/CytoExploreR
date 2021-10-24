@@ -68,7 +68,7 @@ cyto_plot_empty(
   key_text_col_alpha = 1,
   key_title = "",
   key_title_text_font = 1,
-  key_title_text_size = 0.8,
+  key_title_text_size = 1,
   key_title_text_col = "black",
   key_title_text_col_alpha = 1,
   grid = TRUE,

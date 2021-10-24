@@ -2911,7 +2911,7 @@
           }
           # TITLE TEXT
           text(
-            x = key_x[2] + 1 * diff(key_x),
+            x = key_x[2] + 0.99 * diff(key_x),
             y = key_y[2] + 0.02 * diff(key_y),
             pos = 3,
             offset = 0,

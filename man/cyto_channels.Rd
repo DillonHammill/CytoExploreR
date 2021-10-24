@@ -4,7 +4,7 @@
 \alias{cyto_channels}
 \title{Extract channel names}
 \usage{
-cyto_channels(x, select = NULL, exclude = NULL, ...)
+cyto_channels(x, select = NULL, exclude = NULL, append = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -15,6 +15,10 @@ cyto_channels(x, select = NULL, exclude = NULL, ...)
 \item{select}{vector of channel names to select.}
 
 \item{exclude}{vector of channel names to exclude.}
+
+\item{append}{logical indicating whether the name of the channel should be
+appended to the marker names in the form \code{<marker> channel}, set to
+FALSE by default.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the

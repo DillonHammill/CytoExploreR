@@ -5690,7 +5690,7 @@ cyto_apply.flowSet <- function(x,
       lapply(cyto_names(x), function(z){
         output <- cyto_slot(
           FUN(
-            exprs(x[[z]]),
+            cyto_exprs(x[[z]]),
             ...
           ),
           slot = slot

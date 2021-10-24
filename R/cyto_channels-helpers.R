@@ -12,6 +12,9 @@
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param select vector of channel names to select.
 #' @param exclude vector of channel names to exclude.
+#' @param append logical indicating whether the name of the channel should be
+#'   appended to the marker names in the form \code{<marker> channel}, set to
+#'   FALSE by default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -46,6 +49,7 @@
 cyto_channels <- function(x, 
                           select = NULL,
                           exclude = NULL,
+                          append = FALSE,
                           ...){
   
   # LIST
@@ -84,6 +88,25 @@ cyto_channels <- function(x,
               ...)
       )]
     }
+  }
+  
+  # MARKERS
+  markers <- cyto_markers(x)
+  ind <- match(channels, names(markers))
+  ind[!is.na(ind)] <- markers[ind[!is.na(ind)]]
+  
+  # APPEND
+  if(append) {
+    # APPEND MARKERS
+    channels <- paste0(
+      "<",
+      ind,
+      "> ",
+      channels
+    )
+  # STORE MARKERS IN NAMES
+  } else {
+    names(channels) <- ind
   }
   
   # RETURN CHANNELS
@@ -245,9 +268,9 @@ cyto_markers <- function(x,
     if(append) {
       markers <- paste0(
         "<",
-        res,
+        markers,
         "> ",
-        names(res)
+        names(markers)
       )
     }
   }

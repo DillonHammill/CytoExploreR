@@ -411,7 +411,8 @@ cyto_stat_quantile <- function(x,
         x,
         2,
         "cyto_stat_quantile",
-        round = round
+        round = round,
+        ...
       )
     )
   }
