@@ -101,7 +101,8 @@
   #   exprs[, 1:2],
   #   xlab = x_chan,
   #   ylab = y_chan,
-  #   pch = 16
+  #   pch = 16,
+  #   cex = 0.8
   #   # xlim = c(0, 262144),
   #   # ylim = c(0, 262144)
   # )
@@ -146,7 +147,6 @@
   
   # # CREATE PLOT LAYOUT
   # par(mfrow = c(n,n-1),
-  #     oma = c(0,0,3,0),
   #     mar = c(4.1,4.1,2.1,2.1))
   
   # FIT RLM & EXTRACT INTERCEPTS & COEFFICIENTS
@@ -386,7 +386,6 @@
   
   # # CREATE PLOT LAYOUT
   # par(mfrow = c(n, n-1),
-  #     oma = c(0,0,3,0),
   #     mar = c(4.1,4.1,2.1,2.1))
   
   # FIT RLM - EXTRACT INTERCEPTS, COEFFICIENTS, SLOPES & SKEWNESS
