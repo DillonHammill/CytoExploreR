@@ -5395,11 +5395,6 @@ cyto_spillover_extract <- function(x) {
 
 ## CYTO_APPLY ------------------------------------------------------------------
 
-# flowFrame/flowSet methods require parent argument (not used) otherwise parent
-# gets passed to FUN. cyto_apply cannot dispatch to cyto_stats functions unless
-# called within the package - users should interact with cyto_stats_compute
-# directly.
-
 #' Apply a function to elements of cytoset, GatingHierarchy or GatingSet
 #'
 #' \code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}
@@ -5418,17 +5413,24 @@ cyto_spillover_extract <- function(x) {
 #' @param FUN name of a function to apply to each element of \code{x}.
 #' @param ... additional arguments passed to \code{FUN}. Multiple arguments are
 #'   supported but must be named, see examples below.
-#' @param simplify logical indicating whether attempts should be made to coerce
-#'   the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.
+#' @param parent name of the parent(s) population to extract from
+#'   \code{GatingHierarchy} or \code{GatingSet} objects, set to \code{"root"} by
+#'   default.
+#' @param select passed to \code{cyto_select()} to select the samples upon which
+#'   the function should be applied, set to NULL by default to use all supplied
+#'   samples.
+#' @param coerce logical passed to \code{cyto_coerce()} to indicate whether the
+#'   data should be coerced prior to applying the specified function, set to
+#'   FALSE by default.
+#' @param events numeric passed to \code{cyto_sample()} to control the number of
+#'   events over which the specified function is to be applied, set to 1 by
+#'   default to use all events.
 #' @param input indicates the data input format as required by \code{FUN} can be
 #'   either 1 - "cytoset", 2 - "cytoframe", 3 - "matrix", 4 - "column" or 5 -
 #'   "row", set to "cytoframe" by default. \code{cyto_apply} will take care of
 #'   all the data formatting prior to passing it \code{FUN}. The \code{"column"}
 #'   and \code{"row"} options are for functions that expect vectors as the
 #'   input.
-#' @param parent name of the parent(s) population to extract from
-#'   \code{GatingHierarchy} or \code{GatingSet} objects, set to \code{"root"} by
-#'   default.
 #' @param copy logical indicating whether the data should be copied prior to
 #'   preprocessing the data, set to TRUE by default to ensure that the original
 #'   data remains unchanged.
@@ -5444,6 +5446,8 @@ cyto_spillover_extract <- function(x) {
 #'   \code{FUN}, it can be either a be the name of  a function or the name of a
 #'   slot to extract from a list or an array (i.e. column name), set to NULL by
 #'   default to return the entire object returned by \code{FUN}.
+#' @param simplify logical indicating whether attempts should be made to coerce
+#'   the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.
 #'
 #' @importFrom methods is
 #' @importFrom flowCore flowSet
@@ -5480,14 +5484,17 @@ cyto_apply <- function(x,
 cyto_apply.default <- function(x,
                                FUN,
                                ...,
-                               simplify = TRUE,
                                parent = "root",
+                               select = NULL,
+                               coerce = FALSE,
+                               events = 1,
                                input = "cytoframe",
                                copy = TRUE,
                                channels = NULL,
                                trans = NA,
                                inverse = FALSE,
-                               slot = NULL) {
+                               slot = NULL,
+                               simplify = TRUE) {
   
   # GATINGHIERARCHY/GATINGSET
   if(cyto_class(x,  "GatingSet")) {
@@ -5495,7 +5502,7 @@ cyto_apply.default <- function(x,
     # TRANSFORMERS
     trans <- cyto_transformers_extract(x)
     
-    # LIST OF CYTOSETS
+    # LIST OF CYTOSETS PER PARENT
     x <- cyto_data_extract(
       x,
       parent = parent,
@@ -5507,14 +5514,16 @@ cyto_apply.default <- function(x,
       lapply(x, function(z){
         cyto_apply(z,
                    FUN = FUN,
-                   simplify = simplify,
+                   ...,
+                   select = select,
+                   coerce = coerce,
                    input = input,
                    copy = copy,
                    channels = channels,
                    trans = trans,
                    inverse = inverse,
                    slot = slot,
-                   ...)
+                   simplify = simplify)
       }), names = names(x)
     )
     
@@ -5542,14 +5551,16 @@ cyto_apply.default <- function(x,
 cyto_apply.flowSet <- function(x,
                                FUN,
                                ...,
-                               simplify = TRUE,
                                parent = "root",
+                               select = NULL,
+                               coerce = FALSE,
                                input = "cytoframe",
                                copy = TRUE,
                                channels = NULL,
                                trans = NA,
                                inverse = FALSE,
-                               slot = NULL) {
+                               slot = NULL,
+                               simplify = TRUE) {
   
   # FUNCTION
   if(missing(FUN)) {
@@ -5570,14 +5581,34 @@ cyto_apply.flowSet <- function(x,
   # PREPARE FUNCTION
   FUN <- match_fun(FUN) # namespaced function character covered
   
-  # COPY
-  if(copy) {
-    x <- cyto_copy(x)
-  }
-  
   # CHANNELS
   if(!is.null(channels)) {
     x <- x[, cyto_channels_extract(x, channels), drop = FALSE]
+  }
+  
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(x, select)
+  }
+  
+  # SAMPLING/COERCION
+  if(coerce) {
+    x <- cyto_coerce(
+      x, 
+      events = events
+    )
+  } else {
+    if(!all(events == 1)) {
+      x <- cyto_sample(
+        x, 
+        events = events
+      )
+    }
+  }
+  
+  # COPY
+  if(copy) {
+    x <- cyto_copy(x)
   }
   
   # INVERSE TRANSFORM
@@ -5777,28 +5808,32 @@ cyto_apply.flowSet <- function(x,
 cyto_apply.list <- function(x,
                             FUN,
                             ...,
-                            simplify = TRUE,
                             parent = "root",
+                            select = NULL,
+                            coerce = FALSE,
                             input = "cytoframe",
                             copy = TRUE,
                             channels = NULL,
                             trans = NA,
                             inverse = FALSE,
-                            slot = NULL) {
+                            slot = NULL,
+                            simplify = TRUE) {
   
   structure(
     lapply(x, function(z){
       cyto_apply(z,
                  FUN = FUN,
                  ...,
-                 simplify = simplify,
                  parent = parent,
+                 select = select,
+                 coerce = coerce,
                  input = input,
                  copy = copy,
                  channels = channels,
                  trans = trans,
                  inverse = inverse,
-                 slot = slot)
+                 slot = slot,
+                 simplify = simplify)
     }), names = names(x)
   )
   
