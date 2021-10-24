@@ -9,14 +9,17 @@
   x,
   FUN,
   ...,
-  simplify = TRUE,
   parent = "root",
+  select = NULL,
+  coerce = FALSE,
+  events = 1,
   input = "cytoframe",
   copy = TRUE,
   channels = NULL,
   trans = NA,
   inverse = FALSE,
-  slot = NULL
+  slot = NULL,
+  simplify = TRUE
 )
 }
 \arguments{
@@ -29,12 +32,21 @@
 \item{...}{additional arguments passed to \code{FUN}. Multiple arguments are
 supported but must be named, see examples below.}
 
-\item{simplify}{logical indicating whether attempts should be made to coerce
-the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.}
-
 \item{parent}{name of the parent(s) population to extract from
 \code{GatingHierarchy} or \code{GatingSet} objects, set to \code{"root"} by
 default.}
+
+\item{select}{passed to \code{cyto_select()} to select the samples upon which
+the function should be applied, set to NULL by default to use all supplied
+samples.}
+
+\item{coerce}{logical passed to \code{cyto_coerce()} to indicate whether the
+data should be coerced prior to applying the specified function, set to
+FALSE by default.}
+
+\item{events}{numeric passed to \code{cyto_sample()} to control the number of
+events over which the specified function is to be applied, set to 1 by
+default to use all events.}
 
 \item{input}{indicates the data input format as required by \code{FUN} can be
 either 1 - "cytoset", 2 - "cytoframe", 3 - "matrix", 4 - "column" or 5 -
@@ -62,6 +74,9 @@ transformed prior to applying \code{FUN}, set to FALSE by default.}
 \code{FUN}, it can be either a be the name of  a function or the name of a
 slot to extract from a list or an array (i.e. column name), set to NULL by
 default to return the entire object returned by \code{FUN}.}
+
+\item{simplify}{logical indicating whether attempts should be made to coerce
+the output to a \code{cytoset} or \code{matrix}, set to TRUE by default.}
 }
 \description{
 \code{cyto_apply} is convenient wrapper around \code{lapply} and \code{apply}

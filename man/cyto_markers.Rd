@@ -4,7 +4,7 @@
 \alias{cyto_markers}
 \title{Extract marker names}
 \usage{
-cyto_markers(x, select = NULL, exclude = NULL, ...)
+cyto_markers(x, select = NULL, exclude = NULL, append = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -18,6 +18,10 @@ combinations should be returned.}
 
 \item{exclude}{vector of channels or markers for which the channel/marker
 combinations should not be returned.}
+
+\item{append}{logical indicating whether the name of the channel should be
+appended to the marker names in the form \code{<marker> channel}, set to
+FALSE by default.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the

@@ -145,6 +145,9 @@ cyto_channels <- function(x,
 #'   combinations should be returned.
 #' @param exclude vector of channels or markers for which the channel/marker
 #'   combinations should not be returned.
+#' @param append logical indicating whether the name of the channel should be
+#'   appended to the marker names in the form \code{<marker> channel}, set to
+#'   FALSE by default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -182,6 +185,7 @@ cyto_channels <- function(x,
 cyto_markers <- function(x,
                          select = NULL,
                          exclude = NULL,
+                         append = FALSE,
                          ...) {
   
   # LIST
@@ -235,6 +239,16 @@ cyto_markers <- function(x,
                                                       ignore.case = TRUE,
                                                       ...)))]
       }
+    }
+    
+    # APPEND
+    if(append) {
+      markers <- paste0(
+        "<",
+        res,
+        "> ",
+        names(res)
+      )
     }
   }
   
@@ -441,9 +455,6 @@ cyto_channels_extract <- function(x,
 #'   default which ignores character case, set \code{fixed} to TRUE.
 #'
 #' @return  A vector of marker names.
-#'
-#' @importFrom flowWorkspace pData
-#' @importFrom flowCore parameters
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
