@@ -17,7 +17,9 @@ cyto_load(
 \arguments{
 \item{path}{points to the location of the .fcs files to read in. Preferably
 the name of folder in current working directory, but paths to individual
-files are also allowed.}
+files are also allowed. Alternatively, users can supply a
+named list of matrices to be converted into a cytoset for use within
+CytoExploreR.}
 
 \item{select}{vector of file names to select when loading files, set to NULL
 be default to select all files in the specified directory.}

@@ -18,7 +18,9 @@ cyto_setup(
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in (e.g. name of
-a folder in current working directory).}
+a folder in current working directory). Alternatively, users can supply a
+named list of matrices to be converted into a cytoset for use within
+CytoExploreR.}
 
 \item{gatingTemplate}{name of a gatingTemplate csv file to be used for gate
 saving.}

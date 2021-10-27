@@ -207,7 +207,9 @@ cyto_export <- function(x,
 #'
 #' @param path points to the location of the .fcs files to read in. Preferably
 #'   the name of folder in current working directory, but paths to individual
-#'   files are also allowed.
+#'   files are also allowed. Alternatively, users can supply a
+#'   named list of matrices to be converted into a cytoset for use within
+#'   CytoExploreR.
 #' @param select vector of file names to select when loading files, set to NULL
 #'   be default to select all files in the specified directory.
 #' @param exclude vector of file names to exclude when loading files, set to
@@ -224,8 +226,8 @@ cyto_export <- function(x,
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
-#' @importFrom flowCore identifier identifier<- parameters
-#' @importFrom flowWorkspace load_gs load_cytoset_from_fcs pData
+#' @importFrom flowCore flowFrame
+#' @importFrom flowWorkspace load_gs load_cytoset_from_fcs
 #'
 #' @examples
 #' # Load in CytoExploreRData to access data
@@ -251,6 +253,40 @@ cyto_load <- function(path = ".",
                       barcode = FALSE,
                       restrict = FALSE, ...) {
 
+  # PATH - NAMED LIST OF MATRICES
+  if(cyto_class(path, "list", TRUE)) {
+    # NAMES REQUIRED
+    if(is.null(names(path)) | any(is.null(LAPPLY(path, "dim")))) {
+      stop(
+        "'path' must be a named list of matrices!"
+      )
+    }
+    # CONVERT TO CYTOFRAMES & WRAP AS CYTOSET
+    x <- cytoset(
+      structure(
+        lapply(
+          path,
+          function(z) {
+            # DATA.FRAME -> MATRIX
+            if(! cyto_class(z, "matrix", TRUE)) {
+              z <- data.matrix(z)
+            }
+            # CONVERT TO CYTOFRAME
+            cyto_convert(
+              flowFrame(
+                z
+              )
+            )
+          }
+        ),
+        names = names(path)
+      )
+    )
+    
+    # RETURN CYTOSET
+    return(x)
+  }
+  
   # PATH - DIRECTORY/FILES
   files <- LAPPLY(path, function(z){
     # DIRECTORY
@@ -593,7 +629,9 @@ cyto_clean <- function(x,
 #' be created if necessary and assigned as the active gatingTemplate.
 #'
 #' @param path points to the location of the .fcs files to read in (e.g. name of
-#'   a folder in current working directory).
+#'   a folder in current working directory). Alternatively, users can supply a
+#'   named list of matrices to be converted into a cytoset for use within
+#'   CytoExploreR.
 #' @param gatingTemplate name of a gatingTemplate csv file to be used for gate
 #'   saving.
 #' @param restrict logical indicating whether unassigned channels should be
@@ -670,8 +708,26 @@ cyto_setup <- function(path = ".",
                        ...) {
   
   # CYTOSET/GATINGSET
-  message("Loading FCS files into a GatingSet...")
-  x <- cyto_load(path = path, restrict = FALSE, ...)
+  message(
+    paste0(
+      "Loading ",
+      ifelse(
+        cyto_class(
+          path, 
+          "list", 
+          TRUE
+        ),
+        "data",
+        "FCS files"
+      ), 
+      " into a GatingSet..."
+    )
+  )
+  x <- cyto_load(
+    path = path, 
+    restrict = FALSE, 
+    ...
+  )
   
   # MARKERS
   if (markers != FALSE) {
@@ -1299,13 +1355,15 @@ cyto_transform.default <- function(x,
     }
     
     # Dispatch based on type argument to get TransformerList
-    transformer_list <- cyto_transformers_define(x,
-                                                 channels = channels,
-                                                 parent = parent,
-                                                 type = type,
-                                                 select = select,
-                                                 plot = FALSE, 
-                                                 ...)
+    transformer_list <- cyto_transformers_define(
+      x,
+      channels = channels,
+      parent = parent,
+      type = type,
+      select = select,
+      plot = FALSE, 
+      ...
+    )
     
   }
   
@@ -5432,8 +5490,9 @@ cyto_spillover_extract <- function(x) {
 #'   and \code{"row"} options are for functions that expect vectors as the
 #'   input.
 #' @param copy logical indicating whether the data should be copied prior to
-#'   preprocessing the data, set to TRUE by default to ensure that the original
-#'   data remains unchanged.
+#'   preprocessing the data, set to FALSE by default. Users should set this
+#'   argument to TRUE when apply inverse transformations to ensure that the
+#'   original data remains unchanged.
 #' @param channels vector of channels which should be included in the data
 #'   passed to \code{FUN}, set to all channels by default.
 #' @param trans object of class \code{transformerList} containing the
@@ -5489,7 +5548,7 @@ cyto_apply.default <- function(x,
                                coerce = FALSE,
                                events = 1,
                                input = "cytoframe",
-                               copy = TRUE,
+                               copy = FALSE,
                                channels = NULL,
                                trans = NA,
                                inverse = FALSE,
@@ -5557,7 +5616,7 @@ cyto_apply.flowSet <- function(x,
                                coerce = FALSE,
                                events = 1,
                                input = "cytoframe",
-                               copy = TRUE,
+                               copy = FALSE,
                                channels = NULL,
                                trans = NA,
                                inverse = FALSE,
@@ -5581,7 +5640,7 @@ cyto_apply.flowSet <- function(x,
   }
   
   # PREPARE FUNCTION
-  FUN <- match_fun(FUN) # namespaced function character covered
+  FUN <- cyto_func_match(FUN) # namespaced function character covered
   
   # CHANNELS
   if(!is.null(channels)) {
@@ -5815,7 +5874,7 @@ cyto_apply.list <- function(x,
                             coerce = FALSE,
                             events = 1,
                             input = "cytoframe",
-                            copy = TRUE,
+                            copy = FALSE,
                             channels = NULL,
                             trans = NA,
                             inverse = FALSE,
