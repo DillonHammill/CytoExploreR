@@ -88,9 +88,11 @@ cyto_gate_clust <- function(x,
   
   # CLUSTERING RESULT
   cluster_result <- cluster(
-    cyto_extract(fr,
-                 raw = TRUE,
-                 channels = channels), 
+    cyto_data_extract(
+      fr,
+      raw = TRUE,
+      channels = channels
+      ), 
     ...)
   
   # PULL OUT CLUSTERS
