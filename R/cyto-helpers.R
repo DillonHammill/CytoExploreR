@@ -3142,12 +3142,19 @@ cyto_split <- function(x,
 #'
 #' @param x object of class \code{cytoframe}, \code{cytoset},
 #'   \code{GatingHierarchy} or \code{GatingSet}.
+#' @param save_as name of the folder to which the written FCS files should be
+#'   saved, set to NULL by default to save the files to the current working
+#'   directory. To prevent files being overwritten, it is recommended that
+#'   \code{save_as} directory not be manually created before running
+#'   \code{cyto_save}.
 #' @param parent name of the parent population to extract when a
 #'   \code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name
 #'   of the parent is supplied the samples will be written to FCS files in
 #'   separate named folders within the \code{save_as} directory. Otherwise the
 #'   entire \code{GatingSet} or \code{GatingHierarchy} will be saved to the
 #'   specified \code{save_as} directory.
+#' @param alias an alternative way to \code{parent} to specify the names of the
+#'   populations to be saved.
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing FCS files, set to
 #'   FALSE by default.
@@ -3156,20 +3163,7 @@ cyto_split <- function(x,
 #'   for each event within \code{x}, set to \code{Sample-ID} channel by default.
 #' @param names original names of the samples prior to merging using
 #'   \code{cyto_merge_by}, only required when split is TRUE. These names will be
-#'   re-assigned to each of split flowFrames.
-#' @param save_as name of the folder to which the written FCS files should be
-#'   saved, set to NULL by default to save the files to the current working
-#'   directory. To prevent files being overwritten, it is recommended that
-#'   \code{save_as} directory not be manually created before running
-#'   \code{cyto_save}.
-#' @param inverse logical indicating whether the data should be inverse
-#'   transformed prior to writing FCS files, set to FALSE by default. Inverse
-#'   transformations of \code{flowFrame} or \code{flowSet} objects requires
-#'   passing of transformers through the \code{trans} argument.
-#' @param trans object of class \code{transformerList} containing the
-#'   transformation definitions applied to the supplied data. Used internally
-#'   when \code{inverse_transform} is TRUE, to inverse the transformations prior
-#'   to writing FCS files.
+#'   re-assigned to each of split cytoframes.
 #' @param overwrite logical flag to control how \code{save_as} should be handled
 #'   if files already exist in this directory, users will be asked interactively
 #'   if \code{overwrite} is not manually supplied here.
@@ -3208,8 +3202,8 @@ cyto_save <- function(x,
                       parent = NULL,
                       alias = NULL,
                       split = FALSE,
-                      names = NULL,
                       id = NULL,
+                      names = NULL,
                       overwrite = NULL,
                       ...) {
   

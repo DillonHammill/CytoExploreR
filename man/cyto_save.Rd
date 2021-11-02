@@ -10,8 +10,8 @@ cyto_save(
   parent = NULL,
   alias = NULL,
   split = FALSE,
-  names = NULL,
   id = NULL,
+  names = NULL,
   overwrite = NULL,
   ...
 )
@@ -33,17 +33,20 @@ separate named folders within the \code{save_as} directory. Otherwise the
 entire \code{GatingSet} or \code{GatingHierarchy} will be saved to the
 specified \code{save_as} directory.}
 
+\item{alias}{an alternative way to \code{parent} to specify the names of the
+populations to be saved.}
+
 \item{split}{logical indicating whether samples merged using
 \code{cyto_merge_by} should be split prior to writing FCS files, set to
 FALSE by default.}
 
-\item{names}{original names of the samples prior to merging using
-\code{cyto_merge_by}, only required when split is TRUE. These names will be
-re-assigned to each of split flowFrames.}
-
 \item{id}{passed to \code{cyto_split},  can be either the name of a channel
 or marker containing the IDs for samples or a vector containing an index
 for each event within \code{x}, set to \code{Sample-ID} channel by default.}
+
+\item{names}{original names of the samples prior to merging using
+\code{cyto_merge_by}, only required when split is TRUE. These names will be
+re-assigned to each of split cytoframes.}
 
 \item{overwrite}{logical flag to control how \code{save_as} should be handled
 if files already exist in this directory, users will be asked interactively
@@ -54,16 +57,6 @@ allow control over how the data is formatted prior to saving. Setting
 \code{inverse = TRUE} will export data on the linear scale but be sure to
 set \code{copy = TRUE} as well if you only want to inverse data
 transformations for export but leave your data unchanged.}
-
-\item{inverse}{logical indicating whether the data should be inverse
-transformed prior to writing FCS files, set to FALSE by default. Inverse
-transformations of \code{flowFrame} or \code{flowSet} objects requires
-passing of transformers through the \code{trans} argument.}
-
-\item{trans}{object of class \code{transformerList} containing the
-transformation definitions applied to the supplied data. Used internally
-when \code{inverse_transform} is TRUE, to inverse the transformations prior
-to writing FCS files.}
 }
 \value{
 a GatingHierarchy, GatingSet or a list of cytosets.
