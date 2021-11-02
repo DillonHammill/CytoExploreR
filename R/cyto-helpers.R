@@ -1037,20 +1037,19 @@ cyto_names <- function(x) {
 #' @rdname cyto_names
 #' @export
 cyto_names.flowFrame <- function(x) {
-  # DEFUNCT
-  nm <- tryCatch(
-    identifier(x),
-    error = function(e){
-      # FILE NAME
-      return(
-        file_ext_remove(
-          basename(
-            cf_get_uri(x)
-          )
-        )
+  # FLOWFRAME -> IDENTIFIER
+  if(cyto_class(x, "flowFrame", TRUE)) {
+    # IDENTIFIER - CANNOT ACCESS URI - NOT ON DISK
+    nm <- identifier(x)
+  # CYTOFRAME -> URI
+  } else {
+    nm <- file_ext_remove(
+      basename(
+        cf_get_uri(x)
       )
-    }
-  )
+    )
+  }
+  # COMBINED EVENTS
   if (nm == "anonymous") {
     nm <- "Combined Events"
   }
@@ -1906,11 +1905,7 @@ cyto_data_extract <- function(x,
       if(cyto_class(cs, "flowFrame")) {
         structure(
           list(cs),
-          names = gsub(
-            ".h5$",
-            "",
-            basename(cf_get_uri(cs))
-          )
+          names = cyto_names(cs)
         )
       # CYTOSET -> CYTOFRAME
       } else {
@@ -1927,11 +1922,7 @@ cyto_data_extract <- function(x,
         cytoset(
           structure(
             list(cs), 
-            names = gsub(
-              ".h5$",
-              "",
-              basename(cf_get_uri(cs))
-            )
+            names = cyto_names(cs)
           )
         )
         # CYTOSET -> CYTOSET
@@ -1953,7 +1944,8 @@ cyto_data_extract <- function(x,
             cyto_exprs(cs, 
                        markers = markers,
                        drop = FALSE)
-          ), names = "cf_raw"
+          ), 
+          names = cyto_names(cs)
         )
         # CYTOSET -> MATRIX
       } else {
