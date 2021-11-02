@@ -317,18 +317,22 @@ cyto_markers <- function(x,
 #' @export
 cyto_fluor_channels <- function(x,
                                 ...){
-  cyto_channels(x, exclude = c("FSC",
-                               "SSC",
-                               "Time",
-                               "Original",
-                               "Sample",
-                               "Event",
-                               "UMAP",
-                               "t-?SNE",
-                               "PCA",
-                               "EmbedSOM",
-                               "FIt-?SNE"),
-                ...)
+  cyto_channels(
+    x, 
+    exclude = c(
+      "FSC",
+      "SSC",
+      "Time",
+      "Original",
+      "Sample",
+      "Event",
+      "UMAP",
+      "t-?SNE",
+      "PCA",
+      "EmbedSOM",
+      "FIt-?SNE"
+    ),
+  ...)
 }
 
 ## CYTO_CHANNELS_EXTRACT -------------------------------------------------------

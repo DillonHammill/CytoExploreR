@@ -2,63 +2,36 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_save}
 \alias{cyto_save}
-\alias{cyto_save.GatingSet}
-\alias{cyto_save.GatingHierarchy}
-\alias{cyto_save.flowSet}
-\title{Write samples to FCS files in new folder or save GatingSet}
+\title{Write samples to FCS files in new folder or save an entire GatingSet}
 \usage{
-cyto_save(x, ...)
-
-\method{cyto_save}{GatingSet}(
+cyto_save(
   x,
+  save_as = ".",
   parent = NULL,
+  alias = NULL,
   split = FALSE,
   names = NULL,
   id = NULL,
-  save_as = NULL,
-  inverse = FALSE,
-  trans = NULL,
-  overwrite = NULL,
-  ...
-)
-
-\method{cyto_save}{GatingHierarchy}(
-  x,
-  parent = NULL,
-  split = FALSE,
-  names = NULL,
-  id = NULL,
-  save_as = NULL,
-  inverse = FALSE,
-  trans = NULL,
-  overwrite = NULL,
-  ...
-)
-
-\method{cyto_save}{flowSet}(
-  x,
-  split = FALSE,
-  names = NULL,
-  id = NULL,
-  save_as = NULL,
-  inverse = FALSE,
-  trans = NULL,
   overwrite = NULL,
   ...
 )
 }
 \arguments{
-\item{x}{object of class \code{flowSet}, \code{GatingHierarchy} or
-\code{GatingSet}.}
+\item{x}{object of class \code{cytoframe}, \code{cytoset},
+\code{GatingHierarchy} or \code{GatingSet}.}
 
-\item{...}{not in use.}
+\item{save_as}{name of the folder to which the written FCS files should be
+saved, set to NULL by default to save the files to the current working
+directory. To prevent files being overwritten, it is recommended that
+\code{save_as} directory not be manually created before running
+\code{cyto_save}.}
 
 \item{parent}{name of the parent population to extract when a
 \code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name
-of the parent is supplied the samples will be written to FCS files in the
-specified \code{save_as} directory. Otherwise the entire \code{GatingSet}
-or \code{GatingHierarchy} will be saved to the specified \code{save_as}
-directory.}
+of the parent is supplied the samples will be written to FCS files in
+separate named folders within the \code{save_as} directory. Otherwise the
+entire \code{GatingSet} or \code{GatingHierarchy} will be saved to the
+specified \code{save_as} directory.}
 
 \item{split}{logical indicating whether samples merged using
 \code{cyto_merge_by} should be split prior to writing FCS files, set to
@@ -72,11 +45,15 @@ re-assigned to each of split flowFrames.}
 or marker containing the IDs for samples or a vector containing an index
 for each event within \code{x}, set to \code{Sample-ID} channel by default.}
 
-\item{save_as}{name of the folder to which the written FCS files should be
-saved, set to NULL by default to save the files to the current working
-directory. To prevent files being overwritten, it is recommended that
-\code{save_as} directory not be manually created before running
-\code{cyto_save}.}
+\item{overwrite}{logical flag to control how \code{save_as} should be handled
+if files already exist in this directory, users will be asked interactively
+if \code{overwrite} is not manually supplied here.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_data_extract}} to
+allow control over how the data is formatted prior to saving. Setting
+\code{inverse = TRUE} will export data on the linear scale but be sure to
+set \code{copy = TRUE} as well if you only want to inverse data
+transformations for export but leave your data unchanged.}
 
 \item{inverse}{logical indicating whether the data should be inverse
 transformed prior to writing FCS files, set to FALSE by default. Inverse
@@ -87,17 +64,12 @@ passing of transformers through the \code{trans} argument.}
 transformation definitions applied to the supplied data. Used internally
 when \code{inverse_transform} is TRUE, to inverse the transformations prior
 to writing FCS files.}
-
-\item{overwrite}{logical flag to control how \code{save_as} should be handled
-if files already exist in this directory, users will be asked interactively
-if \code{overwrite} is not manually supplied here.}
 }
 \value{
-list of flowFrames containing the data that was saved to the FCS
-  files.
+a GatingHierarchy, GatingSet or a list of cytosets.
 }
 \description{
-Write samples to FCS files in new folder or save GatingSet
+Write samples to FCS files in new folder or save an entire GatingSet
 }
 \examples{
 
@@ -115,6 +87,8 @@ cyto_save(fs, save_as = "Samples")
 }
 \seealso{
 \code{\link{cyto_split}}
+
+\code{\link{cyto_data_extract}}
 }
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}

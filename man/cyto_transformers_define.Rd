@@ -29,18 +29,21 @@ if no channels/markers are supplied.}
 
 \item{type}{a vector indicating the type of transformations to apply to each
 channel, options include \code{"log"}, \code{"asinh"}, \code{"asinh_Gml2"},
-\code{"biexponential"} or \code{"logicle"}. A list or vector named with the
-channels can be used to apply a different transformation type to each
-channel. All channels will have the same settings for each transformation
-type, multiple calls to \code{cyto_transformers_define()} can be made to
-modify these settings per channel. Multiple transformerLists can be joined
-together using \code{cyto_transformers_combine()}.}
+\code{"biexponential"} or \code{"logicle"}. To set different transformation
+types for each channel, supply a vector of transformation types named with
+each of the channels. Users can also define their own custom transformation
+functions by supplying a list of transformation and inverse transformation
+functions for each channel (e.g. list("PE-A" = list(transform = "asinh",
+inverse = "sinh"))). All channels will have the same settings for each
+transformation type, multiple calls to \code{cyto_transformers_define()}
+can be made to modify these settings per channel. Multiple transformerLists
+can be joined together using \code{cyto_transformers_combine()}.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select} to
 select a subset of samples for \code{cyto_plot}.}
 
-\item{events}{number or frequency of events to display in plots, set to
-50000 events by default. See \code{\link{cyto_plot}} for details.}
+\item{events}{number or frequency of events to display in plots, set to 50000
+events by default. See \code{\link{cyto_plot}} for details.}
 
 \item{plot}{logical indicating whether the results of transformations should
 be plotted using \code{cyto_plot}.}

@@ -1764,7 +1764,7 @@ cyto_transform_extract <- function(x,
 #' @return either a list of cytosets, list of cytoframe lists or a list of raw
 #'   data matrix lists.
 #'
-#' @importFrom flowWorkspace gs_pop_get_data
+#' @importFrom flowWorkspace gs_pop_get_data cf_get_uri
 #' @importFrom flowCore exprs
 #'
 #' @examples
@@ -1904,8 +1904,15 @@ cyto_data_extract <- function(x,
     if(format == "cytoframe") {
       # CYTOFRAME -> CYTOFRAME
       if(cyto_class(cs, "flowFrame")) {
-        list(cs) # CANNOT CALL CYTO_NAMES HERE
-        # CYTOSET -> CYTOFRAME
+        structure(
+          list(cs),
+          names = gsub(
+            ".h5$",
+            "",
+            basename(cf_get_uri(cs))
+          )
+        )
+      # CYTOSET -> CYTOFRAME
       } else {
         structure(
           lapply(cyto_names(cs), function(z){
@@ -1913,13 +1920,18 @@ cyto_data_extract <- function(x,
           }), names = cyto_names(cs)
         )
       }
-      # CYTOSET
+    # CYTOSET
     } else if(format == "cytoset") {
       # CYTOFRAME -> CYTOSET
       if(cyto_class(cs, "flowFrame")) {
         cytoset(
           structure(
-            list(cs), names = "cf"
+            list(cs), 
+            names = gsub(
+              ".h5$",
+              "",
+              basename(cf_get_uri(cs))
+            )
           )
         )
         # CYTOSET -> CYTOSET
@@ -1932,7 +1944,7 @@ cyto_data_extract <- function(x,
           cs
         }
       }
-      # MATRIX
+    # MATRIX
     } else if(format == "matrix") {
       # CYTOFRAME -> MATRIX
       if(cyto_class(cs, "flowFrame")) {
@@ -3126,16 +3138,16 @@ cyto_split <- function(x,
 
 ## CYTO_SAVE -------------------------------------------------------------------
 
-#' Write samples to FCS files in new folder or save GatingSet
+#' Write samples to FCS files in new folder or save an entire GatingSet
 #'
-#' @param x object of class \code{flowSet}, \code{GatingHierarchy} or
-#'   \code{GatingSet}.
+#' @param x object of class \code{cytoframe}, \code{cytoset},
+#'   \code{GatingHierarchy} or \code{GatingSet}.
 #' @param parent name of the parent population to extract when a
 #'   \code{GatingHierarchy} or \code{GatingSet} object is supplied. If the name
-#'   of the parent is supplied the samples will be written to FCS files in the
-#'   specified \code{save_as} directory. Otherwise the entire \code{GatingSet}
-#'   or \code{GatingHierarchy} will be saved to the specified \code{save_as}
-#'   directory.
+#'   of the parent is supplied the samples will be written to FCS files in
+#'   separate named folders within the \code{save_as} directory. Otherwise the
+#'   entire \code{GatingSet} or \code{GatingHierarchy} will be saved to the
+#'   specified \code{save_as} directory.
 #' @param split logical indicating whether samples merged using
 #'   \code{cyto_merge_by} should be split prior to writing FCS files, set to
 #'   FALSE by default.
@@ -3161,12 +3173,15 @@ cyto_split <- function(x,
 #' @param overwrite logical flag to control how \code{save_as} should be handled
 #'   if files already exist in this directory, users will be asked interactively
 #'   if \code{overwrite} is not manually supplied here.
-#' @param ... not in use.
+#' @param ... additional arguments passed to \code{\link{cyto_data_extract}} to
+#'   allow control over how the data is formatted prior to saving. Setting
+#'   \code{inverse = TRUE} will export data on the linear scale but be sure to
+#'   set \code{copy = TRUE} as well if you only want to inverse data
+#'   transformations for export but leave your data unchanged.
 #'
-#' @return list of flowFrames containing the data that was saved to the FCS
-#'   files.
+#' @return a GatingHierarchy, GatingSet or a list of cytosets.
 #'
-#' @importFrom flowCore write.FCS exprs
+#' @importFrom flowCore write.FCS
 #' @importFrom flowWorkspace save_gs
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -3185,40 +3200,36 @@ cyto_split <- function(x,
 #' }
 #'
 #' @seealso \code{\link{cyto_split}}
-#'
-#' @rdname cyto_save
+#' @seealso \code{\link{cyto_data_extract}}
 #'
 #' @export
-cyto_save <- function(x, ...) {
-  UseMethod("cyto_save")
-}
-
-#' @rdname cyto_save
-#' @export
-cyto_save.GatingSet <- function(x,
-                                parent = NULL,
-                                split = FALSE,
-                                names = NULL,
-                                id = NULL,
-                                save_as = NULL,
-                                inverse = FALSE,
-                                trans = NULL, 
-                                overwrite = NULL, 
-                                ...) {
+cyto_save <- function(x,
+                      save_as = ".",
+                      parent = NULL,
+                      alias = NULL,
+                      split = FALSE,
+                      names = NULL,
+                      id = NULL,
+                      overwrite = NULL,
+                      ...) {
   
-  # SAVE GATINGSET
-  if (is.null(parent)) {
-    # SAVE_AS
-    if(is.null(save_as)){
+  # PARENT
+  parent <- c(parent, alias)
+  
+  # GATINGHIERARCHY OR GATINGSET -> SAVE ENTIRE GATINGHIERARCHY/GATINGSET
+  if(cyto_class(x, "GatingSet") & is.null(parent)) {
+    # SAVE_AS -> EMPTY DIRECTORY REQUIRED
+    if(is.null(save_as)) {
       stop(
         paste0(
           "Supply the name of a new/empty directory to 'save_as' ",
-          "to save this GatingSet."
+          "to save this ",
+          cyto_class(x), "."
         )
       )
     }
-    # DIRECTORY CHECK
-    if(dir.exists(save_as) & length(list.files(save_as)) > 0){
+    # EMPTY DIRECTORY CHECK
+    if(length(list.files(save_as)) > 0) {
       # OVERWRITE
       if(is.null(overwrite)) {
         overwrite <- cyto_enquire(
@@ -3232,92 +3243,10 @@ cyto_save.GatingSet <- function(x,
       }
       # REPLACE DIRECTORY
       if(overwrite){
-        unlink(save_as, recursive = TRUE)
-      # ABORT
-      } else {
-        invisible(NULL)
-      }
-    }
-    # SAVE GATINGSET
-    message(
-      paste(
-        "Saving GatingSet to ", 
-        save_as, 
-        "..."
-      )
-    )
-    suppressMessages(
-      save_gs(x, save_as)
-    )
-    # RETURN GATINGSET
-    invisible(x)
-    # SAVE FCS FILES
-  } else {
-    # EXTRACT DATA
-    message(paste("Extracting the ", parent, " node from the GatingSet."))
-    cs <- cyto_data_extract(
-      x,
-      parent = parent,
-      copy = TRUE
-    )[[1]]
-    # TRANSFORMATIONS
-    trans <- cyto_transformers_extract(x)
-    # FLOWSET METHOD
-    cs <- cyto_save(
-      x = cs,
-      split = split,
-      names = names,
-      id = id,
-      save_as = save_as,
-      inverse = inverse,
-      trans = trans,
-      overwrite = overwrite
-    )
-    # RETURN DATA
-    invisible(cs)
-  }
-}
-
-#' @rdname cyto_save
-#' @export
-cyto_save.GatingHierarchy <- function(x,
-                                      parent = NULL,
-                                      split = FALSE,
-                                      names = NULL,
-                                      id = NULL,
-                                      save_as = NULL,
-                                      inverse = FALSE,
-                                      trans = NULL,
-                                      overwrite = NULL,
-                                      ...) {
-  
-  # SAVE GATINGHIERARCHY
-  if (is.null(parent)) {
-    # SAVE_AS
-    if(is.null(save_as)){
-      stop(
-        paste0(
-          "Supply the name of a new/empty directory to 'save_as' ",
-          "to save this GatingSet."
+        unlink(
+          save_as, 
+          recursive = TRUE
         )
-      )
-    }
-    # DIRECTORY CHECK
-    if(dir.exists(save_as) & length(list.files(save_as)) > 0){
-      # OVERWRITE
-      if(is.null(overwrite)) {
-        overwrite <- cyto_enquire(
-          paste0(
-            save_as,
-            " already contains some files. ",
-            "Do you want to overwrite this directory? (Y/N)"
-          ),
-          options = c("Y", "T")
-        )
-      }
-      # REPLACE DIRECTORY
-      if(overwrite){
-        unlink(save_as, recursive = TRUE)
         # ABORT
       } else {
         invisible(NULL)
@@ -3325,8 +3254,10 @@ cyto_save.GatingHierarchy <- function(x,
     }
     # SAVE GATINGSET
     message(
-      paste(
-        "Saving GatingSet to ", 
+      paste0(
+        "Saving ",
+        cyto_class(x), 
+        " to ", 
         save_as, 
         "..."
       )
@@ -3334,123 +3265,113 @@ cyto_save.GatingHierarchy <- function(x,
     suppressMessages(
       save_gs(x, save_as)
     )
-    # RETURN GATINGSET
+    # RETURN GATINGSET - INVISIBLE DOES NOT TERMINATE FUNCTION
     invisible(x)
-    # SAVE FCS FILES
+    # WRITE FCS FILES
   } else {
-    # EXTRACT DATA
-    message(paste("Extracting the ", parent, " node from the GatingHierarchy."))
-    cs <- cyto_data_extract(
+    # EXTRACT DATA - NAMED LIST PER PARENT
+    cs_list <- cyto_data_extract(
       x,
       parent = parent,
-      copy = TRUE
-    )[[1]]
-    # TRANSFORMATIONS
-    trans <- cyto_transformers_extract(x)
-    # FLOWSET METHOD
-    cs <- cyto_save(
-      x = cs,
-      split = split,
-      names = names,
-      id = id,
-      save_as = save_as,
-      inverse = inverse,
-      trans = trans,
-      overwrite = overwrite
+      format = "cytoset",
+      ...
     )
-    
-    # RETURN DATA
-    invisible(cs)
-  }
-}
-
-#' @rdname cyto_save
-#' @export
-cyto_save.flowSet <- function(x,
-                              split = FALSE,
-                              names = NULL,
-                              id = NULL,
-                              save_as = NULL,
-                              inverse = FALSE,
-                              trans = NULL,
-                              overwrite = NULL,
-                              ...) {
-  
-  # CYTOSET OF SPLIT CYTOFRAMES
-  if (split == TRUE) {
-    x <- cyto_split(x, 
-                    names = names,
-                    id = id)
-  }
-  
-  # DIRECTORY CHECK
-  if (!is.null(save_as) & dir.exists(save_as)) {
-    # OVERWRITE FILES?
-    if (any(list.files(save_as) %in% cyto_names(x))) {
-      # OVERWRITE
-      if(is.null(overwrite)){
-        overwrite <- cyto_enquire(
-          paste0(
-            "Files will be overwritten in ", 
-            save_as, 
-            ". Do you want to continue? (Y/N)"
-          ),
-          options = c("T", "Y")
-        )
-      }
-      # ABORT
-      if(!overwrite) {
-        invisible(NULL)
-      }
-    }
-  }
-  
-  # MESSAGE
-  if (is.null(save_as)) {
-    location <- "current working directory."
-  } else {
-    location <- save_as
-  }
-  message(paste0("Writing FCS files to ", location, "..."))
-  
-  # INVERSE TRANSFORM?
-  if(inverse == TRUE) {
-    # TRANSFORMERS REQUIRED
-    if (is.null(trans) | .all_na(trans)) {
-      stop("Supply transformerList to 'trans' to inverse transformations.")
-    }
-    # INVERSE TRANSFORM
-    x <- cyto_transform(cyto_copy(x),
-                        trans = trans,
-                        inverse = inverse,
-                        plot = FALSE)
-  }
-  
-  # WRITE FCS FILES
-  lapply(seq_along(x), function(z){
-    # Message
-    message(paste0(cyto_names(x)[z], "..."))
-    # NO DIRECTORY SPECIFIED
-    if (is.null(save_as)) {
-      write.FCS(
-        x[[z]],
-        cyto_names(x)[z]
+    # IF NAMED LIST CREATE NEW FOLDER PER POPULATION
+    cs_list <- structure(
+      lapply(
+        seq_along(cs_list),
+        function(z) {
+          # CYTOSET
+          cs <- cs_list[[z]]
+          # SPLIT DATA
+          if(split) {
+            cs <- cyto_split(
+              cs,
+              names = names,
+              id = id
+            )
+          }
+          # CREATE SAVE_AS DIRECTORY
+          if(!dir.exists(save_as)) {
+            dir.create(save_as)
+          }
+          # PARENTAL DIRECTORIES
+          if(!is.null(names(cs_list)[z])) {
+            # CREATE NEW PARENTAL DIRECTORY IN SAVE_AS
+            dir <- paste0(
+              save_as, 
+              .Platform$file.sep,
+              names(cs_list)[z]
+            )
+            if(!dir.exists(dir)) {
+              dir.create(dir)
+            }
+            # SAVE_AS DIRECTORY
+          } else {
+            dir <- save_as
+          }
+          # DIRECTORY CHECK
+          if(dir.exists(dir) & 
+             any(list.files(dir) %in% cyto_names(cs))) {
+            # OVERWRITE ENQUIRY
+            if(is.null(overwrite)) {
+              # FILES WILL BE OVERWRITTEN
+              message(
+                paste0(
+                  "The following files will be overwritten in ",
+                  dir, 
+                  ":\n",
+                  paste(
+                    cyto_names(cs)[cyto_names(cs) %in% list.files(dir)],
+                    collapse = "\n"
+                  )
+                )
+              )
+              # OVERWRITE?
+              overwrite <- cyto_enquire(
+                "Do you want to continue? (Y/N)",
+                options = c("Y", "T")
+              )
+            }
+            # ABORT
+            if(!overwrite) {
+              return(cs)
+            }
+          }
+          # MESSAGE - WRITING FCS FILES
+          message(
+            paste0(
+              "\nWriting FCS files to ",
+              dir,
+              "..."
+            )
+          )
+          # INDIVIDUAL FCS FILES
+          lapply(
+            seq_along(cs),
+            function(v) {
+              # FCS FILE NAME
+              message(
+                cyto_names(cs)[v]
+              )
+              # WRITE FCS FILES
+              write.FCS(
+                cs[[v]],
+                paste0(
+                  dir,
+                  .Platform$file.sep,
+                  cyto_names(cs)[v]
+                )
+              )
+            }
+          )
+        }
       )
-      # DIRECTORY SPECIFIED
-    } else {
-      # CREATE DIRECTORY
-      if (!dir.exists(save_as)) {
-        dir.create(save_as)
-      }
-      write.FCS(
-        x[[z]],
-        paste0(save_as, "/", cyto_names(x)[z])
-      )
-    }
-  })
+    )
+    # RETURN (SPLIT) DATA
+    invisible(cs_list)
+  }
   
-  # RETURN DATA
-  invisible(x)
 }
 
 ## CYTO_LIST -------------------------------------------------------------------

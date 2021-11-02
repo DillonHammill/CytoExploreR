@@ -14,7 +14,7 @@
   coerce = FALSE,
   events = 1,
   input = "cytoframe",
-  copy = TRUE,
+  copy = FALSE,
   channels = NULL,
   trans = NA,
   inverse = FALSE,
@@ -56,8 +56,9 @@ and \code{"row"} options are for functions that expect vectors as the
 input.}
 
 \item{copy}{logical indicating whether the data should be copied prior to
-preprocessing the data, set to TRUE by default to ensure that the original
-data remains unchanged.}
+preprocessing the data, set to FALSE by default. Users should set this
+argument to TRUE when apply inverse transformations to ensure that the
+original data remains unchanged.}
 
 \item{channels}{vector of channels which should be included in the data
 passed to \code{FUN}, set to all channels by default.}
