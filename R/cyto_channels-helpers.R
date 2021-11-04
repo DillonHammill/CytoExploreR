@@ -652,7 +652,7 @@ cyto_channel_select <- function(x){
                      logo = CytoExploreR_logo(),
                      col_edit = FALSE,
                      row_edit = FALSE,
-                     col_options = list("channel" = opts),
+                     col_options = list("channel" = unname(opts)),
                      col_names = "channel",
                      col_readonly = "name",
                      hide = TRUE,
