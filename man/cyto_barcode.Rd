@@ -18,8 +18,8 @@ overwritten, thus providing a non-interactive way to control how existing
 barcodes are handled.}
 }
 \value{
-barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
-  \code{"Event ID"} column added and annotated.
+barcoded cytoset or GatingSet with \code{"Sample-ID"} and/or
+  \code{"Event-ID"} column added and annotated.
 }
 \description{
 Adds a new parameter to each of the cytoframes in the cytoset called
