@@ -4003,8 +4003,8 @@ cyto_beads_sample <- function(...){
 #'   overwritten, thus providing a non-interactive way to control how existing
 #'   barcodes are handled.
 #'
-#' @return barcoded cytoset or GatingSey with \code{"Sample ID"} and/or
-#'   \code{"Event ID"} column added and annotated.
+#' @return barcoded cytoset or GatingSet with \code{"Sample-ID"} and/or
+#'   \code{"Event-ID"} column added and annotated.
 #'
 #' @importFrom flowWorkspace gs_cyto_data realize_view cytoset
 #'
@@ -4637,6 +4637,31 @@ cyto_compensate.GatingSet <- function(x,
                                       remove = FALSE,
                                       copy = FALSE,
                                       ...) {
+  
+  # WARNING
+  if(!is.null(cyto_spillover_extract(x))) {
+    message(
+      paste0(
+        "Compensation has already been applied to this ",
+        cyto_class(x, class = TRUE),
+        "!"
+      )
+    )
+    # ENQUIRE
+    if(interactive() & cyto_option("CytoExploreR_interactive")) {
+      opt <- cyto_enquire(
+        "Do you want to continue? (Y/N)",
+        options = c("Y", "T")
+      )
+    # ABORT
+    } else {
+      opt <- FALSE
+    }
+    # ABORT
+    if(!opt) {
+      return(x)
+    }
+  }
   
   # CYTOSET
   cs <- cyto_data_extract(
@@ -5713,16 +5738,44 @@ cyto_apply.flowSet <- function(x,
     } else {
       # VECTORS TO MATRIX
       if(is.null(dim(res[[1]]))) {
-        # ATTEMPT MATRIX CONVERSION
+        # ATTEMPT MATRIX CONVERSION - VECTORS DIFFERENT OF SIZES
         res <- structure(
           lapply(
             names(res),
             function(z){
+              matrix(
+                res[[z]],
+                nrow = length(res[[z]]),
+                ncol = 1,
+                dimnames = list(
+                  paste0(
+                    names(res[z]), 
+                    if(!is.null(names(res[[z]])) & length(res[[z]]) > 1) {
+                      paste0("|", names(res[[z]]))
+                    } else {
+                      ""
+                    }
+                  ),
+                  FUN_NAME
+                )
+              )
               tryCatch(
-                matrix(res[[z]],
-                       nrow = 1,
-                       dimnames = list(z,
-                                       names(res[[z]]))),
+                matrix(
+                  res[[z]],
+                  nrow = length(res[[z]]),
+                  ncol = 1,
+                  dimnames = list(
+                    paste0(
+                      names(res[z]), 
+                      if(!is.null(names(res[[z]])) & length(res[[z]]) > 1) {
+                        paste0("|", names(res[[z]]))
+                      } else {
+                        ""
+                      }
+                    ),
+                    FUN_NAME
+                  )
+                ),
                 error = function(e) {
                   return(res[[z]])
                 }
@@ -5735,29 +5788,31 @@ cyto_apply.flowSet <- function(x,
       # LIST OF MATRICES
       if(all(!is.null(LAPPLY(res, "dim")))) {
         # PREPARE & FORMAT MATRICES
-        res <- lapply(names(res), function(z){
-          # ROWNAMES
-          if(is.null(rownames(res[[z]]))) {
-            if(nrow(res[[z]]) > 1) {
-              rownames(res[[z]]) <- paste(z, 1:nrow(res[[z]]), sep = "|")
+        res <- lapply(
+          names(res), 
+          function(z){
+            # ROWNAMES
+            if(is.null(rownames(res[[z]]))) {
+              if(nrow(res[[z]]) > 1) {
+                rownames(res[[z]]) <- paste(z, 1:nrow(res[[z]]), sep = "|")
+              } else {
+                rownames(res[[z]]) <- z
+              }
             } else {
-              rownames(res[[z]]) <- z
+              if(!all(rownames(res[[z]]) == z)) {
+                rownames(res[[z]]) <- paste(z, rownames(res[[z]]), sep = "|")
+              }
             }
-          } else {
-            if(!all(rownames(res[[z]]) == z)) {
-              rownames(res[[z]]) <- paste(z, rownames(res[[z]]), sep = "|")
+            # COLNAMES
+            if(is.null(colnames(res[[z]]))) {
+              if(ncol(res[[z]]) == 1) {
+                colnames(res[[z]]) <- FUN_NAME
+              } else {
+                colnames(res[[z]]) <- paste0(FUN_NAME, "-", 1:ncol(res[[z]]))
+              }
             }
-          }
-          # COLNAMES
-          if(is.null(colnames(res[[z]]))) {
-            if(ncol(res[[z]]) == 1) {
-              colnames(res[[z]]) <- FUN_NAME
-            } else {
-              colnames(res[[z]]) <- paste0(FUN_NAME, "-", 1:ncol(res[[z]]))
-            }
-          }
-          return(res[[z]])
-        })
+            return(res[[z]])
+          })
         # RBIND MATRICES - SAME DIMENSIONS
         if(length(unique(LAPPLY(res, "ncol"))) == 1) {
           res <- do.call("rbind", res)
