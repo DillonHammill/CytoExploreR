@@ -75,7 +75,8 @@ cyto_stat_mean <- function(x,
     return(
       c("mean" = round(
         mean(x, na.rm = TRUE, ...),
-        round))
+        round)
+      )
     )
   # MATRIX - COLMEANS FOR SPEED
   } else {
@@ -559,10 +560,13 @@ cyto_stat_range <- function(x,
     return(
       suppressWarnings(
         round(
-          range(
-            x,
-            na.rm = TRUE,
-            ...
+          structure(
+            range(
+              x,
+              na.rm = TRUE,
+              ...
+            ),
+            names = c("min", "max")
           ),
           round
         )
