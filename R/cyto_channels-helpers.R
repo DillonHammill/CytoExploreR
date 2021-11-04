@@ -439,6 +439,7 @@ cyto_channels_extract <- function(x,
   
   # CHECK
   if (plot == TRUE) {
+    # res <- res[1:length(channels)]
     if (!length(res) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
@@ -587,6 +588,7 @@ cyto_markers_extract <- function(x,
   
   # CHECK
   if (plot == TRUE) {
+    # res <- res[1:length(channels)]
     if (!length(res) %in% c(1, 2)) {
       stop("Invalid number of supplied channels.")
     }
