@@ -274,7 +274,7 @@ cyto_gate_draw <- function(x,
                               select = select,
                               events = events,
                               seed = seed)
-
+  
   # GATING ---------------------------------------------------------------------
   
   # TITLE

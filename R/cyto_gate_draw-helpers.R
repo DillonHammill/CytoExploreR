@@ -131,6 +131,13 @@
     type[length(type)] <- NA
   }
   
+  # MUST CONTAIN A GATE
+  if(.all_na(type)) {
+    stop(
+      "'alias' must contain names for gated and negated populations!"
+    )
+  }
+  
   # RETURN VALID GATE TYPES ----------------------------------------------------
   
   # LIST
