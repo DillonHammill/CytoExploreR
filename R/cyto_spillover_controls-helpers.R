@@ -53,53 +53,73 @@
   
   # UPDATED EXPERIMENT DETAILS
   pd <- cyto_details(cs)
-
+  
   # IDENTIFY HIGHEST QUALITY CONTROLS
   if(any(duplicated(pd$channel))) {
     # SAMPLES TO KEEP
     cyto_ind <- c()
-    lapply(unique(pd$channel), function(z){
-      # MULTIPLE UNSTAINED CONTROLS - USE MIN AVERAGE CV
-      if(grepl("Unstained", z, ignore.case = TRUE)) {
-        # COMPUTE CV IN ALL CHANNELS
-        cv <- cyto_stats_compute(
-          cs[pd$channel == z],
-          channels = pd[, "channel"][pd[, "channel"] != z],
-          stat = "cv",
-          inverse = TRUE,
-          trans = axes_trans, 
-          details = FALSE,
-          markers = FALSE,
-          format = "wide"
-        )[, z]
-        cyto_ind <<- c(
-          cyto_ind, 
-          which.min(
-            rowMeans(cv[, pd[, "channel"][pd[, "channel"] != z]])
+    lapply(
+      unique(pd$channel), 
+      function(z){
+        # MULTIPLE UNSTAINED CONTROLS - USE MIN AVERAGE CV
+        if(grepl("Unstained", z, ignore.case = TRUE)) {
+          # UNSTAINED INDICES
+          ind <- cyto_match(
+            cs, 
+            channel = z,
+            exact = FALSE # UNLIKELY UNSTAINED PARTIAL MATCH
           )
-        )
-        # MULTIPLE STAINED CONTROLS
-      } else {
-        # COMPUTE CHANNEL MEDFI
-        cyto_ind <<- c(
-          cyto_ind,
-          which.max(
-            cyto_stats_compute(
-              cs[pd$channel == z],
-              channels = z,
-              stat = "median",
-              inverse = TRUE,
-              trans = axes_trans, 
-              details = FALSE,
-              markers = FALSE,
-              format = "wide"
-            )[, z]
-          ))
-      }
-    })
+          # COMPUTE CV IN ALL CHANNELS
+          cv <- cyto_stats_compute(
+            cs[ind],
+            channels = pd[, "channel"][pd[, "channel"] != z],
+            stat = "cv",
+            inverse = TRUE,
+            trans = axes_trans, 
+            details = FALSE,
+            markers = FALSE,
+            format = "wide"
+          )[, z]
+          cyto_ind <<- c(
+            cyto_ind, 
+            ind[
+              which.min(
+                rowMeans(cv[, pd[, "channel"][pd[, "channel"] != z]])
+              )
+            ]
+          )
+          # MULTIPLE STAINED CONTROLS
+        } else {
+          # CONTROL INDICES
+          ind <- cyto_match(
+            cs,
+            channel = z,
+            exact = TRUE
+          )
+          # COMPUTE CHANNEL MEDFI
+          medFI <- cyto_stats_compute(
+            cs[ind],
+            channels = z,
+            stat = "median",
+            inverse = TRUE,
+            trans = axes_trans, 
+            details = FALSE,
+            markers = FALSE,
+            format = "wide"
+          )
+          cyto_ind <<- c(
+            cyto_ind,
+            ind[
+              which.max(
+                medFI[, grep("median", colnames(medFI), ignore.case = TRUE)]
+              )
+            ]
+          )
+        }
+      })
     cs <- cs[cyto_ind]
   }
-
+  
   # UPDATE EXPERIMENT DETAILS
   pd <- cyto_details(cs)
   
