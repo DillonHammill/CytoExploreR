@@ -1432,6 +1432,9 @@ cyto_plot_complete <- function(...) {
   # RESET CYTO_PLOT_SAVE
   cyto_option("cyto_plot_save", FALSE)
   
+  # RESET CYTO_PLOT_DATA
+  cyto_option("cyto_plot_data", FALSE)
+  
   # RESET SAVED PARAMETERS
   cyto_plot_par(..., reset = TRUE)
 }
