@@ -566,75 +566,43 @@ cyto_plot <- function(x,
                                    "alias",
                                    "overlay",
                                    "select",
+                                   "merge_by",
                                    "events", 
                                    "seed",
                                    "negate")]
   
-  # HISTOGRAM LAYERS -----------------------------------------------------------
+  # ARGUMENTS ------------------------------------------------------------------
   
-  # TODO: ALLOW HIST_LAYERS TO ACCEPT GROUPING VARIABLES?
+  # HIST_LAYERS - DATA PREPARED IN .CYTO_PLOT_DATA()
+  args$hist_layers <- LAPPLY(args$x, "length")
   
-  # INDIVIDUAL LAYERS (NO OVERLAY)
-  if(length(args$channels) == 1 & all(LAPPLY(args$x, length) == 1)) {
-    # LEGEND TEXT
-    if(.all_na(args$legend_text)){
-      args$legend_text <- names(args$x)
-    }
-    # UNPACK X
-    args$x <- structure(
-      unlist(args$x),
-      names = LAPPLY(seq_along(args$x), function(z){
-        paste0(names(args$x)[z], "\n",names(args$x[[z]]))
-      })
-    )
-    args$x <- unlist(args$x)  
-    # HIST_LAYERS - USE ALL LAYERS
-    if(.all_na(args$hist_layers)) {
-      if(args$hist_stack == 0) {
-        args$hist_layers <- 1
-      } else {
-        args$hist_layers <- length(x)
-      }
-    }
-    # HIST_LAYERS
-    if(sum(args$hist_layers) != length(x)) {
-      # SAME # LAYERS PER PLOT
-      if(length(x) %% args$hist_layers != 0) {
-        stop(
-          stop("Each plot must have the same number of layers!")
-        )
-      }
-      # REPEAT HIST_LAYERS
-      args$hist_layers <- rep(args$hist_layers,
-                              length.out = length(args$x)/args$hist_layers)
-    }
-    # LAYERS
-    L <- LAPPLY(seq_along(args$x), function(z){
-      rep(z, length(x[[z]])) # index in args$gate
-    })
-    names(L) <- 1:length(L) # index in unlist(args$x)
-    L <- split(L, LAPPLY(seq_along(args$hist_layers), function(z){
-      rep(z, args$hist_layers[z])
-    }))
-    # SPLIT LAYERS
-    args$x <- lapply(L, function(z){
-      args$x[as.numeric(names(z))]
-    })
-    names(args$x) <- NULL
-    # GATES
+  # FORMAT GATES FOR HISTOGRAMS IN SAME PLOT
+  if(length(args$channels) == 1 & !all(args$hist_layers == 1)) {
+    # USE FIRST SET OF GATES PER GROUP
     if(!.all_na(args$gate)) {
-      args$gate <- lapply(L, function(z){
-        args$gate[[z[1]]] # use first set of gates
-      })
+      cnt <- 0
+      args$gate <- structure(
+        lapply(
+          seq_along(args$x),
+          function(z) {
+            ind <- seq(cnt, cnt + length(z))
+            cnt <<- cnt + length(z)
+            args$gate[ind][[1]]
+          }
+        ),
+        names = names(args$x)
+      )
+    # NO GATES
     } else {
-      args$gate <- rep(list(NA), length.out = length(args$x))
+      args$gate <- structure(
+        rep(
+          list(NA),
+          length.out = length(args$x)
+        ),
+        names = names(args$x)
+      )
     }
   }
-  
-  # REMOVE MERGE_BY & HIST_LAYERS
-  args <- args[!names(args) %in% c("merge_by")]
-  
-  # ARGUMENTS ------------------------------------------------------------------
   
   # TITLE - INHERIT NAMES
   if(all(LAPPLY(args$title, ".empty"))) {

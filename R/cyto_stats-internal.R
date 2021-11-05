@@ -698,7 +698,6 @@ cyto_stat_density <- function(x,
       kd$range <- c(0, max(kd$y))
     }
     return(kd)
-    
   # MATRIX
   } else {
     # SORT LIMITS
