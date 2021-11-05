@@ -5681,7 +5681,7 @@ cyto_apply.flowSet <- function(x,
       lapply(cyto_names(x), function(z){
         output <- cyto_slot(
           FUN(
-            cyto_exprs(x[[z]]),
+            cyto_exprs(x[[z]], drop = FALSE),
             ...
           ),
           slot = slot
@@ -5695,7 +5695,7 @@ cyto_apply.flowSet <- function(x,
       lapply(cyto_names(x), function(z){
         output <- cyto_slot(
           apply(
-            exprs(x[[z]]),
+            cyto_exprs(x[[z]], drop = FALSE),
             2, 
             FUN, 
             ...
@@ -5709,7 +5709,7 @@ cyto_apply.flowSet <- function(x,
       lapply(cyto_names(x), function(z){
         output <- cyto_slot(
           apply(
-            exprs(x[[z]]),
+            cyto_exprs(x[[z]], drop = FALSE),
             1, 
             FUN,
             ...
@@ -5736,29 +5736,13 @@ cyto_apply.flowSet <- function(x,
       )
       # VECTOR/MATRIX/LIST
     } else {
-      # VECTORS TO MATRIX
-      if(is.null(dim(res[[1]]))) {
+      # VECTORS TO MATRIX - CANNOT USE DIM HERE - S4 OBJECTS NO DIMS
+      if(is.atomic(res[[1]])) {
         # ATTEMPT MATRIX CONVERSION - VECTORS DIFFERENT OF SIZES
         res <- structure(
           lapply(
             names(res),
             function(z){
-              matrix(
-                res[[z]],
-                nrow = length(res[[z]]),
-                ncol = 1,
-                dimnames = list(
-                  paste0(
-                    names(res[z]), 
-                    if(!is.null(names(res[[z]])) & length(res[[z]]) > 1) {
-                      paste0("|", names(res[[z]]))
-                    } else {
-                      ""
-                    }
-                  ),
-                  FUN_NAME
-                )
-              )
               tryCatch(
                 matrix(
                   res[[z]],
@@ -5794,13 +5778,22 @@ cyto_apply.flowSet <- function(x,
             # ROWNAMES
             if(is.null(rownames(res[[z]]))) {
               if(nrow(res[[z]]) > 1) {
-                rownames(res[[z]]) <- paste(z, 1:nrow(res[[z]]), sep = "|")
+                rownames(res[[z]]) <- paste(
+                  z, 
+                  1:nrow(res[[z]]), 
+                  sep = "|"
+                )
               } else {
                 rownames(res[[z]]) <- z
               }
             } else {
-              if(!all(rownames(res[[z]]) == z)) {
-                rownames(res[[z]]) <- paste(z, rownames(res[[z]]), sep = "|")
+              # CYTO_NAMES MISSING IN OUTPUT - CHECK FIRST ENTRY ONLY
+              if(!grepl(z, rownames(res[[z]])[1], fixed = TRUE)) {
+                rownames(res[[z]]) <- paste(
+                  z, 
+                  rownames(res[[z]]), 
+                  sep = "|"
+                )
               }
             }
             # COLNAMES
@@ -5815,7 +5808,7 @@ cyto_apply.flowSet <- function(x,
           })
         # RBIND MATRICES - SAME DIMENSIONS
         if(length(unique(LAPPLY(res, "ncol"))) == 1) {
-          res <- do.call("rbind", res)
+          res <- do.call("rbind", unname(res))
         }
       }
     }
