@@ -157,11 +157,13 @@ cyto_stats_compute <- function(x,
   # EXTRACT DATA ---------------------------------------------------------------
   
   # ALIAS
-  alias <- cyto_data_extract(x,
-                             parent = alias,
-                             select = select,
-                             channels = channels,
-                             copy = TRUE)
+  alias <- cyto_data_extract(
+    x,
+    parent = alias,
+    select = select,
+    channels = channels,
+    copy = TRUE
+  )
   
   # ALIAS NAMES
   if(is.null(names(alias))) {
@@ -171,11 +173,13 @@ cyto_stats_compute <- function(x,
   # EXTRACT PARENT POPULATIONS
   if(cyto_class(x, "GatingSet")) {
     if(!is.null(parent)) {
-      parent <- cyto_data_extract(x,
-                                  parent = parent,
-                                  select = select,
-                                  channels = channels,
-                                  copy = TRUE)
+      parent <- cyto_data_extract(
+        x,
+        parent = parent,
+        select = select,
+        channels = channels,
+        copy = TRUE
+      )
       # PARENT NAMES
       if(is.null(names(parent))) {
         names(parent) <- paste0("parent-", 1:length(parent))
@@ -234,27 +238,38 @@ cyto_stats_compute <- function(x,
     } else if (grepl("^freq$", stat_strip)) {
       # PARENTAL COUNTS
       parent_counts <- structure(
-        lapply(seq_along(parent), function(z){
-          res <- cyto_apply(parent[[z]],
-                            "nrow",
-                            input = "matrix",
-                            copy = FALSE)
-          colnames(res) <- names(parent)[z]
-          return(res)
-        }), names = names(parent)
+        lapply(
+          seq_along(parent), 
+          function(z){
+            res <- cyto_apply(
+              parent[[z]],
+              "nrow",
+              input = "matrix",
+              copy = FALSE
+            )
+            colnames(res) <- names(parent)[z]
+            return(res)
+          }
+        ), 
+        names = names(parent)
       )
       parent_counts <- do.call("cbind", parent_counts)
       # ALIAS COUNTS
       alias_counts <- structure(
-        lapply(alias, function(z){
-          res <- cyto_apply(z,
-                            "nrow",
-                            input = "matrix",
-                            copy = FALSE)
-          res <- res[, rep(1, ncol(parent_counts)), drop = FALSE]
-          colnames(res) <- colnames(parent_counts)
-          return(res)
-        }), names = names(alias)
+        lapply(
+          alias, 
+          function(z){
+            res <- cyto_apply(
+              z,
+              "nrow",
+              input = "matrix",
+              copy = FALSE
+            )
+            res <- res[, rep(1, ncol(parent_counts)), drop = FALSE]
+            colnames(res) <- colnames(parent_counts)
+            return(res)
+          }
+        ), names = names(alias)
       )
       # FREQUENCY
       res <- lapply(alias_counts, function(z){

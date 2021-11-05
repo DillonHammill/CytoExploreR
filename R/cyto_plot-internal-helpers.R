@@ -108,7 +108,6 @@
   if(cyto_class(x, "GatingSet", TRUE)) {
     gs <- x
     gh <- x[[1]]
-  
   # GATINGHIERARCHY
   } else if(cyto_class(x, "GatingHierarchy", TRUE)) {
     gs <- NULL
@@ -139,9 +138,16 @@
   x <- structure(
     lapply(x, function(z){
       if(is.null(gh)) {
-        return(list(z))
+        return(
+          list(z)
+        )
       } else {
-        return(structure(list(z), names = parent))
+        return(
+          structure(
+            list(z), 
+            names = parent
+          )
+        )
       }
     }),
     names = names(x)
@@ -263,9 +269,12 @@
     }
     # COMBINE X & OVERLAY
     x <- structure(
-      lapply(seq_along(x), function(z){
-        c(x[[z]], overlay[[z]])
-      }),
+      lapply(
+        seq_along(x), 
+        function(z) {
+          c(x[[z]], overlay[[z]])
+        }
+      ),
       names = names(x)
     )
   }
@@ -462,13 +471,47 @@
     names = names(x)
   )
 
-  # HIST_LAYERS SUPPLIED
-  if(!.all_na(hist_layers)) {
-    
-  
-  } else {
-    # CHECK CHANNELS
-    
+  # FORMAT DATA FOR HISTOGRAMS
+  if(length(channels) == 1 & all(LAPPLY(x, "length") == 1)) {
+    # HIST_LAYERS
+    if(.all_na(hist_layers)) {
+      if(hist_stack == 0) {
+        hist_layers <- rep(1, length(x))
+      } else {
+        hist_layers <- length(x)
+      }
+    }
+    # CHECK HIST_LAYERS
+    if(sum(hist_layers) != length(x)) {
+      # SAME NUMBER OF LAYERS PER PLOT
+      if(length(x) %% hist_layers[1] != 0) {
+        stop(
+          "Each plot must have the same number of layers!"
+        )
+      }
+      # REPEAT HIST_LAYERS
+      hist_layers <- rep(
+        hist_layers, 
+        length.out = length(x)/hist_layers[1]
+      )
+    }
+    # UNPACK X
+    x <- structure(
+      unlist(x),
+      names = names(x)
+    )
+    # FORMAT X
+    L <- split(seq_along(x), rep(1:(length(x)/hist_layers[1]),
+               each = hist_layers[1]))
+    x <- structure(
+      lapply(
+        L,
+        function(z) {
+          x[z]
+        }
+      ),
+      names = NULL
+    )
   }
   
   # DATA READY FOR CYTO_PLOT
@@ -895,7 +938,7 @@
       )
     }
   })
-  data_range <- do.call("rbind", data_range)
+  data_range <- do.call("rbind", unname(data_range))
   
   # MIN/MAX DATA RANGE
   data_range <- lapply(seq_len(ncol(data_range)), function(z){
@@ -3110,6 +3153,7 @@
       x[[1]][[1]], 
       channels = point_col[1]
     )
+    
     # KEY RANGES REQUIRED
     if(is.null(key_range)) {
       # CALIBRATION SETTINGS
@@ -3134,7 +3178,7 @@
           lapply(
             seq_along(x),
             function(z) {
-              # COMPUTE BINNED COUNTS
+              # COMPUTE DATA RANGE
               cyto_apply(
                 x[[z]][[1]],
                 "cyto_stat_range",
@@ -3654,32 +3698,39 @@
   d <- structure(
     lapply(x, function(cs){
       # HISTOGRAM
-      cyto_apply(cs, 
-                 "cyto_stat_density",
-                 input = "matrix",
-                 channels = channels,
-                 copy = FALSE,
-                 stat = hist_stat,
-                 bins = hist_bins,
-                 smooth = hist_smooth,
-                 limits = matrix(
-                   xlim,
-                   ncol = 1,
-                   dimnames = list(c("min", "max"),
-                                   channels)
-                 ),
-                 simplify = FALSE)[[1]][[1]]
+      cyto_apply(
+        cs, 
+        "cyto_stat_density",
+        input = "matrix",
+        channels = channels,
+        copy = FALSE,
+        stat = hist_stat,
+        bins = hist_bins,
+        smooth = hist_smooth,
+        limits = matrix(
+          xlim,
+          ncol = 1,
+          dimnames = list(
+            c("min", "max"),
+            channels
+          )
+        ),
+        simplify = FALSE
+      )[[1]][[1]]
     }), names = names(x)
   )
   
   # STACKING - RANGE STORED IN DENSITY OBJECT -  CANNOT ROUND DENSITY
-  hist_heights <- LAPPLY(d, function(D){
-    if(.all_na(D)){
-      return(NA)
-    }else{
-      D$range[2]
+  hist_heights <- LAPPLY(
+    d, 
+    function(D){
+      if(.all_na(D)){
+        return(NA)
+      }else{
+        D$range[2]
+      }
     }
-  })
+  )
   hist_stack <- max(hist_heights, na.rm = TRUE) * hist_stack
   hist_levels <- c(0, seq_along(x)) * hist_stack
   d <- lapply(seq_along(d), function(z){
