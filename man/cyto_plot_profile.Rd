@@ -14,7 +14,8 @@ cyto_plot_profile(
   order = "channels",
   layout,
   hist_layers = NA,
-  hist_stack = 0,
+  hist_stack = 0.5,
+  axes_trans = NA,
   header,
   ...
 )
@@ -63,6 +64,14 @@ default. Each plot must contain the same number of histograms.}
 
 \item{hist_stack}{numeric [0,1] indicating the degree of stacking for
 histograms, set to \code{0} by default.}
+
+\item{axes_trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+to transform the channels of the supplied data. \code{cyto_plot} does not
+support in-line transformations and as such the transformations should be
+applied to the data prior to plotting. The transformerList is used
+internally to ensure that the axes on the constructed plots are
+appropriately labelled.}
 
 \item{header}{can be set to NA to remove headers from plots. Alternatively,
 users can supply a vector of headers for each page, this can be tricky to

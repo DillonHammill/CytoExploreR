@@ -92,9 +92,9 @@
         list(
           c(
             structure(
-              list(x)
+              list(x),
+              names = cyto_names(x)
             ),
-            names = cyto_names(x),
             overlay
           )
         )
