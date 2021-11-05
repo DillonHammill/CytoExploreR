@@ -54,7 +54,7 @@ cyto_channels <- function(x,
   
   # LIST
   if(cyto_class(x, "list", TRUE)) {
-    x <- x[[1]]
+    x <- unlist(x)[[1]]
   }
   
   # CHANNELS
@@ -213,7 +213,7 @@ cyto_markers <- function(x,
   
   # LIST
   if(cyto_class(x, "list", TRUE)) {
-    x <- x[[1]]
+    x <- unlist(x)[[1]]
   }
   
   # FLOWFRAME/FLOWSET
