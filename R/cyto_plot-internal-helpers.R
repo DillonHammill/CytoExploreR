@@ -58,7 +58,7 @@
 
 #' Prepare data for cyto_plot
 #' @return list of singular cytosets for each plot
-#' @importFrom flowWorkspace cytoset
+#' @importFrom flowWorkspace cytoset cf_get_uri
 #' @importFrom purrr transpose
 #' @noRd
 .cyto_plot_data <- function(x,
@@ -75,9 +75,18 @@
 
   # DATA PREPARED ALREADY ------------------------------------------------------
   
-  # BYPASS DATA PREPARARTION IN CYTO_PLOT CALL 
-  if(!is.null(cyto_option("cyto_plot_method")) & 
-     cyto_option("cyto_plot_data")) {
+  # BYPASS DATA PREPARTION
+  if(cyto_class(x, "list", TRUE)) {
+    # LIST OF CYTOSET LISTS
+    if(all(LAPPLY(x, "cyto_class", "flowSet"))) {
+      return(
+        list(x)
+      )
+    }
+    return(x)
+  # .CYTO_PLOT_DATA() CALLED
+  } else if(!is.null(cyto_option("cyto_plot_method")) & 
+        cyto_option("cyto_plot_data")) {
     if(.all_na(overlay)) {
       return(
         list(
@@ -104,18 +113,39 @@
   
   # CHECKS ---------------------------------------------------------------------
   
+  # INITIALISE GS/GH
+  gs <- NULL
+  gh <- NULL
+  
   # GATINGSET
   if(cyto_class(x, "GatingSet", TRUE)) {
     gs <- x
     gh <- x[[1]]
   # GATINGHIERARCHY
   } else if(cyto_class(x, "GatingHierarchy", TRUE)) {
-    gs <- NULL
     gh <- x
   # CYTOSET
   } else if(cyto_class(x, "flowSet")) {
-    gs <- NULL
-    gh <- NULL
+    # DO NOTHING
+  # CYTOFRAME
+  } else if(cyto_class(x, "flowFrame")) {
+    # CYTOFRAME -> CYTOSET
+    x <- cytoset(
+      structure(
+        list(
+          cyto_convert(x)
+        ),
+        names = file_ext_remove(
+          basename(
+            cf_get_uri(x)
+          )
+        )
+      )
+    )
+  # MATRIX
+  } else if(cyto_class(x, c("data.frame", "matrix"))) {
+    # MATRIX -> CYTOSET
+    x <- as(x, "cytoset")
   # UNSUPPORTED OBJECT
   } else {
     stop(
@@ -229,9 +259,11 @@
     if(!cyto_class(overlay, "list", TRUE)) {
       overlay <- structure(
         list(overlay),
-        names = ifelse(length(overlay) == 1, 
-                       cyto_names(overlay), 
-                       NULL)
+        names = ifelse(
+          length(overlay) == 1, 
+          cyto_names(overlay), 
+          NULL
+        )
       )
     }
     # OVERLAY - SELECT & GROUP
@@ -239,8 +271,13 @@
       lapply(seq_along(overlay), function(z){
         cs <- overlay[[z]]
         # CHECK
-        if(cyto_class(cs, "flowSet") == FALSE) {
-          stop("cyto_plot only supports cytosets!")
+        if(!cyto_class(cs, "flowSet")) {
+          cs <- tryCatch(
+            as(cs, "cytoset"),
+            error = function(e) {
+              stop("cyto_plot only supports cytosets for overlays!")
+            }
+          )
         }
         # SELECT - IF POSSIBLE
         cs <- tryCatch(
@@ -542,20 +579,23 @@
                              select = NULL,
                              negate = FALSE) {
   
-  # SELECT
-  if(!.empty(select, null = TRUE)) {
-    x <- cyto_select(x, select)
+  # X - PREPARED LIST of CYTOSETS PER GROUP (DATA PREPARED ALREADY)
+  if(cyto_class(x, "list")) {
+    grps <- names(x)
+    names(grps) <- grps
+  # DATA NOT PREPARED YET
+  } else {
+    # EXPERIMENTAL GROUPS
+    grps <- cyto_groups(x,
+                        select = select,
+                        group_by = merge_by,
+                        details = TRUE)
   }
-  
-  # EXPERIMENTAL GROUPS
-  grps <- cyto_groups(x,
-                      group_by = merge_by,
-                      details = TRUE)
   
   # ALIAS - GATINGHIERARCHY/GATINGSET
   if(!.all_na(alias)) {
     # CYTOSET
-    if(cyto_class(x, "flowSet")) {
+    if(!cyto_class(x, "GatingSet")) {
       message(
         "'alias' is only supported for GatingHierarchy and GatingSet objects"
       )
@@ -692,23 +732,27 @@
       }
       # STORE FILTER NAMES IN LIST NAMES
       ids <- LAPPLY(gate, function(z){
-        tryCatch(z@filterId,
-                 error = function(e){
-                  return(NA)
-                })
+        tryCatch(
+          z@filterId,
+          error = function(e){
+            return(NA)
+          })
       })
       names(gate)[!is.na(ids)] <- ids[!is.na(ids)]
       # REPEAT GATES PER GROUP
       gate <- structure(
-        lapply(names(grps), function(z){
-          return(gate)
-        }),
+        lapply(
+          names(grps), 
+          function(z){
+            return(gate)
+          }
+        ),
         names = names(grps)
       )
     # GATE OBJECTS SUPPLIED IN LIST
     } else {
       # LIST OF GATE OBJECT LISTS
-      if(cyto_class(x[[1]], "list", TRUE)) {
+      if(cyto_class(gate[[1]], "list", TRUE)) {
         # LIST OF GATE OBJECTS PER GROUP
         if(length(gate)!= length(grps)) {
           gate <- rep(gate, length.out = length(grps))
@@ -743,9 +787,12 @@
         names(gate)[!is.na(ids)] <- ids[!is.na(ids)]
         # REPEAT GATES PER GROUP
         gate <- structure(
-          lapply(names(grps), function(z){
-            return(gate)
-          }),
+          lapply(
+            names(grps), 
+            function(z){
+              return(gate)
+            }
+          ),
           names = names(grps)
         )
       }

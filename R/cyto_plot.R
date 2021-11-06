@@ -480,15 +480,6 @@ cyto_plot <- function(x,
     })
   }
   
-  # CLASS CHECK ----------------------------------------------------------------
-  
-  # CYTOSET/GATINGHIERARCHY/GATINGSET
-  if(!cyto_class(x, c("flowSet", "GatingSet"))) {
-    stop(
-      "cyto_plot only supports cytoset, GatingHierarchy or GatingSet objects!"
-      )
-  }
-  
   # CYTO_PLOT_THEME ------------------------------------------------------------
   
   # ARGUMENTS
@@ -534,7 +525,9 @@ cyto_plot <- function(x,
     }
   # AXES_TRANS - EXTRACT
   } else {
-    args$axes_trans <- cyto_transformers_extract(args$x)
+    if(cyto_class(args$x, "GatingSet")) {
+      args$axes_trans <- cyto_transformers_extract(args$x)
+    }
   }
   
   # # HEADER - HEADER ADDED TO COMPLETE LAYOUT
@@ -545,18 +538,13 @@ cyto_plot <- function(x,
   
   # GATES PREPARATION ----------------------------------------------------------
   
+  # PASS GATES MANUALLY IF DATA ALREADY PREPARED BY .CYTO_PLOT_DATA()
+  # CANNOT EXTRACT GATES FROM CYTOSETS
+  
   # GATE - LIST OF GATE OBJECT LISTS
   args$gate <- cyto_func_execute(".cyto_plot_gates", args)
   
   # DATA PREPARATION -----------------------------------------------------------
-  
-  # # SORT_BY - CONTROL ORDER WITHOUT MERGING
-  # if(args$merge_by == "name") {
-  #   if(!.empty(args$sort_by)) {
-  #     args$x <- cyto_sort_by(args$x, args$sort_by)
-  #   }
-  # }
-  # args <- args[!names(args) %in% "sort_by"]
   
   # X - LIST OF CYTOSET LISTS - NO BARCODING
   args$x <- cyto_func_execute(".cyto_plot_data", args)
@@ -635,13 +623,18 @@ cyto_plot <- function(x,
       if(!is.null(names(args$x))) {
         args$title <- names(args$x)
       }
-      # POPULATIONS
+      # POPULATIONS/SAMPLES
       if(!is.null(LAPPLY(args$x, "names"))) {
-        args$title <- paste(args$title,
-                            LAPPLY(args$x, function(z){
-                              names(z)[1] # BASE LAYER
-                            }),
-                            sep = "\n")
+        args$title <- paste(
+          args$title,
+          LAPPLY(
+            args$x, 
+            function(z) {
+              names(z)[1] # BASE LAYER
+            }
+          ),
+          sep = "\n"
+        )
       }
     }
   }
