@@ -57,24 +57,36 @@ cyto_channels <- function(x,
     x <- unlist(x)[[1]]
   }
   
-  # CHANNELS
+  # CHANNELS - FLOWFRAME/FLOWSET
   if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
     channels <- BiocGenerics::colnames(x)
-  } else {
+  # CHANNELS - CYTOFRAME/CYTOSET/GATINGSET
+  } else if(cyto_class(x, c("cytoframe", "cytoset", "GatingSet"))) {
     channels <- flowWorkspace::colnames(x)
+  # CHANNELS - DATA.FRAME/MATRIX
+  } else {
+    channels <- colnames(x)
   }
   
   # SELECT
   if(!is.null(select)){
-    ind <- unique(LAPPLY(select, function(z){
-      which(
-        suppressWarnings(
-          grepl(z, 
+    ind <- unique(
+      LAPPLY(
+        select, 
+        function(z){
+          which(
+            suppressWarnings(
+              grepl(
+                z, 
                 channels, 
                 ignore.case = TRUE,
-                ...))
+                ...
+              )
+            )
+          )
+        }
       )
-    }))
+    )
     channels <- channels[ind]
   }
   
@@ -149,8 +161,10 @@ cyto_channels <- function(x,
 "cyto_channels<-" <- function(x, value) {
   if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
     BiocGenerics::colnames(x) <- value
-  } else {
+  } else if(cyto_class(x, c("cytoframe", "cytoset", "GatingSet"))) {
     flowWorkspace::colnames(x) <- value
+  } else {
+    colnames(x) <- value
   }
   return(x)
 }
@@ -219,9 +233,12 @@ cyto_markers <- function(x,
   # FLOWFRAME/FLOWSET
   if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
     markers <- flowCore::markernames(x)
-    # CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET
-  } else {
+  # CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET
+  } else if(cyto_class(x, c("cytoframe", "cytoset", "GatingSet"))) {
     markers <- flowWorkspace::markernames(x)
+  # MATRIX/DATA.FRAME
+  } else {
+    markers <- NULL
   }
   
   # INCONSISTENT MARKERS - ALLOW IF SOME SAMPLES UNANNOTATED
@@ -237,14 +254,24 @@ cyto_markers <- function(x,
     # SELECT
     if(!is.null(select)){
       ind <- unique(LAPPLY(select, function(z){
-        which(suppressWarnings(grepl(z,
-                                     markers,
-                                     ignore.case = TRUE,
-                                     ...)) |
-                suppressWarnings(grepl(z, 
-                                       names(markers),
-                                       ignore.case = TRUE,
-                                       ...)))
+        which(
+          suppressWarnings(
+            grepl(
+              z,
+              markers,
+              ignore.case = TRUE,
+              ...
+            )
+          ) |
+          suppressWarnings(
+            grepl(
+              z, 
+              names(markers),
+              ignore.case = TRUE,
+              ...
+            )
+          )
+        )
       }))
       markers <- markers[ind]
     }
@@ -263,7 +290,6 @@ cyto_markers <- function(x,
                                                       ...)))]
       }
     }
-    
     # APPEND
     if(append) {
       markers <- paste0(
