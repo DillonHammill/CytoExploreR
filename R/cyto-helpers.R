@@ -2935,13 +2935,15 @@ cyto_merge_by <- function(x,
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @noRd
-setAs("cytoset",
-      "cytoframe",
-      function(from){
-        flowFrame_to_cytoframe(
-          as(from, "flowFrame")
-        )
-      })
+setAs(
+  "cytoset",
+  "cytoframe",
+  function(from){
+    flowFrame_to_cytoframe(
+      as(from, "flowFrame")
+    )
+  }
+)
 
 #' Coerce flowSet to cytoframe
 #' 
@@ -2951,13 +2953,105 @@ setAs("cytoset",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @noRd
-setAs("flowSet",
-      "cytoframe",
-      function(from){
-        flowFrame_to_cytoframe(
-          as(from, "flowFrame")
+setAs(
+  "flowSet",
+  "cytoframe",
+  function(from){
+    flowFrame_to_cytoframe(
+      as(from, "flowFrame")
+    )
+  }
+)
+
+#' matrix to cytoframe
+#' 
+#' @importFrom flowWorkspace flowFrame_to_cytoframe
+#' @importFrom flowCore flowFrame
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "matrix",
+  "cytoframe",
+  function(from) {
+    flowFrame_to_cytoframe(
+      flowFrame(
+        data.matrix(from)
+      )
+    )
+  }
+)
+
+#' data.frame to cytoframe
+#' 
+#' @importFrom flowWorkspace flowFrame_to_cytoframe
+#' @importFrom flowCore flowFrame
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "data.frame",
+  "cytoframe",
+  function(from) {
+    flowFrame_to_cytoframe(
+      flowFrame(
+        data.matrix(from)
+      )
+    )
+  }
+)
+
+#' data.frame to cytoset
+#' 
+#' @importFrom flowWorkspace cytoset cf_get_uri
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "data.frame",
+  "cytoset",
+  function(from) {
+    cf <- as(from, "cytoframe")
+    cytoset(
+      structure(
+        list(cf),
+        names = file_ext_remove(
+          basename(
+            cf_get_uri(cf)
+          )
         )
-      })
+      )
+    )
+  }
+)
+
+#' matrix to cytoset
+#' 
+#' @importFrom flowWorkspace cytoset cf_get_uri
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "matrix",
+  "cytoset",
+  function(from) {
+    cf <- as(from, "cytoframe")
+    cytoset(
+      structure(
+        list(cf),
+        names = file_ext_remove(
+          basename(
+            cf_get_uri(cf)
+          )
+        )
+      )
+    )
+  }
+)
 
 ## CYTO_SPLIT ------------------------------------------------------------------
 
