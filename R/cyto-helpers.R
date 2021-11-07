@@ -1,118 +1,186 @@
 ## CYTO_IMPORT -----------------------------------------------------------------
 
-#' Import cytometry data analyzed using other platforms
+#' Import data from other platforms using CytoML
+#'
+#'
 #' @param path path to xml or wsp file and associated fcs files.
-#' @noRd
+#' @param type indicates the type of data to import, options include
+#'   \code{"flowJo"}, \code{"cytobank"} or \code{"diva"}. Set to \code{"flowJo"}
+#'   by default.
+#' @param markers logical indicating whether a call should be made to
+#'   \code{cyto_markers_edit} to update the markers associated with channels in
+#'   the loaded samples, set to TRUE by default. The name of the csv to which
+#'   these details will be supplied can also be passed to this argument.
+#' @param details logical indicating whether a call should be made to
+#'   \code{cyto_details_edit} to update the experimental details associated with
+#'   the loaded samples, set to TRUE by default. The name of the csv to which
+#'   these details will be supplied can also be passed to this argument.
+#' @param gatingTemplate passed to \code{cyto_gatingTemplate_generate()} to
+#'   create a CytoExploreR friendly gatingTemplate based on gates applied to the
+#'   loaded samples.
+#' @param ... additional arguments passed to \code{cytobank_to_gatingset()},
+#'   \code{flowjo_to_gatingset} or \code{diva_to_gatingset}. Refer to
+#'   documentation in CytoML package for more details.
+#'
+#' @return a GatingSet and write new gatingTemplate to CSV file.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#' # flowJo
+#' gs <- cyto_import(
+#'   "flowjo-samples",
+#'   gatingTemplate = "gatingTemplate.csv"
+#' )
+#' }
+#'
+#' @export
 cyto_import <- function(path = ".",
                         type = "flowJo",
-                        select = NULL,
-                        exclude = NULL,
-                        sort = TRUE,
-                        barcode = FALSE,
-                        restrict = FALSE,
                         markers = TRUE,
                         details = TRUE,
-                        gatingTemplate = NULL, ...) {
+                        gatingTemplate = NULL,
+                        ...) {
   
-  # CytoML EXISTS
-  if (requireNamespace("CytoML")) {
-    
-    # FILES IN DIRECTORY
-    file_paths <- list.files(path,
-                             full.names = TRUE)
-    
-    # FILE NAMES
-    file_names <- basename(file_paths)
-    
-    # FILE EXTENSIONS
-    file_ext <- file_ext(file_names)
-    
-    # FCS FILES
-    fcs_files <- file_paths[!file_ext %in% c("", "fcs", "FCS")]
-    
-    # IMPORT CYTOBANK TO GATINGSET
-    if(grepl("cytobank", type, ignore.case = TRUE)){
-      # ACS
-      if(any(grepl("acs", file_ext, ignore.case = TRUE))) {
-        acs_file <- file_paths[which(file_ext == "acs")]
-        cytobank_exp <- CytoML::open_cytobank_experiment(acs_file)
-        gs <- CytoML::cytobank_to_gatingset(cytobank_exp)
-        # XML 
-      }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
-        xml_file <- file_paths[which(grepl(file_ext, 
-                                           "xml", 
-                                           ignore.case = TRUE))]
-        gs <- CytoML::cytobank_to_gatingset(xml_file, fcs_files)
-      }
-      # IMPORT DIVA TO GATINGSET
-    }else if(grepl("diva", type, ignore.case = TRUE)){
+  # TODO: ADD SUPPORT FOR SELECT|EXCLUDE|SORT|RESTRICT
+  # PRE OR POST GATINGSET?
+  
+  # REQUIRE CYTOML
+  cyto_require(
+    "CytoML",
+    source = "BioC",
+    repo = "RGLab/CytoML",
+    ref = paste(
+      "Finak G, Jiang W, Gottardo R (2018). CytoML for cross-platform",
+      "cytometry data sharing. Cytometry A,",
+      "93(12)."
+    )
+  )
+  
+  # FILES IN DIRECTORY
+  file_paths <- list.files(path,
+                           full.names = TRUE)
+  
+  # FILE NAMES
+  file_names <- basename(file_paths)
+  
+  # FILE EXTENSIONS
+  file_ext <- file_ext(file_names)
+  
+  # FCS FILES
+  fcs_files <- file_paths[!file_ext %in% c("", "fcs", "FCS")]
+  
+  # IMPORT CYTOBANK TO GATINGSET
+  if(grepl("cytobank", type, ignore.case = TRUE)){
+    # ACS
+    if(any(grepl("acs", file_ext, ignore.case = TRUE))) {
+      acs_file <- file_paths[which(file_ext == "acs")]
+      cytobank_exp <- cyto_func_call(
+        "CytoML::open_cytobank_experiment",
+        list(acs_file)
+      )
+      gs <- cyto_func_call(
+        "CytoML::cytobank_to_gatingset",
+        list(cytobank_exp, ...)
+      )
+    # XML 
+    }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
       xml_file <- file_paths[which(grepl(file_ext, 
                                          "xml", 
                                          ignore.case = TRUE))]
-      diva_ws <- CytoML::open_diva_xml(xml_file)
-      gs <- CytoML::diva_to_gatingset(diva_ws, fcs_files)
-      # IMPORT FLOWJO TO GATINGSET
-    }else if(grepl("flowjo", type, ignore.case = TRUE)){
-      # WPS
-      if(any(grepl("wsp", file_ext, ignore.case = TRUE))){
-        wps_file <- file_paths[which(grepl(file_ext, 
-                                           "wps", 
-                                           ignore.case = TRUE))]
-        gs <- CytoML::flowjo_to_gatingset(wps_file, path = path)
-        # XML
-      }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
-        xml_file <- file_paths[which(grepl(file_ext, 
-                                           "xml", 
-                                           ignore.case = TRUE))]
-        flowjo_ws <- CytoML::open_flowjo_xml(xml_file)
-        gs <- CytoML::flowjo_to_gatingset(flowjo_ws, fcs_files)
-      }
+      gs <- cyto_func_call(
+        "CytoML::cytobank_to_gatingset",
+        list(xml_file, fcs_files)
+      )
     }
-    
-    # MARKERS
-    if (markers != FALSE) {
-      message("Assigning markers to channels...")
-      # DEFAULT FILE NAME
-      if (markers == TRUE) {
-        gs <- cyto_markers_edit(gs)
-      } else {
-        gs <- cyto_markers_edit(gs,
-                                file = markers
-        )
-      }
+  # IMPORT DIVA TO GATINGSET
+  }else if(grepl("diva", type, ignore.case = TRUE)){
+    xml_file <- file_paths[which(grepl(file_ext, 
+                                       "xml", 
+                                       ignore.case = TRUE))]
+    diva_ws <- cyto_func_call(
+      "CytoML::open_diva_xml",
+      list(xml_file)
+    )
+    gs <- cyto_func_call(
+      "CytoML::diva_to_gatingset",
+      list(diva_ws, fcs_files, ...)
+    )
+  # IMPORT FLOWJO TO GATINGSET
+  }else if(grepl("flowjo", type, ignore.case = TRUE)){
+    # WSP
+    if(any(grepl("wsp", file_ext, ignore.case = TRUE))){
+      wsp_file <- file_paths[which(grepl(file_ext, 
+                                         "wps", 
+                                         ignore.case = TRUE))]
+      gs <- cyto_func_call(
+        "CytoML::flowjo_to_gatingset",
+        list(wsp_file, path = path, ...)
+      )
+    # XML
+    }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
+      xml_file <- file_paths[which(grepl(file_ext, 
+                                         "xml", 
+                                         ignore.case = TRUE))]
+      flowjo_ws <- cyto_func_call(
+        "CytoML::open_flowjo_xml",
+        list(xml_file)
+      )
+      gs <- cyto_func_call(
+        "CytoML::flowjo_to_gatingset",
+        list(flowjo_ws, fcs_files, ...)
+      )
     }
-    
-    # EXPERIMENT DETAILS
-    if (details != FALSE) {
-      message("Updating experiment details...")
-      if (details == TRUE) {
-        gs <- cyto_details_edit(gs)
-      } else {
-        gs <- cyto_details_edit(gs,
-                                file = details
-        )
-      }
-    }
-    
-    # GENERATE GATINGTEMPLATE
-    if(!is.null(gatingTemplate)){
-      # APPEND FILE EXTENSION
-      gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-      # CREATE GATINGTEMPLATE
-      message("Creating CytoExploreR gatingTemplate...")
-      cyto_gatingTemplate_generate(gs, gatingTemplate)
-    }
-    
-    # RETURN GATINGSET
-    return(gs)
-    
-    # CytoML MISSING
-  } else {
-    stop(paste0(
-      "cyto_import requires the CytoML package ",
-      "- BiocManager::install('CytoML')"
-    ))
   }
+  
+  # MARKERS
+  if (markers != FALSE) {
+    message("Assigning markers to channels...")
+    # DEFAULT FILE NAME
+    if (markers == TRUE) {
+      gs <- cyto_markers_edit(
+        gs
+      )
+    } else {
+      gs <- cyto_markers_edit(
+        gs,
+        file = markers
+      )
+    }
+  }
+  
+  # EXPERIMENT DETAILS
+  if (details != FALSE) {
+    message("Updating experiment details...")
+    if (details == TRUE) {
+      gs <- cyto_details_edit(gs)
+    } else {
+      gs <- cyto_details_edit(
+        gs,
+        file = details
+      )
+    }
+  }
+  
+  # BARCODE
+  gs <- cyto_barcode(
+    gs, 
+    type = "events"
+  )
+  
+  # GENERATE GATINGTEMPLATE
+  if(!is.null(gatingTemplate)){
+    # APPEND FILE EXTENSION
+    gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+    # CREATE GATINGTEMPLATE
+    message("Creating CytoExploreR gatingTemplate...")
+    cyto_gatingTemplate_generate(gs, gatingTemplate)
+  }
+  
+  # RETURN GATINGSET
+  return(gs)
+
 }
 
 ## CYTO_EXPORT -----------------------------------------------------------------
