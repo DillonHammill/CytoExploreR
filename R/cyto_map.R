@@ -157,7 +157,10 @@ cyto_map <- function(x,
   
   # NAMES FOR EXPORTED FILES - SPLIT PER GROUP
   names <- structure(
-    lapply(x_data_groups, "cyto_names"),
+    lapply(
+      x_data_groups, 
+      "cyto_names"
+    ),
     names = names(x_data_groups)
   )
   
