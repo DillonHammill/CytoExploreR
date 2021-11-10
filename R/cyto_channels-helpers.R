@@ -425,7 +425,13 @@ cyto_channels_extract <- function(x,
       res <- c(res, channels[z])
     # EXACT MARKER MATCH
     } else if(channels[z] %in% markers) {
-      res <- c(res, names(markers)[match(channels[z], markers)])
+      res <- c(
+        res, 
+        structure(
+          names(markers)[match(channels[z], markers)],
+          names = markers[match(channels[z], markers)]
+        )
+      )
       # EXACT CHANNEL MATCH  
     } else if(channels[z] %in% chans) {
       res <- c(res, chans[match(channels[z], chans)])
@@ -450,7 +456,13 @@ cyto_channels_extract <- function(x,
       )
       # PARTIAL MARKER MATCH
       if(length(marker_ind) != 0) {
-        res <- c(res, names(markers)[marker_ind])
+        res <- c(
+          res, 
+          structure(
+            names(markers)[marker_ind],
+            names = markers[marker_ind]
+          )
+        )
         # PARTIAL CHANNEL MATCH
       } else if(length(channel_ind) != 0) {
         res <- c(res, chans[channel_ind])

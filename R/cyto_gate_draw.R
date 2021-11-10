@@ -309,7 +309,7 @@ cyto_gate_draw <- function(x,
                   },
                   legend = FALSE,
                   axes_trans = axes_trans,
-                  axes_limits = "machine",
+                  axes_limits = axes_limits,
                   title = title[z],
                   ...)
       }
