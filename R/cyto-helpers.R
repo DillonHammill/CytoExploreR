@@ -4506,7 +4506,9 @@ cyto_markers_edit <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param file name of csv file containing the experimental information
 #'   associated with each sample in the supplied data. This file must contain a
-#'   column called \code{"name"} which contains the names of the samples.
+#'   column called \code{"name"} which contains the names of the samples. This
+#'   argument can be set to NA if you don't wish to write the updated experiment
+#'   details to file.
 #' @param ... not in use.
 #'
 #' @return NULL and return \code{flowSet} or \code{GatingSet} with updated
@@ -4527,6 +4529,7 @@ cyto_markers_edit <- function(x,
 #' }
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
 #' @export
 cyto_details_edit <- function(x,
                               file = NULL,
@@ -4600,19 +4603,24 @@ cyto_details_edit <- function(x,
     
   # FILE SUPPLIED MANUALLY
   } else {
-    # FILE EXTENSION
-    file <- file_ext_append(file, ".csv")
-    # FILE EXISTS
-    if (length(grep(file, list.files())) != 0) {
-      message(
-        paste0("Editing data in ", file, "...")
-      )
-      pd <- read_from_csv(file)
-      # MATCH SAMPLES
-      ind <- cyto_match(x, pd[, "name"])
-    # FILE DOES NOT EXIST
+    # FILE NA - DON'T WRITE DATA
+    if(!is.na(file)) {
+      # FILE EXTENSION
+      file <- file_ext_append(file, ".csv")
+      # FILE EXISTS
+      if (length(grep(file, list.files())) != 0) {
+        message(
+          paste0("Editing data in ", file, "...")
+        )
+        pd <- read_from_csv(file)
+        # MATCH SAMPLES
+        ind <- cyto_match(x, pd[, "name"])
+        # FILE DOES NOT EXIST
+      } else {
+        # USE STORED DETAILS
+        pd <- cyto_details(x)
+      }
     } else {
-      # USE STORED DETAILS
       pd <- cyto_details(x)
     }
   }
@@ -4653,9 +4661,11 @@ cyto_details_edit <- function(x,
   cyto_details(x) <- pd
   
   # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
-  write_to_csv(pd,
-               file = file,
-               row.names = TRUE)
+  if(!.all_na(file)) {
+    write_to_csv(pd,
+                 file = file,
+                 row.names = TRUE)
+  }
   
   # Return updated samples
   return(x)

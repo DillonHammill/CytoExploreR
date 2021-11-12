@@ -12,7 +12,9 @@ cyto_details_edit(x, file = NULL, ...)
 
 \item{file}{name of csv file containing the experimental information
 associated with each sample in the supplied data. This file must contain a
-column called \code{"name"} which contains the names of the samples.}
+column called \code{"name"} which contains the names of the samples. This
+argument can be set to NA if you don't wish to write the updated experiment
+details to file.}
 
 \item{...}{not in use.}
 }
