@@ -198,7 +198,7 @@ The compensation controls can be loaded into a GatingSet by passing the name of 
                parent <span class="op">=</span> <span class="st">"Cells"</span>,
                alias <span class="op">=</span> <span class="st">"Single Cells"</span>,
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>, <span class="st">"FSC-H"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-1.png" width="98%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-1.png" width="98%" style="display: block; margin: auto;"></p>
 <p><br></p>
 </div>
 <div id="compute-spillover-matrix" class="section level2">
@@ -212,7 +212,7 @@ The spillover matrix can be automatically calculated using <code>cyto_spillover_
 <span class="va">spill</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_spillover_compute.html">cyto_spillover_compute</a></span><span class="op">(</span><span class="va">gs</span>,
                                 parent <span class="op">=</span> <span class="st">"Single Cells"</span>,
                                 spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Compensation/Compensation-9.png" width="98%" style="display: block; margin: auto;"></p>
+<p><img src="Compensation/Compensation-9.png" width="98%" style="display: block; margin: auto;"></p>
 </div>
 <div id="edit-spillover-matrix" class="section level2">
 <h2 class="hasAnchor">
@@ -225,7 +225,7 @@ The computed spillover matrix can be interactively edited in realtime using <cod
 <span class="va">spill</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_spillover_edit.html">cyto_spillover_edit</a></span><span class="op">(</span><span class="va">gs</span>,
                              parent <span class="op">=</span> <span class="st">"Single Cells"</span>,
                              spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Compensation/Compensation-10.png" width="98%" style="display: block; margin: auto;"></p>
+<p><img src="Compensation/Compensation-10.png" width="98%" style="display: block; margin: auto;"></p>
 <p><br></p>
 </div>
 <div id="visualise-compensation" class="section level2">
@@ -244,7 +244,7 @@ After editing the spillover matrix manually, it is a good idea to check that all
                        parent <span class="op">=</span> <span class="st">"Single Cells"</span>,
                        spillover <span class="op">=</span> <span class="st">"Spillover-Matrix.csv"</span>,
                        compensate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/Compensation/Compensation-14.png" width="98%" style="display: block; margin: auto;"></p>
+<p><img src="Compensation/Compensation-14.png" width="98%" style="display: block; margin: auto;"></p>
 <p><br></p>
 </div>
 </div>
@@ -264,7 +264,7 @@ To load the samples directly into a GatingSet and annotate them with experimenta
 <code class="sourceCode R"><span class="co"># Load and annotate samples</span>
 <span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_setup.html">cyto_setup</a></span><span class="op">(</span><span class="st">"Activation-Samples"</span>,
                  gatingTemplate <span class="op">=</span> <span class="st">"Activation-gatingTemplate.csv"</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-2.png" width="50%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-2.png" width="50%" style="display: block; margin: auto;"></p>
 </div>
 <div id="apply-compensation-and-data-transformations" class="section level2">
 <h2 class="hasAnchor">
@@ -279,7 +279,7 @@ Since the data is always imported uncompensated and on a linear scale, we will n
 
 <span class="co"># Transform fluorescent channels - default logicle transformations</span>
 <span class="va">gs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cyto_transform.html">cyto_transform</a></span><span class="op">(</span><span class="va">gs</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-3.png" width="98%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-3.png" width="98%" style="display: block; margin: auto;"></p>
 <p><br></p>
 </div>
 <div id="gate-samples" class="section level2">
@@ -294,7 +294,7 @@ Now that the data has been properly prepared, it’s time to manually gate popul
                parent <span class="op">=</span> <span class="st">"root"</span>,
                alias <span class="op">=</span> <span class="st">"Cells"</span>,
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>,<span class="st">"SSC-A"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-4.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-4.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 Constructing new gates is as simple as copying and editing the above code. Now let’s gate the single cells within the cells population by drawing a polygon gate using the FSC-A and FSC-H parameters.
 </div>
@@ -304,7 +304,7 @@ Constructing new gates is as simple as copying and editing the above code. Now l
                parent <span class="op">=</span> <span class="st">"Cells"</span>,
                alias <span class="op">=</span> <span class="st">"Single Cells"</span>,
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"FSC-A"</span>,<span class="st">"FSC-H"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-5.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-5.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 As with any other function in <strong>CytoExploreR</strong> that generates plots, <code>cyto_gate_draw</code> makes use of <code>cyto_plot</code> to visualise the data. This means that we can pass any <code>cyto_plot</code> arguments through <code>cyto_gate_draw</code> to modify the constructed plots. This allows us to pull out samples or populations and overlay them on the plot to help us decide where the gate(s) should be set. As an examples, below we have extracted the unstained control and overlaid it onto the plot so that we can better set our live and dead cells gates. Notice how <strong>CytoExploreR</strong> supports gate negation through the <code>negate</code> argument. This means that any events outside the dead cells gate will be classified as live cells without the need for drawing additional gates. To construct the rectangle gate simply select the two diagonal points that encompass the population.
 </div>
@@ -320,7 +320,7 @@ As with any other function in <strong>CytoExploreR</strong> that generates plots
                type <span class="op">=</span> <span class="st">"rectangle"</span>,
                negate <span class="op">=</span> <span class="cn">TRUE</span>,
                overlay <span class="op">=</span> <span class="va">NIL</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-6.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-6.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 <code>cyto_gate_draw</code> also has support for mixed gate type when gating multiplpe populations. For example, we could use an ellipsoid gate for the T cells population and a rectangle gate for the dendritic cells populations.
 </div>
@@ -332,7 +332,7 @@ As with any other function in <strong>CytoExploreR</strong> that generates plots
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD11c"</span>, <span class="st">"Va2"</span><span class="op">)</span>,
                type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ellipse"</span>, <span class="st">"rectangle"</span><span class="op">)</span>,
                overlay <span class="op">=</span> <span class="va">NIL</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-7.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-7.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 Next we will gate the CD4 and CD8 T cells using rectangle gates.
 </div>
@@ -343,7 +343,7 @@ Next we will gate the CD4 and CD8 T cells using rectangle gates.
                alias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4 T Cells"</span>, <span class="st">"CD8 T Cells"</span><span class="op">)</span>,
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD4"</span>, <span class="st">"CD8"</span><span class="op">)</span>,
                type <span class="op">=</span> <span class="st">"r"</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-8.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-8.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 In our last couple of gates, we want to gate our activated CD69+ CD4 and CD8 T cells. For the CD4 T cells we will extract the samples which contain unactivated T cells (i.e. received to antigen) and overlay these onto the plot to make it easier to set the gate.
 </div>
@@ -361,7 +361,7 @@ In our last couple of gates, we want to gate our activated CD69+ CD4 and CD8 T c
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD44"</span>, <span class="st">"CD69"</span><span class="op">)</span>,
                type <span class="op">=</span> <span class="st">"rectangle"</span>,
                overlay <span class="op">=</span> <span class="va">CD4_naive</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-9.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-9.png" width="60%" style="display: block; margin: auto;"></p>
 <div style="line-height: 1.8em;">
 Adding contour lines to the plot can also be helpful in deciding where gates should be set. Let’s add some onto the CD8 T cells so we can set the CD69+ gate.
 </div>
@@ -373,7 +373,7 @@ Adding contour lines to the plot can also be helpful in deciding where gates sho
                channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CD44"</span>, <span class="st">"CD69"</span><span class="op">)</span>,
                type <span class="op">=</span> <span class="st">"rectangle"</span>,
                contour_lines <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-10.png" width="60%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-10.png" width="60%" style="display: block; margin: auto;"></p>
 <p><br></p>
 </div>
 </div>
@@ -396,7 +396,7 @@ It is also easy to plot entire gating schemes using <code>cyto_plot_gating_schem
 <span class="fu"><a href="../reference/cyto_plot_gating_scheme.html">cyto_plot_gating_scheme</a></span><span class="op">(</span><span class="va">gs</span><span class="op">[</span><span class="fl">32</span><span class="op">]</span>,
                         back_gate <span class="op">=</span> <span class="cn">TRUE</span>,
                         gate_track <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="../../../R%20Projects/CytoExploreR-master/vignettes/CytoExploreR/CytoExploreR-11.png" width="98%" style="display: block; margin: auto;"></p>
+<p><img src="CytoExploreR/CytoExploreR-11.png" width="98%" style="display: block; margin: auto;"></p>
 <p><br></p>
 </div>
 <div id="export-statistics" class="section level1">
