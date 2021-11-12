@@ -3675,13 +3675,13 @@ cyto_compensate.GatingSet <- function(x,
 
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
-    # Select rows - square matrix
-    if (nrow(z) == ncol(z)) {
-      z <- z[match(fluor_channels, colnames(z)), ]
-    }
-    # Select columns
-    z <- z[, fluor_channels]
-    return(z)
+    # # Select rows - square matrix
+    # if (nrow(z) == ncol(z)) {
+    #   z <- z[match(fluor_channels, colnames(z)), ]
+    # }
+    # # Select columns
+    # z <- z[, fluor_channels]
+    z[colnames(z) %in% fluor_channels, colnames(z) %in% fluor_channels]
   })
 
   # REMOVE COMPENSATION
@@ -3788,13 +3788,13 @@ cyto_compensate.flowSet <- function(x,
 
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
-    # Select rows - square matrix
-    if (nrow(z) == ncol(z)) {
-      z <- z[match(fluor_channels, colnames(z)), ]
-    }
-    # Select columns
-    z <- z[, fluor_channels]
-    return(z)
+    # # Select rows - square matrix
+    # if (nrow(z) == ncol(z)) {
+    #   z <- z[match(fluor_channels, colnames(z)), ]
+    # }
+    # # Select columns
+    # z <- z[, fluor_channels]
+    z[colnames(z) %in% fluor_channels, colnames(z) %in% fluor_channels]
   })
 
   # REMOVE COMPENSATION
@@ -3878,13 +3878,17 @@ cyto_compensate.flowFrame <- function(x,
   # Channels
   fluor_channels <- cyto_fluor_channels(x)
 
-  # Select rows - square matrix
-  if (nrow(spill) == ncol(spill)) {
-    spill <- spill[match(fluor_channels, colnames(spill)), ]
-  }
-  # Select columns
-  spill <- spill[, fluor_channels]
+  # # Select rows - square matrix
+  # if (nrow(spill) == ncol(spill)) {
+  #   spill <- spill[match(fluor_channels, colnames(spill)), ]
+  # }
+  # # Select columns
+  # spill <- spill[, fluor_channels]
 
+  # RESTRICT SPILL
+  spill <- spill[colnames(spill) %in% fluor_channels, 
+                 colnames(spill) %in% fluor_channels]
+  
   # REMOVE COMPENSATION
   if (remove == TRUE) {
     decompensate(x, spill)
@@ -3954,7 +3958,7 @@ cyto_nodes_convert <- function(x,
   nodes_full <- cyto_nodes(x, path = "full")
   nodes_auto <- cyto_nodes(x, path = "auto")
   nodes_terminal <- basename(nodes_full)
-  
+
   # STRIP REFERENCE TO ROOT
   nodes <- LAPPLY(nodes, function(node){
     if(grepl("root/", node)){
