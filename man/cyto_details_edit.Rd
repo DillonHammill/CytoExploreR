@@ -4,7 +4,7 @@
 \alias{cyto_details_edit}
 \title{Interactively edit cyto_details for a cytoset or GatingSet}
 \usage{
-cyto_details_edit(x, file = NULL, ...)
+cyto_details_edit(x, file = NULL, save_as = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -12,11 +12,16 @@ cyto_details_edit(x, file = NULL, ...)
 
 \item{file}{name of csv file containing the experimental information
 associated with each sample in the supplied data. This file must contain a
-column called \code{"name"} which contains the names of the samples. This
-argument can be set to NA if you don't wish to write the updated experiment
-details to file.}
+column called \code{"name"} which contains the names of the samples.}
 
-\item{...}{not in use.}
+\item{save_as}{name of a CSV to which the edited experimental details should
+be saved, defaults to \code{Experiment-Details.csv} prefixed with the date
+unless \code{file} is specified or a file is found when searching the
+current directory for experimental details. Setting this argument to NA
+will prevent writing of edited experimental details to file.}
+
+\item{...}{additional arguments passed to \code{DataEditR::data_edit()} when
+\code{cyto_details_edit()} is run in interactive mode.}
 }
 \value{
 NULL and return \code{flowSet} or \code{GatingSet} with updated

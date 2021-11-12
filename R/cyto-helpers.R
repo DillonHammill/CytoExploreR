@@ -4506,10 +4506,14 @@ cyto_markers_edit <- function(x,
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param file name of csv file containing the experimental information
 #'   associated with each sample in the supplied data. This file must contain a
-#'   column called \code{"name"} which contains the names of the samples. This
-#'   argument can be set to NA if you don't wish to write the updated experiment
-#'   details to file.
-#' @param ... not in use.
+#'   column called \code{"name"} which contains the names of the samples.
+#' @param save_as name of a CSV to which the edited experimental details should
+#'   be saved, defaults to \code{Experiment-Details.csv} prefixed with the date
+#'   unless \code{file} is specified or a file is found when searching the
+#'   current directory for experimental details. Setting this argument to NA
+#'   will prevent writing of edited experimental details to file.
+#' @param ... additional arguments passed to \code{DataEditR::data_edit()} when
+#'   \code{cyto_details_edit()} is run in interactive mode.
 #'
 #' @return NULL and return \code{flowSet} or \code{GatingSet} with updated
 #'   experimental details.
@@ -4529,10 +4533,11 @@ cyto_markers_edit <- function(x,
 #' }
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @export
 cyto_details_edit <- function(x,
                               file = NULL,
+                              save_as = NULL,
                               ...) {
   
   # CYTOSET/GATINGSET
@@ -4542,82 +4547,99 @@ cyto_details_edit <- function(x,
   
   # FILE MISSING
   if (is.null(file)) {
-    if (length(grep("Experiment-Details.csv", list.files())) != 0) {
-      message("Experiment-Details.csv found in working directory.")
-      
-      # MULTIPLE FILES
-      found_files <- list.files()[grep("Experiment-Details.csv", list.files())]
-
-      # CHECK EACH FILE FOR MATCHING SAMPLES
-      overwrite <- TRUE
-      pd <- lapply(seq_along(found_files), function(z) {
-        pdata <- read_from_csv(found_files[z])
-        # SEARCH FILE FOR SAMPLE NAMES - EXACT MATCH
-        pdata_ind <- NULL
-        cyto_ind <- NULL
-        for(i in 1:ncol(pdata)) {
-          pdata_ind <- i
-          cyto_ind <- tryCatch(
-            cyto_match(x, 
-                       as.vector(pdata[, i]), 
-                       exact = TRUE),
-            error = function(e){
-              return(NULL) # NO MATCHES
-            }
+    # FILE SEARCH
+    pd <- cyto_file_search(
+      "Experiment-Details.csv$",
+      colnames = "name",
+      rownames = rownames(cyto_details(x))
+    )
+    # NO DETAILS FOUND
+    if(length(pd) == 0) {
+      pd <- cyto_details(x)
+    # DETAILS FOUND
+    } else {
+      # MULTIPLE FILES FOUND
+      if(length(pd) > 1) {
+        # ENQUIRE
+        if(interactive() & cyto_option("CytoExploreR_interactive")) {
+          message(
+            "Multiple files found with experimental details for this ",
+            cyto_class(x),
+            ". Which file would you like to import experiment details from?"
           )
-          if(length(cyto_ind) == length(x)) {
-            break()
+          message(
+            paste0(
+              paste0(
+                1:length(pd), 
+                ": ",
+                names(pd)
+              ),
+              sep = "\n"
+            )
+          )
+          opt <- cyto_enquire(NULL)
+          if(is.na(as.numeric(opt))) {
+            opt <- match(opt, names(pd))
           }
-        }
-        # ALL SAMPLES MATCH
-        if(length(cyto_ind) == length(x)) {
-          # DON'T OVERWRITE FILE IF IT CONTAINS EXTRA DATA
-          if(nrow(pdata) > length(cyto_ind)) {
-            overwrite <<- FALSE
-          }
-          colnames(pdata)[pdata_ind] <- "name"
-          return(pdata[cyto_ind, , drop = FALSE])
+          file <- names(pd)[opt]
+          pd <- pd[[opt]]
         } else {
-          return(NULL)
+          warning(
+            paste0(
+              "Multiple files found with experimental details for this ",
+              cyto_class(x),
+              " - resorting to using ",
+              names(pd)[1],
+              "..."
+            )
+          )
+          file <- names(pd)[1]
+          pd <- pd[[1]]
         }
-      })
-      names(pd) <- found_files
-      # NO MATCHING FILE
-      if (all(LAPPLY(pd, "is.null"))) {
-        # USE STORED DETAILS
-        pd <- cyto_details(x)
+      # SINGLE FILE FOUND
       } else {
-        # USE FIRST MATCHING FILE
-        pd[LAPPLY(pd, "is.null")] <- NULL
-        # OVERWRITE DATA IN PLACE IF NO EXTRA DATA PRESENT
-        if(overwrite){
-          file <- names(pd)[1] # SUPPLIED FILE OVERWRITTEN
-        }
+        message(
+          paste0(
+            "Importing saved experiment details from ",
+            names(pd)[1],
+            "..."
+          )
+        )
+        file <- names(pd)[1]
         pd <- pd[[1]]
       }
-    # NO FILE FOUND
-    } else {
-      # USE STORED DETAILS
-      pd <- cyto_details(x)
     }
-    
-  # FILE SUPPLIED MANUALLY
+  # FILE MANUALLY SUPPLIED
   } else {
     # FILE NA - DON'T WRITE DATA
     if(!is.na(file)) {
       # FILE EXTENSION
       file <- file_ext_append(file, ".csv")
       # FILE EXISTS
-      if (length(grep(file, list.files())) != 0) {
+      if(file_exists(file, error = FALSE)) {
         message(
-          paste0("Editing data in ", file, "...")
+          paste0(
+            "Importing experiment details from ",
+            file,
+            "..."
+          )
         )
+        # READ FILE
         pd <- read_from_csv(file)
-        # MATCH SAMPLES
-        ind <- cyto_match(x, pd[, "name"])
-        # FILE DOES NOT EXIST
+        # CHECK FILE
+        if(!"name" %in% colnames(pd) |
+           !all(rownames(cyto_details(x)) %in% rownames(pd))) {
+          stop(
+            paste0(
+              file,
+              " must have rownames and contain entries for every sample in ",
+              "this ",
+              cyto_class(x),
+              "!"
+            )
+          )
+        }
       } else {
-        # USE STORED DETAILS
         pd <- cyto_details(x)
       }
     } else {
@@ -4625,12 +4647,16 @@ cyto_details_edit <- function(x,
     }
   }
   
-  # SAVE EDITS TO NEW FILE
-  if (is.null(file)) {
-    file <- paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-Experiment-Details.csv"
-    )
+  # SAVE_AS
+  if(is.null(save_as)) {
+    if(is.null(file)) {
+      save_as <- paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Experiment-Details.csv"
+      )
+    } else {
+      save_as <- file
+    }
   }
   
   # EDIT DETAILS - ROWNAMES CANNOT BE EDITED
@@ -4657,13 +4683,13 @@ cyto_details_edit <- function(x,
     rownames(pd) <- pd[, "name"]
   }
   
-  # UPDATE DETAILS
-  cyto_details(x) <- pd
+  # UPDATE DETAILS - PD MAY CONTAIN EXTRA INFORMATION
+  cyto_details(x) <- pd[match_ind(rownames(cyto_details(x)), rownames(pd)), ]
   
   # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
-  if(!.all_na(file)) {
+  if(!.all_na(save_as)) {
     write_to_csv(pd,
-                 file = file,
+                 file = save_as,
                  row.names = TRUE)
   }
   
