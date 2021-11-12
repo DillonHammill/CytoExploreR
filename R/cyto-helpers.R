@@ -4323,6 +4323,11 @@ cyto_barcode <- function(x,
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingSet}} or
 #'   \code{GatingSet}.
 #' @param file name of csv file containing columns 'channel' and 'marker'.
+#' @param save_as name of a CSV to which the edited marker assignments should
+#'   be saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
+#'   unless \code{file} is specified or a file is found when searching the
+#'   current directory for experimental markers. Setting this argument to NA
+#'   will prevent writing of edited marker assignments to file.
 #' @param ... not in use.
 #'
 #' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
@@ -4349,129 +4354,154 @@ cyto_barcode <- function(x,
 #' @export
 cyto_markers_edit <- function(x,
                               file = NULL,
+                              save_as = NULL,
                               ...) {
   
   # CHANNELS
   chans <- cyto_channels(x)
   
-  # MARKERS
-  marks <- cyto_markers(x)
-  
   # CHANNELS/MARKERS DATA.FRAME
   pd <- data.frame(
     "channel" = chans,
-    "marker" = LAPPLY(chans, function(z){
-      if(z %in% names(marks)) {
-        return(marks[z])
-      } else {
-        return(NA)
-      }
-    })
+    "marker" = names(chans)
   )
   
-  # FILE MISSING
-  if (is.null(file)) {
-    # FILE EXISTS
-    if (length(grep("Experiment-Markers.csv", list.files())) != 0) {
-      message("Experiment-Markers.csv found in working directory.")
-      # MULTIPLE FILES? - CHECK MATCHING CHANNELS
-      found_files <- list.files()[grep("Experiment-Markers.csv", list.files())]
-      overwrite <- TRUE
-      dt <- lapply(found_files, function(z) {
-        mrks <- read_from_csv(z)
-        rownames(mrks) <- NULL
-        # SEARCH FOR CHANNEL COLUMN
-        mrks_ind <- NULL
-        chans_ind <- NULL
-        for(i in 1:ncol(mrks)) {
-          mrks_ind <- i
-          chans_ind <- match_ind(chans, mrks[, i])
-          if(length(chans_ind) == length(chans)) {
-            break()
-          }
-        }
-        # ALL CHANNELS MATCH
-        if(length(chans_ind) == length(chans)) {
-          # DON'T OVERWRITE FILE IF IT CONTAINS EXTRA DATA
-          if(nrow(mrks) > length(chans)) {
-            overwrite <<- FALSE
-          }
-          colnames(mrks)[mrks_ind] <- "channel"
-          return(mrks[chans_ind, ])
-        } else {
-          return(NULL)
-        }
-      })
-      names(dt) <- found_files
-      # FILES FOUND WITHOUT CHANNEL MATCH
-      if (all(LAPPLY(dt, "is.null"))) {
-        # CHANNEL/MARKER DATA.FRAME
-        dt <- pd
-      # FILES FOUND WITH CHANNEL MATCH
-      } else {
-        # REMOVE EMPTY ENTRIES - SELECT FIRST ONE
-        dt[LAPPLY(dt, "is.null")] <- NULL
-        # OVERWRITE DATA IN PLACE IF NO EXTRA DATA PRESENT
-        if(overwrite) {
-          file <- names(dt)[1]
-        }
-        dt <- dt[[1]]
-      }
-    # FILE DOESN'T EXIST
-    } else {
-      # CHANNEL/MARKER DATA.FRAME
-      dt <- pd
-    }
-  # FILE SUPPLIED
-  } else {
-    # FILE EXISTS
-    if (file_exists(file)) {
-      message(
-        paste0("Editing data in ", file, "...")
+  # INHERIT MARKER ASSIGNMENTS - ONLY IF NONE PRESENT
+  if(.all_na(names(chans))) {
+    # FILE MISSING
+    if(is.null(file)) {
+      pd_new <- cyto_file_search(
+        "Experiment-Markers.csv$",
+        colnames = c("channel", "marker")
       )
-      dt <- read_from_csv(file)
-      # DT MUST CONTAIN ALL CHANNELS IN DATA
-      if(any(!pd$channel %in% dt$channel)) {
-        dt <- rbind(
-          dt,
-          pd[which(!pd$channel %in% dt$channel), , drop = FALSE]
-        )
-      }
-    # FILE DOESN'T EXIST
+      # SINLGE FILE MARKER ASSIGNMENTS FOUND
+      if(length(pd_new) > 0) {
+        # SINGLE FILE
+        if(length(pd_new) == 1) {
+          message(
+            paste0(
+              "Importing saved marker assignments from ",
+              names(pd_new)[1],
+              "..."
+            )
+          )
+          file <- names(pd_new)[1]
+          pd <- pd_new[[1]]
+        # MULTIPLE FILES
+        } else {
+          # ENQUIRE
+          if(interactive() & cyto_option("CytoExploreR_interactive")) {
+            message(
+              "Multiple files found with marker assignments for this ",
+              cyto_class(x),
+              ". Which file would you like to import marker assignments from?"
+            )
+            message(
+              paste0(
+                paste0(
+                  1:length(pd_new), 
+                  ": ",
+                  names(pd_new)
+                ),
+                sep = "\n"
+              )
+            )
+            opt <- cyto_enquire(NULL)
+            opt <- tryCatch(
+              as.numeric(opt),
+              warning = function(w){
+                return(
+                  match(opt, names(pd_new))
+                )
+              }
+            )
+            file <- names(pd_new)[opt]
+            pd <- pd_new[[opt]]
+          } else {
+            warning(
+              paste0(
+                "Multiple files found with marker assignments for this ",
+                cyto_class(x),
+                " - resorting to using ",
+                names(pd_new)[1],
+                "..."
+              )
+            )
+            file <- names(pd_new)[1]
+            pd <- pd_new[[1]]
+          }
+        }
+      } 
+    # FILE SUPPLIED
     } else {
-      # CHANNEL/MARKER DATA.FRAME
-      dt <- pd
+      # FILE EXTENSION
+      file <- file_ext_append(file, ".csv")
+      # FILE EXISTS
+      if(file_exists(file, error = FALSE)) {
+        message(
+          paste0(
+            "Importing marker assignments from ",
+            file,
+            "..."
+          )
+        )
+        # READ FILE
+        pd_new <- read_from_csv(file)
+        # ALL CHANNELS REQUIRED
+        if(any(!pd$channel %in% pd_new$channel)) {
+          pd <- rbind(
+            pd_new,
+            pd[which(!pd$channel %in% pd_new$channel), , drop = FALSE]
+          )
+        } else {
+          pd <- pd_new
+        }
+      }
     }
   }
-  
+
   # DEFAULT FILE NAME
-  if (is.null(file)) {
-    file <- paste0(format(Sys.Date(), "%d%m%y"), "-Experiment-Markers.csv")
+  if (is.null(save_as)) {
+    if(is.null(file)) {
+      save_as <- paste0(
+        format(
+          Sys.Date(), 
+          "%d%m%y"
+        ), 
+        "-Experiment-Markers.csv"
+      )
+    } else {
+      save_as <- file
+    }
   }
   
   # EDIT - NON-INTERACTIVE UPDATE WITHOUT EDITING
   if(interactive() & cyto_option("CytoExploreR_interactive")) {
-    dt_edit <- data_edit(dt,
-                         logo = CytoExploreR_logo(),
-                         title = "Experiment Markers Editor",
-                         row_edit = FALSE, # cannot add/remove rows
-                         col_edit = FALSE,
-                         col_names = c("channel", "marker"),
-                         quiet = TRUE,
-                         hide = TRUE,
-                         viewer = "pane",
-                         ...)
-    # WRITE_TO_CSV NOT IN SCOPE
-    write_to_csv(dt_edit,
-                 file,
+    pd <- data_edit(
+      pd,
+      logo = CytoExploreR_logo(),
+      title = "Experiment Markers Editor",
+      row_edit = FALSE, # cannot add/remove rows
+      col_edit = FALSE,
+      col_names = c("channel", "marker"),
+      quiet = TRUE,
+      hide = TRUE,
+      viewer = "pane",
+      ...
+    )
+  }
+  
+  # WRITE CSV
+  if(!.all_na(save_as)) {
+    write_to_csv(pd,
+                 save_as,
                  row.names = FALSE)
   }
   
   # ONLY UPDATE CHANNELS/MARKERS RELEVANT TO DATA
-  ind <- LAPPLY(dt$channel, match, chans)
-  ind <- ind[!is.na(ind)] # UPDATE ONLY CHANELS/MARKERS IN SAMPLES
-  cyto_chans <- dt_edit$channel[ind]
-  cyto_marks <- dt_edit$marker[ind]
+  ind <- match_ind(chans, pd$channel)
+  cyto_chans <- pd$channel[ind]
+  cyto_marks <- pd$marker[ind]
   names(cyto_marks) <- cyto_chans
   
   # UPDATE CHANNELS
@@ -4578,9 +4608,14 @@ cyto_details_edit <- function(x,
             )
           )
           opt <- cyto_enquire(NULL)
-          if(is.na(as.numeric(opt))) {
-            opt <- match(opt, names(pd))
-          }
+          opt <- tryCatch(
+            as.numeric(opt),
+            warning = function(w){
+              return(
+                match(opt, names(pd_new))
+              )
+            }
+          )
           file <- names(pd)[opt]
           pd <- pd[[opt]]
         } else {
@@ -4611,36 +4646,31 @@ cyto_details_edit <- function(x,
     }
   # FILE MANUALLY SUPPLIED
   } else {
-    # FILE NA - DON'T WRITE DATA
-    if(!is.na(file)) {
-      # FILE EXTENSION
-      file <- file_ext_append(file, ".csv")
-      # FILE EXISTS
-      if(file_exists(file, error = FALSE)) {
-        message(
+    # FILE EXTENSION
+    file <- file_ext_append(file, ".csv")
+    # FILE EXISTS
+    if(file_exists(file, error = FALSE)) {
+      message(
+        paste0(
+          "Importing experiment details from ",
+          file,
+          "..."
+        )
+      )
+      # READ FILE
+      pd <- read_from_csv(file)
+      # CHECK FILE
+      if(!"name" %in% colnames(pd) |
+         !all(rownames(cyto_details(x)) %in% rownames(pd))) {
+        stop(
           paste0(
-            "Importing experiment details from ",
             file,
-            "..."
+            " must have rownames and contain entries for every sample in ",
+            "this ",
+            cyto_class(x),
+            "!"
           )
         )
-        # READ FILE
-        pd <- read_from_csv(file)
-        # CHECK FILE
-        if(!"name" %in% colnames(pd) |
-           !all(rownames(cyto_details(x)) %in% rownames(pd))) {
-          stop(
-            paste0(
-              file,
-              " must have rownames and contain entries for every sample in ",
-              "this ",
-              cyto_class(x),
-              "!"
-            )
-          )
-        }
-      } else {
-        pd <- cyto_details(x)
       }
     } else {
       pd <- cyto_details(x)

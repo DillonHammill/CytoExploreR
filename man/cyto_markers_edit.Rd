@@ -4,7 +4,7 @@
 \alias{cyto_markers_edit}
 \title{Assign marker names to cytoframe or cytoset}
 \usage{
-cyto_markers_edit(x, file = NULL, ...)
+cyto_markers_edit(x, file = NULL, save_as = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
@@ -13,6 +13,12 @@ cyto_markers_edit(x, file = NULL, ...)
 \code{GatingSet}.}
 
 \item{file}{name of csv file containing columns 'channel' and 'marker'.}
+
+\item{save_as}{name of a CSV to which the edited marker assignments should
+be saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
+unless \code{file} is specified or a file is found when searching the
+current directory for experimental markers. Setting this argument to NA
+will prevent writing of edited marker assignments to file.}
 
 \item{...}{not in use.}
 }
