@@ -5113,15 +5113,27 @@ cyto_compensate.flowFrame <- function(x,
   
   # EXCLUDE MISSING PARAMETERS
   spill <- structure(
-    lapply(spill, function(z){
-      # MATCH COLUMN NAMES ONLY - ROWNAMES MAY NOT BE SUPPLIED
-      z <- z[colnames(z) %in% chans, colnames(z) %in% chans]
-      # # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
-      # if(any(z >= 10)){
-      #   z <- z/100
-      # }
-      return(z)
-    }),
+    lapply(
+      spill, 
+      function(z){
+        # REMOVE EXCESS ROWS/COLUMNS - MATRIX MAY BE NON-SQUARE
+        cols_rm <- which(!colnames(z) %in% chans)
+        if(length(cols_rm) > 0) {
+          row_rm <- LAPPLY(
+            cols_rm, 
+            function(w) {
+              which(z[, w] == 1)
+            }
+          )
+          z <- z[-rows_rm, -cols_rm]
+        }
+        # # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
+        # if(any(z >= 10)){
+        #   z <- z/100
+        # }
+        return(z)
+      }
+    ),
     names = names(spill)
   )
   
