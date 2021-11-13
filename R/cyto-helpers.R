@@ -3675,13 +3675,28 @@ cyto_compensate.GatingSet <- function(x,
 
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
+    cols_rm <- which(!colnames(z) %in% chans)
+    if(length(cols_rm) > 0) {
+      z <- z[, -cols_rm]
+      row_rm <- LAPPLY(
+        cols_rm, 
+        function(w) {
+          which(z[, w] == 1)
+        }
+      )
+      row_rm <- row_rm[!is.na(row_rm)]
+      if(length(row_rm) > 0) {
+        z <- z[-row_rm, ]
+      }
+    }
     # # Select rows - square matrix
     # if (nrow(z) == ncol(z)) {
     #   z <- z[match(fluor_channels, colnames(z)), ]
     # }
     # # Select columns
     # z <- z[, fluor_channels]
-    z[colnames(z) %in% fluor_channels, colnames(z) %in% fluor_channels]
+    # z[colnames(z) %in% fluor_channels, colnames(z) %in% fluor_channels]
+    return(z)
   })
 
   # REMOVE COMPENSATION
@@ -3788,13 +3803,28 @@ cyto_compensate.flowSet <- function(x,
 
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
+    cols_rm <- which(!colnames(z) %in% chans)
+    if(length(cols_rm) > 0) {
+      z <- z[, -cols_rm]
+      row_rm <- LAPPLY(
+        cols_rm, 
+        function(w) {
+          which(z[, w] == 1)
+        }
+      )
+      row_rm <- row_rm[!is.na(row_rm)]
+      if(length(row_rm) > 0) {
+        z <- z[-row_rm, ]
+      }
+    }
     # # Select rows - square matrix
     # if (nrow(z) == ncol(z)) {
     #   z <- z[match(fluor_channels, colnames(z)), ]
     # }
     # # Select columns
     # z <- z[, fluor_channels]
-    z[colnames(z) %in% fluor_channels, colnames(z) %in% fluor_channels]
+    # z[colnames(z) %in% fluor_channels, colnames(z) %in% fluor_channels]
+    return(z)
   })
 
   # REMOVE COMPENSATION
@@ -3888,13 +3918,17 @@ cyto_compensate.flowFrame <- function(x,
   # REMOVE EXCESS ROWS/COLUMNS - MATRIX MAY BE NON-SQUARE
   cols_rm <- which(!colnames(spill) %in% fluor_channels)
   if(length(cols_rm) > 0) {
+    spill <- spill[, -cols_rm]
     row_rm <- LAPPLY(
       cols_rm, 
-      function(z) {
-        which(spill[, z] == 1)
+      function(w) {
+        which(spill[, w] == 1)
       }
     )
-    spill <- spill[-rows_rm, -cols_rm]
+    row_rm <- row_rm[!is.na(row_rm)]
+    if(length(row_rm) > 0) {
+      spill <- spill[-row_rm, ]
+    }
   }
   
   # REMOVE COMPENSATION
