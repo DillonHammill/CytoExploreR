@@ -3884,10 +3884,18 @@ cyto_compensate.flowFrame <- function(x,
   # }
   # # Select columns
   # spill <- spill[, fluor_channels]
-
-  # RESTRICT SPILL
-  spill <- spill[colnames(spill) %in% fluor_channels, 
-                 colnames(spill) %in% fluor_channels]
+  
+  # REMOVE EXCESS ROWS/COLUMNS - MATRIX MAY BE NON-SQUARE
+  cols_rm <- which(!colnames(spill) %in% fluor_channels)
+  if(length(cols_rm) > 0) {
+    row_rm <- LAPPLY(
+      cols_rm, 
+      function(z) {
+        which(spill[, z] == 1)
+      }
+    )
+    spill <- spill[-rows_rm, -cols_rm]
+  }
   
   # REMOVE COMPENSATION
   if (remove == TRUE) {
