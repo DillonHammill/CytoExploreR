@@ -433,7 +433,7 @@
                 input = "matrix",
                 channels = z,
                 copy = FALSE
-              )[1, ]
+              )[, 1]
               xp <- c(spill_int[w] + spill_coef[w] * yp[1],
                       spill_int[w] + spill_coef[w] * yp[2])
               if(yp[1] == yp[2] || xp[1] == xp[2]) {

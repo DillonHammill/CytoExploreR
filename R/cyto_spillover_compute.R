@@ -269,7 +269,13 @@ cyto_spillover_compute <- function(x,
   
   # DEFAULT CSV FILENAME
   if (is.null(save_as)) {
-    save_as <- paste0(format(Sys.Date(), "%d%m%y"), "-Spillover-Matrix.csv")
+    save_as <- paste0(
+      format(
+        Sys.Date(), 
+        "%d%m%y"
+      ), 
+      "-Spillover-Matrix.csv"
+    )
   }
   
   # EXPORT SPILLOVER MATRIX TO CSV FILE

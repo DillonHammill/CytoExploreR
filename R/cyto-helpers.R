@@ -5119,13 +5119,17 @@ cyto_compensate.flowFrame <- function(x,
         # REMOVE EXCESS ROWS/COLUMNS - MATRIX MAY BE NON-SQUARE
         cols_rm <- which(!colnames(z) %in% chans)
         if(length(cols_rm) > 0) {
+          z <- z[, -cols_rm]
           row_rm <- LAPPLY(
             cols_rm, 
             function(w) {
               which(z[, w] == 1)
             }
           )
-          z <- z[-rows_rm, -cols_rm]
+          row_rm <- row_rm[!is.na(row_rm)]
+          if(length(row_rm) > 0) {
+            z <- z[-row_rm, ]
+          }
         }
         # # PERCENTAGES -> DECIMAL - SPILLOVER < 1000%
         # if(any(z >= 10)){
