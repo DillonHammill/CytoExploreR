@@ -63,7 +63,7 @@
 #'   dimension-reduced parameters added as additional channels in each of the
 #'   underlyig \code{cytoframes}.
 #'
-#' @importFrom flowWorkspace cytoset gs_cyto_data recompute
+#' @importFrom flowWorkspace cytoset gs_cyto_data recompute GatingSet
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -140,6 +140,7 @@ cyto_map <- function(x,
     parent = parent,
     FUN = "nrow",
     input = "matrix",
+    channels = channels[1], # DON'T LOAD ENTIRE MATRIX INTO MEMORY
     copy = FALSE
   )[, 1]
   
@@ -213,8 +214,11 @@ cyto_map <- function(x,
         copy = FALSE
       )[[1]][[1]]
       # RAW DATA
-      cf_exprs <- cyto_exprs(cf,
-                             channels = channels)
+      cf_exprs <- cyto_exprs(
+        cf,
+        channels = channels,
+        drop = FALSE
+      )
       # RE-SCALE DATA
       if(!is.null(scale)) {
         message(
@@ -303,8 +307,68 @@ cyto_map <- function(x,
   
   # UPDATE CYTOSET IN GATINGSET
   if(cyto_class(x, "GatingSet")) {
-    gs_cyto_data(x) <- x_data_map
-    suppressMessages(recompute(x))
+    
+    # CANNOT ADD NEW PARAMETERS TO SUBSET OF GATINGSET
+    # RECONSTRUCT GATINGSET FROM SCRATCH SO SPILL, TRANS & GATES ARE ATTACHED
+    
+    # RECONSTRUCTING GATINGSET
+    message(
+      "Builing a new GatingSet..."
+    )
+    # REVERSE TRANSFORMATIONS
+    if(!.all_na(trans) & !inverse) {
+      x_data_map <- cyto_transform(
+        x_data_map,
+        trans = trans,
+        inverse = TRUE,
+        plot = FALSE,
+        quiet = TRUE
+      )
+    }
+    # REVERSE COMPENSATION
+    spill <- cyto_spillover_extract(x)
+    if(!is.null(spill)) {
+      x_data_map <- cyto_compensate(
+        x,
+        remove = TRUE
+      )
+    }
+    # BUILD NEW GATINGSET
+    gs <- GatingSet(x_data_map)
+    # RE-APPLY COMPENSATION
+    if(!is.null(spill)) {
+      message(
+        "Compensating for fluorescent spillover..."
+      )
+      gs <- cyto_compensate(
+        gs,
+        spillover = spill
+      )
+    }
+    # RE-APPLY TRANSFORMATIONS
+    if(!.all_na(trans)) {
+      message(
+        "Re-applying data transformations..."
+      )
+      gs <- cyto_transform(
+        gs,
+        trans = trans,
+        inverse = FALSE,
+        plot = FALSE,
+        quiet = TRUE
+      )
+    }
+    # TRANSFER GATES
+    if(length(cyto_nodes(x)) > 1) {
+      message(
+        "Recomputing gates..."
+      )
+      x <- cyto_gate_transfer(
+        x,
+        gs
+      )
+    }
+
   } else {
     x <- x_data_map
   }
