@@ -476,6 +476,7 @@ cyto_gatingTemplate_edit <- function(x,
 #'   environment with the gates in the gatingTemplate.
 #'
 #' @importFrom openCyto gatingTemplate gt_gating
+#' @importFrom methods as
 #'
 #' @examples
 #' \dontrun{
@@ -518,13 +519,15 @@ cyto_gatingTemplate_apply <- function(x,
       gt <- gatingTemplate
     # GATINGTEMPLATE FILE
     } else {
-      # READ GATINGTEMPLATE
-      gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
-      file_exists(gatingTemplate, error = TRUE)
-      # MESSAGE - APPLY GATINGTEMPLATE FILE
-      message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-      # GATINGTEMPLATE FILE -> GATINGTEMPLATE
-      gt <- suppressMessages(gatingTemplate(gatingTemplate))
+      # GATINGTEMPLATE FILE
+      if(is.character(gatingTemplate)) {
+        # READ GATINGTEMPLATE FROM FILE
+        gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
+        file_exists(gatingTemplate, error = TRUE)
+      # COERCE TO DATA.TABLE
+      } else {
+        gatingTemplate <- as(gatingTemplate, "data.table")
+      }
     }
   # NO GATINGTEMPLATE
   } else if (is.null(gatingTemplate)) {
@@ -539,11 +542,23 @@ cyto_gatingTemplate_apply <- function(x,
     # READ GATINGTEMPLATE
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
     file_exists(gatingTemplate, error = TRUE)
-    # MESSAGE - APPLY GATINGTEMPLATE FILE
-    message(paste("Applying", gatingTemplate, "to the GatingSet..."))
-    # GATINGTEMPLATE FILER -> GATINGTEMPLATE
-    gt <- suppressMessages(gatingTemplate(gatingTemplate))
   }
+  
+  # MESSAGE - APPLY GATINGTEMPLATE FILE
+  message(
+    paste(
+      "Applying", 
+      if(is.character(gatingTemplate)) {
+        gatingTemplate()
+      } else {
+        "gatingTemplate"
+      },
+      "to the GatingSet..."
+    )
+  )
+  
+  # GATINGTEMPLATE FILE -> GATINGTEMPLATE
+  gt <- suppressMessages(gatingTemplate(gatingTemplate))
   
   # APPLY GATINGTEMPLATE
   suppressWarnings(gt_gating(gt, x, ...))
