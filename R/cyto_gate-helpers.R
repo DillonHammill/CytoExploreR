@@ -758,17 +758,20 @@ cyto_gate_bool <- function(x,
 
 ## CYTO_GATE_EXTRACT -----------------------------------------------------------
 
-#' Extract Saved Gate(s) from gatingTemplate.
+#' Extract Saved Gate(s) from GatingHierarchy, GatingSet or gatingTemplate.
 #'
 #' @param x object of class \code{GatingHierarchy}, \code{GatingSet},
 #'   \code{gatingTemplate} or the name of a gatingTemplate CSV file.
 #' @param parent name of the parental population.
 #' @param alias name of the population for which the gate must be extracted.
 #' @param select passed to \code{cyto_select}.
-#' @param merge_by passed to \code{cyto_groups} to split \code{GatingSet} intp
-#'   groups, gates will be extracted from the first Gatinghierarchy within each
+#' @param merge_by passed to \code{cyto_groups} to split \code{GatingSet} into
+#'   groups, gates will be extracted from the first GatingHierarchy within each
 #'   group.
 #' @param path passed to \code{cyto_nodes()}.
+#' @param bool logical indicating whether booleanFilters should be converted
+#'   into complementFilters, set to TRUE by default. Only negated booleanFilters
+#'   are supported.
 #' @param ... not in use.
 #'
 #' @importFrom openCyto gt_get_gate gatingTemplate
@@ -809,6 +812,7 @@ cyto_gate_extract <- function(x,
                               select = NULL,
                               merge_by = "name",
                               path = "auto",
+                              bool = TRUE,
                               ...) {
   
   # ALIAS MISSING
@@ -837,7 +841,7 @@ cyto_gate_extract <- function(x,
           lapply(alias, function(w){
             gate <- gh_pop_get_gate(gh, w)
             # CONVERT BOOLEANFILTER TO VALID FILTER
-            if(cyto_class(gate, "booleanFilter")) {
+            if(cyto_class(gate, "booleanFilter") & bool) {
               logic <- gate@deparse
               pops <- unlist(strsplit(logic, "[^[:alnum:][:space:]]"))
               pops <- pops[!LAPPLY(pops, ".empty")]
@@ -911,7 +915,7 @@ cyto_gate_extract <- function(x,
         if("gate" %in% names(parameters(gm))) {
           gate <- unlist(eval(parameters(gm)$gate))[[1]]
           # BOOLEANFILTER
-        } else {
+        } else if(bool) {
           logic <- as.character(parameters(gm)[[1]])
           pops <- unlist(strsplit(logic, "[^[:alnum:][:space:]]"))
           pops <- pops[!LAPPLY(pops, ".empty")]

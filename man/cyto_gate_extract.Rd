@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_gate-helpers.R
 \name{cyto_gate_extract}
 \alias{cyto_gate_extract}
-\title{Extract Saved Gate(s) from gatingTemplate.}
+\title{Extract Saved Gate(s) from GatingHierarchy, GatingSet or gatingTemplate.}
 \usage{
 cyto_gate_extract(
   x,
@@ -11,6 +11,7 @@ cyto_gate_extract(
   select = NULL,
   merge_by = "name",
   path = "auto",
+  bool = TRUE,
   ...
 )
 }
@@ -24,16 +25,20 @@ cyto_gate_extract(
 
 \item{select}{passed to \code{cyto_select}.}
 
-\item{merge_by}{passed to \code{cyto_groups} to split \code{GatingSet} intp
-groups, gates will be extracted from the first Gatinghierarchy within each
+\item{merge_by}{passed to \code{cyto_groups} to split \code{GatingSet} into
+groups, gates will be extracted from the first GatingHierarchy within each
 group.}
 
 \item{path}{passed to \code{cyto_nodes()}.}
 
+\item{bool}{logical indicating whether booleanFilters should be converted
+into complementFilters, set to TRUE by default. Only negated booleanFilters
+are supported.}
+
 \item{...}{not in use.}
 }
 \description{
-Extract Saved Gate(s) from gatingTemplate.
+Extract Saved Gate(s) from GatingHierarchy, GatingSet or gatingTemplate.
 }
 \examples{
 library(CytoExploreRData)
