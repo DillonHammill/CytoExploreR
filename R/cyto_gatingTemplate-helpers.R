@@ -549,7 +549,7 @@ cyto_gatingTemplate_apply <- function(x,
     paste(
       "Applying", 
       if(is.character(gatingTemplate)) {
-        gatingTemplate()
+        gatingTemplate
       } else {
         "gatingTemplate"
       },
