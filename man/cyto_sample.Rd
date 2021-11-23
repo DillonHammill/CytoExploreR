@@ -34,7 +34,7 @@ percentage or number of events to keep respectively. For \code{cytoset} or
 \code{GatingSet} objects, the same degree of sampling is applied to each
 \code{cytoframe} by default. However, cytoframes will be separately sampled
 if a vector the same length as the \code{cytoset} or \code{GatingSet} is
-supplied. Setting \code{events} to 0 will result in downsampling to the
+supplied. Setting \code{events} to NA will result in downsampling to the
 minimum number of events across samples.}
 
 \item{seed}{value used to \code{set.seed()} internally. Setting a value for

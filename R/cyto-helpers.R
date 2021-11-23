@@ -3582,7 +3582,7 @@ cyto_list <- function(x,
 #'   \code{GatingSet} objects, the same degree of sampling is applied to each
 #'   \code{cytoframe} by default. However, cytoframes will be separately sampled
 #'   if a vector the same length as the \code{cytoset} or \code{GatingSet} is
-#'   supplied. Setting \code{events} to 0 will result in downsampling to the
+#'   supplied. Setting \code{events} to NA will result in downsampling to the
 #'   minimum number of events across samples.
 #' @param seed value used to \code{set.seed()} internally. Setting a value for
 #'   seed will return the same result with each run.
@@ -3627,14 +3627,18 @@ cyto_sample.GatingHierarchy <- function(x,
                                         seed = NULL,
                                         ...) {
   
+  # TODO: GATINGSET RECONSTRUCTION REQUIRED
+  
   # EXTRACT CYTOSET
   cs <- gs_cyto_data(x)
   
   # SAMPLING
-  cs <- cyto_sample(cs,
-                    events = events,
-                    seed = seed,
-                    ...)
+  cs <- cyto_sample(
+    cs,
+    events = events,
+    seed = seed,
+    ...
+  )
   
   # REPLACE DATA
   gs_cyto_data(x) <- cs
@@ -3654,14 +3658,18 @@ cyto_sample.GatingSet <- function(x,
                                   seed = NULL,
                                   ...){
   
+  # TODO: GATINGSET RECONSTRUCTION REQUIRED
+  
   # EXTRACT CYTOSET
   cs <- gs_cyto_data(x)
   
   # SAMPLING
-  cs <- cyto_sample(cs,
-                    events = events,
-                    seed = seed,
-                    ...)
+  cs <- cyto_sample(
+    cs,
+    events = events,
+    seed = seed,
+    ...
+  )
   
   # REPLACE DATA
   gs_cyto_data(x) <- cs
@@ -3724,7 +3732,7 @@ cyto_sample.flowSet <- function(x,
                                 ...) {
   
   # SAMPLE TO MINIMUM EVENTS
-  if(all(events == 0)) {
+  if(.all_na(events)) {
     events <- min(
       cyto_apply(
         x,
@@ -3743,18 +3751,23 @@ cyto_sample.flowSet <- function(x,
     )
   }
   
-  # PREPARE DISPLAY - INDIVIDUAL CYTOFRAMES
+  # PREPARE EVENTS - INDIVIDUAL CYTOFRAMES
   events <- rep(events, length.out = length(x))
   
   # SAPLE EACH CYTOFRAME
   cytoset(
     structure(
-      lapply(seq_along(x), function(z){
-        cyto_sample(x[[z]],
-                    events = events[z],
-                    seed = seed,
-                    ...)
-      }),
+      lapply(
+        seq_along(x), 
+        function(z){
+          cyto_sample(
+            x[[z]],
+            events = events[z],
+            seed = seed,
+            ...
+          )
+        }
+      ),
       names = cyto_names(x)
     )
   )
@@ -3772,11 +3785,18 @@ cyto_sample.list <- function(x,
   events <- rep(events, length(x))
   
   # SAMPLING
-  x <- mapply(function(x, events) {
-    cyto_sample(x, 
-                events = events,
-                seed = seed)
-  }, x, events)
+  x <- mapply(
+    function(x,
+             events) {
+      cyto_sample(
+        x, 
+        events = events,
+        seed = seed
+      )
+    }, 
+    x, 
+    events
+  )
   
   # Return sampled list
   return(x)
@@ -4818,7 +4838,8 @@ cyto_details_save <- function(x,
 #'   object.
 #'
 #' @importFrom flowCore decompensate
-#' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe gs_cyto_data
+#' @importFrom flowWorkspace cytoset flowFrame_to_cytoframe GatingSet
+#'   gs_cyto_data
 #'
 #' @examples
 #'
@@ -4848,6 +4869,7 @@ cyto_details_save <- function(x,
 #'
 #' # Apply saved spillover matrix csv file to GatingSet
 #' cyto_compensate(gs, "Spillover-Matrix.csv")
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_compensate
@@ -4867,7 +4889,7 @@ cyto_compensate.GatingSet <- function(x,
                                       ...) {
   
   # WARNING
-  if(!is.null(cyto_spillover_extract(x))) {
+  if(!is.null(cyto_spillover_extract(x)) & !remove) {
     message(
       paste0(
         "Compensation has already been applied to this ",
@@ -4891,6 +4913,9 @@ cyto_compensate.GatingSet <- function(x,
     }
   }
   
+  # TRANSFORMATIONS
+  trans <- cyto_transformers_extract(x)
+  
   # CYTOSET
   cs <- cyto_data_extract(
     x, 
@@ -4905,25 +4930,76 @@ cyto_compensate.GatingSet <- function(x,
     select = select
   )
   
-  # REMOVE COMPENSATION
-  if (remove == TRUE) {
-    cf_list <- lapply(seq_along(cs), function(z) {
-      cyto_convert(
-        decompensate(
-          cs[[z]], 
-          spill[[z]]
-        )
-      )
-    })
-    names(cf_list) <- cyto_names(cs)
-    cs <- cytoset(cf_list)
-    gs_cyto_data(x) <- cs
-    # APPLY COMPENSATION
-  } else if (remove == FALSE) {
-    flowWorkspace::compensate(x, spill)
+  # INVERSE TRANSFORMATIONS
+  if(!.all_na(trans)) {
+    message(
+      "Applying inverse data transformations..."
+    )
+    cs <- cyto_transform(
+      cs,
+      trans = trans,
+      inverse = TRUE,
+      quiet = TRUE,
+      plot = FALSE
+    )
   }
   
-  # RETURN GATINGSET
+  # DECOMPENSATE
+  if(remove) {
+    message(
+      "Removing applied compensation..."
+    )
+    cf_list <- lapply(
+      seq_along(cs), 
+      function(z) {
+        cyto_convert(
+          decompensate(
+            cs[[z]], 
+            spill[[z]]
+          )
+        )
+      })
+    names(cf_list) <- cyto_names(cs)
+    cs <- cytoset(cf_list)
+  }
+  
+  # CREATE NEW GATINGSET
+  gs <- GatingSet(cs)
+  
+  # COMPENSATE
+  if(!remove) {
+    message(
+      "Compensating for fluorescence spillover..."
+    )
+    flowWorkspace::compensate(gs, spill)
+  }
+  
+  # RE-APPLY TRANSFORMATIONS
+  if(!.all_na(trans)) {
+    message(
+      "Re-applying data transformations..."
+    )
+    gs <- cyto_transform(
+      gs,
+      trans = trans,
+      inverse = FALSE,
+      quiet = TRUE,
+      plot = FALSE
+    )
+  }
+  
+  # TRANSFER GATES
+  if(length(cyto_nodes(x)) > 1) {
+    message(
+      "Recomputing gates..."
+    )
+    x <- cyto_gate_transfer(
+      x,
+      gs
+    )
+  }
+  
+  # RETURN UPDATED GATINGSET
   return(x)
 }
 
@@ -5007,7 +5083,7 @@ cyto_compensate.flowFrame <- function(x,
 #'   \code{spillover}. To compensate each sample individually using their stored
 #'   spillover matrix file, set \code{select} to NULL.
 #'
-#' @return a square spillover matrix.
+#' @return a named list of spillover matrices for each sample in \code{x}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
