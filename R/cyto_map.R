@@ -365,7 +365,6 @@ cyto_map <- function(x,
       )
       x <- cyto_gateTemplate_apply(
         x,
-        NULL,
         gs
       )
     }

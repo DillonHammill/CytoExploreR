@@ -5004,7 +5004,6 @@ cyto_compensate.GatingSet <- function(x,
     )
     x <- cyto_gateTemplate_apply(
       x,
-      NULL,
       gs
     )
   }
