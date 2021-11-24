@@ -4,7 +4,7 @@
 \alias{cyto_gateTemplate_apply}
 \title{Apply a set of gates from another GatingHierarchy or GatingSet}
 \usage{
-cyto_gateTemplate_apply(x, gateTemplate = NULL, y)
+cyto_gateTemplate_apply(x, gateTemplate = NULL)
 }
 \arguments{
 \item{x}{an object of class
@@ -13,10 +13,9 @@ cyto_gateTemplate_apply(x, gateTemplate = NULL, y)
 the gates stored in the \code{gateTemplate}.}
 
 \item{gateTemplate}{object created by calling \code{cyto_gateTemplate()} on
-the reference GatingHierarchy or GatingSet.}
-
-\item{y}{an object of class GatingHierarchy or GatingSet from which a
-\code{gateTemplate} should be generated if it is not supplied manually.}
+the reference GatingHierarchy or GatingSet. Alternatively, the reference
+GatingHierarchy or GatingSet can be supplied and a call will be made to
+\code{cyto_gateTemplate()} to create the gateTemplate(s).}
 }
 \value{
 a GatingHierarchy or GatingSet with gates from \code{gateTemplate}
