@@ -363,8 +363,9 @@ cyto_map <- function(x,
       message(
         "Recomputing gates..."
       )
-      x <- cyto_gate_transfer(
+      x <- cyto_gateTemplate_apply(
         x,
+        NULL,
         gs
       )
     }

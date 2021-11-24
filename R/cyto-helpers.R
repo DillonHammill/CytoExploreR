@@ -1464,14 +1464,23 @@ cyto_transform.default <- function(x,
     
     # INVERSE TRANSFORM NOT SUPPORTED
     if (inverse == TRUE) {
+      
+      # TODO: INVERSE TRANSFORM DATA & GATES
+      
+      
       stop(paste(
         "Inverse transformations are not yet supported for",
         "GatingHierarchy/GatingSet objects."
       ))
     }
-    
+
     # APPLY TRANSFORMATIONS
-    x <- suppressMessages(transform(x, transformer_list))
+    x <- suppressMessages(
+      transform(
+        x, 
+        transformer_list
+      )
+    )
   }
   
   # COMPLETE
@@ -4993,8 +5002,9 @@ cyto_compensate.GatingSet <- function(x,
     message(
       "Recomputing gates..."
     )
-    x <- cyto_gate_transfer(
+    x <- cyto_gateTemplate_apply(
       x,
+      NULL,
       gs
     )
   }
