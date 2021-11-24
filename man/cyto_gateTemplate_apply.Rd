@@ -4,15 +4,19 @@
 \alias{cyto_gateTemplate_apply}
 \title{Apply a set of gates from another GatingHierarchy or GatingSet}
 \usage{
-cyto_gateTemplate_apply(x, gateTemplate = NULL)
+cyto_gateTemplate_apply(x, gateTemplate = NULL, y)
 }
 \arguments{
 \item{x}{an object of class
 \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}} which will inherit
+the gates stored in the \code{gateTemplate}.}
 
 \item{gateTemplate}{object created by calling \code{cyto_gateTemplate()} on
 the reference GatingHierarchy or GatingSet.}
+
+\item{y}{an object of class GatingHierarchy or GatingSet from which a
+\code{gateTemplate} should be generated if it is not supplied manually.}
 }
 \value{
 a GatingHierarchy or GatingSet with gates from \code{gateTemplate}

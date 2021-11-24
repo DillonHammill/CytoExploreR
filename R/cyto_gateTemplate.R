@@ -160,9 +160,12 @@ cyto_gateTemplate.GatingSet <- function(x) {
 #'
 #' @param x an object of class
 #'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
-#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} which will inherit
+#'   the gates stored in the \code{gateTemplate}.
 #' @param gateTemplate object created by calling \code{cyto_gateTemplate()} on
 #'   the reference GatingHierarchy or GatingSet.
+#' @param y an object of class GatingHierarchy or GatingSet from which a
+#'   \code{gateTemplate} should be generated if it is not supplied manually.
 #'
 #' @return a GatingHierarchy or GatingSet with gates from \code{gateTemplate}
 #'   applied.
@@ -176,16 +179,23 @@ cyto_gateTemplate.GatingSet <- function(x) {
 #'
 #' @export
 cyto_gateTemplate_apply <- function(x,
-                                    gateTemplate = NULL) {
+                                    gateTemplate = NULL,
+                                    y) {
   
   # GATETEMPLATE REQUIRED
   if(is.null(gateTemplate)) {
-    stop(
-      paste0(
-        "Supply a 'gateTemplate` to transfer gates between GatingHierarchies ",
-        "or GatingSets."
+    # CREATE GATETEMPLATES
+    if(!missing(y)) {
+      gateTemplate <- cyto_gateTemplate(y)
+    # GATETEMPLATE(S) REQUIRED
+    } else {
+      stop(
+        paste0(
+          "Supply a 'gateTemplate` to transfer gates between GatingHierarchies ",
+          "or GatingSets."
+        )
       )
-    )
+    }
   }
   
   # EMPTY GATETEMPLATE
