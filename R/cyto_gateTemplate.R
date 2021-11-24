@@ -112,7 +112,8 @@ cyto_gateTemplate.GatingHierarchy <- function(x) {
               "\\|"
             )[[1]],
             parent = gt$parent[ind[z]],
-            gate = gates[[z]]
+            gate = gates[[z]],
+            channels = gt$dims[ind[z]]
           )
         }
       ),
