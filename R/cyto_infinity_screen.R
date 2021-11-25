@@ -110,15 +110,10 @@ cyto_infinity_screen <- function(path = NULL,
       targets <- read_from_csv(
         files[ind[1]]
       )
-    # INTERACTIVELY CREATE & EDIT TARGET FILE
+      # TARGETS FILE NAME
+      targets_file <- files[ind[1]]
+    # CREATE TARGETS TEMPLATE
     } else {
-      # MESSAGE
-      message(
-        paste0(
-          "Interactively edit the InfinityFlow antibody targets and isotypes",
-          "..."
-        )
-      )
       # CREATE TARGETS
       targets <- data.frame(
         "name" = basename(fcs_files),
@@ -132,6 +127,24 @@ cyto_infinity_screen <- function(path = NULL,
         ),
         stringsAsFactors = FALSE
       )
+      # CREATE NEW TARGETS FILE
+      targets_file <- paste0(
+        format(
+          Sys.Date(),
+          "%d%m%y"
+        ),
+        "-InfinityFlow-Targets.csv"
+      )
+    }
+    # EDIT TARGETS INTERACTIVELY
+    if(interactive() & cyto_option("CytoExploreR_interactive")) {
+      # MESSAGE
+      message(
+        paste0(
+          "Interactively edit the InfinityFlow antibody targets and isotypes",
+          "..."
+        )
+      )
       # EDIT TARGETS
       targets <- data_edit(
         targets,
@@ -143,18 +156,12 @@ cyto_infinity_screen <- function(path = NULL,
         hide = TRUE,
         viewer = "pane"
       )
-      # WRITE TARGETS TO FILE
-      write_to_csv(
-        targets,
-        paste0(
-          format(
-            Sys.Date(),
-            "%d%m%y"
-          ),
-          "-InfinityFlow-Targets.csv"
-        )
-      )
     }
+    # WRITE TARGETS TO FILE
+    write_to_csv(
+      targets,
+      targets_file
+    )
     # UPDATE ISOTYPE & ANNOTATION
     isotype <- targets[, "Infinity_isotype"]
     names(isotype) <- targets[, "name"]
@@ -174,15 +181,11 @@ cyto_infinity_screen <- function(path = NULL,
     # BACKBONE FILE EXISTS 
     if(length(ind) != 0) {
       backbone_selection_file <- files[ind[1]]
-    # INTERACTIVELY CREATE & EDIT BACKBONE FILE
-    } else {
-      # MESSAGE
-      message(
-        paste0(
-          "Interactively edit the InfinityFlow backbone selection file",
-          "..."
-        )
+      backbone <- read_from_csv(
+        backbone_selection_file
       )
+    # CREATE BACKBONE TEMPLATE
+    } else {
       # CREATE BACKBONE SELECTION FILE
       backbone <- data.frame(
         "name" = channels,
@@ -191,6 +194,24 @@ cyto_infinity_screen <- function(path = NULL,
         stringsAsFactors = FALSE
       )
       rownames(backbone) <- NULL
+      # BACKBONE SELECTION TO FILE
+      backbone_selection_file = paste0(
+        format(
+          Sys.Date(),
+          "%d%m%y"
+        ),
+        "-InfinityFlow-Backbone.csv"
+      )
+    }
+    # INTERACTIVELY EDIT BACKBONE
+    if(interactive() & cyto_option("CytoExploreR_interactive")) {
+      # MESSAGE
+      message(
+        paste0(
+          "Interactively edit the InfinityFlow backbone selection file",
+          "..."
+        )
+      )
       # INTERACTIVELY EDIT BACKBONE SELECTION
       backbone <- data_edit(
         backbone,
@@ -203,20 +224,12 @@ cyto_infinity_screen <- function(path = NULL,
         viewer = "pane",
         col_options = list("type" = c("backbone", "exploratory", "discard"))
       )
-      # BACKBONE SELECTION TO FILE
-      backbone_selection_file = paste0(
-        format(
-          Sys.Date(),
-          "%d%m%y"
-        ),
-        "-InfinityFlow-Backbone.csv"
-      )
-      # WRITE NEW BACKBONE SELECTION FILE
-      write_to_csv(
-        backbone,
-        backbone_selection_file
-      )
     }
+    # WRITE NEW BACKBONE SELECTION FILE
+    write_to_csv(
+      backbone,
+      backbone_selection_file
+    )
   }
 
   # SAVE_AS - APPEND INFINITYFLOW
