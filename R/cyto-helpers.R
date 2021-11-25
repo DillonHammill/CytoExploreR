@@ -1348,12 +1348,8 @@ cyto_names_parse <- function(x,
 #' @return object of class \code{flowFrame}, \code{flowSet},
 #'   \code{GatingHierarchy} or \code{GatingSet} with transformations applied.
 #'
-#' @importFrom flowWorkspace recompute gh_get_pop_paths gh_pop_get_parent
-#'   gh_pop_get_gate gh_pop_set_gate gs_pop_set_gate
+#' @importFrom flowWorkspace gs_cyto_data GatingSet
 #' @importFrom flowCore transform transformList
-#' @importFrom grDevices n2mfrow
-#' @importFrom graphics par
-#' @importFrom methods as
 #'
 #' @examples
 #' # Load in CytoExploreRData to access data
@@ -1408,30 +1404,37 @@ cyto_transform.default <- function(x,
                                    quiet = FALSE,
                                    ...) {
   
-  # No transformations supplied - automatically obtain transform definitions
-  if (is.null(trans) | .all_na(trans)) {
-    
-    # Message not recommended to auto-transform flowFrame/flowSet objects
-    if (cyto_class(x, c("flowFrame", "flowSet"))) {
-      if(!quiet) {
-        message(paste(
+  # TRANSFORMERS MISSING
+  if(is.null(trans) | .all_na(trans)) {
+    # WARNING TRANSFORMATION OF CYTOFRAME/CYTOSET OBJECTS
+    if(!quiet & !cyto_class(x, "GatingSet")) {
+      warning(
+        paste(
           "Automatically transforming cytoframe/cytoset objects",
           "is not recommended as transformation definitions will be lost."
-        ))
-      }
+        )
+      )
     }
-    
-    # Dispatch based on type argument to get TransformerList
-    transformer_list <- cyto_transformers_define(
-      x,
-      channels = channels,
-      parent = parent,
-      type = type,
-      select = select,
-      plot = FALSE, 
-      ...
+    # INVERSE TRANSFORM GATINGHIERARCHY/GATINGSET
+    if(cyto_class(x, "GatingSet") & inverse) {
+      transformer_list <- cyto_transformers_extract(x)
+    # TRANSFORMERS FOR CYTOFRAME/CYTOSET/GATINGHIERARCHY/GATINGSET
+    } else {
+      transformer_list <- cyto_transformers_define(
+        x,
+        channels = channels,
+        parent = parent,
+        type = type,
+        select = select,
+        plot = FALSE, 
+        ...
+      )
+    }
+  # TRANS NOT TRANSFORMLIST OR TRANSFORMERLIST
+  } else {
+    stop(
+      "'trans' must be an object of class transformerList!"
     )
-    
   }
   
   # MESSAGE
@@ -1452,36 +1455,146 @@ cyto_transform.default <- function(x,
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
     # Extract transformations from transformerList to transformList
-    transform_list <- cyto_transform_extract(transformer_list,
-                                             inverse = inverse
+    transform_list <- cyto_transform_extract(
+      transformer_list,
+      inverse = inverse
     )
     
-    # APPLY TRANSFORMATIONS
-    x <- suppressMessages(transform(x, transform_list))
-    
-    # TRANSFORM GATINGHIERARCHY OR GATINGSET
-  } else if (cyto_class(x, "GatingSet")) {
-    
-    # INVERSE TRANSFORM NOT SUPPORTED
-    if (inverse == TRUE) {
-      
-      # TODO: INVERSE TRANSFORM DATA & GATES
-      
-      
-      stop(paste(
-        "Inverse transformations are not yet supported for",
-        "GatingHierarchy/GatingSet objects."
-      ))
-    }
-
     # APPLY TRANSFORMATIONS
     x <- suppressMessages(
       transform(
-        x, 
-        transformer_list
+        x,
+        transform_list
       )
     )
+    
+    # TRANSFORM GATINGHIERARCHY OR GATINGSET
+  } else if (cyto_class(x, "GatingSet")) {
+    # NO TRANSFORMERS
+    if(!.all_na(transformer_list)) {
+      # EXTRACT DATA
+      cs <- cyto_data_extract(
+        x,
+        parent = "root",
+        copy = ifelse(copy, FALSE, TRUE) # COPIED ABOVE?
+      )[[1]]
+
+      # GATETEMPLATE
+      gateTemplate <- cyto_gateTemplate(x)
+      
+      # INVERSE TRANSFORMATIONS - APPLIED AT CYTOSET LEVEL - NOT ATTACHED
+      if(inverse) {
+        # TRANSFORMLIST
+        transform_list <- cyto_transform_extract(
+          transformer_list,
+          inverse = inverse
+        )
+        # APPLY INVERSE TRANSFORMATIONS
+        cs <- suppressMessages(
+          transform(
+            cs,
+            transform_list
+          )
+        )
+        # RECONSTRUCT GATINGSET
+        x <- GatingSet(cs)
+      # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
+      } else {
+        # RECONSTRUCT GATINGSET
+        x <- GatingSet(cs)
+        # APPLY DATA TRANSFORMATIONS
+        x <- suppressMessages(
+          transform(
+            x,
+            transformer_list
+          )
+        )
+      }
+      # GATINGHIERARCHY - PREPARE GATES
+      if(cyto_class(gateTemplate, "gateTemplate")) {
+        # GATINGHIERARCHY
+        x <- x[[1]]
+        # ATTEMPT TO TRANSFORM GATES
+        if(length(gateTemplate) > 0) {
+          gateTemplate <- structure(
+            lapply(
+              gateTemplate,
+              function(z) {
+                if(any(z$channels %in% names(transformer_list))) {
+                  z$gate <- tryCatch(
+                    cyto_gate_transform(
+                      z$gate,
+                      trans = transformer_list,
+                      inverse = inverse
+                    ),
+                    error = function(e) {
+                      message(
+                        paste0(
+                          "Transformation of ", cyto_class(z$gate),
+                          " objects is not currently supported!"
+                        )
+                      )
+                      return(z$gate)
+                    }
+                  )
+                }
+                return(z)
+              }
+            ),
+            names = names(gateTemplate),
+            class = "gateTemplate"
+          )
+        }
+      # GATINGSET - PREPARE GATES
+      } else {
+        # PREPARE NEW GATES
+        if(all(LAPPLY(gateTemplate, "length") > 0)) {
+          gateTemplate <- structure(
+            lapply(
+              seq_along(x),
+              function(v) {
+                structure(
+                  lapply(
+                    gateTemplate[[v]],
+                    function(z) {
+                      if(any(z$channels %in% names(transformer_list))) {
+                        z$gate <- tryCatch(
+                          cyto_gate_transform(
+                            z$gate,
+                            trans = transformer_list,
+                            inverse = inverse
+                          ),
+                          error = function(e) {
+                            message(
+                              paste0(
+                                "Transformation of ", cyto_class(z$gate),
+                                " objects is not currently supported!"
+                              )
+                            )
+                            return(z$gate)
+                          }
+                        )
+                      }
+                      return(z)
+                    }
+                  ),
+                  names = names(gateTemplate[[v]]),
+                  class = "gateTemplate"
+                )
+              }
+            ),
+            names = cyto_names(x)
+          )
+        }
+      }
+      # TRANSFER GATES
+      x <- cyto_gateTemplate_apply(
+        x,
+        gateTemplate
+      )
+    }
   }
+
   
   # COMPLETE
   if(!quiet){
@@ -1491,19 +1604,21 @@ cyto_transform.default <- function(x,
   }
   
   # VISUALISE TRANSFORMATIONS
-  if(plot == TRUE) {
+  if(plot) {
     # INVERSE
-    if(inverse == TRUE) {
+    if(inverse) {
       transformer_list <- NA
     }
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      cyto_plot_profile(x,
-                        channels = channels,
-                        select = select,
-                        axes_trans = transformer_list,
-                        axes_limits = axes_limits,
-                        merge_by = "all"),
+      cyto_plot_profile(
+        x,
+        channels = channels,
+        select = select,
+        axes_trans = transformer_list,
+        axes_limits = axes_limits,
+        merge_by = "all"
+      ),
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1552,13 +1667,23 @@ cyto_transform.transformList <- function(x,
     
     # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
     trans <- trans@transforms[names(trans) %in% cyto_channels(x)]
-    trans <- transformList(names(trans),
-                           lapply(trans, function(z){
-                             z@f
-                           }))
+    trans <- transformList(
+      names(trans),
+      lapply(
+        trans, 
+        function(z){
+          z@f
+        }
+      )
+    )
     
     # Transformations applied as is - allow for inverse transformList
-    x <- suppressMessages(transform(x, trans))
+    x <- suppressMessages(
+      transform(
+        x, 
+        trans
+      )
+    )
   }
   
   # COMPLETE
@@ -1572,11 +1697,13 @@ cyto_transform.transformList <- function(x,
   if(plot == TRUE) {
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      cyto_plot_profile(x,
-                        channels = names(trans),
-                        axes_trans = trans,
-                        axes_limits = axes_limits,
-                        merge_by = "all"), 
+      cyto_plot_profile(
+        x,
+        channels = names(trans),
+        axes_trans = trans,
+        axes_limits = axes_limits,
+        merge_by = "all"
+      ), 
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }
@@ -1617,30 +1744,152 @@ cyto_transform.transformerList <- function(x,
   if (cyto_class(x, c("flowFrame", "flowSet"))) {
     
     # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
-    trans <- cyto_transformers_combine(trans[names(trans) %in% cyto_channels(x)])
+    trans <- cyto_transformers_combine(
+      trans[names(trans) %in% cyto_channels(x)]
+    )
     
     # TRANSFORMLIST
-    transform_list <- cyto_transform_extract(trans, inverse = inverse)
+    transform_list <- cyto_transform_extract(
+      trans, 
+      inverse = inverse
+    )
     
     # APPLY TRANSFORMATIONS
-    x <- suppressMessages(transform(x, transform_list))
+    x <- suppressMessages(
+      transform(
+        x, 
+        transform_list
+      )
+    )
     
   # TRANSFORM GATINGHIERARCHY OR GATINGSET
   } else if (cyto_class(x, "GatingSet")) {
     
-    # INVERSE TRANSFORMATIONS NOT SUPPORTED
-    if (inverse == TRUE) {
-      stop(paste(
-        "Inverse transformations are not yet supported for",
-        "GatingHierarchy/GatingSet objects."
-      ))
-    }
-    
     # RESTRICT TRANSFORMERS - SUBSETTED DATA MAY LACK CHANNELS
-    trans <- cyto_transformers_combine(trans[names(trans) %in% cyto_channels(x)])
+    trans <- cyto_transformers_combine(
+      trans[names(trans) %in% cyto_channels(x)]
+    )
     
-    # APPLY TRANSFORMATIONS
-    x <- suppressMessages(transform(x, trans))
+    # EXTRACT DATA
+    cs <- cyto_data_extract(
+      x,
+      parent = "root",
+      copy = ifelse(copy, FALSE, TRUE) # COPIED ABOVE?
+    )[[1]]
+    
+    # GATETEMPLATE
+    gateTemplate <- cyto_gateTemplate(x)
+    
+    # INVERSE TRANSFORMATIONS - APPLIED AT CYTOSET LEVEL - NOT ATTACHED
+    if(inverse) {
+      # TRANSFORMLIST
+      transform_list <- cyto_transform_extract(
+        trans,
+        inverse = inverse
+      )
+      # APPLY INVERSE TRANSFORMATIONS
+      cs <- suppressMessages(
+        transform(
+          cs,
+          transform_list
+        )
+      )
+      # RECONSTRUCT GATINGSET
+      x <- GatingSet(cs)
+      # DATA TRANSFORMATIONS - APPLIED GATINGSET LEVEL - ATTACHED
+    } else {
+      # RECONSTRUCT GATINGSET
+      x <- GatingSet(cs)
+      # APPLY DATA TRANSFORMATIONS
+      x <- suppressMessages(
+        transform(
+          x,
+          trans
+        )
+      )
+    }
+    # GATINGHIERARCHY - PREPARE GATES
+    if(cyto_class(gateTemplate, "gateTemplate")) {
+      # GATINGHIERARCHY
+      x <- x[[1]]
+      # ATTEMPT TO TRANSFORM GATES
+      if(length(gateTemplate) > 0) {
+        gateTemplate <- structure(
+          lapply(
+            gateTemplate,
+            function(z) {
+              if(any(z$channels %in% names(trans))) {
+                z$gate <- tryCatch(
+                  cyto_gate_transform(
+                    z$gate,
+                    trans = trans,
+                    inverse = inverse
+                  ),
+                  error = function(e) {
+                    message(
+                      paste0(
+                        "Transformation of ", cyto_class(z$gate),
+                        " objects is not currently supported!"
+                      )
+                    )
+                    return(z$gate)
+                  }
+                )
+              }
+              return(z)
+            }
+          ),
+          names = names(gateTemplate),
+          class = "gateTemplate"
+        )
+      }
+    # GATINGSET - PREPARE GATES
+    } else {
+      # PREPARE NEW GATES
+      if(all(LAPPLY(gateTemplate, "length") > 0)) {
+        gateTemplate <- structure(
+          lapply(
+            seq_along(x),
+            function(v) {
+              structure(
+                lapply(
+                  gateTemplate[[v]],
+                  function(z) {
+                    if(any(z$channels %in% names(trans))) {
+                      z$gate <- tryCatch(
+                        cyto_gate_transform(
+                          z$gate,
+                          trans = trans,
+                          inverse = inverse
+                        ),
+                        error = function(e) {
+                          message(
+                            paste0(
+                              "Transformation of ", cyto_class(z$gate),
+                              " objects is not currently supported!"
+                            )
+                          )
+                          return(z$gate)
+                        }
+                      )
+                    }
+                    return(z)
+                  }
+                ),
+                names = names(gateTemplate[[v]]),
+                class = "gateTemplate"
+              )
+            }
+          ),
+          names = cyto_names(x)
+        )
+      }
+    }
+    # TRANSFER GATES
+    x <- cyto_gateTemplate_apply(
+      x,
+      gateTemplate
+    )
   }
   
   # COMPLETE
@@ -1658,12 +1907,14 @@ cyto_transform.transformerList <- function(x,
     }
     # PLOT DATA TRANSFORMATIONS
     tryCatch(
-      cyto_plot_profile(x,
-                        parent = "root",
-                        channels = names(trans),
-                        axes_trans = trans,
-                        axes_limits = axes_limits,
-                        merge_by = "all"),
+      cyto_plot_profile(
+        x,
+        parent = "root",
+        channels = names(trans),
+        axes_trans = trans,
+        axes_limits = axes_limits,
+        merge_by = "all"
+      ),
       error = function(e){
         message("Insufficient plotting space to display transformations!")
       }

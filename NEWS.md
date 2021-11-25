@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* `cyto_transform()` can now perform inverse transformations on GatingHierarchies and GatingSets by applying transformations to gates as well.
 * `cyto_transformers_define()` now accepts custom transformers through a named list of the form `list('PE-A' = list('transform' = asinh, 'inverse' = sinh))` where `asinh` and `sinh` are the names of the tranformer functions.
 * `cyto_save()` can now export multiple populations in a single call by writing FCS files to separate folders. `cyto_save()` now calls `cyto_data_extract()` to allow improved flexibility over how the data should be exported (e.g. events, coerce, inverse, copy etc.).
 * `cyto_data_extract()` now appropriately handles cytoframes by using the `uri` instead of `cyto_names()`.
