@@ -4994,7 +4994,12 @@ cyto_details_edit <- function(x,
   }
   
   # UPDATE DETAILS - PD MAY CONTAIN EXTRA INFORMATION
-  cyto_details(x) <- pd[match_ind(rownames(cyto_details(x)), rownames(pd)), ]
+  cyto_details(x) <- pd[match_ind(
+    rownames(
+      cyto_details(x)
+    ), 
+    rownames(pd)
+  ), drop = FALSE]
   
   # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
   if(!.all_na(save_as)) {
