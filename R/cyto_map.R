@@ -313,7 +313,7 @@ cyto_map <- function(x,
     
     # RECONSTRUCTING GATINGSET
     message(
-      "Builing a new GatingSet..."
+      "Building a new GatingSet..."
     )
     # REVERSE TRANSFORMATIONS
     if(!.all_na(trans) & !inverse) {
