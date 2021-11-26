@@ -140,7 +140,7 @@ cyto_gateTemplate.GatingSet <- function(x) {
   
   structure(
     lapply(
-      seq_along(gs),
+      seq_along(x),
       function(z) {
         cyto_gateTemplate(x[[z]])
       }
