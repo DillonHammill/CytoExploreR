@@ -4999,8 +4999,8 @@ cyto_details_edit <- function(x,
       cyto_details(x)
     ), 
     rownames(pd)
-  ), drop = FALSE]
-  
+  ), , drop = FALSE]
+   
   # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
   if(!.all_na(save_as)) {
     write_to_csv(pd,
@@ -5259,9 +5259,11 @@ cyto_compensate.GatingSet <- function(x,
       "Recomputing gates..."
     )
     x <- cyto_gateTemplate_apply(
-      x,
-      gs
+      gs,
+      x
     )
+  } else {
+    x <- gs
   }
   
   # RETURN UPDATED GATINGSET

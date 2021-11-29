@@ -705,79 +705,211 @@
   }
   coords <- do.call("rbind", coords)
   coords <- data.frame(coords)
+  colnames(coords) <- channels
   
-  # Find which points are on major axis
+  # COMPUTE ANTIPODAL CO-ORDINATES ---------------------------------------------
+  
+  # COMPUTE DISTANCE MATRIX
   dst <- as.matrix(stats::dist(coords))
-  mj.pts <- coords[which(dst == max(dst), arr.ind = TRUE)[1, ], ]
   
-  # Find which points are on minor axis
-  mr.pts <- coords[!coords$x %in% mj.pts$x & !coords$y %in% mj.pts$y, ]
+  # MAJOR AXIS
+  mj_coords <- coords[which(dst == max(dst), arr.ind = TRUE)[1, ], ]
+  mj_slope <- diff(mj_coords[, 2])/diff(mj_coords[, 1])
   
-  # Find center of the major axis
-  mj.center <- c(
-    (sum(mj.pts$x) / nrow(mj.pts)),
-    (sum(mj.pts$y) / nrow(mj.pts))
-  )
+  # CENTER - MIDPOINT MAJOR AXIS
+  center <- colMeans(mj_coords)
   
-  # Find center of all points
-  center <- c(sum(c(mj.pts$x, mr.pts$x)) / 4, sum(c(mj.pts$y, mr.pts$y)) / 4)
+  # FIND MINOR AXIS
+  mn_length <- min(dst[dst > 0])
   
-  # Adjust mj.pts to fall on center
-  adj <- c((mj.center[1] - center[1]), (mj.center[2] - center[2]))
-  mj.pts$x <- mj.pts$x - adj[1]
-  mj.pts$y <- mj.pts$y - adj[2]
-  
-  # Find major point which lies above center
-  max.pt <- mj.pts[mj.pts$y > center[2], ]
-  
-  # Radius of the major axis
-  a <- stats::dist(mj.pts) / 2
-  
-  # Radius of the minor axis
-  b <- stats::dist(mr.pts) / 2
-  
-  # Angle between horizontal line through center and max.pt
-  if (max.pt[1] > center[1]) { # angle < pi/2
-    mj.pt.ct <- cbind(max.pt[1], center[2])
-    colnames(mj.pt.ct) <- c("x", "y")
-    adj <- stats::dist(rbind(center, mj.pt.ct))
-    angle <- acos(adj / a)
-  } else if (max.pt[1] <= center[1]) { # angle >= pi/2
-    mj.pt.ct <- cbind(center[1], max.pt[2])
-    colnames(mj.pt.ct) <- c("x", "y")
-    opp <- stats::dist(as.matrix(rbind(max.pt, mj.pt.ct)))
-    angle <- pi / 2 + asin(opp / a)
+  # ORTHOGONAL MINOR AXIS
+  if(mj_slope == 0) {
+    mn_coords <- matrix(
+      c(center[1] -mn_length/2, center[2],
+        center[1] + mn_length/2, center[2]),
+      byrow = TRUE,
+      ncol = 2,
+      dimnames = list(NULL, channels)
+    )
+  } else {
+    mn_slope <- -1/(mj_slope)
+    mn_xcoord <- (mn_length/2)*(1/sqrt(1 + mn_slope^2))
+    mn_ycoord <- (mn_length/2)*(mn_slope/sqrt(1 + mn_slope^2))
+    mn_coords <- matrix(
+      c(center[1] + mn_xcoord, 
+        center[2] + mn_ycoord,
+        center[1] -mn_xcoord, 
+        center[2] -mn_ycoord),
+      byrow = TRUE,
+      ncol = 2,
+      dimnames = list(NULL, channels)
+    )
   }
+
+  # PREPARE CO-ORDINATES
+  coords <- rbind(mj_coords, mn_coords)
   
-  # COVARIANCE MATRIX
-  cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
-  cinv[1, 1] <- (((cos(angle) * cos(angle)) /
-                    (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
-  cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a^2)) - (1 / (b^2)))
-  cinv[1, 2] <- cinv[2, 1]
-  cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
-                   ((cos(angle) * cos(angle)) / (b^2)))
-  cvm <- solve(cinv)
-  dimnames(cvm) <- list(channels, channels)
+  # CONSTRUCT ELLIPSOIDGATE ----------------------------------------------------
+  
+  # COMPUTE COVARIANCE MATRIX - CANNOT CALL COV FLOWCORE ERROR
+  cvm <- .cyto_ellipse_cov(coords)
   
   # CONSTRUCT GATE
   gate <- ellipsoidGate(
     .gate = cvm,
     mean = center,
-    filterId = alias
+    filterId = alias,
+    distance = 1
   )
-  
+
   # PLOT GATE
-  cyto_plot_gate(gate,
-                 channels = channels,
-                 gate_line_type = gate_line_type,
-                 gate_line_width = gate_line_width,
-                 gate_line_col = gate_line_col
+  cyto_plot_gate(
+    gate,
+    channels = channels,
+    gate_line_type = gate_line_type,
+    gate_line_width = gate_line_width,
+    gate_line_col = gate_line_col
   )
+
+  # ****************************************************************************
+  points(coords[, 1],
+         coords[, 2],
+         pch = 16, 
+         cex = 2,
+         col ="blue")
+  # ****************************************************************************
   
   # RETURN GATE OBJECT
   return(gate)
 
+}
+
+#' @noRd
+.cyto_ellipse_cov <- function(x) {
+  
+  # CHANNELS
+  channels <- colnames(x)
+  
+  # CENTER
+  center <- colMeans(x)
+  
+  # INDICES OF FAR RIGHT & FAR LEFT
+  ind <- c(
+    which.max(x[, 1]),
+    which.min(x[, 1])
+  )
+  
+  # FAR RIGHT
+  R <- x[ind[1], ]
+  
+  # FAR LEFT
+  L <- x[ind[2], ]
+  
+  # HALF AXIS LENGTH
+  a <- sqrt((L[1] - R[1])^2 + (L[2] - R[2])^2)/2
+  a2 <- a*a
+  
+  # OTHER AXIS
+  ind <- seq_len(nrow(x))[-ind]
+  V1 <- x[ind[1], ]
+  V2 <- x[ind[2], ]
+  
+  # HALF AXIS LENGTH
+  b <- sqrt(
+    (V1[1]-V2[1])^2 + 
+      (V1[2] - V2[2])^2
+    )/2
+  b2 <- b*b
+  
+  # CHANNEL ORDER
+  # channels <- rev(channels)
+  
+  # NORMALISE
+  L_norm <- sqrt(L[1]*L[1] + L[2]*L[2])
+  x1 <- L[1]/L_norm
+  y1 <- L[2]/L_norm
+  
+  V1_norm <- sqrt(V1[1]*V1[1] + V1[2]*V1[2])
+  x2 <- V1[1]/V1_norm
+  y2 <- V1[2]/V1_norm
+  
+  # COMPUTE COVARIANCE MATRIX
+  p1 <- c(x1 * x1 * a2 + x2 * x2 * b2,
+          x1 * y1 * a2 + x2 * y2 * b2);
+  p2 <- c(p1[2],
+          y1 * y1 * a2 + y2 * y2 * b2);
+  
+  # COVARIANCE MATRIX
+  cov <- matrix(
+    unlist(c(p1, p2)),
+    ncol = 2,
+    byrow = TRUE,
+    dimnames = list(channels, channels)
+  )
+  
+  return(cov)
+  
+  # # X - MATRIX ANTIPODAL CO-ORDINATES
+  # 
+  # # CHANNELS
+  # channels <- colnames(x)
+  # 
+  # # Find which points are on major axis
+  # dst <- as.matrix(stats::dist(x))
+  # mj.pts <- x[which(dst == max(dst), arr.ind = TRUE)[1, ], ]
+  # 
+  # # Find which points are on minor axis
+  # mr.pts <- x[!x[, 1] %in% mj.pts[, 1] & !x[, 2] %in% mj.pts[, 2], ]
+  # 
+  # # Find center of the major axis
+  # mj.center <- c(
+  #   (sum(mj.pts[, 1]) / nrow(mj.pts)),
+  #   (sum(mj.pts[, 2]) / nrow(mj.pts))
+  # )
+  # 
+  # # Find center of all points
+  # center <- colMeans(x)
+  # 
+  # # Adjust mj.pts to fall on center
+  # adj <- c((mj.center[1] - center[1]), (mj.center[2] - center[2]))
+  # mj.pts[, 1] <- mj.pts[, 1] - adj[1]
+  # mj.pts[, 2] <- mj.pts[, 2] - adj[2]
+  # 
+  # # Find major point which lies above center
+  # max.pt <- mj.pts[mj.pts[, 2] > center[2], ]
+  # 
+  # # Radius of the major axis
+  # a <- stats::dist(mj.pts) / 2
+  # 
+  # # Radius of the minor axis
+  # b <- stats::dist(mr.pts) / 2
+  # 
+  # # Angle between horizontal line through center and max.pt
+  # if (max.pt[1] > center[1]) { # angle < pi/2
+  #   mj.pt.ct <- cbind(max.pt[1], center[2])
+  #   colnames(mj.pt.ct) <- channels
+  #   adj <- stats::dist(rbind(center, mj.pt.ct))
+  #   angle <- acos(adj / a)
+  # } else if (max.pt[1] <= center[1]) { # angle >= pi/2
+  #   mj.pt.ct <- cbind(center[1], max.pt[2])
+  #   colnames(mj.pt.ct) <- channels
+  #   opp <- stats::dist(as.matrix(rbind(max.pt, mj.pt.ct)))
+  #   angle <- pi / 2 + asin(opp / a)
+  # }
+  # 
+  # # COVARIANCE MATRIX
+  # cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
+  # cinv[1, 1] <- (((cos(angle) * cos(angle)) /
+  #                   (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
+  # cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a^2)) - (1 / (b^2)))
+  # cinv[1, 2] <- cinv[2, 1]
+  # cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
+  #                  ((cos(angle) * cos(angle)) / (b^2)))
+  # cvm <- solve(cinv)
+  # dimnames(cvm) <- list(channels, channels)
+  # 
+  # return(cvm)
+  
 }
 
 #' @importFrom flowCore quadGate

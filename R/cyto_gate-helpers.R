@@ -2413,97 +2413,182 @@ cyto_gate_transform.ellipsoidGate <- function(x,
   }
   
   # GATE FILTERID
-  gate_name <- x@filterId  
+  name <- x@filterId  
   
   # GATE CHANNELS
-  gate_channels <- parameters(x)  
+  channels <- parameters(x)  
   
-  # GATE COORDS (POLYGON)
-  gate_coords <- .cyto_gate_coords(list(x), channels = gate_channels)
+  # GATE COVARIANCE MATRIX
+  cov <- x@cov
   
-  # GATE CENTER (ELLIPSE)
-  gate_center <- x@mean  
+  # SORT CHANNELS BY COVARIANCE
+  chans <- names(sort(diag(cov), decreasing = TRUE))
   
-  # ADD GATE CENTER TO GATE COORDS
-  gate_coords <- rbind(gate_coords, gate_center)
+  # GATE CENTER
+  center <- x@mean
   
-  # GATE COORDS (ELLIPSE)
-  gate_dist <- as.matrix(dist(round(gate_coords, 2)))
-  gate_dist <- gate_dist[, ncol(gate_dist)]
-  gate_dist <- round(gate_dist[gate_dist != 0], 2)
-  names(gate_dist) <- seq_along(gate_dist) # ORIGINAL ORDER
-  gate_dist_sort <- sort(gate_dist)
+  # DISTANCE
+  dist <- x@distance
   
-  # MINOR AXIS - WATCH OUT FOR DUPLICATES
-  ind <- as.numeric(names(gate_dist_sort[c(1,3)]))
-  gate_min <- gate_coords[ind, ] # closest 2 points
+  # EIGEN DECOMPOSITION
+  eig <- eigen(cov)
   
-  # MAJOR AXIS - WATCH OUT FOR DUPLICATES
-  ind <- as.numeric(names(gate_dist_sort[c(length(gate_dist_sort),
-                                           length(gate_dist_sort) - 3)]))
-  gate_max <- gate_coords[ind, ] # closest 2 points
-  gate_coords <- rbind(gate_min, gate_max, gate_center)
+  # EIGEN VALUES
+  evals <- eig$values
+  names(evals) <- chans
   
-  # CHANNELS TO TRANSFORM
-  gate_trans_channels <- gate_channels[which(gate_channels %in% names(trans))]
+  # EIGEN VECTORS
+  evecs <- eig$vectors
+  colnames(evecs) <- chans
   
-  # TRANSFORMATIONS
-  lapply(gate_trans_channels, function(z){
-    # TRANSFORM COORDS - WATCH OUT INF COORDS
-    if(inverse == FALSE){
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
-        if(is.finite(y)){
-          trans[[z]]$transform(y)
-        }else{
-          y
-        }
-      })
-    }else{
-      gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
-        if(is.finite(y)){
-          trans[[z]]$inverse(y)
-        }else{
-          y
-        }
-      })
+  # MAJOR AXIS LENGTH
+  a2 <- evals[1]*(dist^2)
+  a <- sqrt(a2)
+  a_vec <- a*evecs[, 1]
+  
+  # MINOR AXIS LENGTH
+  b2 <- evals[2]*(dist^2)
+  b <- sqrt(b2)
+  b_vec <- b*evecs[, 2]
+  
+  # ANTIPODAL CO-ORDINATES
+  coords <- matrix(
+    c(
+      c(center[1] + a_vec[1], center[2] + a_vec[2]),
+      c(center[1] - a_vec[1], center[2] - a_vec[2]),
+      c(center[1] + b_vec[1], center[2] + b_vec[2]),
+      c(center[1] - b_vec[1], center[2] - b_vec[2])
+    ),
+    ncol = 2,
+    byrow = FALSE,
+    dimnames = list(NULL, chans)
+  )
+  
+  # APPEND CENTER
+  coords <- rbind(coords, center[chans])
+  
+  # TRANSFORM CO-ORDINATES
+  lapply(
+    1:ncol(coords),
+    function(z) {
+      if(colnames(coords)[z] %in% names(trans)) {
+        # TRANSFORM
+        coords[, z] <<- LAPPLY(
+          coords[, z],
+          function(w) {
+            if(is.finite(w)) {
+              if(!inverse) {
+                trans[[colnames(coords)[z]]]$transform(w)
+              } else {
+                trans[[colnames(coords)[z]]]$inverse(w)
+              }
+            } else {
+              w
+            }
+          }
+        )
+      }
     }
-  })
+  )
   
-  # RADIUS MINOR AXIS
-  b <- dist(gate_coords[c(1,2), ])/2  
+  # NEW TRANSFORMED CENTER
+  center <- coords[nrow(coords), ]
+  coords <- coords[-nrow(coords), ]
   
-  # RADIUS MAJOR AXIS
-  a <- dist(gate_coords[c(3,4), ])/2
+  # RECOMPUTE COVARIANCE MATRIX
+  cov <- .cyto_ellipse_cov(coords)
   
-  # ANGLE - HORIZONTAL THROUGH CENTER TO MAX POINT
-  max_point <- gate_coords[which.max(gate_coords[, 2]), ]
-  if (max_point[1] > gate_center[1]) { # angle < pi/2
-    mj.pt.ct <- cbind(max_point[1], gate_center[2])
-    colnames(mj.pt.ct) <- c("x", "y")
-    adj <- stats::dist(rbind(gate_center, mj.pt.ct))
-    angle <- acos(adj / a)
-  } else if (max_point[1] <= gate_center[1]) { # angle >= pi/2
-    mj.pt.ct <- cbind(gate_center[1], max_point[2])
-    colnames(mj.pt.ct) <- c("x", "y")
-    opp <- stats::dist(as.matrix(rbind(max_point, mj.pt.ct)))
-    angle <- pi / 2 + asin(opp / a)
-  }
-  
-  # COVARIANCE MATRIX
-  cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
-  cinv[1, 1] <- (((cos(angle) * cos(angle)) /
-                    (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
-  cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a^2)) - (1 / (b^2)))
-  cinv[1, 2] <- cinv[2, 1]
-  cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
-                   ((cos(angle) * cos(angle)) / (b^2)))
-  cvm <- solve(cinv)
-  dimnames(cvm) <- list(gate_channels, gate_channels)
-  
+  # # GATE COORDS (POLYGON)
+  # gate_coords <- .cyto_gate_coords(
+  #   list(x),
+  #   channels = gate_channels
+  # )
+  # 
+  # # GATE CENTER (ELLIPSE)
+  # gate_center <- x@mean  
+  # 
+  # # ADD GATE CENTER TO GATE COORDS
+  # gate_coords <- rbind(gate_coords, gate_center)
+  # 
+  # # GATE COORDS (ELLIPSE)
+  # gate_dist <- as.matrix(dist(round(gate_coords, 2)))
+  # gate_dist <- gate_dist[, ncol(gate_dist)]
+  # gate_dist <- round(gate_dist[gate_dist != 0], 2)
+  # names(gate_dist) <- seq_along(gate_dist) # ORIGINAL ORDER
+  # gate_dist_sort <- sort(gate_dist)
+  # 
+  # # MINOR AXIS - WATCH OUT FOR DUPLICATES
+  # ind <- as.numeric(names(gate_dist_sort[c(1,3)]))
+  # gate_min <- gate_coords[ind, ] # closest 2 points
+  # 
+  # # MAJOR AXIS - WATCH OUT FOR DUPLICATES
+  # ind <- as.numeric(names(gate_dist_sort[c(length(gate_dist_sort),
+  #                                          length(gate_dist_sort) - 3)]))
+  # gate_max <- gate_coords[ind, ] # closest 2 points
+  # gate_coords <- rbind(gate_min, gate_max, gate_center)
+  # 
+  # # CHANNELS TO TRANSFORM
+  # gate_trans_channels <- gate_channels[which(gate_channels %in% names(trans))]
+  # 
+  # # TRANSFORMATIONS
+  # lapply(gate_trans_channels, function(z){
+  #   # TRANSFORM COORDS - WATCH OUT INF COORDS
+  #   if(inverse == FALSE){
+  #     gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+  #       if(is.finite(y)){
+  #         trans[[z]]$transform(y)
+  #       }else{
+  #         y
+  #       }
+  #     })
+  #   }else{
+  #     gate_coords[, z] <<- LAPPLY(gate_coords[,z], function(y){
+  #       if(is.finite(y)){
+  #         trans[[z]]$inverse(y)
+  #       }else{
+  #         y
+  #       }
+  #     })
+  #   }
+  # })
+  # 
+  # # RADIUS MINOR AXIS
+  # b <- dist(gate_coords[c(1,2), ])/2
+  # 
+  # # RADIUS MAJOR AXIS
+  # a <- dist(gate_coords[c(3,4), ])/2
+  # 
+  # # ANGLE - HORIZONTAL THROUGH CENTER TO MAX POINT
+  # max_point <- gate_coords[which.max(gate_coords[, 2]), ]
+  # if (max_point[1] > gate_center[1]) { # angle < pi/2
+  #   mj.pt.ct <- cbind(max_point[1], gate_center[2])
+  #   colnames(mj.pt.ct) <- c("x", "y")
+  #   adj <- stats::dist(rbind(gate_center, mj.pt.ct))
+  #   angle <- acos(adj / a)
+  # } else if (max_point[1] <= gate_center[1]) { # angle >= pi/2
+  #   mj.pt.ct <- cbind(gate_center[1], max_point[2])
+  #   colnames(mj.pt.ct) <- c("x", "y")
+  #   opp <- stats::dist(as.matrix(rbind(max_point, mj.pt.ct)))
+  #   angle <- pi / 2 + asin(opp / a)
+  # }
+  # 
+  # # COVARIANCE MATRIX
+  # cinv <- matrix(c(0, 0, 0, 0), nrow = 2, ncol = 2)
+  # cinv[1, 1] <- (((cos(angle) * cos(angle)) /
+  #                   (a^2)) + ((sin(angle) * sin(angle)) / (b^2)))
+  # cinv[2, 1] <- sin(angle) * cos(angle) * ((1 / (a^2)) - (1 / (b^2)))
+  # cinv[1, 2] <- cinv[2, 1]
+  # cinv[2, 2] <- (((sin(angle) * sin(angle)) / (a^2)) +
+  #                  ((cos(angle) * cos(angle)) / (b^2)))
+  # cvm <- solve(cinv)
+  # dimnames(cvm) <- list(gate_channels, gate_channels)
+
   # UPDATE GATE
-  x <- ellipsoidGate(filterId = gate_name,
-                     .gate = cvm,
-                     mean = gate_center)
+  x <- ellipsoidGate(
+    filterId = name,
+    .gate = cov,
+    mean = center
+  )
   return(x)
   
 }

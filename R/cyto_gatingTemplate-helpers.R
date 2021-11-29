@@ -528,6 +528,8 @@ cyto_gatingTemplate_apply <- function(x,
       } else {
         gatingTemplate <- as(gatingTemplate, "data.table")
       }
+      # GATINGTEMPLATE FILE -> GATINGTEMPLATE
+      gt <- suppressMessages(gatingTemplate(gatingTemplate))
     }
   # NO GATINGTEMPLATE
   } else if (is.null(gatingTemplate)) {
@@ -542,6 +544,8 @@ cyto_gatingTemplate_apply <- function(x,
     # READ GATINGTEMPLATE
     gatingTemplate <- file_ext_append(gatingTemplate, ".csv")
     file_exists(gatingTemplate, error = TRUE)
+    # GATINGTEMPLATE FILE -> GATINGTEMPLATE
+    gt <- suppressMessages(gatingTemplate(gatingTemplate))
   }
   
   # MESSAGE - APPLY GATINGTEMPLATE FILE
@@ -557,11 +561,14 @@ cyto_gatingTemplate_apply <- function(x,
     )
   )
   
-  # GATINGTEMPLATE FILE -> GATINGTEMPLATE
-  gt <- suppressMessages(gatingTemplate(gatingTemplate))
-  
   # APPLY GATINGTEMPLATE
-  suppressWarnings(gt_gating(gt, x, ...))
+  suppressWarnings(
+    gt_gating(
+      gt,
+      x,
+      ...
+    )
+  )
   
   # ACTIVE GATINGTEMPLATE
   if(active) {

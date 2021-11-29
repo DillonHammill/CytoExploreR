@@ -364,9 +364,11 @@ cyto_map <- function(x,
         "Recomputing gates..."
       )
       x <- cyto_gateTemplate_apply(
-        x,
-        gs
+        gs, 
+        x
       )
+    } else {
+      x <- gs
     }
 
   } else {
