@@ -343,6 +343,8 @@ cyto_markers <- function(x,
 #' @export
 cyto_fluor_channels <- function(x,
                                 ...){
+  
+  # TODO: SHOULD WE EXCLUDE HEIGHT/WIDTH PARAMTERS HERE?
   cyto_channels(
     x, 
     exclude = c(

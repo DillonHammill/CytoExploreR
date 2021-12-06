@@ -8,6 +8,7 @@ cyto_sample_to_node(x, node = NULL, events = NULL, ...)
 }
 \arguments{
 \item{x}{object of class
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{node}{name of the gated bead population to use for the calculation. If

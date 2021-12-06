@@ -790,7 +790,7 @@
     mj.pt.ct <- cbind(max.pt[1], center[2])
     colnames(mj.pt.ct) <- channels
     adj <- stats::dist(rbind(center, mj.pt.ct))
-    angle <- acos(adj / a) # [-1, 1]
+    angle <- acos(adj / a) # [-1, 1] acos warning
   } else if (max.pt[1] <= center[1]) { # angle >= pi/2
     mj.pt.ct <- cbind(center[1], max.pt[2])
     colnames(mj.pt.ct) <- channels

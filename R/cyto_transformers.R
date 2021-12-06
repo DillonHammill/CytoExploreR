@@ -600,8 +600,10 @@ cyto_transformers_combine <- function(...) {
   transformer_list <- c(...)
   
   # Convert to transformerList
-  transformer_list <- transformerList(names(transformer_list),
-                                      transformer_list)
+  transformer_list <- transformerList(
+    names(transformer_list),
+    transformer_list
+  )
   
   # Return transformations in a single transformerList for cyto_transform
   return(transformer_list)
