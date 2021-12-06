@@ -16,6 +16,8 @@
 #' @noRd
 .cyto_asp_spill <- function(x) {
   
+  # TODO: MAKE AUTOSPILL COMPUTE COEFFICIENTS IN ALL CHANNELS
+  
   # AUTOSPILL - COMPUTE SPILLOVER COEFFICIENTS ---------------------------------
   
   # INITIAL SPILLOVER COEFFICIENTS
@@ -153,38 +155,41 @@
   spill_coef <- do.call(
     "rbind",
     structure(
-      lapply(pd$channel, function(z) {
-        # RESET INTERCEPTS & COEFFICIENTS
-        spill_int <- spill_zero
-        spill_coef <- spill_zero
-        # PREPARE DATA
-        cs <- cyto_select(
-          x,
-          channel = z
-        )
-        # FIT RLM MODELS & UPDATE INTERCEPTS & COEFFICIENTS
-        lapply(pd$channel, function(w){
-          # DIAGONAL PARAMETERS COMBINATIONS
-          if(z == w) {
-            spill_coef[z] <<- 1
-            # NON-DIAGONAL PARAMETER COMBINATIONS
-          } else {
-            # DATA PRIMARY & SECONDARY CHANNEL
-            rlm_params <- .cyto_asp_rlm(
-              cs,
-              x_chan = z,
-              y_chan = w,
-              trim = 0.01
-            )
-            # STORE COEFFICIENT & INTERCEPT
-            spill_int[w] <<- rlm_params[1, 1]
-            spill_coef[w] <<- rlm_params[2, 1]
-          }
-        })
-        return(
-          c(spill_int, spill_coef)
-        )
-      }),
+      lapply(
+        pd$channel, 
+        function(z) {
+          # RESET INTERCEPTS & COEFFICIENTS
+          spill_int <- spill_zero
+          spill_coef <- spill_zero
+          # PREPARE DATA
+          cs <- cyto_select(
+            x,
+            channel = z
+          )
+          # FIT RLM MODELS & UPDATE INTERCEPTS & COEFFICIENTS
+          lapply(pd$channel, function(w){
+            # DIAGONAL PARAMETERS COMBINATIONS
+            if(z == w) {
+              spill_coef[z] <<- 1
+              # NON-DIAGONAL PARAMETER COMBINATIONS
+            } else {
+              # DATA PRIMARY & SECONDARY CHANNEL
+              rlm_params <- .cyto_asp_rlm(
+                cs,
+                x_chan = z,
+                y_chan = w,
+                trim = 0.01
+              )
+              # STORE COEFFICIENT & INTERCEPT
+              spill_int[w] <<- rlm_params[1, 1]
+              spill_coef[w] <<- rlm_params[2, 1]
+            }
+          })
+          return(
+            c(spill_int, spill_coef)
+          )
+        }
+      ),
       names = pd$channel
     )
   )
@@ -392,80 +397,83 @@
   spill_params <- do.call(
     "rbind",
     structure(
-      lapply(pd$channel, function(z){
-        # RESET PARAMETERS
-        spill_int <- spill_zero
-        spill_coef <- spill_zero
-        spill_slope <- spill_zero
-        spill_skew <- spill_zero
-        # EXTRACT DATA
-        cs <- cyto_select(
-          x,
-          channel = z
-        )
-        # FIT RLM MODELS & UPDATE PARAMETERS
-        lapply(pd$channel, function(w){
-          # DIAGONAL PARAMETERS COMBINATIONS
-          if(z == w) {
-            spill_coef[z] <<- 1
-            spill_slope[z] <<- 1
-            # NON-DIAGONAL PARAMETER COMBINATIONS
-          } else {
-            # DATA PRIMARY & SECONDARY CHANNEL
-            rlm_params <- .cyto_asp_rlm(
-              cs,
-              x_chan = z,
-              y_chan = w,
-              trim = 0.01
-            )
-            # STORE COEFFICIENT & INTERCEPT
-            spill_int[w] <<- rlm_params[1, 1]
-            spill_coef[w] <<- rlm_params[2, 1]
-            # SLOPE/SKEWNESS - LINEAR DATA
-            if(!transform) {
-              spill_slope[w] <<- spill_coef[w]
-            # SLOPE/SKEWNESS - TRANSFORMED DATA
+      lapply(
+        pd$channel, 
+        function(z){
+          # RESET PARAMETERS
+          spill_int <- spill_zero
+          spill_coef <- spill_zero
+          spill_slope <- spill_zero
+          spill_skew <- spill_zero
+          # EXTRACT DATA
+          cs <- cyto_select(
+            x,
+            channel = z
+          )
+          # FIT RLM MODELS & UPDATE PARAMETERS
+          lapply(pd$channel, function(w){
+            # DIAGONAL PARAMETERS COMBINATIONS
+            if(z == w) {
+              spill_coef[z] <<- 1
+              spill_slope[z] <<- 1
+              # NON-DIAGONAL PARAMETER COMBINATIONS
             } else {
-              yp <- cyto_apply(
-                cs, 
-                "quantile",
-                probs = c(0.01, 0.99),
-                input = "matrix",
-                channels = z,
-                copy = FALSE
-              )[, 1]
-              xp <- c(spill_int[w] + spill_coef[w] * yp[1],
-                      spill_int[w] + spill_coef[w] * yp[2])
-              if(yp[1] == yp[2] || xp[1] == xp[2]) {
-                spill_slope[w] <<- 0
+              # DATA PRIMARY & SECONDARY CHANNEL
+              rlm_params <- .cyto_asp_rlm(
+                cs,
+                x_chan = z,
+                y_chan = w,
+                trim = 0.01
+              )
+              # STORE COEFFICIENT & INTERCEPT
+              spill_int[w] <<- rlm_params[1, 1]
+              spill_coef[w] <<- rlm_params[2, 1]
+              # SLOPE/SKEWNESS - LINEAR DATA
+              if(!transform) {
+                spill_slope[w] <<- spill_coef[w]
+                # SLOPE/SKEWNESS - TRANSFORMED DATA
               } else {
-                ypt <- .cyto_transform(
-                  yp,
-                  trans = trans,
-                  channel = z,
-                  inverse = TRUE
-                )
-                xpt <- .cyto_transform(
-                  xp,
-                  trans = trans,
-                  channel = w,
-                  inverse = TRUE
-                )
-                spill_slope[w] <<- spill_coef[w] * (xpt[2] - xpt[1]) * 
-                  (yp[2] - yp[1]) / ((xp[2] - xp[1])*(ypt[2] - ypt[1]))
+                yp <- cyto_apply(
+                  cs, 
+                  "quantile",
+                  probs = c(0.01, 0.99),
+                  input = "matrix",
+                  channels = z,
+                  copy = FALSE
+                )[, 1]
+                xp <- c(spill_int[w] + spill_coef[w] * yp[1],
+                        spill_int[w] + spill_coef[w] * yp[2])
+                if(yp[1] == yp[2] || xp[1] == xp[2]) {
+                  spill_slope[w] <<- 0
+                } else {
+                  ypt <- .cyto_transform(
+                    yp,
+                    trans = trans,
+                    channel = z,
+                    inverse = TRUE
+                  )
+                  xpt <- .cyto_transform(
+                    xp,
+                    trans = trans,
+                    channel = w,
+                    inverse = TRUE
+                  )
+                  spill_slope[w] <<- spill_coef[w] * (xpt[2] - xpt[1]) * 
+                    (yp[2] - yp[1]) / ((xp[2] - xp[1])*(ypt[2] - ypt[1]))
+                }
               }
             }
-          }
-        })
-        # RETURN RLM PARAMETERS
-        return(
-          c(
-            spill_int,
-            spill_coef,
-            spill_slope
+          })
+          # RETURN RLM PARAMETERS
+          return(
+            c(
+              spill_int,
+              spill_coef,
+              spill_slope
+            )
           )
-        )
-      }),
+        }
+      ),
       names = pd$channel
     )
   )
