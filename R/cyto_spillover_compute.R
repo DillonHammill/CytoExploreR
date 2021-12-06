@@ -228,7 +228,7 @@ cyto_spillover_compute <- function(x,
       pd,
       pd_new
     )
-    # COMPENSATION DETAILS FOUND  
+  # COMPENSATION DETAILS FOUND  
   } else {
     # MULTIPLE COMPENSATION DETAILS FILES FOUND
     if(length(pd_new) > 1) {
@@ -358,6 +358,7 @@ cyto_spillover_compute <- function(x,
       ), 
       "-Compensation-Details.csv"
     )
+    pd_new <- pd
   # UPDATE DATA IN EXISTING FILE
   } else {
     # ORIGINAL DETAILS STORED IN PD_NEW[[FILE]] - NEW DETAILS STORED IN PD
@@ -385,12 +386,12 @@ cyto_spillover_compute <- function(x,
     # UPDATE ROWS
     ind <- match_ind(rownames(pd), rownames(pd_new[[file]]))
     pd_new[[file]][ind, colnames(pd)] <- pd
-    pd <- pd_new[[file]]
+    pd_new <- pd_new[[file]]
   }
   
   # WRITE DETAILS TO FILE
   write_to_csv(
-    pd,
+    pd_new,
     file,
     row.names = TRUE
   )
