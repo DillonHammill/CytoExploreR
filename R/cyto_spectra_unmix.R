@@ -20,6 +20,8 @@
 #' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing single
 #'   colour controls.
+#' @param parent name of the population to extract from each control to compute
+#'   the spectral unmixing coefficients, set to \code{"root"} by default.
 #' @param channels names of the channels/markers for which unmixing coefficients
 #'   should be computed, set to all fluorescent channels by default.
 #' @param select passed to \code{cyto_select()} to extract a subset of samples
@@ -48,13 +50,12 @@
 #'
 #' @export
 cyto_unmix_compute <- function(x,
+                               parent = "root",
                                channels = NULL,
                                select = NULL,
                                auto = NULL,
                                save_as = NULL,
                                ...) {
-  
-  # TODO: EDITOR SHOULD ALWAYS OPEN IN INTERACTIVE MODE
   
   # PREPARE DATA ---------------------------------------------------------------
   
@@ -90,41 +91,91 @@ cyto_unmix_compute <- function(x,
     }
   )
   
-  # REQUIRED COLUMNS MISSING
-  if(length(vars_req) > 0) {
-    # SEARCH FOR UNMIXING DETAILS
-    pd_new <- cyto_file_search(
-      "-Unmixing-Details.csv$",
-      colnames = c("name", "group", "parent", "label"),
-      rownames = rownames(cyto_details(x)),
+  # FILE MUST REFLECT ANY CHANGES MADE TO DATA
+  # SEARCH FOR UNMIXING DETAILS
+  pd_new <- cyto_file_search(
+    "-Unmixing-Details.csv$",
+    colnames = c("name", "group", "parent", "label"),
+    rownames = rownames(cyto_details(x)),
+  )
+  # NO UNMIXING DETAILS FOUND
+  if(length(pd_new) == 0) {
+    # UNMIXING DETAILS FILE
+    file <- NULL
+    # PREPARE MISSING VARIABLES
+    pd_new <- matrix(
+      NA,
+      nrow = nrow(pd),
+      ncol = length(vars_req),
+      dimnames = list(
+        rownames(pd),
+        vars_req
+      )
     )
-    # NO UNMIXING DETAILS FOUND
-    if(length(pd_new) == 0) {
-      # UNMIXING DETAILS FILE
-      file <- NULL
-      # APPEND MISSING VARIABLES
-      pd <- cbind(
-        pd, 
-        matrix(
-          NA,
-          nrow = nrow(pd),
-          ncol = length(vars_req),
-          dimnames = list(
-            rownames(pd),
-            vars_req
+    # SET DEFAULT FOR PARENT
+    if("parent" %in% colnames(pd_new)) {
+      pd_new[, "parent"] <- rep(parent, length.out = nrow(pd_new))
+    }
+    # APPEND MISSING VARIABLES
+    pd <- cbind(
+      pd, 
+      pd_new
+    )
+  # UNMIXING DETAILS FOUND
+  } else {
+    # MULTIPLE COMPENSATION DETAILS FILES FOUND
+    if(length(pd_new) > 1) {
+      # ENQUIRE
+      if(interactive() & cyto_option("CytoExploreR_interactive")) {
+        message(
+          "Multiple files found with spectral unmixing details for this ",
+          cyto_class(x),
+          ". Which file would you like to import unmixing details from?"
+        )
+        message(
+          paste0(
+            paste0(
+              1:length(pd_new),
+              ": ",
+              names(pd_new)
+            ),
+            sep = "\n"
           )
         )
-      )
-    # UNMIXING DETAILS FOUND
-    } else {
-      # UNMIXING DETAILS FILE
-      file <- names(pd_new)[1]
-      # APPEND MISSING VARIABLES
-      pd <- cbind(
-        pd, 
-        pd_new[[1]][, vars_req]
-      )
+        opt <- cyto_enquire(NULL)
+        opt <- tryCatch(
+          as.numeric(opt),
+          warning = function(w) {
+            return(
+              match(opt, names(pd_new))
+            )
+          }
+        )
+        # COMPENSATION DETAILS FILE
+        pd_new <- pd_new[opt]
+      } else {
+        pd_new <- pd_new[1]
+      }
     }
+    # COMPENSATION DETAILS FILE
+    file <- names(pd_new)
+    message(
+      paste0(
+        "Importing saved unmixing details from ",
+        file,
+        "..."
+      )
+    )
+    # TODO: DO WE WANT TO APPEND ALL DETAILS HERE?
+    # APPEND MISSING VARIABLES
+    pd <- cbind(
+      pd,
+      pd_new[[file]][
+        match_ind(
+          rownames(pd),
+          rownames(pd_new[[file]])
+        ), vars_req]
+    )
   }
   
   # UPDATE EXPERIMENT DETAILS
@@ -132,19 +183,21 @@ cyto_unmix_compute <- function(x,
   
   # INTERACTIVELY EDIT UNMIXING DETAILS
   if(interactive() & cyto_option("CytoExploreR_interactive")) {
+    # EDIT UNMIXING DETAILS - PARENT DROPDOWN
     x <- cyto_details_edit(
       x,
       file = NA,
       col_options = if(cyto_class(x, "GatingSet")) {
-        list("parent" = cyto_nodes(x))
+        list(
+          "parent" = cyto_nodes(x, path = "auto")
+        )
       } else {
         NULL
       }
     )
+    # UPDATE UNMIXING DETAILS
+    pd <- cyto_details(x)
   }
-  
-  # UPDATE UNMIXING DETAILS
-  pd <- cyto_details(x)
   
   # MISSING VARIABLES
   if(!all(vars %in% colnames(pd))) {
@@ -168,11 +221,40 @@ cyto_unmix_compute <- function(x,
       ), 
       "-Spectral-Unmixing-Details.csv"
     )
+    pd_new <- pd
+  # UPDATE DETAILS IN EXISTING FILE
+  } else {
+    # ORIGINAL DETAILS STORED IN PD_NEW[[FILE]] - NEW DETAILS STORED IN PD
+    # ADD NEW COLUMNS TO ORIGINAL DETAILS
+    ind <- which(!colnames(pd) %in% colnames(pd_new[[file]]))
+    if(length(ind) > 0) {
+      pd_new[[file]] <- do.call(
+        "cbind",
+        c(
+          list(
+            pd_new[[file]]
+          ),
+          structure(
+            lapply(
+              ind,
+              function(z) {
+                rep(NA, nrow(pd_new[[file]]))
+              }
+            ),
+            names = colnames(pd)[ind]
+          )
+        )
+      )
+    }
+    # UPDATE ROWS
+    ind <- match_ind(rownames(pd), rownames(pd_new[[file]]))
+    pd_new[[file]][ind, colnames(pd)] <- pd
+    pd_new <- pd_new[[file]]
   }
   
   # EXPORT UPDATED UNMIXING DETAILS
   write_to_csv(
-    pd,
+    pd_new,
     file,
     row.names = TRUE
   )
@@ -483,7 +565,9 @@ cyto_unmix.flowFrame <- function(x,
     )
     # COPY & REMOVE EXCESS PARAMETER
     return(
-      cyto_copy(x[, -match(rm[1], cyto_channels(x))])
+      cyto_copy(
+        x[, -match(rm[1], cyto_channels(x))]
+      )
     )
   # SOME EXTRA CHANNELS
   } else {

@@ -6,6 +6,7 @@
 \usage{
 cyto_unmix_compute(
   x,
+  parent = "root",
   channels = NULL,
   select = NULL,
   auto = NULL,
@@ -17,6 +18,9 @@ cyto_unmix_compute(
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing single
 colour controls.}
+
+\item{parent}{name of the population to extract from each control to compute
+the spectral unmixing coefficients, set to \code{"root"} by default.}
 
 \item{channels}{names of the channels/markers for which unmixing coefficients
 should be computed, set to all fluorescent channels by default.}
