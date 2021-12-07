@@ -252,6 +252,9 @@
 #'   Label positions are set on a per gate basis, all samples in the same group
 #'   will have the same label positions. To individually label plots users must
 #'   manually supply the co-ordinates to label_text_x and label_text_y.
+#' @param label_memory logical indicating whether \code{cyto_plot()} should
+#'   remember label co-ordinates when \code{label_position = "manual"} and use
+#'   those co-ordinates when \code{cyto_plot_save()} is called.
 #' @param label_text_x vector of x co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
 #'   either \code{label_text_x} or \code{label_text_y} to "select".
@@ -442,6 +445,7 @@ cyto_plot <- function(x,
                       label_text,
                       label_stat,
                       label_position = "auto",
+                      label_memory = FALSE,
                       label_text_x = NA,
                       label_text_y = NA,
                       label_text_font = 2,
@@ -500,9 +504,11 @@ cyto_plot <- function(x,
   if(.empty(args$channels)) {
     stop("Supply channel/marker(s) to 'channels' to construct the plot.")
   } else {
-    args$channels <- cyto_channels_extract(args$x,
-                                           channels = args$channels,
-                                           plot = TRUE)
+    args$channels <- cyto_channels_extract(
+      args$x,
+      channels = args$channels,
+      plot = TRUE
+    )
   }
   
   # LAYOUT - CUSTOM PLOT
@@ -652,34 +658,40 @@ cyto_plot <- function(x,
   }
   
   # X AXIS LIMITS - SUPPLIED ON LINEAR SCALE
-  args$xlim <- .cyto_transform(args$xlim,
-                               trans = args$axes_trans,
-                               channel = args$channels[1],
-                               inverse = FALSE)
+  args$xlim <- .cyto_transform(
+    args$xlim,
+    trans = args$axes_trans,
+    channel = args$channels[1],
+    inverse = FALSE
+  )
   
   # COMPUTE MISSING X AXIS LIMITS
   if (any(is.na(args$xlim))) {
     args$xlim[is.na(args$xlim)] <- 
-      .cyto_plot_axes_limits(args$x,
-                             channels = args$channels[1],
-                             gate = args$gate[[1]],
-                             axes_limits = args$axes_limits,
-                             buffer = args$axes_limits_buffer
+      .cyto_plot_axes_limits(
+        args$x,
+        channels = args$channels[1],
+        gate = args$gate[[1]],
+        axes_limits = args$axes_limits,
+        buffer = args$axes_limits_buffer
       )[, args$channels[1]][is.na(args$xlim)]
   }
   
   # Y AXIS LIMITS - SUPPLIED ON LINEAR SCALE
   if(length(args$channels) == 2){
-    args$ylim <- .cyto_transform(args$ylim,
-                                 trans = args$axes_trans,
-                                 channel = args$channels[2])
+    args$ylim <- .cyto_transform(
+      args$ylim,
+      trans = args$axes_trans,
+      channel = args$channels[2]
+    )
     if(any(is.na(args$ylim))) {
       args$ylim[is.na(args$ylim)] <- 
-        .cyto_plot_axes_limits(args$x,
-                               channels = args$channels[2],
-                               gate = args$gate[[1]],
-                               axes_limits = args$axes_limits,
-                               buffer = args$axes_limits_buffer
+        .cyto_plot_axes_limits(
+          args$x,
+          channels = args$channels[2],
+          gate = args$gate[[1]],
+          axes_limits = args$axes_limits,
+          buffer = args$axes_limits_buffer
         )[, args$channels[2]][is.na(args$ylim)]
     }
   }
@@ -687,11 +699,12 @@ cyto_plot <- function(x,
   # X AXIS BREAKS & LABELS
   if (args$axes_text[1] == TRUE) {
     axes_text_x <- 
-      .cyto_plot_axes_text(args$x[[1]],
-                           channels = args$channels[1],
-                           axes_trans = args$axes_trans,
-                           axes_range = list(args$xlim),
-                           axes_limits = args$axes_limits
+      .cyto_plot_axes_text(
+        args$x[[1]],
+        channels = args$channels[1],
+        axes_trans = args$axes_trans,
+        axes_range = list(args$xlim),
+        axes_limits = args$axes_limits
       )[[1]]
   } else {
     axes_text_x <- FALSE
@@ -701,11 +714,12 @@ cyto_plot <- function(x,
   if (args$axes_text[2] == TRUE) {
     if (length(args$channels) == 2) {
       axes_text_y <- 
-        .cyto_plot_axes_text(args$x[[1]],
-                             channels = args$channels[2],
-                             axes_trans = args$axes_trans,
-                             axes_range = list(args$ylim),
-                             axes_limits = args$axes_limits
+        .cyto_plot_axes_text(
+          args$x[[1]],
+          channels = args$channels[2],
+          axes_trans = args$axes_trans,
+          axes_range = list(args$ylim),
+          axes_limits = args$axes_limits
         )[[1]]
     } else if (length(args$channels) == 1) {
       axes_text_y <- NA
@@ -719,24 +733,27 @@ cyto_plot <- function(x,
   args$axes_text <- rep(list(args$axes_text), length.out = length(args$x))
   
   # LABEL_TEXT_X CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
-  args$label_text_x <- .cyto_transform(args$label_text_x,
-                                       trans = args$axes_trans,
-                                       channel = args$channels[1],
-                                       inverse = FALSE)
+  args$label_text_x <- .cyto_transform(
+    args$label_text_x,
+    trans = args$axes_trans,
+    channel = args$channels[1],
+    inverse = FALSE
+  )
   
   # LABEL_TEXT_Y CO-ORDINATES - LINEAR -> TRANSFORMED SCALE
   if(length(channels) == 2) {
-    args$label_text_y <- .cyto_transform(args$label_text_y,
-                                         trans = args$axes_trans,
-                                         channel = args$channels[2],
-                                         inverse = FALSE)
+    args$label_text_y <- .cyto_transform(
+      args$label_text_y,
+      trans = args$axes_trans,
+      channel = args$channels[2],
+      inverse = FALSE
+    )
   }
   
   # LAYOUT MISSING - SET FOR MULTIPLE PLOTS ONLY
   if (all(.empty(args$layout))) {
     # LAYOUT DIMENSIONS
-    args$layout <- .cyto_plot_layout(args$x,
-                                     layout = args$layout)
+    args$layout <- .cyto_plot_layout(args$x, layout = args$layout)
   # LAYOUT TURNED OFF
   } else if (all(args$layout == FALSE) | .all_na(args$layout)) {
     # CHECK GLOBAL PARAMETERS
@@ -754,13 +771,15 @@ cyto_plot <- function(x,
   # HEADER ARGUMENTS - REPEAT PER PAGE
   header_args <- args[grepl("^header", names(args))]
   for(i in names(header_args)) {
-    header_args[[i]] <- rep(header_args[[i]], 
-                            length.out = if(!is.null(dim(args$layout))) {
-                              max(unique(unlist(args$layout)))
-                            }else {
-                              ceiling(length(args$x)/
-                                        prod(args$layout))
-                            })
+    header_args[[i]] <- rep(
+      header_args[[i]], 
+      length.out = if(!is.null(dim(args$layout))) {
+        max(unique(unlist(args$layout)))
+      }else {
+        ceiling(length(args$x)/
+        prod(args$layout))
+      }
+    )
   }
   
   # UPDATE HEADER ARGUMENTS
@@ -795,7 +814,7 @@ cyto_plot <- function(x,
     if("popup_size" %in% names(cyto_option("cyto_plot_par"))) {
       args$popup_size <- cyto_option("cyto_plot_par")[["popup_size"]]
     } else {
-      args$popup_size <- c(10,10)
+      args$popup_size <- c(10, 10)
     }
   }
   
@@ -807,10 +826,12 @@ cyto_plot <- function(x,
   }
   
   # GRAPHICS DEVICE
-  cyto_plot_new(args$popup,
-                popup_size = args$popup_size,
-                layout = args$layout,
-                oma = oma)
+  cyto_plot_new(
+    args$popup,
+    popup_size = args$popup_size,
+    layout = args$layout,
+    oma = oma
+  )
   
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]
@@ -828,11 +849,15 @@ cyto_plot <- function(x,
     return(lapply(args, `[[`, z))
   })
   
-  # RESET MEMORY
-  if(cyto_option("cyto_plot_method") == "cytoset" & 
-     !cyto_option("cyto_plot_save")) {
+  # RESET LABEL MEMORY
+  if(!label_memory) {
     .cyto_plot_args_remove()
   }
+  
+  # if(cyto_option("cyto_plot_method") == "cytoset" & 
+  #    !cyto_option("cyto_plot_save")) {
+  #   .cyto_plot_args_remove()
+  # }
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
@@ -861,8 +886,7 @@ cyto_plot <- function(x,
     
     # GATE DIMENSIONS
     if(!.all_na(ARGS$gate)) {
-      ARGS$gate <- cyto_gate_prepare(ARGS$gate,
-                                     ARGS$channels)
+      ARGS$gate <- cyto_gate_prepare(ARGS$gate, ARGS$channels)
     }
     
     # LABEL TEXT & STAT ARGUMENTS ----------------------------------------------
@@ -913,7 +937,7 @@ cyto_plot <- function(x,
     }
     
     # INHERIT LABEL CO-ORDINATES WHEN SAVING
-    if(cyto_option("cyto_plot_save")) {
+    if(cyto_option("cyto_plot_save") & label_memory) {
       ARGS <- .cyto_plot_args_inherit(ARGS)
     }
     
@@ -940,10 +964,12 @@ cyto_plot <- function(x,
       # HEADER - EXCLUDED FROM ARGS
       if(!.all_na(header)) {
         if(!.all_na(header[1])) {
-          .cyto_plot_header(header[1],
-                            header_text_font = header_text_font[1],
-                            header_text_size = header_text_size[1],
-                            header_text_col = header_text_col[1])
+          .cyto_plot_header(
+            header[1],
+            header_text_font = header_text_font[1],
+            header_text_size = header_text_size[1],
+            header_text_col = header_text_col[1]
+          )
           header <- header[-1]
           header_text_font <- header_text_font[-1]
           header_text_size <- header_text_size[-1]
@@ -967,30 +993,36 @@ cyto_plot <- function(x,
   
   # SAVE MEMORY ----------------------------------------------------------------
   
-  # COMBINE MEMORY
-  memory <- structure(
-    lapply(names(memory[[1]]), function(z){
-      m <- LAPPLY(memory, `[[`, z)
-      names(m) <- rep(NA, length(m))
-      return(m)
-    }), names = names(memory[[1]])
-  )
-  
-  # UPDATE MEMORY
-  if(!cyto_option("cyto_plot_save")) {
-    cyto_plot_memory <- .cyto_plot_args_recall()
-    # NO MEMORY
-    if(is.null(cyto_plot_memory)) {
-      .cyto_plot_args_save(memory)
-    } else {
-      .cyto_plot_args_save(
-        structure(
-          lapply(names(cyto_plot_memory), function(q){
-            c(cyto_plot_memory[[q]],
-              memory[[q]])
-          }), names = names(cyto_plot_memory)
+  # REMEMBER LABEL CO-ORDINATES
+  if(label_memory) {
+    # COMBINE MEMORY
+    memory <- structure(
+      lapply(names(memory[[1]]), function(z){
+        m <- LAPPLY(memory, `[[`, z)
+        names(m) <- rep(NA, length(m))
+        return(m)
+      }), names = names(memory[[1]])
+    )
+    # UPDATE MEMORY
+    if(!cyto_option("cyto_plot_save")) {
+      cyto_plot_memory <- .cyto_plot_args_recall()
+      # NO MEMORY
+      if(is.null(cyto_plot_memory)) {
+        .cyto_plot_args_save(memory)
+      } else {
+        .cyto_plot_args_save(
+          structure(
+            lapply(
+              names(cyto_plot_memory), 
+              function(q) {
+                c(cyto_plot_memory[[q]],
+                  memory[[q]])
+              }
+            ), 
+            names = names(cyto_plot_memory)
+          )
         )
-      )
+      }
     }
   }
   

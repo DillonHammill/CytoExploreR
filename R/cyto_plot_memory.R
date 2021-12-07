@@ -12,9 +12,15 @@
   if(any(file_match)){
     file <- temp_files[file_match]
     file <- file[1]
-    return(readRDS(paste0(temp_dir,
-                          .Platform$file.sep,
-                          file)))
+    return(
+      readRDS(
+        paste0(
+          temp_dir,
+          .Platform$file.sep,
+          file
+        )
+      )
+    )
     # FILES DOES NOT EXIST
   }else{
     return(NULL)
@@ -33,11 +39,15 @@
   .cyto_plot_args_remove()
   
   # SAVE DEPARSED ARGUMENTS 
-  saveRDS(args,
-          paste0(temp_dir,
-                 .Platform$file.sep,
-                 "cyto_plot_memory.rds"),
-          compress =  "xz")
+  saveRDS(
+    args,
+    paste0(
+      temp_dir,
+      .Platform$file.sep,
+      "cyto_plot_memory.rds"
+    ),
+    compress =  "xz"
+  )
   
 }
 
@@ -50,9 +60,13 @@
   file_match <- grepl("cyto_plot_memory.*.rds.*$", temp_files)
   # FILE EXISTS
   if(any(file_match)){
-    file.remove(paste0(temp_dir,
-                       .Platform$file.sep,
-                       temp_files[file_match]))
+    file.remove(
+      paste0(
+        temp_dir,
+        .Platform$file.sep,
+        temp_files[file_match]
+      )
+    )
   }
   invisible(NULL)
 }

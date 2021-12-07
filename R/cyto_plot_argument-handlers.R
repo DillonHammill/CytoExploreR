@@ -165,6 +165,7 @@
     arg_names[grepl("grid", arg_names)], # all grid arguments
     "label",
     "label_position",
+    "label_memory",
     "legend",
     arg_names[grepl("key", arg_names)] # all key arguments
   )
