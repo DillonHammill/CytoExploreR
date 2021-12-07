@@ -3382,6 +3382,57 @@ setAs(
   }
 )
 
+#' cytoframe to cytoset
+#' 
+#' @importFrom flowWorkspace cytoset cf_get_uri
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "cytoframe",
+  "cytoset",
+  function(from) {
+    cytoset(
+      structure(
+        list(from),
+        names = file_ext_remove(
+          basename(
+            cf_get_uri(from)
+          )
+        )
+      )
+    )
+  }
+)
+
+#' flowFrame to cytoset
+#' 
+#' @importFrom flowWorkspace cytoset cf_get_uri
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @noRd
+setAs(
+  "flowFrame",
+  "cytoset",
+  function(from) {
+    cf <- cyto_convert(from)
+    cytoset(
+      structure(
+        list(
+          cf
+        ),
+        names = file_ext_remove(
+          basename(
+            cf_get_uri(cf)
+          )
+        )
+      )
+    )
+  }
+)
+
 ## CYTO_SPLIT ------------------------------------------------------------------
 
 #' Split samples merged with cyto_merge
