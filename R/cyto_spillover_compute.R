@@ -11,9 +11,7 @@
 #' been implemented in \code{cyto_spillover_compute} as a fully automated
 #' algorithm to compute the spillover matrix. Users simply need to ensure that
 #' the channel associated with each control is annotated in the
-#' \code{cyto_details()} of the supplied data or alternatively this information
-#' can be interactively supplied through a channel match file using
-#' \code{cyto_channel_match()}.
+#' \code{cyto_details()} of the supplied data.
 #'
 #' The method proposed by Bagwell et al. (1993) is also supported but is
 #' implemented as a semi-automated approach as it requires gating of the
@@ -72,6 +70,7 @@
 #'   accordance with \code{spillover}.
 #'
 #' @importFrom flowWorkspace cytoset
+#' @importFrom openCyto mindensity
 #'
 #' @examples
 #' \dontrun{
@@ -135,7 +134,6 @@ cyto_spillover_compute <- function(x,
                                    ...) {
 
   # TODO: SUGGEST CHANNELS BASED ON MEDFI IN ALL CHANNELS
-  # TODO: ERROR FOR NON-SQUARE MATRICES - CYTO_COMPENSATE()
   
   # SPILLOVER ------------------------------------------------------------------
   
@@ -225,6 +223,38 @@ cyto_spillover_compute <- function(x,
     # SET DEFAULTS FOR PARENT
     if("parent" %in% colnames(pd_new)) {
       pd_new[, "parent"] <- rep(parent, length.out = nrow(pd_new))
+    }
+    # CHANNEL SUGGESTIONS
+    if("channel" %in% colnames(pd_new)) {
+      # FILL WITH UNSTAINED
+      pd_new[, "channel"] <- rep("Unstained", length(x))
+      # COMPUTE 95th PERCENTILES - USE MAX PER CHANNEL
+      q <- cyto_apply(
+        x,
+        parent = "root",
+        FUN = "cyto_stat_quantile",
+        probs = 0.98,
+        input = "matrix",
+        channels = channels,
+        inverse = FALSE,
+        copy = FALSE
+      )
+      # MAX CHANNEL PER CONTROL
+      ind <- apply(
+        q,
+        1,
+        "which.max"
+      ) 
+      # CROSS CHECK AGAINST OTHER CONTROLS
+      LAPPLY(
+        seq_along(ind),
+        function(z) {
+          # UPDATE DEFAULT CHANNEL
+          if(q[z, channels[ind[z]]] == max(q[, channels[ind[z]]])) {
+            pd_new[z, "channel"] <<- channels[ind[z]]
+          }
+        }
+      )
     }
     # APPEND MISSING VARIABLES
     pd <- cbind(
@@ -447,6 +477,15 @@ cyto_spillover_compute <- function(x,
     }
   }
   
+  # SPILLOVER TEMPLATE
+  spill_mat <- matrix(
+    0,
+    ncol = length(channels),
+    nrow = length(channels),
+    dimnames = list(channels, channels)
+  )
+  diag(spill_mat) <- 1
+  
   # SPILLOVER COMPUTATION ------------------------------------------------------
   
   # BAGWELL METHOD
@@ -634,26 +673,72 @@ cyto_spillover_compute <- function(x,
                   legend = FALSE,
                   ...
                 )
-                # GATE NEGATIVE POPULATION
-                if(is.null(neg_events)) {
-                  neg_gt <- cyto_gate_draw(
+                # INTERACTIVE - USE CYTO_GATE_DRAW()
+                if(interactive() & cyto_option("CytoExploreR_interactive")) {
+                  # GATE NEGATIVE POPULATION
+                  if(is.null(neg_events)) {
+                    neg_gt <- cyto_gate_draw(
+                      x = pos_events,
+                      alias = paste0(y, "-"),
+                      channels = y,
+                      type = "interval",
+                      plot = FALSE
+                    )
+                  } else {
+                    neg_gt <- NULL
+                  }
+                  # GATE POSITIVE POPULATION
+                  pos_gt <- cyto_gate_draw(
                     x = pos_events,
-                    alias = paste0(y, "-"),
+                    alias = paste0(y, "+"),
                     channels = y,
                     type = "interval",
                     plot = FALSE
                   )
+                # NON-INTERACTIVE - USE MINDENSITY()
                 } else {
-                  neg_gt <- NULL
+                  # COMPUTE RANGE TO ELIMINATE OUTLIERS
+                  rng <- cyto_apply(
+                    pos_events,
+                    FUN = "cyto_stat_quantile",
+                    probs = c(0.025, 0.975),
+                    input = "matrix",
+                    channels = y,
+                    copy = FALSE,
+                    inverse = FALSE
+                  )
+                  # GATE NEGATIVE POPULATION
+                  if(is.null(neg_events)) {
+                    # MINDENSITY - GATE NEGATIVE EVENTS
+                    neg_gt <- mindensity(
+                      pos_events[[1]], # CYTOFRAME REQUIRED
+                      channel = y,
+                      filterId = paste0(y, "-"),
+                      positive = FALSE,
+                      min = min(rng),
+                      max = max(rng)
+                    )
+                    # PLOT GATE
+                    cyto_plot_gate(
+                      neg_gt
+                    )
+                  } else {
+                    neg_gt <- NULL
+                  }
+                  # MINDENSITY - GATE POSITIVE EVENTS
+                  pos_gt <- mindensity(
+                    pos_events[[1]], # CYTOFRAME REQUIRED
+                    channel = y,
+                    filterId = paste0(y, "+"),
+                    positive = TRUE,
+                    min = min(rng),
+                    max = max(rng)
+                  )
+                  # PLOT GATE
+                  cyto_plot_gate(
+                    pos_gt
+                  )
                 }
-                # GATE POSITIVE POPULATION
-                pos_gt <- cyto_gate_draw(
-                  x = pos_events,
-                  alias = paste0(y, "+"),
-                  channels = y,
-                  type = "interval",
-                  plot = FALSE
-                )
                 # RETURN GATED POSITIVE/NEGATIVE POPULATIONS
                 return(
                   list(
@@ -830,6 +915,18 @@ cyto_spillover_compute <- function(x,
     spill <- .cyto_asp_spill(cs)
   }
   
+  # FILL SPILLOVER TEMPLATE
+  cols <- channels[channels %in% colnames(spill)]
+  lapply(
+    seq_len(nrow(spill)),
+    function(z) {
+      spill_mat[
+        match(rownames(spill)[z], rownames(spill_mat)), 
+        cols
+      ] <<- spill[z, cols]
+    }
+  )
+  
   # DEFAULT CSV FILENAME
   if (is.null(save_as)) {
     save_as <- paste0(
@@ -848,10 +945,10 @@ cyto_spillover_compute <- function(x,
     )
   } else {
     write_to_csv(
-      spill, 
+      spill_mat, 
       save_as
     )
   }
   
-  return(spill)
+  return(spill_mat)
 }
