@@ -502,7 +502,9 @@ cyto_plot <- function(x,
   
   # CHANNELS
   if(.empty(args$channels)) {
-    stop("Supply channel/marker(s) to 'channels' to construct the plot.")
+    stop(
+      "Supply channel/marker(s) to 'channels' to construct the plot."
+    )
   } else {
     args$channels <- cyto_channels_extract(
       args$x,

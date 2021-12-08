@@ -134,6 +134,9 @@ cyto_spillover_compute <- function(x,
                                    spillover = NULL,
                                    ...) {
 
+  # TODO: SUGGEST CHANNELS BASED ON MEDFI IN ALL CHANNELS
+  # TODO: ERROR FOR NON-SQUARE MATRICES - CYTO_COMPENSATE()
+  
   # SPILLOVER ------------------------------------------------------------------
   
   # BACKWARDS COMPATIBILITY

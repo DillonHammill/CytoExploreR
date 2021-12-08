@@ -71,7 +71,8 @@
                             hist_layers = NA,
                             hist_stack = 0,
                             barcode = FALSE,
-                            seed = 42) {
+                            seed = 42,
+                            ...) {
 
   # DATA PREPARED ALREADY ------------------------------------------------------
   
@@ -86,7 +87,7 @@
     return(x)
   # .CYTO_PLOT_DATA() CALLED
   } else if(!is.null(cyto_option("cyto_plot_method")) & 
-        cyto_option("cyto_plot_data")) {
+            cyto_option("cyto_plot_data")) {
     if(.all_na(overlay)) {
       return(
         list(
@@ -125,40 +126,31 @@
   } else if(cyto_class(x, "GatingHierarchy", TRUE)) {
     gh <- x
   # CYTOSET
-  } else if(cyto_class(x, "flowSet")) {
+  } else if(cyto_class(x, "cytoset")) {
     # DO NOTHING
-  # CYTOFRAME
-  } else if(cyto_class(x, "flowFrame")) {
-    # CYTOFRAME -> CYTOSET
-    x <- cytoset(
-      structure(
-        list(
-          cyto_convert(x)
-        ),
-        names = file_ext_remove(
-          basename(
-            cf_get_uri(x)
+  # COERCE MATRIX/DATA.FRAME/CYTOFRAME TO CYTOSET
+  } else {
+    x <- tryCatch(
+      as(x, "cytoset"),
+      error = function(e) {
+        stop(
+          paste0(
+            "cyto_plot() only supports cytoset, GatingHierarchy or GatingSet ",
+            "objects!"
           )
         )
-      )
-    )
-  # MATRIX
-  } else if(cyto_class(x, c("data.frame", "matrix"))) {
-    # MATRIX -> CYTOSET
-    x <- as(x, "cytoset")
-  # UNSUPPORTED OBJECT
-  } else {
-    stop(
-      "cyto_plot() only supports cytoset, GatingHierarchy or GatingSet objects!"
+      }
     )
   }
   
   # EXTRACT DATA
-  x <- cyto_data_extract(x,
-                         parent = parent,
-                         select = select,
-                         format = "cytoset",
-                         copy = FALSE)
+  x <- cyto_data_extract(
+    x,
+    parent = parent,
+    select = select,
+    format = "cytoset",
+    copy = FALSE
+  )
   parent <- names(x) # path
   
   # GROUP
@@ -271,7 +263,7 @@
       lapply(seq_along(overlay), function(z){
         cs <- overlay[[z]]
         # CHECK
-        if(!cyto_class(cs, "flowSet")) {
+        if(!cyto_class(cs, "cytoset")) {
           cs <- tryCatch(
             as(cs, "cytoset"),
             error = function(e) {
@@ -507,7 +499,7 @@
     }),
     names = names(x)
   )
-
+  
   # FORMAT DATA FOR HISTOGRAMS
   if(length(channels) == 1 & all(LAPPLY(x, "length") == 1)) {
     # HIST_LAYERS
@@ -538,7 +530,8 @@
       names = names(x)
     )
     # FORMAT X
-    L <- split(seq_along(x), rep(1:(length(x)/hist_layers[1]),
+    L <- split(seq_along(x), 
+               rep(1:(length(x)/hist_layers[1]),
                each = hist_layers[1]))
     x <- structure(
       lapply(

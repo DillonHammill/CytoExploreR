@@ -93,7 +93,7 @@ cyto_plot_profile <- function(x,
                               order = "channels",
                               layout,
                               hist_layers = NA,
-                              hist_stack = 0.5,
+                              hist_stack = 0,
                               axes_trans = NA,
                               header,
                               ...) {
@@ -117,17 +117,6 @@ cyto_plot_profile <- function(x,
     axes_trans <- cyto_transformers_extract(x)
   }
   
-  # CALL .CYTO_PLOT_DATA
-  x <- cyto_func_execute(
-    ".cyto_plot_data",
-    .args_list(...)
-  )
-  
-  # SIGNAL CYTO_PLOT_DATA
-  cyto_option("cyto_plot_data", TRUE)
-  
-  # PREPARE PLOT PARAMETERS ----------------------------------------------------
-  
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_channels(
@@ -135,6 +124,20 @@ cyto_plot_profile <- function(x,
       exclude = c("Time", "Event-ID")
     )
   }
+  
+  # CALL .CYTO_PLOT_DATA - PASS A SINGLE CHANNEL FOR FORMATTING
+  args <- .args_list(...)
+  args$channels <- channels[1]
+  x <- cyto_func_execute(
+    ".cyto_plot_data",
+    args
+  )
+  rm(args)
+  
+  # SIGNAL CYTO_PLOT_DATA
+  cyto_option("cyto_plot_data", TRUE)
+  
+  # PREPARE PLOT PARAMETERS ----------------------------------------------------
   
   # PREPARE LAYOUT - IS THIS CORRECT?
   if(missing(layout)) {
@@ -178,10 +181,10 @@ cyto_plot_profile <- function(x,
       # SINGLE LAYER
       if(all(LAPPLY(x, "length") == 1) | !.all_na(overlay)) {
         header <- rep(
-          names(x), 
+          LAPPLY(x, "names"), 
           each = pg
         )
-      # MULTI LAYER
+      # MULTIPLE LAYERS
       } else {
         header <- paste0(
           "Expression Profile - ", 

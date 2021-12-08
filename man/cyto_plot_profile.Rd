@@ -14,7 +14,7 @@ cyto_plot_profile(
   order = "channels",
   layout,
   hist_layers = NA,
-  hist_stack = 0.5,
+  hist_stack = 0,
   axes_trans = NA,
   header,
   ...
