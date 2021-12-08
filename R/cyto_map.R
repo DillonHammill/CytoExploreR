@@ -11,7 +11,9 @@
 #' the data prior to generating the dimension-reduced maps and automatically
 #' splits the data into the original samples for downstream analyses.
 #'
-#' @param x object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+#' @param x object of class \code{data.frame}, \code{matrix},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the parent population to extract from the GatingSet for
 #'   mapping, set to the \code{"root"} node by default.
@@ -88,6 +90,11 @@ cyto_map <- function(x,
                      ...) {
   
   # CHECKS ---------------------------------------------------------------------
+  
+  # CLASS
+  if(!cyto_class(c, c("flowSet", "GatingSet"))) {
+    x <- as(x, "cytoset")
+  }
   
   # CHANNELS
   if(is.null(channels)) {

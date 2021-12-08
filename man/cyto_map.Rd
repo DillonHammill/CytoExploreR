@@ -22,7 +22,9 @@ cyto_map(
 )
 }
 \arguments{
-\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\item{x}{object of class \code{data.frame}, \code{matrix},
+\code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{parent}{name of the parent population to extract from the GatingSet for
