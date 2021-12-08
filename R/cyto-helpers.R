@@ -6609,37 +6609,58 @@ cyto_apply.flowSet <- function(x,
       # VECTOR/MATRIX/LIST
     } else {
       # VECTORS TO MATRIX - CANNOT USE DIM HERE - S4 OBJECTS NO DIMS
-      if(is.atomic(res[[1]])) {
-        # ATTEMPT MATRIX CONVERSION - VECTORS DIFFERENT OF SIZES
-        res <- structure(
-          lapply(
-            names(res),
-            function(z){
-              tryCatch(
+      if(!cyto_class(res[[1]], c("matrix", "data.frame", "list"), TRUE)) {
+        # DONT MERGE CHANNELS INTO SINGLE COLUMN
+        if(!all(names(res[[1]]) %in% channels)) {
+          # ATTEMPT MATRIX CONVERSION - VECTORS DIFFERENT OF SIZES
+          res <- structure(
+            lapply(
+              names(res),
+              function(z){
+                tryCatch(
+                  matrix(
+                    res[[z]],
+                    nrow = length(res[[z]]),
+                    ncol = 1,
+                    dimnames = list(
+                      paste0(
+                        names(res[z]), 
+                        if(!is.null(names(res[[z]])) & length(res[[z]]) > 1) {
+                          paste0("|", names(res[[z]]))
+                        } else {
+                          ""
+                        }
+                      ),
+                      FUN_NAME
+                    )
+                  ),
+                  error = function(e) {
+                    return(res[[z]])
+                  }
+                )
+              }
+            ),
+            names = names(res)
+          )
+        } else {
+          res <- structure(
+            lapply(
+              names(res),
+              function(z){
                 matrix(
                   res[[z]],
-                  nrow = length(res[[z]]),
-                  ncol = 1,
+                  ncol = length(res[[z]]),
+                  nrow = 1,
                   dimnames = list(
-                    paste0(
-                      names(res[z]), 
-                      if(!is.null(names(res[[z]])) & length(res[[z]]) > 1) {
-                        paste0("|", names(res[[z]]))
-                      } else {
-                        ""
-                      }
-                    ),
-                    FUN_NAME
+                    names(res[z]),
+                    names(res[[z]])
                   )
-                ),
-                error = function(e) {
-                  return(res[[z]])
-                }
-              )
-            }
-          ),
-          names = names(res)
-        )
+                )
+              }
+            ),
+            names = names(res)
+          )
+        }
       }
       # LIST OF MATRICES
       if(all(!is.null(LAPPLY(res, "dim")))) {

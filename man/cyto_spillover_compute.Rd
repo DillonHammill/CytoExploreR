@@ -79,9 +79,7 @@ The method proposed by Roca et al. (2021) is now the default method, and has
 been implemented in \code{cyto_spillover_compute} as a fully automated
 algorithm to compute the spillover matrix. Users simply need to ensure that
 the channel associated with each control is annotated in the
-\code{cyto_details()} of the supplied data or alternatively this information
-can be interactively supplied through a channel match file using
-\code{cyto_channel_match()}.
+\code{cyto_details()} of the supplied data.
 
 The method proposed by Bagwell et al. (1993) is also supported but is
 implemented as a semi-automated approach as it requires gating of the
