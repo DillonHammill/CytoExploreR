@@ -4286,11 +4286,13 @@ cyto_sample_n <- function(x,
                           parent = NULL) {
   
   # COUNTS
-  counts <- cyto_apply(x,
-                       "nrow",
-                       parent = parent,
-                       input = "matrix",
-                       copy = FALSE)
+  counts <- cyto_apply(
+    x,
+    "nrow",
+    parent = parent,
+    input = "matrix",
+    copy = FALSE
+  )
 
   # FORMAT
   counts <- structure(
@@ -6478,11 +6480,13 @@ cyto_apply.flowSet <- function(x,
   
   # INVERSE TRANSFORM
   if(!.all_na(trans) & inverse) {
-    x <- cyto_transform(x,
-                        trans = trans,
-                        inverse = inverse,
-                        plot = FALSE,
-                        quiet = TRUE)
+    x <- cyto_transform(
+      x,
+      trans = trans,
+      inverse = inverse,
+      plot = FALSE,
+      quiet = TRUE
+    )
   }
   
   # CYTOSET INPUT 
@@ -6609,9 +6613,10 @@ cyto_apply.flowSet <- function(x,
       # VECTOR/MATRIX/LIST
     } else {
       # VECTORS TO MATRIX - CANNOT USE DIM HERE - S4 OBJECTS NO DIMS
-      if(!cyto_class(res[[1]], c("matrix", "data.frame", "list"), TRUE)) {
+      if(cyto_class(res[[1]], 
+                    c("integer", "numeric", "logical", "character"), TRUE)) {
         # DONT MERGE CHANNELS INTO SINGLE COLUMN
-        if(!all(names(res[[1]]) %in% channels)) {
+        if(!all(names(res[[1]]) %in% cyto_channels(x))) {
           # ATTEMPT MATRIX CONVERSION - VECTORS DIFFERENT OF SIZES
           res <- structure(
             lapply(

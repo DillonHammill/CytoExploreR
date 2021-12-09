@@ -13,7 +13,8 @@ cyto_plot_map <- function(x,
                           point_col = NA,
                           point_col_scale = NA,
                           layout,
-                          header = NA,
+                          header,
+                          title,
                           ...) {
   
   # CYTO_PLOT_COMPLETE ----------------------------------------------------------
@@ -145,6 +146,20 @@ cyto_plot_map <- function(x,
     }
   }
   
+  # TITLES - DEFAULT
+  if(missing(title)) {
+    # CHANNEL ORDER - POINT_COL HEADERS
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      title <- rep(point_col, each = length(grps))
+    # GROUP ORDER
+    } else {
+      title <- rep("", length.out = length(grps) * length(point_col))
+    }
+  # TITLES SUPPLIED
+  } else {
+    title <- rep(title, length.out = length(grps) * length(point_col))
+  }
+  
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
   # CALL CYTO_PLOT - CHANNEL ORDER
@@ -166,6 +181,7 @@ cyto_plot_map <- function(x,
               overlay = overlay,
               layout = layout,
               header = header[cnt + ceiling(w/np)],
+              title = title[z * length(point_col) + seq_len(length(point_col))],
               page = if(w == length(point_col)) {
                 TRUE
               } else {
@@ -192,33 +208,23 @@ cyto_plot_map <- function(x,
         # HEADER COUNTER
         cnt <- (z - 1) * pg
         # RECORD PLOTS PER CHANNEL
-        p <- structure(
-          lapply(seq_along(grps), function(w){
-            # CONSTRUCT PLOT
-            cyto_plot(
-              x,
-              parent = parent,
-              select = grps[[w]][, "name"],
-              merge_by = vars,
-              channels = channels,
-              overlay = overlay,
-              layout = layout,
-              header = header[cnt + ceiling(w/np)],
-              page = if(w == length(grps)) {
-                TRUE
-              } else {
-                FALSE
-              },
-              point_col = point_col[z],
-              point_col_scale <- point_col_scale[[z]],
-              ...
-            )
-          }),
-          names = names(grps)
+        p <- cyto_plot(
+          x,
+          parent = parent,
+          select = select,
+          merge_by = merge_by,
+          channels = channels,
+          overlay = overlay,
+          layout = layout,
+          header = header[cnt + seq_len(pg)],
+          title = title[z * length(grps) + seq_len(length(grps))],
+          page = TRUE,
+          point_col = point_col[z],
+          point_col_scale <- point_col_scale[[z]],
+          ...
         )
         # PREPARE RECORDED PLOTS
         p[LAPPLY(p, "is.null")] <- NULL
-        p <- lapply(p, `[[`, 1)
         return(p)
       }),
       names = point_col

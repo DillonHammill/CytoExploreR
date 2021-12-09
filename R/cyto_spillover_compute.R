@@ -133,8 +133,6 @@ cyto_spillover_compute <- function(x,
                                    spillover = NULL,
                                    ...) {
 
-  # TODO: SUGGEST CHANNELS BASED ON MEDFI IN ALL CHANNELS
-  
   # SPILLOVER ------------------------------------------------------------------
   
   # BACKWARDS COMPATIBILITY
@@ -766,6 +764,7 @@ cyto_spillover_compute <- function(x,
             lapply(
               names(pops), 
               function(w){
+                # TODO: QUANTILE RESTRICTION?
                 # COMPUTE NEGATIVE STATS
                 neg_stats <- cyto_apply(
                   pops[[w]][["-"]],

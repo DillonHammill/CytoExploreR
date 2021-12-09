@@ -90,7 +90,7 @@ cyto_gate_clust <- function(x,
   cluster_result <- cluster(
     cyto_data_extract(
       fr,
-      raw = TRUE,
+      format = "matrix",
       channels = channels
       ), 
     ...)

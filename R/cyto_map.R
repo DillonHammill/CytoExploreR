@@ -92,7 +92,7 @@ cyto_map <- function(x,
   # CHECKS ---------------------------------------------------------------------
   
   # CLASS
-  if(!cyto_class(c, c("flowSet", "GatingSet"))) {
+  if(!cyto_class(x, c("flowSet", "GatingSet"))) {
     x <- as(x, "cytoset")
   }
   
