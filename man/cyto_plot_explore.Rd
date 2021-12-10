@@ -14,6 +14,7 @@ cyto_plot_explore(
   overlay = NA,
   order = "channels",
   layout,
+  axes_trans = NA,
   header,
   ...
 )
@@ -60,6 +61,14 @@ plot each channel on a separate page with a plot for each group in
 
 \item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
 matrix indicating the dimensions of the grid for plotting.}
+
+\item{axes_trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+to transform the channels of the supplied data. \code{cyto_plot} does not
+support in-line transformations and as such the transformations should be
+applied to the data prior to plotting. The transformerList is used
+internally to ensure that the axes on the constructed plots are
+appropriately labelled.}
 
 \item{header}{can be set to NA to remove headers from plots. Alternatively,
 users can supply a vector of headers for each page, this can be tricky to

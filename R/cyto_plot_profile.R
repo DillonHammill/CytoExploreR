@@ -98,6 +98,8 @@ cyto_plot_profile <- function(x,
                               header,
                               ...) {
   
+  # TODO: REMOVE EXCES ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
+  
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
   # CYTO_PLOT METHOD & EXIT
@@ -139,7 +141,7 @@ cyto_plot_profile <- function(x,
   
   # PREPARE PLOT PARAMETERS ----------------------------------------------------
   
-  # PREPARE LAYOUT - IS THIS CORRECT?
+  # PREPARE LAYOUT
   if(missing(layout)) {
     # SWITCH LAYOUTS FOR SINGLE PLOTS
     if(length(channels) == 1) {
@@ -238,20 +240,13 @@ cyto_plot_profile <- function(x,
       function(z) {
         # HEADER COUNTER
         cnt <- (z - 1) * pg
-        # OVERLAY
-        if(length(x[[z]]) > 1) {
-          overlay <- x[[z]][-1]
-        } else {
-          overlay <- NA
-        }
         # RECORDED PLOTS PER GROUP
         p <- lapply(
           seq_along(channels), 
           function(w) {
             # CONSTRUCT PLOT
             cyto_plot(
-              x[[z]][[1]],
-              overlay = overlay,
+              x[[z]], # USE LIST METHOD - CYTO_PLOT_DATA CALLED ALREADY
               channels = channels[w],
               axes_trans = axes_trans,
               layout = layout,
@@ -292,8 +287,7 @@ cyto_plot_profile <- function(x,
             }
             # CONSTRUCT PLOT
             cyto_plot(
-              x[[w]][[1]],
-              overlay = overlay,
+              x[[w]], # USE METHOD CYTO_PLOT_DATA CALLED ALREADY
               channels = channels[z],
               axes_trans = axes_trans,
               layout = layout,
