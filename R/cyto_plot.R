@@ -1,9 +1,5 @@
 ## CYTO_PLOT -------------------------------------------------------------------
 
-# GatingHierarchy/GatingSet methods are almost identical and could probably be
-# combined into a single method for simplicity. select and merge_by arguments
-# are required in GatingHiewrarchy method as it calls cytoset method now.
-
 #' cyto_plot
 #'
 #' Explore and visualise cytometry data.
