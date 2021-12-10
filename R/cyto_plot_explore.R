@@ -173,7 +173,7 @@ cyto_plot_explore <- function(x,
       layout <- .cyto_plot_layout(
         seq_len(
           max(
-            x_chans_combos
+            x_chan_combos
           )
         )
       )
@@ -293,6 +293,7 @@ cyto_plot_explore <- function(x,
                       x[[z]], # USE LIST METHOD CYTO_PLOT_DATA CALLED 
                       parent = parent,
                       channels = c(x_chan, y_chan),
+                      axes_trans = axes_trans,
                       layout = layout,
                       header = header[cnt + ceiling(w/np)],
                       page = if(v == length(y_chans)) {
@@ -343,6 +344,7 @@ cyto_plot_explore <- function(x,
                   x[[z]], # USE LIST METHOD CYTO_PLOT_DATA CALLED
                   parent = parent,
                   channels = c(x_chan, y_chan),
+                  axes_trans = axes_trans,
                   layout = layout,
                   header = header[(cnt - pg):cnt],
                   page = TRUE,
@@ -372,6 +374,6 @@ cyto_plot_explore <- function(x,
   # RECORDED PLOTS -------------------------------------------------------------
   
   # RETURN RECORDED PLOTS
-  return(plots)
+  invisible(plots)
   
 }
