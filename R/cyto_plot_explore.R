@@ -14,7 +14,8 @@
 #'   \code{\link{cyto_fluor_channels}}.
 #' @param channels_y vector of channels or markers to plot on the y axis of the
 #'   plots, by default we use all channels as returned by
-#'   \code{\link{cyto_channels}}.
+#'   \code{\link{cyto_channels}}. \code{channels_y} overlapping with
+#'   \code{channels_x} will be plotted as histograms.
 #' @param select named list containing experimental variables to be used to
 #'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
@@ -46,10 +47,10 @@
 #'   users can supply a vector of headers for each page, this can be tricky to
 #'   get right so it is recommended for users to use the default headers where
 #'   possible.
-#' @param ... additional arguments passed to \code{\link{cyto_plot}}.  
-#'   
+#' @param ... additional arguments passed to \code{\link{cyto_plot}}.
+#'
 #' @return list of recorded plots.
-#'   
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @seealso \code{\link{cyto_plot}}
@@ -137,17 +138,20 @@ cyto_plot_explore <- function(x,
     channels_y <- cyto_channels_extract(x, channels_y)
   }
   
-  # COMPUTE CHANNEL COMBINATIONS FOR CHANNEL IN CHANNELS_X
-  x_chan_combos <- LAPPLY(
-    channels_x,
-    function(z){
-      length(channels_y[!channels_y %in% z])
-    }
-  )
+  # # COMPUTE CHANNEL COMBINATIONS FOR CHANNEL IN CHANNELS_X
+  # x_chan_combos <- LAPPLY(
+  #   channels_x,
+  #   function(z){
+  #     length(channels_y[!channels_y %in% z])
+  #   }
+  # )
   
   # CALL .CYTO_PLOT_DATA() - PASS TWO CHANNELS FOR FORMATTING
   args <- .args_list(...)
-  args$channels <- c(channels_x[1], x_chan_combos[1])
+  args$channels <- c(
+    channels_x[1], 
+    channels_y[channels_y %in% channels_x[1]][1]
+  )
   x <- cyto_func_execute(
     ".cyto_plot_data",
     args
@@ -171,11 +175,7 @@ cyto_plot_explore <- function(x,
     if(grepl("^c", order, ignore.case = TRUE)) {
       # EXCLUDE DUPLICATE CHANNELS
       layout <- .cyto_plot_layout(
-        seq_len(
-          max(
-            x_chan_combos
-          )
-        )
+        channels_y
       )
     # GROUP ORDER
     } else {
@@ -195,7 +195,7 @@ cyto_plot_explore <- function(x,
     # NUMBER OF GROUPS TO PLOT
     n <- length(x)
     # PAGES PER GROUP - X CHANNEL SEPARATE PAGE BY UNIQUE Y CHANNELS
-    pg <- sum(ceiling(x_chan_combos/np))
+    pg <- sum(ceiling(length(channels_y)/np))
     # TOTAL PAGES
     tpg <- n * pg
   # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
@@ -231,7 +231,7 @@ cyto_plot_explore <- function(x,
               " / ",
               cyto_markers_extract(
                 x[[1]],
-                channels = channels_y[!channels_y %in% z],
+                channels = channels_y,
                 append = TRUE
               )
             ),
@@ -281,19 +281,23 @@ cyto_plot_explore <- function(x,
                 # X CHANNEL
                 x_chan <- channels_x[w]
                 # RESTRICT Y CHANNELS
-                y_chans <- channels_y[!channels_y %in% x_chan]
+                y_chans <- channels_y
                 # LOOP THROUGH CHANNELS_Y
                 p <- lapply(
                   seq_along(y_chans), 
                   function(v) {
                     # Y CHANNEL
                     y_chan <- y_chans[v]
+                    if(y_chan == x_chan) {
+                      y_chan <- NULL
+                    }
                     # CONSTRUCT PLOT
                     cyto_plot(
                       x[[z]], # USE LIST METHOD CYTO_PLOT_DATA CALLED 
                       parent = parent,
                       channels = c(x_chan, y_chan),
                       axes_trans = axes_trans,
+                      hist_layers = length(x[[z]]), # SINGLE PANEL ONLY
                       layout = layout,
                       header = header[cnt + ceiling(w/np)],
                       page = if(v == length(y_chans)) {
@@ -329,7 +333,7 @@ cyto_plot_explore <- function(x,
           # X CHANNEL
           x_chan <- channels_x[z]
           # RESTRICT Y CHANNELS
-          y_chans <- channels_y[!channels_y %in% x_chan]
+          y_chans <- channels_y
           # LOOP THROUGH CHANNELS_Y
           p <- structure(
             lapply(
@@ -337,6 +341,9 @@ cyto_plot_explore <- function(x,
               function(w){
                 # Y CHANNEL
                 y_chan <- y_chans[w]
+                if(y_chan == x_chan) {
+                  y_chan <- NULL
+                }
                 # UPDATE HEADER COUNTER
                 cnt <<- cnt + pg
                 # CONSTRUCT PLOT
@@ -345,6 +352,7 @@ cyto_plot_explore <- function(x,
                   parent = parent,
                   channels = c(x_chan, y_chan),
                   axes_trans = axes_trans,
+                  hist_layers = length(x[[z]]), # SINGLE PANEL ONLY
                   layout = layout,
                   header = header[(cnt - pg):cnt],
                   page = TRUE,

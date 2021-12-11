@@ -35,7 +35,8 @@ plots, by default we use channels returned by
 
 \item{channels_y}{vector of channels or markers to plot on the y axis of the
 plots, by default we use all channels as returned by
-\code{\link{cyto_channels}}.}
+\code{\link{cyto_channels}}. \code{channels_y} overlapping with
+\code{channels_x} will be plotted as histograms.}
 
 \item{select}{named list containing experimental variables to be used to
 select samples using \code{\link{cyto_select}} when a \code{flowSet} or
