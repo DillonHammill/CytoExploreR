@@ -2801,15 +2801,19 @@
           }, legend_box_fill, hist_fill_alpha
         )
       }
-      # LEGEND
+      # LEGEND - BOXES - POINT KEY TOO SMALL
       legend(
-        x = 1.07 * .par("usr")[[1]][2],
-        y = cnt + 0.52 * lgnd_height,
-        legend = legend_text,
-        fill = rev(legend_box_fill),
+        x = 1.08 * .par("usr")[[1]][2],
+        y = cnt + 0.6 * lgnd_height,
+        legend = paste0("   ", legend_text), # HACKY WAY TO ALIGN TEXT
+        col = rev(legend_box_fill),
+        pch = 15, # BOX - MATCH POINT LEGEND
+        pt.cex = 2.4,
         xpd = TRUE,
         bty = "n",
-        x.intersp = 0.5,
+        x.intersp = 0.5, # MOVE DIAGONALLY
+        y.intersp = 1.2,
+        adj = c(0, 0.49), # XY ADJUSTMENT
         cex = legend_text_size,
         text.col = rev(legend_text_col),
         text.font = rev(legend_text_font)
@@ -2904,7 +2908,7 @@
                            key = "both",
                            key_scale = "fixed",
                            key_text_font = 1,
-                           key_text_size = 0.8,
+                           key_text_size = 0.9,
                            key_text_col = "black",
                            key_text_col_alpha = 1,
                            key_title = "",

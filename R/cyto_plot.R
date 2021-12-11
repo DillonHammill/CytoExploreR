@@ -203,7 +203,7 @@
 #' @param key_text_font font to use for text in the key, set to 1 by default for
 #'   plain font.
 #' @param key_text_size numeric to control the size of text in the plot key, set
-#'   to 1 by default.
+#'   to 0.9 by default.
 #' @param key_text_col colour to use for text in the plot key, set to
 #'   \code{"black"} by default.
 #' @param key_text_col_alpha numeric [0, 1] to control the transparency of the
@@ -424,7 +424,7 @@ cyto_plot <- function(x,
                       key = "both",
                       key_scale = "fixed", 
                       key_text_font = 1,
-                      key_text_size = 0.8,
+                      key_text_size = 0.9,
                       key_text_col = "black",
                       key_text_col_alpha = 1,
                       key_title = "",

@@ -140,7 +140,7 @@
 #' @param key_text_font font to use for text in the key, set to 1 by default for
 #'   plain font.
 #' @param key_text_size numeric to control the size of text in the plot key, set
-#'   to 1 by default.
+#'   to 0.9 by default.
 #' @param key_text_col colour to use for text in the plot key, set to
 #'   \code{"black"} by default.
 #' @param key_text_col_alpha numeric [0, 1] to control the transparency of the
@@ -250,7 +250,7 @@ cyto_plot_empty <- function(x,
                             key = "both",
                             key_scale = "fixed",
                             key_text_font = 1,
-                            key_text_size = 0.8,
+                            key_text_size = 0.9,
                             key_text_col = "black",
                             key_text_col_alpha = 1,
                             key_title = "",
@@ -440,30 +440,32 @@ cyto_plot_empty <- function(x,
   # MARGINS --------------------------------------------------------------------
   
   # PLOT MARGINS - set par("mar")
-  .cyto_plot_margins(x,
-                     channels = channels,
-                     legend = legend,
-                     legend_text = legend_text,
-                     legend_text_size = legend_text_size,
-                     title = title,
-                     axes_text = axes_text,
-                     margins = margins,
-                     point_col = point_col,
-                     key = key,
-                     key_scale = key_scale
+  .cyto_plot_margins(
+    x,
+    channels = channels,
+    legend = legend,
+    legend_text = legend_text,
+    legend_text_size = legend_text_size,
+    title = title,
+    axes_text = axes_text,
+    margins = margins,
+    point_col = point_col,
+    key = key,
+    key_scale = key_scale
   )
   
   # PLOT CONSTRUCTION ----------------------------------------------------------
   
   # PLOT
-  graphics::plot(1,
-                 type = "n",
-                 axes = FALSE,
-                 xlim = xlim,
-                 ylim = ylim,
-                 xlab = "",
-                 ylab = "",
-                 bty = "n"
+  graphics::plot(
+    1,
+    type = "n",
+    axes = FALSE,
+    xlim = xlim,
+    ylim = ylim,
+    xlab = "",
+    ylab = "",
+    bty = "n"
   )
   
   # X AXIS TEXT
@@ -694,31 +696,32 @@ cyto_plot_empty <- function(x,
   
   # LEGEND - FALSE/"fill"/"line"
   if (legend != FALSE) {
-    .cyto_plot_legend(x,
-                      channels = channels,
-                      legend = legend,
-                      legend_text = legend_text,
-                      legend_text_font = legend_text_font,
-                      legend_text_size = legend_text_size,
-                      legend_text_col = legend_text_col,
-                      legend_line_type = legend_line_type,
-                      legend_line_width = legend_line_width,
-                      legend_line_col = legend_line_col,
-                      legend_box_fill = legend_box_fill,
-                      legend_point_col = legend_point_col,
-                      hist_cols = hist_cols,
-                      hist_fill = hist_fill,
-                      hist_fill_alpha = hist_fill_alpha,
-                      hist_line_type = hist_line_type,
-                      hist_line_width = hist_line_width,
-                      hist_line_col = hist_line_col,
-                      point_shape = point_shape,
-                      point_size = point_size,
-                      point_col_scale = point_col_scale,
-                      point_cols = point_cols,
-                      point_col = point_col,
-                      point_col_alpha = point_col_alpha,
-                      key = key
+    .cyto_plot_legend(
+      x,
+      channels = channels,
+      legend = legend,
+      legend_text = legend_text,
+      legend_text_font = legend_text_font,
+      legend_text_size = legend_text_size,
+      legend_text_col = legend_text_col,
+      legend_line_type = legend_line_type,
+      legend_line_width = legend_line_width,
+      legend_line_col = legend_line_col,
+      legend_box_fill = legend_box_fill,
+      legend_point_col = legend_point_col,
+      hist_cols = hist_cols,
+      hist_fill = hist_fill,
+      hist_fill_alpha = hist_fill_alpha,
+      hist_line_type = hist_line_type,
+      hist_line_width = hist_line_width,
+      hist_line_col = hist_line_col,
+      point_shape = point_shape,
+      point_size = point_size,
+      point_col_scale = point_col_scale,
+      point_cols = point_cols,
+      point_col = point_col,
+      point_col_alpha = point_col_alpha,
+      key = key
     )
   }
 }

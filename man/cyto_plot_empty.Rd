@@ -63,7 +63,7 @@ cyto_plot_empty(
   key = "both",
   key_scale = "fixed",
   key_text_font = 1,
-  key_text_size = 0.8,
+  key_text_size = 0.9,
   key_text_col = "black",
   key_text_col_alpha = 1,
   key_title = "",
@@ -272,7 +272,7 @@ will attempt to compute these limits based on the supplied data if
 plain font.}
 
 \item{key_text_size}{numeric to control the size of text in the plot key, set
-to 1 by default.}
+to 0.9 by default.}
 
 \item{key_text_col}{colour to use for text in the plot key, set to
 \code{"black"} by default.}
