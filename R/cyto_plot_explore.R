@@ -47,6 +47,8 @@
 #'   users can supply a vector of headers for each page, this can be tricky to
 #'   get right so it is recommended for users to use the default headers where
 #'   possible.
+#' @param title text to display above each plot, set to the name of the group or
+#'   channels displayed in the plot by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return list of recorded plots.
@@ -101,6 +103,7 @@ cyto_plot_explore <- function(x,
                               layout,
                               axes_trans = NA,
                               header,
+                              title,
                               ...) {
   
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
@@ -270,6 +273,29 @@ cyto_plot_explore <- function(x,
     }
   }
   
+  # PREPARE TITLES
+  if(missing(title)) {
+   # CHANNEL ORDER - DEFAULT TITLES
+    if(grepl("^c", order, ignore.case = TRUE)) {
+      title <- rep(
+        "",
+        length.out = length(x) * length(channels_x) * length(channels_y)
+      )
+    # GROUP ORDER
+    } else {
+      title <- rep(
+        names(x),
+        times = length(channels_x) * length(channels_y)
+      )
+    }
+  # TITLES SUPPLIED
+  } else {
+    title <- rep(
+      title,
+      length.out = length(x) * length(channels_x) * length(channels_y)
+    )
+  }
+  
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
   # CALL CYTO_PLOT - CHANNEL ORDER
@@ -307,6 +333,10 @@ cyto_plot_explore <- function(x,
                       axes_trans = axes_trans,
                       hist_layers = length(x[[z]]), # SINGLE PANEL ONLY
                       layout = layout,
+                      title = title[
+                        (z - 1) * length(channels_x) * length(channels_y) + 
+                          (w - 1) * length(channels_y) + v
+                      ],
                       header = header[cnt + ceiling(w/np)],
                       page = if(v == length(y_chans)) {
                         TRUE
@@ -364,6 +394,10 @@ cyto_plot_explore <- function(x,
                         axes_trans = axes_trans,
                         hist_layers = length(x[[v]]), # SINGLE PANEL ONLY
                         layout = layout,
+                        title = title[
+                          (z - 1) * length(channels_y) * length(x) + 
+                            (w - 1) * length(x) + v
+                        ],
                         header = header[cnt + ceiling(v/np)],
                         page = if(v == length(x)) {
                           TRUE

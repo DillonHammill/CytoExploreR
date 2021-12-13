@@ -16,6 +16,7 @@ cyto_plot_explore(
   layout,
   axes_trans = NA,
   header,
+  title,
   ...
 )
 }
@@ -75,6 +76,9 @@ appropriately labelled.}
 users can supply a vector of headers for each page, this can be tricky to
 get right so it is recommended for users to use the default headers where
 possible.}
+
+\item{title}{text to display above each plot, set to the name of the group or
+channels displayed in the plot by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }
