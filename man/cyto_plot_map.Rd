@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_plot_map.R
 \name{cyto_plot_map}
 \alias{cyto_plot_map}
-\title{Plot dimension reduced maps in all dimensions}
+\title{Plot expression profiles for dimension reduced maps}
 \usage{
 cyto_plot_map(
   x,
@@ -17,9 +17,143 @@ cyto_plot_map(
   layout,
   header,
   title,
+  axes_trans = NA,
   ...
 )
 }
+\arguments{
+\item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+\code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{parent}{name of the population to plot when a \code{GatingHierarchy} or
+\code{GatingSet} object is supplied, set to the \code{"root"} node by
+default.}
+
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details. Sample selection occurs prior to grouping with \code{merge_by}.}
+
+\item{merge_by}{a vector of pData variables to sort and merge samples into
+groups prior to plotting, set to "name" by default to prevent merging. To
+merge all samples set this argument to \code{TRUE} or \code{"all"}.}
+
+\item{overlay}{name(s) of the populations to overlay or a \code{cytoset},
+\code{list of cytosets} or \code{list of cytoset lists} containing
+populations to be overlaid onto the plot(s). This argument can be set to
+"children" or "descendants" when a \code{GatingSet} or
+\code{GatingHierarchy} to overlay all respective nodes.}
+
+\item{order}{can be either \code{"channels"} or \code{"groups"} to control
+the order in which the data is plotted. Setting \code{order = "channels"}
+will plot each group on a single page with a plot for each channel in
+\code{channels_y}. On the other hand, setting \code{order = "groups"} will
+plot each channel on a separate page with a plot for each group in
+\code{merge_by}.}
+
+\item{point_col}{names of the channels or markers to use for the colour scale
+of each plot, set to all fluorescent channels by default.}
+
+\item{point_col_scale}{vector of colours to use for the colour scale within
+each plot. \code{point_col_scale} can also be supplied as a list of length
+\code{point_col} to use a different colour scale for each marker/channel.}
+
+\item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
+matrix indicating the dimensions of the grid for plotting.}
+
+\item{header}{can be set to NA to remove headers from plots. Alternatively,
+users can supply a vector of headers for each page, this can be tricky to
+get right so it is recommended for users to use the default headers where
+possible.}
+
+\item{title}{text to display above each plot, set to the name of the group or
+channel displayed in the plot by default.}
+
+\item{axes_trans}{object of class
+\code{\link[flowWorkspace:transformerList]{transformerList}} which was used
+to transform the channels of the supplied data. \code{cyto_plot} does not
+support in-line transformations and as such the transformations should be
+applied to the data prior to plotting. The transformerList is used
+internally to ensure that the axes on the constructed plots are
+appropriately labelled.}
+
+\item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
+}
 \description{
-Plot dimension reduced maps in all dimensions
+Plot expression profiles for dimension reduced maps
+}
+\examples{
+\dontrun{
+library(CytoExploreRData)
+
+# Activation GatingSet
+gs <- GatingSet(Activation)
+
+# Compensation
+gs <- cyto_compensate(gs)
+
+# Transformations
+gs <- cyto_transform(gs)
+
+# Gates
+cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+
+# Dimensionality reduction
+gs <- cyto_map(
+  gs[1:32],
+  parent = "Live Cells",
+  channels = c(
+    "Va2",
+    "CD4",
+    "CD8",
+    "CD44",
+    "CD69",
+    "CD11c",
+    "FSC-A",
+    "SSC-A"
+  ),
+  type = "UMAP"
+)
+
+# Calibrate cyto_plot colour scales
+cyto_plot_calibrate(
+  gs,
+  parent = "Live Cells"
+)
+
+# Visualisation
+cyto_plot_map(
+  gs,
+  parent = "Live Cells",
+  merge_by = "all",  # global embedding
+  channels = c("UMAP-1", "UMAP-2"),
+  point_col = c(
+    "Va2",
+    "CD4",
+    "CD8",
+    "CD44",
+    "CD69",
+    "CD11c",
+    "FSC-A",
+    "SSC-A"
+  )
+)
+}
+
+}
+\seealso{
+\code{\link{cyto_plot_calibrate}}
+
+\code{\link{cyto_map}}
+
+\code{\link{cyto_plot}}
+
+\code{\link{cyto_plot_profile}}
+
+\code{\link{cyto_plot_explore}}
+}
+\author{
+Dillon Hammill (Dillon.Hammill@anu.edu.au)
 }

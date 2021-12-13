@@ -104,6 +104,7 @@ cyto_plot_explore <- function(x,
                               ...) {
   
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
+  # TODO: SORT OUT TITLES FOR GROUPS
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
@@ -138,14 +139,6 @@ cyto_plot_explore <- function(x,
     channels_y <- cyto_channels_extract(x, channels_y)
   }
   
-  # # COMPUTE CHANNEL COMBINATIONS FOR CHANNEL IN CHANNELS_X
-  # x_chan_combos <- LAPPLY(
-  #   channels_x,
-  #   function(z){
-  #     length(channels_y[!channels_y %in% z])
-  #   }
-  # )
-  
   # CALL .CYTO_PLOT_DATA() - PASS TWO CHANNELS FOR FORMATTING
   args <- .args_list(...)
   args$channels <- c(
@@ -177,7 +170,7 @@ cyto_plot_explore <- function(x,
       layout <- .cyto_plot_layout(
         channels_y
       )
-    # GROUP ORDER
+      # GROUP ORDER
     } else {
       layout <- .cyto_plot_layout(x)
     }
@@ -195,13 +188,13 @@ cyto_plot_explore <- function(x,
     # NUMBER OF GROUPS TO PLOT
     n <- length(x)
     # PAGES PER GROUP - X CHANNEL SEPARATE PAGE BY UNIQUE Y CHANNELS
-    pg <- sum(ceiling(length(channels_y)/np))
+    pg <- ceiling(length(channels_y)/np) * length(channels_x)
     # TOTAL PAGES
     tpg <- n * pg
-  # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
+    # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
   } else {
     # NUMBER OF GROUPS TO PLOT
-    n <- length(channels_x)
+    n <- length(channels_x) * length(channels_y)
     # PAGES PER GROUP - LENGTH(X)
     pg <- ceiling(length(x)/np)
     # TOTAL PAGES
@@ -216,31 +209,46 @@ cyto_plot_explore <- function(x,
         names(x),
         each = pg
       )
-    # GROUP ORDER
+      # GROUP ORDER
     } else {
-      header <- LAPPLY(
-        channels_x, 
-        function(z){
-          rep(
-            paste0(
-              cyto_markers_extract(
-                x[[1]],
-                channels = z,
-                append = TRUE
-                ),
-              " / ",
-              cyto_markers_extract(
-                x[[1]],
-                channels = channels_y,
-                append = TRUE
+      header <- rep(
+        unname(
+          LAPPLY(
+            channels_x, 
+            function(z){
+              LAPPLY(
+                channels_y,
+                function(v) {
+                  if(v == z) {
+                    cyto_markers_extract(
+                      x[[1]],
+                      channels = z,
+                      append = TRUE
+                    )
+                  } else {
+                    paste0(
+                      cyto_markers_extract(
+                        x[[1]],
+                        channels = z,
+                        append = TRUE
+                      ),
+                      " / ",
+                      cyto_markers_extract(
+                        x[[1]],
+                        channels = v,
+                        append = TRUE
+                      )
+                    )
+                  }
+                }
               )
-            ),
-            each = pg
+            }
           )
-        }
+        ),
+        each = pg
       )
     }
-  # SUPPLIED HEADERS
+    # SUPPLIED HEADERS
   } else {
     # NO HEADERS
     if(.all_na(header)) {
@@ -321,10 +329,8 @@ cyto_plot_explore <- function(x,
       ),
       names = names(x)
     )
-  # CALL CYTO_PLOT - GROUP ORDER
+    # CALL CYTO_PLOT - GROUP ORDER
   } else {
-    # HEADER COUNTER
-    cnt <- 1
     # CONSTRUCT & RECORD PLOTS
     plots <- structure(
       lapply(
@@ -332,43 +338,54 @@ cyto_plot_explore <- function(x,
         function(z){
           # X CHANNEL
           x_chan <- channels_x[z]
-          # RESTRICT Y CHANNELS
-          y_chans <- channels_y
+          # HEADER COUNTER
+          cnt <- (z - 1) * pg * length(channels_y)
           # LOOP THROUGH CHANNELS_Y
-          p <- structure(
+          structure(
             lapply(
-              seq_along(y_chans), 
-              function(w){
+              seq_along(channels_y),
+              function(w) {
+                # INCREMENT HEADER COUNTER
+                cnt <- cnt + (w - 1) * pg
                 # Y CHANNEL
-                y_chan <- y_chans[w]
+                y_chan <- channels_y[w]
                 if(y_chan == x_chan) {
                   y_chan <- NULL
                 }
-                # UPDATE HEADER COUNTER
-                cnt <<- cnt + pg
-                # CONSTRUCT PLOT
-                cyto_plot(
-                  x[[z]], # USE LIST METHOD CYTO_PLOT_DATA CALLED
-                  parent = parent,
-                  channels = c(x_chan, y_chan),
-                  axes_trans = axes_trans,
-                  hist_layers = length(x[[z]]), # SINGLE PANEL ONLY
-                  layout = layout,
-                  header = header[(cnt - pg):cnt],
-                  page = TRUE,
-                  ...
+                # LOOP THROUGH GROUPS
+                p <- structure(
+                  lapply(
+                    seq_along(x),
+                    function(v) {
+                      # CONSTRUCT PLOT
+                      cyto_plot(
+                        x[[v]], # USE LIST METHOD CYTO_PLOT_DATA CALLED
+                        channels = c(x_chan, y_chan),
+                        axes_trans = axes_trans,
+                        hist_layers = length(x[[v]]), # SINGLE PANEL ONLY
+                        layout = layout,
+                        header = header[cnt + ceiling(v/np)],
+                        page = if(v == length(x)) {
+                          TRUE
+                        } else {
+                          FALSE
+                        },
+                        ...
+                      )
+                    }
+                  ),
+                  names = names(x)
                 )
+                # PREPARE PLOTS
+                p[LAPPLY(p, "is.null")] <- NULL
+                p <- lapply(p, `[[`, 1)
+                return(p)
               }
             ),
-            names = y_chans
+            names = channels_y
           )
-        # UPDATE HEADER COUNTER
-        cnt <<- cnt
-        # PREPARE PLOTS
-        p[LAPPLY(p, "is.null")] <- NULL
-        p <- lapply(p, `[[`, 1)
-        return(p)
-      }),
+        }
+      ),
       names = channels_x
     )
   }
