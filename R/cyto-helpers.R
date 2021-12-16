@@ -408,12 +408,17 @@ cyto_load <- function(path = ".",
     # SELECT
     if (!is.null(select)) {
       file_ind <- c()
-      lapply(select, function(z) {
-        if (any(grepl(z, files, ignore.case = TRUE))) {
-          file_ind <<- c(file_ind,
-                         which(grepl(z, files, ignore.case = TRUE)))
+      lapply(
+        select, 
+        function(z) {
+          if (any(grepl(z, files, ignore.case = TRUE))) {
+          file_ind <<- c(
+              file_ind,
+              which(grepl(z, files, ignore.case = TRUE))
+            )
+          }
         }
-      })
+      )
       if(length(file_ind) > 0){
         files <- files[unique(file_ind)]
       }
@@ -422,11 +427,15 @@ cyto_load <- function(path = ".",
     # EXCLUDE
     if (!is.null(exclude)) {
       file_ind <- c()
-      lapply(exclude, function(z) {
-        if (any(grepl(z, files, ignore.case = TRUE))) {
-          file_ind <<- c(file_ind,
-                         which(grepl(z, files, ignore.case = TRUE)))
-        }
+      lapply(
+        exclude, 
+        function(z) {
+          if (any(grepl(z, files, ignore.case = TRUE))) {
+            file_ind <<- c(
+              file_ind,
+              which(grepl(z, files, ignore.case = TRUE))
+            )
+          }
       })
       if(length(file_ind) > 0){
         files <- files[-unique(file_ind)]
@@ -2704,65 +2713,68 @@ cyto_match <- function(x,
   # EXPERIMENTAL VARIABLES
   } else {
     # INDICES PER VARIABLE
-    ind <- lapply(names(args), function(z){
-      # DIRECT MATCH
-      if(z %in% colnames(pd)) {
-        var_ind <- match_ind(z, colnames(pd))
-      # PARTIAL MATCH
-      } else if(exact == FALSE) {
-        var_ind <- grep(
-          z, 
-          colnames(pd),
-          ignore.case = TRUE
-        )
-      }
-      # NO MATCH
-      if(length(var_ind) == 0) {
-        stop(
-          paste0(
-            z,
-            " is not a valid variable in cyto_details(x)."
-          )
-        )
-        # MULTIPLE MATCHES
-      } else if(length(var_ind) > 1) {
-        stop(
-          paste0(
-            z,
-            " matches multiple variables in cyto_details(x)."
-          )
-        )
-      }
-      # ORDER AS SUPPLIED
-      LAPPLY(args[[z]], function(w){
-        # EXACT MATCH
-        if(w %in% pd[, var_ind]) {
-          levels <- which(pd[, var_ind] %in% as.character(w))
-        # PARTIAL MATCH
+    ind <- lapply(
+      names(args), 
+      function(z) {
+        # DIRECT MATCH
+        if(z %in% colnames(pd)) {
+          var_ind <- match_ind(z, colnames(pd))
+          # PARTIAL MATCH
         } else if(exact == FALSE) {
-          levels <- grep(
-            as.character(w),
-            pd[, var_ind],
+          var_ind <- grep(
+            z, 
+            colnames(pd),
             ignore.case = TRUE
           )
         }
         # NO MATCH
-        if(length(levels) == 0) {
+        if(length(var_ind) == 0) {
           stop(
             paste0(
-              w, 
-              " is not a valid level for ",
               z,
-              "!"
+              " is not a valid variable in cyto_details(x)."
+            )
+          )
+          # MULTIPLE MATCHES
+        } else if(length(var_ind) > 1) {
+          stop(
+            paste0(
+              z,
+              " matches multiple variables in cyto_details(x)."
             )
           )
         }
-        return(levels)
-      })
+        # ORDER AS SUPPLIED
+        LAPPLY(args[[z]], function(w){
+          # EXACT MATCH
+          if(w %in% pd[, var_ind]) {
+            levels <- which(pd[, var_ind] %in% as.character(w))
+            # PARTIAL MATCH
+          } else if(exact == FALSE) {
+            levels <- grep(
+              as.character(w),
+              pd[, var_ind],
+              ignore.case = TRUE
+            )
+          }
+          # NO MATCH
+          if(length(levels) == 0) {
+            stop(
+              paste0(
+                w, 
+                " is not a valid level for ",
+                z,
+                "!"
+              )
+            )
+          }
+          return(levels)
+        }
+      )
     })
     # INTERSECTION
     if(length(ind) > 1) {
-      ind <- do.call("intersect", ind)
+      ind <- Reduce("intersect", ind)
     } else {
       ind <- ind[[1]]
     }
