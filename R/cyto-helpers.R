@@ -59,8 +59,10 @@ cyto_import <- function(path = ".",
   )
   
   # FILES IN DIRECTORY
-  file_paths <- list.files(path,
-                           full.names = TRUE)
+  file_paths <- list.files(
+    path,
+    full.names = TRUE
+  )
   
   # FILE NAMES
   file_names <- basename(file_paths)
@@ -86,9 +88,15 @@ cyto_import <- function(path = ".",
       )
     # XML 
     }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
-      xml_file <- file_paths[which(grepl(file_ext, 
-                                         "xml", 
-                                         ignore.case = TRUE))]
+      xml_file <- file_paths[
+        which(
+          grepl(
+            "xml",
+            file_ext,
+            ignore.case = TRUE
+          )
+        )
+      ]
       gs <- cyto_func_call(
         "CytoML::cytobank_to_gatingset",
         list(xml_file, fcs_files)
@@ -96,9 +104,15 @@ cyto_import <- function(path = ".",
     }
   # IMPORT DIVA TO GATINGSET
   }else if(grepl("diva", type, ignore.case = TRUE)){
-    xml_file <- file_paths[which(grepl(file_ext, 
-                                       "xml", 
-                                       ignore.case = TRUE))]
+    xml_file <- file_paths[
+      which(
+        grepl(
+          "xml",
+          file_ext, 
+          ignore.case = TRUE
+        )
+      )
+    ]
     diva_ws <- cyto_func_call(
       "CytoML::open_diva_xml",
       list(xml_file)
@@ -111,18 +125,31 @@ cyto_import <- function(path = ".",
   }else if(grepl("flowjo", type, ignore.case = TRUE)){
     # WSP
     if(any(grepl("wsp", file_ext, ignore.case = TRUE))){
-      wsp_file <- file_paths[which(grepl(file_ext, 
-                                         "wsp", 
-                                         ignore.case = TRUE))]
+      wsp_file <- file_paths[
+        which(
+          grepl(
+            file_ext, 
+            "wsp", 
+            ignore.case = TRUE
+          )
+        )
+      ]
+      wsp <- open_flowjo_xml(wsp_file)
       gs <- cyto_func_call(
         "CytoML::flowjo_to_gatingset",
-        list(wsp_file, path = path, ...)
+        list(wsp, path = path, ...)
       )
     # XML
     }else if(any(grepl("xml", file_ext, ignore.case = TRUE))){
-      xml_file <- file_paths[which(grepl(file_ext, 
-                                         "xml", 
-                                         ignore.case = TRUE))]
+      xml_file <- file_paths[
+        which(
+          grepl(
+            "xml",
+            file_ext,
+            ignore.case = TRUE
+          )
+        )
+      ]
       flowjo_ws <- cyto_func_call(
         "CytoML::open_flowjo_xml",
         list(xml_file)
