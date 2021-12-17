@@ -112,7 +112,7 @@ cyto_import <- function(path = ".",
     # WSP
     if(any(grepl("wsp", file_ext, ignore.case = TRUE))){
       wsp_file <- file_paths[which(grepl(file_ext, 
-                                         "wps", 
+                                         "wsp", 
                                          ignore.case = TRUE))]
       gs <- cyto_func_call(
         "CytoML::flowjo_to_gatingset",
@@ -4604,8 +4604,6 @@ cyto_sample_to_node <- function(x,
   
   # DOWNSAMPLE EACH NODE - EXTRACT EVENT-ID FROM ROOT
   
-  print(node_counts)
-  
   # NODE COUNT - BYPASS ZERO EVENT SAMPLE NODES
   if (is.null(events)) {
     events <- min(node_counts[node_counts > 0])
@@ -4614,8 +4612,6 @@ cyto_sample_to_node <- function(x,
       events <- min(node_counts[node_counts > 0])
     }
   }
-  
-  print(events)
   
   # NODE RATIOS
   node_ratios <- LAPPLY(
@@ -4629,8 +4625,6 @@ cyto_sample_to_node <- function(x,
       }
     }
   )
-  
-  print(node_ratios)
   
   # SAMPLE ROOT NODE -----------------------------------------------------------
   
