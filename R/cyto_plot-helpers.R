@@ -743,7 +743,7 @@ cyto_plot_empty <- function(x,
 #' @param ... additional graphical parameters supplied by name to be passed to
 #'   \code{\link{cyto_plot_par}} to customise the new graphics device.
 #'
-#' @importFrom grDevices dev.cur dev.new dev.list dev.set graphics.off
+#' @importFrom grDevices dev.cur dev.new dev.list dev.set graphics.off dev.off
 #' @importFrom graphics par layout
 #'
 #' @examples
@@ -902,12 +902,16 @@ cyto_plot_new <- function(popup = NULL,
         }
         # RSTUDIO DEVICE
       } else if (dev_new == "rstudio") {
-        dev_ind <- which(grepl("rstudio",
-                               names(dev.list()),
-                               ignore.case = TRUE
-        ))
+        dev_ind <- which(
+          grepl(
+            "rstudio",
+            names(dev.list()),
+            ignore.case = TRUE
+          )
+        )
         if (length(dev_ind) != 0) {
-          dev.set(dev.list()[dev_ind])
+          dev.off(dev.list()[dev_ind])
+          dev.new(noRStudioGD = FALSE)
         } else {
           graphics.off()
           dev.new(noRStudioGD = FALSE)
