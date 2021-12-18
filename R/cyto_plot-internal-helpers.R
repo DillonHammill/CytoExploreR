@@ -579,10 +579,12 @@
   # DATA NOT PREPARED YET
   } else {
     # EXPERIMENTAL GROUPS
-    grps <- cyto_groups(x,
-                        select = select,
-                        group_by = merge_by,
-                        details = TRUE)
+    grps <- cyto_groups(
+      x,
+      select = select,
+      group_by = merge_by,
+      details = TRUE
+    )
   }
   
   # ALIAS - GATINGHIERARCHY/GATINGSET
@@ -598,9 +600,11 @@
       # GATINGHIERARCHY
       gh <- x[[1]]
       # PARENT - AUTO PATH
-      parent <- cyto_nodes_convert(gh,
-                                   nodes = parent,
-                                   path = "auto")
+      parent <- cyto_nodes_convert(
+        gh,
+        nodes = parent,
+        path = "auto"
+      )
       # GATINGTEMPLATE - AUTO PATHS
       gt <- gh_generate_template(gh)
       # NO GATES EXIST
@@ -614,13 +618,17 @@
         )
       }
       # PARENT
-      gt$parent <- cyto_nodes_convert(gh,
-                                      nodes = gt$parent,
-                                      path = "auto")
+      gt$parent <- cyto_nodes_convert(
+        gh,
+        nodes = gt$parent,
+        path = "auto"
+      )
       # ALIAS
-      gt$alias <- cyto_nodes_convert(gh,
-                                     nodes = gt$alias,
-                                     path = "auto")
+      gt$alias <- cyto_nodes_convert(
+        gh,
+        nodes = paste0(gt$parent, "/", gt$alias),
+        path = "auto"
+      )
       # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
       if(any(LAPPLY(alias, ".empty"))) {
         # REMOVE EMPTY ALIAS
@@ -662,9 +670,11 @@
           # CHECK ADDED GATES - MUST ANCHOR TO PARENT (BYPASS)
           if(grepl("add", names(bool)[z])) {
             z <- tryCatch(
-              cyto_nodes_convert(gh,
-                                 nodes = z,
-                                 anchor = parent),
+              cyto_nodes_convert(
+                gh,
+                nodes = z,
+                anchor = parent
+              ),
               error = function(e){
                 return(NULL)
               })
@@ -674,10 +684,14 @@
             }
           }
           # EXTRACT GATE
-          gate <- gh_pop_get_gate(gh,
-                                  cyto_nodes_convert(gh,
-                                                     nodes = z,
-                                                     anchor = parent))
+          gate <- gh_pop_get_gate(
+            gh,
+            cyto_nodes_convert(
+              gh,
+              nodes = z,
+              anchor = parent
+            )
+          )
           # BOOLEAN GATE
           if(cyto_class(gate, "booleanFilter")) {
             # BOOLEAN LOGIC
@@ -717,10 +731,12 @@
         alias <- unique(c(alias, bool))
       }
       # GATES PER GROUP - USE FIRST GH - SELECT HANDLED ABOVE
-      alias <- cyto_gate_extract(x,
-                                 parent = parent,
-                                 alias = alias,
-                                 merge_by = merge_by)
+      alias <- cyto_gate_extract(
+        x,
+        parent = parent,
+        alias = alias,
+        merge_by = merge_by
+      )
     }
   }
   
@@ -764,18 +780,26 @@
         }
         # NEGATE & FILTERID
         gate <- structure(
-          lapply(gate, function(w){
-            # EXTRACT FILTERS
-            gate_list <- unlist(gate[[w]])
-            ids <- LAPPLY(gate_list, function(z){
-              tryCatch(z@filterId,
-                       error = function(e){
-                         return(NA)
-                       })
-            })
-            names(gate_list)[!is.na(ids)] <- ids[!is.na(ids)]
-            return(gate_list)
-          }),
+          lapply(
+            gate, 
+            function(w){
+              # EXTRACT FILTERS
+              gate_list <- unlist(gate[[w]])
+              ids <- LAPPLY(
+                gate_list, 
+                function(z){
+                  tryCatch(
+                    z@filterId,
+                    error = function(e){
+                      return(NA)
+                    }
+                  )
+                }
+              )
+              names(gate_list)[!is.na(ids)] <- ids[!is.na(ids)]
+              return(gate_list)
+            }
+          ),
           names = names(grps)
         )
       # LIST OF GATE OBJECTS  
@@ -804,26 +828,29 @@
     }
     # COMBINE GATE & ALIAS
     gate <- structure(
-      lapply(seq_along(gate), function(z){
-        # COMBINE ALIAS
-        if(!.all_na(alias)) {
-          alias <<- NA
-          gates <- c(alias[[z]], gate[[z]])
-        } else {
-          gates <- gate[[z]]
-        }
-        # NEGATE
-        if(negate) {
-          if(length(gates) == 1) {
-            gates <- c(gates,
-                       list("negate" = !gates[[1]]))
+      lapply(
+        seq_along(gate), 
+        function(z){
+          # COMBINE ALIAS
+          if(!.all_na(alias)) {
+            alias <<- NA
+            gates <- c(alias[[z]], gate[[z]])
           } else {
-            gates <- c(gates,
-                       list("negate" = !do.call("|", unname(unlist(gates)))))
+            gates <- gate[[z]]
           }
+          # NEGATE
+          if(negate) {
+            if(length(gates) == 1) {
+              gates <- c(gates,
+                         list("negate" = !gates[[1]]))
+            } else {
+              gates <- c(gates,
+                         list("negate" = !do.call("|", unname(unlist(gates)))))
+            }
+          }
+          return(gates)
         }
-        return(gates)
-      }),
+      ),
       names = ifelse(.all_na(alias), names(gate), names(alias))
     )
   # GATE - NA
@@ -831,19 +858,22 @@
     # ALIAS INSTEAD OF GATE
     if(!.all_na(alias)) {
       gate <- structure(
-        lapply(alias, function(z){
-          # NEGATE
-          if(negate) {
-            if(length(z) == 1) {
-              z <- c(z,
-                     list("negate" = !z[[1]]))
-            } else {
-              z <- c(z,
-                     list("negate" = !do.call("|", unname(unlist(z)))))
+        lapply(
+          alias, 
+          function(z){
+            # NEGATE
+            if(negate) {
+              if(length(z) == 1) {
+                z <- c(z,
+                       list("negate" = !z[[1]]))
+              } else {
+                z <- c(z,
+                       list("negate" = !do.call("|", unname(unlist(z)))))
+              }
             }
+            return(z)
           }
-          return(z)
-        }),
+        ),
         names = names(alias)
       )
     }
