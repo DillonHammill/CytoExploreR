@@ -302,9 +302,8 @@ cyto_export <- function(x,
 #'
 #' @param path points to the location of the .fcs files to read in. Preferably
 #'   the name of folder in current working directory, but paths to individual
-#'   files are also allowed. Alternatively, users can supply a
-#'   named list of matrices to be converted into a cytoset for use within
-#'   CytoExploreR.
+#'   files are also allowed. Alternatively, users can supply a named list of
+#'   matrices to be converted into a cytoset for use within CytoExploreR.
 #' @param select vector of file names to select when loading files, set to NULL
 #'   be default to select all files in the specified directory.
 #' @param exclude vector of file names to exclude when loading files, set to
@@ -316,6 +315,9 @@ cyto_export <- function(x,
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default. See
 #'   \code{\link{cyto_channels_restrict}}.
+#' @param truncate logical indicating whether the range for each channel should
+#'   be truncated to exclude events with negative values, set to TRUE by
+#'   default.
 #' @param ... additional arguments passed to \code{\link{cyto_load}}.
 #'
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -346,7 +348,9 @@ cyto_load <- function(path = ".",
                       exclude = NULL,
                       sort = TRUE,
                       barcode = FALSE,
-                      restrict = FALSE, ...) {
+                      restrict = FALSE,
+                      truncate = TRUE,
+                      ...) {
 
   # PATH - NAMED LIST OF MATRICES
   if(cyto_class(path, "list", TRUE)) {
@@ -475,7 +479,15 @@ cyto_load <- function(path = ".",
     }
     
     # CYTOSET
-    x <- load_cytoset_from_fcs(files = normalizePath(files), ...)
+    x <- load_cytoset_from_fcs(
+      files = normalizePath(files),
+      min.limit = if(truncate){
+        0
+      } else {
+        NULL
+      },
+      ...
+    )
     
     # BARCODE EVENTS - REQUIRED FOR CYTO_PLOT
     x <- cyto_barcode(x, "events")

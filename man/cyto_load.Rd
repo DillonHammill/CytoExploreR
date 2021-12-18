@@ -11,15 +11,15 @@ cyto_load(
   sort = TRUE,
   barcode = FALSE,
   restrict = FALSE,
+  truncate = TRUE,
   ...
 )
 }
 \arguments{
 \item{path}{points to the location of the .fcs files to read in. Preferably
 the name of folder in current working directory, but paths to individual
-files are also allowed. Alternatively, users can supply a
-named list of matrices to be converted into a cytoset for use within
-CytoExploreR.}
+files are also allowed. Alternatively, users can supply a named list of
+matrices to be converted into a cytoset for use within CytoExploreR.}
 
 \item{select}{vector of file names to select when loading files, set to NULL
 be default to select all files in the specified directory.}
@@ -36,6 +36,10 @@ using \code{cyto_barcode}, set to FALSE by default.}
 \item{restrict}{logical indicating whether unassigned channels should be
 dropped from the returned cytoset, set to FALSE by default. See
 \code{\link{cyto_channels_restrict}}.}
+
+\item{truncate}{logical indicating whether the range for each channel should
+be truncated to exclude events with negative values, set to TRUE by
+default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_load}}.}
 }
