@@ -702,11 +702,14 @@ cyto_channel_select <- function(x){
                      viewer = "pane")
   
   # MISSING CHANNELS
-  lapply(seq_along(chans[, "channel"]), function(z){
-    if(is.na(chans[z, "channel"])){
-      stop(paste0("No channel selected for ", chans[z, "name"], "."))
+  lapply(
+    seq_along(chans[, "channel"]),
+    function(z){
+      if(is.na(chans[z, "channel"])){
+        stop(paste0("No channel selected for ", chans[z, "name"], "."))
+      }
     }
-  })
+  )
   
   # RETURN VECTOR OF CHANNELS
   return(chans[, "channel"])
