@@ -784,6 +784,15 @@ cyto_channel_match <- function(x,
     )
   }
   
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_fluor_channels(x)
+    # EXCLUDE HEIGHT/WIDTH PARAMETERS
+    channels <- channels[!grepl("-H|W$", channels, ignore.case = TRUE)]
+  } else {
+    channels <- cyto_channels_extract(x, channels)
+  }
+  
   # SEARCH FOR FILE TO IMPORT DETAILS
   if(is.null(file)) {
     # FILE SEARCH
@@ -952,7 +961,8 @@ cyto_channel_match <- function(x,
       pop_stats <- cyto_apply(
         x[ind],
         parent = pops,
-        channels = ,
+        channels = channels[1],
+        input = "matrix",
         FUN = "cyto_stat_count",
         copy = FALSE
       )
@@ -987,13 +997,6 @@ cyto_channel_match <- function(x,
     # NAMES
     file_names <- rownames(pd)[ind]
     names(file_names) <- file_names
-    # CHANNELS
-    if(is.null(channels)) {
-      channels <- cyto_fluor_channels(x)
-      channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
-    } else {
-      channels <- cyto_channels_extract(x, channels = channels)
-    }
     # LOCATE UNSTAINED CONTROL(S)
     unst_ind <- grep("Unst|NIL", file_names, ignore.case = TRUE)
     # ANNOTATE UNSTAINED CONTROLS - REMOVE FROM FILE NAMES
