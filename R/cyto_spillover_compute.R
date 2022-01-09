@@ -106,7 +106,7 @@
 #' options("CytoExploreR_wd_check" = TRUE)
 #' }
 #'
-#' @seealso \code{\link{cyto_spillover_edit}}
+#' @seealso \code{\link{cyto_channel_match}}
 #' @seealso \code{\link{cyto_spillover_edit}}
 #' @seealso \code{\link{cyto_plot_compensation}}
 #' @seealso \code{\link{cyto_compensate}}
@@ -165,9 +165,6 @@ cyto_spillover_compute <- function(x,
     select
   )
   
-  # EXPERIMENT DETAILS
-  pd <- cyto_details(x)
-  
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
@@ -177,170 +174,12 @@ cyto_spillover_compute <- function(x,
     channels <- cyto_channels_extract(x, channels)
   }
   
-  # REQUIRED VARIABLES
-  vars <- c(
-    "name",
-    "group",
-    "parent",
-    "channel"
+  # MATCH CHANNELS
+  pd <- cyto_channel_match(
+    x,
+    channels = channels
   )
-  
-  # MISSING VARIABLES
-  vars_req <- c()
-  lapply(
-    vars,
-    function(z) {
-      if(any(grepl(z, colnames(pd), ignore.case = TRUE))) {
-        colnames(pd)[grep(z, colnames(pd), ignore.case = TRUE)[1]] <<- z
-      } else {
-        vars_req <<- c(vars_req, z)
-      }
-    }
-  )
-  # FILE MUST REFLECT ANY CHANGES MADE TO DATA
-  # SEARCH FOR COMPENSATION DETAILS
-  pd_new <- cyto_file_search(
-    "-Compensation-Details.csv$",
-    colnames = c("name", "group", "parent", "channel"),
-    rownames = rownames(pd)
-  )
-  # NO COMPENSATION DETAILS FOUND
-  if(length(pd_new) == 0) {
-    # COMPENSATION DETAILS FILE
-    file <- NULL
-    # PREPARE MISSING VARIBALES
-    pd_new <- matrix(
-      NA,
-      nrow = nrow(pd),
-      ncol = length(vars_req),
-      dimnames = list(
-        rownames(pd),
-        vars_req
-      )
-    )
-    # SET DEFAULTS FOR PARENT
-    if("parent" %in% colnames(pd_new)) {
-      pd_new[, "parent"] <- rep(parent, length.out = nrow(pd_new))
-    }
-    # CHANNEL SUGGESTIONS
-    if("channel" %in% colnames(pd_new)) {
-      # FILL WITH UNSTAINED
-      pd_new[, "channel"] <- rep("Unstained", length(x))
-      # COMPUTE 95th PERCENTILES - USE MAX PER CHANNEL
-      q <- cyto_apply(
-        x,
-        parent = "root",
-        FUN = "cyto_stat_quantile",
-        probs = 0.98,
-        input = "matrix",
-        channels = channels,
-        inverse = FALSE,
-        copy = FALSE
-      )
-      # MAX CHANNEL PER CONTROL
-      ind <- apply(
-        q,
-        1,
-        "which.max"
-      ) 
-      # CROSS CHECK AGAINST OTHER CONTROLS
-      LAPPLY(
-        seq_along(ind),
-        function(z) {
-          # UPDATE DEFAULT CHANNEL
-          if(q[z, channels[ind[z]]] == max(q[, channels[ind[z]]])) {
-            pd_new[z, "channel"] <<- channels[ind[z]]
-          }
-        }
-      )
-    }
-    # APPEND MISSING VARIABLES
-    pd <- cbind(
-      pd,
-      pd_new
-    )
-  # COMPENSATION DETAILS FOUND  
-  } else {
-    # MULTIPLE COMPENSATION DETAILS FILES FOUND
-    if(length(pd_new) > 1) {
-      # ENQUIRE
-      if(interactive() & cyto_option("CytoExploreR_interactive")) {
-        message(
-          "Multiple files found with compensation details for this ",
-          cyto_class(x),
-          ". Which file would you like to import compensation details from?"
-        )
-        message(
-          paste0(
-            paste0(
-              1:length(pd_new),
-              ": ",
-              names(pd_new)
-            ),
-            sep = "\n"
-          )
-        )
-        opt <- cyto_enquire(NULL)
-        opt <- tryCatch(
-          as.numeric(opt),
-          warning = function(w) {
-            return(
-              match(opt, names(pd_new))
-            )
-          }
-        )
-        # COMPENSATION DETAILS FILE
-        pd_new <- pd_new[opt]
-      } else {
-        pd_new <- pd_new[1]
-      }
-    }
-    # COMPENSATION DETAILS FILE
-    file <- names(pd_new)
-    message(
-      paste0(
-        "Importing saved compensation details from ",
-        file,
-        "..."
-      )
-    )
-    # TODO: DO WE WANT TO APPEND ALL DETAILS HERE?
-    # APPEND MISSING VARIABLES
-    pd <- cbind(
-      pd,
-      pd_new[[file]][
-        match_ind(
-          rownames(pd),
-          rownames(pd_new[[file]])
-        ), vars_req]
-    )
-  }
-  
-  # EDIT COMPENSATION DETAILS
-  if(interactive() & cyto_option("CytoExploreR_interactive")) {
-    # STORE ROWNAMES
-    cyto_names <- rownames(pd)
-    rownames(pd) <- NULL
-    # EDIT COMPENSATION DETAILS
-    pd <- data_edit(
-      pd,
-      logo = CytoExploreR_logo(),
-      title = "Compensation Details Editor",
-      row_edit = FALSE, # ALLOW COLUMN ADD/REMOVE BUT NOT ROWS
-      col_names = vars, # CANNOT EDIT VARIBALE NAMES
-      col_readonly = "name", # CANNOT EDIT NAME
-      col_options = list(
-        "parent" = cyto_nodes(x, path = "auto"), # DROPDOWN PARENT OPTIONS
-        "channel" = c(unname(channels), "Unstained") # DROPDOWN CHANNEL OPTIONS
-      ), 
-      quiet = TRUE,
-      hide = TRUE,
-      viewer = "pane",
-      ...
-    )
-    # REPLACE ROWNAMES
-    rownames(pd) <- cyto_names
-  }
+  pd <- pd[match(rownames(cyto_details(x)), rownames(pd)), , drop = FALSE]
   
   # CHECK COMPENSATION DETAILS
   lapply(
@@ -367,6 +206,7 @@ cyto_spillover_compute <- function(x,
   )
   
   # MISSING VARIABLES
+  vars <- c("name", "group", "parent", "channel")
   if(!all(vars %in% colnames(pd))) {
     stop(
       paste0(
@@ -378,57 +218,6 @@ cyto_spillover_compute <- function(x,
       )
     )
   }
-  
-  # WRITE DETAILS TO NEW FILE
-  if(is.null(file)) {
-    # DEFAULT FILE - WRITE UPDATED DETAILS STORED IN PD
-    file <- paste0(
-      format(
-        Sys.Date(), 
-        "%d%m%y"
-      ), 
-      "-Compensation-Details.csv"
-    )
-    pd_new <- pd
-  # UPDATE DATA IN EXISTING FILE
-  } else {
-    # ORIGINAL DETAILS STORED IN PD_NEW[[FILE]] - NEW DETAILS STORED IN PD
-    # ADD NEW COLUMNS TO ORIGINAL DETAILS
-    ind <- which(!colnames(pd) %in% colnames(pd_new[[file]]))
-    if(length(ind) > 0) {
-      pd_new[[file]] <- do.call(
-        "cbind",
-        c(
-          list(
-            pd_new[[file]]
-          ),
-          structure(
-            lapply(
-              ind,
-              function(z) {
-                rep(NA, nrow(pd_new[[file]]))
-              }
-            ),
-            names = colnames(pd)[ind]
-          )
-        )
-      )
-    }
-    # UPDATE ROWS
-    ind <- match_ind(rownames(pd), rownames(pd_new[[file]]))
-    pd_new[[file]][ind, colnames(pd)] <- pd
-    pd_new <- pd_new[[file]]
-  }
-  
-  # WRITE DETAILS TO FILE
-  write_to_csv(
-    pd_new,
-    file,
-    row.names = TRUE
-  )
-  
-  # UPDATE EXPERIMENT DETAILS IN PLACE - COPY DATA AFTER
-  cyto_details(x) <- pd
   
   # TRANSFORMATIONS
   if(.all_na(axes_trans)) {

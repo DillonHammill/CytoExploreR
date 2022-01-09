@@ -142,7 +142,7 @@ Roca et al. (2021). AutoSpill is a principled framework that
   Communications 12(2890).
 }
 \seealso{
-\code{\link{cyto_spillover_edit}}
+\code{\link{cyto_channel_match}}
 
 \code{\link{cyto_spillover_edit}}
 

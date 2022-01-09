@@ -1308,7 +1308,7 @@ cyto_channel_match <- function(x,
         } else {
           "root"
         },
-        "channel" = unname(cyto_fluor_channels(x))
+        "channel" = c(unname(channels), "Unstained")
       ),
       quiet = TRUE,
       hide = TRUE,
