@@ -147,12 +147,10 @@ cyto_plot_map <- function(x,
   
   # CALIBRATION RECOMMENDED
   if(is.null(.cyto_plot_calibrate_recall())) {
-    warning(
-      message(
-        paste0(
-          "Please call 'cyto_plot_calibrate()' before calling ",
-          "'cyto_plot_map()' to properly calibrate colour scales."
-        )
+    message(
+      paste0(
+        "Please call 'cyto_plot_calibrate()' before calling ",
+        "'cyto_plot_map()' to properly calibrate colour scales."
       )
     )
   }

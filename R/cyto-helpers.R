@@ -4936,7 +4936,10 @@ cyto_barcode <- function(x,
 #'   be saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
 #'   unless \code{file} is specified or a file is found when searching the
 #'   current directory for experimental markers. Setting this argument to NA
-#'   will prevent writing of edited marker assignments to file.
+#'   will prevent writing of edited marker assignments to file. Custom file
+#'   names passed to \code{save_as} should end in \code{"Details.csv"} so that
+#'   CytoExploreR can automatically find and read in these details when
+#'   required.
 #' @param ... not in use.
 #'
 #' @return save inputs to "Experiment-Markers.csv" and returns updated samples.
@@ -4978,7 +4981,7 @@ cyto_markers_edit <- function(x,
   # FILE MISSING
   if(is.null(file)) {
     pd_new <- cyto_file_search(
-      "Experiment-Markers.csv$",
+      "Markers.csv$",
       colnames = c("channel", "marker")
     )
     # SINLGE FILE MARKER ASSIGNMENTS FOUND
@@ -5149,7 +5152,10 @@ cyto_markers_edit <- function(x,
 #'   be saved, defaults to \code{Experiment-Details.csv} prefixed with the date
 #'   unless \code{file} is specified or a file is found when searching the
 #'   current directory for experimental details. Setting this argument to NA
-#'   will prevent writing of edited experimental details to file.
+#'   will prevent writing of edited experimental details to file. Custom file
+#'   names passed to \code{save_as} should end in \code{"Details.csv"} so that
+#'   CytoExploreR can automatically find and read in these details when
+#'   required.
 #' @param ... additional arguments passed to \code{DataEditR::data_edit()} when
 #'   \code{cyto_details_edit()} is run in interactive mode.
 #'
@@ -5187,7 +5193,7 @@ cyto_details_edit <- function(x,
   if (is.null(file)) {
     # FILE SEARCH
     pd <- cyto_file_search(
-      "Experiment-Details.csv$",
+      "Details.csv$", # Compensation-Details | Experiment-Details
       colnames = "name",
       rownames = rownames(cyto_details(x))
     )
@@ -5283,6 +5289,12 @@ cyto_details_edit <- function(x,
         )
       }
     } else {
+      warning(
+        paste0(
+          file,
+          " does not exist! Resorting to cyto_details(x) instead..."
+        )
+      )
       pd <- cyto_details(x)
     }
   }
@@ -5835,6 +5847,8 @@ cyto_compensate.flowFrame <- function(x,
 #'   a gatingTemplate CSV file.
 #' @param path can be either \code{"full"} or \code{"auto"} to return the
 #'   complete path or shortest unique path to each node.
+#' @param terminal logical to indicate whether only the paths to terminal nodes
+#'   should be returned, set to FALSE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or
 #'   \code{\link[openCyto:gt_get_nodes]{gt_get_nodes}}.
@@ -5842,23 +5856,55 @@ cyto_compensate.flowFrame <- function(x,
 #' @return character vector of gated node/population names.
 #'
 #' @importFrom flowWorkspace gh_get_pop_paths gs_get_pop_paths
+#'   gh_pop_get_children gs_pop_get_children
 #' @importFrom openCyto gatingTemplate gt_get_nodes
 #'
 #' @export
 cyto_nodes <- function(x,
                        path = "full",
+                       terminal = FALSE,
                        ...) {
   
   # GATINGHIERARCHY
   if (cyto_class(x, "GatingHierarchy", TRUE)) {
-    gh_get_pop_paths(x,
-                     path = path,
-                     ...)
+    nodes <- gh_get_pop_paths(
+      x,
+      path = path,
+      ...
+    )
+    # TERMINAL NODES
+    if(terminal) {
+      nodes <- LAPPLY(
+        nodes,
+        function(node) {
+          if(length(gh_pop_get_children(x, node)) == 0) {
+            return(node)
+          } else {
+            return(NULL)
+          }
+        }
+      )
+    }
   # GATINGSET
   } else if (cyto_class(x, "GatingSet", TRUE)) {
-    gs_get_pop_paths(x,
-                     path = path,
-                     ...)
+    nodes <- gs_get_pop_paths(
+      x,
+      path = path,
+      ...
+    )
+    # TERMINAL NODES
+    if(terminal) {
+      nodes <- LAPPLY(
+        nodes,
+        function(node) {
+          if(length(gs_pop_get_children(x, node)) == 0) {
+            return(node)
+          } else {
+            return(NULL)
+          }
+        }
+      )
+    }
   # GATINGTEMPLATE
   } else {
     # GATINGTEMPLATE NAME
@@ -5868,11 +5914,41 @@ cyto_nodes <- function(x,
     }
     # NODES
     if(path == "full") {
-      names(gt_get_nodes(x, only.names = TRUE, ...))
+      nodes <- names(
+        gt_get_nodes(
+          x, 
+          only.names = TRUE,
+          ...
+        )
+      )
+      names(nodes) <- nodes
     } else {
-      unname(gt_get_nodes(x, only.names = TRUE, ...))
+      nodes <- gt_get_nodes(
+        x, 
+        only.names = TRUE,
+        ...
+      )
     }
+    # TERMINAL NODES
+    if(terminal) {
+      nodes <- LAPPLY(
+        seq_along(nodes),
+        function(z) {
+          # FULL NODE PATH REQUIRED HERE
+          if(length(gt_get_children(x, names(nodes)[z])) == 0) {
+            return(nodes[z])
+          } else {
+            return(NULL)
+          }
+        }
+      )
+    }
+    nodes <- unname(nodes)
   }
+  
+  # NODE PATHS
+  return(nodes)
+  
 }
 
 ## CYTO_NODES_CHECK ------------------------------------------------------------
@@ -6780,22 +6856,28 @@ cyto_apply.list <- function(x,
                             simplify = TRUE) {
   
   structure(
-    lapply(x, function(z){
-      cyto_apply(z,
-                 FUN = FUN,
-                 ...,
-                 parent = parent,
-                 select = select,
-                 coerce = coerce,
-                 events = events,
-                 input = input,
-                 copy = copy,
-                 channels = channels,
-                 trans = trans,
-                 inverse = inverse,
-                 slot = slot,
-                 simplify = simplify)
-    }), names = names(x)
+    lapply(
+      x, 
+      function(z) {
+        cyto_apply(
+          z,
+          FUN = FUN,
+          ...,
+          parent = parent,
+          select = select,
+          coerce = coerce,
+          events = events,
+          input = input,
+          copy = copy,
+          channels = channels,
+          trans = trans,
+          inverse = inverse,
+          slot = slot,
+          simplify = simplify
+        )
+      }
+    ), 
+    names = names(x)
   )
   
 }

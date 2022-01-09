@@ -18,7 +18,10 @@ column called \code{"name"} which contains the names of the samples.}
 be saved, defaults to \code{Experiment-Details.csv} prefixed with the date
 unless \code{file} is specified or a file is found when searching the
 current directory for experimental details. Setting this argument to NA
-will prevent writing of edited experimental details to file.}
+will prevent writing of edited experimental details to file. Custom file
+names passed to \code{save_as} should end in \code{"Details.csv"} so that
+CytoExploreR can automatically find and read in these details when
+required.}
 
 \item{...}{additional arguments passed to \code{DataEditR::data_edit()} when
 \code{cyto_details_edit()} is run in interactive mode.}

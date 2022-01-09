@@ -4,7 +4,7 @@
 \alias{cyto_nodes}
 \title{Names of gated populations in gatingTemplate/GatingHierarchy/GatingSet}
 \usage{
-cyto_nodes(x, path = "full", ...)
+cyto_nodes(x, path = "full", terminal = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -15,6 +15,9 @@ a gatingTemplate CSV file.}
 
 \item{path}{can be either \code{"full"} or \code{"auto"} to return the
 complete path or shortest unique path to each node.}
+
+\item{terminal}{logical to indicate whether only the paths to terminal nodes
+should be returned, set to FALSE by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or

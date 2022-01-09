@@ -2,43 +2,71 @@
 % Please edit documentation in R/cyto_channels-helpers.R
 \name{cyto_channel_match}
 \alias{cyto_channel_match}
-\title{Create a csv file assigning a channel to each compensation control}
+\title{Match each compensation control to a fluorescent channel}
 \usage{
-cyto_channel_match(x, channels = NULL, save_as = NULL)
+cyto_channel_match(
+  x,
+  channels = NULL,
+  file = NULL,
+  save_as = NULL,
+  strip = TRUE,
+  ignore.case = TRUE,
+  insertions = FALSE,
+  ...
+)
 }
 \arguments{
-\item{x}{object of \code{\link[flowWorkspace:cytoset]{cytoset}} or
+\item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}},
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{channels}{vector of channels, one channel for each cytoframe in
-\code{x}. Channels are added a \code{"channel"} column within
-\code{cyto_details(x)} either by name or the order in which the channels
-are supplied. If no channels are supplied the user will be asked to
-interactively enter this information using \code{cyto_channel_select()}.}
+\item{channels}{names of the possible channels or markers to be matched to
+each control, set to all area fluorescent parameters by default.}
 
-\item{save_as}{name to use for the saved channel match csv file, set to
-\code{"date-Channel-Match.csv"} by default. To prevent writing to a new
-channel match file, set this argument to \code{NA}.}
+\item{file}{name of a CSV file from which the channel matching information
+should be inherited. If not supplied, \code{cyto_channel_match()} will
+automatically search for a file named \code{"Compensation-Details.csv"} or
+create interactively create such a file.}
+
+\item{save_as}{name of a CSV file to which the channel matching should be
+written for downstream use, set to \code{"Compensation-Details.csv"}
+prefixed with the date by default. Users can set custom file names here,
+but the file name should contain \code{"Compensation-Details.csv"} in order
+to be automatically detected by CytoExploreR within
+\code{cyto_spillover_compute()}, \code{cyto_spillover_edit()},
+\code{cyto_spillover_spread()} and \code{cyto_plot_compensation()}.}
+
+\item{strip}{logical indicating whether overlapping characters in file names
+should be stripped prior to matching, set to TRUE by default for more
+accurate matching.}
+
+\item{ignore.case}{logical indicating whether all case insensitive matches
+should be found, set to TRUE by default.}
+
+\item{insertions}{logical indicating whether character insertions are allowed
+when matching the marker/channel combinations to the sample names, set to
+FALSE by default to only allow deletions.}
+
+\item{...}{additional arguments passed to \code{link{grep}} when performing
+character matching.}
 }
 \value{
-update \code{cyto_details} of \code{cytoset} or \code{GatingSet},
-  write channel matching to csv file and return channel matching as a
-  data.frame.
+a data.frame written to a CSV file containing information matching
+  each file name to a channel. This channel matching information is also
+  automatically added to the \code{cyto_details()} of the supplied samples
+  where it can be easily accessed by CytoExploreR downstream.
 }
 \description{
-Create a csv file assigning a channel to each compensation control
+Match each compensation control to a fluorescent channel
 }
 \examples{
-if(interactive()) {
 library(CytoExploreRData)
 
-# Compensation Gatingset
-gs <- load_gs(system.file("extdata/Compensation-GatingSet",
-                          package = "CytoExploreRData"))
+# Compensation GatingSet
+gs <- GatingSet(Compensation)
 
-# Select a channel for each control from dropdown menu
+# Channel matching
 cyto_channel_match(gs)
-}
 
 }
 \author{

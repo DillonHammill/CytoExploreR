@@ -28,6 +28,7 @@ cyto_file_search <- function(x,
                              dir = ".",
                              colnames = NULL,
                              rownames = NULL,
+                             ignore.case = TRUE,
                              ...) {
   
   # FILES IN DIRECTORY
@@ -36,7 +37,8 @@ cyto_file_search <- function(x,
     pattern = x,
     recursive = TRUE,
     include.dirs = FALSE,
-    full.names = TRUE
+    full.names = TRUE,
+    ignore.case = ignore.case
   )
   
   # FILES FOUND

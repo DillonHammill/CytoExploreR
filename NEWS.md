@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* `cyto_channel_match()` can now automatically detect the channel associated with each compensation control by matching marker and channel combinations to the file names. Samples where channels cannot be matched by file name will instead be matched by the intensities in the fluorescent channels. `cyto_channel_match()` also gains the ability to automatically detect which compensation controls are beads or cells, an important distinction for `cyto_spillover_compute()`.
 * `cyto_load()` gains a new `truncate` argument set to TRUE by default to allow automatic removal of events with negative values.
 * Added new `label_memory` argument to `cyto_plot()` to allow interactively positioned label co-ordinates to be passed to `cyto_plot()` when `cyto_plot_save()` in called (as we cannot interactively position labels on these graphics devices).
 * Added new `cyto_unmix_compute()` and `cyto_unmix()` to compute and apply spectral unmixing matrices to spectral flow cytometry data.
@@ -37,7 +38,7 @@
 * `cyto_gate_edit()` now appropriately handles the `negate` argument and allows addition/removal of negated gates.
 * `group_by` argument in `cyto_gate_draw()` and `cyto_gate_edit()` has been renamed to `merge_by` to maintain consistency with `cyto_plot()`.
 * Added new `cyto_gate_extract()` function to facilitate the extraction and formatting of gates extracted from GatingHierarchies, GatingSets or gatingTemplates.
-* `cyto_nodes()` family of functions have been updated to include support for extracting and manipulating nodes stored in gatingTemplates.
+* `cyto_nodes()` family of functions have been updated to include support for extracting and manipulating nodes stored in gatingTemplates. A new `terminal` argument has been added to return the paths of nodes which have no descendants.
 * Added `cyto_nodes_ancestor()` to make it easy to get the most recent common ancestor for a collection of populations. 
 * `cyto_gate_bool()` now checks to see if the boolean gate is already defined within the gatingTemplate and asks the user if they would like to update the logic for this gate. As an alternative, boolean gates can be modified manually by directly editing the ntries in the gatingTemplate using `cyto_gatingTemplate_edit()`.
 * `cyto_gate_draw()` now uses a single method that has support for cytoset and GatingSet objects. The cytoset method simply returns the constructed gates in a list, whilst the GatingSet method adds the gates to the GatingSet, updates the gatingTemplate and returns the updated GatingSet.

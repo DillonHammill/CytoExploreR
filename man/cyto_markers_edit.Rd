@@ -18,7 +18,10 @@ cyto_markers_edit(x, file = NULL, save_as = NULL, ...)
 be saved, defaults to \code{Experiment-Markers.csv} prefixed with the date
 unless \code{file} is specified or a file is found when searching the
 current directory for experimental markers. Setting this argument to NA
-will prevent writing of edited marker assignments to file.}
+will prevent writing of edited marker assignments to file. Custom file
+names passed to \code{save_as} should end in \code{"Details.csv"} so that
+CytoExploreR can automatically find and read in these details when
+required.}
 
 \item{...}{not in use.}
 }

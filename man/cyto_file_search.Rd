@@ -4,7 +4,14 @@
 \alias{cyto_file_search}
 \title{Search for CSV file in current directory}
 \usage{
-cyto_file_search(x, dir = ".", colnames = NULL, rownames = NULL, ...)
+cyto_file_search(
+  x,
+  dir = ".",
+  colnames = NULL,
+  rownames = NULL,
+  ignore.case = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{regular expression to use when searching for files by name in
