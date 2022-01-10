@@ -617,16 +617,16 @@
           )
         )
       }
+      # ALIAS - MUST BE BEFORE PARENT
+      gt$alias <- cyto_nodes_convert(
+        gh,
+        nodes = paste0(gt$parent, "/", gt$alias),
+        path = "auto"
+      )
       # PARENT
       gt$parent <- cyto_nodes_convert(
         gh,
         nodes = gt$parent,
-        path = "auto"
-      )
-      # ALIAS
-      gt$alias <- cyto_nodes_convert(
-        gh,
-        nodes = paste0(gt$parent, "/", gt$alias),
         path = "auto"
       )
       # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
