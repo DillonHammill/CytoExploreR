@@ -323,8 +323,6 @@ cyto_transformers_define <- function(x,
             # q = quantile of negative data value (w adjustment)
             # w = linear decades
             
-            # TODO: COMPUTE W BASED ON DATA RANGE TO ACCOMODATE LARGER SCALES
-            
             # RANGE
             if(!"r" %in% names(args)) {
               # DON'T UPDATE GLOBALLY - CHANNEL SPECIFIC RANGES
@@ -341,10 +339,6 @@ cyto_transformers_define <- function(x,
                 ),
                 na.rm = TRUE
               )
-              # DEFAULT M
-              if(!"m" %in% names(args)) {
-                args$m <- 4.5
-              }
             }
             
             # TOP OF SCALE
@@ -354,35 +348,38 @@ cyto_transformers_define <- function(x,
             
             # COMPUTE M FROM RANGE
             if(!"m" %in% names(args)) {
-              args$m <- log10(t) + 1
+              # FLOWCORE USES DEFAULT 4.5 & ADDS +1 FOR ESTIMATE
+              args$m <- log10(args$t) - 1 # FLOWCORE USES + 1
             }
             
             # COMPUTE W - (R MOST NEGATIVE VALUES FOR DISPLAY)
             if(!"w" %in% names(args)) {
               args$w <- 0
-              if(min(args$r) < 0) {
-                # COMPUTE MINIMUM VALUE
+              # EXTRACT DATA < ZERO
+              d <- do.call(
+                "c",
+                cyto_apply(
+                  x,
+                  parent = parent,
+                  select = select,
+                  channels = z,
+                  input = "column",
+                  FUN = function(v) {
+                    v[v < 0]
+                  },
+                  simplify = FALSE
+                )
+              )
+              # COMPUTE MINIMUM VALUE
+              if(length(d) > 0) {
                 args$p <- .Machine$double.eps + quantile(
-                  do.call(
-                    "c",
-                    cyto_apply(
-                      x,
-                      parent = parent,
-                      select = select,
-                      channels = z,
-                      input = "column",
-                      FUN = function(v) {
-                        v[v < 0]
-                      },
-                      simplify = FALSE
-                    )
-                  ),
+                  d,
                   0.05
                 )
                 args$w <- (args$m - log10(args$t/abs(args$p))) / 2
               }
             }
-            
+
             # CHECK W > 0
             if(args$w < 0) {
               stop(
@@ -392,29 +389,31 @@ cyto_transformers_define <- function(x,
                 )
               )
             }
-            
+
             # LOGICLE TRANSFORM - DROP R AND P ARGUMENTS
             trans <- cyto_func_execute(
               "logicleTransform",
               c(list("logicle"), args)
             )
-            
+
             # INVERSE LOGICLE TRANSFORM
             inv <- inverseLogicleTransform(
               trans
             )
-            
+
             # LOGICLE TRANSFORMERS
             flow_trans(
               "logicle",
               trans@.Data,
               inv@.Data
             )
-            
+
             # # ESTIMATELOGICLE CYTOEXPLORER WRAPPER DOESN'T EXPOSE ARGUMENTS
             # estimateLogicle_args <- c("t", "m", "a", "q")
             # trans <- do.call("CytoExploreR_.estimateLogicle",
-            #                  c(args["x"],
+            #                  c("x" = cyto_data_extract(
+            #                    x,
+            #                    coerce = TRUE)[[1]][[1]],
             #                    list("channels" = z),
             #                    args[names(args) %in% estimateLogicle_args]))
             # inv_trans <- inverseLogicleTransform(trans[[z]])

@@ -315,9 +315,6 @@ cyto_export <- function(x,
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default. See
 #'   \code{\link{cyto_channels_restrict}}.
-#' @param truncate logical indicating whether the range for each channel should
-#'   be truncated to exclude events with negative values, set to TRUE by
-#'   default.
 #' @param ... additional arguments passed to \code{\link{cyto_load}}.
 #'
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -349,7 +346,6 @@ cyto_load <- function(path = ".",
                       sort = TRUE,
                       barcode = FALSE,
                       restrict = FALSE,
-                      truncate = TRUE,
                       ...) {
 
   # PATH - NAMED LIST OF MATRICES
@@ -481,11 +477,6 @@ cyto_load <- function(path = ".",
     # CYTOSET
     x <- load_cytoset_from_fcs(
       files = normalizePath(files),
-      min.limit = if(truncate){
-        0
-      } else {
-        NULL
-      },
       ...
     )
     
@@ -2260,7 +2251,7 @@ cyto_data_extract <- function(x,
         seed = seed
       )
      # SAMPLE
-     }else if(all(events != 1)) {
+     }else if(.all_na(events) | all(events != 1)) {
       # SAMPLE EACH CYTOFRAME
       cs <- cyto_sample(
         cs,
@@ -4226,18 +4217,30 @@ cyto_sample.flowSet <- function(x,
   
   # SAMPLE TO MINIMUM EVENTS
   if(.all_na(events)) {
-    events <- min(
-      cyto_apply(
+    events <- cyto_apply(
         x,
         "nrow",
         input = "matrix",
         copy = FALSE
       )
-    )
     # BYPASS ZERO EVENT SAMPLING
-    if(events == 0) {
+    if(min(events) == 0) {
+      warning(
+        paste0(
+          "The following samples contain zero events: \n",
+          paste0(
+            rownames(events[events == 0, ,drop = FALSE]),
+            collapse = "\n"
+          ),
+          "\n",
+          "Downsampling every sample to zero events is illogical so the ",
+          "samples have been returned as is."
+        )
+      )
       return(x)
     }
+    # DOWNSAMPLE TO MINIMUM EVENTS
+    events <- min(events)
     message(
       paste("Downsampling each sample to",
             events, "events.")
@@ -5347,9 +5350,11 @@ cyto_details_edit <- function(x,
    
   # SAVE UPDATED DETAILS - CANNOT SAVE ABOVE AS ROWNAMES REMOVED
   if(!.all_na(save_as)) {
-    write_to_csv(pd,
-                 file = save_as,
-                 row.names = TRUE)
+    write_to_csv(
+      pd,
+      file = save_as,
+      row.names = TRUE
+    )
   }
   
   # Return updated samples

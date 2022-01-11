@@ -772,8 +772,6 @@ cyto_channel_match <- function(x,
                               insertions = FALSE,
                               ...) {
   
-  #channel_match file may contain extra samples
-  
   # CYTOFRAMES NOT SUPPORTED
   if(cyto_class(x, "flowFrame")) {
     stop(
@@ -784,11 +782,24 @@ cyto_channel_match <- function(x,
     )
   }
   
+  # BYPASS CHANNEL MATCHING - INTERNAL USE ONLY!
+  # USED IN CYTO_SPILLOVER_EDIT() | CYTO_PLOT_COMPENSATION()
+  args <- list(...)
+  if("channel_match" %in% names(args)) {
+    cyto_details(x) <- channel_match[
+      match(
+        rownames(cyto_details(x)),
+        rownames(channel_match)
+      ), , drop = FALSE
+    ]
+    return(x)
+  }
+  
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
     # EXCLUDE HEIGHT/WIDTH PARAMETERS
-    channels <- channels[!grepl("-H|W$", channels, ignore.case = TRUE)]
+    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
   } else {
     channels <- cyto_channels_extract(x, channels)
   }

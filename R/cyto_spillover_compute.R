@@ -169,7 +169,7 @@ cyto_spillover_compute <- function(x,
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
     # EXCLUDE HEIGHT/WIDTH PARAMETERS
-    channels <- channels[!grepl("-H|W$", channels, ignore.case = TRUE)]
+    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
   } else {
     channels <- cyto_channels_extract(x, channels)
   }
@@ -269,7 +269,7 @@ cyto_spillover_compute <- function(x,
     0,
     ncol = length(channels),
     nrow = length(channels),
-    dimnames = list(channels, channels)
+    dimnames = list(unname(channels), unname(channels))
   )
   diag(spill_mat) <- 1
   
@@ -734,7 +734,8 @@ cyto_spillover_compute <- function(x,
   } else {
     write_to_csv(
       spill_mat, 
-      save_as
+      save_as,
+      row.names = TRUE
     )
   }
   

@@ -11,7 +11,6 @@ cyto_load(
   sort = TRUE,
   barcode = FALSE,
   restrict = FALSE,
-  truncate = TRUE,
   ...
 )
 }
@@ -36,10 +35,6 @@ using \code{cyto_barcode}, set to FALSE by default.}
 \item{restrict}{logical indicating whether unassigned channels should be
 dropped from the returned cytoset, set to FALSE by default. See
 \code{\link{cyto_channels_restrict}}.}
-
-\item{truncate}{logical indicating whether the range for each channel should
-be truncated to exclude events with negative values, set to TRUE by
-default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_load}}.}
 }

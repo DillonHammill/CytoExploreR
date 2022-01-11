@@ -1,7 +1,7 @@
 # CytoExploreR 2.0.0
 
+* `cyto_transformers_define()` has been updated to automatically compute parameter estimates for instruments with larger dynamic ranges, allowing for appropriate transformation of data from newer instruments.
 * `cyto_channel_match()` can now automatically detect the channel associated with each compensation control by matching marker and channel combinations to the file names. Samples where channels cannot be matched by file name will instead be matched by the intensities in the fluorescent channels. `cyto_channel_match()` also gains the ability to automatically detect which compensation controls are beads or cells, an important distinction for `cyto_spillover_compute()`.
-* `cyto_load()` gains a new `truncate` argument set to TRUE by default to allow automatic removal of events with negative values.
 * Added new `label_memory` argument to `cyto_plot()` to allow interactively positioned label co-ordinates to be passed to `cyto_plot()` when `cyto_plot_save()` in called (as we cannot interactively position labels on these graphics devices).
 * Added new `cyto_unmix_compute()` and `cyto_unmix()` to compute and apply spectral unmixing matrices to spectral flow cytometry data.
 * `channel_match` argument has now been removed from `cyto_spillover_compute()` and `cyto_spillover_edit()` as CytoExploreR will automatically search in the current working directory for a file called `Compensation-Details` to import these details. 
