@@ -350,6 +350,15 @@ cyto_transformers_define <- function(x,
             if(!"m" %in% names(args)) {
               # FLOWCORE USES DEFAULT 4.5 & ADDS +1 FOR ESTIMATE
               args$m <- log10(args$t) - 1 # FLOWCORE USES + 1
+              # ROUND UP TO NEAREST HALF DECADE
+              d <- args$m - floor(args$m)
+              if(d > 0) {
+                if(d < 0.5) {
+                  args$m <- args$m + (0.5 - d)
+                } else {
+                  args$m <- args$m + (1 - d)
+                }
+              }
             }
             
             # COMPUTE W - (R MOST NEGATIVE VALUES FOR DISPLAY)
