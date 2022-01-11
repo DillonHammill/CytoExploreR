@@ -107,7 +107,6 @@ cyto_plot_explore <- function(x,
                               ...) {
   
   # TODO: REMOVE EXCESS ARGUMENTS - PASS THROUGH ... TO .CYTO_PLOT_DATA()
-  # TODO: SORT OUT TITLES FOR GROUPS
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
