@@ -3675,7 +3675,7 @@ cyto_compensate.GatingSet <- function(x,
 
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
-    cols_rm <- which(!colnames(z) %in% chans)
+    cols_rm <- which(!colnames(z) %in% fluor_channels)
     if(length(cols_rm) > 0) {
       z <- z[, -cols_rm]
       row_rm <- LAPPLY(
@@ -3803,7 +3803,7 @@ cyto_compensate.flowSet <- function(x,
 
   # Spillover may contain more channels than in samples
   spill <- lapply(spill, function(z) {
-    cols_rm <- which(!colnames(z) %in% chans)
+    cols_rm <- which(!colnames(z) %in% fluor_channels)
     if(length(cols_rm) > 0) {
       z <- z[, -cols_rm]
       row_rm <- LAPPLY(
