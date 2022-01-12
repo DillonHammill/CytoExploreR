@@ -7,21 +7,20 @@
 #'   single colour compensation controls.
 #' @param parent names of the parent populations to extract from each control
 #'   for plotting.
-#' @param channel_match a vector of channels one per control or the name of a
-#'   CSV file which indicates the name of the channel associated with each
-#'   control. If \code{channel_match} is not supplied or the channels are not
-#'   annotated in \code{cyto_details(x)} the user will be asked to interactively
-#'   enter this information prior to plotting.
-#' @param spillover a matrix or name of a CSV file containing the spillover
-#'   coefficients that should be applied to the data when \code{compensate} is
-#'   TRUE.
-#' @param compensate logical required for \code{cytoset} objects to indicate
-#'   whether the data should be compensated prior to plotting, set to TRUE by
-#'   default. This argument should be set to FALSE if the \code{spillover} has
-#'   already been applied to the data.
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details.
 #' @param overlay can be either \code{"unstained"}, \code{"compensated"},
 #'   \code{"both"} or \code{"none"} to allow control over which data is overlaid
 #'   onto the plots, set to \code{"both"} by default.
+#' @param spillover a matrix or name of a CSV file containing the spillover
+#'   coefficients that should be applied to the data when \code{compensate} is
+#'   TRUE.
+#' @param compensated logical required for \code{cytoset} objects to indicate
+#'   whether the data has already been compensated prior to plotting, set to
+#'   TRUE by default.
+#' @param channel_match for internal use only.
 #' @param axes_trans object of class \code{transformerList} containing the
 #'   definitions of the transformations that have been applied to the data.
 #'   Transformers will be automatically extracted from \code{GatingSet} objects
@@ -68,6 +67,13 @@
 #'   \code{"black"} by default.
 #' @param text_col_alpha numeric [0,1] to control transparency of spillover
 #'   coefficient text, set to 1 by default to use solid colours.
+#' @param header_text_font numeric to control the font of the header text, set
+#'   to 2 for bold font by default. See \code{\link[graphics:par]{font}} for
+#'   alternatives.
+#' @param header_text_size numeric to control the size of the header text, set
+#'   to 1 by default.
+#' @param header_text_col colour to use for the header text, set to "black" by
+#'   default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @importFrom flowWorkspace cytoset
@@ -78,14 +84,16 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @return a list of recorded plots for each single colour control.
-#'
+#' 
 #' @export
 cyto_plot_compensation <- function(x,
                                    parent = "root",
-                                   channel_match = NULL,
-                                   spillover = NULL, 
-                                   compensate = TRUE,
+                                   select = NULL,
                                    overlay = "both",
+                                   channels = NULL,
+                                   spillover = NULL,
+                                   compensated = FALSE,
+                                   channel_match = NA,
                                    axes_trans = NA,
                                    axes_limits = "machine",
                                    layout,
@@ -108,10 +116,10 @@ cyto_plot_compensation <- function(x,
                                    text_size = 1.2,
                                    text_col = "black",
                                    text_col_alpha = 1,
+                                   header_text_font = 2,
+                                   header_text_size = 1,
+                                   header_text_col = "black",
                                    ...) {
-  
-  # TODO: SUPPORT COMPENSATED DATA AND MATRIX MANUALLY SUPPLIED
-  # REMOVE CURRENT MATRIX & APPLY NEW MATRIX
   
   # CYTO_PLOT_COMPLETE ---------------------------------------------------------
   
@@ -125,7 +133,34 @@ cyto_plot_compensation <- function(x,
     })
   }
   
-  # PREPARE COMPENSATED & UNCOMPENSATED DATA -----------------------------------
+  # PREPARE UNCOMPENSATED & COMPENSATED DATA -----------------------------------
+  
+  # SELECT & COPY
+  x <- cyto_copy(
+    cyto_select(
+      x,
+      select
+    )
+  )
+  
+  # CHANNELS
+  if(is.null(channels)) {
+    channels <- cyto_fluor_channels(x)
+    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+  } else {
+    channels <- cyto_channels_extract(x, channels)
+  }
+  
+  # OVERLAY
+  if(!is.character(overlay)) {
+    stop(
+      "'overlay' must be either 'none', 'compensated', 'unstained' or 'both'!"
+    )
+  } else {
+    if(any(grepl("^b", overlay, ignore.case = TRUE))) {
+      overlay <- c("unstained", "compensated")
+    }
+  }
   
   # TRANSFORMERS
   if(.all_na(axes_trans)) {
@@ -133,307 +168,343 @@ cyto_plot_compensation <- function(x,
   }
   
   # APPLIED TRANSFORMERS
-  if(!.all_na(axes_trans)){
+  if(!.all_na(axes_trans)) {
     attributes(axes_trans)$applied <- TRUE
+  }
+  
+  # DEFAULT TRANSFROMERS
+  if(.all_na(axes_trans)) {
+    axes_trans <- cyto_transformers_define(
+      x,
+      parent = "root",
+      channels = channels,
+      type = "biex",
+      plot = FALSE
+    )
+    attributes(axes_trans)$applied <- FALSE
   }
   
   # APPLIED SPILLOVER MATRICES
   if(cyto_class(x, "GatingSet")) {
-    spill <- cyto_spillover_extract(x)[[1]]
+    spill <- cyto_spillover_extract(x)
   } else {
-    spill <- NULL
+    if(compensated) {
+      spill <- cyto_spillover_extract(x)
+    } else {
+      spill <- NULL
+    }
   }
   
-  # OVERLAY - COMPENSATED DATA
-  if(cyto_class(overlay, "cytoset")) {
-    x_comp <- .cyto_spillover_controls_prepare(
-      overlay,
-      type = "bagwell",
-      channel_match = channel_match,
-      axes_trans = axes_trans
+  # TODO: BYPASS CHANNEL MATCHING FOR CYTO_SPILLOVER_EDIT()
+  
+  # CHANNEL MATCH - CYTO_SPILLOVER_EDIT()
+  if(length(x) == 1 & !.all_na(channel_match)) {
+    pd <- channel_match
+  } else {
+    pd <- cyto_channel_match(
+      x,
+      channels = channels
     )
-    overlay <- "compensated"
+  }
+  pd <- pd[match(rownames(cyto_details(x)), rownames(pd)), , drop = FALSE]
+  
+  # UPDATE EXPERIMENT DETAILS
+  cyto_details(x) <- pd
+  
+  # UNCOMPENSATED DATA PER GROUP
+  x_uncomp <- cytoset(
+    structure(
+      lapply(
+        seq_along(x), 
+        function(z) {
+          # PARENT POPULATION
+          if("parent" %in% colnames(pd)) {
+            pop <- pd$parent[z]
+          } else {
+            pop <- parent
+          }
+          print(pop)
+          # EXTRACT LINEAR DATA
+          cs <- cyto_data_extract(
+            x[z],
+            parent = pop,
+            copy = FALSE,
+            trans = if(attributes(axes_trans)$applied) {
+              axes_trans
+            } else {
+              NA
+            },
+            inverse = TRUE
+          )[[1]]
+          # DECOMPENSATE
+          if(!is.null(spill)) {
+            cs <- cyto_compensate(
+              cs,
+              spillover = spill[[z]],
+              remove = TRUE,
+              copy = FALSE
+            )
+          }
+          # RE-APPLY TRANSFORMERS
+          cs <- cyto_transform(
+            cs,
+            trans = axes_trans,
+            copy = FALSE,
+            plot = FALSE,
+            quiet = TRUE
+          )
+          # RETURN CYTOFRAME
+          return(cs[[1]])
+          
+        }
+      ),
+      names = cyto_names(x)
+    )
+  )
+  
+  # PREPARE SPILLOVER MATRICES
+  spillover <- .cyto_spillover_prepare(
+    x_uncomp,
+    spillover = spillover
+  )
+  
+  # COMPENSATED DATA
+  if(any(grepl("^c", overlay, ignore.case = TRUE))) {
+    # INVERSE TRANSFORMATIONS
+    x_comp <- cyto_transform(
+      x_uncomp,
+      trans = axes_trans,
+      inverse = TRUE,
+      copy = TRUE,
+      plot = FALSE,
+      quiet = TRUE
+    )
+    # APPLY COMPENSATION
+    x_comp <- cyto_compensate(
+      x_comp,
+      spillover = spillover, # NULL - STORED SPILLOVER MATRIX
+      copy = FALSE
+    )
+    # RE-APPLY TRANSFORMATIONS
+    x_comp <- cyto_transform(
+      x_comp,
+      trans = axes_trans,
+      inverse = FALSE,
+      copy = FALSE,
+      plot = FALSE,
+      quiet = TRUE
+    )
   } else {
     x_comp <- NULL
   }
   
-  # FORMAT OVERLAY
-  if(overlay == "both") {
-    overlay <- c("compensated", "unstained")
-  } else if(.all_na(overlay)) {
-    overlay <- "none"
-  }
-  
-  # PREPARE DATA - GATINGSET CANNOT BE INVERSE TRANSFORMED
-  x_uncomp <- .cyto_spillover_controls_prepare(
-    x,
-    parent = parent,
-    type = "bagwell",
-    channel_match = channel_match,
-    axes_trans = axes_trans
-  )
-  
-  # DEFAULT TRANSFORMERS
-  if(.all_na(axes_trans)) {
-    axes_trans <- cyto_transformers_define(x,
-                                           parent = parent[[1]],
-                                           type = "logicle",
-                                           plot = FALSE)
-    attributes(axes_trans)$applied <- FALSE
-  }
-  
-  # DATA IS UNCOMPENSATED
-  if(is.null(spill)) {
-    # USE SUPPLIED SPILLOVER MATRIX
-    if(!is.null(spillover)) {
-      if(is.null(dim(spillover))) {
-        spill <- read_from_csv(spillover)
-      } else {
-        spill <- spillover
-      }
-    }
-    # PREPARE COMPENSATED DATA - BYPASS OVERLAY - MANUALLY SUPPLIED
-    if(is.null(x_comp) & "compensated" %in% overlay) {
-      # SPILLOVER REQUIRED
-      if(is.null(spill)) {
-        stop(
-          "Supply a matrix/file to 'spillover' to overlay compensated data!"
-        )
-      # SPILLOVER SUPPLIED
-      } else {
-        # PREPARE COMPENSATED DATA
-        x_comp <- structure(
-          lapply(seq_along(x_uncomp), function(z){
-            structure(
-              lapply(x_uncomp[[z]], function(w){
-                # COPY DATA - UNLINK FROM X_UNCOMP
-                w <- cyto_copy(w)
-                # UNCOMPENSATED DATA IS TRANSFORMED
-                if(attributes(axes_trans)$applied) {
-                  # INVERSE TRANSFORMATIONS
-                  w <- cyto_transform(w,
-                                      trans = axes_trans,
-                                      channels = names(x_uncomp),
-                                      inverse = TRUE,
-                                      copy = FALSE,
-                                      plot = FALSE,
-                                      quiet = TRUE)
-                }
-                # COMPENSATE
-                w <- cyto_compensate(w,
-                                     spillover = spill,
-                                     remove = FALSE,
-                                     copy = FALSE)
-                # APPLY TRANSFORMATIONS
-                w <- cyto_transform(w,
-                                    trans = axes_trans,
-                                    channels = names(x_uncomp),
-                                    inverse = FALSE,
-                                    copy = FALSE,
-                                    plot = FALSE,
-                                    quiet = TRUE)
-                return(w)
-              }),
-              names = names(x_uncomp[[z]])
-            )
-          }),
-          names = names(x_uncomp)
-        )
-      }
-    }
-  # DATA IS COMPENSATED
-  } else {
-    # ASSIGN TO COMPENSATED DATA
-    if(is.null(x_comp)) {
-      x_comp <- x_uncomp
-    }
-    # PREPARE UNCOMPENSATED DATA
-    x_uncomp <- structure(
-      lapply(seq_along(x_comp), function(z){
-        structure(
-          lapply(x_comp[[z]], function(w){
-            # COPY DATA - UNLINK FROM X_COMP
-            w <- cyto_copy(w)
-            # COMPENSATED DATA IS TRANSFORMED
-            if(attributes(axes_trans)$applied) {
-              # INVERSE TRANSFORMATIONS
-              w <- cyto_transform(w,
-                                  trans = axes_trans,
-                                  channels = names(x_uncomp),
-                                  inverse = TRUE,
-                                  copy = FALSE,
-                                  plot = FALSE,
-                                  quiet = TRUE)
-            }
-            # DECOMPENSATE
-            w <- cyto_compensate(w,
-                                 spillover = spill,
-                                 remove = TRUE,
-                                 copy = FALSE)
-            # APPLY TRANSFORMATIONS
-            w <- cyto_transform(w,
-                                trans = axes_trans,
-                                channels = names(x_uncomp),
-                                inverse = FALSE,
-                                copy = FALSE,
-                                plot = FALSE,
-                                quiet = TRUE)
-            return(w)
-          }),
-          names = names(x_comp[[z]])
-        )
-      }),
-      names = names(x_comp)
-    )
-  }
-  
-  # COMPENSATED DATA NOT REQUIRED
-  if(!"compensated" %in% overlay) {
-    x_comp <- NA
-  }
-  
-  # COMBINE DATA
-  x <- structure(
-    lapply(seq_along(x_uncomp), function(z){
-      res <- list()
-      # UNCOMPENSATED
-      res[["uncompensated"]] <- x_uncomp[[z]][["+"]]
-      # COMPENSATED
-      if(!.all_na(x_comp)) {
-        res[["compensated"]] <- x_comp[[z]][["+"]]
-      } else {
-        res[["compensated"]] <- NA
-      }
-      # UNSTAINED - UNCOMEPNSATED
-      if(!"compensated" %in% overlay) {
-        if(!is.null(x_uncomp[[z]][["-"]])) {
-          res[["unstained"]] <- x_uncomp[[z]][["-"]]
-        } else {
-          res[["unstained"]] < NA
-        }
-      # UNSTAINED COMPENSATED
-      } else {
-        if(!is.null(x_comp[[z]][["-"]])) {
-          res[["unstained"]] <- x_comp[[z]][["-"]]
-        } else {
-          res[["unstained"]] < NA
-        }
-      }
-      return(res)
-    }),
-    names = names(x_uncomp)
-  )
+  # EXPERIMENT DETAILS WITHOUT UNSTAINED
+  pd_comp <- pd[
+    !grepl("Unstained", pd$channel, ignore.case = TRUE), , drop = FALSE
+  ]
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
   
   # LAYOUT
   if(missing(layout)) {
-    layout <- .cyto_plot_layout(x)
+    layout <- .cyto_plot_layout(channels)
   }
+  
+  # PLOTS PER PAGE
+  if(is.null(dim(layout))) {
+    np <- prod(layout)
+  } else {
+    np <- length(
+      unique(
+        unlist(
+          layout
+        )
+      )
+    )
+  }
+  
+  # SAMPLES
+  n <- nrow(pd_comp)
+  
+  # PAGES PER SAMPLE
+  pg <- ceiling(length(channels)/np)
+  
+  # TOTAL PAGES
+  tpg <- n * pg
   
   # HEADER
   if(missing(header)) {
-    header <- LAPPLY(x, function(z){
-      cyto_names(z[["uncompensated"]])
-    })
-  }
-  header <- rep(header, length.out = length(x))
-  names(header) <- names(x)
-
-  # CONSTRUCT PLOTS ------------------------------------------------------------
-  
-  # PLOTS PER CONTROL
-  plots <- structure(
-    # PAGE PER CONTROL
-    lapply(names(x), function(z){
-      # PLOT FOR EACH CHANNEL
-      p <- lapply(names(x), function(v){
-        # HISTOGRAM/SCATTER
-         plt <- cyto_plot(
-          x[[z]][["uncompensated"]],
-          channels = if(z == v) {
-            z
-          } else {
-            c(z, v)
-          },
-          overlay = if(!.all_na(overlay)) {
-            x[[z]][overlay]
-          } else {
-            NA
-          },
-          axes_trans = axes_trans,
-          axes_limits = axes_limits,
-          point_col = point_col,
-          point_col_alpha = point_col_alpha,
-          hist_fill = hist_fill,
-          hist_fill_alpha = hist_fill_alpha,
-          header = header[z],
-          title = NA,
-          layout = layout,
-          page = if(v == names(x)[length(x)]) {
-            TRUE
-          } else {
-            FALSE
-          },
-          ...
+    header <- rep(
+      cyto_names(
+        cyto_select(
+          x_uncomp,
+          pd_comp$name
         )
-        # SPILLOVER COEFFICIENTS/LINES
-        if(z != v) {
-          # LINES
-          if(lines) {
-            # ROBUST LINEAR MODEL
-            rlm <- cyto_apply(
-              if("compensated" %in% overlay) {
-                x[[z]][["compensated"]]
+      ),
+      each = pg
+    )
+  } else {
+    header <- rep(
+      header,
+      length.out = nrow(pd_comp) * pg
+    )
+  }
+  
+  # REPEAT HEADER ARGUMENTS
+  header_text_font <- rep(header_text_font, length.out = length(header))
+  header_text_size <- rep(header_text_size, length.out = length(header))
+  header_text_col <- rep(header_text_col, length.out = length(header))
+  
+  # CONSTRUCT PLOTS ------------------------------------------------------------
+    
+  # PLOTS PER SAMPLE
+  plots <- structure(
+    # PAGE PER SAMPLE
+    lapply(
+      seq_along(pd_comp$name),
+      function(z) {
+        # SAMPLE INDEX
+        x_ind <- cyto_match(
+          x_uncomp,
+          pd_comp$name[z],
+          exact = TRUE
+        )
+        # GROUP
+        grp <- pd_comp$group[z]
+        # SEARCH FOR UNSTAINED CONTROL WITHIN GROUP
+        unst_ind <- which(
+          pd$group == grp & grepl("Unstained", pd$channel, ignore.case = TRUE)
+        )
+        # UNSTAINED CONTROL LOCATED
+        if(length(unst_ind) > 0 & 
+           any(grepl("^u", overlay, ignore.case = TRUE))) {
+          NIL <- cyto_select(
+            x_uncomp,
+            pd$name[unst_ind[1]] # USE FIRST UNSTAINED CONTROL
+          )
+        } else {
+          NIL <- NULL
+        }
+        # HEADER COUNTER
+        cnt <- (z - 1) * pg
+        # X CHANNEL
+        xchan <- pd_comp$channel[z]
+        # PLOT FOR EACH CHANNEL
+        p <- structure(
+          lapply(
+            seq_along(channels),
+            function(w) {
+              # Y CHANNEL
+              ychan <- channels[w]
+              # OVERLAY - COMPENSATED | UNSTAINED
+              if(is.null(x_comp) & is.null(NIL)) {
+                overlay <- NA
               } else {
-                x[[z]][["uncompensated"]]
-              },
-              function(q, chans = NULL){
-                rlm(q[, chans[2]] ~ q[, chans[1]])
-              },
-              input = "matrix",
-              channels = c(z, v),
-              copy = FALSE,
-              simplify = FALSE,
-              chans = c(z, v)
-            )[[1]]
-            # PLOT LINEAR MODEL
-            abline(
-              rlm,
-              lty = line_type,
-              lwd = line_width,
-              col = adjustcolor(line_col, line_col_alpha),
-            )
-          }
-          # SPILLOVER COEEFICIENTS
-          if(!is.null(spill) & text) {
-            text(
-              labels = paste0("spill = ", round(spill[z, v]*100, 2), "%"),
-              x = mean(.par("usr")[[1]][1:2]),
-              y = .par("usr")[[1]][3] + 0.9 * diff(.par("usr")[[1]][3:4]),
-              cex = text_size,
-              font = text_font,
-              col = adjustcolor(text_col, text_col_alpha)
-            )
-          }
-        }
-        # RECORD PLOTS
-        if(cyto_class(plt, "list", TRUE)) {
-          # CYTO_PLOT WILL NOT CAPTURE ANNOTATIONS ON LAST PANEL
-          plt <- cyto_plot_record()
-        }
-        return(plt)
-      })
-      # REMOVE NULL PLOTS
-      p[LAPPLY(p, "is.null")] <- NULL
-      if(length(p) == 0) {
-        p <- NULL
+                overlay <- list(
+                  x_comp[x_ind],
+                  NIL
+                )
+                overlay[LAPPLY(overlay, "is.null")] <- NULL
+              }
+              # PLOT - HISTOGRAM | SCATTER
+              cyto_plot(
+                x_uncomp[x_ind],
+                channels = if(xchan == ychan) {
+                  xchan
+                } else {
+                  c(xchan, ychan)
+                },
+                overlay = overlay,
+                axes_trans = axes_trans,
+                axes_limits = axes_limits,
+                point_col = point_col,
+                point_col_alpha = point_col_alpha,
+                hist_fill = hist_fill,
+                hist_fill_alpha = hist_fill_alpha,
+                header = "", # HEADERS MUST BE MANUALLY ADDED
+                title = NA,
+                layout = layout,
+                page = FALSE, # MANUAL PAGING REQUIRED
+                ...
+              )
+              # SPILLOVER COEFFICIENTS | MODELS
+              if(xchan != ychan) {
+                # LINES
+                if(lines) {
+                  # ROBUST LINEAR MODEL
+                  rlm <- cyto_apply(
+                    if(is.null(x_comp)) {
+                      x_uncomp[x_ind]
+                    } else {
+                      x_comp[x_ind]
+                    },
+                    function(q, chans = NULL){
+                      rlm(q[, chans[2]] ~ q[, chans[1]])
+                    },
+                    input = "matrix",
+                    channels = c(xchan, ychan),
+                    copy = FALSE,
+                    simplify = FALSE,
+                    chans = c(xchan, ychan)
+                  )[[1]]
+                  # PLOT LINEAR MODEL
+                  abline(
+                    rlm,
+                    lty = line_type,
+                    lwd = line_width,
+                    col = adjustcolor(line_col, line_col_alpha),
+                  )
+                }
+                # SPILLOVER COEEFICIENTS
+                if(!is.null(spillover[[x_ind]]) & text & 
+                   all(c(xchan, ychan) %in% colnames(spillover[[x_ind]]))) {
+                  text(
+                    labels = paste0(
+                      "spill = ", 
+                      round(
+                        spillover[[x_ind]][
+                          match_ind(xchan, 
+                                    colnames(spillover[[x_ind]])), 
+                          match_ind(ychan, 
+                                    colnames(spillover[[x_ind]]))
+                        ] * 100, 2), 
+                      "%"
+                    ),
+                    x = mean(.par("usr")[[1]][1:2]),
+                    y = .par("usr")[[1]][3] + 0.9 * diff(.par("usr")[[1]][3:4]),
+                    cex = text_size,
+                    font = text_font,
+                    col = adjustcolor(text_col, text_col_alpha)
+                  )
+                }
+              }
+              # PAGE & HEADER & RECORD
+              rec <- NULL
+              if(.par("page")[[1]] | w == length(channels)) {
+                # HEADER INDEX
+                ind <- cnt + ceiling(w/np)
+                # HEADER
+                if(!.all_na(header[ind])) {
+                  .cyto_plot_header(
+                    header[ind],
+                    header_text_font = header_text_font[ind],
+                    header_text_size = header_text_size[ind],
+                    header_text_col = header_text_col[ind]
+                  )
+                }
+                # NEW PAGE
+                cyto_plot_new_page()
+                # RECORD
+                rec <- cyto_plot_record()
+              }
+              return(rec)
+            }
+          ),
+          names = channels
+        )
       }
-      return(p)
-    }),
-    names = LAPPLY(x, function(w){
-      cyto_names(w[["uncompensated"]])
-    })
+    ),
+    names = pd_comp$name
   )
   
   # RECORDED PLOTS -------------------------------------------------------------

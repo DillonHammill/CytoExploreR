@@ -128,10 +128,11 @@ cyto_plot_hist <- function(x,
   # HIST_FILL ------------------------------------------------------------------
   
   # HIST_FILL COLOURS
-  hist_fill <- .cyto_plot_hist_fill(x,
-                                    hist_fill = hist_fill,
-                                    hist_cols = hist_cols,
-                                    hist_fill_alpha = hist_fill_alpha
+  hist_fill <- .cyto_plot_hist_fill(
+    x,
+    hist_fill = hist_fill,
+    hist_cols = hist_cols,
+    hist_fill_alpha = hist_fill_alpha
   )
   
   # REPEAT ARGUMENTS -----------------------------------------------------------
@@ -189,29 +190,27 @@ cyto_plot_hist <- function(x,
       # COUNTER
       cnt <<- cnt + 1
       # BYPASS NA
-      if(!.all_na(D)) {
+      if(cyto_class(D, "density")) {
         # RANGES
         xrng <- c(D$x[1], D$x[length(D$x)]) # x values are sorted
         yrng <- D$range
         # PLOT - ANCHOR POLYGON
-        if (!.all_na(d)) {
-          polygon(
-            x = c(
-              xrng[1] - 0.0001 * (xrng[2] - xrng[1]),
-              D$x,
-              xrng[2] + 0.0001 * (xrng[2] - xrng[1])
-            ),
-            y = c(
-              yrng[1] - 0.0001 * (yrng[2] - yrng[1]),
-              D$y,
-              yrng[1] - 0.0001 * (yrng[2] - yrng[1])
-            ),
-            col = hist_fill,
-            border = hist_line_col,
-            lwd = hist_line_width,
-            lty = hist_line_type
-          )
-        }
+        polygon(
+          x = c(
+            xrng[1] - 0.0001 * (xrng[2] - xrng[1]),
+            D$x,
+            xrng[2] + 0.0001 * (xrng[2] - xrng[1])
+          ),
+          y = c(
+            yrng[1] - 0.0001 * (yrng[2] - yrng[1]),
+            D$y,
+            yrng[1] - 0.0001 * (yrng[2] - yrng[1])
+          ),
+          col = hist_fill,
+          border = hist_line_col,
+          lwd = hist_line_width,
+          lty = hist_line_type
+        )
       }
     },
     d,
