@@ -308,12 +308,13 @@ cyto_plot_empty <- function(x,
   # XLIM
   if (any(is.na(xlim))) {
     # XLIM
-    xlim[is.na(xlim)] <- .cyto_plot_axes_limits(x,
-                                                channels = channels[1],
-                                                gate = gate,
-                                                axes_limits = axes_limits,
-                                                buffer = axes_limits_buffer,
-                                                plot = TRUE
+    xlim[is.na(xlim)] <- .cyto_plot_axes_limits(
+      x,
+      channels = channels[1],
+      gate = gate,
+      axes_limits = axes_limits,
+      buffer = axes_limits_buffer,
+      plot = TRUE
     )[, 1][is.na(xlim)]
   }
   
@@ -322,12 +323,13 @@ cyto_plot_empty <- function(x,
     # 1D PLOT
     if (length(channels) == 1) {
       if (is.null(d)) {
-        d <- .cyto_plot_hist(x,
-                             hist_stat = hist_stat,
-                             hist_smooth = hist_smooth,
-                             hist_bins = hist_bins,
-                             hist_stack = hist_stack,
-                             xlim = xlim
+        d <- .cyto_plot_hist(
+          x,
+          hist_stat = hist_stat,
+          hist_smooth = hist_smooth,
+          hist_bins = hist_bins,
+          hist_stack = hist_stack,
+          xlim = xlim
         )
       }
       # YLIM
@@ -343,12 +345,13 @@ cyto_plot_empty <- function(x,
       # 2D PLOT
     } else if (length(channels) == 2) {
       # YLIM
-      ylim[is.na(ylim)] <- .cyto_plot_axes_limits(x,
-                                                  channels = channels[2],
-                                                  gate = gate,
-                                                  axes_limits = axes_limits,
-                                                  buffer = axes_limits_buffer,
-                                                  plot = TRUE
+      ylim[is.na(ylim)] <- .cyto_plot_axes_limits(
+        x,
+        channels = channels[2],
+        gate = gate,
+        axes_limits = axes_limits,
+        buffer = axes_limits_buffer,
+        plot = TRUE
       )[, 1][is.na(ylim)]
     }
   }
@@ -365,11 +368,12 @@ cyto_plot_empty <- function(x,
     if (.all_na(axes_text[[1]])) {
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[1]] == TRUE) {
-      axes_text[[1]] <- .cyto_plot_axes_text(x,
-                                             channels = channels[1],
-                                             axes_trans = axes_trans,
-                                             axes_range = list(xlim),
-                                             axes_limits = axes_limits
+      axes_text[[1]] <- .cyto_plot_axes_text(
+        x,
+        channels = channels[1],
+        axes_trans = axes_trans,
+        axes_range = list(xlim),
+        axes_limits = axes_limits
       )[[1]]
     }
   }
@@ -380,11 +384,12 @@ cyto_plot_empty <- function(x,
       # NA == TRUE returns NA not T/F
     } else if (axes_text[[2]] == TRUE) {
       if (length(channels) == 2) {
-        axes_text[[2]] <- .cyto_plot_axes_text(x,
-                                               channels = channels[2],
-                                               axes_trans = axes_trans,
-                                               axes_range = list(ylim),
-                                               axes_limits = axes_limits
+        axes_text[[2]] <- .cyto_plot_axes_text(
+          x,
+          channels = channels[2],
+          axes_trans = axes_trans,
+          axes_range = list(ylim),
+          axes_limits = axes_limits
         )[[1]]
       } else {
         axes_text[[2]] <- NA
@@ -402,20 +407,23 @@ cyto_plot_empty <- function(x,
   # AXES LABELS ----------------------------------------------------------------
   
   # AXES LABELS - missing replaced - NA removed
-  axes_labels <- .cyto_plot_axes_label(x,
-                                       channels = channels,
-                                       xlab = xlab,
-                                       ylab = ylab,
-                                       hist_stat = hist_stat)
+  axes_labels <- .cyto_plot_axes_label(
+    x,
+    channels = channels,
+    xlab = xlab,
+    ylab = ylab,
+    hist_stat = hist_stat
+  )
   xlab <- axes_labels[[1]]
   ylab <- axes_labels[[2]]
   
   # TITLE ----------------------------------------------------------------------
   
   # TITLE - missing replaced - NA removed
-  title <- .cyto_plot_title(x,
-                            channels = channels,
-                            title = title
+  title <- .cyto_plot_title(
+    x,
+    channels = channels,
+    title = title
   )
   
   # KEY SCALE ------------------------------------------------------------------
@@ -484,21 +492,23 @@ cyto_plot_empty <- function(x,
   if (cyto_class(axes_text[[1]], "list")) {
     # MINOR TICKS
     x_mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
-    axis(1,
-         at = axes_text[[1]]$at[x_mnr_ind],
-         labels = axes_text[[1]]$label[x_mnr_ind],
-         tck = -0.015
+    axis(
+      1,
+      at = axes_text[[1]]$at[x_mnr_ind],
+      labels = axes_text[[1]]$label[x_mnr_ind],
+      tck = -0.015
     )
     
     # MAJOR TICKS
     x_mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
-    axis(1,
-         at = axes_text[[1]]$at[x_mjr_ind],
-         labels = axes_text[[1]]$label[x_mjr_ind],
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size,
-         tck = -0.03
+    axis(
+      1,
+      at = axes_text[[1]]$at[x_mjr_ind],
+      labels = axes_text[[1]]$label[x_mjr_ind],
+      font.axis = axes_text_font,
+      col.axis = axes_text_col,
+      cex.axis = axes_text_size,
+      tck = -0.03
     )
   }
   
@@ -518,28 +528,31 @@ cyto_plot_empty <- function(x,
   if (cyto_class(axes_text[[2]], "list")) {
     # MINOR TICKS
     y_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
-    axis(2,
-         at = axes_text[[2]]$at[y_mnr_ind],
-         labels = axes_text[[2]]$label[y_mnr_ind],
-         tck = -0.015
+    axis(
+      2,
+      at = axes_text[[2]]$at[y_mnr_ind],
+      labels = axes_text[[2]]$label[y_mnr_ind],
+      tck = -0.015
     )
     # MAJOR TICKS
     y_mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
-    axis(2,
-         at = axes_text[[2]]$at[y_mjr_ind],
-         labels = axes_text[[2]]$label[y_mjr_ind],
-         font.axis = axes_text_font,
-         col.axis = axes_text_col,
-         cex.axis = axes_text_size,
-         tck = -0.03
+    axis(
+      2,
+      at = axes_text[[2]]$at[y_mjr_ind],
+      labels = axes_text[[2]]$label[y_mjr_ind],
+      font.axis = axes_text_font,
+      col.axis = axes_text_col,
+      cex.axis = axes_text_size,
+      tck = -0.03
     )
   }
   
   # BORDER_FILL
   if (border_fill != "white") {
-    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
-         col = adjustcolor(border_fill, border_fill_alpha),
-         border = NA
+    rect(
+      par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+      col = adjustcolor(border_fill, border_fill_alpha),
+      border = NA
     )
   }
   
@@ -558,13 +571,14 @@ cyto_plot_empty <- function(x,
         grid <- 10
       }
       axes_grid <- lapply(channels, function(z) {
-        cyto_apply(x[[1]],
-                   "cyto_stat_quantile",
-                   channels = z,
-                   input = "matrix",
-                   copy = FALSE,
-                   inverse = FALSE,
-                   probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid))
+        cyto_apply(
+          x[[1]],
+          "cyto_stat_quantile",
+          channels = z,
+          input = "matrix",
+          copy = FALSE,
+          inverse = FALSE,
+          probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid))
         )[, 1]
       })
       names(axes_grid) <- channels

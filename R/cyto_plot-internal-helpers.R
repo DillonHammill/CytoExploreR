@@ -3573,7 +3573,7 @@
     # DENSITY GRADIENT
     if(.all_na(args$point_col[[1]])) {
       # NUMBER OF EVENTS
-      N <- nrow(cyto_exprs(x[[1]][[1]]))
+      N <- nrow(cyto_exprs(x[[1]][[1]], drop = FALSE))
       # INSUFFICIENT EVENTS
       if(N < 2) {
         # USE MINIMUM COLOUR FOR POINTS
@@ -3783,29 +3783,33 @@
   # COMPUTE BANDWIDTH BY BINNING XLIM (256 BINS - FLOWJO)
   # INSTRUMENT RANGE IS INCONSISTENT - FLOWWORKSPACE ISSUE #348
   
+  # NOTE: NON-FINITE FROM ERROR - DUE TO AXES LIMITS
+  
   # KERNEL DENSITY - LIST OF DENSITY LISTS PER SAMPLE
   d <- structure(
     lapply(x, function(cs){
-      # HISTOGRAM
-      cyto_apply(
-        cs, 
-        "cyto_stat_density",
-        input = "matrix",
-        channels = channels,
-        copy = FALSE,
-        stat = hist_stat,
-        bins = hist_bins,
-        smooth = hist_smooth,
-        limits = matrix(
-          xlim,
-          ncol = 1,
-          dimnames = list(
-            c("min", "max"),
-            channels
-          )
-        ),
-        simplify = FALSE
-      )[[1]][[1]]
+      # HISTOGRAMS - INSUFFICIENT EVENTS WARNING
+      suppressWarnings(
+        cyto_apply(
+          cs, 
+          "cyto_stat_density",
+          input = "matrix",
+          channels = channels,
+          copy = FALSE,
+          stat = hist_stat,
+          bins = hist_bins,
+          smooth = hist_smooth,
+          limits = matrix(
+            xlim,
+            ncol = 1,
+            dimnames = list(
+              c("min", "max"),
+              channels
+            )
+          ),
+          simplify = FALSE
+        )[[1]][[1]]
+      )
     }), names = names(x)
   )
   
@@ -3820,28 +3824,74 @@
       }
     }
   )
+  
+  # NO EVENTS TO PLOT IN ANY LAYERS
+  if(.all_na(hist_heights)) {
+    # DEFAULT COUNT SCALE
+    if(hist_stat == "count") {
+      hist_heights <- structure(
+        rep(1000, length(hist_heights)),
+        names = names(hist_heights)
+      )
+    # DEFAULT PERCENT SCALE
+    } else if(hist_stat == "percent") {
+      hist_heights <- structure(
+        rep(100, length(hist_heights)),
+        names = names(hist_heights)
+      )
+    # DEFAULT DENSITY SCALE
+    } else {
+      hist_heights <- structure(
+        rep(1, length(hist_heights)),
+        names = names(hist_heights)
+      )
+    }
+  # SOME LAYERS CONTAIN NO EVENTS
+  } else if(any(is.na(hist_heights))) {
+    # USE MEAN HEIGHT FOR EMPTY LAYERS
+    hist_heights[is.na(hist_heights)] <- mean(hist_heights, na.rm = TRUE)
+  }
   hist_stack <- max(hist_heights, na.rm = TRUE) * hist_stack
   hist_levels <- c(0, seq_along(x)) * hist_stack
-  d <- lapply(seq_along(d), function(z){
-    D <- d[[z]]
-    if(z > 1 & !.all_na(D)){
-      D$y <- D$y + hist_levels[z]
-    }
-    return(D)
-  })
+  d <- structure(
+    lapply(
+      seq_along(d), 
+      function(z){
+        D <- d[[z]]
+        if(z > 1 & !.all_na(D)){
+          D$y <- D$y + hist_levels[z]
+        }
+        return(D)
+      }
+    ),
+    names = names(d)
+  )
+  
   # STORE NEW RANGES IN RANGE SLOT
   d <- structure(
-    lapply(seq_along(d), function(z){
-      if(.all_na(hist_heights[z])) {
-        d[[z]]$range <- rep(hist_levels[z], 2)
-      } else {
-        d[[z]]$range <- c(hist_levels[z],
-                          hist_levels[z] + hist_heights[z])
+    lapply(
+      seq_along(d), 
+      function(z){
+        # STORE RNAGE IN LIST
+        if(.all_na(d[[z]])) {
+          return(
+            list(
+              NA,
+              range = c(hist_levels[z],
+                        hist_levels[z] + hist_heights[z])
+            )
+          )
+        # APPEND RANGE TO DENSITY OBJECTS
+        } else {
+          d[[z]]$range <- c(hist_levels[z],
+                            hist_levels[z] + hist_heights[z])
+          return(d[[z]])
+        }
       }
-      return(d[[z]])
-    }), names = names(d)
+    ), 
+    names = names(d)
   )
-
+  
   # STACKED HISTOGRAMS
   return(d)
   
