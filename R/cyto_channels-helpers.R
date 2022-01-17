@@ -764,13 +764,13 @@ cyto_channel_select <- function(x){
 #'
 #' @export
 cyto_channel_match <- function(x,
-                              channels = NULL,
-                              file = NULL,
-                              save_as = NULL,
-                              strip = TRUE,
-                              ignore.case = TRUE,
-                              insertions = FALSE,
-                              ...) {
+                               channels = NULL,
+                               file = NULL,
+                               save_as = NULL,
+                               strip = TRUE,
+                               ignore.case = TRUE,
+                               insertions = FALSE,
+                               ...) {
   
   # CYTOFRAMES NOT SUPPORTED
   if(cyto_class(x, "flowFrame")) {

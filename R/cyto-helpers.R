@@ -383,31 +383,32 @@ cyto_load <- function(path = ".",
   }
   
   # PATH - DIRECTORY/FILES
-  files <- LAPPLY(path, function(z){
-    # DIRECTORY
-    if(dir.exists(z)){
-      return(
-        list.files(
-          z,
-          full.names = TRUE,
-          recursive = TRUE
+  files <- LAPPLY(
+    path, 
+    function(z){
+      # DIRECTORY
+      if(dir.exists(z)){
+        return(
+          list.files(
+            z,
+            full.names = TRUE,
+            recursive = TRUE
+          )
         )
-      )
-    # FILE
-    } else if(!file.exists(z)) {
-      return(
-        z
-      )
-    # DIRECTORY/ FILE DOES NOT EXIST
-    } else {
-      stop(
-        paste0(
-          z,
-          " is inaccessible or does not exist!"
+        # FILE
+      } else if(file.exists(z)) {
+        return(z)
+        # DIRECTORY/ FILE DOES NOT EXIST
+      } else {
+        stop(
+          paste0(
+            z,
+            " is inaccessible or does not exist!"
+          )
         )
-      )
+      }
     }
-  })
+  )
   
   # SAVED GATINGSET
   if ("pb" %in% file_ext(files)) {
