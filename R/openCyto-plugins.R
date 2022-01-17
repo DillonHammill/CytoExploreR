@@ -54,125 +54,284 @@
 .cyto_gate_manual <- function(fr,
                               pp_res,
                               channels,
-                              alias, ...) {
+                              alias, 
+                              ...) {
   
-  # Determine vertices of polygon using gate_draw
-  gates <- cyto_gate_draw(x = fr, 
-                          channels = channels, 
-                          alias = alias, ...)
+  # CALL CYTO_GATE_DRAW
+  cyto_gate_draw(
+    x = fr, 
+    channels = channels, 
+    alias = alias,
+    ...
+  )
   
-  return(gates)
 }
 
-#' Apply Manually Drawn Gates to GatingSet
+## CYTO_GATE_MATCH -------------------------------------------------------------
+
+#' Plugin function to extract gates stored in openCyto gatingTemplates
 #'
-#' This \code{openCyto} plugin for \code{cyto_gate_draw} is required to extract
-#' gates stored in the gatingTemplate and appropraitely apply them to the
-#' GatingSet.
-#'
-#' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
-#'   containing the flow cytometry data for gating.
-#' @param pp_res output of preprocessing function.
-#' @param channels fluorescent channel(s) to use for gating.
-#' @param gate stored \code{cyto_gate_draw} gate in csv file for passing to
-#'   openCyto.
-#'
-#' @return pass saved gate to openCyto to apply to all samples.
-#'
-#' @importFrom openCyto registerPlugins
-#'
+#' @param fr object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}}
+#'   containing data for a group.
+#' @param pp_res return value from a preprocessing function, in this case it
+#'   should be paired with \code{.pp_cyto_gate_match()} which returns the index
+#'   or name of the set of gates to extract from the gatingTemplate.
+#' @param gate passed manually as a list of filters to the openCyto
+#'   gatingTemplate. openCyto will passed the prepared gates to this function
+#'   for further processing.
+#'   
+#' @return a list of filters to be applied to this group.
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
+#' @noRd
+.cyto_gate_match <- function(fr,
+                             pp_res,
+                             channels,
+                             gate) {
+  
+  # PP_RES = NULL - NO GROUPING
+  if(is.null(pp_res)) {
+    ind <- 1
+  }
+  
+  # GATE INDEX
+  if(is.numeric(pp_res)) {
+    ind <- pp_res
+  } else if(is.character(pp_res)) {
+    ind <- match(
+      pp_res,
+      names(gate)
+    )
+  }
+  
+  # EXTRACT GATE
+  return(gate[[ind]])
+  
+}
+
+#' Preprocessing openCyto plugin pass group index/name to gating function
+#'
+#' @param fs an object of class
+#'   \code{\link[flowWorkspace:cytoset-class]{cytoset}} containing the samples
+#'   for this group.
+#' @param gs an object of class \code{\link[flowWorkspace:GatingSet-class]}
+#'   containing data for all samples, including samples within \code{fs}.
+#' @param gm name of the gating method to use, not in use.
+#' @param groupBy specifies how the samples have been grouped based experiment
+#'   variables. Variables should be separated by a colon and index grouping is
+#'   not supported due to inconsistencies in gating.
+#' @param isCollapse used by openCyto as a means of passing
+#'   \code{CollpaseDataForGating} flag to the gating method.
+#' @param ... not in use.
+#' 
+#' @return index or name of the group to be gated.
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @noRd
+.pp_cyto_gate_match <- function(fs,
+                                gs,
+                                gm,
+                                channels,
+                                groupBy = NA,
+                                isCollapse = NA,
+                                ...) {
+  
+  # GROUPBY
+  if(is.character(groupBy) & nchar(groupBy) == 0) {
+    groupBy <- NA
+  }
+  
+  # GROUPING VARIABLES SEPARATED BY COLON
+  if(is.character(groupBy)) {
+    groupBy <- unlist(strsplit(groupBy, ":"))
+  }
+  
+  # EXPERIMENT GROUPS
+  if(!.all_na(groupBy)) {
+    # VARIABLE NAMES
+    if(all(grepl("^[A-Za-z]+$", groupBy, ignore.case = TRUE))) {
+      # MATCH NAMES FS TO GROUPS IN GS
+      grps <- cyto_groups(
+        gs,
+        group_by = groupBy,
+        details = TRUE
+      )
+      # WE COULD ALSO PASS GROUP NAMES HERE
+      ind <- names(grps)[
+        LAPPLY(
+          grps,
+          function(grp) {
+            all(cyto_names(fs) %in% c(rownames(grp), grp$name))
+          }
+        )
+      ]
+    # INDICES NOT SUPPORTED - GATE ORDER INCONSISTENT
+    } else {
+      if(groupBy == length(gs)) {
+        ind <- 1
+      } else {
+        message(
+          "Numeric groupBy is not supported. Grouping all samples."
+        )
+        ind <- 1
+      }
+    }
+  }
+  
+  # NO GROUPING - USE FIRST SET OF GATES
+  if(.all_na(groupBy)) {
+    ind <- 1
+  }
+  
+  # RETURN INDEX OF GATE OR GROUP NAME (PREFERRED)
+  return(ind)
+  
+}
+
+## CYTO_GATE_DRAW --------------------------------------------------------------
+
+#' Manual gating openCyto plugin
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
 #' @noRd
 .cyto_gate_draw <- function(fr,
                             pp_res,
                             channels,
                             gate) {
   
-  # pp_res is NULL - no grouping
-  if (is.null(pp_res)) {
-    gt <- 1
-  }
-  
-  # Index of gate to use
-  if (is.numeric(pp_res)) {
-    gt <- pp_res
-  } else if (is.character(pp_res)) {
-    
-    # names of gates must contain merged groupBy info
-    gt <- match(pp_res, names(gate))
-  }
-  
-  return(gate[[gt]])
+  cyto_func_call(
+    ".cyto_gate_match",
+    .args_list()
+  )
+
 }
 
-#' cyto_gate_draw Preprocessing Function
-#'
-#' This preprocessing function passes on the index of the gate to apply to the
-#' samples.
-#'
-#' @param fs a \code{\link[flowCore:flowSet-class]{flowSet}} object containing
-#'   samples in group for gating.
-#' @param gs a \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} containing
-#'   all the samples to be gated.
-#' @param gm gating method to use for gating, not used.
-#' @param channels, names of the channels used to construct the gate, not used.
-#' @param groupBy grouping variable to partition data, can either a single
-#'   numeric or vector of pData column names.
-#' @param isCollapse logical indicating when the data should be collapsed prior
-#'   to gating, not used.
-#' @param ... not in use.
-#'
-#' @return index of gate to apply to samples.
-#'
-#' @importFrom openCyto registerPlugins
-#'
+#' Manual gating preprocessing openCyto plugin
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#'
+#' 
 #' @noRd
 .pp_cyto_gate_draw <- function(fs,
                                gs,
                                gm,
-                               channels = NA,
+                               channels,
                                groupBy = NA,
-                               isCollapse = NA, ...) {
+                               isCollapse = NA,
+                               ...) {
   
-  # Samples
-  smp <- length(gs)
+  cyto_func_call(
+    ".pp_cyto_gate_match",
+    .args_list(...)
+  )
   
-  # Extract pData information
-  pd <- cyto_details(gs)
+}
+
+## CYTO_GATE_SAMPLE ------------------------------------------------------------
+
+#' Sampling plugin gating function for openCyto
+#'
+#' \code{.pp_cyto_gate_sample()} computes the number of events to extract from
+#' each sample ans returns a logical vector for these events in the merged
+#' cytoframe passed to \code{.cyto_gate_sample()}.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @noRd
+.cyto_gate_sample <- function(fr,
+                              pp_res,
+                              channels) {
   
-  # groupBy
-  if (is.character(groupBy) & nchar(groupBy) == 0) {
-    groupBy <- NA
+  # LOGICAL VECTOR FROM PREPROCESSING FUNCTION
+  return(flowCore::filter(fr, pp_res))
+  
+}
+
+#' Sampling preprocessing function for openCyto
+#' 
+#' See above for details.
+#' 
+#' @importFrom flowWorkspace gh_pop_get_indices
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.pp_cyto_gate_sample <- function(fs,
+                                 gs,
+                                 gm,
+                                 channels,
+                                 groupBy = NA,
+                                 isCollapse = NA,
+                                 events = 1,
+                                 seed = NULL,
+                                 parent = "root",
+                                 ...) {
+  
+  # FS CONTAINS ALL EVENTS FOR GROUP
+  # NEED SAMPLE INDICES
+  
+  # COMPUTE EVENTS -------------------------------------------------------------
+  
+  # TOTAL EVENTS
+  n <- cyto_apply(
+    fs,
+    "nrow",
+    input = "cytoframe",
+    copy = FALSE
+  )[, 1]
+  
+  # EVENTS PER CYTOFRAME
+  events <- cyto_sample_n(
+    fs,
+    events = events
+  )
+  
+  # SEED
+  if(!is.null(seed)) {
+    set.seed(seed)
   }
+
+  # LOGICAL VECTOR GATE
+  return(
+    do.call(
+      "c",
+      lapply(
+        cyto_names(fs),
+        function(z) {
+          ind <- gh_pop_get_indices(
+            gs[[cyto_match(gs, z, exact = TRUE)]],
+            parent
+          )
+          if(length(ind) > 0) {
+            v <- which(ind)
+            if(length(v) > events[z]) {
+              ind[sample(v, length(v) - events[z])] <- FALSE
+            }
+          }
+          return(ind)
+        }
+      )
+    )
+  )
   
-  # split groupBy
-  if (is.character(groupBy)) {
-    groupBy <- unlist(strsplit(groupBy, ":"))
-  }
-  
-  # Add groupBy info to pData gs
-  if (!all(is.na(groupBy)) & all(grepl("^[A-Za-z]+$", groupBy))) {
-    
-    # groupBy is composed of characters
-    pd$groupby <- do.call(paste, pd[, groupBy, drop = FALSE])
-    
-    grpby <- pd[, "groupby"][match(cyto_details(fs[1])[, "name"], pd[, "name"])]
-  } else if (!all(is.na(groupBy)) & !all(grepl("^[A-Za-z]+$", groupBy))) {
-    if (groupBy == smp) {
-      grpby <- 1
-    } else {
-      message("Numeric groupBy is not supported. Grouping all samples.")
-      grpby <- 1
-    }
-  }
-  
-  # No grouping select first gate - only 1 gate expected
-  if (all(is.na(groupBy))) {
-    grpby <- 1
-  }
-  
-  return(grpby)
+  # # SELECT EVENTS BY INDEX
+  # cnt <- 0
+  # lapply(
+  #   seq_along(fs),
+  #   function(z) {
+  #     if(n[z] > 0 & events[z] > 0) {
+  #       ind <- sample(
+  #         (cnt + 1):(cnt + n[z]),
+  #         events[z]
+  #       )
+  #       gate[ind] <<- TRUE
+  #       cnt <<- cnt + n[z]
+  #     }
+  #   }
+  # )
+  # 
+  # # LOGICAL VECTOR
+  # return(gate)
 }

@@ -267,19 +267,24 @@ cyto_gate_draw <- function(x,
   # PREPARE DATA ---------------------------------------------------------------
   
   # LIST OF CYTOSET LISTS
-  cs_lists <- .cyto_plot_data(x,
-                              parent = parent,
-                              overlay = overlay,
-                              merge_by = merge_by,
-                              select = select,
-                              events = events,
-                              seed = seed)
+  cs_lists <- .cyto_plot_data(
+    x,
+    parent = parent,
+    overlay = overlay,
+    merge_by = merge_by,
+    select = select,
+    events = events,
+    seed = seed
+  )
   
   # GATING ---------------------------------------------------------------------
   
   # TITLE
-  title <- rep(c(title, rep("", length(cs_lists))), 
-               length.out = length(cs_lists))
+  title <- rep(
+    c(title, 
+      rep("", length(cs_lists))), 
+    length.out = length(cs_lists)
+  )
   
   # LOOP THROUGH GROUPS
   gate_list <- structure(
@@ -433,30 +438,35 @@ cyto_gate_draw <- function(x,
   message(paste("Adding newly constructed gate(s) to", gatingTemplate, "."))
   
   # ADD GATED POPULATIONS TO GATINGTEMPLATE
-  pops <- lapply(seq_along(alias[!is.na(type)]), function(z) {
-    # PREPARE POP
-    if (length(alias[[z]]) == 1 | type[[z]] == "web") {
-      pop <- "+"
-    } else {
-      pop <- "*"
-    }
-    # GATED POPULATIONS
-    suppressWarnings(
-      gs_add_gating_method(
-        gs = x,
-        alias = paste(alias[[z]], collapse = ","),
-        parent = parent,
-        pop = pop,
-        dims = paste(channels, collapse = ","),
-        gating_method = "cyto_gate_draw",
-        gating_args = list(gate = gate_list[[z]],
-                           openCyto.minEvents = -1),
-        groupBy = group_by,
-        collapseDataForGating = TRUE,
-        preprocessing_method = "pp_cyto_gate_draw"
+  pops <- lapply(
+    seq_along(alias[!is.na(type)]),
+    function(z) {
+      # PREPARE POP
+      if (length(alias[[z]]) == 1 | type[[z]] == "web") {
+        pop <- "+"
+      } else {
+        pop <- "*"
+      }
+      # GATED POPULATIONS
+      suppressWarnings(
+        gs_add_gating_method(
+          gs = x,
+          alias = paste(alias[[z]], collapse = ","),
+          parent = parent,
+          pop = pop,
+          dims = paste(channels, collapse = ","),
+          gating_method = "cyto_gate_draw",
+          gating_args = list(
+            gate = gate_list[[z]],
+            openCyto.minEvents = -1
+          ),
+          groupBy = group_by,
+          collapseDataForGating = TRUE,
+          preprocessing_method = "pp_cyto_gate_draw"
+        )
       )
-    )
-  })
+    }
+  )
 
   # ADD NEGATED POPULATIONS TO GATINGTEMPLATE
   if (negate == TRUE) {
