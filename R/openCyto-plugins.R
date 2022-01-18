@@ -234,7 +234,7 @@
 #' Sampling plugin gating function for openCyto
 #'
 #' \code{.pp_cyto_gate_sample()} computes the number of events to extract from
-#' each sample ans returns a logical vector for these events in the merged
+#' each sample and returns a logical vector for these events in the merged
 #' cytoframe passed to \code{.cyto_gate_sample()}.
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
@@ -244,19 +244,20 @@
                               pp_res,
                               channels) {
   
-  # LOGICAL VECTOR FROM PREPROCESSING FUNCTION
-  return(flowCore::filter(fr, pp_res))
-  
+  # OPENCYTO WILL PASS LOGICAL VECTOR FROM PREPROCESSING
+  return(pp_res)
+
 }
 
 #' Sampling preprocessing function for openCyto
-#' 
+#'
 #' See above for details.
-#' 
+#'
 #' @importFrom flowWorkspace gh_pop_get_indices
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
+#'
+#' @noRd
 #' @noRd
 .pp_cyto_gate_sample <- function(fs,
                                  gs,
@@ -266,72 +267,79 @@
                                  isCollapse = NA,
                                  events = 1,
                                  seed = NULL,
-                                 parent = "root",
                                  ...) {
+    
+  # GROUPBY
+  if(is.character(groupBy) & nchar(groupBy) == 0) {
+    groupBy <- NA
+  }
   
-  # FS CONTAINS ALL EVENTS FOR GROUP
-  # NEED SAMPLE INDICES
+  # GROUPING VARIABLES SEPARATED BY COLON
+  if(is.character(groupBy)) {
+    groupBy <- unlist(strsplit(groupBy, ":"))
+  }
   
-  # COMPUTE EVENTS -------------------------------------------------------------
+  # NO GROUPBY
+  if(.all_na(groupBy)) {
+    groupBy <- "name"
+  }
   
-  # TOTAL EVENTS
-  n <- cyto_apply(
+  # GATING GROUPS
+  grps <- cyto_groups(
+    gs,
+    group_by = groupBy,
+    details = TRUE
+  )
+  
+  # EVENTS PER GROUP
+  events <- rep(events, length.out = length(grps))
+  names(events) <- names(grps)
+  
+  # WE COULD ALSO PASS GROUP NAMES HERE
+  grp_ind <- names(grps)[
+    LAPPLY(
+      grps,
+      function(grp) {
+        all(cyto_names(fs) %in% c(rownames(grp), grp$name))
+      }
+    )
+  ]
+  
+  # COMPUTE EVENTS - THIS GROUP
+  grp_events <- cyto_sample_n(
     fs,
-    "nrow",
-    input = "cytoframe",
-    copy = FALSE
-  )[, 1]
-  
-  # EVENTS PER CYTOFRAME
-  events <- cyto_sample_n(
-    fs,
-    events = events
+    events = events[grp_ind]
   )
   
   # SEED
   if(!is.null(seed)) {
     set.seed(seed)
   }
-
-  # LOGICAL VECTOR GATE
-  return(
-    do.call(
-      "c",
-      lapply(
-        cyto_names(fs),
-        function(z) {
-          ind <- gh_pop_get_indices(
-            gs[[cyto_match(gs, z, exact = TRUE)]],
-            parent
+  
+  # LOGICAL FILTER
+  gate <- cyto_apply(
+    fs, 
+    input = "cytoset",
+    FUN = function(cs) {
+      # LOGICAL SAMPLE FILTER
+      if(nrow(cs[[1]]) == 0) {
+        return(logical(0))
+      } else {
+        keep <- rep(FALSE, nrow(cs[[1]]))
+        keep[
+          sample(
+            seq_len(nrow(cs[[1]])),
+            grp_events[cyto_names(cs)]
           )
-          if(length(ind) > 0) {
-            v <- which(ind)
-            if(length(v) > events[z]) {
-              ind[sample(v, length(v) - events[z])] <- FALSE
-            }
-          }
-          return(ind)
-        }
-      )
-    )
+        ] <- TRUE
+        return(keep)
+      }
+    },
+    copy = FALSE,
+    simplify = FALSE
   )
   
-  # # SELECT EVENTS BY INDEX
-  # cnt <- 0
-  # lapply(
-  #   seq_along(fs),
-  #   function(z) {
-  #     if(n[z] > 0 & events[z] > 0) {
-  #       ind <- sample(
-  #         (cnt + 1):(cnt + n[z]),
-  #         events[z]
-  #       )
-  #       gate[ind] <<- TRUE
-  #       cnt <<- cnt + n[z]
-  #     }
-  #   }
-  # )
-  # 
-  # # LOGICAL VECTOR
-  # return(gate)
+  # RETURN LOGICAL SAMPLE FILTER
+  return(gate)
+  
 }

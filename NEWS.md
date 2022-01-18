@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* Added new `cyto_gate_sample()` gating function to add sampled nodes to a GatingHierarchy or GatingSet objects. `cyto_gate_sample()` performs groupwise proportionate sampling by making calls to `cyto_sample_n()` on each experimental group. 
 * `cyto_transformers_define()` has been updated to automatically compute parameter estimates for instruments with larger dynamic ranges, allowing for appropriate transformation of data from newer instruments.
 * `cyto_channel_match()` can now automatically detect the channel associated with each compensation control by matching marker and channel combinations to the file names. Samples where channels cannot be matched by file name will instead be matched by the intensities in the fluorescent channels. `cyto_channel_match()` also gains the ability to automatically detect which compensation controls are beads or cells, an important distinction for `cyto_spillover_compute()`.
 * Added new `label_memory` argument to `cyto_plot()` to allow interactively positioned label co-ordinates to be passed to `cyto_plot()` when `cyto_plot_save()` in called (as we cannot interactively position labels on these graphics devices).

@@ -33,7 +33,7 @@
 #'  for 1D gates and \code{"polygon"} for 2D gates.
 #' @param gatingTemplate name of \code{gatingTemplate} csv file to which the
 #'  \code{gatingTemplate} entries for the \code{GatingSet} method should be
-#'  saved.
+#'  saved, set to \code{cyto_gatingTemplate_active()} by default.
 #' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
 #'  c("Treatment","Concentration") indicating how the samples should be grouped
 #'  prior to gating, set to "all" by default to apply the same gate(s) to all
@@ -118,8 +118,8 @@
 #'  gate objects per group in group_by, whilst the \code{GatingSet} applies the
 #'  constructed gates directly to the \code{GatingSet} and adds appropriate
 #'  entries into the specified \code{gatingTemplate}. The \code{GatingSet}
-#'  method does not return the constructed gates but instead invisibly returns
-#'  the \code{gatingTemplate} entries.
+#'  method does not return the constructed gates but instead returns
+#'  the updated \code{GatingSet}.
 #'
 #' @importFrom BiocGenerics colnames
 #' @importFrom openCyto gs_add_gating_method
@@ -142,26 +142,27 @@
 #' # Gate drawing requires an interactive R session
 #' library(CytoExploreRData)
 #'
-#' # Load in samples
-#' fs <- Activation
-#' gs <- GatingSet(fs)
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
 #'
 #' # Apply compensation
-#' gs <- compensate(gs)
+#' gs <- cyto_compensate(gs)
 #'
 #' # Transform fluorescent channels
-#' trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
-#' gs <- transform(gs, trans)
+#' gs <- cyto_transform(gs)
 #'
-#' # Gate using cyto_gate_draw
-#' gt_gating(Activation_gatingTemplate, gs)
+#' # Apply gatingTemplate
+#' cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+#' 
+#' # Write gatingTemplate
+#' cyto_gatingTemplate_write(Activation_gatingTemplate, "gatingTemplate.csv")
 #'
 #' # draw gates using cyto_gate_draw
 #' cyto_gate_draw(gs,
 #'   parent = "Dendritic Cells",
 #'   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
 #'   alias = c("CD8+ DC", "CD4+ DC"),
-#'   gatingTemplate = "Example-gatingTemplate.csv",
+#'   gatingTemplate = "gatingTemplate.csv",
 #'   type = "rectangle",
 #'   contour_lines = 15
 #' )
@@ -224,9 +225,11 @@ cyto_gate_draw <- function(x,
       gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
     }
     # CHECK EXISTING ENTRIES IN GATINGTEMPLATE
-    gt <- .cyto_gatingTemplate_check(parent, 
-                                     alias, 
-                                     gatingTemplate)
+    gt <- .cyto_gatingTemplate_check(
+      parent, 
+      alias, 
+      gatingTemplate
+    )
     # CREATE GATINGTEMPLATE
     if (is.null(gt)) {
       message(
@@ -238,10 +241,12 @@ cyto_gate_draw <- function(x,
   }
   
   # TYPE -> LIST
-  type <- .cyto_gate_type(type = type,
-                          channels = channels,
-                          alias = alias,
-                          negate = negate)
+  type <- .cyto_gate_type(
+    type = type,
+    channels = channels,
+    alias = alias,
+    negate = negate
+  )
 
   # ALIAS MISSING
   if(is.null(alias)) {
@@ -305,83 +310,86 @@ cyto_gate_draw <- function(x,
           }
         }
         # MERGED CYTOSET
-        cyto_plot(cs_list[[1]],
-                  channels = channels,
-                  overlay = if(length(cs_list) > 1) {
-                    cs_list[seq_along(cs_list)[-1]]
-                  } else {
-                    NA
-                  },
-                  legend = FALSE,
-                  axes_trans = axes_trans,
-                  axes_limits = axes_limits,
-                  title = title[z],
-                  ...)
+        cyto_plot(
+          cs_list[[1]],
+          channels = channels,
+          overlay = if(length(cs_list) > 1) {
+            cs_list[seq_along(cs_list)[-1]]
+          } else {
+            NA
+          },
+          legend = FALSE,
+          axes_trans = axes_trans,
+          axes_limits = axes_limits,
+          title = title[z],
+          ...
+        )
       }
       # GATE
       gates <- list()
       structure(
-        mapply(function(alias,
-                        type, 
-                        axis,
-                        gate_point_shape,
-                        gate_point_size,
-                        gate_point_col,
-                        gate_point_col_alpha,
-                        gate_line_type,
-                        gate_line_width,
-                        gate_line_col,
-                        gate_line_col_alpha,
-                        label,
-                        label_text_size,
-                        label_text_font,
-                        label_text_col,
-                        label_text_col_alpha,
-                        label_fill,
-                        label_fill_alpha){
-          # DATA TO GATE
-          x <- cs_list[[1]]
-          # ARGUMENTS
-          args <- .args_list()
-          args$channels <- channels
-          # GATE
-          if(!.all_na(type)) {
-            gate <- .cyto_gate_draw_dispatch(args) # ... not used
-            # NEGATE
-          } else {
-            if(length(gates) == 1) {
-              gate <- !gates[[1]]
+        mapply(
+          function(alias,
+                   type, 
+                   axis,
+                   gate_point_shape,
+                   gate_point_size,
+                   gate_point_col,
+                   gate_point_col_alpha,
+                   gate_line_type,
+                   gate_line_width,
+                   gate_line_col,
+                   gate_line_col_alpha,
+                   label,
+                   label_text_size,
+                   label_text_font,
+                   label_text_col,
+                   label_text_col_alpha,
+                   label_fill,
+                   label_fill_alpha){
+            # DATA TO GATE
+            x <- cs_list[[1]]
+            # ARGUMENTS
+            args <- .args_list()
+            args$channels <- channels
+            # GATE
+            if(!.all_na(type)) {
+              gate <- .cyto_gate_draw_dispatch(args) # ... not used
+              # NEGATE
             } else {
-              gate <- !do.call("|", unname(unlist(gates)))
+              if(length(gates) == 1) {
+                gate <- !gates[[1]]
+              } else {
+                gate <- !do.call("|", unname(unlist(gates)))
+              }
             }
-          }
-          # ADD GATE
-          args$gate <- gate
-          gates <<- c(gates, structure(
-            list(gate),
-            names = paste(alias, collapse = "|") # quad gates
-          ))
-          # LABELS - GATE BASE LAYER
-          do.call(".cyto_gate_draw_label", args) # ... not used
-        },
-        alias,
-        type, 
-        axis,
-        gate_point_shape,
-        gate_point_size,
-        gate_point_col,
-        gate_point_col_alpha,
-        gate_line_type,
-        gate_line_width,
-        gate_line_col,
-        gate_line_col_alpha,
-        label,
-        label_text_size,
-        label_text_font,
-        label_text_col,
-        label_text_col_alpha,
-        label_fill,
-        label_fill_alpha),
+            # ADD GATE
+            args$gate <- gate
+            gates <<- c(gates, structure(
+              list(gate),
+              names = paste(alias, collapse = "|") # quad gates
+            ))
+            # LABELS - GATE BASE LAYER
+            do.call(".cyto_gate_draw_label", args) # ... not used
+          },
+          alias,
+          type, 
+          axis,
+          gate_point_shape,
+          gate_point_size,
+          gate_point_col,
+          gate_point_col_alpha,
+          gate_line_type,
+          gate_line_width,
+          gate_line_col,
+          gate_line_col_alpha,
+          label,
+          label_text_size,
+          label_text_font,
+          label_text_col,
+          label_text_col_alpha,
+          label_fill,
+          label_fill_alpha),
         names = alias
       )
       return(gates)
@@ -500,7 +508,7 @@ cyto_gate_draw <- function(x,
   # SAVE UPDATED GATINGTEMPLATE
   cyto_gatingTemplate_write(gt, gatingTemplate)
   
-  # RETURN GATINGTEMPLATE ENTRIES
+  # RETURN GATINGSET
   return(x)
   
 }

@@ -67,7 +67,7 @@ for 1D gates and \code{"polygon"} for 2D gates.}
 
 \item{gatingTemplate}{name of \code{gatingTemplate} csv file to which the
 \code{gatingTemplate} entries for the \code{GatingSet} method should be
-saved.}
+saved, set to \code{cyto_gatingTemplate_active()} by default.}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
 \code{flowSet}, \code{list of flowFrames} or \code{list of flowSets}
@@ -181,8 +181,8 @@ this argument to NULL.}
  gate objects per group in group_by, whilst the \code{GatingSet} applies the
  constructed gates directly to the \code{GatingSet} and adds appropriate
  entries into the specified \code{gatingTemplate}. The \code{GatingSet}
- method does not return the constructed gates but instead invisibly returns
- the \code{gatingTemplate} entries.
+ method does not return the constructed gates but instead returns
+ the updated \code{GatingSet}.
 }
 \description{
 \code{cyto_gate_draw} allows to users to interactive draw gates around
@@ -201,26 +201,27 @@ their entries in the gatingTemplate.
 # Gate drawing requires an interactive R session
 library(CytoExploreRData)
 
-# Load in samples
-fs <- Activation
-gs <- GatingSet(fs)
+# Activation GatingSet
+gs <- GatingSet(Activation)
 
 # Apply compensation
-gs <- compensate(gs)
+gs <- cyto_compensate(gs)
 
 # Transform fluorescent channels
-trans <- estimateLogicle(gs[[4]], cyto_fluor_channels(fs))
-gs <- transform(gs, trans)
+gs <- cyto_transform(gs)
 
-# Gate using cyto_gate_draw
-gt_gating(Activation_gatingTemplate, gs)
+# Apply gatingTemplate
+cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+
+# Write gatingTemplate
+cyto_gatingTemplate_write(Activation_gatingTemplate, "gatingTemplate.csv")
 
 # draw gates using cyto_gate_draw
 cyto_gate_draw(gs,
   parent = "Dendritic Cells",
   channels = c("Alexa Fluor 488-A", "Alexa Fluor 700-A"),
   alias = c("CD8+ DC", "CD4+ DC"),
-  gatingTemplate = "Example-gatingTemplate.csv",
+  gatingTemplate = "gatingTemplate.csv",
   type = "rectangle",
   contour_lines = 15
 )

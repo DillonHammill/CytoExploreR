@@ -9,6 +9,9 @@
   # GATING BELL NOISES
   options("locatorBell" = FALSE)
   
+  # CYTOEXPLORER PARALLEL CONFIGURATION
+  # options("CytoExploreR_parallel" = NULL)
+  
   # INTERACTIVE MODE
   options("CytoExploreR_interactive" = TRUE)
   
@@ -33,15 +36,35 @@
   # CYTO_PLOT() DATA ALREADY PREPARED
   options("cyto_plot_data" = FALSE)
   
-  # Register gating and preprocessing functions with openCyto
+  # REGISTER OPENCYTO PREPROCESSING & GATING FUNCTIONS
   suppressMessages({
-    openCyto::register_plugins(fun = .cyto_gate_manual, 
-                               methodName = "cyto_gate_manual")
-    openCyto::register_plugins(fun = .cyto_gate_draw, 
-                               methodName = "cyto_gate_draw")
-    openCyto::register_plugins(fun = .pp_cyto_gate_draw, 
-                               methodName = "pp_cyto_gate_draw", 
-                               dep = NA, "preprocessing")
+    # MANUAL GATING PLUGIN
+    openCyto::register_plugins(
+      fun = .cyto_gate_manual, 
+      methodName = "cyto_gate_manual"
+    )
+    # CYTO_GATE_DRAW
+    openCyto::register_plugins(
+      fun = .cyto_gate_draw, 
+      methodName = "cyto_gate_draw"
+    )
+    openCyto::register_plugins(
+      fun = .pp_cyto_gate_draw, 
+      methodName = "pp_cyto_gate_draw", 
+      dep = NA,
+      "preprocessing"
+    )
+    # CYTO_GATE_SAMPLE
+    openCyto::register_plugins(
+      fun = .cyto_gate_sample,
+      methodName = "cyto_gate_sample"
+    )
+    openCyto::register_plugins(
+      fun = .pp_cyto_gate_sample, 
+      methodName = "pp_cyto_gate_sample", 
+      dep = NA,
+      "preprocessing"
+    )
   })
   
 }
