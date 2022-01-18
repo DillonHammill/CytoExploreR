@@ -6,13 +6,13 @@
 #' a GatingHierarchy or GatingSet and store these events as a new node.
 #'
 #' @param x object of class
-#'   \code{\link[flowWorkspace:GatingHierarchy]{GatingHierarchy-class}} or
-#'   \code{\link[flowWorkspace:GatingSet]{gatingSet-class}}.
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the parental population to sample, set to the
 #'   \code{"root"} node by default.
 #' @param alias name of the sampled population to be created in the GatingSet.
 #' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
-#'   c("Treatment","Concentration") indicating how the samples should be grouped
+#'   c("Treatment","Concentration")) indicating how the samples should be grouped
 #'   prior to sampling, set to "name" by default to downsample each sample
 #'   separately.
 #' @param events numeric to control the number of events to downsample each
@@ -43,13 +43,13 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @seealso \code{\link{cyto_sample}}
-#' @seealso \code{\link{cyto_gatingtemplate_active}}
+#' @seealso \code{\link{cyto_gatingTemplate_active}}
 #' @seealso \code{\link{cyto_gatingTemplate_edit}}
 #' @seealso \code{\link{cyto_gate_remove}}
 #' @seealso \code{\link{cyto_gate_rename}}
 #'
 #' @examples 
-#' \dontrun {
+#' \dontrun{
 #' library(CytoExploreRData)
 #' 
 #' # Prepare Activation GatingSet

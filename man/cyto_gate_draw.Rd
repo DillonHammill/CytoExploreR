@@ -74,7 +74,7 @@ saved, set to \code{cyto_gatingTemplate_active()} by default.}
 containing populations to be overlaid onto the plot(s).}
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
-c("Treatment","Concentration") indicating how the samples should be grouped
+c("Treatment","Concentration")) indicating how the samples should be grouped
 prior to gating, set to "all" by default to apply the same gate(s) to all
 samples. If merge_by is supplied a different gate will be constructed for
 each merged group.}

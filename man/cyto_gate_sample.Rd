@@ -18,8 +18,8 @@ cyto_gate_sample(
 }
 \arguments{
 \item{x}{object of class
-\code{\link[flowWorkspace:GatingHierarchy]{GatingHierarchy-class}} or
-\code{\link[flowWorkspace:GatingSet]{gatingSet-class}}.}
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{parent}{name of the parental population to sample, set to the
 \code{"root"} node by default.}
@@ -27,7 +27,7 @@ cyto_gate_sample(
 \item{alias}{name of the sampled population to be created in the GatingSet.}
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
-c("Treatment","Concentration") indicating how the samples should be grouped
+c("Treatment","Concentration")) indicating how the samples should be grouped
 prior to sampling, set to "name" by default to downsample each sample
 separately.}
 
@@ -64,7 +64,7 @@ a \code{GatingHierarchy} or \code{GatingSet} with new sampled node
 a GatingHierarchy or GatingSet and store these events as a new node.
 }
 \examples{
-\dontrun {
+\dontrun{
 library(CytoExploreRData)
 
 # Prepare Activation GatingSet
@@ -91,7 +91,7 @@ cyto_gate_sample(
 \seealso{
 \code{\link{cyto_sample}}
 
-\code{\link{cyto_gatingtemplate_active}}
+\code{\link{cyto_gatingTemplate_active}}
 
 \code{\link{cyto_gatingTemplate_edit}}
 
