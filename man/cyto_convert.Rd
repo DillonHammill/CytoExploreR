@@ -10,7 +10,8 @@ cyto_convert(x, ...)
 \item{x}{object of class \code{flowFrame}, \code{flowSet}, \code{cytoframe}
 or \code{cytoset}.}
 
-\item{...}{additional arguments passed to}
+\item{...}{additional arguments passed to the appropriate
+\code{\link[flowWorkspace:convert]{conversion}} function.}
 }
 \value{
 a cytoframe or cytoset.

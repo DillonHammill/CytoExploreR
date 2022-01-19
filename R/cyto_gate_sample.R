@@ -38,7 +38,7 @@
 #' @importFrom openCyto gs_add_gating_method
 #'
 #' @return a \code{GatingHierarchy} or \code{GatingSet} with new sampled node
-#'   added and updated \code{gatingTemplate}.
+#'   added and an updated \code{gatingTemplate}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -142,23 +142,25 @@ cyto_gate_sample <- function(x,
   message(paste("Adding new sample filters to", cyto_class(x), "..."))
   
   # ADD POPULATION TO GATINGSET
-  pops <- suppressMessages(
-    gs_add_gating_method(
-      gs = x,
-      alias = alias,
-      parent = parent,
-      pop = "+",
-      dims = cyto_channels(x)[1], # TODO: EMPTY DIMS
-      gating_method = "cyto_gate_sample",
-      gating_args = list(
-        openCyto.minEvents = -1
-      ),
-      groupBy = group_by,
-      collapseDataForGating = FALSE, # REQUIRED
-      preprocessing_method = "pp_cyto_gate_sample",
-      preprocessing_args =  list(
-        events = events,
-        seed = seed
+  pop <- suppressWarnings(
+    suppressMessages(
+      gs_add_gating_method(
+        gs = x,
+        alias = alias,
+        parent = parent,
+        pop = "+",
+        dims = NA, # EMPTY DIM WARNING
+        gating_method = "cyto_gate_sample",
+        gating_args = list(
+          openCyto.minEvents = -1
+        ),
+        groupBy = group_by,
+        collapseDataForGating = FALSE, # REQUIRED
+        preprocessing_method = "pp_cyto_gate_sample",
+        preprocessing_args =  list(
+          events = events,
+          seed = seed
+        )
       )
     )
   )
@@ -167,7 +169,7 @@ cyto_gate_sample <- function(x,
   gt <- rbind(gt, pop)
   
   # WRITING NEW GATINGTEMPLATE ENTRIES
-  message(paste("Re-writing", gatingTemplate, "with new entries..."))
+  message(paste("Re-writing", gatingTemplate, "with new gating entries..."))
   
   # SAVE UPDATED GATINGTEMPLATE
   cyto_gatingTemplate_write(gt, gatingTemplate)

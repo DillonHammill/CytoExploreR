@@ -343,3 +343,221 @@
   return(gate)
   
 }
+
+## CYTO_GATE_CLEAN -------------------------------------------------------------
+
+#' Anomaly detection algorithm plugin for openCyto
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @noRd
+.cyto_gate_clean <- function(fr,
+                             pp_res,
+                             channels,
+                             type = "PeacoQC",
+                             input = "flowFrame",
+                             params = NULL,
+                             slot = NULL,
+                             ...) {
+  
+  # BYPASS EMPTY CYTOFRAMES
+  if(nrow(fr) == 0) {
+    return(logical(0))
+  }
+  
+  # CHANNELS FOR GATING PASSED THROUGH PARAMS ARGUMENT
+  if(is.null(params)) {
+    params <- cyto_channels(
+      fr,
+      exclude = c("Event", "Sample", "Time")
+    )
+  }
+  
+  # CONVERT DATA TO REQUIRED FORMAT - DATA RESTRICTED TO CHANNELS
+  if(!cyto_class(fr, input, TRUE)) {
+    fr <- cyto_data_extract(
+      fr,
+      format = input,
+      channels = params,
+      copy = FALSE
+    )[[1]][[1]]
+  }
+  
+  # DISPATCH BASED ON TYPE - DEFAULT METHODS
+  if(is.character(type)) {
+    # FLOWAI
+    if(grepl("^FlowAI$", type, ignore.case = TRUE)) {
+      # LOAD FLOWAI
+      cyto_require(
+        "flowAI",
+        source = "BioC",
+        repo = "giannimonaco/flowAI",
+        ref = NULL # DROP REFERENCE - PRINTED MULTIPLE TIMES
+      )
+      # FLOWAI ARGUMENTS - DEFAULTS
+      args_default <- list(
+        output = 3,
+        html_report = FALSE,
+        mini_report = FALSE,
+        fcs_QC = FALSE,
+        folder_results = FALSE
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        list(fr),
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # RUN FLOWAI - REMOVAL INDICES
+      remove <- invisible(
+        capture.output(
+          cyto_func_call(
+            "flowAI::flow_auto_qc",
+            args
+          )[[1]]
+        )
+      )
+      # LOGICAL VECTOR
+      gate <- rep(TRUE, nrow(fr))
+      if(length(remove) > 0) {
+        gate[remove] <- FALSE
+      }
+      return(gate)
+      # FLOWCUT
+    } else if(grepl("^FlowCut$", type, ignore.case = TRUE)) {
+      # LOAD FLOWCUT
+      cyto_require(
+        "flowCut",
+        source = "BioC",
+        repo = "jmeskas/flowCut",
+        ref = NULL
+      )
+      # FLOWCUT ARGUMENTS - DEFAULTS
+      args_default <- list(
+        Plot = "None"
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        list(fr),
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # RUN FLOWAI - REMOVAL INDICES
+      remove <- invisible(
+        capture.output(
+          cyto_func_call(
+            "flowCut::flowCut",
+            args
+          )[["ind"]]
+        )
+      )
+      # LOGICAL VECTOR
+      gate <- rep(TRUE, nrow(fr))
+      if(length(remove) > 0) {
+        gate[remove] <- FALSE
+      }
+      return(gate)
+      # FLOWCLEAN
+    } else if(grepl("^FlowClean", type, ignore.case = TRUE)) {
+      # LOAD FLOWCLEAN
+      cyto_require(
+        "flowClean",
+        source = "BioC",
+        repo = "cafletezbrant/flowClean",
+        ref = NULL
+      )
+      # FLOWCUT ARGUMENTS - DEFAULTS
+      args_default <- list(
+        filePrefixWithDir = cyto_names(fr),
+        ext = ".fcs",
+        diagnostic = FALSE
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        list(fr),
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # RUN FLOWCLEAN
+      gate <- invisible(
+        capture.output(
+          cyto_exprs(
+            cyto_func_call(
+              "flowClean::clean",
+              args
+            ),
+            "GoodVsBad",
+            drop = TRUE
+          ) < 10000
+        )
+      )
+      # LOGICAL VECTOR
+      return(gate)
+      # PEACOQC
+    } else if(grepl("^PeacoQC", type, ignore.case = TRUE)) {
+      # LOAD PEACOQC
+      cyto_require(
+        "PeacoQC",
+        source = "BioC",
+        repo = "saeyslab/PeacoQC",
+        ref = NULL
+      )
+      # PEACOQC ARGUMENTS - DEFAULTS
+      args_default <- list(
+        output = "full",  # MARGIN INDICES
+        channels = cyto_channels(fr),
+        plot = FALSE,
+        save_fcs = FALSE
+      )
+      # COMBINE INCOMING ARGUMENTS
+      args <- list(...)
+      args <- c(
+        args,
+        args_default[!names(args_default) %in% names(args)]
+      )
+      # EVENT INDICES
+      ind <- seq_len(nrow(fr))
+      # REMOVE MARGINS - LIST(FR, INDICES)
+      res <- cyto_func_execute(
+        "PeacoQC::RemoveMargins",
+        c(list("ff" = fr),
+          args)
+      )
+      # REMOVE MARGIN EVENTS
+      if(length(res[[2]]) > 0) {
+        ind <- ind[-c(res[[2]])]
+      }
+      # RUN PEACOQC
+      keep <- cyto_func_execute(
+        "PeacoQC::PeacoQC",
+        c(list("ff" = res[[1]]),
+          args)
+      )[["GoodCells"]]
+      # INDICES TO KEEP
+      if(length(keep) > 0) {
+        ind <- ind[keep]
+      }
+      gate <- rep(FALSE, nrow(fr))
+      if(length(ind) > 0) {
+        gate[ind] <- TRUE
+      }
+      return(gate)
+    }
+  }
+  
+  # NON-DEFAULT TYPE
+  gate <- cyto_slot(
+    cyto_func_call(
+      type,
+      list(fr, ...)
+    ),
+    slot = slot
+  )
+  
+  # RETURN LOGICAL VECTOR
+  return(gate)
+  
+}

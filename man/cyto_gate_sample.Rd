@@ -57,7 +57,7 @@ with older versions of CytoExploreR, \code{group_by} was renamed to
 }
 \value{
 a \code{GatingHierarchy} or \code{GatingSet} with new sampled node
-  added and updated \code{gatingTemplate}.
+  added and an updated \code{gatingTemplate}.
 }
 \description{
 \code{cyto_gate_sample()} provides a way to downsample events within nodes in

@@ -677,7 +677,10 @@ cyto_clean <- function(x,
         }
         # DEFAULT CHANNELS
         if(!"channels" %in% names(args)) {
-          args[["channels"]] <- cyto_channels(fr)
+          args[["channels"]] <- cyto_channels(
+            fr, 
+            exclude = c("Event", "Sample", "Time")
+          )
         }
         # REMOVE MARGINAL EVENTS - RANGES SHOULD BE SUPPLIED MANUALLY
         fr <- cyto_func_execute(
@@ -2132,8 +2135,9 @@ cyto_transform_extract <- function(x,
 #' @return either a list of cytosets, list of cytoframe lists or a list of raw
 #'   data matrix lists.
 #'
-#' @importFrom flowWorkspace gs_pop_get_data cf_get_uri
-#' @importFrom flowCore exprs
+#' @importFrom flowWorkspace gs_pop_get_data cf_get_uri cytoframe_to_flowFrame
+#'   cytoset_to_flowSet
+#' @importFrom flowCore flowSet
 #'
 #' @examples
 #' # Load in CytoExploreRData to access data
@@ -2188,9 +2192,11 @@ cyto_data_extract <- function(x,
   
   # PARENTAL PATH
   if(cyto_class(x, "GatingSet")) {
-    parent <- cyto_nodes_convert(x,
-                                 nodes = parent,
-                                 path = path)
+    parent <- cyto_nodes_convert(
+      x,
+      nodes = parent,
+      path = path
+    )
   }
   
   # EXTRACT TRANSFORMERS
@@ -2198,136 +2204,201 @@ cyto_data_extract <- function(x,
     trans <- cyto_transformers_extract(x)
   }
   
-  # SELECT - CANNOT WORK FOR CYTOFRAMES
-  if(!is.null(select)) {
+  # SELECT
+  if(!is.null(select) & !cyto_class(x, "flowFrame")) {
     x <- cyto_select(x, select)
   }
   
-  # CYTOFRAME/CYTOSET
+  # CYTOFRAME/CYTOSET LIST
   if(cyto_class(x, c("flowFrame", "flowSet"))) {
-    cs_list <- list(x)
-    # GATINGHIERARCHY/GATINGSET
+    cs_list <- list(
+      cyto_convert(x) # SLOW WITH OLD DATA STRUCTURES
+    )
+  # GATINGHIERARCHY/GATINGSET
   } else {
     cs_list <- structure(
-      lapply(parent, function(z){
-        gs_pop_get_data(x, z)
-      }),
+      lapply(
+        parent, 
+        function(z){
+          gs_pop_get_data(x, z)
+        }
+      ),
       names = parent
     )
   }
   
-  # PREPARE CYTOSET LIST
-  res <- lapply(seq_along(cs_list), function(id) {
-    # CYTOSET
-    cs <- cs_list[[id]]
-    # COPY
-    if(copy) {
-      cs <- cyto_copy(cs)
-    }
-    # RESTRICT
-    if(!is.null(channels)) {
-      channels <- cyto_channels_extract(cs, channels)
-      cs <- cs[, channels, drop = FALSE]
-    }
-    # BARCODE
-    if(barcode != FALSE) {
-      if(barcode == TRUE) {
-        barcode <- "samples"
+  # PREPARE CYTOFRAME|CYTOSET LIST
+  res <- lapply(
+    seq_along(cs_list), 
+    function(id) {
+      # CYTOFRAME|CYTOSET
+      cs <- cs_list[[id]]
+      # COPY
+      if(copy) {
+        cs <- cyto_copy(cs)
       }
-      cs <- cyto_barcode(cs,
-                         type = barcode,
-                         overwrite = overwrite)
-    }
-    # COERCE - NAME WITH PARENT
-    if(coerce) {
-      # SAMPLE COERCED CYTOSET
-      cs <- cyto_coerce(
-        cs,
-        format = "cytoset",
-        events = events,
-        name = ifelse(is.null(names(cs_list)), 
-                      paste0("merge-", id),
-                      paste0(names(cs_list)[id], "-merge")),
-        barcode = FALSE,
-        seed = seed
-      )
-     # SAMPLE
-     }else if(.all_na(events) | all(events != 1)) {
-      # SAMPLE EACH CYTOFRAME
-      cs <- cyto_sample(
-        cs,
-        events = events,
-        seed = seed
-      )
-    }
-    # TRANSFORM
-    if(inverse & !.all_na(trans)) {
-      cs <- cyto_transform(cs,
-                           trans = trans,
-                           inverse = inverse,
-                           plot = FALSE,
-                           quiet = TRUE)
-    }
-    # CYTOFRAME
-    if(format == "cytoframe") {
-      # CYTOFRAME -> CYTOFRAME
-      if(cyto_class(cs, "flowFrame")) {
-        structure(
-          list(cs),
-          names = cyto_names(cs)
+      # RESTRICT
+      if(!is.null(channels)) {
+        channels <- cyto_channels_extract(cs, channels)
+        cs <- cs[, channels, drop = FALSE]
+      }
+      # BARCODE
+      if(barcode != FALSE) {
+        if(barcode == TRUE) {
+          barcode <- "samples"
+        }
+        cs <- cyto_barcode(cs,
+                           type = barcode,
+                           overwrite = overwrite)
+      }
+      # COERCE - NAME WITH PARENT
+      if(coerce & cyto_class(x, "flowSet")) {
+        # SAMPLE COERCED CYTOSET
+        cs <- cyto_coerce(
+          cs,
+          format = "cytoset",
+          events = events,
+          name = ifelse(is.null(names(cs_list)), 
+                        paste0("merge-", id),
+                        paste0(names(cs_list)[id], "-merge")),
+          barcode = FALSE,
+          seed = seed
         )
-      # CYTOSET -> CYTOFRAME
-      } else {
-        structure(
-          lapply(cyto_names(cs), function(z){
-            cs[[z]]
-          }), names = cyto_names(cs)
+      # SAMPLE
+      }else if(.all_na(events) | all(events != 1)) {
+        # SAMPLE EACH CYTOFRAME
+        cs <- cyto_sample(
+          cs,
+          events = events,
+          seed = seed
         )
       }
-    # CYTOSET
-    } else if(format == "cytoset") {
-      # CYTOFRAME -> CYTOSET
-      if(cyto_class(cs, "flowFrame")) {
-        cytoset(
+      # TRANSFORM
+      if(inverse & !.all_na(trans)) {
+        cs <- cyto_transform(
+          cs,
+          trans = trans,
+          inverse = inverse,
+          plot = FALSE,
+          quiet = TRUE
+        )
+      }
+      # FLOWFRAME - INTERNAL BACKWARDS COMPATIBILITY
+      if(grepl("flowFrame", format, ignore.case = TRUE)) {
+        # CYTOFRAME -> FLOWFRAME
+        if(cyto_class(cs, "flowFrame")) {
           structure(
-            list(cs), 
+            list(
+              cytoframe_to_flowFrame(cs)
+            ),
             names = cyto_names(cs)
           )
-        )
-        # CYTOSET -> CYTOSET
-      } else {
-        if(split) {
-          structure(lapply(seq_along(cs), function(z){
-            cs[z]
-          }), names = cyto_names(cs))
+        # CYTOSET -> FLOWFRAME
         } else {
-          cs
+          structure(
+            lapply(
+              cyto_names(cs), 
+              function(z) {
+                cs[[z]]
+              }
+            ), names = cyto_names(cs)
+          )
+        }
+      # FLOWSET - INTERNAL BACKWARDS COMPATIBILITY
+      } else if(grepl("flowSet", format, ignore.case = TRUE)) {
+        # CYTOFRAME -> FLOWSET
+        if(cyto_class(cs, "flowFrame")) {
+          flowSet(
+            cytoframe_to_flowFrame(
+              cs
+            )
+          )
+        # CYTOSET -> FLOWSET
+        } else {
+          cytoset_to_flowSet(
+            cs
+          )
+        }
+      # CYTOFRAME
+      } else if(grepl("cytoframe", format, ignore.case = TRUE)) {
+        # CYTOFRAME -> CYTOFRAME
+        if(cyto_class(cs, "flowFrame")) {
+          structure(
+            list(
+              cs
+            ),
+            names = cyto_names(cs)
+          )
+        # CYTOSET -> CYTOFRAME
+        } else {
+          structure(
+            lapply(
+              cyto_names(cs), 
+              function(z) {
+                cs[[z]]
+              }
+            ), names = cyto_names(cs)
+          )
+        }
+      # CYTOSET
+      } else if(grepl("cytoset", format, ignore.case = TRUE)) {
+        # CYTOFRAME -> CYTOSET
+        if(cyto_class(cs, "flowFrame")) {
+          cytoset(
+            structure(
+              list(cs), 
+              names = cyto_names(cs)
+            )
+          )
+        # CYTOSET -> CYTOSET
+        } else {
+          if(split) {
+            structure(
+              lapply(
+                seq_along(cs), 
+                function(z) {
+                  cs[z]
+                }
+              ), 
+              names = cyto_names(cs)
+            )
+          } else {
+            cs
+          }
+        }
+      # MATRIX
+      } else if(grepl("matrix", format, ignore.case = TRUE)) {
+        # CYTOFRAME -> MATRIX
+        if(cyto_class(cs, "flowFrame")) {
+          structure(
+            list(
+              cyto_exprs(
+                cs, 
+                markers = markers,
+                drop = FALSE
+              )
+            ), 
+            names = cyto_names(cs)
+          )
+        # CYTOSET -> MATRIX
+        } else {
+          structure(
+            lapply(
+              cyto_names(cs), 
+              function(z) {
+                cyto_exprs(
+                  cs[[z]],
+                  markers = markers,
+                  drop = FALSE
+                )
+              }
+            ), 
+            names = cyto_names(cs)
+          )
         }
       }
-    # MATRIX
-    } else if(format == "matrix") {
-      # CYTOFRAME -> MATRIX
-      if(cyto_class(cs, "flowFrame")) {
-        structure(
-          list(
-            cyto_exprs(cs, 
-                       markers = markers,
-                       drop = FALSE)
-          ), 
-          names = cyto_names(cs)
-        )
-        # CYTOSET -> MATRIX
-      } else {
-        structure(
-          lapply(cyto_names(cs), function(z){
-            cyto_exprs(cs[[z]],
-                       markers = markers,
-                       drop = FALSE)
-          }), names = cyto_names(cs)
-        )
-      }
     }
-  })
+  )
   names(res) <- names(cs_list)
   
   # EXTRACTED DATA
@@ -6888,8 +6959,30 @@ cyto_apply.list <- function(x,
   
 }
 
-#' Extract elements from objects
-#' @noRd
+## CYTO_SLOT -------------------------------------------------------------------
+
+#' Accessory function to extract elements from objects
+#'
+#' @param x an object from which element(s) are to be extracted.
+#' @param slot can be either the name of a slot to extract or a function that
+#'   converts \code{x} to the desired output.
+#'
+#' @return the element extracted or formatted from \code{x}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#' library(CytoExploreRData)
+#' 
+#' # Create named list
+#' res <- list("A" = 3, "B" = 4)
+#' 
+#' # Extract B from list
+#' cyto_slot(res, "B")
+#' }
+#'
+#' @export
 cyto_slot <- function(x,
                       slot = NULL) {
   
@@ -6963,22 +7056,21 @@ cyto_slot <- function(x,
 #'
 #' @param x object of class \code{flowFrame}, \code{flowSet}, \code{cytoframe}
 #'   or \code{cytoset}.
-#' @param ... additional arguments passed to
+#' @param ... additional arguments passed to the appropriate
+#'   \code{\link[flowWorkspace:convert]{conversion}} function.
 #'
 #' @return a cytoframe or cytoset.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @importFrom flowWorkspace flowFrame_to_cytoframe flowSet_to_cytoset
+#' @importFrom flowWorkspace load_cytoframe_from_fcs flowSet_to_cytoset
 #'
-#' @seealso
-#'   \code{\link[flowWorkspace:convert]{flowFrame_to_cytoframe}}
-#' @seealso
-#'   \code{\link[flowWorkspace:convert]{flowSet_to_cytoset}}  
+#' @seealso \code{\link[flowWorkspace:convert]{flowFrame_to_cytoframe}}
+#' @seealso \code{\link[flowWorkspace:convert]{flowSet_to_cytoset}}
 #'
-#' @examples 
+#' @examples
 #' library(CytoExploreRData)
-#' 
+#'
 #' # flowSet to cytoset
 #' cs <- cyto_convert(Activation)
 #'
@@ -6987,9 +7079,13 @@ cyto_convert <- function(x,
                          ...) {
 
   if(cyto_class(x, "flowFrame", TRUE)) {
+    # # FLOWFRAME_TO_CYTOFRAME() BUT RETAIN ORIGINAL FILENAME
+    # tmp <- paste0(tempdir, .Platform$file.sep, cyto_names(x))
+    # write.FCS(x, tmp)
+    # x <- load_cytoframe_from_fcs(tmp, ...)
     x <- flowFrame_to_cytoframe(x, ...)
   } else if(cyto_class(x, "flowSet", TRUE)) {
-    x <- flowSet_to_cytoset(x)
+    x <- flowSet_to_cytoset(x, ...)
   }
   return(x)
   

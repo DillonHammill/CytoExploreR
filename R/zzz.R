@@ -65,6 +65,11 @@
       dep = NA,
       "preprocessing"
     )
+    # CYTO_GATE_CLEAN
+    openCyto::register_plugins(
+      fun = .cyto_gate_clean,
+      methodName = "cyto_gate_clean"
+    )
   })
   
 }
