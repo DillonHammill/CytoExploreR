@@ -1875,14 +1875,14 @@ cyto_plot_calibrate <- function(x,
           # ANCHORING REQUIRED
           if(minima > 0) {
             if(channels[cnt] %in% names(axes_trans)) {
-              z[min(z)] <- .cyto_transform(
+              z[which.min(z)] <- .cyto_transform(
                 0,
                 trans = axes_trans,
                 channel = channels[cnt],
-                inverse = TRUE
+                inverse = FALSE
               )
             } else {
-              z[min(z)] <- 0
+              z[which.min(z)] <- 0
             }
           }
           # RETURN CHANNEL LIMITS
