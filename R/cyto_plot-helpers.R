@@ -1713,6 +1713,8 @@ cyto_plot_layout <- function(...){
 #'   definitions of the transformers applied to the supplied data. These
 #'   transformers are only required when a cytoset to transform supplied channel
 #'   limits.
+#' @param anchor logical indicating whether the lower limit of the scale should
+#'   be anchored to zero, set to TRUE by default.
 #' @param ... not in use.
 #'
 #' @return saves calibration settings for use by \code{\link{cyto_plot}}.
@@ -1743,6 +1745,7 @@ cyto_plot_calibrate <- function(x,
                                 probs = c(0.01, 0.95),
                                 limits = c(NA, NA),
                                 axes_trans = NA,
+                                anchor = TRUE,
                                 ...){
   
   # RECALL CALIBRATION SETTINGS - ALL CHANNELS
@@ -1795,6 +1798,9 @@ cyto_plot_calibrate <- function(x,
     limits <- limits[, channels, drop = FALSE]
   }
   
+  # ANCHOR - ORDER MAY BE OUT OF SYNC DUE TO SORTING ABOVE
+  anchor <- rep(anchor, length.out = ncol(limits))
+  
   # COMPUTE CALIBRATION SETTINGS
   cnt <- 0
   cyto_cal_new <- apply(
@@ -1802,7 +1808,7 @@ cyto_plot_calibrate <- function(x,
     2,
     function(z) {
       cnt <<- cnt + 1
-      # TRANSFORM LIMITS
+      # TRANSFORM MANUALLY SUPPLIED LIMITS
       if(!.all_na(z) & channels[cnt] %in% names(axes_trans)) {
         z[!is.na(z)] <- .cyto_transform(
           z[!is.na(z)],
@@ -1854,8 +1860,36 @@ cyto_plot_calibrate <- function(x,
         # UPDATE LIMITS
         res <- range(res, na.rm = TRUE)
         z[is.na(z)] <- res[is.na(z)]
+        # ANCHOR
+        if(anchor[cnt]) {
+          minima <- min(z)
+          # CURRENT MINIMUM ON LINEAR SCALE < 0
+          if(channels[cnt] %in% names(axes_trans)) {
+            minima <- .cyto_transform(
+              minima,
+              trans = axes_trans,
+              channel = channels[cnt],
+              inverse = TRUE
+            )
+          }
+          # ANCHORING REQUIRED
+          if(minima > 0) {
+            if(channels[cnt] %in% names(axes_trans)) {
+              z[min(z)] <- .cyto_transform(
+                0,
+                trans = axes_trans,
+                channel = channels[cnt],
+                inverse = TRUE
+              )
+            } else {
+              z[min(z)] <- 0
+            }
+          }
+          # RETURN CHANNEL LIMITS
+          return(z)
+        }
       }
-      # RETRUN MIN/MAX LIMITS PER CHANNEL
+      # RETURN MIN/MAX LIMITS PER CHANNEL
       return(
         c("min" = min(z, na.rm = TRUE),
           "max" = max(z, na.rm = TRUE))

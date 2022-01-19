@@ -37,7 +37,7 @@ gating function.}
 
 \item{channels}{vector of channels/markers over which anomaly detection
 algorithms should be applied to gate high quality events, set to all
-channels except \code{"Time"}, \code{"Event-ID"} and \code{"Sample-ID'} by
+channels except \code{"Time"}, \code{"Event-ID"} and \code{"Sample-ID"} by
 default.}
 
 \item{gatingTemplate}{name of \code{gatingTemplate} csv file to which the

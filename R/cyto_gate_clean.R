@@ -18,7 +18,7 @@
 #'   gating function.
 #' @param channels vector of channels/markers over which anomaly detection
 #'   algorithms should be applied to gate high quality events, set to all
-#'   channels except \code{"Time"}, \code{"Event-ID"} and \code{"Sample-ID'} by
+#'   channels except \code{"Time"}, \code{"Event-ID"} and \code{"Sample-ID"} by
 #'   default.
 #' @param gatingTemplate name of \code{gatingTemplate} csv file to which the
 #'   \code{gatingTemplate} entries for the \code{GatingSet} method should be

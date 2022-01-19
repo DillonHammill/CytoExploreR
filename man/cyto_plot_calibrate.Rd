@@ -12,6 +12,7 @@ cyto_plot_calibrate(
   probs = c(0.01, 0.95),
   limits = c(NA, NA),
   axes_trans = NA,
+  anchor = TRUE,
   ...
 )
 }
@@ -55,6 +56,9 @@ computed using the method indicated by \code{type}.}
 definitions of the transformers applied to the supplied data. These
 transformers are only required when a cytoset to transform supplied channel
 limits.}
+
+\item{anchor}{logical indicating whether the lower limit of the scale should
+be anchored to zero, set to TRUE by default.}
 
 \item{...}{not in use.}
 }
