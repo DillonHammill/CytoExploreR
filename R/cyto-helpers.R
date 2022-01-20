@@ -5057,7 +5057,8 @@ cyto_markers_edit <- function(x,
   if(is.null(file)) {
     pd_new <- cyto_file_search(
       "Markers.csv$",
-      colnames = c("channel", "marker")
+      colnames = c("channel", "marker"),
+      channel = chans
     )
     # SINLGE FILE MARKER ASSIGNMENTS FOUND
     if(length(pd_new) > 0) {

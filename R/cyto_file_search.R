@@ -45,7 +45,6 @@ cyto_file_search <- function(x,
   if(length(files) > 0) {
     # COLUMNS TO SEARCH
     cols <- list(...)
-    
     # SEARCH FILES
     files <- structure(
       lapply(
@@ -73,7 +72,7 @@ cyto_file_search <- function(x,
             lapply(
               names(cols),
               function(w) {
-                if(!all(cols[[w]] %in% f[, cols[[w]]])) {
+                if(!all(cols[[w]] %in% f[, w])) {
                   stop <<- TRUE
                 }
               }
@@ -87,7 +86,6 @@ cyto_file_search <- function(x,
       ),
       names = files
     )
-    
     # RETURN DATA
     files <- files[!LAPPLY(files, "is.null")]
   }
