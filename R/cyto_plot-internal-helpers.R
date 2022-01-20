@@ -572,6 +572,24 @@
                              select = NULL,
                              negate = FALSE) {
   
+  # TODO: BELOW STEP IN CYTO_PLOT()? GROUPS OUT OF SYNC IN CYTO_PLOT_DATA()?
+  # PREPARE X - NON-STANDARD DATA STRUCTURES -> CYTOSET
+  if(cyto_class(x, "list", TRUE)) {
+    x <- structure(
+      lapply(
+        x,
+        function(z) {
+          if(!cyto_class(z, c("flowSet", "GatingSet"))){
+            z <- as(z, "cytoset")
+          }
+          return(z)
+        }
+      )
+    )
+  } else if(!cyto_class(x, c("flowSet", "GatingSet"))) {
+    x <- as(x, "cytoset")
+  }
+  
   # X - PREPARED LIST of CYTOSETS PER GROUP (DATA PREPARED ALREADY)
   if(cyto_class(x, "list")) {
     grps <- names(x)
