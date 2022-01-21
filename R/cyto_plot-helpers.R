@@ -820,6 +820,7 @@ cyto_plot_new <- function(popup = NULL,
   if(cyto_option("cyto_plot_save")) {
     # DON'T OPEN NEW DEVICE - USE EXISTING DEVICE (PDF MULTIPAGE)
     dev_new <- FALSE
+    dev_empty <- dev_empty()
   # NEW GRAPHICS DEVICE REQUIRED?
   } else {
     # NULL -> RSTUDIOGD
@@ -845,22 +846,27 @@ cyto_plot_new <- function(popup = NULL,
       if (dev_new == "popup") {
         # NEW POPUP DEVICE REQUIRED
         dev_new <- "popup"
+        dev_empty <- TRUE
         # REQUIRE - RSTUDIO
       } else {
         # EMPTY DEVICE
         if(dev_empty()) {
           dev_new <- FALSE
+          dev_empty <- TRUE
         # CUSTOM PLOTTING FUNCTION - OPEN NEW DEVICE WHEN FULL
         } else if(cyto_option("cyto_plot_method") != "cytoset") {
           # OPEN NEW DEVICE WHEN FULL
           if(.par("page")[[1]]) {
             dev_new <- "rstudio"
+            dev_empty <- TRUE
           } else {
             dev_new <- FALSE
+            dev_empty <- FALSE
           }
           # NEW LAYOUT
         } else {
           dev_new <- "rstudio"
+          dev_empty <- TRUE
         }
       }
       # CURRENT DEVICE - POPUP
@@ -870,50 +876,69 @@ cyto_plot_new <- function(popup = NULL,
         # EMPTY DEVICE
         if(dev_empty()){
           dev_new <- FALSE
+          dev_empty <- TRUE
         # CUSTOM PLOTTING FUNCTION - OPEN NEW DEVICE WHEN FULL
         } else if(cyto_option("cyto_plot_method") != "cytoset") {
           # OPEN NEW GRAPHICS DEVICE WHEN FULL
           if(.par("page")[[1]]) {
             dev_new <- "popup"
+            dev_empty <- TRUE
           } else {
             dev_new <- FALSE
+            dev_empty <- FALSE
           }
           # NEW LAYOUT
         } else {
           dev_new <- "popup"
+          dev_empty <- TRUE
         }
         # REQUIRE - RSTUDIO
       } else {
         # NEW RSTUDIO DEVICE REQUIRED
         dev_new <- "rstudio"
+        dev_empty <- TRUE
       }
     }
     # OPEN NEW GRAPHICS DEVICE
     if (dev_new != FALSE) {
       # POPUP DEVICE
       if (dev_new == "popup") {
-        if (interactive() & cyto_option("CytoExploreR_interactive")) {
+        # Below code restricts to RStudio device in non-interactive mode
+        # Removed to allow users to use popup window non-interactively
+        # if (interactive() & cyto_option("CytoExploreR_interactive")) {
           if (.Platform$OS.type == "windows") {
-            suppressWarnings(dev.new(height = popup_size[1],
-                                     width = popup_size[2],
-                                     unit = "in",
-                                     noRStudioGD = TRUE))
+            suppressWarnings(
+              dev.new(
+                height = popup_size[1],
+                width = popup_size[2],
+                unit = "in",
+                noRStudioGD = TRUE
+              )
+            )
           } else if (.Platform$OS.type == "unix") {
             if (Sys.info()["sysname"] == "Linux") {
               # Cairo needed for semi-transparency
-              suppressWarnings(dev.new(height = popup_size[1],
-                                       width = popup_size[2],
-                                       unit = "in",
-                                       noRStudioGD = TRUE,
-                                       type = "cairo"))
+              suppressWarnings(
+                dev.new(
+                  height = popup_size[1],
+                  width = popup_size[2],
+                  unit = "in",
+                  noRStudioGD = TRUE,
+                  type = "cairo"
+                )
+              )
             } else if (Sys.info()["sysname"] == "Darwin") {
-              suppressWarnings(dev.new(height = popup_size[1],
-                                       width = popup_size[2],
-                                       unit = "in",
-                                       noRStudioGD = TRUE))
+              suppressWarnings(
+                dev.new(
+                  height = popup_size[1],
+                  width = popup_size[2],
+                  unit = "in",
+                  noRStudioGD = TRUE
+                )
+              )
             }
           }
-        }
+        # }
         # RSTUDIO DEVICE
       } else if (dev_new == "rstudio") {
         dev_ind <- which(
@@ -942,7 +967,7 @@ cyto_plot_new <- function(popup = NULL,
   # SET PARAMETERS -------------------------------------------------------------
   
   # EMPTY DEVICE - SET ALL PARAMETERS
-  if(dev_empty()) {
+  if(dev_empty) {
     # COMBINE SET_PARS & NEW_PARS - REPLACE OLD WITH NEW
     set_pars <- c(
       set_pars[!names(set_pars) %in% names(new_pars)],
