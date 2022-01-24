@@ -413,8 +413,17 @@ cyto_load <- function(path = ".",
   # SAVED GATINGSET
   if ("pb" %in% file_ext(files)) {
     # LOAD GATINGSET
-    x <- load_gs(path = path,
-                 backend_readonly = FALSE)
+    x <- load_gs(
+      path = path,
+      backend_readonly = FALSE
+    )
+    # BARCODE
+    if(!grepl("^Event-?ID$", cyto_channels(x), ignore.case = TRUE)) {
+      x <- cyto_barcode(
+        x,
+        "events"
+      )
+    }
     # FCS FILES
   } else {
     
