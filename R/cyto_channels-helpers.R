@@ -306,6 +306,67 @@ cyto_markers <- function(x,
   
 }
 
+## CYTO_MARKERS REPLACEMENT METHOD ---------------------------------------------
+
+#' Replace marker names
+#' 
+#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#'   \code{\link[flowCore:flowSet-class]{flowSet}},
+#'   \code{\link[flowWorkspace:cytoframe]{cytoframe}},
+#'   \code{\link[flowWorkspace:cytoset]{cytoset}},
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSey}}.
+#' @param value named vector of channels with their associated markers.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @seealso \code{\link{cyto_markers}}
+#' @seealso \code{\link{cyto_markers_edit}}
+#'
+#' @examples 
+#' library(CytoExploreRData)
+#' 
+#' # Activation GatingSet
+#' gs <- load_gs(system.file("extdata/Activation-GatingSet",
+#'                          package = "CytoExploreRData"))
+#' 
+#' # GatingSet
+#' cyto_channels(gs)
+#' 
+#' # Set FSC-A marker to FSC
+#' cyto_markers(gs) <- c("FSC" = "FSC-A")
+#' 
+#' @export
+"cyto_markers<-" <- function(x, value) {
+  # CHECK VALUE
+  if(is.null(names(value))) {
+    stop(
+      "Values to replace must be a named vector of channels with their markers!"
+    )
+  }
+  # TODO: CHACK VALID CHANNELS HAVE BEEN SUPPLIED
+  # PREPARE FLIPPED VALUE
+  if(all(value %in% cyto_channels(x))) {
+    value <- structure(
+      names(value),
+      names = value
+    )
+  }
+  # UPDATE MARKER ASSIGNMENTS
+  if(cyto_class(x, c("flowFrame", "flowSet"), TRUE)) {
+    flowCore::markernames(x) <- value
+  } else if(cyto_class(x, c("cytoframe", "cytoset", "GatingSet"))) {
+    flowWorkspace::markernames(x) <- value
+  } else {
+    stop(
+      paste0(
+        "Cannot replace marker names for objects of class ", cyto_class(x), "!"
+      )
+    )
+  }
+  return(x)
+}
+
 ## CYTO_FLUOR_CHANNELS ---------------------------------------------------------
 
 #' Extract Fluorescent Channels

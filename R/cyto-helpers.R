@@ -2265,7 +2265,7 @@ cyto_data_extract <- function(x,
           seed = seed
         )
       # SAMPLE
-      }else if(.all_na(events) | all(events != 1)) {
+      } else if(.all_na(events) | all(events != 1)) {
         # SAMPLE EACH CYTOFRAME
         cs <- cyto_sample(
           cs,
@@ -2584,7 +2584,8 @@ cyto_exprs.flowSet <- function(x,
 #' 
 #' @export
 cyto_empty <- function(name = NULL,
-                       channels = NULL, ...) {
+                       channels = NULL,
+                       ...) {
   
   # CHANNELS
   if (is.null(channels)) {
@@ -2606,6 +2607,14 @@ cyto_empty <- function(name = NULL,
   # NAME
   if (!is.null(name)) {
     identifier(fr) <- name
+  }
+  
+  # UPDATE MARKERS
+  if(!is.null(names(channels))) {
+    channels <- channels[!names(channels) %in% c("NA", NA)]
+    if(length(channels) > 0) {
+      cyto_markers(fr) <- channels 
+    }
   }
   
   # FLOWFRAME -> CYTOFRAME
@@ -4558,11 +4567,13 @@ cyto_coerce <- function(x,
       )
     )
   }
-
+  
   # REMOVE EMPTY SAMPLES
   if(any(!names(events) %in% ids)) {
-    x <- cyto_select(x,
-                     list("name" = ids[ids %in% names(events)]))
+    x <- cyto_select(
+      x,
+      list("name" = ids[ids %in% names(events)])
+    )
   }
 
   # SAMPLING
