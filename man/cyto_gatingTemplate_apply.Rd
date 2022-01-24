@@ -16,7 +16,9 @@ gates to be applied to \code{x}. This can alos be an object of class
 \item{active}{logical indicating whether the applied gatingTemplate should be
 set as the current active gatingTemplate set to TRUE by default.}
 
-\item{...}{additional arguments passed to gating.}
+\item{...}{additional arguments passed to
+\code{\link[openCyto:gt_gating]{gt_gating()}} including \code{start} and
+\code{stop.at} to only apply particular gates from the gatingTemplate.}
 }
 \value{
 NULL and update the GatingHierarchy/ GatingSet in the global

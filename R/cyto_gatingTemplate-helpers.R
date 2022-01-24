@@ -470,7 +470,9 @@ cyto_gatingTemplate_edit <- function(x,
 #'   \code{gatingTemplate} if a \code{GatingSet} object is supplied.
 #' @param active logical indicating whether the applied gatingTemplate should be
 #'   set as the current active gatingTemplate set to TRUE by default.
-#' @param ... additional arguments passed to gating.
+#' @param ... additional arguments passed to
+#'   \code{\link[openCyto:gt_gating]{gt_gating()}} including \code{start} and
+#'   \code{stop.at} to only apply particular gates from the gatingTemplate.
 #'
 #' @return NULL and update the GatingHierarchy/ GatingSet in the global
 #'   environment with the gates in the gatingTemplate.
