@@ -418,7 +418,7 @@ cyto_load <- function(path = ".",
       backend_readonly = FALSE
     )
     # BARCODE
-    if(!grepl("^Event-?ID$", cyto_channels(x), ignore.case = TRUE)) {
+    if(!any(grepl("^Event-?ID$", cyto_channels(x), ignore.case = TRUE))) {
       x <- cyto_barcode(
         x,
         "events"
@@ -2260,8 +2260,8 @@ cyto_data_extract <- function(x,
                            type = barcode,
                            overwrite = overwrite)
       }
-      # COERCE - NAME WITH PARENT
-      if(coerce & cyto_class(x, "flowSet")) {
+      # COERCE - NAME WITH PARENT - BYPASS CYTOFRAME
+      if(coerce & cyto_class(cs, "flowSet")) {
         # SAMPLE COERCED CYTOSET
         cs <- cyto_coerce(
           cs,
