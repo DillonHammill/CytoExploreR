@@ -61,6 +61,7 @@ cyto_gateTemplate.GatingHierarchy <- function(x) {
           x,
           parent = z$parent[1],
           alias = z$alias,
+          path = "auto",
           bool = FALSE # LEAVE BOOLEANFILTERS ALONE
         )[[1]]
         # ORDER
@@ -80,8 +81,8 @@ cyto_gateTemplate.GatingHierarchy <- function(x) {
               min(
                 which(
                   gt$alias %in% a &
-                    gt$parent == z$parent[1] &
-                    gt$dims == z$dims[1]
+                  gt$parent %in% z$parent[1] &
+                  gt$dims %in% z$dims[1]
                 )
               )
             }
@@ -91,17 +92,32 @@ cyto_gateTemplate.GatingHierarchy <- function(x) {
         return(gate)
       }
     )
-    # ORDER GATES
+    # PREPARE GATES
     gates <- structure(
       unlist(
         gates,
         recursive = FALSE
       ),
       names = LAPPLY(gates, "names")
-    )[order(ind)]
-    ind <- ind[order(ind)]
-    
-    # CREATE GATE TEMPLATE
+    )
+    # MATCH EACH GATE TO NODE
+    order <- order(
+      LAPPLY(
+        names(gates), 
+        function(z){
+          min(
+            match(
+              strsplit(z, "\\|")[[1]],
+              cyto_nodes(x, path = "auto")
+            )
+          )
+        }
+      )
+    )
+    # SORT GATES
+    gates <- gates[order]
+    ind <- ind[order]
+    # CREATE GATETEMPLATE
     gateTemplate <- structure(
       lapply(
         seq_along(gates),

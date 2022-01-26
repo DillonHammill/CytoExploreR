@@ -388,7 +388,7 @@ cyto_transformers_define <- function(x,
                 args$w <- (args$m - log10(args$t/abs(args$p))) / 2
               }
             }
-
+            
             # CHECK W > 0
             if(args$w < 0) {
               stop(

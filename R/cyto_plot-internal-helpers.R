@@ -74,6 +74,8 @@
                             seed = 42,
                             ...) {
 
+  # TODO: COMPUTE NROW ON CYTOFRAME DIRECTLY NOT EXPRS
+  
   # DATA PREPARED ALREADY ------------------------------------------------------
   
   # BYPASS DATA PREPARTION
@@ -328,9 +330,9 @@
             # IDENTIFIER
             id <- ids[q]
             l <- list(
-              "total" = nrow(cyto_exprs(cs[[q]])),
+              "total" = nrow(cyto_exprs(cs[[q]], drop = FALSE)),
               "layer" = NULL,
-              "match" = NULL,
+              "match" = 0,
               "sample" = NULL
             )
             for(v in seq_len(w-1)) {
@@ -401,13 +403,15 @@
             # SAMPLE SIZE OF REFERENCE LAYER
             s <- i[[l]][[id]]$sample
             # CYTOFRAME SUBSET OF PREVIOUS LAYER
-            if(i[[w]][[id]]$match == nrow(cyto_exprs(cs[[id]]))){
+            if(i[[w]][[id]]$match == nrow(cyto_exprs(cs[[id]], drop = FALSE))) {
               # USE EVENT IDs FROM REFERENCE LAYER
               cf_list[[id]] <- cs[[id]][
                 cyto_exprs(cs[[id]], "Event-ID") %in%
                   cyto_exprs(cs_sub_list[[l]][[id]], "Event-ID")
                 ,]
-              i[[w]][[id]]$sample <<- nrow(cyto_exprs(cf_list[[id]]))
+              i[[w]][[id]]$sample <<- nrow(
+                cyto_exprs(cf_list[[id]], drop = FALSE)
+              )
             # CYTOFRAME OVERLAP WITH PREVIOUS LAYER
             } else {
               # EVENT IDs FROM LAYER SAMPLE
@@ -420,7 +424,7 @@
                 !cyto_exprs(cs[[id]], "Event-ID") %in%
                   cyto_exprs(cs_list[[l]][[id]], "Event-ID"),
               ]
-              n <- nrow(cyto_exprs(cf_new))
+              n <- nrow(cyto_exprs(cf_new, drop = FALSE))
               # SAMPLE NON-OVERLAPPING PORTION OF CYTOFRAME
               e <- c(e,
                      cyto_exprs(cf_new)[
