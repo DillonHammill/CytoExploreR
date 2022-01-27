@@ -185,43 +185,32 @@ cyto_transformers_define <- function(x,
       function(z) {
         # TYPE VECTOR
         if(!cyto_class(type, "list", TRUE)) {
-          
           # LOG TRANSFORM
           if(grepl("^log$", type[z], ignore.case = TRUE)) {
-            
             cyto_func_execute("flowjo_log_trans", args)
-            
           # ARCSINH TRANSFORM
           } else if(grepl("^a", type[z], ignore.case = TRUE)) {
-            
             # ARCSINH GML2 FLOWWORKSPACE
             if(grepl("^arc", type[z], ignore.case = TRUE) |
                grepl("g", type[z], ignore.case = TRUE)) {
-              
               # TRANSFORMERS
               args[["inverse"]] <- FALSE
               trans <- cyto_func_execute("asinh_Gml2", args)
-              
               # INVERSE TRANSFORMERS
               args[["inverse"]] <- TRUE
               inv_trans <- cyto_func_execute("asinh_Gml2", args)
-              
               # COMBINE TRANSFORMERS
               flow_trans(
                 "arcsinh_Gml2",
                 trans@.Data,
                 inv_trans@.Data
               )
-              
             # ARCSINH - FLOWVS ESTIMATE COFACTOR
             } else {
-              
               # FLOWVS - CANNOT TURN OFF PLOTS & MESSAGES USE CAT
               # COFACTOR SUPPLIED MANUALLY
               if("cofactor" %in% names(args)) {
-                
                 cf <- args[["cofactor"]]
-                
               # ESTIMATE COFACTOR USING FLOWVS
               } else {
                 # FLOWVS
@@ -271,15 +260,16 @@ cyto_transformers_define <- function(x,
                 sinh_trans
               )
             }
-            
           # BIEXPONENTIAL TRANSFORM
           } else if(grepl("^biex", type[z], ignore.case = TRUE)) {
-            
+            # DEFAULT WIDTHBASIS
+            if(is.null(args[["widthBasis"]])) {
+              args[["widthBasis"]] <- -100
+            }
             # MAXVALUE - HARD CODED
             if(is.null(args[["maxValue"]])) {
               args[["maxValue"]] <- 262144
             }
-            
             # CHECK INSTRUMENT RANGE
             rng <- range(
               cyto_apply(
@@ -293,16 +283,13 @@ cyto_transformers_define <- function(x,
               ),
               na.rm = TRUE
             )
-            
             # MAXVALUE ADJUST - INSTRUMENT RANGE
             if(max(rng) > args[["maxValue"]]) {
               args[["maxValue"]] <- max(rng)
             }
-            
             # TRANSFORMERS
             args[["inverse"]] <- FALSE
             trans <- cyto_func_execute("flowjo_biexp", args)
-            
             # INVERSE TRANSFORMERS
             args[["inverse"]] <- TRUE
             inv_trans <- cyto_func_execute("flowjo_biexp", args)
@@ -311,7 +298,6 @@ cyto_transformers_define <- function(x,
               trans@.Data,
               inv_trans@.Data
             )
-            
           # LOGICLE TRANSFORM
           } else if(grepl("^logicle$", type[z], ignore.case = TRUE)) {
             
@@ -340,12 +326,10 @@ cyto_transformers_define <- function(x,
                 na.rm = TRUE
               )
             }
-            
             # TOP OF SCALE
             if(!"t" %in% names(args)) {
               args$t <- max(args$r)
             }
-            
             # COMPUTE M FROM RANGE
             if(!"m" %in% names(args)) {
               # FLOWCORE USES DEFAULT 4.5 & ADDS +1 FOR ESTIMATE
@@ -360,7 +344,6 @@ cyto_transformers_define <- function(x,
                 }
               }
             }
-            
             # COMPUTE W - (R MOST NEGATIVE VALUES FOR DISPLAY)
             if(!"w" %in% names(args)) {
               args$w <- 0
@@ -388,7 +371,6 @@ cyto_transformers_define <- function(x,
                 args$w <- (args$m - log10(args$t/abs(args$p))) / 2
               }
             }
-            
             # CHECK W > 0
             if(args$w < 0) {
               stop(
@@ -398,18 +380,15 @@ cyto_transformers_define <- function(x,
                 )
               )
             }
-
             # LOGICLE TRANSFORM - DROP R AND P ARGUMENTS
             trans <- cyto_func_execute(
               "logicleTransform",
               c(list("logicle"), args)
             )
-
             # INVERSE LOGICLE TRANSFORM
             inv <- inverseLogicleTransform(
               trans
             )
-
             # LOGICLE TRANSFORMERS
             flow_trans(
               "logicle",
@@ -432,7 +411,7 @@ cyto_transformers_define <- function(x,
             #   inv_trans@.Data
             # )
             
-            # UNSUPPORTED TRANSFORM
+          # UNSUPPORTED TRANSFORM
           } else {
             stop(
               paste(
@@ -442,7 +421,6 @@ cyto_transformers_define <- function(x,
           }
         # TYPE - CUSTOM TRANSFORMERS
         } else {
-          
           # PREPARE TRANSFORM FUNCTION
           trans <- cyto_func_match(
             if(is.null(names(type[[z]]))) {
@@ -451,7 +429,6 @@ cyto_transformers_define <- function(x,
               type[[z]][[grep("^t", names(type[[z]]), ignore.case = TRUE)]]
             }
           )
-          
           # PREPARE INVERSE TRANSFORM FUNCTION
           inv <- cyto_func_match(
             if(is.null(names(type[[z]]))) {
@@ -460,7 +437,6 @@ cyto_transformers_define <- function(x,
               type[[z]][[grep("^i", names(type[[z]]), ignore.case = TRUE)]]
             }
           )
-          
           # PREPARE TRANSFORMERS
           flow_trans(
             "custom",
