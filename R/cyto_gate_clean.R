@@ -18,8 +18,9 @@
 #'   gating function.
 #' @param channels vector of channels/markers over which anomaly detection
 #'   algorithms should be applied to gate high quality events, set to all
-#'   channels except \code{"Time"}, \code{"Event-ID"} and \code{"Sample-ID"} by
-#'   default.
+#'   channels except \code{"Event-ID"} and \code{"Sample-ID"} by default. The
+#'   \code{"Time"} channel should be included here when performing flow rate and
+#'   signal acquisition checks.
 #' @param gatingTemplate name of \code{gatingTemplate} csv file to which the
 #'   \code{gatingTemplate} entries for the \code{GatingSet} method should be
 #'   saved, set to \code{cyto_gatingTemplate_active()} by default.
@@ -40,18 +41,18 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' library(CytoExploreRData)
-#' 
+#'
 #' # Prepare Activation GatingSet
 #' gs <- GatingSet(Activation)
 #' gs <- cyto_compensate(gs)
 #' gs <- cyto_transform(gs)
-#' 
+#'
 #' # Write gatingTemplate to file
 #' cyto_gatingTemplate_create("gatingTemplate.csv", active = TRUE)
-#' 
+#'
 #' # Gate high quality events
 #' cyto_gate_clean(
 #'   gs,
@@ -92,8 +93,6 @@ cyto_gate_clean <- function(x,
                             slot = NULL,
                             ...) {
   
-  # TODO: DISPLAY REFERENCES HERE?
-  
   # CHECKS ---------------------------------------------------------------------
   
   # GATINGSET REQUIRED
@@ -117,7 +116,7 @@ cyto_gate_clean <- function(x,
   if(is.null(channels)) {
     channels <- cyto_channels(
       x,
-      exclude = c("Event", "Sample", "Time")
+      exclude = c("Event", "Sample")
     )
   } else {
     channels <- cyto_channels_extract(
@@ -148,13 +147,63 @@ cyto_gate_clean <- function(x,
     }
   }
   
+  # ALGORITHM REFERNCES --------------------------------------------------------
+  
+  # GATING MESSAGE
+  message(
+    paste0(
+      "Applying ", cyto_func_name(type), "() ", 
+      "anomaly detection algorithm to gate high ",
+      "quality events... \n",
+    )
+  )
+  
+  # DEFAULT ALGORITHM TYPES
+  if(is.character(type)) {
+    # FLOWAI
+    if(grepl("^FlowAI$, type, ignore.case = TRUE")) {
+      message(
+        paste0(
+          "Monaco G, Chen H, Poidinger M, Chen J,",
+          " de Magalhaes J, Larbi A (2016). flowAI:",
+          " automatic and interactive anomaly discerning",
+          " tools for flow cytometry data. Bioinformatics,",
+          " 32(16)."
+        )
+      )
+    # FLOWCUT
+    } else if(grepl("^FlowCut$", type, ignore.case = TRUE)) {
+      message(
+        paste0(
+          "Meskas J, Wang S, Brinkman R (2021). flowCut --- An R",
+          " Package for precise and accurate automated removal of",
+          " outlier events and flagging of files based on time",
+          " versus fluorescence analysis. bioRxiv"
+        )
+      )
+    # FLOWCLEAN
+    } else if(grepl("^FlowClean$", type, ignore.case = TRUE)) {
+      message(
+        paste0(
+          "Fletez-Brant K, Spidlen J, Brinkman R, Roederer M,",
+          " Chattopadhyay P (2016). flowClean: Automated",
+          " identification and removal of fluorescence anaomalies",
+          " in flow cytometry data. Cytometry A 89(5)"
+        )
+      )
+    # PEACOQC
+    } else if(grepl("^PeacoQC$", type, ignore.case = TRUE)) {
+      message(
+        paste0(
+          "Emmaneel A, et al. (2021) PeacoQC: peak-based selection of high ",
+          "quality cytometry data. Cytometry A."
+        )
+      )
+    }
+  }
+  
   # GATINGTEMPLATE ENTRIES -----------------------------------------------------
   
-  # MESSAGE
-  message(
-    "Applying anomaly detection algorithms to gate high quality events..."
-  )
-
   # APPLY GATES TO GATINGSET & CREATE GATINGTEMPLATE ENTRY
   pop <- suppressWarnings(
     suppressMessages(

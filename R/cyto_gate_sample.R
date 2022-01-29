@@ -148,8 +148,8 @@ cyto_gate_sample <- function(x,
         gs = x,
         alias = alias,
         parent = parent,
-        pop = "+",
-        dims = NA, # EMPTY DIM WARNING
+        pop = "*",
+        dims = "", # EMPTY DIMS
         gating_method = "cyto_gate_sample",
         gating_args = list(
           openCyto.minEvents = -1

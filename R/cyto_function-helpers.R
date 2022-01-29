@@ -1,3 +1,35 @@
+## CYTO_FUNC_NAME --------------------------------------------------------------
+
+#' Get the name of a function as a charcter string
+#'
+#' @param FUN character string or function for which the function name should be
+#'   extracted.
+#'
+#' @return a character string with the name of a function.
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @examples 
+#' cyto_func_name("stats::density")
+#'
+#' @export
+cyto_func_name <- function(FUN) {
+  
+  # FUNCTION -> CHARACTER
+  if(cyto_class(FUN, "function")) {
+    FUN <- as.character(
+      substitute(
+        FUN
+      )
+    )
+  # PARSE CHARACTER FUNCTION
+  } else {
+    FUN <- unlist(strsplit(FUN, ":{2,3}"))
+  }
+  return(FUN[length(FUN)])
+  
+}
+
 ## CYTO_FUNC_MATCH -------------------------------------------------------------
 
 #' Convert function name to valid function

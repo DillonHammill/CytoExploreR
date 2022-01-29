@@ -867,10 +867,11 @@ cyto_channel_match <- function(x,
   
   # SEARCH FOR FILE TO IMPORT DETAILS
   if(is.null(file)) {
+    # OLD CHANNEL-MATCH.CSV REQUIRES ROWNAMES
     # FILE SEARCH
     pd <- cyto_file_search(
-      "Details.csv$",
-      colnames = c("name", "group", "parent", "channel"),
+      "Details.csv$|Channel-Match.csv", # BACKWARDS COMPATIBLE
+      colnames = c("name", "channel"),# IGNORE PARENT & GROUP HERE
       rownames = rownames(cyto_details(x))
     )
     # NO DETAILS FOUND
@@ -1089,7 +1090,7 @@ cyto_channel_match <- function(x,
         file_names <- .cyto_string_strip(file_names)
       }
       # COMBINE MARKERS & CHANNELS FOR MATCHING - "MARKER CHANNEL"
-      channels <- unlist(
+      chans <- unlist(
         lapply(
           seq_along(channels),
           function(z) {
@@ -1109,7 +1110,7 @@ cyto_channel_match <- function(x,
                 ),
                 names = channel
               )
-              # NO MARKER
+            # NO MARKER
             } else {
               names(channel) <- channel # STORE CHANNEL NAME 
             }
@@ -1127,7 +1128,7 @@ cyto_channel_match <- function(x,
             # LOOP THROUGH MARKER/CHANNEL COMBOS
             channel_match_opts <- structure(
               lapply(
-                seq_along(channels),
+                seq_along(chans),
                 function(q) {
                   # SPLIT ALPHNUMERIC CHARACTERS - NO SUFFIX
                   channel_split <- strsplit(
@@ -1137,7 +1138,7 @@ cyto_channel_match <- function(x,
                       gsub(
                         "-A$|-H$|-W$",
                         "",
-                        channels[q]
+                        chans[q]
                       ),
                     ),
                     ""
@@ -1279,7 +1280,7 @@ cyto_channel_match <- function(x,
                   }
                 }
               ),
-              names = channels
+              names = chans
             )
             # TODO: MUST HAVE AT LEAST 2 CONSECUTIVE CHARACTERS FOR A MATCH
             # UPDATE CHANNEL_MATCH
@@ -1289,13 +1290,13 @@ cyto_channel_match <- function(x,
               )
               # MULTIPLE CHANNEL MATCHES - CHOOSE SHORTEST CHANNEL OPTION
               if(length(ind) > 0) {
-                ind <- ind[which.min(nchar(channels[ind]))]
+                ind <- ind[which.min(nchar(chans[ind]))]
                 # CANNOT ASSIGN CHANNELS WITH LENGTH - AMBIGUOUS
                 if(length(ind) == 1) {
                   pd[
                     match(names(file_names)[z], rownames(pd)),
                     "channel"
-                  ] <<- names(channels)[ind] # NEED TO STORE ORIGINAL CHANNELS
+                  ] <<- names(chans)[ind] # NEED TO STORE ORIGINAL CHANNELS
                 }
               }
             }
@@ -1346,7 +1347,7 @@ cyto_channel_match <- function(x,
     chans <- cyto_apply(
       cs_list,
       input = "matrix",
-      channels = names(channels),
+      channels = channels,
       FUN = function(z){
         # COMPUTE MEDFI
         res <- cyto_stat_quantile(
