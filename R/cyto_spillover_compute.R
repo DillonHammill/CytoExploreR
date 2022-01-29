@@ -727,11 +727,12 @@ cyto_spillover_compute <- function(x,
   }
   
   # EXPORT SPILLOVER MATRIX TO CSV FILE
-  if (!cyto_class(save_as, "character")) {
-    stop(
-      "'save_as' should be the name of a csv file."
-    )
-  } else {
+  if(!is.na(save_as)) {
+    if (!cyto_class(save_as, "character")) {
+      stop(
+        "'save_as' should be the name of a csv file."
+      )
+    }
     write_to_csv(
       spill_mat, 
       save_as,

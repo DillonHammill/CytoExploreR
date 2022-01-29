@@ -60,7 +60,7 @@ TRUE.}
 
 \item{compensated}{logical required for \code{cytoset} objects to indicate
 whether the data has already been compensated prior to plotting, set to
-TRUE by default.}
+FALSE by default.}
 
 \item{channel_match}{for internal use only.}
 

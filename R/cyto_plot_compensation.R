@@ -19,7 +19,7 @@
 #'   TRUE.
 #' @param compensated logical required for \code{cytoset} objects to indicate
 #'   whether the data has already been compensated prior to plotting, set to
-#'   TRUE by default.
+#'   FALSE by default.
 #' @param channel_match for internal use only.
 #' @param axes_trans object of class \code{transformerList} containing the
 #'   definitions of the transformations that have been applied to the data.
@@ -198,7 +198,7 @@ cyto_plot_compensation <- function(x,
   # TODO: BYPASS CHANNEL MATCHING FOR CYTO_SPILLOVER_EDIT()
   
   # CHANNEL MATCH - CYTO_SPILLOVER_EDIT()
-  if(length(x) == 1 & !.all_na(channel_match)) {
+  if(!.all_na(channel_match)) {
     pd <- channel_match
   } else {
     pd <- cyto_channel_match(
