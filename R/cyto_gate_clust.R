@@ -112,7 +112,6 @@ cyto_gate_clust <- function(x,
     # KMEANS
     } else if(grepl("^kmeans$", type, ignore.case = TRUE)) {
       # USES STATS::KMEANS()
-    # 
     }
   }
   

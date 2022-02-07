@@ -641,6 +641,8 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #' @param parent name of the parent population.
 #' @param alias name of the population of interest.
 #' @param gatingTemplate csv file name of the gatingTemplate.
+#' @param data.table logical indicating whether the checked gatingTemplate
+#'   should be returned as a \code{data.table}, set to TRUE by default.
 #'
 #' @return stops the gating process if an entry already exists in the
 #'   gatingTemplate for the supplied alias.
@@ -650,40 +652,82 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #' @noRd
 .cyto_gatingTemplate_check <- function(parent,
                                        alias,
-                                       gatingTemplate = NULL) {
+                                       gatingTemplate = NULL,
+                                       data.table = TRUE) {
   
   # BYPASS CHECKS - GATINGTEMPLATE DOES NOT EXIST
   gt <- tryCatch(
     suppressWarnings(
-      cyto_gatingTemplate_read(gatingTemplate)
-      ),
+      cyto_gatingTemplate_read(
+        gatingTemplate,
+        parse = TRUE,
+        data.table = TRUE
+      )
+    ),
     error = function(e) {
       NULL
     }
   )
+  
   # MATCHING PARENT & ALIAS
   if (!is.null(gt)) {
-    if (parent %in% gt$parent) {
-      gt_chunk <- gt[gt$parent == parent, ]
-      gt_alias <- lapply(gt_chunk$alias, function(z) {
-        unlist(strsplit(as.character(z), ","))
-      })
-      lapply(gt_alias, function(z) {
-        if (any(alias %in% z)) {
-          message(
-            paste(alias[alias %in% z], collapse = " & "),
-            " already exists in ",
-            gatingTemplate, "."
-          )
-          stop(paste(
-            "Supply another gatingTemplate",
-            "or edit gate(s) using cyto_gate_edit()."
-          ))
-        }
-      })
+    if(nrow(gt) > 0 ){
+      gt_chunk <- gt[
+        LAPPLY(
+          seq_len(nrow(gt)),
+          function(z) {
+            all(parent %in% unlist(strsplit(gt$parent[z], ",")))
+          }
+        ),
+        , drop = FALSE
+      ]
+      # CHECK ALIAS
+      if(nrow(gt_chunk) > 0) {
+        lapply(
+          seq_len(nrow(gt_chunk)),
+          function(z) {
+            pops <- unlist(strsplit(gt_chunk$alias[z], ","))
+            if(!is.null(alias)) {
+              if(any(alias %in% pops)) {
+                # POPULATION(S) EXIST
+                message(
+                  paste0(
+                    "The following population(s) already exist in this ",
+                    ifelse(
+                      is.character(gatingTemplate),
+                      gatingTemplate,
+                      "gatingTemplate"
+                    ), ": \n",
+                    paste0(
+                      alias[alias %in% pops],
+                      collapse = "\n"
+                    )
+                  )
+                )
+                # ERROR
+                stop(
+                  paste0(
+                    "Supply another gatingTemplate or edit existing gate(s) ",
+                    "using cyto_gate_edit()."
+                  )
+                )
+              }
+            }
+          }
+        )
+      }
     }
+    # RETURN UNPARSED GATINGTEMPLATE
+    gt <- cyto_gatingTemplate_read(
+      gatingTemplate,
+      parse = FALSE,
+      data.table = data.table
+    )
   }
+  
+  # GATINGTEMPLATE
   return(gt)
+  
 }
 
 ## CYTO_GATINGTEMPLATE_READ ----------------------------------------------------
@@ -702,7 +746,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #' @param ... additional arguments passed to
 #'   \code{\link[data.table:fread]{fread}}.
 #'
-#' @importFrom data.table as.data.table
+#' @importFrom data.table as.data.table 
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -743,11 +787,26 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
   # GATINGTEMPLATE
   if(cyto_class(gatingTemplate, "gatingTemplate")){
     gt <- as.data.table(gatingTemplate)
-  } else {
+  # DATA.TABLE OR DATA.FRAME
+  } else if( cyto_class(gatingTemplate, c("data.table", "data.frame"))) {
+    gt <- gatingTemplate
+    if(!cyto_class(gt, "data.table")){
+      gt <- as.data.table(gt)
+    } 
+  # FILE NAME
+  } else if(cyto_class(gatingTemplate, "character")) {
     gt <- read_from_csv(
       gatingTemplate,
       data.table = TRUE,
       ...
+    )
+  # UNSUPPORTED GATINGTEMPLATE
+  } else {
+    stop(
+      paste0(
+        "'gatingTemplate' must be either a name of a CSV file, a ",
+        "gatingTremplate or a data.table."
+      )
     )
   }
   
