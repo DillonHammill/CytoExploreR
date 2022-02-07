@@ -25,7 +25,8 @@ cyto_merge_by(
 
 \item{merge_by}{vector of \code{\link{cyto_details}} column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
-prior to merging.}
+prior to merging. Set this argument to \code{"all"} or \code{NA} to merge
+all samples.}
 
 \item{select}{selection criteria passed to \code{\link{cyto_select}} which
 indicates which samples in each group to retain prior to merging, set to

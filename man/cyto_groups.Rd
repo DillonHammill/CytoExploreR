@@ -4,7 +4,7 @@
 \alias{cyto_groups}
 \title{Retrieve details about experimental groups}
 \usage{
-cyto_groups(x, group_by = "all", details = FALSE, select = NULL)
+cyto_groups(x, group_by = "all", details = FALSE, select = NULL, sep = " ")
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
@@ -12,7 +12,9 @@ cyto_groups(x, group_by = "all", details = FALSE, select = NULL)
 
 \item{group_by}{names of cyto_details variables to use for grouping For more
 control over the group order, specify the factor levels for each variable
-in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
+in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+Set this argument to \code{"all"} or \code{NA} to place all samples within
+the same group.}
 
 \item{details}{logical indicating whether the split experimental details
 should be returned instead of the group names, set to FALSE by default.}
@@ -20,6 +22,10 @@ should be returned instead of the group names, set to FALSE by default.}
 \item{select}{vector of indices or named list containing experimental
 variables passed to \code{\link{cyto_select}} to be used to select samples
 prior to retrieving group-wise experimental details.}
+
+\item{sep}{indicates the separator to use when constructing new group names
+from multiple variables, set to \code{" "} by default. For compatibility
+with openCyto, we can set \code{sep = ":"}.}
 }
 \value{
 names of experimental groups or a list of experiment details per

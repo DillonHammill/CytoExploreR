@@ -2981,11 +2981,16 @@ cyto_select <- function(x,
 #' @param group_by names of cyto_details variables to use for grouping For more
 #'   control over the group order, specify the factor levels for each variable
 #'   in a list (e.g. list(Treatment = c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#'   Set this argument to \code{"all"} or \code{NA} to place all samples within
+#'   the same group.
 #' @param details logical indicating whether the split experimental details
 #'   should be returned instead of the group names, set to FALSE by default.
 #' @param select vector of indices or named list containing experimental
 #'   variables passed to \code{\link{cyto_select}} to be used to select samples
 #'   prior to retrieving group-wise experimental details.
+#' @param sep indicates the separator to use when constructing new group names
+#'   from multiple variables, set to \code{" "} by default. For compatibility
+#'   with openCyto, we can set \code{sep = ":"}.
 #'
 #' @return names of experimental groups or a list of experiment details per
 #'   experimental group.
@@ -3019,7 +3024,8 @@ cyto_select <- function(x,
 cyto_groups <- function(x, 
                         group_by = "all",
                         details = FALSE,
-                        select = NULL){
+                        select = NULL,
+                        sep = " "){
   
   # Check class of x
   if (!cyto_class(x, c("flowSet", "GatingSet"))) {
@@ -3082,13 +3088,20 @@ cyto_groups <- function(x,
     group_by <- names(group_by)
     # group_by is a vector of variable names
   } else {
+    # GROUP_BY = NA
+    if(.all_na(group_by)) {
+      group_by <- "all"
+    }
     # Check variables
-    if (group_by[1] != "all" & !all(group_by %in% colnames(pd))) {
-      lapply(group_by, function(y) {
-        if (!y %in% colnames(pd)) {
-          stop(paste0(y, " is not a valid variable for this ", class(x), "."))
+    if(!all(group_by %in% "all") & !all(group_by %in% colnames(pd))) {
+      lapply(
+        group_by, 
+        function(y) {
+          if (!y %in% colnames(pd)) {
+            stop(paste0(y, " is not a valid variable for this ", class(x), "."))
+          }
         }
-      })
+      )
     }
   }
   
@@ -3102,17 +3115,19 @@ cyto_groups <- function(x,
       })
       names(pd_split) <- cyto_names(x)
     } else {
-      pd_split <- split(pd, pd[, group_by],
-                        sep = " ",
-                        lex.order = TRUE,
-                        drop = TRUE
+      pd_split <- split(
+        pd, pd[, group_by],
+        sep = sep,
+        lex.order = TRUE,
+        drop = TRUE
       )
     }
   } else {
-    pd_split <- split(pd, pd[, group_by],
-                      sep = " ",
-                      lex.order = TRUE,
-                      drop = TRUE
+    pd_split <- split(
+      pd, pd[, group_by],
+      sep = sep,
+      lex.order = TRUE,
+      drop = TRUE
     )
   }
   
@@ -3170,10 +3185,12 @@ cyto_sort_by <- function(x,
                          select = NULL) {
   
   # Experiment details per group
-  pd_split <- cyto_groups(x,
-                          select = select,
-                          group_by = sort_by,
-                          details = TRUE)
+  pd_split <- cyto_groups(
+    x,
+    select = select,
+    group_by = sort_by,
+    details = TRUE
+  )
   
   # Combine pd
   pd <- do.call("rbind", pd_split)
@@ -3195,7 +3212,8 @@ cyto_sort_by <- function(x,
 #' @param group_by names of cyto_details variables to use for merging, set to
 #'   "all" to group all samples in \code{x}. The order of the grouping can be
 #'   controlled by specifying the factor levels in a list (e.g. list(Treatment =
-#'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))).
+#'   c("Stim-A","Stim-C","Stim-B", "Stim-D"))). Set this argument to
+#'   \code{"all"} or \code{NA} to place all samples within the same group.
 #' @param select vector of indices or named list containing experimental
 #'   variables passed to \code{\link{cyto_select}} to be used to select samples
 #'   prior to grouping.
@@ -3215,7 +3233,7 @@ cyto_sort_by <- function(x,
 #'
 #' # Group GatingSet by Treatment and OVAConc
 #' cyto_group_by(gs, c("Treatment", "OVAConc"))
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @rdname cyto_group_by
@@ -3231,16 +3249,21 @@ cyto_group_by <- function(x,
                           select = NULL) {
   
   # Experiment details per group
-  pd_split <- cyto_groups(x, 
-                          select = select,
-                          group_by = group_by,
-                          details = TRUE)
+  pd_split <- cyto_groups(
+    x, 
+    select = select,
+    group_by = group_by,
+    details = TRUE
+  )
   
   # Replace each element of pd_split with matching samples
-  x_list <- lapply(seq_len(length(pd_split)), function(z) {
-    ind <- match(rownames(pd_split[[z]]), rownames(cyto_details(x)))
-    x[ind]
-  })
+  x_list <- lapply(
+    seq_len(length(pd_split)), 
+    function(z) {
+      ind <- match(rownames(pd_split[[z]]), rownames(cyto_details(x)))
+      x[ind]
+    }
+  )
   names(x_list) <- names(pd_split)
   
   return(x_list)
@@ -3264,7 +3287,8 @@ cyto_group_by <- function(x,
 #'   \code{"root"} node by default.
 #' @param merge_by vector of \code{\link{cyto_details}} column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
-#'   prior to merging.
+#'   prior to merging. Set this argument to \code{"all"} or \code{NA} to merge
+#'   all samples.
 #' @param select selection criteria passed to \code{\link{cyto_select}} which
 #'   indicates which samples in each group to retain prior to merging, set to
 #'   NULL by default to merge all samples in each group. Filtering steps should
@@ -3317,9 +3341,11 @@ cyto_merge_by <- function(x,
   # EXTRACT DATA ---------------------------------------------------------------
   
   # CYTOSET
-  x <- cyto_data_extract(x,
-                         parent = parent,
-                         copy = FALSE)[[1]]
+  x <- cyto_data_extract(
+    x,
+    parent = parent,
+    copy = FALSE
+  )[[1]]
   
   # BARCODING ------------------------------------------------------------------
   
@@ -3331,8 +3357,10 @@ cyto_merge_by <- function(x,
   # GROUPING -------------------------------------------------------------------
   
   # CYTO_GROUP_BY
-  cs_list <- cyto_group_by(x, 
-                           group_by = merge_by)
+  cs_list <- cyto_group_by(
+    x, 
+    group_by = merge_by
+  )
   
   # COMBINED EVENTS
   if ("all" %in% names(cs_list)) {
@@ -3343,11 +3371,15 @@ cyto_merge_by <- function(x,
   
   # ATTEMPT SELECTION OR RETURN ALL SAMPLES
   if (!is.null(select)) {
-    cs_list <- lapply(cs_list, function(z) {
-      tryCatch(cyto_select(z, select), error = function(e) {
-        z
-      })
-    })
+    cs_list <- lapply(
+      cs_list, 
+      function(z) {
+        tryCatch(cyto_select(z, select), error = function(e) {
+          z
+          }
+        )
+      }
+    )
   }
   
   # MERGING --------------------------------------------------------------------

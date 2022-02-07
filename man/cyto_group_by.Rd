@@ -13,7 +13,8 @@ cyto_group_by(x, group_by = "all", select = NULL)
 \item{group_by}{names of cyto_details variables to use for merging, set to
 "all" to group all samples in \code{x}. The order of the grouping can be
 controlled by specifying the factor levels in a list (e.g. list(Treatment =
-c("Stim-A","Stim-C","Stim-B", "Stim-D"))).}
+c("Stim-A","Stim-C","Stim-B", "Stim-D"))). Set this argument to
+\code{"all"} or \code{NA} to place all samples within the same group.}
 
 \item{select}{vector of indices or named list containing experimental
 variables passed to \code{\link{cyto_select}} to be used to select samples
