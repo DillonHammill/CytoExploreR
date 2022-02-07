@@ -38,6 +38,9 @@ cyto_gate_clust <- function(x,
     channels <- cyto_channels_extract(x, channels = channels)
   }
   
+  # CURRENT NODES
+  nodes <- cyto_nodes(x, path = "auto")
+  
   # GATINGTEMPLATE CHECKS
   if(cyto_class(x, "GatingSet")) {
     # ACTIVE GATINGTEMPLATE
@@ -164,8 +167,20 @@ cyto_gate_clust <- function(x,
     )
   )
   
-  # UPDATE ALIAS IN GATING_ARGS
+  # NEW NODES
+  new_nodes <- cyto_nodes(x, path = "auto")
+  new_nodes <- new_nodes[!new_nodes %in% nodes]
   
+  # EXTRACT GATING ARGUMENTS
+  gating_args <- eval(
+    parse(
+      text = paste0("list(", pop$gating_args, ")")
+    )
+  )
+  
+  # UPDATE ALIAS IN GATING_ARGS
+  gating_args$alias <- paste0(new_nodes, collapse = ",")
+  pop$gating_args <- CytoExploreR_.argDeparser(gating_args)
   
   # ADD POPULATIONS TO GATINGTEMPLATE
   gt <- rbind(gt, pop)
@@ -255,6 +270,7 @@ cyto_gate_clust <- function(x,
                              ...){
   
   # TODO: ADD FRAMEID TO FILTERRESULTS?
+  # TODO: APPLY GATE TO NEW DATA - RESET ALIAS?
   
   # BYPASS EMPTY CYTOFRAME
   if(nrow(fr) == 0) {
@@ -408,23 +424,22 @@ cyto_gate_clust <- function(x,
     `levels<-` (addNA(gate), c(levels(gate), 0))
   }
   
-  # DEFAULT CLUSTER LABELS - FUNCTION NAME
-  if(is.null(alias)) {
+  # ALIAS
+  if(length(alias) == 0) {
     alias <- cyto_func_name(type)
-  } else if(length(alias) > 1) {
-    stop(
+  } else if(length(alias) == 1) {
+    alias <- unlist(strsplit(alias, ","))
+  } 
+  
+  # ALIAS LENGTH CHANGED - APPLY GATINGTEMPLATE TO NEW DATA
+  if(length(alias) > 1 & length(alias) != length(levels(gate))) {
+    warning(
       paste0(
-        "Please supply a single 'alias' to be appended with integers ",
-        "after gating."
+        "'alias' is of the incorrect length - naming the clustered ",
+        "populations with the name of the clustering function instead."
       )
     )
-  }
-
-  # ERROR ALIAS INCORRECT
-  if(!length(alias) %in% c(1, length(levels(gate)))) {
-    stop(
-      "'alias' must be supplied per population or as a single name!"
-    )
+    alias <- cyto_func_name(type)
   }
   
   # PREPARE ALIAS
@@ -447,7 +462,7 @@ cyto_gate_clust <- function(x,
     # ALIAS - INDEX
     alias <- paste0(alias, "-", seq(index + 1, index + length(levels(gate))))
   }
-
+  
   # LABEL CLUSTERS IN SIZE ORDER -> LARGEST TO SMALLEST
   levels(gate)[order(table(gate))] <- alias
   
