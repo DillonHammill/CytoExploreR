@@ -434,12 +434,12 @@ cyto_gate_draw <- function(x,
   # PREPARE GROUP_BY
   if(all(is.character(merge_by))) {
     if(all(merge_by == "all")) {
-      group_by <- "NA"
+      group_by <- NA
     } else {
       group_by <- paste(merge_by, collapse = ":")
     }
   } else {
-    group_by <- "NA"
+    group_by <- NA
   }
   
   # gs_add_gating_method - GATINGTEMPLATE ENTRY & APPLY TO GATINGSET
