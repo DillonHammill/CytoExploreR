@@ -6,10 +6,11 @@
 \usage{
 cyto_spillover_edit(
   x,
-  parent = "root",
-  channel_match = NULL,
-  spill = NULL,
+  select = NULL,
+  channels = NULL,
+  channel_match = TRUE,
   spillover = NULL,
+  compensated = FALSE,
   save_as = NULL,
   axes_trans = NA,
   axes_limits = "machine",
@@ -26,26 +27,24 @@ cyto_spillover_edit(
 \arguments{
 \item{x}{an object of class \code{flowSet} or \code{GatingSet}.}
 
-\item{parent}{name of the parent population to plot when a \code{GatingSet}
-object is supplied.}
+\item{select}{named list containing experimental variables to be used to
+select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+\code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+details.}
 
-\item{channel_match}{name of csv file matching the name of each sample to a
-fluorescent channel. The \code{channel_match} file must contain the columns
-"name" and "channel". The \code{channel_match} file not required to use
-\code{cyto_spillover_edit} but is used internally to automatically select
-channels associated with the selected samples.}
+\item{channel_match}{logical indicating whether a call should be made to
+\code{cyto_channel_match()} to automatically detect an appropriate parental
+population for each control and to match each sample with a fluorescent
+channel. \code{channel_match} is set to TRUE by default, users can set this
+argument to FALSE if they supply samples stained with multiple antibodies.}
 
-\item{spill}{name of a square spillover matrix csv file or spillover matrix
+\item{spillover}{name of a square spillover matrix csv file or spillover matrix
 to edit. Setting \code{spill} to NULL (the default) will result in
 extraction of the spillover matrix generated on the cytometer which is
 attached to the samples. Similarly, if the supplied spillover matrix csv
 file does not exist, the spillover matrix attached to the first sample will
 be used and the edited spillover matrix will be saved to the specified
 file.}
-
-\item{spillover}{added for backwards compatibility with older versions of
-CytoExploreR, this performs the same operations as \code{spill} but will be
-eventually phased out in favour of the more concise \code{spill} argument.}
 
 \item{save_as}{name of a csv file to which the edited spillover matrix should
 be written, set to \code{Spillover-Matrix.csv} prefixed with the date by

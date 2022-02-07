@@ -37,23 +37,22 @@
 #' not specified or to the same name as the specified \code{spillover}.
 #'
 #' @param x an object of class \code{flowSet} or \code{GatingSet}.
-#' @param parent name of the parent population to plot when a \code{GatingSet}
-#'   object is supplied.
-#' @param channel_match name of csv file matching the name of each sample to a
-#'   fluorescent channel. The \code{channel_match} file must contain the columns
-#'   "name" and "channel". The \code{channel_match} file not required to use
-#'   \code{cyto_spillover_edit} but is used internally to automatically select
-#'   channels associated with the selected samples.
-#' @param spill name of a square spillover matrix csv file or spillover matrix
+#' @param select named list containing experimental variables to be used to
+#'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
+#'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
+#'   details.
+#' @param channel_match logical indicating whether a call should be made to
+#'   \code{cyto_channel_match()} to automatically detect an appropriate parental
+#'   population for each control and to match each sample with a fluorescent
+#'   channel. \code{channel_match} is set to TRUE by default, users can set this
+#'   argument to FALSE if they supply samples stained with multiple antibodies.
+#' @param spillover name of a square spillover matrix csv file or spillover matrix
 #'   to edit. Setting \code{spill} to NULL (the default) will result in
 #'   extraction of the spillover matrix generated on the cytometer which is
 #'   attached to the samples. Similarly, if the supplied spillover matrix csv
 #'   file does not exist, the spillover matrix attached to the first sample will
 #'   be used and the edited spillover matrix will be saved to the specified
 #'   file.
-#' @param spillover added for backwards compatibility with older versions of
-#'   CytoExploreR, this performs the same operations as \code{spill} but will be
-#'   eventually phased out in favour of the more concise \code{spill} argument.
 #' @param save_as name of a csv file to which the edited spillover matrix should
 #'   be written, set to \code{Spillover-Matrix.csv} prefixed with the date by
 #'   default.
@@ -105,10 +104,11 @@
 #'
 #' @export
 cyto_spillover_edit <- function(x,
-                                parent = "root",
-                                channel_match = NULL,
-                                spill = NULL,
+                                select = NULL,
+                                channels = NULL,
+                                channel_match = TRUE,
                                 spillover = NULL,
+                                compensated = FALSE,
                                 save_as = NULL,
                                 axes_trans = NA,
                                 axes_limits ="machine",
@@ -131,186 +131,163 @@ cyto_spillover_edit <- function(x,
   }
   
   # COPY
-  x <- cyto_copy(x)
+  x <- cyto_copy(
+    cyto_select(
+      x,
+      select
+    )
+  )
   
   # CHANNELS
-  channels <- cyto_fluor_channels(x)
+  if(is.null(channels)) {
+    channels <- cyto_fluor_channels(x)
+    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+  } else {
+    channels <- cyto_channels_extract(x, channels)
+  }
+
+  # SAMPLE NAMES
+  nms <- cyto_names(x)
   
   # EXPERIMENT DETAILS
   pd <- cyto_details(x)
   
-  # SAMPLE NAMES
-  nms <- cyto_names(x)
-  
-  # CHANNEL_MATCH - EXPERIMENT DETAILS
-  if(any(grepl("channel", colnames(pd), ignore.case = TRUE))) {
-    # MARKERS TO CHANNELS
-    ind <- which(grepl("channel", colnames(pd), ignore.case = TRUE))
-    pd[, "channel"] <- LAPPLY(pd[, ind], function(z) {
-      if (!grepl("unstained", z, ignore.case = TRUE)) {
-        return(cyto_channels_extract(x, z))
-      } else {
-        return(z)
+  # INTERACTIVE CHANNEL_MATCH
+  if(isTRUE(channel_match) | is.character(channel_match)) {
+    pd <- cyto_channel_match(
+      x,
+      channels = channels,
+      file = if(isTRUE(channel_match)) {
+        NULL
+      } else{
+        channel_match
       }
-    })
-  # CHANNEL_MATCH - MANUALLY SUPPLIED
+    )
+    pd <- pd[match(rownames(cyto_details(x)), rownames(pd)), , drop = FALSE]
+  # BYPASS CHANNEL_MATCH
   } else {
-    if(!is.null(channel_match)) {
-      # CHANNEL MATCH - MATRIX/DATA.FRAME
-      if(cyto_class(channel_match, c("data.frame",
-                                     "matrix",
-                                     "tibble"))) {
-        if(!all(c("name", "channel") %in% colnames(channel_match))) {
-          stop(
-            "'channel_match' must contain columns 'name' and 'channel'!"
-          )
+    # BYPASS CYTO_CHANNEL_MATCH TO ALLOW FULL STAINED SAMPLES
+    lapply(
+      c("group", "parent", "channel"),
+      function(z) {
+        if(!z %in% colnames(pd)) {
+          if(z == "parent") {
+            pd[, z] <<- rep("root", nrow(pd))
+          } else {
+            pd[, z] <<- rep(NA, nrow(pd))
+          }
         }
-      # CHANNEL_MATCH FILENAME
-      } else {
-        channel_match <- read_from_csv(channel_match)
       }
-      # UPDATE EXPERIMENT DETAILS - CHANNEL SELECTION
-      pd$channel <- rep(NA, nrow(pd))
-      lapply(nms, function(z) {
-        if (z %in% channel_match$name) {
-          chn <- channel_match$channel[match(z, channel_match$name)]
-          pd[match(z, pd$name), "channel"] <<- chn
-        }
-      })
-    # CHANNEL_MATCH - NOT SUPPLIED
-    } else {
-      # LEAVE ALONE
-      # pd$channel = NULL
-      # pd$channel[c(1:4)] = NULL
-    }
+    )
   }
-  
-  # PARENT  
-  if (is.null(parent)) {
-    if (!"parent" %in% colnames(pd)) {
-      if (!is.null(channel_match)) {
-        if ("parent" %in% colnames(channel_match)) {
-          pd[match(channel_match[, "name"],rownames(pd)), "parent"] <- 
-            channel_match[, "parent"]
-        } else {
-          nodes <- cyto_nodes(x, path = "auto")
-          parent <- rep(nodes[length(nodes)], length(x))
-          pd[, "parent"] <- parent
-        }
-      } else {
-        nodes <- cyto_nodes(x, path = "auto")
-        parent <- rep(nodes[length(nodes)], length(x))
-        pd[, "parent"] <- parent
-      }
-    }
-  } else {
-    parent <- rep(parent, length.out = length(x))
-    pd[, "parent"] <- parent
-  }
+
+  # UPDATE EXPERIMENT DETAILS
   cyto_details(x) <- pd
   
-  # UNCOMPENSATED/TRANSFORMED & LINEAR GATINGSET
-  if(cyto_class(x, "GatingSet")) {
-    # TRANSFORMERS
+  # TRANSFORMERS
+  if(.all_na(axes_trans)) {
     axes_trans <- cyto_transformers_extract(x)
-    cs <- cyto_data_extract(
-      x, 
+  }
+  
+  # APPLIED TRANSFORMERS
+  if(!.all_na(axes_trans)) {
+    attributes(axes_trans)$applied <- TRUE
+  }
+  
+  # DEFAULT TRANSFORMERS
+  if(.all_na(axes_trans)) {
+    axes_trans <- cyto_transformers_define(
+      x,
       parent = "root",
-      copy = FALSE
-    )[[1]]
-    # COMPENSATION
-    comp <- cyto_spillover_extract(x)
-    # COMPENSATED GATINGSET
-    if(!is.null(comp)) {
-      # REVERSE TRANSFORMATIONS
-      if(!.all_na(axes_trans)) {
-        trans <- axes_trans[match_ind(channels, names(axes_trans))]
-        trans <- cyto_transformers_combine(trans)
-        cs <- cyto_transform(cs, 
-                             trans = trans, 
-                             inverse = TRUE, 
-                             plot = FALSE,
-                             quiet = TRUE)
-      }
-      # REMOVE COMPENSATION
-      cs <- cyto_compensate(cs, 
-                            spillover = comp,
-                            remove = TRUE)
-      # GET DEFAULT TRANSFORMERS
-      if (.all_na(axes_trans)) {
-        axes_trans <- cyto_transformers_define(x,
-                                               channels = channels,
-                                               type = "biex",
-                                               plot = FALSE)
-      }
-      # RE-APPLY TRANSFORMATIONS
-      trans <- axes_trans[match_ind(channels, names(axes_trans))]
-      trans <- cyto_transformers_combine(trans)
-      cs <- cyto_transform(cs,
-                           trans = trans,
-                           plot = FALSE,
-                           quiet = TRUE)
-      # REPLACE DATA
-      gs_cyto_data(x) <- cs
-    # UNCOMPENSATED GATINGSET
-    } else {
-      # UNTRANSFOMED GATINGSET
-      if (.all_na(axes_trans)) {
-        # GET DEFAULT TRANSFORMERS
-        axes_trans <- cyto_transformers_define(x,
-                                               channels = channels,
-                                               type = "biex",
-                                               plot = FALSE)
-        # RE-APPLY TRANSFORMATIONS
-        trans <- axes_trans[match_ind(channels, names(axes_trans))]
-        trans <- cyto_transformers_combine(trans)
-        cs <- cyto_transform(cs,
-                             trans = trans,
-                             plot = FALSE,
-                             quiet = TRUE)
-        # REPLACE DATA
-        gs_cyto_data(x) <- cs
-      }
-    }
-    # LINEAR UNTRANSFORMED GATINGSET
-    if (!.all_na(axes_trans)) {
-      # GS TRANSFORMED & UNCOMPENSATED
-      x_linear <- cyto_copy(x)
-      cs <- cyto_data_extract(x_linear, "root")[[1]]
-      # INVERSE TRANSFORMATIONS
-      trans <- axes_trans[match_ind(channels, names(axes_trans))]
-      trans <- cyto_transformers_combine(trans)
-      cs <- cyto_transform(cs,
-                           trans = trans,
-                           inverse = TRUE,
-                           plot = FALSE,
-                           quiet = TRUE)
-      # REPLACE DATA
-      gs_cyto_data(x_linear) <- cs
-    }
-  # UNCOMPENSATED/TRANSFORMED & LINEAR CYTOSET
+      channels = channels,
+      type = "biex",
+      plot = FALSE
+    )
+    attributes(axes_trans)$applied <- FALSE
+  }
+  
+  # APPLIED SPILLOVER MATRICES
+  if(cyto_class(x, "GatingSet")) {
+    spill <- cyto_spillover_extract(x)
   } else {
-    # LINEAR DATA
-    if(.all_na(axes_trans)) {
-      x_linear <- cyto_copy(x)
-      axes_trans <- cyto_transformers_define(x,
-                                             channels = channels,
-                                             type = "biex",
-                                             plot = FALSE)
-      x <- cyto_transform(x,
-                          trans = axes_trans,
-                          plot = FALSE,
-                          quiet = TRUE)
-    # TRANSFORMED DATA
+    # CYTOSET COMPENSATION FLAG
+    if(compensated) {
+      spill <- cyto_spillover_extract(x)
     } else {
-      trans <- axes_trans[match_ind(channels, names(axes_trans))]
-      trans <- cyto_transformers_combine(trans)
-      x_linear <- cyto_transform(cyto_copy(x),
-                                 trans = trans,
-                                 inverse = TRUE,
-                                 plot = FALSE,
-                                 quiet = TRUE)
+      spill <- NULL
     }
+  }
+  
+  # DEFAULT SPILLOVER MATRIX TO EDIT
+  if(is.null(spillover)) {
+    # ATTEMPT TO EXTRACT SPILLOVER MATRIX FROM CYTOSET
+    spillover <- cyto_spillover_extract(
+      cyto_data_extract(
+        x,
+        parent = "root",
+        format = "cytoset",
+        copy = FALSE
+      )[[1]]
+    )
+    # NO SPILLOVER MATRIX FOUND
+    if(!is.null(spillover)) {
+      spillover <- spillover[!LAPPLY(spillover, "is.null")][[1]]
+    # TEMPLATE SPILLOVER MATRIX
+    } else {
+      spillover <- matrix(
+        0,
+        nrow = length(channels),
+        ncol = length(channels),
+        dimnames = list(
+          channels,
+          channels
+        )
+      )
+      diag(spillover) <- 1
+    }
+  # PREPARE SUPPLIED SPILLOVER MATRIX
+  } else {
+    spillover <- .cyto_spillover_prepare(
+      x,
+      spillover = spillover
+    )[[1]]
+  }
+  
+  # X -> LINEAR SCALE
+  if(attributes(axes_trans)$applied & any(channels %in% names(axes_trans))) {
+    x <- cyto_transform(
+      x,
+      trans = cyto_transformers_combine(
+        axes_trans[match_ind(channels, names(axes_trans))]
+      ),
+      inverse = TRUE,
+      copy = TRUE,
+      plot = FALSE,
+      quiet = TRUE
+    )
+  }
+  # X -> DECOMPENSATE
+  if(!is.null(spill)) {
+    x <- cyto_compensate(
+      x,
+      spillover = spill,
+      remove = TRUE
+    )
+  }
+  # X - LINEAR UNCOMPENSATED
+  x_linear <- cyto_copy(x)
+  # X - TRANSFORMED UNCOMPENSATED
+  if(any(channels %in% names(axes_trans))) {
+    x <- cyto_transform(
+      x,
+      trans = cyto_transformers_combine(
+        axes_trans[match_ind(channels, names(axes_trans))]
+      ),
+      inverse = FALSE,
+      copy = FALSE,
+      plot = FALSE,
+      quiet = TRUE
+    )
   }
   
   # SHINY DEFAULTS -------------------------------------------------------------
@@ -352,25 +329,17 @@ cyto_spillover_edit <- function(x,
                            plots_opts_select)
   }
   
-  # SPILL - BACKWARDS COMPATIBILITY
-  if(!is.null(spillover)) {
-    spill <- spillover
-    message(
-      paste0(
-        "'spillover' is now deprecated in favour of the more concise 'spill' ",
-        "argument. Please pass your spillover matrix to 'spill' instead."
-      )
-   )
-  }
-  
   # SAVE_AS
-  if(is.character(spill)) {
-      save_as <- spill
-  } else {
-    save_as <- paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-", "Spillover-Matrix.csv"
-    )
+  if(is.null(save_as)) {
+    # USE SPILLOVER FILE NAME
+    if(is.character(spillover)) {
+      save_as <- spillover
+    } else {
+      save_as <- paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-", "Spillover-Matrix.csv"
+      )
+    }
   }
   
   # SHINY APPLICATION ----------------------------------------------------------
@@ -396,10 +365,12 @@ cyto_spillover_edit <- function(x,
           sidebarLayout(
             sidebarPanel(
               width = 3,
-              dataSelectUI("editor_select_unst",
+              cytoSelectUI("editor_select_unst",
                            label = "Select unstained sample:"),
-              dataSelectUI("editor_select",
+              cytoSelectUI("editor_select",
                            label = "Select sample:"),
+              nodeSelectUI("editor_node_select",
+                           label = "Select parent:"),
               channelSelectUI("editor_xchannel",
                               label = "X axis:"),
               channelSelectUI("editor_ychannel",
@@ -436,10 +407,12 @@ cyto_spillover_edit <- function(x,
           sidebarLayout(
             sidebarPanel(
               width = 3,
-              dataSelectUI("plots_select_unst",
+              cytoSelectUI("plots_select_unst",
                            label = "Select unstained sample:"),
-              dataSelectUI("plots_select",
+              cytoSelectUI("plots_select",
                            label = "Select sample:"),
+              nodeSelectUI("plots_node_select",
+                           label = "Select parent:"),
               channelSelectUI("plots_xchannel",
                               label = "Channel:"),
               optionsUI("plots_options",
@@ -458,9 +431,9 @@ cyto_spillover_edit <- function(x,
             ),
             mainPanel(
               width = 9,
-              # compPlotUI(
-              #   "plots"
-              # )
+              compPlotUI(
+                "plots"
+              )
             )
           )
         )
@@ -486,10 +459,37 @@ cyto_spillover_edit <- function(x,
         plots_opts_select = plots_opts_select
       )
       
+      # PARENT -----------------------------------------------------------------
+      
+      # PARENT DROPDOWN
+      editor_parent <- nodeSelectServer(
+        "editor_node_select",
+        data = reactive(x),
+        selected = reactive(values$parent)
+      )
+      
+      # PARENT MANUALLY SELECTED
+      observe({
+        values$parent <- editor_parent()
+      })
+      
+      # PARENT INHERITED FROM SELECTED SAMPLE
+      observe({
+        if(!.empty(ID(), null = TRUE)) {
+          values$parent <- cyto_details(
+            cyto_select(
+              x,
+              ID(),
+              exact = TRUE
+            )
+          )$parent
+        }
+      })
+      
       # UNSTAINED CONTROL ------------------------------------------------------
       
       # NAME - UNSTAINED CONTROL
-      NIL <- dataSelectServer(
+      NIL <- cytoSelectServer(
         "editor_select_unst", 
         data = reactive(x),
         choices = "None",
@@ -515,23 +515,27 @@ cyto_spillover_edit <- function(x,
             parent = values$parent,
             copy = TRUE
           )[[1]]
-          # TRANSFORMERS
-          trans <- axes_trans[match_ind(channels, names(axes_trans))]
-          trans <- cyto_transformers_combine(trans)
-          # COMPENSATE & TRANSFORM
-          values$NIL_comp_trans <- cyto_transform(
-            if(!is.null(values$spill)){
-              cyto_compensate(
-                NIL_linear,
-                values$spill
-              )
-            } else {
-              NIL_linear
-            },
-            trans = trans,
-            plot = FALSE,
-            quiet = TRUE
-          )
+          # COMPENSATE
+          if(!is.null(values$spill)) {
+            NIL_linear <- cyto_compensate(
+              NIL_linear,
+              spillover = values$spill
+            )
+          }
+          # TRANSFORM
+          if(any(channels %in% names(axes_trans))) {
+            values$NIL_comp_trans <- cyto_transform(
+              NIL_linear,
+              trans = cyto_transformers_combine(
+                axes_trans[match_ind(channels, names(axes_trans))]
+              ),
+              inverse = FALSE,
+              copy = FALSE,
+              plot = FALSE,
+              quiet = TRUE
+            )
+          }
+        # NO UNSTAINED CONTROL SELECTED
         } else {
           values$NIL_comp_trans <- NULL
         }
@@ -540,7 +544,7 @@ cyto_spillover_edit <- function(x,
       # SELECTED CONTROL -------------------------------------------------------
       
       # NAME - SELECTED CONTROL
-      ID <- dataSelectServer(
+      ID <- cytoSelectServer(
         "editor_select",
         data = reactive(x),
         selected = reactive(values$ID_select)
@@ -555,13 +559,18 @@ cyto_spillover_edit <- function(x,
       
       # SELECTED CONTROL - COMPENSATED & TRANSFORMED
       observe({
+        # SAMPLE SELECTED
         if(!.empty(values$ID_select, null = TRUE)) {
-          # PARENT
-          values$parent <- cyto_details(x_linear[values$ID_select])[, "parent"]
+          # # PARENT
+          # values$parent <- cyto_details(x_linear[values$ID_select])[, "parent"]
           # X CHANNEL
-          values$xchan_select <- cyto_details(x_linear)$channel[
-            cyto_match(x_linear, values$ID_select)
-          ]
+          values$xchan_select <- cyto_details(
+            cyto_select(
+              x,
+              values$ID_select,
+              exact = TRUE
+            )
+          )$channel
           # LINEAR DATA
           ID_linear <- cyto_data_extract(
             x_linear,
@@ -569,23 +578,27 @@ cyto_spillover_edit <- function(x,
             parent = values$parent,
             copy = TRUE
           )[[1]]
-          # TRANSFORMERS
-          trans <- axes_trans[match_ind(channels, names(axes_trans))]
-          trans <- cyto_transformers_combine(trans)
-          # COMPENSATE & TRANSFORM
-          values$ID_comp_trans <- cyto_transform(
-            if(!is.null(values$spill)){
-              cyto_compensate(
-                ID_linear,
-                values$spill
-              )
-            } else {
-              ID_linear
-            },
-            trans = trans,
-            plot = FALSE,
-            quiet = TRUE
-          )
+          # COMPENSATE
+          if(!is.null(values$spill)) {
+            ID_linear <- cyto_compensate(
+              ID_linear,
+              spillover = values$spill
+            )
+          }
+          # TRANSFORM
+          if(any(channels %in% names(axes_trans))) {
+            values$ID_comp_trans <- cyto_transform(
+              ID_linear,
+              trans = cyto_transformers_combine(
+                axes_trans[match_ind(channels, names(axes_trans))]
+              ),
+              inverse = FALSE,
+              copy = FALSE,
+              plot = FALSE,
+              quiet = TRUE
+            )
+          }
+        # NO SAMPLE SELECTED
         } else {
           values$ID_comp_trans <- NULL
         }
@@ -618,7 +631,7 @@ cyto_spillover_edit <- function(x,
       spill_edit <- spillEditServer(
         "editor_spill",
         data = reactive(x),
-        spill = reactive(spill),
+        spill = reactive(spillover),
         xchan = xchan,
         ychan = ychan
       )
@@ -675,7 +688,7 @@ cyto_spillover_edit <- function(x,
       # PLOTS TAB --------------------------------------------------------------
       
       # NAME - UNSTAINED CONTROL
-      plots_NIL <- dataSelectServer(
+      plots_NIL <- cytoSelectServer(
         "plots_select_unst", 
         data = reactive(x),
         choices = "None",
@@ -689,7 +702,7 @@ cyto_spillover_edit <- function(x,
       })
       
       # NAME - SELECTED CONTROL
-      plots_ID <- dataSelectServer(
+      plots_ID <- cytoSelectServer(
         "plots_select",
         data = reactive(x),
         selected = reactive(values$ID_select)
@@ -698,6 +711,20 @@ cyto_spillover_edit <- function(x,
       observe({
         if(!.empty(plots_ID(), null = TRUE)) {
           values$ID_select <- plots_ID()
+        }
+      })
+      
+      # PARENT DROPDOWN
+      plots_parent <- nodeSelectServer(
+        "plots_node_select",
+        data = reactive(x),
+        selected = reactive(values$parent)
+      )
+      
+      # PARENT MANUALLY SELECTED
+      observe({
+        if(!.empty(plots_parent(), null = TRUE)) {
+          values$parent <- plots_parent()
         }
       })
       
@@ -721,9 +748,23 @@ cyto_spillover_edit <- function(x,
       )
       
       # COMPENSATION PLOTS
-      # compPlotServer(
-      #   
-      # )
+      compPlotServer(
+        "plots",
+        ID_comp_trans = reactive(values$ID_comp_trans),
+        NIL_comp_trans = reactive(values$NIL_comp_trans),
+        opts = reactive(values$plots_opts_select),
+        xchan = reactive(values$xchan_select),
+        channels = reactive(channels),
+        spillover = reactive(values$spill),
+        axes_trans = axes_trans,
+        axes_limits = axes_limits,
+        events = events,
+        point_size = point_size,
+        axes_text_size = axes_text_size,
+        axes_label_text_size = axes_label_size,
+        title_text_size = title_text_size,
+        ...
+      )
       
       # SAVE & EXPORT ----------------------------------------------------------
       
@@ -754,7 +795,7 @@ cyto_spillover_edit <- function(x,
 }
 
 #' @noRd
-dataSelectUI <- function(id,
+cytoSelectUI <- function(id,
                          label = NULL,
                          ...) {
   selectInput(
@@ -765,7 +806,7 @@ dataSelectUI <- function(id,
 }
 
 #' @noRd
-dataSelectServer <- function(id,
+cytoSelectServer <- function(id,
                              data = reactive(NULL),
                              choices = NULL,
                              selected = reactive(NULL)) {
@@ -881,8 +922,8 @@ channelSelectServer <- function(id,
     # CHANNELS
     observe({
       if(!.empty(data(), null = TRUE)) {
-        values$channels <- cyto_fluor_channels(data())
-        values$channels_excl <- cyto_fluor_channels(data())
+        values$channels <- unname(cyto_fluor_channels(data()))
+        values$channels_excl <- unname(cyto_fluor_channels(data()))
       }
     })
     
@@ -910,13 +951,19 @@ channelSelectServer <- function(id,
       values$select <- input$select
     })
     
-    
     observe({
-      updateSelectInput(
-        session,
-        "select",
-        selected = selected()
-      )
+      if(!is.null(selected())) {
+        if(is.na(selected())) {
+          select <- values$channels[1]
+        } else {
+          select <- selected()
+        }
+        updateSelectInput(
+          session,
+          "select",
+          selected = selected()
+        )
+      }
     })
     
     # CHANNEL UP 
@@ -957,6 +1004,59 @@ channelSelectServer <- function(id,
       })
     )
     
+  })
+  
+}
+
+#' @noRd
+nodeSelectUI <- function(id,
+                         label = NULL,
+                         ...) {
+  
+  selectInput(
+    NS(id, "select"),
+    label = label,
+    choices = "root",
+    ...
+  )
+  
+}
+
+#' @noRd
+nodeSelectServer <- function(id,
+                             data = reactive(NULL),
+                             choices = NULL,
+                             selected = reactive(NULL)) {
+  
+  moduleServer(
+    id, 
+    function(input, output, session) {
+    
+    # NAMESPACE
+    ns <- session$ns
+    
+    # VALUES
+    values <- reactiveValues(
+      select = NULL
+    )
+    
+    # UPDATE UI OPTIONS
+    observe({
+      if(cyto_class(data(), "GatingSet")) {
+        updateSelectInput(
+          session,
+          "select",
+          choices = cyto_nodes(data(), path = "auto"),
+          selected = selected()
+        )
+      }
+    })
+    
+    observeEvent(input$select, {
+      values$select <- input$select
+    })
+    
+    return(reactive({values$select}))
   })
   
 }
@@ -1452,13 +1552,15 @@ compPlotUI <- function(id,
   
 }
 
+#' @importFrom flowWorkspace cytoset
 #' @noRd
 compPlotServer <- function(id,
                            ID_comp_trans = reactive(NULL),
                            NIL_comp_trans = reactive(NULL),
                            opts = reactive(NULL),
                            xchan = reactive(NULL),
-                           ychan = reactive(NULL),
+                           channels = reactive(NULL),
+                           spillover = reactive(NULL),
                            axes_trans = NA,
                            axes_limits = "machine",
                            events = 2000,
@@ -1478,36 +1580,117 @@ compPlotServer <- function(id,
       if((!.empty(ID_comp_trans(), null = TRUE) | 
           (!.empty(ID_comp_trans(), null = TRUE) &
            !.empty(NIL_comp_trans(), null = TRUE))) &
-         (!.empty(xchan(), null = TRUE) & !.empty(ychan(), null = TRUE))) {
-        # SAVE IMAGE
-        temp <- paste0(tempdir(),
-                       .Platform$file.sep,
-                       "cyto_spillover_edit.png")
+         (!.empty(xchan(), null = TRUE) & !.empty(channels(), null = TRUE))) {
+        # SAVE IMAGE TEMPFILE
+        temp <- paste0(
+          tempdir(),
+          .Platform$file.sep,
+          "cyto_spillover_edit.png"
+        )
+        # TODO: PREPARE GRAPHICS DIMENSIONS BY CHANNELS LENGTH
+        # PREPARE GRAPHICS DEVICE
         cyto_plot_save(
           temp,
           height = 6,
           width = 12,
           res = 300
         )
+        # PREPARE DATA
+        if(!.empty(ID_comp_trans(), null = TRUE)) {
+          # COMBINE UNSTAINED
+          if(!.empty(ID_comp_trans(), null = TRUE)) {
+            cs <- cytoset(
+              structure(
+                list(
+                  ID_comp_trans()[[1]],
+                  NIL_comp_trans()[[1]]
+                ),
+                names = c(
+                  cyto_names(ID_comp_trans()),
+                  cyto_names(NIL_comp_trans())
+                )
+              )
+            )
+          # STAINED ONLY
+          } else {
+            cs <- ID_comp_trans()
+          }
+        }
+        # UPDATE EXPERIMENT DETAILS
+        pd <- cyto_details(cs)
+        pd$channel <- c(xchan(), "unstained")[seq_along(cs)]
         # CYTO_PLOT_COMPENSATION
-        
+        suppressWarnings(
+          cyto_plot_compensation(
+            cs,
+            channels = channels(),
+            channel_match = pd,
+            overlay = if(!any(c("unstained", "compensated") %in% opts())){
+              "none"
+            } else {
+              opts()[opts() %in% c("unstained", "compensated")]
+            },
+            spillover = spillover(),
+            compensated = TRUE,
+            axes_trans = axes_trans,
+            axes_limits = axes_limits,
+            events = events,
+            point_size = point_size,
+            point_col = if(all(c("unstained", "compensated") %in% opts())) {
+              c("magenta", "blue", "grey40")
+            } else if("unstained" %in% opts()) {
+              c("magenta", "grey40")
+            } else if("compensated" %in% opts()) {
+              c("magenta", "blue")
+            } else {
+              c("magenta")
+            },
+            hist_fill = if(all(c("unstained", "compensated") %in% opts())) {
+              c("magenta", "blue", "grey40")
+            } else if("unstained" %in% opts()) {
+              c("magenta", "grey40")
+            } else if("compensated" %in% opts()) {
+              c("magenta", "blue")
+            } else {
+              c("magenta")
+            },
+            lines = if("models" %in% opts()) {
+              TRUE
+            } else {
+              FALSE
+            },
+            text = TRUE,
+            axes_text_size = 1.7,
+            axes_label_text_size = 2,
+            title_text_size = 2,
+            popup = FALSE,
+            ...
+          )
+        )
         # COMPLETE
         cyto_plot_complete()
         # RENDER IMAGE
-        list(src = temp,
-             height = 400)
+        list(
+          src = temp,
+          height = 800
+        )
       } else {
         # SAVE BLANK IMAGE
-        temp <- paste0(tempdir(),
-                       .Platform$file.sep,
-                       "cyto_spillover_edit.png")
-        cyto_plot_save(temp,
-                       height = 6,
-                       width = 12,
-                       res = 300)
+        temp <- paste0(
+          tempdir(),
+          .Platform$file.sep,
+          "cyto_spillover_edit.png"
+        )
+        cyto_plot_save(
+          temp,
+          height = 6,
+          width = 12,
+          res = 300)
         cyto_plot_complete()
-        list(src = temp,
-             height = 400)
+        list(
+          src = temp,
+          height = 800
+        )
       }
     }, deleteFile = TRUE)
   })
