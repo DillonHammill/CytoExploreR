@@ -130,16 +130,24 @@ cyto_gate_sample <- function(x,
   # PREPARE GROUP_BY
   if(all(is.character(merge_by))) {
     if(all(merge_by == "all")) {
-      group_by <- "NA"
+      group_by <- NA
     } else {
       group_by <- paste(merge_by, collapse = ":")
     }
   } else {
-    group_by <- "NA"
+    group_by <- NA
   }
   
   # gs_add_gating_method - GATINGTEMPLATE ENTRY & APPLY TO GATINGSET
-  message(paste("Adding new sample filters to", cyto_class(x), "..."))
+  message(
+    paste(
+      "Adding new sample filters to", 
+      parent, 
+      "population in this", 
+      cyto_class(x), 
+      "..."
+    )
+  )
   
   # ADD POPULATION TO GATINGSET
   pop <- suppressWarnings(
@@ -152,14 +160,14 @@ cyto_gate_sample <- function(x,
         dims = "", # EMPTY DIMS
         gating_method = "cyto_gate_sample",
         gating_args = list(
-          openCyto.minEvents = -1
+          "openCyto.minEvents" = -1
         ),
         groupBy = group_by,
         collapseDataForGating = FALSE, # REQUIRED
         preprocessing_method = "pp_cyto_gate_sample",
         preprocessing_args =  list(
-          events = events,
-          seed = seed
+          "events" = events,
+          "seed" = seed
         )
       )
     )
