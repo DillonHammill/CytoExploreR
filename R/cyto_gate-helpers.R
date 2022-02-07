@@ -253,77 +253,119 @@ cyto_gate_remove <- function(gs,
     gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
   }
   
-  # READ IN GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(gatingTemplate)
+  # PARSE GATINGTEMPLATE
+  gt <- cyto_gatingTemplate_parse(
+    gatingTemplate,
+    data.table = FALSE
+  )
   
   # PREPARE GATINGTEMPLATE ALIAS
-  gt_alias <- lapply(seq_along(gt$alias), function(z) {
-    cyto_nodes_convert(gs,
-                       nodes = unlist(strsplit(as.character(gt$alias[z]), ",")),
-                       anchor = gt$parent[z],
-                       path = "auto")
-  })
+  gt_alias <- lapply(
+    seq_along(gt$alias), 
+    function(z) {
+      # PARSE PARENT
+      prnt <- unlist(strsplit(as.character(gt$parent[z]), ","))
+      # PARSE ALIAS
+      pops <- unlist(strsplit(as.character(gt$alias[z]), ","))
+      # ANCHOR ALIAS
+      LAPPLY(
+        parent,
+        function(v) {
+          cyto_nodes_convert(
+            gs,
+            nodes = pops,
+            anchor = prnt,
+            path = "auto"
+          )
+        }
+      )
+    }
+  )
   
   # ALIAS
-  alias <- cyto_nodes_convert(gs,
-                              nodes = alias,
-                              path = "auto")
+  alias <- cyto_nodes_convert(
+    gs,
+    nodes = alias,
+    path = "auto",
+    anchor = parent
+  )
   
   # MULTIPLE ALIAS - REMOVE ALL ASSOCIATED NODES
-  alias <- unique(LAPPLY(seq_len(length(alias)), function(z) {
-    LAPPLY(gt_alias, function(y) {
-      if (alias[z] %in% y) {
-        y
-      } else {
-        NA
+  alias <- unique(
+    LAPPLY(
+      seq_len(
+        length(alias)
+      ), 
+      function(z) {
+        LAPPLY(
+          gt_alias, 
+          function(y) {
+            if (alias[z] %in% y) {
+              y
+            } else {
+              NA
+            }
+          }
+        )
       }
-    })
-  }))
+    )
+  )
   alias <- alias[!is.na(alias)]
   
   # CHILDREN
   chldrn <- LAPPLY(
     alias,
     function(x) {
-      pop <- cyto_nodes_convert(gs,
-                                nodes = x,
-                                anchor = parent,
-                                path = "auto")
-      basename(gh_pop_get_descendants(gs[[1]], pop))
+      # pop <- cyto_nodes_convert(
+      #   gs,
+      #   nodes = x,
+      #   anchor = parent,
+      #   path = "auto"
+      # )
+      gh_pop_get_descendants(gs[[1]], x, path = "auto")
     }
   )
   chldrn <- unlist(chldrn, use.names = FALSE)
   chldrn <- unique(c(alias, chldrn))
   
   # REMOVE ROWS ALIAS == CHILDREN
-  ind <- LAPPLY(gt_alias, function(z) {
-    any(chldrn %in% z)
-  })
+  ind <- LAPPLY(
+    gt_alias, 
+    function(z) {
+      any(chldrn %in% z)
+    }
+  )
   gt <- gt[!ind, ]
   
   # MESSAGE
-  message(paste0(
-    "Removing gate(s) from the GatingSet and ",
-    gatingTemplate, "."
-  ))
+  message(
+    paste0(
+      "Removing gate(s) from the GatingSet and ",
+      gatingTemplate, "."
+    )
+  )
   
   # REMOVE NODES FROM GATINGSET
   for (i in seq_len(length(alias))) {
     if (alias[i] %in% cyto_nodes(gs, path = "auto")) {
-      if (!is.null(parent)) {
-        pop <- cyto_nodes_convert(gs,
-                                  nodes = alias[i],
-                                  anchor = parent)
-      } else {
-        pop <- alias[i]
-      }
-      suppressMessages(gs_pop_remove(gs, pop))
+      # if (!is.null(parent)) {
+      #   pop <- cyto_nodes_convert(
+      #     gs,
+      #     nodes = alias[i],
+      #     anchor = parent
+      #   )
+      # } else {
+      #   pop <- alias[i]
+      # }
+      suppressMessages(gs_pop_remove(gs, alias[i]))
     }
   }
   
   # UPDATE GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt,
-                            save_as = gatingTemplate)
+  cyto_gatingTemplate_write(
+    gt,
+    save_as = gatingTemplate
+  )
   
   # RETURN GATINGSET
   return(gs)
