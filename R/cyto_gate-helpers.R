@@ -187,7 +187,7 @@ cyto_gate_apply <- function(x,
 
 #' Remove Gate(s) and Edit gatingTemplate csv File
 #'
-#' @param gs an object of class \code{GatingSet}.
+#' @param x object of class \code{GatingHierarchy} or \code{GatingSet}.
 #' @param parent name of the parent population from which to remove the gate.
 #'   This argument is not necessary but is included to allow conversion of
 #'   \code{cyto_gate_draw} code to \code{cyto_gate_remove} code by simply
@@ -235,7 +235,7 @@ cyto_gate_apply <- function(x,
 #' cyto_gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")
 #' }
 #' @export
-cyto_gate_remove <- function(gs,
+cyto_gate_remove <- function(x,
                              parent = NULL,
                              alias = NULL,
                              channels = NULL,
@@ -261,7 +261,7 @@ cyto_gate_remove <- function(gs,
   
   # PREPARE GATINGTEMPLATE ALIAS
   gt_alias <- lapply(
-    seq_along(gt$alias), 
+    seq_len(nrow(gt)), 
     function(z) {
       # PARSE PARENT
       prnt <- unlist(strsplit(as.character(gt$parent[z]), ","))
@@ -269,12 +269,12 @@ cyto_gate_remove <- function(gs,
       pops <- unlist(strsplit(as.character(gt$alias[z]), ","))
       # ANCHOR ALIAS
       LAPPLY(
-        parent,
+        prnt,
         function(v) {
           cyto_nodes_convert(
-            gs,
+            x,
             nodes = pops,
-            anchor = prnt,
+            anchor = v,
             path = "auto"
           )
         }
@@ -284,7 +284,7 @@ cyto_gate_remove <- function(gs,
   
   # ALIAS
   alias <- cyto_nodes_convert(
-    gs,
+    x,
     nodes = alias,
     path = "auto",
     anchor = parent
@@ -315,14 +315,8 @@ cyto_gate_remove <- function(gs,
   # CHILDREN
   chldrn <- LAPPLY(
     alias,
-    function(x) {
-      # pop <- cyto_nodes_convert(
-      #   gs,
-      #   nodes = x,
-      #   anchor = parent,
-      #   path = "auto"
-      # )
-      gh_pop_get_descendants(gs[[1]], x, path = "auto")
+    function(z) {
+      gh_pop_get_descendants(x[[1]], z, path = "auto")
     }
   )
   chldrn <- unlist(chldrn, use.names = FALSE)
@@ -330,34 +324,38 @@ cyto_gate_remove <- function(gs,
   
   # REMOVE ROWS ALIAS == CHILDREN
   ind <- LAPPLY(
-    gt_alias, 
+    gt_alias,
     function(z) {
       any(chldrn %in% z)
     }
   )
-  gt <- gt[!ind, ]
+  
+  # UNPARSED GATINGTEMPLATE
+  gt <- cyto_gatingTemplate_read(
+    gatingTemplate,
+    # data.table = FALSE,
+    parse = FALSE
+  )
+  gt <- gt[!ind, , drop = FALSE]
   
   # MESSAGE
   message(
     paste0(
-      "Removing gate(s) from the GatingSet and ",
-      gatingTemplate, "."
+      "Removing the following gates from this ",
+      cyto_class(x), " and ", 
+      ifelse(is.character(gatingTemplate) , gatingTemplate, "gatingTemplate"), 
+      ": \n",
+      paste0(
+        unlist(gt_alias[ind]),
+        collapse = "\n"
+      )
     )
   )
   
   # REMOVE NODES FROM GATINGSET
   for (i in seq_len(length(alias))) {
-    if (alias[i] %in% cyto_nodes(gs, path = "auto")) {
-      # if (!is.null(parent)) {
-      #   pop <- cyto_nodes_convert(
-      #     gs,
-      #     nodes = alias[i],
-      #     anchor = parent
-      #   )
-      # } else {
-      #   pop <- alias[i]
-      # }
-      suppressMessages(gs_pop_remove(gs, alias[i]))
+    if (alias[i] %in% cyto_nodes(x, path = "auto")) {
+      suppressMessages(gs_pop_remove(x, alias[i]))
     }
   }
   
@@ -368,7 +366,7 @@ cyto_gate_remove <- function(gs,
   )
   
   # RETURN GATINGSET
-  return(gs)
+  return(x)
   
 }
 
@@ -402,9 +400,11 @@ cyto_gate_rename <- function(x,
   }
   
   # ALIAS INVALID
-  alias <- cyto_nodes_convert(x,
-                              nodes = alias,
-                              path = "auto")
+  alias <- cyto_nodes_convert(
+    x,
+    nodes = alias,
+    path = "auto"
+  )
   
   # RENAME GATES IN GATINGHIERARCHY/GATINGSET
   mapply(function(alias, name) {
@@ -419,12 +419,15 @@ cyto_gate_rename <- function(x,
   gt <- cyto_gatingTemplate_read(gatingTemplate)
   
   # UPDATE PARENTAL NAMES
-  lapply(seq_along(alias), function(z) {
-    # CHANGES DESCENDANT NODES AS WELL (eg CD4 T Cells & CD69+ CD4 T Cells)
-    if (any(grepl(alias[z], gt$parent, fixed = TRUE))) {
-      gt[grepl(alias[z], gt$parent, fixed = TRUE), "parent"] <<- names[z]
+  lapply(
+    seq_along(alias), 
+    function(z) {
+      # CHANGES DESCENDANT NODES AS WELL (eg CD4 T Cells & CD69+ CD4 T Cells)
+      if (any(grepl(alias[z], gt$parent, fixed = TRUE))) {
+        gt[grepl(alias[z], gt$parent, fixed = TRUE), "parent"] <<- names[z]
+      }
     }
-  })
+  )
   
   # UPDATE ALIAS NAMES
   gt_alias <- lapply(gt$alias, function(z) {

@@ -5,7 +5,7 @@
 \title{Remove Gate(s) and Edit gatingTemplate csv File}
 \usage{
 cyto_gate_remove(
-  gs,
+  x,
   parent = NULL,
   alias = NULL,
   channels = NULL,
@@ -15,7 +15,7 @@ cyto_gate_remove(
 )
 }
 \arguments{
-\item{gs}{an object of class \code{GatingSet}.}
+\item{x}{object of class \code{GatingHierarchy} or \code{GatingSet}.}
 
 \item{parent}{name of the parent population from which to remove the gate.
 This argument is not necessary but is included to allow conversion of
