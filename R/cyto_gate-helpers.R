@@ -407,13 +407,17 @@ cyto_gate_rename <- function(x,
   )
   
   # RENAME GATES IN GATINGHIERARCHY/GATINGSET
-  mapply(function(alias, name) {
-    if (cyto_class(x, "GatingHierarchy")) {
-      gh_pop_set_name(x, alias, name)
-    } else {
-      gs_pop_set_name(x, alias, name)
-    }
-  }, alias, names)
+  mapply(
+    function(alias, name) {
+      if (cyto_class(x, "GatingHierarchy")) {
+        gh_pop_set_name(x, alias, name)
+      } else {
+        gs_pop_set_name(x, alias, name)
+      }
+    },
+    alias, 
+    names
+  )
   
   # READ IN GATINGTEMPLATE
   gt <- cyto_gatingTemplate_read(gatingTemplate)
@@ -433,34 +437,48 @@ cyto_gate_rename <- function(x,
   gt_alias <- lapply(gt$alias, function(z) {
     unlist(strsplit(as.character(z), ","))
   })
-  gt_alias <- LAPPLY(gt_alias, function(z) {
-    lapply(seq_len(length(alias)), function(y) {
-      # CHANGES DESCENDANT NODES
-      if (any(grepl(alias[y], z, fixed = TRUE))) {
-        z[grepl(alias[y], z, fixed = TRUE)] <<- names[y]
-      }
-    })
-    # RE-COLLAPSE ALIAS
-    z <- paste(z, collapse = ",")
-    return(z)
-  })
+  gt_alias <- LAPPLY(
+    gt_alias, 
+    function(z) {
+      lapply(
+        seq_len(length(alias)), 
+        function(y) {
+          # CHANGES DESCENDANT NODES
+          if (any(grepl(alias[y], z, fixed = TRUE))) {
+            z[grepl(alias[y], z, fixed = TRUE)] <<- names[y]
+          }
+        }
+      )
+      # RE-COLLAPSE ALIAS
+      z <- paste(z, collapse = ",")
+      return(z)
+    }
+  )
   gt[, "alias"] <- gt_alias
   
-  # UPDATE GATING ARGUMENTS
-  lapply(seq_len(nrow(gt)), function(z) {
-    gating_args <- gt[z, "gating_args"]
-    lapply(seq_along(alias), function(y) {
-      # DESCENDANT NODES CHANGE
-      if (any(grepl(alias[y], gating_args, fixed = TRUE))) {
-        gating_args <<- gsub(alias[y], names[y], gating_args)
-      }
-    })
-    gt[z, "gating_args"] <<- gating_args
-  })
+  # UPDATE GATING ARGUMENTS - CAPTURES BOOLEAN | CLUSTERS
+  lapply(
+    seq_len(nrow(gt)), 
+    function(z) {
+      gating_args <- gt[z, "gating_args"]
+      lapply(
+        seq_along(alias), 
+        function(y) {
+          # DESCENDANT NODES CHANGE
+          if (any(grepl(alias[y], gating_args, fixed = TRUE))) {
+            gating_args <<- gsub(alias[y], names[y], gating_args)
+          }
+        }
+      )
+      gt[z, "gating_args"] <<- gating_args
+    }
+  )
   
   # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt,
-                            save_as = gatingTemplate)
+  cyto_gatingTemplate_write(
+    gt,
+    save_as = gatingTemplate
+  )
   
   # RETURN GATINGSET
   return(x)
