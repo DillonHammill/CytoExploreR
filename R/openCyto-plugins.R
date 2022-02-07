@@ -11,13 +11,13 @@
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 #'   containing the flow cytometry data for gating.
-#' @param pp_res output of preprocessing function.
+#' @param pp_res output of pre-processing function.
 #' @param channels name(s) of the channel(s) to be used for plotting.
 #' @param alias name of the population to be gated. This is not inherited from
 #'   the gatingTemplate and must be supplied manually to the gating_args.
-#' @param ... additional arguments passsed to \code{\link{cyto_plot}}.
+#' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
-#' @return a \code{filters} object containing the contructed gate objects which
+#' @return a \code{filters} object containing the constructed gate objects which
 #'   is passed onto the \code{openCyto} gating pipeline to apply these gates to
 #'   the GatingSet.
 #'
@@ -178,10 +178,8 @@
         ind <- 1
       }
     }
-  }
-  
   # NO GROUPING - USE FIRST SET OF GATES
-  if(.all_na(groupBy)) {
+  } else {
     ind <- 1
   }
   
@@ -200,7 +198,8 @@
 .cyto_gate_draw <- function(fr,
                             pp_res,
                             channels,
-                            gate) {
+                            gate,
+                            ...) {
   
   cyto_func_call(
     ".cyto_gate_match",
@@ -242,7 +241,8 @@
 #' @noRd
 .cyto_gate_sample <- function(fr,
                               pp_res,
-                              channels) {
+                              channels,
+                              ...) {
   
   # OPENCYTO WILL PASS LOGICAL VECTOR FROM PREPROCESSING
   return(pp_res)
@@ -253,11 +253,8 @@
 #'
 #' See above for details.
 #'
-#' @importFrom flowWorkspace gh_pop_get_indices
-#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
-#' @noRd
 #' @noRd
 .pp_cyto_gate_sample <- function(fs,
                                  gs,
@@ -270,7 +267,7 @@
                                  ...) {
     
   # GROUPBY
-  if(is.character(groupBy) & nchar(groupBy) == 0) {
+  if(groupBy %in% "") {
     groupBy <- NA
   }
   
@@ -279,16 +276,12 @@
     groupBy <- unlist(strsplit(groupBy, ":"))
   }
   
-  # NO GROUPBY
-  if(.all_na(groupBy)) {
-    groupBy <- "name"
-  }
-  
-  # GATING GROUPS
+  # GATING GROUPS - NA -> COMBINED EVENTS
   grps <- cyto_groups(
     gs,
     group_by = groupBy,
-    details = TRUE
+    details = TRUE,
+    sep = ":"
   )
   
   # EVENTS PER GROUP
@@ -316,6 +309,7 @@
     set.seed(seed)
   }
   
+  # NAMES = SAMPLES -> COLLAPSEDATAFORGATING = FALSE
   # LOGICAL FILTER
   gate <- cyto_apply(
     fs, 
@@ -369,10 +363,11 @@
   if(is.null(params)) {
     params <- cyto_channels(
       fr,
-      exclude = c("Event", "Sample", "Time")
+      exclude = c("Event", "Sample")
     )
   }
   
+  # TODO: MORE FLEXIBLE MATCHING TO INPUT
   # CONVERT DATA TO REQUIRED FORMAT - DATA RESTRICTED TO CHANNELS
   if(!cyto_class(fr, input, TRUE)) {
     fr <- cyto_data_extract(
@@ -387,13 +382,6 @@
   if(is.character(type)) {
     # FLOWAI
     if(grepl("^FlowAI$", type, ignore.case = TRUE)) {
-      # LOAD FLOWAI
-      cyto_require(
-        "flowAI",
-        source = "BioC",
-        repo = "giannimonaco/flowAI",
-        ref = NULL # DROP REFERENCE - PRINTED MULTIPLE TIMES
-      )
       # FLOWAI ARGUMENTS - DEFAULTS
       args_default <- list(
         output = 3,
@@ -410,13 +398,11 @@
         args_default[!names(args_default) %in% names(args)]
       )
       # RUN FLOWAI - REMOVAL INDICES
-      remove <- invisible(
-        capture.output(
-          cyto_func_call(
-            "flowAI::flow_auto_qc",
-            args
-          )[[1]]
-        )
+      remove <- suppressPrint(
+        cyto_func_call(
+          "flowAI::flow_auto_qc",
+           args
+         )[[1]]
       )
       # LOGICAL VECTOR
       gate <- rep(TRUE, nrow(fr))
@@ -426,13 +412,6 @@
       return(gate)
       # FLOWCUT
     } else if(grepl("^FlowCut$", type, ignore.case = TRUE)) {
-      # LOAD FLOWCUT
-      cyto_require(
-        "flowCut",
-        source = "BioC",
-        repo = "jmeskas/flowCut",
-        ref = NULL
-      )
       # FLOWCUT ARGUMENTS - DEFAULTS
       args_default <- list(
         Plot = "None"
@@ -461,13 +440,6 @@
       return(gate)
       # FLOWCLEAN
     } else if(grepl("^FlowClean", type, ignore.case = TRUE)) {
-      # LOAD FLOWCLEAN
-      cyto_require(
-        "flowClean",
-        source = "BioC",
-        repo = "cafletezbrant/flowClean",
-        ref = NULL
-      )
       # FLOWCUT ARGUMENTS - DEFAULTS
       args_default <- list(
         filePrefixWithDir = cyto_names(fr),
@@ -498,13 +470,6 @@
       return(gate)
       # PEACOQC
     } else if(grepl("^PeacoQC", type, ignore.case = TRUE)) {
-      # LOAD PEACOQC
-      cyto_require(
-        "PeacoQC",
-        source = "BioC",
-        repo = "saeyslab/PeacoQC",
-        ref = NULL
-      )
       # PEACOQC ARGUMENTS - DEFAULTS
       args_default <- list(
         output = "full",  # MARGIN INDICES
