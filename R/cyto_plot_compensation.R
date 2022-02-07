@@ -195,10 +195,11 @@ cyto_plot_compensation <- function(x,
     }
   }
   
-  # TODO: BYPASS CHANNEL MATCHING FOR CYTO_SPILLOVER_EDIT()
-  
-  # CHANNEL MATCH - CYTO_SPILLOVER_EDIT()
+  # CHANNEL MATCH - CYTO_SPILLOVER_EDIT() BYPASS
   if(!.all_na(channel_match)) {
+    warning(
+      "'channel_match' is now reserved for internal use only!"
+    )
     pd <- channel_match
   } else {
     pd <- cyto_channel_match(
