@@ -154,16 +154,20 @@ cyto_gate_clean <- function(x,
     paste0(
       "Applying ", cyto_func_name(type), "() ", 
       "anomaly detection algorithm to gate high ",
-      "quality events... \n",
+      "quality events in the ", parent, " population...\n"
     )
   )
   
   # DEFAULT ALGORITHM TYPES
   if(is.character(type)) {
     # FLOWAI
-    if(grepl("^FlowAI$, type, ignore.case = TRUE")) {
-      message(
-        paste0(
+    if(grepl("^FlowAI$", type, ignore.case = TRUE)) {
+      # LOAD FLOWAI
+      cyto_require(
+        "flowAI",
+        source = "BioC",
+        repo = "giannimonaco/flowAI",
+        ref = paste0(
           "Monaco G, Chen H, Poidinger M, Chen J,",
           " de Magalhaes J, Larbi A (2016). flowAI:",
           " automatic and interactive anomaly discerning",
@@ -173,8 +177,12 @@ cyto_gate_clean <- function(x,
       )
     # FLOWCUT
     } else if(grepl("^FlowCut$", type, ignore.case = TRUE)) {
-      message(
-        paste0(
+      # LOAD FLOWCUT
+      cyto_require(
+        "flowCut",
+        source = "BioC",
+        repo = "jmeskas/flowCut",
+        ref = paste0(
           "Meskas J, Wang S, Brinkman R (2021). flowCut --- An R",
           " Package for precise and accurate automated removal of",
           " outlier events and flagging of files based on time",
@@ -183,8 +191,12 @@ cyto_gate_clean <- function(x,
       )
     # FLOWCLEAN
     } else if(grepl("^FlowClean$", type, ignore.case = TRUE)) {
-      message(
-        paste0(
+      # LOAD FLOWCLEAN
+      cyto_require(
+        "flowClean",
+        source = "BioC",
+        repo = "cafletezbrant/flowClean",
+        ref = paste0(
           "Fletez-Brant K, Spidlen J, Brinkman R, Roederer M,",
           " Chattopadhyay P (2016). flowClean: Automated",
           " identification and removal of fluorescence anaomalies",
@@ -193,8 +205,12 @@ cyto_gate_clean <- function(x,
       )
     # PEACOQC
     } else if(grepl("^PeacoQC$", type, ignore.case = TRUE)) {
-      message(
-        paste0(
+      # LOAD PEACOQC
+      cyto_require(
+        "PeacoQC",
+        source = "BioC",
+        repo = "saeyslab/PeacoQC",
+        ref = paste0(
           "Emmaneel A, et al. (2021) PeacoQC: peak-based selection of high ",
           "quality cytometry data. Cytometry A."
         )
@@ -211,15 +227,15 @@ cyto_gate_clean <- function(x,
         gs = x,
         alias = alias,
         parent = parent,
-        pop = "+",
-        dims = NA, # EMPTY DIM WARNING
+        pop = "*",
+        dims = "", # EMPTY DIM WARNING
         gating_method = "cyto_gate_clean",
         gating_args = list(
-          type = type,
-          input = input,
-          params = channels,
-          slot = slot,
-          openCyto.minEvents = -1,
+          "type" = type,
+          "input" = input,
+          "params" = channels,
+          "slot" = slot,
+          "openCyto.minEvents" = -1,
           ...
         ),
         groupBy = NA,
