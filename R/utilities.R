@@ -35,7 +35,6 @@ CytoExploreR_logo <- function(){
   do.call(x, args[names(args) %in% .formal_args(x, drop = drop)])
 }
 
-
 ## DOCALL ----------------------------------------------------------------------
 
 #' Modified version of do.call that handles namespaces
@@ -306,4 +305,14 @@ SysExec <- function(
 #' @noRd
 str_num <- function(x) {
   as.numeric(gsub("[^0-9.-]+", "", as.character(x)))
+}
+
+## SUPPRESSPRINT ---------------------------------------------------------------
+
+#' Wrapper to suppress cat() within a function call
+#' @noRd
+suppressPrint <- function(x) {
+  sink(tempfile()) 
+  on.exit(sink()) 
+  invisible(force(x)) 
 }
