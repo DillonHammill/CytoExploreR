@@ -879,7 +879,7 @@ cyto_gatingTemplate_parse <- function(gatingTemplate,
         )
         # REPLACE * ALIAS ENTRY
         gt_chunk$alias <- rep(
-          paste(gating_args$alias,  collapse = ","), 
+          paste0(gating_args$alias,  collapse = ","), 
           nrow(gt_chunk)
         )
       }
