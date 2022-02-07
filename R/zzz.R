@@ -56,19 +56,30 @@
     )
     # CYTO_GATE_SAMPLE
     openCyto::register_plugins(
-      fun = .cyto_gate_sample,
-      methodName = "cyto_gate_sample"
-    )
-    openCyto::register_plugins(
       fun = .pp_cyto_gate_sample, 
       methodName = "pp_cyto_gate_sample", 
       dep = NA,
       "preprocessing"
     )
+    openCyto::register_plugins(
+      fun = .cyto_gate_sample,
+      methodName = "cyto_gate_sample"
+    )
     # CYTO_GATE_CLEAN
     openCyto::register_plugins(
       fun = .cyto_gate_clean,
       methodName = "cyto_gate_clean"
+    )
+    # CYTO_GATE_CLUST
+    openCyto::register_plugins(
+      fun = .pp_cyto_gate_clust, 
+      methodName = "pp_cyto_gate_clust", 
+      dep = NA,
+      "preprocessing"
+    )
+    openCyto::register_plugins(
+      fun = .cyto_gate_clust,
+      methodName = "cyto_gate_clust"
     )
   })
   
