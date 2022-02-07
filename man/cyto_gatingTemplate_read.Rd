@@ -4,7 +4,12 @@
 \alias{cyto_gatingTemplate_read}
 \title{Read in a gatingTemplate object or gatingTemplate csv file}
 \usage{
-cyto_gatingTemplate_read(gatingTemplate = NULL, data.table = FALSE, ...)
+cyto_gatingTemplate_read(
+  gatingTemplate = NULL,
+  data.table = FALSE,
+  parse = FALSE,
+  ...
+)
 }
 \arguments{
 \item{gatingTemplate}{gatingTemplate object or the name of a gatingTemplate
@@ -13,6 +18,11 @@ csv file to read in.}
 \item{data.table}{logical indicating whether the gatingTemplate should be
 read into a \code{data.table}, set to FALSE by default to use
 \code{data.frame}.}
+
+\item{parse}{logical indicating whether attempts should be made to parse
+\code{alias = "*"} into a valid set of comma separated aliases, set to
+FALSE by default. Required to appropriately parse gating entries created by
+\code{cyto_gate_clust()}.}
 
 \item{...}{additional arguments passed to
 \code{\link[data.table:fread]{fread}}.}

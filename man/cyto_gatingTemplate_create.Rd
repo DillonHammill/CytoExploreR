@@ -4,13 +4,25 @@
 \alias{cyto_gatingTemplate_create}
 \title{Create an empty gatingTemplate csv file}
 \usage{
-cyto_gatingTemplate_create(gatingTemplate = NULL, active = FALSE)
+cyto_gatingTemplate_create(
+  gatingTemplate = NULL,
+  active = FALSE,
+  data.table = FALSE
+)
 }
 \arguments{
 \item{gatingTemplate}{name of the gatingTemplate csv file to create.}
 
 \item{active}{logical indicating whether the created gatingTemplate should be
 set as the active gatingTemplate, set to FALSE by default.}
+
+\item{data.table}{logical passed to \code{cyto_gatingTemplate_read()} to
+control whether the empty gatingTemplate is returned as a \code{data.table}
+or \code{data.frame}, set to FALSE by default.}
+}
+\value{
+an empty gatingTemplate in the form of a \code{data.table} or
+  \code{data.frame}.
 }
 \description{
 Create an empty gatingTemplate csv file

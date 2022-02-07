@@ -203,8 +203,10 @@ cyto_gatingTemplate_generate.GatingHierarchy <- function(x,
   }), ]
   
   # SAVE GATINGTEMPLATE
-  write_to_csv(gt_entries,
-               gatingTemplate)
+  write_to_csv(
+    gt_entries,
+    gatingTemplate
+  )
   
   # GATINGTEMPLATE OBJECT
   gt <- gatingTemplate(gatingTemplate, ...)
@@ -221,9 +223,11 @@ cyto_gatingTemplate_generate.GatingSet <- function(x,
                                                    ...){
   
   # CALL GATINGHIERARCHY METHOD
-  gt <- cyto_gatingTemplate_generate(x[[1]],
-                                     gatingTemplate = gatingTemplate,
-                                     ...)
+  gt <- cyto_gatingTemplate_generate(
+    x[[1]],
+    gatingTemplate = gatingTemplate,
+    ...
+  )
   
   # RETURN GATINGTEMPLATE OBJECT
   return(gt)
@@ -305,6 +309,12 @@ cyto_gatingTemplate_select <- function(...){
 #' @param gatingTemplate name of the gatingTemplate csv file to create.
 #' @param active logical indicating whether the created gatingTemplate should be
 #'   set as the active gatingTemplate, set to FALSE by default.
+#' @param data.table logical passed to \code{cyto_gatingTemplate_read()} to
+#'   control whether the empty gatingTemplate is returned as a \code{data.table}
+#'   or \code{data.frame}, set to FALSE by default.
+#'
+#' @return an empty gatingTemplate in the form of a \code{data.table} or
+#'   \code{data.frame}.
 #'
 #' @importFrom utils write.csv
 #' @importFrom stats setNames
@@ -313,7 +323,8 @@ cyto_gatingTemplate_select <- function(...){
 #'
 #' @export
 cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
-                                       active = FALSE) {
+                                       active = FALSE,
+                                       data.table = FALSE) {
   
   # ACTIVE GATINGTEMPLATE
   if (is.null(gatingTemplate)) {
@@ -352,14 +363,20 @@ cyto_gatingTemplate_create <- function(gatingTemplate = NULL,
   # MESSAGE
   message(paste("Creating", gatingTemplate, "..."))
   # WRITE GATINGTEMPLATE
-  write_to_csv(gt,
-               gatingTemplate)
+  write_to_csv(gt, gatingTemplate)
   # SET ACTIVE GATINGTEMPLATE
   if(active){
     cyto_gatingTemplate_active(gatingTemplate)
   }
   
-  invisible(NULL)
+  # RETURN EMPTY DATA.TABLE
+  invisible(
+    cyto_gatingTemplate_read(
+      gatingTemplate,
+      data.table = data.table,
+      parse = FALSE
+    )
+  )
 }
 
 ## GATINGTEMPLATE_EDIT ---------------------------------------------------------
@@ -423,15 +440,17 @@ cyto_gatingTemplate_edit <- function(x,
   message("Add new rows to add boolean or reference gates to the GatingSet.")
   
   # Edit gatingTemplate
-  gt <- data_edit(gt, 
-                  title = "gatingTemplate Editor",
-                  logo = CytoExploreR_logo(),
-                  col_edit = FALSE,
-                  col_names = colnames(gt),
-                  quiet = TRUE,
-                  hide = TRUE,
-                  viewer = "pane",
-                  ...)
+  gt <- data_edit(
+    gt, 
+    title = "gatingTemplate Editor",
+    logo = CytoExploreR_logo(),
+    col_edit = FALSE,
+    col_names = colnames(gt),
+    quiet = TRUE,
+    hide = TRUE,
+    viewer = "pane",
+    ...
+  )
   
   # BE NICE - REMOVE WHITESPACE FROM DIMS (COMMON MISTAKE)
   gt$dims <- gsub(" *, *", ",", gt$dims)
@@ -611,8 +630,8 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
      "preprocessing_method"] <- "pp_cyto_gate_draw" 
   
   # SAVE UPDATED GATINGTEMPLATE
-  write_to_csv(gt,
-               save_as)
+  write_to_csv(gt, save_as)
+  
 }
 
 ## GATINGTEMPLATE CHECK --------------------------------------------------------
@@ -676,23 +695,27 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #' @param data.table logical indicating whether the gatingTemplate should be
 #'   read into a \code{data.table}, set to FALSE by default to use
 #'   \code{data.frame}.
+#' @param parse logical indicating whether attempts should be made to parse
+#'   \code{alias = "*"} into a valid set of comma separated aliases, set to
+#'   FALSE by default. Required to appropriately parse gating entries created by
+#'   \code{cyto_gate_clust()}.
 #' @param ... additional arguments passed to
 #'   \code{\link[data.table:fread]{fread}}.
 #'
 #' @importFrom data.table as.data.table
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' library(CytoExploreRData)
-#' 
+#'
 #' # gatingTemplate
 #' gt <- cyto_gatingTemplate_read(Activation_gatingTemplate)
-#' 
+#'
 #' # write gatingTemplate
 #' cyto_gatingTemplate_write(gt, "gatingTemplate.csv")
-#' 
+#'
 #' # gatingTemplate csv file
 #' gt <- cyto_gatingTemplate_read("gatingTemplate.csv")
 #' }
@@ -700,6 +723,7 @@ cyto_gatingTemplate_update <- function(gatingTemplate = NULL,
 #' @export
 cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
                                      data.table = FALSE, 
+                                     parse = FALSE,
                                      ...){
   
   # NO GATINGTEMPLATE
@@ -719,14 +743,22 @@ cyto_gatingTemplate_read <- function(gatingTemplate = NULL,
   # GATINGTEMPLATE
   if(cyto_class(gatingTemplate, "gatingTemplate")){
     gt <- as.data.table(gatingTemplate)
-    # DATA.FRAME
-    if(!data.table){
-      gt <- as.data.frame(gt)
-    }
   } else {
-    gt <- read_from_csv(gatingTemplate,
-                        data.table = data.table,
-                        ...)
+    gt <- read_from_csv(
+      gatingTemplate,
+      data.table = TRUE,
+      ...
+    )
+  }
+  
+  # PARSE GATINGTEMPLATE
+  if(parse) {
+    gt <- cyto_gatingTemplate_parse(gt)
+  }
+  
+  # FORMAT GATINGTEMPLATE - DATA.FRAME REQUIRED
+  if(!data.table) {
+    gt <- as.data.frame(gt)
   }
   
   # RETURN GATINGTEMPLATE
@@ -781,9 +813,95 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
     LAPPLY(gatingTemplate$preprocessing_args, ".empty")] <- "NA"
   
   # WRITE GATINGTEMPLATE
-  write_to_csv(gatingTemplate,
-               file = save_as, 
-               na = "NA",
-               ...)
+  write_to_csv(
+    gatingTemplate,
+    file = save_as, 
+    na = "NA",
+    ...
+  )
+  
+}
+
+## CYTO_GATINGTEMPLATE_PARSE ---------------------------------------------------
+
+#' Convert parsed gatingTemplate into a format compatible with CytoExploreR
+#'
+#' @param gatingtemplate gatingTemplate object or the name of a gatingTemplate
+#'   csv file to read in and parse.
+#' @param data.table logical indicating whether the parsed gatingTemplate should
+#'   be returned as a \code{data.table}, set to TRUE by default.
+#' @param ... not in use
+#'
+#' @return parsed gatingTemplate as either a \code{data.table} or
+#'   \code{data.frame}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom openCyto CytoExploreR_.preprocess_row
+#'
+#' @examples 
+#' \dontrun{
+#' library(CytoExploreRData)
+#' # Parse Activation gatingTemplate
+#' cyto_gatingTemplate_parse(Activation_gatingTemplate)
+#' }
+#'
+#' @export
+cyto_gatingTemplate_parse <- function(gatingTemplate,
+                                      data.table = TRUE) {
+  
+  # READ IN GATINGTEMPLATE
+  gt <- cyto_gatingTemplate_read(
+    gatingTemplate,
+    data.table = TRUE
+  )
+  
+  # PARSE GATINGTEMPLATE ENTRIES
+  lapply(
+    seq_len(nrow(gt)),
+    function(z) {
+      # OPENCYTO PARSING|EXPANSION
+      gt_chunk <- CytoExploreR_.preprocess_row(
+        gt[z, ]
+      )
+      # CYTO_GATE_CLUST - PULL ALIAS FROM GATING_ARGS
+      if(all(gt_chunk$alias %in% "*" & 
+             gt_chunk$gating_method %in% "cyto_gate_clust")) {
+        # EXTRACT ALIAS FROM GATING ARGUMENTS
+        gating_args <- eval(
+          parse(
+            text = paste0(
+              "list(",
+              gt_chunk$gating_args,
+              ")"
+            )
+          )
+        )
+        # REPLACE * ALIAS ENTRY
+        gt_chunk$alias <- rep(
+          paste(gating_args$alias,  collapse = ","), 
+          nrow(gt_chunk)
+        )
+      }
+      # PREPARE ALIAS - UPDATE GATINGTEMPLATE
+      gt$alias[z] <<- paste0(
+        unique(
+          unlist(
+            strsplit(
+              gt_chunk$alias,
+              ","
+            )
+          )
+        ), 
+        collapse = ","
+      )
+    }
+  )
+  
+  # RETURN PARSED GATINGTEMPLATE
+  if(!data.table) {
+    gt <- as.data.frame(gt)
+  }
+  return(gt)
   
 }
