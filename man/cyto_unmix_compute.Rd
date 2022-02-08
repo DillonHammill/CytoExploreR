@@ -35,6 +35,8 @@ the levels of background autofluorescence.}
 written, set to \code{Spectral-Unmixing-Matrix.csv} prefixed with the date
 by default. Set this argument to NA if you don't want to write the unmixing
 matrix to file.}
+
+\item{...}{not in use.}
 }
 \value{
 computed unmixing coefficients in the form of a matrix.

@@ -31,6 +31,10 @@ cyto_plot_map(
 \code{GatingSet} object is supplied, set to the \code{"root"} node by
 default.}
 
+\item{channels}{names of the channels or markers to use on the x and y axes
+of the plots, normally dimension reduced parameters such as
+\code{c("FIt-SNE-1", "FIt-SNE-2")}.}
+
 \item{select}{named list containing experimental variables to be used to
 select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more

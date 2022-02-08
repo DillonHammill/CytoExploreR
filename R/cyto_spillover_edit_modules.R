@@ -41,18 +41,25 @@
 #'   select samples using \code{\link{cyto_select}} when a \code{flowSet} or
 #'   \code{GatingSet} is supplied. Refer to \code{\link{cyto_select}} for more
 #'   details.
+#' @param channels names of the channels or markers in which compensation should
+#'   be visualised, set to all area fluorescence parameters by default.
+#'   \code{channels} can be ued to restrict the list of parameters that are
+#'   displayed within the spillover editor.
 #' @param channel_match logical indicating whether a call should be made to
 #'   \code{cyto_channel_match()} to automatically detect an appropriate parental
 #'   population for each control and to match each sample with a fluorescent
 #'   channel. \code{channel_match} is set to TRUE by default, users can set this
 #'   argument to FALSE if they supply samples stained with multiple antibodies.
-#' @param spillover name of a square spillover matrix csv file or spillover matrix
-#'   to edit. Setting \code{spill} to NULL (the default) will result in
+#' @param spillover name of a square spillover matrix csv file or spillover
+#'   matrix to edit. Setting \code{spill} to NULL (the default) will result in
 #'   extraction of the spillover matrix generated on the cytometer which is
 #'   attached to the samples. Similarly, if the supplied spillover matrix csv
 #'   file does not exist, the spillover matrix attached to the first sample will
 #'   be used and the edited spillover matrix will be saved to the specified
 #'   file.
+#' @param compensated logical required when a \code{cytoset} is supplied to
+#'   indicate whether the supplied data has been compensated prior to passing it
+#'   to \code{cyto_spillover_edit()}, set to FALSE by default.
 #' @param save_as name of a csv file to which the edited spillover matrix should
 #'   be written, set to \code{Spillover-Matrix.csv} prefixed with the date by
 #'   default.

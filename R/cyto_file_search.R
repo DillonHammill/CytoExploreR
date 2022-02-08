@@ -7,6 +7,8 @@
 #' @param dir location where the search should be performed.
 #' @param rownames minimal requirement for row names in the file.
 #' @param colnames minimal requirement for column names in the file.
+#' @param ignore.cse logical passed to \code{grepl()} to indicate whether to
+#'   ignore the case when matching the file name, set to TRUE by default.
 #' @param ... additional named arguments indicating values to find in particular
 #'   columns of the file (e.g. name = c("Activation_1.fcs")).
 #'
@@ -14,13 +16,13 @@
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
-#' \dontrun{ 
+#' @examples
+#' \dontrun{
 #'   # search for experiment details of samples
-#'   cyto_file_search( 
-#'     "Experiment-Details.csv$", 
+#'   cyto_file_search(
+#'     "Experiment-Details.csv$",
 #'     rownames = c("Activation_1.fcs", "Activation_2.fcs")
-#'   ) 
+#'   )
 #' }
 #'
 #' @export

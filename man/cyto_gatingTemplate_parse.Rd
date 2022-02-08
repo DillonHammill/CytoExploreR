@@ -7,11 +7,11 @@
 cyto_gatingTemplate_parse(gatingTemplate, data.table = TRUE)
 }
 \arguments{
+\item{gatingTemplate}{gatingTemplate object or the name of a gatingTemplate
+csv file to read in and parse.}
+
 \item{data.table}{logical indicating whether the parsed gatingTemplate should
 be returned as a \code{data.table}, set to TRUE by default.}
-
-\item{gatingtemplate}{gatingTemplate object or the name of a gatingTemplate
-csv file to read in and parse.}
 
 \item{...}{not in use}
 }

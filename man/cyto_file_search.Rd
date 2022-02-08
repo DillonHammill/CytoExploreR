@@ -25,6 +25,9 @@ specified directory.}
 
 \item{...}{additional named arguments indicating values to find in particular
 columns of the file (e.g. name = c("Activation_1.fcs")).}
+
+\item{ignore.cse}{logical passed to \code{grepl()} to indicate whether to
+ignore the case when matching the file name, set to TRUE by default.}
 }
 \value{
 NULL or data read in from file matching search criteria.
@@ -33,12 +36,12 @@ NULL or data read in from file matching search criteria.
 Search for CSV file in current directory
 }
 \examples{
-\dontrun{ 
+\dontrun{
   # search for experiment details of samples
-  cyto_file_search( 
-    "Experiment-Details.csv$", 
+  cyto_file_search(
+    "Experiment-Details.csv$",
     rownames = c("Activation_1.fcs", "Activation_2.fcs")
-  ) 
+  )
 }
 
 }

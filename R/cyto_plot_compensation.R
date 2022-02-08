@@ -14,6 +14,8 @@
 #' @param overlay can be either \code{"unstained"}, \code{"compensated"},
 #'   \code{"both"} or \code{"none"} to allow control over which data is overlaid
 #'   onto the plots, set to \code{"both"} by default.
+#' @param channels names of the channels or markers in which comensation should
+#'   be visualised, set to all area fluorescentce parameter by default.
 #' @param spillover a matrix or name of a CSV file containing the spillover
 #'   coefficients that should be applied to the data when \code{compensate} is
 #'   TRUE.
@@ -84,7 +86,7 @@
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @return a list of recorded plots for each single colour control.
-#' 
+#'
 #' @export
 cyto_plot_compensation <- function(x,
                                    parent = "root",

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_gate_clust.R
 \name{cyto_gate_clust}
 \alias{cyto_gate_clust}
-\title{Use clustering algorithm to gate populations}
+\title{Use clustering algorithms to gate populations in a GatingSet}
 \usage{
 cyto_gate_clust(
   x,
@@ -13,15 +13,81 @@ cyto_gate_clust(
   merge_by = "all",
   gatingTemplate = NULL,
   group_by = NULL,
-  slot = NULL,
   input = "flowFrame",
   inverse = FALSE,
+  slot = NULL,
   ...
 )
 }
 \arguments{
-\item{x}{object of class \code{GatingSet}.}
+\item{x}{object of class
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
+
+\item{parent}{name of the parent population to gate using the clustering
+algorithm supplied to \code{type}.}
+
+\item{alias}{names(s) to use for the newly clustered populations. For
+unsupervised clustering algorithms where the number of clusters can only be
+determined post gating, supply a single character string to \code{alias} to
+labels these populations. \code{cyto_gate_clust()} will automatically
+append \code{alias} with integers to generate unique names for each of the
+clustered populations. If \code{alias} is not supplied,
+\code{cyto_gate_clust} will instead resort to using the name of the
+function supplied to \code{type}.}
+
+\item{channels}{names of the channels or markers to be be passed to the
+clustering algorithm during the gating step.}
+
+\item{type}{either a character string to indicate the type of clustering
+algorithm to apply or a function to perform the clustering.}
+
+\item{merge_by}{a vector of experiment variables to merge the data into
+groups prior to applying the clustering algorithm supplied to \code{type},
+set to \code{"all"} by default to merge all samples prior to gating. If
+\code{merge_by} is used, the specified clustering algorithm will be applied
+separately to each group of merged samples.}
+
+\item{gatingTemplate}{name of \code{gatingTemplate} csv file to which the
+\code{gatingTemplate} entries for the \code{GatingSet} method should be
+saved, set to \code{cyto_gatingTemplate_active()} by default.}
+
+\item{group_by}{included for compatibility with \code{openCyto} but is
+treated in the same way as \code{merge_by}.}
+
+\item{input}{indicates the format in which the data should be passed to the
+clustering algorithm passed to \code{type}, options include
+\code{"flowFrame"}, \code{"cytoframe"}, \code{"flowSet"}, \code{"cytoset"}
+or \code{"matrix"}.}
+
+\item{inverse}{logical to indicate whether inverse data transformations
+should be applied to the data prior to passing it to the clustering
+algorithm specified by \code{type}, set to FALSE by default.}
+
+\item{slot}{a character string or function to apply to the output of a custom
+clustering algorithm to extract the cluster labels after gating. The
+purpose of \code{slot} is to ensure that a valid gate type (i.e. a factor
+containing the factor labels) is passed to \code{openCyto} during the
+gating step.}
+
+\item{...}{additional arguments passed to the clustering algorithm supplied
+to \code{type}, refer to the documentation for the relevant clustering
+algorithm for more details.}
+}
+\value{
+a GatingHierarchy or GatingSet with gates added for the clustered
+  populations and an updated gatingTemplate.
 }
 \description{
-Use clustering algorithm to gate populations
+Use clustering algorithms to gate populations in a GatingSet
+}
+\seealso{
+\code{\link{cyto_gate_remove}}
+
+\code{\link{cyto_gate_rename}}
+
+\code{\link{cyto_gatingTemplate_edit}}
+}
+\author{
+Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

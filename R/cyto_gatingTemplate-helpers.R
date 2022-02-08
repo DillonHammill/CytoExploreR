@@ -885,7 +885,7 @@ cyto_gatingTemplate_write <- function(gatingTemplate = NULL,
 
 #' Convert parsed gatingTemplate into a format compatible with CytoExploreR
 #'
-#' @param gatingtemplate gatingTemplate object or the name of a gatingTemplate
+#' @param gatingTemplate gatingTemplate object or the name of a gatingTemplate
 #'   csv file to read in and parse.
 #' @param data.table logical indicating whether the parsed gatingTemplate should
 #'   be returned as a \code{data.table}, set to TRUE by default.
