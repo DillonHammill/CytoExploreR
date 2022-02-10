@@ -1460,15 +1460,14 @@ cyto_plot_complete <- function(...) {
   
   # CLOSE DEVICE (not RStudioGD/X11/quartz)
   if (cyto_option("cyto_plot_save")) {
-    if (!names(dev.cur()) %in% c(
-      "RStudioGD",
-      "windows",
-      "X11",
-      "x11",
-      "quartz",
-      "cairo",
-      "Cairo"
-    )) {
+    if(!any(LAPPLY(
+      c("RStudio", "windows", "x11", "quartz", "cairo"), function(z){
+      grepl(
+        z,
+        dev.cur(),
+        ignore.case = TRUE
+      )
+    }))) {
       dev.off()
     }
   }
