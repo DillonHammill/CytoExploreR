@@ -753,11 +753,12 @@ cyto_plot_empty <- function(x,
 #' @param popup logical indicating whether a pop-up graphics device should be
 #'   opened, set to TRUE by default if called outside of \code{cyto_plot()}.
 #' @param popup_size  a vector of length 2 to control the height and width of
-#'   pop-up graphics device in inches, set to \code{c(10,10)} by default. 
+#'   pop-up graphics device in inches, set to \code{c(10,10)} by default.
 #' @param ... additional graphical parameters supplied by name to be passed to
 #'   \code{\link{cyto_plot_par}} to customise the new graphics device.
 #'
 #' @importFrom grDevices dev.cur dev.new dev.list dev.set graphics.off dev.off
+#'   x11
 #' @importFrom graphics par layout
 #'
 #' @examples
@@ -917,23 +918,23 @@ cyto_plot_new <- function(popup = NULL,
             )
           } else if (.Platform$OS.type == "unix") {
             if (Sys.info()["sysname"] == "Linux") {
+              # dev.new() opens slower xquarts
+              # x11 opens through R graphics - much faster rendering
               # Cairo needed for semi-transparency
+              # nbcairo used for speed
               suppressWarnings(
-                dev.new(
+                x11(
                   height = popup_size[1],
                   width = popup_size[2],
-                  unit = "in",
-                  noRStudioGD = TRUE,
-                  type = "cairo"
+                  type = "nbcairo"
                 )
               )
             } else if (Sys.info()["sysname"] == "Darwin") {
               suppressWarnings(
-                dev.new(
+                x11(
                   height = popup_size[1],
                   width = popup_size[2],
-                  unit = "in",
-                  noRStudioGD = TRUE
+                  type = "nbcairo"
                 )
               )
             }
