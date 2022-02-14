@@ -1,5 +1,7 @@
 # CytoExploreR 2.0.0
 
+* Added new `cyto_gate_clust()` gating function to apply ANY clustering algorithm and store populations as gates in the GatingHierarchy or GatingSet.
+* Added new `cyto_gate_clean()` gating function to apply ANY anomaly detection algorithm and store high quality events as a gated population.
 * Added new `cyto_gate_sample()` gating function to add sampled nodes to a GatingHierarchy or GatingSet objects. `cyto_gate_sample()` performs groupwise proportionate sampling by making calls to `cyto_sample_n()` on each experimental group. 
 * `cyto_transformers_define()` has been updated to automatically compute parameter estimates for instruments with larger dynamic ranges, allowing for appropriate transformation of data from newer instruments.
 * `cyto_channel_match()` can now automatically detect the channel associated with each compensation control by matching marker and channel combinations to the file names. Samples where channels cannot be matched by file name will instead be matched by the intensities in the fluorescent channels. `cyto_channel_match()` also gains the ability to automatically detect which compensation controls are beads or cells, an important distinction for `cyto_spillover_compute()`.
