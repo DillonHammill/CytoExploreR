@@ -361,10 +361,10 @@ cyto_spillover_edit <- function(x,
           img(
             src = CytoExploreR_logo(),
             width = 35
-              ), 
+          ), 
           "CytoExploreR Spillover Matrix Editor"
-          )
-        ),
+        )
+      ),
       tabsetPanel(
         tabPanel(
           "Editor",
@@ -414,27 +414,37 @@ cyto_spillover_edit <- function(x,
           sidebarLayout(
             sidebarPanel(
               width = 3,
-              cytoSelectUI("plots_select_unst",
-                           label = "Select unstained sample:"),
-              cytoSelectUI("plots_select",
-                           label = "Select sample:"),
-              nodeSelectUI("plots_node_select",
-                           label = "Select parent:"),
-              channelSelectUI("plots_xchannel",
-                              label = "Channel:"),
-              optionsUI("plots_options",
-                        label = NULL,
-                        selected = plots_opts_select,
-                        choiceNames = list(
-                          "Overlay unstained control",
-                          "Overlay compensated data",
-                          "Fit robust linear models"
-                        ),
-                        choiceValues = list(
-                          "unstained",
-                          "compensated",
-                          "models"
-                        ))
+              cytoSelectUI(
+                "plots_select_unst",
+                label = "Select unstained sample:"
+              ),
+              cytoSelectUI(
+                "plots_select",
+                label = "Select sample:"
+              ),
+              nodeSelectUI(
+                "plots_node_select",
+                label = "Select parent:"
+              ),
+              channelSelectUI(
+                "plots_xchannel",
+                label = "Channel:"
+              ),
+              optionsUI(
+                "plots_options",
+                 label = NULL,
+                 selected = plots_opts_select,
+                 choiceNames = list(
+                   "Overlay unstained control",
+                   "Overlay compensated data",
+                   "Fit robust linear models"
+                 ),
+                 choiceValues = list(
+                   "unstained",
+                   "compensated",
+                   "models"
+                 )
+              )
             ),
             mainPanel(
               width = 9,
@@ -751,18 +761,23 @@ cyto_spillover_edit <- function(x,
       # PLOTS OPTIONS
       plots_opts <- optionsServer(
         "plots_options",
-        selected = reactive(values$plots_opts_select)
+        selected = reactive({values$plots_opts_select})
       )
+      
+      # UPDATE PLOT OPTIONS
+      observe({
+        values$plots_opts_select <- plots_opts()
+      })
       
       # COMPENSATION PLOTS
       compPlotServer(
         "plots",
-        ID_comp_trans = reactive(values$ID_comp_trans),
-        NIL_comp_trans = reactive(values$NIL_comp_trans),
-        opts = reactive(values$plots_opts_select),
-        xchan = reactive(values$xchan_select),
-        channels = reactive(channels),
-        spillover = reactive(values$spill),
+        ID_comp_trans = reactive({values$ID_comp_trans}),
+        NIL_comp_trans = reactive({values$NIL_comp_trans}),
+        opts = reactive({values$plots_opts_select}),
+        xchan = reactive({values$xchan_select}),
+        channels = reactive({channels}),
+        spillover = reactive({values$spill}),
         axes_trans = axes_trans,
         axes_limits = axes_limits,
         events = events,
@@ -1308,6 +1323,7 @@ editPlotUI <- function(id,
   
   plotOutput(
     NS(id, "plot"),
+    width = "90%",
     ...
   )
   
@@ -1334,7 +1350,7 @@ editPlotServer <- function(id,
                             session){
 
     # PLOTS
-    output$plot <- renderImage({
+    output$plot <- renderPlot({
       # BYPASS PLOTS FOR MISSING DATA
       if((!.empty(ID_comp_trans(), null = TRUE) | 
           (!.empty(ID_comp_trans(), null = TRUE) &
@@ -1346,16 +1362,6 @@ editPlotServer <- function(id,
            "overlay" %in% opts()){
           overlay <- TRUE
         }
-        # SAVE IMAGE
-        temp <- paste0(tempdir(),
-                       .Platform$file.sep,
-                       "cyto_spillover_edit.png")
-        cyto_plot_save(
-          temp,
-          height = 6,
-          width = 12,
-          res = 300
-        )
         # CUSTOM LAYOUT
         cyto_plot_custom(
           layout = matrix(
@@ -1365,27 +1371,29 @@ editPlotServer <- function(id,
           ),
           popup = FALSE
         )
-        # SCATTERPLOT
-        cyto_plot(
-          ID_comp_trans(),
-          channels = c(xchan(), ychan()),
-          overlay = if(overlay) {
-            NIL_comp_trans()
-          } else {
-            NA
-          },
-          axes_trans = axes_trans,
-          axes_limits = axes_limits,
-          events = events,
-          title = cyto_names(ID_comp_trans()),
-          point_size = point_size,
-          axes_text_size = axes_text_size,
-          axes_label_text_size = axes_label_text_size,
-          title_text_size = title_text_size,
-          key_text_size = 2,
-          key_title_text_size = 2,
-          popup = FALSE,
-          ...
+        # SCATTERPLOT - NO PROGRESS BAR
+        suppressPrint(
+          cyto_plot(
+            ID_comp_trans(),
+            channels = c(xchan(), ychan()),
+            overlay = if(overlay) {
+              NIL_comp_trans()
+            } else {
+              NA
+            },
+            axes_trans = axes_trans,
+            axes_limits = axes_limits,
+            events = events,
+            title = cyto_names(ID_comp_trans()),
+            point_size = point_size,
+            axes_text_size = axes_text_size,
+            axes_label_text_size = axes_label_text_size,
+            title_text_size = title_text_size,
+            key_text_size = 2,
+            key_title_text_size = 2,
+            popup = FALSE,
+            ...
+          )
         )
         # STORE PLOT LIMITS
         usr <- .par("usr")[[1]]
@@ -1436,115 +1444,102 @@ editPlotServer <- function(id,
             label_text_x <- min(lims) + 
               0.90 * diff(lims)
           }
-          # CONSTRCUT PLOT
-          cyto_plot(
-            if (overlay) {
-              NIL_comp_trans()
-            } else {
-              ID_comp_trans()
-            },
-            channels = chan,
-            overlay = if (overlay) {
-              ID_comp_trans()
-            } else {
-              NA
-            },
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            events = events,
-            title = NA,
-            ylab = "Density",
-            hist_fill = if (overlay){
-              c("grey70", "white")
-            }else {
-              "white" 
-            },
-            hist_fill_alpha = if (overlay){
-              c(1, 0)
-            }else {
-              1
-            },
-            hist_line_col = if (overlay){
-              c("black", "blue")
-            } else {
-              "blue"
-            }, 
-            hist_line_width = 2,
-            axes_text_size = axes_text_size,
-            axes_label_text_size = axes_label_text_size,
-            title_text_size = title_text_size,
-            popup = FALSE,
-            label_text = if (chan == ychan()){
+          # CONSTRUCT PLOT - NO PROGRESS BAR
+          suppressPrint(
+            cyto_plot(
               if (overlay) {
-                c("MedFI", "MedFI")
+                NIL_comp_trans()
               } else {
-                c("MedFI")
-              }
-            } else {
-              NA
-            },
-            label_stat = if (chan == ychan()){
-              if (overlay) {
-                c("median", "median")
+                ID_comp_trans()
+              },
+              channels = chan,
+              overlay = if (overlay) {
+                ID_comp_trans()
               } else {
-                c("median")
-              }
-            } else {
-              NA
-            },
-            label_text_x = if (chan == ychan()) {
-              if(overlay) {
-                rep(
-                  label_text_x,
-                  2
-                )
+                NA
+              },
+              axes_trans = axes_trans,
+              axes_limits = axes_limits,
+              events = events,
+              title = NA,
+              ylab = "Density",
+              hist_fill = if (overlay){
+                c("grey70", "white")
+              }else {
+                "white" 
+              },
+              hist_fill_alpha = if (overlay){
+                c(1, 0)
+              }else {
+                1
+              },
+              hist_line_col = if (overlay){
+                c("black", "blue")
               } else {
-                label_text_x
-              }
-            } else {
-              NA
-            },
-            label_text_y = if (chan == ychan()) {
-              if(overlay) {
-                c(80, 30)
+                "blue"
+              }, 
+              hist_line_width = 2,
+              axes_text_size = axes_text_size,
+              axes_label_text_size = axes_label_text_size,
+              title_text_size = title_text_size,
+              popup = FALSE,
+              label_text = if (chan == ychan()){
+                if (overlay) {
+                  c("MedFI", "MedFI")
+                } else {
+                  c("MedFI")
+                }
               } else {
-                c(50)
-              }
-            } else {
-              NA
-            },
-            label_text_col = if (chan == ychan()){
-              if(overlay){
-                c("grey40", "blue")
+                NA
+              },
+              label_stat = if (chan == ychan()){
+                if (overlay) {
+                  c("median", "median")
+                } else {
+                  c("median")
+                }
               } else {
-                c("blue")
-              }
-            } else {
-              "black"
-            },
-            label_text_size = 1.1,
-            ...
+                NA
+              },
+              label_text_x = if (chan == ychan()) {
+                if(overlay) {
+                  rep(
+                    label_text_x,
+                    2
+                  )
+                } else {
+                  label_text_x
+                }
+              } else {
+                NA
+              },
+              label_text_y = if (chan == ychan()) {
+                if(overlay) {
+                  c(80, 30)
+                } else {
+                  c(50)
+                }
+              } else {
+                NA
+              },
+              label_text_col = if (chan == ychan()){
+                if(overlay){
+                  c("grey40", "blue")
+                } else {
+                  c("blue")
+                }
+              } else {
+                "black"
+              },
+              label_text_size = 1.1,
+              ...
+            )
           )
         }
-        # COMPLETE
+        # RESET - CYTO_PLOT_COMPLETE
         cyto_plot_complete()
-        # RENDER IMAGE
-        list(src = temp,
-             height = 400)
-      } else {
-        # SAVE BLANK IMAGE
-        temp <- paste0(tempdir(),
-                       .Platform$file.sep,
-                       "cyto_spillover_edit.png")
-        cyto_plot_save(temp,
-                       height = 6,
-                       width = 12,
-                       res = 300)
-        cyto_plot_complete()
-        list(src = temp,
-             height = 400)
       }
-    }, deleteFile = TRUE)
+    })
   })
 }
 
@@ -1554,6 +1549,7 @@ compPlotUI <- function(id,
   
   plotOutput(
     NS(id, "cyto_plot_comp"),
+    height = "800px",
     ...
   )
   
@@ -1581,27 +1577,23 @@ compPlotServer <- function(id,
                             output,
                             session){
     
+    # VALUES
+    values <- reactiveValues(
+      layout = NULL
+    )
+    
+    # CUSTOM LAYOUT
+    observe({
+      values$layout <- c(ceiling(length(channels())/4), 4)
+    })
+    
     # PLOTS
-    output$cyto_plot_comp <- renderImage({
+    output$cyto_plot_comp <- renderPlot({
       # BYPASS PLOTS FOR MISSING DATA
       if((!.empty(ID_comp_trans(), null = TRUE) | 
           (!.empty(ID_comp_trans(), null = TRUE) &
            !.empty(NIL_comp_trans(), null = TRUE))) &
          (!.empty(xchan(), null = TRUE) & !.empty(channels(), null = TRUE))) {
-        # SAVE IMAGE TEMPFILE
-        temp <- paste0(
-          tempdir(),
-          .Platform$file.sep,
-          "cyto_spillover_edit.png"
-        )
-        # TODO: PREPARE GRAPHICS DIMENSIONS BY CHANNELS LENGTH
-        # PREPARE GRAPHICS DEVICE
-        cyto_plot_save(
-          temp,
-          height = 6,
-          width = 12,
-          res = 300
-        )
         # PREPARE DATA
         if(!.empty(ID_comp_trans(), null = TRUE)) {
           # COMBINE UNSTAINED
@@ -1627,79 +1619,61 @@ compPlotServer <- function(id,
         pd <- cyto_details(cs)
         pd$channel <- c(xchan(), "unstained")[seq_along(cs)]
         # CYTO_PLOT_COMPENSATION
-        suppressWarnings(
-          cyto_plot_compensation(
-            cs,
-            channels = channels(),
-            channel_match = pd,
-            overlay = if(!any(c("unstained", "compensated") %in% opts())){
-              "none"
-            } else {
-              opts()[opts() %in% c("unstained", "compensated")]
-            },
-            spillover = spillover(),
-            compensated = TRUE,
-            axes_trans = axes_trans,
-            axes_limits = axes_limits,
-            events = events,
-            point_size = point_size,
-            point_col = if(all(c("unstained", "compensated") %in% opts())) {
-              c("magenta", "blue", "grey40")
-            } else if("unstained" %in% opts()) {
-              c("magenta", "grey40")
-            } else if("compensated" %in% opts()) {
-              c("magenta", "blue")
-            } else {
-              c("magenta")
-            },
-            hist_fill = if(all(c("unstained", "compensated") %in% opts())) {
-              c("magenta", "blue", "grey40")
-            } else if("unstained" %in% opts()) {
-              c("magenta", "grey40")
-            } else if("compensated" %in% opts()) {
-              c("magenta", "blue")
-            } else {
-              c("magenta")
-            },
-            lines = if("models" %in% opts()) {
-              TRUE
-            } else {
-              FALSE
-            },
-            text = TRUE,
-            axes_text_size = 1.7,
-            axes_label_text_size = 2,
-            title_text_size = 2,
-            popup = FALSE,
-            ...
+        suppressPrint(
+          suppressWarnings(
+            cyto_plot_compensation(
+              cs,
+              channels = channels(),
+              channel_match = pd,
+              overlay = if(!any(c("unstained", "compensated") %in% opts())){
+                "none"
+              } else {
+                opts()[opts() %in% c("unstained", "compensated")]
+              },
+              spillover = spillover(),
+              compensated = TRUE,
+              axes_trans = axes_trans,
+              axes_limits = axes_limits,
+              events = events,
+              point_size = point_size,
+              point_col = if(all(c("unstained", "compensated") %in% opts())) {
+                c("magenta", "blue", "grey40")
+              } else if("unstained" %in% opts()) {
+                c("magenta", "grey40")
+              } else if("compensated" %in% opts()) {
+                c("magenta", "blue")
+              } else {
+                c("magenta")
+              },
+              hist_fill = if(all(c("unstained", "compensated") %in% opts())) {
+                c("magenta", "blue", "grey40")
+              } else if("unstained" %in% opts()) {
+                c("magenta", "grey40")
+              } else if("compensated" %in% opts()) {
+                c("magenta", "blue")
+              } else {
+                c("magenta")
+              },
+              lines = if("models" %in% opts()) {
+                TRUE
+              } else {
+                FALSE
+              },
+              text = TRUE,
+              text_size = 1.5,
+              axes_text_size = 1.7,
+              axes_label_text_size = 2,
+              title_text_size = 2,
+              layout = values$layout,
+              popup = FALSE,
+              ...
+            )
           )
         )
-        # COMPLETE
-        cyto_plot_complete()
-        # RENDER IMAGE
-        list(
-          src = temp,
-          height = 800
-        )
-      } else {
-        # SAVE BLANK IMAGE
-        temp <- paste0(
-          tempdir(),
-          .Platform$file.sep,
-          "cyto_spillover_edit.png"
-        )
-        cyto_plot_save(
-          temp,
-          height = 6,
-          width = 12,
-          res = 300)
-        cyto_plot_complete()
-        list(
-          src = temp,
-          height = 800
-        )
       }
-    }, deleteFile = TRUE)
+    },
+    height = reactive({250 * values$layout[1]})
+    )
   })
 }
 
@@ -1715,9 +1689,11 @@ compPlotServer <- function(id,
                                  channels = NULL) {
   
   # RAW DATA
-  raw_data <- cyto_data_extract(x, 
-                                format = "matrix",
-                                copy = FALSE)[[1]][[1]]
+  raw_data <- cyto_data_extract(
+    x, 
+    format = "matrix",
+    copy = FALSE
+  )[[1]][[1]]
   raw_data <- raw_data[, channels]
   # SORT RAW DATA
   raw_data <- raw_data[order(raw_data[, channels[1]]), ]
