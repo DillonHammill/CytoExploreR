@@ -27,6 +27,9 @@
   # CYTO_PLOT() METHOD
   options("cyto_plot_method" = NULL)
   
+  # CYTO_PLOT() CUSTOM IN SHINY
+  options("cyto_plot_shiny" = NULL)
+  
   # CYTO_PLOT() SET GRAPHICAL PARAMETERS
   options("cyto_plot_par" = list())
   

@@ -822,6 +822,15 @@ cyto_plot_new <- function(popup = NULL,
     # DON'T OPEN NEW DEVICE - USE EXISTING DEVICE (PDF MULTIPAGE)
     dev_new <- FALSE
     dev_empty <- dev_empty()
+  # SHINY - CUSTOM REQUIRES FLAG - DEV_EMPTY() ALWAYS FALSE
+  } else if(shiny::isRunning()) {
+    dev_new <- FALSE
+    if(is.null(cyto_option("cyto_plot_shiny"))) {
+      dev_empty <- TRUE
+      cyto_option("cyto_plot_shiny", TRUE)
+    } else {
+      dev_empty <- FALSE
+    }
   # NEW GRAPHICS DEVICE REQUIRED?
   } else {
     # NULL -> RSTUDIOGD
@@ -940,22 +949,22 @@ cyto_plot_new <- function(popup = NULL,
             }
           }
         # }
-        # RSTUDIO DEVICE
-      } else if (dev_new == "rstudio") {
+      # NON-POPUP DEVICE - RSTUDIO | SHINY (CAIRO)
+      } else if(dev_new == "rstudio") {
         dev_ind <- which(
           grepl(
-            "rstudio",
+            dev_new,
             names(dev.list()),
             ignore.case = TRUE
           )
         )
         if (length(dev_ind) != 0) {
           dev.off(dev.list()[dev_ind])
-          dev.new(noRStudioGD = FALSE)
         } else {
           graphics.off()
-          dev.new(noRStudioGD = FALSE)
         }
+        # NEW DEVICE
+        dev.new(noRStudioGD = FALSE)
       }
     }
   }
@@ -1041,6 +1050,9 @@ cyto_plot_reset <- function() {
   
   # Signal which cyto_plot method has been called
   cyto_option("cyto_plot_method", NULL)
+  
+  # shiny
+  cyto_option("cyto_plot_shiny", NULL)
   
   # Reset saved parameters
   cyto_plot_par(reset = TRUE)
@@ -1474,6 +1486,9 @@ cyto_plot_complete <- function(...) {
   
   # RESET CYTO_PLOT_METHOD
   cyto_option("cyto_plot_method", NULL)
+  
+  # CYTO_PLOT_CUSTOM SHINY
+  cyto_option("cyto_plot_shiny", NULL)
   
   # RESET CYTO_PLOT_SAVE
   cyto_option("cyto_plot_save", FALSE)
