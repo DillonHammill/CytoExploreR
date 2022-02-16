@@ -5216,7 +5216,7 @@ cyto_markers_edit <- function(x,
   
   # EDIT - NON-INTERACTIVE UPDATE WITHOUT EDITING
   if(interactive() & cyto_option("CytoExploreR_interactive")) {
-    pd <- data_edit(
+    pd_new <- data_edit(
       pd,
       logo = CytoExploreR_logo(),
       title = "Experiment Markers Editor",
@@ -5232,15 +5232,17 @@ cyto_markers_edit <- function(x,
   
   # WRITE CSV
   if(!.all_na(save_as)) {
-    write_to_csv(pd,
-                 save_as,
-                 row.names = FALSE)
+    write_to_csv(
+      pd_new,
+      save_as,
+      row.names = FALSE
+    )
   }
   
   # ONLY UPDATE CHANNELS/MARKERS RELEVANT TO DATA
   ind <- match_ind(chans, pd$channel)
-  cyto_chans <- pd$channel[ind]
-  cyto_marks <- pd$marker[ind]
+  cyto_chans <- pd_new$channel[ind]
+  cyto_marks <- pd_new$marker[ind]
   names(cyto_marks) <- cyto_chans
   
   # UPDATE CHANNELS
