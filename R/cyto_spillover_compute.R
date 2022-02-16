@@ -64,6 +64,8 @@
 #'   arguments.
 #' @param spillover superseded by the \code{save_as} argument above, only
 #'   included for backwards compatibility with older versions of CytoExploreR.
+#' @param plot logical indicating whether the computed spillover matrix should
+#'   be displayed in a heatmap, set to TRUE by default.
 #' @param ... additional arguments passed to \code{\link{cyto_plot}}.
 #'
 #' @return spillover matrix and write spillover matrix to csv file named in
@@ -71,6 +73,7 @@
 #'
 #' @importFrom flowWorkspace cytoset
 #' @importFrom openCyto mindensity
+#' @importFrom HeatmapR heat_map
 #'
 #' @examples
 #' \dontrun{
@@ -131,6 +134,7 @@ cyto_spillover_compute <- function(x,
                                    axes_trans = NA,
                                    axes_limits = "machine",
                                    spillover = NULL,
+                                   plot = FALSE,
                                    ...) {
 
   # SPILLOVER ------------------------------------------------------------------
@@ -139,7 +143,7 @@ cyto_spillover_compute <- function(x,
   if(!is.null(spillover)) {
     warning(
       paste0(
-        "'spillover' is now deprecated in favour of `save_as` - ",
+        "'spillover' is now deprecated in favour of 'save_as' - ",
         "please use that argument instead."
       )
     )
@@ -737,6 +741,20 @@ cyto_spillover_compute <- function(x,
       spill_mat, 
       save_as,
       row.names = TRUE
+    )
+  }
+  
+  # HEATMAP
+  if(plot) {
+    sp <- spill_mat
+    if(is.null(rownames(sp))) {
+      rownames(sp) <- colnames(sp)
+    }
+    diag(sp) <- NA
+    # CONSTRUCT HEATMAP - USE CYTO_PLOT_HEATMAP?
+    heat_map(
+      sp,
+      box_col_empty = "grey40"
     )
   }
   

@@ -14,6 +14,7 @@ cyto_spillover_compute(
   axes_trans = NA,
   axes_limits = "machine",
   spillover = NULL,
+  plot = FALSE,
   ...
 )
 }
@@ -61,6 +62,9 @@ arguments.}
 
 \item{spillover}{superseded by the \code{save_as} argument above, only
 included for backwards compatibility with older versions of CytoExploreR.}
+
+\item{plot}{logical indicating whether the computed spillover matrix should
+be displayed in a heatmap, set to TRUE by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_plot}}.}
 }

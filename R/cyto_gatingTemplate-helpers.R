@@ -1,3 +1,66 @@
+## CYTO_GATINGTEMPLATE ---------------------------------------------------------
+
+#' Extract a gatingTemplate from a GtaingHierrachy or GatingSet
+#'
+#' Simply a wrapper around
+#' \code{\link[openCyto:gh_generate_template]{gh_generate_template()}} to
+#' extract a gatingTemplate from either a GatingHierarchy or GatingSet.
+#'
+#' @param x an object of class
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param select passed to \code{cyto_select()} to select the GatingHierarchy
+#'   from which the gatingTemplate should be extracted, set to 1 by default to
+#'   select the first GatingHierarchy.
+#' @param data.table logical indicating whether the extracted gatingTemplate
+#'   should be returned as a \code{data.table}, set to FALSE by default.
+#'
+#' @return gatingTemplate as either a \code{data.frame} or \code{data.table}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @importFrom openCyto gh_generate_template
+#' @importFrom data.table data.table
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#' gs <- cyto_compensate(gs)
+#' gs <- cyto_transform(gs)
+#' gs <- cyto_gatingTemplate_apply(gs)
+#'
+#' # Extract gatingTemplate
+#' gt <- cyto_gatingTemplate_apply(gs)
+#'
+#' @export
+cyto_gatingTemplate <- function(x,
+                                select = 1,
+                                data.table = FALSE) {
+  
+  # SELECT GATINGHIERARCHY
+  gh <- cyto_select(
+    x, 
+    select
+  )
+  
+  # EXTRACT GATINGTEMPLATE
+  gt <- gh_generate_template(gh)
+  
+  # CONVERT EMPTY DIMS -> NA
+  gt$dims[!nzchar(gt$dims)] <- NA
+  
+  # DATA.TABLE
+  if(data.table) {
+    data.table(gt)
+  }
+  
+  # GATINGTEMPLATE
+  return(gt)
+  
+}
+
 ## GATINGTEMPLATE GENERATE -----------------------------------------------------
 
 #' Generate a CytoExploreR gatingTemplate for a GatingHierarchy or GatingSet

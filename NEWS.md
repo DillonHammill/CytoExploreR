@@ -1,5 +1,6 @@
 # CytoExploreR 2.0.0
 
+* `CytoExploreR` now uses the `HeatmapR` package to display heatmaps in `cyto_spillover_compute()` and `cyto_spillover_spread_compute()`.
 * Added new `cyto_gate_clust()` gating function to apply ANY clustering algorithm and store populations as gates in the GatingHierarchy or GatingSet.
 * Added new `cyto_gate_clean()` gating function to apply ANY anomaly detection algorithm and store high quality events as a gated population.
 * Added new `cyto_gate_sample()` gating function to add sampled nodes to a GatingHierarchy or GatingSet objects. `cyto_gate_sample()` performs groupwise proportionate sampling by making calls to `cyto_sample_n()` on each experimental group. 
