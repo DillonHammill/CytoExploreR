@@ -1,4 +1,4 @@
-## CYTO_GATINGTEMPLATE ---------------------------------------------------------
+## CYTO_GATINGTEMPLATE_EXTRACT -------------------------------------------------
 
 #' Extract a gatingTemplate from a GtaingHierrachy or GatingSet
 #'
@@ -14,6 +14,7 @@
 #'   select the first GatingHierarchy.
 #' @param data.table logical indicating whether the extracted gatingTemplate
 #'   should be returned as a \code{data.table}, set to FALSE by default.
+#' @param ... not in use.
 #'
 #' @return gatingTemplate as either a \code{data.frame} or \code{data.table}.
 #'
@@ -32,12 +33,13 @@
 #' gs <- cyto_gatingTemplate_apply(gs)
 #'
 #' # Extract gatingTemplate
-#' gt <- cyto_gatingTemplate_apply(gs)
+#' cyto_gatingTemplate_extract(gs)
 #'
 #' @export
-cyto_gatingTemplate <- function(x,
-                                select = 1,
-                                data.table = FALSE) {
+cyto_gatingTemplate_extract <- function(x,
+                                        select = 1,
+                                        data.table = FALSE,
+                                        ...) {
   
   # SELECT GATINGHIERARCHY
   gh <- cyto_select(
