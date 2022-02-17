@@ -2,9 +2,15 @@
 % Please edit documentation in R/cyto_gatingTemplate-helpers.R
 \name{cyto_gatingTemplate_extract}
 \alias{cyto_gatingTemplate_extract}
-\title{Extract a gatingTemplate from a GtaingHierrachy or GatingSet}
+\title{Extract a gatingTemplate from a GatingHierrachy or GatingSet}
 \usage{
-cyto_gatingTemplate_extract(x, select = 1, data.table = FALSE, ...)
+cyto_gatingTemplate_extract(
+  x,
+  select = 1,
+  sort = TRUE,
+  data.table = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{an object of class
@@ -15,6 +21,10 @@ cyto_gatingTemplate_extract(x, select = 1, data.table = FALSE, ...)
 from which the gatingTemplate should be extracted, set to 1 by default to
 select the first GatingHierarchy.}
 
+\item{sort}{logical indicating whether the entries in the gatingtemplate
+should be sorted to match the order of the nodes in the GatingHierarchy or
+GatingSet, set to TRUE by default.}
+
 \item{data.table}{logical indicating whether the extracted gatingTemplate
 should be returned as a \code{data.table}, set to FALSE by default.}
 
@@ -24,7 +34,7 @@ should be returned as a \code{data.table}, set to FALSE by default.}
 gatingTemplate as either a \code{data.frame} or \code{data.table}.
 }
 \description{
-Simply a wrapper around
+Simply a modified wrapper around
 \code{\link[openCyto:gh_generate_template]{gh_generate_template()}} to
 extract a gatingTemplate from either a GatingHierarchy or GatingSet.
 }

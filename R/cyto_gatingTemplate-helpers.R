@@ -1,8 +1,8 @@
 ## CYTO_GATINGTEMPLATE_EXTRACT -------------------------------------------------
 
-#' Extract a gatingTemplate from a GtaingHierrachy or GatingSet
+#' Extract a gatingTemplate from a GatingHierrachy or GatingSet
 #'
-#' Simply a wrapper around
+#' Simply a modified wrapper around
 #' \code{\link[openCyto:gh_generate_template]{gh_generate_template()}} to
 #' extract a gatingTemplate from either a GatingHierarchy or GatingSet.
 #'
@@ -12,6 +12,9 @@
 #' @param select passed to \code{cyto_select()} to select the GatingHierarchy
 #'   from which the gatingTemplate should be extracted, set to 1 by default to
 #'   select the first GatingHierarchy.
+#' @param sort logical indicating whether the entries in the gatingtemplate
+#'   should be sorted to match the order of the nodes in the GatingHierarchy or
+#'   GatingSet, set to TRUE by default.
 #' @param data.table logical indicating whether the extracted gatingTemplate
 #'   should be returned as a \code{data.table}, set to FALSE by default.
 #' @param ... not in use.
@@ -38,6 +41,7 @@
 #' @export
 cyto_gatingTemplate_extract <- function(x,
                                         select = 1,
+                                        sort = TRUE,
                                         data.table = FALSE,
                                         ...) {
   
@@ -52,6 +56,24 @@ cyto_gatingTemplate_extract <- function(x,
   
   # CONVERT EMPTY DIMS -> NA
   gt$dims[!nzchar(gt$dims)] <- NA
+  
+  # SORT ENTRIES
+  if(sort) {
+    # AUTO PATHS FOR ENTRIES
+    pops <- LAPPLY(
+      seq_len(nrow(gt)),
+      function(z) {
+        cyto_nodes_convert(
+          gh,
+          nodes = gt$alias[z],
+          anchor = gt$parent[z],
+          path = "auto"
+        )
+      }
+    )
+    # SORT GATINGTEMPLATE
+    gt <- gt[match(cyto_nodes(gh, path = "auto")[-1], pops), , drop = FALSE]
+  }
   
   # DATA.TABLE
   if(data.table) {
