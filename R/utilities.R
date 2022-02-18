@@ -316,3 +316,63 @@ suppressPrint <- function(x) {
   on.exit(sink()) 
   invisible(force(x)) 
 }
+
+## GREP ------------------------------------------------------------------------
+
+#' Wrapper around grep() to allow fixed case insenstive search
+#' @noRd
+.grep <- function(pattern,
+                  x,
+                  ignore.case = TRUE,
+                  fixed = FALSE,
+                  ...) {
+  
+  if(fixed & ignore.case) {
+    grep(
+      tolower(pattern),
+      tolower(x),
+      ignore.case = FALSE,
+      fixed = TRUE,
+      ...
+    )
+  } else {
+    grep(
+      pattern,
+      x,
+      ignore.case = ignore.case,
+      fixed = fixed,
+      ...
+    )
+  }
+
+}
+
+## GREPL -----------------------------------------------------------------------
+
+#' Wrapper around grepl() to allow fixed case insensitive search
+#' @noRd
+.grepl <- function(pattern,
+                   x,
+                   ignore.case = TRUE,
+                   fixed = FALSE,
+                   ...) {
+  
+  if(fixed & ignore.case) {
+    grepl(
+      tolower(pattern),
+      tolower(x),
+      ignore.case = FALSE,
+      fixed = TRUE,
+      ...
+    )
+  } else {
+    grepl(
+      pattern,
+      x,
+      ignore.case = ignore.case,
+      fixed = fixed,
+      ...
+    )
+  }
+  
+}

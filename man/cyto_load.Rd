@@ -11,6 +11,8 @@ cyto_load(
   sort = TRUE,
   barcode = FALSE,
   restrict = FALSE,
+  fixed = FALSE,
+  ignore.case = TRUE,
   ...
 )
 }
@@ -36,7 +38,16 @@ using \code{cyto_barcode}, set to FALSE by default.}
 dropped from the returned cytoset, set to FALSE by default. See
 \code{\link{cyto_channels_restrict}}.}
 
-\item{...}{additional arguments passed to \code{\link{cyto_load}}.}
+\item{fixed}{logical passed to \code{grepl()} during file name matching in
+\code{select} and \code{exclude} to control whether an exact match is
+required, set to FALSE by default for more flexible matching.}
+
+\item{ignore.case}{logical passed to \code{grepl()} during file name matching
+in \code{select} and \code{exclude} to control whether case insensitive
+matching is required, set to TRUE by default.}
+
+\item{...}{additional arguments passed to
+\code{\link{load_cytoset_from_fcs()}}.}
 }
 \value{
 object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or

@@ -315,7 +315,14 @@ cyto_export <- function(x,
 #' @param restrict logical indicating whether unassigned channels should be
 #'   dropped from the returned cytoset, set to FALSE by default. See
 #'   \code{\link{cyto_channels_restrict}}.
-#' @param ... additional arguments passed to \code{\link{cyto_load}}.
+#' @param fixed logical passed to \code{grepl()} during file name matching in
+#'   \code{select} and \code{exclude} to control whether an exact match is
+#'   required, set to FALSE by default for more flexible matching.
+#' @param ignore.case logical passed to \code{grepl()} during file name matching
+#'   in \code{select} and \code{exclude} to control whether case insensitive
+#'   matching is required, set to TRUE by default.
+#' @param ... additional arguments passed to
+#'   \code{\link{load_cytoset_from_fcs()}}.
 #'
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
@@ -346,6 +353,8 @@ cyto_load <- function(path = ".",
                       sort = TRUE,
                       barcode = FALSE,
                       restrict = FALSE,
+                      fixed = FALSE,
+                      ignore.case = TRUE,
                       ...) {
 
   # PATH - NAMED LIST OF MATRICES
@@ -418,42 +427,41 @@ cyto_load <- function(path = ".",
       backend_readonly = FALSE
     )
     # BARCODE
-    if(!any(grepl("^Event-?ID$", cyto_channels(x), ignore.case = TRUE))) {
+    if(!any(.grepl("^Event-?ID$", cyto_channels(x), ignore.case = TRUE))) {
       x <- cyto_barcode(
         x,
         "events"
       )
     }
-    # FCS FILES
+  # FCS FILES
   } else {
-    
     # VALID FILES
     files_ext <- file_ext(files)
     files_ind <- which(!files_ext %in% c("", "fcs", "FCS"))
-    
     # NO VALID FILES
     if(length(files_ind) == length(files)){
       stop(paste0(path,
                   " does not contain any valid FCS files."))
     }
-    
     # EXCLUDE IRRELEVANT FILES
     if(length(files_ind) > 0){
       files <- files[-files_ind]
     }
-    
     # SELECT
     if (!is.null(select)) {
       file_ind <- c()
       lapply(
         select, 
         function(z) {
-          if (any(grepl(z, files, ignore.case = TRUE))) {
           file_ind <<- c(
-              file_ind,
-              which(grepl(z, files, ignore.case = TRUE))
+            file_ind,
+            .grep(
+              z, 
+              files, 
+              ignore.case = ignore.case, 
+              fixed = fixed
             )
-          }
+          )
         }
       )
       if(length(file_ind) > 0){
@@ -467,13 +475,17 @@ cyto_load <- function(path = ".",
       lapply(
         exclude, 
         function(z) {
-          if (any(grepl(z, files, ignore.case = TRUE))) {
-            file_ind <<- c(
-              file_ind,
-              which(grepl(z, files, ignore.case = TRUE))
+          file_ind <<- c(
+            file_ind,
+            .grep(
+              z,
+              files,
+              ignore.case = ignore.case,
+              fixed = fixed
             )
-          }
-      })
+          )
+        }
+      )
       if(length(file_ind) > 0){
         files <- files[-unique(file_ind)]
       }
