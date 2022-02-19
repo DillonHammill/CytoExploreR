@@ -77,7 +77,7 @@
 * Rename all `density` arguments to instead use `hist` as a prefix.
 * Add legend fro point colour scale to `cyto_plot()`.
 * Add support for adding grid lines to `cyto_plot()` through `grid` argument and customisation through `grid_line_width`, `grid_line_col` and `grid_line_alpha` arguments.
-* Add new `cyto_plot_par()` function to handle graphical parameters within `cyto_plot()`. Refine behaviour of all `cyto_plot()` helper functions to ensure graphics devices are opened when expected. `cyto_plot_layout()` is now defunct, `layout` can now be directly passed to `cyto_plot_new()` or `cyto_plot_complete()`.
+* Add new `cyto_plot_par()` function to handle graphical parameters within `cyto_plot()`. Refine behaviour of all `cyto_plot()` helper functions to ensure graphics devices are opened when expected. `cyto_plot_layout()` is now defunct, `layout` can now be directly passed to `cyto_plot_new()`, `cyto_plot_custom()` or `cyto_plot_complete()`.
 * Support for scattermore is now integrated in `cyto_plot_point()` through the `point_fast` argument, which is set to FALSE by default.
 * Add new `cyto_gate_copy()` function to support copying of gates from one node to another.
 * Add support for partial matches in `cyto_channels_extract()` and `cyto_markers_extract()`. This means that partial matching of channels/markers is now supported by `cyto_plot()` as well.

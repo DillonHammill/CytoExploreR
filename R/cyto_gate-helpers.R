@@ -886,14 +886,18 @@ cyto_gate_extract <- function(x,
   # GATINGHIERARCHY/GATINGSET
   if(cyto_class(x, "GatingSet")) {
     # ANCHOR ALIAS TO PARENT
-    alias <- cyto_nodes_convert(x,
-                                nodes = alias,
-                                anchor = parent,
-                                path = path)
+    alias <- cyto_nodes_convert(
+      x,
+      nodes = alias,
+      anchor = parent,
+      path = path
+    )
     # SPLIT INTO GROUPS
-    x <- cyto_group_by(x, 
-                       group_by = merge_by,
-                       select = select)
+    x <- cyto_group_by(
+      x, 
+      group_by = merge_by,
+      select = select
+    )
     # EXTRACT GATES PER GROUP
     gates <- structure(
       lapply(x, function(z){
@@ -908,14 +912,35 @@ cyto_gate_extract <- function(x,
               logic <- gate@deparse
               pops <- unlist(strsplit(logic, "[^[:alnum:][:space:]]"))
               pops <- pops[!LAPPLY(pops, ".empty")]
+              # BOOLEAN GATE REFERS TO OTHER POPULATIONS
+              if(is.null(
+                tryCatch(
+                  cyto_nodes_convert(
+                    gh,
+                    nodes = pops,
+                    path = "auto"
+                  ),
+                  error = function(e) {
+                    NULL
+                  }
+                )
+              )) {
+                return(gate)
+              }
+              # EXTRACT OPERATORS
               ops <- unlist(strsplit(logic, "[[:alnum:][:space:]]"))
               ops <- ops[!LAPPLY(ops, ".empty")]
+              # EXTRACT GATES
               gts <- structure(
-                lapply(pops, function(q){
-                  gh_pop_get_gate(gh, q)
-                }),
+                lapply(
+                  pops, 
+                  function(q) {
+                    gh_pop_get_gate(gh, q)
+                  }
+                ),
                 names = pops
               )
+              # CREATE COMBINED COMPLEX FILTER
               gate <- eval(
                 parse(
                   text = paste0(ops, "gts[['", pops, "']]", collapse = "")
@@ -964,35 +989,61 @@ cyto_gate_extract <- function(x,
     gates <- structure(
       lapply(alias, function(x) {
         # ALIAS NODE
-        ind <- LAPPLY(seq_len(length(nds)), function(z) {
-          if (x %in% nds[[z]]) {
-            z
-          } else {
-            NA
+        ind <- LAPPLY(
+          seq_len(length(nds)), 
+          function(z) {
+            if (x %in% nds[[z]]) {
+              z
+            } else {
+              NA
+            }
           }
-        })
+        )
         ind <- ind[!is.na(ind)][1]
         alias <- names(nds[ind])
         gm <- gt_get_gate(gatingTemplate, parent, alias)
         # GATE OBJECT
         if("gate" %in% names(parameters(gm))) {
           gate <- unlist(eval(parameters(gm)$gate))[[1]]
-          # BOOLEANFILTER
+        # BOOLEANFILTER
         } else if(bool) {
           logic <- as.character(parameters(gm)[[1]])
           pops <- unlist(strsplit(logic, "[^[:alnum:][:space:]]"))
           pops <- pops[!LAPPLY(pops, ".empty")]
+          # BOOLEAN GATE REFERS TO OTHER POPULATIONS
+          if(is.null(
+            tryCatch(
+              cyto_nodes_convert(
+                x,
+                nodes = pops,
+                path = "auto"
+              ),
+              error = function(e){
+                NULL
+              }
+            )
+          )) {
+            return(gate)
+          }
+          # OPERATORS
           ops <- unlist(strsplit(logic, "[[:alnum:][:space:]]"))
           ops <- ops[!LAPPLY(ops, ".empty")]
+          # EXTRACT GATES
           gts <- structure(
-            lapply(pops, function(q){
-              gt_gates <- gt_get_gate(gatingTemplate, 
-                                      parent, 
-                                      names(nds)[match(q, nds)])
-              unlist(eval(parameters(gt_gates)$gate))[[1]]
-            }),
+            lapply(
+              pops, 
+              function(q) {
+                gt_gates <- gt_get_gate(
+                  gatingTemplate, 
+                  parent, 
+                  names(nds)[match(q, nds)]
+                )
+                unlist(eval(parameters(gt_gates)$gate))[[1]]
+              }
+            ),
             names = pops
           )
+          # CREATE COMBINED FILTER
           gate <- eval(
             parse(
               text = paste0(ops, "gts[['", pops, "']]", collapse = "")

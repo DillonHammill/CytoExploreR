@@ -12,9 +12,15 @@
 #' @param select passed to \code{cyto_select()} to select the GatingHierarchy
 #'   from which the gatingTemplate should be extracted, set to 1 by default to
 #'   select the first GatingHierarchy.
-#' @param sort logical indicating whether the entries in the gatingtemplate
+#' @param sort logical indicating whether the entries in the gatingTemplate
 #'   should be sorted to match the order of the nodes in the GatingHierarchy or
 #'   GatingSet, set to TRUE by default.
+#' @param bool logical indicating whether attempts should be made to supply
+#'   \code{dims} for boolean filters, set to FALSE by default. Basically, we
+#'   check whether the boolean gate was defined based on gates constructed on
+#'   the same \code{parent} in the same channels.
+#' @param drop logical indicating whether entries with empty \code{dims} should
+#'   be excluded from the extracted gatingTemplate, set to FALSE by default.
 #' @param data.table logical indicating whether the extracted gatingTemplate
 #'   should be returned as a \code{data.table}, set to FALSE by default.
 #' @param ... not in use.
@@ -42,6 +48,8 @@
 cyto_gatingTemplate_extract <- function(x,
                                         select = 1,
                                         sort = TRUE,
+                                        bool = FALSE,
+                                        drop = FALSE,
                                         data.table = FALSE,
                                         ...) {
   
@@ -56,6 +64,83 @@ cyto_gatingTemplate_extract <- function(x,
   
   # CONVERT EMPTY DIMS -> NA
   gt$dims[!nzchar(gt$dims)] <- NA
+  
+  # TRY SETTING BOOLEAN FILTER DIMS - CYTO_PLOT_GATING_SCHEME()
+  if(any(is.na(gt$dims)) & bool) {
+    # ENTRIES WITH EMPTY DIMS
+    ind <- which(is.na(gt$dims))
+    # CHECK ENTRIES
+    lapply(
+      ind,
+      function(z) {
+        # EXTRACT GATE
+        gate <- cyto_gate_extract(
+          gh,
+          alias = cyto_nodes_convert(
+            gh,
+            nodes = gt$alias[z],
+            anchor = gt$parent[z],
+            path = "auto"
+          ),
+          bool = FALSE
+        )[[1]][[1]]
+        # PARSE DIMS FROM VALID BOOLEANFILTERS
+        if(cyto_class(gate, "booleanFilter")) {
+          print(gate@deparse)
+          # EXTRACT POPULATIONS
+          pops <- unlist(
+            strsplit(
+              gate@deparse,
+              "[^[:alnum:][:space:]]"
+            )
+          )
+          pops <- pops[nzchar(pops)]
+          pops <- tryCatch(
+            cyto_nodes_convert(
+              gh,
+              nodes = pops,
+              anchor = gt$parent[z],
+              path = "auto"
+            ),
+            error = function(e) {
+              return(NULL)
+            }
+          )
+          # BOOLENAFILTER REFERENCING VALID POPULATIONS
+          if(!is.null(pops)) {
+            # NEGATED BOOLEANFILTERS ONLY (FOR NOW)
+            ops <- unlist(
+              strsplit(
+                gate@deparse,
+                "[[:alnum:][:space:]]"
+              )
+            )
+            ops <- ops[nzchar(ops)]
+            # POPULATION DIMS
+            pop_dims <-  unique(
+              gt$dims[gt$alias %in% pops & gt$parent %in% gt$parent[z]]
+            )
+            # NEGATED BOOLEANFILTER BASED ON POPS IN SAME DIMS
+            if(length(pop_dims) == 1 & 
+               ops[1] %in% "!") {
+              if(length(ops) > 1) {
+                if(all(ops[-1] %in% c("!&", "&!"))) {
+                  gt$dims[z] <<- pop_dims
+                }
+              } else {
+                gt$dims[z] <<- pop_dims
+              }
+            }
+          }
+        }
+      }
+    )
+  }
+  
+  # DROP EMPTY DIMS ENTRIES
+  if(drop) {
+    gt <- gt[which(!is.na(gt$dims)), , drop = FALSE]
+  }
   
   # SORT ENTRIES
   if(sort) {
@@ -72,7 +157,14 @@ cyto_gatingTemplate_extract <- function(x,
       }
     )
     # SORT GATINGTEMPLATE
-    gt <- gt[match(cyto_nodes(gh, path = "auto")[-1], pops), , drop = FALSE]
+    gt <- gt[
+      order(
+        match(
+          pops, 
+          cyto_nodes(gh, path = "auto")[-1]
+        )
+      ), , drop = FALSE
+    ]
   }
   
   # DATA.TABLE

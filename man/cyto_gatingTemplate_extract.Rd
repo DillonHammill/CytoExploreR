@@ -8,6 +8,8 @@ cyto_gatingTemplate_extract(
   x,
   select = 1,
   sort = TRUE,
+  bool = FALSE,
+  drop = FALSE,
   data.table = FALSE,
   ...
 )
@@ -21,9 +23,17 @@ cyto_gatingTemplate_extract(
 from which the gatingTemplate should be extracted, set to 1 by default to
 select the first GatingHierarchy.}
 
-\item{sort}{logical indicating whether the entries in the gatingtemplate
+\item{sort}{logical indicating whether the entries in the gatingTemplate
 should be sorted to match the order of the nodes in the GatingHierarchy or
 GatingSet, set to TRUE by default.}
+
+\item{bool}{logical indicating whether attempts should be made to supply
+\code{dims} for boolean filters, set to FALSE by default. Basically, we
+check whether the boolean gate was defined based on gates constructed on
+the same \code{parent} in the same channels.}
+
+\item{drop}{logical indicating whether entries with empty \code{dims} should
+be excluded from the extracted gatingTemplate, set to FALSE by default.}
 
 \item{data.table}{logical indicating whether the extracted gatingTemplate
 should be returned as a \code{data.table}, set to FALSE by default.}
