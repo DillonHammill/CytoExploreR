@@ -4,7 +4,7 @@
 \alias{cyto_nodes_ancestor}
 \title{Get name of most recent common ancestor shared by nodes}
 \usage{
-cyto_nodes_ancestor(x, nodes = NULL, ...)
+cyto_nodes_ancestor(x, nodes = NULL, hidden = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy},\code{GatingSet},
@@ -12,6 +12,9 @@ cyto_nodes_ancestor(x, nodes = NULL, ...)
 
 \item{nodes}{vector of nodes for which the most recent common ancestor should
 be returned.}
+
+\item{hidden}{logical indicating whether hidden nodes should be included in
+the search for the most recent ancestral node, set to FALSE by default.}
 
 \item{...}{additional arguments passed to \code{\link{cyto_nodes_convert}} to
 control the format of the returned ancestral node.}

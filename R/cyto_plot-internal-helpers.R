@@ -231,7 +231,8 @@
                 parent = cyto_nodes_convert(
                   gh,
                   nodes = z,
-                  anchor = parent
+                  anchor = parent,
+                  hidden = TRUE
                 ),
                 copy = FALSE,
                 format = "cytoset"
@@ -641,7 +642,8 @@
       parent <- cyto_nodes_convert(
         gh,
         nodes = parent,
-        path = "auto"
+        path = "auto",
+        hidden = TRUE
       )
       # GATINGTEMPLATE - AUTO PATHS
       gt <- gh_generate_template(gh)
@@ -659,13 +661,15 @@
       gt$alias <- cyto_nodes_convert(
         gh,
         nodes = paste0(gt$parent, "/", gt$alias),
-        path = "auto"
+        path = "auto",
+        hidden = TRUE
       )
       # PARENT
       gt$parent <- cyto_nodes_convert(
         gh,
         nodes = gt$parent,
-        path = "auto"
+        path = "auto",
+        hidden = TRUE
       )
       # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
       if(any(LAPPLY(alias, ".empty"))) {
@@ -711,7 +715,8 @@
               cyto_nodes_convert(
                 gh,
                 nodes = z,
-                anchor = parent
+                anchor = parent,
+                hidden = TRUE
               ),
               error = function(e){
                 return(NULL)
@@ -727,7 +732,8 @@
             cyto_nodes_convert(
               gh,
               nodes = z,
-              anchor = parent
+              anchor = parent,
+              hidden = TRUE
             )
           )
           # BOOLEAN GATE

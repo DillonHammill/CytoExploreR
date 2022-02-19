@@ -4,7 +4,7 @@
 \alias{cyto_nodes}
 \title{Names of gated populations in gatingTemplate/GatingHierarchy/GatingSet}
 \usage{
-cyto_nodes(x, path = "full", terminal = FALSE, ...)
+cyto_nodes(x, path = "full", terminal = FALSE, hidden = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -18,6 +18,10 @@ complete path or shortest unique path to each node.}
 
 \item{terminal}{logical to indicate whether only the paths to terminal nodes
 should be returned, set to FALSE by default.}
+
+\item{hidden}{logical to control whether the paths to hidden nodes should be
+included, set to FALSE by default. \code{hidden} acts in place of the
+\code{showHidden} argument for consistency with other CytoExploreR APIs.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:gs_get_pop_paths]{gs_get_pop_paths}} or

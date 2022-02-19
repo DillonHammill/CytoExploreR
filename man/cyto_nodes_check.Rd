@@ -4,13 +4,16 @@
 \alias{cyto_nodes_check}
 \title{Check if nodes are unique and exist in GatingSet or GatingHierarchy}
 \usage{
-cyto_nodes_check(x, nodes = NULL)
+cyto_nodes_check(x, nodes = NULL, hidden = TRUE)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy}, \code{GatingSet},
 \code{gatingTemplate} or the name of a gatingTemplate CSV file.}
 
 \item{nodes}{vector of node paths to check.}
+
+\item{hidden}{logical to indicate whether checks should include hidden nodes
+as well, set to TRUE by default.}
 }
 \value{
 supplied nodes or throw an error if any nodes do not exist or are not

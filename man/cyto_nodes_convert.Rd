@@ -4,7 +4,13 @@
 \alias{cyto_nodes_convert}
 \title{Convert to unique node paths}
 \usage{
-cyto_nodes_convert(x, nodes = NULL, anchor = NULL, path = "auto")
+cyto_nodes_convert(
+  x,
+  nodes = NULL,
+  anchor = NULL,
+  path = "auto",
+  hidden = FALSE
+)
 }
 \arguments{
 \item{x}{object of class \code{GatingHierarchy}, \code{GatingSet},
@@ -16,7 +22,10 @@ cyto_nodes_convert(x, nodes = NULL, anchor = NULL, path = "auto")
 nodes.}
 
 \item{path}{specifies whether the returned nodes should be in the "full" or
-"auto" format, set to "auto" by default}
+"auto" format, set to "auto" by default.}
+
+\item{hidden}{logical indicating whether hidden nodes should be included, set
+to FALSE by default.}
 }
 \value{
 vector of unique paths for each of the supplied nodes.
