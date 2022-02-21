@@ -636,143 +636,27 @@
       alias <- NA
     # GATINGHIERARCHY/GATINGSET
     } else {
-      # GATINGHIERARCHY
-      gh <- x[[1]]
-      # PARENT - AUTO PATH
-      parent <- cyto_nodes_convert(
-        gh,
-        nodes = parent,
-        path = "auto",
-        hidden = TRUE
+      # GATINGTEMPLATE
+      gt <- cyto_gatingTemplate_extract(
+        x[[1]],
+        bool = TRUE,
+        drop = TRUE
       )
-      # GATINGTEMPLATE - AUTO PATHS
-      gt <- gh_generate_template(gh)
-      # NO GATES EXIST
-      if(nrow(gt) == 0) {
-        stop(
-          paste0(
-            "This ", 
-            cyto_class(x),
-            "doesn't contain any gated populations!"
+      # EMPTY ALIAS - PLACE BOOL IN RCORRECT ORDER
+      if(any(LAPPLY(alias, ".empty"))) {
+        alias <- alias[!LAPPLY(alias, ".empty")]
+        pops <- gt[gt$dims %in% c(paste(channels, collapse = ","), 
+                                  paste(rev(channels), collapse = ",")), ]
+        bool_ind <- which(pops$gating_mathod %in% "boolGate")
+        if(length(bool_ind) > 0) {
+          pops <- rbind(pops[-bool_ind, ], pops[bool_ind, ])
+        }
+        alias <- unique(
+          c(
+            alias,
+            pops$alias
           )
         )
-      }
-      # ALIAS - MUST BE BEFORE PARENT
-      gt$alias <- cyto_nodes_convert(
-        gh,
-        nodes = paste0(gt$parent, "/", gt$alias),
-        path = "auto",
-        hidden = TRUE
-      )
-      # PARENT
-      gt$parent <- cyto_nodes_convert(
-        gh,
-        nodes = gt$parent,
-        path = "auto",
-        hidden = TRUE
-      )
-      # EMPTY ALIAS - BOOLEAN FILTERS NOT SUPPORTED (LACK CHANNELS)
-      if(any(LAPPLY(alias, ".empty"))) {
-        # REMOVE EMPTY ALIAS
-        alias <- alias[!LAPPLY(alias, ".empty")]
-        # 2D - MATCH BOTH CHANNELS
-        if(length(channels) == 2) {
-          pops <- gt$alias[
-            gt$dims == paste(channels, collapse = ",") |
-              gt$dims == paste(rev(channels), collapse = ",")
-          ]
-          # 1D - SINGLE CHANNEL MATCH
-        } else if(length(channels) == 1) {
-          pops <- gt$alias[
-            LAPPLY(gt$dims, function(z){
-              grepl(channels, z)
-            })
-          ]
-        }
-        # SEARCH POSSIBLE BOOLEAN GATES
-        pops <- c(pops,
-                  add = gt$alias[LAPPLY(gt$dims, ".empty")])
-        # UPDATE ALIAS
-        alias <- c(alias, pops)
-      }
-      # REMOVE BOOLEAN GATES FROM ALIAS
-      bool <- LAPPLY(alias, function(z){
-        if(.empty(gt[gt$alias == z, "dims"])) {
-          return(z)
-        }else {
-          return(NULL)
-        }
-      })
-      if(length(bool) > 0){
-        alias <- alias[-match(bool, alias)]
-      }
-      # CHECK BOOLEAN GATES IN ALIAS
-      if(length(bool) > 0) {
-        bool <- LAPPLY(bool, function(z){
-          # CHECK ADDED GATES - MUST ANCHOR TO PARENT (BYPASS)
-          if(grepl("add", names(bool)[z])) {
-            z <- tryCatch(
-              cyto_nodes_convert(
-                gh,
-                nodes = z,
-                anchor = parent,
-                hidden = TRUE
-              ),
-              error = function(e){
-                return(NULL)
-              })
-            # INVALID BOOLEAN GATE
-            if(is.null(z)) {
-              return(z)
-            }
-          }
-          # EXTRACT GATE
-          gate <- gh_pop_get_gate(
-            gh,
-            cyto_nodes_convert(
-              gh,
-              nodes = z,
-              anchor = parent,
-              hidden = TRUE
-            )
-          )
-          # BOOLEAN GATE
-          if(cyto_class(gate, "booleanFilter")) {
-            # BOOLEAN LOGIC
-            logic <- gate@deparse
-            # ONLY AND/NOT SUPPORTED
-            if(!grepl("^!", logic)) {
-              if(!grepl("add", names(bool)[z])) {
-                message("Only NOT boolean gates are supported!")
-              }
-              return(NULL)
-            } else if(grepl("|", logic, fixed = TRUE)) {
-              if(!grepl("add", names(bool)[z])){
-                message("Only AND NOT boolean gates are supported!")
-              }
-              return(NULL)
-            } else {
-              # STRIP &! - CHECK ALIAS
-              bool_alias <- gsub("^!", "", logic)
-              bool_alias <- unlist(strsplit(bool_alias, "&!"))
-              # BOOLEAN GATE MUST REFERENCE EVERY POPULATION IN ALIAS
-              if(!all(bool_alias %in% alias)) {
-                return(NULL)
-              } else {
-                return(z)
-              }
-              # # BOOL ALIAS MUST BE IN ALIAS
-              # if(!all(bool_alias %in% alias)) {
-              #   alias <<- unique(c(alias, bool_alias))
-              # }
-            }
-            # UNSUPPORTED GATE
-          } else {
-            return(NULL)
-          }
-        })
-        # COMBINE ALIAS & BOOLEAN GATES
-        alias <- unique(c(alias, bool))
       }
       # GATES PER GROUP - USE FIRST GH - SELECT HANDLED ABOVE
       alias <- cyto_gate_extract(
@@ -980,17 +864,23 @@
     x <- lapply(x, function(z){
       # GATINGHIERARCHY/GATINGSET
       if(cyto_class(z, "GatingSet")){
-        z <- cyto_data_extract(z, 
-                               parent = parent,
-                               copy = FALSE)[[1]]
+        z <- cyto_data_extract(
+          z, 
+          parent = parent,
+          copy = FALSE
+        )[[1]]
       }
       return(z)
     })
   # GATINGHIERARCHY/GATINGSET
   }else if(cyto_class(x, "GatingSet")){
-    x <- list(cyto_data_extract(x, 
-                                parent = parent,
-                                copy = FALSE)[[1]])
+    x <- list(
+      cyto_data_extract(
+        x, 
+        parent = parent,
+        copy = FALSE
+      )[[1]]
+    )
   # CYTOFRAME/CYTOSET
   } else {
     x <- list(x)
@@ -1023,16 +913,19 @@
       # QUANTILE TRIM 1%
       if(type == "trim") {
         rng <- cyto_stat_quantile(
-          cyto_exprs(z,
-                     channels = channels,
-                     drop = FALSE),
+          cyto_exprs(
+            z,
+            channels = channels,
+            drop = FALSE
+          ),
           probs = c(0.01, 1)
         )
         rownames(rng) <- c("min", "max")
       } else {
         rng <- suppressWarnings(
-          range(z[, channels],
-                type = type)
+          range(
+            z[, channels],
+            type = type)
         )
       }
     }else if(cyto_class(z, "flowSet")){
@@ -1045,9 +938,11 @@
           }
           if(axes_limits == "trim") {
             rng <- cyto_stat_quantile(
-              cyto_exprs(y,
-                         channels = channels,
-                         drop = FALSE),
+              cyto_exprs(
+                y,
+                channels = channels,
+                drop = FALSE
+              ),
               probs = c(0.01, 1)
             )
             rownames(rng) <- c("min", "max")
@@ -1084,12 +979,14 @@
         )
       }else if(cyto_class(z, "flowSet")){
         rng <- suppressWarnings(
-          cyto_apply(z,
-                     "range",
-                     type = "instrument",
-                     input = "cytoframe",
-                     channels = channels,
-                     inverse = FALSE)
+          cyto_apply(
+            z,
+            "range",
+            type = "instrument",
+            input = "cytoframe",
+            channels = channels,
+            inverse = FALSE
+          )
         )
       }
       return(rng)
@@ -2992,8 +2889,12 @@
                            key_title_text_col_alpha = 1,
                            axes_trans = NA) {
   
+  # LOGICAL KEY
+  key[key %in% FALSE] <- "none"
+  key[key %in% TRUE] <- "both"
+  
   # CONSTRUCT KEY
-  if(!.all_na(key) | !key == "none") {
+  if(!.all_na(key) & !key %in% "none") {
     # COMPUTE KEY LOCATION
     usr <- .par("usr")[[1]]
     key_x <- c(

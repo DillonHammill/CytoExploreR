@@ -570,39 +570,45 @@ cyto_plot_empty <- function(x,
       if (!is.numeric(grid)) {
         grid <- 10
       }
-      axes_grid <- lapply(channels, function(z) {
-        cyto_apply(
-          x[[1]],
-          "cyto_stat_quantile",
-          channels = z,
-          input = "matrix",
-          copy = FALSE,
-          inverse = FALSE,
-          probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid))
-        )[, 1]
-      })
+      axes_grid <- lapply(
+        channels, 
+        function(z) {
+          cyto_apply(
+            x[[1]],
+            "cyto_stat_quantile",
+            channels = z,
+            input = "matrix",
+            copy = FALSE,
+            inverse = FALSE,
+            probs = seq(0, 1, ifelse(grid > 1, 1 / grid, grid))
+          )[, 1]
+        }
+      )
       names(axes_grid) <- channels
     }
     # X AXIS GRID LINES
-    lapply(seq_along(axes_grid), function(z) {
-      # VERTICAL LINES
-      if (z == 1) {
-        abline(
-          v = axes_grid[[z]],
-          lty = grid_line_type,
-          lwd = grid_line_width,
-          col = adjustcolor(grid_line_col, grid_line_alpha)
-        )
+    lapply(
+      seq_along(axes_grid), 
+      function(z) {
+        # VERTICAL LINES
+        if (z == 1) {
+          abline(
+            v = axes_grid[[z]],
+            lty = grid_line_type,
+            lwd = grid_line_width,
+            col = adjustcolor(grid_line_col, grid_line_alpha)
+          )
         # HORIZONTAL LINES
-      } else {
-        abline(
-          h = axes_grid[[z]],
-          lty = grid_line_type,
-          lwd = grid_line_width,
-          col = adjustcolor(grid_line_col, grid_line_alpha)
-        )
+        } else {
+          abline(
+            h = axes_grid[[z]],
+            lty = grid_line_type,
+            lwd = grid_line_width,
+            col = adjustcolor(grid_line_col, grid_line_alpha)
+          )
+        }
       }
-    })
+    )
   }
   
   # BORDER
@@ -682,8 +688,7 @@ cyto_plot_empty <- function(x,
   # KEY - COUNTS OR MARKER EXPRESSION - BASE LAYER ONLY
   if(length(channels) == 2 &
      (is.na(point_col)[1] |
-      any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
-     !key %in% "none") {
+      any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
     # ADD KEY TO PLOT
     .cyto_plot_key(
       x,
@@ -1573,7 +1578,7 @@ cyto_plot_theme <- function(...,
     cyto_option("cyto_plot_theme", theme_args)
   }
   # RETURN THEME ARUMENTS
-  invisible(theme_args)
+  return(theme_args)
 }
 
 ## CYTO_PLOT_PAR ---------------------------------------------------------------

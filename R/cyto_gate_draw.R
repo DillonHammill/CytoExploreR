@@ -486,12 +486,15 @@ cyto_gate_draw <- function(x,
         pop = "+",
         dims = paste(channels, collapse = ","),
         gating_method = "boolGate",
-        gating_args = paste0("!", 
-                             paste(
-                               unlist(alias[which(!is.na(type))]), 
-                               collapse = "&!"
-                               )
-                             ),
+        gating_args = paste0(
+          "!", 
+          paste(
+            unlist(
+              alias[which(!is.na(type))]
+            ), 
+            collapse = "&!"
+          )
+        ),
         groupBy = group_by,
         collapseDataForGating = TRUE,
         preprocessing_method = NA

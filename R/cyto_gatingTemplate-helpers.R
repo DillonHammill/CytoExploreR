@@ -86,7 +86,6 @@ cyto_gatingTemplate_extract <- function(x,
         )[[1]][[1]]
         # PARSE DIMS FROM VALID BOOLEANFILTERS
         if(cyto_class(gate, "booleanFilter")) {
-          print(gate@deparse)
           # EXTRACT POPULATIONS
           pops <- unlist(
             strsplit(
@@ -108,6 +107,8 @@ cyto_gatingTemplate_extract <- function(x,
           )
           # BOOLENAFILTER REFERENCING VALID POPULATIONS
           if(!is.null(pops)) {
+            # SET GATING METHOD
+            gt$gating_method[z] <<- "boolGate"
             # NEGATED BOOLEANFILTERS ONLY (FOR NOW)
             ops <- unlist(
               strsplit(

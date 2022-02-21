@@ -3727,9 +3727,12 @@ cyto_split <- function(x,
     } else {
       id <- split(
         id,
-        LAPPLY(nrow(cnts), function(z){
-          rep(z, cnts[z, 1])
-        }),
+        LAPPLY(
+          nrow(cnts), 
+          function(z){
+            rep(z, cnts[z, 1])
+          }
+        ),
         drop = FALSE
       )
     }
@@ -3745,68 +3748,99 @@ cyto_split <- function(x,
   }
   
   # LOOP THROUGH CYTOSET
-  cf_list <- lapply(seq_along(x), function(z){
-    # CYTOFRAME
-    cf <- cyto_data_extract(
-      x[z],
-      format = "cytoframe",
-      copy = FALSE
-    )[[1]][[1]]
-    # IDS
-    if(cyto_class(id, "list", TRUE)) {
-      ids <- id[[z]]
-      if(!cyto_class(ids, "factor")) {
-        ids <- factor(ids)
-      }
-    # IDS - STORED IN A CHANNEL
-    } else {
-      ids <- factor(
-        cyto_exprs(
-          cf, 
-          channels = id,
-          drop = TRUE
-        )
-      )
-    }
-    # BYPASS EMPTY SAMPLES
-    cf_list <- split(
-      cf,
-      ids
-    )
-    # STORE SPLIT DATA IN SEPARATE H5 FILES
-    cf_list <- lapply(cf_list, "cyto_copy")
-    # NAMES
-    if (!is.null(names)) {
-      names(cf_list) <- tryCatch(
-        names[seq(1, length(cf_list))],
-        error = function(e){
-          stop(
-            "Insufficient sample names passed to 'names'!"
+  cf_list <- lapply(
+    seq_along(x), 
+    function(z){
+      # CYTOFRAME
+      cf <- cyto_data_extract(
+        x[z],
+        format = "cytoframe",
+        copy = FALSE
+      )[[1]][[1]]
+      # IDS
+      if(cyto_class(id, "list", TRUE)) {
+        ids <- id[[z]]
+        if(!cyto_class(ids, "factor")) {
+          ids <- factor(ids)
+        }
+      # IDS - STORED IN A CHANNEL
+      } else {
+        # CYTOEXPLORER - SAMPLE-ID
+        if(id %in% "Sample-ID") {
+          ids <- factor(
+            cyto_exprs(
+              cf, 
+              channels = id,
+              drop = TRUE
+            )
+          )
+        # OTHER CHANNEL - FLOWJO COMPATIBILITY
+        } else {
+          # EXTRACT CHANNEL
+          exprs <- cyto_exprs(
+            cf,
+            channels = id,
+            drop = TRUE
+          )
+          # COMPUTE KERNEL DENSITY
+          d <- cyto_stat_density(
+            exprs,
+            stat = "density"
+          )
+          # COMPUTE CUT POINTS
+          breaks <- c(
+            min(d$x),
+            d$x[which(diff(diff(-d$y) >= 0) < 0)],
+            max(d$x)
+          )
+          # CONVERT TO FACTOR
+          ids <- cut(
+            exprs,
+            breaks = breaks,
+            labels = seq_len(length(breaks) - 1)
           )
         }
-      )
-      # REMOVE USED NAMES
-      names <<- names[-seq( 1, length(cf_list))]
-      # NO NAMES
-    } else {
-      # FACTOR LEVELS - MAY BE ASSIGNED
-      if(!is.character(type.convert(names(cf_list), as.is = TRUE))) {
-        names(cf_list) <- paste0("Sample-", names(cf_list))
       }
-    }
-    # IDENTIFIERS - NOT REQUIRED
-    cf_list <- structure(
-      lapply(
-        seq_along(cf_list),
-        function(v) {
-          identifier(cf_list[[v]]) <<- names(cf_list)[v]
-          return(cf_list[[v]])
+      # BYPASS EMPTY SAMPLES
+      cf_list <- split(
+        cf,
+        ids
+      )
+      # STORE SPLIT DATA IN SEPARATE H5 FILES
+      cf_list <- lapply(cf_list, "cyto_copy")
+      # NAMES
+      if (!is.null(names)) {
+        names(cf_list) <- tryCatch(
+          names[seq(1, length(cf_list))],
+          error = function(e){
+            stop(
+              "Insufficient sample names passed to 'names'!"
+            )
+          }
+        )
+        # REMOVE USED NAMES
+        names <<- names[-seq( 1, length(cf_list))]
+      # NO NAMES
+      } else {
+        # FACTOR LEVELS - MAY BE ASSIGNED
+        if(!is.character(type.convert(names(cf_list), as.is = TRUE))) {
+          names(cf_list) <- paste0("Sample-", names(cf_list))
         }
-      ),
-      names = names(cf_list)
-    )
-    return(cf_list)
-  })
+      }
+      # IDENTIFIERS - NOT REQUIRED
+      cf_list <- structure(
+        lapply(
+          seq_along(cf_list),
+          function(v) {
+            identifier(cf_list[[v]]) <<- names(cf_list)[v]
+            return(cf_list[[v]])
+          }
+        ),
+        names = names(cf_list)
+      )
+      return(cf_list)
+    }
+  )
   
   # FLATTEN CYTOFRAME LIST
   cf_list <- unlist(cf_list)
@@ -6294,6 +6328,8 @@ cyto_nodes_convert <- function(x,
                                path = "auto",
                                hidden = FALSE) {
   
+  # TODO: ALLOW DIFFERENT ANCHOR PER NODE 
+  
   # PATHS
   nodes_full <- cyto_nodes(
     x, 
@@ -6559,9 +6595,16 @@ cyto_nodes_ancestor <- function(x,
     if(all(LAPPLY(nodes_split[-1], function(z){
       all(nodes_split[[1]][seq_len(i)] %in% z)
     }))){
-      ancestor <- c(ancestor, 
-                    paste0("/", paste0(nodes_split[[1]][seq_len(i)],
-                                       collapse = "/")))
+      ancestor <- c(
+        ancestor, 
+        paste0(
+          "/", 
+          paste0(
+            nodes_split[[1]][seq_len(i)],
+            collapse = "/"
+          )
+        )
+      )
       break()
     }
   }
@@ -6581,6 +6624,123 @@ cyto_nodes_ancestor <- function(x,
   
   # RETURN COMMON ANCESTOR
   return(ancestor)
+  
+}
+
+## CYTO_NODES_KIN --------------------------------------------------------------
+
+#' Get paths to nodes
+#'
+#' @param x object of class
+#'   \code{\link[flowWorkspace:GtaingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
+#' @param nodes vector of nodes for which the relative nodes should be returned.
+#' @param type options include \code{"children"}, \code{"parent"},
+#'   \code{"grandparent"} or \code{"descendants"} to indicate the type of
+#'   relationship required for each of the supplied nodes.
+#' @param path specifies whether the returned nodes should be in the "full" or
+#'   "auto" format, set to "auto" by default.
+#' @param hidden logical indicating whether hidden nodes should be included in
+#'   the search for relatives, set to TRUE by default.
+#' @param ... not in use.
+#'
+#' @return the paths of the nodes of relation \code{type} to each of the
+#'   supplied nodes.
+#'
+#' @importFrom flowWorkspace gh_pop_get_parent gh_pop_get_children
+#'   gh_pop_get_descendants
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' library(CytoExploreRData)
+#'
+#' # Activation GatingSet
+#' gs <- GatingSet(Activation)
+#' gs <- cyto_compensate(gs)
+#' gs <- cyto_transform(gs)
+#' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+#'
+#' # T Cells parent
+#' cyto_nodes_kin(
+#'   "T Cells",
+#'   "parent"
+#' )
+#'
+#' # Descendants of Live Cells
+#' cyto_nodes_kin(
+#'   "Live Cells",
+#'   "descendants"
+#' )
+#'
+#' @export
+cyto_nodes_kin <- function(x,
+                           nodes = NULL,
+                           type = "children",
+                           path = "auto",
+                           hidden = TRUE,
+                           ...) {
+  
+  # NOTE: HIDDEN NOT SUPPORTED FOR PARENTS IN FLOWWORKSPACE
+  
+  # GATINGHIERARCHY
+  gh <- x
+  if(cyto_class(x, "GatingSet", TRUE)) {
+    gh <- x[[1]]
+  }
+  
+  # RELATIVE NODES
+  LAPPLY(
+    nodes,
+    function(node) {
+      # CHILDREN
+      if(.grepl("^c", type)) {
+        pops <- gh_pop_get_children(
+          gh,
+          node,
+          showHidden = hidden,
+          path = path
+        )
+      # DESCENDANTS
+      } else if(.grepl("^d", type)) {
+        pops <- gh_pop_get_descendants(
+          gh,
+          node,
+          showHidden = hidden,
+          path = path
+        )
+      # PARENT
+      } else if(.grepl("^p", type)) {
+        pops <- gh_pop_get_parent(
+          gh,
+          node,
+          path = path
+        )
+      # GRANDPARENT
+      } else if(.grepl("^g", type)) {
+        parent <- gh_pop_get_parent(
+          gh,
+          node,
+          path = path
+        )
+        pops <- gh_pop_get_parent(
+          gh,
+          parent,
+          path = path
+        )
+      # UNSUPPORTED TYPE
+      } else {
+        stop(
+          paste0(
+            "'type' must be either 'parent', 'children', ",
+            "'descendants' or 'grandparent'!"
+          )
+        )
+      }
+      names(pops) <- rep(node, length(pops))
+      return(pops)
+    }
+  )
   
 }
 
