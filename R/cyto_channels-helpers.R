@@ -1521,10 +1521,12 @@ cyto_channels_restrict <- function(x,
   # PERFORM DEFAULT CHANNEL REMOVAL --------------------------------------------
   
   # PRIVELEGED CHANNELS
-  channels_exempt <- cyto_channels(x, 
-                                   select = c("FSC",
-                                              "SSC",
-                                              "Time"))
+  channels_exempt <- cyto_channels(
+    x, 
+    select = c("FSC",
+               "SSC",
+               "Time")
+  )
   
   # CHANNELS WITH MARKERS ASSIGNED
   if(length(markers) != 0){

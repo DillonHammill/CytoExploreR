@@ -635,6 +635,10 @@ cyto_spillover_edit <- function(x,
       #   values$xchan_select <- pd$channel[cyto_match(x, values$ID_select)]
       # })
       
+      observe({
+        values$xchan_select <- xchan()
+      })
+      
       # Y CHANNEL
       ychan <- channelSelectServer(
         "editor_ychannel",
@@ -690,7 +694,7 @@ cyto_spillover_edit <- function(x,
         NIL_comp_trans = reactive({values$NIL_comp_trans}),
         parent = reactive({values$parent}),
         opts = editor_opts,
-        xchan = xchan,
+        xchan = reactive({values$xchan_select}),
         ychan = ychan,
         axes_trans = axes_trans,
         axes_limits = axes_limits,
