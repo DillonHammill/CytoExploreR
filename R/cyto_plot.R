@@ -859,135 +859,147 @@ cyto_plot <- function(x,
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
+  # PLOTTING PROGRESS BAR
+  pb <- cyto_progress(
+    label = "plotting ",
+    total = length(args)
+  )
+  
   # ADD PLOTS 
   cnt <- 0
   memory <- list()
-  plots <- lapply(seq_along(args), function(z){
-    
-    #  PLOT COUNTER
-    cnt <<- cnt + 1
-    
-    # PLOT ARGUMENTS
-    ARGS <- args[[z]]
-    class(ARGS) <- "cyto_plot"
-    
-    # HISTOGRAMS ---------------------------------------------------------------
-    
-    # HISTOGRAMS - STAT/SMOOTH/STACK
-    if(length(ARGS$channels) == 1) {
-      ARGS$d <- do.call(".cyto_plot_hist", ARGS)
-    } else {
-      ARGS$d <- NA
-    }
-    
-    # GATES --------------------------------------------------------------------
-    
-    # GATE DIMENSIONS
-    if(!.all_na(ARGS$gate)) {
-      ARGS$gate <- cyto_gate_prepare(ARGS$gate, ARGS$channels)
-    }
-    
-    # LABEL TEXT & STAT ARGUMENTS ----------------------------------------------
-    
-    # LABEL ARGUMENTS
-    label_args <- do.call(".cyto_plot_label_args", ARGS)
-    ARGS[c("label",
-           "label_text",
-           "label_stat")] <- label_args[c("label",
-                                          "label_text",
-                                          "label_stat")]
-    
-    # LEGEND -------------------------------------------------------------------
-    
-    # LEGEND_TEXT
-    if(.all_na(ARGS$legend_text)) {
-      ARGS$legend_text <- LAPPLY(ARGS$x, "cyto_names") 
-    }
-    
-    # LABEL STATISTICS ---------------------------------------------------------
-    
-    # POPULATIONS TO LABEL
-    ARGS$pops <- do.call(".cyto_plot_label_pops", ARGS)
-    
-    # STATISTICS
-    if(ARGS$label == TRUE) {
+  plots <- lapply(
+    seq_along(args),
+    function(z){
+      
+      #  PLOT COUNTER
+      cnt <<- cnt + 1
+      
+      # PLOT ARGUMENTS
+      ARGS <- args[[z]]
+      class(ARGS) <- "cyto_plot"
+      
+      # HISTOGRAMS -------------------------------------------------------------
+      
+      # HISTOGRAMS - STAT/SMOOTH/STACK
+      if(length(ARGS$channels) == 1) {
+        ARGS$d <- do.call(".cyto_plot_hist", ARGS)
+      } else {
+        ARGS$d <- NA
+      }
+      
+      # GATES ------------------------------------------------------------------
+      
+      # GATE DIMENSIONS
+      if(!.all_na(ARGS$gate)) {
+        ARGS$gate <- cyto_gate_prepare(ARGS$gate, ARGS$channels)
+      }
+      
+      # LABEL TEXT & STAT ARGUMENTS --------------------------------------------
+      
+      # LABEL ARGUMENTS
+      label_args <- do.call(".cyto_plot_label_args", ARGS)
+      ARGS[c("label",
+             "label_text",
+             "label_stat")] <- label_args[c("label",
+                                            "label_text",
+                                            "label_stat")]
+      
+      # LEGEND -----------------------------------------------------------------
+      
+      # LEGEND_TEXT
+      if(.all_na(ARGS$legend_text)) {
+        ARGS$legend_text <- LAPPLY(ARGS$x, "cyto_names") 
+      }
+      
+      # LABEL STATISTICS -------------------------------------------------------
+      
+      # POPULATIONS TO LABEL
+      ARGS$pops <- do.call(".cyto_plot_label_pops", ARGS)
+      
       # STATISTICS
-      ARGS$label_stat <- do.call(".cyto_plot_label_stat", ARGS)
-      # COMBINE LABEL_TEXT & LABEL_STAT
-      ARGS$label_text <- do.call(".cyto_plot_label_text", ARGS)
-    }
-    
-    # INHERIT LABEL CO-ORDINATES FROM MEMORY BETWEEN PLOTS
-    if(!cyto_option("cyto_plot_save") &
-       ARGS$label &
-       z > 1 &
-       any(
-         is.na(
-           c(ARGS$label_text_x,
-             ARGS$label_text_y)
-         )
-       )) {
-      label_args <- c("label_text_x", "label_text_y")
-      lapply(label_args, function(arg){
-        arg_ind <- which(is.na(ARGS[[arg]]))
-        ARGS[[arg]][arg_ind] <<- memory[[1]][[arg]][arg_ind]
-      })
-    }
-    
-    # INHERIT LABEL CO-ORDINATES WHEN SAVING
-    if(cyto_option("cyto_plot_save") & label_memory) {
-      ARGS <- .cyto_plot_args_inherit(ARGS)
-    }
-    
-    # PLOT CONSTRUCTION --------------------------------------------------------
-    
-    # BUILD PLOT
-    ARGS <- .cyto_plot_build(ARGS)
-    
-    # PLOT MEMORY --------------------------------------------------------------
-    
-    # RECORD LABEL CO-ORDINATES
-    memory[[z]] <<- ARGS[c("label_text_x", "label_text_y")]
-    
-    # GRAPHICS DEVICE ----------------------------------------------------------
-    
-    # FILL GRAPHICS DEVICE - NEW PAGE
-    if(z == length(args) & 
-       (cyto_option("cyto_plot_method") == "cytoset" | page)) {
-      cyto_plot_new_page()
-    }
-    
-    # RECORD FULL GRAPHICS DEVICE
-    if(.par("page") == TRUE) {
-      # HEADER - EXCLUDED FROM ARGS
-      if(!.all_na(header)) {
-        if(!.all_na(header[1])) {
-          .cyto_plot_header(
-            header[1],
-            header_text_font = header_text_font[1],
-            header_text_size = header_text_size[1],
-            header_text_col = header_text_col[1]
-          )
-          header <- header[-1]
-          header_text_font <- header_text_font[-1]
-          header_text_size <- header_text_size[-1]
-          header_text_col <- header_text_col[-1]
+      if(ARGS$label == TRUE) {
+        # STATISTICS
+        ARGS$label_stat <- do.call(".cyto_plot_label_stat", ARGS)
+        # COMBINE LABEL_TEXT & LABEL_STAT
+        ARGS$label_text <- do.call(".cyto_plot_label_text", ARGS)
+      }
+      
+      # INHERIT LABEL CO-ORDINATES FROM MEMORY BETWEEN PLOTS
+      if(!cyto_option("cyto_plot_save") &
+         ARGS$label &
+         z > 1 &
+         any(
+           is.na(
+             c(ARGS$label_text_x,
+               ARGS$label_text_y)
+           )
+         )) {
+        label_args <- c("label_text_x", "label_text_y")
+        lapply(label_args, function(arg){
+          arg_ind <- which(is.na(ARGS[[arg]]))
+          ARGS[[arg]][arg_ind] <<- memory[[1]][[arg]][arg_ind]
+        })
+      }
+      
+      # INHERIT LABEL CO-ORDINATES WHEN SAVING
+      if(cyto_option("cyto_plot_save") & label_memory) {
+        ARGS <- .cyto_plot_args_inherit(ARGS)
+      }
+      
+      # PLOT CONSTRUCTION ------------------------------------------------------
+      
+      # BUILD PLOT
+      ARGS <- .cyto_plot_build(ARGS)
+      
+      # PLOT MEMORY ------------------------------------------------------------
+      
+      # RECORD LABEL CO-ORDINATES
+      memory[[z]] <<- ARGS[c("label_text_x", "label_text_y")]
+      
+      # GRAPHICS DEVICE --------------------------------------------------------
+      
+      # FILL GRAPHICS DEVICE - NEW PAGE
+      if(z == length(args) & 
+         (cyto_option("cyto_plot_method") == "cytoset" | page)) {
+        cyto_plot_new_page()
+      }
+      
+      # RECORD FULL GRAPHICS DEVICE
+      if(.par("page") == TRUE) {
+        # HEADER - EXCLUDED FROM ARGS
+        if(!.all_na(header)) {
+          if(!.all_na(header[1])) {
+            .cyto_plot_header(
+              header[1],
+              header_text_font = header_text_font[1],
+              header_text_size = header_text_size[1],
+              header_text_col = header_text_col[1]
+            )
+            header <- header[-1]
+            header_text_font <- header_text_font[-1]
+            header_text_size <- header_text_size[-1]
+            header_text_col <- header_text_col[-1]
+          }
         }
+        # RECORD
+        p <- cyto_plot_record()
+        # NEW DEVICE
+        if(z < length(args)) {
+          cyto_plot_new() # USE GLOBAL SETTINGS
+        }
+      } else {
+        p <- NULL
       }
-      # RECORD
-      p <- cyto_plot_record()
-      # NEW DEVICE
-      if(z < length(args)) {
-        cyto_plot_new() # USE GLOBAL SETTINGS
-      }
-    } else {
-      p <- NULL
+      
+      # UPDATE PROGRESS BAR
+      cyto_progress(pb)
+      
+      # RETURN RECORDED PLOT
+      return(p)
+      
     }
-    
-    # RETURN RECORDED PLOT
-    return(p)
-    
-  })
+  )
   
   # SAVE MEMORY ----------------------------------------------------------------
   

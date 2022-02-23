@@ -15,6 +15,9 @@
   # INTERACTIVE MODE
   options("CytoExploreR_interactive" = TRUE)
   
+  # PROGRESS BARS
+  options("CytoExploreR_progress" = FALSE)
+  
   # ACTIVE GATINGTEMPLATE
   options("CytoExploreR_gatingTemplate" = NULL)
   

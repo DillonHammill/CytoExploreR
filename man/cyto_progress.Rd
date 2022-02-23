@@ -4,10 +4,10 @@
 \alias{cyto_progress}
 \title{CytoExploreR progress bar}
 \usage{
-cyto_progress(bar = NULL, label = NULL, total = 100, clear = FALSE, ...)
+cyto_progress(pb = NULL, label = NULL, total = 100, clear = FALSE, ...)
 }
 \arguments{
-\item{bar}{an existing progress bar to increment.}
+\item{pb}{an existing progress bar to increment.}
 
 \item{label}{text to include to the left of the progress bar.}
 

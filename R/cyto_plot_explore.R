@@ -193,6 +193,8 @@ cyto_plot_explore <- function(x,
     pg <- ceiling(length(channels_y)/np) * length(channels_x)
     # TOTAL PAGES
     tpg <- n * pg
+    # TOTAL PLOTS
+    tp <- n * length(channels_y) * length(channels_x)
     # PAGES - GROUPS FOR each X/Y CHANNEL COMBINATION
   } else {
     # NUMBER OF GROUPS TO PLOT
@@ -201,6 +203,8 @@ cyto_plot_explore <- function(x,
     pg <- ceiling(length(x)/np)
     # TOTAL PAGES
     tpg <- n * pg
+    # TOTAL PLOTS
+    tp <- n * length(x)
   }
   
   # PREPARE HEADERS
@@ -299,6 +303,11 @@ cyto_plot_explore <- function(x,
   
   # CALL CYTO_PLOT - CHANNEL ORDER
   if(grepl("^c", order, ignore.case = TRUE)) {
+    # PROGRESS BAR
+    pb <- cyto_progress(
+      label = "cyto_plot_explore()",
+      total = tp
+    )
     # CONSTRUCT & RECORD PLOTS
     plots <- structure(
       lapply(
@@ -325,7 +334,7 @@ cyto_plot_explore <- function(x,
                       y_chan <- NULL
                     }
                     # CONSTRUCT PLOT
-                    cyto_plot(
+                    r <- cyto_plot(
                       x[[z]], # USE LIST METHOD CYTO_PLOT_DATA CALLED 
                       parent = parent,
                       channels = c(x_chan, y_chan),
@@ -344,6 +353,9 @@ cyto_plot_explore <- function(x,
                       },
                       ...
                     )
+                    # INCREMENT PROGRESS BAR
+                    cyto_progress(pb)
+                    return(r)
                   }
                 )
                 # PREPARE PLOTS
@@ -360,6 +372,11 @@ cyto_plot_explore <- function(x,
     )
     # CALL CYTO_PLOT - GROUP ORDER
   } else {
+    # PROGRESS BAR
+    pb <- cyto_progress(
+      label = "cyto_plot_explore()",
+      total = tp
+    )
     # CONSTRUCT & RECORD PLOTS
     plots <- structure(
       lapply(
@@ -387,7 +404,7 @@ cyto_plot_explore <- function(x,
                     seq_along(x),
                     function(v) {
                       # CONSTRUCT PLOT
-                      cyto_plot(
+                      r <- cyto_plot(
                         x[[v]], # USE LIST METHOD CYTO_PLOT_DATA CALLED
                         channels = c(x_chan, y_chan),
                         axes_trans = axes_trans,
@@ -405,6 +422,9 @@ cyto_plot_explore <- function(x,
                         },
                         ...
                       )
+                      # INCREMENT PROGRESS BAR
+                      cyto_progress(pb)
+                      return(r)
                     }
                   ),
                   names = names(x)

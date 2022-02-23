@@ -187,7 +187,8 @@
           overlay <- overlay[!grepl("^descendants", 
                                     overlay, 
                                     ignore.case = TRUE)]
-          overlay <- c(overlay, tryCatch(
+          overlay <- c(
+            overlay, tryCatch(
             gh_pop_get_descendants(
               gh,
               parent,
@@ -311,13 +312,12 @@
   }
   
   # PROGRESS BAR
-  pb <- txtProgressBar(
-    min = 0,
-    max = length(x),
-    style = 3,
-    width = 40
+  pb <- cyto_progress(
+    label = "compiling",
+    total = length(x),
+    clear = FALSE
   )
-  
+
   # SAMPLE & MERGE
   x <- structure(
     # LOOP THROUGH EACH PLOT
@@ -491,35 +491,32 @@
           }
         })
         # UPDATE PROGRESS BAR
-        setTxtProgressBar(
-          pb,
-          z
-        )
+        cyto_progress(pb)
         # COERCE
         structure(
-          lapply(seq_along(cs_sub_list), function(r){
-            if(length(cs_sub_list[[r]]) > 1) {
-              cytoset(
-                structure(
-                  list(
-                    as(cs_sub_list[[r]], "cytoframe")
-                  ),
-                  names = grp
+          lapply(
+            seq_along(cs_sub_list), 
+            function(r){
+              if(length(cs_sub_list[[r]]) > 1) {
+                cytoset(
+                  structure(
+                    list(
+                      as(cs_sub_list[[r]], "cytoframe")
+                    ),
+                    names = grp
+                  )
                 )
-              )
-            } else {
-              return(cs_sub_list[[r]])
+              } else {
+                return(cs_sub_list[[r]])
+              }
             }
-          }),
+          ),
           names = names(cs_list)
         )
       }
     ),
     names = names(x)
   )
-  
-  # TERMINATE PROGRESS BAR
-  close(pb)
   
   # FORMAT DATA FOR HISTOGRAMS
   if(length(channels) == 1 & all(LAPPLY(x, "length") == 1)) {
@@ -551,9 +548,11 @@
       names = names(x)
     )
     # FORMAT X
-    L <- split(seq_along(x), 
-               rep(1:(length(x)/hist_layers[1]),
-               each = hist_layers[1]))
+    L <- split(
+      seq_along(x), 
+      rep(1:(length(x)/hist_layers[1]),
+      each = hist_layers[1])
+    )
     x <- structure(
       lapply(
         L,

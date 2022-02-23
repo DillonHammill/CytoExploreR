@@ -335,6 +335,9 @@ cyto_plot_compensation <- function(x,
   # TOTAL PAGES
   tpg <- n * pg
   
+  # TOTAL PLOTS
+  tp <- n * length(channels)
+  
   # HEADER
   if(missing(header)) {
     header <- rep(
@@ -360,6 +363,12 @@ cyto_plot_compensation <- function(x,
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
     
+  # PROGRESS BAR
+  pb <- cyto_progress(
+    label = "cyto_plot_compensation()",
+    total = tp
+  )
+  
   # PLOTS PER SAMPLE
   plots <- structure(
     # PAGE PER SAMPLE
@@ -481,6 +490,8 @@ cyto_plot_compensation <- function(x,
                   )
                 }
               }
+              # INCREMENT PROGRESS BAR
+              cyto_progress(pb)
               # PAGE & HEADER & RECORD
               rec <- NULL
               if(.par("page")[[1]] | w == length(channels)) {

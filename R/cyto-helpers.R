@@ -7764,7 +7764,7 @@ cyto_require <- function(x,
 
 #' CytoExploreR progress bar
 #'
-#' @param bar an existing progress bar to increment.
+#' @param pb an existing progress bar to increment.
 #' @param label text to include to the left of the progress bar.
 #' @param total the maximum number of iterations for the progress bar.
 #' @param clear logical indicating whether the progress bar should be removed
@@ -7787,28 +7787,40 @@ cyto_require <- function(x,
 #' }
 #' 
 #' @export
-cyto_progress <- function(bar = NULL,
+cyto_progress <- function(pb = NULL,
                           label = NULL,
                           total = 100,
                           clear = FALSE,
                           ...) {
   
   # ITERATE EXISTING PROGRESS BAR
-  if(!is.null(bar)) {
-    bar$tick()
+  if(!is.null(pb)) {
+    # INCREMENT PROGRESS BAR
+    if(!pb$finished) {
+      pb$tick()
+    }
+    # PROGRESS BAR COMPLETE
+    if(pb$finished) {
+      cyto_option("CytoExploreR_progress", FALSE)
+    }
   } else {
-    bar <- progress::progress_bar$new(
-      format = paste0(
-        "",
-        label,
-        " [:bar] :percent ETA::eta"
-      ),
-      total = total,
-      clear = clear,
-      ...
-    )
-    bar$tick(0)
+    # CREATE NEW PROGRESS BAR - NO ACTIVE PROGRESS BARS
+    if(!cyto_option("CytoExploreR_progress")) {
+      pb <- progress_bar$new(
+        format = paste0(
+          "",
+          label,
+          " [:bar] :percent ETA::eta"
+        ),
+        total = total,
+        clear = clear,
+        show_after = 0,
+        ...
+      )
+      pb$tick(0)
+      cyto_option("CytoExploreR_progress", TRUE) 
+    }
   }
-  return(bar)
+  return(pb)
   
 }
