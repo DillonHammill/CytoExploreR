@@ -191,3 +191,85 @@ cyto_func_execute <- function(FUN,
   )
   
 }
+
+## CYTO_FUNC_MAPPLY ------------------------------------------------------------
+
+#' Apply a function iteratively over a list of arguments
+#'
+#' \code{cyto_func_mapply()} is a convenient wrapper around
+#' \code{cyto_func_match()} and \code{mapply()} with the addition of an
+#' \code{INDEX} argument to apply the function over a subset of the arguments.
+#'
+#' @param FUN name of the function to apply, passed to \code{cyto_func_match()}
+#'   to obtain a valid function.
+#' @param args a named list of arguments over which \code{FUN} is to be
+#'   iteratively applied.
+#' @param MoreArgs additional arguments passed to \code{FUN} that should not be
+#'   iterated over.
+#' @param SIMPLIFY passed to \code{mapply()} to determine the output format
+#'   after each function call, set to TRUE by default.
+#' @param USE.NAMES passed to \code{mapply()} to control whether names should be
+#'   retained in the output of each functin call, set to TRUE by default.
+#' @param INDEX integers to indicate the set of arguments in \code{args} over
+#'   which \code{FUN} should be applied, set to NULL by default to iterate over
+#'   all arguments.
+#'
+#' @return output of the specified function called iteratively over the list of
+#'   arguments.
+#'
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#'
+#' @examples 
+#' a <- c(1, 2, 3)
+#' b <- c(1, 2, 3)
+#' c <- c(1, 2, 3)
+#' 
+#' add_nums <- function(a, b, c){
+#'   a + b + c
+#' }
+#'
+#' cyto_func_mapply(
+#'   "add_nums",
+#'   list(a = a, b = b, c = c)
+#' )
+#' 
+#' cyto_func_mapply(
+#'   "add_nums",
+#'   list(a = a, b = b, c = c),
+#'   INDEX = 2
+#' )
+#'
+#' @export
+cyto_func_mapply <- function(FUN,
+                             args,
+                             MoreArgs = NULL,
+                             SIMPLIFY = TRUE,
+                             USE.NAMES = TRUE,
+                             INDEX = NULL) {
+  
+  # PREPARE ARGUMENTS - INDEX
+  if(!is.null(INDEX)) {
+    args <- structure(
+      lapply(
+        args,
+        function(arg) {
+          arg[INDEX]
+        }
+      ),
+      names = names(args)
+    )
+  }
+  
+  # CALL FUNCTION ON ARGUMENTS
+  cyto_func_call(
+    "mapply",
+    c(
+      "FUN" = cyto_func_match(FUN),
+      args,
+      "MoreArgs" = MoreArgs,
+      "SIMPLIFY" = SIMPLIFY,
+      "USE.NAMES" = USE.NAMES
+    )
+  )
+  
+}

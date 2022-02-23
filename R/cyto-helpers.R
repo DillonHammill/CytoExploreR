@@ -6632,7 +6632,7 @@ cyto_nodes_ancestor <- function(x,
 #' Get paths to nodes
 #'
 #' @param x object of class
-#'   \code{\link[flowWorkspace:GtaingHierarchy-class]{GatingHierarchy}} or
+#'   \code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param nodes vector of nodes for which the relative nodes should be returned.
 #' @param type options include \code{"children"}, \code{"parent"},
@@ -7757,5 +7757,58 @@ cyto_require <- function(x,
   if(!is.null(ref)) {
     message(ref)
   }
+  
+}
+
+## CYTO_PROGRESS ---------------------------------------------------------------
+
+#' CytoExploreR progress bar
+#'
+#' @param bar an existing progress bar to increment.
+#' @param label text to include to the left of the progress bar.
+#' @param total the maximum number of iterations for the progress bar.
+#' @param clear logical indicating whether the progress bar should be removed
+#'   from the console once complete, set to TRUE by default.
+#' @param ... additional arguments passed to \code{progress_bar}.
+#'
+#' @return progress bar object.
+#'
+#' @importFrom progress progress_bar
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#'   pb <- cyto_progress(total = 10)
+#'   lapply(1:10, function(z) {
+#'     cyto_progress(pb)
+#'     Sys.sleep(0.2)
+#'   })
+#' }
+#' 
+#' @export
+cyto_progress <- function(bar = NULL,
+                          label = NULL,
+                          total = 100,
+                          clear = FALSE,
+                          ...) {
+  
+  # ITERATE EXISTING PROGRESS BAR
+  if(!is.null(bar)) {
+    bar$tick()
+  } else {
+    bar <- progress::progress_bar$new(
+      format = paste0(
+        "",
+        label,
+        " [:bar] :percent ETA::eta"
+      ),
+      total = total,
+      clear = clear,
+      ...
+    )
+    bar$tick(0)
+  }
+  return(bar)
   
 }

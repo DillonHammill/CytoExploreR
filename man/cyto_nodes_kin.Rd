@@ -15,7 +15,7 @@ cyto_nodes_kin(
 }
 \arguments{
 \item{x}{object of class
-\code{\link[flowWorkspace:GtaingHierarchy-class]{GatingHierarchy}} or
+\code{\link[flowWorkspace:GatingHierarchy-class]{GatingHierarchy}} or
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
 \item{nodes}{vector of nodes for which the relative nodes should be returned.}
