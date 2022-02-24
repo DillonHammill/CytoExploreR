@@ -474,13 +474,14 @@ cyto_plot_gating_scheme <- function(x,
   
   # PLOT CONSTRUCTION ----------------------------------------------------------
   
+  # PROGRESS BAR - INCREMENTED BY CYTO_PLOT()
+  pb <- cyto_progress(
+    label = "cyto_plot_gating_scheme()",
+    total = tp
+  )
+  
   # CALL CYTO_PLOT() - PER GROUP
   if(grepl("^n", order, ignore.case = TRUE)) {
-    # PROGRESS BAR
-    pb <- cyto_progress(
-      label = "cyto_plot_gating_scheme()",
-      total = tp
-    )
     # LOOP THROUGH GROUPS
     plots <- structure(
       lapply(
@@ -632,8 +633,6 @@ cyto_plot_gating_scheme <- function(x,
                     }
                   )
                 }
-                # UPDATE PROGRESS BAR
-                cyto_progress(pb)
                 # PAGE | HEADER | RECORD
                 rec <- NULL
                 if(.par("page")[[1]] | w == length(gt_split)) {

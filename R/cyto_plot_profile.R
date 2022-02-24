@@ -127,7 +127,7 @@ cyto_plot_profile <- function(x,
     )
   }
   
-  # CALL .CYTO_PLOT_DATA - PASS A SINGLE CHANNEL FOR FORMATTING
+  # CALL .CYTO_PLOT_DATA - PASS A SINGLE CHANNEL FOR FORMATTING - HIST_LAYERS
   args <- .args_list(...)
   args$channels <- channels[1]
   x <- cyto_func_execute(
@@ -170,10 +170,12 @@ cyto_plot_profile <- function(x,
     n <- length(x)
     pg <- ceiling(length(channels)/np)
     tpg <- n * pg
+    tp <- n * length(channels)
   } else {
     n <- length(channels)
     pg <- ceiling(length(x)/np)
     tpg <- n * pg
+    tp <- n * length(x)
   }
   
   # PREPARE HEADERS
@@ -232,13 +234,14 @@ cyto_plot_profile <- function(x,
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
+  # CREATE PROGRESS BAR - INCREMENTED BY CYTO_PLOT()
+  pb <- cyto_progress(
+    label = "cyto_plot_profile()",
+    total = tp
+  )
+  
   # CALL CYTO_PLOT IN CHANNEL ORDER
   if(grepl("^c", order, ignore.case = TRUE)) {
-    # PROGRESS BAR
-    pb <- cyto_progress(
-      label = "cyto_plot_profile()",
-      total = length(x)
-    )
     # CONSTRUCT & RECORD PLOTS
     plots <- lapply(
       seq_along(x), 
@@ -267,8 +270,6 @@ cyto_plot_profile <- function(x,
             )
           }
         )
-        # INCREMENT PROPGRESS BAR
-        cyto_progress(pb)
         # PREPARE RECORDED PLOTS
         p[LAPPLY(p, "is.null")] <- NULL
         return(p)
@@ -276,11 +277,6 @@ cyto_plot_profile <- function(x,
     )
   # CALL CYTO_PLOT IN GROUP ORDER 
   } else {
-    # PROGRESS BAR
-    pb <- cyto_progress(
-      label = "cyto_plot_profile()",
-      total = length(channels)
-    )
     # CONSTRUCT & RECORD PLOTS
     plots <- lapply(
       seq_along(channels), 
@@ -315,8 +311,6 @@ cyto_plot_profile <- function(x,
             )
           }
         )
-        # INCREMENT PROPGRESS BAR
-        cyto_progress(pb)
         # PREPARE RECORDED PLOTS
         p[LAPPLY(p, "is.null")] <- NULL
         return(p)

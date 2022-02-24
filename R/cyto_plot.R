@@ -861,7 +861,7 @@ cyto_plot <- function(x,
   
   # PLOTTING PROGRESS BAR
   pb <- cyto_progress(
-    label = "plotting ",
+    label = "cyto_plot()",
     total = length(args)
   )
   
@@ -993,7 +993,12 @@ cyto_plot <- function(x,
       }
       
       # UPDATE PROGRESS BAR
-      cyto_progress(pb)
+      pb <- cyto_option("CytoExploreR_progress")
+      if(!is.null(pb)) {
+        if(.grepl("^cyto_plot", names(pb))) {
+          cyto_progress(pb[[1]])
+        }
+      }
       
       # RETURN RECORDED PLOT
       return(p)

@@ -7801,11 +7801,11 @@ cyto_progress <- function(pb = NULL,
     }
     # PROGRESS BAR COMPLETE
     if(pb$finished) {
-      cyto_option("CytoExploreR_progress", FALSE)
+      cyto_option("CytoExploreR_progress", NULL)
     }
   } else {
     # CREATE NEW PROGRESS BAR - NO ACTIVE PROGRESS BARS
-    if(!cyto_option("CytoExploreR_progress")) {
+    if(is.null(cyto_option("CytoExploreR_progress"))) {
       pb <- progress_bar$new(
         format = paste0(
           "",
@@ -7818,7 +7818,13 @@ cyto_progress <- function(pb = NULL,
         ...
       )
       pb$tick(0)
-      cyto_option("CytoExploreR_progress", TRUE) 
+      cyto_option(
+        "CytoExploreR_progress", 
+        structure(
+          list(pb), 
+          names = label
+        )
+      ) 
     }
   }
   return(pb)

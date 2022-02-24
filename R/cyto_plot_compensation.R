@@ -363,7 +363,7 @@ cyto_plot_compensation <- function(x,
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
     
-  # PROGRESS BAR
+  # PROGRESS BAR - INCREMETED BY CYTO_PLOT()
   pb <- cyto_progress(
     label = "cyto_plot_compensation()",
     total = tp
@@ -490,8 +490,6 @@ cyto_plot_compensation <- function(x,
                   )
                 }
               }
-              # INCREMENT PROGRESS BAR
-              cyto_progress(pb)
               # PAGE & HEADER & RECORD
               rec <- NULL
               if(.par("page")[[1]] | w == length(channels)) {

@@ -335,13 +335,14 @@ cyto_plot_map <- function(x,
   
   # CONSTRUCT PLOTS ------------------------------------------------------------
   
+  # CREATE PROGRESS BAR - INCREMENTED BY CYTO_PLOT()
+  pb <- cyto_progress(
+    label = "cyto_plot_map()",
+    total = tp
+  )
+  
   # CALL CYTO_PLOT - CHANNEL ORDER
   if(grepl("^c", order, ignore.case = TRUE)) {
-    # PROGRESS BAR
-    pb <- cyto_progress(
-      label = "cyto-plot_map()",
-      total = tp
-    )
     # CONSTRUCT PLOTS
     plots <- structure(
       lapply(
@@ -355,7 +356,7 @@ cyto_plot_map <- function(x,
                seq_along(point_col),
                function(w){
                  # CONSTRUCT PLOT
-                 r <- cyto_plot(
+                 cyto_plot(
                    x[[z]], # USE LIST METHOD - CYTO_PLOT DATA CALLED
                    channels = channels,
                    axes_trans = axes_trans,
@@ -371,9 +372,6 @@ cyto_plot_map <- function(x,
                    point_col_scale <- point_col_scale[[w]],
                    ...
                  )
-                 # INCREMENT PROGRESS BAR
-                 cyto_progress(pb)
-                 return(r)
                }
             ),
             names = point_col
@@ -388,11 +386,6 @@ cyto_plot_map <- function(x,
     )
   # CALL CYTO_PLOT - GROUP ORDER
   } else {
-    # CREATE PROGRESS BAR
-    pb <- cyto_progress(
-      label = "cyto_plot_map()",
-      total = tp
-    )
     # CONSTRUCT PLOTS
     plots <- structure(
       lapply(
@@ -406,7 +399,7 @@ cyto_plot_map <- function(x,
               seq_along(x),
               function(w) {
                 # CONSTRUCT PLOT
-                r <- cyto_plot(
+                cyto_plot(
                   x[[w]],
                   channels = channels,
                   axes_trans = axes_trans,
@@ -422,9 +415,6 @@ cyto_plot_map <- function(x,
                   point_col_scale = point_col_scale[[z]],
                   ...
                 )
-                # INCREMENT PROGRESS BAR
-                cyto_progress(pb)
-                return(r)
               }
             ),
             names = names(x)

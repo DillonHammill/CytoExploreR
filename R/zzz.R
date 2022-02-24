@@ -16,7 +16,7 @@
   options("CytoExploreR_interactive" = TRUE)
   
   # PROGRESS BARS
-  options("CytoExploreR_progress" = FALSE)
+  options("CytoExploreR_progress" = NULL)
   
   # ACTIVE GATINGTEMPLATE
   options("CytoExploreR_gatingTemplate" = NULL)
