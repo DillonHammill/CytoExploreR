@@ -2,9 +2,12 @@
 % Please edit documentation in R/cyto-helpers.R
 \name{cyto_markers_edit}
 \alias{cyto_markers_edit}
+\alias{cyto_channels_edit}
 \title{Assign marker names to cytoframe or cytoset}
 \usage{
 cyto_markers_edit(x, file = NULL, save_as = NULL, ...)
+
+cyto_channels_edit(x, file = NULL, save_as = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}},

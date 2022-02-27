@@ -5196,6 +5196,10 @@ cyto_barcode <- function(x,
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @name cyto_markers_edit
+NULL
+
+#' @rdname cyto_markers_edit
 #' @export
 cyto_markers_edit <- function(x,
                               file = NULL,
@@ -5373,6 +5377,24 @@ cyto_markers_edit <- function(x,
   
   # UPDATE CHANNELS/MARKERS IN PLACE
   return(x)
+}
+
+## CYTO_CHANNELS_EDIT ----------------------------------------------------------
+
+#' @rdname cyto_markers_edit
+#' @export
+cyto_channels_edit <- function(x,
+                               file = NULL,
+                               save_as = NULL,
+                               ...) {
+  
+  cyto_markers_edit(
+    x,
+    file = file,
+    save_as = save_as,
+    ...
+  )
+  
 }
 
 ## CYTO_DETAILS_EDIT -----------------------------------------------------------
