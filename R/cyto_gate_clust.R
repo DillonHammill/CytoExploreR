@@ -332,6 +332,7 @@ cyto_gate_clust <- function(x,
           function(z) {
             res <- as(factor(), "filterResult")
             res@filterId <- "cyto_gate_clust"
+            res@frameId <- z
             return(res)
           }
         ),
@@ -350,11 +351,8 @@ cyto_gate_clust <- function(x,
   
   # DEFAULT CLUSTERING METHODS
   if(is.character(type)) {
-    # NIMBUS
-    if(grepl("^nimbus$", type, ignore.case = TRUE)) {
-      
     # FLOWSOM
-    } else if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
+    if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
       # TODO: CHECK DIMENSIONS OF SOM REQUIRED?
       # FLOWSOM DEFAULT ARGUMENTS
       args_default <- list(
@@ -547,10 +545,11 @@ cyto_gate_clust <- function(x,
   # CONVERT TO FILTERRESULT - RETAINS SET POPULATION NAMES
   gate <- structure(
     lapply(
-      gate,
+      seq_along(gate),
       function(z) {
-        res <- as(z, "filterResult")
+        res <- as(gate[[z]], "filterResult")
         res@filterId <- "cyto_gate_clust"
+        res@frameId <- names(gate)[z]
         return(res)
       }
     ),
