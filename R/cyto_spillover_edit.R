@@ -466,7 +466,7 @@ cyto_spillover_edit <- function(x,
       # VALUES
       values <- reactiveValues(
         parent = "root",
-        spill = NULL,
+        spill = spillover,
         NIL_select = NIL_select,
         NIL_comp_trans = NULL,
         ID_select = ID_select,
@@ -652,7 +652,7 @@ cyto_spillover_edit <- function(x,
       spill_edit <- spillEditServer(
         "editor_spill",
         data = reactive(x),
-        spill = reactive(spillover),
+        spill = reactive({values$spill}),
         xchan = xchan,
         ychan = ychan
       )
@@ -1228,6 +1228,14 @@ spillEditServer <- function(id,
     observeEvent(input$spill, {
       sp <- hot_to_r(input$spill)
       rownames(sp) <- colnames(sp)
+      if(any(is.na(sp))) {
+        if(is.null(values$spill)) {
+          sp[is.na(sp)] <- 0
+        } else {
+          # NO RE-RENDER
+          sp[is.na(sp)] <- values$spill[is.na(sp)]
+        }
+      }
       values$spill <- sp
     })
     # RETURN EDITED SPILLOVER MATRIX
