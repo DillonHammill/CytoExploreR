@@ -43,8 +43,8 @@
 #' @param select passed to \code{\link{cyto_select}} to select the samples
 #'   required to compute the spillover matrix.
 #' @param channels names of the channels or markers for which spillover
-#'   coefficients should be computed, set to all fluorescent channels excluding
-#'   \code{"-H"} and \code{"-W"} parameters.
+#'   coefficients should be computed, set to all area fluorescent channels by
+#'   default.
 #' @param type options include \code{"Bagwell"} or \code{"Roca"} to indicate
 #'   which method to use when computing the spillover matrix, set to
 #'   \code{"Roca"} by default. Refer to \code{references} section for more
@@ -172,10 +172,10 @@ cyto_spillover_compute <- function(x,
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_fluor_channels(x)
-    # EXCLUDE HEIGHT/WIDTH PARAMETERS
-    channels <- channels[!grepl("-H$|-W$", channels, ignore.case = TRUE)]
+    # DEFAULT - ALL AREA PARAMETERS
+    channels <- channels[grepl("-A$", channels, ignore.case = TRUE)]
   } else {
-    channels <- cyto_channels_extract(x, channels)
+    channels <- unique(cyto_channels_extract(x, channels))
   }
   
   # MATCH CHANNELS
@@ -236,7 +236,8 @@ cyto_spillover_compute <- function(x,
         x, 
         channels = channels[!channels %in% names(axes_trans)],
         type = "biex",
-        plot = FALSE
+        plot = FALSE,
+        progress = FALSE
       )
       # APPLY NEW TRANSFORMERS
       x <- suppressWarnings(
@@ -303,6 +304,8 @@ cyto_spillover_compute <- function(x,
       group_by = "group"
     )
     
+    print(pd)
+    
     # PREPARE EACH GROUP
     cs_list <- structure(
       lapply(
@@ -322,6 +325,7 @@ cyto_spillover_compute <- function(x,
             function(z) {
               # FIND BEST CONTROL PER CHANNEL
               ind <- which(pd$channel == z)
+              print(ind)
               # UNSTAINED CONTROL
               if(grepl("unstained", z, ignore.case = TRUE)) {
                 # MULTIPLE UNSTAINED CONTROLS - CV

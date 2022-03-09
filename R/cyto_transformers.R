@@ -97,6 +97,8 @@ cyto_transformer_extract <- function(...){
 #'   to \code{"machine"} by default to use entire axes ranges. Fine control over
 #'   axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 #'   arguments.
+#' @param progress logical indicating whether to display the progress bar(s)
+#'   when computing transformer definitions, set to TRUE by default.
 #' @param ... additional arguments passed to
 #'   \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}},
 #'   \code{\link[flowWorkspace:asinh_Gml2]{asinh_Gml2}},
@@ -129,7 +131,13 @@ cyto_transformers_define <- function(x,
                                      events = 50000,
                                      plot = TRUE,
                                      axes_limits = "machine",
+                                     progress = TRUE,
                                      ...) {
+  
+  # RESET PROGRESS BAR ON EXIT
+  on.exit({
+    cyto_option("CytoExploreR_progress", NULL)
+  })
   
   # PREPARE CHANNELS
   if(is.null(channels)) {
@@ -178,6 +186,14 @@ cyto_transformers_define <- function(x,
     names(type) <- channels
   }
   
+  # PROGRESS BAR
+  if(progress) {
+    pb <- cyto_progress(
+      label = "cyto_transformers_define()",
+      total = length(channels)
+    )
+  }
+  
   # TRANSFORMATION DEFINITIONS
   transformer_list <- structure(
     lapply(
@@ -187,7 +203,7 @@ cyto_transformers_define <- function(x,
         if(!cyto_class(type, "list", TRUE)) {
           # LOG TRANSFORM
           if(grepl("^log$", type[z], ignore.case = TRUE)) {
-            cyto_func_execute("flowjo_log_trans", args)
+            trans <- cyto_func_execute("flowjo_log_trans", args)
           # ARCSINH TRANSFORM
           } else if(grepl("^a", type[z], ignore.case = TRUE)) {
             # ARCSINH GML2 FLOWWORKSPACE
@@ -200,7 +216,7 @@ cyto_transformers_define <- function(x,
               args[["inverse"]] <- TRUE
               inv_trans <- cyto_func_execute("asinh_Gml2", args)
               # COMBINE TRANSFORMERS
-              flow_trans(
+              trans <- flow_trans(
                 "arcsinh_Gml2",
                 trans@.Data,
                 inv_trans@.Data
@@ -254,7 +270,7 @@ cyto_transformers_define <- function(x,
                 sinh(x/cofactor)
               }
               # TRANSFORMERS
-              flow_trans(
+              trans <- flow_trans(
                 "arcsinh",
                 asinh_trans,
                 sinh_trans
@@ -293,7 +309,7 @@ cyto_transformers_define <- function(x,
             # INVERSE TRANSFORMERS
             args[["inverse"]] <- TRUE
             inv_trans <- cyto_func_execute("flowjo_biexp", args)
-            flow_trans(
+            trans <- flow_trans(
               "biexponential",
               trans@.Data,
               inv_trans@.Data
@@ -390,7 +406,7 @@ cyto_transformers_define <- function(x,
               trans
             )
             # LOGICLE TRANSFORMERS
-            flow_trans(
+            trans <- flow_trans(
               "logicle",
               trans@.Data,
               inv@.Data
@@ -438,12 +454,17 @@ cyto_transformers_define <- function(x,
             }
           )
           # PREPARE TRANSFORMERS
-          flow_trans(
+          trans <- flow_trans(
             "custom",
             trans, # TRANSFORM
             inv    # INVERSE TRANSFORM
           )
         }
+        # INCREMENT PROGRESS BAR
+        if(progress){
+          cyto_progress(pb)
+        }
+        return(trans)
       }
     ), names = channels
   )
@@ -484,9 +505,13 @@ cyto_transformers_define <- function(x,
         events = 1 # SAMPLED ABOVE FOR FASTER TRANSFORMATIONS
       ), 
       error = function(e){
-        message("Insufficient plotting space to display transformations!")
-        if(!"RStudioGD" %in% names(dev.cur())) {
-          dev.off()
+        if(.grepl("figure margins too large", e$message)) {
+          message("Insufficient plotting space to display transformations!")
+          if(!"RStudioGD" %in% names(dev.cur())) {
+            dev.off()
+          }
+        } else {
+          e
         }
       }
     )

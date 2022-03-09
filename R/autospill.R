@@ -373,7 +373,8 @@
         channels = pd$channel,
         type = "biex",
         widthBasis = -100,
-        plot = FALSE
+        plot = FALSE,
+        progress = FALSE
       )
     }
     # APPLY TRANSFORMATIONS

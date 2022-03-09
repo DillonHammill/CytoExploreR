@@ -36,8 +36,8 @@ specified in a \code{parent} column in the channel match CSV file or in
 required to compute the spillover matrix.}
 
 \item{channels}{names of the channels or markers for which spillover
-coefficients should be computed, set to all fluorescent channels excluding
-\code{"-H"} and \code{"-W"} parameters.}
+coefficients should be computed, set to all area fluorescent channels by
+default.}
 
 \item{type}{options include \code{"Bagwell"} or \code{"Roca"} to indicate
 which method to use when computing the spillover matrix, set to

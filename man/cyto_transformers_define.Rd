@@ -13,6 +13,7 @@ cyto_transformers_define(
   events = 50000,
   plot = TRUE,
   axes_limits = "machine",
+  progress = TRUE,
   ...
 )
 }
@@ -53,6 +54,9 @@ be plotted using \code{cyto_plot}.}
 to \code{"machine"} by default to use entire axes ranges. Fine control over
 axes limits can be obtained by altering the \code{xlim} and \code{ylim}
 arguments.}
+
+\item{progress}{logical indicating whether to display the progress bar(s)
+when computing transformer definitions, set to TRUE by default.}
 
 \item{...}{additional arguments passed to
 \code{\link[flowWorkspace:flowjo_log_trans]{flowjo_log_trans}},
