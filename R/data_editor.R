@@ -21,7 +21,7 @@
 #'
 #' @importFrom shiny shinyApp fluidPage titlePanel mainPanel runApp onStop img
 #'   div paneViewer observeEvent
-#' @importFrom shinythemes shinytheme
+#' @importFrom bslib bs_theme
 #' @importFrom rhandsontable rHandsontableOutput renderRHandsontable
 #'   rhandsontable hot_col hot_to_r
 #' @importFrom utils read.csv write.csv
@@ -90,7 +90,7 @@ data_editor <- function(x,
     
     # USER INTERFACE
     ui <- fluidPage(
-      theme = shinytheme("yeti"),
+      theme = bs_theme(version = 3, bootswatch = "yeti"),
       titlePanel(div(img(src = logo, width = 100), title)),
       mainPanel(rHandsontableOutput("x")),
       actionButton("save_and_close", "Save & Close")

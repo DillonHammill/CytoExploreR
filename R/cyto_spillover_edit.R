@@ -85,7 +85,7 @@
 #'   updateSelectInput onStop stopApp runApp updateCheckboxInput paneViewer
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
-#' @importFrom shinythemes shinytheme
+#' @importFrom bslib bs_theme
 #' @importFrom magrittr %>%
 #' @importFrom methods as is
 #' @importFrom stats median
@@ -222,7 +222,7 @@ cyto_spillover_edit.GatingSet <- function(x,
     # REPLACE DATA
     gs_cyto_data(gs_linear) <- cs
   }
-
+  
   # PREPARE CHANNEL_MATCH ----------------------------------------------------
 
   # PREPARE CHANNEL_MATCH VARIABLE (MARKERS TO CHANNELS)
@@ -401,7 +401,7 @@ cyto_spillover_edit.GatingSet <- function(x,
   # APPLICATION
   app <- shinyApp(
     ui <- fluidPage(
-      theme = shinytheme("yeti"),
+      theme = bs_theme(version = 3, bootswatch = "yeti"),
       titlePanel("CytoExploreR Spillover Matrix Editor"),
       tabsetPanel(
         tabPanel("Editor",
@@ -1394,7 +1394,7 @@ cyto_spillover_edit.flowSet <- function(x,
   # Shiny application
   app <- shinyApp(
     ui <- fluidPage(
-      theme = shinytheme("yeti"),
+      theme = bs_theme(version = 3, bootswatch = "yeti"),
       titlePanel("CytoExploreR Spillover Matrix Editor"),
       tabsetPanel(
         tabPanel("Editor",

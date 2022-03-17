@@ -20,6 +20,7 @@ Depends:
   openCyto (>= 1.25.2)
 Imports: 
   BiocGenerics, 
+  bslib,
   data.table,
   dplyr,
   EmbedSOM,
@@ -36,7 +37,6 @@ Imports:
   Rtsne,
   rsvd,
   shiny, 
-  shinythemes, 
   stats,
   superheat (>= 1.0.0),
   tibble,
