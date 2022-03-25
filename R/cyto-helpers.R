@@ -4338,25 +4338,29 @@ cyto_spillover_extract <- function(x) {
     # FLOWSET
   } else if (is(x, "flowSet")) {
     spill <- lapply(seq_along(x), function(z) {
-      # CyTOF lacks spill slot (just in case)
-      sp <- tryCatch(keyword(x[[z]], "SPILL"), error = function(e) {
-        NULL
-      })
-      if(!is.null(sp)) {
-        sp <- sp[[1]]
+      # KEYWORDS
+      kw <- keyword(x[[z]])
+      # SPILLOVER SLOT
+      ind <- grep("^SPILL", names(kw), ignore.case = TRUE)
+      if(length(ind) > 0) {
+        return(kw[[ind]])
+      } else {
+        return(NULL)
       }
     })
     names(spill) <- cyto_names(x)
     if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
     }
-    # FLOWFRAME
+  # FLOWFRAME
   } else if (is(x, "flowFrame")) {
-    spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
-      NULL
-    })
-    if (!is.null(spill)) {
-      names(spill) <- cyto_names(x)
+    # KEYWORDS
+    kw <- keyword(x)
+    ind <- grep("^SPILL", names(kw), ignore.case = TRUE)
+    if(length(ind) > 0) {
+      spill <- structure(kw[ind], names = cyto_names(x))
+    } else {
+      spill <- NULL
     }
   }
   
