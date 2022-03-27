@@ -4341,7 +4341,7 @@ cyto_spillover_extract <- function(x) {
       # KEYWORDS
       kw <- keyword(x[[z]])
       # SPILLOVER SLOT
-      ind <- grep("^SPILL", names(kw), ignore.case = TRUE)
+      ind <- grep("SPILL", names(kw), ignore.case = TRUE)
       if(length(ind) > 0) {
         return(kw[[ind]])
       } else {
@@ -4356,7 +4356,7 @@ cyto_spillover_extract <- function(x) {
   } else if (is(x, "flowFrame")) {
     # KEYWORDS
     kw <- keyword(x)
-    ind <- grep("^SPILL", names(kw), ignore.case = TRUE)
+    ind <- grep("SPILL", names(kw), ignore.case = TRUE)
     if(length(ind) > 0) {
       spill <- structure(kw[ind], names = cyto_names(x))
     } else {
