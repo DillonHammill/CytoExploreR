@@ -3479,7 +3479,8 @@ setAs(
   "cytoframe",
   function(from){
     flowFrame_to_cytoframe(
-      as(from, "flowFrame")
+      as(from, "flowFrame"),
+      emptyValue = FALSE
     )
   }
 )
@@ -3497,7 +3498,8 @@ setAs(
   "cytoframe",
   function(from){
     flowFrame_to_cytoframe(
-      as(from, "flowFrame")
+      as(from, "flowFrame"),
+      emptyValue = FALSE
     )
   }
 )
@@ -3517,7 +3519,8 @@ setAs(
     flowFrame_to_cytoframe(
       flowFrame(
         data.matrix(from)
-      )
+      ),
+      emptyValue = FALSE
     )
   }
 )
@@ -3537,7 +3540,8 @@ setAs(
     flowFrame_to_cytoframe(
       flowFrame(
         data.matrix(from)
-      )
+      ),
+      emptyValue = FALSE
     )
   }
 )
@@ -3942,8 +3946,7 @@ cyto_save <- function(x,
         overwrite <- cyto_enquire(
           paste0(
             save_as,
-            " already contains some files. ",
-            "Do you want to overwrite this directory? (Y/N)"
+            " is non-empty. Overwrite? (Y/N)"
           ),
           options = c("Y", "T")
         )
@@ -4714,7 +4717,10 @@ cyto_coerce <- function(x,
             seed = seed
           )
           if(cyto_class(fr, "flowFrame", TRUE)) {
-            fr <- flowFrame_to_cytoframe(fr)
+            fr <- flowFrame_to_cytoframe(
+              fr,
+              emptyValue = FALSE # REQUIRED?
+            )
           }
           return(fr)
         }
@@ -4734,8 +4740,14 @@ cyto_coerce <- function(x,
   if(length(x) == 1) {
     x <- x[[1]]
   } else {
+    x <- as(x, "flowFrame")
+  }
+  
+  # CYTOFRAME
+  if(cyto_class(x, "flowFrame", TRUE)) {
     x <- flowFrame_to_cytoframe(
-      as(x, "flowFrame")
+      x,
+      emptyValue = FALSE # REQUIRED?
     )
   }
   
@@ -6857,12 +6869,14 @@ cyto_spillover_extract <- function(x) {
     spill <- lapply(
       seq_along(x), 
       function(z) {
-        # CyTOF lacks spill slot (just in case)
-        sp <- tryCatch(keyword(x[[z]], "SPILL"), error = function(e) {
-          NULL
-        })
-        if(!is.null(sp)) {
-          sp <- sp[[1]]
+        # KEYWORDS
+        kw <- keyword(x[[z]])
+        # SPILLOVER SLOT
+        ind <- grep("SPILL", names(kw), ignore.case = TRUE)
+        if(length(ind) > 0) {
+          return(kw[[ind]])
+        } else {
+          return(NULL)
         }
       }
     )
@@ -6870,13 +6884,16 @@ cyto_spillover_extract <- function(x) {
     if (all(LAPPLY(spill, "is.null"))) {
       spill <- NULL
     }
-    # CYTOFRAME
+  # CYTOFRAME
   } else if (cyto_class(x, "flowFrame")) {
-    # CANNOT SET NAMES
-    spill <- tryCatch(keyword(x, "SPILL"), error = function(e) {
-      NULL
-    })
-    names(spill) <- cyto_names(x)
+    # KEYWORDS
+    kw <- keyword(x)
+    ind <- grep("SPILL", names(kw), ignore.case = TRUE)
+    if(length(ind) > 0) {
+      spill <- structure(kw[ind], names = cyto_names(x))
+    } else {
+      spill <- NULL
+    }
   }
   
   # RETURN LIST OF SPILLOVER MATRICES
