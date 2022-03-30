@@ -1500,7 +1500,8 @@ cyto_plot_complete <- function(...) {
   # RESET CYTO_PLOT() PROGRESS BAR
   pb <- cyto_option("CytoExploreR_progress")
   if(!is.null(pb)) {
-    if(.grepl("^cyto_plot", names(pb))) {
+    if(.grepl("^cyto_plot", names(pb)) |
+       .grepl("^compiling", names(pb))) {
       cyto_option("CytoExploreR_progress", NULL)
     }
   }

@@ -189,31 +189,35 @@
                                     ignore.case = TRUE)]
           overlay <- c(
             overlay, tryCatch(
-            gh_pop_get_descendants(
-              gh,
-              parent,
-              path = "auto"
-            ),
-            error = function(e){
-              return(NA)
-            }
-          ))
+              gh_pop_get_descendants(
+                gh,
+               parent,
+                path = "auto"
+              ),
+              error = function(e){
+                return(NA)
+              }
+            )
+          )
         } 
         # CHILDREN
         if(any(grepl("^children", overlay, ignore.case = TRUE))) {
           overlay <- overlay[!grepl("^children",
                                     overlay,
                                     ignore.case = TRUE)]
-          overlay <- c(overlay, tryCatch(
-            gh_pop_get_children(
-              gh,
-              parent,
-              path = "auto"
-            ),
-            error = function(e){
-              return(NA)
-            }
-          ))
+          overlay <- c(
+            overlay, 
+            tryCatch(
+              gh_pop_get_children(
+                gh,
+                parent,
+                path = "auto"
+              ),
+              error = function(e){
+                return(NA)
+              }
+            )
+          )
         }
         # REMOVE DUPLICATES
         overlay <- unique(overlay)
@@ -263,34 +267,37 @@
     }
     # OVERLAY - SELECT & GROUP
     overlay  <- structure(
-      lapply(seq_along(overlay), function(z){
-        cs <- overlay[[z]]
-        # CHECK
-        if(!cyto_class(cs, "cytoset")) {
+      lapply(
+        seq_along(overlay),
+        function(z){
+          cs <- overlay[[z]]
+          # CHECK
+          if(!cyto_class(cs, "cytoset")) {
+            cs <- tryCatch(
+              as(cs, "cytoset"),
+              error = function(e) {
+                stop("cyto_plot only supports cytosets for overlays!")
+              }
+            )
+          }
+          # SELECT - IF POSSIBLE
           cs <- tryCatch(
-            as(cs, "cytoset"),
-            error = function(e) {
-              stop("cyto_plot only supports cytosets for overlays!")
-            }
+            cyto_select(cs, select),
+            error = function(e){return(cs)}
           )
+          # GROUP - ONLY IF SAME GROUPS
+          if(setequal(cyto_groups(cs, merge_by), names(x))) {
+            cs <- cyto_group_by(cs, merge_by)
+          } else {
+            cs <- structure(
+              rep(list(cs), length(x)),
+              names  = names(x)
+            )
+          }
+          # LAYER
+          return(cs)
         }
-        # SELECT - IF POSSIBLE
-        cs <- tryCatch(
-          cyto_select(cs, select),
-          error = function(e){return(cs)}
-        )
-        # GROUP - ONLY IF SAME GROUPS
-        if(setequal(cyto_groups(cs, merge_by), names(x))) {
-          cs <- cyto_group_by(cs, merge_by)
-        } else {
-          cs <- structure(
-            rep(list(cs), length(x)),
-            names  = names(x)
-          )
-        }
-        # LAYER
-        return(cs)
-      }),
+      ),
       names = names(overlay)
     )
     # TRANSPOSE OVERLAY - GROUPS
@@ -317,7 +324,7 @@
     total = length(x),
     clear = FALSE
   )
-
+  
   # SAMPLE & MERGE
   x <- structure(
     # LOOP THROUGH EACH PLOT
