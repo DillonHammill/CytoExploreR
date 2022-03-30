@@ -1047,25 +1047,33 @@ dev_empty <- function() {
 #' @export
 cyto_plot_reset <- function() {
   
-  # Create custom theme for cyto_plot
+  # RESET CYTO_PLOT() PROGRESS BAR
+  pb <- cyto_option("CytoExploreR_progress")
+  if(!is.null(pb)) {
+    if(.grepl("^cyto_plot", names(pb))) {
+      cyto_option("CytoExploreR_progress", NULL)
+    }
+  }
+  
+  # RESET THEME
   cyto_option("cyto_plot_theme", NULL)
   
-  # Signal cyto_plot_save method has been called
+  # RESET CYTO_PLOT_SAVE FLAG
   cyto_option("cyto_plot_save", FALSE)
   
-  # Signal which cyto_plot method has been called
+  # RESET CYTO_PLOT_METHOD FLAG
   cyto_option("cyto_plot_method", NULL)
   
-  # shiny
+  # RESET CYTO_PLOT_SHINY FLAG
   cyto_option("cyto_plot_shiny", NULL)
   
-  # Reset saved parameters
+  # RESET SAVED CYTO_PLOT() PARAMETERS
   cyto_plot_par(reset = TRUE)
   
-  # Reset memory
+  # RESET CYTO_PLOT_MEMORY FLAG
   .cyto_plot_args_remove()
   
-  # Turn off graphics device
+  # RESET GRAPHICS DEVICE
   if (dev.cur() != 1) {
     dev.off()
   }
@@ -1489,6 +1497,14 @@ cyto_plot_complete <- function(...) {
     }
   }
   
+  # RESET CYTO_PLOT() PROGRESS BAR
+  pb <- cyto_option("CytoExploreR_progress")
+  if(!is.null(pb)) {
+    if(.grepl("^cyto_plot", names(pb))) {
+      cyto_option("CytoExploreR_progress", NULL)
+    }
+  }
+  
   # RESET CYTO_PLOT_METHOD
   cyto_option("cyto_plot_method", NULL)
   
@@ -1793,6 +1809,11 @@ cyto_plot_calibrate <- function(x,
                                 anchor = TRUE,
                                 ...){
   
+  # RESET PROGRESS BAR
+  on.exit({
+    cyto_option("CytoExploreR_progress", NULL)
+  })
+  
   # RECALL CALIBRATION SETTINGS - ALL CHANNELS
   cyto_cal <- .cyto_plot_calibrate_recall()
   
@@ -1845,6 +1866,12 @@ cyto_plot_calibrate <- function(x,
   
   # ANCHOR - ORDER MAY BE OUT OF SYNC DUE TO SORTING ABOVE
   anchor <- rep(anchor, length.out = ncol(limits))
+  
+  # PROGRESS BAR
+  pb <- cyto_progress(
+    label = "cyto_plot_calibrate()",
+    total = ncol(limits)
+  )
   
   # COMPUTE CALIBRATION SETTINGS
   cnt <- 0
@@ -1930,10 +1957,10 @@ cyto_plot_calibrate <- function(x,
               z[which.min(z)] <- 0
             }
           }
-          # RETURN CHANNEL LIMITS
-          return(z)
         }
       }
+      # UPDATE PROGRESS BAR
+      cyto_progress(pb)
       # RETURN MIN/MAX LIMITS PER CHANNEL
       return(
         c("min" = min(z, na.rm = TRUE),
@@ -1953,11 +1980,14 @@ cyto_plot_calibrate <- function(x,
   }
   
   # SAVE RDS TO TEMPFILE
-  tempfile <- paste0(tempdir(),
-                     .Platform$file.sep,
-                     "cyto_plot_calibrate.rds")
-  saveRDS(cyto_cal,
-          tempfile)
+  saveRDS(
+    cyto_cal,
+    paste0(
+      tempdir(),
+      .Platform$file.sep,
+      "cyto_plot_calibrate.rds"
+    )
+  )
   
 }
 

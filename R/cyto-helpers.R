@@ -7549,7 +7549,7 @@ cyto_convert <- function(x,
     # tmp <- paste0(tempdir, .Platform$file.sep, cyto_names(x))
     # write.FCS(x, tmp)
     # x <- load_cytoframe_from_fcs(tmp, ...)
-    x <- flowFrame_to_cytoframe(x, ...)
+    x <- flowFrame_to_cytoframe(x, emptyValue = FALSE, ...)
   } else if(cyto_class(x, "flowSet", TRUE)) {
     x <- flowSet_to_cytoset(x, ...)
   }
@@ -7807,7 +7807,7 @@ cyto_require <- function(x,
 #' @param label text to include to the left of the progress bar.
 #' @param total the maximum number of iterations for the progress bar.
 #' @param clear logical indicating whether the progress bar should be removed
-#'   from the console once complete, set to TRUE by default.
+#'   from the console once complete, set to FALSE by default.
 #' @param ... additional arguments passed to \code{progress_bar}.
 #'
 #' @return progress bar object.

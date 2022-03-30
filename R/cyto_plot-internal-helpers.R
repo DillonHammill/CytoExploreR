@@ -1340,46 +1340,50 @@
   
   # AXES_LABELS
   cnt <- 0
-  axes_labels <- lapply(channels, function(z) {
-    cnt <<- cnt + 1
-    # LABELS
-    if (cnt == 1) {
-      lab <- xlab
-    } else {
-      lab <- ylab
-    }
-    # XLAB OR SCATTER YLAB
-    if (!.all_na(z)) {
-      # XLAB/YLAB
-      if (missing(lab) | .empty(lab)) {
-        # MARKER ASSIGNED - DIFFERENT FROM CHANNEL
-        ind <- match_ind(z, names(markers))
-        if (length(ind) > 0 & !z %in% markers) {
-          return(paste(markers[ind], z))
-        } else {
-          return(z)
-        }
-      } else if (.all_na(lab)) {
-        return(NA)
+  axes_labels <- lapply(
+    channels, 
+    function(z) {
+      cnt <<- cnt + 1
+      # LABELS
+      if (cnt == 1) {
+        lab <- xlab
+      } else {
+        lab <- ylab
       }
-      # HISTOGRAM YLAB
-    } else {
-      if (missing(lab) | .empty(lab)) {
-        # COUNT
-        if (hist_stat == "count") {
-          return("Count")
-          # PERCENT
-        } else if (hist_stat == "percent") {
-          return("% of Mode")
-          # DENSITY
-        } else if (hist_stat == "density") {
-          return("Density")
+      # XLAB OR SCATTER YLAB
+      if (!.all_na(z)) {
+        # XLAB/YLAB
+        if (missing(lab) | .empty(lab)) {
+          # MARKER ASSIGNED - DIFFERENT FROM CHANNEL
+          ind <- match_ind(z, names(markers))
+          if (length(ind) > 0 & !z %in% markers) {
+            return(paste(markers[ind], z))
+          } else {
+            return(z)
+          }
+        } else if (.all_na(lab)) {
+          return(NA)
         }
-      } else if (.all_na(lab)) {
-        return(NA)
+        # HISTOGRAM YLAB
+      } else {
+        if (missing(lab) | .empty(lab)) {
+          # COUNT
+          if (hist_stat == "count") {
+            return("Count")
+            # PERCENT
+          } else if (hist_stat == "percent") {
+            return("% of Mode")
+            # DENSITY
+          } else if (hist_stat == "density") {
+            return("Density")
+          }
+        } else if (.all_na(lab)) {
+          return(NA)
+        }
       }
+      return(lab)
     }
-  })
+  )
   names(axes_labels) <- c("xlab", "ylab")
   
   # RETURN AXES LABELS

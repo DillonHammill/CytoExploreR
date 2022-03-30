@@ -368,7 +368,7 @@ cyto_plot_explore <- function(x,
       ),
       names = names(x)
     )
-    # CALL CYTO_PLOT - GROUP ORDER
+  # CALL CYTO_PLOT - GROUP ORDER
   } else {
     # CONSTRUCT & RECORD PLOTS
     plots <- structure(

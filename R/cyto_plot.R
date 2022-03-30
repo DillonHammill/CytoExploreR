@@ -936,10 +936,13 @@ cyto_plot <- function(x,
            )
          )) {
         label_args <- c("label_text_x", "label_text_y")
-        lapply(label_args, function(arg){
-          arg_ind <- which(is.na(ARGS[[arg]]))
-          ARGS[[arg]][arg_ind] <<- memory[[1]][[arg]][arg_ind]
-        })
+        lapply(
+          label_args, 
+          function(arg){
+            arg_ind <- which(is.na(ARGS[[arg]]))
+            ARGS[[arg]][arg_ind] <<- memory[[1]][[arg]][arg_ind]
+          }
+        )
       }
       
       # INHERIT LABEL CO-ORDINATES WHEN SAVING
