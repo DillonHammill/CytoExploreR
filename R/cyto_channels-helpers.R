@@ -750,17 +750,19 @@ cyto_channel_select <- function(x){
                       stringsAsFactors = FALSE)
   
   # CHANNEL SELECTION
-  chans <- data_edit(chans,
-                     title = "Channel Selector",
-                     logo = CytoExploreR_logo(),
-                     col_edit = FALSE,
-                     row_edit = FALSE,
-                     col_options = list("channel" = unname(opts)),
-                     col_names = "channel",
-                     col_readonly = "name",
-                     hide = TRUE,
-                     quiet = TRUE,
-                     viewer = "pane")
+  chans <- data_edit(
+    chans,
+    title = "Channel Selector",
+    logo = CytoExploreR_logo(),
+    col_edit = FALSE,
+    row_edit = FALSE,
+    col_options = list("channel" = unname(opts)),
+    col_names = "channel",
+    col_readonly = "name",
+    hide = TRUE,
+    quiet = TRUE,
+    viewer = "pane"
+  )
   
   # MISSING CHANNELS
   lapply(
@@ -1348,15 +1350,19 @@ cyto_channel_match <- function(x,
       cs_list,
       input = "matrix",
       channels = channels,
-      FUN = function(z){
-        # COMPUTE MEDFI
-        res <- cyto_stat_quantile(
-          z,
-          probs = 0.95
-        )
-        return(
-          names(res)[which.max(res)]
-        )
+      FUN = function(z) {
+        # DEFAULT CHANNEL
+        res <- channels[1]
+        # QUANTILE
+        if(nrow(z) > 0) {
+          res <- cyto_stat_quantile(
+            z,
+            probs = 0.95
+          )
+          res <- names(res)[which.max(res)]
+        }
+        # MATCHING CHANNEL
+        return(res)
       },
       copy = FALSE
     )
@@ -1525,7 +1531,9 @@ cyto_channels_restrict <- function(x,
     x, 
     select = c("FSC",
                "SSC",
-               "Time")
+               "Time",
+               "^Event-?ID$",
+               "^Sample-?ID$")
   )
   
   # CHANNELS WITH MARKERS ASSIGNED
