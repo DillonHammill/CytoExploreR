@@ -162,9 +162,9 @@ cyto_plot_explore <- function(x,
   if(missing(layout)) {
     # SWITCH LAYOUTS FOR SINGLE PLOTS
     if(length(channels_x) == 1) {
-      order <- "groups"
-    } else if(length(x) == 1) {
       order <- "channels"
+    } else if(length(x) == 1) {
+      order <- "groups"
     }
     # CHANNEL ORDER
     if(grepl("^c", order, ignore.case = TRUE)) {
