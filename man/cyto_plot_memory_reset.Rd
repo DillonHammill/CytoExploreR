@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_plot-helpers.R
 \name{cyto_plot_memory_reset}
 \alias{cyto_plot_memory_reset}
-\title{Reset cyto_plot() memory}
+\title{Reset stored cyto_plot() memory}
 \usage{
 cyto_plot_memory_reset()
 }

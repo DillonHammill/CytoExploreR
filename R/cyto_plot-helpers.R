@@ -1528,7 +1528,7 @@ cyto_plot_complete <- function(...) {
 
 ## CYTO_PLOT_MEMORY_RESET ------------------------------------------------------
 
-#' Reset cyto_plot() memory
+#' Reset stored cyto_plot() memory
 #' 
 #' An accessory function to reset \code{cyto_plot()} argument history.
 #' 
