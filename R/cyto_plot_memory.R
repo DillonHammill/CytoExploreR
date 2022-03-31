@@ -86,21 +86,23 @@
   # MEMORY
   } else {
     # LOOP THROUGH ARGUMENTS
-    lapply(names(memory), function(z){
-      # MEMORY START INDEX
-      memory_ind <- match(NA, names(memory[[z]]))
-      # MEMORY INDICES TO USE
-      memory_use <- seq(memory_ind,
-                        memory_ind + length(args[[z]]) - 1)
-      names(memory[[z]])[memory_use] <- "DONE"
-      # RESET CYTO_PLOT_MEMORY INDICATOR - ALL DONE
-      if(!any(is.na(names(memory[[z]])))) {
-        names(memory[[z]]) <- NA
+    lapply(
+      names(memory), 
+      function(z) {
+        # MEMORY START INDEX
+        memory_ind <- match(NA, names(memory[[z]]))
+        # MEMORY INDICES TO USE
+        memory_use <- seq(memory_ind, memory_ind + length(args[[z]]) - 1)
+        names(memory[[z]])[memory_use] <- "DONE"
+        # RESET CYTO_PLOT_MEMORY INDICATOR - ALL DONE
+        if(!any(is.na(names(memory[[z]])))) {
+          names(memory[[z]]) <- NA
+        }
+        .cyto_plot_args_save(memory)
+        # LIST OF CYTO_PLOT ARGUMENT LISTS
+        args[[z]] <<- memory[[z]][memory_use]
       }
-      .cyto_plot_args_save(memory)
-      # LIST OF CYTO_PLOT ARGUMENT LISTS
-      args[[z]] <<- memory[[z]][memory_use]
-    })
+    )
     # UPDATED ARGUMENTS
     return(args)
   }

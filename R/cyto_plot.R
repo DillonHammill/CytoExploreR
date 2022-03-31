@@ -248,9 +248,6 @@
 #'   Label positions are set on a per gate basis, all samples in the same group
 #'   will have the same label positions. To individually label plots users must
 #'   manually supply the co-ordinates to label_text_x and label_text_y.
-#' @param label_memory logical indicating whether \code{cyto_plot()} should
-#'   remember label co-ordinates when \code{label_position = "manual"} and use
-#'   those co-ordinates when \code{cyto_plot_save()} is called.
 #' @param label_text_x vector of x co-ordinate(s) to manually adjust the
 #'   position plot label(s) on the plot. To interactively position labels set
 #'   either \code{label_text_x} or \code{label_text_y} to "select".
@@ -312,6 +309,10 @@
 #'   default. This argument is only required for custom layouts which result in
 #'   pages with empty panels that require a header, because cyto_plot() only
 #'   adds headers to complete pages.
+#' @param memory logical indicating whether \code{cyto_plot()} should remember
+#'   label co-ordinates when \code{label_position = "manual"} and use those
+#'   co-ordinates when \code{cyto_plot_save()} is called, set to TRUE by
+#'   default.
 #' @param seed numeric passed to \code{\link{set.seed}} to ensure that the same
 #'   sampling is applied with each \code{\link{cyto_plot}} call, set to an
 #'   arbitrary numeric by default. This behaviour can be turned off by setting
@@ -441,7 +442,6 @@ cyto_plot <- function(x,
                       label_text,
                       label_stat,
                       label_position = "auto",
-                      label_memory = FALSE,
                       label_text_x = NA,
                       label_text_y = NA,
                       label_text_font = 2,
@@ -465,6 +465,7 @@ cyto_plot <- function(x,
                       header_text_size = 1,
                       header_text_col = "black",
                       page = FALSE,
+                      memory = TRUE,
                       seed = 42,
                       ...) {
   
@@ -831,6 +832,13 @@ cyto_plot <- function(x,
     oma = oma
   )
   
+  # RESET LABEL MEMORY
+  if(cyto_option("cyto_plot_method") == "cytoset" & 
+     !cyto_option("cyto_plot_save") & !memory) {
+    cyto_plot_memory_reset()
+  }
+  args <- args[!names(args) %in% "memory"]
+  
   # REMOVE LAYOUT FROM ARGUMENTS - CANNOT SPLIT BELOW
   args <- args[!names(args) %in% c("layout")]
   
@@ -847,11 +855,6 @@ cyto_plot <- function(x,
     return(lapply(args, `[[`, z))
   })
   
-  # RESET LABEL MEMORY
-  if(!label_memory) {
-    .cyto_plot_args_remove()
-  }
-  
   # if(cyto_option("cyto_plot_method") == "cytoset" & 
   #    !cyto_option("cyto_plot_save")) {
   #   .cyto_plot_args_remove()
@@ -867,17 +870,23 @@ cyto_plot <- function(x,
   
   # ADD PLOTS 
   cnt <- 0
-  memory <- list()
+  m <- list()
   plots <- lapply(
     seq_along(args),
     function(z){
       
-      #  PLOT COUNTER
+      # PLOT COUNTER
       cnt <<- cnt + 1
       
       # PLOT ARGUMENTS
       ARGS <- args[[z]]
       class(ARGS) <- "cyto_plot"
+      
+      # RESORT TO AUTO LABEL POSITIONS
+      if(cyto_option("cyto_plot_save") & !memory) {
+        print("HEH")
+        ARGS$label_position <- "auto"
+      }
       
       # HISTOGRAMS -------------------------------------------------------------
       
@@ -938,15 +947,17 @@ cyto_plot <- function(x,
         label_args <- c("label_text_x", "label_text_y")
         lapply(
           label_args, 
-          function(arg){
+          function(arg) {
             arg_ind <- which(is.na(ARGS[[arg]]))
-            ARGS[[arg]][arg_ind] <<- memory[[1]][[arg]][arg_ind]
+            ARGS[[arg]][arg_ind] <<- m[[1]][[arg]][arg_ind]
           }
         )
       }
       
       # INHERIT LABEL CO-ORDINATES WHEN SAVING
-      if(cyto_option("cyto_plot_save") & label_memory) {
+      if(cyto_option("cyto_plot_save") & 
+         memory & 
+         ARGS$label_position == "manual") {
         ARGS <- .cyto_plot_args_inherit(ARGS)
       }
       
@@ -958,7 +969,7 @@ cyto_plot <- function(x,
       # PLOT MEMORY ------------------------------------------------------------
       
       # RECORD LABEL CO-ORDINATES
-      memory[[z]] <<- ARGS[c("label_text_x", "label_text_y")]
+      m[[z]] <<- ARGS[c("label_text_x", "label_text_y")]
       
       # GRAPHICS DEVICE --------------------------------------------------------
       
@@ -1012,21 +1023,25 @@ cyto_plot <- function(x,
   # SAVE MEMORY ----------------------------------------------------------------
   
   # REMEMBER LABEL CO-ORDINATES
-  if(label_memory) {
+  if(memory) {
     # COMBINE MEMORY
-    memory <- structure(
-      lapply(names(memory[[1]]), function(z){
-        m <- LAPPLY(memory, `[[`, z)
-        names(m) <- rep(NA, length(m))
-        return(m)
-      }), names = names(memory[[1]])
+    m <- structure(
+      lapply(
+        names(m[[1]]), 
+        function(z){
+          m <- LAPPLY(m, `[[`, z)
+          names(m) <- rep(NA, length(m))
+          return(m)
+        }
+      ), 
+      names = names(m[[1]])
     )
     # UPDATE MEMORY
     if(!cyto_option("cyto_plot_save")) {
       cyto_plot_memory <- .cyto_plot_args_recall()
       # NO MEMORY
       if(is.null(cyto_plot_memory)) {
-        .cyto_plot_args_save(memory)
+        .cyto_plot_args_save(m)
       } else {
         .cyto_plot_args_save(
           structure(
@@ -1034,7 +1049,7 @@ cyto_plot <- function(x,
               names(cyto_plot_memory), 
               function(q) {
                 c(cyto_plot_memory[[q]],
-                  memory[[q]])
+                  m[[q]])
               }
             ), 
             names = names(cyto_plot_memory)

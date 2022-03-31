@@ -91,7 +91,6 @@ cyto_plot(
   label_text,
   label_stat,
   label_position = "auto",
-  label_memory = FALSE,
   label_text_x = NA,
   label_text_y = NA,
   label_text_font = 2,
@@ -115,6 +114,7 @@ cyto_plot(
   header_text_size = 1,
   header_text_col = "black",
   page = FALSE,
+  memory = TRUE,
   seed = 42,
   ...
 )
@@ -450,10 +450,6 @@ Label positions are set on a per gate basis, all samples in the same group
 will have the same label positions. To individually label plots users must
 manually supply the co-ordinates to label_text_x and label_text_y.}
 
-\item{label_memory}{logical indicating whether \code{cyto_plot()} should
-remember label co-ordinates when \code{label_position = "manual"} and use
-those co-ordinates when \code{cyto_plot_save()} is called.}
-
 \item{label_text_x}{vector of x co-ordinate(s) to manually adjust the
 position plot label(s) on the plot. To interactively position labels set
 either \code{label_text_x} or \code{label_text_y} to "select".}
@@ -537,6 +533,11 @@ a new page is required after constructing the plot(s), set to FALSE by
 default. This argument is only required for custom layouts which result in
 pages with empty panels that require a header, because cyto_plot() only
 adds headers to complete pages.}
+
+\item{memory}{logical indicating whether \code{cyto_plot()} should remember
+label co-ordinates when \code{label_position = "manual"} and use those
+co-ordinates when \code{cyto_plot_save()} is called, set to TRUE by
+default.}
 
 \item{seed}{numeric passed to \code{\link{set.seed}} to ensure that the same
 sampling is applied with each \code{\link{cyto_plot}} call, set to an

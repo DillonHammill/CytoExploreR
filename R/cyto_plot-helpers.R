@@ -1483,8 +1483,11 @@ cyto_plot_custom <- function(...) {
 #' @export
 cyto_plot_complete <- function(...) {
   
+  # TODO: REMOVE SAVED ARGUMENTS?
+  
   # CLOSE DEVICE (not RStudioGD/X11/quartz)
   if (cyto_option("cyto_plot_save")) {
+    # CLOSE GRAPHICS DEVICE
     if(!any(LAPPLY(
       c("RStudio", "windows", "x11", "quartz", "cairo"), function(z){
       grepl(
@@ -1495,13 +1498,14 @@ cyto_plot_complete <- function(...) {
     }))) {
       dev.off()
     }
+    # RESET MEMORY
+    cyto_plot_memory_reset()
   }
   
   # RESET CYTO_PLOT() PROGRESS BAR
   pb <- cyto_option("CytoExploreR_progress")
   if(!is.null(pb)) {
-    if(.grepl("^cyto_plot", names(pb)) |
-       .grepl("^compiling", names(pb))) {
+    if(.grepl("^cyto_plot", names(pb))) {
       cyto_option("CytoExploreR_progress", NULL)
     }
   }
@@ -1520,6 +1524,24 @@ cyto_plot_complete <- function(...) {
   
   # RESET SAVED PARAMETERS
   cyto_plot_par(..., reset = TRUE)
+}
+
+## CYTO_PLOT_MEMORY_RESET ------------------------------------------------------
+
+#' Reset cyto_plot() memory
+#' 
+#' An accessory function to reset \code{cyto_plot()} argument history.
+#' 
+#' @examples 
+#' \dontrun{
+#' cyto_plot_memory_reset()
+#' }
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @export
+cyto_plot_memory_reset <- function() {
+  .cyto_plot_args_remove()
 }
 
 ## CYTO_PLOT_THEME -------------------------------------------------------------
