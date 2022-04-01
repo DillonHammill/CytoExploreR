@@ -2915,6 +2915,9 @@
                            key_title_text_size = 1,
                            key_title_text_col = "black",
                            key_title_text_col_alpha = 1,
+                           key_hist_line_type = 1,
+                           key_hist_line_width = 1.5,
+                           key_hist_line_col = "black",
                            axes_trans = NA) {
   
   # LOGICAL KEY
@@ -3070,6 +3073,47 @@
         )
       }
     )
+    # ADD DENSITY TRACE
+    if(!.all_na(point_col[1])) {
+      # DATA
+      exprs <- cyto_exprs(
+        x[[1]],
+        channels = point_col,
+        drop = TRUE
+      )[[1]]
+      # NEED ENOUGH EVENTS
+      if(length(exprs) >= 2) {
+        # COMPUTE DENSITY
+        d <- cyto_stat_density(
+          exprs,
+          smooth = 1.5
+        )
+        # MAP DENSITY TO Y AXIS
+        ind <- which(
+          d$x >= min(key_scale$range) &
+            d$x <= max(key_scale$range)
+        )
+        # ADD DENSITY TRACE
+        if(length(ind) > 0) {
+          d$x <- d$x[ind]
+          d$y <- d$y[ind]
+          # RESCALE
+          d$x <- min(key_y) + 
+            ((d$x - min(d$x)) / (diff(range(d$x)))) * diff(range(key_y))
+          d$y <- min(key_x) + 
+            ((d$y - min(d$y)) / (diff(range(d$y)))) * diff(range(key_x))
+          # ADD DENSITY LINE TO KEY
+          lines(
+            d$y,
+            d$x,
+            col = key_hist_line_col,
+            lty = key_hist_line_type,
+            lwd = key_hist_line_width,
+            xpd = TRUE
+          )
+        }
+      }
+    }
   }
 
   invisible(NULL)

@@ -219,6 +219,13 @@
 #'   \code{"black"} by default.
 #' @param key_title_text_col_alpha numeric [0, 1] to control the transparency of
 #'   the key title text, set to 1 by default to remove transparency.
+#' @param key_hist_line_type line type(s) to use for histogram borders in the
+#'   key, set to 1 by default to use solid lines. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param key_hist_line_width numeric to control line width(s) for histogram
+#'   borders lines, set to 1 by default.
+#' @param key_hist_line_col colour to use for the histogram border in the key,
+#'   set to \code{"black"} by default.
 #' @param gate_line_type integer [0,6] to control the line type of gates, set to
 #'   \code{1} to draw solid lines by default. See
 #'   \code{\link[graphics:par]{lty}} for alternatives.
@@ -433,6 +440,9 @@ cyto_plot <- function(x,
                       key_title_text_size = 1,
                       key_title_text_col = "black",
                       key_title_text_col_alpha = 1,
+                      key_line_type = 1,
+                      key_line_width = 1.5,
+                      key_line_col = "black",
                       gate_line_type = 1,
                       gate_line_width = 2.5,
                       gate_line_col = "red",

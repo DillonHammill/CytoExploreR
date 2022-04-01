@@ -82,6 +82,9 @@ cyto_plot(
   key_title_text_size = 1,
   key_title_text_col = "black",
   key_title_text_col_alpha = 1,
+  key_line_type = 1,
+  key_line_width = 1.5,
+  key_line_col = "black",
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
@@ -545,6 +548,16 @@ arbitrary numeric by default. This behaviour can be turned off by setting
 this argument to NULL.}
 
 \item{...}{not currently in use.}
+
+\item{key_hist_line_type}{line type(s) to use for histogram borders in the
+key, set to 1 by default to use solid lines. See
+\code{\link[graphics:par]{lty}} for alternatives.}
+
+\item{key_hist_line_width}{numeric to control line width(s) for histogram
+borders lines, set to 1 by default.}
+
+\item{key_hist_line_col}{colour to use for the histogram border in the key,
+set to \code{"black"} by default.}
 }
 \value{
 a list containing the recorded plots.

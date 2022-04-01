@@ -156,6 +156,13 @@
 #'   \code{"black"} by default.
 #' @param key_title_text_col_alpha numeric [0, 1] to control the transparency of
 #'   the key title text, set to 1 by default to remove transparency.
+#' @param key_hist_line_type line type(s) to use for histogram borders in the
+#'   key, set to 1 by default to use solid lines. See
+#'   \code{\link[graphics:par]{lty}} for alternatives.
+#' @param key_hist_line_width numeric to control line width(s) for histogram
+#'   borders lines, set to 1 by default.
+#' @param key_hist_line_col colour to use for the histogram border in the key,
+#'   set to \code{"black"} by default.
 #' @param grid logical indicating whether to include grid lines in the plot
 #'   background, set to TRUE by default. Alternatively, users can supply a
 #'   integer to indicate the number of equally spaced quantiles to used for the
@@ -258,6 +265,9 @@ cyto_plot_empty <- function(x,
                             key_title_text_size = 1,
                             key_title_text_col = "black",
                             key_title_text_col_alpha = 1,
+                            key_hist_line_type = 1,
+                            key_hist_line_width = 1.5,
+                            key_hist_line_col = "black",
                             grid = TRUE,
                             grid_line_type = 1,
                             grid_line_width = 1,
@@ -709,7 +719,10 @@ cyto_plot_empty <- function(x,
       key_title_text_size = key_title_text_size,
       key_title_text_font = key_title_text_font,
       key_title_text_col = key_title_text_col,
-      key_title_text_col_alpha = key_title_text_col_alpha
+      key_title_text_col_alpha = key_title_text_col_alpha,
+      key_hist_line_type = key_hist_line_type,
+      key_hist_line_width = key_hist_line_width,
+      key_hist_line_col = key_hist_line_col
     )
   }
   
@@ -2173,6 +2186,9 @@ cyto_plot_theme_args <- function() {
     "key_title_text_font",
     "key_title_text_size",
     "key_title_text_col",
-    "key_title_text_col_alpha"
+    "key_title_text_col_alpha",
+    "key_hist_line_type",
+    "key_hist_line_width",
+    "key_hist_line_col"
   )
 }
