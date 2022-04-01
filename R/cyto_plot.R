@@ -884,7 +884,6 @@ cyto_plot <- function(x,
       
       # RESORT TO AUTO LABEL POSITIONS
       if(cyto_option("cyto_plot_save") & !memory) {
-        print("HEH")
         ARGS$label_position <- "auto"
       }
       

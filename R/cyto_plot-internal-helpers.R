@@ -1696,24 +1696,23 @@
         ),
         length(x)
       )
-      label_text <- LAPPLY(
-        seq_along(label_text),
-        function(z) {
-          if(!.all_na(label_stat[z])) {
-            if(.empty(label_text[z])) {
-              return(pops[z])
-            } else {
-              return(label_text[z])
-            }
-          } else {
-            return(NA)
-          }
-        }
-      )
-    # REMOVE LABEL_TEXT
     } else {
-      label_text[LAPPLY(label_text, ".empty")] <- NA
+      pops <- names(x)
     }
+    label_text <- LAPPLY(
+      seq_along(label_text),
+      function(z) {
+        if(!.all_na(label_stat[z])) {
+          if(.empty(label_text[z])) {
+            return(pops[z])
+          } else {
+            return(label_text[z])
+          }
+        } else {
+          return(NA)
+        }
+      }
+    )
   }
   
   # LABEL
