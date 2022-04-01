@@ -508,8 +508,24 @@ cyto_gate_draw <- function(x,
   # COMBINE NEW ENTRIES WITH EXISTING ONES
   gt <- rbind(gt, pops)
   
-  # SAVE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt, gatingTemplate)
+  # SAVE UPDATED GATINGTEMPLATE - IN CASE OF WRITING ERROR - SYNC GATINGSET
+  tryCatch(
+    cyto_gatingTemplate_write(
+      gt,
+      gatingTemplate
+    ),
+    error = function(e) {
+      lapply(
+        unlist(alias),
+        function(z) {
+          gs_pop_remove(
+            gs,
+            z
+          )
+        }
+      )
+    }
+  )
   
   # RETURN GATINGSET
   return(x)
