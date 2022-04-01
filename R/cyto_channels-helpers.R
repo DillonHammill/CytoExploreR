@@ -15,6 +15,8 @@
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
+#' @param ignore.case logical indicating whether case insensitive channel
+#'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -50,6 +52,7 @@ cyto_channels <- function(x,
                           select = NULL,
                           exclude = NULL,
                           append = FALSE,
+                          ignore.case = TRUE,
                           ...){
   
   # LIST
@@ -74,12 +77,14 @@ cyto_channels <- function(x,
       LAPPLY(
         select, 
         function(z){
+          # EXACT MATCH
+          match(z, channels)
           which(
             suppressWarnings(
-              grepl(
+              .grepl(
                 z, 
                 channels, 
-                ignore.case = TRUE,
+                ignore.case = ignore.case,
                 ...
               )
             )
@@ -94,10 +99,12 @@ cyto_channels <- function(x,
   if(!is.null(exclude)){
     for(z in exclude){
       channels <- channels[!suppressWarnings(
-        grepl(z, 
-              channels, 
-              ignore.case = TRUE,
-              ...)
+        .grepl(
+          z, 
+          channels, 
+          ignore.case = ignore.case,
+          ...
+        )
       )]
     }
   }
@@ -185,6 +192,8 @@ cyto_channels <- function(x,
 #' @param append logical indicating whether the name of the channel should be
 #'   appended to the marker names in the form \code{<marker> channel}, set to
 #'   FALSE by default.
+#' @param ignore.case logical indicating whether case insensitive channel
+#'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -223,6 +232,7 @@ cyto_markers <- function(x,
                          select = NULL,
                          exclude = NULL,
                          append = FALSE,
+                         ignore.case = TRUE,
                          ...) {
   
   # LIST
@@ -256,18 +266,18 @@ cyto_markers <- function(x,
       ind <- unique(LAPPLY(select, function(z){
         which(
           suppressWarnings(
-            grepl(
+            .grepl(
               z,
               markers,
-              ignore.case = TRUE,
+              ignore.case = ignore.case,
               ...
             )
           ) |
           suppressWarnings(
-            grepl(
+            .grepl(
               z, 
               names(markers),
-              ignore.case = TRUE,
+              ignore.case = ignore.case,
               ...
             )
           )
@@ -280,14 +290,21 @@ cyto_markers <- function(x,
     if(!is.null(exclude)){
       # EXCLUDE
       for(z in exclude) {
-        markers <- markers[!(suppressWarnings(grepl(z, 
-                                                    markers,
-                                                    ignore.case = TRUE,
-                                                    ...)) |
-                               suppressWarnings(grepl(z,
-                                                      names(markers),
-                                                      ignore.case = TRUE,
-                                                      ...)))]
+        markers <- markers[
+          !(suppressWarnings(
+            .grepl(
+              z, 
+              markers,
+              ignore.case = ignore.case,
+              ...
+            )
+          ) | suppressWarnings(
+            .grepl(z,
+            names(markers),
+            ignore.case = ignore.case,
+            ...
+          )
+        ))]
       }
     }
     # APPEND
@@ -449,6 +466,8 @@ cyto_fluor_channels <- function(x,
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param ignore.case logical indicating whether case insensitive channel
+#'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -472,6 +491,7 @@ cyto_channels_extract <- function(x,
                                   channels, 
                                   skip = NULL,
                                   plot = FALSE,
+                                  ignore.case = TRUE,
                                   ...) {
   
   # CHANNELS
@@ -484,7 +504,7 @@ cyto_channels_extract <- function(x,
   res <- c()
   for(z in seq_along(channels)) {
     # SKIP
-    if(any(grepl(channels[z], skip, ignore.case = TRUE, ...))) {
+    if(any(.grepl(channels[z], skip, ignore.case = ignore.case, ...))) {
       res <- c(res, channels[z])
     # EXACT MARKER MATCH
     } else if(channels[z] %in% markers) {
@@ -495,26 +515,30 @@ cyto_channels_extract <- function(x,
           names = markers[match(channels[z], markers)]
         )
       )
-      # EXACT CHANNEL MATCH  
+    # EXACT CHANNEL MATCH  
     } else if(channels[z] %in% chans) {
       res <- c(res, chans[match(channels[z], chans)])
-      # PARTIAL OR NO MATCH
+    # PARTIAL OR NO MATCH
     } else {
       # PARTIAL MATCHES
       marker_ind <- suppressWarnings(
         which(
-          grepl(channels[z],
-                markers,
-                ignore.case = TRUE,
-                ...)
+          .grepl(
+            channels[z],
+            markers,
+            ignore.case = ignore.case,
+            ...
+          )
         )
       )
       channel_ind <- suppressWarnings(
         which(
-          grepl(channels[z],
-                chans,
-                ignore.case = TRUE,
-                ...)
+          .grepl(
+            channels[z],
+            chans,
+            ignore.case = ignore.case,
+            ...
+          )
         )
       )
       # PARTIAL MARKER MATCH
@@ -579,6 +603,8 @@ cyto_channels_extract <- function(x,
 #' @param plot logical indicating whether the channels will be used to construct
 #'   a plot, set to FALSE by default. If set to TRUE an additional check will be
 #'   performed to ensure that only 1 or 2 \code{channels} are supplied.
+#' @param ignore.case logical indicating whether case insensitive channel
+#'   matches should be returned, set to TRUE bu default.
 #' @param ... additional arguments passed to \code{\link[base:grep]{grepl}} for
 #'   character matching. For exact character string matching to override the
 #'   default which ignores character case, set \code{fixed} to TRUE.
@@ -605,6 +631,7 @@ cyto_markers_extract <- function(x,
                                  skip = NULL,
                                  append = FALSE,
                                  plot = FALSE,
+                                 ignore.case = TRUE,
                                  ...) {
   
   # MARKERS
@@ -617,7 +644,7 @@ cyto_markers_extract <- function(x,
   res <- c()
   for(z in seq_along(channels)) {
     # SKIP
-    if(any(grepl(channels[z], skip, ignore.case = TRUE, ...))) {
+    if(any(.grepl(channels[z], skip, ignore.case = ignore.case, ...))) {
       res <- c(res, channels[z])
       names(res[length(res)]) <- channels[z] # append
     # EXACT MARKER MATCH
@@ -631,18 +658,22 @@ cyto_markers_extract <- function(x,
       # PARTIAL MATCHES
       marker_ind <- suppressWarnings(
         which(
-          grepl(channels[z],
-                markers,
-                ignore.case = TRUE,
-                ...)
+          .grepl(
+            channels[z],
+            markers,
+            ignore.case = ignore.case,
+            ...
+          )
         )
       )
       channel_ind <- suppressWarnings(
         which(
-          grepl(channels[z],
-                names(markers),
-                ignore.case = TRUE,
-                ...)
+          grepl(
+            channels[z],
+            names(markers),
+            ignore.case = ignore.case,
+            ...
+          )
         )
       )
       
@@ -663,18 +694,18 @@ cyto_markers_extract <- function(x,
             )
           )
           # CHANNEL UNASSIGNED MARKER - PARTIAL
-        } else if(any(grepl(channels[z], chans, ignore.case = TRUE, ...))) {
+        } else if(any(.grepl(channels[z], chans, ignore.case = ignore.case, ...))) {
           res <- c(
             res,
             structure(
-              chans[which(grepl(channels[z],
-                                chans,
-                                ignore.case = TRUE,
-                                ...))],
-              names = chans[which(grepl(channels[z],
-                                        chans,
-                                        ignore.case = TRUE,
-                                        ...))])
+              chans[which(.grepl(channels[z],
+                                 chans,
+                                 ignore.case = ignore.case,
+                                 ...))],
+              names = chans[which(.grepl(channels[z],
+                                         chans,
+                                         ignore.case = ignore.case,
+                                         ...))])
           )
           # INVALID CHANNEL/MARKER
         } else {

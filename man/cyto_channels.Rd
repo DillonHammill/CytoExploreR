@@ -4,7 +4,14 @@
 \alias{cyto_channels}
 \title{Extract channel names}
 \usage{
-cyto_channels(x, select = NULL, exclude = NULL, append = FALSE, ...)
+cyto_channels(
+  x,
+  select = NULL,
+  exclude = NULL,
+  append = FALSE,
+  ignore.case = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowWorkspace:cytoframe]{cytoframe}},
@@ -19,6 +26,9 @@ cyto_channels(x, select = NULL, exclude = NULL, append = FALSE, ...)
 \item{append}{logical indicating whether the name of the channel should be
 appended to the marker names in the form \code{<marker> channel}, set to
 FALSE by default.}
+
+\item{ignore.case}{logical indicating whether case insensitive channel
+matches should be returned, set to TRUE bu default.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the

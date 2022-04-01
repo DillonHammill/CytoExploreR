@@ -10,6 +10,7 @@ cyto_markers_extract(
   skip = NULL,
   append = FALSE,
   plot = FALSE,
+  ignore.case = TRUE,
   ...
 )
 }
@@ -33,6 +34,9 @@ FALSE by default.}
 \item{plot}{logical indicating whether the channels will be used to construct
 a plot, set to FALSE by default. If set to TRUE an additional check will be
 performed to ensure that only 1 or 2 \code{channels} are supplied.}
+
+\item{ignore.case}{logical indicating whether case insensitive channel
+matches should be returned, set to TRUE bu default.}
 
 \item{...}{additional arguments passed to \code{\link[base:grep]{grepl}} for
 character matching. For exact character string matching to override the

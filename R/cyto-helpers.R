@@ -326,7 +326,7 @@ cyto_export <- function(x,
 #'   in \code{select} and \code{exclude} to control whether case insensitive
 #'   matching is required, set to TRUE by default.
 #' @param ... additional arguments passed to
-#'   \code{\link{load_cytoset_from_fcs()}}.
+#'   \code{\link[flowWorkspace:load_cytoset_from_fcs]{load_cytoset_from_fcs()}}.
 #'
 #' @return object of class \code{\link[flowWorkspace:cytoset]{cytoset}} or
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.

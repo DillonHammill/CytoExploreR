@@ -1697,7 +1697,11 @@
         length(x)
       )
     } else {
-      pops <- names(x)
+      if(!is.null(names(x))) {
+        pops <- names(x)
+      } else {
+        pops <- rep(NA, length(x))
+      }
     }
     label_text <- LAPPLY(
       seq_along(label_text),
