@@ -198,14 +198,17 @@ cyto_stat_mode <- function(x,
       ...
     )
     return(
-      c(
-        "mode" = round(
-          kde$x[kde$y == max(kde$y)],
-          round
+      if(.all_na(kde)) {
+        c("mode" = NA)
+      } else {
+        c(
+          "mode" = round(
+            kde$x[kde$y == max(kde$y)],
+            round
+          )
         )
-      )
+      }
     )
-    
   # MATRIX
   } else {
     # SORT LIMITS

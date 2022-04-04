@@ -2148,11 +2148,12 @@
               } else {
                 # RANGE
                 rng <- suppressMessages(
-                  .cyto_plot_axes_limits(pops[[z]][[y]],
-                                         channels = channels[1],
-                                         axes_limits = axes_limits,
-                                         buffer = 0,
-                                         anchor = FALSE
+                  .cyto_plot_axes_limits(
+                    pops[[z]][[y]],
+                    channels = channels[1],
+                    axes_limits = axes_limits,
+                    buffer = 0,
+                    anchor = FALSE
                   )[, channels]
                 )
                 # UNIMODAL - 50% RANGE
@@ -2195,13 +2196,15 @@
                 text_x[y] <- mean(c(xmin, xmax))
               } else {
                 # MODE
-                text_x[y] <- cyto_apply(pops[[z]][[y]],
-                                        "cyto_stat_mode",
-                                        input = "matrix",
-                                        channels = channels[1],
-                                        smooth = hist_smooth,
-                                        bins = hist_bins,
-                                        inverse = FALSE)[, 1]
+                text_x[y] <- cyto_apply(
+                  pops[[z]][[y]],
+                  "cyto_stat_mode",
+                  input = "matrix",
+                  channels = channels[1],
+                  smooth = hist_smooth,
+                  bins = hist_bins,
+                  inverse = FALSE
+                )[, 1]
               }
             }
           # X COORD - MANUALLY SUPPLIED
@@ -2219,18 +2222,20 @@
               if (cyto_apply(pops[[z]][[y]],
                              "nrow",
                              input = "matrix",
-                             copy = FALSE)[, 1] == 0) {
+                             copy = FALSE)[, 1] < 2) {
                 # RANGE CENTER
                 text_y[y] <- mean(c(ymin, ymax))
               } else {
                 # MODE
-                text_y[y] <- cyto_apply(pops[[z]][[y]],
-                                        "cyto_stat_mode",
-                                        input = "matrix",
-                                        channels = channels[2],
-                                        smooth = hist_smooth,
-                                        bins = hist_bins,
-                                        inverse = FALSE)[, 1]
+                text_y[y] <- cyto_apply(
+                  pops[[z]][[y]],
+                  "cyto_stat_mode",
+                  input = "matrix",
+                  channels = channels[2],
+                  smooth = hist_smooth,
+                  bins = hist_bins,
+                  inverse = FALSE
+                )[, 1]
               }
             }
           # Y COORD - MANUALLY SUPPLIED
@@ -2256,12 +2261,18 @@
   })
   
   # UPDATE LABEL_COORDS
-  label_text_x <- lapply(label_text_xy, function(z){
-    unlist(z[, "x", drop = TRUE])
-  })
-  label_text_y <- lapply(label_text_xy, function(z){
-    unlist(z[, "y", drop = TRUE])
-  })
+  label_text_x <- lapply(
+    label_text_xy, 
+    function(z){
+      unlist(z[, "x", drop = TRUE])
+    }
+  )
+  label_text_y <- lapply(
+    label_text_xy, 
+    function(z){
+      unlist(z[, "y", drop = TRUE])
+    }
+  )
   
   # OFFSET LABEL CO-ORDINATES --------------------------------------------------
   
