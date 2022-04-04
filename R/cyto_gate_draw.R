@@ -238,12 +238,6 @@ cyto_gate_draw <- function(x,
       cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
       gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
     }
-    # CHECK ALIAS AGAINST PARENT
-    if(any(parent %in% alias)) {
-      stop(
-        "Cannot gate population(s) with the same name as 'parent'!"
-      )
-    }
   }
   
   # TYPE -> LIST
@@ -259,6 +253,14 @@ cyto_gate_draw <- function(x,
     stop("Supply the name(s) for the gated population(s) to 'alias'.")
   # ALIAS -> LIST
   } else {
+    # CHECK ALIAS AGAINST PARENT
+    if(cyto_class(x, "GatingSet")) {
+      if(parent %in% alias) {
+        stop(
+          "Cannot gate population(s) with the same name as 'parent'!"
+        )
+      }
+    }
     alias <- .cyto_gate_alias(alias, type)
   }
   
