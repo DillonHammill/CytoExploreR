@@ -238,6 +238,12 @@ cyto_gate_draw <- function(x,
       cyto_gatingTemplate_create(gatingTemplate, active = TRUE)
       gt <- cyto_gatingTemplate_read(gatingTemplate, data.table = TRUE)
     }
+    # CHECK ALIAS AGAINST PARENT
+    if(any(parent %in% alias)) {
+      stop(
+        "Cannot gate population(s) with the same name as 'parent'!"
+      )
+    }
   }
   
   # TYPE -> LIST
@@ -409,18 +415,24 @@ cyto_gate_draw <- function(x,
 
   # WRAP GATES AS FILTERS LIST
   gate_list <- structure(
-    lapply(seq_along(gate_list), function(z){
-      gates <- structure(
-        lapply(seq_along(gate_list[[z]]), function(y){
-          if(!cyto_class(gate_list[[z]][[y]], "quadGate")) {
-            filters(gate_list[[z]][y])
-          } else {
-            gate_list[[z]][[y]]
-          }
-        }),
+    lapply(
+      seq_along(gate_list),
+      function(z){
+        gates <- structure(
+          lapply(
+            seq_along(gate_list[[z]]),
+            function(y) {
+              if(!cyto_class(gate_list[[z]][[y]], "quadGate")) {
+                filters(gate_list[[z]][y])
+              } else {
+                gate_list[[z]][[y]]
+              }
+            }
+          ),
         names = names(gate_list[[z]])
-      )
-    }), 
+        )
+      }
+    ), 
     names = names(gate_list)
   )
   
@@ -518,6 +530,7 @@ cyto_gate_draw <- function(x,
       lapply(
         unlist(alias),
         function(z) {
+          # TODO: QUADRANT GATES? NAMES ARGUMENT?
           gs_pop_remove(
             gs,
             z

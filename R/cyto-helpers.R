@@ -6405,7 +6405,7 @@ cyto_nodes_convert <- function(x,
           }
         )
       )
-      # AUTO NODE
+    # AUTO NODE
     } else if (anchor %in% nodes_auto) {
       anchor_match <- which(
         LAPPLY(
@@ -6415,7 +6415,7 @@ cyto_nodes_convert <- function(x,
           }
         )
       )
-      # FULL NODE
+    # FULL NODE
     } else if (anchor %in% nodes_full) {
       anchor_match <- which(
         LAPPLY(
