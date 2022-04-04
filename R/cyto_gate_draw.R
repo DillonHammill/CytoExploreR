@@ -257,7 +257,7 @@ cyto_gate_draw <- function(x,
     if(cyto_class(x, "GatingSet")) {
       if(parent %in% alias) {
         stop(
-          "Cannot gate population(s) with the same name as 'parent'!"
+          "Cannot gate population(s) with the same name(s) as 'parent'!"
         )
       }
     }
