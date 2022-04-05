@@ -10,6 +10,7 @@ cyto_nodes_kin(
   type = "children",
   path = "auto",
   hidden = TRUE,
+  terminal = FALSE,
   ...
 )
 }
@@ -29,6 +30,9 @@ relationship required for each of the supplied nodes.}
 
 \item{hidden}{logical indicating whether hidden nodes should be included in
 the search for relatives, set to TRUE by default.}
+
+\item{terminal}{logical to indicate whether only the relative with terminal
+nodes should be returned, set to FALSE by default.}
 
 \item{...}{not in use.}
 }

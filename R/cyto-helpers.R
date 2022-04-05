@@ -6676,6 +6676,8 @@ cyto_nodes_ancestor <- function(x,
 #'   "auto" format, set to "auto" by default.
 #' @param hidden logical indicating whether hidden nodes should be included in
 #'   the search for relatives, set to TRUE by default.
+#' @param terminal logical to indicate whether only the relative with terminal
+#'   nodes should be returned, set to FALSE by default.
 #' @param ... not in use.
 #'
 #' @return the paths of the nodes of relation \code{type} to each of the
@@ -6713,6 +6715,7 @@ cyto_nodes_kin <- function(x,
                            type = "children",
                            path = "auto",
                            hidden = TRUE,
+                           terminal = FALSE,
                            ...) {
   
   # NOTE: HIDDEN NOT SUPPORTED FOR PARENTS IN FLOWWORKSPACE
@@ -6772,6 +6775,23 @@ cyto_nodes_kin <- function(x,
         )
       }
       names(pops) <- rep(node, length(pops))
+      # TERMINAL
+      if(terminal) {
+        pops <- pops[
+          LAPPLY(
+            pops,
+            function(pop) {
+              length(
+                gh_pop_get_children(
+                  gh,
+                  unname(pop),
+                  showHidden = hidden
+                )
+              ) == 0
+            }
+          )
+        ]
+      }
       return(pops)
     }
   )
