@@ -185,44 +185,59 @@
       # GATINGHIERRACHY REQUIRED
       if(!is.null(gh)) {
         # DESCENDANTS
-        if(any(grepl("^descendants", overlay, ignore.case = TRUE))) {
-          overlay <- overlay[!grepl("^descendants", 
-                                    overlay, 
-                                    ignore.case = TRUE)]
-          overlay <- c(
-            overlay, tryCatch(
-              gh_pop_get_descendants(
-                gh,
-               parent,
-                path = "auto"
-              ),
-              error = function(e){
-                return(NA)
-              }
-            )
+        ind <- which(grepl("descendants", overlay, ignore.case = TRUE))
+        if(length(ind) > 0) {
+          # TERMINAL
+          pops <- tryCatch(
+            cyto_nodes_kin(
+              gh,
+              nodes = parent,
+              type = "descendants",
+              terminal = if(grepl("terminal", overlay[ind], ignore.case = TRUE)) {
+                TRUE
+              } else {
+                FALSE
+              },
+              path = "auto"
+            ),
+            error = function(e){
+              return(NA)
+            }
           )
-        } 
-        # CHILDREN
-        if(any(grepl("^children", overlay, ignore.case = TRUE))) {
-          overlay <- overlay[!grepl("^children",
-                                    overlay,
-                                    ignore.case = TRUE)]
-          overlay <- c(
-            overlay, 
-            tryCatch(
-              gh_pop_get_children(
-                gh,
-                parent,
-                path = "auto"
-              ),
-              error = function(e){
-                return(NA)
-              }
-            )
-          )
+          pops <- pops[!is.na(pops)]
         }
+        # EXCLUDE FROM OVERLAY
+        overlay <- c(overlay[-ind], pops)
+        # CHILDREN
+        ind <- which(grepl("children", overlay, ignore.case = TRUE))
+        if(length(ind) > 0) {
+          # TERMINAL
+          pops <- tryCatch(
+            cyto_nodes_kin(
+              gh,
+              nodes = parent,
+              type = "children",
+              terminal = if(grepl("terminal", overlay[ind], ignore.case = TRUE)) {
+                TRUE
+              } else {
+                FALSE
+              },
+              path = "auto"
+            ),
+            error = function(e){
+              return(NA)
+            }
+          )
+          pops <- pops[!is.na(pops)]
+        }
+        # EXCLUDE FROM OVERLAY
+        overlay <- c(overlay[-ind], pops)
         # REMOVE DUPLICATES
         overlay <- unique(overlay)
+        # EMPTY OVERLAY 
+        if(length(overlay) == 0) {
+          overlay <- NA
+        }
         # EXTRACT DATA
         overlay <- structure(
           lapply(overlay, function(z) {

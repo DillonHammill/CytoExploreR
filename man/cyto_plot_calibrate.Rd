@@ -8,6 +8,7 @@ cyto_plot_calibrate(
   x,
   parent = "root",
   channels = NULL,
+  select = NULL,
   type = "quantile",
   probs = c(0.01, 0.95),
   limits = c(NA, NA),
@@ -34,6 +35,10 @@ within the same \code{cyto_plot_calibrate} call will use the same settings
 for \code{type} and \code{probs}. Multiple calls to
 \code{cyto_plot_calibrate} allow for channel-wise control over these
 settings which are stored globally.}
+
+\item{select}{sample selection criteria passed to \code{cyto_select()} to
+extract samples that should be used to calibrate the channels, set to NULL
+by default to calibrate channels using data from all samples.}
 
 \item{type}{indicates the type of calibration to perform, options include
 \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.

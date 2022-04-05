@@ -1792,6 +1792,9 @@ cyto_plot_layout <- function(...){
 #'   for \code{type} and \code{probs}. Multiple calls to
 #'   \code{cyto_plot_calibrate} allow for channel-wise control over these
 #'   settings which are stored globally.
+#' @param select sample selection criteria passed to \code{cyto_select()} to
+#'   extract samples that should be used to calibrate the channels, set to NULL
+#'   by default to calibrate channels using data from all samples.
 #' @param type indicates the type of calibration to perform, options include
 #'   \code{"range"} or \code{"quantile"}, set to \code{"quantile"} by default.
 #'   Range calibration simply uses the full range of values across samples for
@@ -1838,6 +1841,7 @@ cyto_plot_layout <- function(...){
 cyto_plot_calibrate <- function(x,
                                 parent = "root",
                                 channels = NULL,
+                                select = NULL,
                                 type = "quantile",
                                 probs = c(0.01, 0.95),
                                 limits = c(NA, NA),
@@ -1853,6 +1857,14 @@ cyto_plot_calibrate <- function(x,
   # RECALL CALIBRATION SETTINGS - ALL CHANNELS
   cyto_cal <- .cyto_plot_calibrate_recall()
   
+  # SELECT
+  if(!is.null(select)){
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
+
   # CHANNELS
   if(is.null(channels)) {
     channels <- cyto_channels(x)
