@@ -205,9 +205,9 @@
             }
           )
           pops <- pops[!is.na(pops)]
-        }
-        # EXCLUDE FROM OVERLAY
+          # EXCLUDE FROM OVERLAY
         overlay <- c(overlay[-ind], pops)
+        }
         # CHILDREN
         ind <- which(grepl("children", overlay, ignore.case = TRUE))
         if(length(ind) > 0) {
@@ -229,9 +229,9 @@
             }
           )
           pops <- pops[!is.na(pops)]
+          # EXCLUDE FROM OVERLAY
+          overlay <- c(overlay[-ind], pops)
         }
-        # EXCLUDE FROM OVERLAY
-        overlay <- c(overlay[-ind], pops)
         # REMOVE DUPLICATES
         overlay <- unique(overlay)
         # EMPTY OVERLAY 
