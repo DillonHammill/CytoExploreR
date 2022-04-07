@@ -326,7 +326,6 @@ cyto_gate_draw <- function(x,
           } else {
             NA
           },
-          legend = FALSE,
           axes_trans = axes_trans,
           axes_limits = axes_limits,
           title = title[z],
