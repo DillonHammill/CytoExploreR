@@ -9,7 +9,8 @@ cyto_nodes_convert(
   nodes = NULL,
   anchor = NULL,
   path = "auto",
-  hidden = FALSE
+  hidden = FALSE,
+  sort = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ nodes.}
 
 \item{hidden}{logical indicating whether hidden nodes should be included, set
 to FALSE by default.}
+
+\item{sort}{logical indicating whether the returned nodes should be sorted to
+match their order in the gating tree, set to FALSE by default.}
 }
 \value{
 vector of unique paths for each of the supplied nodes.

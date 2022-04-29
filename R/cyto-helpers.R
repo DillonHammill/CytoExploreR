@@ -6350,6 +6350,8 @@ cyto_nodes_check <- function(x,
 #'   "auto" format, set to "auto" by default.
 #' @param hidden logical indicating whether hidden nodes should be included, set
 #'   to FALSE by default.
+#' @param sort logical indicating whether the returned nodes should be sorted to
+#'   match their order in the gating tree, set to FALSE by default.
 #'
 #' @return vector of unique paths for each of the supplied nodes.
 #'
@@ -6360,7 +6362,8 @@ cyto_nodes_convert <- function(x,
                                nodes = NULL,
                                anchor = NULL,
                                path = "auto",
-                               hidden = FALSE) {
+                               hidden = FALSE,
+                               sort = FALSE) {
   
   # TODO: ALLOW DIFFERENT ANCHOR PER NODE 
   
@@ -6547,6 +6550,23 @@ cyto_nodes_convert <- function(x,
       }
     }
   )
+  
+  # SORT NODES
+  if(sort) {
+    nodes <- structure(
+      LAPPLY(
+        nodes,
+        function(node){
+          if(path == "auto") {
+            nodes_auto[match(node, nodes_auto)]
+          } else {
+            nodes_full[match(node, nodes_full)]
+          }
+        }
+      ),
+      names = names(nodes)
+    )
+  }
   
   # RETURN UNIQUE NODES
   return(nodes)
