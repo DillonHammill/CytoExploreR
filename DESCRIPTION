@@ -34,7 +34,7 @@ Imports:
     robustbase,
     rhandsontable (>= 0.3.8),
     shiny,
-    shinythemes,
+    bslib,
     stats,
     tidyr,
     utils,

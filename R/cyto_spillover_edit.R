@@ -97,7 +97,7 @@
 #'   updateCheckboxGroupInput checkboxGroupInput
 #' @importFrom rhandsontable rhandsontable rHandsontableOutput hot_to_r
 #'   renderRHandsontable hot_cols hot_rows
-#' @importFrom shinythemes shinytheme
+#' @importFrom bslib bs_theme
 #' @importFrom rhandsontable %>%
 #' @importFrom stats median
 #' @importFrom graphics lines layout
@@ -357,7 +357,10 @@ cyto_spillover_edit <- function(x,
   app <- shinyApp(
     # USER INTERFACE
     ui <- fluidPage(
-      theme = shinytheme("yeti"),
+      theme = bs_theme(
+        bootswatch = "yeti",
+        version = 3
+      ),
       titlePanel(
         span(
           img(
