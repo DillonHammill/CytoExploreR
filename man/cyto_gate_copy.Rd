@@ -10,6 +10,8 @@ cyto_gate_copy(
   alias = NULL,
   copy = NULL,
   gatingTemplate = NULL,
+  reference = FALSE,
+  hidden = FALSE,
   ...
 )
 }
@@ -18,13 +20,23 @@ cyto_gate_copy(
 
 \item{parent}{name of the parental node to which the gates should be copied.}
 
-\item{alias}{vector of names for the copied gates, must be the same length as
-copy.}
+\item{alias}{vector of new names for the copied gates, must be the same
+length as copy.}
 
-\item{copy}{vector of names to copy to new parent.}
+\item{copy}{vector of uniquely identifiable names of gates to copy to each
+parent. \code{copy} must be distinct from \code{alias} when \code{reference
+= TRUE}.}
 
 \item{gatingTemplate}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the new entries should be saved.}
+
+\item{reference}{logical indicating whether the copied gates should be
+treated as references gates to original gates (i.e. co-ordinates remain in
+sync with the original gates), set to FALSE by default to create separate
+copies of the original gates.}
+
+\item{hidden}{logical to indicate whether the search for nodes to copy should
+include hidden nodes as well, set to FALSE by default.}
 
 \item{...}{not in use.}
 }

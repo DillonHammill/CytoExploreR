@@ -491,11 +491,19 @@ cyto_gate_rename <- function(x,
 #'
 #' @param x object of class \code{GatingSet}.
 #' @param parent name of the parental node to which the gates should be copied.
-#' @param alias vector of names for the copied gates, must be the same length as
-#'   copy.
-#' @param copy vector of names to copy to new parent.
+#' @param alias vector of new names for the copied gates, must be the same
+#'   length as copy.
+#' @param copy vector of uniquely identifiable names of gates to copy to each
+#'   parent. \code{copy} must be distinct from \code{alias} when \code{reference
+#'   = TRUE}.
 #' @param gatingTemplate name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the new entries should be saved.
+#' @param reference logical indicating whether the copied gates should be
+#'   treated as references gates to original gates (i.e. co-ordinates remain in
+#'   sync with the original gates), set to FALSE by default to create separate
+#'   copies of the original gates.
+#' @param hidden logical to indicate whether the search for nodes to copy should
+#'   include hidden nodes as well, set to FALSE by default.
 #' @param ... not in use.
 #'
 #' @return object of class \code{GatingSet} with copied gates applied and update
@@ -513,6 +521,8 @@ cyto_gate_copy <- function(x,
                            alias = NULL,
                            copy = NULL,
                            gatingTemplate = NULL,
+                           reference = FALSE,
+                           hidden = FALSE,
                            ...){
   
   # TODO: CHECK IF GATE ALREADY EXISTS - MESSAGE TO USE CYTO_GATE_EDIT()
@@ -528,18 +538,50 @@ cyto_gate_copy <- function(x,
   if (is.null(parent)) {
     stop("Supply the name of the parent population.")
   } else {
-    parent <- cyto_nodes_convert(x,
-                                 nodes = parent,
-                                 path = "auto")
+    parent <- cyto_nodes_convert(
+      x,
+      nodes = parent,
+      path = "auto",
+      hidden = hidden
+    )
   }
   
-  # ALIAS
+  # SORT NODES TO COPY
   if (is.null(copy)) {
     stop("Supply the name of the reference node to 'copy'.")
   } else {
-    copy <- cyto_nodes_convert(x,
-                               nodes = copy,
-                               path = "auto")
+    # CONVERT TO VALID NODE PATHS
+    copy <- cyto_nodes_convert(
+      x,
+      nodes = copy,
+      path = "auto",
+      sort = FALSE,
+      hidden = hidden
+    )
+    # SORT NODE PATHS
+    copy_ind <- match(
+      copy,
+      cyto_nodes(
+        x,
+        path = "auto",
+        hidden = hidden
+      )
+    )
+    copy <- copy[order(copy_ind)]
+  }
+  
+  # DEFAULT NODE NAMES
+  if(is.null(alias)) {
+    alias <- copy
+  # ALIAS SUPPLIED
+  } else {
+    # NEW NODES
+    if(length(alias) != length(copy)) {
+      stop(
+        "'alias' must be the same length as 'copy'!"
+      )
+    }
+    alias <- alias[order(copy_ind)]
   }
   
   # MISSING GATINGTEMPLATE
@@ -547,40 +589,150 @@ cyto_gate_copy <- function(x,
     gatingTemplate <- cyto_gatingTemplate_active(ask = TRUE)
   }
   
-  # UPDATE GATINGTEMPLATE ------------------------------------------------------
+  # READ GATINGTEMPLATE
+  gt <- cyto_gatingTemplate_read(
+    gatingTemplate,
+    parse = TRUE
+  )
   
-  # NEW ENTRIES
-  gt_entries <- lapply(seq_along(alias), function(z){
-    suppressMessages(
-      gs_add_gating_method(
-        gs = x,
-        parent = parent,
-        alias = alias[z],
-        dims = paste(
-          parameters(
-            gs_pop_get_gate(x, copy[z])[[1]]
-          ),
-          collapse = ","),
-        gating_method = "refGate",
-        gating_args = copy[z]
+  # GATINGTEMPLATE POPULATIONS
+  gt_pops <- lapply(
+    1:nrow(gt),
+    function(z) {
+      cyto_nodes_convert(
+        x,
+        nodes = paste0(
+          gt[z, "parent"],
+          "/",
+          unlist(strsplit(gt[z, "alias"], ","))
+        ),
+        path = "auto",
+        hidden = hidden,
+        sort = FALSE
+      )
+    }
+  )
+    
+  # LOCATE NODES TO COPY IN GATINGTEMPLATE
+  copy_ind <- LAPPLY(
+    copy, 
+    function(z) {
+      m <- NA
+      for(i in seq_along(gt_pops)) {
+        m <- match(z, gt_pops[[i]])
+        if(!is.na(m)) {
+          m <- i
+          break()
+        }
+      }
+      return(m)
+    }
+  )
+  
+  # NODES NOT LOCATED
+  if(any(is.na(copy_ind))) {
+    stop(
+      paste0(
+        "The following node(s) could not be located in the gatingTemplate: \n",
+        paste(
+          copy[is.na(copy_ind)],
+          colapse = "\n"
+        )
       )
     )
-  })
+  }
+  
+  # SPLIT NODES BY GATINGTEMPLATE ENTRIES
+  names(copy) <- copy_ind
+  copy <- split(copy, copy_ind)
+  alias <- split(alias, copy_ind)
+  
+  # UPDATE GATINGTEMPLATE ------------------------------------------------------
+  
+  # COPY NODES TO EACH PARENT
+  gt_entries <- do.call(
+    "rbind",
+    lapply(
+      parent,
+      function(z) {
+        do.call(
+         "rbind",
+          lapply(
+            seq_along(copy),
+            function(w) {
+              # REFERENCE GATE
+              if(reference) {
+                # UNIQUE ALIAS REQUIRED
+                if(all(alias[[w]] == copy[[w]])) {
+                  stop(
+                    paste0(
+                      "'alias' must be distinct from 'copy' to create a ",
+                      "reference gate!"
+                    )
+                  )
+                }
+                # CREATE NEW REFERENCE GATE
+                suppressMessages(
+                  gs_add_gating_method(
+                    gs = x,
+                    parent = z,
+                    alias = paste(
+                      alias[[w]],
+                      collapse = ","
+                    ),
+                    dims = paste(
+                      parameters(
+                        gs_pop_get_gate(
+                          x,
+                          copy[[w]]
+                        )[[1]]
+                      ),
+                      collapse = ","
+                    ),
+                    gating_method = "refGate",
+                    gating_args = copy[[w]]
+                  )
+                )
+              # DEEP COPY
+              } else {
+                # LOCATE EXISTING GATINGTEMPLATE ENTRY
+                gt_pop <- gt[as.numeric(names(copy[[w]][1])), ]
+                # TODO: FIX NAMES OF GATES IN GATING_ARGS FOR CYTO_GATE_DRAW()?
+                # COPY GATING ENTRY
+                suppressMessages(
+                  gs_add_gating_method(
+                    gs = x,
+                    pop = gt_pop$pop,
+                    parent = z,
+                    alias = paste0(
+                      alias[[w]],
+                      collapse = ","
+                    ),
+                    dims = gt_pop$dims,
+                    gating_method = gt_pop$gating_method,
+                    gating_args = gt_pop$gating_args,
+                    collapseDataForGating = gt_pop$collapseDataForGating,
+                    groupBy = gt_pop$groupBy,
+                    preprocessing_method = gt_pop$preprocessing_method,
+                    preprocessing_args = gt_pop$preprocessing_args
+                  )
+                )
+              }
+            }
+          )
+        )
+      }
+    )
+  )
   
   # COMBINE GATINGTEMPLATE ENTRIES
-  gt_entries <- do.call("rbind", 
-                        gt_entries)
-  
-  # LOAD GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(gatingTemplate)
-  
-  # UPDATE GATINGTEMPLATE
-  gt <- rbind(gt, 
-              gt_entries)
+  gt <- do.call(
+    "rbind", 
+    list(gt, gt_entries)
+  )
   
   # WRITE UPDATED GATINGTEMPLATE
-  cyto_gatingTemplate_write(gt,
-                            save_as = gatingTemplate)
+  cyto_gatingTemplate_write(gt, save_as = gatingTemplate)
   
   # RETURN UPDATED GATINGSET 
   return(x)
