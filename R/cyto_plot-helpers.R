@@ -969,20 +969,20 @@ cyto_plot_new <- function(popup = NULL,
         # }
       # NON-POPUP DEVICE - RSTUDIO | SHINY (CAIRO)
       } else if(dev_new == "rstudio") {
-        dev_ind <- which(
-          grepl(
-            dev_new,
-            names(dev.list()),
-            ignore.case = TRUE
-          )
-        )
-        if (length(dev_ind) != 0) {
-          dev.off(dev.list()[dev_ind])
-        } else {
-          graphics.off()
-        }
+        # dev_ind <- which(
+        #   grepl(
+        #     dev_new,
+        #     names(dev.list()),
+        #     ignore.case = TRUE
+        #   )
+        # )
+        # if (length(dev_ind) != 0) {
+        #   dev.off(dev.list()[dev_ind])
+        # } else {
+        #   graphics.off()
+        # }
         # NEW DEVICE
-        dev.new(noRStudioGD = FALSE)
+        # dev.new(noRStudioGD = FALSE)
       }
     }
   }
@@ -1591,6 +1591,7 @@ cyto_plot_memory_reset <- function() {
 #'
 #' # Reset to default setting
 #' cyto_plot_theme_reset()
+#' 
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
@@ -1631,6 +1632,44 @@ cyto_plot_theme <- function(...,
   }
   # RETURN THEME ARUMENTS
   return(theme_args)
+}
+
+# CYTO_PLOT_THEME_RESET --------------------------------------------------------
+
+#' Reset an existing cyto_plot() theme to the default theme
+#' 
+#' @param ... not in use.
+#' @return NULL.
+#' 
+#' @examples
+#' # Make all plots have a black background
+#' cyto_plot_theme(border_fill = "black")
+#'
+#' # Black ground with custom colour scale for points and purple gates
+#' cyto_plot_theme(
+#'   border_fill = "black",
+#'   point_col_scale = c(
+#'     "cyan",
+#'     "green",
+#'     "yellow",
+#'     "orange",
+#'     "red",
+#'     "darkred"
+#'   ),
+#'   gate_line_col = "magenta"
+#' )
+#'
+#' # Reset to default settings
+#' cyto_plot_theme_reset()
+#' 
+#' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
+#' 
+#' @export
+cyto_plot_theme_reset <- function(...) {
+  
+  cyto_option("cyto_plot_theme", NULL)
+  invisible(NULL)
+  
 }
 
 ## CYTO_PLOT_PAR ---------------------------------------------------------------

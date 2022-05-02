@@ -203,7 +203,8 @@ cyto_plot_map <- function(x,
       rep(
         point_col_scale, 
         length.out = length(point_col)
-      ), names = point_col
+      ), 
+      names = point_col
     )
   # POINT_COL_SCALE - VECTOR/FUNCTION - SAME COLOUR SCALE PER CHANNEL
   } else {
@@ -369,7 +370,7 @@ cyto_plot_map <- function(x,
                      FALSE
                    },
                    point_col = point_col[w],
-                   point_col_scale <- point_col_scale[[w]],
+                   point_col_scale = point_col_scale[[w]],
                    ...
                  )
                }

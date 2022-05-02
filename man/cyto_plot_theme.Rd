@@ -39,6 +39,7 @@ cyto_plot_theme(
 
 # Reset to default setting
 cyto_plot_theme_reset()
+
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)
