@@ -101,3 +101,106 @@ cyto_file_search <- function(x,
   return(files)
   
 }
+
+## CYTO_FILE_NAME --------------------------------------------------------------
+
+#' Create a unique name for a file
+#'
+#' @param x desired name for a file optionally including the extension, if the
+#'   extension is not manually supplied to \code{ext}.
+#' @param ext the file extension prefixed by \code{"."}.
+#' @param ... not in use.
+#' 
+#' @return a unique file name.
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' cyto_file_name("Experiment-Details.csv")
+#'
+#' @export
+cyto_file_name <- function(x,
+                           ext = NULL,
+                           ...) {
+  
+  # FILE EXTENSION
+  if(!nzchar(file_ext(x))) {
+    if(is.null(ext)) {
+      stop(
+        paste0(
+          x,
+          " does not contain a valid file extension!"
+        )
+      )
+    }
+    x <- paste0(x, ".", file_ext(x))
+  }
+  
+  # FILE DOES NOT EXIST
+  if(!file_exists(x)) {
+    return(x)
+  }
+  
+  # EXTENSION
+  ext <- file_ext(x)
+  
+  # CHECK SUFFIX
+  id <- gsub(
+    paste0(
+      ".*-([0-9]+)\\.",
+      ext, 
+      "$"
+    ), 
+    "\\1", 
+    x
+  )
+  
+  # NEW SUFFIX
+  if(id == x) {
+    id = 0
+  } else {
+    id <- as.numeric(id)
+  }
+  
+  # INCREMENT SUFFIX
+  while(file_exists(x)) {
+    id <- id + 1
+    if(id == 1) {
+      x <- paste0(
+        gsub(
+          paste0(
+            "(.*)\\.",
+            ext,
+            "$"
+          ),
+          "\\1",
+          x
+        ),
+        "-",
+        id,
+        ".",
+        ext
+      )
+    } else {
+      x <- paste0(
+        gsub(
+          paste0(
+            "(.*)-[0-9]+\\.",
+            ext,
+            "$"
+          ),
+          "\\1",
+          x
+        ),
+        "-",
+        id,
+        ".",
+        ext
+      )
+    }
+
+  }
+
+  return(x)
+  
+}

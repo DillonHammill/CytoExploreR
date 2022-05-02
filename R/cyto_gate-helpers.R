@@ -876,20 +876,29 @@ cyto_gate_bool <- function(x,
     })
     return(logic_split)
   })
-  logic <- LAPPLY(logic, function(z){
-    paste0(z, collapse = "")
-  })
+  logic <- LAPPLY(
+    logic, 
+    function(z){
+      paste0(z, collapse = "")
+    }
+  )
   
   # LOGIC - POPULATIONS
-  logic_pop_list <- lapply(logic, function(z){
-    p <- unlist(strsplit(z, "\\||\\&|\\!"))
-    p <- p[!LAPPLY(p, ".empty")]
-    LAPPLY(p, function(y){
-      cyto_nodes_convert(x,
-                         nodes = y,
-                         path = "auto")
-    })
-  })
+  logic_pop_list <- lapply(
+    logic, 
+    function(z){
+      p <- unlist(strsplit(z, "\\||\\&|\\!"))
+      p <- p[!LAPPLY(p, ".empty")]
+      LAPPLY(
+        p, 
+        function(y) {
+          cyto_nodes_convert(x,
+                             nodes = y,
+                             path = "auto")
+        }
+      )
+    }
+  )
   
   # PARENT
   if(is.null(parent)){
