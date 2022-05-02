@@ -342,9 +342,11 @@ cyto_spillover_edit <- function(x,
     if(is.character(spillover)) {
       save_as <- spillover
     } else {
-      save_as <- paste0(
-        format(Sys.Date(), "%d%m%y"),
-        "-", "Spillover-Matrix.csv"
+      save_as <- cyto_file_name(
+        paste0(
+          format(Sys.Date(), "%d%m%y"),
+          "-", "Spillover-Matrix.csv"
+        )
       )
     }
   }

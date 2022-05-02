@@ -903,8 +903,8 @@ cyto_channel_match <- function(x,
     # OLD CHANNEL-MATCH.CSV REQUIRES ROWNAMES
     # FILE SEARCH
     pd <- cyto_file_search(
-      "Details.csv$|Channel-Match.csv", # BACKWARDS COMPATIBLE
-      colnames = c("name", "channel"),# IGNORE PARENT & GROUP HERE
+      "Details.*\\.csv$|Channel-Match.*\\.csv", # BACKWARDS COMPATIBLE
+      colnames = c("name", "channel"), # IGNORE PARENT & GROUP HERE
       rownames = rownames(cyto_details(x))
     )
     # NO DETAILS FOUND
@@ -1013,9 +1013,11 @@ cyto_channel_match <- function(x,
   if(is.null(save_as)) {
     # FILE MISSING
     if(is.null(file)) {
-      save_as <- paste0(
-        format(Sys.Date(), "%d%m%y"),
-        "-", "Compensation-Details.csv"
+      save_as <- cyto_file_name(
+        paste0(
+          format(Sys.Date(), "%d%m%y"),
+          "-", "Compensation-Details.csv"
+        )
       )
       # SAVE TO FILE
     } else {

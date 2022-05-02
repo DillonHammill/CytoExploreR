@@ -293,8 +293,12 @@ cyto_spillover_spread_compute <- function(x,
   
   # Default spillover spread file name
   if(is.null(spillover_spread)){
-    spillover_spread <- paste0(format(Sys.Date(), "%d%m%y"),
-                               "-Spillover-Spread.csv")
+    spillover_spread <- cyto_file_name(
+      paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Spillover-Spread.csv"
+      )
+    )
   }
   
   # Write to csv file

@@ -304,8 +304,6 @@ cyto_spillover_compute <- function(x,
       group_by = "group"
     )
     
-    print(pd)
-    
     # PREPARE EACH GROUP
     cs_list <- structure(
       lapply(
@@ -325,7 +323,6 @@ cyto_spillover_compute <- function(x,
             function(z) {
               # FIND BEST CONTROL PER CHANNEL
               ind <- which(pd$channel == z)
-              print(ind)
               # UNSTAINED CONTROL
               if(grepl("unstained", z, ignore.case = TRUE)) {
                 # MULTIPLE UNSTAINED CONTROLS - CV
@@ -725,12 +722,14 @@ cyto_spillover_compute <- function(x,
   
   # DEFAULT CSV FILENAME
   if (is.null(save_as)) {
-    save_as <- paste0(
-      format(
-        Sys.Date(), 
-        "%d%m%y"
-      ), 
-      "-Spillover-Matrix.csv"
+    save_as <- cyto_file_name(
+      paste0(
+        format(
+          Sys.Date(), 
+          "%d%m%y"
+        ), 
+        "-Spillover-Matrix.csv"
+      )
     )
   }
   

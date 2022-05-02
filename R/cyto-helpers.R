@@ -5229,8 +5229,9 @@ cyto_markers_edit <- function(x,
   
   # FILE MISSING
   if(is.null(file)) {
+    # FILE SEARCH - BYPASS SUFFIX
     pd_new <- cyto_file_search(
-      "Markers.csv$",
+      "Markers.*\\.csv$",
       colnames = c("channel", "marker"),
       channel = chans
     )
@@ -5324,12 +5325,14 @@ cyto_markers_edit <- function(x,
   # DEFAULT FILE NAME
   if (is.null(save_as)) {
     if(is.null(file)) {
-      save_as <- paste0(
-        format(
-          Sys.Date(), 
-          "%d%m%y"
-        ), 
-        "-Experiment-Markers.csv"
+      save_as <- cyto_file_name(
+        paste0(
+          format(
+            Sys.Date(), 
+            "%d%m%y"
+          ), 
+          "-Experiment-Markers.csv"
+        )
       )
     } else {
       save_as <- file
@@ -5461,9 +5464,9 @@ cyto_details_edit <- function(x,
   
   # FILE MISSING
   if (is.null(file)) {
-    # FILE SEARCH
+    # FILE SEARCH - BYPASS SUFFIX
     pd <- cyto_file_search(
-      "Details.csv$", # Compensation-Details | Experiment-Details
+      "Details.*\\.csv$", # Compensation-Details | Experiment-Details
       colnames = "name",
       rownames = rownames(cyto_details(x))
     )
@@ -5572,9 +5575,11 @@ cyto_details_edit <- function(x,
   # SAVE_AS
   if(is.null(save_as)) {
     if(is.null(file)) {
-      save_as <- paste0(
-        format(Sys.Date(), "%d%m%y"),
-        "-Experiment-Details.csv"
+      save_as <- cyto_file_name(
+        paste0(
+          format(Sys.Date(), "%d%m%y"),
+          "-Experiment-Details.csv"
+        )
       )
     } else {
       save_as <- file
@@ -5668,9 +5673,11 @@ cyto_details_save <- function(x,
   
   # SAVE AS
   if (is.null(save_as)) {
-    save_as <- paste0(
-      format(Sys.Date(), "%d%m%y"),
-      "-Experiment-Details.csv"
+    save_as <- cyto_file_name(
+      paste0(
+        format(Sys.Date(), "%d%m%y"),
+        "-Experiment-Details.csv"
+      )
     )
   }
   

@@ -95,7 +95,7 @@ cyto_unmix_compute <- function(x,
   # FILE MUST REFLECT ANY CHANGES MADE TO DATA
   # SEARCH FOR UNMIXING DETAILS
   pd_new <- cyto_file_search(
-    "-Unmixing-Details.csv$",
+    "-Unmixing-Details.*\\.csv$",
     colnames = c("name", "group", "parent", "label"),
     rownames = rownames(cyto_details(x)),
   )
@@ -215,12 +215,14 @@ cyto_unmix_compute <- function(x,
   
   # FILE - SAVE UNMIXING DETAILS
   if(is.null(file)) {
-    file <- paste0(
-      format(
-        Sys.Date(), 
-        "%d%m%y"
-      ), 
-      "-Spectral-Unmixing-Details.csv"
+    file <- cyto_file_name(
+      paste0(
+        format(
+          Sys.Date(), 
+          "%d%m%y"
+        ), 
+        "-Spectral-Unmixing-Details.csv"
+      )
     )
     pd_new <- pd
   # UPDATE DETAILS IN EXISTING FILE
@@ -413,12 +415,14 @@ cyto_unmix_compute <- function(x,
   
   # DEFAULT FILENAME
   if(is.null(save_as)) {
-    save_as <- paste0(
-      format(
-        Sys.Date(), 
-        "%d%m%y"
-      ), 
-      "-Spectral-Unmixing-Matrix.csv"
+    save_as <- cyto_file_name(
+      paste0(
+        format(
+          Sys.Date(), 
+          "%d%m%y"
+        ), 
+        "-Spectral-Unmixing-Matrix.csv"
+      )
     )
   }
   
