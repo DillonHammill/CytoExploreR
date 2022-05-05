@@ -5458,7 +5458,7 @@ cyto_details_edit <- function(x,
                               ...) {
   
   # CYTOSET/GATINGSET
-  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet", TRUE)) {
+  if (!cyto_class(x, "flowSet") & !cyto_class(x, "GatingSet")) {
     stop("Please supply either a flowSet or a GatingSet")
   }
   

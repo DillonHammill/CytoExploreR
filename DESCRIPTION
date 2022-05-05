@@ -20,6 +20,7 @@ Depends:
   openCyto (>= 1.25.2)
 Imports: 
     BiocGenerics,
+    bslib,
     data.table,
     DataEditR (>= 0.1.2),
     dplyr,
@@ -34,7 +35,6 @@ Imports:
     robustbase,
     rhandsontable (>= 0.3.8),
     shiny,
-    bslib,
     stats,
     tidyr,
     utils,
