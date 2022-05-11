@@ -1182,18 +1182,7 @@ cyto_stat_rescale <- function(x,
   # VECTOR
   } else {
     return(
-      LAPPLY(
-        x, 
-        function(w) {
-          if(w < min(scale)) {
-            return(0)
-          } else if(w > max(scale)) {
-            return(1)
-          } else {
-            return((w - min(scale)) / diff(scale))
-          }
-        }
-      )
+      min(scale) + ((x-min(x))/diff(range(x)))*diff(scale)
     )
   }
   
