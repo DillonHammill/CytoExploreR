@@ -1125,19 +1125,21 @@
   
   # PAD AXES RANGES - 4% BASE GRAPHICS
   axes_range <- structure(
-    lapply(axes_range, function(z){
-      if(!.all_na(z)) {
-        # RANGE
-        rng <- diff(z)
-        pad <- (rng - rng / 1.04) / 2
-        return(
-          c(z[1] - pad,
-            z[2] + pad)
-        )
-      } else {
-        return(z)
+    lapply(
+      axes_range, 
+      function(z){
+        if(!.all_na(z)) {
+          # RANGE
+          rng <- diff(z)
+          pad <- (rng - rng / 1.04) / 2
+          return(
+            c(z[1] - pad,
+              z[2] + pad)
+          )
+        } else {
+          return(z)
+        }
       }
-    }
     ), 
     names = names(axes_range)
   )
@@ -1145,68 +1147,207 @@
   # AXES TICKS & LABELS --------------------------------------------------------
   
   # LOOP THROUGH CHANNELS
-  axes_text <- lapply(seq_along(channels), function(z) {
-    # CHANNEL
-    chan <- channels[z]
-    # AXES RANGE
-    rng <- axes_range[[z]]
-    # NO CHANNEL OR AXES RANGE SUPPLIED - BYPASS
-    if(.all_na(chan) & .all_na(rng)) {
-      return(NA)
-    }
-    # LINEAR SCALE
-    if(!chan %in% names(axes_trans)) {
-      # COMPUTE MAJOR TICKS
-      axis_major_ticks <- axisTicks(
-        rng,
-        log = FALSE
-      )
-      names(axis_major_ticks) <- trimws(
-        format(
-          unname(axis_major_ticks), 
-          scientific = FALSE
+  axes_text <- lapply(
+    seq_along(channels), 
+    function(z) {
+      # CHANNEL
+      chan <- channels[z]
+      # AXES RANGE
+      rng <- axes_range[[z]]
+      # NO CHANNEL OR AXES RANGE SUPPLIED - BYPASS
+      if(.all_na(chan) & .all_na(rng)) {
+        return(NA)
+      }
+      # LINEAR SCALE
+      if(!chan %in% names(axes_trans)) {
+        # COMPUTE MAJOR TICKS
+        axis_major_ticks <- axisTicks(
+          rng,
+          log = FALSE
         )
-      )
-      # COMPUTE MINOR TICKS - WITHIN MAJOR TICK RANGE
-      axis_minor_ticks <- LAPPLY(
-        seq_len(length(axis_major_ticks) - 1),
-        function(w){
-          pretty(
-            axis_major_ticks[c(w, w + 1)],
-            n = 5
+        names(axis_major_ticks) <- trimws(
+          format(
+            unname(axis_major_ticks), 
+            scientific = FALSE
+          )
+        )
+        # COMPUTE MINOR TICKS - WITHIN MAJOR TICK RANGE
+        axis_minor_ticks <- LAPPLY(
+          seq_len(length(axis_major_ticks) - 1),
+          function(w){
+            pretty(
+              axis_major_ticks[c(w, w + 1)],
+              n = 5
+            )
+          }
+        )
+        # COMPUTE MINOR TICKS - OUTSIDE MAJOR TICK RANGE
+        axis_minor_ticks <- c(
+          seq(
+            min(axis_major_ticks),
+            min(rng),
+            diff(axis_minor_ticks[2:1])
+          ),
+          axis_minor_ticks,
+          seq(
+            max(axis_major_ticks),
+            max(rng),
+            diff(axis_minor_ticks[1:2])
+          )
+        )
+        axis_minor_ticks <- axis_minor_ticks[
+          !axis_minor_ticks %in% axis_major_ticks
+        ]
+        names(axis_minor_ticks) <- rep("", length(axis_minor_ticks))
+        # COMBINED AXIS TICKS
+        axis_ticks <- sort(
+          c(
+            axis_minor_ticks,
+            axis_major_ticks
+          )
+        )
+        # RESCALE TICK LOCATIONS - KEY MAPPING TO Y AXIS
+        if(!.all_na(rescale)) {
+          # RESCALE TICK LOCATIONS
+          axis_ticks <- structure(
+            LAPPLY(
+              axis_ticks,
+              function(v) {
+                cyto_stat_rescale(
+                  v,
+                  scale = rescale,
+                  limits = rng
+                )
+              }
+            ),
+            names = names(axis_ticks)
           )
         }
-      )
-      # COMPUTE MINOR TICKS - OUTSIDE MAJOR TICK RANGE
-      axis_minor_ticks <- c(
-        seq(
-          min(axis_major_ticks),
-          min(rng),
-          diff(axis_minor_ticks[2:1])
-        ),
-        axis_minor_ticks,
-        seq(
-          max(axis_major_ticks),
-          max(rng),
-          diff(axis_minor_ticks[1:2])
+        # FORMAT LABELS - NOT MAPPED TO AXIS - ABBREVIATE LABELS
+        if(format) {
+          names(axis_ticks) <- LAPPLY(
+            names(axis_ticks),
+            function(v) {
+              if(!.empty(v)) {
+                v <- as.numeric(v)
+                if(v / 1000 >= 1) {
+                  if(v / 1000000 >= 1) {
+                    return(
+                      paste0(
+                        round(v / 1000000, 1),
+                        "M"
+                      )
+                    )
+                  } else {
+                    return(
+                      paste0(
+                        round(v / 1000, 1),
+                        "K"
+                      )
+                    )
+                  }
+                } else {
+                  return(v)
+                }
+              } else {
+                return(v)
+              }
+            }
+          )
+        }
+        # RETURN PREPARED AXIS LOCATIONS & LABELS
+        return(
+          list(
+            "label" = names(axis_ticks),
+            "at" = axis_ticks
+          )
         )
-      )
-      axis_minor_ticks <- axis_minor_ticks[
-        !axis_minor_ticks %in% axis_major_ticks
-      ]
-      names(axis_minor_ticks) <- rep("", length(axis_minor_ticks))
-      # COMBINED AXIS TICKS
-      axis_ticks <- sort(
-        c(
-          axis_minor_ticks,
-          axis_major_ticks
-        )
-      )
-      # RESCALE TICK LOCATIONS - KEY MAPPING TO Y AXIS
-      if(!.all_na(rescale)) {
-        # RESCALE TICK LOCATIONS
-        axis_ticks <- structure(
+        # TRANSFORMED SCALE
+      } else {
+        # AXIS TICKS
+        axis_ticks <- c(
+          sort(
+            LAPPLY(
+              1 * 10^seq_len(9),
+              function(v) {
+                -seq(90, 10, -10) * v
+              }
+            )
+          ),
+          seq(-9, 9, 1),
           LAPPLY(
+            1 * 10^seq_len(9),
+            function(v) {
+              seq(10, 90, 10) * v
+            }
+          )
+        )
+        # AXIS LABELS
+        axis_labels <- lapply(axis_ticks, function(v) {
+          if (v != 0) {
+            pwr <- log10(abs(v))
+          }
+          if (v == 0) {
+            quote(0)
+          } else if (pwr == 0) {
+            quote("")
+          } else if (abs(pwr) %% 1 == 0) {
+            if(v < 0) {
+              substitute(-10^pwr)
+            } else {
+              substitute(10^pwr)
+            }
+          } else {
+            quote("")
+          }
+        })
+        # AXES TEXT
+        trans_func <- axes_trans[[chan]]$transform
+        inv_func <- axes_trans[[chan]]$inverse
+        # AXES RANGE ON LINEAR SCALE
+        if (!.all_na(rng)) {
+          rng <- inv_func(rng)
+        } else {
+          rng <- inv_func(
+            .cyto_plot_axes_limits(
+              x,
+              channels = chan,
+              axes_limits = axes_limits,
+              buffer = axes_limits_buffer
+            )[, chan])
+        }
+        # RESTRICT AXES TICKS & LABELS BY RANGE
+        ind <- which(axis_ticks > min(rng) & axis_ticks < max(rng))
+        axis_ticks <- axis_ticks[ind]
+        axis_labels <- axis_labels[ind]
+        # BREAKS - TRANSFORMED SCALE
+        axis_ticks <- signif(trans_func(axis_ticks))
+        # RANGE - TRANSFORMED SCALE
+        rng <- trans_func(rng)
+        # REMOVE OVERLAPPING LABELS AROUND ZERO 
+        if("0" %in% axis_labels) {
+          # BUFFERING AROUND ZERO
+          zero_ind <- match_ind("0", axis_labels)
+          zero_break <- axis_ticks[zero_ind]
+          zero_rng <- c(
+            zero_break - 0.025 * diff(rng),
+            zero_break + 0.025 * diff(rng)
+          )
+          # TICKS WITHIN RANGE - EMPTY LABELS
+          ind <- which(
+            axis_ticks > min(zero_rng) &
+              axis_ticks < max(zero_rng)
+          )
+          lapply(ind, function(q){
+            axis_labels[[q]] <<- ""
+          })
+          axis_labels[[zero_ind]] <- "0"
+        }
+        axis_labels <- do.call("expression", axis_labels)
+        # RESCALE TICK LOCATIONS - KEY MAPPING TO Y AXIS
+        if(!.all_na(rescale)) {
+          # RESCALE TICK LOCATIONS
+          axis_ticks <- LAPPLY(
             axis_ticks,
             function(v) {
               cyto_stat_rescale(
@@ -1215,154 +1356,18 @@
                 limits = rng
               )
             }
-          ),
-          names = names(axis_ticks)
-        )
-      }
-      # FORMAT LABELS - NOT MAPPED TO AXIS - ABBREVIATE LABELS
-      if(format) {
-        names(axis_ticks) <- LAPPLY(
-          names(axis_ticks),
-          function(v) {
-            if(!.empty(v)) {
-              v <- as.numeric(v)
-              if(v / 1000 >= 1) {
-                if(v / 1000000 >= 1) {
-                  return(
-                    paste0(
-                      round(v / 1000000, 1),
-                      "M"
-                    )
-                  )
-                } else {
-                  return(
-                    paste0(
-                      round(v / 1000, 1),
-                      "K"
-                    )
-                  )
-                }
-              } else {
-                return(v)
-              }
-            } else {
-              return(v)
-            }
-          }
-        )
-      }
-      # RETURN PREPARED AXIS LOCATIONS & LABELS
-      return(
-        list(
-          "label" = names(axis_ticks),
-          "at" = axis_ticks
-        )
-      )
-    # TRANSFORMED SCALE
-    } else {
-      # AXIS TICKS
-      axis_ticks <- c(
-        sort(
-          LAPPLY(
-            1 * 10^seq_len(9),
-            function(v) {
-              -seq(90, 10, -10) * v
-            }
           )
-        ),
-        seq(-9, 9, 1),
-        LAPPLY(
-          1 * 10^seq_len(9),
-          function(v) {
-            seq(10, 90, 10) * v
-          }
-        )
-      )
-      # AXIS LABELS
-      axis_labels <- lapply(axis_ticks, function(v) {
-        if (v != 0) {
-          pwr <- log10(abs(v))
         }
-        if (v == 0) {
-          quote(0)
-        } else if (pwr == 0) {
-          quote("")
-        } else if (abs(pwr) %% 1 == 0) {
-          if(v < 0) {
-            substitute(-10^pwr)
-          } else {
-            substitute(10^pwr)
-          }
-        } else {
-          quote("")
-        }
-      })
-      # AXES TEXT
-      trans_func <- axes_trans[[chan]]$transform
-      inv_func <- axes_trans[[chan]]$inverse
-      # AXES RANGE ON LINEAR SCALE
-      if (!.all_na(rng)) {
-        rng <- inv_func(rng)
-      } else {
-        rng <- inv_func(
-          .cyto_plot_axes_limits(
-            x,
-            channels = chan,
-            axes_limits = axes_limits,
-            buffer = axes_limits_buffer
-          )[, chan])
-      }
-      # RESTRICT AXES TICKS & LABELS BY RANGE
-      ind <- which(axis_ticks > min(rng) & axis_ticks < max(rng))
-      axis_ticks <- axis_ticks[ind]
-      axis_labels <- axis_labels[ind]
-      # BREAKS - TRANSFORMED SCALE
-      axis_ticks <- signif(trans_func(axis_ticks))
-      # RANGE - TRANSFORMED SCALE
-      rng <- trans_func(rng)
-      # REMOVE OVERLAPPING LABELS AROUND ZERO 
-      if("0" %in% axis_labels) {
-        # BUFFERING AROUND ZERO
-        zero_ind <- match_ind("0", axis_labels)
-        zero_break <- axis_ticks[zero_ind]
-        zero_rng <- c(
-          zero_break - 0.025 * diff(rng),
-          zero_break + 0.025 * diff(rng)
-        )
-        # TICKS WITHIN RANGE - EMPTY LABELS
-        ind <- which(
-          axis_ticks > min(zero_rng) &
-            axis_ticks < max(zero_rng)
-        )
-        lapply(ind, function(q){
-          axis_labels[[q]] <<- ""
-        })
-        axis_labels[[zero_ind]] <- "0"
-      }
-      axis_labels <- do.call("expression", axis_labels)
-      # RESCALE TICK LOCATIONS - KEY MAPPING TO Y AXIS
-      if(!.all_na(rescale)) {
-        # RESCALE TICK LOCATIONS
-        axis_ticks <- LAPPLY(
-          axis_ticks,
-          function(v) {
-            cyto_stat_rescale(
-              v,
-              scale = rescale,
-              limits = rng
-            )
-          }
+        # BREAKS & LABELS
+        return(
+          list(
+            "label" = axis_labels, 
+            "at" = axis_ticks
+          )
         )
       }
-      # BREAKS & LABELS
-      return(
-        list(
-          "label" = axis_labels, 
-          "at" = axis_ticks
-        )
-      )
     }
-  })
+  )
   
 }
 
@@ -1501,76 +1506,78 @@
   # ARGUMENTS
   args <- .args_list()
 
-  # MARGINS
-  if (is.null(margins) | .empty(margins) | .all_na(margins)) {
+  # EMPTY MARGINS
+  if(.empty(margins, TRUE)) {
+    margins <- rep(NA, 4) 
+  }
+  
+  # MARGIN LENGTH
+  margins <- rep(c(margins, rep(NA, 4)), length.out = 4)
+  
+  # MARGIN DEFAULT
+  mar <- c(5.1, 5.1, 4.1, 2.1)
+  
+  # KEY 
+  if(length(channels) == 2 & 
+     (any(is.na(point_col)) | 
+      any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
+     !key %in% "none") {
+    # KEY SCALE & TEXT
+    if(key %in% "both") {
+      mar[4] <- mar[4] + 2.9
+    } else {
+      mar[4] <- mar[4] + 1
+    }
+  }
     
-    # DEFAULT
-    mar <- c(5.1, 5.1, 4.1, 2.1)
-    
-    # KEY 
+  # LEGEND TEXT
+  if (legend != FALSE & !.all_na(legend_text)) {
+    # KEY REQUIRED
     if(length(channels) == 2 & 
        (any(is.na(point_col)) | 
         any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
        !key %in% "none") {
       # KEY SCALE & TEXT
-      if(key %in% "both") {
-        mar[4] <- mar[4] + 2.9
-      } else {
-        mar[4] <- mar[4] + 1
-      }
-    }
-    
-    # LEGEND TEXT
-    if (legend != FALSE & !.all_na(legend_text)) {
-      # KEY REQUIRED
-      if(length(channels) == 2 & 
-         (any(is.na(point_col)) | 
-          any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
-         !key %in% "none") {
-        # KEY SCALE & TEXT
-        if(key %in% "both" & length(channels) == 2) {
-          mar[4] <- 8.8 + max(nchar(legend_text))*0.32*mean(legend_text_size)
+      if(key %in% "both" & length(channels) == 2) {
+        mar[4] <- 8.8 + max(nchar(legend_text))*0.32*mean(legend_text_size)
         # KEY SCALE ONLY
-        } else {
-          mar[4] <- 7.5 + max(nchar(legend_text))*0.32*mean(legend_text_size)
-        }
-      # NO KEY
       } else {
-        mar[4] <- 7 + max(nchar(legend_text))*0.32*mean(legend_text_size)
+        mar[4] <- 7.5 + max(nchar(legend_text))*0.32*mean(legend_text_size)
       }
+      # NO KEY
+    } else {
+      mar[4] <- 7 + max(nchar(legend_text))*0.32*mean(legend_text_size)
     }
+  }
     
-    # TITLE
-    if (.all_na(title)) {
-      mar[3] <- 2.2
-    }
-    
-    # X AXIS
-    if (!all(is(axes_text[[1]], "list"))) {
-      if (.all_na(axes_text[[1]])) {
-        # NA == FALSE returns NA not T/F
-      } else if (all(axes_text[[1]] == FALSE)) {
-        mar[1] <- 4.1
-      }
-    }
-    
-    # Y AXIS
-    if (!all(is(axes_text[[2]], "list"))) {
-      if (.all_na(axes_text[[2]])) {
-        # NA == FALSE return NA not T/F
-      } else if (all(axes_text[[2]] == FALSE)) {
-        mar[2] <- 4.1
-      }
-    }
-  } else {
-    if (length(margins) != 4) {
-      stop("'margins' must be a vector with 4 elements.")
-    }
-    mar <- margins
+  # TITLE
+  if (.all_na(title)) {
+    mar[3] <- 2.2
   }
   
+  # X AXIS
+  if (!all(is(axes_text[[1]], "list"))) {
+    if (.all_na(axes_text[[1]])) {
+      # NA == FALSE returns NA not T/F
+    } else if (all(axes_text[[1]] == FALSE)) {
+      mar[1] <- 4.1
+    }
+  }
+  
+  # Y AXIS
+  if (!all(is(axes_text[[2]], "list"))) {
+    if (.all_na(axes_text[[2]])) {
+      # NA == FALSE return NA not T/F
+    } else if (all(axes_text[[2]] == FALSE)) {
+      mar[2] <- 4.1
+    }
+  }
+    
+  # UPDATE MARGINS
+  margins[is.na(margins)] <- mar[is.na(margins)]
+  
   # SET MAR PARAMETER
-  cyto_plot_par(mar = mar)
+  cyto_plot_par(mar = margins)
 
 }
 
