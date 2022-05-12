@@ -1146,19 +1146,11 @@ cyto_stat_bkde2d <- function(x,
 #' @noRd
 cyto_stat_rescale <- function(x,
                               scale = c(0,1),
-                              limits = NULL) {
+                              limits = c(NA,NA)) {
   
   # MATRIX
   if(!is.null(dim(x))) {
-    # DEFAULT LIMITS
-    if(is.null(limits)) {
-      limits <- apply(
-        x,
-        2,
-        "range"
-      )
-    }
-    # PREPARE LIMITS
+    # PREPARE LIMITS VECTOR -> MATRIX
     if(is.null(dim(limits))) {
       limits <- suppressWarnings(
         matrix(
@@ -1221,10 +1213,13 @@ cyto_stat_rescale <- function(x,
     )
   # VECTOR
   } else {
-    # RESTRICT DATA TO LIMITS
-    if(!is.null(limits)) {
-      x[x < min(limits)] <- min(limits)
-      x[x > max(limits)] <- max(limits)
+    # RESTRICT DATA BELOW MINIMUM
+    if(!is.na(limits[1])) {
+      x[x < limits[1]] <- limits[1]
+    }
+    # RESTRICT DATA ABOVE MAXIMUM
+    if(!is.na(limits[2])) {
+      x[x > limits[2]] <- limits[2]
     }
     # RESCALE
     x <- min(scale) + ((x-min(x))/diff(range(x)))*diff(scale)
