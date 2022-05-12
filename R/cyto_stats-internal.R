@@ -1213,16 +1213,15 @@ cyto_stat_rescale <- function(x,
     )
   # VECTOR
   } else {
-    # RESTRICT DATA BELOW MINIMUM
-    if(!is.na(limits[1])) {
-      x[x < limits[1]] <- limits[1]
+    # COMPUTE LIMITS
+    if(any(is.na(limits))) {
+      limits[is.na(limits)] <- range(x)[is.na(limits)]
     }
-    # RESTRICT DATA ABOVE MAXIMUM
-    if(!is.na(limits[2])) {
-      x[x > limits[2]] <- limits[2]
-    }
+    # RESTRICT
+    x[x < min(limits)] <- min(limits)
+    x[x > max(limits)] <- max(limits)
     # RESCALE
-    x <- min(scale) + ((x-min(x))/diff(range(x)))*diff(scale)
+    x <- min(scale) + ((x-min(limits))/diff(limits))*diff(scale)
     # RETURN RESCALED DATA
     return(x)
   }

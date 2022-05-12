@@ -897,17 +897,20 @@
   # LIST CYTOFRAMES/CYTOSETS
   if(cyto_class(x, "list")){
     x <- unlist(x) 
-    x <- lapply(x, function(z){
-      # GATINGHIERARCHY/GATINGSET
-      if(cyto_class(z, "GatingSet")){
-        z <- cyto_data_extract(
-          z, 
-          parent = parent,
-          copy = FALSE
-        )[[1]]
+    x <- lapply(
+      x, 
+      function(z){
+        # GATINGHIERARCHY/GATINGSET
+        if(cyto_class(z, "GatingSet")){
+          z <- cyto_data_extract(
+            z, 
+            parent = parent,
+            copy = FALSE
+          )[[1]]
+        }
+        return(z)
       }
-      return(z)
-    })
+    )
   # GATINGHIERARCHY/GATINGSET
   }else if(cyto_class(x, "GatingSet")){
     x <- list(
@@ -998,9 +1001,12 @@
   data_range <- do.call("rbind", unname(data_range))
   
   # MIN/MAX DATA RANGE
-  data_range <- lapply(seq_len(ncol(data_range)), function(z){
-    c(min(data_range[, z]), max(data_range[, z]))
-  })
+  data_range <- lapply(
+    seq_len(ncol(data_range)),
+    function(z){
+      c(min(data_range[, z]), max(data_range[, z]))
+    }
+  )
   data_range <- do.call("cbind", data_range)
   colnames(data_range) <- channels
   rownames(data_range) <- c("min", "max")
@@ -1029,9 +1035,12 @@
     })
     machine_range <- do.call("rbind", machine_range)
     # MIN/MAX DATA RANGE
-    machine_range <- lapply(seq_len(ncol(machine_range)), function(z){
-      c(min(machine_range[, z]), max(machine_range[, z]))
-    })
+    machine_range <- lapply(
+      seq_len(ncol(machine_range)),
+      function(z){
+        c(min(machine_range[, z]), max(machine_range[, z]))
+      }
+    )
     machine_range <- do.call("cbind", machine_range)
     colnames(machine_range) <- channels
     rownames(machine_range) <- c("min", "max")
@@ -1200,7 +1209,11 @@
           LAPPLY(
             axis_ticks,
             function(v) {
-              min(rescale) + ((v - min(rng))/diff(rng)) * diff(rescale)
+              cyto_stat_rescale(
+                v,
+                scale = rescale,
+                limits = rng
+              )
             }
           ),
           names = names(axis_ticks)
@@ -1333,8 +1346,11 @@
         axis_ticks <- LAPPLY(
           axis_ticks,
           function(v) {
-            min(rescale) + 
-              ((v - min(rng))/diff(rng)) * diff(rescale)
+            cyto_stat_rescale(
+              v,
+              scale = rescale,
+              limits = rng
+            )
           }
         )
       }
@@ -3652,18 +3668,21 @@
         # RE-SCALE BINNED COUNTS - RANGE [0,1]
         args$bkde2d$counts <- cyto_stat_rescale(
           args$bkde2d$counts,
-          scale = matrix(
+          limits = matrix(  # USED TO SCALE INSTEAD OF LIMITS
             args$key_scale$range,
             nrow = 2,
             ncol = ncol(args$bkde2d$counts)
           )
         )
-        # RE-SCALE BKDE
+        # RE-SCALE BKDE - RANGE [0, 1]
         if(args$point_col_smooth) {
           # STORE RE-SCALED BKDE IN COUNTS SLOT
-          args$bkde2d$counts <- min(args$bkde2d$counts) +
-            ((args$bkde2d$bkde - min(args$bkde2d$bkde))/
-               diff(range(args$bkde2d$bkde))) * diff(range(args$bkde2d$counts))
+          args$bkde2d$counts <- cyto_stat_rescale(
+            args$bkde2d$counts
+          )
+          # args$bkde2d$counts <- min(args$bkde2d$counts) +
+          #   ((args$bkde2d$bkde - min(args$bkde2d$bkde))/
+          #      diff(range(args$bkde2d$bkde))) * diff(range(args$bkde2d$counts))
         }
         # MAP BKDE TO ROWS & ASSIGN COLOURS
         args$point_col[[1]] <- cyto_apply(
@@ -3760,14 +3779,14 @@
           channels = args$point_col[[1]],
           input = "column",
           copy = FALSE,
-          scale = args$key_scale$range,
+          limits = args$key_scale$range,
           FUN = function(z,
                          scale) {
             rgb(
               args$point_col_scale(
                 cyto_stat_rescale(
                   z, 
-                  scale = scale
+                  limits = limits
                 )
               ),
               maxColorValue = 255
@@ -3795,12 +3814,15 @@
   }
   
   # POINT COLOUR ALPHA ADJUSTMENT
-  lapply(seq_along(args$point_col), function(z) {
-    args$point_col[[z]] <<- adjustcolor(
-      args$point_col[[z]], 
-      args$point_col_alpha[z]
-    )
-  })
+  lapply(
+    seq_along(args$point_col), 
+    function(z) {
+      args$point_col[[z]] <<- adjustcolor(
+        args$point_col[[z]], 
+        args$point_col_alpha[z]
+      )
+    }
+  )
   
   # RETURN LIST OF COLOURS
   return(args$point_col)
@@ -3830,30 +3852,33 @@
   
   # KERNEL DENSITY - LIST OF DENSITY LISTS PER SAMPLE
   d <- structure(
-    lapply(x, function(cs){
-      # HISTOGRAMS - INSUFFICIENT EVENTS WARNING
-      suppressWarnings(
-        cyto_apply(
-          cs, 
-          "cyto_stat_density",
-          input = "matrix",
-          channels = channels,
-          copy = FALSE,
-          stat = hist_stat,
-          bins = hist_bins,
-          smooth = hist_smooth,
-          limits = matrix(
-            xlim,
-            ncol = 1,
-            dimnames = list(
-              c("min", "max"),
-              channels
-            )
-          ),
-          simplify = FALSE
-        )[[1]][[1]]
-      )
-    }), names = names(x)
+    lapply(
+      x, 
+      function(cs){
+        # HISTOGRAMS - INSUFFICIENT EVENTS WARNING
+        suppressWarnings(
+          cyto_apply(
+            cs, 
+            "cyto_stat_density",
+            input = "matrix",
+            channels = channels,
+            copy = FALSE,
+            stat = hist_stat,
+            bins = hist_bins,
+            smooth = hist_smooth,
+            limits = matrix(
+              xlim,
+              ncol = 1,
+              dimnames = list(
+                c("min", "max"),
+                channels
+              )
+            ),
+            simplify = FALSE
+          )[[1]][[1]]
+        )
+      }
+    ), names = names(x)
   )
   
   # STACKING - RANGE STORED IN DENSITY OBJECT -  CANNOT ROUND DENSITY

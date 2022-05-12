@@ -1853,7 +1853,7 @@ cyto_plot_layout <- function(...){
 #'   transformers are only required when a cytoset to transform supplied channel
 #'   limits.
 #' @param anchor logical indicating whether the lower limit of the scale should
-#'   be anchored to zero, set to TRUE by default.
+#'   be anchored to zero, set to FALSE by default.
 #' @param ... not in use.
 #'
 #' @return saves calibration settings for use by \code{\link{cyto_plot}}.
@@ -1885,7 +1885,7 @@ cyto_plot_calibrate <- function(x,
                                 probs = c(0.01, 0.95),
                                 limits = c(NA, NA),
                                 axes_trans = NA,
-                                anchor = TRUE,
+                                anchor = FALSE,
                                 ...){
   
   # RESET PROGRESS BAR
@@ -2041,6 +2041,7 @@ cyto_plot_calibrate <- function(x,
                 inverse = FALSE
               )
             } else {
+              # TODO: NOT DESIRABLE FOR EXPORTED DATA MISSING TRANSFORMERS
               z[which.min(z)] <- 0
             }
           }
