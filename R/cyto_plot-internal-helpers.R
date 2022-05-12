@@ -1840,20 +1840,23 @@
   args <- .args_list()
   
   # GATING PER LAYER (list of pops per layer)
-  pops <- lapply(seq_along(x), function(z){
-    cs <- x[[z]]
-    # NO LABEL - NO GATING REQUIRED (CHECK WHOLE LAYER)
-    if(.all_na(labels_per_layer[[z]])) {
-      return(rep(list(cs), length(label_stat)/layers))
-    # LABEL - GATING REQUIRED
-    } else {
-      # LIST OF GATED POPULATIONS PER GATE -> LIST OF POPS (CYTOSETS)
-      unlist(
-        cyto_gate_apply(cs,
-                        gate = gate)
-      )
+  pops <- lapply(
+    seq_along(x),
+    function(z){
+      cs <- x[[z]]
+      # NO LABEL - NO GATING REQUIRED (CHECK WHOLE LAYER)
+      if(.all_na(labels_per_layer[[z]])) {
+        return(rep(list(cs), length(label_stat)/layers))
+        # LABEL - GATING REQUIRED
+      } else {
+        # LIST OF GATED POPULATIONS PER GATE -> LIST OF POPS (CYTOSETS)
+        unlist(
+          cyto_gate_apply(cs,
+                          gate = gate)
+        )
+      }
     }
-  })
+  )
   
   # RETURN LIST OF GATED POPULATIONS
   return(pops)
@@ -2308,24 +2311,30 @@
   # OFFSET LABEL CO-ORDINATES --------------------------------------------------
   
   # LABEL DIMENSIONS
-  label_dims <- lapply(seq_len(L), function(z){
-    lapply(seq_len(GNP), function(y){
-      # COMPUTE LABEL DIMENSIONS
-      if (!.all_na(label_text[[z]][y])) {
-        .cyto_plot_label_dims(
-          label_text = label_text[[z]][y],
-          label_text_x = label_text_x[[z]][y],
-          label_text_y = label_text_y[[z]][y],
-          label_text_size = label_text_size[[z]][y]
-        )
-      } else {
-        matrix(rep(NA, 4),
-               ncol = 2,
-               dimnames = list(NULL, c("x", "y"))
-        )
-      }
-    })
-  })
+  label_dims <- lapply(
+    seq_len(L), 
+    function(z){
+      lapply(
+        seq_len(GNP), 
+        function(y){
+          # COMPUTE LABEL DIMENSIONS
+          if (!.all_na(label_text[[z]][y])) {
+            .cyto_plot_label_dims(
+              label_text = label_text[[z]][y],
+              label_text_x = label_text_x[[z]][y],
+              label_text_y = label_text_y[[z]][y],
+              label_text_size = label_text_size[[z]][y]
+            )
+          } else {
+            matrix(rep(NA, 4),
+                   ncol = 2,
+                   dimnames = list(NULL, c("x", "y"))
+            )
+          }
+        }
+      )
+    }
+  )
   
   # OFFSET BY LAYER
   if (length(channels) == 1 & hist_stack != 0) {
@@ -3140,10 +3149,16 @@
           d$x <- d$x[ind]
           d$y <- d$y[ind]
           # RESCALE
-          d$x <- min(key_y) + 
-            ((d$x - min(d$x)) / (diff(range(d$x)))) * diff(range(key_y))
-          d$y <- min(key_x) + 
-            ((d$y - min(d$y)) / (diff(range(d$y)))) * diff(range(key_x))
+          d$x <- cyto_stat_rescale(
+            d$x,
+            scale = key_y,
+            limits = range(d$x)
+          )
+          d$y <- cyto_stat_rescale(
+            d$y,
+            scale = key_x,
+            limits = range(d$y)
+          )
           # ADD DENSITY LINE TO KEY
           lines(
             d$y,
@@ -3298,7 +3313,6 @@
       x[[1]][[1]], 
       channels = point_col[1]
     )
-    
     # KEY RANGES REQUIRED
     if(is.null(key_range)) {
       # CALIBRATION SETTINGS
@@ -3336,12 +3350,15 @@
           names = names(x)
         )
         # EXCLUDE INFINITE LIMITS
-        key_range <- lapply(key_range, function(v){
-          if(!any(is.finite(v))) {
-            v[!is.finite(v)] <- NA
+        key_range <- lapply(
+          key_range, 
+          function(v){
+            if(!any(is.finite(v))) {
+              v[!is.finite(v)] <- NA
+            }
+            return(v)
           }
-          return(v)
-        })
+        )
         # FIXED KEY SCALE - DATA RANGE
         if(key_scale == "fixed") {
           key_range  <- structure(
