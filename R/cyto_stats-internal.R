@@ -1133,29 +1133,64 @@ cyto_stat_bkde2d <- function(x,
 ## CYTO_STAT_RESCALE -----------------------------------------------------------
 
 #' Rescale values within a newly defined range
-#' 
+#'
 #' @param x values to be rescaled in the form of a vector.
 #' @param scale min max values of new scale.
-#' 
+#' @param limits desired range for data on the current scale, values outside
+#'   this range will be set to these limits prior to rescaling.
+#'
 #' @return vector or matrix of rescaled values within range [0,1].
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
+#'
 #' @noRd
 cyto_stat_rescale <- function(x,
-                              scale = NULL) {
-  
-  # SCALE REQUIRED
-  if(is.null(scale)) {
-    stop(
-      "Supply min/max values for new scale(s) to 'scale' to rescale values!"
-    )
-  }
+                              scale = c(0,1),
+                              limits = NULL) {
   
   # MATRIX
   if(!is.null(dim(x))) {
-    # SCALE
-    if(is.null(dim(scale)) | ncol(scale) != ncol(x)) {
+    # DEFAULT LIMITS
+    if(is.null(limits)) {
+      limits <- apply(
+        x,
+        2,
+        "range"
+      )
+    }
+    # PREPARE LIMITS
+    if(is.null(dim(limits))) {
+      limits <- suppressWarnings(
+        matrix(
+          limits,
+          ncol = ncol(x),
+          nrow = 2,
+          dimnames = list(NULL, colnames(x))
+        )
+      )
+    }
+    # CHECK LIMITS MATRIX
+    if(!setequal(dim(limits), c(2, ncol(x)))) {
+      stop(
+        "'limits' must a matrix of min/max values for each column in x!"
+      )
+    }
+    # PREPARE SCALE VECTOR -> MATRIX
+    if(is.null(dim(scale))) {
+      scale <- suppressWarnings(
+        matrix(
+          scale,
+          ncol = ncol(x),
+          nrow = 2,
+          dimnames = list(
+            NULL,
+            colnames(x)
+          )
+        )
+      )
+    }
+    # CHECK SCALE MARIX
+    if(!setequal(dim(scale), c(2, ncol(x)))) {
       stop(
         "'scale' must a matrix of min/max values for each column in x!"
       )
@@ -1174,6 +1209,11 @@ cyto_stat_rescale <- function(x,
               scale[, colnames(x)[cnt]]
             } else {
               scale[, cnt]
+            },
+            limits = if(!is.null(colnames(x)) & !is.null(colnames(limits))) {
+              limits[, colnames(x)[cnt]]
+            } else {
+              limits[, cnt]
             }
           )
         }
@@ -1181,9 +1221,15 @@ cyto_stat_rescale <- function(x,
     )
   # VECTOR
   } else {
-    return(
-      min(scale) + ((x-min(x))/diff(range(x)))*diff(scale)
-    )
+    # RESTRICT DATA TO LIMITS
+    if(!is.null(limits)) {
+      x[x < min(limits)] <- min(limits)
+      x[x > max(limits)] <- max(limits)
+    }
+    # RESCALE
+    x <- min(scale) + ((x-min(x))/diff(range(x)))*diff(scale)
+    # RETURN RESCALED DATA
+    return(x)
   }
   
 }
