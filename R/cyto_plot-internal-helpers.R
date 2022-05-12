@@ -3694,12 +3694,9 @@
         # RE-SCALE BKDE - RANGE [0, 1]
         if(args$point_col_smooth) {
           # STORE RE-SCALED BKDE IN COUNTS SLOT
-          args$bkde2d$counts <- cyto_stat_rescale(
-            args$bkde2d$counts
-          )
-          # args$bkde2d$counts <- min(args$bkde2d$counts) +
-          #   ((args$bkde2d$bkde - min(args$bkde2d$bkde))/
-          #      diff(range(args$bkde2d$bkde))) * diff(range(args$bkde2d$counts))
+          args$bkde2d$counts <- min(args$bkde2d$counts) +
+            ((args$bkde2d$bkde - min(args$bkde2d$bkde))/
+               diff(range(args$bkde2d$bkde))) * diff(range(args$bkde2d$counts))
         }
         # MAP BKDE TO ROWS & ASSIGN COLOURS
         args$point_col[[1]] <- cyto_apply(
@@ -3798,7 +3795,7 @@
           copy = FALSE,
           limits = args$key_scale$range,
           FUN = function(z,
-                         scale) {
+                         limits) {
             rgb(
               args$point_col_scale(
                 cyto_stat_rescale(
