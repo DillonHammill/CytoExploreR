@@ -145,6 +145,8 @@
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
+#'   \code{axes_text} can also be set to NA to remove the text only but keep the
+#'   axes ticks.
 #' @param axes_text_font numeric to control the font of axes text, set to 1 for
 #'   plain font by default. See \code{\link[graphics:par]{font}} for
 #'   alternatives.
@@ -613,20 +615,26 @@ cyto_plot <- function(x,
     args$title <- rep("", length(args$x))
     # HISTOGRAMS
     if(length(args$channels) == 1) {
-      args$title <- LAPPLY(seq_along(args$title), function(z){
-        paste0(args$title[z], names(args$x)[z])
-      })
+      args$title <- LAPPLY(
+        seq_along(args$title), 
+        function(z){
+          paste0(args$title[z], names(args$x)[z])
+        }
+      )
       # GROUPS
       if(!is.null(names(args$x))) {
         args$title <- names(args$x)
       }
       # POPULATIONS - SHARED
-      args$title <- LAPPLY(seq_along(args$x), function(z){
-        if(length(unique(names(args$x[[z]]))) == 1) {
-          return(
-            paste(args$title[z],
-                  unique(names(args$x[[z]])),
-                  sep = "\n")
+      args$title <- LAPPLY(
+        seq_along(args$x), 
+        function(z){
+          if(length(unique(names(args$x[[z]]))) == 1) {
+            return(
+             paste(
+               args$title[z],
+               unique(names(args$x[[z]])),
+               sep = "\n")
             )
         } else {
           return(args$title[z])
@@ -706,36 +714,27 @@ cyto_plot <- function(x,
   }
   
   # X AXIS BREAKS & LABELS
-  if (args$axes_text[1] == TRUE) {
-    axes_text_x <- 
-      .cyto_plot_axes_text(
-        args$x[[1]],
-        channels = args$channels[1],
-        axes_trans = args$axes_trans,
-        axes_range = list(args$xlim),
-        axes_limits = args$axes_limits
-      )[[1]]
-  } else {
-    axes_text_x <- FALSE
-  }
+  axes_text_x <- 
+    .cyto_plot_axes_text(
+      args$x[[1]],
+      channels = args$channels[1],
+      axes_text = args$axes_text[1],
+      axes_trans = args$axes_trans,
+      axes_range = list(args$xlim),
+      axes_limits = args$axes_limits
+    )[[1]]
+
   
   # Y AXIS BREAKS & LABELS
-  if (args$axes_text[2] == TRUE) {
-    if (length(args$channels) == 2) {
-      axes_text_y <- 
-        .cyto_plot_axes_text(
-          args$x[[1]],
-          channels = args$channels[2],
-          axes_trans = args$axes_trans,
-          axes_range = list(args$ylim),
-          axes_limits = args$axes_limits
-        )[[1]]
-    } else if (length(args$channels) == 1) {
-      axes_text_y <- NA
-    }
-  } else {
-    axes_text_y <- FALSE
-  }
+  axes_text_y <- 
+    .cyto_plot_axes_text(
+      args$x[[1]],
+      channels = args$channels[2],
+      axes_text = args$axes_text[2],
+      axes_trans = args$axes_trans,
+      axes_range = list(args$ylim),
+      axes_limits = args$axes_limits
+    )[[1]]
   
   # AXES_TEXT
   args$axes_text <- list(axes_text_x, axes_text_y)

@@ -1100,6 +1100,9 @@
 #'
 #' @param x list of cytoframes/cytosets.
 #' @param channels name(s) of the channel(s) used to construct the plot.
+#' @param axes_text logical indicating whether the axes should be displayed by
+#'   \code{cyto_plot()}, set to TRUE by default. Alternatively NA to exclude
+#'   text only.
 #' @param axes_trans transformerList.
 #' @param axes_range named list of axes limits for each each axis (i.e.
 #'   list(xlim,ylim)).
@@ -1112,6 +1115,7 @@
 #' @noRd
 .cyto_plot_axes_text <- function(x,
                                  channels,
+                                 axes_text = TRUE,
                                  axes_trans = NA,
                                  axes_range = list(NA, NA),
                                  axes_limits = "data",
@@ -1146,8 +1150,11 @@
   
   # AXES TICKS & LABELS --------------------------------------------------------
   
+  # AXES_TEXT
+  axes_text <- rep(axes_text, length.out = length(channels))
+  
   # LOOP THROUGH CHANNELS
-  axes_text <- lapply(
+  lapply(
     seq_along(channels), 
     function(z) {
       # CHANNEL
@@ -1156,7 +1163,13 @@
       rng <- axes_range[[z]]
       # NO CHANNEL OR AXES RANGE SUPPLIED - BYPASS
       if(.all_na(chan) & .all_na(rng)) {
-        return(NA)
+        return(
+          list(
+            "label" = NULL,
+            "at" = NULL,
+            "add" = axes_text[z]
+          )
+        )
       }
       # LINEAR SCALE
       if(!chan %in% names(axes_trans)) {
@@ -1259,7 +1272,8 @@
         return(
           list(
             "label" = names(axis_ticks),
-            "at" = axis_ticks
+            "at" = axis_ticks,
+            "add" = axes_text[z]
           )
         )
         # TRANSFORMED SCALE
@@ -1283,24 +1297,27 @@
           )
         )
         # AXIS LABELS
-        axis_labels <- lapply(axis_ticks, function(v) {
-          if (v != 0) {
-            pwr <- log10(abs(v))
-          }
-          if (v == 0) {
-            quote(0)
-          } else if (pwr == 0) {
-            quote("")
-          } else if (abs(pwr) %% 1 == 0) {
-            if(v < 0) {
-              substitute(-10^pwr)
-            } else {
-              substitute(10^pwr)
+        axis_labels <- lapply(
+          axis_ticks, 
+          function(v) {
+            if (v != 0) {
+              pwr <- log10(abs(v))
             }
-          } else {
-            quote("")
+            if (v == 0) {
+              quote(0)
+            } else if (pwr == 0) {
+              quote("")
+            } else if (abs(pwr) %% 1 == 0) {
+              if(v < 0) {
+                substitute(-10^pwr)
+              } else {
+                substitute(10^pwr)
+              }
+            } else {
+              quote("")
+            }
           }
-        })
+        )
         # AXES TEXT
         trans_func <- axes_trans[[chan]]$transform
         inv_func <- axes_trans[[chan]]$inverse
@@ -1362,7 +1379,8 @@
         return(
           list(
             "label" = axis_labels, 
-            "at" = axis_ticks
+            "at" = axis_ticks,
+            "add" = axes_text[z]
           )
         )
       }
@@ -1556,20 +1574,30 @@
   }
   
   # X AXIS
-  if (!all(is(axes_text[[1]], "list"))) {
-    if (.all_na(axes_text[[1]])) {
-      # NA == FALSE returns NA not T/F
-    } else if (all(axes_text[[1]] == FALSE)) {
-      mar[1] <- 4.1
+  if (!cyto_class(axes_text[[1]], "list")) {
+    # X AXIS - TICKS ONLY
+    if(is.na(axes_text[[1]]$add)) {
+      mar[1] <- mar[1] - 0.5
+    # NO X AXIS
+    } else if(!axes_text[[1]]$add) {
+      mar[1] <- mar[1] - 1
+    # COMPLETE X AXIS
+    } else {
+      
     }
   }
   
   # Y AXIS
-  if (!all(is(axes_text[[2]], "list"))) {
-    if (.all_na(axes_text[[2]])) {
-      # NA == FALSE return NA not T/F
-    } else if (all(axes_text[[2]] == FALSE)) {
-      mar[2] <- 4.1
+  if (!cyto_class(axes_text[[2]], "list")) {
+    # X AXIS - TICKS ONLY
+    if(is.na(axes_text[[2]]$add)) {
+      mar[2] <- mar[2] - 0.5
+      # NO X AXIS
+    } else if(!axes_text[[2]]$add) {
+      mar[2] <- mar[2] - 1
+      # COMPLETE X AXIS
+    } else {
+      
     }
   }
     

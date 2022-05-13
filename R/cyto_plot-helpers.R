@@ -80,6 +80,8 @@
 #' @param axes_text logical vector of length 2 indicating whether axis text
 #'   should be included for the x and y axes respectively, set to
 #'   \code{c(TRUE,TRUE)} by default to display axes text on both axes.
+#'   \code{axes_text} can also be set to NA to remove the text only but keep the
+#'   axes ticks.
 #' @param axes_text_font numeric indicating the font to use for axes, set to 1
 #'   for plain font by default. See \code{\link[graphics:par]{?par}} font for
 #'   details.
@@ -370,48 +372,48 @@ cyto_plot_empty <- function(x,
   
   # Convert axes_text to list - allows inheritance from cyto_plot
   if (!cyto_class(axes_text, "list")) {
-    axes_text <- list(axes_text[1], axes_text[2])
+    axes_text <- list(
+      list(
+        "label" = NULL,
+        "at" = NULL,
+        "add" = axes_text[1]
+      ),
+      list(
+        "label" = NULL,
+        "at" = NULL,
+        "add" = axes_text[2]
+      )
+    )
   }
   
-  # X axis breaks and labels -  can be inherited from cyto_plot
-  if (!cyto_class(axes_text[[1]], "list")) {
-    if (.all_na(axes_text[[1]])) {
-      # NA == TRUE returns NA not T/F
-    } else if (axes_text[[1]] == TRUE) {
-      axes_text[[1]] <- .cyto_plot_axes_text(
-        x,
-        channels = channels[1],
-        axes_trans = axes_trans,
-        axes_range = list(xlim),
-        axes_limits = axes_limits
-      )[[1]]
-    }
-  }
-  
-  # Y axis breaks and labels - can be inherited from cyto_plot
-  if (!cyto_class(axes_text[[2]], "list")) {
-    if (.all_na(axes_text[[2]])) {
-      # NA == TRUE returns NA not T/F
-    } else if (axes_text[[2]] == TRUE) {
-      if (length(channels) == 2) {
-        axes_text[[2]] <- .cyto_plot_axes_text(
-          x,
-          channels = channels[2],
-          axes_trans = axes_trans,
-          axes_range = list(ylim),
-          axes_limits = axes_limits
-        )[[1]]
-      } else {
-        axes_text[[2]] <- NA
-      }
-    }
-  }
+  # # X axis breaks and labels -  can be inherited from cyto_plot
+  # if (length(axes_text[[1]]$label) == 0) {
+  #   axes_text[[1]] <- .cyto_plot_axes_text(
+  #     x,
+  #     channels = channels[1],
+  #     axes_text = axes_text[[1]],
+  #     axes_trans = axes_trans,
+  #     axes_range = list(xlim),
+  #     axes_limits = axes_limits
+  #   )[[1]]
+  # }
+  # 
+  # # Y axis breaks and labels - can be inherited from cyto_plot
+  # if (length(axes_text[[2]]$label) == 0) {
+  #   axes_text[[2]] <- .cyto_plot_axes_text(
+  #     x,
+  #     channels = channels[2],
+  #     axes_text = axes_text[[2]],
+  #     axes_trans = axes_trans,
+  #     axes_range = list(ylim),
+  #     axes_limits = axes_limits
+  #   )[[1]]
+  # }
   
   # Turn off y axis labels for stacked overlays
-  if (length(x) > 1 &
-      hist_stack != 0 &
-      length(channels) == 1) {
-    axes_text <- list(axes_text[[1]], FALSE)
+  if (length(x) > 1 & hist_stack != 0 & length(channels) == 1) {
+    axes_text[[2]]$add <- FALSE
+    # axes_text <- list(axes_text[[1]], FALSE)
   }
 
   # AXES LABELS ----------------------------------------------------------------
@@ -483,14 +485,18 @@ cyto_plot_empty <- function(x,
     ylim = ylim,
     xlab = "",
     ylab = "",
-    bty = "n"
+    bty = "n",
+    xaxt = "n",
+    yaxt = "n",
+    ann = FALSE
   )
   
   # X AXIS TEXT
-  if(.all_na(axes_text[[1]])) {
+  if(length(axes_text[[1]]$at) == 0) {
     axes_text[[1]] <- .cyto_plot_axes_text(
       x,
       channels = channels[1],
+      axes_text = axes_text[[1]]$add,
       axes_range = list(xlim),
       axes_limits = axes_limits,
       axes_limits_buffer = axes_limits_buffer,
@@ -498,35 +504,52 @@ cyto_plot_empty <- function(x,
     )[[1]]
   }
   
-  # ADD X AXIS TO PLOT
-  if (cyto_class(axes_text[[1]], "list")) {
+  # ADD X AXIS
+  if(!axes_text[[1]]$add %in% FALSE) {
     # MINOR TICKS
     x_mnr_ind <- which(as.character(axes_text[[1]]$label) == "")
-    axis(
-      1,
-      at = axes_text[[1]]$at[x_mnr_ind],
-      labels = axes_text[[1]]$label[x_mnr_ind],
-      tck = -0.015
-    )
-    
+    # MINOR AXIS TICKS
+    if(axes_text[[1]]$add %in% c(TRUE, NA)) {
+      axis(
+        1,
+        at = axes_text[[1]]$at[x_mnr_ind],
+        labels = axes_text[[1]]$label[x_mnr_ind],
+        tck = -0.015
+      )
+    }
     # MAJOR TICKS
     x_mjr_ind <- which(as.character(axes_text[[1]]$label) != "")
-    axis(
-      1,
-      at = axes_text[[1]]$at[x_mjr_ind],
-      labels = axes_text[[1]]$label[x_mjr_ind],
-      font.axis = axes_text_font,
-      col.axis = axes_text_col,
-      cex.axis = axes_text_size,
-      tck = -0.03
-    )
+    # MAJOR AXIS TICKS & TEXT
+    if(axes_text[[1]]$add %in% TRUE) {
+      axis(
+        1,
+        at = axes_text[[1]]$at[x_mjr_ind],
+        labels = axes_text[[1]]$label[x_mjr_ind],
+        font.axis = axes_text_font,
+        col.axis = axes_text_col,
+        cex.axis = axes_text_size,
+        tck = -0.03
+      )
+    # MAJOR AXIS TICKS ONLY
+    } else {
+      axis(
+        1,
+        at = axes_text[[1]]$at[x_mjr_ind],
+        labels = rep("", length(axes_text[[1]]$label[x_mjr_ind])),
+        font.axis = axes_text_font,
+        col.axis = axes_text_col,
+        cex.axis = axes_text_size,
+        tck = -0.03
+      )
+    }
   }
   
   # Y AXIS TEXT
-  if(.all_na(axes_text[[2]])) {
+  if(length(axes_text[[2]]$at) == 0) {
     axes_text[[2]] <- .cyto_plot_axes_text(
       x,
       channels = channels[2],
+      axes_text = axes_text[[2]]$add,
       axes_range = list(ylim),
       axes_limits = axes_limits,
       axes_limits_buffer = axes_limits_buffer,
@@ -534,27 +557,44 @@ cyto_plot_empty <- function(x,
     )[[1]]
   }
   
-  # ADD Y AXIS TO PLOT
-  if (cyto_class(axes_text[[2]], "list")) {
+  # ADD XY AXIS
+  if(!axes_text[[2]]$add %in% FALSE) {
     # MINOR TICKS
-    y_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
-    axis(
-      2,
-      at = axes_text[[2]]$at[y_mnr_ind],
-      labels = axes_text[[2]]$label[y_mnr_ind],
-      tck = -0.015
-    )
+    x_mnr_ind <- which(as.character(axes_text[[2]]$label) == "")
+    # MINOR AXIS TICKS
+    if(axes_text[[2]]$add %in% c(TRUE, NA)) {
+      axis(
+        2,
+        at = axes_text[[2]]$at[x_mnr_ind],
+        labels = axes_text[[2]]$label[x_mnr_ind],
+        tck = -0.015
+      )
+    }
     # MAJOR TICKS
-    y_mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
-    axis(
-      2,
-      at = axes_text[[2]]$at[y_mjr_ind],
-      labels = axes_text[[2]]$label[y_mjr_ind],
-      font.axis = axes_text_font,
-      col.axis = axes_text_col,
-      cex.axis = axes_text_size,
-      tck = -0.03
-    )
+    x_mjr_ind <- which(as.character(axes_text[[2]]$label) != "")
+    # MAJOR AXIS TICKS & TEXT
+    if(axes_text[[2]]$add %in% TRUE) {
+      axis(
+        2,
+        at = axes_text[[2]]$at[x_mjr_ind],
+        labels = axes_text[[2]]$label[x_mjr_ind],
+        font.axis = axes_text_font,
+        col.axis = axes_text_col,
+        cex.axis = axes_text_size,
+        tck = -0.03
+      )
+      # MAJOR AXIS TICKS ONLY
+    } else {
+      axis(
+        2,
+        at = axes_text[[2]]$at[x_mjr_ind],
+        labels = rep("", length(axes_text[[2]]$label[x_mjr_ind])),
+        font.axis = axes_text_font,
+        col.axis = axes_text_col,
+        cex.axis = axes_text_size,
+        tck = -0.03
+      )
+    }
   }
   
   # BORDER_FILL
@@ -641,54 +681,62 @@ cyto_plot_empty <- function(x,
   
   # XLAB - position labels closer if axes text is missing
   if (!.all_na(xlab)) {
-    if (is(axes_text[[1]], "list")) {
-      title(
-        xlab = xlab,
-        font.lab = axes_label_text_font,
-        col.lab = axes_label_text_col,
-        cex.lab = axes_label_text_size
-      )
-    } else if (.all_na(axes_text[[1]])) {
-      title(
-        xlab = xlab,
-        font.lab = axes_label_text_font,
-        col.lab = axes_label_text_col,
-        cex.lab = axes_label_text_size
-      )
-    } else if (axes_text[[1]] == FALSE) {
+    # NO X AXIS
+    if(axes_text[[1]]$add %in% FALSE) {
       title(
         xlab = xlab,
         font.lab = axes_label_text_font,
         col.lab = axes_label_text_col,
         cex.lab = axes_label_text_size,
         mgp = c(2, 0, 0)
+      )
+    # X AXIS TICKS ONLY
+    } else if(axes_text[[1]]$add %in% NA) {
+      title(
+        xlab = xlab,
+        font.lab = axes_label_text_font,
+        col.lab = axes_label_text_col,
+        cex.lab = axes_label_text_size,
+        line = 2
+      )
+    # X AXIS TICKS & TEXT
+    } else {
+      title(
+        xlab = xlab,
+        font.lab = axes_label_text_font,
+        col.lab = axes_label_text_col,
+        cex.lab = axes_label_text_size
       )
     }
   }
   
   # YLAB - position labels closer if axes text is missing
   if (!.all_na(ylab)) {
-    if (is(axes_text[[2]], "list")) {
-      title(
-        ylab = ylab,
-        font.lab = axes_label_text_font,
-        col.lab = axes_label_text_col,
-        cex.lab = axes_label_text_size
-      )
-    } else if (.all_na(axes_text[[2]])) {
-      title(
-        ylab = ylab,
-        font.lab = axes_label_text_font,
-        col.lab = axes_label_text_col,
-        cex.lab = axes_label_text_size
-      )
-    } else if (axes_text[[2]] == FALSE) {
+    # NO Y AXIS
+    if(axes_text[[2]]$add %in% FALSE) {
       title(
         ylab = ylab,
         font.lab = axes_label_text_font,
         col.lab = axes_label_text_col,
         cex.lab = axes_label_text_size,
         mgp = c(2, 0, 0)
+      )
+      # Y AXIS TICKS ONLY
+    } else if(axes_text[[2]]$add %in% NA) {
+      title(
+        ylab = ylab,
+        font.lab = axes_label_text_font,
+        col.lab = axes_label_text_col,
+        cex.lab = axes_label_text_size,
+        line = 2
+      )
+      # Y AXIS TICKS & TEXT
+    } else {
+      title(
+        ylab = ylab,
+        font.lab = axes_label_text_font,
+        col.lab = axes_label_text_col,
+        cex.lab = axes_label_text_size
       )
     }
   }

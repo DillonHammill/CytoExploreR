@@ -309,7 +309,9 @@ add to either end of the axes limits, set to 0.03 by default.}
 
 \item{axes_text}{logical vector of length 2 indicating whether axis text
 should be included for the x and y axes respectively, set to
-\code{c(TRUE,TRUE)} by default to display axes text on both axes.}
+\code{c(TRUE,TRUE)} by default to display axes text on both axes.
+\code{axes_text} can also be set to NA to remove the text only but keep the
+axes ticks.}
 
 \item{axes_text_font}{numeric to control the font of axes text, set to 1 for
 plain font by default. See \code{\link[graphics:par]{font}} for
