@@ -183,6 +183,100 @@ cyto_gate_apply <- function(x,
   
 }
 
+## CYTO_GATE_INDICES -----------------------------------------------------------
+
+#' Extract event level gate indices for samples in a GatingSet
+#'
+#' @param x object of class GatingHierarchy or GatingSet.
+#' @param select list of selection criteria passed to \code{cyto_select()} to
+#'   restrict the samples prior to extracting the population indices for each
+#'   node.
+#' @param nodes names of the populations for which the indices should be
+#'   returned, set to all nodes except the \code{"root"} node by default.
+#'
+#' @return a named list containing a matrix of indices for each of the supplied
+#'   nodes.
+#'   
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom flowWorkspace gh_pop_get_indices_mat
+#' 
+#' @examples 
+#' \dontrun{
+#' library(CytoExploreRData)
+#'
+#' # Load in samples
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#'
+#' # Apply compensation
+#' gs <- cyto_compensate(gs)
+#'
+#' # Transform fluorescent channels
+#' gs <- cyto_transform(gs)
+#'
+#' # Gate using cyto_gate_draw
+#' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
+#'
+#' # Remove T Cells population - replace gatingTemplate name
+#' cyto_gate_indices(
+#'   gs, 
+#'   select = 32, 
+#'   nodes = c("T Cells", "CD4 T Cells", "CD8 T Cells")
+#' )
+#' }
+#'
+#' @export
+cyto_gate_indices <- function(x,
+                              select = NULL,
+                              nodes = NULL) {
+  
+  # GATINGHIERARCHY | GATINGSET
+  if(!cyto_class(x, "GatingSet")) {
+    stop(
+      "'x' must be either a GatingHierarchy or GatingSet!"
+    )
+  }
+  
+  # RESTRICT DATA
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
+  
+  # DEFAULT NODES - DROP ROOT NODE
+  if(is.null(nodes)) {
+    nodes <- cyto_nodes(
+      x,
+      path = "auto"
+    )[-1]
+  # CONVERT VALID NODES
+  } else {
+    nodes <- cyto_nodes_convert(
+      x,
+      nodes,
+      path = "auto"
+    )
+  }
+
+  # EXTRACT POPULATION INDICIES
+  structure(
+    lapply(
+      seq_along(x),
+      function(z) {
+        gh_pop_get_indices_mat(
+          x[[z]],
+          nodes
+        )
+      }
+    ),
+    names = cyto_names(x)
+  )
+  
+}
+
 ## CYTO_GATE_REMOVE ------------------------------------------------------------
 
 #' Remove Gate(s) and Edit gatingTemplate csv File
@@ -228,8 +322,7 @@ cyto_gate_apply <- function(x,
 #' gs <- cyto_transform(gs)
 #'
 #' # Gate using cyto_gate_draw
-#' gt <- Activation_gatingTemplate
-#' gt_gating(gt, gs)
+#' gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 #'
 #' # Remove T Cells population - replace gatingTemplate name
 #' cyto_gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")

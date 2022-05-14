@@ -62,8 +62,7 @@ gs <- cyto_compensate(gs)
 gs <- cyto_transform(gs)
 
 # Gate using cyto_gate_draw
-gt <- Activation_gatingTemplate
-gt_gating(gt, gs)
+gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 
 # Remove T Cells population - replace gatingTemplate name
 cyto_gate_remove(gs, "T Cells", gatingTemplate = "gatingTemplate.csv")
