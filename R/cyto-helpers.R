@@ -1062,7 +1062,7 @@ cyto_class <- function(x,
 #'
 #' @importFrom flowWorkspace pData
 #' @importFrom utils type.convert
-#'
+#' 
 #' @examples
 #' library(CytoExploreRData)
 #'
@@ -6359,6 +6359,8 @@ cyto_nodes_check <- function(x,
 #'   to FALSE by default.
 #' @param sort logical indicating whether the returned nodes should be sorted to
 #'   match their order in the gating tree, set to FALSE by default.
+#' @param ignore.case logical to indicate whether case insensitive matching
+#'   should be used, set to FALSE by default.
 #'
 #' @return vector of unique paths for each of the supplied nodes.
 #'
@@ -6370,7 +6372,8 @@ cyto_nodes_convert <- function(x,
                                anchor = NULL,
                                path = "auto",
                                hidden = FALSE,
-                               sort = FALSE) {
+                               sort = FALSE,
+                               ignore.case = FALSE) {
   
   # TODO: ALLOW DIFFERENT ANCHOR PER NODE 
   
@@ -6380,12 +6383,12 @@ cyto_nodes_convert <- function(x,
     path = "full",
     hidden = hidden
   )
-  nodes_auto <- cyto_nodes(
-    x, 
-    path = "auto",
-    hidden = hidden
-  )
-  nodes_terminal <- basename(nodes_full)
+  # nodes_auto <- cyto_nodes(
+  #   x, 
+  #   path = "auto",
+  #   hidden = hidden
+  # )
+  # nodes_terminal <- basename(nodes_full)
   
   # STRIP REFERENCE TO ROOT
   nodes <- LAPPLY(
@@ -6393,7 +6396,6 @@ cyto_nodes_convert <- function(x,
     function(node){
       if(grepl("root/", node)){
         node <- gsub("root/", "/", node)
-        return(node)
       }
       return(node)
     }
@@ -6401,85 +6403,53 @@ cyto_nodes_convert <- function(x,
   
   # ANCHOR
   if (!is.null(anchor)) {
+    # TODO: PERFORM SEARCH WITH ESCAPED SLASHES
+    # ANCHOR NODE(S) SEARCH
+    anchor_match <- grep(
+      paste0(
+        if(!grepl("^\\/", anchor)) {
+          "/"
+        } else {
+          ""
+        }, anchor, "$" # AVOID PARTIAL MATCH IN TERMINAL NODE
+      ),
+      nodes_full,
+      fixed = FALSE,
+      ignore.case = ignore.case
+    )
     # INVALID ANCHOR
-    if (!anchor %in% c(nodes_full, nodes_auto, nodes_terminal)) {
+    if(length(anchor_match) == 0) {
       stop(paste0(anchor, " does not exist in this ", class(x), "!"))
-    }
-    # TERMINAL ANCHOR
-    if (anchor %in% nodes_terminal) {
-      anchor_match <- which(
-        LAPPLY(
-          nodes_terminal,
-          function(node_terminal) {
-            anchor == node_terminal
-          }
-        )
-      )
-    # AUTO NODE
-    } else if (anchor %in% nodes_auto) {
-      anchor_match <- which(
-        LAPPLY(
-          nodes_auto, 
-          function(node_auto) {
-            anchor == node_auto
-          }
-        )
-      )
-    # FULL NODE
-    } else if (anchor %in% nodes_full) {
-      anchor_match <- which(
-        LAPPLY(
-          nodes_full, 
-          function(node_full) {
-            anchor == node_full
-          }
-        )
-      )
     }
     # ANCHOR MUST BE UNIQUE
     if (length(anchor_match) > 1) {
       stop(paste0(anchor, " is not unique within this ", class(x), "!"))
     }
-    # AUTO ANCHOR
-    anchor <- nodes_auto[anchor_match]
+    # FULL ANCHOR
+    anchor <- nodes_full[anchor_match]
   }
   
   # CONVERT NODES
   nodes <- LAPPLY(
     nodes, 
     function(node) {
-      # TERMINAL NODE
-      if (node %in% nodes_terminal) {
-        nodes_match <- which(
-          LAPPLY(
-            nodes_terminal, 
-            function(node_terminal) {
-              node == node_terminal
-            }
-          )
-        )
-        # AUTO NODE
-      } else if (node %in% nodes_auto) {
-        nodes_match <- which(
-          LAPPLY(
-            nodes_auto, 
-            function(node_auto) {
-              node == node_auto
-            }
-          )
-        )
-        # FULL NODE
-      } else if (node %in% nodes_full) {
-        nodes_match <- which(
-          LAPPLY(
-            nodes_full,
-            function(node_full) {
-              node == node_full
-            }
-          )
-        )
-        # NODE DOES NOT EXIST
-      } else {
+      # NODE SEARCH
+      nodes_match <- grep(
+        paste0(
+          if(!grepl("^\\/", node)) {
+            "/"
+          } else {
+            ""
+          },
+          node,
+          "$"
+        ),
+        nodes_full,
+        ignore.case = ignore.case,
+        fixed = FALSE
+      )
+      # INVALID NODE
+      if(length(nodes_match) == 0) {
         stop(paste0(node, " does not exist in this ", class(x), "!"))
       }
       # RETURN NODE
@@ -6490,12 +6460,12 @@ cyto_nodes_convert <- function(x,
           hidden = hidden
         )[nodes_match]
         return(nodes)
-        # AMBIGUOUS NODE - ANCHOR TO PARENTAL NODE
+      # AMBIGUOUS NODE - ANCHOR TO PARENTAL NODE
       } else if (length(nodes_match) > 1) {
         # NO ANCHOR
         if (is.null(anchor)) {
           stop(paste0(node, " is ambiguous in this ", class(x), "!"))
-          # ANCHOR
+        # ANCHOR
         } else if (!is.null(anchor)) {
           # SPLIT NODE
           node_split <- .cyto_nodes_split(node)
@@ -6518,11 +6488,13 @@ cyto_nodes_convert <- function(x,
           )
           # CANNOT FIND UNIQUE NODE PATH
           if (length(ind) == 0) {
-            stop(paste0(
-              "Failed to generate unique path for ", node,
-              " relative to ", anchor, "."
-            ))
-            # UNIQUE NODE PATH EXISTS
+            stop(
+              paste0(
+                "Failed to generate unique path for ", node,
+                " relative to ", anchor, "."
+              )
+            )
+          # UNIQUE NODE PATH EXISTS
           } else {
             if (length(ind) == 1) {
               node <- cyto_nodes(
@@ -6531,8 +6503,8 @@ cyto_nodes_convert <- function(x,
                 hidden = hidden
               )[ind]
               return(node)
+            # NON-UNIQUE NODE PATH - CHOOSE SHORTEST
             } else if (length(ind) > 1) {
-              # USE SHORTEST PATH (REMOVE DESCENDANTS)
               nodes_unique <- nodes_full_split[ind]
               nodes_lengths <- LAPPLY(nodes_unique, "length")
               nodes_length_min <- min(nodes_lengths)

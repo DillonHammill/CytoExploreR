@@ -10,7 +10,8 @@ cyto_nodes_convert(
   anchor = NULL,
   path = "auto",
   hidden = FALSE,
-  sort = FALSE
+  sort = FALSE,
+  ignore.case = FALSE
 )
 }
 \arguments{
@@ -30,6 +31,9 @@ to FALSE by default.}
 
 \item{sort}{logical indicating whether the returned nodes should be sorted to
 match their order in the gating tree, set to FALSE by default.}
+
+\item{ignore.case}{logical to indicate whether case insensitive matching
+should be used, set to FALSE by default.}
 }
 \value{
 vector of unique paths for each of the supplied nodes.
