@@ -6436,7 +6436,9 @@ cyto_nodes_convert <- function(x,
       # NODE SEARCH
       nodes_match <- grep(
         paste0(
-          if(!grepl("^\\/", node)) {
+          if(node == "root") {
+            ""
+          } else if(!grepl("^\\/", node)) {
             "/"
           } else {
             ""
