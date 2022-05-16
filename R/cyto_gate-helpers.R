@@ -188,6 +188,8 @@ cyto_gate_apply <- function(x,
 #' Extract event level gate indices for samples in a GatingSet
 #'
 #' @param x object of class GatingHierarchy or GatingSet.
+#' @param parent name of the parent population from which the gate indices
+#'   should be returned, set to the \code{"root"} node by default.
 #' @param select list of selection criteria passed to \code{cyto_select()} to
 #'   restrict the samples prior to extracting the population indices for each
 #'   node.
@@ -196,12 +198,12 @@ cyto_gate_apply <- function(x,
 #'
 #' @return a named list containing a matrix of indices for each of the supplied
 #'   nodes.
-#'   
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @importFrom flowWorkspace gh_pop_get_indices_mat
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
 #' library(CytoExploreRData)
 #'
@@ -220,14 +222,15 @@ cyto_gate_apply <- function(x,
 #'
 #' # Remove T Cells population - replace gatingTemplate name
 #' cyto_gate_indices(
-#'   gs, 
-#'   select = 32, 
+#'   gs,
+#'   select = 32,
 #'   nodes = c("T Cells", "CD4 T Cells", "CD8 T Cells")
 #' )
 #' }
 #'
 #' @export
 cyto_gate_indices <- function(x,
+                              parent = "root",
                               select = NULL,
                               nodes = NULL) {
   
@@ -246,6 +249,13 @@ cyto_gate_indices <- function(x,
     )
   }
   
+  # PARENT
+  parent <- cyto_nodes_convert(
+    x,
+    nodes = parent,
+    path = "auto"
+  )
+  
   # DEFAULT NODES - DROP ROOT NODE
   if(is.null(nodes)) {
     nodes <- cyto_nodes(
@@ -261,15 +271,20 @@ cyto_gate_indices <- function(x,
     )
   }
 
+  # ADD PARENT NODE
+  nodes <- c(parent, nodes)
+  
   # EXTRACT POPULATION INDICIES
   structure(
     lapply(
       seq_along(x),
       function(z) {
-        gh_pop_get_indices_mat(
+        ind <- gh_pop_get_indices_mat(
           x[[z]],
           nodes
         )
+        # SUBSET TO PARENT - DROP INDICES
+        ind[ind[, 1] == TRUE, -1, drop = FALSE]
       }
     ),
     names = cyto_names(x)

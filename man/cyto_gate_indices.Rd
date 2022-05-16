@@ -4,10 +4,13 @@
 \alias{cyto_gate_indices}
 \title{Extract event level gate indices for samples in a GatingSet}
 \usage{
-cyto_gate_indices(x, select = NULL, nodes = NULL)
+cyto_gate_indices(x, parent = "root", select = NULL, nodes = NULL)
 }
 \arguments{
 \item{x}{object of class GatingHierarchy or GatingSet.}
+
+\item{parent}{name of the parent population from which the gate indices
+should be returned, set to the \code{"root"} node by default.}
 
 \item{select}{list of selection criteria passed to \code{cyto_select()} to
 restrict the samples prior to extracting the population indices for each
@@ -42,8 +45,8 @@ gs <- cyto_gatingTemplate_apply(gs, Activation_gatingTemplate)
 
 # Remove T Cells population - replace gatingTemplate name
 cyto_gate_indices(
-  gs, 
-  select = 32, 
+  gs,
+  select = 32,
   nodes = c("T Cells", "CD4 T Cells", "CD8 T Cells")
 )
 }
