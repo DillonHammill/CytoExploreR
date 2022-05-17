@@ -437,6 +437,8 @@ cyto_load <- function(path = ".",
         "events"
       )
     }
+    # RECOMPUTE
+    suppressMessages(recompute(x))
   # FCS FILES
   } else {
     # VALID FILES
