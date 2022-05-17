@@ -6394,9 +6394,9 @@ cyto_nodes_convert <- function(x,
   nodes <- LAPPLY(
     nodes, 
     function(node){
-      # DROP ROOT
-      if(grepl("root/", node)){
-        node <- gsub("root/", "/", node)
+      # DROP ROOT REFERENCE
+      if(grepl("\\/?root\\/", node)){
+        node <- gsub("\\/?root\\/", "/", node)
       }
       # ESCAPE SPECIAL CHARACTERS
       node <- gsub(
@@ -6411,6 +6411,10 @@ cyto_nodes_convert <- function(x,
   # ANCHOR
   if (!is.null(anchor)) {
     # TODO: PERFORM SEARCH WITH ESCAPED SLASHES
+    # DROP ROOT REFERENCE
+    if(grepl("\\/?root\\/", anchor)){
+      anchor <- gsub("\\/?root\\/", "/", anchor)
+    }
     # ESCAPE SPECIAL CHARACTERS
     anchor <- gsub(
       "([.|()\\^{}+$*?]|\\[|\\])", 
@@ -6420,7 +6424,9 @@ cyto_nodes_convert <- function(x,
     # ANCHOR NODE(S) SEARCH
     anchor_match <- grep(
       paste0(
-        if(!grepl("^\\/", anchor)) {
+        if(anchor == "root") {
+          ""
+        } else if(!grepl("^\\/", anchor)) {
           "\\/"
         } else {
           ""
