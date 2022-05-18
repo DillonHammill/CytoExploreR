@@ -389,28 +389,34 @@
   names(x) <- x_names
   
   # NUMERIC CONVERSION
-  x <- lapply(seq_along(x), function(z){
-    arg <- names(x[z])
-    if(arg %in% names(args)){
-      lapply(x[[arg]], function(w){
-        if(is.vector(w)) {
-          empty_ind <- which(LAPPLY(w, ".empty"))
-          if(length(empty_ind) == 0) {
-            return(type.convert(w, as.is = TRUE))
-          } else if(length(empty_ind) == length(w)) {
-            return(w)
-          } else {
-            w[-empty_ind] <- type.convert(w[-empty_ind], as.is = TRUE)
-            return(w)
+  x <- lapply(
+    seq_along(x), 
+    function(z){
+      arg <- names(x[z])
+      if(arg %in% names(args)){
+        lapply(
+          x[[arg]], 
+          function(w){
+            if(is.vector(w) & !is.list(w)) {
+              empty_ind <- which(LAPPLY(w, ".empty"))
+              if(length(empty_ind) == 0) {
+                return(type.convert(w, as.is = TRUE))
+              } else if(length(empty_ind) == length(w)) {
+                return(w)
+              } else {
+                w[-empty_ind] <- type.convert(w[-empty_ind], as.is = TRUE)
+                return(w)
+              }
+            } else {
+              return(w)
+            }
           }
-        } else {
-          return(w)
-        }
-      })
-    } else {
-      return(x[[z]])
+        )
+      } else {
+        return(x[[z]])
+      }
     }
-  })
+  )
   names(x) <- x_names
   
   # RETURN SPLIT ARGUMENTS
