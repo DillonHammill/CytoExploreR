@@ -482,7 +482,9 @@ cyto_plot_empty <- function(x,
     margins = margins,
     point_col = point_col,
     key = key,
-    key_scale = key_scale
+    key_scale = key_scale,
+    key_text_size = key_text_size,
+    key_title_text_size = key_title_text_size
   )
   
   # PLOT CONSTRUCTION ----------------------------------------------------------

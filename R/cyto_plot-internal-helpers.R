@@ -1519,7 +1519,9 @@
                                margins = c(NA, NA, NA, NA),
                                point_col = NA,
                                key = "both",
-                               key_scale = "fixed") {
+                               key_scale = "fixed",
+                               key_text_size = 0.9,
+                               key_title_text_size = 0.9) {
   
   # ARGUMENTS
   args <- .args_list()
@@ -1535,42 +1537,40 @@
   # MARGIN DEFAULT
   mar <- c(5.1, 5.1, 4.1, 2.1)
   
-  # KEY 
-  if(length(channels) == 2 & 
-     (any(is.na(point_col)) | 
-      any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
-     !key %in% "none") {
-    # KEY SCALE & TEXT
-    if(key %in% "both") {
-      mar[4] <- mar[4] + 2.9
-    } else {
-      mar[4] <- mar[4] + 1
+  # KEY
+  if(length(channels) == 2 &
+     !key %in% "none" &
+     cyto_class(key_scale, "cyto_plot_key")) {
+    # SPACE FOR COLOUR SCALE
+    mar[4] <- mar[4] + 1
+    # SPACE FOR TICKS
+    if(key %in% c(TRUE, "both")) {
+      mar[4] <- mar[4] + 0.6
     }
+    # SPACE FOR KEY TITLE & LABELS
+    key_title_space <- 0
+    if(!.all_na(key_scale$title)) {
+      key_title_space <- (nchar(key_scale$title)/2) * 0.32 * key_title_text_size
+    }
+    # SPACE FOR TICKS & LABELS
+    key_label_space <- 0
+    if(key %in% c(TRUE, "both")) {
+      key_label_space <- (max(nchar(key_scale$label))/2) * 0.42 * key_text_size
+    }
+    mar[4] <- mar[4] + max(key_title_space, key_label_space)
   }
     
   # LEGEND TEXT
   if (legend != FALSE & !.all_na(legend_text)) {
-    # KEY REQUIRED
-    if(length(channels) == 2 & 
-       (any(is.na(point_col)) | 
-        any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
-       !key %in% "none") {
-      # KEY SCALE & TEXT
-      if(key %in% "both" & length(channels) == 2) {
-        mar[4] <- 8.8 + max(nchar(legend_text))*0.32*mean(legend_text_size)
-        # KEY SCALE ONLY
-      } else {
-        mar[4] <- 7.5 + max(nchar(legend_text))*0.32*mean(legend_text_size)
-      }
-      # NO KEY
-    } else {
-      mar[4] <- 7 + max(nchar(legend_text))*0.32*mean(legend_text_size)
-    }
+    mar[4] <- mar[4] + 2.1 + max(nchar(legend_text))*0.32*mean(legend_text_size)
   }
     
+  # RIGHT PADDING
+  mar[4] <- mar[4] + 0.1
+  
   # TITLE
   if (.all_na(title)) {
-    mar[3] <- 2.2
+    mar[3] <- mar[3] - 1.9
   }
   
   # X AXIS
@@ -3080,7 +3080,7 @@
         if(!.all_na(key_scale$title)) {
           # TITLE TEXT
           text(
-            x = key_x[2] + 0.99 * diff(key_x),
+            x = key_x[2],
             y = key_y[2] + 0.02 * diff(key_y),
             pos = 3,
             offset = 0,
