@@ -805,6 +805,7 @@ cyto_plot <- function(x,
       ylim = args$ylim,
       point_col = args$point_col,
       key_scale = args$key_scale,
+      key_title = key_title,
       axes_trans = args$axes_trans
     )
   # KEY_SCALE 1D - REQUIRED FOR ARGUMENT SPLITTER

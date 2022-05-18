@@ -442,19 +442,30 @@ cyto_plot_empty <- function(x,
   
   # KEY_SCALE REQUIRED FOR MARGINS
   if(length(channels) == 2 &
-     (is.na(point_col)[1] |
-      any(point_col %in% c(cyto_channels(x), cyto_markers(x)))) &
-     key %in% c("scale", "both") &
+     key %in% c("scale", "both") & 
      !cyto_class(key_scale, "cyto_plot_key")) {
-    key_scale <- .cyto_plot_key_scale(
-      x,
-      channels = channels,
-      xlim = xlim,
-      ylim = ylim,
-      point_col = point_col,
-      key_scale = key_scale,
-      axes_trans = axes_trans
-    )[[1]]
+    # KEY REQUIRED?
+    if(cyto_class(point_col, "list", TRUE)) {
+      req <- TRUE
+    } else if((is.na(point_col)[1] |
+               any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
+      req <- TRUE
+    } else {
+      req <- FALSE
+    }
+    # COMPUTE KEY_SCALE
+    if(req) {
+      key_scale <- .cyto_plot_key_scale(
+        x,
+        channels = channels,
+        xlim = xlim,
+        ylim = ylim,
+        point_col = point_col,
+        key_scale = key_scale,
+        key_title = key_title,
+        axes_trans = axes_trans
+      )[[1]]
+    }
   }
   
   # MARGINS --------------------------------------------------------------------
