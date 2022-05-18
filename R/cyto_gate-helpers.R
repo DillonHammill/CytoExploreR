@@ -195,6 +195,8 @@ cyto_gate_apply <- function(x,
 #'   node.
 #' @param nodes names of the populations for which the indices should be
 #'   returned, set to all nodes except the \code{"root"} node by default.
+#' @param labels logical indicating whether logical gate memberships should be
+#'   converted into a merged factor of node names, set to FALSE by default.
 #'
 #' @return a named list containing a matrix of indices for each of the supplied
 #'   nodes.
@@ -232,7 +234,8 @@ cyto_gate_apply <- function(x,
 cyto_gate_indices <- function(x,
                               parent = "root",
                               select = NULL,
-                              nodes = NULL) {
+                              nodes = NULL,
+                              labels = FALSE) {
   
   # GATINGHIERARCHY | GATINGSET
   if(!cyto_class(x, "GatingSet")) {
@@ -279,12 +282,44 @@ cyto_gate_indices <- function(x,
     lapply(
       seq_along(x),
       function(z) {
+        # GATE MEMBERSHIPS
         ind <- gh_pop_get_indices_mat(
           x[[z]],
           nodes
         )
-        # SUBSET TO PARENT - DROP INDICES
-        ind[ind[, 1] == TRUE, -1, drop = FALSE]
+        # SUBSET TO PARENT
+        ind <- ind[ind[, parent] == TRUE, , drop = FALSE]
+        # LABELS
+        if(labels) {
+          ind <- factor(
+            apply(
+              ind, 
+              1,
+              function(v) {
+                # COLUMN
+                i <- which(v)
+                # CONFLICT
+                if(length(i) > 2) {
+                  warning(
+                    paste0(
+                      "Replacing ambiguous cluster labels with ",
+                      parent, "!"
+                    )
+                  )
+                  return(colnames(ind)[1])
+                # PARENT
+                } else if(length(i) == 1) {
+                  return(colnames(ind)[i])
+                # NODE
+                } else if(length(i) == 2) {
+                  return(colnames(ind)[i[i != 1]])
+                }
+              }
+            ),
+            levels = nodes
+          )
+        }
+        return(ind)
       }
     ),
     names = cyto_names(x)

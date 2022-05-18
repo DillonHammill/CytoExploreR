@@ -4,7 +4,13 @@
 \alias{cyto_gate_indices}
 \title{Extract event level gate indices for samples in a GatingSet}
 \usage{
-cyto_gate_indices(x, parent = "root", select = NULL, nodes = NULL)
+cyto_gate_indices(
+  x,
+  parent = "root",
+  select = NULL,
+  nodes = NULL,
+  labels = FALSE
+)
 }
 \arguments{
 \item{x}{object of class GatingHierarchy or GatingSet.}
@@ -18,6 +24,9 @@ node.}
 
 \item{nodes}{names of the populations for which the indices should be
 returned, set to all nodes except the \code{"root"} node by default.}
+
+\item{labels}{logical indicating whether logical gate memberships should be
+converted into a merged factor of node names, set to FALSE by default.}
 }
 \value{
 a named list containing a matrix of indices for each of the supplied
