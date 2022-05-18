@@ -1495,7 +1495,7 @@
 
 #' Set plot margins
 #'
-#' @param x list of flowFrames or density objects to plot.
+#' @param x list of cytosets or density objects to plot.
 #' @param legend logical indicating whether a legend should be included in the
 #'   plot.
 #' @param title if NULL remove excess space above plot.
@@ -3077,45 +3077,19 @@
           }
         )
         # KEY TITLE - BYPASS IF COLOURS SUPPLIED MANUALLY PER EVENT
-        if(!.all_na(key_title)) {
-          # DEFAULT TITLE
-          if(.empty(key_title) & !cyto_class(point_col, "list", TRUE)) {
-            # COUNTS
-            if(.all_na(point_col[1])) {
-              key_title <- "count"
-            } else {
-              # TRY MARKER FIRST (SHORTER)
-              key_title <- tryCatch(
-                cyto_markers_extract(
-                  x,
-                  channels = point_col[1]
-                ),
-                error = function(e){
-                  # RESORT TO CHANNEL
-                  cyto_channels_extract(
-                    x,
-                    channels = point_col[1]
-                  )
-                }
-              )
-            }
-          } else {
-            key_title <- NA
-          }
+        if(!.all_na(key_scale$title)) {
           # TITLE TEXT
-          if(!.all_na(key_title)) {
-            text(
-              x = key_x[2] + 0.99 * diff(key_x),
-              y = key_y[2] + 0.02 * diff(key_y),
-              pos = 3,
-              offset = 0,
-              labels = key_title,
-              font = key_title_text_font,
-              cex = key_title_text_size,
-              col = adjustcolor(key_title_text_col, key_title_text_col_alpha),
-              xpd = TRUE
-            )
-          }
+          text(
+            x = key_x[2] + 0.99 * diff(key_x),
+            y = key_y[2] + 0.02 * diff(key_y),
+            pos = 3,
+            offset = 0,
+            labels = key_scale$title,
+            font = key_title_text_font,
+            cex = key_title_text_size,
+            col = adjustcolor(key_title_text_col, key_title_text_col_alpha),
+            xpd = TRUE
+          )
         }
       }
     }
@@ -3231,6 +3205,7 @@
                                  ylim = c(NA, NA),
                                  point_col = NA,
                                  key_scale = "fixed",
+                                 key_title = "",
                                  axes_trans = NA) {
   
   # X AXES LIMITS REQUIRED - CROP GRID
@@ -3281,6 +3256,9 @@
   if(!cyto_class(point_col, "list", TRUE)) {
     point_col <- rep(list(point_col[1]), length.out = length(x))
   }
+  
+  # KEY_TITLE
+  key_title <- rep(key_title, length.out = length(x))
   
   # PREPARE KEY - MARKERS|CHANNELS OR COLOURS
   if(cyto_class(point_col[[1]], "character")) {
@@ -3348,50 +3326,60 @@
           names = names(key_range)
         )
       }
+      # PREPARE KEYS
+      key <- structure(
+        lapply(
+          seq_along(key_range),
+          function(z){
+            # INFINITE RANGE
+            if(.all_na(key_range[[z]]) | any(!is.finite(key_range[[z]]))) {
+              k <- list(
+                "range" = NA,
+                "label" = NA,
+                "at" = NA
+              )
+              # PREPARE AXIS TICKS & LABELS
+            } else {
+              pad <- (diff(key_range[[z]]) - diff(key_range[[z]])/1.04)/2
+              k <- .cyto_plot_axes_text(
+                channels = point_col[[1]],
+                axes_range = list(key_range[[z]]),
+                axes_trans = axes_trans,
+                rescale = ylim,
+                format = TRUE
+              )[[1]]
+              k$range <- c(min(key_range[[z]]) - pad, max(key_range[[z]]) + pad)
+              k$title <- if(.empty(key_title[z])) {
+                point_col[[z]]
+              } else {
+                key_title[z]
+              }
+            }
+            class(k) <- "cyto_plot_key"
+            return(k)
+          }
+        )
+      )
     # COLOURS SUPPLIED MANUALLY
     } else {
       # KEY PLACEHOLDER
-      k <- list(
-        "range" =  NA,
-        "label" = NA,
-        "at" = NA
-      )
-      class(k) <- "cyto_plot_key"
-      key <- rep(
-        list(k),
-        length(x)
-      )
-      names(key) <- names(x)
-    }
-    # PREPARE KEYS
-    key <- structure(
-      lapply(
-        key_range,
-        function(z){
-          # INFINITE RANGE
-          if(.all_na(z) | any(!is.finite(z))) {
+      key <- structure(
+        lapply(
+          seq_along(x),
+          function(z) {
             k <- list(
-              "range" = NA,
+              "range" =  NA,
               "label" = NA,
-              "at" = NA
+              "at" = NA,
+              "title" = NA
             )
-            # PREPARE AXIS TICKS & LABELS
-          } else {
-            pad <- (diff(z) - diff(z)/1.04)/2
-            k <- .cyto_plot_axes_text(
-              channels = point_col[[1]],
-              axes_range = list(z),
-              axes_trans = axes_trans,
-              rescale = ylim,
-              format = TRUE
-            )[[1]]
-            k$range <- c(min(z) - pad, max(z) + pad)
+            class(k) <- "cyto_plot_key"
+            return(k)
           }
-          class(k) <- "cyto_plot_key"
-          return(k)
-        }
+        ),
+        names = names(x)
       )
-    )
+    }
   # PREPARE KEY - NUMERIC | LOGICAL | FACTOR
   } else if(cyto_class(point_col[[1]], c("numeric", "logical", "factor"))) {
     # NUMERIC
@@ -3424,10 +3412,10 @@
       # PREPARE KEYS
       key <- structure(
         lapply(
-          key_range,
+          seq_along(key_range),
           function(z){
             # INFINITE RANGE
-            if(.all_na(z) | any(!is.finite(z))) {
+            if(.all_na(key_range[[z]]) | any(!is.finite(key_range[[z]]))) {
               k <- list(
                 "range" = NA,
                 "label" = NA,
@@ -3435,14 +3423,15 @@
               )
               # PREPARE AXIS TICKS & LABELS
             } else {
-              pad <- (diff(z) - diff(z)/1.04)/2
+              pad <- (diff(key_range[[z]]) - diff(key_range[[z]])/1.04)/2
               k <- .cyto_plot_axes_text(
                 channels = NA,
-                axes_range = list(z),
+                axes_range = list(key_range[[z]]),
                 rescale = ylim,
                 format = TRUE
               )[[1]]
-              k$range <- c(min(z) - pad, max(z) + pad)
+              k$range <- c(min(key_range[[z]]) - pad, max(key_range[[z]]) + pad)
+              k$title <- key_title[z]
             }
             class(k) <- "cyto_plot_key"
             return(k)
@@ -3498,25 +3487,32 @@
         # PREPARE KEYS
         key <- structure(
           lapply(
-            key_range,
+            seq_along(key_range),
             function(z){
               # NA BKDE - TOO FEW EVENTS
-              if(.all_na(z)) {
+              if(.all_na(key_range[[z]])) {
                 k <-list(
                   "range" = NA,
                   "label" = NA,
-                  "at" = NA
+                  "at" = NA,
+                  "title" = NA
                 )
                 # PREPARE AXIS TICKS & LABELS
               } else {
-                pad <- (diff(z) - diff(z)/1.04)/2
+                pad <- (diff(key_range[[z]]) - diff(key_range[[z]])/1.04)/2
                 k <- .cyto_plot_axes_text(
                   channels = NA,
-                  axes_range = list(z),
+                  axes_range = list(key_range[[z]]),
                   rescale = ylim,
                   format = TRUE
                 )[[1]]
-                k$range <- c(min(z) - pad, max(z) + pad)
+                k$range <- c(min(key_range[[z]]) - pad, 
+                             max(key_range[[z]]) + pad)
+                k$title <- if(.empty(key_title[z])) {
+                  "count"
+                } else {
+                  key_title[z]
+                }
               }
               class(k) <- "cyto_plot_key"
               return(k)
@@ -3528,7 +3524,7 @@
         # PREPARE KEYS - FIXED ONLY
         key <- structure(
           lapply(
-            key_range,
+            seq_along(key_range),
             function(z){
               pad <- (diff(c(0,1)) - diff(c(0,1))/1.04)/2
               k <- .cyto_plot_axes_text(
@@ -3538,6 +3534,7 @@
                 format = TRUE
               )[[1]]
               k$range <- c(0 - pad, 1 + pad)
+              k$title <- key_title[z]
               class(k) <- "cyto_plot_key"
               return(k)
             }
@@ -3569,20 +3566,22 @@
       # PREPARE KEYS
       key <- structure(
         lapply(
-          key_range,
+          seq_along(key_range),
           function(z){
-            pad <- (diff(c(1, length(z))) - diff(c(1, length(z)))/1.04)/2
+            pad <- (diff(c(1, length(key_range[[z]]))) - 
+                      diff(c(1, length(key_range[[z]])))/1.04)/2
             k <- list(
-              range = c(1 - pad, length(z) + pad),
+              range = c(1 - pad, length(key_range[[z]]) + pad),
               at = cyto_stat_rescale(
-                1:length(z),
+                1:length(key_range[[z]]),
                 scale = ylim,
                 limits = c(
                   1 - pad,
-                  length(z) + pad
+                  length(key_range[[z]]) + pad
                 )   # ADD 4% PADDING - BYPASS CYTO_PLOT_AXES_TEXT()
               ),
-              label = z
+              label = key_range[[z]],
+              title = key_title[z]
             )
             class(k) <- "cyto_plot_key"
             return(k)
@@ -3599,17 +3598,22 @@
       )
     )
     # KEY PLACEHOLDER
-    k <- list(
-      "range" =  NA,
-      "label" = NA,
-      "at" = NA
+    key <- structure(
+      lapply(
+        seq_along(x),
+        function(z) {
+          k <- list(
+            "range" =  NA,
+            "label" = NA,
+            "at" = NA,
+            "title" = NA
+          )
+          class(k) <- "cyto_plot_key"
+          return(k)
+        }
+      ),
+      names = names(x)
     )
-    class(k) <- "cyto_plot_key"
-    key <- rep(
-      list(k),
-      length(x)
-    )
-    names(key) <- names(x)
   }
   
   # RETURN KEYS
