@@ -337,6 +337,26 @@
     )
   }
   
+  # EVENTS - NA -> MINIMUM ACROSS BASE LAYERS
+  if(.all_na(events)) {
+    events <- min(
+      LAPPLY(
+        x,
+        function(z) {
+          cyto_stat_count(
+            cyto_exprs(z[[1]][[1]])
+          )
+        }
+      )
+    )
+    message(
+      paste0(
+        "Downsampling the base layer in each plot to ",
+        events, " events..."
+      )
+    )
+  }
+  
   # PROGRESS BAR
   pb <- cyto_progress(
     label = "cyto_plot_data()",
