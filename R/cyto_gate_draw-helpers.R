@@ -163,20 +163,22 @@
   # ALIAS PER GATE TYPE --------------------------------------------------------
   
   # EXPECTED ALIAS LENGTH PER GATE TYPE
-  N <- LAPPLY(type, function(z){
-    # Negate already handled above (type set to NA)
-    if(.all_na(z)){
-      n <- 1
-    }else if(z == "quadrant"){
-      n <- 4 
-    }else if(z %in% .split_gate_types()){  
-      n <- length(alias)
-    }else{
-      n <- 1
+  N <- LAPPLY(
+    type, 
+    function(z) {
+      # Negate already handled above (type set to NA)
+      if(.all_na(z)){
+        n <- 1
+      }else if(z == "quadrant"){
+        n <- 4 
+      }else if(z %in% .split_gate_types()){  
+        n <- length(alias)
+      }else{
+        n <- 1
+      }
+      return(n)
     }
-    return(n)
-  })
-  
+  )
   
   # CHECK ALIAS ----------------------------------------------------------------
   
@@ -184,6 +186,16 @@
   if(length(alias) != sum(N)){
     stop("Supply a name for each of the population(s) to 'alias'.")
   }  
+  
+  # CHECK FOR ILLEGAL CHARACTER - OPENCYTO VALIDITY CHECK
+  lapply(
+    alias,
+    function(z) {
+      if(grepl("[\\|\\&|\\:|\\/]", z)) {
+        stop(z , "contains illegal character: |,&,:,/")
+      }
+    }
+  )
   
   # SPLIT ALIAS ----------------------------------------------------------------
   
