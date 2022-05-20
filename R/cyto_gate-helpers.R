@@ -318,6 +318,9 @@ cyto_gate_indices <- function(x,
             ),
             levels = nodes
           )
+        # DROP PARENT
+        } else {
+          ind <- ind[, -match(parent, colnames(ind)), drop = FALSE]
         }
         return(ind)
       }
