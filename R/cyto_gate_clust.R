@@ -127,16 +127,8 @@ cyto_gate_clust <- function(x,
   
   # DEFAULT ALGORITHM TYPES
   if(is.character(type)) {
-    # NIMBUS
-    if(grepl("^nimbus", type, ignore.case = TRUE)) {
-      # LOAD NIMBUS
-      cyto_require(
-        "nimbus",
-        source = "GitHub",
-        repo = "DillonHammill/nimbus"
-      )
     # FLOWSOM
-    } else if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
+    if(grepl("^FlowSOM$", type, ignore.case = TRUE)) {
       # LOAD FLOWSOM
       cyto_require(
         "FlowSOM",
