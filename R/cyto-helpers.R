@@ -3979,7 +3979,7 @@ cyto_save <- function(x,
     )
     # RETURN GATINGSET - INVISIBLE DOES NOT TERMINATE FUNCTION
     invisible(x)
-    # WRITE FCS FILES
+  # WRITE FCS FILES
   } else {
     # EXTRACT DATA - NAMED LIST PER PARENT
     cs_list <- cyto_data_extract(
@@ -4066,15 +4066,31 @@ cyto_save <- function(x,
               message(
                 cyto_names(cs)[v]
               )
-              # WRITE FCS FILES
-              write.FCS(
-                cs[[v]],
-                paste0(
-                  dir,
-                  .Platform$file.sep,
-                  cyto_names(cs)[v]
+              # WRITE FCS FILE APPEND PARENT
+              if(!is.null(names(cs_list)[z])) {
+                write.FCS(
+                  cs[[v]],
+                  paste0(
+                    dir,
+                    .Platform$file.sep,
+                    paste0(
+                      gsub(".fcs$", "_", cyto_names(cs)[v]),
+                      names(cs_list)[z],
+                      ".fcs"
+                    )
+                  )
                 )
-              )
+              # WRITE FCS USING ORIGINAL NAMES
+              } else {
+                write.FCS(
+                  cs[[v]],
+                  paste0(
+                    dir,
+                    .Platform$file.sep,
+                    cyto_names(cs)[v]
+                  )
+                )
+              }
             }
           )
         }
