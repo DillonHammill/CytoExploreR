@@ -3927,7 +3927,16 @@ cyto_save <- function(x,
                       ...) {
   
   # PARENT
-  parent <- c(parent, alias)
+  if(cyto_class(x, "GatingSet")) {
+    parent <- c(parent, alias)
+    if(!is.null(parent)) {
+      parent <- cyto_nodes_convert(
+        x,
+        nodes = parent,
+        path = "auto"
+      )
+    }
+  }
   
   # GATINGHIERARCHY OR GATINGSET -> SAVE ENTIRE GATINGHIERARCHY/GATINGSET
   if(cyto_class(x, "GatingSet") & is.null(parent)) {
@@ -3986,6 +3995,7 @@ cyto_save <- function(x,
       x,
       parent = parent,
       format = "cytoset",
+      path = "auto",
       ...
     )
     # IF NAMED LIST CREATE NEW FOLDER PER POPULATION
@@ -4018,13 +4028,33 @@ cyto_save <- function(x,
             if(!dir.exists(dir)) {
               dir.create(dir)
             }
-            # SAVE_AS DIRECTORY
+            # FILE NAMES
+            fcs_names <- paste0(
+              dir,
+              .Platform$file.sep,
+              paste0(
+                gsub(
+                  ".fcs$",
+                  "_", 
+                  cyto_names(cs)[v]
+                ),
+                gsub(
+                  "\\/| ", # DROP / & SPACES
+                  "_",
+                  names(cs_list)[z]
+                ), # ALIAS CONTAIN /
+                ".fcs"
+              )
+            )
+          # SAVE_AS DIRECTORY
           } else {
             dir <- save_as
+            # FILE NAMES
+            fcs_names <- cyto_names(cs)
           }
           # DIRECTORY CHECK
           if(dir.exists(dir) & 
-             any(list.files(dir) %in% cyto_names(cs))) {
+             any(list.files(dir) %in% fcs_names)) {
             # OVERWRITE ENQUIRY
             if(is.null(overwrite)) {
               # FILES WILL BE OVERWRITTEN
@@ -4034,7 +4064,7 @@ cyto_save <- function(x,
                   dir, 
                   ":\n",
                   paste(
-                    cyto_names(cs)[cyto_names(cs) %in% list.files(dir)],
+                    fcs_names[fcs_names %in% list.files(dir)],
                     collapse = "\n"
                   )
                 )
@@ -4064,7 +4094,7 @@ cyto_save <- function(x,
             function(v) {
               # FCS FILE NAME
               message(
-                cyto_names(cs)[v]
+                fcs_names[v]
               )
               # WRITE FCS FILE APPEND PARENT
               if(!is.null(names(cs_list)[z])) {
@@ -4074,7 +4104,7 @@ cyto_save <- function(x,
                     dir,
                     .Platform$file.sep,
                     paste0(
-                      gsub(".fcs$", "_", cyto_names(cs)[v]),
+                      gsub(".fcs$", "_", fcs_names[v]),
                       names(cs_list)[z],
                       ".fcs"
                     )
@@ -4087,7 +4117,7 @@ cyto_save <- function(x,
                   paste0(
                     dir,
                     .Platform$file.sep,
-                    cyto_names(cs)[v]
+                    fcs_names[v]
                   )
                 )
               }
