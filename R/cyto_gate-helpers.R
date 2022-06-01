@@ -1602,13 +1602,17 @@ cyto_gate_edit <- function(x,
   # PREPARE GATINGTEMPLATE -----------------------------------------------------
   
   # READ GATINGTEMPLATE
-  gt <- cyto_gatingTemplate_read(gatingTemplate,
-                                 data.table = FALSE)
+  gt <- cyto_gatingTemplate_read(
+    gatingTemplate,
+    data.table = FALSE
+  )
   
   # REPLACE PARENT WITH FULL PATHS (IN CASE)
-  gt$parent <- cyto_nodes_convert(x, 
-                                  nodes = gt$parent,
-                                  path = "full")
+  gt$parent <- cyto_nodes_convert(
+    x, 
+    nodes = gt$parent,
+    path = "full"
+  )
   
   # RESTRICT GATINGTEMPLATE
   gt_chunk <- 
@@ -1671,43 +1675,59 @@ cyto_gate_edit <- function(x,
   # EXTRACT GATES FROM GATINGSET DIRECTLY --------------------------------------
   
   # GATES PER GROUP - BOOLEAN GATES EXCLUDED
-  gates_gs <- cyto_gate_extract(x,
-                                parent = parent,
-                                alias = alias,
-                                select = select,
-                                merge_by = merge_by)
+  gates_gs <- cyto_gate_extract(
+    x,
+    parent = parent,
+    alias = alias,
+    select = select,
+    merge_by = merge_by
+  )
   
   # PREPARE ALIAS & TYPE -------------------------------------------------------
   
   # GET GATE TYPE FROM EXISTING GATES
   if (is.null(type)) {
-    type <- cyto_gate_type(gates_gs[[1]])
+    type <- cyto_gate_type(
+      gates_gs[[1]]
+    )
   }
   
   # TYPE
-  type <- .cyto_gate_type(type, channels, alias, negate = FALSE)
+  type <- .cyto_gate_type(
+    type, 
+    channels,
+    alias, 
+    negate = FALSE
+  )
   
   # ALIAS - LIST PER GATE TYPE
-  alias <- .cyto_gate_alias(alias, type)
+  alias <- .cyto_gate_alias(
+    alias,
+    type
+  )
   
   # PREPARE DATA ---------------------------------------------------------------
   
   # LIST OF CYTOSET LISTS
-  cs_lists <- .cyto_plot_data(x,
-                              parent = parent,
-                              overlay = overlay,
-                              merge_by = merge_by,
-                              select = select,
-                              events = events,
-                              seed = seed)
+  cs_lists <- .cyto_plot_data(
+    x,
+    parent = parent,
+    overlay = overlay,
+    merge_by = merge_by,
+    select = select,
+    events = events,
+    seed = seed
+  )
   
   # SELECT GROUP(S) TO EDIT ----------------------------------------------------
   
   # GROUPS
-  pd_groups <- cyto_groups(x,
-                           select = select,
-                           group_by = merge_by,
-                           details = TRUE)
+  pd_groups <- cyto_groups(
+    x,
+    select = select,
+    group_by = merge_by,
+    details = TRUE
+  )
   
   # PREPARE GROUP NAMES
   grps <- names(cs_lists)
@@ -1729,20 +1749,24 @@ cyto_gate_edit <- function(x,
     message("Select the group(s) to edit:")
     # INTERACTIVE GROUP SELECTION
     if(interactive()) {
-      grps <- data.frame("group" = grps,
-                         "select" = NA,
-                         stringsAsFactors = FALSE)
-      grps <- data_edit(grps,
-                        title = "Group Selection",
-                        logo = CytoExploreR_logo(),
-                        col_edit = FALSE,
-                        row_edit = FALSE,
-                        col_options = list("select" = c(TRUE, FALSE)),
-                        colnames = c("select", "group"),
-                        col_readonly = "group",
-                        viewer = "pane",
-                        hide = TRUE,
-                        quiet = TRUE)
+      grps <- data.frame(
+        "group" = grps,
+        "select" = NA,
+        stringsAsFactors = FALSE
+      )
+      grps <- data_edit(
+        grps,
+        title = "Group Selection",
+        logo = CytoExploreR_logo(),
+        col_edit = FALSE,
+        row_edit = FALSE,
+        col_options = list("select" = c(TRUE, FALSE)),
+        colnames = c("select", "group"),
+        col_readonly = "group",
+        viewer = "pane",
+        hide = TRUE,
+        quiet = TRUE
+      )
       grps <- grps[, "group"][which(grps[, "select"] == 1)]
       # NA TO CHARACTERS
       if(any(is.na(grps))){
@@ -1784,23 +1808,25 @@ cyto_gate_edit <- function(x,
         }
       }
       # CYTO_PLOT
-      cyto_plot(cs_list[[1]],
-                overlay = if(length(cs_list) > 1){
-                  cs_list[seq_along(cs_list)[-1]]
-                } else {
-                  NA
-                },
-                channels = channels,
-                axes_trans = axes_trans,
-                axes_limits = axes_limits,
-                legend = FALSE,
-                gate = gate,
-                gate_line_width = 2.5,
-                gate_line_col = "magenta",
-                gate_line_alpha = 0.8,
-                label = FALSE,
-                title = title[w],
-                ...)
+      cyto_plot(
+        cs_list[[1]],
+        overlay = if(length(cs_list) > 1){
+          cs_list[seq_along(cs_list)[-1]]
+        } else {
+          NA
+        },
+        channels = channels,
+        axes_trans = axes_trans,
+        axes_limits = axes_limits,
+        legend = FALSE,
+        gate = gate,
+        gate_line_width = 2.5,
+        gate_line_col = "magenta",
+        gate_line_alpha = 0.8,
+        label = FALSE,
+        title = title[w],
+        ...
+      )
     }
     
     # 2D INTERVAL - AXIS ARGUMENT
@@ -1817,31 +1843,33 @@ cyto_gate_edit <- function(x,
     }
     
     # DRAW NEW GATES
-    gate_new <- cyto_gate_draw(cs_list[[1]],
-                               alias = if(negate){
-                                 c(unlist(alias), bool_alias, alias_new)
-                               } else {
-                                 unlist(alias)
-                               },
-                               channels = channels,
-                               type = type,
-                               negate = negate,
-                               axis = axis,
-                               plot = FALSE,
-                               gate_point_shape = gate_point_shape,
-                               gate_point_size = gate_point_size,
-                               gate_point_col = gate_point_col,
-                               gate_point_col_alpha = gate_point_col_alpha,
-                               gate_line_type = gate_line_type,
-                               gate_line_width = gate_line_width,
-                               gate_line_col = gate_line_col,
-                               gate_line_col_alpha = gate_line_col_alpha,
-                               label_text_size = label_text_size,
-                               label_text_font = label_text_font,
-                               label_text_col = label_text_col,
-                               label_text_col_alpha = label_text_col_alpha,
-                               label_fill = label_fill,
-                               label_fill_alpha = label_fill_alpha)[[1]]
+    gate_new <- cyto_gate_draw(
+      cs_list[[1]],
+      alias = if(negate){
+        c(unlist(alias), bool_alias, alias_new)
+      } else {
+        unlist(alias)
+      },
+      channels = channels,
+      type = type,
+      negate = negate,
+      axis = axis,
+      plot = FALSE,
+      gate_point_shape = gate_point_shape,
+      gate_point_size = gate_point_size,
+      gate_point_col = gate_point_col,
+      gate_point_col_alpha = gate_point_col_alpha,
+      gate_line_type = gate_line_type,
+      gate_line_width = gate_line_width,
+      gate_line_col = gate_line_col,
+      gate_line_col_alpha = gate_line_col_alpha,
+      label_text_size = label_text_size,
+      label_text_font = label_text_font,
+      label_text_col = label_text_col,
+      label_text_col_alpha = label_text_col_alpha,
+      label_fill = label_fill,
+      label_fill_alpha = label_fill_alpha
+    )[[1]]
     
     # REMOVE BOOLEAN GATE
     if(negate == TRUE) {
@@ -1905,9 +1933,11 @@ cyto_gate_edit <- function(x,
   # INDEX PARENT IN GATINTEMPLATE (FULL PATH)
   parent_ind <- match(
     prnt,
-    cyto_nodes_convert(x, 
-                       nodes = gt$parent,
-                       path = "full")
+    cyto_nodes_convert(
+      x, 
+      nodes = gt$parent,
+      path = "full"
+    )
   )
   # MODIFY GATINGTEMPLATE - GATED POPULATIONS ONLY
   for (i in seq_len(length(als))) {
@@ -1936,13 +1966,16 @@ cyto_gate_edit <- function(x,
   alias <- as.character(unlist(alias))
   
   # CONVERT QUAD TO RECTANGLE FOR GATINGSET SAVING (EASIEST WAY)
-  gates_gs <- lapply(gates_gs, function(z){
-    if(cyto_class(z[[1]], "quadGate")){
-      .cyto_gate_quad_convert(z[[1]], channels)
-    }else{
-      z
+  gates_gs <- lapply(
+    gates_gs, 
+    function(z){
+      if(cyto_class(z[[1]], "quadGate")){
+        .cyto_gate_quad_convert(z[[1]], channels)
+      }else{
+        z
+      }
     }
-  })
+  )
   
   # APPLY NEW GATES TO GATINGSET
   lapply(grps, function(z) {
@@ -1957,15 +1990,19 @@ cyto_gate_edit <- function(x,
       )
       names(gates_update) <- cyto_names(x[ind])
       # ANCHOR
-      alias_anchor <- cyto_nodes_convert(x,
-                                         nodes = alias[y],
-                                         anchor = parent)
+      alias_anchor <- cyto_nodes_convert(
+        x,
+        nodes = alias[y],
+        anchor = parent
+      )
       # UPDATE GATE
-      suppressMessages(gs_pop_set_gate(
-        x[ind],
-        alias_anchor,
-        gates_update
-      ))
+      suppressMessages(
+        gs_pop_set_gate(
+          x[ind],
+          alias_anchor,
+          gates_update
+        )
+      )
       # RECOMPUTE STATISTICS
       suppressMessages(recompute(x[ind], alias_anchor))
     })
@@ -1997,11 +2034,18 @@ cyto_gate_edit <- function(x,
       )
       # GATINGTEMPLATE
       gt <- rbind(gt, pop)
-      # UPDATE EXISTING BOOLEAN GATE  
+    # UPDATE EXISTING BOOLEAN GATE  
     } else{
-      suppressMessages(recompute(x, cyto_nodes_convert(x,
-                                                       nodes = alias_new,
-                                                       anchor = parent)))
+      suppressMessages(
+        recompute(
+          x, 
+          cyto_nodes_convert(
+            x,
+            nodes = bool_alias,
+            anchor = parent
+          )
+        )
+      )
     }
     # REMOVE BOOLEAN GATE
   } else {
