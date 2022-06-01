@@ -3998,6 +3998,14 @@ cyto_save <- function(x,
       path = "auto",
       ...
     )
+    # FORMAT NAMES - FILE FOLDER NAMES DROP / & SPACES
+    if(!is.null(names(cs_list))) {
+      names(cs_list) <- gsub(
+        "\\/ ",
+        "_",
+        names(cs_list)
+      )
+    }
     # IF NAMED LIST CREATE NEW FOLDER PER POPULATION
     cs_list <- structure(
       lapply(
@@ -4038,11 +4046,7 @@ cyto_save <- function(x,
                   "_", 
                   cyto_names(cs)[v]
                 ),
-                gsub(
-                  "\\/| ", # DROP / & SPACES
-                  "_",
-                  names(cs_list)[z]
-                ), # ALIAS CONTAIN /
+                names(cs_list)[z],
                 ".fcs"
               )
             )
