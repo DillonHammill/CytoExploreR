@@ -3069,6 +3069,14 @@ cyto_groups <- function(x,
     stop("'x' should be an object of class cytoset or GatingSet.")
   }
   
+  # SELECT
+  if(!is.null(select)) {
+    x <- cyto_select(
+      x,
+      select
+    )
+  }
+  
   # Extract experiment details
   pd <- cyto_details(x)
   
@@ -3106,7 +3114,7 @@ cyto_groups <- function(x,
             if (!y %in% unique(pd[, var])) {
               stop(paste0(
                 y, " is not a valid factor level for ",
-                group_by[[z]],
+                var,
                 "."
               ))
             }
