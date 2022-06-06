@@ -3397,7 +3397,6 @@ cyto_merge_by <- function(x,
   x <- cyto_data_extract(
     x,
     parent = parent,
-    channels = channels,
     barcode = barcode,
     copy = FALSE,
     ...
@@ -3423,8 +3422,13 @@ cyto_merge_by <- function(x,
     cs_list <- lapply(
       cs_list, 
       function(z) {
-        tryCatch(cyto_select(z, select), error = function(e) {
-          z
+        tryCatch(
+          cyto_select(
+            z, 
+            select
+          ), 
+          error = function(e) {
+            z
           }
         )
       }
@@ -3436,20 +3440,23 @@ cyto_merge_by <- function(x,
   # CONVERT EACH GROUP TO MERGED CYTOSET/FLOWSET
   if(.grepl("s", format)) {
     structure(
-      lapply(seq_along(cs_list), function(z){
-        do.call(
-          cyto_class(cs_list[[z]]), # flowSet() / cytoset()
-          list(
-            structure(
-              list(
-                as(cs_list[[z]], 
-                   cyto_class(cs_list[[z]][[1]])) # flowFrame|cytoframe
-              ),
-              names = names(cs_list)[z]
+      lapply(
+        seq_along(cs_list), 
+        function(z){
+          do.call(
+            cyto_class(cs_list[[z]]), # flowSet() / cytoset()
+            list(
+              structure(
+                list(
+                  as(cs_list[[z]], 
+                     cyto_class(cs_list[[z]][[1]])) # flowFrame|cytoframe
+                ),
+                names = names(cs_list)[z]
+              )
             )
           )
-        )
-      }),
+        }
+      ),
       names = names(cs_list)
     )
   # CONVERT EACH GROUP TO CYTOFRAME
