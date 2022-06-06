@@ -3353,7 +3353,7 @@ cyto_group_by <- function(x,
 #'   sample events based on the number of merged samples.
 #' @param format either \code{"cytoframe"} or \code{"cytoset"} to indicate the
 #'   desired format for merged groups, set to \code{"cytoset"} by default.
-#' @param ... additional arguments passed to \code{\link{cyto_barcode}}.
+#' @param ... additional arguments passed to \code{\link{cyto_data_extract}}.
 #'
 #' @return list of flowFrames merged by the grouping variables specified by
 #'   \code{merge_by}.
@@ -3397,15 +3397,11 @@ cyto_merge_by <- function(x,
   x <- cyto_data_extract(
     x,
     parent = parent,
-    copy = FALSE
+    channels = channels,
+    barcode = barcode,
+    copy = FALSE,
+    ...
   )[[1]]
-  
-  # BARCODING ------------------------------------------------------------------
-  
-  # SAMPLE ID
-  if(barcode) {
-    x <- cyto_barcode(x, ...)
-  }
   
   # GROUPING -------------------------------------------------------------------
   

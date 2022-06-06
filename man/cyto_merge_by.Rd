@@ -42,7 +42,7 @@ sample events based on the number of merged samples.}
 \item{format}{either \code{"cytoframe"} or \code{"cytoset"} to indicate the
 desired format for merged groups, set to \code{"cytoset"} by default.}
 
-\item{...}{additional arguments passed to \code{\link{cyto_barcode}}.}
+\item{...}{additional arguments passed to \code{\link{cyto_data_extract}}.}
 }
 \value{
 list of flowFrames merged by the grouping variables specified by
