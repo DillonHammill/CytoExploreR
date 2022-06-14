@@ -42,7 +42,9 @@
 #'   display. Values [0,1] indicate the percentage of events to display (i.e.
 #'   value of 1 will display all events), whilst values larger than 1 indicate
 #'   the number of events to display. The default value for \code{events} is set
-#'   to 50000 to display 50000 events only.
+#'   to 50000 to display 50000 events only. Setting \code{events = NA} will
+#'   automatically determine the minimum number of events across groups and use
+#'   that number for downsampling.
 #' @param layout a vector of the length 2 of form \code{c(#rows, #columns)} or a
 #'   matrix indicating the dimensions of the grid for plotting.
 #' @param margins a vector of length 4 to control the margins around the bottom,
@@ -196,6 +198,8 @@
 #'   \code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
 #'   key from the plot(s). Set to \code{"both"} by default to display colour
 #'   scale and associated text in the key.
+#' @param key_size a vector of scaling factors between 0 and Inf for the weight
+#'   and height of the key, set to \code{c(1,1)} by default.
 #' @param key_scale can be either \code{"fixed"} to use the same colour scale
 #'   for points between plots, or \code{"free"} to set a unique colour scale for
 #'   each plot. \code{key_scale} is set to \code{"fixed"} by default create a
@@ -432,6 +436,7 @@ cyto_plot <- function(x,
                       legend_box_fill = NA,
                       legend_point_col = NA,
                       key = "both",
+                      key_size = c(1, 1),
                       key_scale = "fixed", 
                       key_text_font = 1,
                       key_text_size = 0.9,
@@ -442,9 +447,9 @@ cyto_plot <- function(x,
                       key_title_text_size = 1,
                       key_title_text_col = "black",
                       key_title_text_col_alpha = 1,
-                      key_line_type = 1,
-                      key_line_width = 1.5,
-                      key_line_col = "black",
+                      key_hist_line_type = 1,
+                      key_hist_line_width = 1.5,
+                      key_hist_line_col = "black",
                       gate_line_type = 1,
                       gate_line_width = 2.5,
                       gate_line_col = "red",
@@ -797,24 +802,18 @@ cyto_plot <- function(x,
   args <- args[!names(args) %in% names(header_args)]
   
   # KEY_SCALE 
-  if(length(channels) == 2) {
-    args$key_scale <- .cyto_plot_key_scale(
-      args$x,
-      channels = args$channels,
-      xlim = args$xlim,
-      ylim = args$ylim,
-      point_col = args$point_col,
-      key_scale = args$key_scale,
-      key_title = key_title,
-      axes_trans = args$axes_trans
-    )
-  # KEY_SCALE 1D - REQUIRED FOR ARGUMENT SPLITTER
-  } else {
-    args$key_scale <- split(
-      rep("fixed", length.out = length(args$x)),
-      1:length(args$x)
-    )
-  }
+  args$key_scale <- .cyto_plot_key_scale(
+    args$x,
+    channels = args$channels,
+    xlim = args$xlim,
+    ylim = args$ylim,
+    point_col = args$point_col,
+    key = args$key,
+    key_size = args$key_size,
+    key_scale = args$key_scale,
+    key_title = key_title,
+    axes_trans = args$axes_trans
+  )
   
   # PREPARE GRAPHICS DEVICE ----------------------------------------------------
   

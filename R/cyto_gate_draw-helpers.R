@@ -197,6 +197,19 @@
     }
   )
   
+  # DUPLICATE ALIAS
+  if(any(duplicated(alias))) {
+    stop(
+      paste0(
+        "Duplicate population names passed to 'alias': \n",
+        paste0(
+          alias[duplicated(alias)],
+          sep = "\n"
+        )
+      )
+    )
+  }
+  
   # SPLIT ALIAS ----------------------------------------------------------------
   
   # PREPARE ALIAS

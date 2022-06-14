@@ -61,6 +61,7 @@ cyto_plot_empty(
   legend_box_fill = NA,
   legend_point_col = NA,
   key = "both",
+  key_size = c(1, 1),
   key_scale = "fixed",
   key_text_font = 1,
   key_text_size = 0.9,
@@ -266,6 +267,9 @@ legend.}
 \code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
 key from the plot(s). Set to \code{"both"} by default to display colour
 scale and associated text in the key.}
+
+\item{key_size}{a vector of scaling factors between 0 and Inf for the weight
+and height of the key, set to \code{c(1,1)} by default.}
 
 \item{key_scale}{inherits scale limits computed within \code{cyto_plot},
 should be a vector of the form \code{c(min, max)}, \code{cyto_plot_empty()}

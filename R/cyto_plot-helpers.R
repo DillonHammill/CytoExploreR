@@ -134,6 +134,8 @@
 #'   \code{counts} or \code{fluorescence units}, or \code{"none"} to remove the
 #'   key from the plot(s). Set to \code{"both"} by default to display colour
 #'   scale and associated text in the key.
+#' @param key_size a vector of scaling factors between 0 and Inf for the weight
+#'   and height of the key, set to \code{c(1,1)} by default.
 #' @param key_scale inherits scale limits computed within \code{cyto_plot},
 #'   should be a vector of the form \code{c(min, max)}, \code{cyto_plot_empty()}
 #'   will attempt to compute these limits based on the supplied data if
@@ -257,6 +259,7 @@ cyto_plot_empty <- function(x,
                             legend_box_fill = NA,
                             legend_point_col = NA,
                             key = "both",
+                            key_size = c(1, 1),
                             key_scale = "fixed",
                             key_text_font = 1,
                             key_text_size = 0.9,
@@ -441,31 +444,19 @@ cyto_plot_empty <- function(x,
   # KEY SCALE ------------------------------------------------------------------
   
   # KEY_SCALE REQUIRED FOR MARGINS
-  if(length(channels) == 2 &
-     key %in% c("scale", "both") & 
-     !cyto_class(key_scale, "cyto_plot_key")) {
-    # KEY REQUIRED?
-    if(cyto_class(point_col, "list", TRUE)) {
-      req <- TRUE
-    } else if((is.na(point_col)[1] |
-               any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
-      req <- TRUE
-    } else {
-      req <- FALSE
-    }
-    # COMPUTE KEY_SCALE
-    if(req) {
-      key_scale <- .cyto_plot_key_scale(
-        x,
-        channels = channels,
-        xlim = xlim,
-        ylim = ylim,
-        point_col = point_col,
-        key_scale = key_scale,
-        key_title = key_title,
-        axes_trans = axes_trans
-      )[[1]]
-    }
+  if(!cyto_class(key_scale, "cyto_plot_key")) {
+    key_scale <- .cyto_plot_key_scale(
+      x,
+      channels = channels,
+      xlim = xlim,
+      ylim = ylim,
+      point_col = point_col,
+      key = key,
+      key_size = key_size,
+      key_scale = key_scale,
+      key_title = key_title,
+      axes_trans = axes_trans
+    )[[1]]
   }
   
   # MARGINS --------------------------------------------------------------------
@@ -481,7 +472,7 @@ cyto_plot_empty <- function(x,
     axes_text = axes_text,
     margins = margins,
     point_col = point_col,
-    key = key,
+    key_size = key_size,
     key_scale = key_scale,
     key_text_size = key_text_size,
     key_title_text_size = key_title_text_size
@@ -756,44 +747,33 @@ cyto_plot_empty <- function(x,
   
   # KEY ------------------------------------------------------------------------
   
-  # KEY - COUNTS OR MARKER EXPRESSION - BASE LAYER ONLY
-  if(length(channels) == 2) {
-    # KEY REQUIRED?
-    if(cyto_class(point_col, "list", TRUE)) {
-      add <- TRUE
-    } else if((is.na(point_col)[1] |
-               any(point_col %in% c(cyto_channels(x), cyto_markers(x))))) {
-      add <- TRUE
-    } else {
-      add <- FALSE
-    }
-    # ADD KEY TO PLOT
-    if(add) {
-      .cyto_plot_key(
-        x,
-        channels = channels,
-        xlim = xlim,
-        ylim = ylim,
-        point_col = point_col,
-        point_col_scale = point_col_scale,
-        point_col_alpha = point_col_alpha,
-        key = key,
-        key_scale = key_scale,
-        key_text_font = key_text_font,
-        key_text_size = key_text_size,
-        key_text_col = key_text_col,
-        key_text_col_alpha = key_text_col_alpha,
-        axes_trans = axes_trans,
-        key_title = key_title,
-        key_title_text_size = key_title_text_size,
-        key_title_text_font = key_title_text_font,
-        key_title_text_col = key_title_text_col,
-        key_title_text_col_alpha = key_title_text_col_alpha,
-        key_hist_line_type = key_hist_line_type,
-        key_hist_line_width = key_hist_line_width,
-        key_hist_line_col = key_hist_line_col
-      )
-    }
+  # KEY
+  if(!key_scale$key %in% c(NA, "none")) {
+    .cyto_plot_key(
+      x,
+      channels = channels,
+      xlim = xlim,
+      ylim = ylim,
+      point_col = point_col,
+      point_col_scale = point_col_scale,
+      point_col_alpha = point_col_alpha,
+      key = key,
+      key_size = key_size,
+      key_scale = key_scale,
+      key_text_font = key_text_font,
+      key_text_size = key_text_size,
+      key_text_col = key_text_col,
+      key_text_col_alpha = key_text_col_alpha,
+      axes_trans = axes_trans,
+      key_title = key_title,
+      key_title_text_size = key_title_text_size,
+      key_title_text_font = key_title_text_font,
+      key_title_text_col = key_title_text_col,
+      key_title_text_col_alpha = key_title_text_col_alpha,
+      key_hist_line_type = key_hist_line_type,
+      key_hist_line_width = key_hist_line_width,
+      key_hist_line_col = key_hist_line_col
+    )
   }
   
   # LEGEND - FALSE/"fill"/"line"

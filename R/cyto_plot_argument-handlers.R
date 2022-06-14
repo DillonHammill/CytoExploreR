@@ -326,7 +326,7 @@
             arg_split[[z]][arg_ind] <<- rep(arg_split[[z]][-arg_ind],
                                             length.out = arg_length)
             arg_complete <<- c(arg_complete, z)
-            # FILL ARGUMENT WITH DEFAULT
+          # FILL ARGUMENT WITH DEFAULT
           }else{
             arg_ind <- which(arg_split[[z]] == "*-*")
             arg_length <- length(arg_ind)

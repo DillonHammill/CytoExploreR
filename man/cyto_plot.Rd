@@ -72,6 +72,7 @@ cyto_plot(
   legend_box_fill = NA,
   legend_point_col = NA,
   key = "both",
+  key_size = c(1, 1),
   key_scale = "fixed",
   key_text_font = 1,
   key_text_size = 0.9,
@@ -82,9 +83,9 @@ cyto_plot(
   key_title_text_size = 1,
   key_title_text_col = "black",
   key_title_text_col_alpha = 1,
-  key_line_type = 1,
-  key_line_width = 1.5,
-  key_line_col = "black",
+  key_hist_line_type = 1,
+  key_hist_line_width = 1.5,
+  key_hist_line_col = "black",
   gate_line_type = 1,
   gate_line_width = 2.5,
   gate_line_col = "red",
@@ -176,7 +177,9 @@ arguments.}
 display. Values [0,1] indicate the percentage of events to display (i.e.
 value of 1 will display all events), whilst values larger than 1 indicate
 the number of events to display. The default value for \code{events} is set
-to 50000 to display 50000 events only.}
+to 50000 to display 50000 events only. Setting \code{events = NA} will
+automatically determine the minimum number of events across groups and use
+that number for downsampling.}
 
 \item{layout}{a vector of the length 2 of form \code{c(#rows, #columns)} or a
 matrix indicating the dimensions of the grid for plotting.}
@@ -382,6 +385,9 @@ legend.}
 key from the plot(s). Set to \code{"both"} by default to display colour
 scale and associated text in the key.}
 
+\item{key_size}{a vector of scaling factors between 0 and Inf for the weight
+and height of the key, set to \code{c(1,1)} by default.}
+
 \item{key_scale}{can be either \code{"fixed"} to use the same colour scale
 for points between plots, or \code{"free"} to set a unique colour scale for
 each plot. \code{key_scale} is set to \code{"fixed"} by default create a
@@ -416,6 +422,16 @@ key, set to 1 by default.}
 
 \item{key_title_text_col_alpha}{numeric [0, 1] to control the transparency of
 the key title text, set to 1 by default to remove transparency.}
+
+\item{key_hist_line_type}{line type(s) to use for histogram borders in the
+key, set to 1 by default to use solid lines. See
+\code{\link[graphics:par]{lty}} for alternatives.}
+
+\item{key_hist_line_width}{numeric to control line width(s) for histogram
+borders lines, set to 1 by default.}
+
+\item{key_hist_line_col}{colour to use for the histogram border in the key,
+set to \code{"black"} by default.}
 
 \item{gate_line_type}{integer [0,6] to control the line type of gates, set to
 \code{1} to draw solid lines by default. See
@@ -550,16 +566,6 @@ arbitrary numeric by default. This behaviour can be turned off by setting
 this argument to NULL.}
 
 \item{...}{not currently in use.}
-
-\item{key_hist_line_type}{line type(s) to use for histogram borders in the
-key, set to 1 by default to use solid lines. See
-\code{\link[graphics:par]{lty}} for alternatives.}
-
-\item{key_hist_line_width}{numeric to control line width(s) for histogram
-borders lines, set to 1 by default.}
-
-\item{key_hist_line_col}{colour to use for the histogram border in the key,
-set to \code{"black"} by default.}
 }
 \value{
 a list containing the recorded plots.

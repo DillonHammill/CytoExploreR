@@ -1538,8 +1538,8 @@
                                axes_text = list(TRUE, TRUE),
                                margins = c(NA, NA, NA, NA),
                                point_col = NA,
-                               key = "both",
                                key_scale = "fixed",
+                               key_size = c(1,1),
                                key_text_size = 0.9,
                                key_title_text_size = 0.9) {
   
@@ -1557,34 +1557,61 @@
   # MARGIN DEFAULT
   mar <- c(5.1, 5.1, 4.1, 2.1)
   
+  # KEY_SCALE
+  if(!cyto_class(key_scale, "cyto_plot_key")) {
+    stop(
+      ".cyto_plot_margins() requires 'key_scale' of class cyto_plot_key!"
+    )
+  }
+  
   # KEY
-  if(length(channels) == 2 &
-     !key %in% "none" &
-     cyto_class(key_scale, "cyto_plot_key")) {
-    # SPACE FOR COLOUR SCALE
-    mar[4] <- mar[4] + 1
+  if(!key_scale$key %in% c(NA, "none")) {
+    # KEY BOX SPACE
+    mar[4] <- mar[4] + key_size[1]
     # SPACE FOR TICKS
-    if(key %in% c(TRUE, "both")) {
+    if(key_scale$key %in% c(TRUE, "both")) {
       mar[4] <- mar[4] + 0.6
     }
-    # SPACE FOR KEY TITLE & LABELS
+    # KEY TITLE SPACE
     key_title_space <- 0
-    if(!.all_na(key_scale$title)) {
-      key_title_space <- (nchar(key_scale$title)/2) * 0.32 * key_title_text_size
+    if(!key_scale$title %in% c(NA, "")) {
+      key_title_space <- (nchar(key_scale$title)/2) * 0.6 *
+        mean(key_title_text_size)
+      if(key_size[2] == 1) {
+        if(key_title_space > key_size[1]) {
+          key_title_space <- 0.55 * key_title_space - 0.5 * key_size[1]
+          mar[4] <- mar[4] + key_title_space
+        } else {
+          key_title_space <- 0
+        }
+      } else {
+        if(key_title_space >  key_size[1]) {
+          key_title_space <- key_title_space - key_size[1]
+          mar[4] <- mar[4] + key_title_space
+        } else {
+          key_title_space <- 0
+        }
+      }
     }
-    # SPACE FOR TICKS & LABELS
+    # KEY LABEL SPACE
     key_label_space <- 0
-    if(key %in% c(TRUE, "both")) {
-      key_label_space <- (max(nchar(key_scale$label))/2) * 0.42 * key_text_size
+    if(key_scale$key %in% c(TRUE, "both")) {
+      key_label_space <- (max(nchar(key_scale$label))/2) * 0.42 * 
+        mean(key_text_size)
+      if(key_label_space >  key_title_space) {
+        key_label_space <- key_label_space - key_title_space
+        mar[4] <- mar[4] + key_label_space
+      } else {
+        key_label_space <- 0
+      }
     }
-    mar[4] <- mar[4] + max(key_title_space, key_label_space)
   }
-    
+  
   # LEGEND TEXT
   if (legend != FALSE & !.all_na(legend_text)) {
     mar[4] <- mar[4] + 2.1 + max(nchar(legend_text))*0.32*mean(legend_text_size)
   }
-    
+  
   # RIGHT PADDING
   mar[4] <- mar[4] + 0.1
   
@@ -1622,6 +1649,7 @@
   }
     
   # UPDATE MARGINS
+  mar[mar < 0] <- 0
   margins[is.na(margins)] <- mar[is.na(margins)]
   
   # SET MAR PARAMETER
@@ -2999,7 +3027,7 @@
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
-#' @importFrom graphics text rect lines
+#' @importFrom graphics text rect lines strwidth
 #' @importFrom grDevices adjustcolor colorRamp
 #' 
 #' @noRd
@@ -3012,6 +3040,7 @@
                            point_col = NA,
                            key = "both",
                            key_scale = "fixed",
+                           key_size = c(1, 1),
                            key_text_font = 1,
                            key_text_size = 0.9,
                            key_text_col = "black",
@@ -3030,29 +3059,48 @@
   key[key %in% FALSE] <- "none"
   key[key %in% TRUE] <- "both"
   
+  # KEY SIZE
+  key_size <- rep(c(key_size, c(1,1)), length.out = 2)
+  
+  # COMPUTE KEY_SCALE
+  if(key == "both" & !cyto_class(key_scale, "cyto_plot_key")) {
+    key_scale <- .cyto_plot_key_scale(
+      list(x),
+      channels = channels,
+      xlim = xlim,
+      ylim = ylim,
+      point_col = point_col,
+      key = key,
+      key_scale = key_scale,
+      axes_trans = axes_trans
+    )[[1]]
+  }
+  
   # CONSTRUCT KEY
-  if(!.all_na(key) & !key %in% "none") {
+  if(!key_scale$key %in% c(NA, "none")) {
     # COMPUTE KEY LOCATION
     usr <- .par("usr")[[1]]
+    # KEY X CO-ORDINATES
     key_x <- c(
       usr[2] + 0.005 * diff(usr[1:2]),
-      usr[2] + 0.035 * diff(usr[1:2])
+      usr[2] + 0.005 + 0.03 * key_size[1] * diff(usr[1:2])
     )
-    key_y <- usr[3:4]
+    # KEY TITLE SPACE
+    if(key_size[2] != 1) {
+      key_x <- key_x + 0.45 * strwidth(
+        key_scale$title,
+        cex = key_title_text_size,
+        font = key_title_text_font,
+        units = "user"
+      )
+    }
+    # KEY Y CO-ORDINATES
+    key_y <- c(
+      mean(usr[3:4]) - key_size[2] * 0.5 * diff(usr[3:4]),
+      mean(usr[3:4]) + key_size[2] * 0.5 * diff(usr[3:4])
+    )
     # KEY AXIS & TITLE
-    if(key == "both") {
-      # KEY_SCALE REQUIRED
-      if(!cyto_class(key_scale, "cyto_plot_key")) {
-        key_scale <- .cyto_plot_key_scale(
-          list(x),
-          channels = channels,
-          xlim = xlim,
-          ylim = ylim,
-          point_col = point_col,
-          key_scale = key_scale,
-          axes_trans = axes_trans
-        )[[1]]
-      }
+    if(key_scale$key == "both") {
       # KEY AXIS TEXT - BYPASS EMPTY SAMPLES FREE SCALE
       if(!.all_na(key_scale$at)) {
         # KEY AXIS
@@ -3063,7 +3111,7 @@
             if(as.character(key_scale$label[z]) != "") {
               # MAJOR TICK
               lines(
-                x = c(key_x[2], key_x[2] + 0.6 * diff(key_x)),
+                x = c(key_x[2], key_x[2] + 0.6 * 0.03 * diff(usr[1:2])),
                 y = c(key_scale$at[z], key_scale$at[z]),
                 lwd = 1,
                 lty = 1,
@@ -3072,7 +3120,7 @@
               )
               # TEXT
               text(
-                x = key_x[2] + 0.8 * diff(key_x),
+                x = key_x[2] + 0.8 * 0.03 * diff(usr[1:2]),
                 y = key_scale$at[z],
                 pos = 4,
                 offset = 0,
@@ -3086,7 +3134,7 @@
             } else {
               # MINOR TICK
               lines(
-                x = c(key_x[2], key_x[2] + 0.3 * diff(key_x)),
+                x = c(key_x[2], key_x[2] + 0.3 * 0.03 * diff(usr[1:2])),
                 y = c(key_scale$at[z], key_scale$at[z]),
                 lwd = 1,
                 lty = 1,
@@ -3139,9 +3187,9 @@
     # KEY BOXES
     key_box_x <- key_x
     key_box_y <- seq(
-      usr[3],
-      usr[4],
-      diff(usr[3:4]) / key_boxes
+      min(key_y),
+      max(key_y),
+      diff(key_y) / key_boxes
     )
     lapply(
       seq_len(key_boxes),
@@ -3224,9 +3272,34 @@
                                  xlim = c(NA, NA),
                                  ylim = c(NA, NA),
                                  point_col = NA,
+                                 key = "both",
+                                 key_size = c(1, 1),
                                  key_scale = "fixed",
                                  key_title = "",
                                  axes_trans = NA) {
+  
+  # 1D REMOVE KEY 
+  if(length(channels) == 1) {
+    return(
+      structure(
+        lapply(
+          seq_along(x),
+          function(z) {
+            k <- list(
+              "key" = "none",
+              "range" = NA,
+              "label" = NA,
+              "at" = NA,
+              "title" = NA
+            )
+            class(k) <- "cyto_plot_key"
+            return(k)
+          }
+        ),
+        names = names(x)
+      )
+    )
+  }
   
   # X AXES LIMITS REQUIRED - CROP GRID
   if(any(is.na(xlim))) {
@@ -3249,6 +3322,13 @@
       max(ylim) + (diff(ylim) - diff(ylim) / 1.04) / 2
     )
   }
+  
+  # KEY_SIZE
+  key_size <- rep(c(key_size, c(1, 1)), length.out = 2)
+  key_y <- c(
+    mean(ylim) - key_size[2] * 0.5 * diff(ylim),
+    mean(ylim) + key_size[2] * 0.5 * diff(ylim)
+  )
   
   # PREPARE KEY SCALE - LIST
   if(cyto_class(key_scale, "list", TRUE)) {
@@ -3278,7 +3358,7 @@
   }
   
   # KEY_TITLE
-  key_title <- rep(key_title, length.out = length(x))
+  key_title <- unname(rep(key_title, length.out = length(x)))
   
   # PREPARE KEY - MARKERS|CHANNELS OR COLOURS
   if(cyto_class(point_col[[1]], "character")) {
@@ -3354,9 +3434,11 @@
             # INFINITE RANGE
             if(.all_na(key_range[[z]]) | any(!is.finite(key_range[[z]]))) {
               k <- list(
+                "key" = "none",
                 "range" = NA,
                 "label" = NA,
-                "at" = NA
+                "at" = NA,
+                "title" = NA
               )
               # PREPARE AXIS TICKS & LABELS
             } else {
@@ -3365,15 +3447,22 @@
                 channels = point_col[[1]],
                 axes_range = list(key_range[[z]]),
                 axes_trans = axes_trans,
-                rescale = ylim,
+                rescale = key_y,
                 format = TRUE
               )[[1]]
               k$range <- c(min(key_range[[z]]) - pad, max(key_range[[z]]) + pad)
               k$title <- if(.empty(key_title[z])) {
-                point_col[[z]]
+                unname(
+                  cyto_markers_extract(
+                    x[[1]][[1]], 
+                    channels = point_col[[1]]
+                  )
+                )
               } else {
                 key_title[z]
               }
+              k$key <- key
+              k$label <- unname(k$label)
             }
             class(k) <- "cyto_plot_key"
             return(k)
@@ -3388,6 +3477,7 @@
           seq_along(x),
           function(z) {
             k <- list(
+              "key" = "none",
               "range" =  NA,
               "label" = NA,
               "at" = NA,
@@ -3437,9 +3527,11 @@
             # INFINITE RANGE
             if(.all_na(key_range[[z]]) | any(!is.finite(key_range[[z]]))) {
               k <- list(
+                "key" = "none",
                 "range" = NA,
                 "label" = NA,
-                "at" = NA
+                "at" = NA,
+                "title" = NA
               )
               # PREPARE AXIS TICKS & LABELS
             } else {
@@ -3447,11 +3539,13 @@
               k <- .cyto_plot_axes_text(
                 channels = NA,
                 axes_range = list(key_range[[z]]),
-                rescale = ylim,
+                rescale = key_y,
                 format = TRUE
               )[[1]]
               k$range <- c(min(key_range[[z]]) - pad, max(key_range[[z]]) + pad)
               k$title <- key_title[z]
+              k$key <- key
+              k$label <- unname(k$label)
             }
             class(k) <- "cyto_plot_key"
             return(k)
@@ -3512,6 +3606,7 @@
               # NA BKDE - TOO FEW EVENTS
               if(.all_na(key_range[[z]])) {
                 k <-list(
+                  "key" = "none",
                   "range" = NA,
                   "label" = NA,
                   "at" = NA,
@@ -3523,7 +3618,7 @@
                 k <- .cyto_plot_axes_text(
                   channels = NA,
                   axes_range = list(key_range[[z]]),
-                  rescale = ylim,
+                  rescale = key_y,
                   format = TRUE
                 )[[1]]
                 k$range <- c(min(key_range[[z]]) - pad, 
@@ -3533,6 +3628,8 @@
                 } else {
                   key_title[z]
                 }
+                k$key <- key
+                k$label <- unname(k$label)
               }
               class(k) <- "cyto_plot_key"
               return(k)
@@ -3550,11 +3647,13 @@
               k <- .cyto_plot_axes_text(
                 channels = NA,
                 axes_range = list(c(0, 1)),
-                rescale = ylim,
+                rescale = key_y,
                 format = TRUE
               )[[1]]
               k$range <- c(0 - pad, 1 + pad)
               k$title <- key_title[z]
+              k$key <- key
+              k$label <- unname(k$label)
               class(k) <- "cyto_plot_key"
               return(k)
             }
@@ -3594,14 +3693,15 @@
               range = c(1 - pad, length(key_range[[z]]) + pad),
               at = cyto_stat_rescale(
                 1:length(key_range[[z]]),
-                scale = ylim,
+                scale = key_y,
                 limits = c(
                   1 - pad,
                   length(key_range[[z]]) + pad
                 )   # ADD 4% PADDING - BYPASS CYTO_PLOT_AXES_TEXT()
               ),
-              label = key_range[[z]],
-              title = key_title[z]
+              label = unname(key_range[[z]]),
+              title = key_title[z],
+              key = key
             )
             class(k) <- "cyto_plot_key"
             return(k)
@@ -3623,6 +3723,7 @@
         seq_along(x),
         function(z) {
           k <- list(
+            "key" = "none",
             "range" =  NA,
             "label" = NA,
             "at" = NA,
