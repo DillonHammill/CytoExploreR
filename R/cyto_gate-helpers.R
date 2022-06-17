@@ -1259,10 +1259,15 @@ cyto_gate_extract <- function(x,
           names = alias
         )
         # RECTANGLEGATES BELONG TO QUADGATE?
-        quad_ind <- which(LAPPLY(gates, function(v){
-          cyto_class(v, "rectangleGate") &
-            any(grepl("quad", names(attributes(v))))
-        }))
+        quad_ind <- which(
+          LAPPLY(
+            gates, 
+            function(v) {
+              cyto_class(v, "rectangleGate") & 
+                any(grepl("quad", names(attributes(v))))
+            }
+          )
+        )
         # ALL RECTANGLES MUST BE PRESENT
         if(length(quad_ind) == 4) {
           # CREATE QUADGATE

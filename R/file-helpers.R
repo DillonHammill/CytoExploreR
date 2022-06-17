@@ -243,10 +243,12 @@ read_from_csv <- function(x,
     )
   }
   dt <- suppressMessages(
-    fread(x, 
-          data.table = TRUE,
-          header = TRUE,
-          ...)
+    fread(
+      x, 
+      data.table = TRUE,
+      header = TRUE,
+      ...
+    )
   )
   if(data.table == FALSE) {
     dt <- as.data.frame(dt)

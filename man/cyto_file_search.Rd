@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyto_file_search.R
 \name{cyto_file_search}
 \alias{cyto_file_search}
-\title{Search for CSV file in current directory}
+\title{Search for CSV file with required information in current directory}
 \usage{
 cyto_file_search(
   x,
@@ -10,6 +10,9 @@ cyto_file_search(
   colnames = NULL,
   rownames = NULL,
   ignore.case = TRUE,
+  data.table = FALSE,
+  type = NULL,
+  files = NULL,
   ...
 )
 }
@@ -23,6 +26,19 @@ specified directory.}
 
 \item{rownames}{minimal requirement for row names in the file.}
 
+\item{data.table}{logical indicating whether the imported data should be
+returned as a \code{data.table} instead of a \code{data.frame}, set to
+FALSE by default.}
+
+\item{type}{for internal use only to specify the type of data for which the
+search has been performed, simply used to provide informative messages when
+multiple files are located.}
+
+\item{files}{optional vector of file names in the current working directory
+from which data should be imported. Supplying the file names manually will
+bypass the internal file search but still perform the same checks on the
+imported data.}
+
 \item{...}{additional named arguments indicating values to find in particular
 columns of the file (e.g. name = c("Activation_1.fcs")).}
 
@@ -30,10 +46,20 @@ columns of the file (e.g. name = c("Activation_1.fcs")).}
 ignore the case when matching the file name, set to TRUE by default.}
 }
 \value{
-NULL or data read in from file matching search criteria.
+NULL or a list named with the file name containing a
+  \code{data.frame} or \code{data.table} of the data imported from the
+  selected file.
 }
 \description{
-Search for CSV file in current directory
+\code{cyto_file_search()} performs a search in the current working directory
+for a CSV file matching the supplied file name as well as the specified
+column and row name requirements. If multiple files are located and
+CytoExploreR is run in interactive mode, the user will be prompted to select
+the file manually. Otherwise, \code{cyto_file_search()} will resort to
+importing data from the first file name which matches all the requirements.
+\code{cyto_file_search()} will automatically import the data from the
+requested file and return it in the form of a \code{data.frame} or
+\code{data.table} for downstream use.
 }
 \examples{
 \dontrun{

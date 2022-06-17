@@ -329,8 +329,13 @@ cyto_plot_labeller <- function(label_text = NA,
           }else{
             txt <- label_text
           }
-          message(paste("Select a location on the plot the position the",
-                        txt, "label."))
+          message(
+            paste(
+              "\n Select a location on the plot the position the",
+              txt,
+              "label."
+            )
+          )
           label_text_xy <- locator(n = 1)
           label_text_x <- label_text_xy[[1]]
           label_text_y <- label_text_xy[[2]]

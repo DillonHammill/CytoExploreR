@@ -1,6 +1,16 @@
 ## CYTO_FILE_SEARCH ------------------------------------------------------------
 
-#' Search for CSV file in current directory
+#' Search for CSV file with required information in current directory
+#'
+#' \code{cyto_file_search()} performs a search in the current working directory
+#' for a CSV file matching the supplied file name as well as the specified
+#' column and row name requirements. If multiple files are located and
+#' CytoExploreR is run in interactive mode, the user will be prompted to select
+#' the file manually. Otherwise, \code{cyto_file_search()} will resort to
+#' importing data from the first file name which matches all the requirements.
+#' \code{cyto_file_search()} will automatically import the data from the
+#' requested file and return it in the form of a \code{data.frame} or
+#' \code{data.table} for downstream use.
 #'
 #' @param x regular expression to use when searching for files by name in
 #'   specified directory.
@@ -9,10 +19,22 @@
 #' @param colnames minimal requirement for column names in the file.
 #' @param ignore.cse logical passed to \code{grepl()} to indicate whether to
 #'   ignore the case when matching the file name, set to TRUE by default.
+#' @param data.table logical indicating whether the imported data should be
+#'   returned as a \code{data.table} instead of a \code{data.frame}, set to
+#'   FALSE by default.
+#' @param type for internal use only to specify the type of data for which the
+#'   search has been performed, simply used to provide informative messages when
+#'   multiple files are located.
+#' @param files optional vector of file names in the current working directory
+#'   from which data should be imported. Supplying the file names manually will
+#'   bypass the internal file search but still perform the same checks on the
+#'   imported data.
 #' @param ... additional named arguments indicating values to find in particular
 #'   columns of the file (e.g. name = c("Activation_1.fcs")).
 #'
-#' @return NULL or data read in from file matching search criteria.
+#' @return NULL or a list named with the file name containing a
+#'   \code{data.frame} or \code{data.table} of the data imported from the
+#'   selected file.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -31,17 +53,28 @@ cyto_file_search <- function(x,
                              colnames = NULL,
                              rownames = NULL,
                              ignore.case = TRUE,
+                             data.table = FALSE,
+                             type = NULL,
+                             files = NULL,
                              ...) {
   
-  # FILES IN DIRECTORY
-  files <- list.files(
-    dir,
-    pattern = x,
-    recursive = TRUE,
-    include.dirs = FALSE,
-    full.names = TRUE,
-    ignore.case = ignore.case
-  )
+  # SEARCH FOR FILES
+  if(is.null(files)) {
+    files <- list.files(
+      dir,
+      pattern = x,
+      recursive = TRUE,
+      include.dirs = FALSE,
+      full.names = TRUE,
+      ignore.case = ignore.case
+    )
+  # FILES SUPPLIED
+  } else {
+    file_exists(
+      file,
+      error = TRUE
+    )
+  }
   
   # FILES FOUND
   if(length(files) > 0) {
@@ -54,7 +87,8 @@ cyto_file_search <- function(x,
         function(z) {
           # READ FILE
           f <- read_from_csv(
-            z
+            z,
+            data.table = data.table
           )
           # CHECK FILE COLUMN NAMES
           if(!is.null(colnames)) {
@@ -63,7 +97,7 @@ cyto_file_search <- function(x,
             }
           }
           # CHECK FILE ROW NAMES
-          if(!is.null(rownames)) {
+          if(!data.table & !is.null(rownames)) {
             if(!all(rownames %in% rownames(f))) {
               return(NULL)
             }
@@ -95,6 +129,78 @@ cyto_file_search <- function(x,
   # NO FILES FOUND
   if(length(files) == 0) {
     files <- NULL
+  # SINGLE FILE FOUND
+  } else if(length(files) == 1) {
+    message(
+      paste0(
+        "Importing ",
+        if(is.null(type)) {
+          "saved data"
+        } else {
+          type
+        },
+        " from ",
+        names(files),
+        "..."
+      )
+    )
+    files <- files[1]
+  # MULTIPLE FILES LOCATED
+  } else {
+    # INTERACTIVE FILE SELECTION
+    if(interactive & cyto_option("CytoExploreR_interactive")) {
+      message(
+        paste0(
+          "Multiple files located matching the ",
+          type,
+          " search criteria. ",
+          "Which file would you like to import ",
+          if(is.null(type)) {
+            "data"
+          } else {
+            type
+          },
+          " from?"
+        )
+      )
+      # FILE OPTIONS
+      message(
+        paste0(
+          names(files),
+          sep = "\n"
+        )
+      )
+      # FILE SELECTION
+      opt <- cyto_enquire(NULL)
+      opt <- tryCatch(
+        as.numeric(opt),
+        warning = function(w){
+          return(
+            match(opt, names(pd))
+          )
+        }
+      )
+      files <- files[opt]
+    # DEFAULT TO FIRST FILE
+    } else {
+      message(
+        paste0(
+          "Multiple files located matching the ",
+          type,
+          " search criteria. ",
+          "Resorting to importing  ",
+          if(is.null(type)) {
+            "data"
+          } else {
+            type
+          },
+          " from ",
+          names(files)[1],
+          "..."
+        )
+      )
+      files <- files[1]
+    }
   }
   
   # READ IN DATA IN LIST

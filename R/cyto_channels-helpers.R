@@ -898,130 +898,42 @@ cyto_channel_match <- function(x,
     channels <- cyto_channels_extract(x, channels)
   }
   
-  # SEARCH FOR FILE TO IMPORT DETAILS
-  if(is.null(file)) {
-    # OLD CHANNEL-MATCH.CSV REQUIRES ROWNAMES
-    # FILE SEARCH
-    pd <- cyto_file_search(
-      "Details.*\\.csv$|Channel-Match.*\\.csv", # BACKWARDS COMPATIBLE
-      colnames = c("name", "channel"), # IGNORE PARENT & GROUP HERE
-      rownames = rownames(cyto_details(x))
-    )
-    # NO DETAILS FOUND
-    if(length(pd) == 0) {
-      pd <- cyto_details(x)
-      # CHANNEL MATCH FILE LOCATED
-    } else {
-      # MULTIPLE CHANNEL MATCH FILES LOCATED
-      if(length(pd) > 1) {
-        # ENQUIRE
-        if(interactive() & cyto_option("CytoExploreR_interactive")) {
-          message(
-            paste0(
-              "Multiple files found with channel matching details for this ",
-              cyto_class(x),
-              ". Which file would you like to inherit these details from?"
-            )
-          )
-          message(
-            paste0(
-              paste0(
-                seq_along(pd),
-                ": ",
-                names(pd)
-              ),
-              sep = "\n"
-            )
-          )
-          opt <- cyto_enquire(NULL)
-          opt <- tryCatch(
-            as.numeric(opt),
-            warning = function(w) {
-              match(opt, names(pd))
-            }
-          )
-          file <- names(pd)[opt]
-          pd <- pd[[opt]]
-          # NON-INTERACTIVE FILE SELECTION
-        } else {
-          warning(
-            paste0(
-              "Multiple files found with channel matching details for this ",
-              cyto_class(x),
-              " - resorting to using ",
-              names(pd)[1],
-              "..."
-            )
-          )
-          file <- names(pd)[1]
-          pd <- pd[[1]]
-        }
-        # SINGLE CHANNEL MATCH FILE LOCATED
-      } else {
-        message(
-          paste0(
-            "Importing saved channel matching details from ",
-            names(pd)[1],
-            "..."
-          )
-        )
-        file <- names(pd)[1]
-        pd <- pd[[1]]
-      }
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+  
+  # IMPORT DATA FROM FILE
+  pd_new <- cyto_file_search(
+    "Details.*\\.csv$|Channel-Match.*\\.csv",
+    colnames = c("channel", "marker"),
+    rownames = rownames(pd),
+    ignore.case = TRUE,
+    data.table = FALSE,
+    type = "channel match details",
+    files = file
+  )
+  
+  # DETAILS LOCATED IN FILE
+  if(!is.null(pd_new)) {
+    # SAVE TO IMPORTED FILE
+    if(is.null(file)) {
+      file <- names(pd_new)
     }
-    # FILE MANUALLY SUPPLIED
-  } else {
-    # FILE EXTENSION
-    file <- file_ext_append(file, ".csv")
-    # FILE EXISTS
-    if(file_exists(file, error = FALSE)) {
-      message(
-        paste0(
-          "Importing experiment details from ",
-          file,
-          "..."
-        )
-      )
-      # READ FILE
-      pd <- read_from_csv(file)
-      # CHECK FILE
-      if(!"name" %in% colnames(pd) |
-         !all(rownames(cyto_details(x)) %in% rownames(pd))) {
-        stop(
-          paste0(
-            file,
-            " must have rownames and contain entries for every sample in ",
-            "this ",
-            cyto_class(x),
-            "!"
-          )
-        )
-      }
-      # FILE DOES NOT EXIST
-    } else {
-      warning(
-        paste0(
-          file,
-          " does not exist! Resorting to cyto_details(x) instead..."
-        )
-      )
-      pd <- cyto_details(x)
-    }
+    pd <- pd_new[[1]]
   }
   
-  # SAVE_AS
-  if(is.null(save_as)) {
-    # FILE MISSING
-    if(is.null(file)) {
+  # DEFAULT FILE NAME
+  if (is.null(save_as)) {
+    save_as <- file
+    if(is.null(save_as)) {
       save_as <- cyto_file_name(
         paste0(
-          format(Sys.Date(), "%d%m%y"),
-          "-", "Compensation-Details.csv"
+          format(
+            Sys.Date(), 
+            "%d%m%y"
+          ), 
+          "-Compensation-Details.csv"
         )
       )
-      # SAVE TO FILE
-    } else {
-      save_as <- file
     }
   }
   

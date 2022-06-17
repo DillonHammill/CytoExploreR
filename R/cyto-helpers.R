@@ -5290,104 +5290,31 @@ cyto_markers_edit <- function(x,
     "marker" = names(chans)
   )
   
-  # FILE MISSING
-  if(is.null(file)) {
-    # FILE SEARCH - BYPASS SUFFIX
-    pd_new <- cyto_file_search(
-      "Markers.*\\.csv$",
-      colnames = c("channel", "marker"),
-      channel = chans
-    )
-    # SINLGE FILE MARKER ASSIGNMENTS FOUND
-    if(length(pd_new) > 0) {
-      # SINGLE FILE
-      if(length(pd_new) == 1) {
-        message(
-          paste0(
-            "Importing saved marker assignments from ",
-            names(pd_new)[1],
-            "..."
-          )
-        )
-        file <- names(pd_new)[1]
-        pd <- pd_new[[1]]
-        # MULTIPLE FILES
-      } else {
-        # ENQUIRE
-        if(interactive() & cyto_option("CytoExploreR_interactive")) {
-          message(
-            paste0(
-              "Multiple files found with marker assignments for this ",
-              cyto_class(x),
-              ". Which file would you like to import marker assignments from?"
-            )
-          )
-          message(
-            paste0(
-              paste0(
-                1:length(pd_new), 
-                ": ",
-                names(pd_new)
-              ),
-              sep = "\n"
-            )
-          )
-          opt <- cyto_enquire(NULL)
-          opt <- tryCatch(
-            as.numeric(opt),
-            warning = function(w){
-              return(
-                match(opt, names(pd_new))
-              )
-            }
-          )
-          file <- names(pd_new)[opt]
-          pd <- pd_new[[opt]]
-        } else {
-          warning(
-            paste0(
-              "Multiple files found with marker assignments for this ",
-              cyto_class(x),
-              " - resorting to using ",
-              names(pd_new)[1],
-              "..."
-            )
-          )
-          file <- names(pd_new)[1]
-          pd <- pd_new[[1]]
-        }
-      }
-    } 
-    # FILE SUPPLIED
-  } else {
-    # FILE EXTENSION
-    file <- file_ext_append(file, ".csv")
-    # FILE EXISTS
-    if(file_exists(file, error = FALSE)) {
-      message(
-        paste0(
-          "Importing marker assignments from ",
-          file,
-          "..."
-        )
-      )
-      # READ FILE
-      pd_new <- read_from_csv(file)
-      # ALL CHANNELS REQUIRED
-      if(any(!pd$channel %in% pd_new$channel)) {
-        pd <- rbind(
-          pd_new,
-          pd[which(!pd$channel %in% pd_new$channel), , drop = FALSE]
-        )
-      } else {
-        pd <- pd_new
-      }
+  # IMPORT DATA FROM FILE
+  pd_new <- cyto_file_search(
+    "Markers.*\\.csv$",
+    colnames = c("channel", "marker"),
+    rownames = NULL,
+    ignore.case = TRUE,
+    data.table = FALSE,
+    type = "marker assignments",
+    files = file,
+    channel = chans
+  )
+  
+  # DETAILS LOCATED IN FILE
+  if(!is.null(pd_new)) {
+    # SAVE TO IMPORTED FILE
+    if(is.null(file)) {
+      file <- names(pd_new)
     }
+    pd <- pd_new[[1]]
   }
-
+  
   # DEFAULT FILE NAME
   if (is.null(save_as)) {
-    if(is.null(file)) {
+    save_as <- file
+    if(is.null(save_as)) {
       save_as <- cyto_file_name(
         paste0(
           format(
@@ -5397,8 +5324,6 @@ cyto_markers_edit <- function(x,
           "-Experiment-Markers.csv"
         )
       )
-    } else {
-      save_as <- file
     }
   }
   
@@ -5525,127 +5450,43 @@ cyto_details_edit <- function(x,
     stop("Please supply either a flowSet or a GatingSet")
   }
   
-  # FILE MISSING
-  if (is.null(file)) {
-    # FILE SEARCH - BYPASS SUFFIX
-    pd <- cyto_file_search(
-      "Details.*\\.csv$", # Compensation-Details | Experiment-Details
-      colnames = "name",
-      rownames = rownames(cyto_details(x))
-    )
-    # NO DETAILS FOUND
-    if(length(pd) == 0) {
-      pd <- cyto_details(x)
-    # DETAILS FOUND
-    } else {
-      # MULTIPLE FILES FOUND
-      if(length(pd) > 1) {
-        # ENQUIRE
-        if(interactive() & cyto_option("CytoExploreR_interactive")) {
-          message(
-            paste0(
-              "Multiple files found with experimental details for this ",
-              cyto_class(x),
-              ". Which file would you like to import experiment details from?"
-            )
-          )
-          message(
-            paste0(
-              paste0(
-                1:length(pd), 
-                ": ",
-                names(pd)
-              ),
-              sep = "\n"
-            )
-          )
-          opt <- cyto_enquire(NULL)
-          opt <- tryCatch(
-            as.numeric(opt),
-            warning = function(w){
-              return(
-                match(opt, names(pd))
-              )
-            }
-          )
-          file <- names(pd)[opt]
-          pd <- pd[[opt]]
-        } else {
-          warning(
-            paste0(
-              "Multiple files found with experimental details for this ",
-              cyto_class(x),
-              " - resorting to using ",
-              names(pd)[1],
-              "..."
-            )
-          )
-          file <- names(pd)[1]
-          pd <- pd[[1]]
-        }
-      # SINGLE FILE FOUND
-      } else {
-        message(
-          paste0(
-            "Importing saved experiment details from ",
-            names(pd)[1],
-            "..."
-          )
-        )
-        file <- names(pd)[1]
-        pd <- pd[[1]]
-      }
+  # EXPERIMENT DETAILS
+  pd <- cyto_details(x)
+  
+  # IMPORT DATA FROM FILE
+  pd_new <- cyto_file_search(
+    "Details.*\\.csv$",
+    colnames = "name",
+    rownames = rownames(cyto_details(x)),
+    ignore.case = TRUE,
+    data.table = FALSE,
+    type = "experiment details",
+    files = file,
+    channel = chans
+  )
+  
+  # INHERIT EXPERIMENT DETAILS FROM FILE
+  if(!is.null(pd_new)) {
+    # SAVE TO FILE
+    if(is.null(file)) {
+      file <- names(pd_new)
     }
-  # FILE MANUALLY SUPPLIED
-  } else {
-    # FILE EXTENSION
-    file <- file_ext_append(file, ".csv")
-    # FILE EXISTS
-    if(file_exists(file, error = FALSE)) {
-      message(
-        paste0(
-          "Importing experiment details from ",
-          file,
-          "..."
-        )
-      )
-      # READ FILE
-      pd <- read_from_csv(file)
-      # CHECK FILE
-      if(!"name" %in% colnames(pd) |
-         !all(rownames(cyto_details(x)) %in% rownames(pd))) {
-        stop(
-          paste0(
-            file,
-            " must have rownames and contain entries for every sample in ",
-            "this ",
-            cyto_class(x),
-            "!"
-          )
-        )
-      }
-    } else {
-      warning(
-        paste0(
-          file,
-          " does not exist! Resorting to cyto_details(x) instead..."
-        )
-      )
-      pd <- cyto_details(x)
-    }
+    pd <- pd_new[[1]]
   }
   
   # SAVE_AS
   if(is.null(save_as)) {
-    if(is.null(file)) {
+    save_as <- file
+    if(is.null(save_as)) {
       save_as <- cyto_file_name(
         paste0(
-          format(Sys.Date(), "%d%m%y"),
+          format(
+            Sys.Date(), 
+            "%d%m%y"
+          ), 
           "-Experiment-Details.csv"
         )
       )
-    } else {
-      save_as <- file
     }
   }
   

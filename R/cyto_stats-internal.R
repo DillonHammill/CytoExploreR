@@ -660,7 +660,7 @@ cyto_stat_density <- function(x,
         bandwidth <- 0
       } else {
         if(.all_na(limits[, 1])) {
-          rng <- range(x)
+          rng <- range(x, na.rm = TRUE)
         } else {
           rng <- limits[, 1]
         }
@@ -678,7 +678,7 @@ cyto_stat_density <- function(x,
     }
     # KERNEL DENSITY
     kd <- stats::density(
-      x,
+      x[!is.na(x)],
       adjust = smooth, 
       bw = bandwidth, 
       ...

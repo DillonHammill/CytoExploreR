@@ -92,128 +92,90 @@ cyto_unmix_compute <- function(x,
     }
   )
   
-  # FILE MUST REFLECT ANY CHANGES MADE TO DATA
-  # SEARCH FOR UNMIXING DETAILS
+  # IMPORT DATA FROM FILE
   pd_new <- cyto_file_search(
     "-Unmixing-Details.*\\.csv$",
     colnames = c("name", "group", "parent", "label"),
     rownames = rownames(cyto_details(x)),
+    ignore.case = TRUE,
+    data.table = FALSE,
+    type = "spectral unmixing details",
+    files = NULL
   )
-  # NO UNMIXING DETAILS FOUND
-  if(length(pd_new) == 0) {
-    # UNMIXING DETAILS FILE
-    file <- NULL
-    # PREPARE MISSING VARIABLES
-    pd_new <- matrix(
-      NA,
-      nrow = nrow(pd),
-      ncol = length(vars_req),
-      dimnames = list(
-        rownames(pd),
-        vars_req
-      )
-    )
-    # SET DEFAULT FOR PARENT
-    if("parent" %in% colnames(pd_new)) {
-      pd_new[, "parent"] <- rep(parent, length.out = nrow(pd_new))
-    }
-    # APPEND MISSING VARIABLES
-    pd <- cbind(
-      pd, 
-      pd_new
-    )
-  # UNMIXING DETAILS FOUND
-  } else {
-    # MULTIPLE COMPENSATION DETAILS FILES FOUND
-    if(length(pd_new) > 1) {
-      # ENQUIRE
-      if(interactive() & cyto_option("CytoExploreR_interactive")) {
-        message(
-          "Multiple files found with spectral unmixing details for this ",
-          cyto_class(x),
-          ". Which file would you like to import unmixing details from?"
-        )
-        message(
-          paste0(
-            paste0(
-              1:length(pd_new),
-              ": ",
-              names(pd_new)
-            ),
-            sep = "\n"
-          )
-        )
-        opt <- cyto_enquire(NULL)
-        opt <- tryCatch(
-          as.numeric(opt),
-          warning = function(w) {
-            return(
-              match(opt, names(pd_new))
-            )
-          }
-        )
-        # COMPENSATION DETAILS FILE
-        pd_new <- pd_new[opt]
-      } else {
-        pd_new <- pd_new[1]
+  
+  # INHERIT DETAILS FROM FILE - FILE MAY CONTAIN EXTRA ROWS
+  if(!is.null(pd_new)) {
+    # APPEND EXTRA DETAILS NOT IN FILE
+    vars <- colnames(pd)[!colnames(pd) %in% colnames(pd_new)]
+    lapply(
+      vars,
+      function(z) {
+        pd_new[, z] <<- NA
+        pd_new[match(rownames(pd), rownames(pd_new)), z] <<- pd[, z]
       }
-    }
-    # COMPENSATION DETAILS FILE
+    )
+    pd <- pd_new[[1]]
     file <- names(pd_new)
-    message(
-      paste0(
-        "Importing saved unmixing details from ",
-        file,
-        "..."
-      )
-    )
-    # TODO: DO WE WANT TO APPEND ALL DETAILS HERE?
-    # APPEND MISSING VARIABLES
-    pd <- cbind(
-      pd,
-      pd_new[[file]][
-        match_ind(
-          rownames(pd),
-          rownames(pd_new[[file]])
-        ), vars_req]
-    )
-  }
-  
-  # UPDATE EXPERIMENT DETAILS
-  cyto_details(x) <- pd
-  
-  # INTERACTIVELY EDIT UNMIXING DETAILS
-  if(interactive() & cyto_option("CytoExploreR_interactive")) {
-    # EDIT UNMIXING DETAILS - PARENT DROPDOWN
-    x <- cyto_details_edit(
-      x,
-      file = NA,
-      col_options = if(cyto_class(x, "GatingSet")) {
-        list(
-          "parent" = cyto_nodes(x, path = "auto")
-        )
-      } else {
-        NULL
-      }
-    )
-    # UPDATE UNMIXING DETAILS
-    pd <- cyto_details(x)
+  } else {
+    file <- NULL
   }
   
   # MISSING VARIABLES
-  if(!all(vars %in% colnames(pd))) {
-    stop(
-      paste0(
-        "cyto_details(x) is missing required variables: ",
-        paste0(
-          vars[!vars %in% colnames(pd)],
-          collapse = " & "
+  if(length(vars_req) > 0) {
+    pd <- cbind(
+      pd,
+      matrix(
+        NA,
+        nrow = nrow(pd),
+        ncol = length(vars_req),
+        dimnames = list(
+          rownames(pd),
+          vars_req
         )
       )
     )
   }
   
-  # FILE - SAVE UNMIXING DETAILS
+  # DEFAULT PARENT
+  if(.all_na(pd[, "parent"])) {
+    pd[, "parent"] <- rep(parent, length.out = nrow(pd))
+  }
+  
+  # EDIT DETAILS - ROWNAMES CANNOT BE EDITED
+  if(interactive() & cyto_option("CytoExploreR_interactive")) {
+    # REMOVE ROW NAMES
+    cyto_names <- rownames(pd)
+    rownames(pd) <- NULL
+    # EDIT
+    pd <- data_edit(
+      pd,
+      logo = CytoExploreR_logo(),
+      title = "Spectral Unmixing Details Editor",
+      row_edit = FALSE,
+      # col_readonly = "name",
+      quiet = TRUE,
+      hide = TRUE,
+      viewer = "pane",
+      ...
+    )
+    # REPLACE ROW NAMES - REQUIRED TO UPDATE CYTO_DETAILS
+    rownames(pd) <- cyto_names
+  }
+  
+  # DETAILS REQUIRE ROWNAMES FOR UPDATING - (ROWNAMES MISSING IN FILE)
+  if(is.null(rownames(pd))) {
+    rownames(pd) <- pd[, "name"]
+  }
+  
+  # UPDATE DETAILS - PD MAY CONTAIN EXTRA INFORMATION
+  cyto_details(x) <- pd[match_ind(
+    rownames(
+      cyto_details(x)
+    ), 
+    rownames(pd)
+  ), , drop = FALSE]
+  
+  # SAVE UNMIXING DETAILS TO FILE
   if(is.null(file)) {
     file <- cyto_file_name(
       paste0(
@@ -224,43 +186,17 @@ cyto_unmix_compute <- function(x,
         "-Spectral-Unmixing-Details.csv"
       )
     )
-    pd_new <- pd
-  # UPDATE DETAILS IN EXISTING FILE
-  } else {
-    # ORIGINAL DETAILS STORED IN PD_NEW[[FILE]] - NEW DETAILS STORED IN PD
-    # ADD NEW COLUMNS TO ORIGINAL DETAILS
-    ind <- which(!colnames(pd) %in% colnames(pd_new[[file]]))
-    if(length(ind) > 0) {
-      pd_new[[file]] <- do.call(
-        "cbind",
-        c(
-          list(
-            pd_new[[file]]
-          ),
-          structure(
-            lapply(
-              ind,
-              function(z) {
-                rep(NA, nrow(pd_new[[file]]))
-              }
-            ),
-            names = colnames(pd)[ind]
-          )
-        )
-      )
-    }
-    # UPDATE ROWS
-    ind <- match_ind(rownames(pd), rownames(pd_new[[file]]))
-    pd_new[[file]][ind, colnames(pd)] <- pd
-    pd_new <- pd_new[[file]]
   }
   
-  # EXPORT UPDATED UNMIXING DETAILS
+  # EXPORT UNMIXINING DETAILS
   write_to_csv(
-    pd_new,
-    file,
+    pd,
+    file = file,
     row.names = TRUE
   )
+
+  # RESTRICTED EXPERIMENT DETAILS
+  pd <- cyto_details(x)
   
   # SPLIT DATA INTO GROUPS
   cs_list <- cyto_group_by(
