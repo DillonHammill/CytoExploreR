@@ -267,7 +267,7 @@ cyto_plot_gating_scheme <- function(x,
         )
       }
     )
-    gt <- gt[unique(ind), , drop = FALSE]
+    gt_split <- gt_split[unique(ind)]
   }
   
   # NODE PROPERTIES ------------------------------------------------------------
